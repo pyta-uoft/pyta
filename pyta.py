@@ -9,21 +9,29 @@ To run the checker, call the check function on the name of the module to check.
 > pyta.check('mymodule')
 """
 import importlib.util
-import ast
+import pylint.lint as lint
+
+from pylint.reporters import BaseReporter
 
 def check(module_name):
     spec = importlib.util.find_spec(module_name)
-    with open(spec.origin, 'r') as f:
-        source = f.read()
 
-    module_ast = ast.parse(source)
+    reporter = PyTAReporter()
+    linter = lint.PyLinter(reporter=reporter)
+    linter.load_default_plugins()
+    linter.check([spec.origin])
+    reporter.print_message_ids()
 
-    visitor = PrintVisitor()
-    visitor.visit(module_ast)
 
+class PyTAReporter(BaseReporter):
+    def __init__(self):
+        super().__init__(self)
+        self._messages = []
 
-class PrintVisitor(ast.NodeVisitor):
-    def visit(self, node, depth=0):
-        print('  ' * depth + node.__class__.__name__)
-        for child in ast.iter_child_nodes(node):
-            self.visit(child, depth + 1)
+    def handle_message(self, msg):
+        """Handle a new message triggered on the current file."""
+        self._messages.append(msg)
+
+    def print_message_ids(self):
+        for msg in self._messages:
+            print(msg.msg_id)

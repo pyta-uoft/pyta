@@ -13,6 +13,12 @@ import pylint.lint as lint
 
 from pylint.reporters import BaseReporter
 
+import webbrowser
+import os
+from urllib.request import pathname2url
+
+HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
+
 def check(module_name):
     spec = importlib.util.find_spec(module_name)
 
@@ -21,6 +27,12 @@ def check(module_name):
     linter.load_default_plugins()
     linter.check([spec.origin])
     reporter.print_message_ids()
+
+def doc(msg_id):
+    """Open a webpage documenting for the given message id."""
+    msg_url = HELP_URL + '#' + msg_id
+    print(msg_url)
+    webbrowser.open(msg_url)
 
 
 class PyTAReporter(BaseReporter):

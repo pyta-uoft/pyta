@@ -1,7 +1,13 @@
+"""Example showing a forbidden import."""
+
+import re
+
 def greet(name):
-    print('hello, ' + name)
-    my_var = 'dog'
-    return 1 + my_var
+    """Print a message to the user."""
+    if re.search('[a-zA-Z]{5}', name) is None:
+        print('Invalid name')
+    else:
+        print('hello, ' + name)
 
 
 if __name__ == '__main__':

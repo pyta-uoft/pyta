@@ -1,0 +1,6 @@
+[ELIF]
+
+# Set maximum allowed if nesting. Note that the real limit is 3, but
+# there seems to be an off by one issue in how max-nested-blocks is used.
+max-nested-blocks = 2
+

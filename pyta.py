@@ -17,7 +17,7 @@ import os
 from urllib.request import pathname2url
 
 # Local version of website; will be updated later.
-HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
+HELP_URL = 'file:' + pathname2url(os.path.abspath('../website/gen/index.html'))
 
 def check(module_name):
     """Check a module for errors, printing a report.
@@ -38,7 +38,21 @@ def doc(msg_id):
     """Open a webpage explaining the error for the given message."""
     msg_url = HELP_URL + '#' + msg_id
     print('Opening {} in a browser.'.format(msg_url))
-    webbrowser.open(msg_url)
+
+    # https://hg.python.org/cpython/file/5661480f7763/Lib/webbrowser.py#l607
+    # https://stackoverflow.com/questions/22445217
+    # open in chrome since its not in the _tryorder, _browsers instances
+
+    # MacOS
+    chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
+
+    # Windows
+    # chrome_path = 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe %s'
+
+    # Linux
+    # chrome_path = '/usr/bin/google-chrome %s'
+
+    webbrowser.get(chrome_path).open(msg_url)
 
 
 class PyTAReporter(BaseReporter):

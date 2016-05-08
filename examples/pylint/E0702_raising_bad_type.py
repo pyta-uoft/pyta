@@ -1,2 +1,2 @@
 def raise_bad():
-    raise "string"
+    raise 1

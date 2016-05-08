@@ -1,6 +1,6 @@
 def func(num):
 	try:
-		result = num / 0
+		raise ZeroDivisionError()
 	except Exception:
 		print('This is always triggered')
 	except ZeroDivisionError:

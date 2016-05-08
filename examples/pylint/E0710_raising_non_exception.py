@@ -1,6 +1,6 @@
-class ExceptionWithNoBaseClass:
+class ClassWithNoExceptionParent:
     def __init__(self):
         pass
 
 def throw_exception():
-    raise ExceptionWithNoBaseClass()
+    raise ClassWithNoExceptionParent()

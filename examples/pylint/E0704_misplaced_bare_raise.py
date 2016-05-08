@@ -1,10 +1,12 @@
-# Start of the program, so we don't have any try/except surrounding the code.
-if __name__ == "__main__":
-    numerator = 5
-    denominator = 0
-    if denominator == 0:
-        raise Exception('Bad denominator')
-    else:
-        print(numerator / denominator)
+class CustomException(Exception):
+	pass
 
-    
+def bad_raise()
+	# Bad example, needs to be in an 'except' block:
+	raise
+	
+	# How to properly use:
+	try:
+		raise CustomException
+    except CustomException:
+		raise  # Continue passing on the error

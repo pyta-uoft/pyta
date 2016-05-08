@@ -1,8 +1,5 @@
-def something_dangerous():
-	pass
-
-def too_generic():
+def generic_catch():
 	try:
-		something_dangerous()
-	except:
-		print('Should specify a reasonable exception type')
+		a = 5 / 0
+	except Exception:
+		print('Got exception')

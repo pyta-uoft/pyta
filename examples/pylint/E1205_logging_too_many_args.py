@@ -6,4 +6,4 @@
 import logging
 
 # Error on next line.
-logging.error('This is a %s %s', 'logging', 'Error', 'Message')
+logging.error('This is a %s %s', 'logging', 'Error', 'Message') 

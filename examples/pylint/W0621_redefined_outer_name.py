@@ -6,4 +6,4 @@ when a variable’s name has been defined in the outer scope.
 var = None
 
 def fun():
-    var = open('/file', 'w') # Error on this line
+    var = open('/file', 'w') # Error on this line 

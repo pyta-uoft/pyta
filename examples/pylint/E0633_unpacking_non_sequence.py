@@ -9,4 +9,4 @@ def is_none(var1, var2):
     else:
         return var1, var2
 
-result = is_none(var1, var2) # Error on this line
+result = is_none(var1, var2) # Error on this line 

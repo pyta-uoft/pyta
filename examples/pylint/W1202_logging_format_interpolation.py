@@ -4,4 +4,4 @@
 
 import logging
 
-logging.debug('logging: {}'.format('message')) # Error on this line
+logging.debug('logging: {}'.format('message')) # Error on this line 

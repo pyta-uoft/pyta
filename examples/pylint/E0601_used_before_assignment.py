@@ -4,4 +4,4 @@ a local variable is accessed before it’s assignment.
 """
 
 print(a) # Error on this line
-a = 1
+a = 1 

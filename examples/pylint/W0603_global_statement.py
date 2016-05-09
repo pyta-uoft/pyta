@@ -7,4 +7,4 @@ def fun():
     var = "I'm a variable"
     print(var)
 
-fun()
+fun() 

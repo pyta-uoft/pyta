@@ -6,5 +6,5 @@ from logging import * # Error on this line
 
 def fun():
     print("logging unused.")
-
-fun()
+    
+fun() 

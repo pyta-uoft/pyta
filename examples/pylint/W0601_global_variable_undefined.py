@@ -7,4 +7,4 @@ def fun():
     """Using global variable keyword"""
 
     global var  # Defined locally, it becomes global.
-    var = 1 # initialize locally
+    var = 1 # initialize locally 

@@ -2,6 +2,7 @@
 
 """
 
+
 def pos():
     """
     @rtype: bool

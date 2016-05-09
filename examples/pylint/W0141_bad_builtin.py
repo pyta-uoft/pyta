@@ -1,6 +1,7 @@
-"""pylint: expression not asssigned
-Note: doesn't work
+"""pylint: bad builtin
+
 """
+
 
 def pos(obj):
     """

@@ -2,6 +2,7 @@
 
 """
 
+
 def pos(obj):
     """
     @type obj: int
@@ -11,6 +12,7 @@ def pos(obj):
         return False
     else:
         return True
+
 
 def pos(obj):
     """

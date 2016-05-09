@@ -1,6 +1,7 @@
-"""pylint: misplaced comparision constant
+"""pylint: misplaced comparison constant
 
 """
+
 
 def pos(obj):
     """

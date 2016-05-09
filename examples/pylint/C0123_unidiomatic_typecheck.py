@@ -1,4 +1,4 @@
-"""pylint: unidiomatic typecheck
+"""pylint: unidiomatic type check
 
 """
 
@@ -9,4 +9,3 @@ def is_int(obj):
     @rtype: bool
     """
     return type(obj) == "<type 'int'>"
-

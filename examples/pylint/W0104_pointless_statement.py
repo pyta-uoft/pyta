@@ -2,9 +2,9 @@
 
 """
 
+
 def add(lst):
     """
-    @type lst: list
     @type lst: list
     @rtype: int
     """

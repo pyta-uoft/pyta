@@ -1,10 +1,10 @@
-"""pylint: expression not asssigned
+"""pylint: unreachable
 Note: doesn't work
 """
 
+
 def add(lst):
     """
-    @type lst: list
     @type lst: list
     @rtype: int
     """

@@ -2,9 +2,9 @@
 Note: doesn't work
 """
 
+
 def letters(lst):
     """
-    @type lst: list
     @type lst: list
     @rtype: int
     """

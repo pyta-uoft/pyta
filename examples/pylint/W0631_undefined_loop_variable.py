@@ -5,5 +5,4 @@ for i in range(5):
     print(i)
 
 for i in range(5): # Error on this line
-    print(i)
-    
+    print(i) 

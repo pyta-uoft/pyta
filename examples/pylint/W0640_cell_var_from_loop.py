@@ -6,5 +6,4 @@ using the same value for the closed-over variable.
 
 for i in range(5):
     def print_fun():
-        print(i) # Error on this line
-        
+        print(i) # Error on this line 

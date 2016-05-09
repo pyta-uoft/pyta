@@ -5,4 +5,4 @@
 import logging
 
 # Error on next line.
-logging.error('Logging%20Error Message %s', 'One')
+logging.error('Logging%20Error Message %s', 'One') 

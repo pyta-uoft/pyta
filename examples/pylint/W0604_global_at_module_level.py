@@ -8,4 +8,4 @@ def some_fun(var):
 
 global var # Global statement at the module level.
 var = 3
-some_fun(var)
+some_fun(var) 

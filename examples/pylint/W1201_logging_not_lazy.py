@@ -5,4 +5,4 @@ Used.
 
 import logging
 
-logging.debug("debug logging message %s" % 'one') # Error on this line
+logging.debug("debug logging message %s" % 'one') # Error on this line 

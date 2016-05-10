@@ -1,5 +1,9 @@
-def ClassWithNoInit:
-	# Missing the __init__ method here
-	
-	def return_forty_two(self):
-		return 42
+class ClassWithNoInit:
+	def does_stuff(self, n):
+		return n
+	def does_more_stuff(self, n, m):
+		return n * m
+
+class ClassWithNoInitTwo(ClassWithNoInit):
+	def does_nothing(self):
+		print('hello')

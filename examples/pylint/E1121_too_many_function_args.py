@@ -2,17 +2,14 @@
 """
 
 
-class User:
-    def __init__(self, name, age):
-        """
-        Initialize the User.
+def get_sum(x, y):
+    """
+    Return the sum of x and y.
 
-        @type self: User
-        @type name: str
-        @type age: int
-        @rtype: None
-        """
-        self.name = name
-        self.age = age
+    @type x: int
+    @type y: int
+    @rtype: int
+    """
+    return x + y
 
-User("David", 21, 4)
+get_sum(1, 2, 3)  # Error on this line

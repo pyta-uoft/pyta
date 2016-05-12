@@ -1,31 +1,22 @@
 """pylint: too many instance attributes
 
-Used when class has too many instance attributes, try to reduce this to get a
-simpler (and so easier to use) class.
-
-Default: 7
+Note: the limit is 7 instance attributes.
 """
-# pylint: disable=too-few-public-methods, invalid-name
 
 class MyClass(object):
-    """Example with class attributes that will be set as instance attributes
-    later.
+    """Example with too many instance attributes.
     """
-    animal = "Dog"  # These are class attributes...
-    bread = "Sourdough"
-    liquid = "Water"
-    colour = "Black"
-    shape = "Circle"
-    direction = "Up"
-    clothing = "Shirt"
-    number = 3
 
-class_instance = MyClass()
-class_instance.animal = "Cat"  # These are instance attributes...
-class_instance.bread = "Rye"
-class_instance.liquid = "Juice"
-class_instance.colour = "Green"
-class_instance.shape = "Hexagon"
-class_instance.direction = "Left"
-class_instance.clothing = "Socks"
-class_instance.number = 10
+    def __init__(self):
+        """
+        The are all instance attributes
+        """
+
+        self.animal = "Dog"  # These are instance attributes...
+        self.bread = "Sourdough"
+        self.liquid = "Water"
+        self.colour = "Black"
+        self.shape = "Circle"
+        self.direction = "Up"
+        self.clothing = "Shirt"
+        self.number = 3

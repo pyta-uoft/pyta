@@ -1,12 +1,4 @@
 """pylint: redundant unittest assert
-
-The first argument of assertTrue and assertFalse is a "condition", which should
-evaluate to True or False. If the condition is a constant value, then it is
-considered to always be True, since it cannot be anything different.
-
-The warning message looks like:
-Redundant use of (assertTrue or assertFalse) with constant value <your-constant>
-
 """
 
 import unittest
@@ -25,4 +17,4 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue('YES')
         self.assertTrue(1)
         self.assertTrue(True)
-        self.assertTrue(False)  # even this!
+        self.assertTrue(False)

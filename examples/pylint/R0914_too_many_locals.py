@@ -1,10 +1,7 @@
 """pylint: too many locals
 
-Used when a function or method has too many local variables.
-
-Default: 15
+Note: the limit is 15 local variables.
 """
-# pylint: disable=unused-variable
 
 def too_many_locals():
     """Example function that has to many local variables."""

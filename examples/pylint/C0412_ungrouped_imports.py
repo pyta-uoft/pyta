@@ -1,7 +1,4 @@
 """pylint: ungrouped imports
-
-This is raised when imports from <package-name> are not grouped by packages.
-
 """
 
 from sys import byteorder  # same packages should be grouped

@@ -1,18 +1,14 @@
 """pylint: too many statements
 
-Used when a function or method has too many statements. You should then split it
-in smaller functions / methods.
-
-Default: 50
+Note: the limit is 50 statements.
 """
 
-# pylint: disable=unused-variable, too-many-locals
 def statement(arg):
-    """Dummy function"""
+    """Dummy function to demonstrate an example within too_many_statements()"""
     pass
 
 def too_many_statements(arg):
-    """Look at all of them"""
+    """There are too many statements in this function."""
     statement_1 = 1  # lots of statements...
     statement_2 = 2
     statement_3 = 3
@@ -53,6 +49,7 @@ def too_many_statements(arg):
     statement_38 = 38
     statement_39 = 39
     statement_40 = 40
+
     statement("function calls are statements too")
     statement("function calls are statements too")
     statement("function calls are statements too")
@@ -60,7 +57,7 @@ def too_many_statements(arg):
     statement("function calls are statements too")
     statement("function calls are statements too")
     statement("function calls are statements too")
-    statment_also = "this is..." if arg else "...another statement"
-    
+    statement("function calls are statements too")
+
     if arg:
         statments = "this block (including condition) counts as 2 statements."

@@ -1,6 +1,5 @@
 """pylint: redefined variable type
-
-The type of a variable changes inside a method or a function."""
+"""
 
 def obvious_variable_redefinition(arg):
     """Redefinition of <variable-name> type from <type_1> to <type_2>"""

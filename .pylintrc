@@ -7,25 +7,4 @@ max-nested-blocks = 2
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s).
-disable=E1300
-
-# Disable the message, report, category or checker with the given id(s).
-disable=E1301
-
-# Disable the message, report, category or checker with the given id(s).
-disable=E1302
-
-# Disable the message, report, category or checker with the given id(s).
-disable=E1304
-
-# Disable the message, report, category or checker with the given id(s).
-disable=W1300
-
-# Disable the message, report, category or checker with the given id(s).
-disable=W1301
-
-# Disable the message, report, category or checker with the given id(s).
-disable=W1302
-
-# Disable the message, report, category or checker with the given id(s).
-disable=W1304
+disable=E1300, E1301, E1302, E1304, W1300, W1301, W1302, W1304

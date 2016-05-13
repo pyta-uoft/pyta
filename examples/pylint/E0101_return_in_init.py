@@ -5,6 +5,9 @@
 
 class Animal:
     """An animal in the zoo.
+
+    === Public Attributes ===
+    @type name: str
     """
     def __init__(self, name):
         self.name = name

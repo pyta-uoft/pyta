@@ -3,10 +3,8 @@
 """
 
 
-def is_true(obj):
+def is_false(obj):
     """
     """
-    if obj is False:
-        return False
-    else:
-        return True
+    return obj is False
+

@@ -2,6 +2,7 @@
 
 """
 
+
 def is_equal(obj):
     """
     @type obj: int

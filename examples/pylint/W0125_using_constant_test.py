@@ -7,7 +7,7 @@ def pos():
     """
     @rtype: bool
     """
-    if 0:
+    if True:
         return False
     else:
         return True

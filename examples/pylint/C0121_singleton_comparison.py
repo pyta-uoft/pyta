@@ -2,6 +2,7 @@
 
 """
 
+
 def is_true():
     """
     @type obj: int

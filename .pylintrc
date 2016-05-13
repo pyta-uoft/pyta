@@ -4,3 +4,7 @@
 # there seems to be an off by one issue in how max-nested-blocks is used.
 max-nested-blocks = 2
 
+[MESSAGES CONTROL]
+
+# disable=E0116, E0114, E0112, E0115, E0106, E0113, E0111, E0105, E0100, E0117
+# disable=W0150, W0120, W0124, W0108, W0123, W0122, W0110, C0122, C0200,

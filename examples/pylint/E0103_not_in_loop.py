@@ -1,5 +1,5 @@
 """pylint: not in loop
-
+Need to disable W0101: Unreachable
 """
 
 
@@ -12,6 +12,6 @@ def add(lst):
     temp = 0
     for item in lst:
         temp += item
-    break
+    break # error on this line
     return temp
 

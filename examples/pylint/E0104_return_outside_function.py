@@ -2,6 +2,7 @@
 
 """
 
+
 def add(lst):
     """ Calculates the sum of the elements in the given list.
 
@@ -12,5 +13,5 @@ def add(lst):
     for item in lst:
         temp += item
 
-return False
+return False # error on this line
 

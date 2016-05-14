@@ -1,5 +1,5 @@
 """pylint: return in init
-
+Need to disable Too few public methods
 """
 
 
@@ -18,17 +18,5 @@ class Animal:
         self.name = name
         return True
 
-    def is_animal(self):
-        """
-        @type self: Animal
-        @rtype: bool
-        """
-        return isinstance(self.name, str)
 
-    def getter(self):
-        """
-        @type self: Animal
-        @rtype: str
-        """
-        return self.name
 

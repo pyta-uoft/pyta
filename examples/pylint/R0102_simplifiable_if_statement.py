@@ -1,5 +1,4 @@
 """pylint: simplifiable if statement
-
 """
 
 def is_even(num):

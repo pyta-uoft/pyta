@@ -3,7 +3,7 @@
 """
 
 
-def pos():
+def is_false():
     """
     @rtype: bool
     """

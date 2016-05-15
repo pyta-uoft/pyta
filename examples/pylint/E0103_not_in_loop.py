@@ -12,6 +12,6 @@ def add(lst):
     temp = 0
     for item in lst:
         temp += item
-    break # error on this line
+    break  # Error on this line
     return temp
 

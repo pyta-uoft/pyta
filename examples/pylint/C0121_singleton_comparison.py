@@ -5,11 +5,10 @@
 
 def is_true():
     """
-    @type obj: int
     @rtype: bool
     """
     temp = 5
-    if temp == True:
+    if temp == None:
         return False
     else:
         return True

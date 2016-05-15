@@ -13,5 +13,5 @@ def add(lst):
     for item in lst:
         temp += item
 
-return False # error on this line
+return False  # Error on this line
 

@@ -1,11 +1,10 @@
-"""pylint: uneeded not
+"""pylint: unneeded not
 
 """
 
 
 def is_true():
     """
-    @type obj: int
     @rtype: bool
     """
     temp = 5

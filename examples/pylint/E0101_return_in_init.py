@@ -16,7 +16,7 @@ class Animal:
         @rtype: None
         """
         self.name = name
-        return True
+        return True  # Error on this line
 
 
 

@@ -1,5 +1,4 @@
-"""pylint: expression not assigned
-Note: doesn't work
+"""pylint: unnecessary pass
 """
 
 
@@ -11,5 +10,5 @@ def add(lst):
     temp = 0
     for item in lst:
         temp += item
-        pass
+        pass  # Error on this line
     return temp

@@ -2,7 +2,7 @@
 """
 
 
-def method():
+def function():
     """ A test for the global variables checker
     @rtype: None
     """
@@ -12,16 +12,16 @@ def method():
     VALUE = 100
 
 VALUE = 0
-method()
+function()
 print(VALUE)
 
 
-def method1():
+def function1():
     """ A test for the global variables checker
     @rtype: None
     """
 
-    def method2():
+    def function2():
         """ A test for the global variables checker
          @rtype: None
         """
@@ -31,7 +31,7 @@ def method1():
 
     # Set local.
     value = 10
-    method2()
+    function2()
 
     # Local variable reflects nonlocal change.
     print(value)

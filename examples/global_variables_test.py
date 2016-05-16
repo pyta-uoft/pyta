@@ -1,5 +1,4 @@
 """Test file for global variables checker
-
 """
 
 

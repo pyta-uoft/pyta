@@ -10,4 +10,4 @@ max-nested-blocks = 2
 # Disable the message, report, category or checker with the given id(s).
 disable=C0410, R0401, R0901, R0903, R0904, R0911, R0916, W0402, W0403, W0410,
 W1501, W1502, W1505, E1300, E1301, E1302, E1304, W1300, W1301, W1302, W1304,
-E1124, E1125, E1129, E1132, W1402
+E1124, E1125, E1129, E1132, W1402, E1303, W1306, W1307

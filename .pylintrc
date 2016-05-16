@@ -4,3 +4,10 @@
 # there seems to be an off by one issue in how max-nested-blocks is used.
 max-nested-blocks = 2
 
+
+[MESSAGES CONTROL]
+
+# Disable the message, report, category or checker with the given id(s).
+
+# Variable Checker
+disable=W0640, W0623, W0614, W0604, W0603, W0602, W0601, E0604, E0603, E1200, E1201, E1202, W1201, E1205, E1206

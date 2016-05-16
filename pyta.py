@@ -30,6 +30,9 @@ def check(module_name):
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['checkers'])
+    linter.load_plugin_modules(['global_variables_checker'])
+    linter.read_config_file()
+    linter.load_config_file()
     linter.check([spec.origin])
     reporter.print_message_ids()
 

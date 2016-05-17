@@ -42,10 +42,4 @@ class IOFunctionChecker(BaseChecker):
 
 
 def register(linter):
-    """
-    Required method to auto register this checker.
-
-    @param linter: Main interface object for Pylint plugins
-    @rtype linter: Pylint object
-    """
     linter.register_checker(IOFunctionChecker(linter))

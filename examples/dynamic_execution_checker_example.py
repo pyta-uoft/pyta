@@ -1,6 +1,9 @@
-"""Example showing a forbidden use of built-in function eval()."""
+"""Example showing a forbidden execution of eval()."""
 
 
-def greet():
-    eval('a = 4')   # Error on this line.
-    compile()
+def dynamic_execution(name):
+    eval('hello, my name is ' + name)
+
+if __name__ == '__main__':
+    dynamic_execution('hayley')
+

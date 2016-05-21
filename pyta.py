@@ -29,7 +29,7 @@ def check(module_name):
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
-    linter.load_plugin_modules(['checkers'])
+    linter.load_plugin_modules(['checkers', 'IO_Function_checker', 'Always_return_checker'])
     linter.read_config_file()
     linter.load_config_file()
     linter.check([spec.origin])

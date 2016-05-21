@@ -8,6 +8,7 @@ from pylint.checkers.utils import check_messages
 
 FORBIDDEN_BUILTIN = ['input', 'print', 'open']
 
+
 class IOFunctionChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
@@ -26,6 +27,9 @@ class IOFunctionChecker(BaseChecker):
                           'used, separated by a comma'}
                  ),
                )
+
+    # this is important so that your checker is executed before others
+    priority = -1
 
     @check_messages("IO-function-not-allowed")
     def visit_call(self, node):

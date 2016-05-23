@@ -1,8 +1,3 @@
-"""pylint: dangerous default value
-
-"""
-
-
 def add(lst=[]):
     """ Calculates the sum of the elements in the given list.
 

@@ -1,8 +1,3 @@
-"""pylint: too many instance attributes
-
-Note: the limit is 7 instance attributes.
-"""
-
 class MyClass(object):
     """Example with too many instance attributes.
     """

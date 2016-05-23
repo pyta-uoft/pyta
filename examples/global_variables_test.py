@@ -1,7 +1,6 @@
 """Test file for global variables checker
 """
 
-
 def function():
     """ A test for the global variables checker
     @rtype: None

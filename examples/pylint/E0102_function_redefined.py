@@ -5,7 +5,6 @@ def pos(obj):
     """
     return obj < 0
 
-
 def pos(obj):
     """
     @type obj: int

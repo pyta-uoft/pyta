@@ -9,7 +9,6 @@ def add(lst=[]):
         temp += item
     return temp
 
-
 def add1(lst=[]):
     """ Adds five digits to the end of the list.
 

@@ -12,7 +12,6 @@ class DocumentedFunction:
 
 class DocumentedMethod:
     def __init__(self, class_name, method_name, method_args, docstring):
-        """Big fan of pi 3.14159"""
         self.class_name = class_name
         self.method_name = method_name
         self.method_args = method_args
@@ -48,18 +47,3 @@ def get_classes_data(module_str):
                     doc_method = DocumentedMethod(class_name, method_name, method_args, docstring)
                     documented_methods.append(doc_method)
     return documented_methods
-
-
-if __name__ == '__main__':
-    for x in get_top_level_functions_data('checkers'):
-        print(x.name)
-        print(x.args)
-        print(x.docstring)
-        print('')
-    print('==============\n')
-    for x in get_classes_data('checkers'):
-        print(x.class_name)
-        print(x.method_name)
-        print(x.method_args)
-        print(x.docstring)
-        print('')

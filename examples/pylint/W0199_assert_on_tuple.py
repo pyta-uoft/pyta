@@ -1,8 +1,3 @@
-"""pylint: assert on tuple
-
-"""
-
-
 def check(ex1, ex2):
     """
     @type x: int

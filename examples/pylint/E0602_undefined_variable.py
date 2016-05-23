@@ -1,7 +1,3 @@
-"""pylint: Undefined variable %r Used when an undefined variable is accessed.
-
-"""
-
 var1 = 1
 
 print(var1)

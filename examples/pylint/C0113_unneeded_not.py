@@ -1,8 +1,3 @@
-"""pylint: unneeded not
-
-"""
-
-
 def is_true():
     """
     @rtype: bool

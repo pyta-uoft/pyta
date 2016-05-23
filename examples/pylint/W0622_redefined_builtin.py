@@ -1,7 +1,3 @@
-"""pylint: Attempting to redefine built-in %r, or function override a build-in.
-
-"""
-
 from __future__ import print_function
 import builtins
 

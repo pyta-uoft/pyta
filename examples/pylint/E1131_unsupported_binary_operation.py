@@ -1,7 +1,3 @@
-""" pylint: unsupported binary operation
-"""
-
-
 def my_fuc(t, n):
     """Add <n> to <t>."""
     if type(t) is tuple:

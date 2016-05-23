@@ -1,7 +1,3 @@
-"""pylint: Unused argument %r.
-
-"""
-
 def fun(x, y, z):
     return(x + y)
 

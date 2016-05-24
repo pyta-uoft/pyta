@@ -1,7 +1,3 @@
-"""pylint: invalid unary operand type
-"""
-
-
 def info(age):
     """
     Return the info about my age.

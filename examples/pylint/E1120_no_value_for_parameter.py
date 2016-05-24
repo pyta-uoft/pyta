@@ -1,7 +1,3 @@
-"""pylint: no value for parameter
-"""
-
-
 def get_sum(x, y, z):
     """
     Return the sum of x, y and z.

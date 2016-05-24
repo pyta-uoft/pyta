@@ -1,8 +1,3 @@
-"""pylint: function redefined
-
-"""
-
-
 def pos(obj):
     """
     @type obj: int
@@ -10,11 +5,9 @@ def pos(obj):
     """
     return obj < 0
 
-
 def pos(obj):
     """
     @type obj: int
     @rtype: bool
     """
     return obj < 1
-

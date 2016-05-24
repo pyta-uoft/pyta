@@ -1,8 +1,3 @@
-"""pylint: dangerous default value
-
-"""
-
-
 def add(lst=[]):
     """ Calculates the sum of the elements in the given list.
 
@@ -13,7 +8,6 @@ def add(lst=[]):
     for item in lst:
         temp += item
     return temp
-
 
 def add1(lst=[]):
     """ Adds five digits to the end of the list.

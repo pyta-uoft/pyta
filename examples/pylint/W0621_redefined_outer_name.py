@@ -1,9 +1,5 @@
-"""pylint: Redefining name %r from outer scope (line %s) Used
-when a variable’s name has been defined in the outer scope.
-
-"""
-
-var = None
+var = None   # var defined here in the outer scope/
 
 def fun():
-    var = open('/file', 'w') # Error on this line 
+    var = open('/file', 'w')   # redefining var that has already been defined
+                               # in the outer scope.

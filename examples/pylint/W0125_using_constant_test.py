@@ -1,8 +1,3 @@
-"""pylint: using constant test
-
-"""
-
-
 def is_false():
     """
     @rtype: bool

@@ -1,8 +1,3 @@
-"""pylint: too many branches
-
-Note: the limit is 12 branches.
-"""
-
 def lots_of_branches(arg):
     """Example to demonstrate max branching."""
     if arg == 1:

@@ -1,8 +1,3 @@
-"""pylint: not in loop
-Need to disable W0101: Unreachable
-"""
-
-
 def add(lst):
     """ Calculates the sum of the elements in the given list.
 
@@ -14,4 +9,3 @@ def add(lst):
         temp += item
     break  # Error on this line
     return temp
-

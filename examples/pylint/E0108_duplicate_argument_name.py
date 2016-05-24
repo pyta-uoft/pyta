@@ -1,7 +1,3 @@
-"""pylint: duplicate argument name
-
-"""
-
 def add(lst, lst):
     """
     @type lst: list

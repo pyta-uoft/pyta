@@ -1,6 +1,7 @@
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 
+
 class MyAstroidChecker(BaseChecker):
     __implements__ = IAstroidChecker
 

@@ -1,8 +1,3 @@
-"""pylint: pointless statement
-
-"""
-
-
 def add(lst):
     """
     @type lst: list

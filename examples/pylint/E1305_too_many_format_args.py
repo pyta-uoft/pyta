@@ -1,5 +1,3 @@
-"""pylint: too many format args.
-"""
 name = "Amy"
 age = "17"
 country = "England"

@@ -1,8 +1,3 @@
-"""pylint: singleton comparison
-
-"""
-
-
 def is_true():
     """
     @rtype: bool

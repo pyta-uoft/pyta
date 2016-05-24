@@ -1,7 +1,3 @@
-"""pylint: No name %r cannot be found in referenced module %.
-
-"""
-
 """ mod1.py """ # inside of mod1 module.
 
 __all__ = ['a', 'b']

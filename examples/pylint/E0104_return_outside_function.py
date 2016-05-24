@@ -1,8 +1,3 @@
-"""pylint: return outside function
-
-"""
-
-
 def add(lst):
     """ Calculates the sum of the elements in the given list.
 

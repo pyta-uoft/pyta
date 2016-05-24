@@ -1,8 +1,3 @@
-"""pylint: return in init
-Need to disable Too few public methods
-"""
-
-
 class Animal:
     """An animal in the zoo.
 
@@ -17,6 +12,3 @@ class Animal:
         """
         self.name = name
         return True  # Error on this line
-
-
-

@@ -2,6 +2,7 @@
 
 
 def dynamic_execution(name):
+    """Append in front of string 'name'"""
     eval('hello, my name is ' + name)
 
 if __name__ == '__main__':

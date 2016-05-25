@@ -38,7 +38,6 @@ class IOFunctionChecker(BaseChecker):
             # ignore the name if it's not a builtin (i.e. not defined in the
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
-                # if name in self.config.io_functions:
                 if name in self.config.functions_not_allowed:
                     args = "{} on line {}".format(name, node.lineno)
                     # add the message

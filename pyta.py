@@ -30,9 +30,9 @@ def check(module_name):
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
-    linter.load_plugin_modules(['checkers',
-                                'global_variables_checker',
-                                'dynamic_execution_checker'])
+    linter.load_plugin_modules(['checkers/forbidden_import_checker',
+                                'checkers/global_variables_checker',
+                                'checkers/dynamic_execution_checker'])
     linter.read_config_file()
     linter.load_config_file()
     linter.check([spec.origin])

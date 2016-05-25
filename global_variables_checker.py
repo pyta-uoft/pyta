@@ -4,6 +4,8 @@
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 import astroid
+import re
+
 
 class GlobalVariablesChecker(BaseChecker):
     __implements__ = IAstroidChecker
@@ -26,8 +28,13 @@ class GlobalVariablesChecker(BaseChecker):
 
     def visit_assign(self, node):
         if isinstance(node.frame(), astroid.scoped_nodes.Module):
-            args = "you declared global variables on line {}".format(node.lineno)
-            self.add_message('forbidden-global-variables', node=node, args=args)
+            regex = str(node.targets[0])
+            s = re.findall('\((.*?)\)', regex)[0]
+            a = re.match('(([A-Z_][A-Z0-9_]*)|(__.*__))$', s)
+            # Raise an error only if it's not a constant
+            if a is None:
+                args = "you declared global variables on line {}".format(node.lineno)
+                self.add_message('forbidden-global-variables', node=node, args=args)
 
 def register(linter):
     """required method to auto register this checker"""

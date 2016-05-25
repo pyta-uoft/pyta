@@ -1,6 +1,4 @@
-"""pylint: duplicate key
-
-"""
-
-ex = {'runner1': '5km', 'runner1': '7km'}
-
+ex = {
+    'runner1': '5km', 
+    'runner1': '7km'
+}

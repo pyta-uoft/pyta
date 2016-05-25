@@ -1,7 +1,3 @@
-"""pylint: unnecessary pass
-"""
-
-
 def add(lst):
     """
     @type lst: list

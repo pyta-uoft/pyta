@@ -1,8 +1,3 @@
-"""pylint: unreachable
-Note: doesn't work
-"""
-
-
 def add(lst):
     """
     @type lst: list

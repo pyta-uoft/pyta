@@ -1,6 +1,3 @@
-"""pylint: redefined variable type
-"""
-
 def obvious_variable_redefinition(arg):
     """Redefinition of <variable-name> type from <type_1> to <type_2>"""
     arg = 1

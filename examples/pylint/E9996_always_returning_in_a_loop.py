@@ -9,6 +9,11 @@ def loop():
         print("sss")
         if j < 2:
             j += 1
+            for k in range(0, 2):
+                if k > 2:
+                    return 1
+                else:
+                    return 1
         if j > 1:
             return 1
         else:
@@ -20,6 +25,4 @@ def loop():
             return 2
         else:
             print(1)
-            return 4
-        i += 1
-
+        return 4

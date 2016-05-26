@@ -12,7 +12,7 @@ class AlwaysReturnChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'always_return'
-    msgs = {'E9996': ('Always returning object or none in loop on line %s',
+    msgs = {'E9996': ('Always returning an object or none in the loop on line %s',
                       'always_returning_in_a_loop',
                       'Used when you always return an object or none in a loop, '
                       'this may cause the loop only runs once.'),

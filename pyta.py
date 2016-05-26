@@ -19,6 +19,7 @@ from urllib.request import pathname2url
 # Local version of website; will be updated later.
 HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
 
+
 def check(module_name):
     """Check a module for errors, printing a report.
 
@@ -29,7 +30,10 @@ def check(module_name):
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
-    linter.load_plugin_modules(['checkers', 'Always_return_checker'])
+    linter.load_plugin_modules(['checkers',
+                                'global_variables_checker',
+                                'dynamic_execution_checker',
+                                'always_return_checker'])
     linter.read_config_file()
     linter.load_config_file()
     linter.check([spec.origin])

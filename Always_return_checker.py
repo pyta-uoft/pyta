@@ -3,7 +3,6 @@
 
 import astroid
 from pylint.interfaces import IAstroidChecker
-from pylint.checkers import base
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 
@@ -13,7 +12,7 @@ class AlwaysReturnChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'always_return'
-    msgs = {'E9997': ('Always returning true/false in loop on line %s',
+    msgs = {'E9996': ('Always returning true/false in loop on line %s',
                       'always_returning_in_a_loop',
                       'Used when you always return ture or false in a loop, '
                       'this may cause the loop only runs once.'),
@@ -23,60 +22,64 @@ class AlwaysReturnChecker(BaseChecker):
     priority = -1
 
     @check_messages("always_returning_in_a_loop")
-    def visit_for(self, node):
-        length = len(node.body)
-        first_branch = node.body[0]
-        # If the node is just a single statement, check whether it's a return
-        # statement.
-        if length == 1 and first_branch.is_statement:
-            if isinstance(first_branch, astroid.Return):
-                args = "{}".format(node.lineno)
-                self.add_message("always_returning_in_a_loop", node=node, args=args)
-        # If it's a sequence of statements, check whether one of them is a
+    def helper_fuc(self, node):
+        flag = True
+        body_length = len(node.body)
+        # If the node is just a single statement or a sequence of statement,
+        # check whether it's a return statement or whether one of them is a
         # return statement
-        if length > 1 and all([child.is_statement for child in node.body]):
-            if any([isinstance(child, astroid.Return) for child in node.body]):
-                args = "{}".format(node.lineno)
-                self.add_message("always_returning_in_a_loop", node=node, args=args)
+        if body_length > 0 and any([isinstance(child, astroid.Return) for child in node.body]):
+            args = "{}".format(node.lineno)
+            self.add_message("always_returning_in_a_loop", node=node, args=args)
         # If it's an if statement, check each branch separately, and only
         # return True if every branch has an explicit return.
-        if length == 1 and isinstance(first_branch, astroid.If):
-            if any([isinstance(child, astroid.Return) for child in first_branch.body]):
-                args = "{}".format(node.lineno)
-                self.add_message("always_returning_in_a_loop", node=node, args=args)
-        # If it's a loop, check the body of the loop.
-        if isinstance(first_branch, astroid.For):
-            return self.visit_for(first_branch)
-        if isinstance(first_branch, astroid.While):
-            return self.visit_while(first_branch)
+        for branch in node.body:
+            # check if the current branch is astroid.If
+            if isinstance(branch, astroid.If):
+                # Return False if there is no return in this branch
+                if not any([isinstance(child, astroid.Return) for child in (
+                        branch.body + branch.orelse)]):
+                    flag = False
+                # set first_branch
+                if branch.orelse and isinstance(branch.orelse[0], astroid.If):
+                    first_branch = branch.orelse[0]
+                elif branch.orelse:
+                    # Return False if there is no return in else branch
+                    if not any([isinstance(child, astroid.Return) for child in (
+                            branch.orelse)]):
+                        flag = False
+                    first_branch = "end"
+                else:
+                    first_branch = "end"
+                # check if every branch has a explicit return
+                while first_branch != "end":
+                    # Return False if there is no return in this branch
+                    if not any([isinstance(child, astroid.Return) for child in (
+                            first_branch.body + first_branch.orelse)]):
+                        flag = False
+                    if first_branch.orelse and isinstance(first_branch.orelse[0],
+                        astroid.If):
+                        first_branch = first_branch.orelse[0]
+                    # Return False if there is no return in else branch
+                    elif first_branch.orelse:
+                        if not any([isinstance(child, astroid.Return) for child in (
+                                first_branch.orelse)]):
+                            flag = False
+                    else:
+                        first_branch = "end"
+            # If it's a loop, check the body of the loop.
+            if isinstance(branch, astroid.For) or isinstance(branch, astroid.While):
+                return self.helper_fuc(branch)
+        # check the flag and decide whether there is error
+        if flag:
+            args = "{}".format(node.lineno)
+            self.add_message("always_returning_in_a_loop", node=node, args=args)
+
+    def visit_for(self, node):
+        self.helper_fuc(node)
 
     def visit_while(self, node):
-        length = len(node.body)
-        first_branch = node.body[0]
-        # If the node is just a single statement, check whether it's a return
-        # statement.
-        if length == 1 and first_branch.is_statement:
-            if isinstance(first_branch, astroid.Return):
-                args = "{}".format(node.lineno)
-                self.add_message("always_returning_in_a_loop", node=node, args=args)
-        # If it's a sequence of statements, check whether one of them is a
-        # return statement
-        if length > 1 and all([child.is_statement for child in node.body]):
-            if any([isinstance(child, astroid.Return) for child in node.body]):
-                args = "{}".format(node.lineno)
-                self.add_message("always_returning_in_a_loop", node=node, args=args)
-        # If it's an if statement, check each branch separately, and only
-        # return True if every branch has an explicit return.
-        if length == 1 and isinstance(first_branch, astroid.If):
-            if any([isinstance(child, astroid.Return) for child in first_branch.body]):
-                args = "{}".format(node.lineno)
-                self.add_message("always_returning_in_a_loop", node=node, args=args)
-        # If it's a loop, check the body of the loop.
-        if isinstance(first_branch, astroid.For):
-            return self.visit_for(first_branch)
-        if isinstance(first_branch, astroid.While):
-            return self.visit_while(first_branch)
-
+        self.helper_fuc(node)
 
 def register(linter):
     linter.register_checker(AlwaysReturnChecker(linter))

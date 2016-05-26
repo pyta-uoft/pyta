@@ -9,8 +9,6 @@ def loop():
         print("sss")
         if j < 2:
             j += 1
-            if j > 1:
-                print(1)
         if j > 1:
             return 1
         else:

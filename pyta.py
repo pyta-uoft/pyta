@@ -26,7 +26,19 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
+
+    # Check if `module_name` is not the type str, raise error.
+    if not isinstance(module_name, str):
+        raise NameError("The Module '{}' has an invalid name. Module "
+                        "name must be the type str.".format(module_name)) \
+                        from None
+
+    # Detect if the extension .py is added, and if it is, remove it.
+    if module_name.endswith('.py'):
+        module_name = module_name[:-3]
+
     spec = importlib.util.find_spec(module_name)
+
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
@@ -36,7 +48,13 @@ def check(module_name):
                                 'checkers/IO_Function_checker'])
     linter.read_config_file()
     linter.load_config_file()
-    linter.check([spec.origin])
+
+    # When module is not found, raise exception.
+    try:
+        linter.check([spec.origin])
+    except AttributeError:
+        raise ValueError("The Module '{}' could not be found in the given "
+                         "location.".format(module_name)) from None
     reporter.print_message_ids()
 
 

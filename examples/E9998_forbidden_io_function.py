@@ -3,8 +3,6 @@
 
 
 def hello():
-    """Print a message to the user."""
-
     # You should not use input action in some assignments
     name = input("What is your name?")  # Error on this line
 

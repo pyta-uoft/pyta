@@ -1,4 +1,4 @@
-def set_values(var1, var2):e
+def set_values(var1, var2):
 
     var1 = 1
     var2 = 2

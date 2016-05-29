@@ -11,8 +11,8 @@ class GlobalVariablesChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'global_variables'
-    msgs = {'E9997': ('Global variables should not be used in CSC108/CSC148 - %s', 'forbidden-global-variables',
-                      '')}
+    msgs = {'E9997': ('Global variables should not be used in CSC108/CSC148 - '
+                      '%s', 'forbidden-global-variables', '')}
 
     options = ()
     # this is important so that your checker is executed before others
@@ -33,8 +33,11 @@ class GlobalVariablesChecker(BaseChecker):
             a = re.match('(([A-Z_][A-Z0-9_]*)|(__.*__))$', s)
             # Raise an error only if it's not a constant
             if a is None:
-                args = "you declared global variables on line {}".format(node.lineno)
-                self.add_message('forbidden-global-variables', node=node, args=args)
+                args = "you declared the global variable '{}' on line {}".\
+                    format(s, node.lineno)
+                self.add_message('forbidden-global-variables', node=node,
+                                 args=args)
+
 
 def register(linter):
     """required method to auto register this checker"""

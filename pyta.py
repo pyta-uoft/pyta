@@ -32,7 +32,8 @@ def check(module_name):
     linter.load_default_plugins()
     linter.load_plugin_modules(['checkers/forbidden_import_checker',
                                 'checkers/global_variables_checker',
-                                'checkers/dynamic_execution_checker'])
+                                'checkers/dynamic_execution_checker',
+                                'checkers/IO_Function_checker'])
     linter.read_config_file()
     linter.load_config_file()
     linter.check([spec.origin])

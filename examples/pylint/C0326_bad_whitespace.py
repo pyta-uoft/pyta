@@ -1,10 +1,5 @@
-""" pylint: Bad whitespace
-
-"""
-
-
 def func( temp):
-    """Prints if a function is positive or negative
+    """Print "positive" if <temp> is greater than 0. ELse print "negative".
     """
     if temp <= 0:
         print('neg')

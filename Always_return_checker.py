@@ -23,8 +23,7 @@ class AlwaysReturnChecker(BaseChecker):
 
     @check_messages("always_returning_in_a_loop")
     def helper_fuc(self, node):
-        # If the node is just a single statement, check whether it's a return statement.
-        # If it's a sequence of statements, check whether one of them is a return statement.
+        # Check if the node is a return statement
         if isinstance(node, astroid.Return):
             args = "{}".format(node.lineno)
             self.add_message("always_returning_in_a_loop", node=node, args=args)
@@ -71,12 +70,10 @@ class AlwaysReturnChecker(BaseChecker):
                 self.helper_fuc(child)
 
     def visit_for(self, node):
-        for child in node.body:
-            self.helper_fuc(child)
+        self.helper_fuc(node)
 
     def visit_while(self, node):
-        for child in node.body:
-            self.helper_fuc(child)
+        self.helper_fuc(node)
 
 
 def register(linter):

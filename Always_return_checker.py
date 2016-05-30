@@ -70,10 +70,10 @@ class AlwaysReturnChecker(BaseChecker):
                 self.helper_fuc(child)
 
     def visit_for(self, node):
-        self.helper_fuc(node)
+        return self.helper_fuc(node)
 
     def visit_while(self, node):
-        self.helper_fuc(node)
+        return self.helper_fuc(node)
 
 
 def register(linter):

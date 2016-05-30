@@ -6,5 +6,5 @@ def info(age):
     @rtype: str
     """
     return "My age is" + age    # Error on this line
-
+                                # corrected version: "My age is" + str(age)
 info(2)

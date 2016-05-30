@@ -5,6 +5,7 @@ from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 import astroid
 import re
+from pylint.checkers.base import CONST_NAME_RGX
 
 
 class GlobalVariablesChecker(BaseChecker):
@@ -30,7 +31,7 @@ class GlobalVariablesChecker(BaseChecker):
         if isinstance(node.frame(), astroid.scoped_nodes.Module):
             regex = str(node.targets[0])
             s = re.findall('\((.*?)\)', regex)[0]
-            a = re.match('(([A-Z_][A-Z0-9_]*)|(__.*__))$', s)
+            a = re.match(CONST_NAME_RGX, s)
             # Raise an error only if it's not a constant
             if a is None:
                 args = "you declared the global variable '{}' on line {}".\

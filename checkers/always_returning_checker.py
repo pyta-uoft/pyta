@@ -28,6 +28,10 @@ class AlwaysReturnChecker(BaseChecker):
             self.add_message("always_returning_in_a_loop", node=node, args=args)
         # check if the node a if statement
         if isinstance(node, astroid.If):
+            # check the body of the if node
+            for child in node.body:
+                if isinstance(child, astroid.If):
+                    return self.helper_func(child, args)
             # set the flag = True.
             # Once there is not an explicit return, flag = false
             flag = True

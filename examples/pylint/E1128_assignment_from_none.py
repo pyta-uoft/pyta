@@ -1,7 +1,3 @@
-"""pylint: assignment from none.
-"""
-
-
 def f():
     return None
 

@@ -1,7 +1,9 @@
 def func( temp):
     """Print "positive" if <temp> is greater than 0. ELse print "negative".
+    @type temp: int
+    @rtype: str
     """
     if temp <= 0:
-        print('neg')
+        return "neg"
     else:
-        print('pos')
+        return "pos"

@@ -1,5 +1,7 @@
 def pos(temp):
-    """Print "positive" if <temp> is greater than 0. ELse print "negative".
+    """Return "positive" if <temp> is greater than 0. ELse return "negative".
+    @type temp: int
+    @rtype: str
     """
     if temp > 0: return "positive"
     else:

@@ -1,6 +1,3 @@
-"""Test file for global variables checker
-"""
-
 def function():
     """ A test for the global variables checker
     @rtype: None
@@ -13,6 +10,8 @@ def function():
 VALUE = 0
 function()
 print(VALUE)
+ex = 1
+print(ex)
 
 
 def function1():

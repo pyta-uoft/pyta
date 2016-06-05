@@ -1,6 +1,3 @@
-"""pylint: redundant unittest assert
-"""
-
 import unittest
 
 class TestStringMethods(unittest.TestCase):

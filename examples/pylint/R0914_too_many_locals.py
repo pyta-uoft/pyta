@@ -1,8 +1,3 @@
-"""pylint: too many locals
-
-Note: the limit is 15 local variables.
-"""
-
 def too_many_locals():
     """Example function that has to many local variables."""
     local_variable_1 = 1

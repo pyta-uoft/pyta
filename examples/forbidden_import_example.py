@@ -1,5 +1,3 @@
-"""Example showing a forbidden import."""
-
 import re
 
 def greet(name):

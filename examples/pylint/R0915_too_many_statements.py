@@ -1,8 +1,3 @@
-"""pylint: too many statements
-
-Note: the limit is 50 statements.
-"""
-
 def statement(arg):
     """Dummy function to demonstrate an example within too_many_statements()"""
     pass

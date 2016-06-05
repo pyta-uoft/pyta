@@ -1,7 +1,3 @@
-"""pylint: too many function args.
-"""
-
-
 def get_sum(x, y):
     """
     Return the sum of x and y.

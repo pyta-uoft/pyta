@@ -1,7 +1,8 @@
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 
-class MyAstroidChecker(BaseChecker):
+
+class ForbiddenImportChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'custom'
@@ -24,4 +25,4 @@ class MyAstroidChecker(BaseChecker):
 
 def register(linter):
     """required method to auto register this checker"""
-    linter.register_checker(MyAstroidChecker(linter))
+    linter.register_checker(ForbiddenImportChecker(linter))

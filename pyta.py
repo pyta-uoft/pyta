@@ -14,6 +14,7 @@ from pylint.reporters import BaseReporter
 
 import webbrowser
 import os
+import sys
 from urllib.request import pathname2url
 
 # Local version of website; will be updated later.
@@ -26,6 +27,9 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
+    if sys.version_info<(3,3,0):
+        sys.stderr.write("You need python 3.3 or later to run this script\n")
+        exit(1)
     spec = importlib.util.find_spec(module_name)
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)

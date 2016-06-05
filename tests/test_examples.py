@@ -10,19 +10,14 @@ _EXAMPLE_PREFIX_REGEX = '[CEFRW]\d{4}'
 
 
 def get_test_file_paths():
-	"""Gets all the files from the examples folder for testing."""
-	# Since examples are located elsewhere, change there first. 
-	old_wd = os.getcwd()
-	os.chdir(_EXAMPLES_PATH)
-	cur_wd = os.getcwd()
-	# Now get every file.
+	"""Gets all the files from the examples folder for testing. This will
+	return all the full file paths to the file, meaning they will have the
+	_EXAMPLES_PATH prefix followed by the file name for each element.
+	A list of all the file paths will be returned."""
 	test_files = []
-	for test_file in os.listdir('.'):
-		path = os.path.join(cur_wd, test_file)
-		if os.path.isfile(path):
-			test_files.append(path)
-	# Restore back to our old current working directory before returning.
-	os.chdir(old_wd)
+	for root, directories, files in os.walk(_EXAMPLES_PATH, topdown=True):
+		for filename in files:
+			test_files.append(_EXAMPLES_PATH + filename)
 	return test_files
 
 
@@ -45,8 +40,7 @@ def create_test_function(test_file, checker_name):
 
 
 def make_new_unit_tests():
-	"""Creates all the new unit tests dynamically."""
-	global _EXAMPLE_PREFIX_REGEX
+	"""Creates all the new unit tests dynamically from the testing directory."""
 	for test_file in get_test_file_paths():
 		base_name = os.path.basename(test_file)
 		if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):

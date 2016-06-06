@@ -1,16 +1,8 @@
-"""pylint: too many instance attributes
-
-Note: the limit is 7 instance attributes.
-"""
-
 class MyClass(object):
-    """Example with too many instance attributes.
-    """
+    """Example with too many instance attributes."""
 
     def __init__(self):
-        """
-        The are all instance attributes
-        """
+        """The are all instance attributes"""
 
         self.animal = "Dog"  # These are instance attributes...
         self.bread = "Sourdough"

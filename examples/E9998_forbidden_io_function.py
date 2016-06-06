@@ -1,6 +1,3 @@
-"""pyta: forbidden I/O function
-"""
-
 
 def hello():
     """Print a message to the user."""

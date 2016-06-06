@@ -53,8 +53,8 @@ def check(module_name):
     try:
         linter.check([spec.origin])
     except AttributeError:
-        raise ValueError("The Module '{}' could not be found in the given "
-                         "location.".format(module_name)) from None
+        print ("The Module '{}' could not be found in the given "
+                         "location.".format(module_name))
     reporter.print_message_ids()
 
 

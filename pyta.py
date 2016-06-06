@@ -16,6 +16,11 @@ import webbrowser
 import os
 from urllib.request import pathname2url
 
+import sys
+from colorama import Fore, Style
+from colorama import init, AnsiToWin32
+import platform
+
 # Local version of website; will be updated later.
 HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
 
@@ -59,12 +64,20 @@ class PyTAReporter(BaseReporter):
     def print_message_ids(self):
         # Sort the messages by their type.
         self._messages.sort(key=lambda s: s[0])
-
+        # Check if the OS currently running is Windows
+        if sys.platform == "win32":
+        # if platform.system() == "Windows":
+            init()
+        else:
+            init(wrap=False)
+        # stream = AnsiToWin32(sys.stderr).stream
         for msg in self._messages:
             if msg.msg_id.startswith('E'):
                 # Error codes appear in red
-                code = '\033[1;31m' + msg.msg_id + '\033[0m:'
+                # code = '\033[1;31m' + msg.msg_id + '\033[0m:'
+                code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             else:
-                code = '\033[1m' + msg.msg_id + '\033[0m:'
-
+                # code = '\033[1m' + msg.msg_id + '\033[0m:'
+                code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
+            # print(platform.system())

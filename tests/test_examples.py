@@ -5,7 +5,7 @@ import subprocess
 import re
 
 
-_EXAMPLES_PATH = '../examples/pylint/'
+_EXAMPLES_PATH = 'examples/pylint/'
 _EXAMPLE_PREFIX_REGEX = '[CEFRW]\d{4}'
 
 

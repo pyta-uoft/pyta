@@ -38,3 +38,11 @@ included as a library). In the Python interpreter, try running:
 [Some output should be shown]
 >>> pyta.doc('E9999')
 ```
+
+
+## Tests
+
+We have a test suite which checks every example file to see if PyTA actually
+picks up on the error the file is supposed to illustrate.
+
+To run the tests, enter `python tests/test_examples.py` in the terminal.

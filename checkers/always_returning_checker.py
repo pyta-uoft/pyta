@@ -42,6 +42,9 @@ class AlwaysReturnChecker(BaseChecker):
             if node.orelse and isinstance(node.orelse[0], astroid.If):
                 first_branch = node.orelse[0]
             elif node.orelse:
+                for child in node.orelse:
+                    if isinstance(child, astroid.If):
+                        return self.helper_func(child, args)
                 # Return False if there is no return in else branch
                 if not any([isinstance(child, astroid.Return) for child in (
                         node.orelse)]):
@@ -69,6 +72,9 @@ class AlwaysReturnChecker(BaseChecker):
                     first_branch = first_branch.orelse[0]
                 # Return False if there is no return in else branch
                 elif first_branch.orelse:
+                    for child in first_branch.orelse:
+                        if isinstance(child, astroid.If):
+                            return self.helper_func(child, args)
                     if not any([isinstance(child, astroid.Return) for child in (
                             first_branch.orelse)]):
                         flag = False

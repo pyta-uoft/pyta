@@ -20,6 +20,11 @@ from urllib.request import pathname2url
 # Local version of website; will be updated later.
 HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
 
+# check the python version
+if sys.version_info > (3,4,0):
+    sys.stderr.write("You need python 3.4 or later to run this script\n")
+    exit(1)
+
 
 def check(module_name):
     """Check a module for errors, printing a report.
@@ -27,9 +32,6 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
-    if sys.version_info<(3,3,0):
-        sys.stderr.write("You need python 3.3 or later to run this script\n")
-        exit(1)
     spec = importlib.util.find_spec(module_name)
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)

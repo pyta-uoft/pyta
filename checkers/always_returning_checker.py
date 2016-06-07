@@ -51,6 +51,10 @@ class AlwaysReturnChecker(BaseChecker):
                 first_branch = "end"
             # check if every branch has a explicit return
             while first_branch != "end":
+                # deal with the condition of nested if
+                for child in first_branch.body:
+                    if isinstance(child, astroid.If):
+                        return self.helper_func(child, args)
                 # Return False if there is no return in this branch
                 if not any([isinstance(child, astroid.Return) for child in (
                         first_branch.body + first_branch.orelse)]):
@@ -58,6 +62,10 @@ class AlwaysReturnChecker(BaseChecker):
                     first_branch = "end"
                 if first_branch.orelse and isinstance(first_branch.orelse[0],
                                                       astroid.If):
+                    # deal with the condition of nested if
+                    for child in first_branch.orelse.body:
+                        if isinstance(child, astroid.If):
+                            return self.helper_func(child, args)
                     first_branch = first_branch.orelse[0]
                 # Return False if there is no return in else branch
                 elif first_branch.orelse:

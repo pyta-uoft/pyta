@@ -11,6 +11,7 @@ To run the checker, call the check function on the name of the module to check.
 import importlib.util
 import pylint.lint as lint
 from pylint.reporters import BaseReporter
+from astroid import MANAGER
 
 import webbrowser
 
@@ -25,6 +26,9 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
+    # Reset astroid cache
+    MANAGER.astroid_cache.clear()
+
     spec = importlib.util.find_spec(module_name)
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)

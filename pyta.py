@@ -13,11 +13,10 @@ import pylint.lint as lint
 from pylint.reporters import BaseReporter
 
 import webbrowser
-import os
-from urllib.request import pathname2url
+
 
 # Local version of website; will be updated later.
-HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
+HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 
 def check(module_name):

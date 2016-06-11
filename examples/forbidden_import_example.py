@@ -1,5 +1,5 @@
 import re
-__import__(re)
+__import__("pyta")
 
 
 def greet(name):

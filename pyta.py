@@ -29,9 +29,8 @@ def check(module_name):
 
     # Check if `module_name` is not the type str, raise error.
     if not isinstance(module_name, str):
-        raise NameError("The Module '{}' has an invalid name. Module "
-                        "name must be the type str.".format(module_name)) \
-                        from None
+        print ("The Module '{}' has an invalid name. Module "
+                        "name must be the type str.".format(module_name))
 
     # Detect if the extension .py is added, and if it is, remove it.
     if module_name.endswith('.py'):
@@ -53,8 +52,7 @@ def check(module_name):
     try:
         linter.check([spec.origin])
     except AttributeError:
-        print ("The Module '{}' could not be found in the given "
-                         "location.".format(module_name))
+        print ("The Module '{}' could not be found.".format(module_name))
     reporter.print_message_ids()
 
 

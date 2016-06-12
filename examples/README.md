@@ -1,22 +1,28 @@
 # Standardization of PyTA Examples
 
-## Sorts of Examples
-
-* Custom examples: located in `pyta/examples/`
-* PyLint examples: located in `pyta/examples/pylint`
-
 
 ## Purpose
 
 Examples should illustrate an error in a succinct way, while clearly explaining
 the cause of the error to a beginner audience.
 
+
+## Sorts of Examples
+
+* Custom examples: located in `pyta/examples/`
+* PyLint examples: located in `pyta/examples/pylint/`
+
+
+## How Examples are Included
+
 The examples are included in the website index file with the `pandocfilters`
 module. See `/website/index.md` for the syntax to include the examples. Note
 that further explanation in addition to the example can be added directly to
 the `index.md` file.
 
+
 ## Documentation
+
 
 #### Module Docstrings
 

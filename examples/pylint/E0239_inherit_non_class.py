@@ -1,2 +1,2 @@
 class newclass("str"):
-	pass
+    pass

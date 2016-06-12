@@ -1,2 +1,2 @@
 def call_exception():
-	raise NotImplemented()
+    raise NotImplemented()

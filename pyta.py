@@ -11,13 +11,13 @@ To run the checker, call the check function on the name of the module to check.
 import importlib.util
 import pylint.lint as lint
 from pylint.reporters import BaseReporter
+from astroid import MANAGER
 
 import webbrowser
-import os
-from urllib.request import pathname2url
+
 
 # Local version of website; will be updated later.
-HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
+HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 
 def check(module_name):
@@ -26,6 +26,9 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
+    # Reset astroid cache
+    MANAGER.astroid_cache.clear()
+
     spec = importlib.util.find_spec(module_name)
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)

@@ -1,4 +1,5 @@
 import astroid
+import inspect
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
@@ -9,7 +10,7 @@ class ForbiddenImportChecker(BaseChecker):
 
     name = 'custom'
     msgs = {'E9999':
-                ('You may not import any modules - you %s',
+                ('You may not import any modules - you imported \033[4;34m%s\033[0m on line %s.',
                  'forbidden-import',
                  'Used when you use import')}
     options = ()
@@ -21,9 +22,8 @@ class ForbiddenImportChecker(BaseChecker):
         """visit and Import node"""
         self.add_message('forbidden-import',
                          node=node,
-                         args=('imported \033[4;34m%s\033[0m on line %s.' %
-                               (', '.join(map(lambda x: x[0], node.names)),
-                               node.lineno)))
+                         args=(', '.join(map(lambda x: x[0], node.names)),
+                               node.lineno))
 
     @check_messages("forbidden-import")
     def visit_call(self, node):
@@ -33,7 +33,7 @@ class ForbiddenImportChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 if name == "__import__":
-                    args = "use \033[4;34m__import__\033[0m on line {}".format(node.lineno)
+                    args = (node.args[0].as_string(), node.lineno)
                     # add the message
                     self.add_message('forbidden-import', node=node,
                                      args=args)

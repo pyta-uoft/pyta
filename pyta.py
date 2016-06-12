@@ -11,13 +11,14 @@ To run the checker, call the check function on the name of the module to check.
 import importlib.util
 import pylint.lint as lint
 from pylint.reporters import BaseReporter
+from astroid import MANAGER
 
 import webbrowser
-import os
-from urllib.request import pathname2url
+
 
 # Local version of website; will be updated later.
-HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
+HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
+
 
 def check(module_name):
     """Check a module for errors, printing a report.
@@ -25,11 +26,17 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
+    # Reset astroid cache
+    MANAGER.astroid_cache.clear()
+
     spec = importlib.util.find_spec(module_name)
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
-    linter.load_plugin_modules(['checkers'])
+    linter.load_plugin_modules(['checkers/forbidden_import_checker',
+                                'checkers/global_variables_checker',
+                                'checkers/dynamic_execution_checker',
+                                'checkers/IO_Function_checker'])
     linter.read_config_file()
     linter.load_config_file()
     linter.check([spec.origin])

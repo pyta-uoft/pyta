@@ -21,8 +21,8 @@ from urllib.request import pathname2url
 HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
 
 # check the python version
-if sys.version_info > (3,4,0):
-    sys.stderr.write('You need Python 3.4 or later to run this script\n')
+if sys.version_info < (3, 4, 0):
+    print('You need Python 3.4 or later to run this script\n')
     exit(1)
 
 

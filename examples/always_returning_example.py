@@ -5,8 +5,7 @@ def loop():
             for k in range(0, 2):
                 if k > 2:
                     for i in range(0, 5):
-                        if i < 2:
-                            return 2
+                        return 2
                     return 1
                 else:
                     return 1

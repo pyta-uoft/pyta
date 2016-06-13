@@ -23,8 +23,6 @@ HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
 # check the python version
 if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script\n')
-    exit(1)
-
 
 def check(module_name):
     """Check a module for errors, printing a report.

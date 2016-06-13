@@ -1,9 +1,9 @@
 def func( temp):
-    """Return "positive" if <temp> is greater than 0. ELse return "negative".
+    '''Return "positive" if <temp> is greater than 0. Else return "negative".
     @type temp: int
     @rtype: str
-    """
-    if temp <= 0:
-        return "neg"
+    '''
+    if temp > 0:
+        return "positive"
     else:
-        return "pos"
+        return "negative"

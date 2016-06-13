@@ -57,7 +57,7 @@ def check(module_name):
     except AttributeError:
         print("The Module '{}' could not be found. ".format(module_name))
         return
-
+            
     reporter.print_message_ids()
 
 def doc(msg_id):

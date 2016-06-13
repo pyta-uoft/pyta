@@ -31,10 +31,21 @@ def check(module_name):
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
+    # Check if `module_name` is not the type str, raise error.
+    if not isinstance(module_name, str):
+        print("The Module '{}' has an invalid name. Module name must be the "
+              "type str.".format(module_name))
+        return
+
+    # Detect if the extension .py is added, and if it is, remove it.
+    if module_name.endswith('.py'):
+        module_name = module_name[:-3]
+
     # Reset astroid cache
     MANAGER.astroid_cache.clear()
 
     spec = importlib.util.find_spec(module_name)
+
     reporter = PyTAReporter()
     linter = lint.PyLinter(reporter=reporter)
     linter.load_default_plugins()
@@ -45,9 +56,15 @@ def check(module_name):
                                 'checkers/always_returning_checker'])
     linter.read_config_file()
     linter.load_config_file()
-    linter.check([spec.origin])
-    reporter.print_message_ids()
 
+    # When module is not found, raise exception.
+    try:
+        linter.check([spec.origin])
+    except AttributeError:
+        print("The Module '{}' could not be found. ".format(module_name))
+        return
+            
+    reporter.print_message_ids()
 
 def doc(msg_id):
     """Open a webpage explaining the error for the given message."""

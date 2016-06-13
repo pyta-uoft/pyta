@@ -23,9 +23,7 @@ class ColorReporter(BaseReporter):
         for msg in self._messages:
             if msg.msg_id.startswith('E'):
                 # Error codes appear in red
-                # code = '\033[1;31m' + msg.msg_id + '\033[0m:'
                 code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             else:
-                # code = '\033[1m' + msg.msg_id + '\033[0m:'
                 code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             print(code, '({})\n    {}'.format(msg.symbol, msg.msg))

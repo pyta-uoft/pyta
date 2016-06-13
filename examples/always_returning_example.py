@@ -1,9 +1,12 @@
 def loop():
-    for j in range(0, 1):
+    for j in range(0, 10):
         if j < 2:
             j += 1
             for k in range(0, 2):
                 if k > 2:
+                    for l in range(0, 5):
+                        if l < 2:
+                            return 2
                     return 1
                 else:
                     return 1
@@ -17,5 +20,5 @@ def loop():
         if i > 2:
             return 2
         else:
-            print(1)
+            i += 1
         return 4

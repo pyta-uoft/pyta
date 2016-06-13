@@ -1,4 +1,6 @@
 import re
+__import__("pyta")
+
 
 def greet(name):
     """Print a message to the user."""
@@ -10,3 +12,4 @@ def greet(name):
 
 if __name__ == '__main__':
     greet('david')
+

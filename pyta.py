@@ -14,10 +14,15 @@ from pylint.reporters import BaseReporter
 from astroid import MANAGER
 
 import webbrowser
+import sys
 
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
+
+# check the python version
+if sys.version_info < (3, 4, 0):
+    print('You need Python 3.4 or later to run this script')
 
 
 def check(module_name):

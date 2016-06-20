@@ -53,11 +53,9 @@ def check(module_name):
                                 'checkers/global_variables_checker',
                                 'checkers/dynamic_execution_checker',
                                 'checkers/IO_Function_checker',
-<<<<<<< HEAD
-                                'checkers/invalid_range_index_checker'])
-=======
+                                'checkers/invalid_range_index_checker',
                                 'checkers/always_returning_checker'])
->>>>>>> 457b9bcbb468b686035626721027732a5172b65e
+
     linter.read_config_file()
     linter.load_config_file()
 

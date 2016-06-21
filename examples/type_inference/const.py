@@ -22,5 +22,8 @@ dict = {'Name': 'Hayley'}
 # binary operator & int
 5 + 1
 
+# None Type
+None
+
 # unary operator & int
 -2

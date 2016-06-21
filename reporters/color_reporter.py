@@ -7,7 +7,7 @@ from colorama import init
 
 class ColorReporter(PlainReporter):
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
 
     # Override this method
     def print_message_ids(self):

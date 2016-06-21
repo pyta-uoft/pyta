@@ -57,8 +57,6 @@ def check(module_name, reporter=ColorReporter):
                                 'checkers/always_returning_checker'])
     linter.read_config_file()
     linter.load_config_file()
-    linter.check([spec.origin])
-    current_reporter.print_message_ids()
 
     # When module is not found, raise exception.
     try:
@@ -66,6 +64,9 @@ def check(module_name, reporter=ColorReporter):
     except AttributeError:
         print("The Module '{}' could not be found. ".format(module_name))
         return
+
+    current_reporter.print_message_ids()
+
 
 def doc(msg_id):
     """Open a webpage explaining the error for the given message."""

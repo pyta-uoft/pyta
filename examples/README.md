@@ -51,10 +51,10 @@ def the_function_name(arg_name1, arg_name2):
 #### Comments
 
 Write comments in a manner that would be used to talk to a beginner. Be explicit
-with clear explanation, and avoid using jargon terms.
+with clear explanation, and avoid using jargon.
 
 Try to point out where the error occurs in the example, if possible. Inline
-comments, with two spaces before the has, are useful for this purpose, for
+comments, with two spaces before the hash symbol, are useful for this purpose, for
 example:
 
 ```python
@@ -65,6 +65,15 @@ temp += 1  # Error on this line. This line is unreachable.
 
 ## Structure
 
+Imports (if needed) should be one-per-line, like:
+
+```python
+import sys
+import math
+```
+
+Use single quotes, unless specified otherwise.
+
 Indent with 4 spaces.
 
 Each example generally has only one class or method.
@@ -72,13 +81,11 @@ Each example generally has only one class or method.
 Examples typically do not need to be executed by calling them, since the
 linter checks the examples statically.
 
-Print statements are acceptable, but not necessary.
-
-Imports should be one-per-line, like:
-
-```python
-import sys
-import math
-```
+Print statements should be avoided.
 
 
+## Correctness
+
+The (pycodestyle)[https://github.com/PyCQA/pycodestyle] tool can be used to check for compliance with the (PEP 8)[https://www.python.org/dev/peps/pep-0008/] style guide.
+
+Examples should be checked with PyTA to ensure the indented message is raised. Extraneous messages should be limited in a well-crafted example.

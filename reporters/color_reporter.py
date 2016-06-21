@@ -15,11 +15,12 @@ class ColorReporter(BaseReporter):
         self._messages.append(msg)
 
     def print_message_ids(self):
+        # Check if the OS currently running is Windows
+        init(wrap=(sys.platform == "win32"))
+
         # Sort the messages by their type.
         self._messages.sort(key=lambda s: s[0])
-        # Check if the OS currently running is Windows
 
-        init(wrap=(sys.platform == "win32"))
         for msg in self._messages:
             if msg.msg_id.startswith('E'):
                 # Error codes appear in red

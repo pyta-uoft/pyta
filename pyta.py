@@ -21,15 +21,16 @@ from urllib.request import pathname2url
 HELP_URL = 'file:' + pathname2url(os.path.abspath('website/index.html'))
 
 
-def check(module_name, reporter=ColorReporter()):
+def check(module_name, reporter=ColorReporter):
     """Check a module for errors, printing a report.
 
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
     spec = importlib.util.find_spec(module_name)
-    #reporter = ColorReporter()
-    linter = lint.PyLinter(reporter=reporter)
+
+    current_reporter = reporter()
+    linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['checkers/forbidden_import_checker',
                                 'checkers/global_variables_checker',
@@ -38,7 +39,7 @@ def check(module_name, reporter=ColorReporter()):
     linter.read_config_file()
     linter.load_config_file()
     linter.check([spec.origin])
-    reporter.print_message_ids()
+    current_reporter.print_message_ids()
 
 
 def doc(msg_id):

@@ -4,6 +4,11 @@
 # there seems to be an off by one issue in how max-nested-blocks is used.
 max-nested-blocks = 2
 
+[FORMAT]
+
+# Set the maximum line length. The maximum line length in pep8 is 80 characters.
+max-line-length = 79
+
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s).
@@ -13,4 +18,5 @@ disable=C0410, R0401, R0901, R0903, R0904, R0911, R0916, W0402, W0403, W0410,
     E0116, E0114, E0112, E0115, E0106, E0113, E0111, E0105, E0100, E0117,
     W0150, W0120, W0124, W0108, W0123, W0122, W0110, C0122, C0200, W0141,
     W0640, W0623, W0614, W0604, W0603, W0602, W0601, E0604, E0603, E1200,
-    E1201, E1202, W1201, E1205, E1206
+    E1201, E1202, W1201, E1205, E1206, similarities, newstyle, python3,
+    W0512, C0403, C0401, C0402, E1701, E1700, W0332, C0327, C0328

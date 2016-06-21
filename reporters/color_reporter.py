@@ -1,19 +1,15 @@
-from pylint.reporters import BaseReporter
+from reporters.plain_reporter import PlainReporter
 
 import sys
 from colorama import Fore, Style
 from colorama import init
 
 
-class ColorReporter(BaseReporter):
+class ColorReporter(PlainReporter):
     def __init__(self):
         super().__init__(self)
-        self._messages = []
 
-    def handle_message(self, msg):
-        """Handle a new message triggered on the current file."""
-        self._messages.append(msg)
-
+    # Override this method
     def print_message_ids(self):
         # Check if the OS currently running is Windows
         init(wrap=(sys.platform == "win32"))

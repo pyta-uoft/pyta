@@ -86,6 +86,6 @@ Print statements should be avoided.
 
 ## Correctness
 
-The (pycodestyle)[https://github.com/PyCQA/pycodestyle] tool can be used to check for compliance with the (PEP 8)[https://www.python.org/dev/peps/pep-0008/] style guide.
+The [pycodestyle](https://github.com/PyCQA/pycodestyle) tool can be used to check for compliance with the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide.
 
 Examples should be checked with PyTA to ensure the indented message is raised. Extraneous messages should be limited in a well-crafted example.

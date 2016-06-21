@@ -14,8 +14,7 @@ class ColorReporter(PlainReporter):
         # Check if the OS currently running is Windows
         init(wrap=(sys.platform == "win32"))
 
-        # Sort the messages by their type.
-        self._messages.sort(key=lambda s: s[0])
+        self.sort_messages()
 
         for msg in self._messages:
             if msg.msg_id.startswith('E'):

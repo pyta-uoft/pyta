@@ -12,7 +12,7 @@ class ColorReporter(PlainReporter):
     # Override this method
     def print_message_ids(self):
         # Check if the OS currently running is Windows
-        init(wrap=(sys.platform == "win32"))
+        init(wrap=(sys.platform == 'win32'))
 
         # Sort the messages by their type.
         self._messages.sort(key=lambda s: s[0])

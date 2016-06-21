@@ -76,7 +76,7 @@ Use single quotes, unless specified otherwise.
 
 Indent with 4 spaces.
 
-Each example generally has only one class or method.
+Each example generally has only one class or function.
 
 Examples typically do not need to be executed by calling them, since the
 linter checks the examples statically.
@@ -88,4 +88,4 @@ Print statements should be avoided.
 
 Examples should be compliant with the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide. The [pycodestyle](https://github.com/PyCQA/pycodestyle) tool can be used to check for compliance with PEP 8.
 
-Examples should be checked with PyTA to ensure the indented message is raised. Extraneous messages should be limited in a well-crafted example.
+Examples should be checked with PyTA to ensure the intended message is raised. Extraneous messages should be limited in a well-crafted example.

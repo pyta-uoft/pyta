@@ -93,6 +93,7 @@ Some messages are allowed in the examples:
 ```
 Invalid module name
 Missing module docstring
+Invalid constant name
 ```
 
 Examples should be checked with PyTA to ensure the intended message is raised. Extraneous messages should be limited in a well-crafted example.

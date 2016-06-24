@@ -50,8 +50,8 @@ def the_function_name(arg_name1, arg_name2):
 
 #### Comments
 
-Write comments in a manner that would be used to talk to a beginner. Be explicit
-with clear explanation, and avoid using jargon.
+Write comments in a manner that would be used to explain to a beginner. Be 
+explicit with clear explanation, and avoid using jargon.
 
 Try to point out where the error occurs in the example, if possible. Inline
 comments, with two spaces before the hash symbol, are useful for this purpose, for
@@ -86,6 +86,6 @@ Print statements should be avoided.
 
 ## Correctness
 
-Examples should be compliant with the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide. The [pycodestyle](https://github.com/PyCQA/pycodestyle) tool can be used to check for compliance with PEP 8.
+Examples should be compliant with the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide, where possible. The [pycodestyle](https://github.com/PyCQA/pycodestyle) tool can be used to check for compliance with PEP 8.
 
 Examples should be checked with PyTA to ensure the intended message is raised. Extraneous messages should be limited in a well-crafted example.

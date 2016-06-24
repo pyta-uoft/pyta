@@ -55,7 +55,6 @@ def check(module_name):
                                 'checkers/IO_Function_checker',
                                 'checkers/invalid_range_index_checker',
                                 'checkers/always_returning_checker'])
-
     linter.read_config_file()
     linter.load_config_file()
 

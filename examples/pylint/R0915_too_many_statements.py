@@ -2,6 +2,7 @@ def statement(arg):
     """Dummy function to demonstrate an example within too_many_statements()"""
     pass
 
+
 def too_many_statements(arg):
     """There are too many statements in this function."""
     statement_1 = 1  # lots of statements...

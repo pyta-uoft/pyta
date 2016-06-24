@@ -1,5 +1,5 @@
 def f():
-    print("s")
+    print('s')
 
 
 def g():

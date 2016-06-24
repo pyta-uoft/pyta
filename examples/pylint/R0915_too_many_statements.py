@@ -5,7 +5,7 @@ def statement(arg):
 
 def too_many_statements(arg):
     """There are too many statements in this function."""
-    statement_1 = 1  # lots of statements...
+    statement_1 = 1
     statement_2 = 2
     statement_3 = 3
     statement_4 = 4
@@ -46,14 +46,14 @@ def too_many_statements(arg):
     statement_39 = 39
     statement_40 = 40
 
-    statement("function calls are statements too")
-    statement("function calls are statements too")
-    statement("function calls are statements too")
-    statement("function calls are statements too")
-    statement("function calls are statements too")
-    statement("function calls are statements too")
-    statement("function calls are statements too")
-    statement("function calls are statements too")
+    statement('function calls are statements too')
+    statement('function calls are statements too')
+    statement('function calls are statements too')
+    statement('function calls are statements too')
+    statement('function calls are statements too')
+    statement('function calls are statements too')
+    statement('function calls are statements too')
+    statement('function calls are statements too')
 
     if arg:
-        statments = "this block (including condition) counts as 2 statements."
+        statments = 'this block (including condition) counts as 2 statements.'

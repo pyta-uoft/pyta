@@ -7,11 +7,10 @@ for j in range(0, 1, 3):
 for k in range(9, 1, -9):
     k += 1
 
-for m in range(0, 1):
-    m += 1
-
 for n in range(0, 1.1):
     n += 1
 
-for n in range(4, 5):
-    n += 1
+for m in range(4, 5):
+    m += 1
+    
+    

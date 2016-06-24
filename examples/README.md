@@ -88,4 +88,11 @@ Print statements should be avoided.
 
 Examples should be compliant with the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide, where possible. The [pycodestyle](https://github.com/PyCQA/pycodestyle) tool can be used to check for compliance with PEP 8.
 
+Some messages are allowed in the examples:
+
+```
+Invalid module name
+Missing module docstring
+```
+
 Examples should be checked with PyTA to ensure the intended message is raised. Extraneous messages should be limited in a well-crafted example.

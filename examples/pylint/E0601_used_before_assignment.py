@@ -1,2 +1,2 @@
-print(a) # Error on this line
-a = 1 
+print(a)  # Error on this line
+a = 1

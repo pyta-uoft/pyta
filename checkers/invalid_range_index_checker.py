@@ -26,20 +26,19 @@ class InvalidRangeIndexChecker(BaseChecker):
             if not (name in node.frame() or name in node.root()) and name == 'range':
                 # the arguments of 'range' call
                 arg = node.args
+                lst = list(map(lambda z: literal_eval(z.as_string()), arg))
                 # check if there is no args in 'range' call
                 if len(arg) == 0 or \
                         not all([isinstance(literal_eval(c.as_string()), int) for c in arg])\
-                    or (len(arg) == 1 and literal_eval(arg[0].as_string()) < 2)\
-                    or (len(arg) == 2 and literal_eval(arg[1].as_string()) < 2):
+                    or (len(arg) == 1 and lst[0] < 2)\
+                    or (len(arg) == 2 and lst[1] - lst[0] < 2):
                     args = "{}".format(node.lineno)
                     self.add_message('invalid-range-index', node=node,
                                  args=args)
                 if len(arg) == 3:
-                    a = literal_eval(arg[0].as_string())
-                    b = literal_eval(arg[1].as_string())
-                    c = literal_eval(arg[2].as_string())
-                    if abs(c) >= abs(a - b) or c == 0 or (a > b and c < 0) or \
-                                            a < b and c > 0:
+                    if abs(lst[2]) >= abs(lst[0] - lst[1]) or lst[2] == 0 or \
+                            (lst[0] > lst[1] and lst[2] < 0) or lst[0] < lst[1]\
+                            and lst[2] > 0:
                         args = "{}".format(node.lineno)
                         self.add_message('invalid-range-index', node=node,
                                  args=args)

@@ -1,5 +1,5 @@
 for i in range(0):
-    i+= 1
+    i += 1
 
 for j in range(0, 1, 3):
     j += 1
@@ -11,4 +11,7 @@ for m in range(0, 1):
     m += 1
 
 for n in range(0, 1.1):
+    n += 1
+
+for n in range(4, 5):
     n += 1

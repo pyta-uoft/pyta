@@ -22,11 +22,11 @@ class AssigningToSelfChecker(BaseChecker):
 
     @check_messages("assigning_to_self")
     def visit_assign(self, node):
-        print(node)
-        print(node.name)
-        if isinstance(node, astroid.Assign):
+        target = node.targets[0]
+        if isinstance(target, astroid.AssignName) and target.as_string() == "self":
             args = node.lineno
             self.add_message('assigning_to_self', node=node, args=args)
+
 
 def register(linter):
     linter.register_checker(AssigningToSelfChecker(linter))

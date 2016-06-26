@@ -1,6 +1,10 @@
 class Assigning():
-    def __init__(self, value):
+    def __init__(self, value, name):
         self.value = value
+        self.name = name
         
-    def change_value(self, newvalue):
-        self = newvalue
+    def new(self, newvalue, newname):
+        # wrong approach
+        self = newvalue  # Error on this line
+        # correct approach
+        self.name = newname

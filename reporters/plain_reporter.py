@@ -24,21 +24,25 @@ class PlainReporter(BaseReporter):
         self._messages.sort(key=lambda s: s[0])
 
         i = 0
-        count = 0
         while i < len(self._messages):
             current_id = self._messages[i].msg_id
-
+            count = 1
+            messages = ''
+            msg_count = 1
             while i+1 < len(self._messages) and self._messages[i+1].msg_id == current_id:
                 count += 1
+                if msg_count <= 5:
+                    messages += '\n    ' + self._messages[i+1].msg
+                    msg_count += 1
                 self._messages.pop(i+1)
 
             msg = self._messages[i].msg
 
             if count > 1:
-                msg = self._messages[i].msg + '. This error also occurs at '+ str(count) +' more places.'
+                msg = 'This error occurs at '+ str(count) + ' places:\n    ' + self._messages[i].msg + messages
                 #temp = self._messages[i].__setattr__(self._messages[i].msg, 'hello')
-            elif count == 1:
-                msg = self._messages[i].msg + '. This error also occurs at 1 more place.'
+            #elif count == 1:
+            #    msg = self._messages[i].msg + 'This error occurs at 1 place.'
 
             msgid = self._messages[i].msg_id
             symbol = self._messages[i].symbol

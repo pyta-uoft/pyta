@@ -1,1 +1,1 @@
-s = "{} and {}".format("first")  # Error on this line
+s = '{} and {}'.format('first')  # Error on this line

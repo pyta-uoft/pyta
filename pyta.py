@@ -16,8 +16,6 @@ from astroid import MANAGER
 import webbrowser
 import sys
 
-
-
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 

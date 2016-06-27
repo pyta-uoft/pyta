@@ -1,3 +1,4 @@
+
 # float
 3.1415
 
@@ -19,12 +20,14 @@ True
 # dict
 dict = {'Name': 'Hayley'}
 
-# binary operator & int
-5 + 1
-
 # None Type
 None
+
+# binary operator & int
+5 + 1
 
 # unary operator & int
 -2
 
+# unary operator & float
++0.343234

@@ -50,13 +50,30 @@ class TypeVisitor(TransformVisitor):
 def set_const(node):
     """Populate type constraints for astroid nodes."""
     if isinstance(node, astroid.Const):
-        # astroid.Const represent a constant node like num/str/bool/None/bytes.
+        # # astroid.Const represent a constant node like num/str/bool/None/bytes.
+        # if isinstance(node.parent, astroid.UnaryOp):
+        #     print(node.value)
+        #     Expr(value=astroid.UnaryOp(op=USub(), operand=Name(id='a', ctx=Load())))
         node.type_constraints = [type(node.value)]
-    elif isinstance(node, astroid.List) or isinstance(node, astroid.Tuple) \
-            or isinstance(node, astroid.Dict):
+    elif isinstance(node, astroid.Tuple):
         node.type_constraints = [type(())]
-    elif isinstance(node, astroid.BinOp) or isinstance(node, astroid.UnaryOp):
+    elif isinstance(node, astroid.List):
         node.type_constraints = [type([])]
+    elif isinstance(node, astroid.Dict):
+        node.type_constraints = [type({})]
+
+    elif isinstance(node, astroid.BinOp):
+        op = node.op
+        left_operand = node.left.value
+        right_operand = node.right.value
+        result = eval(str(left_operand) + op + str(right_operand))
+        node.type_constraints = [type(result)]
+
+    elif isinstance(node, astroid.UnaryOp):
+        op = node.op
+        operand = node.operand.value
+        result = eval(op + str(operand))
+        node.type_constraints = [type(result)]
 
 
 if __name__ == '__main__':

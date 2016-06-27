@@ -1,8 +1,6 @@
 language: python
 python:
-	- "3.3"
-	- "3.4"
-	- "3.5"
+  - "3.3"
 install: "pip install pylint"
 script: 
-	- python test/test_dummy.py
+  - python test/test_dummy.py

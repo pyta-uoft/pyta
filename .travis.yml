@@ -3,4 +3,4 @@ python:
   - "3.3"
 install: "pip install pylint"
 script: 
-  - python tests/test_dummy.py
+  - python tests/test_examples.py

@@ -3,7 +3,7 @@ class Assigning():
         self.value = value
         self.name = name
         
-    def new(self, newvalue, newname):
+    def new_attr(self, newvalue, newname):
         # wrong approach
         self = newvalue  # Error on this line
         # correct approach

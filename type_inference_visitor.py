@@ -54,9 +54,9 @@ def set_const(node):
         node.type_constraints = [type(node.value)]
     elif isinstance(node, astroid.List) or isinstance(node, astroid.Tuple) \
             or isinstance(node, astroid.Dict):
-        node.type_constraints = [type(node)]
+        node.type_constraints = [type(())]
     elif isinstance(node, astroid.BinOp) or isinstance(node, astroid.UnaryOp):
-        node.type_constraints = [type(node)]
+        node.type_constraints = [type([])]
 
 
 if __name__ == '__main__':

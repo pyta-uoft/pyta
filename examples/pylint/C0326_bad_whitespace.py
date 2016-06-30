@@ -1,9 +1,6 @@
-def func( temp):
-    '''Return 'positive' if <temp> is greater than 0. Else return 'negative'.
+def func( temp):  # bad whitespace here
+    """Return whether <temp> is greater than 0
     @type temp: int
-    @rtype: str
-    '''
-    if temp > 0:
-        return 'positive'
-    else:
-        return 'negative'
+    @rtype: bool
+    """
+    return temp > 0

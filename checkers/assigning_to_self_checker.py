@@ -12,7 +12,7 @@ class AssigningToSelfChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'always_return'
-    msgs = {'E9992': ('Assigning value to self on line %s',
+    msgs = {'E9990': ('Assigning value to self on line %s',
                       'assigning_to_self',
                       'Used when you assign a value to self'),
            }
@@ -23,7 +23,7 @@ class AssigningToSelfChecker(BaseChecker):
     @check_messages("assigning_to_self")
     def visit_assign(self, node):
         target = node.targets[0]
-        if isinstance(target, astroid.AssignName) and target.as_string() == "self":
+        if isinstance(target, astroid.AssignName) and target.name == "self":
             args = node.lineno
             self.add_message('assigning_to_self', node=node, args=args)
 

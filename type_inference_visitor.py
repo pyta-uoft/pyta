@@ -18,6 +18,8 @@ class TypeVisitor(TransformVisitor):
                 value = getattr(node, field)
                 visited = self._visit_generic(value)
                 setattr(node, field, visited)
+
+
         return self._transform(node)
 
 
@@ -53,21 +55,35 @@ def set_dict(node):
 
 def set_binop(node):
     if isinstance(node, astroid.BinOp):
-        op = node.op
+        # op = node.op
         left_operand = node.left.value
         right_operand = node.right.value
-        result = eval(str(left_operand) + op + str(right_operand))
-        node.type_constraints = [type(result)]
+
+        # Using typing.Union to find both types of the operands, if they are
+        # found as different types, such as list and string, return an type
+        # error.
+        result = [typing.Union[type(left_operand), type(right_operand)]]
+        if len(result) > 1:
+            warnings.warn('Different types of operands found, binop node %s'
+                          'might have a type error.' % node)
+        print("type constraints (by typing): " + str(typing.Union[type(
+            left_operand), type(right_operand)]))
+
+        # result = eval(str(left_operand) + op + str(right_operand))
+        # node.type_constraints = [type(result)]
+        node.type_constraints = result
     else:
         warnings.warn('node %s is not binary operator type.' % node)
 
 
 def set_unaryop(node):
     if isinstance(node, astroid.UnaryOp):
-        op = node.op
+        # op = node.op
         operand = node.operand.value
-        result = eval(op + str(operand))
-        node.type_constraints = [type(result)]
+
+        # result = eval(op + str(operand))
+        # node.type_constraints = [type(result)]
+        node.type_constraints = [type(operand)]
     else:
         warnings.warn('node %s is not unary operator type.' % node)
 

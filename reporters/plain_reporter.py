@@ -12,14 +12,11 @@ class PlainReporter(BaseReporter):
         self._messages.append(msg)
 
     def print_message_ids(self):
-        # Sort the messages by their type.
-        #self._messages.sort(key=lambda s: s[0])
+        # Sort the messages.
         self.sort_messages()
         for msg in self._messages:
             code = msg.msg_id
-            #print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
             print(code, '({}) {}\n    {}'.format(msg.symbol, msg.obj, msg.msg))
-            # print(msg)
 
     def sort_messages(self):
         # Sort the messages by their type.
@@ -43,19 +40,6 @@ class PlainReporter(BaseReporter):
                 msg_new = self._messages[i].msg + temp
 
             obj_new = 'This error occurs at ' + str(count) + ' places:'
-            # msgid = self._messages[i].msg_id
-            # symbol = self._messages[i].symbol
-            # confidence = self._messages[i].confidence
-            # abspath = self._messages[i].abspath
-            # path = self._messages[i].path
-            # module = self._messages[i].module
-            # obj = self._messages[i].obj
-            # line = self._messages[i].line
-            # column = self._messages[i].column
-            # self._messages[i] = Message(msgid, symbol, (abspath, path,
-            #                                                 module, obj, line,
-            #                                                 column), msg,
-            #                                 confidence)
             self._messages[i] = self._messages[i]._replace(msg=msg_new)
             self._messages[i] = self._messages[i]._replace(obj=obj_new)
             i += 1

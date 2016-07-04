@@ -17,7 +17,8 @@ class PlainReporter(BaseReporter):
         self.sort_messages()
         for msg in self._messages:
             code = msg.msg_id
-            print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
+            #print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
+            print(code, '({})'.format(msg.symbol), msg.msg, sep=' ')
 
     def sort_messages(self):
         # Sort the messages by their type.
@@ -27,38 +28,32 @@ class PlainReporter(BaseReporter):
         while i < len(self._messages):
             current_id = self._messages[i].msg_id
             count = 1
-            messages = ''
-            msg_count = 1
-            while i+1 < len(self._messages) and self._messages[i+1].msg_id == current_id:
+            messages = []
+            while i + 1 < len(self._messages) and self._messages[i + 1].msg_id == current_id:
                 count += 1
-                if msg_count <= 5:
-                    messages += '\n    ' + self._messages[i+1].msg
-                    msg_count += 1
+                if len(messages) <= 5:
+                    messages.append(self._messages[i+1].msg)
                 self._messages.pop(i+1)
 
-            msg = self._messages[i].msg
+            msg_new = '\n    ' + self._messages[i].msg
 
-            if count > 1:
-                msg = 'This error occurs at '+ str(count) + ' places:\n    ' + self._messages[i].msg + messages
-                #temp = self._messages[i].__setattr__(self._messages[i].msg, 'hello')
-            #elif count == 1:
-            #    msg = self._messages[i].msg + 'This error occurs at 1 place.'
+            if len(messages) > 0:
+                temp = '\n    ' + '\n    '.join(messages)
+                msg_new = 'This error occurs at ' + str(count) + ' places:\n    ' + self._messages[i].msg + temp
 
-            msgid = self._messages[i].msg_id
-            symbol = self._messages[i].symbol
-            confidence = self._messages[i].confidence
-            abspath = self._messages[i].abspath
-            path = self._messages[i].path
-            module = self._messages[i].module
-            obj = self._messages[i].obj
-            line = self._messages[i].line
-            column = self._messages[i].column
-            self._messages[i] = Message(msgid, symbol, (abspath, path,
-                                                            module, obj, line,
-                                                            column), msg,
-                                            confidence)
-
-            #Message(msgid, symbol='forbidden-global-variables', msg="Global variables should not be used in CSC108/CSC148 - you used the keyword 'global' on line 7", C='E', category='error', confidence)
-
-            count = 0
+            # msgid = self._messages[i].msg_id
+            # symbol = self._messages[i].symbol
+            # confidence = self._messages[i].confidence
+            # abspath = self._messages[i].abspath
+            # path = self._messages[i].path
+            # module = self._messages[i].module
+            # obj = self._messages[i].obj
+            # line = self._messages[i].line
+            # column = self._messages[i].column
+            # self._messages[i] = Message(msgid, symbol, (abspath, path,
+            #                                                 module, obj, line,
+            #                                                 column), msg,
+            #                                 confidence)
+            #print(type(self._messages[i]))
+            self._messages[i] = self._messages[i]._replace(msg=msg_new)
             i += 1

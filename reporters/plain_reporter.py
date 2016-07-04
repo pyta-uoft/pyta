@@ -18,7 +18,8 @@ class PlainReporter(BaseReporter):
         for msg in self._messages:
             code = msg.msg_id
             #print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
-            print(code, '({})'.format(msg.symbol), msg.msg, sep=' ')
+            print(code, '({}) {}\n    {}'.format(msg.symbol, msg.obj, msg.msg))
+            # print(msg)
 
     def sort_messages(self):
         # Sort the messages by their type.
@@ -35,12 +36,13 @@ class PlainReporter(BaseReporter):
                     messages.append(self._messages[i+1].msg)
                 self._messages.pop(i+1)
 
-            msg_new = '\n    ' + self._messages[i].msg
+            msg_new = self._messages[i].msg
 
             if len(messages) > 0:
                 temp = '\n    ' + '\n    '.join(messages)
-                msg_new = 'This error occurs at ' + str(count) + ' places:\n    ' + self._messages[i].msg + temp
+                msg_new = self._messages[i].msg + temp
 
+            obj_new = 'This error occurs at ' + str(count) + ' places:'
             # msgid = self._messages[i].msg_id
             # symbol = self._messages[i].symbol
             # confidence = self._messages[i].confidence
@@ -54,6 +56,6 @@ class PlainReporter(BaseReporter):
             #                                                 module, obj, line,
             #                                                 column), msg,
             #                                 confidence)
-            #print(type(self._messages[i]))
             self._messages[i] = self._messages[i]._replace(msg=msg_new)
+            self._messages[i] = self._messages[i]._replace(obj=obj_new)
             i += 1

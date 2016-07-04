@@ -18,8 +18,6 @@ class TypeVisitor(TransformVisitor):
                 value = getattr(node, field)
                 visited = self._visit_generic(value)
                 setattr(node, field, visited)
-
-
         return self._transform(node)
 
 
@@ -27,35 +25,43 @@ def set_const(node):
     """Populate type constraints for astroid nodes."""
     if isinstance(node, astroid.Const):
         # astroid.Const represent a constant node like num/str/bool/None/bytes.
-        node.type_constraints = [type(node.value)]
+        result = [type(node.value)]
+        node.type_constraints = result
+        print(str(node.value) + "\n" + str(result) + "\n")
     else:
         warnings.warn('node %s is not const type.' % node)
 
 
 def set_tuple(node):
     if isinstance(node, astroid.Tuple):
-        node.type_constraints = [type(())]
+        result = [tuple]
+        node.type_constraints = result
+        print("(" + ")" + "\n" + str(result) + "\n")
     else:
         warnings.warn('node %s is not tuple type.' % node)
 
 
 def set_list(node):
     if isinstance(node, astroid.List):
-        node.type_constraints = [type([])]
+        result = [list]
+        node.type_constraints = result
+        print("[" + "]" + "\n" + str(result) + "\n")
     else:
         warnings.warn('node %s is not list type.' % node)
 
 
 def set_dict(node):
     if isinstance(node, astroid.Dict):
-        node.type_constraints = [type({})]
+        result = [dict]
+        node.type_constraints = result
+        print("{" + "}" + "\n" + str(result) + "\n")
     else:
         warnings.warn('node %s is not dict type.' % node)
 
 
 def set_binop(node):
     if isinstance(node, astroid.BinOp):
-        # op = node.op
+        op = node.op
         left_operand = node.left.value
         right_operand = node.right.value
 
@@ -63,11 +69,17 @@ def set_binop(node):
         # found as different types, such as list and string, return an type
         # error.
         result = [typing.Union[type(left_operand), type(right_operand)]]
+
+        # if int and float were added togeter, take float as the type
+        # constraint.
+        if result == [typing.Union[int, float]] or result == [typing.Union[
+                      float, int]]:
+            result = [typing.Union[float, float]]
         if len(result) > 1:
             warnings.warn('Different types of operands found, binop node %s'
                           'might have a type error.' % node)
-        print("type constraints (by typing): " + str(typing.Union[type(
-            left_operand), type(right_operand)]))
+        print(str(left_operand) + " " + str(op) + " " + str(right_operand) +
+              "\n" + str(result) + "\n")
 
         # result = eval(str(left_operand) + op + str(right_operand))
         # node.type_constraints = [type(result)]
@@ -78,12 +90,14 @@ def set_binop(node):
 
 def set_unaryop(node):
     if isinstance(node, astroid.UnaryOp):
-        # op = node.op
+        op = node.op
         operand = node.operand.value
 
         # result = eval(op + str(operand))
         # node.type_constraints = [type(result)]
-        node.type_constraints = [type(operand)]
+        result = [type(operand)]
+        node.type_constraints = result
+        print(str(op) + str(operand) + "\n" + str(result) + "\n")
     else:
         warnings.warn('node %s is not unary operator type.' % node)
 

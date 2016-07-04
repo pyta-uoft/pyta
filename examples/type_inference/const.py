@@ -23,11 +23,11 @@ dict = {'Name': 'Hayley'}
 # None Type
 None
 
-# binary operator & int
-5 + 1
-
 # unary operator & int
--2
+-6.08
 
-# unary operator & float
-+0.343234
+# binary operator & int
+100 + 101
+
+# binary operator & int
+5 - 7.891

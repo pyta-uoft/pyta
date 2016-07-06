@@ -1,5 +1,5 @@
 try:
-    pass
+    raise ZeroDivisionError()
 except:
     return False
 else:

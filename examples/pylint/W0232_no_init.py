@@ -1,6 +1,7 @@
 class ClassWithNoInit:
     def does_stuff(self, n):
         return n
+
     def does_more_stuff(self, n, m):
         return n * m
 

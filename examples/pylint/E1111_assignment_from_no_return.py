@@ -1,5 +1,6 @@
 def f():
-    print("s")
+    print('s')
+
 
 def g():
     x = f()  # Error on this line

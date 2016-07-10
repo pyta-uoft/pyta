@@ -1,5 +1,4 @@
 from pylint.reporters import BaseReporter
-from pylint.utils import Message
 
 
 class PlainReporter(BaseReporter):
@@ -30,16 +29,14 @@ class PlainReporter(BaseReporter):
             while i + 1 < len(self._messages) and self._messages[i + 1].msg_id == current_id:
                 count += 1
                 if len(messages) <= 5:
-                    messages.append(self._messages[i+1].msg)
-                self._messages.pop(i+1)
+                    messages.append(self._messages[i + 1].msg)
+                self._messages.pop(i + 1)
 
             msg_new = self._messages[i].msg
 
             if len(messages) > 0:
-                temp = '\n    ' + '\n    '.join(messages)
-                msg_new = self._messages[i].msg + temp
+                msg_new = self._messages[i].msg + '\n    ' + '\n    '.join(messages)
 
             obj_new = 'This error occurs at ' + str(count) + ' places:'
-            self._messages[i] = self._messages[i]._replace(msg=msg_new)
-            self._messages[i] = self._messages[i]._replace(obj=obj_new)
+            self._messages[i] = self._messages[i]._replace(msg=msg_new, obj=obj_new)
             i += 1

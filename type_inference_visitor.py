@@ -2,7 +2,7 @@ from astroid.transforms import TransformVisitor
 import astroid
 import warnings
 import typing
-from typing import Tuple, Mapping, Sequence, TypeVar
+from typing import Tuple, Mapping, Sequence, TypeVar, List
 
 
 class TypeVisitor(TransformVisitor):
@@ -54,15 +54,19 @@ def set_tuple(node):
 
 
 def set_list(node):
-    node.type_constraints = [node_child.type_constraints for node_child in
-                             node.elts]
-    print("[" + "]" + "\n" + str(node.type_constraints) + "\n")
+    node.type_constraints = list(node_child.type_constraints for node_child in
+                             node.elts)
+    print("[1, 2342]" + "\n" + str(node.type_constraints) + "\n")
 
 
 def set_dict(node):
-    result = [dict]
+    # result = dict
+    # node.type_constraints = result
+    result = {}
+    for key, value in node.items:
+        result[key.type_constraints] = value.type_constraints
     node.type_constraints = result
-    print("{" + "}" + "\n" + str(result) + "\n")
+    print("dict = {'Name': 'Hayley'}" + "\n" + str(node.type_constraints) + "\n")
 
 
 def set_binop(node):
@@ -89,12 +93,8 @@ def set_unaryop(node):
     if isinstance(node, astroid.UnaryOp):
         op = node.op
         operand = node.operand.value
-
-        # result = eval(op + str(operand))
-        # node.type_constraints = [type(result)]
-        result = [type(operand)]
-        node.type_constraints = result
-        print(str(op) + str(operand) + "\n" + str(result) + "\n")
+        node.type_constraints = type(operand)
+        print(str(op) + str(operand) + "\n" + str(node.type_constraints) + "\n")
     else:
         warnings.warn('node %s is not unary operator type.' % node)
 

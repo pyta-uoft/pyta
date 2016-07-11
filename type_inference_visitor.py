@@ -2,17 +2,12 @@ from astroid.transforms import TransformVisitor
 import astroid
 import warnings
 import typing
+from typing import Tuple, Mapping, Sequence, TypeVar
 
 
 class TypeVisitor(TransformVisitor):
 
     def _visit(self, node):
-        # If node is an instance of List/Tuple/Dict, instead of breaking
-        # down to smaller pieces of node such as const nodes, keep the
-        # bigger piece and directly use an transform function on it.
-        if isinstance(node, astroid.List) or isinstance(node, astroid.Tuple)\
-                or isinstance(node, astroid.Dict):
-            return self._transform(node)
         if hasattr(node, '_astroid_fields'):
             for field in node._astroid_fields:
                 value = getattr(node, field)
@@ -20,72 +15,74 @@ class TypeVisitor(TransformVisitor):
                 setattr(node, field, visited)
         return self._transform(node)
 
+    def _visit_generic(self, node):
+        if isinstance(node, list):
+            return [self._visit_generic(child) for child in node]
+        elif isinstance(node, tuple):
+            return tuple(self._visit_generic(child) for child in node)
+        else:
+            return self._visit(node)
+
+    # def _visit(self, node):
+    #     # If node is an instance of List/Tuple/Dict, instead of breaking
+    #     # down to smaller pieces of node such as const nodes, keep the
+    #     # bigger piece and directly use an transform function on it.
+    #     if isinstance(node, astroid.List) or isinstance(node, astroid.Tuple)\
+    #             or isinstance(node, astroid.Dict):
+    #         return self._transform(node)
+    #     if hasattr(node, '_astroid_fields'):
+    #         for field in node._astroid_fields:
+    #             value = getattr(node, field)
+    #             visited = self._visit_generic(value)
+    #             setattr(node, field, visited)
+    #     return self._transform(node)
+
 
 def set_const(node):
     """Populate type constraints for astroid nodes."""
-    if isinstance(node, astroid.Const):
-        # astroid.Const represent a constant node like num/str/bool/None/bytes.
-        result = [type(node.value)]
-        node.type_constraints = result
-        print(str(node.value) + "\n" + str(result) + "\n")
-    else:
-        warnings.warn('node %s is not const type.' % node)
+    # astroid.Const represent a constant node like num/str/bool/None/bytes.
+    result = type(node.value)
+    node.type_constraints = result
+    print(str(node.value) + "\n" + str(result) + "\n")
 
 
 def set_tuple(node):
-    if isinstance(node, astroid.Tuple):
-        result = [tuple]
-        node.type_constraints = result
-        print("(" + ")" + "\n" + str(result) + "\n")
-    else:
-        warnings.warn('node %s is not tuple type.' % node)
+    node.type_constraints = tuple(node_child.type_constraints for node_child
+                                  in node.elts)
+    print("(True, 3)")
+    print(str(node.type_constraints) + "\n")
 
 
 def set_list(node):
-    if isinstance(node, astroid.List):
-        result = [list]
-        node.type_constraints = result
-        print("[" + "]" + "\n" + str(result) + "\n")
-    else:
-        warnings.warn('node %s is not list type.' % node)
+    node.type_constraints = [node_child.type_constraints for node_child in
+                             node.elts]
+    print("[" + "]" + "\n" + str(node.type_constraints) + "\n")
 
 
 def set_dict(node):
-    if isinstance(node, astroid.Dict):
-        result = [dict]
-        node.type_constraints = result
-        print("{" + "}" + "\n" + str(result) + "\n")
-    else:
-        warnings.warn('node %s is not dict type.' % node)
+    result = [dict]
+    node.type_constraints = result
+    print("{" + "}" + "\n" + str(result) + "\n")
 
 
 def set_binop(node):
-    if isinstance(node, astroid.BinOp):
-        op = node.op
-        left_operand = node.left.value
-        right_operand = node.right.value
+    op = node.op
+    left_operand = node.left.type_constraints
+    right_operand = node.right.type_constraints
 
-        # Using typing.Union to find both types of the operands, if they are
-        # found as different types, such as list and string, return an type
-        # error.
-        result = [typing.Union[type(left_operand), type(right_operand)]]
-
-        # if int and float were added togeter, take float as the type
-        # constraint.
-        if result == [typing.Union[int, float]] or result == [typing.Union[
-                      float, int]]:
-            result = [typing.Union[float, float]]
-        if len(result) > 1:
-            warnings.warn('Different types of operands found, binop node %s'
-                          'might have a type error.' % node)
-        print(str(left_operand) + " " + str(op) + " " + str(right_operand) +
-              "\n" + str(result) + "\n")
-
-        # result = eval(str(left_operand) + op + str(right_operand))
-        # node.type_constraints = [type(result)]
-        node.type_constraints = result
+    result = [left_operand]
+    if right_operand==int and left_operand==float:
+        node.type_constraints = left_operand
+    elif right_operand==float and left_operand==int:
+        node.type_constraints = right_operand
+    elif right_operand not in result:
+        warnings.warn('Different types of operands found, binop node %s'
+                      'might have a type error.' % node)
     else:
-        warnings.warn('node %s is not binary operator type.' % node)
+        node.type_constraints = left_operand
+
+    print(str(node.left.value) + " " + str(op) + " " + str(node.right.value) +
+          "\n" + str(result) + "\n")
 
 
 def set_unaryop(node):

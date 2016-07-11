@@ -1,17 +1,6 @@
 from reporters.plain_reporter import PlainReporter
 from jinja2 import Environment
 
-HTML = '''<html>
-<head>
-<title>{{ title }}</title>
-</head>
-<body>
-    <p>{{ code }} ({{symbol}}) {{obj}}</p>
-    <p>    {{msg}}</p>
-
-</body>
-</html>'''
-
 
 class HTMLReporter(PlainReporter):
     def __init__(self):
@@ -22,8 +11,8 @@ class HTMLReporter(PlainReporter):
         # Sort the messages.
         self.sort_messages()
 
-        #template = Template(u'{{ code }} ({{symbol}}) {{obj}}\n    {{msg}}')
-        template = Environment(keep_trailing_newline=True, autoescape=False).from_string(HTML)
+        #template = Environment(keep_trailing_newline=True, autoescape=False).from_string(HTML)
+        template = Environment().get_template('template.txt')
         f = open('output.html', 'w')
 
         for msg in self._messages:

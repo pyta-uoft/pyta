@@ -1,1 +1,1 @@
-[l+l for l in 'str']
+my_var

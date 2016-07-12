@@ -1,2 +1,1 @@
-n = None
-x = 1 if n else 0
+x = 1 if True else 0

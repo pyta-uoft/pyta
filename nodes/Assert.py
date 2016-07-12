@@ -1,1 +1,1 @@
-assert (x)
+assert x

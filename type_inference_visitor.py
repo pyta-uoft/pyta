@@ -1,8 +1,7 @@
 from astroid.transforms import TransformVisitor
 import astroid
 import warnings
-import typing
-from typing import Tuple, Mapping, Sequence, TypeVar, List
+from typing import Tuple, List, Dict
 
 
 class TypeVisitor(TransformVisitor):
@@ -47,25 +46,48 @@ def set_const(node):
 
 
 def set_tuple(node):
-    node.type_constraints = tuple(node_child.type_constraints for node_child
-                                  in node.elts)
+    # node_types contains types of elements inside tuple.
+    node_types = [node_child.type_constraints for node_child in node.elts]
+    node.type_constraints = Tuple[node_types[0], node_types[1]]
     print("(True, 3)")
     print(str(node.type_constraints) + "\n")
 
 
 def set_list(node):
-    node.type_constraints = list(node_child.type_constraints for node_child in
-                             node.elts)
-    print("[1, 2342]" + "\n" + str(node.type_constraints) + "\n")
+    # node_types contains types of elements inside list.
+    node_types = []
+    for node_child in node.elts:
+        if node_child.type_constraints not in node_types:
+            node_types.append(node_child.type_constraints)
+
+    # if list has more than one types, just set node.type_constraints to
+    # list, if list has only 1 types, set the node.type_constraints to be
+    # List of that type.
+    if len(node_types) == 1:
+        node.type_constraints = List[node_types[0]]
+    elif len(node_types) == 0 or len(node_types) > 1:
+        node.type_constraints = List
+
+    print("[1, 's']" + "\n" + str(node.type_constraints) + "\n")
 
 
 def set_dict(node):
-    # result = dict
-    # node.type_constraints = result
-    result = {}
+    # node_types contains types of elements inside Dict.
+    node_types = []
     for key, value in node.items:
-        result[key.type_constraints] = value.type_constraints
-    node.type_constraints = result
+        if key.type_constraints not in node_types:
+            node_types.append(key.type_constraints)
+        if value.type_constraints not in node_types:
+            node_types.append(value.type_constraints)
+
+    # parameter of Dict[] must be 2 or 0.
+    if len(node_types) == 1:
+        node.type_constraints = Dict[node_types[0], node_types[0]]
+    elif len(node_types) == 2:
+        node.type_constraints = Dict[node_types[0], node_types[1]]
+    elif len(node_types) == 0 or len(node_types) > 2:
+        node.type_constraints = Dict
+
     print("dict = {'Name': 'Hayley'}" + "\n" + str(node.type_constraints) + "\n")
 
 
@@ -74,30 +96,24 @@ def set_binop(node):
     left_operand = node.left.type_constraints
     right_operand = node.right.type_constraints
 
-    result = [left_operand]
-    if right_operand==int and left_operand==float:
-        node.type_constraints = left_operand
-    elif right_operand==float and left_operand==int:
+    node.type_constraints = left_operand
+    if right_operand == int and node.type_constraints ==float:
+        node.type_constraints = node.type_constraints
+    elif right_operand == float and node.type_constraints == int:
         node.type_constraints = right_operand
-    elif right_operand not in result:
+    elif right_operand != left_operand:
         warnings.warn('Different types of operands found, binop node %s'
                       'might have a type error.' % node)
-    else:
-        node.type_constraints = left_operand
 
     print(str(node.left.value) + " " + str(op) + " " + str(node.right.value) +
-          "\n" + str(result) + "\n")
+          "\n" + str(node.type_constraints) + "\n")
 
 
 def set_unaryop(node):
-    if isinstance(node, astroid.UnaryOp):
-        op = node.op
-        operand = node.operand.value
-        node.type_constraints = type(operand)
-        print(str(op) + str(operand) + "\n" + str(node.type_constraints) + "\n")
-    else:
-        warnings.warn('node %s is not unary operator type.' % node)
-
+    op = node.op
+    operand = node.operand.value
+    node.type_constraints = type(operand)
+    print(str(op) + str(operand) + "\n" + str(node.type_constraints) + "\n")
 
 if __name__ == '__main__':
     # TODO: turn this into a proper test, (UnaryBinOps/List/Tuple/Dict/Const)

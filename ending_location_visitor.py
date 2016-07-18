@@ -75,7 +75,7 @@ class TestEndingLocation(unittest.TestCase):
         """Given a filepath (file_location), parse with astroid, and return 
         the module.
         """
-        with open('examples/ending_locations/const.py') as f:
+        with open(file_location) as f:
             content = f.read()
         return astroid.parse(content)
 
@@ -88,6 +88,7 @@ class TestEndingLocation(unittest.TestCase):
         """Check a file for whether all ending location properties have been 
         set.
         """
+        pass
 
     # Test methods must start with 'test_', and pass in 'self'
     def test_const(self):

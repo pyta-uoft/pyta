@@ -16,20 +16,20 @@ def to_str(s):
 
 # Precondition: args length is >= 1
 def inject_whitespace(*args):
-	if len(args) == 1:
-		return args[0]
-	out = args[0]
-	for i in range(1, len(args) - 1):
-		out += ws + args[i]
-	return out + ws + args[-1]
+    if len(args) == 1:
+        return args[0]
+    out = args[0]
+    for i in range(1, len(args) - 1):
+        out += ws + args[i]
+    return out + ws + args[-1]
 
 def parse_docstring(docstr):
-	return docstring.parse(docstr)
+    return docstring.parse(docstr)
 
 element = forward_decl()
 elements = forward_decl()
 ws = skip(many(a(' ') | a('\t')))
-anystr = oneplus(some(lambda c: c.isalpha())) >> to_str
+anystr = oneplus(some(str.isalpha)) >> to_str
 a_list = inject_whitespace(a_str('list'), skip_str('of'), element)
 a_set = inject_whitespace(a_str('set'), skip_str('of'), element)
 a_dict = inject_whitespace(a_str('dict'), skip_str('of'), a('{'), element, a(','), element, a('}'))
@@ -63,7 +63,7 @@ def print_nested(L, indent=0):
             print_nested(x, indent + 1)
     
 # =============================
-    	
+        
 res = parse_docstring('(int, bool, tuple of (Hi, None)) -> bool')
 print(res)
 #print(flatten(res))

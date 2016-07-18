@@ -108,7 +108,6 @@ def set_unaryop(node):
 
 
 if __name__ == '__main__':
-    # TODO: turn this into a proper test, (UnaryBinOps/List/Tuple/Dict/Const)
     # Creating the TypeVisitor object.
     type_visitor = TypeVisitor()
     # Registering a transform function to astroid nodes.
@@ -118,7 +117,8 @@ if __name__ == '__main__':
     type_visitor.register_transform(astroid.Dict, set_dict)
     type_visitor.register_transform(astroid.BinOp, set_binop)
     type_visitor.register_transform(astroid.UnaryOp, set_unaryop)
-    with open('examples/type_inference/const.py') as f:
+    with open('examples/type_inference/type_inference_visitor_unittest.py') \
+            as f:
         content = f.read()
     module = astroid.parse(content)
     type_visitor.visit(module)

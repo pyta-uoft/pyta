@@ -16,4 +16,4 @@ class PlainReporter(BaseReporter):
 
         for msg in self._messages:
             code = msg.msg_id
-            print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
+            print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))

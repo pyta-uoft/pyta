@@ -42,15 +42,14 @@ def set_const(node):
     # astroid.Const represent a constant node like num/str/bool/None/bytes.
     result = type(node.value)
     node.type_constraints = result
-    print(str(node.value) + "\n" + str(result) + "\n")
 
 
 def set_tuple(node):
     # node_types contains types of elements inside tuple.
     node_types = [node_child.type_constraints for node_child in node.elts]
+    # Since tuple has only 2 elements, node.type_constraints will return
+    # types of both elements.
     node.type_constraints = Tuple[node_types[0], node_types[1]]
-    print("(True, 3)")
-    print(str(node.type_constraints) + "\n")
 
 
 def set_list(node):
@@ -67,8 +66,6 @@ def set_list(node):
         node.type_constraints = List[node_types[0]]
     elif len(node_types) == 0 or len(node_types) > 1:
         node.type_constraints = List
-
-    print("[1, 's']" + "\n" + str(node.type_constraints) + "\n")
 
 
 def set_dict(node):
@@ -88,8 +85,6 @@ def set_dict(node):
     elif len(node_types) == 0 or len(node_types) > 2:
         node.type_constraints = Dict
 
-    print("dict = {'Name': 'Hayley'}" + "\n" + str(node.type_constraints) + "\n")
-
 
 def set_binop(node):
     op = node.op
@@ -105,15 +100,12 @@ def set_binop(node):
         warnings.warn('Different types of operands found, binop node %s'
                       'might have a type error.' % node)
 
-    print(str(node.left.value) + " " + str(op) + " " + str(node.right.value) +
-          "\n" + str(node.type_constraints) + "\n")
-
 
 def set_unaryop(node):
     op = node.op
     operand = node.operand.value
     node.type_constraints = type(operand)
-    print(str(op) + str(operand) + "\n" + str(node.type_constraints) + "\n")
+
 
 if __name__ == '__main__':
     # TODO: turn this into a proper test, (UnaryBinOps/List/Tuple/Dict/Const)

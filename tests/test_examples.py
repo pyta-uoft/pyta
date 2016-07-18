@@ -26,8 +26,7 @@ def get_file_paths():
     for root, directories, files in os.walk(_EXAMPLES_PATH, topdown=True):
         for filename in files:
             if filename not in ignored_tests:
-                if filename == 'R0101_too_many_nested_blocks.py':
-                    test_files.append(_EXAMPLES_PATH + filename)
+                test_files.append(_EXAMPLES_PATH + filename)
     return test_files
 
 

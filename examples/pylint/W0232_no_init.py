@@ -9,3 +9,5 @@ class ClassWithNoInit:
 class ClassWithNoInitTwo(ClassWithNoInit):
     def does_nothing(self):
         print('hello')
+
+del ClassWithNoInit.__init__

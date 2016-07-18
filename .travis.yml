@@ -3,4 +3,4 @@ python:
   - "3.5"
 install: "pip install pylint"
 script: 
-  - python tests/test_examples.py
+  - nosetests --config=nose.cfg

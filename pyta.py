@@ -24,7 +24,7 @@ if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check(module_name, reporter=ColorReporter):
+def check(module_name, reporter=ColorReporter, number=5):
     """Check a module for errors, printing a report.
 
     The name of the module should be passed in as a string,
@@ -45,7 +45,7 @@ def check(module_name, reporter=ColorReporter):
 
     spec = importlib.util.find_spec(module_name)
 
-    current_reporter = reporter()
+    current_reporter = reporter(number)
     linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['checkers/forbidden_import_checker',

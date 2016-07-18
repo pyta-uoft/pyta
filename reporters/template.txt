@@ -1,0 +1,9 @@
+<html>
+<head>
+</head>
+<body>
+    <p>{{ code }} ({{symbol}}) {{obj}}</p>
+    <p>    {{msg}}</p>
+
+</body>
+</html>

@@ -9,7 +9,7 @@ class HTMLReporter(PlainReporter):
     # Override this method
     def print_message_ids(self):
         # Sort the messages.
-        self.sort_messages()
+        self._messages.sort(key=lambda s: s[0])
 
         #template = Environment(keep_trailing_newline=True, autoescape=False).from_string(HTML)
         template = Environment().get_template('template.txt')

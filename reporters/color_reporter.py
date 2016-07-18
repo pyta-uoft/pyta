@@ -14,8 +14,7 @@ class ColorReporter(PlainReporter):
         # Check if the OS currently running is Windows
         init(wrap=(sys.platform == 'win32'))
 
-        # Sort the messages by their type.
-        self._messages.sort(key=lambda s: s[0])
+        self.sort_messages()
 
         for msg in self._messages:
             if msg.msg_id.startswith('E'):
@@ -23,4 +22,4 @@ class ColorReporter(PlainReporter):
                 code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             else:
                 code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
-            print(code, '({})\n    {}'.format(msg.symbol, msg.msg))
+            print(code, '({}) {}\n    {}'.format(msg.symbol, msg.obj, msg.msg))

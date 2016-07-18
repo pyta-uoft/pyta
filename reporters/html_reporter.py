@@ -1,5 +1,8 @@
 from reporters.plain_reporter import PlainReporter
-from jinja2 import Environment
+from jinja2 import Environment, FileSystemLoader
+import os
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class HTMLReporter(PlainReporter):
@@ -11,15 +14,13 @@ class HTMLReporter(PlainReporter):
         # Sort the messages.
         self.sort_messages()
 
-        #template = Environment(keep_trailing_newline=True, autoescape=False).from_string(HTML)
-        template = Environment().get_template('template.txt')
-        f = open('output.html', 'w')
+        template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template('templates/template.txt')
 
-        for msg in self._messages:
-            code = msg.msg_id
-            msg_new = msg.msg.replace('\n', '<br/>')
-            msg = msg._replace(msg=msg_new)
-            f = open('output.html', 'a')
-            f.write(template.render(code=code,symbol=msg.symbol,obj=msg.obj,msg=msg.msg))
-            print(template.render(code=code,symbol=msg.symbol,obj=msg.obj,msg=msg.msg))
-        f.close()
+        with open('output.html', 'w') as f:
+            for msg in self._messages:
+                code = msg.msg_id
+                msg_new = msg.msg.replace('\r', '')
+                msg_new = msg_new.replace('\n', '<br/>')
+                msg = msg._replace(msg=msg_new)
+
+                f.write(template.render(code=code,symbol=msg.symbol,obj=msg.obj,msg=msg.msg))

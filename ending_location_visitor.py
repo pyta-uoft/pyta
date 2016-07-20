@@ -1,45 +1,93 @@
 """
-Source:
+Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 
+See class and method docstrings for explanations.
 """
 
+from sys import exit
 from astroid.transforms import TransformVisitor
 import astroid
 import unittest
 import logging
 from setendings import *
+from inspect_ast import visit_astroid
 
 # Set the log level (DEBUG, ERROR, ...), and message format.
-logging.basicConfig(format='', level=logging.ERROR)
+logging.basicConfig(format='', level=logging.DEBUG)
+
+
+class EasyTransformVisitor(TransformVisitor):
+    """Subclass that overrides the methods of TransformVisitor that take
+    (node_class, transform) parameters, so we can provide one string that
+    fetches the bound objects from our data structure.
+    Use:
+    self.ending_transformer.easy_register_transform('BinOp')
+
+    instead of:
+    self.ending_transformer.register_transform(astroid.BinOp, set_binop)
+    """
+
+    def easy_register_transform(self, node_string, predicate=None):
+        """Invoke the register_transform()
+        """
+        node = nodes[node_string]['node']
+        func = nodes[node_string]['function']
+        self.register_transform(node, func)
+
 
 class EndingVisitor(TransformVisitor):
-    """Overriding some TransformVisitor to use the visit traversal, and other
-    things for testing.
+    """Subclass of TransformVisitor used for the visit() traversal, and other
+    things just for testing, i.e. EndingVisitor subclass is independent of our
+    linter functionality so free to override the methods in this EndingVisitor 
+    subclass.
     """
 
     def __init__(self):
         super().__init__()
-        # Keep a list rather than a set, because "too many" is wrong.
-        self.props_check = []
+        self.reset()
 
     def _transform(self, node):
-        """Value returned here is also returned by the visit() method in
+        """Overridden method.
+        Note: the value returned here is also returned by the visit() method in
         TransformVisitor.
         """
-        if isinstance(node, astroid.Const):
-            self.props_check.append([node.lineno, node.end_lineno, 
+        if isinstance(node, self.node_type):  # check it is intended node type.
+            try:
+                self.props_check.append([node.lineno, node.end_lineno, 
                                     node.col_offset, node.end_col_offset])
-            logging.debug('Visiting node ' + str(node))
-            logging.debug('\tLines {} to {}'.format(node.lineno, node.end_lineno))
-            logging.debug('\tCols {} to {}'.format(node.col_offset, node.end_col_offset))
+            except AttributeError:
+                # (with our message) raise again to also get traceback.
+                raise AttributeError('''Make sure the properties are set in 
+                    setendings.py and the function is registered with
+                    ending_transformer.register_transform()''')
+
+            # logging.debug('Visiting node ' + str(node))
+            # logging.debug('\tLines {} to {}'.format(node.lineno, node.end_lineno))
+            # logging.debug('\tCols {} to {}'.format(node.col_offset, node.end_col_offset))
         return self.props_check
+
+    def type(self, node_type):
+        """Set the type of node that we are inspecting. The type of node is
+        compared against in a private method.
+        """
+        self.node_type = node_type
+        return self;
+
+    def reset(self):
+        """Reset between test methods.
+        """
+        # Keep a list rather than a set, because "too many" is wrong.
+        self.props_check = []
+        self.node_type = None
+
+
 
 
 ################################################################################
 class TestEndingLocation(unittest.TestCase):
     """
-    Testing the properties set on ast nodes: `end_lineno`, `end_col_offset`.
+    Prove the `end_lineno`, `end_col_offset` properties are set on ast nodes.
 
     Method explanations:
     ending_transformer.visit(module)
@@ -50,7 +98,9 @@ class TestEndingLocation(unittest.TestCase):
     ending_visitor.visit(module)
         Show that the transform worked.
 
-    ending_transformer.register_transform(astroid.<Type>, <function_name>)
+    ending_transformer.easy_register_transform(<astroid-node-name>),
+    i.e.
+    ending_transformer.register_transform(astroid.<Type>, <function>)
         Register `transform(node)` function to be applied on the given
         astroid's `node_class`. Internally, appends the function to a
         dictionary in the TransformVisitor class. The keys are the node types,
@@ -63,78 +113,111 @@ class TestEndingLocation(unittest.TestCase):
         [lineno, end_lineno, col_offset, end_col_offset]
     """
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
+        '''A class method called before tests in an individual class run.
+        setUpClass is called with the class as the only argument and must be
+        decorated as a classmethod():'''
+        
         # A visitor to transform the nodes.
-        self.ending_transformer = TransformVisitor()
+        self.ending_transformer = EasyTransformVisitor()  # TransformVisitor
         # A visitor to test the nodes property correctness.
         self.ending_visitor = EndingVisitor()
-        # Register `transform(node)` function.
-        self.ending_transformer.register_transform(astroid.Const, set_const)
+        # Register all `transform(node)` functions here...
+        # self.ending_transformer.register_transform(astroid.Const, set_const)
+        # self.ending_transformer.register_transform(astroid.BinOp, set_binop)
+        self.ending_transformer.easy_register_transform('Const')
+        self.ending_transformer.easy_register_transform('BinOp')
+        
 
-    def _get_content_as_module(self, file_location):
+    def setUp(self):
+        '''Method called to prepare the test fixture. This is called immediately
+        before calling the test method; other than AssertionError or SkipTest,
+        any exception raised by this method will be considered an error rather
+        than a test failure. The default implementation does nothing.'''
+        pass
+
+    def tearDown(self):
+        '''Method called immediately after the test method has been called and
+        the result recorded. This is called even if the test method raised an
+        exception, so the implementation in subclasses may need to be
+        particularly careful about checking internal state. Any exception,
+        other than AssertionError or SkipTest, raised by this method will be
+        considered an additional error rather than a test failure (thus
+        increasing the total number of reported errors). This method will only
+        be called if the setUp() succeeds, regardless of the outcome of the
+        test method. The default implementation does nothing.'''
+        self.ending_visitor.reset()
+
+    def _get_file_as_module(self, file_location):
         """Given a filepath (file_location), parse with astroid, and return 
         the module.
         """
         with open(file_location) as f:
             content = f.read()
-        return astroid.parse(content)
+        return self._get_string_as_module(content)
+
+    def _get_string_as_module(self, string):
+        """Parse the string with astroid, and return the module.
+        """
+        return astroid.parse(string)
 
     def _are_equal(self, expected, props_assigned):
         """Check if two lists are equal. Not more items, and not less items.
+        Note we cannot use a set because this would hide the inequality from
+        repeated items.
+        TODO: check for equality without respect to order of items in top-level.
         """
-        pass
+        return expected == props_assigned
+
+    def assertSameness(self, expected, props):
+        """If they are not equal, then it will print each side.
+        """
+        try:
+            self.assertTrue(self._are_equal(expected, props))
+        except AssertionError as e:
+            logging.error('Compare:\n{}\nprops: {}'.format('-'*70, props))
+            logging.error('expected: {}'.format(expected))
+            raise e  # otherwise, test will always 'pass'
 
     def _all_props_set(self):
         """Check a file for whether all ending location properties have been 
         set.
         """
-        pass
+        pass  # TODO
 
-    # Test methods must start with 'test_', and pass in 'self'
     def test_const(self):
         expected = [[1, 1, 0, 6], [2, 2, 4, 6]]
         file_location = 'examples/ending_locations/const.py'
-        module = self._get_content_as_module(file_location)
+        module = self._get_file_as_module(file_location)
+        # visit_astroid(module)
         self.ending_transformer.visit(module)  # transform
-        props_assigned = self.ending_visitor.visit(module)  # check
-        # logging.debug(props_assigned)
-        self.assertEqual(props_assigned, expected)
+        props = self.ending_visitor.type(astroid.Const).visit(module)  # check
+        # logging.debug(props)
+        # self.assertTrue(self._are_equal(expected, props))
+        self.assertSameness(expected, props)
+
+    # def test_binop(self):
+    #     expected = [[1, 1, 0, 5]]
+    #     string = '''1 + 2
+    #              '''
+    #     module = self._get_string_as_module(string)
+    #     # visit_astroid(module)
+    #     self.ending_transformer.visit(module)  # transform
+    #     props = self.ending_visitor.type(astroid.BinOp).visit(module)  # check
+    #     # logging.debug(props)
+    #     self.assertSameness(expected, props)
+
+
+    # TODO: Many more test functions here...
+
+
+
 
 
 if __name__ == '__main__':
-    # TODO: turn this into a proper test
-    # ending_transformer = TransformVisitor()
-
-    # make an astroid object
-    # with open('examples/ending_locations/const.py') as f:
-    #     content = f.read()
-    # module = astroid.parse(content)
-
-    # Register `transform(node)` function to be applied on the given
-    # astroid's `node_class`. Internally, appends the function to a
-    # dictionary in the TransformVisitor class. The keys are the node types, so
-    # each node must have been assigned/registered a transform function!!
-    # The transform function may return a value which is then used to
-    # substitute the original node in the tree.
-    # params: node_class, transform function
-    # ending_transformer.register_transform(astroid.Const, set_const)    
-
-    # for node in module.body:
-    #     print("node:", node)
-
-    # Walk the given astroid *tree* and transform each encountered node
-    # *** Only the nodes which have transforms registered will actually
-    # be replaced or changed.
-    # ending_transformer.visit(module)
-
-    # Show that the mutation worked.
-    # ending_visitor = EndingVisitor()
-    # ending_visitor.visit(module)
-
     # run tests
     # unittest.main()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestEndingLocation)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-
 

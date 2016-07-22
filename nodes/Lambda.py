@@ -1,0 +1,1 @@
+fun = lambda: 3

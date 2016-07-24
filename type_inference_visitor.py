@@ -22,29 +22,13 @@ class TypeVisitor(TransformVisitor):
         else:
             return self._visit(node)
 
-    # def _visit(self, node):
-    #     # If node is an instance of List/Tuple/Dict, instead of breaking
-    #     # down to smaller pieces of node such as const nodes, keep the
-    #     # bigger piece and directly use an transform function on it.
-    #     if isinstance(node, astroid.List) or isinstance(node, astroid.Tuple)\
-    #             or isinstance(node, astroid.Dict):
-    #         return self._transform(node)
-    #     if hasattr(node, '_astroid_fields'):
-    #         for field in node._astroid_fields:
-    #             value = getattr(node, field)
-    #             visited = self._visit_generic(value)
-    #             setattr(node, field, visited)
-    #     return self._transform(node)
+
+def set_const_type_constraints(node):
+    """Populate type constraints for astroid nodes num/str/bool/None/bytes."""
+    node.type_constraints = node.value.__class__
 
 
-def set_const(node):
-    """Populate type constraints for astroid nodes."""
-    # astroid.Const represent a constant node like num/str/bool/None/bytes.
-    result = type(node.value)
-    node.type_constraints = result
-
-
-def set_tuple(node):
+def set_tuple_type_constraints(node):
     # node_types contains types of elements inside tuple.
     node_types = [node_child.type_constraints for node_child in node.elts]
     # Since tuple has only 2 elements, node.type_constraints will return
@@ -52,7 +36,7 @@ def set_tuple(node):
     node.type_constraints = Tuple[node_types[0], node_types[1]]
 
 
-def set_list(node):
+def set_list_type_constraints(node):
     # node_types contains types of elements inside list.
     node_types = []
     for node_child in node.elts:
@@ -64,63 +48,46 @@ def set_list(node):
     # List of that type.
     if len(node_types) == 1:
         node.type_constraints = List[node_types[0]]
-    elif len(node_types) == 0 or len(node_types) > 1:
+    else:
         node.type_constraints = List
 
 
-def set_dict(node):
+def set_dict_type_constraints(node):
     # node_types contains types of elements inside Dict.
-    node_types = []
+    key_types = []
+    value_types = []
     for key, value in node.items:
-        if key.type_constraints not in node_types:
-            node_types.append(key.type_constraints)
-        if value.type_constraints not in node_types:
-            node_types.append(value.type_constraints)
+        if key.type_constraints not in key_types:
+            key_types.append(key.type_constraints)
+        if value.type_constraints not in value_types:
+            value_types.append(value.type_constraints)
 
-    # parameter of Dict[] must be 2 or 0.
-    if len(node_types) == 1:
-        node.type_constraints = Dict[node_types[0], node_types[0]]
-    elif len(node_types) == 2:
-        node.type_constraints = Dict[node_types[0], node_types[1]]
-    elif len(node_types) == 0 or len(node_types) > 2:
+    # if all the keys have the same type, and all the values have the same
+    # type, return the node.type_constraints with the 2 types, else,
+    # just return the general Dict type.
+    if len(key_types) == 1 and len(value_types) == 1:
+        node.type_constraints = Dict[key_types[0], value_types[0]]
+    else:
         node.type_constraints = Dict
 
 
-def set_binop(node):
+def set_binop_type_constraints(node):
     op = node.op
     left_operand = node.left.type_constraints
     right_operand = node.right.type_constraints
 
     node.type_constraints = left_operand
-    if right_operand == int and node.type_constraints ==float:
-        node.type_constraints = node.type_constraints
-    elif right_operand == float and node.type_constraints == int:
+    if ((right_operand == int and node.type_constraints ==float) or
+        (right_operand == float and node.type_constraints == int)):
+        node.type_constraints = float
+    elif right_operand==left_operand:
         node.type_constraints = right_operand
-    elif right_operand != left_operand:
+    else:
         warnings.warn('Different types of operands found, binop node %s'
                       'might have a type error.' % node)
 
 
-def set_unaryop(node):
+def set_unaryop_type_constraints(node):
     op = node.op
     operand = node.operand.value
     node.type_constraints = type(operand)
-
-
-if __name__ == '__main__':
-    # Creating the TypeVisitor object.
-    type_visitor = TypeVisitor()
-    # Registering a transform function to astroid nodes.
-    type_visitor.register_transform(astroid.Const, set_const)
-    type_visitor.register_transform(astroid.List, set_list)
-    type_visitor.register_transform(astroid.Tuple, set_tuple)
-    type_visitor.register_transform(astroid.Dict, set_dict)
-    type_visitor.register_transform(astroid.BinOp, set_binop)
-    type_visitor.register_transform(astroid.UnaryOp, set_unaryop)
-    with open('examples/type_inference/type_inference_visitor_unittest.py') \
-            as f:
-        content = f.read()
-    module = astroid.parse(content)
-    type_visitor.visit(module)
-    # print('Visiting node ' + str(node))
-    # print('Type constraints:' + str(node.type_constraints))

@@ -5,8 +5,7 @@ import sys
 import astroid
 from typing import Tuple, List, Dict
 from astroid import test_utils
-from type_inference_visitor import TypeVisitor, set_const, set_binop, \
-    set_unaryop, set_dict, set_list, set_tuple
+from type_inference_visitor import *
 
 
 class SetConstFunctionTest(unittest.TestCase):
@@ -15,41 +14,60 @@ class SetConstFunctionTest(unittest.TestCase):
     def test_const_str(self):
         """testing if the function set_const has the correct output for node
         type str."""
-        expected = str
+        # Creating an TypeVisitor class
+        type_visitor = TypeVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        # Creating a str node.
         node = test_utils.extract_node("""a = __('sample_string')""")
-        set_const(node)
+        # Use type_visitor to visit the node and assign type constraints to
+        # that node.
+        type_visitor.visit(node)
+        expected = str
         self.assertEqual(expected, node.type_constraints)
 
     def test_const_int(self):
         """testing if the function set_const has the correct output for node
         type int."""
-        expected = int
+        type_visitor = TypeVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
         node = test_utils.extract_node("""a = __(5)""")
-        set_const(node)
+        type_visitor.visit(node)
+        expected = int
         self.assertEqual(expected, node.type_constraints)
 
     def test_const_float(self):
         """testing if the function set_const has the correct output for node
         type float."""
-        expected = float
+        type_visitor = TypeVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
         node = test_utils.extract_node("""a = __(2.18)""")
-        set_const(node)
+        type_visitor.visit(node)
+        expected = float
         self.assertEqual(expected, node.type_constraints)
 
     def test_const_bool(self):
         """testing if the function set_const has the correct output for node
         type boolean."""
-        expected = bool
+        type_visitor = TypeVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
         node = test_utils.extract_node("""a = __(True)""")
-        set_const(node)
+        type_visitor.visit(node)
+        expected = bool
         self.assertEqual(expected, node.type_constraints)
 
     def test_const_none(self):
         """testing if the function set_const has the correct output for
         NoneType node."""
-        expected = type(None)
+        type_visitor = TypeVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
         node = test_utils.extract_node("""a = __(None)""")
-        set_const(node)
+        type_visitor.visit(node)
+        expected = type(None)
         self.assertEqual(expected, node.type_constraints)
 
 
@@ -77,14 +95,13 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         ])
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.BinOp, set_binop)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.BinOp,
+                                        set_binop_type_constraints)
         module = astroid.parse("""10 + 2""")    # int
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = int
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(int, visited_module.body[0].value.type_constraints)
 
     def test_binop_diff_type_operands(self):
         """testing if a binary operator that's been passed into
@@ -92,28 +109,26 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         when operands have different types.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.BinOp, set_binop)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.BinOp,
+                                    set_binop_type_constraints)
         module = astroid.parse("""6 + 0.3""")   # float
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = float
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(float, visited_module.body[0].value.type_constraints)
 
     def test_unary(self):
         """testing if a unary operator that's been passed into
         TypeVisitor has the correct type_constraints attribute.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.UnaryOp, set_unaryop)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.UnaryOp,
+                                        set_unaryop_type_constraints)
         module = astroid.parse("""-2""")    # int
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = int
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(int, visited_module.body[0].value.type_constraints)
 
     def test_list_same_type_elements(self):
         """testing if a list that's been passed into TypeVisitor
@@ -122,14 +137,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         The list contains only 1 type of elements.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.List, set_list)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.List,
+                                        set_list_type_constraints)
         module = astroid.parse("""['hi', 'how', 'is', 'life']""")  # List(str)
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = List[str]
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(List[str], visited_module.body[
+            0].value.type_constraints)
 
     def test_list_different_type_elements(self):
         """testing if a list that's been passed into TypeVisitor
@@ -138,14 +153,13 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         The list contains different type of elements.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.List, set_list)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.List,
+                                        set_list_type_constraints)
         module = astroid.parse("""[1, 2, 2.5, 3, 'cheese']""")  # List
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = List
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(List, visited_module.body[0].value.type_constraints)
 
     def test_tuple_same_type_elements(self):
         """testing if a tuple that's been passed into TypeVisitor
@@ -154,14 +168,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         The tuple contains 2 same type of elements.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.Tuple, set_tuple)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Tuple,
+                                        set_tuple_type_constraints)
         module = astroid.parse("""(1, 2)""")    # Tuple[int, int]
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = Tuple[int, int]
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Tuple[int, int], visited_module.body[
+            0].value.type_constraints)
 
     def test_tuple_diff_type_elements(self):
         """testing if a tuple that's been passed into TypeVisitor
@@ -170,14 +184,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         The tuple contains 2 different type of elements.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.Tuple, set_tuple)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Tuple,
+                                    set_tuple_type_constraints)
         module = astroid.parse("""('GPA', 4.0)""")    # Tuple[str, float]
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = Tuple[str, float]
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Tuple[str, float], visited_module.body[
+            0].value.type_constraints)
 
     def test_dict_same_type_elements(self):
         """testing if a dict that's been passed into TypeVisitor
@@ -190,14 +204,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         Dict object has to be set as Dict[type1, type1].
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.Dict, set_dict)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Dict,
+                                        set_dict_type_constraints)
         module = astroid.parse("""{'a':'one', 'b':'two'}""")  # Dict[str, str]
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = Dict[str, str]
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Dict[str, str],
+                         visited_module.body[0].value.type_constraints)
 
     def test_dict_2_diff_type_elements(self):
         """testing if a dict that's been passed into TypeVisitor
@@ -213,14 +227,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         will be reasonable to show 2 different types as well.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.Dict, set_dict)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Dict,
+                                        set_dict_type_constraints)
         module = astroid.parse("""{'a': 1, 'b': 2}""")  # Dict[str, int]
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = Dict[str, int]
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Dict[str, int], visited_module.body[
+            0].value.type_constraints)
 
     def test_dict_multi_diff_type_elements(self):
         """testing if a dict that's been passed into TypeVisitor
@@ -229,14 +243,13 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         The dict contains more than 2 different types of elements.
         """
         type_visitor = TypeVisitor()
-        type_visitor.register_transform(astroid.Const, set_const)
-        type_visitor.register_transform(astroid.Dict, set_dict)
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Dict,
+                                        set_dict_type_constraints)
         module = astroid.parse("""{'a': 1, 0.25:True}""")  # Dict
-        transformed_module = type_visitor.visit(module)
-        for node in transformed_module.body:
-            result = node.value.type_constraints
-        expected = Dict
-        self.assertEqual(expected, result)
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Dict, visited_module.body[0].value.type_constraints)
 
 
 if __name__ == '__main__':

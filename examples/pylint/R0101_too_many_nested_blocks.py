@@ -1,18 +1,8 @@
-def f(x):
-    x = None
-    if x == 14:
-        print(x)
+def my_f(num):
+    if num > 0:
+        if num > 3:
+            if num > 10:
+                if num < 50:
+                    print(num)
     else:
-        if x == 24:
-            print(x)
-        else:
-            if x == 15:
-                if x == 18:
-                    if arg == 152:
-                        print(x)
-                    else:
-                        if arg == 1:
-                            return print(x)
-                        else:
-                            if arg == 999:
-                                return print(x)
+        print('done')

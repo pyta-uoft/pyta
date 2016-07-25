@@ -1,0 +1,3 @@
+@wrapper
+def fun():
+    pass

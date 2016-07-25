@@ -22,4 +22,4 @@ class ColorReporter(PlainReporter):
                 code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             else:
                 code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
-            print(code, '({}) {}\n    {}'.format(msg.symbol, msg.obj, msg.msg))
+            print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))

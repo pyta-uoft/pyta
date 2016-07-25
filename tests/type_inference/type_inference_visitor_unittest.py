@@ -2,9 +2,11 @@
 
 import unittest
 import sys
+from astroid.transforms import TransformVisitor
 import astroid
 from typing import Tuple, List, Dict
 from astroid import test_utils
+
 from type_inference_visitor import *
 
 
@@ -15,7 +17,7 @@ class SetConstFunctionTest(unittest.TestCase):
         """testing if the function set_const has the correct output for node
         type str."""
         # Creating an TypeVisitor class
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         # Creating a str node.
@@ -29,7 +31,7 @@ class SetConstFunctionTest(unittest.TestCase):
     def test_const_int(self):
         """testing if the function set_const has the correct output for node
         type int."""
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         node = test_utils.extract_node("""a = __(5)""")
@@ -40,7 +42,7 @@ class SetConstFunctionTest(unittest.TestCase):
     def test_const_float(self):
         """testing if the function set_const has the correct output for node
         type float."""
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         node = test_utils.extract_node("""a = __(2.18)""")
@@ -51,7 +53,7 @@ class SetConstFunctionTest(unittest.TestCase):
     def test_const_bool(self):
         """testing if the function set_const has the correct output for node
         type boolean."""
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         node = test_utils.extract_node("""a = __(True)""")
@@ -62,7 +64,7 @@ class SetConstFunctionTest(unittest.TestCase):
     def test_const_none(self):
         """testing if the function set_const has the correct output for
         NoneType node."""
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         node = test_utils.extract_node("""a = __(None)""")
@@ -94,7 +96,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         Expr(value=UnaryOp(op=USub(), operand=Name(id='a', ctx=Load()))),
         ])
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.BinOp,
@@ -108,7 +110,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         TypeVisitor has the correct type_constraints attribute
         when operands have different types.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.BinOp,
@@ -121,7 +123,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """testing if a unary operator that's been passed into
         TypeVisitor has the correct type_constraints attribute.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.UnaryOp,
@@ -136,7 +138,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The list contains only 1 type of elements.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.List,
@@ -152,7 +154,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The list contains different type of elements.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.List,
@@ -167,14 +169,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The tuple contains 2 same type of elements.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.Tuple,
                                         set_tuple_type_constraints)
-        module = astroid.parse("""(1, 2)""")    # Tuple[int, int]
+        module = astroid.parse("""(1, 2)""")    # Tuple[int]
         visited_module = type_visitor.visit(module)
-        self.assertEqual(Tuple[int, int], visited_module.body[
+        self.assertEqual(Tuple[int], visited_module.body[
             0].value.type_constraints)
 
     def test_tuple_diff_type_elements(self):
@@ -183,14 +185,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The tuple contains 2 different type of elements.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.Tuple,
                                     set_tuple_type_constraints)
         module = astroid.parse("""('GPA', 4.0)""")    # Tuple[str, float]
         visited_module = type_visitor.visit(module)
-        self.assertEqual(Tuple[str, float], visited_module.body[
+        self.assertEqual(Tuple, visited_module.body[
             0].value.type_constraints)
 
     def test_dict_same_type_elements(self):
@@ -203,7 +205,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         contains a single type(call it type1), the type_constraints of this
         Dict object has to be set as Dict[type1, type1].
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.Dict,
@@ -226,7 +228,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         return Dict[type1, type1] with a repetition of type1, so I think it
         will be reasonable to show 2 different types as well.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.Dict,
@@ -242,7 +244,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The dict contains more than 2 different types of elements.
         """
-        type_visitor = TypeVisitor()
+        type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.Dict,

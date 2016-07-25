@@ -312,6 +312,19 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         self.assertEqual(Tuple[int], visited_module.body[
             0].value.type_constraints)
 
+    def test_nested(self):
+        """testing if a nested list that's been passed into TypeVisitor
+        has the correct type_constraints attribute.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.List,
+                                        set_list_type_constraints)
+        module = astroid.parse("""[1, [[2, 2.5], [3, 'a']]]""")  # List
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(List, visited_module.body[0].value.type_constraints)
+
     def test_tuple_diff_type_elements(self):
         """testing if a tuple that's been passed into TypeVisitor
         has the correct type_constraints attribute.
@@ -328,17 +341,15 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         self.assertEqual(Tuple, visited_module.body[0].value.type_constraints)
 
     def test_nested_tuple(self):
-        """testing if a tuple that's been passed into TypeVisitor
-        has the correct type_constraints attribute.
-
-        The tuple contains different type of multiple elements.
+        """testing if a nested tuple that's been passed into TypeVisitor
+        has the correct type_constraints attribute..
         """
         type_visitor = TransformVisitor()
         type_visitor.register_transform(astroid.Const,
                                         set_const_type_constraints)
         type_visitor.register_transform(astroid.Tuple,
                                         set_tuple_type_constraints)
-        module = astroid.parse("""(1, (2, (3, 4)))""")  # Tuple
+        module = astroid.parse("""(1, (2, (3, '4')))""")  # Tuple
         visited_module = type_visitor.visit(module)
         self.assertEqual(Tuple, visited_module.body[0].value.type_constraints)
 

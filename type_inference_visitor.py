@@ -57,7 +57,6 @@ def set_dict_type_constraints(node):
 
 
 def set_binop_type_constraints(node):
-    op = node.op
     left_operand = node.left.type_constraints
     right_operand = node.right.type_constraints
 
@@ -73,6 +72,5 @@ def set_binop_type_constraints(node):
 
 
 def set_unaryop_type_constraints(node):
-    op = node.op
     operand = node.operand.value
     node.type_constraints = type(operand)

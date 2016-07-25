@@ -254,5 +254,94 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         self.assertEqual(Dict, visited_module.body[0].value.type_constraints)
 
 
+class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
+
+    def test_binop_multiple_operands_same_type(self):
+        """testing if a binary operator that's been passed into
+        TypeVisitor has the correct type_constraints attribute
+        when multiple operands have same types.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.BinOp,
+                                    set_binop_type_constraints)
+        module = astroid.parse("""1 + 2 + 3 + 4 + 5""")   # int
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(int, visited_module.body[0].value.type_constraints)
+
+    def test_binop_multiple_operands_different_type(self):
+        """testing if a binary operator that's been passed into
+        TypeVisitor has the correct type_constraints attribute
+        when multiple operands have different types.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const, set_const_type_constraints)
+        type_visitor.register_transform(astroid.BinOp,
+                                        set_binop_type_constraints)
+        module = astroid.parse("""1 + 2 + 3 + 4 - 5.5""")   # float
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(float, visited_module.body[0].value.type_constraints)
+
+    def test_binop_multiple_operands_different_type_with_brackets(self):
+        """testing if a binary operator that's been passed into
+        TypeVisitor has the correct type_constraints attribute
+        when multiple operands have different types with brackets.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const, set_const_type_constraints)
+        type_visitor.register_transform(astroid.BinOp,
+                                        set_binop_type_constraints)
+        module = astroid.parse("""1 + 2 + 3 + 4 - (5.5 + 4.5)""")   # float
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(float, visited_module.body[0].value.type_constraints)
+
+    def test_tuple_same_type_multi_elements(self):
+        """testing if a tuple that's been passed into TypeVisitor
+        has the correct type_constraints attribute.
+
+        The tuple contains same type of multiple elements.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Tuple,
+                                        set_tuple_type_constraints)
+        module = astroid.parse("""(1, 2, 3, 4, 5, 6)""")  # Tuple[int]
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Tuple[int], visited_module.body[
+            0].value.type_constraints)
+
+    def test_tuple_diff_type_elements(self):
+        """testing if a tuple that's been passed into TypeVisitor
+        has the correct type_constraints attribute.
+
+        The tuple contains different type of multiple elements.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Tuple,
+                                        set_tuple_type_constraints)
+        module = astroid.parse("""('a', 4.0, 'b', 'c', 'd', True)""")  # Tuple
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Tuple, visited_module.body[0].value.type_constraints)
+
+    def test_nested_tuple(self):
+        """testing if a tuple that's been passed into TypeVisitor
+        has the correct type_constraints attribute.
+
+        The tuple contains different type of multiple elements.
+        """
+        type_visitor = TransformVisitor()
+        type_visitor.register_transform(astroid.Const,
+                                        set_const_type_constraints)
+        type_visitor.register_transform(astroid.Tuple,
+                                        set_tuple_type_constraints)
+        module = astroid.parse("""(1, (2, (3, 4)))""")  # Tuple
+        visited_module = type_visitor.visit(module)
+        self.assertEqual(Tuple, visited_module.body[0].value.type_constraints)
+
+
 if __name__ == '__main__':
     unittest.main()

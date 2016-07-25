@@ -13,7 +13,6 @@ ignored_tests = [
     'E1130_invalid_unary_operand_type.py',
     'E1131_unsupported_binary_operation.py',
     'W0222_signature_differs.py',
-    'W0232_no_init.py',
 ]
 
 

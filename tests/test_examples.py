@@ -30,7 +30,7 @@ def get_file_paths():
     return test_files
 
 
-def create_function(test_file, checker_name):
+def create_checker_test(test_file, checker_name):
     """Creates a test function from a test file, and a checker name.
     test_file: The full path (string) to the file.
     checker_name: The hyphenated checker name that should be detected.
@@ -59,5 +59,5 @@ def test_examples_files():
         if not base_name.lower().endswith('.py'):
             assert False
         checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.
-        test_function = create_function(test_file, checker_name)
+        test_function = create_checker_test(test_file, checker_name)
         yield test_function

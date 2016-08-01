@@ -1,3 +1,5 @@
+"""Helper module for ending_location_visitor.py
+"""
 from sys import exit
 import astroid
 import logging
@@ -11,10 +13,6 @@ logging.basicConfig(format='', level=logging.DEBUG)
 # on the nodes.
 # TODO: Separate into Class? .. would need static methods.
 ################################################################################
-def _set_end_lineno(node):
-    """Transform the property in-place.
-    """
-    node.end_lineno = node.lineno
 
 def _set_end_lineno(node):
     """Transform the property in-place.
@@ -25,14 +23,14 @@ def _set_end_lineno(node):
     # Guard. 
     if node.tolineno is None:
         # TODO: write new code to gracefully handle, if this is ever reached.
-        logging.error("⛔ lineno is None at node: {}".format(node))
+        logging.error("ERROR:️ lineno is None at node: {}".format(node))
         sys.exit(1)
     else:
         node.end_lineno = node.tolineno
 
 def _set_end_col_offset_by_string_old(node):
     """Set the end_col_offset property by the as_string attribute.
-    Uses the end column location of the last line, instead of the widest line.
+    The old way uses the end column location of the widest line.
     """
     
     # Get the widest line in the source code.
@@ -82,9 +80,9 @@ def _set_end_col_offset_by_string(node):
     # print('props: ', dir(node))
     last_child_end = node.last_child().end_col_offset
     if last_child_end is None:
-        logging.error("⛔ ERROR:️ last child's end_col_offset property is None.")
+        logging.error("ERROR:️ last child's end_col_offset property is None.")
         # sys.exit(1)
-        raise Exception('''⛔ last child's end_col_offset property is None.''')
+        raise Exception('''last child's end_col_offset property is None.''')
         # TODO: get the type of astroid node (Const?, Expr?, ...)
         # and calculate its 
 
@@ -100,13 +98,13 @@ def _set_end_col_offset_by_value(node):
     """
     # Guard: should have .value property
     if 'value' not in dir(node):
-        raise Exception('''⛔️ node must have the .value property.''')
+        raise Exception('''ERROR:️ node must have the .value property.''')
         sys.exit(1)
 
     # Guard: something with .value shouldn't have children. Use a different
     # function instead of _set_end_col_offset_by_value.
     for child in node.get_children():  # get_children() returns a generator.
-        raise Exception('''⛔ _set_end_col_offset_by_value function 
+        raise Exception('''ERROR:️ _set_end_col_offset_by_value function 
                         should not be called if has children.''')
         sys.exit(1)
     node.end_col_offset = node.col_offset + len(str(node.value))

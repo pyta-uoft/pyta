@@ -3,6 +3,8 @@ Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 
 See class and method docstrings for explanations.
+
+Run: python ending_location_visitor.py 
 """
 
 from sys import exit
@@ -128,6 +130,10 @@ class TestEndingLocation(unittest.TestCase):
         # self.ending_transformer.register_transform(astroid.BinOp, set_binop)
         self.ending_transformer.easy_register_transform('Const')
         self.ending_transformer.easy_register_transform('BinOp')
+
+
+
+        # TODO: attach more nodes with their transform functions here.
         
 
     def setUp(self):
@@ -167,11 +173,14 @@ class TestEndingLocation(unittest.TestCase):
         Note we cannot use a set because this would hide the inequality from
         repeated items.
         TODO: check for equality without respect to order of items in top-level.
+        For example, the following lists are 'equal' for our purposes.
+        [[1, 1, 0, 6], [2, 2, 4, 6]]
+        [[2, 2, 4, 6], [1, 1, 0, 6]]
         """
         return expected == props_assigned
 
     def assertSameness(self, expected, props):
-        """If they are not equal, then it will print each side.
+        """If sequences are not equal, it is convenient to see each side.
         """
         try:
             self.assertTrue(self._are_equal(expected, props))
@@ -187,7 +196,7 @@ class TestEndingLocation(unittest.TestCase):
         pass  # TODO
 
     def test_const(self):
-        expected = [[1, 1, 0, 6], [2, 2, 4, 6]]
+        expected = [[1, 1, 0, 6], [22, 2, 4, 6]]
         file_location = 'examples/ending_locations/const.py'
         module = self._get_file_as_module(file_location)
         # visit_astroid(module)
@@ -211,13 +220,12 @@ class TestEndingLocation(unittest.TestCase):
 
     # TODO: Many more test functions here...
 
+    
+
 
 
 
 
 if __name__ == '__main__':
-    # run tests
-    # unittest.main()
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestEndingLocation)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.main()  # run tests
 

@@ -9,6 +9,10 @@ max-nested-blocks = 2
 # Set the maximum line length. The maximum line length in pep8 is 80 characters.
 max-line-length = 79
 
+[FORBIDDEN IMPORT]
+
+# Set the list of modules that are allowed to be imported
+
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s).

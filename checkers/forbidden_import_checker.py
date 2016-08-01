@@ -8,7 +8,7 @@ from pylint.checkers.utils import check_messages
 class ForbiddenImportChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
-    name = 'forbiddenimport'
+    name = 'forbidden import'
     msgs = {'E9999':
                 ('You may not import any modules - you imported \033[4;34m%s\033[0m on line %s.',
                  'forbidden-import',
@@ -33,11 +33,6 @@ class ForbiddenImportChecker(BaseChecker):
         if temp != []:
             self.add_message('forbidden-import', node=node, args=(', '.join(map(lambda x: x[0], temp)), node.lineno))
 
-        #self.add_message('forbidden-import',
-        #                 node=node,
-        #                 args=(', '.join(map(lambda x: x[0], node.names)),
-        #                       node.lineno))
-
     @check_messages("forbidden-import")
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name):
@@ -48,7 +43,6 @@ class ForbiddenImportChecker(BaseChecker):
                 if name == "__import__":
                     if node.args[0].value not in self.config.allowed_import_modules:
                         args = (node.args[0].value, node.lineno)
-                        #args = (node.args[0].as_string(), node.lineno)
                         # add the message
                         self.add_message('forbidden-import', node=node,
                                          args=args)

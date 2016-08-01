@@ -1,9 +1,8 @@
-def add(lst=[]):
-    """ Calculates the sum of the elements in the given list.
-    @type lst: list
-    @rtype: int
-    """
-    temp = 0
-    for item in lst:
-        temp += item
-    return temp
+def make_list(n, lst=[]):
+    for i in range(n):
+        lst.append(i)
+    print(lst)
+
+
+print(make_list(5))
+print(make_list(5))

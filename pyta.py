@@ -52,6 +52,8 @@ def check(module_name, reporter=ColorReporter):
                                 'checkers/global_variables_checker',
                                 'checkers/dynamic_execution_checker',
                                 'checkers/IO_Function_checker',
+                                'checkers/invalid_range_index_checker',
+                                'checkers/assigning_to_self_checker',
                                 'checkers/always_returning_checker'])
     linter.read_config_file()
     linter.load_config_file()

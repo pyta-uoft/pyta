@@ -18,9 +18,9 @@ class HTMLReporter(PlainReporter):
 
         with open('output.html', 'w') as f:
             for msg in self._messages:
-                code = msg.msg_id
                 msg_new = msg.msg.replace('\r', '')
-                msg_new = msg_new.replace('\n', '<br/>')
-                msg = msg._replace(msg=msg_new)
+                msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
+                i = self._messages.index(msg)
+                self._messages[i] = msg._replace(msg=msg_new)
 
-                f.write(template.render(code=code,symbol=msg.symbol,obj=msg.obj,msg=msg.msg))
+            f.write(template.render(messages=self._messages))

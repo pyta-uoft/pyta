@@ -4,27 +4,20 @@ from typing import Tuple, List, Dict, Set
 
 def set_const_type_constraints(node):
     """Populate type constraints for astroid nodes num/str/bool/None/bytes."""
-    node.type_constraints = node.value.__class__
+    node.type_constraints = type(node.value)
 
 
 def set_tuple_type_constraints(node):
     # node_types contains types of elements inside tuple.
-    node_types = set()
-    for node_child in node.elts:
-        if node_child.type_constraints not in node_types:
-            node_types.add(node_child.type_constraints)
-    if len(node_types) == 1:
-        node.type_constraints = Tuple[node_types.pop()]
-    else:
-        node.type_constraints = Tuple
+    node_types = [x.type_constraints for x in [*node.elts]]
+    node.type_constraints = Tuple[list(*node_types)]
 
 
 def set_list_type_constraints(node):
     # node_types contains types of elements inside list.
     node_types = set()
     for node_child in node.elts:
-        if node_child.type_constraints not in node_types:
-            node_types.add(node_child.type_constraints)
+        node_types.add(node_child.type_constraints)
 
     # if list has more than one types, just set node.type_constraints to
     # list, if list has only 1 types, set the node.type_constraints to be
@@ -42,10 +35,8 @@ def set_dict_type_constraints(node):
     key_types = set()
     value_types = set()
     for key, value in node.items:
-        if key.type_constraints not in key_types:
-            key_types.add(key.type_constraints)
-        if value.type_constraints not in value_types:
-            value_types.add(value.type_constraints)
+        key_types.add(key.type_constraints)
+        value_types.add(value.type_constraints)
 
     # if all the keys have the same type, and all the values have the same
     # type, return the node.type_constraints with the 2 types, else,
@@ -72,5 +63,4 @@ def set_binop_type_constraints(node):
 
 
 def set_unaryop_type_constraints(node):
-    operand = node.operand.value
-    node.type_constraints = type(operand)
+    node.type_constraints = node.operand.type_constraints

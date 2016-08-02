@@ -1,4 +1,4 @@
-from csc108_docstring import *
+from docstring.csc108_docstring import *
 import unittest
 
 

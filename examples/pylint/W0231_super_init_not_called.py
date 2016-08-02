@@ -5,4 +5,5 @@ class Parent:
 
 class Child(Parent):
     def __init__(self):
-        Parent.__init__(self)  # You must have this
+        # Parent.__init__(self)  # You must have this
+        pass

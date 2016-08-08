@@ -3,14 +3,17 @@ import inspect
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
+from colorama import Fore
 
 
 class ForbiddenImportChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
+    # \033[4;34m%s\033[0m
     name = 'forbidden import'
     msgs = {'E9999':
-                ('You may not import any modules - you imported \033[4;34m%s\033[0m on line %s.',
+                ('You may not import any modules - you imported ' + Fore.BLUE +
+                 '%s' + Fore.BLACK + ' on line %s.',
                  'forbidden-import',
                  'Used when you use import')}
     options = (('allowed_import_modules',
@@ -18,7 +21,7 @@ class ForbiddenImportChecker(BaseChecker):
                  'type': 'csv',
                  'metavar': '<modules>',
                  'help': 'Allowed modules to be imported.'}
-               ),)
+                ),)
 
     # this is important so that your checker is executed before others
     priority = -1
@@ -26,10 +29,8 @@ class ForbiddenImportChecker(BaseChecker):
     @check_messages("forbidden-import")
     def visit_import(self, node):
         """visit and Import node"""
-        temp = []
-        for name in node.names:
-            if name[0] not in self.config.allowed_import_modules:
-                temp.append(name)
+        temp = [name for name in node.names if name[0] not in self.config.allowed_import_modules]
+
         if temp != []:
             self.add_message('forbidden-import', node=node, args=(', '.join(map(lambda x: x[0], temp)), node.lineno))
 

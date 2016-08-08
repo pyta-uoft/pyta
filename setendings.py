@@ -23,26 +23,40 @@ def _set_end_lineno(node):
     # Guard. 
     if node.tolineno is None:
         # TODO: write new code to gracefully handle, if this is ever reached.
-        logging.error("ERROR:️ lineno is None at node: {}".format(node))
-        sys.exit(1)
+        raise Exception('''ERROR:️ lineno is None at node:''', node, 
+                        node.as_string())
     else:
         node.end_lineno = node.tolineno
 
-def _set_end_col_offset_by_string_old(node):
-    """Set the end_col_offset property by the as_string attribute.
-    The old way uses the end column location of the widest line.
-    """
-    
-    # Get the widest line in the source code.
-    lines = [line for line in node.as_string().split('\n')]
-    max_width_line = max(lines, key=len)
-    max_width = len(max_width_line)
-    # Note: node.col_offset could be 'None'
-    node.end_col_offset = (node.col_offset or 0) + max_width
-
-
-
 def _set_end_col_offset_by_string(node):
+    """Nodes without children can get end_col_offset by length of string.
+    Hopefully this works without problems.
+    """
+    NO_CHILDREN_TYPE = [astroid.Arguments, astroid.AssignName, astroid.Break, 
+            astroid.Const, astroid.DelName, astroid.Ellipsis, astroid.Global, 
+            astroid.Import, astroid.ImportFrom, astroid.List, astroid.Name, 
+            astroid.Nonlocal, astroid.Pass, astroid.Yield]
+
+    node_string = node.as_string()
+
+    if type(node) not in NO_CHILDREN_TYPE:
+        raise Exception('''ERROR:️ node not found in NO_CHILDREN list.''', node, 
+                        node_string)
+
+    # Guard: to use this approach, it shouldn't have children.
+    for child in node.get_children():  # get_children() returns a generator.
+        raise Exception('''ERROR:️ should not be called if has children.''', 
+                        node, node_string)
+
+    # Guard: should have .value property
+    if not hasattr(node, 'as_string'):
+        raise Exception('''ERROR:️ node must have the .as_string property.''', 
+                        node, node_string)
+
+    # _set_child_end_col_offset_by_value(node)
+    node.end_col_offset = node.col_offset + len(node_string)
+
+def _set_end_col_offset(node):
     """Set the end_col_offset property by the as_string attribute.
     Uses the end column location of the last line, instead of the widest line.
     Need to do a custom postorder traversal to set end_col_offset property of 
@@ -52,66 +66,46 @@ def _set_end_col_offset_by_string(node):
     """
 
     # Compare with "None" since value could be "0", which is falsey.
-    # Returning a.s.a.p. reduces the runtime (considerably?).
-    if node.end_lineno is not None and node.end_col_offset is not None:
-        return  # since properties are already set.
+    # Returning a.s.a.p. reduces the runtime.
+    # Some nodes dont have the attribute set yet.
+    if hasattr(node, 'end_lineno') and hasattr(node, 'end_col_offset'):
+        if node.end_lineno is not None and node.end_col_offset is not None:
+            return  # since properties are already set.
 
     # Doing this first makes it a postorder traversal.
     for child in node.get_children():  # get_children() returns a generator.
-        _set_end_col_offset_by_string(child)
+        _set_end_col_offset(child)
 
-    node_as_string = str(node)
-    node_name = node_as_string[ : node_as_string.find('(')]
-    # print('node: ', node_name)
+    # if possible, set the end_col_offset by that of the last child
+    if node.last_child():
+        _set_by_last_child(node, node.last_child())
+    # Arrgghh astroid.Arguments cannot rely on last_child() being set properly.
+    elif type(node) is astroid.Arguments:
+        last_child = None
+        for last_child in node.get_children():  # get_children() returns a generator
+            pass  # skip to last
+        print('last item in Arguments:', last_child)
+        _set_by_last_child(node, last_child)
+    # No children. Postorder traversal sets these children first.
+    else:
+        # print(type(node) in NO_CHILDREN)
+        print('no children: {}'.format(node))
+        _set_end_col_offset_by_string(node)
 
-    #❕TODO: set up the below to work with postorder traversal, setting all
-    # child properties, calling the different transform functions by node
-    # type in nodes.. nodes[node_name]['function']
-
-
-
-
-
-
-    
-
-
-    # Temporary:    
-    # print('props: ', dir(node))
-    last_child_end = node.last_child().end_col_offset
-    if last_child_end is None:
-        logging.error("ERROR:️ last child's end_col_offset property is None.")
-        # sys.exit(1)
-        raise Exception('''last child's end_col_offset property is None.''')
-        # TODO: get the type of astroid node (Const?, Expr?, ...)
-        # and calculate its 
-
-    print('last: ', node.last_child().end_col_offset)
-    node.end_col_offset = node.last_child().end_col_offset
-    
-
-
-
-
-def _set_end_col_offset_by_value(node):
-    """Set the end_col_offset property by the value attribute.
+def _set_by_last_child(node, last_child_node):
+    """Set end_col_offset by the value of the node's last child.
     """
-    # Guard: should have .value property
-    if 'value' not in dir(node):
-        raise Exception('''ERROR:️ node must have the .value property.''')
-        sys.exit(1)
-
-    # Guard: something with .value shouldn't have children. Use a different
-    # function instead of _set_end_col_offset_by_value.
-    for child in node.get_children():  # get_children() returns a generator.
-        raise Exception('''ERROR:️ _set_end_col_offset_by_value function 
-                        should not be called if has children.''')
-        sys.exit(1)
-    node.end_col_offset = node.col_offset + len(str(node.value))
+    if hasattr(last_child_node, 'end_col_offset'):
+        if last_child_node.end_col_offset is None:  # this shoulnt happen
+            raise Exception("ERROR:️ last child's end_col_offset property is None.")
+        node.end_col_offset = last_child_node.end_col_offset
+    # Postorder sets children first!
+    else:
+        node.end_col_offset = last_child_node.col_offset + len(node.as_string())
+        print('end_col_offset was set: ', node.end_col_offset)
 
 
 # TODO: maybe separate the following concerns into different files.
-
 # Define the functions to transform the nodes.
 # These functions are registered to their respective node type with the
 # register_transform function.
@@ -121,7 +115,7 @@ def set_general(node):
     """General function called by many of the other transform functions.
     Populate ending locations for astroid node."""
     _set_end_lineno(node)
-    _set_end_col_offset_by_string(node)
+    _set_end_col_offset(node)
 
 #######
 
@@ -169,9 +163,9 @@ def set_await(node):
     """Populate ending locations for node: astroid.Await"""
     set_general(node)
 
-def set_binop(node):
-    """Populate ending locations for node: astroid.BinOp"""
-    set_general(node)
+# def set_binop(node):
+#     """Populate ending locations for node: astroid.BinOp"""
+#     set_general(node)
 
 def set_boolop(node):
     """Populate ending locations for node: astroid.BoolOp"""
@@ -197,14 +191,14 @@ def set_comprehension(node):
     """Populate ending locations for node: astroid.Comprehension"""
     set_general(node)
 
-def set_const(node):
-    """Populate ending locations for node: astroid.Const
-    Note: only Const node has .value property.
-    Examples include: ints, None, True, False.
-    Always true: Const is always 1 line.
-    """
-    _set_end_lineno(node)
-    _set_end_col_offset_by_value(node)
+# def set_const(node):
+#     """Populate ending locations for node: astroid.Const
+#     Note: only Const node has .value property.
+#     Examples include: ints, None, True, False.
+#     Always true: Const is always 1 line.
+#     """
+#     _set_end_lineno(node)
+#     _set_child_end_col_offset_by_value(node)
 
 def set_continue(node):
     """Populate ending locations for node: astroid.Continue"""
@@ -328,7 +322,9 @@ def set_nonlocal(node):
 
 def set_pass(node):
     """Populate ending locations for node: astroid.Pass"""
-    set_general(node)
+    # set_general(node)
+    _set_end_lineno(node)
+    node.end_col_offset = node.col_offset + 4  # "pass" has constant length
 
 def set_print(node):
     """Populate ending locations for node: astroid.Print"""
@@ -397,226 +393,5 @@ def set_yield(node):
 def set_yieldfrom(node):
     """Populate ending locations for node: astroid.YieldFrom"""
     set_general(node)
-
-
-
-
-
-
-
-# Data structure to control the transform functions bound to each node type.
-# Some nodes will share general transform functions.
-# Sometimes postorder traversals are done on subtrees of nodes, and we use the
-# binding of node string to transform function to dynamically set attributes
-# within the subtree.
-# Use like: 
-    # x = 'BinOp'
-    # nodes[x][function]
-################################################################################
-nodes = {
-'Arguments': {'function': set_arguments,
-            'node': astroid.Arguments,
-            'string': 'Arguments'},
-'Assert': {'function': set_assert,
-            'node': astroid.Assert,
-            'string': 'Assert'},
-'Assign': {'function': set_assign,
-            'node': astroid.Assign,
-            'string': 'Assign'},
-'AssignAttr': {'function': set_assignattr,
-            'node': astroid.AssignAttr,
-            'string': 'AssignAttr'},
-'AssignName': {'function': set_assignname,
-            'node': astroid.AssignName,
-            'string': 'AssignName'},
-'AsyncFor': {'function': set_asyncfor,
-            'node': astroid.AsyncFor,
-            'string': 'AsyncFor'},
-'AsyncFunctionDef': {'function': set_asyncfunctiondef,
-            'node': astroid.AsyncFunctionDef,
-            'string': 'AsyncFunctionDef'},
-'AsyncWith': {'function': set_asyncwith,
-            'node': astroid.AsyncWith,
-            'string': 'AsyncWith'},
-'Attribute': {'function': set_attribute,
-            'node': astroid.Attribute,
-            'string': 'Attribute'},
-'AugAssign': {'function': set_augassign,
-            'node': astroid.AugAssign,
-            'string': 'AugAssign'},
-'Await': {'function': set_await,
-            'node': astroid.Await,
-            'string': 'Await'},
-'BinOp': {'function': set_binop,
-            'node': astroid.BinOp,
-            'string': 'BinOp'},
-'BoolOp': {'function': set_boolop,
-            'node': astroid.BoolOp,
-            'string': 'BoolOp'},
-'Break': {'function': set_break,
-            'node': astroid.Break,
-            'string': 'Break'},
-'Call': {'function': set_call,
-            'node': astroid.Call,
-            'string': 'Call'},
-'ClassDef': {'function': set_classdef,
-            'node': astroid.ClassDef,
-            'string': 'ClassDef'},
-'Compare': {'function': set_compare,
-            'node': astroid.Compare,
-            'string': 'Compare'},
-'Comprehension': {'function': set_comprehension,
-            'node': astroid.Comprehension,
-            'string': 'Comprehension'},
-'Const': {'function': set_const,
-            'node': astroid.Const,
-            'string': 'Const'},
-'Continue': {'function': set_continue,
-            'node': astroid.Continue,
-            'string': 'Continue'},
-'Decorators': {'function': set_decorators,
-            'node': astroid.Decorators,
-            'string': 'Decorators'},
-'DelAttr': {'function': set_delattr,
-            'node': astroid.DelAttr,
-            'string': 'DelAttr'},
-'DelName': {'function': set_delname,
-            'node': astroid.DelName,
-            'string': 'DelName'},
-'Delete': {'function': set_delete,
-            'node': astroid.Delete,
-            'string': 'Delete'},
-'Dict': {'function': set_dict,
-            'node': astroid.Dict,
-            'string': 'Dict'},
-'DictComp': {'function': set_dictcomp,
-            'node': astroid.DictComp,
-            'string': 'DictComp'},
-'DictUnpack': {'function': set_dictunpack,
-            'node': astroid.DictUnpack,
-            'string': 'DictUnpack'},
-'Ellipsis': {'function': set_ellipsis,
-            'node': astroid.Ellipsis,
-            'string': 'Ellipsis'},
-'EmptyNode': {'function': set_emptynode,
-            'node': astroid.EmptyNode,
-            'string': 'EmptyNode'},
-'ExceptHandler': {'function': set_excepthandler,
-            'node': astroid.ExceptHandler,
-            'string': 'ExceptHandler'},
-'Exec': {'function': set_exec,
-            'node': astroid.Exec,
-            'string': 'Exec'},
-'Expr': {'function': set_expr,
-            'node': astroid.Expr,
-            'string': 'Expr'},
-'ExtSlice': {'function': set_extslice,
-            'node': astroid.ExtSlice,
-            'string': 'ExtSlice'},
-'For': {'function': set_for,
-            'node': astroid.For,
-            'string': 'For'},
-'FunctionDef': {'function': set_functiondef,
-            'node': astroid.FunctionDef,
-            'string': 'FunctionDef'},
-'GeneratorExp': {'function': set_generatorexp,
-            'node': astroid.GeneratorExp,
-            'string': 'GeneratorExp'},
-'Global': {'function': set_global,
-            'node': astroid.Global,
-            'string': 'Global'},
-'If': {'function': set_if,
-            'node': astroid.If,
-            'string': 'If'},
-'IfExp': {'function': set_ifexp,
-            'node': astroid.IfExp,
-            'string': 'IfExp'},
-'Import': {'function': set_import,
-            'node': astroid.Import,
-            'string': 'Import'},
-'ImportFrom': {'function': set_importfrom,
-            'node': astroid.ImportFrom,
-            'string': 'ImportFrom'},
-'Index': {'function': set_index,
-            'node': astroid.Index,
-            'string': 'Index'},
-'Keyword': {'function': set_keyword,
-            'node': astroid.Keyword,
-            'string': 'Keyword'},
-'Lambda': {'function': set_lambda,
-            'node': astroid.Lambda,
-            'string': 'Lambda'},
-'List': {'function': set_list,
-            'node': astroid.List,
-            'string': 'List'},
-'ListComp': {'function': set_listcomp,
-            'node': astroid.ListComp,
-            'string': 'ListComp'},
-'Module': {'function': set_module,
-            'node': astroid.Module,
-            'string': 'Module'},
-'Name': {'function': set_name,
-            'node': astroid.Name,
-            'string': 'Name'},
-'Nonlocal': {'function': set_nonlocal,
-            'node': astroid.Nonlocal,
-            'string': 'Nonlocal'},
-'Pass': {'function': set_pass,
-            'node': astroid.Pass,
-            'string': 'Pass'},
-'Print': {'function': set_print,
-            'node': astroid.Print,
-            'string': 'Print'},
-'Raise': {'function': set_raise,
-            'node': astroid.Raise,
-            'string': 'Raise'},
-'Repr': {'function': set_repr,
-            'node': astroid.Repr,
-            'string': 'Repr'},
-'Return': {'function': set_return,
-            'node': astroid.Return,
-            'string': 'Return'},
-'Set': {'function': set_set,
-            'node': astroid.Set,
-            'string': 'Set'},
-'SetComp': {'function': set_setcomp,
-            'node': astroid.SetComp,
-            'string': 'SetComp'},
-'Slice': {'function': set_slice,
-            'node': astroid.Slice,
-            'string': 'Slice'},
-'Starred': {'function': set_starred,
-            'node': astroid.Starred,
-            'string': 'Starred'},
-'Subscript': {'function': set_subscript,
-            'node': astroid.Subscript,
-            'string': 'Subscript'},
-'TryExcept': {'function': set_tryexcept,
-            'node': astroid.TryExcept,
-            'string': 'TryExcept'},
-'TryFinally': {'function': set_tryfinally,
-            'node': astroid.TryFinally,
-            'string': 'TryFinally'},
-'Tuple': {'function': set_tuple,
-            'node': astroid.Tuple,
-            'string': 'Tuple'},
-'UnaryOp': {'function': set_unaryop,
-            'node': astroid.UnaryOp,
-            'string': 'UnaryOp'},
-'While': {'function': set_while,
-            'node': astroid.While,
-            'string': 'While'},
-'With': {'function': set_with,
-            'node': astroid.With,
-            'string': 'With'},
-'Yield': {'function': set_yield,
-            'node': astroid.Yield,
-            'string': 'Yield'},
-'YieldFrom': {'function': set_yieldfrom,
-            'node': astroid.YieldFrom,
-            'string': 'YieldFrom'}
-}    
-
-
 
 

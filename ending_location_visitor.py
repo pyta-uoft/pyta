@@ -22,7 +22,7 @@ logging.basicConfig(format='', level=logging.DEBUG)
 class EndingVisitor(TransformVisitor):
     """Subclass of TransformVisitor used for the visit() traversal, and other
     things just for testing, i.e. EndingVisitor subclass is independent of our
-    linter functionality so free to override the methods in this EndingVisitor 
+    linter functionality, so free to override the methods in this EndingVisitor 
     subclass.
     """
 
@@ -98,9 +98,9 @@ class TestEndingLocation(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        '''A class method called before tests in an individual class run.
+        """A class method called before tests in an individual class run.
         setUpClass is called with the class as the only argument and must be
-        decorated as a classmethod():'''
+        decorated as a classmethod():"""
         
         # A visitor to transform the nodes.
         self.ending_transformer = TransformVisitor()
@@ -109,23 +109,37 @@ class TestEndingLocation(unittest.TestCase):
         self.ending_visitor = EndingVisitor()
 
         # Register all `transform(node)` functions here...
-        self.ending_transformer.register_transform(astroid.Const, set_const)
-        self.ending_transformer.register_transform(astroid.BinOp, set_binop)
-
-
-
         # TODO: attach more nodes with their transform functions here.
+        self.ending_transformer.register_transform(astroid.Arguments, set_general)
+
+        self.ending_transformer.register_transform(astroid.Const, set_general)
+        self.ending_transformer.register_transform(astroid.BinOp, set_general)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
         
 
     def setUp(self):
-        '''Method called to prepare the test fixture. This is called immediately
+        """Method called to prepare the test fixture. This is called immediately
         before calling the test method; other than AssertionError or SkipTest,
         any exception raised by this method will be considered an error rather
-        than a test failure. The default implementation does nothing.'''
+        than a test failure. The default implementation does nothing."""
         pass
 
     def tearDown(self):
-        '''Method called immediately after the test method has been called and
+        """Method called immediately after the test method has been called and
         the result recorded. This is called even if the test method raised an
         exception, so the implementation in subclasses may need to be
         particularly careful about checking internal state. Any exception,
@@ -133,7 +147,7 @@ class TestEndingLocation(unittest.TestCase):
         considered an additional error rather than a test failure (thus
         increasing the total number of reported errors). This method will only
         be called if the setUp() succeeds, regardless of the outcome of the
-        test method. The default implementation does nothing.'''
+        test method. The default implementation does nothing."""
         self.ending_visitor.reset()
 
     def _get_file_as_module(self, file_location):
@@ -168,6 +182,7 @@ class TestEndingLocation(unittest.TestCase):
         except AssertionError as e:
             logging.error('Compare:\n{}\nprops: {}'.format('-'*70, props))
             logging.error('expected: {}'.format(expected))
+            logging.error('[lineno, end_lineno, col_offset, end_col_offset]')
             raise e  # otherwise, test will always 'pass'
 
     def _all_props_set(self):
@@ -175,33 +190,63 @@ class TestEndingLocation(unittest.TestCase):
         set.
         """
         pass  # TODO
+    
+    def test_arguments(self):
+        """[]
+        """
+        expected = [[1, 2, 8, 30]]
+        example = '''def fun(so, many, arguments, and_some_are_long, soooooooooooooooooooo, 
+                            wrappppppppppppppppppp):
+                        pass
+                 '''
+        module = self._get_string_as_module(example)
+        # visit_astroid(module)
+        self.ending_transformer.visit(module)  # transform
+        props = self.ending_visitor.type(astroid.Arguments).visit(module)  # check
+        # logging.debug(props)
+        self.assertSameness(expected, props)
 
     def test_const(self):
         """[]
         """
         expected = [[1, 1, 0, 6], [2, 2, 4, 6]]
-        file_location = 'examples/ending_locations/const.py'
-        module = self._get_file_as_module(file_location)
+        example = 'examples/ending_locations/const.py'
+        module = self._get_file_as_module(example)
         # visit_astroid(module)
         self.ending_transformer.visit(module)  # transform
         props = self.ending_visitor.type(astroid.Const).visit(module)  # check
         # logging.debug(props)
-        # self.assertTrue(self._are_equal(expected, props))
         self.assertSameness(expected, props)
 
-    # def test_binop(self):
-    #     expected = [[1, 1, 0, 5]]
-    #     string = '''1 + 2
-    #              '''
-    #     module = self._get_string_as_module(string)
-    #     # visit_astroid(module)
-    #     self.ending_transformer.visit(module)  # transform
-    #     props = self.ending_visitor.type(astroid.BinOp).visit(module)  # check
-    #     # logging.debug(props)
-    #     self.assertSameness(expected, props)
+    def test_binop(self):
+        # note 6 col_offset is weird, but we didn't set it.
+        # first binop is (1 + 2), then ((1 + 2) + 3)
+        expected = [[1, 1, 0, 5], [1, 1, 6, 9]]
+        example = '''1 + 2 + 3
+                 '''
+        module = self._get_string_as_module(example)
+        self.ending_transformer.visit(module)  # transform
+        props = self.ending_visitor.type(astroid.BinOp).visit(module)  # check
+        self.assertSameness(expected, props)
 
 
     # TODO: Many more test functions here...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     
 

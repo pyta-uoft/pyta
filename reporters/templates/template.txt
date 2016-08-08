@@ -1,0 +1,12 @@
+<html>
+<head>
+</head>
+<body>
+<u1>
+    {% for message in messages %}
+        <p>{{ message.msg_id }} ({{ message.symbol }}) {{ message.obj }}<br/>&emsp;&emsp;{{message.msg }}</p>
+    {% endfor %}
+
+</u1>
+</body>
+</html>

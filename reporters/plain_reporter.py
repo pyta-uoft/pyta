@@ -16,7 +16,7 @@ class PlainReporter(BaseReporter):
         self.sort_messages()
         for msg in self._messages:
             code = msg.msg_id
-            print(code, '({}) {}\n    {}'.format(msg.symbol, msg.obj, msg.msg))
+            print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))
 
     def sort_messages(self):
         # Sort the messages by their type.

@@ -12,6 +12,7 @@ max-line-length = 79
 [FORBIDDEN IMPORT]
 
 # Set the list of modules that are allowed to be imported
+# For example: allowed_import_modules=pyta
 
 [MESSAGES CONTROL]
 

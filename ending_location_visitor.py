@@ -4,7 +4,7 @@ https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 
 See class and method docstrings for explanations.
 
-Run: python ending_location_visitor.py 
+Run: python ending_location_visitor.py
 """
 
 from sys import exit
@@ -17,25 +17,6 @@ from inspect_ast import visit_astroid
 
 # Set the log level (DEBUG, ERROR, ...), and message format.
 logging.basicConfig(format='', level=logging.DEBUG)
-
-
-class EasyTransformVisitor(TransformVisitor):
-    """Subclass that overrides the methods of TransformVisitor that take
-    (node_class, transform) parameters, so we can provide one string that
-    fetches the bound objects from our data structure.
-    Use:
-    self.ending_transformer.easy_register_transform('BinOp')
-
-    instead of:
-    self.ending_transformer.register_transform(astroid.BinOp, set_binop)
-    """
-
-    def easy_register_transform(self, node_string, predicate=None):
-        """Invoke the register_transform()
-        """
-        node = nodes[node_string]['node']
-        func = nodes[node_string]['function']
-        self.register_transform(node, func)
 
 
 class EndingVisitor(TransformVisitor):
@@ -122,14 +103,14 @@ class TestEndingLocation(unittest.TestCase):
         decorated as a classmethod():'''
         
         # A visitor to transform the nodes.
-        self.ending_transformer = EasyTransformVisitor()  # TransformVisitor
+        self.ending_transformer = TransformVisitor()
+
         # A visitor to test the nodes property correctness.
         self.ending_visitor = EndingVisitor()
+
         # Register all `transform(node)` functions here...
-        # self.ending_transformer.register_transform(astroid.Const, set_const)
-        # self.ending_transformer.register_transform(astroid.BinOp, set_binop)
-        self.ending_transformer.easy_register_transform('Const')
-        self.ending_transformer.easy_register_transform('BinOp')
+        self.ending_transformer.register_transform(astroid.Const, set_const)
+        self.ending_transformer.register_transform(astroid.BinOp, set_binop)
 
 
 
@@ -196,7 +177,9 @@ class TestEndingLocation(unittest.TestCase):
         pass  # TODO
 
     def test_const(self):
-        expected = [[1, 1, 0, 6], [22, 2, 4, 6]]
+        """[]
+        """
+        expected = [[1, 1, 0, 6], [2, 2, 4, 6]]
         file_location = 'examples/ending_locations/const.py'
         module = self._get_file_as_module(file_location)
         # visit_astroid(module)

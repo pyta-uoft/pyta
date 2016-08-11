@@ -20,10 +20,13 @@ def _set_end_lineno(node):
     Goal is to work on various multi-line nodes, with complicated nesting.
     'tolineno' is set correctly on everything, by asteroid.
     """
+
+    # TODO: set this from the last child!!
+
     # Guard. 
     if node.tolineno is None:
         # TODO: write new code to gracefully handle, if this is ever reached.
-        raise Exception('''ERROR:️ lineno is None at node:''', node, 
+        raise Exception('''ERROR:️ tolineno is None at node:''', node, 
                         node.as_string())
     else:
         node.end_lineno = node.tolineno
@@ -76,21 +79,39 @@ def _set_end_col_offset(node):
     for child in node.get_children():  # get_children() returns a generator.
         _set_end_col_offset(child)
 
+    last_child = _get_last_child(node)
+
     # if possible, set the end_col_offset by that of the last child
+    if last_child:
+        # astroid.Arguments nodes dont have a 'lineno' or 'col_offset' property!
+        # Note: there may be others out there!
+        if type(node) is astroid.Arguments:
+            node.col_offset = next(node.get_children()).col_offset
+
+        alert_property_missing(last_child)
+        _set_by_last_child(node, last_child)
+    else:
+        print('no children: {}'.format(node))
+        alert_property_missing(node)
+        _set_end_col_offset_by_string(node)
+
+def _get_last_child(node):
+    """Returns the last child, or if no children, returns None.
+    """
     if node.last_child():
-        _set_by_last_child(node, node.last_child())
-    # Arrgghh astroid.Arguments cannot rely on last_child() being set properly.
+        return node.last_child()
+    # Arrgghh astroid.Arguments dont have a last_child()!
     elif type(node) is astroid.Arguments:
-        last_child = None
+        # Get the first child, from the generator, and use its col_offset
+        last_child = None  # save a reference to last child for later.
         for last_child in node.get_children():  # get_children() returns a generator
             pass  # skip to last
-        print('last item in Arguments:', last_child)
-        _set_by_last_child(node, last_child)
-    # No children. Postorder traversal sets these children first.
+        if last_child is None:
+            raise Exception('''ERROR:️ last_child is None at node:''', node, 
+                            node.as_string())
+        return last_child
     else:
-        # print(type(node) in NO_CHILDREN)
-        print('no children: {}'.format(node))
-        _set_end_col_offset_by_string(node)
+        return None
 
 def _set_by_last_child(node, last_child_node):
     """Set end_col_offset by the value of the node's last child.
@@ -104,6 +125,25 @@ def _set_by_last_child(node, last_child_node):
         node.end_col_offset = last_child_node.col_offset + len(node.as_string())
         print('end_col_offset was set: ', node.end_col_offset)
 
+def alert_property_missing(node):
+    """Purpose: alert immediately if any properties are missing in any of the
+    many different types of nodes. For example 'lineno' and 'col_offset' are
+    originally missing in all astroid.Arguments nodes.
+    TODO: Write new code to gracefully handle, if exceptions are ever raised.
+    """
+    if node.tolineno is None:
+        raise Exception('''ERROR:️ tolineno is None at node:''', node, 
+                        node.as_string())
+
+    if node.fromlineno is None:
+        raise Exception('''ERROR:️ fromlineno is None at node:''', node, 
+                        node.as_string())
+
+    if node.col_offset is None:
+        raise Exception('''ERROR:️ col_offset is None at node:''', node, 
+                        node.as_string())
+
+
 
 # TODO: maybe separate the following concerns into different files.
 # Define the functions to transform the nodes.
@@ -116,282 +156,4 @@ def set_general(node):
     Populate ending locations for astroid node."""
     _set_end_lineno(node)
     _set_end_col_offset(node)
-
-#######
-
-def set_arguments(node):
-    """Populate ending locations for node: astroid.Arguments"""
-    set_general(node)
-
-def set_assert(node):
-    """Populate ending locations for node: astroid.Assert"""
-    set_general(node)
-
-def set_assign(node):
-    """Populate ending locations for node: astroid.Assign"""
-    set_general(node)
-
-def set_assignattr(node):
-    """Populate ending locations for node: astroid.AssignAttr"""
-    set_general(node)
-
-def set_assignname(node):
-    """Populate ending locations for node: astroid.AssignName"""
-    set_general(node)
-
-def set_asyncfor(node):
-    """Populate ending locations for node: astroid.AsyncFor"""
-    set_general(node)
-
-def set_asyncfunctiondef(node):
-    """Populate ending locations for node: astroid.AsyncFunctionDef"""
-    set_general(node)
-
-def set_asyncwith(node):
-    """Populate ending locations for node: astroid.AsyncWith"""
-    set_general(node)
-
-def set_attribute(node):
-    """Populate ending locations for node: astroid.Attribute"""
-    set_general(node)
-
-def set_augassign(node):
-    """Populate ending locations for node: astroid.AugAssign"""
-    set_general(node)
-
-def set_await(node):
-    """Populate ending locations for node: astroid.Await"""
-    set_general(node)
-
-# def set_binop(node):
-#     """Populate ending locations for node: astroid.BinOp"""
-#     set_general(node)
-
-def set_boolop(node):
-    """Populate ending locations for node: astroid.BoolOp"""
-    set_general(node)
-
-def set_break(node):
-    """Populate ending locations for node: astroid.Break"""
-    set_general(node)
-
-def set_call(node):
-    """Populate ending locations for node: astroid.Call"""
-    set_general(node)
-
-def set_classdef(node):
-    """Populate ending locations for node: astroid.ClassDef"""
-    set_general(node)
-
-def set_compare(node):
-    """Populate ending locations for node: astroid.Compare"""
-    set_general(node)
-
-def set_comprehension(node):
-    """Populate ending locations for node: astroid.Comprehension"""
-    set_general(node)
-
-# def set_const(node):
-#     """Populate ending locations for node: astroid.Const
-#     Note: only Const node has .value property.
-#     Examples include: ints, None, True, False.
-#     Always true: Const is always 1 line.
-#     """
-#     _set_end_lineno(node)
-#     _set_child_end_col_offset_by_value(node)
-
-def set_continue(node):
-    """Populate ending locations for node: astroid.Continue"""
-    set_general(node)
-
-def set_decorators(node):
-    """Populate ending locations for node: astroid.Decorators"""
-    set_general(node)
-
-def set_delattr(node):
-    """Populate ending locations for node: astroid.DelAttr"""
-    set_general(node)
-
-def set_delname(node):
-    """Populate ending locations for node: astroid.DelName"""
-    set_general(node)
-
-def set_delete(node):
-    """Populate ending locations for node: astroid.Delete"""
-    set_general(node)
-
-def set_dict(node):
-    """Populate ending locations for node: astroid.Dict"""
-    set_general(node)
-
-def set_dictcomp(node):
-    """Populate ending locations for node: astroid.DictComp"""
-    set_general(node)
-
-def set_dictunpack(node):
-    """Populate ending locations for node: astroid.DictUnpack"""
-    set_general(node)
-
-def set_ellipsis(node):
-    """Populate ending locations for node: astroid.Ellipsis"""
-    set_general(node)
-
-def set_emptynode(node):
-    """Populate ending locations for node: astroid.EmptyNode"""
-    set_general(node)
-
-def set_excepthandler(node):
-    """Populate ending locations for node: astroid.ExceptHandler"""
-    set_general(node)
-
-def set_exec(node):
-    """Populate ending locations for node: astroid.Exec"""
-    set_general(node)
-
-def set_expr(node):
-    """Populate ending locations for node: astroid.Expr"""
-    set_general(node)
-
-def set_extslice(node):
-    """Populate ending locations for node: astroid.ExtSlice"""
-    set_general(node)
-
-def set_for(node):
-    """Populate ending locations for node: astroid.For"""
-    set_general(node)
-
-def set_functiondef(node):
-    """Populate ending locations for node: astroid.FunctionDef"""
-    set_general(node)
-
-def set_generatorexp(node):
-    """Populate ending locations for node: astroid.GeneratorExp"""
-    set_general(node)
-
-def set_global(node):
-    """Populate ending locations for node: astroid.Global"""
-    set_general(node)
-
-def set_if(node):
-    """Populate ending locations for node: astroid.If"""
-    set_general(node)
-
-def set_ifexp(node):
-    """Populate ending locations for node: astroid.IfExp"""
-    set_general(node)
-
-def set_import(node):
-    """Populate ending locations for node: astroid.Import"""
-    set_general(node)
-
-def set_importfrom(node):
-    """Populate ending locations for node: astroid.ImportFrom"""
-    set_general(node)
-
-def set_index(node):
-    """Populate ending locations for node: astroid.Index"""
-    set_general(node)
-
-def set_keyword(node):
-    """Populate ending locations for node: astroid.Keyword"""
-    set_general(node)
-
-def set_lambda(node):
-    """Populate ending locations for node: astroid.Lambda"""
-    set_general(node)
-
-def set_list(node):
-    """Populate ending locations for node: astroid.List"""
-    set_general(node)
-
-def set_listcomp(node):
-    """Populate ending locations for node: astroid.ListComp"""
-    set_general(node)
-
-def set_module(node):
-    """Populate ending locations for node: astroid.Module"""
-    set_general(node)
-
-def set_name(node):
-    """Populate ending locations for node: astroid.Name"""
-    set_general(node)
-
-def set_nonlocal(node):
-    """Populate ending locations for node: astroid.Nonlocal"""
-    set_general(node)
-
-def set_pass(node):
-    """Populate ending locations for node: astroid.Pass"""
-    # set_general(node)
-    _set_end_lineno(node)
-    node.end_col_offset = node.col_offset + 4  # "pass" has constant length
-
-def set_print(node):
-    """Populate ending locations for node: astroid.Print"""
-    set_general(node)
-
-def set_raise(node):
-    """Populate ending locations for node: astroid.Raise"""
-    set_general(node)
-
-def set_repr(node):
-    """Populate ending locations for node: astroid.Repr"""
-    set_general(node)
-
-def set_return(node):
-    """Populate ending locations for node: astroid.Return"""
-    set_general(node)
-
-def set_set(node):
-    """Populate ending locations for node: astroid.Set"""
-    set_general(node)
-
-def set_setcomp(node):
-    """Populate ending locations for node: astroid.SetComp"""
-    set_general(node)
-
-def set_slice(node):
-    """Populate ending locations for node: astroid.Slice"""
-    set_general(node)
-
-def set_starred(node):
-    """Populate ending locations for node: astroid.Starred"""
-    set_general(node)
-
-def set_subscript(node):
-    """Populate ending locations for node: astroid.Subscript"""
-    set_general(node)
-
-def set_tryexcept(node):
-    """Populate ending locations for node: astroid.TryExcept"""
-    set_general(node)
-
-def set_tryfinally(node):
-    """Populate ending locations for node: astroid.TryFinally"""
-    set_general(node)
-
-def set_tuple(node):
-    """Populate ending locations for node: astroid.Tuple"""
-    set_general(node)
-
-def set_unaryop(node):
-    """Populate ending locations for node: astroid.UnaryOp"""
-    set_general(node)
-
-def set_while(node):
-    """Populate ending locations for node: astroid.While"""
-    set_general(node)
-
-def set_with(node):
-    """Populate ending locations for node: astroid.With"""
-    set_general(node)
-
-def set_yield(node):
-    """Populate ending locations for node: astroid.Yield"""
-    set_general(node)
-
-def set_yieldfrom(node):
-    """Populate ending locations for node: astroid.YieldFrom"""
-    set_general(node)
-
 

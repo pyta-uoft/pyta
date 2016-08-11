@@ -37,7 +37,7 @@ class EndingVisitor(TransformVisitor):
         """
         if isinstance(node, self.node_type):  # check it is intended node type.
             try:
-                self.props_check.append([node.lineno, node.end_lineno, 
+                self.props_check.append([node.fromlineno, node.end_lineno, 
                                     node.col_offset, node.end_col_offset])
             except AttributeError:
                 # (with our message) raise again to also get traceback.
@@ -46,7 +46,7 @@ class EndingVisitor(TransformVisitor):
                     ending_transformer.register_transform()''')
 
             # logging.debug('Visiting node ' + str(node))
-            # logging.debug('\tLines {} to {}'.format(node.lineno, node.end_lineno))
+            # logging.debug('\tLines {} to {}'.format(node.fromlineno, node.end_lineno))
             # logging.debug('\tCols {} to {}'.format(node.col_offset, node.end_col_offset))
         return self.props_check
 
@@ -93,7 +93,7 @@ class TestEndingLocation(unittest.TestCase):
         params: node_class, transform function
 
     We store the correct values as: 
-        [lineno, end_lineno, col_offset, end_col_offset]
+        [fromlineno, end_lineno, col_offset, end_col_offset]
     """
 
     @classmethod
@@ -182,7 +182,7 @@ class TestEndingLocation(unittest.TestCase):
         except AssertionError as e:
             logging.error('Compare:\n{}\nprops: {}'.format('-'*70, props))
             logging.error('expected: {}'.format(expected))
-            logging.error('[lineno, end_lineno, col_offset, end_col_offset]')
+            logging.error('[fromlineno, end_lineno, col_offset, end_col_offset]')
             raise e  # otherwise, test will always 'pass'
 
     def _all_props_set(self):

@@ -49,7 +49,7 @@ def set_end_lineno(node, last_child=None):
     else:
         node.end_lineno = node.tolineno
 
-def _set_end_col_offset_by_string(node, last_child=None):
+def set_end_col_offset_by_string(node, last_child=None):
     """Nodes without children can get end_col_offset by length of string.
     Nodes with children get end_col_offset by length of string of last child.
     Hopefully this works without problems.
@@ -107,7 +107,7 @@ def set_end_col_offset(node, last_child=None):
     else:
         # Recall: children set first in postorder traversal.
         # Should this always set by string, is there another way?
-        _set_end_col_offset_by_string(node, last_child)
+        set_end_col_offset_by_string(node, last_child)
 
 def _get_last_child(node):
     """Returns the last child node, or None.
@@ -140,4 +140,4 @@ def set_without_children(node):
     """
     last_child = _get_last_child(node)
     set_end_lineno(node, last_child)
-    set_end_col_offset(node, last_child)
+    set_end_col_offset_by_string(node, last_child)

@@ -42,9 +42,8 @@ def init_register_ending_setters():
 def set_end_lineno(node, last_child=None):
     """Set `end_lineno` property by the last child, if possible.
     """
-    if node.tolineno is None:  # Assertion
-        raise Exception('''ERROR:️ tolineno is None but should be set by asteroid 
-                        on node: {}. Context: {}'''.format(node, node.as_string()))
+    assert node.tolineno, '''ERROR:️ tolineno is None but should be set by 
+        asteroid on node: {}. Context: {}'''.format(node, node.as_string())
     if last_child:
         node.end_lineno = last_child.tolineno
     else:
@@ -57,24 +56,20 @@ def _set_end_col_offset_by_string(node, last_child=None):
     """
     # TODO: refactor some repetitive code in these two code blocks?
     if last_child:
-        if not hasattr(last_child, 'as_string'):  # Assertion
-            raise Exception('''ERROR:️ node {} must have the .as_string property.'''
-                            .format(last_child))
+        assert hasattr(last_child, 'as_string'), '''ERROR:️ node {} must have the
+            .as_string property.'''.format(last_child)
         # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
-        if last_child.col_offset is None:  # Assertion
-            raise Exception('''ERROR:️ node {} last_child has None col_offset, 
-                which we need to set node's col_offset.'''.format(last_child))
-        else:
-            node.col_offset = last_child.col_offset
-
+        assert last_child.col_offset is not None, '''ERROR:️ node {} last_child 
+            has col_offset == None, which we need to set node's col_offset.
+            '''.format(last_child)
+        node.col_offset = last_child.col_offset
         # print('\n before:', node.col_offset)
         # print('\n node:', node)
         # print('\n col_offset1:', last_child.col_offset)
         node.end_col_offset = last_child.col_offset + len(last_child.as_string())
     else:  # No children..
-        if not hasattr(node, 'as_string'):  # Assertion
-            raise Exception('''ERROR:️ node {} must have the .as_string property.'''
-                            .format(node))
+        assert hasattr(node, 'as_string'), '''ERROR:️ node {} must have the 
+            .as_string property.'''.format(node)
         # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
         if node.col_offset is None:
             # Get col_offset from first child from generator.
@@ -95,19 +90,18 @@ def set_end_col_offset(node, last_child=None):
     propert set, then all of its children are set.
     """
     if hasattr(node, 'end_lineno') and hasattr(node, 'end_col_offset'):
-        if node.end_lineno is not None and node.end_col_offset is not None:
+        if node.end_lineno and node.end_col_offset:
             return  # reduces runtime since properties already set.
 
     # Check: contradiction found. Revise NO_CHILDREN_TYPE list for correctness.
-    if last_child and type(node) in NO_CHILDREN_TYPE:
-        raise Exception('''ERROR:️ {} node in NO_CHILDREN_TYPE has children ({}).
-            Suggest: remove it from this list. Context:\n{}'''
-            .format(node, last_child, node.as_string()))
+    assert not last_child or type(node) not in NO_CHILDREN_TYPE, '''ERROR:️ {} 
+        node in NO_CHILDREN_TYPE has children ({}). Suggest: remove it from the 
+        list.Context:\n{}'''.format(node, last_child, node.as_string())
 
     if hasattr(last_child, 'end_col_offset'):  # Set by last child
-        if last_child.end_col_offset is None:  # Assertion
-            raise Exception('''ERROR:️ last child end_col_offset should not be 
-                None if used to set others. Node {}.'''.format(last_child))
+        assert last_child.end_col_offset is not None, '''ERROR:️ last child 
+            end_col_offset should not be None if used to set others. 
+            Node {}.'''.format(last_child)
         node.end_col_offset = last_child.end_col_offset
     # Set by string of node or last_child. May not have child.
     else:

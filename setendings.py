@@ -31,11 +31,37 @@ def init_register_ending_setters():
     """
     ending_transformer = TransformVisitor()
     ending_transformer.register_transform(astroid.Arguments, set_general)
+    ending_transformer.register_transform(astroid.Assert, set_general)
+    # ending_transformer.register_transform(astroid.Assign, set_general)
+    # ending_transformer.register_transform(astroid.AssignAttr, set_general)
+    # ending_transformer.register_transform(astroid.AssignName, set_general)
+    # ending_transformer.register_transform(astroid.AsyncFor, set_general)
+    # ending_transformer.register_transform(astroid.AsyncFunctionDef, set_general)
+    # ending_transformer.register_transform(astroid.AsyncWith, set_general)
+    # ending_transformer.register_transform(astroid.Attribute, set_general)
+    # ending_transformer.register_transform(astroid.AugAssign, set_general)
+    # ending_transformer.register_transform(astroid.Await, set_general)
+    ending_transformer.register_transform(astroid.BinOp, set_general)
+    # ending_transformer.register_transform(astroid.BoolOp, set_general)
+    # ending_transformer.register_transform(astroid.Break, set_general)
+    # ending_transformer.register_transform(astroid.Call, set_general)
+    # ending_transformer.register_transform(astroid.ClassDef, set_general)
+    # ending_transformer.register_transform(astroid.Compare, set_general)
+    # ending_transformer.register_transform(astroid.Comprehension, set_general)
     ending_transformer.register_transform(astroid.Const, 
                                                 set_without_children)
-    ending_transformer.register_transform(astroid.BinOp, set_general)
-    
-    # TODO: attach more nodes with their transform functions here.
+    # ending_transformer.register_transform(astroid.Continue, set_general)
+    # ending_transformer.register_transform(astroid.Decorators, set_general)
+    # ending_transformer.register_transform(astroid.DelAttr, set_general)
+    # ending_transformer.register_transform(astroid.Delete, set_general)
+    # ending_transformer.register_transform(astroid.DelName, set_general)
+    # ending_transformer.register_transform(astroid.Dict, set_general)
+    # ending_transformer.register_transform(astroid.DictComp, set_general)
+    # ending_transformer.register_transform(astroid.Ellipsis, set_general)
+    # ending_transformer.register_transform(astroid.ExceptHandler, set_general)
+    # ending_transformer.register_transform(astroid.Expr, set_general)
+    # ending_transformer.register_transform(astroid.ExtSlice, set_general)
+    # TODO: attach more nodes with their transform functions here...
 
     return ending_transformer
 

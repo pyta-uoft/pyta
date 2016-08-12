@@ -134,6 +134,14 @@ class TestEndingLocation(unittest.TestCase):
         module = self._get_file_as_module(example)
         self.set_and_check(module, astroid.Arguments, expected)
 
+    def test_assert(self):
+        """
+        """
+        expected = [(1, 1, 0, 43), (2, 2, 0, 11)]
+        example = 'examples/ending_locations/assert.py'
+        module = self._get_file_as_module(example)
+        self.set_and_check(module, astroid.Assert, expected)
+
     def test_const(self):
         """
         """
@@ -148,7 +156,7 @@ class TestEndingLocation(unittest.TestCase):
         """
         expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
         example = '''1 + 2 + 3
-                 '''
+                  '''
         module = self._get_string_as_module(example)
         self.set_and_check(module, astroid.BinOp, expected)
 

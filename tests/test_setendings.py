@@ -142,6 +142,21 @@ class TestEndingLocation(unittest.TestCase):
         module = self._get_file_as_module(example)
         self.set_and_check(module, astroid.Assert, expected)
 
+    def test_assign(self):
+        """
+        """
+        expected = [(1, 1, 0, 6)]
+        example = '''x = 10'''
+        module = self._get_string_as_module(example)
+        self.set_and_check(module, astroid.Assign, expected)
+
+
+
+
+
+
+    
+
     def test_const(self):
         """
         """
@@ -155,8 +170,7 @@ class TestEndingLocation(unittest.TestCase):
         first binop is (1 + 2), then ((1 + 2) + 3)
         """
         expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
-        example = '''1 + 2 + 3
-                  '''
+        example = '''1 + 2 + 3'''
         module = self._get_string_as_module(example)
         self.set_and_check(module, astroid.BinOp, expected)
 

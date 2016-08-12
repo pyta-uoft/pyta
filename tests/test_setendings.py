@@ -127,39 +127,30 @@ class TestEndingLocation(unittest.TestCase):
         self._assertSameness(expected, props)
 
     def test_arguments(self):
-        """
-        """
         expected = [(1, 2, 8, 30)]
         example = 'examples/ending_locations/arguments.py'
         module = self._get_file_as_module(example)
         self.set_and_check(module, astroid.Arguments, expected)
 
     def test_assert(self):
-        """
-        """
         expected = [(1, 1, 0, 43), (2, 2, 0, 11)]
         example = 'examples/ending_locations/assert.py'
         module = self._get_file_as_module(example)
         self.set_and_check(module, astroid.Assert, expected)
 
     def test_assign(self):
-        """
-        """
         expected = [(1, 1, 0, 6)]
         example = '''x = 10'''
         module = self._get_string_as_module(example)
         self.set_and_check(module, astroid.Assign, expected)
 
-
-
-
-
-
-    
+    def test_assignattr(self):
+        expected = [(3, 3, 8, 12)]
+        example = 'nodes/AssignAttr.py'
+        module = self._get_file_as_module(example)
+        self.set_and_check(module, astroid.AssignAttr, expected)
 
     def test_const(self):
-        """
-        """
         expected = [(1, 1, 0, 6), (2, 2, 4, 6)]
         example = 'examples/ending_locations/const.py'
         module = self._get_file_as_module(example)

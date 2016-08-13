@@ -19,7 +19,7 @@ logging.basicConfig(format='', level=logging.DEBUG)
 
 # Note this is preliminary data. These nodes are not guaranteed to never have
 # children. Nodes are removed from this list manually on contradiction.
-# Any contradictions to this list will be raised as exception.
+# Any contradictions to this list will be raised as assertion exception.
 NO_CHILDREN_TYPE = [astroid.AssignName, astroid.Break, 
             astroid.Const, astroid.DelName, astroid.Ellipsis, astroid.Global, 
             astroid.Import, astroid.ImportFrom, astroid.List, astroid.Name, 
@@ -48,8 +48,7 @@ def init_register_ending_setters():
     # ending_transformer.register_transform(astroid.ClassDef, set_general)
     # ending_transformer.register_transform(astroid.Compare, set_general)
     # ending_transformer.register_transform(astroid.Comprehension, set_general)
-    ending_transformer.register_transform(astroid.Const, 
-                                                set_without_children)
+    ending_transformer.register_transform(astroid.Const, set_without_children)
     # ending_transformer.register_transform(astroid.Continue, set_general)
     # ending_transformer.register_transform(astroid.Decorators, set_general)
     # ending_transformer.register_transform(astroid.DelAttr, set_general)
@@ -83,7 +82,7 @@ def set_end_col_offset_by_string(node, last_child=None):
     # TODO: refactor some repetitive code in these two code blocks?
     if last_child:
         assert hasattr(last_child, 'as_string'), '''ERROR:️ node {} must have the
-            .as_string property.'''.format(last_child)
+            .as_string method.'''.format(last_child)
         # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
         assert last_child.col_offset is not None, '''ERROR:️ node {} last_child 
             has col_offset == None, which we need to set node's col_offset.
@@ -95,7 +94,7 @@ def set_end_col_offset_by_string(node, last_child=None):
         node.end_col_offset = last_child.col_offset + len(last_child.as_string())
     else:  # No children..
         assert hasattr(node, 'as_string'), '''ERROR:️ node {} must have the 
-            .as_string property.'''.format(node)
+            .as_string method.'''.format(node)
         # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
         if node.col_offset is None:
             # Get col_offset from first child from generator.
@@ -119,10 +118,11 @@ def set_end_col_offset(node, last_child=None):
         if node.end_lineno and node.end_col_offset:
             return  # reduces runtime since properties already set.
 
-    # Check: contradiction found. Revise NO_CHILDREN_TYPE list for correctness.
-    assert not last_child or type(node) not in NO_CHILDREN_TYPE, '''ERROR:️ {} 
-        node in NO_CHILDREN_TYPE has children ({}). Suggest: remove it from the 
-        list.Context:\n{}'''.format(node, last_child, node.as_string())
+    # Check for correctness of NO_CHILDREN_TYPE list.
+    assert not last_child or type(node) not in NO_CHILDREN_TYPE, '''ERROR:️ 
+        Contradiction found. {} node in NO_CHILDREN_TYPE has children ({}). 
+        Suggestion: remove node from the list. Context:\n{}'''.format(node, 
+        last_child, node.as_string())
 
     if hasattr(last_child, 'end_col_offset'):  # Set by last child
         assert last_child.end_col_offset is not None, '''ERROR:️ last child 
@@ -164,6 +164,6 @@ def set_without_children(node):
     """Populate ending locations for nodes that are guaranteed to never have
     children. E.g. Const.
     """
-    last_child = _get_last_child(node)
+    last_child = _get_last_child(node)  # always None here.
     set_end_lineno(node, last_child)
-    set_end_col_offset_by_string(node, last_child)
+    set_end_col_offset_by_string(node)

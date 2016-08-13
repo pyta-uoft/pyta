@@ -31,22 +31,15 @@ class NodeNG(object):
         self.reset()
 
     def reset(self):
-        """Reset between test methods.
+        """Reset between test methods (and once on init).
         """
         # Keep a list rather than a set, because "too many" is wrong.
         self._props_check = []
 
     def check_endings(self, module, node_class):
-        for child_node in module.body:
-            self._check_endings_helper(child_node, node_class)
-        return self._props_check
-
-    def _check_endings_helper(self, child_node, node_class):
-        """Iterate nodes of class, and collect the properties in a list of 
-        tuple.
+        """Look at the nodes of a certain class, and inspect certain properties.
         """
-        # nodes_of_class is an iterable on the children of provided node.
-        for node in child_node.nodes_of_class(node_class):  # generator
+        for node in module.nodes_of_class(node_class):  # generator
             try:
                 self._props_check.append((node.fromlineno, node.end_lineno, 
                                         node.col_offset, node.end_col_offset))
@@ -55,6 +48,7 @@ class NodeNG(object):
                 raise AttributeError('''Make sure the properties are set in 
                     setendings.py and the function is registered
                     with ending_transformer.register_transform()''')
+        return self._props_check
 
 
 class TestEndingLocation(unittest.TestCase):
@@ -158,7 +152,7 @@ class TestEndingLocation(unittest.TestCase):
 
     def test_binop(self):
         """note: value of col_offset = 6, is weird but we didn't set it.
-        first binop is (1 + 2), then ((1 + 2) + 3)
+        first (depends on pre/postorder) binop is ((1 + 2) + 3), then (1 + 2)
         """
         expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
         example = '''1 + 2 + 3'''

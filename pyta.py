@@ -10,7 +10,9 @@ To run the checker, call the check function on the name of the module to check.
 """
 import importlib.util
 import pylint.lint as lint
+import pycodestyle as pycode
 from reporters.color_reporter import ColorReporter
+from colorama import Style
 from astroid import MANAGER
 
 import webbrowser
@@ -66,7 +68,15 @@ def check(module_name, reporter=ColorReporter):
         print("The Module '{}' could not be found. ".format(module_name))
         return
 
+    temp = module_name.split('.')
+    if (len(temp) != 1):
+        module_name = temp[0] + '/' + temp[1] + '.py'
+    style = pycode.Checker(module_name)
+
     current_reporter.print_message_ids()
+    print(Style.BRIGHT + 'Pycodestyle Errors:' + Style.RESET_ALL)
+    file_errors = style.check_all()
+    print("Found %s errors (and warnings)" % file_errors)
 
 
 def doc(msg_id):

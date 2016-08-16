@@ -9,14 +9,13 @@ from colorama import Fore
 class ForbiddenImportChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
-    # \033[4;34m%s\033[0m
     name = 'forbidden import'
     msgs = {'E9999':
                 ('You may not import any modules - you imported ' + Fore.BLUE +
                  '%s' + Fore.BLACK + ' on line %s.',
                  'forbidden-import',
                  'Used when you use import')}
-    options = (('allowed_import_modules',
+    options = (('allowed-import-modules',
                 {'default': (),
                  'type': 'csv',
                  'metavar': '<modules>',
@@ -32,7 +31,9 @@ class ForbiddenImportChecker(BaseChecker):
         temp = [name for name in node.names if name[0] not in self.config.allowed_import_modules]
 
         if temp != []:
-            self.add_message('forbidden-import', node=node, args=(', '.join(map(lambda x: x[0], temp)), node.lineno))
+            self.add_message(
+                'forbidden-import', node=node,
+                args=(', '.join(map(lambda x: x[0], temp)), node.lineno))
 
     @check_messages("forbidden-import")
     def visit_call(self, node):

@@ -5,20 +5,6 @@ from tokenize import generate_tokens
 from io import StringIO
 
 
-def flatten(nested_list):
-    output_list = []
-    recursively_flatten(nested_list, output_list)
-    return output_list
-
-
-def recursively_flatten(item, output_list):
-    if not isinstance(item, list) and not isinstance(item, tuple):
-        output_list.append(item)
-        return
-    for x in item:
-        recursively_flatten(x, output_list)
-
-
 def a_str(s):
     return some(lambda x: x.string == s)
 
@@ -48,8 +34,7 @@ def compile_dict_type(data):
 
 
 def compile_tuple_type(data):
-    flat_data = flatten(data[1:])
-    return typing.Tuple[tuple(flat_data)]
+    return typing.Tuple[tuple(data[1])]
 
 
 def to_simple_type(token):
@@ -79,27 +64,43 @@ dict_parser = (a_str('dict') + skip_of + skip_str('{') + element + skip_str(',')
               compile_dict_type
 tuple_parser = (a_str('tuple') + skip_of + skip_str('(') + elements + skip_str(')')) >> compile_tuple_type
 element.define(set_parser | list_parser | dict_parser | tuple_parser | any_class)
-elements.define(maybe(many(element + skip_str(','))) + element)
-docstring_parser = skip_str('(') + maybe(elements) + skip_str(')') + skip_str('->') + element
+elements.define((many(element + skip_str(',')) + element) >>
+                (lambda x: x[0] + [x[1]]))
+type_contract_parser = skip_str('(') + maybe(elements) + skip_str(')') + skip_str('->') + element
 
-non_right_arrow = some(lambda x: x != '>')
-single_arrow = a_str('>') + non_right_arrow
-double_arrow = a_str('>>') + non_right_arrow
-docstring_description = oneplus(non_right_arrow | single_arrow | double_arrow) >> to_str
+docstring_description = many(some(lambda token: '>>>' not in token.line)) >> (lambda tokens: ' '.join(token.string for token in tokens))
 
-docstring_doctest = a_str('>>>') + (oneplus(some(is_valid_char)) >> to_str)
+docstring_doctest = many(some(lambda token: True)) >> (lambda tokens: ' '.join(token.string for token in tokens))
 
-entire_docstring = maybe(docstring_parser) + maybe(docstring_description) + maybe(docstring_doctest) + finished
+entire_docstring = maybe(type_contract_parser) + docstring_description +\
+                   docstring_doctest + finished
 
 
 def parse_csc108_docstring(docstring):
     """Reads a docstring in the CSC108 format and extracts the argument types.
     @param str docstring: The docstring to read.
-    @return: A parsed output of the docstring as a argument -> type list.
+    @return: A parsed output of the docstring.
     """
     output = list(generate_tokens(StringIO(docstring.strip()).readline))
-    out = docstring_parser.parse(output)
-    out = [x for x in out if x is not None]
-    output_list = combine_elements_to_list(out[:-1])
-    output_list.append(out[-1])
-    return output_list
+    return entire_docstring.parse(output)[:4]
+
+
+if __name__ == '__main__':
+    # Sample test
+    r = parse_csc108_docstring("""
+      (tuple of (int, int), str) -> list of int
+
+      This function does something pretty cool
+
+      >>> f(1)
+      10
+      >>> f(2)
+      42
+      >>> f(3)
+      45
+      """)
+
+    print('Function inputs', r[0])
+    print('Function output', r[1])
+    print('Description', r[2])
+    print('Doctests', r[3])

@@ -4,49 +4,49 @@ from docstring.csc108_docstring import *
 
 def test_simple_docstring():
     parsed_docstring = parse_csc108_docstring('(int) -> bool')
-    assert len(parsed_docstring) == 2
-    assert parsed_docstring[0] == int
+    assert len(parsed_docstring) == 4
+    assert parsed_docstring[0] == [int]
     assert parsed_docstring[1] == bool
 
 
 def test_collection_simple_docstring():
     parsed_docstring = parse_csc108_docstring('(list of list of int) -> dict of {int, bool}')
-    assert len(parsed_docstring) == 2
-    assert parsed_docstring[0] == List[List[int]]
+    assert len(parsed_docstring) == 4
+    assert parsed_docstring[0] == [List[List[int]]]
     assert parsed_docstring[1] == Dict[int, bool]
 
 
 def test_simple_docstring_with_spaces():
     parsed_docstring = parse_csc108_docstring('  (int)  ->    bool ')
-    assert len(parsed_docstring) == 2
-    assert parsed_docstring[0] == int
+    assert len(parsed_docstring) == 4
+    assert parsed_docstring[0] == [int]
     assert parsed_docstring[1] == bool
 
 
 def test_collection_all_docstring():
     parsed_docstring = parse_csc108_docstring('(list of tuple of (int, bool), set of RandomClass) -> NoneType')
-    assert len(parsed_docstring) == 3
-    assert parsed_docstring[0] == List[Tuple[int, bool]]
+    assert len(parsed_docstring) == 4
+    assert parsed_docstring[0][0] == List[Tuple[int, bool]]
     # Comparing with forwardref's fails for some unknown reason (needs investigating).
     desired_type = Set[typing._ForwardRef('RandomClass')]
-    assert str(desired_type) == str(parsed_docstring[1])
-    assert parsed_docstring[2] == None.__class__
+    assert str(desired_type) == str(parsed_docstring[0][1])
+    assert parsed_docstring[1] == None.__class__
 
 
 def test_tuple_single_element():
     parsed_docstring = parse_csc108_docstring('(tuple of (int)) -> int')
     print(parsed_docstring)
-    assert len(parsed_docstring) == 2
+    assert len(parsed_docstring) == 4
     desired_type = Tuple[int]
-    assert str(desired_type) == str(parsed_docstring[0])
+    assert str(desired_type) == str(parsed_docstring[0][0])
     assert parsed_docstring[1] == int
 
 
 def test_empty_docstring():
     parsed_docstring = parse_csc108_docstring('() -> int')
     print(parsed_docstring)
-    assert len(parsed_docstring) == 1
-    assert parsed_docstring[0] == int
+    assert len(parsed_docstring) == 4
+    assert parsed_docstring[1] == int
 
 
 def test_malformed_substring():

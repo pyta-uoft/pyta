@@ -89,15 +89,15 @@ class TestEndingLocation(unittest.TestCase):
         test method. The default implementation does nothing."""
         self.nodeng.reset()
 
-    def _get_file_as_module(self, file_location):
+    def get_file_as_module(self, file_location):
         """Given a filepath (file_location), parse with astroid, and return 
         the module.
         """
         with open(file_location) as f:
             content = f.read()
-        return self._get_string_as_module(content)
+        return self.get_string_as_module(content)
 
-    def _get_string_as_module(self, string):
+    def get_string_as_module(self, string):
         """Parse the string with astroid, and return the module.
         """
         return astroid.parse(string)
@@ -123,31 +123,31 @@ class TestEndingLocation(unittest.TestCase):
     def test_arguments(self):
         expected = [(1, 2, 8, 30)]
         example = 'examples/ending_locations/arguments.py'
-        module = self._get_file_as_module(example)
+        module = self.get_file_as_module(example)
         self.set_and_check(module, astroid.Arguments, expected)
 
     def test_assert(self):
         expected = [(1, 1, 0, 43), (2, 2, 0, 11)]
         example = 'examples/ending_locations/assert.py'
-        module = self._get_file_as_module(example)
+        module = self.get_file_as_module(example)
         self.set_and_check(module, astroid.Assert, expected)
 
     def test_assign(self):
         expected = [(1, 1, 0, 6)]
         example = '''x = 10'''
-        module = self._get_string_as_module(example)
+        module = self.get_string_as_module(example)
         self.set_and_check(module, astroid.Assign, expected)
 
     def test_assignattr(self):
         expected = [(3, 3, 8, 12)]
         example = 'nodes/AssignAttr.py'
-        module = self._get_file_as_module(example)
+        module = self.get_file_as_module(example)
         self.set_and_check(module, astroid.AssignAttr, expected)
 
     def test_const(self):
         expected = [(1, 1, 0, 6), (2, 2, 4, 6)]
         example = 'examples/ending_locations/const.py'
-        module = self._get_file_as_module(example)
+        module = self.get_file_as_module(example)
         self.set_and_check(module, astroid.Const, expected)
 
     def test_binop(self):
@@ -156,7 +156,7 @@ class TestEndingLocation(unittest.TestCase):
         """
         expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
         example = '''1 + 2 + 3'''
-        module = self._get_string_as_module(example)
+        module = self.get_string_as_module(example)
         self.set_and_check(module, astroid.BinOp, expected)
 
     # TODO: Many more test functions here...

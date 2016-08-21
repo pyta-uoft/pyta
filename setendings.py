@@ -30,116 +30,95 @@ def init_register_ending_setters():
     Register the transform functions on an instance of TransformVisitor.
     """
     ending_transformer = TransformVisitor()
-    ending_transformer.register_transform(astroid.Arguments, set_general)
-    ending_transformer.register_transform(astroid.Assert, set_general)
-    ending_transformer.register_transform(astroid.Assign, set_general)
-    ending_transformer.register_transform(astroid.AssignAttr, set_general)
-    # ending_transformer.register_transform(astroid.AssignName, set_general)
-    # ending_transformer.register_transform(astroid.AsyncFor, set_general)
-    # ending_transformer.register_transform(astroid.AsyncFunctionDef, set_general)
-    # ending_transformer.register_transform(astroid.AsyncWith, set_general)
-    # ending_transformer.register_transform(astroid.Attribute, set_general)
-    # ending_transformer.register_transform(astroid.AugAssign, set_general)
-    # ending_transformer.register_transform(astroid.Await, set_general)
-    ending_transformer.register_transform(astroid.BinOp, set_general)
-    # ending_transformer.register_transform(astroid.BoolOp, set_general)
-    # ending_transformer.register_transform(astroid.Break, set_general)
-    # ending_transformer.register_transform(astroid.Call, set_general)
-    # ending_transformer.register_transform(astroid.ClassDef, set_general)
-    # ending_transformer.register_transform(astroid.Compare, set_general)
-    # ending_transformer.register_transform(astroid.Comprehension, set_general)
+    ending_transformer.register_transform(astroid.Arguments, set_from_last_child)
+    ending_transformer.register_transform(astroid.Assert, set_from_last_child)
+    ending_transformer.register_transform(astroid.Assign, set_from_last_child)
+    ending_transformer.register_transform(astroid.AssignAttr, set_from_last_child)
+    ending_transformer.register_transform(astroid.AssignName, set_without_children)
+    # ending_transformer.register_transform(astroid.AsyncFor, set_from_last_child)
+    # ending_transformer.register_transform(astroid.AsyncFunctionDef, set_from_last_child)
+    # ending_transformer.register_transform(astroid.AsyncWith, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Attribute, set_from_last_child)
+    # ending_transformer.register_transform(astroid.AugAssign, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Await, set_from_last_child)
+    ending_transformer.register_transform(astroid.BinOp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.BoolOp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Break, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Call, set_from_last_child)
+    # ending_transformer.register_transform(astroid.ClassDef, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Compare, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Comprehension, set_from_last_child)
     ending_transformer.register_transform(astroid.Const, set_without_children)
-    # ending_transformer.register_transform(astroid.Continue, set_general)
-    # ending_transformer.register_transform(astroid.Decorators, set_general)
-    # ending_transformer.register_transform(astroid.DelAttr, set_general)
-    # ending_transformer.register_transform(astroid.Delete, set_general)
-    # ending_transformer.register_transform(astroid.DelName, set_general)
-    # ending_transformer.register_transform(astroid.Dict, set_general)
-    # ending_transformer.register_transform(astroid.DictComp, set_general)
-    # ending_transformer.register_transform(astroid.Ellipsis, set_general)
-    # ending_transformer.register_transform(astroid.ExceptHandler, set_general)
-    # ending_transformer.register_transform(astroid.Expr, set_general)
-    # ending_transformer.register_transform(astroid.ExtSlice, set_general)
-    # TODO: attach more nodes with their transform functions here...
+    # ending_transformer.register_transform(astroid.Continue, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Decorators, set_from_last_child)
+    # ending_transformer.register_transform(astroid.DelAttr, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Delete, set_from_last_child)
+    # ending_transformer.register_transform(astroid.DelName, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Dict, set_from_last_child)
+    # ending_transformer.register_transform(astroid.DictComp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Ellipsis, set_from_last_child)
+    # ending_transformer.register_transform(astroid.ExceptHandler, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Expr, set_from_last_child)
+    # ending_transformer.register_transform(astroid.ExtSlice, set_from_last_child)
+    # ending_transformer.register_transform(astroid.For, set_from_last_child)
+    # ending_transformer.register_transform(astroid.FunctionDef, set_from_last_child)
+    # ending_transformer.register_transform(astroid.GeneratorExp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Global, set_from_last_child)
+    # ending_transformer.register_transform(astroid.If, set_from_last_child)
+    # ending_transformer.register_transform(astroid.IfExp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Import, set_from_last_child)
+    # ending_transformer.register_transform(astroid.ImportFrom, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Index, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Keyword, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Lambda, set_from_last_child)
+    # ending_transformer.register_transform(astroid.List, set_from_last_child)
+    # ending_transformer.register_transform(astroid.ListComp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Module, set_from_last_child)
+    ending_transformer.register_transform(astroid.Name, set_without_children)
+    # ending_transformer.register_transform(astroid.Nonlocal, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Pass, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Print, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Raise, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Repr, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Return, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Set, set_from_last_child)
+    # ending_transformer.register_transform(astroid.SetComp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Slice, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Starred, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Subscript, set_from_last_child)
+    # ending_transformer.register_transform(astroid.TryExcept, set_from_last_child)
+    # ending_transformer.register_transform(astroid.TryFinally, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Tuple, set_from_last_child)
+    # ending_transformer.register_transform(astroid.UnaryOp, set_from_last_child)
+    # ending_transformer.register_transform(astroid.While, set_from_last_child)
+    # ending_transformer.register_transform(astroid.With, set_from_last_child)
+    # ending_transformer.register_transform(astroid.Yield, set_from_last_child)
+    # ending_transformer.register_transform(astroid.YieldFrom, set_from_last_child)
 
     return ending_transformer
 
-def set_end_lineno(node, last_child=None):
-    """Set `end_lineno` property by the last child, if possible.
+def set_end_col_offset_by_string(node):
+    """Nodes without children can get end_col_offset by length of string, with
+    the as_string attribute.
     """
-    assert node.tolineno, '''ERROR:️ tolineno is None but should be set by 
-        asteroid on node: {}. Context: {}'''.format(node, node.as_string())
-    if last_child:
-        node.end_lineno = last_child.tolineno
-    else:
-        node.end_lineno = node.tolineno
-
-def set_end_col_offset_by_string(node, last_child=None):
-    """Nodes without children can get end_col_offset by length of string.
-    Nodes with children get end_col_offset by length of string of last child.
-    Hopefully this works without problems.
-    """
-    # TODO: refactor some repetitive code in these two code blocks?
-    if last_child:
-        assert hasattr(last_child, 'as_string'), '''ERROR:️ node {} must have the
-            .as_string method.'''.format(last_child)
-        # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
-        assert last_child.col_offset is not None, '''ERROR:️ node {} last_child 
-            has col_offset == None, which we need to set node's col_offset.
-            '''.format(last_child)
-        node.col_offset = last_child.col_offset
-        # print('\n before:', node.col_offset)
-        # print('\n node:', node)
-        # print('\n col_offset1:', last_child.col_offset)
-        node.end_col_offset = last_child.col_offset + len(last_child.as_string())
-    else:  # No children..
-        assert hasattr(node, 'as_string'), '''ERROR:️ node {} must have the 
-            .as_string method.'''.format(node)
-        # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
-        if node.col_offset is None:
-            # Get col_offset from first child from generator.
-            first_child = next(node.get_children())
-            # print('\n first_child:', first_child)
-            node.col_offset = first_child.col_offset
-    
-        # print('\n node:', node)
-        # print('\n col_offset2:', node.col_offset)
-        node.end_col_offset = node.col_offset + len(node.as_string())
+    node.end_col_offset = node.col_offset + len(node.as_string())
 
 def set_end_col_offset(node, last_child=None):
-    """Set the end_col_offset property by the as_string attribute.
-    Uses the end column location of the last line, instead of the widest line.
-    Need to do a custom postorder traversal to set end_col_offset property of 
-    child nodes first, since it is sometimes unset in the last child.
-    Postorder setting of children results in the assumption: if a node has the
-    propert set, then all of its children are set.
+    """Nodes with children get end_col_offset by length of string of last child.
+    Postorder setting of children first yields precondition: if a node has the
+    property set, then all of its children are set.
     """
-    if hasattr(node, 'end_lineno') and hasattr(node, 'end_col_offset'):
-        if node.end_lineno and node.end_col_offset:
-            return  # reduces runtime since properties already set.
-
-    # Check for correctness of NO_CHILDREN_TYPE list.
-    assert not last_child or type(node) not in NO_CHILDREN_TYPE, '''ERROR:️ 
-        Contradiction found. {} node in NO_CHILDREN_TYPE has children ({}). 
-        Suggestion: remove node from the list. Context:\n{}'''.format(node, 
-        last_child, node.as_string())
-
-    if hasattr(last_child, 'end_col_offset'):  # Set by last child
-        assert last_child.end_col_offset is not None, '''ERROR:️ last child 
-            end_col_offset should not be None if used to set others. 
-            Node {}.'''.format(last_child)
-        node.end_col_offset = last_child.end_col_offset
-    # Set by string of node or last_child. May not have child.
-    else:
-        # Recall: children set first in postorder traversal.
-        # Should this always set by string, is there another way?
-        set_end_col_offset_by_string(node, last_child)
+    node.end_col_offset = last_child.end_col_offset
+    # Some nodes have col_offset prop not set. e.g. astroid.Arguments..
+    # Note: there may be a better place than here to put this code block:
+    if node.col_offset is None:
+        # Get col_offset from first child from generator.
+        node.col_offset = next(node.get_children()).col_offset
 
 def _get_last_child(node):
     """Returns the last child node, or None.
     """
     if node.last_child():
-        # logging.debug('\n node: {}. last_child: {}'.format(node, node.last_child()))
         return node.last_child()
     else:
         # Some nodes' last_child() attribute not set, e.g. astroid.Arguments
@@ -153,17 +132,36 @@ def _get_last_child(node):
 # These functions are registered to their respective node type with the
 # register_transform function.
 # Mutates the nodes, adding the properties: `end_lineno`, `end_col_offset`.
-def set_general(node):
+def set_from_last_child(node):
     """General function called by many of the other transform functions.
-    Populate ending locations for astroid node."""
+    Populate ending locations for astroid node.
+    Precondition: `node` must have a `last_child` (node)."""
     last_child = _get_last_child(node)
-    set_end_lineno(node, last_child)
+    assert last_child, '''ERROR:️ {} node must have children to set props.
+        Context:\n{}'''.format(node, node.as_string())
+    assert last_child.tolineno, '''ERROR:️ tolineno is None but should exist
+        on node: {}. Context: {}'''.format(last_child, last_child.as_string())
+    assert last_child.end_lineno is not None, '''ERROR:️ end_lineno is None but
+        should be set first in preorder traversal on node: {}. Context: {}
+        '''.format(last_child, last_child.as_string())
+    assert last_child.end_col_offset is not None, '''ERROR:️ last child 
+        end_col_offset should not be None if used to set others. 
+        Node {}.'''.format(last_child)
+    node.end_lineno = last_child.tolineno
     set_end_col_offset(node, last_child)
 
 def set_without_children(node):
     """Populate ending locations for nodes that are guaranteed to never have
     children. E.g. Const.
+    Precondition: `node` must not have a `last_child` (node).
     """
-    last_child = _get_last_child(node)  # always None here.
-    set_end_lineno(node, last_child)
+    assert node.tolineno, '''ERROR:️ tolineno is None but should be set by 
+        asteroid on node: {}. Context: {}'''.format(node, node.as_string())
+    assert hasattr(node, 'as_string'), '''ERROR:️ node {} must have the 
+        .as_string method.'''.format(node)
+    assert not _get_last_child(node) or type(node) not in NO_CHILDREN_TYPE, '''
+        ERROR:️ Contradiction found. {} node in NO_CHILDREN_TYPE has children 
+        ({}). Suggestion: remove node from the list. Context:\n{}'''.format(
+            node, last_child, node.as_string())
+    node.end_lineno = node.tolineno
     set_end_col_offset_by_string(node)

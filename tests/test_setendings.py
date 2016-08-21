@@ -1,17 +1,16 @@
 """
 Tests for setendings.py, check `end_lineno` and `end_col_offset` 
 properties are set.
+To run: python tests/test_setendings.py
 
 Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 
-See class and method docstrings for explanations.
-
-Run: python tests/test_setendings.py
+NodeNG Source:
+https://github.com/PyCQA/astroid/blob/master/astroid/node_classes.py#L145
 """
 
 from astroid.bases import NodeNG
-# import astroid
 import unittest
 import logging
 from setendings import *

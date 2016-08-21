@@ -7,15 +7,14 @@ In astroid/astroid/transforms.py, functions are registered to types in the
 line 83 eventually leads to the transform called on each node at line 36, 
 within the _transform method.
 
+Astroid Source:
+https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
+
 If possible, set the `end_col_offset` property by that of the node's last child.
 """
 
 import astroid
 from astroid.transforms import TransformVisitor
-import logging
-
-# Set the log level (DEBUG, ERROR, ...), and message format.
-logging.basicConfig(format='', level=logging.DEBUG)
 
 # Note this is preliminary data. These nodes are not guaranteed to never have
 # children. Nodes are removed from this list manually on contradiction.

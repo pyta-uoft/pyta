@@ -132,9 +132,9 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Assert, expected)
 
     def test_assign(self):
-        expected = [(1, 1, 0, 6)]
-        example = '''x = 10'''
-        module = self.get_string_as_module(example)
+        expected = [(1, 1, 0, 5)]
+        example = 'nodes/Assign.py'
+        module = self.get_file_as_module(example)
         self.set_and_check(module, astroid.Assign, expected)
 
     def test_assignattr(self):

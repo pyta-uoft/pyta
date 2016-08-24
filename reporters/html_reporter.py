@@ -6,8 +6,8 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class HTMLReporter(PlainReporter):
-    def __init__(self, number_of_messages):
-        super().__init__(number_of_messages)
+    def __init__(self):
+        super().__init__()
 
     # Override this method
     def print_message_ids(self):

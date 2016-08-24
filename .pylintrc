@@ -7,12 +7,12 @@ max-nested-blocks = 3
 [FORMAT]
 
 # Set the maximum line length. The maximum line length in pep8 is 80 characters.
-max-line-length = 79
+max-line-length = 80
 
 [FORBIDDEN IMPORT]
 
-# Set the list of modules that are allowed to be imported
-# For example: allowed-import-modules=pyta
+# Set the whitelist of modules that are allowed to be imported
+allowed-import-modules=doctest,unittest
 
 [MESSAGES CONTROL]
 

@@ -30,9 +30,9 @@ class PlainReporter(BaseReporter):
             while i + 1 < len(self._messages) and self._messages[i + 1].msg_id == current_id:
                 count += 1
                 if self._number_of_messages == 0:
-                    messages.append(self._messages[i + 1].msg)
+                    messages.append('[Line {}] {}'.format(self._messages[i + 1].line, self._messages[i + 1].msg))
                 elif len(messages) < self._number_of_messages - 1:
-                    messages.append(self._messages[i + 1].msg)
+                    messages.append('[Line {}] {}'.format(self._messages[i + 1].line, self._messages[i + 1].msg))
                 self._messages.pop(i + 1)
 
             msg_new = self._messages[i].msg

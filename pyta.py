@@ -10,11 +10,12 @@ To run the checker, call the check function on the name of the module to check.
 """
 import importlib.util
 import pylint.lint as lint
-from reporters.color_reporter import ColorReporter
+from reporters.color_reporter import PlainReporter
 from astroid import MANAGER
 
 import webbrowser
 import sys
+import os
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
@@ -24,7 +25,7 @@ if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check(module_name, reporter=ColorReporter, number_of_messages=5):
+def check(module_name, reporter=PlainReporter, number_of_messages=5):
     """Check a module for errors, printing a report.
 
     The name of the module should be passed in as a string,
@@ -35,6 +36,8 @@ def check(module_name, reporter=ColorReporter, number_of_messages=5):
         print("The Module '{}' has an invalid name. Module name must be the "
               "type str.".format(module_name))
         return
+
+    module_name = module_name.replace(os.path.sep, '.')
 
     # Detect if the extension .py is added, and if it is, remove it.
     if module_name.endswith('.py'):
@@ -65,6 +68,9 @@ def check(module_name, reporter=ColorReporter, number_of_messages=5):
     except AttributeError:
         print("The Module '{}' could not be found. ".format(module_name))
         return
+    except Exception as e:
+        print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
+        print(e)
 
     current_reporter.print_message_ids()
 

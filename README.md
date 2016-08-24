@@ -18,12 +18,12 @@ material going into further detail for the emitted errors.
 
 ## Requirements
 
-PyTA supports Python 3 and requires pylint. If you have Python and pip (a
+PyTA supports Python 3 and requires pylint and a few other Python libraries. If you have Python and pip (a
 Python package manager, bundled with Python 3.4+), run the following command
-to install pylint:
+to install them:
 
 ```
-> pip install pylint
+> pip install pylint colorama funcparserlib
 ```
 
 ## Demo

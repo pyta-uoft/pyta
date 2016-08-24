@@ -1,6 +1,6 @@
-class ClassWithNoExceptionParent():
-    """This class doesn't inherit from BaseException."""
-    pass
+class ClassWithNoExceptionParent:
+    def __init__(self):
+        pass
 
-
-raise ClassWithNoExceptionParent()
+def throw_exception():
+    raise ClassWithNoExceptionParent()

@@ -1,2 +1,2 @@
-class newclass('str'):
+class newclass("str"):
     pass

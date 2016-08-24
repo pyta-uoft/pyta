@@ -1,2 +1,1 @@
-# Error on the following line:
-action = '{bond}, {james} {act}'.format(bond='bond', james='james')
+action = '{bond}, {james} {act}'.format(bond='bond', james='james') # Error on this line

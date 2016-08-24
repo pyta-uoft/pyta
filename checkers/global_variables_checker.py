@@ -28,9 +28,7 @@ class GlobalVariablesChecker(BaseChecker):
         self.add_message('forbidden-global-variables', node=node, args=args)
 
     def visit_assign(self, node):
-        if (isinstance(node.frame(), astroid.scoped_nodes.Module) and
-                not is_in_main(node)):
-
+        if isinstance(node.frame(), astroid.scoped_nodes.Module):
             regex = str(node.targets[0])
             s = re.findall('\((.*?)\)', regex)[0]
             a = re.match(CONST_NAME_RGX, s)
@@ -40,20 +38,6 @@ class GlobalVariablesChecker(BaseChecker):
                     format(s, node.lineno)
                 self.add_message('forbidden-global-variables', node=node,
                                  args=args)
-
-
-def is_in_main(node):
-    try:
-        parent = node.parent
-
-        return (
-            isinstance(parent, astroid.node_classes.If) and
-            parent.test.left.name == '__name__' and
-            parent.test.ops[0][1].value == '__main__'
-        )
-    except (AttributeError, IndexError) as e:
-        print(e)
-        return False
 
 
 def register(linter):

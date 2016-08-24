@@ -7,4 +7,4 @@ def add(lst):
     for item in lst:
         temp += item
     return temp
-    temp += 1  # Error on this line
+    temp += 1 # Error on this line

@@ -1,3 +1,5 @@
-def f(x):
-    y = 5  # This variable isn't used
-    return x
+def fun():
+    return 1, 2
+
+var1, var2 = fun() # Error on this line
+print(var1) 

@@ -34,7 +34,7 @@ included as a library). In the Python interpreter, try running:
 
 ```python
 >>> import pyta
->>> pyta.check('examples.hello')
+>>> pyta.check_all('examples.forbidden_import_example')
 [Some output should be shown]
 >>> pyta.doc('E9999')
 ```

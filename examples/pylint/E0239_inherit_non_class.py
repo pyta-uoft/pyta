@@ -1,2 +1,0 @@
-class newclass("str"):
-    pass

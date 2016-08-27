@@ -6,7 +6,6 @@ class NoSelfUsage:
         num = num + 2
         print(num)
 
-
 # You would fix it as follows by moving it outside the class:
 def no_self(num):
     num = num + 2

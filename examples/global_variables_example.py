@@ -33,8 +33,3 @@ def function1():
 
     # Local variable reflects nonlocal change.
     print(value)
-
-
-if __name__ == '__main__':
-    # This assignment is okay
-    x = 10

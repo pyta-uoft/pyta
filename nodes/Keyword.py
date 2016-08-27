@@ -1,1 +1,0 @@
-str(object=2)

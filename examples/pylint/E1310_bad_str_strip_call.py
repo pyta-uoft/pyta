@@ -1,2 +1,2 @@
-foo = 'tests'
-foo.lstrip('java')  # Error on this line
+foo = "tests"
+foo.lstrip("java")  # Error on this line

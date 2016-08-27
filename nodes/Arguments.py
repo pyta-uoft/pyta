@@ -1,2 +1,0 @@
-def fun(arg):
-    pass

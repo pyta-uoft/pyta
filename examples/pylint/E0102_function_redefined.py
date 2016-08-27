@@ -1,14 +1,13 @@
-def positive(obj):
+def pos(obj):
     """
     @type obj: int
     @rtype: bool
     """
-    return obj > 0
+    return obj < 0
 
-
-def positive(obj):
+def pos(obj):
     """
     @type obj: int
     @rtype: bool
     """
-    return obj >= 0
+    return obj < 1

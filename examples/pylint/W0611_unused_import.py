@@ -1,1 +1,6 @@
-import re  # Module imported, and not used.
+import re # Error on this line
+
+def fun():
+    print("re module unused.")
+
+fun() 

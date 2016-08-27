@@ -1,5 +1,6 @@
 def add(lst):
     """ Calculates the sum of the elements in the given list.
+
     @type lst: list
     @rtype: bool
     """
@@ -8,3 +9,4 @@ def add(lst):
         temp += item
 
 return False  # Error on this line
+

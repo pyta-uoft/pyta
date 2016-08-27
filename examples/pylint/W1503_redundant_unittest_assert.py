@@ -1,6 +1,5 @@
 import unittest
 
-
 class TestStringMethods(unittest.TestCase):
     """Simple tests for example purposes."""
 

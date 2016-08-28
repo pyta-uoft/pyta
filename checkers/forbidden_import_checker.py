@@ -3,7 +3,7 @@ import inspect
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from colorama import Fore
+from colorama import Fore, Style
 
 
 class ForbiddenImportChecker(BaseChecker):
@@ -12,7 +12,7 @@ class ForbiddenImportChecker(BaseChecker):
     name = 'forbidden import'
     msgs = {'E9999':
                 ('You may not import any modules - you imported ' + Fore.BLUE +
-                 '%s' + Fore.BLACK + ' on line %s.',
+                 '%s' + Style.RESET_ALL + ' on line %s.',
                  'forbidden-import',
                  'Used when you use import')}
     options = (('allowed-import-modules',

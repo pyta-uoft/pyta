@@ -95,6 +95,9 @@ def check_basic(module_name, reporter=PlainReporter, number_of_messages=5):
     MANAGER.astroid_cache.clear()
 
     spec = importlib.util.find_spec(module_name)
+    if spec is None:
+        print("The Module '{}' could not be found. ".format(module_name))
+        return
 
     current_reporter = reporter(number_of_messages)
     linter = lint.PyLinter(reporter=current_reporter)
@@ -114,17 +117,14 @@ def check_basic(module_name, reporter=PlainReporter, number_of_messages=5):
     linter.global_set_option('enable',
                              BASIC_CHECKS)
 
-    # When module is not found, raise exception.
+    # Make sure the program doesn't crash for students.
+    # Could use some improvement for better logging and error reporting.
     try:
         linter.check([spec.origin])
-    except AttributeError:
-        print("The Module '{}' could not be found. ".format(module_name))
-        return
+        current_reporter.print_message_ids()
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print(e)
-
-    current_reporter.print_message_ids()
 
 
 def check_all(module_name, reporter=PlainReporter, number_of_messages=5):
@@ -149,6 +149,9 @@ def check_all(module_name, reporter=PlainReporter, number_of_messages=5):
     MANAGER.astroid_cache.clear()
 
     spec = importlib.util.find_spec(module_name)
+    if spec is None:
+        print("The Module '{}' could not be found. ".format(module_name))
+        return
 
     current_reporter = reporter(number_of_messages)
     linter = lint.PyLinter(reporter=current_reporter)
@@ -164,12 +167,8 @@ def check_all(module_name, reporter=PlainReporter, number_of_messages=5):
     linter.read_config_file()
     linter.load_config_file()
 
-    # When module is not found, raise exception.
     try:
         linter.check([spec.origin])
-    except AttributeError:
-        print("The Module '{}' could not be found. ".format(module_name))
-        return
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print(e)

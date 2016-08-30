@@ -10,7 +10,7 @@ To run the checker, call the check function on the name of the module to check.
 """
 import importlib.util
 import pylint.lint as lint
-from reporters.color_reporter import PlainReporter
+from reporters.color_reporter import ColorReporter
 from astroid import MANAGER
 
 import webbrowser
@@ -73,7 +73,7 @@ if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check_basic(module_name, reporter=PlainReporter, number_of_messages=5):
+def check_basic(module_name, reporter=ColorReporter, number_of_messages=5):
     """Check a module for errors, printing a report.
 
     The name of the module should be passed in as a string,
@@ -127,7 +127,7 @@ def check_basic(module_name, reporter=PlainReporter, number_of_messages=5):
         print(e)
 
 
-def check_all(module_name, reporter=PlainReporter, number_of_messages=5):
+def check_all(module_name, reporter=ColorReporter, number_of_messages=5):
     """Check a module for errors, printing a report.
 
     The name of the module should be passed in as a string,

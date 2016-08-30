@@ -17,10 +17,16 @@ class HTMLReporter(PlainReporter):
         template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template('templates/template.txt')
 
         with open('output.html', 'w') as f:
-            for msg in self._messages:
+            for msg in self._error_messages:
                 msg_new = msg.msg.replace('\r', '')
                 msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
-                i = self._messages.index(msg)
-                self._messages[i] = msg._replace(msg=msg_new)
+                i = self._error_messages.index(msg)
+                self._error_messages[i] = msg._replace(msg=msg_new)
 
-            f.write(template.render(messages=self._messages))
+            for msg in self._style_messages:
+                msg_new = msg.msg.replace('\r', '')
+                msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
+                i = self._style_messages.index(msg)
+                self._style_messages[i] = msg._replace(msg=msg_new)
+
+            f.write(template.render(messages=(self._error_messages + self._style_messages)))

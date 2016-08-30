@@ -1,49 +1,109 @@
 from pylint.reporters import BaseReporter
 
 
+# Checks to enable for basic_check (trying to find errors
+# and forbidden constructs only)
+ERROR_CHECKS = [
+    'used-before-assignment',
+    'undefined-variable',
+    'undefined-loop-variable',
+    'not-in-loop',
+    'return-outside-function',
+    'duplicate-key',
+    'unreachable',
+    'pointless-statement',
+    'pointless-string-statement'
+    'no-member',
+    'not-callable',
+    'assignment-from-no-return',
+    'assignment-from-none',
+    'no-value-for-parameter',
+    'too-many-function-args',
+    'invalid-sequence-index',
+    'invalid-slice-index',
+    'invalid-unary-operand-type',
+    'unsupported-binary-operation',
+    'unsupported-membership-test',
+    'unsubscriptable-object',
+    'unbalanced-tuple-unpacking',
+    'unpacking-non-sequence',
+    'function-redefined',
+    'duplicate-argument-name',
+    'import-error',
+    'no-name-in-module',
+    'non-parent-init-called',
+    'access-member-before-definition',
+    'method-hidden',
+    'unexpected-special-method-signature',
+    'inherit-non-class',
+    'duplicate-except',
+    'bad-except-order',
+    'raising-bad-type',
+    'raising-non-exception',
+    'catching-non-exception',
+    'E9996',
+    'E9991',
+    'E0001',
+    'E9999'
+]
+
+
 class PlainReporter(BaseReporter):
     def __init__(self, number_of_messages):
         super().__init__(self)
-        self._messages = []
+        self._error_messages = []
+        self._style_messages = []
         self._number_of_messages = number_of_messages
 
     def handle_message(self, msg):
         """Handle a new message triggered on the current file."""
-        self._messages.append(msg)
+        if msg.msg_id in ERROR_CHECKS:
+            self._error_messages.append(msg)
+        else:
+            self._style_messages.append(msg)
 
-    def print_message_ids(self):
+    def print_messages(self, level='all'):
         # Sort the messages.
         self.sort_messages()
-        for msg in self._messages:
+        print('=== Code errors/forbidden usage (fix these right away!) ===')
+        for msg in self._error_messages:
             code = msg.msg_id
             print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))
 
+        if level == 'all':
+            print('\n')
+            print('=== Style/convention errors (fix these before submission) ===')
+            for msg in self._style_messages:
+                code = msg.msg_id
+                print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))
+
     def sort_messages(self):
         # Sort the messages by their type.
-        self._messages.sort(key=lambda s: s[0])
+        for message_list in [self._error_messages, self._style_messages]:
+            message_list.sort(key=lambda s: s[0])
 
-        i = 0
-        while i < len(self._messages):
-            current_id = self._messages[i].msg_id
-            count = 1
-            messages = []
-            while i + 1 < len(self._messages) and self._messages[i + 1].msg_id == current_id:
-                count += 1
-                if self._number_of_messages == 0:
-                    messages.append('[Line {}] {}'.format(self._messages[i + 1].line, self._messages[i + 1].msg))
-                elif len(messages) < self._number_of_messages - 1:
-                    messages.append('[Line {}] {}'.format(self._messages[i + 1].line, self._messages[i + 1].msg))
-                self._messages.pop(i + 1)
+            i = 0
+            while i < len(message_list):
+                current_id = message_list[i].msg_id
+                count = 1
+                messages = []
+                while i + 1 < len(message_list) and message_list[i + 1].msg_id == current_id:
+                    count += 1
+                    if self._number_of_messages == 0:
+                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
+                    elif len(messages) < self._number_of_messages - 1:
+                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
+                    message_list.pop(i + 1)
 
-            msg_new = self._messages[i].msg
+                msg_new = message_list[i].msg
 
-            if len(messages) > 0:
-                msg_new = self._messages[i].msg + '\n    ' + '\n    '.join(messages)
+                if len(messages) > 0:
+                    msg_new = message_list[i].msg + '\n    ' + '\n    '.join(messages)
 
-            obj_new = 'This error occurs at ' + str(count) + ' places:'
+                obj_new = 'This error occurs at ' + str(count) + ' places:'
 
-            if self._number_of_messages != 0 and self._number_of_messages < count:
-                obj_new = 'This error occurs at ' + str(count) + ' places. Only first ' + str(self._number_of_messages) + ' errors shown:'
+                if self._number_of_messages != 0 and self._number_of_messages < count:
+                    obj_new = 'This error occurs at ' + str(count) + ' places. Only first ' + str(self._number_of_messages) + ' errors shown:'
 
-            self._messages[i] = self._messages[i]._replace(msg=msg_new, obj=obj_new)
-            i += 1
+                message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
+                i += 1

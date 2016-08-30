@@ -10,16 +10,20 @@ class ColorReporter(PlainReporter):
         super().__init__(number_of_messages)
 
     # Override this method
-    def print_message_ids(self):
+    def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
         init(wrap=(sys.platform == 'win32'), strip=False, convert=False)
 
         self.sort_messages()
 
-        for msg in self._messages:
-            if msg.msg_id.startswith('E'):
-                # Error codes appear in red
-                code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
-            else:
-                code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
+        print(Style.BRIGHT + '=== Code errors/forbidden usage (fix these right away!) ===' + Style.RESET_ALL)
+        for msg in self._error_messages:
+            code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))
+
+        if level == 'all':
+            print('\n')
+            print(Style.BRIGHT + '=== Style/convention errors (fix these before submission) ===' + Style.RESET_ALL)
+            for msg in self._style_messages:
+                code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
+                print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))

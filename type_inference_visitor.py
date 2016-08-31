@@ -1,5 +1,7 @@
 import warnings
+import astroid
 from typing import Tuple, List, Dict, Set
+from astroid.transforms import TransformVisitor
 
 
 def set_const_type_constraints(node):
@@ -66,3 +68,18 @@ def set_binop_type_constraints(node):
 def set_unaryop_type_constraints(node):
     # recursive
     node.type_constraints = node.operand.type_constraints
+
+
+def register_type_constraints_setter():
+    """Instantiate a visitor to transform the nodes.
+    Register the transform functions on an instance of TransformVisitor.
+    """
+    type_visitor = TransformVisitor()
+    type_visitor.register_transform(astroid.Const, set_const_type_constraints)
+    type_visitor.register_transform(astroid.Tuple, set_tuple_type_constraints)
+    type_visitor.register_transform(astroid.List, set_list_type_constraints)
+    type_visitor.register_transform(astroid.Dict, set_dict_type_constraints)
+    type_visitor.register_transform(astroid.UnaryOp,
+                                    set_unaryop_type_constraints)
+    type_visitor.register_transform(astroid.BinOp, set_binop_type_constraints)
+    return type_visitor

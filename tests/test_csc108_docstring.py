@@ -1,5 +1,6 @@
 from typing import *
-from docstring.csc108_docstring import *
+
+from python_ta.docstring.csc108_docstring import *
 
 
 def test_simple_docstring():

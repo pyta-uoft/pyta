@@ -5,17 +5,18 @@ introductory Python courses, using static analysis of their code.
 
 To run the checker, call the check function on the name of the module to check.
 
-> import pyta
-> pyta.check_all('mymodule')
+> import python_ta
+> python_ta.check_all('mymodule')
 """
 import importlib.util
+import os
+import sys
+import webbrowser
+
 import pylint.lint as lint
-from reporters.color_reporter import ColorReporter
 from astroid import MANAGER
 
-import webbrowser
-import sys
-import os
+from .reporters import ColorReporter
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
@@ -44,7 +45,8 @@ def check_all(module_name, reporter=ColorReporter, number_of_messages=5):
     _check(module_name, reporter, number_of_messages, level='all')
 
 
-def _check(module_name, reporter=ColorReporter, number_of_messages=5, level='all'):
+def _check(module_name, reporter=ColorReporter, number_of_messages=5, level='all',
+           local_config_file=False):
     """Check a module for problems, printing a report.
 
     <level> is used to specify which checks should be made.
@@ -75,15 +77,18 @@ def _check(module_name, reporter=ColorReporter, number_of_messages=5, level='all
     current_reporter = reporter(number_of_messages)
     linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
-    linter.load_plugin_modules(['checkers/forbidden_import_checker',
-                                'checkers/global_variables_checker',
-                                'checkers/dynamic_execution_checker',
-                                'checkers/IO_Function_checker',
+    linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
+                                'python_ta/checkers/global_variables_checker',
+                                'python_ta/checkers/dynamic_execution_checker',
+                                'python_ta/checkers/IO_Function_checker',
                                 # TODO: Fix this test
-                                #'checkers/invalid_range_index_checker',
-                                'checkers/assigning_to_self_checker',
-                                'checkers/always_returning_checker'])
-    linter.read_config_file()
+                                #'python_ta/checkers/invalid_range_index_checker',
+                                'python_ta/checkers/assigning_to_self_checker',
+                                'python_ta/checkers/always_returning_checker'])
+    if local_config_file:
+        linter.read_config_file()
+    else:
+        linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
     linter.load_config_file()
 
     # Make sure the program doesn't crash for students.

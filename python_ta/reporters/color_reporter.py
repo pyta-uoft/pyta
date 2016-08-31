@@ -1,8 +1,9 @@
-from reporters.plain_reporter import PlainReporter
-
 import sys
+
 from colorama import Fore, Style
 from colorama import init
+
+from .plain_reporter import PlainReporter
 
 
 class ColorReporter(PlainReporter):
@@ -12,7 +13,7 @@ class ColorReporter(PlainReporter):
     # Override this method
     def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
-        init(wrap=(sys.platform == 'win32'), strip=False, convert=False)
+        init(wrap=(sys.platform == 'win32'), strip=False)
 
         self.sort_messages()
 

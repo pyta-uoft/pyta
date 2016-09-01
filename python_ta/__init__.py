@@ -7,6 +7,12 @@ To run the checker, call the check function on the name of the module to check.
 
 > import python_ta
 > python_ta.check_all('mymodule')
+
+Or, put the following code in your Python module:
+
+if __name__ == '__main__':
+    import python_ta
+    python_ta.check_all()
 """
 import importlib.util
 import os
@@ -27,16 +33,16 @@ if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check_errors(module_name, reporter=ColorReporter, number_of_messages=5):
+def check_errors(module_name='', reporter=ColorReporter, number_of_messages=5):
     """Check a module for errors, printing a report.
 
     The name of the module should be the name of a module,
     or the path to a Python file.
     """
-    _check(module_name, reporter, number_of_messages, level='error')
+    _check(module_name=module_name, reporter=reporter, number_of_messages=number_of_messages, level='error')
 
 
-def check_all(module_name, reporter=ColorReporter, number_of_messages=5):
+def check_all(module_name='', reporter=ColorReporter, number_of_messages=5):
     """Check a module for errors and style warnings, printing a report.
 
     The name of the module should be passed in as a string,
@@ -45,7 +51,7 @@ def check_all(module_name, reporter=ColorReporter, number_of_messages=5):
     _check(module_name, reporter, number_of_messages, level='all')
 
 
-def _check(module_name, reporter=ColorReporter, number_of_messages=5, level='all',
+def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',
            local_config_file=False):
     """Check a module for problems, printing a report.
 
@@ -54,22 +60,26 @@ def _check(module_name, reporter=ColorReporter, number_of_messages=5, level='all
     The name of the module should be the name of a module,
     or the path to a Python file.
     """
-    # Check if `module_name` is not the type str, raise error.
-    if not isinstance(module_name, str):
-        print("The Module '{}' has an invalid name. Module name must be the "
-              "type str.".format(module_name))
-        return
-
-    module_name = module_name.replace(os.path.sep, '.')
-
-    # Detect if the extension .py is added, and if it is, remove it.
-    if module_name.endswith('.py'):
-        module_name = module_name[:-3]
-
     # Reset astroid cache
     MANAGER.astroid_cache.clear()
 
-    spec = importlib.util.find_spec(module_name)
+    if module_name == '':
+        m = sys.modules['__main__']
+        spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
+    else:
+        # Check if `module_name` is not the type str, raise error.
+        if not isinstance(module_name, str):
+            print("The Module '{}' has an invalid name. Module name must be the "
+                  "type str.".format(module_name))
+            return
+        module_name = module_name.replace(os.path.sep, '.')
+
+        # Detect if the extension .py is added, and if it is, remove it.
+        if module_name.endswith('.py'):
+            module_name = module_name[:-3]
+
+        spec = importlib.util.find_spec(module_name)
+
     if spec is None:
         print("The Module '{}' could not be found. ".format(module_name))
         return

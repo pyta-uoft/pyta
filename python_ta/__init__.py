@@ -21,6 +21,7 @@ import webbrowser
 
 import pylint.lint as lint
 from astroid import MANAGER
+import pycodestyle
 
 from .reporters import ColorReporter
 
@@ -52,7 +53,7 @@ def check_all(module_name='', reporter=ColorReporter, number_of_messages=5):
 
 
 def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',
-           local_config_file=False):
+           local_config_file=False, pep8=False):
     """Check a module for problems, printing a report.
 
     <level> is used to specify which checks should be made.
@@ -106,6 +107,9 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     try:
         linter.check([spec.origin])
         current_reporter.print_messages(level)
+
+        if pep8:
+            _check_pycodestyle(module_name.replace('.', os.path.sep) + '.py')
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print(e)
@@ -116,3 +120,11 @@ def doc(msg_id):
     msg_url = HELP_URL + '#' + msg_id
     print('Opening {} in a browser.'.format(msg_url))
     webbrowser.open(msg_url)
+
+
+# TODO: Move this into a separate module
+def _check_pycodestyle(module_name):
+    print('\n=== PEP8 Errors ===')
+    style_checker = pycodestyle.Checker(module_name)
+    num_errors = style_checker.check_all()
+    print("Found %s errors (and warnings)" % num_errors)

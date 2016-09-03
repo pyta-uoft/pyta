@@ -19,6 +19,7 @@ setup(
     license='MIT',
     packages=['python_ta', 'python_ta.reporters', 'python_ta.checkers', 'python_ta.docstring'],
     install_requires=[
+        'pycodestyle',
         'pylint',
         'colorama',
         'six',

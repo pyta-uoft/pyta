@@ -25,6 +25,7 @@ import pycodestyle
 
 from .reporters import ColorReporter
 
+
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
@@ -34,26 +35,29 @@ if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check_errors(module_name='', reporter=ColorReporter, number_of_messages=5):
+def check_errors(module_name='', reporter=ColorReporter, number_of_messages=5,
+                 config=''):
     """Check a module for errors, printing a report.
 
     The name of the module should be the name of a module,
     or the path to a Python file.
     """
-    _check(module_name=module_name, reporter=reporter, number_of_messages=number_of_messages, level='error')
+    _check(module_name=module_name, reporter=reporter, number_of_messages=number_of_messages, level='error', local_config_file=config)
 
 
-def check_all(module_name='', reporter=ColorReporter, number_of_messages=5):
+def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
+              config=''):
     """Check a module for errors and style warnings, printing a report.
 
     The name of the module should be passed in as a string,
     without a file extension (.py).
     """
-    _check(module_name, reporter, number_of_messages, level='all')
+    _check(module_name, reporter, number_of_messages, level='all',
+           local_config_file=config)
 
 
 def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',
-           local_config_file=False, pep8=False):
+           local_config_file='', pep8=False):
     """Check a module for problems, printing a report.
 
     <level> is used to specify which checks should be made.
@@ -96,8 +100,8 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                                 #'python_ta/checkers/invalid_range_index_checker',
                                 'python_ta/checkers/assigning_to_self_checker',
                                 'python_ta/checkers/always_returning_checker'])
-    if local_config_file:
-        linter.read_config_file()
+    if local_config_file != '':
+        linter.read_config_file(local_config_file)
     else:
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
     linter.load_config_file()

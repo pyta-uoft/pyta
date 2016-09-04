@@ -73,7 +73,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         has the correct type_constraints attribute when both operands have
         the same type.
         """
-        module = astroid.parse("""10 + 2""")    # int
+        module = astroid.parse("""10 + 2""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
@@ -84,7 +84,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         TypeVisitor has the correct type_constraints attribute
         when operands have different types.
         """
-        module = astroid.parse("""6 + 0.3""")   # float
+        module = astroid.parse("""6 + 0.3""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
@@ -94,7 +94,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """testing if a unary operator that's been passed into
         TypeVisitor has the correct type_constraints attribute.
         """
-        module = astroid.parse("""-2""")    # int
+        module = astroid.parse("""-2""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.UnaryOp)]
@@ -106,7 +106,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The list contains only 1 type of elements.
         """
-        module = astroid.parse("""['hi', 'how', 'is', 'life']""")  # List(str)
+        module = astroid.parse("""['hi', 'how', 'is', 'life']""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.List)]
@@ -118,7 +118,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The list contains different type of elements.
         """
-        module = astroid.parse("""[1, 2, 2.5, 3, 'cheese']""")  # List
+        module = astroid.parse("""[1, 2, 2.5, 3, 'cheese']""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.List)]
@@ -130,7 +130,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The tuple contains 2 same type of elements.
         """
-        module = astroid.parse("""(1, 2)""")    # Tuple[int, int]
+        module = astroid.parse("""(1, 2)""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Tuple)]
@@ -158,7 +158,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         contains a single type(call it type1), the type_constraints of this
         Dict object has to be set as Dict[type1, type1].
         """
-        module = astroid.parse("""{'a':'one', 'b':'two'}""")  # Dict[str, str]
+        module = astroid.parse("""{'a':'one', 'b':'two'}""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Dict)]
@@ -177,7 +177,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         return Dict[type1, type1] with a repetition of type1, so I think it
         will be reasonable to show 2 different types as well.
         """
-        module = astroid.parse("""{'a': 1, 'b': 2}""")  # Dict[str, int]
+        module = astroid.parse("""{'a': 1, 'b': 2}""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Dict)]
@@ -189,14 +189,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
 
         The dict contains more than 2 different types of elements.
         """
-        module = astroid.parse("""{'a': 1, 0.25:True}""")  # Dict
+        module = astroid.parse("""{'a': 1, 0.25:True}""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Dict)]
         self.assertEqual([Dict], result)
 
 
-class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
+class TypeInferenceVisitorTestMoreComplex(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -204,7 +204,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         self.type_visitor = register_type_constraints_setter()
 
     def test_multi_unary(self):
-        module = astroid.parse("""-(+(-(+(-1))))""")  # int
+        module = astroid.parse("""-(+(-(+(-1))))""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.UnaryOp)]
@@ -217,7 +217,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         TypeVisitor has the correct type_constraints attribute
         when multiple operands have same types.
         """
-        module = astroid.parse("""1 + 2 + 3 + 4 + 5""")   # int
+        module = astroid.parse("""1 + 2 + 3 + 4 + 5""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
@@ -230,7 +230,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         TypeVisitor has the correct type_constraints attribute
         when multiple operands have different types.
         """
-        module = astroid.parse("""1 + 2 + 3 + 4 - 5.5""")   # float
+        module = astroid.parse("""1 + 2 + 3 + 4 - 5.5""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
@@ -241,7 +241,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         TypeVisitor has the correct type_constraints attribute
         when multiple operands have different types with brackets.
         """
-        module = astroid.parse("""1 + 2 + 3 + 4 - (5.5 + 4.5)""")   # float
+        module = astroid.parse("""1 + 2 + 3 + 4 - (5.5 + 4.5)""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
@@ -253,7 +253,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
 
         The tuple contains same type of multiple elements.
         """
-        module = astroid.parse("""(1, 2, 3, 4, 5, 6)""")  # Tuple[int]
+        module = astroid.parse("""(1, 2, 3, 4, 5, 6)""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Tuple)]
@@ -263,7 +263,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         """testing if a nested list that's been passed into TypeVisitor
         has the correct type_constraints attribute.
         """
-        module = astroid.parse("""[1, [[2, 2.5], [3, 'a']]]""")  # List
+        module = astroid.parse("""[1, [[2, 2.5], [3, 'a']]]""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.List)]
@@ -302,7 +302,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
 
         The tuple contains different type of multiple elements.
         """
-        module = astroid.parse("""('a', 4.0, 'b', 'c', 'd', True)""")  # Tuple
+        module = astroid.parse("""('a', 4.0, 'b', 'c', 'd', True)""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Tuple)]
@@ -312,7 +312,7 @@ class TypeInferenceVisitorTestMoreComplexed(unittest.TestCase):
         """testing if a nested tuple that's been passed into TypeVisitor
         has the correct type_constraints attribute..
         """
-        module = astroid.parse("""(1, (2, (3, '4')))""")  # Tuple
+        module = astroid.parse("""(1, (2, (3, '4')))""")
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Tuple)]

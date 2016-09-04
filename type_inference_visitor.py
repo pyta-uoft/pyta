@@ -1,4 +1,3 @@
-import warnings
 import astroid
 from typing import Tuple, List, Dict, Set
 from astroid.transforms import TransformVisitor
@@ -21,7 +20,7 @@ def set_list_type_constraints(node):
     for node_child in node.elts:
         node_types.add(node_child.type_constraints)
 
-    # if list has more than one types, just set node.type_constraints to
+    # if list has more than 1 types, just set node.type_constraints to
     # list, if list has only 1 types, set the node.type_constraints to be
     # List of that type.
     if len(node_types) == 1:
@@ -53,16 +52,14 @@ def set_binop_type_constraints(node):
     # recursive
     left_operand = node.left.type_constraints
     right_operand = node.right.type_constraints
-
     node.type_constraints = left_operand
+
     if ((right_operand == int and node.type_constraints == float) or
         (right_operand == float and node.type_constraints == int)):
         node.type_constraints = float
-    elif right_operand == left_operand:
-        node.type_constraints = right_operand
-    else:
-        warnings.warn('Different types of operands found, binop node %s'
-                      'might have a type error.' % node)
+    elif right_operand != left_operand:
+        raise ValueError('Different types of operands found, binop node %s'
+                         'might have a type error.' % node)
 
 
 def set_unaryop_type_constraints(node):

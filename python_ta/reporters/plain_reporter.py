@@ -68,14 +68,14 @@ class PlainReporter(BaseReporter):
         print('=== Code errors/forbidden usage (fix these right away!) ===')
         for msg in self._error_messages:
             code = msg.msg_id
-            print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))
+            print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
 
         if level == 'all':
             print('\n')
             print('=== Style/convention errors (fix these before submission) ===')
             for msg in self._style_messages:
                 code = msg.msg_id
-                print(code, '({})\n    [Line {}] {}'.format(msg.symbol, msg.line, msg.msg))
+                print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
 
     def sort_messages(self):
         # Sort the messages by their type.
@@ -100,10 +100,10 @@ class PlainReporter(BaseReporter):
                 if len(messages) > 0:
                     msg_new = message_list[i].msg + '\n    ' + '\n    '.join(messages)
 
-                obj_new = 'This error occurs at ' + str(count) + ' places:'
+                obj_new = 'Number of occurrences: {}.'.format(count)
 
                 if self._number_of_messages != 0 and self._number_of_messages < count:
-                    obj_new = 'This error occurs at ' + str(count) + ' places. Only first ' + str(self._number_of_messages) + ' errors shown:'
+                    obj_new = obj_new + ' First {} shown.'.format(self._number_of_messages)
 
                 message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
                 i += 1

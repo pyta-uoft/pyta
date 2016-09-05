@@ -1,0 +1,3 @@
+include README.md
+include python_ta/.pylintrc
+include python_ta/reporters/templates/*

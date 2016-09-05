@@ -9,8 +9,8 @@ the cause of the error to a beginner audience.
 
 ## Sorts of Examples
 
-* Custom examples: located in `pyta/examples/`
-* PyLint examples: located in `pyta/examples/pylint/`
+* Custom examples: located in `python_ta/examples/`
+* PyLint examples: located in `python_ta/examples/pylint/`
 
 
 ## How Examples are Included

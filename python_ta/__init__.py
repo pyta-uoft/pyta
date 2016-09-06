@@ -17,9 +17,11 @@ if __name__ == '__main__':
 import importlib.util
 import os
 import sys
+import tokenize
 import webbrowser
 
 import pylint.lint as lint
+import pylint
 from astroid import MANAGER
 import pycodestyle
 
@@ -109,6 +111,20 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:
+        # Check for inline "pylint:" comment, which may indicate a student
+        # trying to disable a check.
+        # TODO: Put this into a helper function.
+        with tokenize.open(spec.origin) as f:
+            for (tok_type, content, _, _, _) in tokenize.generate_tokens(f.readline):
+                if tok_type != tokenize.COMMENT:
+                    continue
+                match = pylint.utils.OPTION_RGX.search(content)
+                if match is None:
+                    continue
+                else:
+                    print('ERROR: string "pylint:" found in comment. No checks will be run.')
+                    return
+
         linter.check([spec.origin])
         current_reporter.print_messages(level)
 

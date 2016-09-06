@@ -1,17 +1,3 @@
-class Rectangle:
-    def __init__(self, width, height):
-        """
-        Initialize the Rectangle.
-
-        @type self: Rectangle
-        @type width: int
-        @type height: int
-        @rtype: None
-        """
-        self.width = width
-        self.height = height
-
-r = Rectangle(5, 4)
-
-# no such member in Rectangle class
-print(r.area())  # Error on this line
+x = 'hello world'
+print(x.prop)    # Error: strings don't have a 'prop' attribute
+print(x.meth())  # Error: strings don't have a 'meth' method

@@ -21,11 +21,17 @@ class IOFunctionChecker(BaseChecker):
                       'That doesn\'t mean you can not use it !'),
            }
     options = (('functions-not-allowed',
-                 {'default': FORBIDDEN_BUILTIN,
-                  'type': 'csv', 'metavar': '<builtin function names>',
-                  'help': 'List of builtins function names that should not be '
-                          'used, separated by a comma'}
-                 ),
+                {'default': FORBIDDEN_BUILTIN,
+                 'type': 'csv', 'metavar': '<builtin function names>',
+                 'help': 'List of builtins function names that should not be '
+                         'used, separated by a comma'}
+                ),
+               ('allowed-io',
+                {'default': (),
+                 'type': 'csv',
+                 'metavar': '<forbidden io>',
+                 'help': 'Allowed modules to be imported.'}
+                )
                )
 
     # this is important so that your checker is executed before others
@@ -38,10 +44,12 @@ class IOFunctionChecker(BaseChecker):
             # ignore the name if it's not a builtin (i.e. not defined in the
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
-                if name in self.config.functions_not_allowed:
-                    args = "{} on line {}".format(name, node.lineno)
-                    # add the message
-                    self.add_message('IO-function-not-allowed', node=node, args=args)
+                scope = node.scope()
+                # TODO: Only FunctionDefs are checked. Include global scope?
+                if isinstance(scope, astroid.FunctionDef) and scope.name not in self.config.allowed_io:
+                    if name in self.config.functions_not_allowed:
+                        self.add_message('IO-function-not-allowed', node=node,
+                                         args=name)
 
 
 def register(linter):

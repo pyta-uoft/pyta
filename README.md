@@ -11,19 +11,19 @@ necessarily have the most beginner-friendly format. PyTA has two central goals:
    fixing errors, and good preparation for the terser messages they will see
    in their careers.
 
-This is a new project I hope to start in the Summer of 2016, and will likely
-take the form of a wrapper around pylint (with custom checkers) that operates
+This is a new project I started in the Summer of 2016, and takes the form
+of a wrapper around [pylint](pylint.org) (with custom checkers) that operates
 directly on Python modules, as well as a website with some supplementary
 material going into further detail for the emitted errors.
 
-## Requirements
+## Installation
 
-PyTA supports Python 3 and requires pylint and a few other Python libraries. If you have Python and pip (a
-Python package manager, bundled with Python 3.4+), run the following command
-to install them:
+If you're developing PyTA, simply clone this repo.
+
+If you want to just check it out, you can install it using `pip`:
 
 ```
-> pip install pylint colorama funcparserlib
+> pip install python-ta
 ```
 
 ## Demo
@@ -33,10 +33,10 @@ and then run `python` in this directory (PyTA is primarily meant to be
 included as a library). In the Python interpreter, try running:
 
 ```python
->>> import pyta
->>> pyta.check_all('examples.forbidden_import_example')
+>>> import python_ta
+>>> python_ta.check_all('python_ta.examples.forbidden_import_example')
 [Some output should be shown]
->>> pyta.doc('E9999')
+>>> python_ta.doc('E9999')
 ```
 
 

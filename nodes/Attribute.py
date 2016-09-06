@@ -1,1 +1,1 @@
-''.endswith('')
+'hello'.endswith('')

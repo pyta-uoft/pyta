@@ -1,13 +1,14 @@
 """
-Tests for setendings.py, check `end_lineno` and `end_col_offset` 
+Tests for setendings.py, check `end_lineno` and `end_col_offset`
 properties are set.
 To run: python tests/test_setendings.py
 """
 
-from astroid.bases import NodeNG
-import unittest
 import logging
-from setendings import *
+import unittest
+
+from astroid.bases import NodeNG
+from python_ta.transforms.setendings import *
 
 # Set the log level (DEBUG, ERROR, ...), and message format.
 logging.basicConfig(format='', level=logging.DEBUG)
@@ -34,11 +35,11 @@ class NodeNG(object):
         """
         for node in module.nodes_of_class(node_class):  # generator
             try:
-                self._props_check.append((node.fromlineno, node.end_lineno, 
+                self._props_check.append((node.fromlineno, node.end_lineno,
                                         node.col_offset, node.end_col_offset))
             except AttributeError:
                 # raise again to also get traceback along with message.
-                raise AttributeError('''Make sure the properties are set in 
+                raise AttributeError('''Make sure the properties are set in
                     setendings.py and the function is registered
                     with ending_transformer.register_transform()''')
         return self._props_check
@@ -48,7 +49,7 @@ class TestEndingLocation(unittest.TestCase):
     """The method, ending_transformer.visit(module) walks the given astroid
     *tree* and transform each encountered node. Only the nodes which have
     transforms registered will actually be replaced or changed.
-    
+
     We store the correct values as a tuple:
     (fromlineno, end_lineno, col_offset, end_col_offset)
     """
@@ -83,7 +84,7 @@ class TestEndingLocation(unittest.TestCase):
         self.nodeng.reset()
 
     def get_file_as_module(self, file_location):
-        """Given a filepath (file_location), parse with astroid, and return 
+        """Given a filepath (file_location), parse with astroid, and return
         the module.
         """
         with open(file_location) as f:
@@ -162,7 +163,7 @@ class TestEndingLocation(unittest.TestCase):
         """Note: Setting the attribute node by its last child doesn't include
         the attribute in determining the end_col_offset.
         """
-        expected = [(1, 1, 0, 2)]
+        expected = [(1, 1, 0, 7)]
         module = self.get_file_as_module('nodes/Attribute.py')
         self.set_and_check(module, astroid.Attribute, expected)
 
@@ -238,7 +239,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Continue, expected)
 
     def test_decorators(self):
-        expected = [(1, 1, 0, 8)]
+        expected = [(1, 1, 0, 16)]
         module = self.get_file_as_module('nodes/Decorators.py')
         self.set_and_check(module, astroid.Decorators, expected)
 
@@ -312,7 +313,7 @@ class TestEndingLocation(unittest.TestCase):
     def test_expr(self):
         """Note: end_col_offset is after the '1' (i.e. astroid.Const last child node) and does not include the last ')'.
         """
-        expected = [(1, 1, 0, 7)]
+        expected = [(1, 1, 0, 7), (2, 2, 0, 9)]
         module = self.get_file_as_module('nodes/Expr.py')
         self.set_and_check(module, astroid.Expr, expected)
 
@@ -327,8 +328,6 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.For, expected)
 
     def test_functiondef(self):
-        """Note: currently the end_col_offset is set after the first '('
-        """
         expected = [(1, 2, 0, 8)]
         module = self.get_file_as_module('nodes/FunctionDef.py')
         self.set_and_check(module, astroid.FunctionDef, expected)
@@ -374,7 +373,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Keyword, expected)
 
     def test_lambda(self):
-        expected = [(1, 1, 6, 15)]
+        expected = [(1, 1, 6, 15), (2, 2, 7, 25)]
         module = self.get_file_as_module('nodes/Lambda.py')
         self.set_and_check(module, astroid.Lambda, expected)
 

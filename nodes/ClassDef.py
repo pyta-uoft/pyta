@@ -1,2 +1,2 @@
-class ClassName():
+class ClassName:
     pass

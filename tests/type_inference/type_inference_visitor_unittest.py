@@ -1,8 +1,9 @@
 """Unittest for the type_inference_visitor."""
 
 import unittest
+
 from astroid import node_classes
-from type_inference_visitor import *
+from python_ta.transforms.type_inference_visitor import *
 
 
 class SetConstFunctionTest(unittest.TestCase):

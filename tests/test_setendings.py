@@ -194,9 +194,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Break, expected)
 
     def test_call(self):
-        """Note: the end_col_offset is 1 left of the last ')'.
-        """
-        expected = [(1, 1, 0, 7)]
+        expected = [(1, 1, 0, 8)]
         module = self.get_file_as_module('nodes/Call.py')
         self.set_and_check(module, astroid.Call, expected)
 
@@ -213,10 +211,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Compare, expected)
 
     def test_comprehension(self):
-        """Note: The end_col_offset is currently being set by the node
-        astroid.AssignName, which may not be desired.
-        """
-        expected = [(1, 1, 7, 19)]
+        expected = [(1, 1, 3, 20)]
         module = self.get_file_as_module('nodes/Comprehension.py')
         self.set_and_check(module, astroid.Comprehension, expected)
 
@@ -231,7 +226,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Continue, expected)
 
     def test_decorators(self):
-        expected = [(1, 1, 0, 16)]
+        expected = [(1, 1, 0, 17)]
         module = self.get_file_as_module('nodes/Decorators.py')
         self.set_and_check(module, astroid.Decorators, expected)
 
@@ -259,7 +254,7 @@ class TestEndingLocation(unittest.TestCase):
         """Note: col_offset is before first '{' (i.e. astroid.DictComp node),
         end_col_offset is after the '3' (i.e. astroid.Const last child node).
         """
-        expected = [(1, 1, 0, 27)]
+        expected = [(1, 1, 0, 28)]
         module = self.get_file_as_module('nodes/DictComp.py')
         self.set_and_check(module, astroid.DictComp, expected)
 
@@ -297,7 +292,7 @@ class TestEndingLocation(unittest.TestCase):
     def test_expr(self):
         """Note: end_col_offset is after the '1' (i.e. astroid.Const last child node) and does not include the last ')'.
         """
-        expected = [(1, 1, 0, 7), (2, 2, 0, 9)]
+        expected = [(1, 1, 0, 8), (2, 2, 0, 9)]
         module = self.get_file_as_module('nodes/Expr.py')
         self.set_and_check(module, astroid.Expr, expected)
 
@@ -317,7 +312,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.FunctionDef, expected)
 
     def test_generatorexp(self):
-        expected = [(1, 1, 1, 23)]
+        expected = [(1, 1, 0, 25)]
         module = self.get_file_as_module('nodes/GeneratorExp.py')
         self.set_and_check(module, astroid.GeneratorExp, expected)
 
@@ -401,7 +396,7 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.Print, expected)
 
     def test_raise(self):
-        expected = [(1, 1, 0, 23)]
+        expected = [(1, 1, 0, 25)]
         module = self.get_file_as_module('nodes/Raise.py')
         self.set_and_check(module, astroid.Raise, expected)
 

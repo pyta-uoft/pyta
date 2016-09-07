@@ -50,19 +50,18 @@ NODES_WITH_CHILDREN = [
     astroid.Await,
     astroid.BinOp,
     astroid.BoolOp,
-    # TODO: missing right parens
     astroid.Call,
     astroid.ClassDef,
     astroid.Compare,
     astroid.Comprehension,
-    # TODO: missing right parens (note: only if decorator takes args)
     astroid.Decorators,
-    # TODO: missing keyword 'del' and attribute name
     astroid.DelAttr,
     astroid.Delete,
     # TODO: missing right }
+    # [This one is tricky because there is no way to capture the last brace]
     astroid.Dict,
     # TODO: missing right }
+    # [This one is tricky because there is no way to capture the last brace]
     astroid.DictComp,
     astroid.ExceptHandler,
     # TODO: missing *both* outer brackets
@@ -71,7 +70,6 @@ NODES_WITH_CHILDREN = [
     astroid.Expr,
     astroid.For,
     astroid.FunctionDef,
-    # TODO: missing *both* outer parens
     astroid.GeneratorExp,
     # TODO: need to fix elif (start) col_offset
     astroid.If,
@@ -134,6 +132,12 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.DelName, lambda node: set_front_adjust(node, 4))
     ending_transformer.register_transform(astroid.Attribute, set_attribute)
     ending_transformer.register_transform(astroid.Await, set_await)
+    ending_transformer.register_transform(astroid.Call, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Comprehension, lambda node: set_front_adjust(node, 4))
+    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_front_adjust(node, 1))
+    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Raise, lambda node: set_end_adjust(node, 1))
+    
     
 
     # TODO: investigate these nodes.
@@ -154,9 +158,18 @@ def init_register_ending_setters():
 def set_front_adjust(node, adjust=0):
     """Include the 'async' keyword in expressions for all Async* nodes.
     Include the 'del' keyword in expressions for all Del* nodes.
+    Include the 'for' keyword in expressions for all Comprehension nodes.
+    Include the first parens for all GeneratorExp nodes.
     Precondition: col_offset has been set.
     """
     node.col_offset -= adjust
+
+
+def set_end_adjust(node, adjust=0):
+    """end_col_offset missing right parens on nodes:
+    astroid.Call, astroid.GeneratorExp, astroid.Raise
+    """
+    node.end_col_offset += adjust
 
 
 # TODO: Log when this function is called.

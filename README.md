@@ -48,3 +48,12 @@ We have a test suite which checks every example file to see if PyTA actually
 picks up on the error the file is supposed to illustrate.
 
 To run the tests, enter `python tests/test_examples.py` in the terminal.
+
+
+## Contributors
+
+Nigel Fong,
+Christopher Koehler,
+Hayley Lin,
+Shweta Mogalapalli,
+Jasmine Wu

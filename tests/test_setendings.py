@@ -170,12 +170,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.AugAssign, expected)
 
     def test_await(self):
-        """Note: col_offset property always set before the 'await' keyword.
-        Aside: this example shows the case where setting end_col_offset by the
-        child (i.e. arguments.Name) doesn't capture some information like the
-        parenthesis in the parent arguments.Call node.
-        """
-        expected = [(5, 5, 4, 25)]
+        expected = [(5, 5, 4, 27)]
         module = self.get_file_as_module('nodes/Await.py')
         self.set_and_check(module, astroid.Await, expected)
 

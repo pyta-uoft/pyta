@@ -133,6 +133,7 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.DelAttr, lambda node: set_front_adjust(node, 4))
     ending_transformer.register_transform(astroid.DelName, lambda node: set_front_adjust(node, 4))
     ending_transformer.register_transform(astroid.Attribute, set_attribute)
+    ending_transformer.register_transform(astroid.Await, set_await)
     
 
     # TODO: investigate these nodes.
@@ -257,6 +258,13 @@ def set_attribute(node):
     set by left side of dot operator, but it should use both sides.
     """
     node.end_col_offset = node.col_offset + len(node.parent.as_string())
+
+
+def set_await(node):
+    """Setting end_col_offset by last child (i.e. arguments.Name) didn't 
+    capture the left and right parenthesis in the arguments.Call node.
+    """
+    node.end_col_offset = node.col_offset + len(node.as_string())
 
 
 def _get_last_child(node):

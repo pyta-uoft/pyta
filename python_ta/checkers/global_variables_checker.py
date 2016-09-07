@@ -44,7 +44,7 @@ class GlobalVariablesChecker(BaseChecker):
 
 def is_in_main(node):
     try:
-        parent = node.parent
+        parent = node.statement().parent
 
         return (
             isinstance(parent, astroid.node_classes.If) and
@@ -52,7 +52,6 @@ def is_in_main(node):
             parent.test.ops[0][1].value == '__main__'
         )
     except (AttributeError, IndexError) as e:
-        print(e)
         return False
 
 

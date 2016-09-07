@@ -11,7 +11,7 @@ necessarily have the most beginner-friendly format. PyTA has two central goals:
    fixing errors, and good preparation for the terser messages they will see
    in their careers.
 
-This is a new project I started in the Summer of 2016, and takes the form
+This is a new project started in the Summer of 2016, and takes the form
 of a wrapper around [pylint](pylint.org) (with custom checkers) that operates
 directly on Python modules, as well as a website with some supplementary
 material going into further detail for the emitted errors.
@@ -20,7 +20,9 @@ material going into further detail for the emitted errors.
 
 If you're developing PyTA, simply clone this repo.
 
-If you want to just check it out, you can install it using `pip`:
+If you want to just check it out, you can install it using `pip`
+(or possibly `pip3` on OSX, depending on what previous versions of
+`pip` and Python you have installed):
 
 ```
 > pip install python-ta

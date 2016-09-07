@@ -12,7 +12,7 @@ ERROR_CHECKS = [
     'duplicate-key',
     'unreachable',
     'pointless-statement',
-    'pointless-string-statement'
+    'pointless-string-statement',
     'no-member',
     'not-callable',
     'assignment-from-no-return',
@@ -41,6 +41,7 @@ ERROR_CHECKS = [
     'raising-bad-type',
     'raising-non-exception',
     'catching-non-exception',
+    'bad-indentation',
     'E9996',
     'E9991',
     'E0001',
@@ -57,7 +58,7 @@ class PlainReporter(BaseReporter):
 
     def handle_message(self, msg):
         """Handle a new message triggered on the current file."""
-        if msg.msg_id in ERROR_CHECKS:
+        if msg.msg_id in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
             self._error_messages.append(msg)
         else:
             self._style_messages.append(msg)

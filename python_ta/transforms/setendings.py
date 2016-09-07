@@ -188,7 +188,7 @@ def fix_start_attributes(node):
             node.col_offset = first_child.col_offset
 
     except StopIteration:
-        # No children. Go to the enclosing statement as use that.
+        # No children. Go to the enclosing statement and use that.
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
         assert statement.fromlineno is not None and statement.col_offset is not None, \

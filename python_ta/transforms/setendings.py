@@ -45,7 +45,6 @@ NODES_WITH_CHILDREN = [
     astroid.AsyncFor,
     astroid.AsyncFunctionDef,
     astroid.AsyncWith,
-    # TODO: Same problem as AssignAttr (attribute missing)
     astroid.Attribute,
     astroid.AugAssign,
     astroid.Await,
@@ -133,6 +132,8 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.AsyncWith, lambda node: set_front_adjust(node, 6))
     ending_transformer.register_transform(astroid.DelAttr, lambda node: set_front_adjust(node, 4))
     ending_transformer.register_transform(astroid.DelName, lambda node: set_front_adjust(node, 4))
+    ending_transformer.register_transform(astroid.Attribute, set_attribute)
+    
 
     # TODO: investigate these nodes.
     # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
@@ -243,11 +244,19 @@ def set_arguments(node):
 
 
 def set_assignattr(node):
-    """astroid.AssignAttr node (e.g. self.name) should be set by the left and
+    """astroid.AssignAttr node should be set by the left and
     right side of the dot operator. Originally it would use 'self' rather than 
-    'self.name'
+    'self.name'. We can't use the parent node as `set_attribute` does.
     """
     node.end_col_offset = node.col_offset + len(node.as_string())
+
+
+def set_attribute(node):
+    """Setting the attribute node by its last child wouldn't include
+    the attribute in determining the end_col_offset, i.e. it was originally 
+    set by left side of dot operator, but it should use both sides.
+    """
+    node.end_col_offset = node.col_offset + len(node.parent.as_string())
 
 
 def _get_last_child(node):

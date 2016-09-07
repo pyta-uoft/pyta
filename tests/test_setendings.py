@@ -160,10 +160,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.AsyncWith, expected)
 
     def test_attribute(self):
-        """Note: Setting the attribute node by its last child doesn't include
-        the attribute in determining the end_col_offset.
-        """
-        expected = [(1, 1, 0, 7)]
+        expected = [(1, 1, 0, 20), (2, 2, 0, 22)]
         module = self.get_file_as_module('nodes/Attribute.py')
         self.set_and_check(module, astroid.Attribute, expected)
 

@@ -4,6 +4,7 @@ import astroid
 import colorama
 from colorama import Fore, Back, Style
 import python_ta.transforms.setendings as setendings
+import os 
 
 colorama.init(strip=False)
 
@@ -24,7 +25,7 @@ def print_node(filename, node_class):
             line = source_lines[node.fromlineno - 1]
             out = [Style.DIM +
                    line[:node.col_offset] +
-                   Style.BRIGHT + Fore.LIGHTBLACK_EX + Back.BLACK +
+                   Style.BRIGHT + Fore.WHITE + Back.BLACK +
                    line[node.col_offset:node.end_col_offset] +
                    Style.DIM +
                    line[node.end_col_offset:] + Style.RESET_ALL]
@@ -36,7 +37,7 @@ def print_node(filename, node_class):
             out = (
                 [Style.DIM +
                  first_line[:node.col_offset] +
-                 Style.BRIGHT + Fore.LIGHTBLACK_EX + Back.BLACK +
+                 Style.BRIGHT + Fore.WHITE + Back.BLACK +
                  first_line[node.col_offset:]] +
                 middle_lines +
                 [last_line[:node.end_col_offset] +
@@ -50,7 +51,7 @@ def print_node(filename, node_class):
 if __name__ == '__main__':
     for node_class in astroid.ALL_NODE_CLASSES:
         print('=== {} ==='.format(node_class.__name__))
-        file_location = '../nodes/' + node_class.__name__ + '.py'
+        file_location = 'nodes/' + node_class.__name__ + '.py'
         try:
             print_node(file_location, node_class)
         except FileNotFoundError:

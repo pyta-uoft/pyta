@@ -40,9 +40,6 @@ NODES_WITHOUT_CHILDREN = [
 NODES_WITH_CHILDREN = [
     astroid.Assert,
     astroid.Assign,
-    # TODO: This one identifies only the expression to the left of the period,
-    # and not the name of the attribute.
-    # Given 'self.name = 10', it will highlight 'self' rather than 'self.name'
     astroid.AssignAttr,
     # TODO: Include the 'async' keyword in expressions for all Async* nodes.
     astroid.AsyncFor,
@@ -122,14 +119,15 @@ def init_register_ending_setters():
             fix_start_attributes,
             lambda node: node.fromlineno is None or node.col_offset is None)
 
-    # Ad hoc transformations
-    ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
-    ending_transformer.register_transform(astroid.Arguments, set_arguments)
-
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
     for node_class in NODES_WITHOUT_CHILDREN:
         ending_transformer.register_transform(node_class, set_without_children)
+
+    # Ad hoc transformations, due to inconsistencies in locations.
+    ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
+    ending_transformer.register_transform(astroid.Arguments, set_arguments)
+    ending_transformer.register_transform(astroid.AssignAttr, set_assignattr)
 
     # TODO: investigate these nodes.
     # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
@@ -229,6 +227,14 @@ def set_arguments(node):
     else:
         fix_start_attributes_arguments(node)
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
+
+
+def set_assignattr(node):
+    """astroid.AssignAttr node (e.g. self.name) should be set by the left and
+    right side of the dot operator. Originally it would use 'self' rather than 
+    'self.name'
+    """
+    node.end_col_offset = node.col_offset + len(node.as_string())
 
 
 def _get_last_child(node):

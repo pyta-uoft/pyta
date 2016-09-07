@@ -117,6 +117,8 @@ class TestEndingLocation(unittest.TestCase):
         props = self.nodeng.check_endings(module, node_class)
         self._assertSameness(expected, props)
 
+    ################ Test Functions ################
+
     def test_arguments(self):
         expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18)]
         module = self.get_file_as_module('examples/ending_locations/arguments.py')
@@ -133,7 +135,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Assign, expected)
 
     def test_assignattr(self):
-        expected = [(3, 3, 8, 12)]
+        expected = [(3, 3, 8, 17)]
         module = self.get_file_as_module('nodes/AssignAttr.py')
         self.set_and_check(module, astroid.AssignAttr, expected)
 

@@ -64,9 +64,9 @@ NODES_WITH_CHILDREN = [
     # [This one is tricky because there is no way to capture the last brace]
     astroid.DictComp,
     astroid.ExceptHandler,
-    # TODO: missing *both* outer brackets
     astroid.ExtSlice,
     # TODO: missing right paren
+    # [This one is tricky because original paren are lost in astroid properties]
     astroid.Expr,
     astroid.For,
     astroid.FunctionDef,
@@ -74,7 +74,6 @@ NODES_WITH_CHILDREN = [
     # TODO: need to fix elif (start) col_offset
     astroid.If,
     astroid.IfExp,
-    # TODO: missing *both* outer brackets
     astroid.Index,
     # TODO: would be good to see the name of the keyword as well
     astroid.Keyword,
@@ -90,7 +89,6 @@ NODES_WITH_CHILDREN = [
     # TODO: missing *both* outer brackets
     astroid.Slice,
     astroid.Starred,
-    # TODO: missing right ]
     astroid.Subscript,
     astroid.TryExcept,
     astroid.TryFinally,
@@ -137,8 +135,9 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_front_adjust(node, 1))
     ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_end_adjust(node, 1))
     ending_transformer.register_transform(astroid.Raise, lambda node: set_end_adjust(node, 1))
-    
-    
+    ending_transformer.register_transform(astroid.ExtSlice, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Index, lambda node: set_front_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Index, lambda node: set_end_adjust(node, 1))
 
     # TODO: investigate these nodes.
     # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
@@ -159,15 +158,15 @@ def set_front_adjust(node, adjust=0):
     """Include the 'async' keyword in expressions for all Async* nodes.
     Include the 'del' keyword in expressions for all Del* nodes.
     Include the 'for' keyword in expressions for all Comprehension nodes.
-    Include the first parens for all GeneratorExp nodes.
+    Include the first parens for all nodes: GeneratorExp.
     Precondition: col_offset has been set.
     """
     node.col_offset -= adjust
 
 
 def set_end_adjust(node, adjust=0):
-    """end_col_offset missing right parens on nodes:
-    astroid.Call, astroid.GeneratorExp, astroid.Raise
+    """end_col_offset missing right parens/brackets on nodes:
+    astroid.Call, astroid.GeneratorExp, astroid.Raise, astroid.ExtSlice.
     """
     node.end_col_offset += adjust
 

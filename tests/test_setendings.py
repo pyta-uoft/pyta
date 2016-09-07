@@ -246,6 +246,8 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.DelName, expected)
 
     def test_dict(self):
+        """missing right }
+        """
         expected = [(1, 3, 4, 10)]
         module = self.get_file_as_module('examples/ending_locations/dict.py')
         self.set_and_check(module, astroid.Dict, expected)
@@ -292,12 +294,12 @@ class TestEndingLocation(unittest.TestCase):
     def test_expr(self):
         """Note: end_col_offset is after the '1' (i.e. astroid.Const last child node) and does not include the last ')'.
         """
-        expected = [(1, 1, 0, 8), (2, 2, 0, 9)]
+        expected = [(1, 1, 0, 8), (2, 2, 0, 9), (3, 3, 0, 8)]
         module = self.get_file_as_module('nodes/Expr.py')
         self.set_and_check(module, astroid.Expr, expected)
 
     def test_extslice(self):
-        expected = [(1, 1, 4, 10)]
+        expected = [(1, 1, 3, 11)]
         module = self.get_file_as_module('nodes/ExtSlice.py')
         self.set_and_check(module, astroid.ExtSlice, expected)
 
@@ -342,7 +344,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.ImportFrom, expected)
 
     def test_index(self):
-        expected = [(1, 1, 2, 4)]
+        expected = [(1, 1, 1, 5)]
         module = self.get_file_as_module('nodes/Index.py')
         self.set_and_check(module, astroid.Index, expected)
 
@@ -438,9 +440,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Starred, expected)
 
     def test_subscript(self):
-        """Note: col_offset includes '[', but end_col_offset doesn't include ']'
-        """
-        expected = [(1, 1, 0, 3)]
+        expected = [(1, 1, 0, 4)]
         module = self.get_file_as_module('nodes/Subscript.py')
         self.set_and_check(module, astroid.Subscript, expected)
 

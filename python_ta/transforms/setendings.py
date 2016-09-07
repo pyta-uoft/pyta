@@ -35,13 +35,13 @@ NODES_WITHOUT_CHILDREN = [
     astroid.Yield
 ]
 
+
 # These nodes have a child, and their end_lineno and end_col_offset
 # attributes are set equal to those of their last child.
 NODES_WITH_CHILDREN = [
     astroid.Assert,
     astroid.Assign,
     astroid.AssignAttr,
-    # TODO: Include the 'async' keyword in expressions for all Async* nodes.
     astroid.AsyncFor,
     astroid.AsyncFunctionDef,
     astroid.AsyncWith,
@@ -128,6 +128,11 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
     ending_transformer.register_transform(astroid.Arguments, set_arguments)
     ending_transformer.register_transform(astroid.AssignAttr, set_assignattr)
+    ending_transformer.register_transform(astroid.AsyncFor, lambda node: set_front_adjust(node, 6))
+    ending_transformer.register_transform(astroid.AsyncFunctionDef, lambda node: set_front_adjust(node, 6))
+    ending_transformer.register_transform(astroid.AsyncWith, lambda node: set_front_adjust(node, 6))
+    ending_transformer.register_transform(astroid.DelAttr, lambda node: set_front_adjust(node, 4))
+    ending_transformer.register_transform(astroid.DelName, lambda node: set_front_adjust(node, 4))
 
     # TODO: investigate these nodes.
     # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
@@ -143,6 +148,14 @@ def init_register_ending_setters():
 # These functions are called on individual nodes to either fix the
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
+
+def set_front_adjust(node, adjust=0):
+    """Include the 'async' keyword in expressions for all Async* nodes.
+    Include the 'del' keyword in expressions for all Del* nodes.
+    Precondition: col_offset has been set.
+    """
+    node.col_offset -= adjust
+
 
 # TODO: Log when this function is called.
 def fix_start_attributes(node):

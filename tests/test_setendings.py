@@ -145,19 +145,17 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Assign, expected)
 
     def test_asyncfor(self):
-        """Note: col_offset property always set after the 'async' keyword.
-        """
-        expected = [(3, 4, 10, 12)]
+        expected = [(3, 4, 4, 12)]
         module = self.get_file_as_module('nodes/AsyncFor.py')
         self.set_and_check(module, astroid.AsyncFor, expected)
 
     def test_asyncfunctiondef(self):
-        expected = [(1, 2, 6, 12)]
+        expected = [(1, 2, 0, 12)]
         module = self.get_file_as_module('nodes/AsyncFunctionDef.py')
         self.set_and_check(module, astroid.AsyncFunctionDef, expected)
 
     def test_asyncwith(self):
-        expected = [(2, 3, 10, 12)]
+        expected = [(2, 3, 4, 12)]
         module = self.get_file_as_module('nodes/AsyncWith.py')
         self.set_and_check(module, astroid.AsyncWith, expected)
 
@@ -246,25 +244,17 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Decorators, expected)
 
     def test_delattr(self):
-        """Note: col_offset property is set _after_ the 'del' keyword, and the
-        attribute is not included in the end_col_offset.
-        """
-        expected = [(4, 4, 12, 16)]
+        expected = [(4, 4, 8, 16)]
         module = self.get_file_as_module('nodes/DelAttr.py')
         self.set_and_check(module, astroid.DelAttr, expected)
 
     def test_delete(self):
-        """Note: col_offset property is set _before_ the 'del' keyword.
-        """
         expected = [(1, 1, 0, 5)]
         module = self.get_file_as_module('nodes/Delete.py')
         self.set_and_check(module, astroid.Delete, expected)
 
     def test_delname(self):
-        """Note: col_offset property is set on the next node _after_ the 'del'
-        keyword.
-        """
-        expected = [(1, 1, 4, 5)]
+        expected = [(1, 1, 0, 5)]
         module = self.get_file_as_module('nodes/DelName.py')
         self.set_and_check(module, astroid.DelName, expected)
 

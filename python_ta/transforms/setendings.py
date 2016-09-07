@@ -175,15 +175,16 @@ def fix_start_attributes(node):
 
 
 def fix_start_attributes_arguments(node):
-    """Fix the col_offset attribute for astroid.Argument nodes."""
+    """Fix the col_offset attribute for astroid.Argument nodes.
+    Precondition: node does not have children."""
     # set from col offset of parent FunctionDef node plus len of name.
     parent_node = node.parent
     if isinstance(parent_node, astroid.FunctionDef):
         # account for 'def', name of the signature, and '('
         node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
     elif isinstance(parent_node, astroid.Lambda):
-        # account for 'lambda :'
-        node.col_offset = parent_node.col_offset + 7
+        # account for 'lambda'
+        node.col_offset = parent_node.col_offset + 6
         # If there are no arguments, this node takes up no space
 
 
@@ -226,6 +227,7 @@ def set_arguments(node):
     if _get_last_child(node):
         set_from_last_child(node)
     else:
+        fix_start_attributes_arguments(node)
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
 
 

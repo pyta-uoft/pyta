@@ -118,7 +118,7 @@ class TestEndingLocation(unittest.TestCase):
         self._assertSameness(expected, props)
 
     def test_arguments(self):
-        expected = [(1, 2, 8, 30)]
+        expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18)]
         module = self.get_file_as_module('examples/ending_locations/arguments.py')
         self.set_and_check(module, astroid.Arguments, expected)
 

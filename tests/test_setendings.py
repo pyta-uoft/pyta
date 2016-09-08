@@ -324,7 +324,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Global, expected)
 
     def test_if(self):
-        expected = [(1, 2, 0, 8)]
+        expected = [(1, 2, 0, 8), (3, 4, 0, 8)]
         module = self.get_file_as_module('nodes/If.py')
         self.set_and_check(module, astroid.If, expected)
 
@@ -349,7 +349,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Index, expected)
 
     def test_keyword(self):
-        expected = [(1, 1, 11, 12)]
+        expected = [(1, 1, 4, 12)]
         module = self.get_file_as_module('nodes/Keyword.py')
         self.set_and_check(module, astroid.Keyword, expected)
 
@@ -364,7 +364,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.List, expected)
 
     def test_listcomp(self):
-        expected = [(1, 1, 1, 19)]
+        expected = [(1, 1, 0, 20)]
         module = self.get_file_as_module('nodes/ListComp.py')
         self.set_and_check(module, astroid.ListComp, expected)
 
@@ -415,22 +415,17 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Return, expected)
 
     def test_set(self):
-        """Note: col_offset includes '{', but end_col_offset doesn't include '}'
-        """
-        expected = [(1, 1, 0, 2)]
+        expected = [(1, 1, 0, 3)]
         module = self.get_file_as_module('nodes/Set.py')
         self.set_and_check(module, astroid.Set, expected)
 
     def test_setcomp(self):
-        expected = [(1, 1, 0, 19)]
+        expected = [(1, 1, 0, 20)]
         module = self.get_file_as_module('nodes/SetComp.py')
         self.set_and_check(module, astroid.SetComp, expected)
 
     def test_slice(self):
-        """Note: col_offset and end_col_offset are set to the first constant
-        encountered, either on left or right side of colon.
-        """
-        expected = [(1, 1, 2, 3)]
+        expected = [(1, 1, 1, 5)]
         module = self.get_file_as_module('nodes/Slice.py')
         self.set_and_check(module, astroid.Slice, expected)
 
@@ -455,7 +450,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.TryFinally, expected)
 
     def test_tuple(self):
-        expected = [(1, 1, 1, 5), (2, 2, 1, 2)]
+        expected = [(1, 1, 0, 6), (2, 2, 0, 5)]
         module = self.get_file_as_module('examples/ending_locations/tuple.py')
         self.set_and_check(module, astroid.Tuple, expected)
 

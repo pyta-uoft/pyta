@@ -75,24 +75,18 @@ NODES_WITH_CHILDREN = [
     astroid.If,
     astroid.IfExp,
     astroid.Index,
-    # TODO: would be good to see the name of the keyword as well
     astroid.Keyword,
     astroid.Lambda,
-    # TODO: missing *both* outer brackets
     astroid.ListComp,
     astroid.Raise,
     astroid.Return,
-    # TODO: missing right }
     astroid.Set,
-    # TODO: missing right }
     astroid.SetComp,
-    # TODO: missing *both* outer brackets
     astroid.Slice,
     astroid.Starred,
     astroid.Subscript,
     astroid.TryExcept,
     astroid.TryFinally,
-    # TODO: missing *both* outer parens
     astroid.Tuple,
     astroid.UnaryOp,
     astroid.While,
@@ -135,9 +129,15 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_front_adjust(node, 1))
     ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_end_adjust(node, 1))
     ending_transformer.register_transform(astroid.Raise, lambda node: set_end_adjust(node, 1))
-    ending_transformer.register_transform(astroid.ExtSlice, lambda node: set_end_adjust(node, 1))
     ending_transformer.register_transform(astroid.Index, lambda node: set_front_adjust(node, 1))
     ending_transformer.register_transform(astroid.Index, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Keyword, set_keyword)
+    ending_transformer.register_transform(astroid.ListComp, lambda node: set_front_adjust(node, 1))
+    ending_transformer.register_transform(astroid.ListComp, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Set, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.SetComp, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Slice, set_slice)
+    ending_transformer.register_transform(astroid.Tuple, set_tuple)
 
     # TODO: investigate these nodes.
     # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
@@ -158,15 +158,15 @@ def set_front_adjust(node, adjust=0):
     """Include the 'async' keyword in expressions for all Async* nodes.
     Include the 'del' keyword in expressions for all Del* nodes.
     Include the 'for' keyword in expressions for all Comprehension nodes.
-    Include the first parens for all nodes: GeneratorExp.
+    Include the first parens/brackets for all nodes: GeneratorExp, ListComp.
     Precondition: col_offset has been set.
     """
     node.col_offset -= adjust
 
 
 def set_end_adjust(node, adjust=0):
-    """end_col_offset missing right parens/brackets on nodes:
-    astroid.Call, astroid.GeneratorExp, astroid.Raise, astroid.ExtSlice.
+    """end_col_offset missing right parens/brackets/braces on nodes:
+    Call, GeneratorExp, Raise, ExtSlice, ListComp, Set
     """
     node.end_col_offset += adjust
 
@@ -179,6 +179,9 @@ def fix_start_attributes(node):
 
     Question: is the 'fromlineno' attribute always set?
     """
+    assert node.fromlineno is not None, \
+            'node {} doesn\'t have fromlineno set.'.format(node)
+
     try:
         first_child = next(node.get_children())
         if node.fromlineno is None:
@@ -276,6 +279,36 @@ def set_await(node):
     """Setting end_col_offset by last child (i.e. arguments.Name) didn't 
     capture the left and right parenthesis in the arguments.Call node.
     """
+    node.end_col_offset = node.col_offset + len(node.as_string())
+
+
+def set_keyword(node):
+    """Setting the missing col_offset by last child didn't capture the keyword 
+    name. Determine col_offset by the index of the keyword string relative
+    to its parent.
+    """
+    node_str = node.as_string()
+    outer = node.statement()
+    assert node_str is not None, \
+            'node {} string cannot be used to find index.'.format(node)
+    node.col_offset = outer.col_offset + outer.as_string().index(node_str)
+
+
+def set_slice(node):
+    """Determine end_col_offset by adding to the string length of the
+    node. Also adjust col_offset by one to include the left bracket.
+    Useful for nodes consisting of [1: ].
+    """
+    node.end_col_offset = node.col_offset + len(node.as_string()) + 1
+    node.col_offset -= 1
+
+
+def set_tuple(node):
+    """Determine end_col_offset by adding to the string length of the
+    node. Also adjust col_offset by one to include the left bracket.
+    Useful for nodes consisting of (1, ).
+    """
+    node.col_offset -= 1
     node.end_col_offset = node.col_offset + len(node.as_string())
 
 

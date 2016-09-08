@@ -71,7 +71,6 @@ NODES_WITH_CHILDREN = [
     astroid.For,
     astroid.FunctionDef,
     astroid.GeneratorExp,
-    # TODO: need to fix elif (start) col_offset
     astroid.If,
     astroid.IfExp,
     astroid.Index,
@@ -138,6 +137,7 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.SetComp, lambda node: set_end_adjust(node, 1))
     ending_transformer.register_transform(astroid.Slice, set_slice)
     ending_transformer.register_transform(astroid.Tuple, set_tuple)
+    ending_transformer.register_transform(astroid.If, set_if)
 
     # TODO: investigate these nodes.
     # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
@@ -310,6 +310,27 @@ def set_tuple(node):
     """
     node.col_offset -= 1
     node.end_col_offset = node.col_offset + len(node.as_string())
+
+
+def set_if(node):
+    """Set the end_col_offset of an if/elif block to the last statement (thats
+    not another if) in the code block, which is not necessarily the last child. 
+    """
+    # Set col_offset of elif by the col_offset of the parent node (if any).
+    if node.parent:
+        node.col_offset = node.parent.col_offset or 0
+
+    # Set end_col_offset by the node previous to a child node: `If`,
+    # otherwise set by last child.
+    prev_node = None
+    for use_node in node.get_children():
+        if isinstance(use_node, astroid.If):
+            use_node = prev_node
+            break
+        else:
+            prev_node = use_node
+    node.end_lineno = use_node.end_lineno
+    node.end_col_offset = use_node.end_col_offset
 
 
 def _get_last_child(node):

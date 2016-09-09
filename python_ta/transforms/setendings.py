@@ -145,25 +145,25 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
     ending_transformer.register_transform(astroid.Arguments, set_arguments)
     ending_transformer.register_transform(astroid.AssignAttr, set_assignattr)
-    ending_transformer.register_transform(astroid.AsyncFor, lambda node: set_front_adjust(node, 6))
-    ending_transformer.register_transform(astroid.AsyncFunctionDef, lambda node: set_front_adjust(node, 6))
-    ending_transformer.register_transform(astroid.AsyncWith, lambda node: set_front_adjust(node, 6))
-    ending_transformer.register_transform(astroid.DelAttr, lambda node: set_front_adjust(node, 4))
-    ending_transformer.register_transform(astroid.DelName, lambda node: set_front_adjust(node, 4))
+    ending_transformer.register_transform(astroid.AsyncFor, lambda node: front_end_adjust(node, -6, 0))
+    ending_transformer.register_transform(astroid.AsyncFunctionDef, lambda node: front_end_adjust(node, -6, 0))
+    ending_transformer.register_transform(astroid.AsyncWith, lambda node: front_end_adjust(node, -6, 0))
+    ending_transformer.register_transform(astroid.DelAttr, lambda node: front_end_adjust(node, -4, 0))
+    ending_transformer.register_transform(astroid.DelName, lambda node: front_end_adjust(node, -4, 0))
     ending_transformer.register_transform(astroid.Attribute, set_attribute)
     ending_transformer.register_transform(astroid.Await, set_await)
-    ending_transformer.register_transform(astroid.Call, lambda node: set_end_adjust(node, 1))
-    ending_transformer.register_transform(astroid.Comprehension, lambda node: set_front_adjust(node, 4))
-    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_front_adjust(node, 1))
-    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: set_end_adjust(node, 1))
-    ending_transformer.register_transform(astroid.Raise, lambda node: set_end_adjust(node, 1))
-    ending_transformer.register_transform(astroid.Index, lambda node: set_front_adjust(node, 1))
-    ending_transformer.register_transform(astroid.Index, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.Call, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Comprehension, lambda node: front_end_adjust(node, -4, 0))
+    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: front_end_adjust(node, -1, 0))
+    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Raise, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Index, lambda node: front_end_adjust(node, -1, 0))
+    ending_transformer.register_transform(astroid.Index, lambda node: front_end_adjust(node, 0, 1))
     ending_transformer.register_transform(astroid.Keyword, set_keyword)
-    ending_transformer.register_transform(astroid.ListComp, lambda node: set_front_adjust(node, 1))
-    ending_transformer.register_transform(astroid.ListComp, lambda node: set_end_adjust(node, 1))
-    ending_transformer.register_transform(astroid.Set, lambda node: set_end_adjust(node, 1))
-    ending_transformer.register_transform(astroid.SetComp, lambda node: set_end_adjust(node, 1))
+    ending_transformer.register_transform(astroid.ListComp, lambda node: front_end_adjust(node, -1, 0))
+    ending_transformer.register_transform(astroid.ListComp, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Set, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.SetComp, lambda node: front_end_adjust(node, 0, 1))
     ending_transformer.register_transform(astroid.Slice, set_slice)
     ending_transformer.register_transform(astroid.Tuple, set_tuple)
     ending_transformer.register_transform(astroid.If, set_if)
@@ -183,21 +183,20 @@ def init_register_ending_setters():
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
 
-def set_front_adjust(node, adjust=0):
-    """Include the 'async' keyword in expressions for all Async* nodes.
-    Include the 'del' keyword in expressions for all Del* nodes.
-    Include the 'for' keyword in expressions for all Comprehension nodes.
-    Include the first parens/brackets for all nodes: GeneratorExp, ListComp.
-    Precondition: col_offset has been set.
-    """
-    node.col_offset -= adjust
+def front_end_adjust(node, front_adjust=0, end_adjust=0):
+    """Precondition: col_offset and end_col_offset have been set.
+    col_offset adjustment..
+        • Include the 'async' keyword in expressions for Async* nodes.
+        • Include the 'del' keyword in expressions for Del* nodes.
+        • Include the 'for' keyword in expressions for Comprehension nodes.
+        • Include the first parens/brackets for nodes: GeneratorExp, ListComp.
 
-
-def set_end_adjust(node, adjust=0):
-    """end_col_offset missing right parens/brackets/braces on nodes:
-    Call, GeneratorExp, Raise, ExtSlice, ListComp, Set
+    end_col_offset adjustment..
+        • Missing right parens/brackets/braces on nodes: Call, GeneratorExp, 
+        Raise, ExtSlice, ListComp, Set
     """
-    node.end_col_offset += adjust
+    node.col_offset += front_adjust
+    node.end_col_offset += end_adjust
 
 
 def fix_start_attributes(node):
@@ -205,7 +204,8 @@ def fix_start_attributes(node):
     astroid.Comprehension, astroid.ExtSlice, astroid.Index,
     astroid.Keyword, astroid.Module, astroid.Slice
 
-    Question: is the 'fromlineno' attribute always set?
+    Question: is the 'fromlineno' attribute always set? 
+        ==> preliminary answer is, yes.
     """
     assert node.fromlineno is not None, \
             'node {} doesn\'t have fromlineno set.'.format(node)
@@ -230,20 +230,6 @@ def fix_start_attributes(node):
             node.fromlineno = statement.fromlineno
         if node.col_offset is None:
             node.col_offset = statement.col_offset
-
-
-def fix_start_attributes_arguments(node):
-    """Fix the col_offset attribute for astroid.Argument nodes.
-    Precondition: node does not have children."""
-    # set from col offset of parent FunctionDef node plus len of name.
-    parent_node = node.parent
-    if isinstance(parent_node, astroid.FunctionDef):
-        # account for 'def', name of the signature, and '('
-        node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
-    elif isinstance(parent_node, astroid.Lambda):
-        # account for 'lambda'
-        node.col_offset = parent_node.col_offset + 6
-        # If there are no arguments, this node takes up no space
 
 
 def set_from_last_child(node):
@@ -284,8 +270,16 @@ def set_arguments(node):
     """
     if _get_last_child(node):
         set_from_last_child(node)
-    else:
-        fix_start_attributes_arguments(node)
+    else:  # node does not have children.
+        # set from col offset of parent node, plus len of name, etc.
+        # Note: if there are no arguments, this node takes up no space
+        parent_node = node.parent
+        if isinstance(parent_node, astroid.FunctionDef):
+            # account for string length of 'def', name of the signature, and '('
+            node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
+        elif isinstance(parent_node, astroid.Lambda):
+            # account for string length of 'lambda'
+            node.col_offset = parent_node.col_offset + 6
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
 
 

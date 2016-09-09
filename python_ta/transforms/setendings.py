@@ -78,6 +78,7 @@ NODES_WITH_CHILDREN = [
     astroid.Keyword,
     astroid.Lambda,
     astroid.ListComp,
+    astroid.Module,
     astroid.Raise,
     astroid.Return,
     astroid.Set,
@@ -109,11 +110,15 @@ class NodeDataStore():
         logging.basicConfig(format=log_format, datefmt=log_date_time_format, 
                             filename=log_filename, level=logging.INFO)
 
-    def write(self, prefix=''):
-        """Log data in a simple csv format."""
+    def dump(self, prefix=''):
+        """Log stored data in a simple csv format."""
         if prefix is not '':
             prefix += ' '  # add space after
         logging.info('{}{}'.format(prefix, ','.join(sorted(list(self._storage)))))
+
+    def write(self, message):
+        """Write message to a log file."""
+        logging.info(message)
 
     def store(self, node):
         """Store node to data structure."""
@@ -166,12 +171,11 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.If, set_if)
 
     # TODO: investigate these nodes.
-    # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
-    # ending_transformer.register_transform(astroid.EmptyNode, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Exec, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Module, set_without_col_offset)
-    # ending_transformer.register_transform(astroid.Print, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Repr, set_from_last_child)
+    ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
+    ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
+    ending_transformer.register_transform(astroid.Exec, discover_nodes)
+    ending_transformer.register_transform(astroid.Print, discover_nodes)
+    ending_transformer.register_transform(astroid.Repr, discover_nodes)
     return ending_transformer
 
 
@@ -179,6 +183,18 @@ def init_register_ending_setters():
 # These functions are called on individual nodes to either fix the
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
+
+def discover_nodes(node):
+    """Log to file and console when an elusive node is encountered, so it can
+    be classified, and tested..
+    """
+    # Some formatting for the code output
+    output = ['='*40] + [line for line in node.statement().as_string().strip().split('\n')] + ['='*40]
+    message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
+    # Print to console to  and log for persistance.
+    print('\n' + message)
+    node_data_store.write(message)
+
 
 def front_end_adjust(node, front_adjust=0, end_adjust=0):
     """Precondition: col_offset and end_col_offset have been set.

@@ -67,7 +67,7 @@ class TestEndingLocation(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         """A class method called after tests in an individual class have run."""
-        node_data_store.write('fix_start_attributes')  # Log to file.
+        node_data_store.dump('fix_start_attributes')  # Log to file.
 
     def setUp(self):
         """Method called to prepare the test fixture. This is called immediately
@@ -373,12 +373,10 @@ class TestEndingLocation(unittest.TestCase):
         module = self.get_file_as_module('nodes/ListComp.py')
         self.set_and_check(module, astroid.ListComp, expected)
 
-    # def test_module(self):
-    #     """NODE EXAMPLE DOES NOT EXIST
-    #     """
-    #     expected = []
-    #     module = self.get_file_as_module('nodes/Module.py')
-    #     self.set_and_check(module, astroid.Module, expected)
+    def test_module(self):
+        expected = [(0, 2, 0, 1)]
+        module = self.get_file_as_module('nodes/Module.py')
+        self.set_and_check(module, astroid.Module, expected)
 
     def test_name(self):
         expected = [(1, 1, 0, 6)]

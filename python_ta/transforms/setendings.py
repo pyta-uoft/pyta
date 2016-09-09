@@ -14,6 +14,7 @@ If possible, set the `end_col_offset` property by that of the node's last child.
 """
 import astroid
 from astroid.transforms import TransformVisitor
+import logging
 
 
 # These nodes have no children, and their end_lineno and end_col_offset
@@ -58,10 +59,10 @@ NODES_WITH_CHILDREN = [
     astroid.DelAttr,
     astroid.Delete,
     # TODO: missing right }
-    # [This one is tricky because there is no way to capture the last brace]
+    # [This one is tricky because there is no way to capture the last brace location]
     astroid.Dict,
     # TODO: missing right }
-    # [This one is tricky because there is no way to capture the last brace]
+    # [This one is tricky because there is no way to capture the last brace location]
     astroid.DictComp,
     astroid.ExceptHandler,
     astroid.ExtSlice,
@@ -92,6 +93,34 @@ NODES_WITH_CHILDREN = [
     astroid.With,
     astroid.YieldFrom
 ]
+
+
+class NodeDataStore():
+    """Collect data and log at end of all tests."""
+    def __init__(self):
+        """Store data without dupes."""
+        self._storage = set()
+
+        # Question: do we want to move logger to its own module, in a utils directory?
+        # Recall: the `logging` namespace is in the global scope.
+        log_format = '%(asctime)s %(levelname)s %(message)s'
+        log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
+        log_filename = 'python_ta/transforms/setendings_log.log'
+        logging.basicConfig(format=log_format, datefmt=log_date_time_format, 
+                            filename=log_filename, level=logging.INFO)
+
+    def write(self, prefix=''):
+        """Log data in a simple csv format."""
+        if prefix is not '':
+            prefix += ' '  # add space after
+        logging.info('{}{}'.format(prefix, ','.join(sorted(list(self._storage)))))
+
+    def store(self, node):
+        """Store node to data structure."""
+        self._storage.add(node)
+
+# Global to expose to importing modules, and the transform functions.
+node_data_store = NodeDataStore()
 
 
 def init_register_ending_setters():
@@ -171,7 +200,6 @@ def set_end_adjust(node, adjust=0):
     node.end_col_offset += adjust
 
 
-# TODO: Log when this function is called.
 def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
     astroid.Comprehension, astroid.ExtSlice, astroid.Index,
@@ -181,6 +209,8 @@ def fix_start_attributes(node):
     """
     assert node.fromlineno is not None, \
             'node {} doesn\'t have fromlineno set.'.format(node)
+
+    node_data_store.store(str(node)[:-2])  # add item to be logged.
 
     try:
         first_child = next(node.get_children())

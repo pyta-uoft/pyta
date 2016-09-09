@@ -64,6 +64,11 @@ class TestEndingLocation(unittest.TestCase):
         # Check the nodes property correctness.
         self.nodeng = NodeNG()
 
+    @classmethod
+    def tearDownClass(self):
+        """A class method called after tests in an individual class have run."""
+        node_data_store.write('fix_start_attributes')  # Log to file.
+
     def setUp(self):
         """Method called to prepare the test fixture. This is called immediately
         before calling the test method; other than AssertionError or SkipTest,

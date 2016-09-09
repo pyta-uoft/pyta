@@ -61,8 +61,6 @@ NODES_WITH_CHILDREN = [
     # TODO: missing right }
     # [This one is tricky because there is no way to capture the last brace location]
     astroid.Dict,
-    # TODO: missing right }
-    # [This one is tricky because there is no way to capture the last brace location]
     astroid.DictComp,
     astroid.ExceptHandler,
     astroid.ExtSlice,
@@ -169,8 +167,9 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.Slice, set_slice)
     ending_transformer.register_transform(astroid.Tuple, set_tuple)
     ending_transformer.register_transform(astroid.If, set_if)
+    ending_transformer.register_transform(astroid.DictComp, lambda node: front_end_adjust(node, 0, 1))
 
-    # TODO: investigate these nodes.
+    # Investigate these nodes and create tests/transforms/etc when found.
     ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
     ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
     ending_transformer.register_transform(astroid.Exec, discover_nodes)
@@ -206,7 +205,7 @@ def front_end_adjust(node, front_adjust=0, end_adjust=0):
 
     end_col_offset adjustment..
         • Missing right parens/brackets/braces on nodes: Call, GeneratorExp, 
-        Raise, ExtSlice, ListComp, Set
+        Raise, ExtSlice, ListComp, Set, DictComp.
     """
     node.col_offset += front_adjust
     node.end_col_offset += end_adjust

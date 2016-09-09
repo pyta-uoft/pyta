@@ -258,10 +258,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Dict, expected)
 
     def test_dictcomp(self):
-        """Note: col_offset is before first '{' (i.e. astroid.DictComp node),
-        end_col_offset is after the '3' (i.e. astroid.Const last child node).
-        """
-        expected = [(1, 1, 0, 28)]
+        expected = [(1, 1, 0, 29)]
         module = self.get_file_as_module('nodes/DictComp.py')
         self.set_and_check(module, astroid.DictComp, expected)
 

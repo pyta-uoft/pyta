@@ -154,14 +154,11 @@ def init_register_ending_setters():
     ending_transformer.register_transform(astroid.Await, set_await)
     ending_transformer.register_transform(astroid.Call, lambda node: front_end_adjust(node, 0, 1))
     ending_transformer.register_transform(astroid.Comprehension, lambda node: front_end_adjust(node, -4, 0))
-    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: front_end_adjust(node, -1, 0))
-    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: front_end_adjust(node, -1, 1))
     ending_transformer.register_transform(astroid.Raise, lambda node: front_end_adjust(node, 0, 1))
-    ending_transformer.register_transform(astroid.Index, lambda node: front_end_adjust(node, -1, 0))
-    ending_transformer.register_transform(astroid.Index, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Index, lambda node: front_end_adjust(node, -1, 1))
     ending_transformer.register_transform(astroid.Keyword, set_keyword)
-    ending_transformer.register_transform(astroid.ListComp, lambda node: front_end_adjust(node, -1, 0))
-    ending_transformer.register_transform(astroid.ListComp, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.ListComp, lambda node: front_end_adjust(node, -1, 1))
     ending_transformer.register_transform(astroid.Set, lambda node: front_end_adjust(node, 0, 1))
     ending_transformer.register_transform(astroid.SetComp, lambda node: front_end_adjust(node, 0, 1))
     ending_transformer.register_transform(astroid.Slice, set_slice)
@@ -201,10 +198,9 @@ def front_end_adjust(node, front_adjust=0, end_adjust=0):
 
 def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
-    astroid.Comprehension, astroid.ExtSlice, astroid.Index,
-    astroid.Keyword, astroid.Module, astroid.Slice
+    Comprehension, ExtSlice, Index, Keyword, Module, Slice.
 
-    Question: is the 'fromlineno' attribute always set? 
+    Question: is the 'fromlineno' attribute always set?
         ==> preliminary answer is, yes.
     """
     assert node.fromlineno is not None, \

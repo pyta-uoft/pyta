@@ -190,7 +190,7 @@ def discover_nodes(node):
     # Some formatting for the code output
     output = ['='*40] + [line for line in node.statement().as_string().strip().split('\n')] + ['='*40]
     message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
-    # Print to console to  and log for persistance.
+    # Print to console, and log for persistance.
     print('\n' + message)
     node_data_store.write(message)
 

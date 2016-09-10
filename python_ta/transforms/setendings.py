@@ -14,6 +14,7 @@ If possible, set the `end_col_offset` property by that of the node's last child.
 """
 import astroid
 from astroid.transforms import TransformVisitor
+import logging
 
 
 # These nodes have no children, and their end_lineno and end_col_offset
@@ -35,78 +36,94 @@ NODES_WITHOUT_CHILDREN = [
     astroid.Yield
 ]
 
+
 # These nodes have a child, and their end_lineno and end_col_offset
 # attributes are set equal to those of their last child.
 NODES_WITH_CHILDREN = [
     astroid.Assert,
     astroid.Assign,
-    # TODO: This one identifies only the expression to the left of the period,
-    # and not the name of the attribute.
-    # Given 'self.name = 10', it will highlight 'self' rather than 'self.name'
     astroid.AssignAttr,
-    # TODO: Include the 'async' keyword in expressions for all Async* nodes.
     astroid.AsyncFor,
     astroid.AsyncFunctionDef,
     astroid.AsyncWith,
-    # TODO: Same problem as AssignAttr (attribute missing)
     astroid.Attribute,
     astroid.AugAssign,
     astroid.Await,
     astroid.BinOp,
     astroid.BoolOp,
-    # TODO: missing right parens
     astroid.Call,
     astroid.ClassDef,
     astroid.Compare,
     astroid.Comprehension,
-    # TODO: missing right parens (note: only if decorator takes args)
     astroid.Decorators,
-    # TODO: missing keyword 'del' and attribute name
     astroid.DelAttr,
     astroid.Delete,
     # TODO: missing right }
+    # [This one is tricky because there is no way to capture the last brace location]
     astroid.Dict,
-    # TODO: missing right }
     astroid.DictComp,
     astroid.ExceptHandler,
-    # TODO: missing *both* outer brackets
     astroid.ExtSlice,
     # TODO: missing right paren
+    # [This one is tricky because original paren are lost in astroid properties]
     astroid.Expr,
     astroid.For,
     astroid.FunctionDef,
-    # TODO: missing *both* outer parens
     astroid.GeneratorExp,
-    # TODO: need to fix elif (start) col_offset
     astroid.If,
     astroid.IfExp,
-    # TODO: missing *both* outer brackets
     astroid.Index,
-    # TODO: would be good to see the name of the keyword as well
     astroid.Keyword,
     astroid.Lambda,
-    # TODO: missing *both* outer brackets
     astroid.ListComp,
+    astroid.Module,
     astroid.Raise,
     astroid.Return,
-    # TODO: missing right }
     astroid.Set,
-    # TODO: missing right }
     astroid.SetComp,
-    # TODO: missing *both* outer brackets
     astroid.Slice,
     astroid.Starred,
-    # TODO: missing right ]
     astroid.Subscript,
     astroid.TryExcept,
     astroid.TryFinally,
-    # TODO: missing *both* outer parens
     astroid.Tuple,
     astroid.UnaryOp,
     astroid.While,
     astroid.With,
     astroid.YieldFrom
 ]
+
+
+class NodeDataStore():
+    """Collect data and log at end of all tests."""
+    def __init__(self):
+        """Store data without dupes."""
+        self._storage = set()
+
+        # Question: do we want to move logger to its own module, in a utils directory?
+        # Recall: the `logging` namespace is in the global scope.
+        log_format = '%(asctime)s %(levelname)s %(message)s'
+        log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
+        log_filename = 'python_ta/transforms/setendings_log.log'
+        logging.basicConfig(format=log_format, datefmt=log_date_time_format, 
+                            filename=log_filename, level=logging.INFO)
+
+    def dump(self, prefix=''):
+        """Log stored data in a simple csv format."""
+        if prefix is not '':
+            prefix += ' '  # add space after
+        logging.info('{}{}'.format(prefix, ','.join(sorted(list(self._storage)))))
+
+    def write(self, message):
+        """Write message to a log file."""
+        logging.info(message)
+
+    def store(self, node):
+        """Store node to data structure."""
+        self._storage.add(node)
+
+# Global to expose to importing modules, and the transform functions.
+node_data_store = NodeDataStore()
 
 
 def init_register_ending_setters():
@@ -122,22 +139,42 @@ def init_register_ending_setters():
             fix_start_attributes,
             lambda node: node.fromlineno is None or node.col_offset is None)
 
-    # Ad hoc transformations
-    ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
-    ending_transformer.register_transform(astroid.Arguments, set_arguments)
-
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
     for node_class in NODES_WITHOUT_CHILDREN:
         ending_transformer.register_transform(node_class, set_without_children)
 
-    # TODO: investigate these nodes.
-    # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
-    # ending_transformer.register_transform(astroid.EmptyNode, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Exec, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Module, set_without_col_offset)
-    # ending_transformer.register_transform(astroid.Print, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Repr, set_from_last_child)
+    # Ad hoc transformations, due to inconsistencies in locations.
+    ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
+    ending_transformer.register_transform(astroid.Arguments, set_arguments)
+    ending_transformer.register_transform(astroid.AssignAttr, set_assignattr)
+    ending_transformer.register_transform(astroid.AsyncFor, lambda node: front_end_adjust(node, -6, 0))
+    ending_transformer.register_transform(astroid.AsyncFunctionDef, lambda node: front_end_adjust(node, -6, 0))
+    ending_transformer.register_transform(astroid.AsyncWith, lambda node: front_end_adjust(node, -6, 0))
+    ending_transformer.register_transform(astroid.DelAttr, lambda node: front_end_adjust(node, -4, 0))
+    ending_transformer.register_transform(astroid.DelName, lambda node: front_end_adjust(node, -4, 0))
+    ending_transformer.register_transform(astroid.Attribute, set_attribute)
+    ending_transformer.register_transform(astroid.Await, set_await)
+    ending_transformer.register_transform(astroid.Call, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Comprehension, lambda node: front_end_adjust(node, -4, 0))
+    ending_transformer.register_transform(astroid.GeneratorExp, lambda node: front_end_adjust(node, -1, 1))
+    ending_transformer.register_transform(astroid.Raise, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Index, lambda node: front_end_adjust(node, -1, 1))
+    ending_transformer.register_transform(astroid.Keyword, set_keyword)
+    ending_transformer.register_transform(astroid.ListComp, lambda node: front_end_adjust(node, -1, 1))
+    ending_transformer.register_transform(astroid.Set, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.SetComp, lambda node: front_end_adjust(node, 0, 1))
+    ending_transformer.register_transform(astroid.Slice, set_slice)
+    ending_transformer.register_transform(astroid.Tuple, set_tuple)
+    ending_transformer.register_transform(astroid.If, set_if)
+    ending_transformer.register_transform(astroid.DictComp, lambda node: front_end_adjust(node, 0, 1))
+
+    # Investigate these nodes and create tests/transforms/etc when found.
+    ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
+    ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
+    ending_transformer.register_transform(astroid.Exec, discover_nodes)
+    ending_transformer.register_transform(astroid.Print, discover_nodes)
+    ending_transformer.register_transform(astroid.Repr, discover_nodes)
     return ending_transformer
 
 
@@ -146,14 +183,46 @@ def init_register_ending_setters():
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
 
-# TODO: Log when this function is called.
+def discover_nodes(node):
+    """Log to file and console when an elusive node is encountered, so it can
+    be classified, and tested..
+    """
+    # Some formatting for the code output
+    output = ['='*40] + [line for line in node.statement().as_string().strip().split('\n')] + ['='*40]
+    message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
+    # Print to console, and log for persistance.
+    print('\n' + message)
+    node_data_store.write(message)
+
+
+def front_end_adjust(node, front_adjust=0, end_adjust=0):
+    """Precondition: col_offset and end_col_offset have been set.
+    col_offset adjustment..
+        • Include the 'async' keyword in expressions for Async* nodes.
+        • Include the 'del' keyword in expressions for Del* nodes.
+        • Include the 'for' keyword in expressions for Comprehension nodes.
+        • Include the first parens/brackets for nodes: GeneratorExp, ListComp.
+
+    end_col_offset adjustment..
+        • Missing right parens/brackets/braces on nodes: Call, GeneratorExp, 
+        Raise, ExtSlice, ListComp, Set, DictComp.
+    """
+    node.col_offset += front_adjust
+    node.end_col_offset += end_adjust
+
+
 def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
-    astroid.Comprehension, astroid.ExtSlice, astroid.Index,
-    astroid.Keyword, astroid.Module, astroid.Slice
+    Comprehension, ExtSlice, Index, Keyword, Module, Slice.
 
     Question: is the 'fromlineno' attribute always set?
+        ==> preliminary answer is, yes.
     """
+    assert node.fromlineno is not None, \
+            'node {} doesn\'t have fromlineno set.'.format(node)
+
+    node_data_store.store(str(node)[:-2])  # add item to be logged.
+
     try:
         first_child = next(node.get_children())
         if node.fromlineno is None:
@@ -162,7 +231,7 @@ def fix_start_attributes(node):
             node.col_offset = first_child.col_offset
 
     except StopIteration:
-        # No children. Go to the enclosing statement as use that.
+        # No children. Go to the enclosing statement and use that.
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
         assert statement.fromlineno is not None and statement.col_offset is not None, \
@@ -172,19 +241,6 @@ def fix_start_attributes(node):
             node.fromlineno = statement.fromlineno
         if node.col_offset is None:
             node.col_offset = statement.col_offset
-
-
-def fix_start_attributes_arguments(node):
-    """Fix the col_offset attribute for astroid.Argument nodes."""
-    # set from col offset of parent FunctionDef node plus len of name.
-    parent_node = node.parent
-    if isinstance(parent_node, astroid.FunctionDef):
-        # account for 'def', name of the signature, and '('
-        node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
-    elif isinstance(parent_node, astroid.Lambda):
-        # account for 'lambda :'
-        node.col_offset = parent_node.col_offset + 7
-        # If there are no arguments, this node takes up no space
 
 
 def set_from_last_child(node):
@@ -225,8 +281,91 @@ def set_arguments(node):
     """
     if _get_last_child(node):
         set_from_last_child(node)
-    else:
+    else:  # node does not have children.
+        # set from col offset of parent node, plus len of name, etc.
+        # Note: if there are no arguments, this node takes up no space
+        parent_node = node.parent
+        if isinstance(parent_node, astroid.FunctionDef):
+            # account for string length of 'def', name of the signature, and '('
+            node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
+        elif isinstance(parent_node, astroid.Lambda):
+            # account for string length of 'lambda'
+            node.col_offset = parent_node.col_offset + 6
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
+
+
+def set_assignattr(node):
+    """astroid.AssignAttr node should be set by the left and
+    right side of the dot operator. Originally it would use 'self' rather than 
+    'self.name'. We can't use the parent node as `set_attribute` does.
+    """
+    node.end_col_offset = node.col_offset + len(node.as_string())
+
+
+def set_attribute(node):
+    """Setting the attribute node by its last child wouldn't include
+    the attribute in determining the end_col_offset, i.e. it was originally 
+    set by left side of dot operator, but it should use both sides.
+    """
+    node.end_col_offset = node.col_offset + len(node.parent.as_string())
+
+
+def set_await(node):
+    """Setting end_col_offset by last child (i.e. arguments.Name) didn't 
+    capture the left and right parenthesis in the arguments.Call node.
+    """
+    node.end_col_offset = node.col_offset + len(node.as_string())
+
+
+def set_keyword(node):
+    """Setting the missing col_offset by last child didn't capture the keyword 
+    name. Determine col_offset by the index of the keyword string relative
+    to its parent.
+    """
+    node_str = node.as_string()
+    outer = node.statement()
+    assert node_str is not None, \
+            'node {} string cannot be used to find index.'.format(node)
+    node.col_offset = outer.col_offset + outer.as_string().index(node_str)
+
+
+def set_slice(node):
+    """Determine end_col_offset by adding to the string length of the
+    node. Also adjust col_offset by one to include the left bracket.
+    Useful for nodes consisting of [1: ].
+    """
+    node.end_col_offset = node.col_offset + len(node.as_string()) + 1
+    node.col_offset -= 1
+
+
+def set_tuple(node):
+    """Determine end_col_offset by adding to the string length of the
+    node. Also adjust col_offset by one to include the left bracket.
+    Useful for nodes consisting of (1, ).
+    """
+    node.col_offset -= 1
+    node.end_col_offset = node.col_offset + len(node.as_string())
+
+
+def set_if(node):
+    """Set the end_col_offset of an if/elif block to the last statement (thats
+    not another if) in the code block, which is not necessarily the last child. 
+    """
+    # Set col_offset of elif by the col_offset of the parent node (if any).
+    if node.parent:
+        node.col_offset = node.parent.col_offset or 0
+
+    # Set end_col_offset by the node previous to a child node: `If`,
+    # otherwise set by last child.
+    prev_node = None
+    for use_node in node.get_children():
+        if isinstance(use_node, astroid.If):
+            use_node = prev_node
+            break
+        else:
+            prev_node = use_node
+    node.end_lineno = use_node.end_lineno
+    node.end_col_offset = use_node.end_col_offset
 
 
 def _get_last_child(node):

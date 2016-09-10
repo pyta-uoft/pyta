@@ -64,6 +64,11 @@ class TestEndingLocation(unittest.TestCase):
         # Check the nodes property correctness.
         self.nodeng = NodeNG()
 
+    @classmethod
+    def tearDownClass(self):
+        """A class method called after tests in an individual class have run."""
+        node_data_store.dump('fix_start_attributes')  # Log to file.
+
     def setUp(self):
         """Method called to prepare the test fixture. This is called immediately
         before calling the test method; other than AssertionError or SkipTest,
@@ -117,8 +122,10 @@ class TestEndingLocation(unittest.TestCase):
         props = self.nodeng.check_endings(module, node_class)
         self._assertSameness(expected, props)
 
+    ################ Test Functions ################
+
     def test_arguments(self):
-        expected = [(1, 2, 8, 30)]
+        expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18)]
         module = self.get_file_as_module('examples/ending_locations/arguments.py')
         self.set_and_check(module, astroid.Arguments, expected)
 
@@ -133,7 +140,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Assign, expected)
 
     def test_assignattr(self):
-        expected = [(3, 3, 8, 12)]
+        expected = [(3, 3, 8, 17)]
         module = self.get_file_as_module('nodes/AssignAttr.py')
         self.set_and_check(module, astroid.AssignAttr, expected)
 
@@ -143,27 +150,22 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Assign, expected)
 
     def test_asyncfor(self):
-        """Note: col_offset property always set after the 'async' keyword.
-        """
-        expected = [(3, 4, 10, 12)]
+        expected = [(3, 4, 4, 12)]
         module = self.get_file_as_module('nodes/AsyncFor.py')
         self.set_and_check(module, astroid.AsyncFor, expected)
 
     def test_asyncfunctiondef(self):
-        expected = [(1, 2, 6, 12)]
+        expected = [(1, 2, 0, 12)]
         module = self.get_file_as_module('nodes/AsyncFunctionDef.py')
         self.set_and_check(module, astroid.AsyncFunctionDef, expected)
 
     def test_asyncwith(self):
-        expected = [(2, 3, 10, 12)]
+        expected = [(2, 3, 4, 12)]
         module = self.get_file_as_module('nodes/AsyncWith.py')
         self.set_and_check(module, astroid.AsyncWith, expected)
 
     def test_attribute(self):
-        """Note: Setting the attribute node by its last child doesn't include
-        the attribute in determining the end_col_offset.
-        """
-        expected = [(1, 1, 0, 7)]
+        expected = [(1, 1, 0, 20), (2, 2, 0, 22)]
         module = self.get_file_as_module('nodes/Attribute.py')
         self.set_and_check(module, astroid.Attribute, expected)
 
@@ -173,12 +175,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.AugAssign, expected)
 
     def test_await(self):
-        """Note: col_offset property always set before the 'await' keyword.
-        Aside: this example shows the case where setting end_col_offset by the
-        child (i.e. arguments.Name) doesn't capture some information like the
-        parenthesis in the parent arguments.Call node.
-        """
-        expected = [(5, 5, 4, 25)]
+        expected = [(5, 5, 4, 27)]
         module = self.get_file_as_module('nodes/Await.py')
         self.set_and_check(module, astroid.Await, expected)
 
@@ -202,9 +199,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Break, expected)
 
     def test_call(self):
-        """Note: the end_col_offset is 1 left of the last ')'.
-        """
-        expected = [(1, 1, 0, 7)]
+        expected = [(1, 1, 0, 8)]
         module = self.get_file_as_module('nodes/Call.py')
         self.set_and_check(module, astroid.Call, expected)
 
@@ -221,10 +216,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Compare, expected)
 
     def test_comprehension(self):
-        """Note: The end_col_offset is currently being set by the node
-        astroid.AssignName, which may not be desired.
-        """
-        expected = [(1, 1, 7, 19)]
+        expected = [(1, 1, 3, 20)]
         module = self.get_file_as_module('nodes/Comprehension.py')
         self.set_and_check(module, astroid.Comprehension, expected)
 
@@ -239,43 +231,34 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Continue, expected)
 
     def test_decorators(self):
-        expected = [(1, 1, 0, 16)]
+        expected = [(1, 1, 0, 17)]
         module = self.get_file_as_module('nodes/Decorators.py')
         self.set_and_check(module, astroid.Decorators, expected)
 
     def test_delattr(self):
-        """Note: col_offset property is set _after_ the 'del' keyword, and the
-        attribute is not included in the end_col_offset.
-        """
-        expected = [(4, 4, 12, 16)]
+        expected = [(4, 4, 8, 16)]
         module = self.get_file_as_module('nodes/DelAttr.py')
         self.set_and_check(module, astroid.DelAttr, expected)
 
     def test_delete(self):
-        """Note: col_offset property is set _before_ the 'del' keyword.
-        """
         expected = [(1, 1, 0, 5)]
         module = self.get_file_as_module('nodes/Delete.py')
         self.set_and_check(module, astroid.Delete, expected)
 
     def test_delname(self):
-        """Note: col_offset property is set on the next node _after_ the 'del'
-        keyword.
-        """
-        expected = [(1, 1, 4, 5)]
+        expected = [(1, 1, 0, 5)]
         module = self.get_file_as_module('nodes/DelName.py')
         self.set_and_check(module, astroid.DelName, expected)
 
     def test_dict(self):
+        """missing right }
+        """
         expected = [(1, 3, 4, 10)]
         module = self.get_file_as_module('examples/ending_locations/dict.py')
         self.set_and_check(module, astroid.Dict, expected)
 
     def test_dictcomp(self):
-        """Note: col_offset is before first '{' (i.e. astroid.DictComp node),
-        end_col_offset is after the '3' (i.e. astroid.Const last child node).
-        """
-        expected = [(1, 1, 0, 27)]
+        expected = [(1, 1, 0, 29)]
         module = self.get_file_as_module('nodes/DictComp.py')
         self.set_and_check(module, astroid.DictComp, expected)
 
@@ -313,12 +296,12 @@ class TestEndingLocation(unittest.TestCase):
     def test_expr(self):
         """Note: end_col_offset is after the '1' (i.e. astroid.Const last child node) and does not include the last ')'.
         """
-        expected = [(1, 1, 0, 7), (2, 2, 0, 9)]
+        expected = [(1, 1, 0, 8), (2, 2, 0, 9), (3, 3, 0, 8)]
         module = self.get_file_as_module('nodes/Expr.py')
         self.set_and_check(module, astroid.Expr, expected)
 
     def test_extslice(self):
-        expected = [(1, 1, 4, 10)]
+        expected = [(1, 1, 3, 11)]
         module = self.get_file_as_module('nodes/ExtSlice.py')
         self.set_and_check(module, astroid.ExtSlice, expected)
 
@@ -333,7 +316,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.FunctionDef, expected)
 
     def test_generatorexp(self):
-        expected = [(1, 1, 1, 23)]
+        expected = [(1, 1, 0, 25)]
         module = self.get_file_as_module('nodes/GeneratorExp.py')
         self.set_and_check(module, astroid.GeneratorExp, expected)
 
@@ -343,7 +326,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Global, expected)
 
     def test_if(self):
-        expected = [(1, 2, 0, 8)]
+        expected = [(1, 2, 0, 8), (3, 4, 0, 8)]
         module = self.get_file_as_module('nodes/If.py')
         self.set_and_check(module, astroid.If, expected)
 
@@ -363,12 +346,12 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.ImportFrom, expected)
 
     def test_index(self):
-        expected = [(1, 1, 2, 4)]
+        expected = [(1, 1, 1, 5)]
         module = self.get_file_as_module('nodes/Index.py')
         self.set_and_check(module, astroid.Index, expected)
 
     def test_keyword(self):
-        expected = [(1, 1, 11, 12)]
+        expected = [(1, 1, 4, 12)]
         module = self.get_file_as_module('nodes/Keyword.py')
         self.set_and_check(module, astroid.Keyword, expected)
 
@@ -383,16 +366,14 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.List, expected)
 
     def test_listcomp(self):
-        expected = [(1, 1, 1, 19)]
+        expected = [(1, 1, 0, 20)]
         module = self.get_file_as_module('nodes/ListComp.py')
         self.set_and_check(module, astroid.ListComp, expected)
 
-    # def test_module(self):
-    #     """NODE EXAMPLE DOES NOT EXIST
-    #     """
-    #     expected = []
-    #     module = self.get_file_as_module('nodes/Module.py')
-    #     self.set_and_check(module, astroid.Module, expected)
+    def test_module(self):
+        expected = [(0, 2, 0, 1)]
+        module = self.get_file_as_module('nodes/Module.py')
+        self.set_and_check(module, astroid.Module, expected)
 
     def test_name(self):
         expected = [(1, 1, 0, 6)]
@@ -417,7 +398,7 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.Print, expected)
 
     def test_raise(self):
-        expected = [(1, 1, 0, 23)]
+        expected = [(1, 1, 0, 25)]
         module = self.get_file_as_module('nodes/Raise.py')
         self.set_and_check(module, astroid.Raise, expected)
 
@@ -434,22 +415,17 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Return, expected)
 
     def test_set(self):
-        """Note: col_offset includes '{', but end_col_offset doesn't include '}'
-        """
-        expected = [(1, 1, 0, 2)]
+        expected = [(1, 1, 0, 3)]
         module = self.get_file_as_module('nodes/Set.py')
         self.set_and_check(module, astroid.Set, expected)
 
     def test_setcomp(self):
-        expected = [(1, 1, 0, 19)]
+        expected = [(1, 1, 0, 20)]
         module = self.get_file_as_module('nodes/SetComp.py')
         self.set_and_check(module, astroid.SetComp, expected)
 
     def test_slice(self):
-        """Note: col_offset and end_col_offset are set to the first constant
-        encountered, either on left or right side of colon.
-        """
-        expected = [(1, 1, 2, 3)]
+        expected = [(1, 1, 1, 5)]
         module = self.get_file_as_module('nodes/Slice.py')
         self.set_and_check(module, astroid.Slice, expected)
 
@@ -459,9 +435,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Starred, expected)
 
     def test_subscript(self):
-        """Note: col_offset includes '[', but end_col_offset doesn't include ']'
-        """
-        expected = [(1, 1, 0, 3)]
+        expected = [(1, 1, 0, 4)]
         module = self.get_file_as_module('nodes/Subscript.py')
         self.set_and_check(module, astroid.Subscript, expected)
 
@@ -476,7 +450,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.TryFinally, expected)
 
     def test_tuple(self):
-        expected = [(1, 1, 1, 5), (2, 2, 1, 2)]
+        expected = [(1, 1, 0, 6), (2, 2, 0, 5)]
         module = self.get_file_as_module('examples/ending_locations/tuple.py')
         self.set_and_check(module, astroid.Tuple, expected)
 

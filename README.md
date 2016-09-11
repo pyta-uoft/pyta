@@ -36,7 +36,7 @@ included as a library). In the Python interpreter, try running:
 
 ```python
 >>> import python_ta
->>> python_ta.check_all('python_ta.examples.forbidden_import_example')
+>>> python_ta.check_all('examples.forbidden_import_example')
 [Some output should be shown]
 >>> python_ta.doc('E9999')
 ```
@@ -47,7 +47,7 @@ included as a library). In the Python interpreter, try running:
 We have a test suite which checks every example file to see if PyTA actually
 picks up on the error the file is supposed to illustrate.
 
-To run the tests, enter `python tests/test_examples.py` in the terminal.
+To run the tests, enter `python tests/test_examples.py` in the terminal. (If you're on a Mac, you'll likely need to do `python3 tests/test_examples.py` instead.)
 
 
 ## Contributors

@@ -14,6 +14,7 @@ If possible, set the `end_col_offset` property by that of the node's last child.
 """
 import astroid
 from astroid.transforms import TransformVisitor
+import logging
 
 
 # These nodes have no children, and their end_lineno and end_col_offset
@@ -65,6 +66,7 @@ NODES_WITH_CHILDREN = [
     astroid.DelAttr,
     astroid.Delete,
     # TODO: missing right }
+    # [This one is tricky because there is no way to capture the last brace location]
     astroid.Dict,
     # TODO: missing right }
     astroid.DictComp,
@@ -72,6 +74,7 @@ NODES_WITH_CHILDREN = [
     # TODO: missing *both* outer brackets
     astroid.ExtSlice,
     # TODO: missing right paren
+    # [This one is tricky because original paren are lost in astroid properties]
     astroid.Expr,
     astroid.For,
     astroid.FunctionDef,
@@ -87,6 +90,7 @@ NODES_WITH_CHILDREN = [
     astroid.Lambda,
     # TODO: missing *both* outer brackets
     astroid.ListComp,
+    astroid.Module,
     astroid.Raise,
     astroid.Return,
     # TODO: missing right }
@@ -107,6 +111,38 @@ NODES_WITH_CHILDREN = [
     astroid.With,
     astroid.YieldFrom
 ]
+
+
+class NodeDataStore():
+    """Collect data and log at end of all tests."""
+    def __init__(self):
+        """Store data without dupes."""
+        self._storage = set()
+
+        # Question: do we want to move logger to its own module, in a utils directory?
+        # Recall: the `logging` namespace is in the global scope.
+        log_format = '%(asctime)s %(levelname)s %(message)s'
+        log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
+        log_filename = 'python_ta/transforms/setendings_log.log'
+        logging.basicConfig(format=log_format, datefmt=log_date_time_format, 
+                            filename=log_filename, level=logging.INFO)
+
+    def dump(self, prefix=''):
+        """Log stored data in a simple csv format."""
+        if prefix is not '':
+            prefix += ' '  # add space after
+        logging.info('{}{}'.format(prefix, ','.join(sorted(list(self._storage)))))
+
+    def write(self, message):
+        """Write message to a log file."""
+        logging.info(message)
+
+    def store(self, node):
+        """Store node to data structure."""
+        self._storage.add(node)
+
+# Global to expose to importing modules, and the transform functions.
+node_data_store = NodeDataStore()
 
 
 def init_register_ending_setters():
@@ -131,13 +167,12 @@ def init_register_ending_setters():
     for node_class in NODES_WITHOUT_CHILDREN:
         ending_transformer.register_transform(node_class, set_without_children)
 
-    # TODO: investigate these nodes.
-    # ending_transformer.register_transform(astroid.DictUnpack, set_from_last_child)
-    # ending_transformer.register_transform(astroid.EmptyNode, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Exec, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Module, set_without_col_offset)
-    # ending_transformer.register_transform(astroid.Print, set_from_last_child)
-    # ending_transformer.register_transform(astroid.Repr, set_from_last_child)
+    # TODO: investigate these nodes, and create tests/transforms/etc when found.
+    ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
+    ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
+    ending_transformer.register_transform(astroid.Exec, discover_nodes)
+    ending_transformer.register_transform(astroid.Print, discover_nodes)
+    ending_transformer.register_transform(astroid.Repr, discover_nodes)
     return ending_transformer
 
 
@@ -146,14 +181,31 @@ def init_register_ending_setters():
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
 
-# TODO: Log when this function is called.
+def discover_nodes(node):
+    """Log to file and console when an elusive node is encountered, so it can
+    be classified, and tested..
+    """
+    # Some formatting for the code output
+    output = ['='*40] + [line for line in node.statement().as_string().strip().split('\n')] + ['='*40]
+    message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
+    # Print to console, and log for persistance.
+    print('\n' + message)
+    node_data_store.write(message)
+
+
 def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
-    astroid.Comprehension, astroid.ExtSlice, astroid.Index,
-    astroid.Keyword, astroid.Module, astroid.Slice
+    Comprehension, ExtSlice, Index, Keyword, Module, Slice.
 
     Question: is the 'fromlineno' attribute always set?
+        ==> preliminary answer is, yes.
     """
+    assert node.fromlineno is not None, \
+            'node {} doesn\'t have fromlineno set.'.format(node)
+
+    # Log when this function is called.
+    node_data_store.store(str(node)[:-2])
+
     try:
         first_child = next(node.get_children())
         if node.fromlineno is None:
@@ -162,7 +214,7 @@ def fix_start_attributes(node):
             node.col_offset = first_child.col_offset
 
     except StopIteration:
-        # No children. Go to the enclosing statement as use that.
+        # No children. Go to the enclosing statement and use that.
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
         assert statement.fromlineno is not None and statement.col_offset is not None, \
@@ -172,19 +224,6 @@ def fix_start_attributes(node):
             node.fromlineno = statement.fromlineno
         if node.col_offset is None:
             node.col_offset = statement.col_offset
-
-
-def fix_start_attributes_arguments(node):
-    """Fix the col_offset attribute for astroid.Argument nodes."""
-    # set from col offset of parent FunctionDef node plus len of name.
-    parent_node = node.parent
-    if isinstance(parent_node, astroid.FunctionDef):
-        # account for 'def', name of the signature, and '('
-        node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
-    elif isinstance(parent_node, astroid.Lambda):
-        # account for 'lambda :'
-        node.col_offset = parent_node.col_offset + 7
-        # If there are no arguments, this node takes up no space
 
 
 def set_from_last_child(node):
@@ -225,7 +264,16 @@ def set_arguments(node):
     """
     if _get_last_child(node):
         set_from_last_child(node)
-    else:
+    else:  # node does not have children.
+        # set from col offset of parent node, plus len of name, etc.
+        # Note: if there are no arguments, this node takes up no space
+        parent_node = node.parent
+        if isinstance(parent_node, astroid.FunctionDef):
+            # account for string length of 'def', name of the signature, and '('
+            node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
+        elif isinstance(parent_node, astroid.Lambda):
+            # account for string length of 'lambda'
+            node.col_offset = parent_node.col_offset + 6
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
 
 

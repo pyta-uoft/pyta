@@ -4,14 +4,9 @@ properties are set.
 To run: python tests/test_setendings.py
 """
 
-import logging
 import unittest
-
 from astroid.bases import NodeNG
 from python_ta.transforms.setendings import *
-
-# Set the log level (DEBUG, ERROR, ...), and message format.
-logging.basicConfig(format='', level=logging.DEBUG)
 
 
 class NodeNG(object):
@@ -64,6 +59,11 @@ class TestEndingLocation(unittest.TestCase):
         # Check the nodes property correctness.
         self.nodeng = NodeNG()
 
+    @classmethod
+    def tearDownClass(self):
+        """A class method called after tests in an individual class have run."""
+        node_data_store.dump('fix_start_attributes')  # Log to file.
+
     def setUp(self):
         """Method called to prepare the test fixture. This is called immediately
         before calling the test method; other than AssertionError or SkipTest,
@@ -103,11 +103,11 @@ class TestEndingLocation(unittest.TestCase):
         try:
             self.assertEqual(expected, props)
         except AssertionError as e:
-            logging.error('\n{}'.format('-'*70))
-            logging.error(' Compare: [(fromlineno, end_lineno, col_offset, end_col_offset)]')
-            logging.error('Expected: {}'.format(expected))
-            logging.error('  Actual: {}'.format(props))
-            logging.error('{}'.format('-'*70))
+            print('\n{}'.format('-'*70))
+            print(' Compare: [(fromlineno, end_lineno, col_offset, end_col_offset)]')
+            print('Expected: {}'.format(expected))
+            print('  Actual: {}'.format(props))
+            print('{}'.format('-'*70))
             raise e  # otherwise, test will always 'pass'
 
     def set_and_check(self, module, node_class, expected):
@@ -118,7 +118,7 @@ class TestEndingLocation(unittest.TestCase):
         self._assertSameness(expected, props)
 
     def test_arguments(self):
-        expected = [(1, 2, 8, 30)]
+        expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18)]
         module = self.get_file_as_module('examples/ending_locations/arguments.py')
         self.set_and_check(module, astroid.Arguments, expected)
 
@@ -163,7 +163,7 @@ class TestEndingLocation(unittest.TestCase):
         """Note: Setting the attribute node by its last child doesn't include
         the attribute in determining the end_col_offset.
         """
-        expected = [(1, 1, 0, 7)]
+        expected = [(1, 1, 0, 7), (2, 2, 0, 8)]
         module = self.get_file_as_module('nodes/Attribute.py')
         self.set_and_check(module, astroid.Attribute, expected)
 
@@ -313,7 +313,7 @@ class TestEndingLocation(unittest.TestCase):
     def test_expr(self):
         """Note: end_col_offset is after the '1' (i.e. astroid.Const last child node) and does not include the last ')'.
         """
-        expected = [(1, 1, 0, 7), (2, 2, 0, 9)]
+        expected = [(1, 1, 0, 7), (2, 2, 0, 9), (3, 3, 0, 8)]
         module = self.get_file_as_module('nodes/Expr.py')
         self.set_and_check(module, astroid.Expr, expected)
 
@@ -343,7 +343,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Global, expected)
 
     def test_if(self):
-        expected = [(1, 2, 0, 8)]
+        expected = [(1, 4, 0, 8), (3, 4, 5, 8)]
         module = self.get_file_as_module('nodes/If.py')
         self.set_and_check(module, astroid.If, expected)
 
@@ -387,12 +387,10 @@ class TestEndingLocation(unittest.TestCase):
         module = self.get_file_as_module('nodes/ListComp.py')
         self.set_and_check(module, astroid.ListComp, expected)
 
-    # def test_module(self):
-    #     """NODE EXAMPLE DOES NOT EXIST
-    #     """
-    #     expected = []
-    #     module = self.get_file_as_module('nodes/Module.py')
-    #     self.set_and_check(module, astroid.Module, expected)
+    def test_module(self):
+        expected = [(0, 2, 0, 1)]
+        module = self.get_file_as_module('nodes/Module.py')
+        self.set_and_check(module, astroid.Module, expected)
 
     def test_name(self):
         expected = [(1, 1, 0, 6)]

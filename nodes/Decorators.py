@@ -7,9 +7,9 @@ Attributes:
     - body            (list)  the list of nodes inside the function
 
 Example:
-    - decorator_list  -> @wrapper
-    - name            -> fun
-    - body            -> pass
+    - decorator_list  -> [@wrapper]
+    - name            -> "fun"
+    - body            -> [pass]
 """
 
 @wrapper

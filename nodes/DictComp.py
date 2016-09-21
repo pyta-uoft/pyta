@@ -9,7 +9,7 @@ Attributes:
 Example:
     - key         -> str(n)
     - value       -> n
-    - generators  -> for n in range(3)
+    - generators  -> [for n in range(3)]
 """
 
 {str(n): n for n in range(3)}

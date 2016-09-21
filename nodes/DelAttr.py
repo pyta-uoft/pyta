@@ -5,7 +5,7 @@ Attributes:
     - targets  (list)  the targets to be deleted of type Attributes
 
 Example:
-    - targets  -> self.attr
+    - targets  -> [self.attr]
 """
 
 class Foo():

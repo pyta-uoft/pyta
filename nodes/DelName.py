@@ -5,7 +5,7 @@ Attributes:
     - targets  (list)  the targets to be deleted of type Name
 
 Example:
-    - targets  -> x
+    - targets  -> [x]
 """
 
 del x

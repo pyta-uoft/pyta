@@ -10,7 +10,7 @@ Attributes:
 Example:
     - type  -> None
     - name  -> None
-    - body  -> pass
+    - body  -> [pass]
 """
 
 try:

@@ -6,7 +6,7 @@ Attributes:
                        Subscript
 
 Example:
-    - targets  -> x
+    - targets  -> [x]
 """
 
 del x

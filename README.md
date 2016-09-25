@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="https://github.com/pyta-uoft/website/blob/master/images/pyta_logo_markdown.png?raw=true" alt="pyta logo" width="120">
+</p>
+
 # PyTA
 
 PyTA is a Python program which uses static code analysis to help students find

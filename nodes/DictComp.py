@@ -1,10 +1,15 @@
 """
 DictComp astroid node
 
+A DictComp node represents dictionary comprehensions in Python.
+
 Attributes:
-    - key         (node)  the part that will be evaluated for each item
-    - value       (node)  the part that will be evaluated for each item
-    - generators  (list)  a list of comprehension node
+    - key         (node)
+        - The part that will be evaluated for each item.
+    - value       (node)
+        - The part that will be evaluated for each item.
+    - generators  (List[Node])
+        - A list of comprehension node. See Comprehension node for more details.
 
 Example:
     - key         -> str(n)

@@ -1,11 +1,19 @@
 """
 DelAttr astroid node
 
+DelAttr deletes the named attribute, provided the object allows it. For example,
+delattr(x, 'foobar') is equivalent to del x.foobar.
+
 Attributes:
-    - targets  (list)  the targets to be deleted of type Attributes
+    - object  (object)
+        - The object which its attribute is being deleted.
+    - name    (str)
+        - The name of the attribute being deleted. The string must be the name
+          of one of the attributes of object.
 
 Example:
-    - targets  -> [self.attr]
+    - object  -> self
+    - name    -> "attr"
 """
 
 class Foo():

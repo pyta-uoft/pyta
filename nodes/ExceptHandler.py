@@ -11,25 +11,14 @@ Attributes:
     - body  (List[Node])
         - A list of nodes.
 
-Example 1:
-    - type  -> None
-    - name  -> None
+Example:
+    - type  -> ValueError
+    - name  -> e
     - body  -> [pass]
 
-Example 2:
-    - type  -> ValueError
-    - name  -> None
-    - body  -> [print("NOOOOOO!!!!!!!!!")]
 """
 
-#Example 1
 try:
     pass
-except:
+except ValueError as e:
     pass
-
-#Example 2
-try:
-    x = int(input("Please enter a number"))
-except ValueError:
-    print("NOOOOOO!!!!!!!!!")

@@ -8,17 +8,19 @@ function and fun is the function being decorated.
 
 Attributes:
     - decorator_list  (List[Decorators])
-        - The list of decorators to be applied. The first in the list will be
-          applied last.
+        - The list of decorators to be applied. See FunctionDef.py for an
+          example.
     - name            (str)
         - The name of the decorator function with type str.
     - args            (Node[Arguments])
-        - The argument of decorator is a function.
+        - The argument of decorator is a function, method, or class.
     - body            (list)
         - The list of nodes inside the decorator function.
+    - returns         (None)
+        - The return annotation.
 
 Example:
-    - decorator_list  -> [@wrapper]
+    - decorator_list  -> []
     - name            -> "wrapper"
     - args            -> fun()
     - body            -> None

@@ -4,9 +4,8 @@ List astroid node
 This node represents the Python list objects.
 
 Attributes:
-    - elts  (List[Assign_target])
-        - The elements in this list, which can be any Assignment target
-          type (Attribute, Subscript, Starred, Name, List, or Tuple).
+    - elts  (List[Expr])
+        - The elements in this list, which can be any expression.
     - ctx   (class[expr_context])
         - The context in which this list is to be used, either Load or Store.
 

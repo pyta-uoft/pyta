@@ -331,5 +331,56 @@ class TypeInferenceVisitorTestMoreComplex(unittest.TestCase):
         self.assertEqual(Tuple[int, List, List, Tuple[bool, str]], result[0])
 
 
+class MoreTupleTests(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        # Instantiate a visitor, and register the transform functions to it.
+        self.type_visitor = register_type_constraints_setter()
+
+    def test_list_of_str(self):
+        module = astroid.parse("""['a', 'b'] + ['c', 'd']""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([List[str]], result)
+
+    def test_mixed_list(self):
+        module = astroid.parse("""['a', 'b'] + [1, 2]""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([List], result)
+
+    def test_tuple_of_int(self):
+        module = astroid.parse("""(1, 2) + (3, 4)""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([Tuple[int, int]], result)
+
+    def test_mixed_tuple(self):
+        module = astroid.parse("""('a', 'b') + (1, 2)""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        # for the type_constraints of binop which has tuple type of operands,
+        # does all elements type from both operands need to be listed?
+        self.assertEqual([Tuple], result)
+
+    def test_dict_of_str_int(self):
+        module = astroid.parse("""{'a': 1} + {'b': 2}""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([Dict[str, int]], result)
+
+    def test_mixed_dict(self):
+        module = astroid.parse("""{'a': 1} + {'b': 'c'}""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([Dict], result)
+
 if __name__ == '__main__':
     unittest.main()

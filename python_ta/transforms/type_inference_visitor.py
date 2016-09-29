@@ -1,4 +1,5 @@
 import astroid
+import astroid.node_classes
 from typing import Tuple, List, Dict, Set
 from astroid.transforms import TransformVisitor
 
@@ -45,12 +46,25 @@ def set_binop_type_constraints(node):
     left_type = node.left.type_constraints
     right_type = node.right.type_constraints
 
-    if ((right_type == int and left_type == float) or
+    if left_type == right_type:
+        node.type_constraints = node.left.type_constraints
+    elif type(node.left) == type(node.right) == astroid.node_classes.List:
+        node.type_constraints = List
+    elif type(node.left) == type(node.right) == astroid.node_classes.Tuple:
+        node.type_constraints = Tuple
+    elif type(node.left) == type(node.right) == astroid.node_classes.Dict:
+        node.type_constraints = Dict
+    elif ((right_type == int and left_type == float) or
         (right_type == float and left_type == int)):
         node.type_constraints = float
-    elif right_type == left_type:
-        node.type_constraints = left_type
-    else:
+    elif ((right_type == int and left_type == str) or
+        (right_type == str and left_type == int) or
+        (right_type == float and left_type == str) or
+        (right_type == str and left_type == float) or
+        (right_type == list and left_type != list) or
+        (right_type != list and left_type == list) or
+        (right_type == tuple and left_type != tuple) or
+        (right_type != tuple and left_type == tuple)):
         raise ValueError('Different types of operands found, binop node %s'
                          'might have a type error.' % node)
 

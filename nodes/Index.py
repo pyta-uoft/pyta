@@ -4,7 +4,7 @@ Index astroid node
 Simple subscripting with a single value.
 
 Attributes:
-    - value  (Node)
+    - value  (Num)
         - A Num node contains a single value.
 
 Example:

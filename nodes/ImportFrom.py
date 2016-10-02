@@ -4,12 +4,12 @@ ImportFrom astroid node
 This node represents statement from x import y.
 
 Attributes:
-    - module  (str)
+    - modname  (str)
         - The name of the module that is being imported from.
-    - names   (Node)
+    - names    (List[Alias])
         - List of alias nodes. Each alias node has a name attribute and an
           asname attribute.
-    - level   (int)
+    - level    (int)
         - An integer that holds the level of the relative import. 0 means
           absolute import.
 

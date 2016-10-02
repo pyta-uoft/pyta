@@ -4,7 +4,7 @@ ExceptHandler astroid node
 ExceptHandler is a single except clause.
 
 Attributes:
-    - type  (node)
+    - type  (Node)
         - Typically a Name node like ValueError or TypeError.
     - name  (str)
         - A raw string for the name to hold the exception.

@@ -2,11 +2,11 @@
 DelName astroid node
 
 Attributes:
-    - targets  (List[Node])
-        - The targets to be deleted of type Name node.
+    - name  (Name)
+        - The name node to be deleted.
 
 Example:
-    - targets  -> [x]
+    - name  -> x
 """
 
 del x

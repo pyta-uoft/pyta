@@ -5,15 +5,14 @@ DelAttr deletes the named attribute, provided the object allows it. For example,
 delattr(x, 'foobar') is equivalent to del x.foobar.
 
 Attributes:
-    - object  (object)
-        - The object which its attribute is being deleted.
-    - name    (str)
-        - The name of the attribute being deleted. The string must be the name
-          of one of the attributes of object.
+    - expr      (Node)
+        - The node object whose attribute is being deleted.
+    - attrname  (str)
+        - The name of the attribute being deleted.
 
 Example:
-    - object  -> self
-    - name    -> "attr"
+    - expr      -> Foo
+    - attrname  -> "attr"
 """
 
 class Foo():

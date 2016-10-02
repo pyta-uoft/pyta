@@ -4,7 +4,7 @@ Import astroid node
 An import statement
 
 Attributes:
-    - names  (List[Node])
+    - names  (List[Alias])
         - List of alias nodes. Each alias node has a name attribute and an
           asname attribute.
 

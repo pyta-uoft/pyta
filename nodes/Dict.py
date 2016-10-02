@@ -4,14 +4,11 @@ Dict astroid node
 This node represents the Python dictionary objects.
 
 Attributes:
-    - keys    (list)
-        - The keys of the dict.
-    - values  (list)
-        - The values of the dict, in the same order as the keys.
+    - items  (List[Tuple])
+        - Contains the tuple of key and value pair.
 
 Example:
-    - keys    -> ['b']
-    - values  -> [1]
+    - items  -> [('b', 1)]
 """
 
 a = {'b': 1}

@@ -4,7 +4,7 @@ For astroid node
 A for loop.
 
 Attributes:
-    - target  (Node(Name|Tuple|List))
+    - target  (Node(Name | Tuple | List))
         - Holds the variable(s) the loop assigns to as a single node.
     - iter    (Node)
         - The node to be looped over.

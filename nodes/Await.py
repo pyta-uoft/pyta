@@ -5,10 +5,10 @@ An await expression. Only valid in the body of an AsyncFunctionDef.
 
 Attributes:
     - value  (Node)
-        - What Await astroid node waits for.
+        - What the expression waits for.
 
 Example:
-    - value  -> [to be filled]
+    - value  -> pass
 """
 
 def async_coroutine():

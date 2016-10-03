@@ -1,12 +1,16 @@
 """
 Assign astroid node
 
+An assignment.
+
 Attributes:
-    - targets  (list)  a list of nodes
-    - value    (type)  a single node
+    - targets  (List[Node])
+        - A list of nodes.
+    - value    (Node)
+        - A single node.
 
 Example:
-    - targets  -> x
+    - targets  -> [x]
     - value    -> 3
 """
 

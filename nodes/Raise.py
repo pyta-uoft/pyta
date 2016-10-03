@@ -6,10 +6,10 @@ exceptions. This statement also handles exception chaining using the "from"
 clause, which is included in the Raise node.
 
 Attributes:
-    - exc    (node)
+    - exc    (Node | None)
         - The exception to be raised, either a Call or Name node. Can also
           be None for standalone "raise" statements.
-    - cause  (node)
+    - cause  (Node)
         - This optional attribute allows explicit declaration of the
           originating exception, using a Call or Name exception node.
 

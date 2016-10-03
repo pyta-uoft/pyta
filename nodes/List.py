@@ -16,6 +16,10 @@ Example 1:
 Example 2:
     - elts  -> [Num(1), Num(2), Num(3)]
     - ctx   -> Load
+
+Example 3:
+    - elts  -> [Num(1), Num(2)]
+    - ctx   -> Store
 """
 
 # Example 1
@@ -23,3 +27,6 @@ Example 2:
 
 # Example 2
 [1, 2, 3]
+
+# Example 3
+[x, y] = 7, 8

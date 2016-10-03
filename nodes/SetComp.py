@@ -9,7 +9,7 @@ Attributes:
     - elt         (Expr)
         - The part to be evaluated to make every item in the set. This can
           be any expression node, such as a BinOp or Str.
-    - generators  (List[])
+    - generators  (List[Comprehension])
         - This list contains one Comprehension node for every "for" clause
           in this set comprehension.
 

@@ -3,5 +3,7 @@
 # it is, then run a check_all on it.
 # os.walk doesn't return anything
 # return stat_reporter in the end
+
+
 def pyta_statistics():
     pass

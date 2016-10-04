@@ -2,7 +2,7 @@
 Slice astroid node
 
 This node represents the Python slicing operator, used to isolate parts of
-an iterable.
+an iterable. It is used in the Subscript node.
 
 Attributes:
     - lower  (Num)

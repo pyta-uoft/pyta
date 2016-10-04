@@ -18,7 +18,7 @@ Example 2:
     - ctx   -> Load
 
 Example 3:
-    - elts  -> [Num(1), Num(2)]
+    - elts  -> [Name('x', Store()), Name('y', Store())]
     - ctx   -> Store
 """
 

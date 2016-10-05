@@ -1,5 +1,4 @@
 from .plain_reporter import PlainReporter
-import pyta_stats
 # Report the results from pyta_stats.py
 
 

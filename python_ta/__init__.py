@@ -25,8 +25,7 @@ import pylint
 from astroid import MANAGER
 import pycodestyle
 
-from .reporters import ColorReporter
-
+from .reporters import ColorReporter, StatReporter
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'

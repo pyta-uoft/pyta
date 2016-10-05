@@ -1,5 +1,5 @@
 from .plain_reporter import PlainReporter
-# record, collect, and count each type of errors and report it.
+# Report the results from pyta_stats.py
 
 
 class StatReporter(PlainReporter):
@@ -16,6 +16,7 @@ class StatReporter(PlainReporter):
 
     def print_messages(self, level='all'):
         """
+        Overrides the corresponding function in PlainReporter.
 
 
         @type self: StatReporter

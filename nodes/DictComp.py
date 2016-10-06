@@ -16,9 +16,9 @@ Attributes:
 Example:
     - key         -> str(n)
     - value       -> n
-    - generators  -> [comprehension(n, range(3))]
+    - generators  -> [Comprehension(n, range(3))]
     - locals      -> {'key': str(n), 'value': n,
-                     'generators': generator(for n in range(3))}
+                     'generators': (for n in range(3))}
 """
 
 {str(n): n for n in range(3)}

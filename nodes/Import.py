@@ -9,7 +9,7 @@ Attributes:
           asname attribute.
 
 Example:
-    - names  -> [alias(astroid, ast)]
+    - names  -> [Alias(astroid, ast)]
 """
 
 import astroid as ast

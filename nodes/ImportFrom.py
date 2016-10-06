@@ -15,8 +15,8 @@ Attributes:
 
 Example:
     - module  -> "transforms"
-    - names   -> [alias(TransformVisitor)]
-    - level   -> 1
+    - names   -> [Alias(TransformVisitor, tfv)]
+    - level   -> 0
 """
 
-from astroid.transforms import TransformVisitor
+from transforms import TransformVisitor as tfv

@@ -14,10 +14,10 @@ Attributes:
 
 Example:
     - elt         -> g
-    - generators  -> [comprehension(ip, num),
-                     comprehension(num, range(9)))]
-    - locals      -> {'elt': g, 'generators': [comprehension(ip, num),
-                     comprehension(num, range(9)))]}
+    - generators  -> [Comprehension(ip, num),
+                     Comprehension(num, range(9)))]
+    - locals      -> {'elt': g, 'generators': [Comprehension(ip, num),
+                     Comprehension(num, range(9)))]}
 """
 
 (g for ip in num for num in range(9))

@@ -4,11 +4,12 @@ ExtSlice astroid node
 Extended slicing which most python objects like list and string don't support.
 
 Attributes:
-    - dims  (Slice)
+    - dims  (List[Slice | Index])
         - Holds a Slice node.
 
 Example:
-    - dims  -> Slice(lower=Num(n=2), upper=Num(n=3), step=None)
+    - dims  -> [Slice(lower=Num(n=2), upper=Num(n=3), step=None),
+                Index(value=Num(n=1)]
 """
 
 class Foo(object):

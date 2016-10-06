@@ -13,7 +13,7 @@ Attributes:
 
 Example:
     - type  -> ValueError
-    - name  -> e
+    - name  -> 'e'
     - body  -> [pass]
 
 """

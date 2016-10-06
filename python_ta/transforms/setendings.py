@@ -66,7 +66,6 @@ NODES_WITH_CHILDREN = [
     astroid.DelAttr,
     astroid.Delete,
     # TODO: missing right }
-    # [This one is tricky because there is no way to capture the last brace location]
     astroid.Dict,
     # TODO: missing right }
     astroid.DictComp,
@@ -74,7 +73,6 @@ NODES_WITH_CHILDREN = [
     # TODO: missing *both* outer brackets
     astroid.ExtSlice,
     # TODO: missing right paren
-    # [This one is tricky because original paren are lost in astroid properties]
     astroid.Expr,
     astroid.For,
     astroid.FunctionDef,

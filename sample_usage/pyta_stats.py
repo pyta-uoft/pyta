@@ -21,11 +21,9 @@ def pyta_statistics(directory):
     """
     global multi_files
     multi_files = True
-
-
     # walk directory, find every "file":
-    # Does check_all take "file" by itself? Need altered filepath?
-    # check_all(file, reporter=StatReporter)
+    # for each .py file visited, run python_ta.check_all(reporter=StatReporter)
+    # run stats_calculator
 
 
 def stats_calculator(error_msgs, style_msgs):
@@ -42,11 +40,13 @@ def stats_calculator(error_msgs, style_msgs):
     @rtype: dict
     """
     stats = {}
+    # collect all the errors and style errors from error_msgs, style_msgs, and
+    # have them in a dictionary with this form:
+    # {"Error or Style" + ": " + "msg.id " + "(msg.symbol)": int}
+    # put this dict in to helper functions frequent_complaints(), percentage()
+    # return the result of those functions in a dict with whatever form you like
 
-    # aggregate stats
-    # TODO: does this aggregate stats itself or call helpers?
-
-    return stats
+    # TODO
 
 
 def frequent_complaints(comp_dict, top="all"):
@@ -72,4 +72,6 @@ def frequent_complaints(comp_dict, top="all"):
     else:
         return most_frequently
 
+# def relative_whatever(dict, top):
+    #calculate the percentage
 

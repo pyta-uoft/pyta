@@ -23,7 +23,7 @@ def pyta_statistics(directory):
     multi_files = True
     # walk directory, find every "file":
     # for each .py file visited, run python_ta.check_all(reporter=StatReporter)
-    # run stats_calculator
+    # store messages in global error_messages and style_messages
 
 
 def stats_calculator(error_msgs, style_msgs):
@@ -40,8 +40,7 @@ def stats_calculator(error_msgs, style_msgs):
     @rtype: dict
     """
     stats = {}
-    # collect all the errors and style errors from error_msgs, style_msgs, and
-    # have them in a dictionary with this form:
+    # have all the errors and style errors from error_msgs, style_msgs in a dictionary with this form:
     # {"Error or Style" + ": " + "msg.id " + "(msg.symbol)": int}
     # put this dict in to helper functions frequent_complaints(), percentage()
     # return the result of those functions in a dict with whatever form you like

@@ -6,10 +6,11 @@ expression from None to a function Call.
 
 Attributes:
     - value  (Expr)
-        - The value to be returned, which can be any possible expression.
+        - Optionally, the value to be returned, which can be any possible
+          expression.
 
 Example 1:
-    - value  -> None
+    - value  ->
 
 Example 2:
     - value  -> Num(1)

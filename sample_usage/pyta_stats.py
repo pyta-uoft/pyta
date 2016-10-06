@@ -1,14 +1,11 @@
-# Use os.walk to walk through all the files in a directory from top to bottem.
-# Everytime when os.walk walks a file, check if the file is a python file, if
-# it is, then run a check_all on it.
-# os.walk doesn't return anything
 import os
 from os.path import join
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
 
-multi_files = False
 # keeps track of who called stat_calculator, to tell StatReporter how to print
+multi_files = False
+# make sure these two variables get set back to [] after
 error_messages = []
 style_messages = []
 

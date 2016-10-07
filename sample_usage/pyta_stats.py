@@ -1,36 +1,45 @@
 import os
-from os.path import join
 import python_ta
-from python_ta.reporters.stat_reporter import StatReporter
+from python_ta.reporters.stat_reporter import StatReporter, error_messages, style_messages
 
 # keeps track of who called stat_calculator, to tell StatReporter how to print
 multi_files = False
-# make sure these two variables get set back to [] after
-error_messages = []
-style_messages = []
 
 
 def pyta_statistics(directory):
     """
     Recursively run python_ta.check_all() on the files in the directory and its
     subdirectories to collect the error and style messages.
+    Assume directory is a folder that contains subdirectories named by
+    student's utorid/studentID/group name, or directory can also be a student
+    folder itself. Also assume that student's directory doesn't contain any
+    subdirectories, only files.
 
     @param str directory: The string of the path way of the directory.
     @rtype: None
     """
     global multi_files
     multi_files = True
-    # store information to error_messages and style_messages
-    global error_messages
-    global style_messages
+    all_errors = []
+    all_style = []
+    all_stats = {}
     for root_str, dir_list, file_list in os.walk(directory):
-        for file in file_list:
-            # check if file is a .py file
-            if file[-3:] == ".py":
-                python_ta.check_all(file, reporter=StatReporter)
-                # store all the msg objects of this student's files
-                error_messages.append(StatReporter._error_messages)
-                style_messages.append(StatReporter._style_messages)
+        # check if directory is student directory or assignment parent directory
+        if dir_list is []:
+            # It is a student folder
+            for file in file_list:
+                # check if file is a .py file
+                if file[-3:] == ".py":
+                    python_ta.check_all(file, reporter=StatReporter)
+                    # store all the msg objects of this student's files
+                    for msg in error_messages:
+                        all_errors.append(msg)
+                    for msg in style_messages:
+                        all_style.append(msg)
+                    student_id = os.path.basename(os.path.normpath(root_str))
+                    all_stats[student_id] = stats_calculator(all_errors,
+                                                             all_style)
+    return all_stats
 
 
 def stats_calculator(error_msgs, style_msgs): #these two things will be lists of Message objects
@@ -100,8 +109,8 @@ def frequent_complaints(comp_dict, top=5):
     # So the name of the error first and then the number of its occurrence.
     # return the top whatever number
     if isinstance(top, int):
-        if top < StatReporter._number_of_messages:
-            top = StatReporter._number_of_messages
+        if top > len(most_frequently):
+            top = len(most_frequently)
             return most_frequently[0:top]
         else:
             return most_frequently[0:top]

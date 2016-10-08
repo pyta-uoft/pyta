@@ -16,7 +16,7 @@ Attributes:
 Example:
     - target  -> [Name(id='x', ctx=Store())]
     - value   -> Num(n=1)
-    - op      -> +=
+    - op      -> Add()
 """
 
 x += 1

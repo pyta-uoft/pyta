@@ -11,7 +11,7 @@ Attributes:
           positionally.
     - kwonlyargs   (List[arg])
         - A list of keyword-only argument names.
-    - kw_defaults  (List[None|arg])
+    - kw_defaults  (List[None | arg])
         - A list of default values for keyword-only arguments.
     - vararg       (arg|None)
         - A variable-length argument.
@@ -27,6 +27,7 @@ Example:
     - kw_defaults  -> [None,Num(n=3)]
     - vararg       -> arg(arg='g', annotation=None)
     - kwarg        -> arg(arg='g', annotation=None)
+    - defaults     -> [Num(n=1),Num(n=2)]
 """
 
 def f(a: 'annotation', b=1, c=2, *d, e, f=3, **g):

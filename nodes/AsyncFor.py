@@ -20,9 +20,9 @@ Attributes:
  Example:
      - target  -> Name(id='a', ctx=Store())
      - iter    -> Name(id='b', ctx=Load())
-     - body    -> [If(test=Compare(left=Name(id='a', ctx=Load()), ops=[Gt(),],
-                  comparators=[Num(n=5),], [Break(),]
-     - orelse  -> [Continue(),], []
+     - body    -> [If(test=Compare(left=Name(id='a', ctx=Load()), ops=[Gt()],
+                  comparators=[Num(n=5)], [Break()]
+     - orelse  -> [Continue()], []
 """
 
 async def fun():

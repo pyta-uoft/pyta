@@ -20,13 +20,13 @@ Attributes:
 
 Example:
     - args         -> [arg(arg='a', annotation=Str(s='annotation')),arg(arg='b',
-                      annotation=None),arg(arg='c', annotation=None),]
+                      annotation=None),arg(arg='c', annotation=None)]
     - vararg       -> arg(arg='g', annotation=None)
     - kwonlyargs   -> [arg(arg='e', annotation=None),arg(arg='f',
-                      annotation=None),]
+                      annotation=None)]
     - kwarg        -> arg(arg='g', annotation=None)
-    - defaults     -> [Num(n=1),Num(n=2),]
-    - kw_defaults  -> [None,Num(n=3),]
+    - defaults     -> [Num(n=1),Num(n=2)]
+    - kw_defaults  -> [None,Num(n=3)]
 """
 
 def f(a: 'annotation', b=1, c=2, *d, e, f=3, **g):

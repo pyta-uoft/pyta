@@ -8,7 +8,7 @@ Attributes:
         - The name node to be assigned.
 
 Example:
-    - name  -> x
+    - name  -> Name(id='x', ctx=Store())
 """
 
 x = 3

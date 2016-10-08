@@ -8,13 +8,13 @@ Attributes:
         - The function.
     - args      (List[Node])
         - List of the arguments passed by position.
-    - keywords  (List[Keyword])
+    - keywords  (List[Keyword | None])
         - List of keyword objects representing arguments passed by keyword.
 
 Example 1:
-    - func      -> print
-    - args      -> []
-    - keywords  -> [1]
+    - func      -> Name(id='print', ctx=Load())
+    - args      -> Name(id='ord', ctx=Load())
+    - keywords  -> []
 
 Example 2:
     - func      -> Name(id='func', ctx=Load())
@@ -23,7 +23,7 @@ Example 2:
 """
 
 # Example 1
-print(1)
+[ord(c) for line in file for c in line]
 
 # Example 2
 def func(a, b=c, *d, **e):

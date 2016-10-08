@@ -5,7 +5,7 @@ An augmented assignment, which is the combination, in a single statement, of a
 binary operation and an assignment statement.
 
 Attributes:
-    - target  (Name | Subscript | Attribute)
+    - target  (List[Name | Subscript | Attribute])
         - A list of nodes. Multiple nodes represent assigning the same value.
           to each.
     - value   (Node)
@@ -14,8 +14,8 @@ Attributes:
         - The operator to be performed on target.
 
 Example:
-    - target  -> x
-    - value   -> 1
+    - target  -> [Name(id='x', ctx=Store())
+    - value   -> Num(n=1)
     - op      -> +=
 """
 

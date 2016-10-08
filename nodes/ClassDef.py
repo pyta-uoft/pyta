@@ -13,9 +13,8 @@ Attributes:
 
 Example:
     - decorators  -> @wrapper
-    - bases       -> [Name(id='base1', ctx=Load()),
-                     Name(id='base2', ctx=Load()),]
-    - body        -> [Pass(),]
+    - bases       -> [Name(id='base1', ctx=Load()),Name(id='base2', ctx=Load())]
+    - body        -> [Pass()]
 """
 
 @wrapper

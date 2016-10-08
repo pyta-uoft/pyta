@@ -8,8 +8,9 @@ Attributes:
         - The function.
     - args      (List[Node])
         - List of the arguments passed by position.
-    - keywords  (List[Keyword | None])
+    - keywords  (List[Keyword] | None)
         - List of keyword objects representing arguments passed by keyword.
+          If None, keywords is an empty list.
 
 Example 1:
     - func      -> Name(id='print', ctx=Load())

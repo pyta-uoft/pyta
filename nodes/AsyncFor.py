@@ -13,7 +13,7 @@ Attributes:
         - The single node to be looped over.
     - body    (List[Node])
         - The node to be executed.
-    - orelse  (List[Node])
+    - orelse  (List[Node] | None)
         - Node will execute if the loop finished normally rather than via a
         break statement.
 
@@ -22,7 +22,7 @@ Attributes:
      - iter    -> Name(id='b', ctx=Load())
      - body    -> [If(test=Compare(left=Name(id='a', ctx=Load()), ops=[Gt()],
                   comparators=[Num(n=5)], [Break()]
-     - orelse  -> [Continue()], []
+     - orelse  -> [Continue()]
 """
 
 async def fun():

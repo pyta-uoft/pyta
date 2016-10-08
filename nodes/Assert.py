@@ -7,8 +7,9 @@ Attributes:
     - test  (Expr)
         - This holds the condition, such as a Compare node, to be evaluated
           True or False
-    - fail  (Node)
-        - Usually a str; the message shown if condition is False.
+    - fail  (Node | None)
+        - Usually a str; the message shown if condition is False. If None, only
+          AssertionError is shown.
 
 Example:
     - test  -> x == 0

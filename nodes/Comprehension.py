@@ -12,8 +12,8 @@ Attributes:
         - List of test expressions.
 
 Example:
-    - target  -> x
-    - iter    -> range(3)
+    - target  -> Name(id='line', ctx=Store())
+    - iter    -> Name(id='range(3)', ctx=Load())
     - ifs     -> []
 """
 

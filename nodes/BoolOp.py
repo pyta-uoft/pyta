@@ -11,7 +11,7 @@ Attributes:
 
 Example:
     - values  -> None, 1
-    - op      -> or
+    - op      -> Or
 """
 
 x = None or 1

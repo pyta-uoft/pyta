@@ -4,14 +4,14 @@ Attribute astroid node
 To give attribute access.
 
 Attributes:
-    - expr      (Expr)
-        - An expression for the attribute name.
-    - attrname  (node)
-        - The attribute name.
+    - expr      (Node)
+        - Those node object whose attribute is given access to.
+    - attrname  (str)
+        - The name of the access.
 
 Example:
     - expr      -> ''
-    - attrname  -> ''
+    - attrname  -> 'endswith', ctx=Load()
 """
 
 ''.endswith('')

@@ -12,7 +12,7 @@ Attributes:
 
 Example:
     - test  -> x == 0
-    - fail  -> 'x isn't 0!' # AssertionError and this message if condition is
+    - fail  -> "x isn't 0!" # AssertionError and this message if condition is
                False
 """
 

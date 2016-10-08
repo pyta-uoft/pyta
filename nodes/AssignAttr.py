@@ -4,14 +4,14 @@ AssignAttr astroid node
 To assign a value to the relationship attribute.
 
 Attributes:
-    - expr      (Expr)
-        - An expression to be assigned.
-    - attrname  (Node)
-        - The name that is assigned to the expression.
+    - expr      (Node)
+        - The node object whose attribute is assigned.
+    - attrname  (str)
+        - The name of the attribute that is assigned.
 
 Example:
-    - expr      -> 'name'
-    - attrname  -> 'self.name'
+    - expr      -> ClassName
+    - attrname  -> "name"
 """
 
 class ClassName():

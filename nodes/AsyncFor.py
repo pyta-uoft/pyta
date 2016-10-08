@@ -6,6 +6,17 @@ Subclass of For astroid node. This node iterates over async code with a for-loop
  rather the code executes all operations in one go. Only valid in body of an
  AsyncFunctionDef astroid node.
 
+Attributes:
+    - target  (Node(Name | Tuple | List))
+        - Holds the variable(s) the loop assigns to as a single node.
+    - iter    (Node)
+        - The node to be looped over.
+    - body    (Node)
+        - The node to be executed.
+    - orelse  (Node)
+        - Node will execute if the loop finished normally rather than via a
+        break statement.
+
  Example:
      - target  -> i
      - iter    -> i in range(3)

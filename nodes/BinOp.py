@@ -12,9 +12,9 @@ Attributes:
         - The operator to be performed on left and right.
 
 Example:
-    - left   -> 1
-    - right  -> 2
-    - op     -> +
+    - left   -> Name(Num(n=1), ctx=Load())
+    - right  -> Name(Num(n=2), ctx=Load())
+    - op     -> Add()
 """
 
 1 + 2

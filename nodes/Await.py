@@ -8,7 +8,8 @@ Attributes:
         - What the expression waits for.
 
 Example:
-    - value  -> pass
+    - value  -> Call(func=Name(id='async_coroutine', ctx=Load()), args=[],
+                keywords=[])
 """
 
 def async_coroutine():

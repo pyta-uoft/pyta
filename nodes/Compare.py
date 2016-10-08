@@ -10,8 +10,8 @@ Attributes:
         - The list of operators to be performed on left.
 
 Example:
-    - left  -> 3
-    - ops   -> [>]
+    - left  -> Name(id='3', ctx=Load()
+    - ops   -> [Gt()]
 """
 
 3 > 2

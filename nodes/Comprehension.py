@@ -8,7 +8,7 @@ Attributes:
         - Typically a name or tuple node; the reference to use for each element.
     - iter    (Node)
         - The object to iterate over.
-    - ifs     (List[Expr] | None)
+    - ifs     (List[Expr])
         - List of test expressions. If None, ifs is an empty list.
 
 Example:

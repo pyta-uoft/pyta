@@ -8,8 +8,8 @@ Attributes:
         - Typically a name or tuple node; the reference to use for each element.
     - iter    (Node)
         - The object to iterate over.
-    - ifs     (List[Expr])
-        - List of test expressions.
+    - ifs     (List[Expr] | None)
+        - List of test expressions. If None, ifs is an empty list.
 
 Example:
     - target  -> Name(id='line', ctx=Store())

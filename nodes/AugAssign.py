@@ -14,7 +14,7 @@ Attributes:
         - The operator to be performed on target.
 
 Example:
-    - target  -> [Name(id='x', ctx=Store())
+    - target  -> [Name(id='x', ctx=Store())]
     - value   -> Num(n=1)
     - op      -> +=
 """

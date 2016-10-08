@@ -15,7 +15,7 @@ Attributes:
         - The code to be performed until the with statement closes.
 
 Example:
-    - items  -> [Call(open('/foo/bar', 'r') Name('f', Load())]
+    - items  -> [Call(open('/foo/bar', 'r'), Name('f', Load())]
     - body   -> [Node(Pass)]
 """
 

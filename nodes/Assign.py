@@ -10,8 +10,8 @@ Attributes:
         - A single node.
 
 Example:
-    - targets  -> [x]
-    - value    -> 3
+    - targets  -> [Name(id='x', ctx=Store()),]
+    - value    -> Num(n=3)
 """
 
 x = 3

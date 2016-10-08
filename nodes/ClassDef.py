@@ -13,10 +13,11 @@ Attributes:
 
 Example:
     - decorators  -> @wrapper
-    - bases       -> [Classname()]
-    - body        -> [pass]
+    - bases       -> [Name(id='base1', ctx=Load()),
+                     Name(id='base2', ctx=Load()),]
+    - body        -> [Pass(),]
 """
 
 @wrapper
-class ClassName():
+class foo(base1, base2, metaclass=meta):
     pass

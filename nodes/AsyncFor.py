@@ -10,21 +10,25 @@ Attributes:
     - target  (Node(Name | Tuple | List))
         - Holds the variable(s) the loop assigns to as a single node.
     - iter    (Node)
-        - The node to be looped over.
-    - body    (Node)
+        - The single node to be looped over.
+    - body    (List[Node])
         - The node to be executed.
-    - orelse  (Node)
+    - orelse  (List[Node])
         - Node will execute if the loop finished normally rather than via a
         break statement.
 
  Example:
-     - target  -> i
-     - iter    -> i in range(3)
-     - body    -> pass
-     - orelse  -> None
+     - target  -> Name(id='a', ctx=Store())
+     - iter    -> Name(id='b', ctx=Load())
+     - body    -> [If(test=Compare(left=Name(id='a', ctx=Load()), ops=[Gt(),],
+                  comparators=[Num(n=5),], [Break(),]
+     - orelse  -> [Continue(),], []
 """
 
 async def fun():
     """Note coroutine function must be declared with async def."""
-    async for i in range(3):
-        pass
+    async for a in b:
+        if a > 5:
+            break
+        else:
+            continue

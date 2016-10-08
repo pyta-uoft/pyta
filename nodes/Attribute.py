@@ -10,8 +10,8 @@ Attributes:
         - The name of the access.
 
 Example:
-    - expr      -> ''
-    - attrname  -> 'endswith', ctx=Load()
+    - expr      -> ""
+    - attrname  -> "endswith"
 """
 
 ''.endswith('')

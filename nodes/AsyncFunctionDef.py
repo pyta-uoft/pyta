@@ -19,8 +19,9 @@ Attributes:
         - The return annotation.
 
 Example:
-    - name        -> "func"
-    - args        -> arg
+    - name        -> animal
+    - args        -> arguments(args=[], vararg=None, kwonlyargs=
+                     [arg(arg='arg')],kw_defaults=[], kwarg=None, defaults=[])
     - doc         -> "This is function animal."
     - body        -> [Assign(dog, "an animal")]
     - decorators  -> @wrapper

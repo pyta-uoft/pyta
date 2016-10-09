@@ -1,6 +1,6 @@
 import os
 import python_ta
-from python_ta.reporters.stat_reporter import StatReporter, error_messages, style_messages
+from python_ta.reporters.stat_reporter import StatReporter
 
 # keeps track of who called stat_calculator, to tell StatReporter how to print
 multi_files = False
@@ -32,9 +32,9 @@ def pyta_statistics(directory):
                 if file[-3:] == ".py":
                     python_ta.check_all(file, reporter=StatReporter)
                     # store all the msg objects of this student's files
-                    for msg in error_messages:
+                    for msg in StatReporter.error_messages:
                         all_errors.append(msg)
-                    for msg in style_messages:
+                    for msg in StatReporter.style_messages:
                         all_style.append(msg)
                     student_id = os.path.basename(os.path.normpath(root_str))
                     all_stats[student_id] = stats_calculator(all_errors,

@@ -194,9 +194,6 @@ def discover_nodes(node):
 def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
     Comprehension, ExtSlice, Index, Keyword, Module, Slice.
-
-    Question: is the 'fromlineno' attribute always set?
-        ==> preliminary answer is, yes.
     """
     assert node.fromlineno is not None, \
             'node {} doesn\'t have fromlineno set.'.format(node)

@@ -1,9 +1,7 @@
 import os
 import python_ta
-from python_ta.reporters.stat_reporter import StatReporter, error_messages, style_messages
-
-# keeps track of who called stat_calculator, to tell StatReporter how to print
-multi_files = False
+from python_ta.reporters.stat_reporter import StatReporter
+from .stats_analysis import *
 
 
 def pyta_statistics(directory):
@@ -32,9 +30,9 @@ def pyta_statistics(directory):
                 if file[-3:] == ".py":
                     python_ta.check_all(file, reporter=StatReporter)
                     # store all the msg objects of this student's files
-                    for msg in error_messages:
+                    for msg in StatReporter.error_messages:
                         all_errors.append(msg)
-                    for msg in style_messages:
+                    for msg in StatReporter.style_messages:
                         all_style.append(msg)
                     student_id = os.path.basename(os.path.normpath(root_str))
                     all_stats[student_id] = stats_calculator(all_errors,
@@ -42,55 +40,7 @@ def pyta_statistics(directory):
     return all_stats
 
 
-def stats_calculator(error_msgs, style_msgs): #these two things will be lists of Message objects
-    """
-    Analyse the given lists of error and style Message objects to aggregate
-    statistics on and return them in dictionary form.
-    Called by StatReporter.
-    Results dictionary format:
-    TODO
-    @param list error_msgs: Message objects for all errors found by linters
-    @param list style_msgs: Message objects for all style issues
-    @rtype: dict
-    """
-
-    # {msg.symbol + "(" + msg.object + ")": count}
-    all_msgs = error_msgs + style_msgs
-    # get dict of values {id:int, id2:int}
-    msgs_dict = calculator(all_msgs)
-    # sort into list of tuple, highest on top
-    freq_nums = frequent_complaints(msgs_dict)
-
-    total_errors = sum([msgs_dict[msg_id] for msg_id in msgs_dict])
-    # divide each value by total and round to two places
-    for message in msgs_dict:
-        msgs_dict[message] = (msgs_dict[message]/total_errors * 100).__round__(2)
-    perc_nums = frequent_complaints(msgs_dict)
-    stats = {'Most Frequent Messages In Numbers': freq_nums, 'Most Frequent Messages In Percentages': perc_nums}
-
-    return stats
-
-    # return dict = {"error" : int}
-
-
-def calculator(msgs):
-    """
-    Returns the number of errors for msgs.
-    :param list[Message] msgs: Message objects for all errors found by linters
-    :rtype: dict
-    """
-
-    included = []
-    msgs_dict = {}
-
-    for msg in msgs:
-        if msg.msg_id not in included:
-            msgs_dict[msg.msg_id + "(" + msg.symbol + ")"] = msgs.count(msg.msg_id)
-            included.append(msg.msg_id)
-    return msgs_dict
-
-
-def frequent_complaints(comp_dict, top=5):
+def frequent_messages(comp_dict, top=5):
     """
     Sort the errors in error_dict from the most frequent to least frequent in a
     list.
@@ -108,7 +58,7 @@ def frequent_complaints(comp_dict, top=5):
     most_frequently.reverse()
     # So the name of the error first and then the number of its occurrence.
     # return the top whatever number
-    if isinstance(top, int):
+    if isinstance(top, int) and top > 0:
         if top > len(most_frequently):
             top = len(most_frequently)
             return most_frequently[0:top]

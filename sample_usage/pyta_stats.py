@@ -37,6 +37,7 @@ def pyta_statistics(directory):
                     student_id = os.path.basename(os.path.normpath(root_str))
                     all_stats[student_id] = stats_calculator(all_errors,
                                                              all_style)
+                    StatReporter.reset_message()
     return all_stats
 
 

@@ -31,15 +31,15 @@ class StatReporter(PlainReporter):
     # to appease PyCharm's NotImplemented complaint
     _display = None
 
+    @staticmethod
+    def reset_messages():
+        """
+        Resets the class-level lists that hold the message lists to empty, so as to
+        avoid aggregating all files' messages in the StatReporter.
+        Called by pyta_statistics before every instantiation of StatReporter by
+        python_ta.check_all().
 
-def reset_messages():
-    """
-    Resets the class-level lists that hold the message lists to empty, so as to
-    avoid aggregating all files' messages in the StatReporter.
-    Called by pyta_statistics before every instantiation of StatReporter by
-    python_ta.check_all().
-
-    @rtype: None
-    """
-    StatReporter.error_messages = []
-    StatReporter.style_messages = []
+        @rtype: None
+        """
+        StatReporter.error_messages = []
+        StatReporter.style_messages = []

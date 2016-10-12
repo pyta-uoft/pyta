@@ -42,7 +42,6 @@ def frequent_messages(comp_dict, top=5):
     Sort the errors in error_dict from the most frequent to least frequent in a
     list.
     Return top couple most frequently occurred errors.
-
     @type comp_dict: dict
     @type top: int
     @rtype: list

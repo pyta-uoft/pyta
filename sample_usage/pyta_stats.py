@@ -1,7 +1,7 @@
 import os
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
-from .stats_analysis import *
+from sample_usage.stats_analysis import summary_calc
 
 
 def pyta_statistics(directory):
@@ -16,25 +16,51 @@ def pyta_statistics(directory):
     @param str directory: The string of the path way of the directory.
     @rtype: None
     """
-    all_errors = []
-    all_style = []
-    all_stats = {}
+    all_errors = {}
     for root_str, dir_list, file_list in os.walk(directory):
         # check if directory is student directory or assignment parent directory
         if dir_list is []:
             # It is a student folder
+            student_errors = []
+            student_style = []
             for file in file_list:
                 # check if file is a .py file
                 if file[-3:] == ".py":
                     python_ta.check_all(file, reporter=StatReporter)
                     # store all the msg objects of this student's files
-                    all_errors.extend(StatReporter.error_messages)
-                    all_style.extend(StatReporter.style_messages)
-                    student_id = os.path.basename(os.path.normpath(root_str))
-                    all_stats[student_id] = stats_calculator(all_errors,
-                                                             all_style)
+                    student_errors.extend(StatReporter.error_messages)
+                    student_style.extend(StatReporter.style_messages)
+                    student_id = os.path.basename(root_str)
+                    all_errors[student_id] = (student_errors, student_style)
+
                     StatReporter.reset_messages()
-    return all_stats
+    _print_stats(*summary_calc(all_errors))
+
+
+def _print_stats(individual_stats, summary_stats):
+    """
+    Pretty prints the statistics aggregated by summary_calc.
+
+    @param dict individual_stats: stats computed per student/group
+    @param dict summary_stats: stats computed over all the students
+    @rtype: dict
+    """
+    print("=========================", "Statistics per Student/Group",
+          "=========================")
+    for student_name, (error_dict, style_dict) in individual_stats.items():
+        print("Student/group:", student_name)
+        print("\t=== Code errors ===")
+        for stat_type, value in error_dict.items():
+            print("\t{}: {}".format(stat_type, value))
+        print("\t=== Style errors ===")
+        for stat_type, value in style_dict.items():
+            print("\t{}: {}".format(stat_type, value))
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+    print("======================", "Aggregate Statistics for Directory",
+          "======================")
+    for stat_type, value in summary_stats:
+        print("{}: {}".format(stat_type, value))
 
 
 def frequent_messages(comp_dict, top=5):
@@ -42,6 +68,7 @@ def frequent_messages(comp_dict, top=5):
     Sort the errors in error_dict from the most frequent to least frequent in a
     list.
     Return top couple most frequently occurred errors.
+
     @type comp_dict: dict
     @type top: int
     @rtype: list

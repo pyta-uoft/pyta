@@ -16,8 +16,6 @@ def pyta_statistics(directory):
     @param str directory: The string of the path way of the directory.
     @rtype: None
     """
-    global multi_files
-    multi_files = True
     all_errors = []
     all_style = []
     all_stats = {}
@@ -30,14 +28,12 @@ def pyta_statistics(directory):
                 if file[-3:] == ".py":
                     python_ta.check_all(file, reporter=StatReporter)
                     # store all the msg objects of this student's files
-                    for msg in StatReporter.error_messages:
-                        all_errors.append(msg)
-                    for msg in StatReporter.style_messages:
-                        all_style.append(msg)
+                    all_errors.extend(StatReporter.error_messages)
+                    all_style.extend(StatReporter.style_messages)
                     student_id = os.path.basename(os.path.normpath(root_str))
                     all_stats[student_id] = stats_calculator(all_errors,
                                                              all_style)
-                    StatReporter.reset_message()
+                    StatReporter.reset_messages()
     return all_stats
 
 
@@ -52,7 +48,7 @@ def frequent_messages(comp_dict, top=5):
     @rtype: list
     """
     # get key-value pair in a list
-    most_frequently = [pair for pair in comp_dict.items()]
+    most_frequently = list(comp_dict.items())
     # sort the list according to the value
     most_frequently.sort(key=lambda p: p[1])
     # from larger number to lower number

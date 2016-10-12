@@ -34,7 +34,7 @@ def pyta_statistics(directory):
                         all_errors.append(msg)
                     for msg in StatReporter.style_messages:
                         all_style.append(msg)
-                    student_id = os.path.basename(os.path.normpath(root_str))
+                    student_id = os.path.basename(root_str)
                     all_stats[student_id] = stats_calculator(all_errors,
                                                              all_style)
                     StatReporter.reset_message()

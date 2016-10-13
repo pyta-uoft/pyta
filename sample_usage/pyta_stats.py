@@ -1,7 +1,7 @@
 import os
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
-from sample_usage.stats_analysis import summary_calc
+from sample_usage.stats_analysis import summary
 
 
 def pyta_statistics(directory):
@@ -9,7 +9,7 @@ def pyta_statistics(directory):
     Recursively run python_ta.check_all() on the files in the directory and its
     subdirectories to collect the error and style messages.
     Assume directory is a folder that contains subdirectories named by
-    student's utorid/studentID/group name, or directory can also be a student
+    student's UTORid/studentID/group name, or directory can also be a student
     folder itself. Also assume that student's directory doesn't contain any
     subdirectories, only files.
 
@@ -34,58 +34,68 @@ def pyta_statistics(directory):
                     all_errors[student_id] = (student_errors, student_style)
 
                     StatReporter.reset_messages()
-    _print_stats(*summary_calc(all_errors))
+    _print_stats(*summary(all_errors))
 
 
 def _print_stats(individual_stats, summary_stats):
     """
-    Pretty prints the statistics aggregated by summary_calc.
+    Pretty prints the statistics aggregated by summary.
 
     @param dict individual_stats: stats computed per student/group
     @param dict summary_stats: stats computed over all the students
     @rtype: dict
     """
-    print("=========================", "Statistics per Student/Group",
-          "=========================")
+    if summary_stats:
+        print("=========================", "Statistics per Student/Group",
+              "=========================")
     for student_name, (error_dict, style_dict) in individual_stats.items():
         print("Student/group:", student_name)
         print("\t=== Code errors ===")
-        for stat_type, value in error_dict.items():
-            print("\t{}: {}".format(stat_type, value))
+        for stat_type, stats in error_dict.items():
+            print("\t" + stat_type + ":")
+            _print_top_errors(stats)
+
         print("\t=== Style errors ===")
-        for stat_type, value in style_dict.items():
-            print("\t{}: {}".format(stat_type, value))
+        for stat_type, stats in style_dict.items():
+            print("\t" + stat_type + ":")
+            _print_top_errors(stats)
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
-    print("======================", "Aggregate Statistics for Directory",
-          "======================")
-    for stat_type, value in summary_stats:
-        print("{}: {}".format(stat_type, value))
+    if summary_stats:
+        print("\n\n======================",
+              "Aggregate Statistics for Directory", "======================")
+        # Top 5 Frequent Code Errors
+        stat_type, stats = summary_stats[0]
+        print(stat_type + ":")
+        _print_top_errors(stats, tabs=1)
+
+        # Average Code Errors Per Student
+        print("\n{}: {}".format(summary_stats[1][0], summary_stats[1][1]))
+
+        # Top 5 Frequent Style Errors
+        stat_type, stats = summary_stats[2]
+        print(stat_type + ":")
+        _print_top_errors(stats, tabs=1)
+
+        # Average Style Errors Per Student
+        print("\n{}: {}".format(summary_stats[3][0], summary_stats[3][1]))
+
+        # Five Number Summary
+        print("===", summary_stats[4][0], "===")
+        five_numbers = summary_stats[4][1]
+        for stat_type, value in five_numbers:
+            print("\t{}: {}".format(stat_type, value))
+
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" * 2)
 
 
-def frequent_messages(comp_dict, top=5):
+def _print_top_errors(stats, tabs=2):
     """
-    Sort the errors in error_dict from the most frequent to least frequent in a
-    list.
-    Return top couple most frequently occurred errors.
+    Pretty prints a list of most frequent errors and their counts.
 
-    @type comp_dict: dict
-    @type top: int
-    @rtype: list
+    @param list[tuple(str, int)] stats: the errors and counts to be printed
+    @rtype: None
     """
-    # get key-value pair in a list
-    most_frequently = list(comp_dict.items())
-    # sort the list according to the value
-    most_frequently.sort(key=lambda p: p[1])
-    # from larger number to lower number
-    most_frequently.reverse()
-    # So the name of the error first and then the number of its occurrence.
-    # return the top whatever number
-    if isinstance(top, int) and top > 0:
-        if top > len(most_frequently):
-            top = len(most_frequently)
-            return most_frequently[0:top]
-        else:
-            return most_frequently[0:top]
-    else:
-        raise TypeError("No!! Put a positive integer please.")
+    i = 1
+    while i <= len(stats):
+        print("{}{}. {}: {}".format("\t" * tabs, i, stats[i][0], stats[i][1]))

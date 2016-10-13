@@ -65,11 +65,13 @@ def summary(all_msgs):
     # Calculating the Five Number Summary for all errors (per student)
     stu_errors.sort(reverse=True)
 
-    if len(stu_errors) % 2 == 1:
-        median = stu_errors[len(stu_errors) // 2 + 1]
+    if len(stu_errors) == 1:
+        median = stu_errors[0][0]
+    elif len(stu_errors) % 2 == 1:
+        median = stu_errors[len(stu_errors) // 2 + 1][0]
     else:
-        median = (stu_errors[len(stu_errors) // 2 + 1] +
-                  stu_errors[len(stu_errors) // 2]) // 2
+        median = (stu_errors[len(stu_errors) // 2 + 1][0] +
+                  stu_errors[len(stu_errors) // 2])[0] // 2
 
     q3 = stu_errors[round(0.25 * len(stu_errors))]
     q1 = stu_errors[round(0.75 * len(stu_errors))]

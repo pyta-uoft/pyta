@@ -1,7 +1,7 @@
 from .pyta_stats import frequent_messages
 
 
-def indiv_calc(error_msgs, style_msgs):  # these two things will be lists of Message objects
+def indiv_calc(error_msgs, style_msgs):
     """
     Analyse the given lists of error and style Message objects error_msgs and
     style_msgs for an individual.
@@ -30,7 +30,7 @@ def indiv_calc(error_msgs, style_msgs):  # these two things will be lists of Mes
 
 def summary(all_msgs):
     """
-    Provide a summary of each individual's errors from all_msgs and provide an
+    Provides a summary of each individual's errors from all_msgs and provide an
     overall summary of the class's performance.
 
     :param list[Message]:
@@ -40,16 +40,19 @@ def summary(all_msgs):
     num_stu = len(all_msgs)
     code_errors = 0
     style_errors = 0
-    total_errors = code_errors + style_errors
     freq_error = {}
     freq_style = {}
+    stu_errors = []
 
+    if len(all_msgs) == 1:
+        indiv_calc(all_msgs[0][0], all_msgs[0][1])
     for student in all_msgs:
         # in the form [('std1', [<stats>]), ('std2', [<stats>])]
         errors = all_msgs[student][0]
         styles = all_msgs[student][1]
         calc = indiv_calc(errors, styles)
         sum_calc[0].append((student, calc))
+        stu_errors.append(len(errors) + len(styles))
         # to find Most Frequent Errors in Numbers
         for code_error in calc[2][1]:
             # in ('msg.id', 3), ('msg.id2', 2) format currently
@@ -66,16 +69,32 @@ def summary(all_msgs):
             else:
                 freq_style[style_error] += style_error[1]
 
-    error_numperc = calc_helper(freq_error)
-    style_numperc = calc_helper(freq_style)
+    error_num = frequent_messages(freq_error)
+    style_num = frequent_messages(freq_style)
 
+    stu_errors.sort()
+    stu_errors.reverse()
 
-    sum_calc[1].append((('Top 3 Frequent Code Errors', (error_numperc[0][:3], error_numperc[1][:3]),
+    if len(stu_errors) % 2 == 1:
+        median = stu_errors[len(stu_errors) // 2 + 1]
+    else:
+        median = (stu_errors[len(stu_errors) // 2 + 1] +
+                  stu_errors[len(stu_errors) // 2]) // 2
+
+    q3 = stu_errors[round(0.25 * len(stu_errors))]
+    q1 = stu_errors[round(0.75 * len(stu_errors))]
+
+    sum_calc[1].append((('Top 5 Frequent Code Errors', (error_num),
                         ('Average Code Errors Per Student',
                          code_errors/num_stu.__round__(2)),
-                        ('Top 3 Frequent Style Errors', (style_numperc[0][:3], error_numperc[1][:3])),
+                        ('Top 5 Frequent Style Errors', (style_num)),
                         ('Average Style Errors Per Student',
-                         style_errors/num_stu.__round__(2)))))
+                         style_errors/num_stu.__round__(2)),
+                         ('Five Number Summary', [('Most', stu_errors[0]),
+                                                  ('Upper Quartile Q3',
+                                                   q3), ('Median', median),
+                                                  ('Lower Quartile Q1', q1),
+                                                  ('Least', stu_errors[-1])]))))
 
     return sum_calc
 
@@ -102,6 +121,7 @@ def calc_helper(msgs):
 def _message_counter(msgs):
     """
     Returns the number of errors for msgs.
+
     :param list[Message] msgs: Message objects for all errors found by linters
     :rtype: dict
     """

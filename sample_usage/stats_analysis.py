@@ -1,7 +1,7 @@
 from .pyta_stats import frequent_messages
 
 
-def stats_calculator(error_msgs, style_msgs):  # these two things will be lists of Message objects
+def indiv_calc(error_msgs, style_msgs):  # these two things will be lists of Message objects
     """
     Analyse the given lists of error and style Message objects to aggregate
     statistics on and return them in dictionary form.
@@ -14,30 +14,54 @@ def stats_calculator(error_msgs, style_msgs):  # these two things will be lists 
 
     # {msg.symbol + "(" + msg.object + ")": count}
     all_msgs = error_msgs + style_msgs
-    # get dict of values {id:int, id2:int}
-    msgs_dict = _message_counter(all_msgs)
-    # sort into list of tuple, highest on top
-    freq_nums = frequent_messages(msgs_dict)
 
-    total_errors = len(all_msgs)
-    # divide each value by total and round to two places
-    for message in msgs_dict:
-        msgs_dict[message] = (msgs_dict[message]/total_errors * 100).__round__(2)
-    perc_nums = frequent_messages(msgs_dict)
-    stats = {'Most Frequent Messages In Numbers': freq_nums,
-             'Most Frequent Messages In Percentages': perc_nums}
+    all_num = calc_helper(all_msgs)
+    error_num = calc_helper(error_msgs)
+    style_num = calc_helper(style_msgs)
+
+    stats = {'Most Frequent Messages In Numbers': all_num[0],
+             'Most Frequent Messages In Percentages': all_num[1],
+             'Most Frequent Errors In Numbers': error_num[0],
+             'Most Frequent Errors in Percentages':error_num[1],
+             'Most Frequent Styles In Numbers': style_num[0],
+             'Most Frequent Styles in Percentages': style_num[1]}
 
     return stats
 
     # return dict = {"error" : int}
 
+def summary_calc(all_msgs):
+    """
 
-def _message_counter(msgs):
+    :param list[Message]:
+    :rtype: list
+    """
+    pass
+
+def calc_helper(msgs):
+    """
+    Returns frequent messages in numbers and in percentages.
+
+    :param list[Message]: Message objects for all errors found by linters
+    :rtype: list
+    """
+    # get dict of values {id:int, id2:int}
+    msgs_dict = message_counter(msgs)
+    # sort into list of tuple, highest on top
+    freq_nums = frequent_messages(msgs_dict)
+    total_msgs = sum([msgs_dict[msg_id] for msg_id in msgs_dict])
+    # divide each value by total and round to two places
+    for message in msgs_dict:
+        msgs_dict[message] = (msgs_dict[message]/total_msgs * 100).__round__(2)
+    perc_nums = frequent_messages(msgs_dict)
+    return [freq_nums, perc_nums]
+
+
+def message_counter(msgs):
     """
     Returns the number of errors for msgs.
-
-    @param list[Message] msgs: Message objects for all errors found by linters
-    @rtype: dict
+    :param list[Message] msgs: Message objects for all errors found by linters
+    :rtype: dict
     """
 
     included = []
@@ -45,7 +69,6 @@ def _message_counter(msgs):
 
     for msg in msgs:
         if msg.msg_id not in included:
-            msgs_dict[msg.msg_id + " (" + msg.symbol + ")"] = \
-                msgs.count(msg.msg_id)
+            msgs_dict[msg.msg_id + "(" + msg.symbol + ")"] = msgs.count(msg.msg_id)
             included.append(msg.msg_id)
     return msgs_dict

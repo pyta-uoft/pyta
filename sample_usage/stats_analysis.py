@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 def indiv_calc(error_msgs, style_msgs):
     """
     Analyses the given lists of error and style Message objects error_msgs and
@@ -42,7 +44,7 @@ def summary(all_msgs):
         student, stats = all_msgs.popitem()
         return [[(student, indiv_calc(*stats))], []]
 
-    sum_calc = [[], []]
+    sum_calc = [[], []]     # two * OrderedDict()
     code_errors = []
     style_errors = []
     stu_errors = []
@@ -53,6 +55,7 @@ def summary(all_msgs):
         styles = all_msgs[student][1]
         calc = indiv_calc(errors, styles)
         sum_calc[0].append((student, calc))
+        # for OrderedDict: indiv_dict[student] = calc
         stu_errors.append((len(errors) + len(styles), student))
 
         # To find Most Frequent Errors (aggregate)
@@ -71,7 +74,7 @@ def summary(all_msgs):
         median = stu_errors[len(stu_errors) // 2 + 1][0]
     else:
         median = (stu_errors[len(stu_errors) // 2 + 1][0] +
-                  stu_errors[len(stu_errors) // 2])[0] // 2
+                  stu_errors[len(stu_errors) // 2][0]) // 2
 
     q3 = stu_errors[round(0.25 * len(stu_errors))]
     q1 = stu_errors[round(0.75 * len(stu_errors))]

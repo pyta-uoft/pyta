@@ -19,19 +19,20 @@ def pyta_statistics(directory):
     all_errors = {}
     for root_str, dir_list, file_list in os.walk(directory):
         # check if directory is student directory or assignment parent directory
-        if dir_list is []:
+        if not dir_list:
             # It is a student folder
             student_errors = []
             student_style = []
             for file in file_list:
                 # check if file is a .py file
                 if file[-3:] == ".py":
-                    python_ta.check_all(file, reporter=StatReporter)
+                    python_ta.check_all(os.path.join(root_str, file),
+                                        reporter=StatReporter)
                     # store all the msg objects of this student's files
                     student_errors.extend(StatReporter.error_messages)
                     student_style.extend(StatReporter.style_messages)
                     student_id = os.path.basename(root_str)
-                    all_errors[student_id] = (student_errors, student_style)
+                    all_errors[student_id] = (student_errors, student_style)  # TODO: ordered students?
 
                     StatReporter.reset_messages()
     _print_stats(*summary(all_errors))
@@ -41,14 +42,14 @@ def _print_stats(individual_stats, summary_stats):
     """
     Pretty prints the statistics aggregated by summary.
 
-    @param dict individual_stats: stats computed per student/group
-    @param dict summary_stats: stats computed over all the students
+    @param list individual_stats: stats computed per student/group
+    @param list summary_stats: stats computed over all the students
     @rtype: dict
     """
     if summary_stats:
         print("=========================", "Statistics per Student/Group",
               "=========================")
-    for student_name, (error_dict, style_dict) in individual_stats.items():
+    for student_name, (error_dict, style_dict) in individual_stats:  # TODO
         print("Student/group:", student_name)
         print("\t=== Code errors ===")
         for stat_type, stats in error_dict.items():

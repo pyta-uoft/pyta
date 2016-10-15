@@ -1,6 +1,6 @@
 import astroid
 import astroid.node_classes
-from typing import Tuple, List, Dict, Set
+from typing import Tuple, List, Dict, Set, TupleMeta
 from astroid.transforms import TransformVisitor
 
 
@@ -17,7 +17,6 @@ def set_tuple_type_constraints(node):
 def set_list_type_constraints(node):
     # node_types contains types of elements inside list.
     node_types = {node_child.type_constraints for node_child in node.elts}
-
     # If list has more than one type, just set node.type_constraints to List.
     # If list has only one type T, set the node.type_constraints to be List[T].
     if len(node_types) == 1:
@@ -42,26 +41,43 @@ def set_dict_type_constraints(node):
         node.type_constraints = Dict
 
 
+def helper_rules(e1, e2):
+    if e1 == float and e2 == int:
+        return float
+    if e2 == float and e1 == int:
+        return float
+
+
 def set_binop_type_constraints(node):
     left_type = node.left.type_constraints
     right_type = node.right.type_constraints
 
+    if hasattr(left_type, '__origin__'):
+        node_origin = left_type.__origin__
+    elif hasattr(left_type, '__class__'):
+        node_origin = left_type.__class__
+
     # '*' does not work for same type of operands such as str, list... etc
-    if node.op != '*' and left_type == right_type:
-        node.type_constraints = node.left.type_constraints
+    if node.op != '*' and left_type == right_type and node_origin != TupleMeta \
+            and node_origin != List:
+        node.type_constraints = left_type
 
-    # A list can be concatenate to another list using '+' operator
-    elif node.op == '+' and \
-            (isinstance(node.left, astroid.node_classes.List) and
-                isinstance(node.right, astroid.node_classes.List)):
-        node.type_constraints = List
+    # A List or Tuple can be concatenate to another list using '+' operator
+    elif node.op == '+' and hasattr(left_type, '__origin__') and hasattr(
+            right_type, '__origin__'):
+        if left_type.__origin__ == right_type.__origin__ == List:
+            if left_type == right_type:
+                node.type_constraints = left_type
+            else:
+                node.type_constraints = List
 
-    # A tuple can be concatenate to another tuple using '+' operator
-    elif node.op == '+' and \
-            (isinstance(node.left, astroid.node_classes.Tuple) and
-                isinstance(node.right, astroid.node_classes.Tuple)):
-        node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                            node.left.elts + node.right.elts)]
+    elif node.op == '+' and hasattr(left_type, '__class__') and hasattr(
+                right_type, '__class__') and (left_type.__class__ ==
+                                        right_type.__class__ == TupleMeta):
+            all_elts = node.left.elts + node.right.elts
+            node.type_constraints = Tuple[tuple(x.type_constraints for x in
+                                          all_elts)]
+
 
     # operations between an integer and float should result a float
     elif ((right_type == int and left_type == float) or

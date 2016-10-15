@@ -87,8 +87,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""6 + 0.3""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
-            node_classes.BinOp)]
+        result = [n.type_constraints for n in module.nodes_of_class(node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_unary(self):
@@ -338,6 +337,13 @@ class MoreTupleTests(unittest.TestCase):
         # Instantiate a visitor, and register the transform functions to it.
         self.type_visitor = register_type_constraints_setter()
 
+    def test_str(self):
+        module = astroid.parse("""[1, 2, 'aaa' + 'bbb']""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([str], result)
+
     def test_str_multiplication(self):
         module = astroid.parse("""[1, 2, 'ccc' * 3]""")
         self.type_visitor.visit(module)
@@ -378,7 +384,7 @@ class MoreTupleTests(unittest.TestCase):
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
-        self.assertEqual([Tuple[int, int]], result)
+        self.assertEqual([Tuple[int, int, int, int]], result)
 
     def test_mixed_tuple(self):
         module = astroid.parse("""('a', 'b') + (1, 2)""")

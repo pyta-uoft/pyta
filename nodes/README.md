@@ -1,12 +1,11 @@
 # Astroid Node Documentation
 
-## Purpose
+The modules in this directory exist to explain the attributes (and sometimes 
+the role) of every node used by astroid.
+Since astroid often have different attributes than the built-in ast module,
+we have taken care to document all these different nodes here.
 
-While the builtin Python AST module `ast` has excellent documentation both 
-[officially](https://docs.python.org/3.5/library/ast.html) and [elsewhere](https://greentreesnakes.readthedocs.io/en/latest/), the [official Astroid AST documentation](http://astroid.readthedocs.io/en/latest/) is sorely lacking. 
-Thus, this module and its docstrings exist to explain the attributes (and sometimes 
-the role) of every\* node used by Astroid. 
-\*A notable exception is the Module node, which is omitted even from Astroid's 
+A notable exception is the Module node, which is omitted even from Astroid's 
 own node lists, since it is the parent node of every other node.
 
 ## Format
@@ -32,19 +31,12 @@ Example:
 
 ## Informal Grammar
 
-While the Python AST module's [abstract grammar](https://docs.python.org/3.5/library/ast.html#abstract-grammar) is very well-defined, there is no 
-such resource available for Astroid. However, using various resources (such 
-as the original Python grammar, Green Tree Snakes documentation, Astroid 
-source code, and string representations of Astroid ASTs), it is possible to
-come to a rough understanding of how Astroid treats various nodes of similar 
-types similarly. Thus, in the Astroid documentation here, we often use the 
+In the Astroid documentation here, we often use the 
 `Expr` and `Stmt` names to represent expression and statement nodes, where 
 nodes in each category play similar roles in certain sitations. For example, 
 `Expr` nodes can often be assigned to and values can be loaded from them. 
 On the other hand, `Stmt` nodes are standalone lines (or blocks) of code that 
 usually compose the body of a parent node.
-(The `Expr` type is actually represented in Astroid by the `Expr` node itself,
-but there is no such `Stmt` node.)
 
 ### `Stmt` Nodes
 

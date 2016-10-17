@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from statistics import median
 
 
 def indiv_calc(error_msgs, style_msgs):
@@ -6,24 +7,21 @@ def indiv_calc(error_msgs, style_msgs):
     Analyses the given lists of error and style Message objects error_msgs and
     style_msgs for an individual.
 
-    @param list error_msgs: Message objects for all of a student's code errors
-    @param list style_msgs: Message objects for all of a student's style issues
-    @rtype: list[tuple]
+    @param List error_msgs: Message objects for all of a student's code errors
+    @param List style_msgs: Message objects for all of a student's style issues
+    @rtype: List[Tuple[str, List]]
     """
 
     # {msg.symbol + "(" + msg.object + ")": count}
     all_msgs = error_msgs + style_msgs
 
-    all_num = _calc_helper(all_msgs)
-    error_num = _calc_helper(error_msgs)
-    style_num = _calc_helper(style_msgs)
+    all_num = list(zip(*_calc_helper(all_msgs)))
+    error_num = list(zip(*_calc_helper(error_msgs)))
+    style_num = list(zip(*_calc_helper(style_msgs)))
 
-    stats = [('Most Frequent Messages In Numbers', all_num[0]),
-             ('Most Frequent Messages In Percentages', all_num[1]),
-             ('Most Frequent Errors In Numbers', error_num[0]),
-             ('Most Frequent Errors in Percentages', error_num[1]),
-             ('Most Frequent Styles In Numbers', style_num[0]),
-             ('Most Frequent Styles in Percentages', style_num[1])]
+    stats = [('Most Frequent Messages', all_num),
+             ('Most Frequent Errors', error_num),
+             ('Most Frequent Styles', style_num)]
 
     return stats
 
@@ -62,44 +60,40 @@ def summary(all_msgs):
 
     error_num = frequent_messages(_message_counter(code_errors))
     style_num = frequent_messages(_message_counter(style_errors))
-
+    both_num = frequent_messages(_message_counter(code_errors + style_errors))
 
     # Calculating the Five Number Summary for all errors (per student)
     stu_errors.sort(reverse=True)
 
-    if len(stu_errors) == 1:
-        median = stu_errors[0]
-    elif len(stu_errors) % 2 == 1:
-        median = stu_errors[len(stu_errors) // 2 + 1]
-    else:
-        median = (stu_errors[len(stu_errors) // 2 + 1] +
-                  stu_errors[len(stu_errors) // 2]) // 2
+    med = median(stu_errors)
 
     q3 = stu_errors[round(0.25 * len(stu_errors))]
     q1 = stu_errors[round(0.75 * len(stu_errors))]
 
     sum_stats = [('Top 5 Frequent Code Errors', error_num),
                  ('Average Code Errors Per Student',
-                  (len(code_errors) / num_stu).__round__(2)),
+                  round(len(code_errors) / num_stu, 2)),
                  ('Top 5 Frequent Style Errors', style_num),
                  ('Average Style Errors Per Student',
-                  (len(style_errors) / num_stu).__round__(2)),
+                  round(len(style_errors) / num_stu, 2)),
+                 ('Top 5 Frequent Errors of Either Type', both_num),
+                 ('Average Errors of Either Type Per Student',
+                  round((len(code_errors) + len(style_errors)) / num_stu, 2)),
                  ('Five Number Summary of Errors Per Student',
-                  [('Most', stu_errors[0]),
+                  [('Most Errors', stu_errors[0]),
                    ('Upper Quartile (Q3)', q3),
-                   ('Median', median),
+                   ('Median', med),
                    ('Lower Quartile (Q1)', q1),
-                   ('Least', stu_errors[-1])])]
+                   ('Least Errors', stu_errors[-1])])]
 
     return indiv_stats, sum_stats
 
 
 def _calc_helper(msgs):
-    """
-    Returns frequent messages in numbers and in percentages.
+    """Returns frequent messages in numbers and in percentages.
 
-    @param list[Message] msgs: Message objects for all errors found by linters
-    @rtype: list
+    @param List[Message] msgs: Message objects for all errors found by linters
+    @rtype: List[List]
     """
     # get dict of values {id:int, id2:int}
     msgs_dict = _message_counter(msgs)
@@ -108,17 +102,16 @@ def _calc_helper(msgs):
     total_msgs = len(msgs)
     # divide each value by total and round to two places
     for message in msgs_dict:
-        msgs_dict[message] = (msgs_dict[message]/total_msgs * 100).__round__(2)
+        msgs_dict[message] = round((msgs_dict[message]/total_msgs * 100), 2)
     perc_nums = frequent_messages(msgs_dict)
     return [freq_nums, perc_nums]
 
 
 def _message_counter(msgs):
-    """
-    Returns the number of errors for every type of error in msgs.
+    """Returns the number of errors for every type of error in msgs.
 
-    @param list[Message] msgs: any given Message objects for errors
-    @rtype: dict[str : int]
+    @param List[Message] msgs: any given Message objects for errors
+    @rtype: Dict[str, int]
     """
 
     msgs = msgs.copy()  # prevent aliasing
@@ -133,27 +126,18 @@ def _message_counter(msgs):
 
 def frequent_messages(comp_dict, top=5):
     """
-    Sort the errors in error_dict from the most frequent to least frequent in a
+    Sort the errors in comp_dict from the most frequent to least frequent in a
     list.
     Return top couple most frequently occurred errors.
 
-    @type comp_dict: dict
+    @type comp_dict: Dict[str, number]
     @type top: int
-    @rtype: list
+    @rtype: List[Tuple[str, number]]
     """
     # get key-value pair in a list
     most_frequently = list(comp_dict.items())
-    # sort the list according to the value
-    most_frequently.sort(key=lambda p: p[1])
-    # from larger number to lower number
-    most_frequently.reverse()
+    # sort the list according to the value, from larger number to lower number
+    most_frequently.sort(key=lambda p: p[1], reverse=True)
     # So the name of the error first and then the number of its occurrence.
     # return the top whatever number
-    if isinstance(top, int) and top > 0:
-        if top > len(most_frequently):
-            top = len(most_frequently)
-            return most_frequently[0:top]
-        else:
-            return most_frequently[0:top]
-    else:
-        raise TypeError("No!! Put a positive integer please.")
+    return most_frequently[0:top]

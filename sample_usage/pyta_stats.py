@@ -41,8 +41,13 @@ def pyta_statistics(directory):
 
 
 def _print_stats(individual_stats, summary_stats):
-    """
-    Pretty prints the statistics aggregated by summary.
+    """Pretty prints the statistics aggregated by summary.
+
+    @param OrderedDict[str, List] individual_stats:
+        stats computed per student/group
+    @param OrderedDict[str, List | OrderedDict] summary_stats:
+        stats computed over all the students
+    @rtype: dict
 
     Format:
     ===================== Statistics per Student/Group =====================
@@ -65,7 +70,7 @@ def _print_stats(individual_stats, summary_stats):
 
     ================== Aggregate Statistics for Directory ==================
     Top 5 Frequent Code Errors:
-        1. <Error Type 1>: <number> (<percentage>%)
+        1. <Error Type 1>: <number>
         2. ...
     Average Code Errors Per Student: <number>
 
@@ -75,23 +80,15 @@ def _print_stats(individual_stats, summary_stats):
 
     ...
 
-    ======= Five Number Summary =======
-        Most:                <number>
+    ======= Five Number Summary of Errors Per Student =======
+        Most Errors:         <number>
         Upper Quartile (Q3): <number>
         Median:              <number>
         Lower Quartile (Q1): <number>
-        Least:               <number>
+        Least Errors:        <number>
 
     ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~
-
-
-    @param OrderedDict[str, List] individual_stats:
-        stats computed per student/group
-    @param OrderedDict[str, List | OrderedDict] summary_stats:
-        stats computed over all the students
-    @rtype: dict
     """
-    # TODO: make aggregate stats conform to format
     if summary_stats:
         print("=====================", "Statistics per Student/Group",
               "=====================")
@@ -108,7 +105,7 @@ def _print_stats(individual_stats, summary_stats):
         # Top 5 Frequent Code Errors
         stat_type, stats = summary_stats[0]
         print(stat_type + ":")
-        _print_top_errors(stats, tabs=1)
+        _print_top_errors(stats, tabs=1, per=False)
 
         # Average Code Errors Per Student
         print("{}: {}\n".format(summary_stats[1][0], summary_stats[1][1]))
@@ -116,14 +113,22 @@ def _print_stats(individual_stats, summary_stats):
         # Top 5 Frequent Style Errors
         stat_type, stats = summary_stats[2]
         print(stat_type + ":")
-        _print_top_errors(stats, tabs=1)
+        _print_top_errors(stats, tabs=1, per=False)
 
         # Average Style Errors Per Student
         print("{}: {}\n".format(summary_stats[3][0], summary_stats[3][1]))
 
+        # Top 5 Frequent Errors of Either Type
+        stat_type, stats = summary_stats[4]
+        print(stat_type + ":")
+        _print_top_errors(stats, tabs=1, per=False)
+
+        # Average Errors of Either Type Per Student
+        print("{}: {}\n".format(summary_stats[5][0], summary_stats[5][1]))
+
         # Five Number Summary
-        print("=======", summary_stats[4][0], "=======")
-        five_numbers = summary_stats[4][1]
+        print("=======", summary_stats[6][0], "=======")
+        five_numbers = summary_stats[6][1]
         for stat_type, value in five_numbers:
             print("\t{}:{}{}".format(stat_type, ' ' * (20 - len(stat_type)),
                                      value))
@@ -131,13 +136,19 @@ def _print_stats(individual_stats, summary_stats):
         print("\n~" + "=~" * 37)
 
 
-def _print_top_errors(stats, tabs=2):
-    """
-    Pretty prints a list of most frequent errors and their counts.
+def _print_top_errors(stats, tabs=2, per=True):
+    """Pretty prints a list of most frequent errors and their counts.
 
-    @param list[tuple(str, int)] stats: the errors and counts to be printed
+    @param List[Tuple[str, int | Tuple]] stats: the errors & counts to print
+    @param int tabs: the number of tabs to print before every line
+    @param bool per: whether the stats are number-percentage tuples
     @rtype: None
     """
     i = 1
     while i <= len(stats):
-        print("{}{}. {}: {}".format("\t" * tabs, i, stats[i][0], stats[i][1]))
+        stat = stats[i]
+        print("{}{}. {}:".format("\t" * tabs, i, stat[0]), end='')
+        if per:
+            print("{} ({}%)".format(stat[1][0], stat[1][1]))
+        else:
+            print(stat[1])

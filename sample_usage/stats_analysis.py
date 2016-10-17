@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+
 def indiv_calc(error_msgs, style_msgs):
     """
     Analyses the given lists of error and style Message objects error_msgs and
@@ -42,21 +43,18 @@ def summary(all_msgs):
     # If directory was for student, not course, return empty summary stats list.
     if num_stu == 1:
         student, stats = all_msgs.popitem()
-        return [[(student, indiv_calc(*stats))], []]
+        return OrderedDict([(student, indiv_calc(*stats))]), OrderedDict()
 
-    sum_calc = [[], []]     # two * OrderedDict()
+    indiv_stats = OrderedDict()
     code_errors = []
     style_errors = []
     stu_errors = []
 
     for student in all_msgs:
-        # in the form [('std1', [<stats>]), ('std2', [<stats>])]
-        errors = all_msgs[student][0]
-        styles = all_msgs[student][1]
-        calc = indiv_calc(errors, styles)
-        sum_calc[0].append((student, calc))
-        # for OrderedDict: indiv_dict[student] = calc
-        stu_errors.append((len(errors) + len(styles), student))
+        # in the form {std1': (<error>, <style>), 'std2': (<error>, <style>), }
+        errors, styles = all_msgs[student]
+        indiv_stats[student] = indiv_calc(errors, styles)
+        stu_errors.append(len(errors) + len(styles))
 
         # To find Most Frequent Errors (aggregate)
         code_errors.append(errors)
@@ -65,34 +63,35 @@ def summary(all_msgs):
     error_num = frequent_messages(_message_counter(code_errors))
     style_num = frequent_messages(_message_counter(style_errors))
 
+
     # Calculating the Five Number Summary for all errors (per student)
     stu_errors.sort(reverse=True)
 
     if len(stu_errors) == 1:
-        median = stu_errors[0][0]
+        median = stu_errors[0]
     elif len(stu_errors) % 2 == 1:
-        median = stu_errors[len(stu_errors) // 2 + 1][0]
+        median = stu_errors[len(stu_errors) // 2 + 1]
     else:
-        median = (stu_errors[len(stu_errors) // 2 + 1][0] +
-                  stu_errors[len(stu_errors) // 2][0]) // 2
+        median = (stu_errors[len(stu_errors) // 2 + 1] +
+                  stu_errors[len(stu_errors) // 2]) // 2
 
     q3 = stu_errors[round(0.25 * len(stu_errors))]
     q1 = stu_errors[round(0.75 * len(stu_errors))]
 
-    sum_calc[1] = [('Top 5 Frequent Code Errors', error_num),
-                   ('Average Code Errors Per Student',
-                    (len(code_errors) / num_stu).__round__(2)),
-                   ('Top 5 Frequent Style Errors', style_num),
-                   ('Average Style Errors Per Student',
-                    (len(style_errors) / num_stu).__round__(2)),
-                   ('Five Number Summary of Errors Per Student',
-                    [('Most', stu_errors[0]),
-                     ('Upper Quartile (Q3)', q3),
-                     ('Median', median),
-                     ('Lower Quartile (Q1)', q1),
-                     ('Least', stu_errors[-1])])]
+    sum_stats = [('Top 5 Frequent Code Errors', error_num),
+                 ('Average Code Errors Per Student',
+                  (len(code_errors) / num_stu).__round__(2)),
+                 ('Top 5 Frequent Style Errors', style_num),
+                 ('Average Style Errors Per Student',
+                  (len(style_errors) / num_stu).__round__(2)),
+                 ('Five Number Summary of Errors Per Student',
+                  [('Most', stu_errors[0]),
+                   ('Upper Quartile (Q3)', q3),
+                   ('Median', median),
+                   ('Lower Quartile (Q1)', q1),
+                   ('Least', stu_errors[-1])])]
 
-    return sum_calc
+    return indiv_stats, sum_stats
 
 
 def _calc_helper(msgs):

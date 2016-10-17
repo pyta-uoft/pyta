@@ -20,22 +20,21 @@ def pyta_statistics(directory):
     all_errors = OrderedDict()
     for root_str, dir_list, file_list in os.walk(directory):
         # check if directory is student directory or assignment parent directory
-        if not dir_list:
+        if dir_list == []:
             # It is a student folder
+            student_id = os.path.basename(root_str)
             student_errors = []
             student_style = []
             for file in file_list:
                 # check if file is a .py file
-                if file[-3:] == ".py":
-                    python_ta.check_all(os.path.join(root_str, file),
+                if file.endswith(".py"):
+                    python_ta.check_all(os.path.join(student_id, file),
                                         reporter=StatReporter)
                     # store all the msg objects of this student's files
-                    student_errors.extend(StatReporter.error_messages)
-                    student_style.extend(StatReporter.style_messages)
-                    student_id = os.path.basename(root_str)
-                    all_errors[student_id] = (student_errors, student_style)
-
-                    StatReporter.reset_messages()
+            student_errors.extend(StatReporter.error_messages)
+            student_style.extend(StatReporter.style_messages)
+            all_errors[student_id] = (student_errors, student_style)
+            StatReporter.reset_messages()
 
     if len(all_errors) < 1:
         raise Exception("No student files found in given directory!")

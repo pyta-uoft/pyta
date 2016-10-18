@@ -2,13 +2,13 @@ from collections import OrderedDict
 from statistics import median
 
 
-def indiv_calc(error_msgs, style_msgs):
+def _individual_calc(error_msgs, style_msgs):
     """
     Analyses the given lists of error and style Message objects error_msgs and
     style_msgs for an individual.
 
-    @param List error_msgs: Message objects for all of a student's code errors
-    @param List style_msgs: Message objects for all of a student's style issues
+    @param List[Message] error_msgs: all of this individual's code errors
+    @param List[Message] style_msgs: all of this individual's style issues
     @rtype: List[Tuple[str, List]]
     """
 
@@ -32,16 +32,16 @@ def summary(all_msgs):
     overall summary of the course's performance (if applicable).
     Called by pyta_statistics.
 
-    @param dict[str -> tuple(list[Message], list[Message])] all_msgs:
+    @param OrderedDict[str, Tuple[List[Message], List[Message]]] all_msgs:
         the tuple of code and error messages for each student's files
-    @rtype: list[list[tuple]]]
+    @rtype: Tuple[OrderedDict[str, List]]]
     """
     num_stu = len(all_msgs)
 
     # If directory was for student, not course, return empty summary stats list.
     if num_stu == 1:
         student, stats = all_msgs.popitem()
-        return OrderedDict([(student, indiv_calc(*stats))]), OrderedDict()
+        return OrderedDict([(student, _individual_calc(*stats))]), OrderedDict()
 
     indiv_stats = OrderedDict()
     code_errors = []
@@ -51,16 +51,16 @@ def summary(all_msgs):
     for student in all_msgs:
         # in the form {std1': (<error>, <style>), 'std2': (<error>, <style>), }
         errors, styles = all_msgs[student]
-        indiv_stats[student] = indiv_calc(errors, styles)
+        indiv_stats[student] = _individual_calc(errors, styles)
         stu_errors.append(len(errors) + len(styles))
 
         # To find Most Frequent Errors (aggregate)
         code_errors.append(errors)
         style_errors.append(styles)
 
-    error_num = frequent_messages(_message_counter(code_errors))
-    style_num = frequent_messages(_message_counter(style_errors))
-    both_num = frequent_messages(_message_counter(code_errors + style_errors))
+    error_num = _frequent_messages(_message_counter(code_errors))
+    style_num = _frequent_messages(_message_counter(style_errors))
+    both_num = _frequent_messages(_message_counter(code_errors + style_errors))
 
     # Calculating the Five Number Summary for all errors (per student)
     stu_errors.sort(reverse=True)
@@ -98,12 +98,12 @@ def _calc_helper(msgs):
     # get dict of values {id:int, id2:int}
     msgs_dict = _message_counter(msgs)
     # sort into list of tuple, highest on top
-    freq_nums = frequent_messages(msgs_dict)
+    freq_nums = _frequent_messages(msgs_dict)
     total_msgs = len(msgs)
     # divide each value by total and round to two places
     for message in msgs_dict:
         msgs_dict[message] = round((msgs_dict[message]/total_msgs * 100), 2)
-    perc_nums = frequent_messages(msgs_dict)
+    perc_nums = _frequent_messages(msgs_dict)
     return [freq_nums, perc_nums]
 
 
@@ -124,7 +124,7 @@ def _message_counter(msgs):
     return msgs_dict
 
 
-def frequent_messages(comp_dict, top=5):
+def _frequent_messages(comp_dict, top=5):
     """
     Sort the errors in comp_dict from the most frequent to least frequent in a
     list.

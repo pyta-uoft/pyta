@@ -144,10 +144,8 @@ def _print_top_errors(stats, tabs=2, per=True):
     @param bool per: whether the stats are number-percentage tuples
     @rtype: None
     """
-    i = 1
-    while i <= len(stats):
-        stat = stats[i]
-        print("{}{}. {}:".format("\t" * tabs, i, stat[0]), end='')
+    for i, stat in enumerate(stats):
+        print("{}{}. {}:".format("\t" * tabs, i + 1, stat[0]), end='')
         if per:
             print("{} ({}%)".format(stat[1][0], stat[1][1]))
         else:

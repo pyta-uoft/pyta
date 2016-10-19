@@ -1,4 +1,4 @@
-import os
+import os, sys
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
 from sample_usage.stats_analysis import summary
@@ -18,6 +18,10 @@ def pyta_statistics(directory):
     @rtype: None
     """
     all_errors = OrderedDict()
+
+    # Add directory to PYTHONPATH so that python_ta.check_all() can see modules inside
+    sys.path.append(directory)
+
     for root_str, dir_list, file_list in os.walk(directory):
         # check if directory is student directory or assignment parent directory
         if not dir_list:
@@ -145,8 +149,6 @@ def _print_top_errors(stats, tabs=2, per=True):
     @rtype: None
     """
     for i, stat in enumerate(stats):
-        print("{}{}. {}:".format("\t" * tabs, i + 1, stat[0]), end='')
-        if per:
-            print("{} ({}%)".format(stat[1][0], stat[1][1]))
-        else:
-            print(stat[1])
+        print("{}{}. {}: {}".format("\t" * tabs, i + 1,
+                                    stat[0][0], stat[0][1]), end=' ')
+        print("({}%)".format(stat[1][1]) if per else '')

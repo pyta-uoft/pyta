@@ -55,8 +55,8 @@ def summary(all_msgs):
         stu_errors.append(len(errors) + len(styles))
 
         # To find Most Frequent Errors (aggregate)
-        code_errors.append(errors)
-        style_errors.append(styles)
+        code_errors.extend(errors)
+        style_errors.extend(styles)
 
     error_num = _frequent_messages(_message_counter(code_errors))
     style_num = _frequent_messages(_message_counter(style_errors))

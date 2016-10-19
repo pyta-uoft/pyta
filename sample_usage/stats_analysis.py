@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from statistics import median
+from math import ceil
 
 
 def _individual_calc(error_msgs, style_msgs):
@@ -14,12 +15,16 @@ def _individual_calc(error_msgs, style_msgs):
 
     # {msg.symbol + "(" + msg.object + ")": count}
     all_msgs = error_msgs + style_msgs
+    totals = [('Error and Style Messages', len(all_msgs)),
+              ('Error Messages', len(error_msgs)),
+              ('Style Messages', len(style_msgs))]
 
     all_num = list(zip(*_calc_helper(all_msgs)))
     error_num = list(zip(*_calc_helper(error_msgs)))
     style_num = list(zip(*_calc_helper(style_msgs)))
 
-    stats = [('Most Frequent Messages', all_num),
+    stats = [('Totals', totals),
+             ('Most Frequent Messages', all_num),
              ('Most Frequent Errors', error_num),
              ('Most Frequent Styles', style_num)]
 
@@ -67,8 +72,9 @@ def summary(all_msgs):
 
     med = median(stu_errors)
 
-    q3 = stu_errors[round(0.25 * len(stu_errors))]
-    q1 = stu_errors[round(0.75 * len(stu_errors))]
+    # improving quartiles without numpy, as per StackOverflow.com/a/15589202
+    q3 = stu_errors[ceil(0.25 * len(stu_errors)) - 1]
+    q1 = stu_errors[ceil(0.75 * len(stu_errors)) - 1]
 
     sum_stats = [('Top 5 Frequent Code Errors', error_num),
                  ('Average Code Errors Per Student',

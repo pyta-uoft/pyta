@@ -13,11 +13,12 @@ folder, or even the directory of an entire course worth of students' projects.
 
 ***Individual Statistics***
 
+* Total number of messages of each type (code, style, both)
 * Most frequent messages (code & style)
 * Most frequent code errors
 * Most frequent style errors
 
-(Each statistic is presented in raw and percentage form.)
+(The frequency statistics are presented in both raw and percentage form.)
 
 ***Aggregate Statistics***
 

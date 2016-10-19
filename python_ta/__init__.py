@@ -85,6 +85,7 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
             module_name = module_name[:-3]
 
         spec = importlib.util.find_spec(module_name)
+
     if spec is None:
         print("The Module '{}' could not be found. ".format(module_name))
         return

@@ -136,7 +136,8 @@ class NodeDataStore():
         logging.info(message)
 
     def store(self, node):
-        """Store node to data structure."""
+        """Store node to data structure so the dump joins related items instead
+        of having many separate messages."""
         self._storage.add(node)
 
 # Global to expose to importing modules, and the transform functions.
@@ -184,9 +185,10 @@ def discover_nodes(node):
     be classified, and tested..
     """
     # Some formatting for the code output
-    output = ['='*40] + [line for line in node.statement().as_string().strip().split('\n')] + ['='*40]
+    output = [line for line in node.statement().as_string().strip().split('\n')]
+    output = ['=' * 40] + output + ['=' * 40]
     message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
-    # Print to console, and log for persistance.
+    # Print to console, and log for persistence.
     print('\n' + message)
     node_data_store.write(message)
 

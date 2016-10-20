@@ -79,12 +79,12 @@ def _print_stats(individual_stats, summary_stats):
 
 
     ================== Aggregate Statistics for Directory ==================
-    Top 5 Frequent Code Errors:
+    Most Frequent Code Errors:
         1. <Error Type 1>: <number>
         2. ...
     Average Code Errors Per Student: <number>
 
-    Top 5 ...
+    Most ...
         ...
     ...
 
@@ -122,7 +122,7 @@ def _print_stats(individual_stats, summary_stats):
     if summary_stats:
         print("\n==================",
               "Aggregate Statistics for Directory", "==================")
-        # Top 5 Frequent Code Errors
+        # Most Frequent Code Errors
         stat_type, stats = summary_stats[0]
         print(stat_type + ":")
         _print_top_errors(stats)
@@ -130,7 +130,7 @@ def _print_stats(individual_stats, summary_stats):
         # Average Code Errors Per Student
         print("{}: {}\n".format(summary_stats[1][0], summary_stats[1][1]))
 
-        # Top 5 Frequent Style Errors
+        # Most Frequent Style Errors
         stat_type, stats = summary_stats[2]
         print(stat_type + ":")
         _print_top_errors(stats)
@@ -138,7 +138,7 @@ def _print_stats(individual_stats, summary_stats):
         # Average Style Errors Per Student
         print("{}: {}\n".format(summary_stats[3][0], summary_stats[3][1]))
 
-        # Top 5 Frequent Errors of Either Type
+        # Most Frequent Errors of Either Type
         stat_type, stats = summary_stats[4]
         print(stat_type + ":")
         _print_top_errors(stats)

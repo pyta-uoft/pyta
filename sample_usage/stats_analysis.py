@@ -76,13 +76,13 @@ def summary(all_msgs):
     q3 = stu_errors[ceil(0.25 * len(stu_errors)) - 1]
     q1 = stu_errors[ceil(0.75 * len(stu_errors)) - 1]
 
-    sum_stats = [('Top 5 Frequent Code Errors', error_num),
+    sum_stats = [('Most Frequent Code Errors', error_num),
                  ('Average Code Errors Per Student',
                   round(len(code_errors) / num_stu, 2)),
-                 ('Top 5 Frequent Style Errors', style_num),
+                 ('Most Frequent Style Errors', style_num),
                  ('Average Style Errors Per Student',
                   round(len(style_errors) / num_stu, 2)),
-                 ('Top 5 Frequent Errors of Either Type', both_num),
+                 ('Most Frequent Errors of Either Type', both_num),
                  ('Average Errors of Either Type Per Student',
                   round((len(code_errors) + len(style_errors)) / num_stu, 2)),
                  ('Five Number Summary of Errors Per Student',

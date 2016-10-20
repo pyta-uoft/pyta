@@ -100,8 +100,11 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                                 # TODO: Fix this test
                                 #'python_ta/checkers/invalid_range_index_checker',
                                 'python_ta/checkers/assigning_to_self_checker',
-                                'python_ta/checkers/always_returning_checker',
-                                'python_ta/checkers/pycodestyle_checker'])
+                                'python_ta/checkers/always_returning_checker'])
+
+    if pep8:
+        linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
+
     if local_config_file != '':
         linter.read_config_file(local_config_file)
     else:

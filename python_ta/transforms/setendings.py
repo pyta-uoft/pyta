@@ -262,15 +262,7 @@ def set_arguments(node):
     if _get_last_child(node):
         set_from_last_child(node)
     else:  # node does not have children.
-        # set from col offset of parent node, plus len of name, etc.
-        # Note: if there are no arguments, this node takes up no space
-        parent_node = node.parent
-        if isinstance(parent_node, astroid.FunctionDef):
-            # account for string length of 'def', name of the signature, and '('
-            node.col_offset = parent_node.col_offset + len(parent_node.name) + 5
-        elif isinstance(parent_node, astroid.Lambda):
-            # account for string length of 'lambda'
-            node.col_offset = parent_node.col_offset + 6
+        # TODO: this should be replaced with the string parsing strategy
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
 
 

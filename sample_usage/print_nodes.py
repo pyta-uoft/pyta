@@ -8,14 +8,18 @@ import os
 
 colorama.init(strip=False, autoreset=True)
 
-# Stying for each key part from, 
-# (col_offset, fromlineno) to (end_col_offset, end_lineno).
-MAIN_COL = Style.BRIGHT + Fore.WHITE + Back.BLACK
 
-
-def wrap_color(code_string):
-    """Wrap key parts in styling and resets."""
-    return MAIN_COL + code_string + Back.RESET
+def _wrap_color(code_string):
+    """Wrap key parts in styling and resets.
+    Stying for each key part from, 
+    (col_offset, fromlineno) to (end_col_offset, end_lineno).
+    Note: use this to set color back to default (on mac, and others?): 
+          Style.RESET_ALL + Style.DIM
+    """
+    ret = Style.BRIGHT + Fore.WHITE + Back.BLACK
+    ret += code_string
+    ret += Style.RESET_ALL + Style.DIM + Fore.RESET + Back.RESET
+    return ret
 
 
 def print_node(filename, node_class):
@@ -33,14 +37,10 @@ def print_node(filename, node_class):
         if node.fromlineno == node.end_lineno:
             line = source_lines[node.fromlineno - 1]  # string
             out = [
-                Style.DIM +
                 line[:node.col_offset] +
 
                 # The key part:
-                MAIN_COL +
-                line[node.col_offset : node.end_col_offset] +
-
-                Style.DIM + Fore.RESET + Back.RESET +
+                _wrap_color(line[node.col_offset: node.end_col_offset]) +
                 line[node.end_col_offset:]
             ]
         else:
@@ -51,7 +51,7 @@ def print_node(filename, node_class):
             if middle_lines:
                 # For each item in the list of lines of strings,
                 # add colorama style to middle like the first and last lines
-                middle_lines = '\n'.join(list(map(wrap_color, middle_lines))) + '\n'
+                middle_lines = '\n'.join(list(map(_wrap_color, middle_lines))) + '\n'
             else:
                 middle_lines = ''  # coerce list to string
 
@@ -59,23 +59,15 @@ def print_node(filename, node_class):
                 middle_lines = '\n' + middle_lines
 
             out = [
-                Style.DIM + 
                 first_line[:node.col_offset] +
                 
                 # The key part:
-                MAIN_COL + 
-                first_line[node.col_offset:] +
-
-                Back.RESET + 
+                _wrap_color(first_line[node.col_offset:]) +
                 middle_lines +
-
-                MAIN_COL + 
-                last_line[:node.end_col_offset] + 
-                
-                Style.DIM + Back.RESET +
+                _wrap_color(last_line[:node.end_col_offset]) + 
                 last_line[node.end_col_offset:]
             ]
-        print('\n'.join(out))
+        print(Style.DIM + '\n'.join(out))
 
 
 

@@ -10,10 +10,11 @@ from pylint.checkers.utils import check_messages
 class AlwaysReturnChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
-
-    name = 'always_return'
+    # name is the same as file name but without _checker part
+    name = 'always_returning'
+    # use dashes for connecting words in message symbol
     msgs = {'E9996': ('Always returning an object or none in the loop at this line',
-                      'always_returning_in_a_loop',
+                      'always-returning-in-a-loop',
                       'Used when you always return an object or none in a loop, '
                       'this may cause the loop to only run once.'),
            }
@@ -53,15 +54,16 @@ class AlwaysReturnChecker(BaseChecker):
         else:
             return False
 
-    @check_messages("always_returning_in_a_loop")
+    # pass in message symbol as a parameter of check_messages
+    @check_messages("always-returning-in-a-loop")
     def visit_for(self, node):
         if self._check_always_return(node):
-            self.add_message('always_returning_in_a_loop', node=node)
+            self.add_message('always-returning-in-a-loop', node=node)
 
-    @check_messages("always_returning_in_a_loop")
+    @check_messages("always-returning-in-a-loop")
     def visit_while(self, node):
         if self._check_always_return(node):
-            self.add_message("always_returning_in_a_loop", node=node)
+            self.add_message("always-returning-in-a-loop", node=node)
 
 
 def register(linter):

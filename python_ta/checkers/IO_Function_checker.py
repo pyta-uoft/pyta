@@ -13,7 +13,7 @@ class IOFunctionChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = 'IO-functions'
+    name = 'IO_Function'
     msgs = {'E9998': ('Used IO function %s',
                       'IO-function-not-allowed',
                       'Used when you use the IO functions "print", "open" or'

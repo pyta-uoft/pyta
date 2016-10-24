@@ -6,9 +6,10 @@ from ast import literal_eval
 
 
 class InvalidRangeIndexChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
-    name = 'custom'
+    name = 'invalid_range_index'
     msgs = {'E9993':
                 ('You should not use invalid range index on line %s',
                  'invalid-range-index',

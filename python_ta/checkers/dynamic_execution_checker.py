@@ -10,6 +10,7 @@ FORBIDDEN_BUILTIN = ["compile", "eval", "exec"]
 
 
 class DynamicExecutionChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
     name = 'dynamic_execution'
@@ -28,7 +29,7 @@ class DynamicExecutionChecker(BaseChecker):
 
     priority = -1
 
-    @check_messages('dynamic_execution')
+    @check_messages('dynamic-execution-not-allowed')
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name):
             name = node.func.name

@@ -42,11 +42,13 @@ def set_dict_type_constraints(node):
         node.type_constraints = Dict
 
 
-def helper_rules(operand1, operand2, operator):
-
+def helper_rules(par1, par2, operator):
+    operand1 = par1.type_constraints
+    operand2 = par2.type_constraints
     # checking if the types could possible be List/Tuple
     left_type = -1
     right_type = -1
+    types = []
 
     if hasattr(operand1, '__origin__'):
         if operand1.__origin__ == List:
@@ -64,94 +66,70 @@ def helper_rules(operand1, operand2, operator):
 
     if operator == '+':
         if operand1 == float and operand2 == int:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == float:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == int:
-            return [int]
+            types.append(int)
         elif operand1 == float and operand2 == float:
-            return [float]
+            types.append(float)
         elif operand1 == str and operand2 == str:
-            return [str]
+            types.append(str)
         elif left_type == 1 and right_type == 1: # Both List
-            return [List, List]
+            if operand1 == operand2:
+                types.append(operand1)
+            else:
+                types.append(List)
         elif left_type == 0 and right_type == 0: # Both Tuple
-            return [Tuple, Tuple]
+            types.append(Tuple[tuple(operand1.__tuple_params__ +
+                                     operand2.__tuple_params__)])
 
     elif operator == '-':
         if operand1 == float and operand2 == int:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == float:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == int:
-            return [int]
+            types.append(int)
         elif operand1 == float and operand2 == float:
-            return [float]
+            types.append(float)
 
     elif operator == '*':
         if operand1 == float and operand2 == int:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == float:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == int:
-            return [int]
+            types.append(int)
         elif operand1 == float and operand2 == float:
-            return [float]
+            types.append(float)
         elif operand1 == int and operand2 == str:
-            return [str]
+            types.append(str)
         elif operand1 == str and operand2 == int:
-            return [str]
+            types.append(str)
         elif operand1 == int and right_type == 1:
-            return [int, List]
+            types.append(operand2)
         elif left_type == 1 and operand2 == int:
-            return [List, int]
+            types.append(operand1)
         elif operand1 == int and operand2 == List:
-            return [List]
+            types.append(List)
         elif operand1 == List and operand2 == int:
-            return [List]
+            types.append(List)
         elif operand1 == int and right_type == 0:
-            return [int, Tuple]
+            types.append(Tuple[tuple(operand2.__tuple_params__ *
+                                     par1.value)])
         elif left_type == 0 and operand2 == int:
-            return [Tuple, int]
-
-    else:
-        return []
+            types.append(Tuple[tuple(operand1.__tuple_params__ *
+                                     par2.value)])
+    return types
 
 
 def set_binop_type_constraints(node):
-    left_type = node.left.type_constraints
-    right_type = node.right.type_constraints
 
-    ruled_type = helper_rules(left_type, right_type, node.op)
+    ruled_type = helper_rules(node.left, node.right, node.op)
 
     if len(ruled_type) == 1:
         node.type_constraints = ruled_type[0]
-    elif len(ruled_type) == 2:
-        # both Tuple
-        if ruled_type == [Tuple, Tuple]:
-            all_elts = node.left.elts + node.right.elts
-            node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                                all_elts)]
-        # both List
-        elif ruled_type == [List, List]:
-            if left_type == right_type:
-                node.type_constraints = left_type
-            else:
-                node.type_constraints = List
-        # multiply an int n to a list l is concatenating n-1 times l to the
-        # original list l.
-        elif ruled_type == [List, int]:
-            node.type_constraints = left_type
-        elif ruled_type == [int, List]:
-            node.type_constraints = right_type
-        # multiply an int n to a tuple t is concatenating n-1 times t to the
-        # original tuple t.
-        elif ruled_type == [Tuple, int]:
-            node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                        node.left.elts * node.right.value)]
-        elif ruled_type == [int, Tuple]:
-            node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                        node.right.elts * node.left.value)]
     else:
         raise ValueError('Different types of operands found, binop node %s'
                          'might have a type error.' % node)

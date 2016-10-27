@@ -42,27 +42,24 @@ def set_dict_type_constraints(node):
         node.type_constraints = Dict
 
 
+def helper_list_tuple_detection(typeConstraints):
+    result = -1
+    if hasattr(typeConstraints, '__origin__'):
+        if typeConstraints.__origin__ == List:
+            result = 1
+    elif hasattr(typeConstraints, '__class__'):
+        if typeConstraints.__class__ == TupleMeta:
+            result = 0
+    return result
+
+
 def helper_rules(par1, par2, operator):
     operand1 = par1.type_constraints
     operand2 = par2.type_constraints
+    types = [] # result
     # checking if the types could possible be List/Tuple
-    left_type = -1
-    right_type = -1
-    types = []
-
-    if hasattr(operand1, '__origin__'):
-        if operand1.__origin__ == List:
-            left_type = 1 # 1 for List 0 for Tuple.
-    elif hasattr(operand1, '__class__'):
-        if operand1.__class__ == TupleMeta:
-            left_type = 0
-
-    if hasattr(operand2, '__origin__'):
-        if operand2.__origin__ == List:
-            right_type = 1
-    elif hasattr(operand2, '__class__'):
-        if operand2.__class__ == TupleMeta:
-            right_type = 0
+    left_type = helper_list_tuple_detection(operand1)
+    right_type = helper_list_tuple_detection(operand2)
 
     if operator == '+':
         if operand1 == float and operand2 == int:
@@ -121,13 +118,12 @@ def helper_rules(par1, par2, operator):
         elif left_type == 0 and operand2 == int:
             types.append(Tuple[tuple(operand1.__tuple_params__ *
                                      par2.value)])
+
     return types
 
 
 def set_binop_type_constraints(node):
-
     ruled_type = helper_rules(node.left, node.right, node.op)
-
     if len(ruled_type) == 1:
         node.type_constraints = ruled_type[0]
     else:

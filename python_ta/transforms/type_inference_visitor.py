@@ -13,6 +13,7 @@ def set_tuple_type_constraints(node):
     # node_types contains types of elements inside tuple.
     node.type_constraints = Tuple[tuple(x.type_constraints for x in node.elts)]
 
+# subscript node
 
 def set_list_type_constraints(node):
     # node_types contains types of elements inside list.
@@ -41,85 +42,116 @@ def set_dict_type_constraints(node):
         node.type_constraints = Dict
 
 
-def helper_rules(e1, e2):
-    if e1 == float and e2 == int:
-        return float
-    if e2 == float and e1 == int:
-        return float
+def helper_rules(operand1, operand2, operator):
+
+    # checking if the types could possible be List/Tuple
+    left_type = -1
+    right_type = -1
+
+    if hasattr(operand1, '__origin__'):
+        if operand1.__origin__ == List:
+            left_type = 1 # 1 for List 0 for Tuple.
+    elif hasattr(operand1, '__class__'):
+        if operand1.__class__ == TupleMeta:
+            left_type = 0
+
+    if hasattr(operand2, '__origin__'):
+        if operand2.__origin__ == List:
+            right_type = 1
+    elif hasattr(operand2, '__class__'):
+        if operand2.__class__ == TupleMeta:
+            right_type = 0
+
+    if operator == '+':
+        if operand1 == float and operand2 == int:
+            return [float]
+        elif operand1 == int and operand2 == float:
+            return [float]
+        elif operand1 == int and operand2 == int:
+            return [int]
+        elif operand1 == float and operand2 == float:
+            return [float]
+        elif operand1 == str and operand2 == str:
+            return [str]
+        elif left_type == 1 and right_type == 1: # Both List
+            return [List, List]
+        elif left_type == 0 and right_type == 0: # Both Tuple
+            return [Tuple, Tuple]
+
+    elif operator == '-':
+        if operand1 == float and operand2 == int:
+            return [float]
+        elif operand1 == int and operand2 == float:
+            return [float]
+        elif operand1 == int and operand2 == int:
+            return [int]
+        elif operand1 == float and operand2 == float:
+            return [float]
+
+    elif operator == '*':
+        if operand1 == float and operand2 == int:
+            return [float]
+        elif operand1 == int and operand2 == float:
+            return [float]
+        elif operand1 == int and operand2 == int:
+            return [int]
+        elif operand1 == float and operand2 == float:
+            return [float]
+        elif operand1 == int and operand2 == str:
+            return [str]
+        elif operand1 == str and operand2 == int:
+            return [str]
+        elif operand1 == int and right_type == 1:
+            return [int, List]
+        elif left_type == 1 and operand2 == int:
+            return [List, int]
+        elif operand1 == int and operand2 == List:
+            return [List]
+        elif operand1 == List and operand2 == int:
+            return [List]
+        elif operand1 == int and right_type == 0:
+            return [int, Tuple]
+        elif left_type == 0 and operand2 == int:
+            return [Tuple, int]
+
+    else:
+        return []
 
 
 def set_binop_type_constraints(node):
     left_type = node.left.type_constraints
     right_type = node.right.type_constraints
 
-    if hasattr(left_type, '__origin__'):
-        node_origin = left_type.__origin__
-    elif hasattr(left_type, '__class__'):
-        node_origin = left_type.__class__
+    ruled_type = helper_rules(left_type, right_type, node.op)
 
-    # '*' does not work for same type of operands such as str, list... etc
-    if node.op != '*' and left_type == right_type and node_origin != TupleMeta \
-            and node_origin != List:
-        node.type_constraints = left_type
-
-    # A List or Tuple can be concatenate to another list using '+' operator
-    elif node.op == '+' and hasattr(left_type, '__origin__') and hasattr(
-            right_type, '__origin__'):
-        if left_type.__origin__ == right_type.__origin__ == List:
+    if len(ruled_type) == 1:
+        node.type_constraints = ruled_type[0]
+    elif len(ruled_type) == 2:
+        # both Tuple
+        if ruled_type == [Tuple, Tuple]:
+            all_elts = node.left.elts + node.right.elts
+            node.type_constraints = Tuple[tuple(x.type_constraints for x in
+                                                all_elts)]
+        # both List
+        elif ruled_type == [List, List]:
             if left_type == right_type:
                 node.type_constraints = left_type
             else:
                 node.type_constraints = List
-
-    elif node.op == '+' and hasattr(left_type, '__class__') and hasattr(
-                right_type, '__class__') and (left_type.__class__ ==
-                                        right_type.__class__ == TupleMeta):
-            all_elts = node.left.elts + node.right.elts
+        # multiply an int n to a list l is concatenating n-1 times l to the
+        # original list l.
+        elif ruled_type == [List, int]:
+            node.type_constraints = left_type
+        elif ruled_type == [int, List]:
+            node.type_constraints = right_type
+        # multiply an int n to a tuple t is concatenating n-1 times t to the
+        # original tuple t.
+        elif ruled_type == [Tuple, int]:
             node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                          all_elts)]
-
-
-    # operations between an integer and float should result a float
-    elif ((right_type == int and left_type == float) or
-        (right_type == float and left_type == int)):
-        node.type_constraints = float
-
-    elif right_type == int and left_type == int:
-        node.type_constraints = int
-
-    elif right_type == float and left_type == float:
-        node.type_constraints = float
-
-    # multiply an int n to a str s is concatenating n-1 times s to the
-    # original string s.
-    elif node.op == '*' and \
-            ((right_type == int and left_type == str) or
-            (right_type == str and left_type == int)):
-        node.type_constraints = str
-
-    # multiply an int n to a list l is concatenating n-1 times l to the
-    # original list l.
-    elif node.op == '*' and left_type == int and \
-            isinstance(node.right, astroid.node_classes.List):
-        node.type_constraints = right_type
-
-    elif node.op == '*' and right_type == int and \
-            isinstance(node.left, astroid.node_classes.List):
-        node.type_constraints = left_type
-
-    # multiply an int n to a tuple t is concatenating n-1 times t to the
-    # original tuple t.
-    elif node.op == '*' and left_type == int and \
-            isinstance(node.right, astroid.node_classes.Tuple):
-        node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                            node.right.elts * node.left.value)]
-
-    elif node.op == '*' and right_type == int and \
-            isinstance(node.left, astroid.node_classes.Tuple):
-        node.type_constraints = Tuple[tuple(x.type_constraints for x in
-                                            node.left.elts * node.right.value)]
-
-    # for all other invalid cases, raise an ValueError
+                                        node.left.elts * node.right.value)]
+        elif ruled_type == [int, Tuple]:
+            node.type_constraints = Tuple[tuple(x.type_constraints for x in
+                                        node.right.elts * node.left.value)]
     else:
         raise ValueError('Different types of operands found, binop node %s'
                          'might have a type error.' % node)

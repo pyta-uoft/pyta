@@ -63,7 +63,6 @@ class SetConstFunctionTest(unittest.TestCase):
 class TypeInferenceVisitorTest(unittest.TestCase):
     """testers for type_inference_visitor. Modules are been passed in instead
     of single nodes."""
-
     @classmethod
     def setUpClass(self):
         # Instantiate a visitor, and register the transform functions to it.

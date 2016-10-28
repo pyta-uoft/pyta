@@ -142,16 +142,6 @@ def helper_rules(par1, par2, operator):
         elif operand1 == float and operand2 == float:
             types.append(float)
 
-    elif operator == '<' or operator == '>':
-        if (operand1 == str and operand2 == str) or \
-        (operand1 == int and operand2 == int) or \
-        (operand1 == float and operand2 == int) or \
-        (operand1 == int and operand2 == float) or \
-        (operand1 == float and operand2 == float) or \
-        (operand1 == List and operand2 == List) or \
-        (operand1 == Tuple and operand2 == Tuple):
-            types.append(bool)
-
     return types
 
 

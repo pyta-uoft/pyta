@@ -329,7 +329,7 @@ class TypeInferenceVisitorTestMoreComplex(unittest.TestCase):
         self.assertEqual(Tuple[int, List, List, Tuple[bool, str]], result[0])
 
 
-class MoreTupleTests(unittest.TestCase):
+class BinOpTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -420,6 +420,91 @@ class MoreTupleTests(unittest.TestCase):
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
+
+    def test_float_with_power(self):
+        module = astroid.parse("""(2.2) ** 1.2""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_int_with_power(self):
+        module = astroid.parse("""2 ** 3""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([int], result)
+
+    def test_int_float_with_power(self):
+        module = astroid.parse("""2.2 ** 6""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_modulus0(self):
+        module = astroid.parse("""(2.2) % 1.2""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_modulus1(self):
+        module = astroid.parse("""23 % 3""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([int], result)
+
+    def test_modulus2(self):
+        module = astroid.parse("""2.2 % 6""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_floordiv0(self):
+        module = astroid.parse("""(2.2) // 1.223332""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_floordiv1(self):
+        module = astroid.parse("""23 // 300""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([int], result)
+
+    def test_floordiv2(self):
+        module = astroid.parse("""2.2212 // 600""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_div0(self):
+        module = astroid.parse("""2.2212 / 600""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_div1(self):
+        module = astroid.parse("""300 / 600""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([float], result)
+
+    def test_div2(self):
+        module = astroid.parse("""1200 / 600""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BinOp)]
+        self.assertEqual([int], result)
+
 
 
 if __name__ == '__main__':

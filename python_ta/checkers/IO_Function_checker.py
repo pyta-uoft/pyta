@@ -20,7 +20,7 @@ class IOFunctionChecker(BaseChecker):
                       '"input". Pylint just try to discourage this usage. '
                       'That doesn\'t mean you can not use it !'),
            }
-    options = (('functions-not-allowed',
+    options = (('forbidden-io-functions',
                 {'default': FORBIDDEN_BUILTIN,
                  'type': 'csv', 'metavar': '<builtin function names>',
                  'help': 'List of builtins function names that should not be '
@@ -47,7 +47,7 @@ class IOFunctionChecker(BaseChecker):
                 scope = node.scope()
                 # TODO: Only FunctionDefs are checked. Include global scope?
                 if isinstance(scope, astroid.FunctionDef) and scope.name not in self.config.allowed_io:
-                    if name in self.config.functions_not_allowed:
+                    if name in self.config.forbidden_io_functions:
                         self.add_message('IO-function-not-allowed', node=node,
                                          args=name)
 

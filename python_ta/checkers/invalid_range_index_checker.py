@@ -13,7 +13,6 @@ class InvalidRangeIndexChecker(BaseChecker):
                 ('You should not use invalid range index on line %s',
                  'invalid-range-index',
                  'Used when you use invalid index range')}
-    options = ()
     # this is important so that your checker is executed before others
     priority = -1
 

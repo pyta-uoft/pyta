@@ -612,6 +612,34 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
+    def test_compare3(self):
+        module = astroid.parse("True != False")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
+
+    def test_compare4(self):
+        module = astroid.parse("[1, 2, 3] is List")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
+
+    def test_compare5(self):
+        module = astroid.parse("[1, 1, 1] is not [1, 1, 1]")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
+
+    def test_compare6(self):
+        module = astroid.parse("[1, 1, 1] not in (1, 2)")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
+
 
 if __name__ == '__main__':
     unittest.main()

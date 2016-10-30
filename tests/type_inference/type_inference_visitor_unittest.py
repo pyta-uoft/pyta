@@ -580,7 +580,6 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             nested = ('a', 1, [0, 0, ('hhhhh', ['hhhhh', 1])])
             nested[2][2][1][0][0]
             """
-        # problem encountered: we should be able to directly
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(

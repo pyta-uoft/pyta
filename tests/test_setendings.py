@@ -54,8 +54,6 @@ class TestEndingLocation(unittest.TestCase):
         """A class method called before tests in an individual class run.
         setUpClass is called with the class as the only argument and must be
         decorated as a classmethod():"""
-        # Instantiate a visitor, and register the transform functions to it.
-        self.ending_transformer = init_register_ending_setters()
         # Check the nodes property correctness.
         self.nodeng = NodeNG()
 
@@ -88,7 +86,13 @@ class TestEndingLocation(unittest.TestCase):
 
     def get_string_as_module(self, string):
         """Parse the string with astroid, and return the module.
+
+        Also initialize the ending transformer here.
         """
+        source_lines = string.split('\n')
+        # Instantiate a visitor, and register the transform functions to it.
+        self.ending_transformer = init_register_ending_setters(source_lines)
+
         return astroid.parse(string)
 
     def _assertSameness(self, expected, props):
@@ -219,7 +223,7 @@ class TestEndingLocation(unittest.TestCase):
         """Note: The end_col_offset is currently being set by the node
         astroid.AssignName, which may not be desired.
         """
-        expected = [(1, 1, 7, 19)]
+        expected = [(1, 1, 7, 20)]
         module = self.get_file_as_module('nodes/Comprehension.py')
         self.set_and_check(module, astroid.Comprehension, expected)
 
@@ -270,7 +274,7 @@ class TestEndingLocation(unittest.TestCase):
         """Note: col_offset is before first '{' (i.e. astroid.DictComp node),
         end_col_offset is after the '3' (i.e. astroid.Const last child node).
         """
-        expected = [(1, 1, 0, 27)]
+        expected = [(1, 1, 0, 28)]
         module = self.get_file_as_module('nodes/DictComp.py')
         self.set_and_check(module, astroid.DictComp, expected)
 
@@ -328,7 +332,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.FunctionDef, expected)
 
     def test_generatorexp(self):
-        expected = [(1, 1, 1, 23)]
+        expected = [(1, 1, 1, 24)]
         module = self.get_file_as_module('nodes/GeneratorExp.py')
         self.set_and_check(module, astroid.GeneratorExp, expected)
 
@@ -469,7 +473,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.TryFinally, expected)
 
     def test_tuple(self):
-        expected = [(1, 1, 1, 5), (2, 2, 1, 2)]
+        expected = [(1, 1, 0, 6), (2, 2, 0, 5)]
         module = self.get_file_as_module('examples/ending_locations/tuple.py')
         self.set_and_check(module, astroid.Tuple, expected)
 

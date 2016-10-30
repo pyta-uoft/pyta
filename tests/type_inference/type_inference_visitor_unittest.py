@@ -575,6 +575,18 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             node_classes.Subscript)]
         self.assertEqual([str], result)
 
+    def test_subscript6(self):
+        test_block = """
+            nested = ('a', 1, [0, 0, ('hhhhh', ['hhhhh', 1])])
+            nested[2][2][1][0][0]
+            """
+        # problem encountered: we should be able to directly
+        module = astroid.parse(test_block)
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Subscript)]
+        self.assertEqual([str, str, List, Tuple[str, List], List], result)
+
 
 if __name__ == '__main__':
     unittest.main()

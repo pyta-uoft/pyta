@@ -200,6 +200,12 @@ def set_subscript_type_constraints(node):
             node.type_constraints = inferred.type_constraints
 
 
+def set_compare_type_constraints(node):
+    """Compare operators includes:
+    '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
+    node.type_constraints = bool
+
+
 def register_type_constraints_setter():
     """Instantiate a visitor to transform the nodes.
     Register the transform functions on an instance of TransformVisitor.
@@ -213,5 +219,7 @@ def register_type_constraints_setter():
                                     set_unaryop_type_constraints)
     type_visitor.register_transform(astroid.Subscript,
                                     set_subscript_type_constraints)
+    type_visitor.register_transform(astroid.Compare,
+                                    set_compare_type_constraints)
     type_visitor.register_transform(astroid.BinOp, set_binop_type_constraints)
     return type_visitor

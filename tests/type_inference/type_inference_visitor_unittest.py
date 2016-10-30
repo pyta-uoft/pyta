@@ -580,12 +580,37 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             nested = ('a', 1, [0, 0, ('hhhhh', ['hhhhh', 1])])
             nested[2][2][1][0][0]
             """
-        # problem encountered: we should be able to directly
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
         result = [n.type_constraints for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([str, str, List, Tuple[str, List], List], result)
+
+    def test_compare0(self):
+        module = astroid.parse("""1 < 2""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
+
+    def test_compare1(self):
+        module = astroid.parse("""[1, 2, 3] <= [4, 5]""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
+
+    def test_compare2(self):
+        code = """
+        a = 'forest'
+        b = 'gold'
+        a >= b
+        """
+        module = astroid.parse(code)
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.Compare)]
+        self.assertEqual([bool], result)
 
 
 if __name__ == '__main__':

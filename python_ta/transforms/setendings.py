@@ -110,38 +110,12 @@ NODES_WITH_CHILDREN = [
     astroid.YieldFrom
 ]
 
-
-class NodeDataStore():
-    """Collect data and log at end of all tests."""
-    def __init__(self):
-        """Store data without dupes."""
-        self._storage = set()
-
-        # Question: do we want to move logger to its own module, in a utils directory?
-        # Recall: the `logging` namespace is in the global scope.
-        log_format = '%(asctime)s %(levelname)s %(message)s'
-        log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
-        log_filename = 'python_ta/transforms/setendings_log.log'
-        logging.basicConfig(format=log_format, datefmt=log_date_time_format, 
-                            filename=log_filename, level=logging.INFO)
-
-    def dump(self, prefix=''):
-        """Log stored data in a simple csv format."""
-        if prefix is not '':
-            prefix += ' '  # add space after
-        logging.info('{}{}'.format(prefix, ','.join(sorted(list(self._storage)))))
-
-    def write(self, message):
-        """Write message to a log file."""
-        logging.info(message)
-
-    def store(self, node):
-        """Store node to data structure so the dump joins related items instead
-        of having many separate messages."""
-        self._storage.add(node)
-
-# Global to expose to importing modules, and the transform functions.
-node_data_store = NodeDataStore()
+# Configure logging
+log_format = '%(asctime)s %(levelname)s %(message)s'
+log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
+log_filename = 'python_ta/transforms/setendings_log.log'
+logging.basicConfig(format=log_format, datefmt=log_date_time_format,
+                    level=logging.INFO)
 
 
 def init_register_ending_setters():
@@ -190,7 +164,7 @@ def discover_nodes(node):
     message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
     # Print to console, and log for persistence.
     print('\n' + message)
-    node_data_store.write(message)
+    logging.info(message)
 
 
 def fix_start_attributes(node):
@@ -201,7 +175,7 @@ def fix_start_attributes(node):
             'node {} doesn\'t have fromlineno set.'.format(node)
 
     # Log when this function is called.
-    node_data_store.store(str(node)[:-2])
+    logging.info(str(node)[:-2])
 
     try:
         first_child = next(node.get_children())

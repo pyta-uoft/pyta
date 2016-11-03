@@ -9,7 +9,7 @@ class PycodestyleChecker(BaseChecker):
     __implements__ = IRawChecker
 
     name = 'pep8_errors'
-    msgs = {'E9989': ('Found errors (and warnings)'
+    msgs = {'E9989': ('Found pep8 errors (and warnings)'
                       '%s', 'pep8-errors', '')}
 
     options = ()

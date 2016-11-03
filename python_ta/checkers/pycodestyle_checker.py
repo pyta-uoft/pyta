@@ -19,13 +19,20 @@ class PycodestyleChecker(BaseChecker):
     def process_module(self, node):
         style_checker = pycodestyle.Checker(node.stream().name)
 
+        # catch the output of check_all() in pycodestyle
         with io.StringIO() as buf, redirect_stdout(buf):
-            num_errors = style_checker.check_all()
+            style_checker.check_all()
             output = buf.getvalue()
-        output = output.replace('\n', '')
-        output = output.split(':')
-        self.add_message('pep8-errors', line=output[1],
-                            args=output[3])
+
+        # Handle the case of multiple error messages
+        lst = output.split('\n')
+
+        for line in lst:
+            if line != '':
+                line = line.split(':')
+                self.add_message('pep8-errors', line=line[1],
+                                 args=line[3])
+
 
 def register(linter):
     """required method to auto register this checker"""

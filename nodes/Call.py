@@ -27,5 +27,4 @@ Example 2:
 [ord(c) for line in file for c in line]
 
 # Example 2
-def func(a, b=c, *d, **e):
-    pass
+func(a, b=c, *d, **e)

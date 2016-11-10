@@ -18,5 +18,5 @@ Example:
 """
 
 @wrapper
-class foo(base1, base2, metaclass=meta):
+class foo(base1, base2):
     pass

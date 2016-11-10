@@ -42,11 +42,10 @@ usually compose the body of a parent node.
 
 * Assert
 * Assign
-* AssignAtr
-* AssignName
 * AsyncFor
 * AsyncFunctionDef
 * AsyncWith
+* Attribute
 * AugAssign
 * Break
 * ClassDef
@@ -61,6 +60,7 @@ usually compose the body of a parent node.
 * If
 * Import
 * ImportFrom
+* Name
 * Nonlocal
 * Pass
 * Raise
@@ -93,17 +93,37 @@ usually compose the body of a parent node.
 
 These nodes are also assignable (can be the target of an Assign, etc.):
 
-* Attribute
+* AssignAttr
+* AssignName
 * List
-* Name
 * Starred
 * Subscript
 * Tuple
 
 ### Expression Context
 
-Some Python or Astroid AST nodes have an attribute called `ctx` that is used
+All *assignable* Python and Astroid AST nodes have an attribute called `ctx` that is used
 to indicate the context in which the node appears, and may have a value of 
-`Load`, `Store`, or `Del`. To refer to these collectively, our Astroid docs 
+`Load`, `Store`, or `Del`. (To refer to these collectively, our Astroid docs 
 often refer to an `expr_context` type of node, so please do not be confused
-when you see that notation.
+when you see that notation.)
+
+Interestingly, Astroid has two differences from Python builtin ASTs with regards 
+to expression contexts of assignable nodes: the `Name` and `Attribute` nodes. 
+These nodes do not have a `ctx` attribute; instead, the Astroid developers made 
+the decision to split each use of the `Name` and `Attribute` nodes in 
+different contexts into completely new node types. That is why the assignable
+nodes listed above include `AssignAttr` and `AssignName`. See the table below
+for more details.
+
+Node and Context | Python version | Astroid version
+---------------- | -------------- | ---------------
+`Attribute` in `Load` | `Attribute` with `ctx=Load` | Simple `Attribute` node
+`Attribute` in `Store` | `Attribute` with `ctx=Store` | `AssignAttr` node
+`Attribute` in `Del` | `Attribute` with `ctx=Del` | `DelAttr` node
+`Name` in `Load` | `Name` with `ctx=Load` | Simple `Name` node
+`Name` in `Store` | `Name` with `ctx=Store` | `AssignName` node
+`Name` in `Del` | `Name` with `ctx=Del` | `DelName` node
+
+For more information about this change, please see the original issue made 
+by the Astroid developers: https://github.com/PyCQA/astroid/issues/267#issuecomment-163119276

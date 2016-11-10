@@ -1,12 +1,5 @@
 # TODOs for node documentation
 
-## Global changes
-
-Investigate whether the `ctx` attribute exists for all relevant nodes,
-and list all of these nodes.
-Also include more description of what the values of this attribute mean,
-and how they appear in Python code.
-
 ## Assign
 
 The type of `targets` can probably be more specific to just a small
@@ -87,15 +80,6 @@ A Decorators node is actually a child of a FunctionDef.
 
 The type of the `nodes` attribute seems to be a list of names, and is certainly not type `Decorators` (this would be oddly recursive).
 
-## DelAttr
-
-The description is describing the behaviour of the built-in `delattr` function,
-which is not the same as the `DelAttr` node.
-Note that the `DelAttr` node in the file's example is *only* the code `self.attr`
-in `del self.attr`.
-
-The given example value for `expr` is incorrect.
-
 ## DelName
 
 The description of `name` is awkwardly worded. Perhaps it's missing a word or two?
@@ -161,10 +145,6 @@ The type of `value` is more general; e.g., `x[1+2]`.
 It seems like the type of `Generators` should be `List[Comprehension]`,
 unless there is another possibility for these elements?
 
-## Name
-
-The string type should be represented as `str`, not `Str` (this type is not privided by the `types` module).
- 
 ## Nonlocal
 
 The example is technically incorrect, and is a little misleading.

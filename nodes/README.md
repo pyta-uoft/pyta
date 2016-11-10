@@ -32,13 +32,13 @@ Example:
 ## Informal Grammar
 
 In the Astroid documentation here, we often use the 
-`Expr` and `Stmt` names to represent expression and statement nodes, where 
-nodes in each category play similar roles in certain sitations. For example, 
+`Expr` and `Statement` names to represent expression and statement nodes, where 
+nodes in each category play similar roles in certain situations. For example, 
 `Expr` nodes can often be assigned to and values can be loaded from them. 
-On the other hand, `Stmt` nodes are standalone lines (or blocks) of code that 
+On the other hand, `Statement` nodes are standalone lines (or blocks) of code that 
 usually compose the body of a parent node.
 
-### `Stmt` Nodes
+### `Statement` Nodes
 
 * Assert
 * Assign

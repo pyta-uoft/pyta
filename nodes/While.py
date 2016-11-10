@@ -6,9 +6,9 @@ This node represents the Python while loop structure.
 Attributes:
     - test    (Compare | Name)
         - The boolean loop condition to determine whether the loop continues.
-    - body    (List[Stmt])
+    - body    (List[Statement])
         - The code to be performed while the loop condition is true.
-    - orelse  (List[Stmt])
+    - orelse  (List[Statement])
         - The code in the else statement (to be performed once the loop exits).
 
 Example:

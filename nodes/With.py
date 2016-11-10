@@ -9,7 +9,7 @@ Attributes:
         - The expressions or expression-reassigned Name pairs that are to be
           set up by this "with" and torn down after the completion of body.
           Expressions are usually Call or Name nodes.
-    - body   (List[Stmt])
+    - body   (List[Statement])
         - The code to be performed until the with statement closes.
 
 Example:

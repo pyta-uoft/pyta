@@ -7,8 +7,6 @@ and list all of these nodes.
 Also include more description of what the values of this attribute mean,
 and how they appear in Python code.
 
-Rename `Stmt` type to the property node class `Statement`.
-
 ## Assign
 
 The type of `targets` can probably be more specific to just a small

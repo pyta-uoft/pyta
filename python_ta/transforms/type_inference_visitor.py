@@ -200,6 +200,7 @@ def set_subscript_type_constraints(node):
             node.type_constraints = inferred.type_constraints
 
 
+# TODO: Add check in the set_compare_type_constraints as in BinOp.
 def set_compare_type_constraints(node):
     """Compare operators includes:
     '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
@@ -222,11 +223,6 @@ def set_boolop_type_constraints(node):
             node.type_constraints = node.values[0].type_constraints
         else:
             node.type_constraints = node.values[1].type_constraints
-
-
-def set_assign_type_constraints(node):
-    """Assignment operators includes: '=' """
-    node.type_constraints = node.value.type_constraints
 
 
 def register_type_constraints_setter():

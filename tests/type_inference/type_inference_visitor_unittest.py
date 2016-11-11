@@ -671,28 +671,6 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             node_classes.BoolOp)]
         self.assertEqual([str, int, int], result)
 
-    def test_assign0(self):
-        module = astroid.parse("""i = 5""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
-            node_classes.Assign)]
-        self.assertEqual([int], result)
-
-    def test_assign1(self):
-        code = """
-            i = "whatttttt"
-            j = [1, 2, 4]
-            k = {'a': 1, 'b': 2342423432}
-            i *= 2
-            i //= 1
-            i %= 3
-        """
-        module = astroid.parse(code)
-        self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
-            node_classes.Assign)]
-        self.assertEqual([str, List[int], Dict[str, int]], result)
-
 
 if __name__ == '__main__':
     unittest.main()

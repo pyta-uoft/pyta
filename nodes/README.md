@@ -45,14 +45,11 @@ usually compose the body of a parent node.
 * AsyncFor
 * AsyncFunctionDef
 * AsyncWith
-* Attribute
 * AugAssign
 * Break
 * ClassDef
 * Continue
-* DelAttr
 * Delete
-* DelName
 * Expr (when appearing alone)
 * For
 * FunctionDef
@@ -60,7 +57,6 @@ usually compose the body of a parent node.
 * If
 * Import
 * ImportFrom
-* Name
 * Nonlocal
 * Pass
 * Raise
@@ -72,12 +68,15 @@ usually compose the body of a parent node.
 
 ### `Expr` Nodes
 
+* Attribute  (see below)
 * Await
 * BinOp
 * BoolOp
 * Call
 * Compare
 * Constant
+* DelAttr  (see below)
+* DelName  (see below)
 * Dict
 * DictComp
 * Ellipsis
@@ -85,16 +84,17 @@ usually compose the body of a parent node.
 * IfExp
 * Lambda
 * ListComp
+* Name  (see below)
 * Set
 * SetComp
 * UnaryOp
 * Yield
 * YieldFrom
 
-These nodes are also assignable (can be the target of an Assign, etc.):
+These expression nodes are also assignable (can be the target of an Assign, etc.):
 
-* AssignAttr
-* AssignName
+* AssignAttr  (see below)
+* AssignName  (see below)
 * List
 * Starred
 * Subscript

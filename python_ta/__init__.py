@@ -28,7 +28,6 @@ import pycodestyle
 from .reporters import ColorReporter
 from .patches import patch_all
 
-
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 

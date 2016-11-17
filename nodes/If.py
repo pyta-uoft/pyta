@@ -6,7 +6,7 @@ An if statement.
 Attributes:
     - test    (Node)
         - Holds a single node such as Compare.
-    - Body    (List[Node])
+    - body    (List[Node])
         - A list of nodes that will execute if the condition passes.
     - orelse  (List[Node])
         - The else clause. Also, elif clauses don’t have a special
@@ -14,7 +14,7 @@ Attributes:
 
 Example:
     - test    -> n == 0
-    - Body    -> [pass]
+    - body    -> [pass]
     - orelse  -> [If(n > 0, pass, None), n = 3]
 """
 

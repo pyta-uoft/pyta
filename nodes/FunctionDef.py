@@ -12,25 +12,25 @@ Attributes:
         - The docstring of the function.
     - body        (List[Node])
         - The list of nodes inside the function.
-    - decorators  (Decorator)
-        - The decorator to be applied on this function.
+    - decorators  (List[Decorators])
+        - The list of decorators to be applied to this function.
     - returns     (None)
-        - The return annotation.
+        - The return annotation. Only python3 has a return annotation.
 
 Example:
     - name        -> "fun"
     - args        -> arg
     - doc         -> "This is a function fun."
-    - body        -> [Assign(party, "yeah!")]
-    - decorators  -> @wrapper
-    - returns     -> return party
+    - body        -> [Assign(return_annotation, "cool!")]
+    - decorators  -> [@wrapper]
+    - returns     -> str
 """
 
 @wrapper
-def fun(arg):
+def fun(arg) -> str:
     """
     This is a function fun.
     """
-    party = "yeah!"
-    return party
+    return_annotation = "cool!"
+    return return_annotation
 

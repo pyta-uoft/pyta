@@ -26,6 +26,7 @@ from astroid import MANAGER
 import pycodestyle
 
 from .reporters import ColorReporter
+from .patches import patch_all
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
@@ -106,6 +107,9 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     else:
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
     linter.load_config_file()
+
+    # Monkeypatch pylint
+    patch_all()
 
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.

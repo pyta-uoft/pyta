@@ -12,7 +12,6 @@ def _individual_calc(error_msgs, style_msgs):
     @param List[Message] style_msgs: all of this individual's style issues
     @rtype: List[Tuple[str, List]]
     """
-
     # {msg.symbol + "(" + msg.object + ")": count}
     all_msgs = error_msgs + style_msgs
     totals = [('Error and Style Messages', len(all_msgs)),
@@ -23,12 +22,10 @@ def _individual_calc(error_msgs, style_msgs):
     error_num = list(zip(*_calc_helper(error_msgs)))
     style_num = list(zip(*_calc_helper(style_msgs)))
 
-    stats = [('Totals', totals),
-             ('Most Frequent Messages', all_num),
-             ('Most Frequent Errors', error_num),
-             ('Most Frequent Styles', style_num)]
-
-    return stats
+    return [('Totals', totals),
+            ('Most Frequent Messages', all_num),
+            ('Most Frequent Errors', error_num),
+            ('Most Frequent Styles', style_num)]
 
 
 def summary(all_msgs):
@@ -53,9 +50,8 @@ def summary(all_msgs):
     style_errors = []
     stu_errors = []
 
-    for student in all_msgs:
+    for student, (errors, styles) in all_msgs.items():
         # in the form {std1': (<error>, <style>), 'std2': (<error>, <style>), }
-        errors, styles = all_msgs[student]
         indiv_stats[student] = _individual_calc(errors, styles)
         stu_errors.append(len(errors) + len(styles))
 
@@ -114,17 +110,15 @@ def _calc_helper(msgs):
 
 
 def _message_counter(msgs):
-    """Returns the number of errors for every type of error in msgs.
+    """Return the number of errors for every type of error in msgs.
 
-    @param List[Message] msgs: any given Message objects for errors
+    @param List[Message] msgs: the messages to count
     @rtype: Dict[str, int]
     """
-
-    msgs = msgs.copy()  # prevent aliasing
     msgs_dict = {}
 
     for msg in msgs:
-        key = msg.msg_id + " (" + msg.symbol + ")"
+        key = '{} ({})'.format(msg.msg_id, msg.symbol)
         if key not in msgs_dict:
             msgs_dict[key] = sum(1 for m in msgs if m.msg_id == msg.msg_id)
     return msgs_dict
@@ -134,7 +128,7 @@ def _frequent_messages(comp_dict, top=5):
     """
     Sort the errors in comp_dict from the most frequent to least frequent in a
     list.
-    Return top couple most frequently occurred errors.
+    Return <top> most frequently occurring errors.
 
     @type comp_dict: Dict[str, number]
     @type top: int
@@ -146,4 +140,4 @@ def _frequent_messages(comp_dict, top=5):
     most_frequently.sort(key=lambda p: p[1], reverse=True)
     # So the name of the error first and then the number of its occurrence.
     # return the top whatever number
-    return most_frequently[0:top]
+    return most_frequently[:top]

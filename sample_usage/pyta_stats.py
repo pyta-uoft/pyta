@@ -24,25 +24,22 @@ def pyta_statistics(directory):
     sys.path.append(directory)
 
     for root_str, dir_list, file_list in os.walk(directory):
-        # check if directory is student directory or assignment parent directory
-        if not dir_list:
-            # It is a student folder
+        # check if directory is student directory
+        if len(dir_list) == 0:
             student_id = os.path.basename(root_str)
 
             for file in file_list:
-                # check if file is a .py file
-                if file.endswith(".py"):
+                if file.endswith('.py'):
                     python_ta.check_all(os.path.join(student_id, file),
                                         reporter=StatReporter)
                     # store all the msg objects of this student's files
             all_errors[student_id] = (StatReporter.error_messages,
                                       StatReporter.style_messages)
-            StatReporter.reset_messages()
 
-    if len(all_errors) < 1:
-        raise Exception("No student files found in given directory!")
-
-    _print_stats(*summary(all_errors))
+    if len(all_errors) == 0:
+        raise Exception('No student files found in given directory!')
+    else:
+        _print_stats(*summary(all_errors))
 
 
 def _print_stats(individual_stats, summary_stats):
@@ -99,60 +96,59 @@ def _print_stats(individual_stats, summary_stats):
 
     ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~
     """
-    if summary_stats:  # subtitle only needed if there are also aggregate stats
-        print("=====================", "Statistics per Student/Group",
-              "=====================")
-    for student_name, stats in individual_stats.items():
-        print("Student/group:", student_name)
+    print('===================== Statistics per Submission',
+          '=====================')
+
+    for name, stats in individual_stats.items():
+        print('Submission by:', name)
 
         # Totals are printed differently
-        totals = stats.pop(0)
-        print("\t" + totals[0] + ":")
-        totals = totals[1]
+        header, totals = stats.pop(0)
+        print('\t{}:'.format(header))
         for total, count in totals:
-            print("\t\t{:26}{}".format(total + ':', count))
-        print()
+            print('\t\t{:26}{}'.format(total + ':', count))
 
         # Print "most frequent" stats
         for stat_type, results in stats:
-            print("\t" + stat_type + ":")
+            print('\t{}:'.format(stat_type))
             _print_top_errors(results, 2, False)
-        print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+        print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 
-    if summary_stats:
-        print("\n==================",
-              "Aggregate Statistics for Directory", "==================")
-        # Most Frequent Code Errors
-        stat_type, stats = summary_stats[0]
-        print(stat_type + ":")
-        _print_top_errors(stats)
+    if len(summary_stats) == 0:
+        return
 
-        # Average Code Errors Per Student
-        print("{}: {}\n".format(summary_stats[1][0], summary_stats[1][1]))
+    print('\n================== Aggregate Statistics for Directory',
+          '==================')
 
-        # Most Frequent Style Errors
-        stat_type, stats = summary_stats[2]
-        print(stat_type + ":")
-        _print_top_errors(stats)
+    # Most Frequent Code Errors
+    stat_type, stats = summary_stats[0]
+    print(stat_type + ':')
+    _print_top_errors(stats)
 
-        # Average Style Errors Per Student
-        print("{}: {}\n".format(summary_stats[3][0], summary_stats[3][1]))
+    # Average Code Errors Per Student
+    print('{}: {}\n'.format(summary_stats[1][0], summary_stats[1][1]))
 
-        # Most Frequent Errors of Either Type
-        stat_type, stats = summary_stats[4]
-        print(stat_type + ":")
-        _print_top_errors(stats)
+    # Most Frequent Style Errors
+    stat_type, stats = summary_stats[2]
+    print(stat_type + ':')
+    _print_top_errors(stats)
 
-        # Average Errors of Either Type Per Student
-        print("{}: {}\n".format(summary_stats[5][0], summary_stats[5][1]))
+    # Average Style Errors Per Student
+    print('{}: {}\n'.format(summary_stats[3][0], summary_stats[3][1]))
 
-        # Five Number Summary
-        print("=======", summary_stats[6][0], "=======")
-        five_numbers = summary_stats[6][1]
-        for stat_type, value in five_numbers:
-            print("\t{:21}{}".format(stat_type + ':', value))
+    # Most Frequent Errors of Either Type
+    stat_type, stats = summary_stats[4]
+    print(stat_type + ':')
+    _print_top_errors(stats)
 
-        print("\n~" + "=~" * 37)
+    # Average Errors of Either Type Per Student
+    print('{}: {}\n'.format(summary_stats[5][0], summary_stats[5][1]))
+
+    # Five Number Summary
+    print('======= {} ======='.format(summary_stats[6][0]))
+    five_numbers = summary_stats[6][1]
+    for stat_type, value in five_numbers:
+        print('\t{:21}{}'.format(stat_type + ':', value))
 
 
 def _print_top_errors(stats, tabs=1, aggregate=True):
@@ -164,10 +160,10 @@ def _print_top_errors(stats, tabs=1, aggregate=True):
     @rtype: None
     """
     for i, stat in enumerate(stats):
-        print("{}{}.".format("\t" * tabs, i + 1), end=' ')
-    # TODO: figure out a non-hardcoded alternative for 38 in prints:
+        print('{}{}.'.format('\t' * tabs, i + 1), end=' ')
+        # TODO: figure out a non-hardcoded alternative for 38 in prints:
         if aggregate:
-            print("{:38} {:3}".format(stat[0] + ':', stat[1]))
+            print('{:38} {:3}'.format(stat[0] + ':', stat[1]))
         else:
-            print("{:38} {:3} ({}%)".format(stat[0][0] + ':',
+            print('{:38} {:3} ({}%)'.format(stat[0][0] + ':',
                                             stat[0][1], stat[1][1]))

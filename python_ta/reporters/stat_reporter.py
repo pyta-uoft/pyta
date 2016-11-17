@@ -7,15 +7,19 @@ class StatReporter(PlainReporter):
     style_messages = []
 
     def __init__(self, number_of_messages):
-        """Inherited from class PlainReporter.
+        """Initialize a StatReporter.
+
+        Clear the two class-level message lists.
 
         @type number_of_messages: int
         @rtype: None
         """
         super().__init__(number_of_messages)
+        StatReporter.error_messages = []
+        StatReporter.style_messages = []
 
     def print_messages(self, level='all'):
-        """Overrides the corresponding function in PlainReporter.
+        """Override the corresponding function in PlainReporter.
 
         @type level: str
         @rtype: None
@@ -25,16 +29,3 @@ class StatReporter(PlainReporter):
 
     # to appease PyCharm's NotImplemented complaint
     _display = None
-
-    @staticmethod
-    def reset_messages():
-        """
-        Resets the class-level lists that hold the message lists to empty, so as to
-        avoid aggregating all files' messages in the StatReporter.
-        Called by pyta_statistics before every instantiation of StatReporter by
-        python_ta.check_all().
-
-        @rtype: None
-        """
-        StatReporter.error_messages = []
-        StatReporter.style_messages = []

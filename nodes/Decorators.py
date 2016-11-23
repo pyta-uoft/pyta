@@ -7,13 +7,14 @@ the function being decorated. A Decorators node is a child node of FunctionDef
 node.
 
 Attributes:
-    - nodes  (Node)
-        - Represents a decorators node.
+    - nodes  (List[Name])
+        - A list of names of the decorators
 
 Example:
-    - nodes  -> wrapper
+    - nodes  -> [Name(wrapper), Name(decor)]
 """
 
 @wrapper
+@decor
 def fun():
     pass

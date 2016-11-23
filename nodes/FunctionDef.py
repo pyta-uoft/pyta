@@ -14,15 +14,15 @@ Attributes:
         - The list of nodes inside the function.
     - decorators  (List[Decorators])
         - The list of decorators to be applied to this function.
-    - returns     (None)
+    - returns     (Name)
         - The return annotation. Only python3 has a return annotation.
 
 Example:
     - name        -> "fun"
     - args        -> arg
     - doc         -> "This is a function fun."
-    - body        -> [Assign(return_annotation, "cool!")]
-    - decorators  -> [@wrapper]
+    - body        -> [Assign(AssignName(return_annotation))]
+    - decorators  -> [Name(wrapper)]
     - returns     -> str
 """
 

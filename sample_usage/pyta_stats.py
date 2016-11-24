@@ -20,13 +20,13 @@ def pyta_statistics(directory):
     """
     all_errors = OrderedDict()
 
-    # Add directory to PYTHONPATH so python_ta.check_all can see modules inside
-    sys.path.append(directory)
-
     for root_str, dir_list, file_list in os.walk(directory):
         # check if directory is student directory
         if len(dir_list) == 0:
             student_id = os.path.basename(root_str)
+
+            # Add directory to PYTHONPATH so python_ta.check_all can see modules inside
+            sys.path.append(os.path.basename(root_str))
 
             for file in file_list:
                 if file.endswith('.py'):
@@ -35,6 +35,7 @@ def pyta_statistics(directory):
                     # store all the msg objects of this student's files
             all_errors[student_id] = (StatReporter.error_messages,
                                       StatReporter.style_messages)
+            del sys.path[-1]
 
     if len(all_errors) == 0:
         raise Exception('No student files found in given directory!')

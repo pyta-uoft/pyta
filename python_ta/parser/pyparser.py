@@ -1,4 +1,4 @@
-from funcparserlib import finished, many, maybe, skip, some, a, with_forward_decls, forward_decl
+from funcparserlib.parser import finished, many, maybe, skip, some, a, with_forward_decls, forward_decl
 from tokenize import generate_tokens
 from io import StringIO
 import token
@@ -51,6 +51,22 @@ def parse(tokens):
         return functools.reduce(lambda s, f_x: f_x[0](s, f_x[1]), list, z)
     
     eval = unarg(eval_expr)
+
+    @unarg
+    def make_list(first, rest):
+        if len(rest) == 0:
+            return [first]
+        else:
+            items = list(rest)
+            items.insert(0, first)
+            return items
+    
+    
+    def make_maybe_empty_list(arg):
+        if arg is None:
+            return []
+        else:
+            return make_list(arg)
     
     def make_number(s):
         try:
@@ -58,38 +74,80 @@ def parse(tokens):
         except ValueError:
             return float(s)
     
-    def to_simple_type(s):
-        try:
-            if s == 'int':
-                return int
-            elif s == 'str':
-                return str
-            elif s == 'float':
-                return float
-            elif s == 'bool':
-                return bool
-            elif s in ['obj', 'object']:
-                return typing.Any
-            elif s in ['None', 'NoneType']:
-                return type(None)
-            return s
-        except ValueError:
-            raise
+    def make_string(s):
+        return str(s)
         
     number = (
         some(lambda tok: tok.code == token.NUMBER)
         >> tokval
         >> make_number)
     
-    str = (
-        some(lambda tok: tok.code == token.STRING)
-        >> tokval
-        >> to_simple_type)
+    string = (
+     some(lambda tok: tok.code == token.STRING)
+     >> tokval
+     >> (lambda s: s[1:-1]))
+
+    def skip_str(s):
+        return skip(some(lambda x: x.string == s))
+    
+    name = (
+        some(lambda tok: tok.code == token.NAME)
+        >> tokval)
+    
+    await = (
+        some(lambda tok: tok.code == token.AWAIT)
+        >> tokval)    
+    
+    star = (
+        some(lambda tok: tok.code == token.STAR)
+        >> tokval)
+    
     
     # operator
     op = lambda s: a(Token(token.OP, s)) >> tokval
     op_ = lambda s: skip(op(s))
 
+    # Means of composition
+    @with_forward_decls
+    def primary1():
+        return number | (op_('(') + expr + op_(')'))
+    
+    @with_forward_decls
+    def primary2():
+        return  (op_('(') + expr + op_(')'))
+
+    rawname = (some(lambda tok: tok.code == token.NAME) >> tokval)
+    
+    kw = lambda s: skip(a(Token(token.NAME, s)))
+    
+    newline = skip(a(Token(token.NEWLINE, '\n')))
+    indent = skip(a(Token(token.INDENT, '    ')))
+    dedent = skip(a(Token(token.DEDENT, '')))
+    
+    comma = op_(',')
+    semicolon = op_(';')
+    dot = op_('.')
+    colon = op_(':')
+    dbl_quote = op_('"')
+    assign = colon + op_('=')
+    
+    openparen = op_('(')
+    closeparen = op_(')')
+    inparens = lambda s: openparen + s + closeparen
+    
+    opencurlyparen = op_('{')
+    closecurlyparen = op_('}')
+    incurlyparens = lambda s: opencurlyparen + s + closecurlyparen
+    
+    openbracket = op_('[')
+    closebracket = op_(']')
+    inbrackets = lambda s: openbracket + s + closebracket
+    
+    listof = lambda s: (s + many(comma + s)) >> make_list
+    
+    maybe_empty_listof = lambda s: maybe(s + many(comma + s)) >> make_maybe_empty_list 
+    
+    
     add = makeop('+', operator.add)
     sub = makeop('-', operator.sub)
     mul = makeop('*', operator.mul)
@@ -98,21 +156,19 @@ def parse(tokens):
     mod = makeop('%', operator.mod)
     floor_div = makeop('//', operator.floordiv)
     
-    # comparison operator
+    # comp_op
     eq = makeop('==', operator.eq)
     lt = makeop('<', operator.lt)
     le = makeop('<=', operator.le)
-    ne = makeop('!=', operator.ne)
+    ne1 = makeop('!=', operator.ne)
+    ne2 = makeop("<>", operator.ne)
     ge = makeop('>=', operator.ge)
     gt = makeop('>',operator.gt)
     cin = makeop('in', operator.contains)
     cis = makeop('is',operator.is_)
     cisnot = makeop('is not', operator.is_not)
-        
-    # logical operator
-    no = makeop('!', operator.not_)
-
-    # assignment operator
+    
+    # augassign
     an = makeop('+=', operator.iadd)
     sn = makeop('-=', operator.isub)
     muln = makeop('*=', operator.imul)
@@ -120,9 +176,13 @@ def parse(tokens):
     fdn = makeop('//=', operator.ifloordiv)
     pn = makeop('**=', operator.ipow)
     mon = makeop('%=',operator.imod)
+    irightshift = makeop('>>=', operator.irshift)
+    ileftshift = makeop('<<=', operator.ilshift)
+    ior = makeop('|=', operator.ior)
+    ixor = makeop('^=', operator.ixor)
     
-    
-    # bitwise operator
+
+    no = makeop('!', operator.not_)
     band = makeop('&', operator.and_)
     bxor = makeop('^', operator.xor)
     inv = makeop('~', operator.invert)
@@ -130,33 +190,63 @@ def parse(tokens):
     leftshift = makeop('<<', operator.lshift)
     rightshift = makeop('>>', operator.rshift)  
     
-    # Operator	Description Precedence
-    # **	Exponentiation (raise to the power)
-    # ~ + -	Complement, unary plus and minus (method names for the last two are +@ and -@)
-    # * / % //	Multiply, divide, modulo and floor division
-    # + -	Addition and subtraction
-    # >> <<	Right and left bitwise shift
-    # &	Bitwise 'AND'	
-    # ^ |	Bitwise exclusive `OR' and regular `OR'
-    # <= < > >=	Comparison operators
-    # <> == !=	Equality operators
-    # = %= /= //= -= += *= **=	Assignment operators
-    # is is not	Identity operators
-    # in not in	Membership operators
-    # not or and	Logical operators
-    
     mul_op = mul | div | mod | floor_div
     add_op = add | sub
     shift = leftshift | rightshift
     com_op = lt | gt | le | ge
-    eq_op = eq | ne
+    eq_op = eq | ne1 | ne2
     asslst = an | sn | muln | dn | fdn | pn | fdn | mon
     is_op = cis | cisnot
+    # TODO
     
-    # more operators
-    #TODO
+    # atom: ('(' [yield_expr|testlist_comp] ')' |
+    #    '[' [testlist_comp] ']' |
+    #    '{' [dictorsetmaker] '}' |
+    #    NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
+    # not used in grammar, but may appear in "node" passed from Parser to Compiler
+    # encoding_decl: NAME
+    # 
+    # yield_expr: 'yield' [yield_arg]
+    # yield_arg: 'from' test | testlist
     
+    #TODO left: '@=' | '&='
+    augassign = an | sn | muln | dn | mon | fdn | irightshift | ileftshift \
+                | ior | ixor
+    
+    #TODO can not find 'not in' function?
+    comp_op = lt | gt | le | ge | eq | ne1 | ne2 | cin | cis | cisnot
 
+    #TODO # power: atom_expr ['**' factor]
+    #TODO what about factor and power
+    #
+    power = (pow)
+    factor_c = add | sub | inv
+    # !
+    factor = many(factor_c) | power
+    #TODO no "@"
+    term_c = mul | div | floor_div | mod
+    term = factor + many(term_c + factor)
+    add_sub = add | sub
+    arith_expr = term + many(add_sub + term)
+    shift = leftshift | rightshift
+    shift_expr = arith_expr + many(shift + arith_expr)
+    and_expr = shift_expr + many(band + shift_expr)
+    xor_expr = and_expr + many(bxor + and_expr)
+    expr = xor_expr + many(bor + xor_expr)
+    star_expr = expr + many(star + expr)
+    #TODO what is the difference between {} []
+    # atom: ('(' [yield_expr|testlist_comp] ')' |
+    #    '[' [testlist_comp] ']' |
+    #    '{' [dictorsetmaker] '}' |
+    #    NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
+    atom = number | str | name
+    
+    
+    
+    
+    
+    
+    
     # Means of composition
     @with_forward_decls
     def primary():
@@ -186,9 +276,4 @@ def parse(tokens):
     return toplevel.parse(tokens)
 
 if __name__ == "__main__":
-    print(parse(tokenize('3 //= 3')))
-    print(parse(tokenize('3 += 3')))
-    print(parse(tokenize('(3 - 3) * 3 + (3 * 3)')))
-    print(parse(tokenize('((3 - 1) * 3) + (3 * 3)')))
-    print(parse(tokenize('2 * 32 ** 1')) == 64)
-    print(parse(tokenize('2 ** 32 - 1')) == 4294967295)
+    print(parse(tokenize('1<2')))

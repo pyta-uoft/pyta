@@ -25,8 +25,8 @@ def pyta_statistics(directory):
         if len(dir_list) == 0:
             student_id = os.path.basename(root_str)
 
-            # Add directory to PYTHONPATH so python_ta.check_all can see modules inside
-            sys.path.append(os.path.basename(root_str))
+            # Add parent of directory to PYTHONPATH so python_ta.check_all can see modules inside
+            sys.path.append(os.path.dirname(root_str))
 
             for file in file_list:
                 if file.endswith('.py'):

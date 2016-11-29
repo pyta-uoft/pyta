@@ -200,10 +200,29 @@ def set_subscript_type_constraints(node):
             node.type_constraints = inferred.type_constraints
 
 
+# TODO: Add check in the set_compare_type_constraints as in BinOp.
 def set_compare_type_constraints(node):
     """Compare operators includes:
     '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
     node.type_constraints = bool
+
+
+def set_boolop_type_constraints(node):
+    """Boolean operators includes: 'and', 'or'
+    Logic of Boolean Operations:
+    x or y --> if x is false, then y, else x
+    x and y --> if x is false, then x, else y
+    """
+    if node.op == 'or':
+        if not node.values[0]:
+            node.type_constraints = node.values[1].type_constraints
+        else:
+            node.type_constraints = node.values[0].type_constraints
+    elif node.op == 'and':
+        if not node.values[0]:
+            node.type_constraints = node.values[0].type_constraints
+        else:
+            node.type_constraints = node.values[1].type_constraints
 
 
 def register_type_constraints_setter():
@@ -215,11 +234,16 @@ def register_type_constraints_setter():
     type_visitor.register_transform(astroid.Tuple, set_tuple_type_constraints)
     type_visitor.register_transform(astroid.List, set_list_type_constraints)
     type_visitor.register_transform(astroid.Dict, set_dict_type_constraints)
+    type_visitor.register_transform(astroid.BinOp, set_binop_type_constraints)
     type_visitor.register_transform(astroid.UnaryOp,
                                     set_unaryop_type_constraints)
     type_visitor.register_transform(astroid.Subscript,
                                     set_subscript_type_constraints)
     type_visitor.register_transform(astroid.Compare,
                                     set_compare_type_constraints)
-    type_visitor.register_transform(astroid.BinOp, set_binop_type_constraints)
+    type_visitor.register_transform(astroid.BoolOp,
+                                    set_boolop_type_constraints)
+    type_visitor.register_transform(astroid.Assign,
+                                    set_assign_type_constraints)
+
     return type_visitor

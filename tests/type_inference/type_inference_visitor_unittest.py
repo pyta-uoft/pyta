@@ -640,6 +640,37 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
+    def test_bool0(self):
+        module = astroid.parse("""99 or 100""")
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BoolOp)]
+        self.assertEqual([int], result)
+
+    def test_bool2(self):
+        code = """
+            bool1 = 0 or "abcde"
+            bool2 = "abcde" and 0
+            bool3 = 0 and "abcde"
+        """
+        module = astroid.parse(code)
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BoolOp)]
+        self.assertEqual([int, int, str], result)
+
+    def test_bool3(self):
+        code = """
+            bool1 = "String1" and "String2"
+            bool2 = (not True) and (not 7)
+            bool3 = False and (not not 7)
+        """
+        module = astroid.parse(code)
+        self.type_visitor.visit(module)
+        result = [n.type_constraints for n in module.nodes_of_class(
+            node_classes.BoolOp)]
+        self.assertEqual([str, int, int], result)
+
 
 if __name__ == '__main__':
     unittest.main()

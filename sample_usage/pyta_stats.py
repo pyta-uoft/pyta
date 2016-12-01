@@ -150,6 +150,9 @@ def _print_stats(individual_stats, summary_stats):
     for stat_type, value in five_numbers:
         print('\t{:21}{}'.format(stat_type + ':', value))
 
+    # Standard Deviation
+    print('\n{}: {}'.format(summary_stats[7][0], summary_stats[7][1]))
+
 
 def _print_top_errors(stats, tabs=1, aggregate=True):
     """Pretty prints a list of most frequent errors and their counts.

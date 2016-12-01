@@ -1,17 +1,16 @@
 """
 DelAttr astroid node
 
-DelAttr deletes the named attribute, provided the object allows it. For example,
-delattr(x, 'foobar') is equivalent to del x.foobar.
+This node represents the part where an attribute of an object is being deleted.
 
 Attributes:
-    - expr      (Node)
+    - expr      (Name)
         - The node object whose attribute is being deleted.
     - attrname  (str)
         - The name of the attribute being deleted.
 
 Example:
-    - expr      -> Foo
+    - expr      -> Name("self", del())
     - attrname  -> "attr"
 """
 

@@ -1,12 +1,14 @@
 """
 DelName astroid node
 
+Represents the part when an object is being deleted.
+
 Attributes:
     - name  (Name)
-        - The name node to be deleted.
+        - The node being deleted.
 
 Example:
-    - name  -> x
+    - name  -> Name('x', del())
 """
 
 del x

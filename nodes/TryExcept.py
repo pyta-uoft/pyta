@@ -16,13 +16,27 @@ Attributes:
         - Optionally, the code to be executed if the "try" code does not
           raise any exceptions.
 
-Example:
+Example 1:
     - body      -> [Pass]
     - handlers  -> [ExceptHandler(body=[Pass])]
-    - orelse    ->
+    - orelse    -> []
+
+Example 2:
+    - body      -> [Pass]
+    - handlers  -> [ExceptHandler(body=[Pass])]
+    - orelse    -> [Pass]
 """
 
+# Example 1
 try:
     pass
 except:
+    pass
+
+# Example 2
+try:
+    pass
+except:
+    pass
+else:
     pass

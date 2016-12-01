@@ -50,7 +50,7 @@ usually compose the body of a parent node.
 * ClassDef
 * Continue
 * Delete
-* Expr (when appearing alone)
+* Expr (when enclosing an Expr-type node)
 * For
 * FunctionDef
 * Global
@@ -68,15 +68,15 @@ usually compose the body of a parent node.
 
 ### `Expr` Nodes
 
-* Attribute  (see below)
+* Attribute  (see [below](#expression-context))
 * Await
 * BinOp
 * BoolOp
 * Call
 * Compare
-* Constant
-* DelAttr  (see below)
-* DelName  (see below)
+* Const
+* DelAttr  (see [below](#expression-context))
+* DelName  (see [below](#expression-context))
 * Dict
 * DictComp
 * Ellipsis
@@ -84,7 +84,7 @@ usually compose the body of a parent node.
 * IfExp
 * Lambda
 * ListComp
-* Name  (see below)
+* Name  (see [below](#expression-context))
 * Set
 * SetComp
 * UnaryOp
@@ -93,8 +93,8 @@ usually compose the body of a parent node.
 
 These expression nodes are also assignable (can be the target of an Assign, etc.):
 
-* AssignAttr  (see below)
-* AssignName  (see below)
+* AssignAttr  (see [below](#expression-context))
+* AssignName  (see [below](#expression-context))
 * List
 * Starred
 * Subscript

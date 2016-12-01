@@ -9,10 +9,6 @@ and how they appear in Python code.
 
 Rename `Stmt` type to the property node class `Statement`.
 
-## AsyncFor
-
-Example for `orelse` is wrong (the `else` is currently tied to the `if` rather than the `for` loop.
-
 ## AugAssign
 
 Like `Assign`, would be good to show an example of augmented assignment with multiple targets.

@@ -6,6 +6,8 @@ A class definition.
 Attributes:
     - name        (str)
         - A raw string for the class name.
+    - doc         (str)
+        - The docstring of this function.
     - decorators  (Decorators)
         - The decorator to be applied on this function.
     - bases       (List[Node])
@@ -15,6 +17,7 @@ Attributes:
 
 Example:
     - name        -> 'Foo'
+    - doc         -> ''
     - decorators  -> @wrapper
     - bases       -> [Name(id='base1', ctx=Load()),Name(id='base2', ctx=Load())]
     - body        -> [Pass()]

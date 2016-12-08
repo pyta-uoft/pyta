@@ -1,5 +1,4 @@
 """checker for global variables
-
 """
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
@@ -9,6 +8,7 @@ from pylint.checkers.base import CONST_NAME_RGX
 
 
 class GlobalVariablesChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
     name = 'global_variables'

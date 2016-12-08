@@ -15,7 +15,6 @@ class GlobalVariablesChecker(BaseChecker):
     msgs = {'E9997': ('Global variables should not be used in CSC108/CSC148 - '
                       '%s', 'forbidden-global-variables', '')}
 
-    options = ()
     # this is important so that your checker is executed before others
     priority = -1
 

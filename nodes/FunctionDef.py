@@ -10,7 +10,7 @@ Attributes:
         - An arguments node. See Arguments.py for more details.
     - doc         (str)
         - The docstring of the function.
-    - body        (List[Node])
+    - body        (List[Statement])
         - The list of nodes inside the function.
     - decorators  (Decorators)
         - The decorators to be applied to this function.
@@ -21,7 +21,8 @@ Example:
     - name        -> "fun"
     - args        -> arg
     - doc         -> "This is a function fun."
-    - body        -> [Assign(AssignName(return_annotation))]
+    - body        -> [Assign(AssignName(return_annotation)),
+                     Return(Name(return_annotation)]
     - decorators  -> [Name(wrapper)]
     - returns     -> str
 """

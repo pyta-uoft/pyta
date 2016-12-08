@@ -12,8 +12,8 @@ Attributes:
         - The else clause.
 
 Example:
-    - test    -> True
-    - body    -> [x = 1]
+    - test    -> Const(True)
+    - body    -> [1]
     - orelse  -> [0]
 """
 

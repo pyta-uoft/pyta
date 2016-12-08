@@ -10,7 +10,7 @@ Attributes:
         - The name of the attribute being deleted.
 
 Example:
-    - expr      -> Name("self", del())
+    - expr      -> Name("self", Del())
     - attrname  -> "attr"
 """
 

@@ -10,18 +10,20 @@ Attributes:
     - iter    (Call)
         - A function call node which represents the part that iterates over
           the loop.
-    - body    (Node)
+    - body    (List[Statement])
         - The node to be executed.
-    - orelse  (Node)
-        - Node will execute if the loop finished normally rather than via a
+    - orelse  (List[Statement])
+        - The nodes will execute if the loop finished normally rather than via a
         break statement.
 
-Example 1:
+Example:
     - target  -> AssignName(i)
     - iter    -> Call(func = Name(range), args = [3])
-    - body    -> Break()
-    - orelse  -> []
+    - body    -> [Break()]
+    - orelse  -> [Pass()]
 """
 
 for i in range(3):
     break
+else:
+    pass

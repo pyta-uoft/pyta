@@ -8,7 +8,7 @@ Attributes:
         - The node being deleted.
 
 Example:
-    - name  -> Name('x', del())
+    - name  -> Name('x', Del())
 """
 
 del x

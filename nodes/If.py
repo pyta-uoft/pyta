@@ -13,9 +13,9 @@ Attributes:
           representation so it appears as If nodes within orelse.
 
 Example:
-    - test    -> n == 0
-    - body    -> [pass]
-    - orelse  -> [If(n > 0, pass, None), n = 3]
+    - test    -> Compare(Name(n), [(3,)])
+    - body    -> [Pass()]
+    - orelse  -> [If(n > 0, pass, n = 3)]
 """
 
 if n == 0:

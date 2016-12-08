@@ -1,7 +1,8 @@
 """
 Const astroid node
 
-Represents a constant node like num, str, bool, None, bytes.
+Represents a literal constant node like num, str, bool, None, bytes, not
+computed values.
 
 Attributes:
     - value  (num | str | bool | None | bytes)

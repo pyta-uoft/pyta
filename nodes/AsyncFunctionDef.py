@@ -29,7 +29,7 @@ Example:
 """
 
 @wrapper
-def animal(arg):
+async def animal(arg):
     """
     This is function animal.
     """

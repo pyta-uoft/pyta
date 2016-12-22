@@ -6,7 +6,7 @@ from sample_usage.stats_analysis import summary
 from collections import OrderedDict
 
 
-def pyta_statistics(directory):
+def pyta_statistics(directory, config=''):
     """
     Recursively run python_ta.check_all() on the files in the directory and its
     subdirectories to collect the error and style messages.
@@ -16,7 +16,8 @@ def pyta_statistics(directory):
     subdirectories, only files.
 
     @param str directory: The string of the path way of the directory.
-    @rtype: None
+    @param str config: A path to the configuration file to use.
+    @rtype: dict[str, str]
     """
     all_errors = OrderedDict()
 
@@ -27,11 +28,12 @@ def pyta_statistics(directory):
 
             # Add parent of directory to PYTHONPATH so python_ta.check_all can see modules inside
             sys.path.append(os.path.dirname(root_str))
-
             for file in file_list:
                 if file.endswith('.py'):
                     python_ta.check_all(os.path.join(student_id, file),
-                                        reporter=StatReporter)
+                                        reporter=StatReporter,
+                                        config=config,
+                                        number_of_messages=0)
                     # store all the msg objects of this student's files
             all_errors[student_id] = (StatReporter.error_messages,
                                       StatReporter.style_messages)
@@ -41,6 +43,7 @@ def pyta_statistics(directory):
         raise Exception('No student files found in given directory!')
     else:
         _print_stats(*summary(all_errors))
+        return all_errors
 
 
 def _print_stats(individual_stats, summary_stats):

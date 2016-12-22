@@ -1,5 +1,4 @@
 import os
-import sys
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
 from sample_usage.stats_analysis import summary
@@ -26,18 +25,15 @@ def pyta_statistics(directory, config=''):
         if len(dir_list) == 0:
             student_id = os.path.basename(root_str)
 
-            # Add parent of directory to PYTHONPATH so python_ta.check_all can see modules inside
-            sys.path.append(os.path.dirname(root_str))
             for file in file_list:
                 if file.endswith('.py'):
-                    python_ta.check_all(os.path.join(student_id, file),
+                    python_ta.check_all(os.path.join(root_str, file),
                                         reporter=StatReporter,
                                         config=config,
                                         number_of_messages=0)
                     # store all the msg objects of this student's files
             all_errors[student_id] = (StatReporter.error_messages,
                                       StatReporter.style_messages)
-            del sys.path[-1]
 
     if len(all_errors) == 0:
         raise Exception('No student files found in given directory!')

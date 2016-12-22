@@ -66,9 +66,6 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     The name of the module should be the name of a module,
     or the path to a Python file.
     """
-    # Reset astroid cache
-    MANAGER.astroid_cache.clear()
-
     if module_name == '':
         m = sys.modules['__main__']
         spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
@@ -89,6 +86,11 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     if spec is None:
         print("The Module '{}' could not be found. ".format(module_name))
         return
+
+    # Clear the astroid cache of this module (allows for on-the-fly changes
+    # to be detected in consecutive runs in the interpreter).
+    if spec.name in MANAGER.astroid_cache:
+        del MANAGER.astroid_cache[spec.name]
 
     current_reporter = reporter(number_of_messages)
     linter = lint.PyLinter(reporter=current_reporter)

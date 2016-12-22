@@ -1,11 +1,11 @@
 """
 DelAttr astroid node
 
-This is an astroid Attribute node specifically in the Del (being deleted) context,
-that is, the attribute of another node that is being deleted.
+This node represents an attribute of an object being deleted.
+This is an astroid Attribute node specifically in the Del (being deleted) context.
 
 Attributes:
-    - expr      (Node)
+    - expr      (Name)
         - The node object whose attribute is being deleted.
     - attrname  (str)
         - The name of the attribute being deleted.

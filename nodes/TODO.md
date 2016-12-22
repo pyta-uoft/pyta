@@ -1,13 +1,29 @@
 # TODOs for node documentation
 
-## Global changes
+## Assign
 
-Investigate whether the `ctx` attribute exists for all relevant nodes,
-and list all of these nodes.
-Also include more description of what the values of this attribute mean,
-and how they appear in Python code.
+The type of `targets` can probably be more specific to just a small
+set of node classes (e.g., `Name`?).
 
-Rename `Stmt` type to the property node class `Statement`.
+It would be good to show different examples of the different nodes that could appear on the left,
+as well as an example of multiple assignment:
+
+```python
+x = y = z = 1 + 2
+```
+
+## AsyncFor
+
+Example for `orelse` is wrong (the `else` is currently tied to the `if` rather than the `for` loop.
+
+## AsyncFunctionDef
+
+The example does not use the `async` keyword, and so does not actually illustrate an `AsyncFunctionDef`.
+
+## Attribute
+
+The descriptions for both the node itself and both of its attributes need work.
+
 
 ## AugAssign
 
@@ -48,15 +64,6 @@ The description of wrapper "turns from a FunctionDef to a Decorators node" is in
 A Decorators node is actually a child of a FunctionDef.
 
 The type of the `nodes` attribute seems to be a list of names, and is certainly not type `Decorators` (this would be oddly recursive).
-
-## DelAttr
-
-The description is describing the behaviour of the built-in `delattr` function,
-which is not the same as the `DelAttr` node.
-Note that the `DelAttr` node in the file's example is *only* the code `self.attr`
-in `del self.attr`.
-
-The given example value for `expr` is incorrect.
 
 ## DelName
 
@@ -122,10 +129,6 @@ The type of `value` is more general; e.g., `x[1+2]`.
 
 It seems like the type of `Generators` should be `List[Comprehension]`,
 unless there is another possibility for these elements?
-
-## Name
-
-The string type should be represented as `str`, not `Str` (this type is not privided by the `types` module).
 
 ## Nonlocal
 

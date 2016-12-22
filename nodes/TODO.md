@@ -1,14 +1,5 @@
 # TODOs for node documentation
 
-## Global changes
-
-Investigate whether the `ctx` attribute exists for all relevant nodes,
-and list all of these nodes.
-Also include more description of what the values of this attribute mean,
-and how they appear in Python code.
-
-Rename `Stmt` type to the property node class `Statement`.
-
 ## Assign
 
 The type of `targets` can probably be more specific to just a small
@@ -33,6 +24,7 @@ The example does not use the `async` keyword, and so does not actually illustrat
 
 The descriptions for both the node itself and both of its attributes need work.
 
+
 ## AugAssign
 
 Like `Assign`, would be good to show an example of augmented assignment with multiple targets.
@@ -51,18 +43,6 @@ Same question as `BinOp` about the `op` attribute.
 Also, it seems like there should be more investigation into `values`.
 If this is a list, does that mean `BoolOp` doesn't just represent binary operations?
 We should give an example for other cases then.
-
-## Call
-
-The first example should be much simpler, involving a function call that is not inside a list comprehension.
-
-The second example illustrates a function definition, not a function call.
-
-## ClassDef
-
-Is it not the case that the `metaclass=meta` information is stored somewhere?
-
-It should also be the case that the *name* of the class (which should be changed to a capitalized word) is stored somewhere in the node.
 
 ## Compare
 
@@ -101,10 +81,6 @@ The type of `value` is more general; e.g., `x[1+2]`.
 
 It seems like the type of `Generators` should be `List[Comprehension]`,
 unless there is another possibility for these elements?
-
-## Name
-
-The string type should be represented as `str`, not `Str` (this type is not privided by the `types` module).
 
 ## Nonlocal
 

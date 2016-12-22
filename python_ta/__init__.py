@@ -23,10 +23,9 @@ import webbrowser
 import pylint.lint as lint
 import pylint
 from astroid import MANAGER
-import pycodestyle
 
 from .reporters import ColorReporter
-
+from .patches import patch_all
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
@@ -67,9 +66,6 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     The name of the module should be the name of a module,
     or the path to a Python file.
     """
-    # Reset astroid cache
-    MANAGER.astroid_cache.clear()
-
     if module_name == '':
         m = sys.modules['__main__']
         spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
@@ -91,6 +87,11 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
         print("The Module '{}' could not be found. ".format(module_name))
         return
 
+    # Clear the astroid cache of this module (allows for on-the-fly changes
+    # to be detected in consecutive runs in the interpreter).
+    if spec.name in MANAGER.astroid_cache:
+        del MANAGER.astroid_cache[spec.name]
+
     current_reporter = reporter(number_of_messages)
     linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
@@ -102,11 +103,18 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                                 #'python_ta/checkers/invalid_range_index_checker',
                                 'python_ta/checkers/assigning_to_self_checker',
                                 'python_ta/checkers/always_returning_checker'])
+
+    if pep8:
+        linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
+
     if local_config_file != '':
         linter.read_config_file(local_config_file)
     else:
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
     linter.load_config_file()
+
+    # Monkeypatch pylint
+    patch_all()
 
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
@@ -128,8 +136,6 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
         linter.check([spec.origin])
         current_reporter.print_messages(level)
 
-        if pep8:
-            _check_pycodestyle(module_name.replace('.', os.path.sep) + '.py')
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print(e)
@@ -141,10 +147,3 @@ def doc(msg_id):
     print('Opening {} in a browser.'.format(msg_url))
     webbrowser.open(msg_url)
 
-
-# TODO: Move this into a separate module
-def _check_pycodestyle(module_name):
-    print('\n=== PEP8 Errors ===')
-    style_checker = pycodestyle.Checker(module_name)
-    num_errors = style_checker.check_all()
-    print("Found %s errors (and warnings)" % num_errors)

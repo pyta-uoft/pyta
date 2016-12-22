@@ -6,8 +6,10 @@ similarly to the "yield" statement except that the generator can delegate
 some generating work to another generator.
 
 Attributes:
-    - value  (GeneratorExp)
-        - The generator that this YieldFrom is delegating work to.
+    - value  (Expr)
+        - The generator that this YieldFrom is delegating work to,
+          which must be a generator expression (either a GeneratorExp node
+          or an Expr node containing a generator expression).
 
 Example:
     - value  -> Call(range, Name('g', Load()))

@@ -1,7 +1,8 @@
 """
 Attribute astroid node
 
-To give attribute access.
+To give attribute access. (This is only for Attribute nodes appearing
+in a Store context. For more information, see the README.)
 
 Attributes:
     - expr      (Node)
@@ -10,8 +11,8 @@ Attributes:
         - The name of the access.
 
 Example:
-    - expr      -> ""
-    - attrname  -> "endswith"
+    - expr      -> Name(id='snake', ctx=Load())
+    - attrname  -> "colour"
 """
 
-''.endswith('')
+snake.colour

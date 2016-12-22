@@ -5,14 +5,14 @@ This node represents the Python set object.
 
 Attributes:
     - elts  (List[Expr])
-        - The elements in this list, which can be any immutable/hashable
+        - The elements in this set, which can be any immutable/hashable
           type expression.
 
 Example 1:
     - elts  -> []
 
 Example 2:
-    - elts  -> [Num(1), Num(2), Str(hi)]
+    - elts  -> [Const(int(1)), Const(int(2)), Const(str(hi))]
 """
 
 # Example 1

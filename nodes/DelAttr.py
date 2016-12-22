@@ -1,7 +1,8 @@
 """
 DelAttr astroid node
 
-This node represents the part where an attribute of an object is being deleted.
+This node represents an attribute of an object being deleted.
+This is an astroid Attribute node specifically in the Del (being deleted) context.
 
 Attributes:
     - expr      (Name)
@@ -10,7 +11,7 @@ Attributes:
         - The name of the attribute being deleted.
 
 Example:
-    - expr      -> Name("self", Del())
+    - expr      -> Name(id="self")
     - attrname  -> "attr"
 """
 

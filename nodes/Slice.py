@@ -5,14 +5,15 @@ This node represents the Python slicing operator, used to isolate parts of
 an iterable. It is used in the Subscript node.
 
 Attributes:
-    - lower  (Num)
-        - The optional lower bound of this slice, an integer. 0 by default.
-    - upper  (Num)
-        - The optional upper bound (non-inclusive) of this slice, an integer.
-          The length of the iterable being sliced by default.
-    - step   (Num)
+    - lower  (Expr)
+        - The optional lower bound of this slice, which must evaluate to an
+          integer. Default: 0.
+    - upper  (Expr)
+        - The optional upper bound (non-inclusive) of this slice, which must
+          evaluate to an integer. Default: length of the iterable being sliced.
+    - step   (Expr | None)
         - The optional step (number of iterations to skip) for this slice,
-          an integer. None by default.
+          which must evaluate to an integer. Default: None.
 
 Example 1:
     - lower  -> 0

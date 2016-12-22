@@ -108,3 +108,5 @@ class PlainReporter(BaseReporter):
 
                 message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
                 i += 1
+
+    _display = None

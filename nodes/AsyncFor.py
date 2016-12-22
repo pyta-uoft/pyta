@@ -30,5 +30,5 @@ async def fun():
     async for a in b:
         if a > 5:
             break
-        else:
-            continue
+    else:
+        continue

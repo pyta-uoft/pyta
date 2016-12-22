@@ -239,7 +239,6 @@ def parse(tokens):
     #    '[' [testlist_comp] ']' |
     #    '{' [dictorsetmaker] '}' |
     #    NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
-    atom = number | str | name
     
     
     

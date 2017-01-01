@@ -62,21 +62,6 @@ Finally, the variable name given in the example documentation is incorrect.
 
 The description of `value` should really reference the fact that these are literal constants rather than just computed values.
 
-## Import
-
-Not all imports need to have an alias (e.g., `import astroid` vs. `import astroid as ast`).
-It would be good to show an example of both, and how the attribute values differ.
-
-Also would be good to show having multiple imports on the same line.
-
-## ImportFrom
-
-Same comment as `Import`. Also worth investigating: is the `level` attribute on `Import` as well?
-
-## Index
-
-The type of `value` is more general; e.g., `x[1+2]`.
-
 ## ListComp
 
 It seems like the type of `Generators` should be `List[Comprehension]`,

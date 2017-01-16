@@ -10,6 +10,7 @@ FORBIDDEN_BUILTIN = ["compile", "eval", "exec"]
 
 
 class DynamicExecutionChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
     name = 'dynamic_execution'
@@ -18,7 +19,7 @@ class DynamicExecutionChecker(BaseChecker):
                       'Used when you use the dynamic functions "eval", "compile" or'
                       '"exec". '),}
 
-    options = (('functions_not_allowed',
+    options = (('forbidden-dynamic-exec',
                 {'default': FORBIDDEN_BUILTIN,
                  'type': 'csv', 'metavar': '<builtin function names>',
                  'help': 'List of builtins function names that should not be '
@@ -28,7 +29,7 @@ class DynamicExecutionChecker(BaseChecker):
 
     priority = -1
 
-    @check_messages('dynamic_execution')
+    @check_messages('dynamic-execution-not-allowed')
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name):
             name = node.func.name
@@ -36,7 +37,7 @@ class DynamicExecutionChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 # if name in FORBIDDEN_BUILTIN:
-                if name in self.config.functions_not_allowed:
+                if name in self.config.forbidden_dynamic_exec:
                     args = "{} on line {}".format(name, node.lineno)
                     # add the message
                     self.add_message('dynamic-execution-not-allowed', node=node, args=args)

@@ -7,9 +7,10 @@ from colorama import Fore, Style
 
 
 class ForbiddenImportChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
-    name = 'forbidden import'
+    name = 'forbidden_import'
     msgs = {'E9999':
                 ('You may not import any modules - you imported ' + Fore.BLUE +
                  '%s' + Style.RESET_ALL + ' on line %s.',

@@ -203,9 +203,11 @@ class TestEndingLocation(unittest.TestCase):
 
     def test_call(self):
         """Note: the end_col_offset is 1 left of the last ')'.
+        >>>print(1, 2, 3,  
+        >>>     4)
         """
-        expected = [(1, 1, 0, 7)]
-        module = self.get_file_as_module('nodes/Call.py')
+        expected = [(1, 2, 0, 7)]  # goal: end_col_offset == 7
+        module = self.get_file_as_module('examples/ending_locations/Call.py')
         self.set_and_check(module, astroid.Call, expected)
 
     # def test_classdef(self):

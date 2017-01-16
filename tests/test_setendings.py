@@ -205,7 +205,7 @@ class TestEndingLocation(unittest.TestCase):
         >>>print(1, 2, 3,  
         >>>     4)
         """
-        expected = [(1, 2, 0, 7)]  # goal: end_col_offset == 7
+        expected = [(1, 2, 0, 9)]
         module = self.get_file_as_module('examples/ending_locations/Call.py')
         self.set_and_check(module, astroid.Call, expected)
 

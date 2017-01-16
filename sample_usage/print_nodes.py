@@ -30,7 +30,7 @@ def print_node(filename, node_class):
     module = astroid.parse(content)
 
     # Set end_lineno and end_col_offset for all nodes in `module`.
-    ending_transformer = setendings.init_register_ending_setters()
+    ending_transformer = setendings.init_register_ending_setters(source_lines)
     ending_transformer.visit(module)
 
     for node in module.nodes_of_class(node_class):

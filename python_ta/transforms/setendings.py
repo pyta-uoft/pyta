@@ -55,7 +55,6 @@ NODES_WITH_CHILDREN = [
     astroid.Await,
     astroid.BinOp,
     astroid.BoolOp,
-    # TODO: missing right parens
     astroid.Call,
     astroid.ClassDef,
     astroid.Compare,
@@ -121,6 +120,7 @@ def _is_open_paren(s, index):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
+    (astroid.Call, None, _is_close_paren),
     (astroid.Comprehension, None, _is_close_paren),
     (astroid.Tuple, _is_open_paren, _is_close_paren)
 ]

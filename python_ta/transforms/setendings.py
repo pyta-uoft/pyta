@@ -59,7 +59,6 @@ NODES_WITH_CHILDREN = [
     astroid.Call,
     astroid.ClassDef,
     astroid.Compare,
-    astroid.Comprehension,
     # TODO: missing right parens (note: only if decorator takes args)
     astroid.Decorators,
     # TODO: missing keyword 'del' and attribute name
@@ -102,8 +101,6 @@ NODES_WITH_CHILDREN = [
     astroid.Subscript,
     astroid.TryExcept,
     astroid.TryFinally,
-    # TODO: missing *both* outer parens
-    astroid.Tuple,
     astroid.UnaryOp,
     astroid.While,
     astroid.With,
@@ -111,40 +108,32 @@ NODES_WITH_CHILDREN = [
 ]
 
 
-class NodeDataStore():
-    """Collect data and log at end of all tests."""
-    def __init__(self):
-        """Store data without dupes."""
-        self._storage = set()
-
-        # Question: do we want to move logger to its own module, in a utils directory?
-        # Recall: the `logging` namespace is in the global scope.
-        log_format = '%(asctime)s %(levelname)s %(message)s'
-        log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
-        log_filename = 'python_ta/transforms/setendings_log.log'
-        logging.basicConfig(format=log_format, datefmt=log_date_time_format, 
-                            filename=log_filename, level=logging.INFO)
-
-    def dump(self, prefix=''):
-        """Log stored data in a simple csv format."""
-        if prefix is not '':
-            prefix += ' '  # add space after
-        logging.info('{}{}'.format(prefix, ','.join(sorted(list(self._storage)))))
-
-    def write(self, message):
-        """Write message to a log file."""
-        logging.info(message)
-
-    def store(self, node):
-        """Store node to data structure so the dump joins related items instead
-        of having many separate messages."""
-        self._storage.add(node)
-
-# Global to expose to importing modules, and the transform functions.
-node_data_store = NodeDataStore()
+# Helpers for setting locations based on source code.
+def _is_close_paren(s, index):
+    return s[index] == ')'
 
 
-def init_register_ending_setters():
+def _is_open_paren(s, index):
+    return s[index] == '('
+
+
+# Nodes the require the source code for proper location setting
+# Elements here are in the form
+# (node class, predicate for start | None, predicate for end | None)
+NODES_REQUIRING_SOURCE = [
+    (astroid.Comprehension, None, _is_close_paren),
+    (astroid.Tuple, _is_open_paren, _is_close_paren)
+]
+
+# Configure logging
+log_format = '%(asctime)s %(levelname)s %(message)s'
+log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
+log_filename = 'python_ta/transforms/setendings_log.log'
+logging.basicConfig(format=log_format, datefmt=log_date_time_format,
+                    level=logging.WARNING)
+
+
+def init_register_ending_setters(source_code):
     """Instantiate a visitor to transform the nodes.
     Register the transform functions on an instance of TransformVisitor.
     """
@@ -165,6 +154,15 @@ def init_register_ending_setters():
         ending_transformer.register_transform(node_class, set_from_last_child)
     for node_class in NODES_WITHOUT_CHILDREN:
         ending_transformer.register_transform(node_class, set_without_children)
+
+    # Nodes where the source code must also be provided.
+    for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
+        if start_pred is not None:
+            ending_transformer.register_transform(
+                node_class, start_setter_from_source(source_code, start_pred))
+        if end_pred is not None:
+            ending_transformer.register_transform(
+                node_class, end_setter_from_source(source_code, end_pred))
 
     # TODO: investigate these nodes, and create tests/transforms/etc when found.
     ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
@@ -190,7 +188,7 @@ def discover_nodes(node):
     message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
     # Print to console, and log for persistence.
     print('\n' + message)
-    node_data_store.write(message)
+    logging.info(message)
 
 
 def fix_start_attributes(node):
@@ -201,7 +199,7 @@ def fix_start_attributes(node):
             'node {} doesn\'t have fromlineno set.'.format(node)
 
     # Log when this function is called.
-    node_data_store.store(str(node)[:-2])
+    logging.info(str(node)[:-2])
 
     try:
         first_child = next(node.get_children())
@@ -278,3 +276,69 @@ def _get_last_child(node):
         for skip_to_last_child in node.get_children():
             pass  # skip to last
         return skip_to_last_child  # postcondition: node, or None.
+
+
+def end_setter_from_source(source_code, pred):
+    """Returns a *function* that sets ending locations for a node from source.
+
+    The basic technique is to do the following:
+      1. Find the ending locations for the node based on its last child.
+      2. Starting at that point, iterate through characters in the source code
+         up to and including the first index that satisfies pred.
+
+    pred is a function that takes a string and index and returns a bool,
+    e.g. _is_close_paren
+    """
+    def set_endings_from_source(node):
+        set_from_last_child(node)
+
+        # Initialize counters. Note: we need to offset lineno,
+        # since it's 1-indexed.
+        col_offset, lineno = node.end_col_offset, node.end_lineno - 1
+
+        # First, search the remaining part of the current end line
+        for j in range(col_offset, len(source_code[lineno])):
+            if pred(source_code[lineno], j):
+                node.end_col_offset = j + 1
+                return
+
+        # If that doesn't work, search remaining lines
+        for i in range(lineno + 1, len(source_code)):
+            for j in range(len(source_code[i])):
+                if pred(source_code[i], j):
+                    node.end_col_offset, node.end_lineno = j + 1, i + 1
+                    return
+
+    return set_endings_from_source
+
+
+def start_setter_from_source(source_code, pred):
+    """Returns a *function* that sets start locations for a node from source.
+
+    The basic technique is to do the following:
+      1. Find the start locations for the node (already set).
+      2. Starting at that point, iterate through characters in the source code
+         in reverse until reaching the first index that satisfies pred.
+
+    pred is a function that takes a string and index and returns a bool,
+    e.g. _is_open_paren
+    """
+    def set_start_from_source(node):
+        # Initialize counters. Note: we need to offset lineno,
+        # since it's 1-indexed.
+        col_offset, lineno = node.col_offset - 1, node.fromlineno - 1
+
+        # First, search the remaining part of the current end line
+        for j in range(col_offset, -1, -1):
+            if pred(source_code[lineno], j):
+                node.col_offset = j
+                return
+
+        # If that doesn't work, search remaining lines
+        for i in range(lineno - 1, -1, -1):
+            for j in range(len(source_code[i]) - 1, -1, -1):
+                if pred(source_code[i], j):
+                    node.end_col_offset, node.end_lineno = j, i + 1
+                    return
+
+    return set_start_from_source

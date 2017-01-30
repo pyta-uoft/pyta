@@ -1,6 +1,23 @@
 """
 Top-level functions to mutate the astroid nodes with `end_col_offset` and
-`end_lineno` properties.
+`end_lineno` properties. 
+
+Where possible, the `end_col_offset` property is set by that of the node's last child.
+
+    fromlineno
+        - existing attribute.
+        - one-indexed
+    end_lineno
+        - new attribute
+        - one-indexed
+    col_offset
+        - existing attribute.
+        - zero-indexed
+        - located left of the first character.
+    end_col_offset
+        - new attribute
+        - zero-indexed
+        - located right of the last character (essentially the string length).
 
 In astroid/astroid/transforms.py, functions are registered to types in the
 `transforms` dictionary in the TransformVisitor class. The traversal at
@@ -9,8 +26,6 @@ within the _transform method.
 
 Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
-
-If possible, set the `end_col_offset` property by that of the node's last child.
 """
 import astroid
 from astroid.transforms import TransformVisitor
@@ -45,7 +60,6 @@ NODES_WITH_CHILDREN = [
     # and not the name of the attribute.
     # Given 'self.name = 10', it will highlight 'self' rather than 'self.name'
     astroid.AssignAttr,
-    # TODO: Include the 'async' keyword in expressions for all Async* nodes.
     astroid.AsyncFor,
     astroid.AsyncFunctionDef,
     astroid.AsyncWith,
@@ -63,40 +77,23 @@ NODES_WITH_CHILDREN = [
     # TODO: missing keyword 'del' and attribute name
     astroid.DelAttr,
     astroid.Delete,
-    # TODO: missing right }
-    astroid.Dict,
-    # TODO: missing right }
-    astroid.DictComp,
     astroid.ExceptHandler,
     # TODO: missing *both* outer brackets
     astroid.ExtSlice,
-    # TODO: missing right paren
     astroid.Expr,
     astroid.For,
     astroid.FunctionDef,
-    # TODO: missing *both* outer parens
     astroid.GeneratorExp,
     # TODO: need to fix elif (start) col_offset
     astroid.If,
     astroid.IfExp,
-    # TODO: missing *both* outer brackets
-    astroid.Index,
     # TODO: would be good to see the name of the keyword as well
     astroid.Keyword,
     astroid.Lambda,
-    # TODO: missing *both* outer brackets
-    astroid.ListComp,
     astroid.Module,
     astroid.Raise,
     astroid.Return,
-    # TODO: missing right }
-    astroid.Set,
-    # TODO: missing right }
-    astroid.SetComp,
-    # TODO: missing *both* outer brackets
-    astroid.Slice,
     astroid.Starred,
-    # TODO: missing right ]
     astroid.Subscript,
     astroid.TryExcept,
     astroid.TryFinally,
@@ -106,24 +103,84 @@ NODES_WITH_CHILDREN = [
     astroid.YieldFrom
 ]
 
-
-# Helpers for setting locations based on source code.
+# Predicate functions, for setting locations based on source code.
 def _is_close_paren(s, index):
+    """(string, int) --> bool
+    Fix to include right )"""
     return s[index] == ')'
 
 
 def _is_open_paren(s, index):
+    """(string, int) --> bool
+    Fix to include left ("""
     return s[index] == '('
 
+
+def _is_close_brace(s, index):
+    """(string, int) --> bool
+    Fix to include right }"""
+    return s[index] == '}'
+
+
+def _is_open_brace(s, index):
+    """(string, int) --> bool
+    Fix to include left {"""
+    return s[index] == '{'
+
+
+def _is_close_bracket(s, index):
+    """(string, int) --> bool
+    Fix to include right ]"""
+    return s[index] == ']'
+
+
+def _is_open_bracket(s, index):
+    """(string, int) --> bool
+    Fix to include left ["""
+    return s[index] == '['
+
+
+def _is_for(s, index):
+    """(string, int) --> bool
+    Search for beginning of the `for`. [TODO: search for the whole keyword.]
+    """
+    return s[index] == 'f'
+
+
+def _is_async(s, index):
+    """(string, int) --> bool
+    Search for beginning of the `async`. [TODO: search for the whole keyword.]
+    """
+    return s[index] == 'a'
 
 # Nodes the require the source code for proper location setting
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
+    
+    (astroid.AsyncFor, _is_async, None),
     (astroid.Call, None, _is_close_paren),
-    (astroid.Comprehension, None, _is_close_paren),
+    (astroid.Comprehension, _is_for, _is_close_paren),
+    (astroid.Dict, None, _is_close_brace),
+    
+    # TODO: missing right }
+    (astroid.DictComp, None, _is_close_brace),
+
+    # Buggy:
+    (astroid.Expr, _is_open_paren, _is_close_paren),
+    (astroid.GeneratorExp, _is_open_paren, None),
+    (astroid.Index, _is_open_bracket, _is_close_bracket),
+    
+    # TODO: missing *both* outer brackets
+    (astroid.ListComp, _is_open_bracket, _is_close_bracket),
+    (astroid.Set, None, _is_close_brace),
+    (astroid.SetComp, None, _is_close_brace),
+    
+    # TODO: missing *both* outer brackets
+    (astroid.Slice, _is_open_bracket, _is_close_bracket),
     (astroid.Tuple, _is_open_paren, _is_close_paren)
 ]
+
 
 # Configure logging
 log_format = '%(asctime)s %(levelname)s %(message)s'
@@ -149,7 +206,7 @@ def init_register_ending_setters(source_code):
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
     ending_transformer.register_transform(astroid.Arguments, set_arguments)
-
+    
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
     for node_class in NODES_WITHOUT_CHILDREN:
@@ -229,11 +286,12 @@ def set_from_last_child(node):
       - `node` has col_offset property set.
     """
     last_child = _get_last_child(node)
-
+    
     assert (last_child is not None and
             last_child.end_lineno is not None and
             last_child.end_col_offset is not None),\
-        'ERROR: last_child is missing or is missing attributes.'
+            'ERROR: last_child ({}) of node ({}) is missing attributes.'\
+            .format(last_child, node)
 
     node.end_lineno, node.end_col_offset = last_child.end_lineno, last_child.end_col_offset
 
@@ -294,6 +352,7 @@ def end_setter_from_source(source_code, pred):
 
         # Initialize counters. Note: we need to offset lineno,
         # since it's 1-indexed.
+        # TBD: should this be 'end_col_offset' instead of 'col_offset'?
         col_offset, lineno = node.end_col_offset, node.end_lineno - 1
 
         # First, search the remaining part of the current end line
@@ -314,6 +373,7 @@ def end_setter_from_source(source_code, pred):
 
 def start_setter_from_source(source_code, pred):
     """Returns a *function* that sets start locations for a node from source.
+    Recall `source_code`, `pred` are within the lexical scope of the returned function.
 
     The basic technique is to do the following:
       1. Find the start locations for the node (already set).

@@ -1,7 +1,6 @@
-class Foo(object):
-    def __getitem__(self, item):
-        return item
-
-foo = Foo()
-print(foo[1, 2:3])
-# (1, slice(2, 3, None))
+a[1, :3]
+a [  1, 2:3  ]
+a[1, 2:]
+a [    1, 2:  ]
+a[1, 
+    2:3]

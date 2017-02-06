@@ -97,26 +97,16 @@ class TestEndingLocation(unittest.TestCase):
 
         return astroid.parse(string)
 
-    def _assertSameness(self, expected, props):
-        """If sequences are not equal, it is convenient to see each side, and
-        any other info you want to print.
-        """
-        try:
-            self.assertEqual(expected, props)
-        except AssertionError as e:
-            print('\n{}'.format('-'*70))
-            print(' Compare: [(fromlineno, end_lineno, col_offset, end_col_offset)]')
-            print('Expected: {}'.format(expected))
-            print('  Actual: {}'.format(props))
-            print('{}'.format('-'*70))
-            raise e  # otherwise, test will always 'pass'
-
     def set_and_check(self, module, node_class, expected):
         """Example is either in a file, or provided as a string literal.
         """
         self.ending_transformer.visit(module)  # Apply all transforms.
         props = self.nodeng.check_endings(module, node_class)  # Inspect parts.
-        self._assertSameness(expected, props)
+        err_str = '\n{}\n'.format('- ' * 35)
+        err_str += ' Compare: [(fromlineno, end_lineno, col_offset, end_col_offset)]\n'
+        err_str += 'Expected: {}\n'.format(expected)
+        err_str += '  Actual: {}'.format(props)
+        self.assertEqual(expected, props, err_str)
 
     # def test_arguments(self):
     #     expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18)]
@@ -133,12 +123,14 @@ class TestEndingLocation(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Assign.py')
         self.set_and_check(module, astroid.Assign, expected)
 
-    # def test_assignattr(self):
-    #     """this one is tricky. currently it uses 'self' but we want 'self.name'
-    #     """
-    #     expected = [(3, 3, 8, 17), (4, 4, 8, 19)]
-    #     module = self.get_file_as_module(PATH + 'AssignAttr.py')
-    #     self.set_and_check(module, astroid.AssignAttr, expected)
+    def test_assignattr(self):
+        """
+        Given 'self.name = 10', we want to highlight 'self.name' rather than
+        just 'self'.
+        """
+        expected = [(3, 3, 8, 17), (4, 4, 8, 19)]
+        module = self.get_file_as_module(PATH + 'AssignAttr.py')
+        self.set_and_check(module, astroid.AssignAttr, expected)
 
     # def test_assignname(self):
     #     expected = [(1, 1, 0, 5)]
@@ -162,13 +154,13 @@ class TestEndingLocation(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'AsyncWith.py')
     #     self.set_and_check(module, astroid.AsyncWith, expected)
 
-    # def test_attribute(self):
-    #     """Note: Setting the attribute node by its last child doesn't include
-    #     the attribute in determining the end_col_offset.
-    #     """
-    #     expected = [(1, 1, 0, 7), (2, 2, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'Attribute.py')
-    #     self.set_and_check(module, astroid.Attribute, expected)
+    def test_attribute(self):
+        """Note: Setting the attribute node by its last child doesn't include
+        the attribute in determining the end_col_offset.
+        """
+        expected = [(1, 1, 0, 12), (2, 2, 0, 14)]
+        module = self.get_file_as_module(PATH + 'Attribute.py')
+        self.set_and_check(module, astroid.Attribute, expected)
 
     # def test_augassign(self):
     #     expected = [(1, 1, 0, 6)]
@@ -321,7 +313,9 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.Expr, expected)
 
     # def test_extslice(self):
-    #     expected = [(1, 1, 4, 10)]
+    #     """buggy
+    #     """
+    #     expected = [(1, 1, 1, 8), (2, 2, 2, 14), (3, 3, 1, 8), (4, 4, 2, 15), (5, 6, 1, 8)]
     #     module = self.get_file_as_module(PATH + 'ExtSlice.py')
     #     self.set_and_check(module, astroid.ExtSlice, expected)
 
@@ -450,7 +444,7 @@ class TestEndingLocation(unittest.TestCase):
     #     """Note: col_offset and end_col_offset are set to the first constant
     #     encountered, either on left or right side of colon.
     #     """
-    #     expected = [(1, 1, 2, 3), (2, 2, 0, 3), (3, 3, 0, 3), (4, 4, 0, 3), (5, 5, 0, 3), (6, 6, 0, 3), (6, 6, 0, 3)]
+    #     expected = [(1, 1, 1, 4), (2, 2, 2, 9), (3, 3, 1, 5), (4, 4, 2, 14), (5, 5, 1, 9), (6, 6, 3, 27), (7, 8, 1, 3)]
     #     module = self.get_file_as_module(PATH + 'Slice.py')
     #     self.set_and_check(module, astroid.Slice, expected)
 

@@ -359,7 +359,7 @@ def _get_last_child(node):
         return skip_to_last_child  # postcondition: node, or None.
 
 
-DEBUG = 1
+DEBUG = 0
 
 
 def end_setter_from_source(source_code, pred):
@@ -489,11 +489,11 @@ def start_setter_from_source(source_code, pred):
                                 node ))
 
                 if pred(source_code[i], j, node):
-                    temp_c = node.end_col_offset
-                    temp_l = node.end_lineno
+                    # temp_c = node.end_col_offset
+                    # temp_l = node.end_lineno
                     node.end_col_offset, node.end_lineno = j, i + 1
-                    print('end_col_offset ({}-->{})'.format(temp_c, node.end_col_offset))
-                    print('end_lineno ({}-->{})'.format(temp_l, node.end_lineno))
+                    # print('end_col_offset ({}-->{})'.format(temp_c, node.end_col_offset))
+                    # print('end_lineno ({}-->{})'.format(temp_l, node.end_lineno))
                     return
 
     return set_start_from_source

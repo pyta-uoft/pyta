@@ -11,21 +11,21 @@ class AssigningToSelfChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = 'always_return'
+    name = 'assigning_to_self'
     msgs = {'E9990': ('Assigning value to self on line %s',
-                      'assigning_to_self',
+                      'assigning-to-self',
                       'Used when you assign a value to self'),
            }
 
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages('assigning_to_self')
+    @check_messages('assigning-to-self')
     def visit_assign(self, node):
         target = node.targets[0]
         if isinstance(target, astroid.AssignName) and target.name == 'self':
             args = node.lineno
-            self.add_message('assigning_to_self', node=node, args=args)
+            self.add_message('assigning-to-self', node=node, args=args)
 
 
 def register(linter):

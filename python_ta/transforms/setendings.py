@@ -39,6 +39,8 @@ NODES_WITHOUT_CHILDREN = [
     astroid.Break,
     astroid.Const,
     astroid.Continue,
+
+    # TODO: missing keyword 'del' and attribute name
     astroid.DelName,
     astroid.Ellipsis,
     astroid.Global,
@@ -66,18 +68,13 @@ NODES_WITH_CHILDREN = [
     astroid.Call,
     astroid.ClassDef,
     astroid.Compare,
-    
-    # TODO: missing right parens (note: only if decorator takes args)
     astroid.Decorators,
-    
-    # TODO: missing keyword 'del' and attribute name
-    astroid.DelAttr,
     astroid.Delete,
     astroid.ExceptHandler,
     
     # TODO: missing *both* outer brackets
     astroid.ExtSlice,  # Buggy because children (index, slice) already use the brackets.
-    astroid.Expr,
+    astroid.Expr,  # need this here?
     astroid.For,
     astroid.FunctionDef,
     astroid.GeneratorExp,
@@ -148,13 +145,19 @@ def _is_async(s, index, node):
 
 def _is_attr_name(s, index, node):
     """(string, int, node) --> bool
-    Search for the name of the attribute.
+    Search for the name of the attribute. Left-to-right.
     """
     target_len = len(node.attrname)
     if index < target_len: return False
     # print('---> "{}", "{}"'.format(s[index-target_len : index], node.attrname))
     return s[index-target_len+1 : index+1] == node.attrname
 
+def _is_del(s, index, node):
+    """(string, int, node) --> bool
+    Search for the del keyword. Right-to-left.
+    """
+    del_len = 3
+    return s[index : index+del_len] == 'del'
 
 # Nodes the require the source code for proper location setting
 # Elements here are in the form
@@ -166,6 +169,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.Attribute, None, _is_attr_name),
     (astroid.Call, None, _is_close_paren),
     (astroid.Comprehension, _is_for, _is_close_paren),
+    (astroid.DelAttr, _is_del, _is_attr_name),
     (astroid.Dict, None, _is_close_brace),
     
     # TODO: missing right }
@@ -355,7 +359,7 @@ def _get_last_child(node):
         return skip_to_last_child  # postcondition: node, or None.
 
 
-DEBUG = 0
+DEBUG = 1
 
 
 def end_setter_from_source(source_code, pred):
@@ -389,7 +393,7 @@ def end_setter_from_source(source_code, pred):
             # temp1 += source_code[lineno][j]
             
             if DEBUG:
-                print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL.'\
+                print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL-END.'\
                     .format(source_code[lineno][j], 
                             source_code[lineno], 
                             end_col_offset, 
@@ -413,7 +417,7 @@ def end_setter_from_source(source_code, pred):
             for j in range(len(source_code[i])):
 
                 if DEBUG:
-                    print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE.'\
+                    print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE-END.'\
                         .format(source_code[i][j], 
                                 source_code[i], 
                                 0, 
@@ -453,15 +457,43 @@ def start_setter_from_source(source_code, pred):
         # First, search the remaining part of the current end line
         for j in range(col_offset, -1, -1):
 
+            if DEBUG:
+                print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL-START.'\
+                    .format(source_code[lineno][j], 
+                            source_code[lineno], 
+                            col_offset, 
+                            j, 
+                            -1, 
+                            node ))
+
             if pred(source_code[lineno], j, node):
+                temp = node.col_offset
                 node.col_offset = j
+                if DEBUG:
+                    print('col_offset ({}-->{})'.format(temp, node.col_offset))
                 return
 
-        # If that doesn't work, search remaining lines
+        # If that doesn't work, search remaining lines, 'i'. From bottom-to-top.
         for i in range(lineno - 1, -1, -1):
+
+            # Search each character 'j' in line 'i'. From right-to-left.
             for j in range(len(source_code[i]) - 1, -1, -1):
+
+                if DEBUG:
+                    print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE-START.'\
+                        .format(source_code[i][j], 
+                                source_code[i], 
+                                lineno - 1, 
+                                j, 
+                                -1, 
+                                node ))
+
                 if pred(source_code[i], j, node):
+                    temp_c = node.end_col_offset
+                    temp_l = node.end_lineno
                     node.end_col_offset, node.end_lineno = j, i + 1
+                    print('end_col_offset ({}-->{})'.format(temp_c, node.end_col_offset))
+                    print('end_lineno ({}-->{})'.format(temp_l, node.end_lineno))
                     return
 
     return set_start_from_source

@@ -7,9 +7,6 @@ from .plain_reporter import PlainReporter
 
 
 class ColorReporter(PlainReporter):
-    def __init__(self, number_of_messages):
-        super().__init__(number_of_messages)
-
     # Override this method
     def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
@@ -28,3 +25,5 @@ class ColorReporter(PlainReporter):
             for msg in self._style_messages:
                 code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
                 print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
+                # print('   ', msg.node.lineno, msg.node.col_offset, msg.node.end_lineno, msg.node.end_col_offset)
+                print('   ', '\n'.join(self._source_lines[msg.node.lineno - 1:msg.node.end_lineno]))

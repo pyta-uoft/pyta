@@ -92,7 +92,11 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     if spec.name in MANAGER.astroid_cache:
         del MANAGER.astroid_cache[spec.name]
 
-    current_reporter = reporter(number_of_messages)
+    source_lines = []
+    with open(spec.origin) as f:
+        source_lines = f.readlines()
+    current_reporter = reporter(number_of_messages, source_lines)
+
     linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',

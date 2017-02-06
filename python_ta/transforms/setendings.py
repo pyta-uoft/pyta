@@ -342,3 +342,52 @@ def start_setter_from_source(source_code, pred):
                     return
 
     return set_start_from_source
+
+
+# Make this module a pylint plugin
+def register(linter):
+    old_get_ast = linter.get_ast
+    def new_get_ast(filepath, modname):
+        ast = old_get_ast(filepath, modname)
+        with open(filepath) as f:
+            source_code = f.readlines()
+        ending_transformer = TransformVisitor()
+        register_transforms(source_code, ending_transformer)
+        ending_transformer.visit(ast)
+        return ast
+
+    linter.get_ast = new_get_ast
+
+
+def register_transforms(source_code, obj):
+    # Check consistency of astroid-provided fromlineno and col_offset attributes.
+    for node_class in astroid.ALL_NODE_CLASSES:
+        obj.register_transform(
+            node_class,
+            fix_start_attributes,
+            lambda node: node.fromlineno is None or node.col_offset is None)
+
+    # Ad hoc transformations
+        obj.register_transform(astroid.Arguments, fix_start_attributes)
+        obj.register_transform(astroid.Arguments, set_arguments)
+
+    for node_class in NODES_WITH_CHILDREN:
+        obj.register_transform(node_class, set_from_last_child)
+    for node_class in NODES_WITHOUT_CHILDREN:
+        obj.register_transform(node_class, set_without_children)
+
+    # Nodes where the source code must also be provided.
+    for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
+        if start_pred is not None:
+            obj.register_transform(
+                node_class, start_setter_from_source(source_code, start_pred))
+        if end_pred is not None:
+            obj.register_transform(
+                node_class, end_setter_from_source(source_code, end_pred))
+
+    # TODO: investigate these nodes, and create tests/transforms/etc when found.
+    obj.register_transform(astroid.DictUnpack, discover_nodes)
+    obj.register_transform(astroid.EmptyNode, discover_nodes)
+    obj.register_transform(astroid.Exec, discover_nodes)
+    obj.register_transform(astroid.Print, discover_nodes)
+    obj.register_transform(astroid.Repr, discover_nodes)

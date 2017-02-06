@@ -73,7 +73,8 @@ NODES_WITH_CHILDREN = [
     astroid.ExceptHandler,
     
     # TODO: missing *both* outer brackets
-    astroid.ExtSlice,  # Buggy because children (index, slice) already use the brackets.
+    # Buggy because children (index, slice) already use the brackets.
+    astroid.ExtSlice,
     astroid.Expr,  # need this here?
     astroid.For,
     astroid.FunctionDef,
@@ -82,14 +83,11 @@ NODES_WITH_CHILDREN = [
     # TODO: need to fix elif (start) col_offset
     astroid.If,
     astroid.IfExp,
-    
-    # TODO: would be good to see the name of the keyword as well
     astroid.Keyword,
     astroid.Lambda,
     astroid.Module,
     astroid.Raise,
     astroid.Return,
-    # astroid.Slice,
     astroid.Starred,
     astroid.Subscript,
     astroid.TryExcept,
@@ -152,6 +150,13 @@ def _is_attr_name(s, index, node):
     # print('---> "{}", "{}"'.format(s[index-target_len : index], node.attrname))
     return s[index-target_len+1 : index+1] == node.attrname
 
+def _is_arg_name(s, index, node):
+    """(string, int, node) --> bool
+    Search for the name of the argument. Right-to-left.
+    """
+    if not node.arg: return False
+    return s[index : index+len(node.arg)] == node.arg
+
 def _is_del(s, index, node):
     """(string, int, node) --> bool
     Search for the del keyword. Right-to-left.
@@ -182,6 +187,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.ExtSlice, _is_open_bracket, _is_close_bracket),
     (astroid.GeneratorExp, _is_open_paren, None),
     (astroid.Index, _is_open_bracket, _is_close_bracket),
+    (astroid.Keyword, _is_arg_name, None),
     
     # TODO: missing *both* outer brackets
     (astroid.ListComp, _is_open_bracket, _is_close_bracket),

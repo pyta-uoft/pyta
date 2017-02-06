@@ -261,8 +261,9 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Decorators, expected)
 
     def test_delattr(self):
-        """Note: col_offset property is set _after_ the 'del' keyword, and the
-        attribute is not included in the end_col_offset.
+        """
+        Include the 'del' keyword in the col_offset property.
+        Include the attribute name in the end_col_offset property.
         """
         expected = [(4, 4, 8, 21), (5, 5, 8, 23)]
         module = self.get_file_as_module(PATH + 'DelAttr.py')
@@ -395,12 +396,12 @@ class TestEndingLocation(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Index.py')
         self.set_and_check(module, astroid.Index, expected)
 
-    # def test_keyword(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 11, 12)]
-    #     module = self.get_file_as_module(PATH + 'Keyword.py')
-    #     self.set_and_check(module, astroid.Keyword, expected)
+    def test_keyword(self):
+        """Include the name of the keyword, contained in 'node.arg' attribute.
+        """
+        expected = [(1, 1, 4, 12), (2, 2, 5, 15)]
+        module = self.get_file_as_module(PATH + 'Keyword.py')
+        self.set_and_check(module, astroid.Keyword, expected)
 
     # def test_lambda(self):
     #     """

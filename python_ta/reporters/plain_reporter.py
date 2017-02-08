@@ -70,7 +70,8 @@ class PlainReporter(BaseReporter):
     def handle_node(self, msgid, node):
         """Add node attribute to last message."""
         if msgid in ERROR_CHECKS:
-            self._error_messages[-1] = NewMessage(*self._error_messages[-1], node)
+            if not isinstance(self._error_messages[-1], NewMessage):
+                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node)
         else:
             if not isinstance(self._style_messages[-1], NewMessage):
                 self._style_messages[-1] = NewMessage(*self._style_messages[-1], node)

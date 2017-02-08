@@ -18,6 +18,13 @@ class ColorReporter(PlainReporter):
         for msg in self._error_messages:
             code = Fore.RED + Style.BRIGHT + msg.msg_id + Style.RESET_ALL
             print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
+            try:
+                print('   ', msg.node.lineno, msg.node.col_offset,
+                      msg.node.end_lineno, msg.node.end_col_offset)
+                print('   ', '\n'.join(self._source_lines[
+                                       msg.node.lineno - 1:msg.node.end_lineno]))
+            except AttributeError:
+                pass
 
         if level == 'all':
             print('\n')
@@ -25,5 +32,8 @@ class ColorReporter(PlainReporter):
             for msg in self._style_messages:
                 code = Style.BRIGHT + msg.msg_id + Style.RESET_ALL
                 print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
-                # print('   ', msg.node.lineno, msg.node.col_offset, msg.node.end_lineno, msg.node.end_col_offset)
-                print('   ', '\n'.join(self._source_lines[msg.node.lineno - 1:msg.node.end_lineno]))
+                try:
+                    print('   ', msg.node.lineno, msg.node.col_offset, msg.node.end_lineno, msg.node.end_col_offset)
+                    print('   ', '\n'.join(self._source_lines[msg.node.lineno - 1:msg.node.end_lineno]))
+                except AttributeError:
+                    pass

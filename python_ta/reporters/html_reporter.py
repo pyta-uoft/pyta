@@ -9,7 +9,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class HTMLReporter(PlainReporter):
     # Override this method
-    def print_message_ids(self):
+    def print_messages(self, level='all'):
         # Sort the messages.
         self.sort_messages()
 

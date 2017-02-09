@@ -140,11 +140,6 @@ The type of `value` is more general; e.g., `x[1+2]`.
 
 `args` is an `Arguments` node.
 
-## ListComp
-
-It seems like the type of `Generators` should be `List[Comprehension]`,
-unless there is another possibility for these elements?
-
 ## Nonlocal
 
 The example is technically incorrect, and is a little misleading.
@@ -156,7 +151,8 @@ So the example should be changed to something like
 def outer():
     x = 10
     y = 100
-    def inner(y):
+    def inner():  ***
+        y = 5
         nonlocal x, y
         x = 3 * y
     inner(1)
@@ -167,48 +163,12 @@ def outer():
 
 The type of `value` should be `Expr | None`. 
 
-In Example 1's documentation, the value of `value` should be explicitly written as `None`.
-
-## Set
-
-Description of `elts` should refer to "this set" rather than "this list."
-
-## Slice
-
-The types of the three attributes should be arbitrary `Expr` nodes, but you can say that they must evaluate to an integer for the expression to be successful at runtime.
-
-Also if they can be None, use `Expr | None`.
+*** In Example 1's documentation, the value of `value` should be explicitly written as `None`.
 
 ## Starred
 
-Would be good to mention what the `Starred` node appears under in the example, since it's not immediately obvious. (Is there an implicit `Tuple` representing the assignment targets?)
-
-## TryExcept
-
-Explicitly write `None` for the value that is None in the example.
-
-Would be good to give an example of how to get a non-None value for `orelse`, presumably using `else`.
+Would be good to mention what the `Starred` node appears under in the example, since it's not immediately obvious. *** (Is there an implicit `Tuple` representing the assignment targets?)
 
 ## TryFinally
 
-It seems like the `body` actually has type `TryExcept`.
-
-## While
-
-The `test` can be an arbitrary `Expr` (e.g., imagine a function call here).
- 
-In the example, the `test` is actually a `Const` node with value `True`.
-
-## With
-
-It seems like `items` is a list of tuples, not a list of `Expr`.
-
-## Yield
-
-Express the type of `value` as `Expr | None`.
-
-Explicitly write `None` in the first example description.
-
-## YieldFrom
-
-The type of `value` is not necessarily a `GeneratorExp` (in fact, in the example given it is a `Call`).
+*** It seems like the `body` actually has type `TryExcept`.

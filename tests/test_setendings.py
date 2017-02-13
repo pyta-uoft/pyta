@@ -234,23 +234,23 @@ class TestEndingLocation(unittest.TestCase):
     def test_comprehension(self):
         """col_offset should start from beginning of the 'for..'
         """
-        expected = [(20, 20, 3, 20)]
+        expected = [(1, 1, 3, 20)]
         module = self.get_file_as_module(PATH + 'Comprehension.py')
         self.set_and_check(module, astroid.Comprehension, expected)
 
-    # def test_const(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 6), (2, 2, 4, 6)]
-    #     module = self.get_file_as_module(PATH + 'const.py')
-    #     self.set_and_check(module, astroid.Const, expected)
+    def test_const(self):
+        """
+        """
+        expected = [(1, 1, 0, 6), (2, 2, 4, 6)]
+        module = self.get_file_as_module(PATH + 'const.py')
+        self.set_and_check(module, astroid.Const, expected)
 
-    # def test_continue(self):
-    #     """
-    #     """
-    #     expected = [(2, 2, 4, 12)]
-    #     module = self.get_file_as_module(PATH + 'Continue.py')
-    #     self.set_and_check(module, astroid.Continue, expected)
+    def test_continue(self):
+        """
+        """
+        expected = [(2, 2, 4, 12)]
+        module = self.get_file_as_module(PATH + 'Continue.py')
+        self.set_and_check(module, astroid.Continue, expected)
 
     def test_decorators(self):
         """
@@ -261,28 +261,26 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Decorators, expected)
 
     def test_delattr(self):
-        """
-        Include the 'del' keyword in the col_offset property.
+        """Include the 'del' keyword in the col_offset property.
         Include the attribute name in the end_col_offset property.
         """
         expected = [(4, 4, 8, 21), (5, 5, 8, 23)]
         module = self.get_file_as_module(PATH + 'DelAttr.py')
         self.set_and_check(module, astroid.DelAttr, expected)
 
-    # def test_delete(self):
-    #     """Note: col_offset property is set _before_ the 'del' keyword.
-    #     """
-    #     expected = [(1, 1, 0, 5)]
-    #     module = self.get_file_as_module(PATH + 'Delete.py')
-    #     self.set_and_check(module, astroid.Delete, expected)
+    def test_delete(self):
+        """Include the 'del' keyword in the col_offset property.
+        """
+        expected = [(1, 1, 0, 5), (2, 2, 0, 22)]
+        module = self.get_file_as_module(PATH + 'Delete.py')
+        self.set_and_check(module, astroid.Delete, expected)
 
-    # def test_delname(self):
-    #     """Note: col_offset property is set on the next node _after_ the 'del'
-    #     keyword.
-    #     """
-    #     expected = [(1, 1, 4, 5)]
-    #     module = self.get_file_as_module(PATH + 'DelName.py')
-    #     self.set_and_check(module, astroid.DelName, expected)
+    def test_delname(self):
+        """Include the 'del' keyword in the col_offset property.
+        """
+        expected = [(1, 1, 0, 5)]
+        module = self.get_file_as_module(PATH + 'DelName.py')
+        self.set_and_check(module, astroid.DelName, expected)
 
     def test_dict(self):
         expected = [(1, 1, 6, 32), (2, 5, 4, 1), (6, 9, 4, 6)]

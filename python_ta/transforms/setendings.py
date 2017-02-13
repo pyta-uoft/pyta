@@ -39,8 +39,6 @@ NODES_WITHOUT_CHILDREN = [
     astroid.Break,
     astroid.Const,
     astroid.Continue,
-
-    # TODO: missing keyword 'del' and attribute name
     astroid.DelName,
     astroid.Ellipsis,
     astroid.Global,
@@ -173,8 +171,9 @@ NODES_REQUIRING_SOURCE = [
     (astroid.AsyncFor, _is_async, None),
     (astroid.Attribute, None, _is_attr_name),
     (astroid.Call, None, _is_close_paren),
-    (astroid.Comprehension, _is_for, _is_close_paren),
+    (astroid.Comprehension, _is_for, _is_close_paren),  # maybe not _is_close_paren
     (astroid.DelAttr, _is_del, _is_attr_name),
+    (astroid.DelName, _is_del, None),
     (astroid.Dict, None, _is_close_brace),
     
     # TODO: missing right }
@@ -184,7 +183,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.Expr, _is_open_paren, _is_close_paren),
 
     # TODO: missing *both* outer brackets
-    (astroid.ExtSlice, _is_open_bracket, _is_close_bracket),
+    (astroid.ExtSlice, _is_open_bracket, _is_close_bracket),  # TODO: the index/slice should not be set to the end_col_offset of the ExtSlice.
     (astroid.GeneratorExp, _is_open_paren, None),
     (astroid.Index, _is_open_bracket, _is_close_bracket),
     (astroid.Keyword, _is_arg_name, None),

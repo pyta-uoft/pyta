@@ -21,8 +21,21 @@ class ColorReporter(PlainReporter):
             try:
                 print('   ', msg.node.lineno, msg.node.col_offset,
                       msg.node.end_lineno, msg.node.end_col_offset)
-                print('   ', '\n'.join(self._source_lines[
-                                       msg.node.lineno - 1:msg.node.end_lineno]))
+                # Wendy's code starts here
+                print(Style.BRIGHT + '\n    Your Code Starts Here:\n' + Style.RESET_ALL)
+                if msg.node.lineno != 0:
+                    print('    ' + Fore.LIGHTBLACK_EX + str(msg.node.lineno) + Style.RESET_ALL +
+                          '    ' + Fore.RED + self._source_lines[msg.node.lineno - 1] + Style.RESET_ALL)
+                    for line in range(msg.node.lineno, msg.node.end_lineno):
+                        print('    ' + Fore.LIGHTBLACK_EX + str(line + 1) + Style.RESET_ALL +
+                              '    ' + self._source_lines[line])
+                else:
+                    print('    ' + Fore.LIGHTBLACK_EX + str(msg.node.lineno + 1) + Style.RESET_ALL +
+                          '    ' + Fore.RED + self._source_lines[msg.node.lineno] + Style.RESET_ALL)
+                    for line in range(msg.node.lineno + 1, msg.node.end_lineno):
+                        print('    ' + Fore.LIGHTBLACK_EX + str(line + 2) + Style.RESET_ALL +
+                              '    ' + self._source_lines[line])
+                # Wendy's code ends here
             except AttributeError:
                 pass
 
@@ -34,6 +47,20 @@ class ColorReporter(PlainReporter):
                 print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
                 try:
                     print('   ', msg.node.lineno, msg.node.col_offset, msg.node.end_lineno, msg.node.end_col_offset)
-                    print('   ', '\n'.join(self._source_lines[msg.node.lineno - 1:msg.node.end_lineno]))
+                    # Wendy's code starts here
+                    print(Style.BRIGHT + '\n    Your Code Starts Here:\n' + Style.RESET_ALL)
+                    if msg.node.lineno != 0:
+                        print('    ' + Fore.LIGHTBLACK_EX + str(msg.node.lineno) + Style.RESET_ALL +
+                              '    ' + Fore.RED + self._source_lines[msg.node.lineno - 1] + Style.RESET_ALL)
+                        for line in range(msg.node.lineno, msg.node.end_lineno):
+                            print('    ' + Fore.LIGHTBLACK_EX + str(line + 1) + Style.RESET_ALL +
+                                  '    ' + self._source_lines[line])
+                    else:
+                        print('    ' + Fore.LIGHTBLACK_EX + str(msg.node.lineno + 1) + Style.RESET_ALL +
+                              '    ' + Fore.RED + self._source_lines[msg.node.lineno] + Style.RESET_ALL)
+                        for line in range(msg.node.lineno + 1, msg.node.end_lineno):
+                            print('    ' + Fore.LIGHTBLACK_EX + str(line + 2) + Style.RESET_ALL +
+                                  '    ' + self._source_lines[line])
+                            # Wendy's code ends here
                 except AttributeError:
                     pass

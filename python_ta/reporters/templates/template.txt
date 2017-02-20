@@ -2,6 +2,7 @@
 <head>
 </head>
 <body>
+<h1>PyTA Error Report</h1>
 <u1>
     {% for message in messages %}
         <p>{{ message.msg_id }} ({{ message.symbol }}) {{ message.obj }}<br/>&emsp;&emsp;{{message.msg }}</p>

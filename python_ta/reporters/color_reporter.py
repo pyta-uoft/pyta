@@ -33,7 +33,7 @@ class ColorReporter(PlainReporter):
                     print('    ' + Fore.LIGHTBLACK_EX + str(msg.node.lineno + 1) + Style.RESET_ALL +
                           '    ' + Fore.RED + self._source_lines[msg.node.lineno] + Style.RESET_ALL)
                     for line in range(msg.node.lineno + 1, msg.node.end_lineno):
-                        print('    ' + Fore.LIGHTBLACK_EX + str(line + 2) + Style.RESET_ALL +
+                        print('    ' + Fore.LIGHTBLACK_EX + str(line + 1) + Style.RESET_ALL +
                               '    ' + self._source_lines[line])
                 # Wendy's code ends here
             except AttributeError:
@@ -59,7 +59,7 @@ class ColorReporter(PlainReporter):
                         print('    ' + Fore.LIGHTBLACK_EX + str(msg.node.lineno + 1) + Style.RESET_ALL +
                               '    ' + Fore.RED + self._source_lines[msg.node.lineno] + Style.RESET_ALL)
                         for line in range(msg.node.lineno + 1, msg.node.end_lineno):
-                            print('    ' + Fore.LIGHTBLACK_EX + str(line + 2) + Style.RESET_ALL +
+                            print('    ' + Fore.LIGHTBLACK_EX + str(line + 1) + Style.RESET_ALL +
                                   '    ' + self._source_lines[line])
                             # Wendy's code ends here
                 except AttributeError:

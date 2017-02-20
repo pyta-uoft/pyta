@@ -61,6 +61,6 @@ class ColorReporter(PlainReporter):
                         for line in range(msg.node.lineno + 1, msg.node.end_lineno):
                             print('    ' + Fore.LIGHTBLACK_EX + str(line + 1) + Style.RESET_ALL +
                                   '    ' + self._source_lines[line])
-                            # Wendy's code ends here
+                    # Wendy's code ends here
                 except AttributeError:
                     pass

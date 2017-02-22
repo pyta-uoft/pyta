@@ -30,7 +30,6 @@ https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 import astroid
 from astroid.transforms import TransformVisitor
 import logging
-from sys import exit
 
 CONSUMABLES = " \n\t\\"
 

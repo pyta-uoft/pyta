@@ -7,6 +7,7 @@ Run from /pyta/ dir: `python tests/test_setendings.py`
 import unittest
 from astroid.bases import NodeNG
 from python_ta.transforms.setendings import *
+from colorama import Back, Fore
 
 PATH = 'examples/ending_locations/'
 
@@ -58,6 +59,7 @@ class TestEndingLocation(unittest.TestCase):
         decorated as a classmethod():"""
         # Check the nodes property correctness.
         self.nodeng = NodeNG()
+        self.maxDiff = None
 
     def setUp(self):
         """Method called to prepare the test fixture. This is called immediately
@@ -104,8 +106,8 @@ class TestEndingLocation(unittest.TestCase):
         props = self.nodeng.check_endings(module, node_class)  # Inspect parts.
         err_str = '\n{}\n'.format('- ' * 35)
         err_str += ' Compare: [(fromlineno, end_lineno, col_offset, end_col_offset)]\n'
-        err_str += 'Expected: {}\n'.format(expected)
-        err_str += '  Actual: {}'.format(props)
+        err_str += 'Expected: {}\n'.format(Fore.GREEN + str(expected) + Fore.RESET)
+        err_str += '  Actual: {}'.format(Fore.RED + str(props) + Fore.RESET)
         self.assertEqual(expected, props, err_str)
 
     # def test_arguments(self):
@@ -188,6 +190,7 @@ class TestEndingLocation(unittest.TestCase):
     # def test_binop(self):
     #     """note: value of col_offset = 6, is weird but we didn't set it.
     #     first (depends on pre/postorder) binop is ((1 + 2) + 3), then (1 + 2)
+    #     TODO: add the "( (100) * (42)  )" test 
     #     """
     #     expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
     #     example = '''1 + 2 + 3'''
@@ -232,9 +235,12 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.Compare, expected)
 
     def test_comprehension(self):
-        """col_offset should start from beginning of the 'for..'
         """
-        expected = [(1, 1, 3, 20)]
+        Could be in a SetComp, ListComp, or GeneratorExp.. in each respective 
+        case, the subsequent char could be either a brace, bracket, or paren.
+        Aside: col_offset should start from beginning of the 'for'.
+        """
+        expected = [(1, 1, 7, 20), (2, 2, 7, 16), (2, 2, 21, 36), (3, 3, 9, 18), (3, 3, 23, 40)]
         module = self.get_file_as_module(PATH + 'Comprehension.py')
         self.set_and_check(module, astroid.Comprehension, expected)
 
@@ -287,12 +293,12 @@ class TestEndingLocation(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'dict.py')
         self.set_and_check(module, astroid.Dict, expected)
 
-    # def test_dictcomp(self):
-    #     """Buggy
-    #     """
-    #     expected = [(1, 1, 0, 29), (2, 2, 0, 37)]
-    #     module = self.get_file_as_module(PATH + 'DictComp.py')
-    #     self.set_and_check(module, astroid.DictComp, expected)
+    def test_dictcomp(self):
+        """Buggy
+        """
+        expected = [(1, 1, 0, 29), (2, 2, 0, 37), (3, 7, 0, 1)]
+        module = self.get_file_as_module(PATH + 'DictComp.py')
+        self.set_and_check(module, astroid.DictComp, expected)
 
     # def test_dictunpack(self):
     #     """NODE EXAMPLE DOES NOT EXIST
@@ -326,18 +332,18 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.Exec, expected)
 
     # def test_expr(self):
-    #     """
+    #     """TODO: test all the Expr nodes in 'Slice.py'
     #     """
     #     expected = [(1, 1, 0, 12), (2, 2, 0, 13), (3, 3, 0, 11), (4, 4, 0, 17)]
     #     module = self.get_file_as_module(PATH + 'Expr.py')
     #     self.set_and_check(module, astroid.Expr, expected)
 
-    # def test_extslice(self):
-    #     """buggy
-    #     """
-    #     expected = [(1, 1, 1, 8), (2, 2, 2, 14), (3, 3, 1, 8), (4, 4, 2, 15), (5, 6, 1, 8)]
-    #     module = self.get_file_as_module(PATH + 'ExtSlice.py')
-    #     self.set_and_check(module, astroid.ExtSlice, expected)
+    def test_extslice(self):
+        """
+        """
+        expected = [(1, 1, 1, 8), (2, 2, 2, 14), (3, 3, 1, 8), (4, 4, 2, 15), (5, 6, 1, 8)]
+        module = self.get_file_as_module(PATH + 'ExtSlice.py')
+        self.set_and_check(module, astroid.ExtSlice, expected)
 
     # def test_for(self):
     #     expected = [(1, 2, 0, 9)]
@@ -390,6 +396,8 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.ImportFrom, expected)
 
     def test_index(self):
+        """Should include the enclosing brackets, e.g. "[1]" instead of "1".
+        """
         expected = [(1, 1, 1, 5), (2, 2, 2, 10), (3, 3, 2, 15)]
         module = self.get_file_as_module(PATH + 'Index.py')
         self.set_and_check(module, astroid.Index, expected)
@@ -486,13 +494,31 @@ class TestEndingLocation(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'SetComp.py')
         self.set_and_check(module, astroid.SetComp, expected)
 
-    # def test_slice(self):
-    #     """Note: col_offset and end_col_offset are set to the first constant
-    #     encountered, either on left or right side of colon.
-    #     """
-    #     expected = [(1, 1, 1, 4), (2, 2, 2, 9), (3, 3, 1, 5), (4, 4, 2, 14), (5, 5, 1, 9), (6, 6, 3, 27), (7, 8, 1, 3)]
-    #     module = self.get_file_as_module(PATH + 'Slice.py')
-    #     self.set_and_check(module, astroid.Slice, expected)
+    def test_slice(self):
+        """Note: col_offset and end_col_offset are set to the first constant
+        encountered, either on left or right side of colon.
+        Should capture both brackets..
+        """
+        expected = [(1, 1, 2, 3), 
+                    (2, 2, 3, 8), 
+                    (3, 3, 2, 4), 
+                    (4, 4, 3, 13), 
+                    (5, 5, 2, 8), 
+                    (6, 6, 8, 30), 
+                    (7, 8, 2, 2), 
+                    (9, 9, 2, 4), 
+                    (9, 9, 6, 7),
+                    (10, 10, 2, 3),
+                    (10, 10, 5, 7),
+                    (11, 11, 2, 3),
+                    (11, 11, 5, 6),
+                    (12, 12, 2, 4),
+                    (13, 13, 2, 3),
+                    (13, 13, 10, 11),
+                    (14, 14, 6, 11),
+                    ]
+        module = self.get_file_as_module(PATH + 'Slice.py')
+        self.set_and_check(module, astroid.Slice, expected)
 
     # def test_starred(self):
     #     """
@@ -502,7 +528,28 @@ class TestEndingLocation(unittest.TestCase):
     #     self.set_and_check(module, astroid.Starred, expected)
 
     def test_subscript(self):
-        expected = [(1, 1, 0, 4), (2, 2, 0, 8)]
+        """
+        """
+        expected = [(1, 1, 0, 4), 
+                    (2, 2, 0, 8),
+                    (3, 3, 0, 4),
+                    (4, 4, 0, 9),
+                    (5, 5, 0, 5),
+                    (6, 6, 0, 14),
+                    (7, 7, 0, 9),
+                    (8, 8, 4, 31),
+                    (9, 10, 0, 3),
+                    (11, 11, 0, 8),
+                    (11, 11, 0, 5),
+                    (12, 12, 0, 8),
+                    (12, 12, 0, 4),
+                    (13, 13, 0, 7),
+                    (13, 13, 0, 4),
+                    (14, 14, 0, 5),
+                    (15, 15, 0, 12),
+                    (15, 15, 0, 4),
+                    (16, 16, 4, 12)
+                    ]
         module = self.get_file_as_module(PATH + 'Subscript.py')
         self.set_and_check(module, astroid.Subscript, expected)
 

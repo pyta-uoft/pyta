@@ -6,6 +6,8 @@ from astroid.node_classes import *
 from typing import Tuple, List, Dict, Set, TupleMeta
 from astroid.transforms import TransformVisitor
 
+class NoType:
+    pass
 
 def set_const_type_constraints(node):
     """Populate type constraints for astroid nodes num/str/bool/None/bytes."""
@@ -225,6 +227,27 @@ def set_boolop_type_constraints(node):
             node.type_constraints = node.values[1].type_constraints
 
 
+def set_expr_type_constraints(node):
+    """Expr nodes take the value of their child
+    """
+    node.type_constraints = node.value.type_constraints
+
+
+def set_assign_type_constraints(node):
+    first_target = node.targets[0]
+    node.type_constraints = (NoType, {first_target.name: node.value.type_constraints})
+
+
+def set_module_type_constraints(node):
+    names = {k: NoType for k in node.globals.keys()}
+    for s in node.body:
+        if s.is_statement and isinstance(s.type_constraints, tuple) and len(s.type_constraints) > 1:
+            for identifier, type_constraint in s.type_constraints[1].items():
+                if identifier in names:
+                    names[identifier] = type_constraint
+    node.type_constraints = (NoType, names)
+
+
 def register_type_constraints_setter():
     """Instantiate a visitor to transform the nodes.
     Register the transform functions on an instance of TransformVisitor.
@@ -243,7 +266,10 @@ def register_type_constraints_setter():
                                     set_compare_type_constraints)
     type_visitor.register_transform(astroid.BoolOp,
                                     set_boolop_type_constraints)
+    type_visitor.register_transform(astroid.Expr,
+                                    set_expr_type_constraints)
     type_visitor.register_transform(astroid.Assign,
                                     set_assign_type_constraints)
-
+    type_visitor.register_transform(astroid.Module,
+                                    set_module_type_constraints)
     return type_visitor

@@ -1,13 +1,30 @@
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+<div id="date">
+<script type="text/javascript">
+document.write("<p>" + Date() + "</p>")
+</script>
+</div>
+<div id="header">
+<br/>
+<div class="title">
+PyTA Error Report
+</div>
+</div>
 </head>
+<br/>
 <body>
-<h1>PyTA Error Report</h1>
+<div id="inside">
+<p/>
+<div id="core">
 <u1>
     {% for message in messages %}
         <p>{{ message.msg_id }} ({{ message.symbol }}) {{ message.obj }}<br/>&emsp;&emsp;{{message.msg }}</p>
     {% endfor %}
-
 </u1>
+</div>
+<p/>
+</div>
 </body>
 </html>

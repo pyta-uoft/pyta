@@ -1,0 +1,42 @@
+#header {
+	height: 110px;
+	border-radius: 25px;
+	border: medium solid rgb(35, 35, 35);
+	background-color: rgb(247, 243, 111);
+	#padding: 10px;
+}
+body {
+
+	background-color: rgb(230, 201, 108);
+	text-align: center;
+}
+#date {
+	font-size: 12;
+	text-align: right;
+}
+.title {
+	margin: auto;
+	font-family: Impact;
+	font-size: 50;
+	border-radius: 25px;
+	border: thin solid rgb(122, 122, 122);
+	width: 600px;
+	background-color: rgb(255, 255, 255);
+	padding: 5px;
+}
+#inside {
+	border-radius: 25px;
+	border: thin solid rgb(0, 0, 0);
+	background-color: rgb(255, 249, 224);
+}
+#core {
+	margin: auto;
+	text-align: center;
+	font-size: 15;
+	border-radius: 25px;
+	border: thin solid rgb(122, 122, 122);
+	width: 600px;
+	background-color: rgb(255, 255, 255);
+	padding: 15px;
+	font-family: Tahoma;
+}

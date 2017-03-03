@@ -7,12 +7,12 @@ from .plain_reporter import PlainReporter
 
 
 # One-size-fits-all type messages (symbols)
-simple = {"IO-function-not-allowed",
-          "forbidden-import",
-          "invalid-name",
-          "forbidden-global-variables",
-          "blacklisted-name",
-          "unneeded-not"}
+# simple = {"IO-function-not-allowed",
+#           "forbidden-import",
+#           "invalid-name",
+#           "forbidden-global-variables",
+#           "blacklisted-name",
+#           "unneeded-not"}
 
 # Messages without a source code line to highlight or
 # that should be highlighted specially
@@ -62,31 +62,35 @@ class ColorReporter(PlainReporter):
                 if n == -1:
                     n = 0
                 text = self._source_lines[n][:-1]
+                # Pad line number with spaces to even out indent:
+                number = _colourify(Fore.LIGHTBLACK_EX, "{:>3}".format(n+1))
                 # UNCOMMENT TO IGNORE BLANK LINES:
                 # if text.strip() == '':
                 #     return
 
                 if linetype == "e":    # (error)
-                    result += '    ' + \
-                              _colourify(Style.BRIGHT + Fore.LIGHTBLACK_EX,
-                                         str(n + 1))
-                    start_col = msg.node.col_offset
-                    end_col = msg.node.end_col_offset
+                    result += '    ' + _colourify(Style.BRIGHT, number)
+                    if hasattr(msg, "node") and msg.node is not None:
+                        start_col = msg.node.col_offset
+                        end_col = msg.node.end_col_offset
+                    else:
+                        start_col = 0
+                        end_col = len(text)
                     result += '    ' + text[:start_col]
                     result += _colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
                                          text[start_col:end_col])
                     result += text[end_col:]
 
                 elif linetype == "c":  # (context)
-                    result += '    ' + _colourify(Fore.LIGHTBLACK_EX, str(n + 1))
+                    result += '    ' + number
                     result += '    ' + _colourify(Fore.LIGHTBLACK_EX, text)
 
                 elif linetype == "o":  # (other)
-                    result += '    ' + _colourify(Fore.LIGHTBLACK_EX, str(n + 1))
+                    result += '    ' + number
                     result += '    ' + text
 
                 elif linetype == '.':  # (ellipsis)
-                    result += '    ' + _colourify(Fore.LIGHTBLACK_EX, str(n + 1))
+                    result += '    ' + number
                     result += '    '
                     spaces = len(text) - len(text.lstrip(' '))
                     result += spaces * ' ' + '...'
@@ -103,12 +107,23 @@ class ColorReporter(PlainReporter):
                 result += code + ' ({})  {}\n'.format(first_msg.symbol,
                                                       first_msg.obj) + '\n'
                 for msg in messages[msg_id]:
+                    msg_text = msg.msg
+                    if msg.symbol == "bad-whitespace":  # fix Pylint inconsistency
+                        msg_text = msg_text.partition('\n')[0]
                     result += _colourify(Style.BRIGHT, '   [Line {}] {}'.format(
-                        msg.line, msg.msg)) + '\n'
+                        msg.line, msg_text)) + '\n'
 
                     try:
-                        start = msg.node.fromlineno
-                        end = msg.node.end_lineno
+                        if hasattr(msg, "node") and msg.node is not None:
+                            start = msg.node.fromlineno
+                            end = msg.node.end_lineno
+                        else:
+                            # Some message types don't have a node, including:
+                            # - line-too-long
+                            # - bad-whitespace
+                            # - trailing-newlines
+                            start = end = msg.line
+
                         # print('      ', msg.symbol, msg.node.lineno, msg.node.col_offset,
                         #       msg.node.end_lineno, msg.node.end_col_offset)
 
@@ -140,11 +155,11 @@ class ColorReporter(PlainReporter):
                                 add_line(start - 1, 'e')
                                 add_line(start, '.')
 
-                            if msg.symbol == "too-many-nested-blocks":
-                                pass
-
-                            if msg.symbol == "always-returning-in-a-loop":
-                                pass
+                            # if msg.symbol == "too-many-nested-blocks":
+                            #     pass
+                            #
+                            # if msg.symbol == "always-returning-in-a-loop":
+                            #     pass
 
                     except AttributeError:
                         # print('      PROBLEM: ', msg.symbol)

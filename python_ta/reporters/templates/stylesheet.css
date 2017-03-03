@@ -2,12 +2,12 @@
 	height: 110px;
 	border-radius: 25px;
 	border: medium solid rgb(35, 35, 35);
-	background-color: rgb(247, 243, 111);
+	background-color: rgb(130, 216, 245);
 	#padding: 10px;
 }
 body {
 
-	background-color: rgb(230, 201, 108);
+	background-color: rgb(237, 251, 255);
 	text-align: center;
 }
 #date {
@@ -20,23 +20,24 @@ body {
 	font-size: 50;
 	border-radius: 25px;
 	border: thin solid rgb(122, 122, 122);
-	width: 600px;
+	width: 500px;
+	color: rgb(42, 77, 173);
 	background-color: rgb(255, 255, 255);
 	padding: 5px;
 }
 #inside {
 	border-radius: 25px;
 	border: thin solid rgb(0, 0, 0);
-	background-color: rgb(255, 249, 224);
+	background-color: rgb(199, 239, 252);
 }
 #core {
 	margin: auto;
-	text-align: center;
-	font-size: 15;
+	text-align: left;
+	font-family: Lucida Console;
+	font-size: 12;
 	border-radius: 25px;
 	border: thin solid rgb(122, 122, 122);
-	width: 600px;
+	width: 550px;
 	background-color: rgb(255, 255, 255);
 	padding: 15px;
-	font-family: Tahoma;
 }

@@ -27,8 +27,10 @@ PyTA Error Report
 <p/>
 </div>
 </body>
+<a href="http://www.cs.toronto.edu/~david/pyta/">
 <div style="position: relative">
                 <p style="position: fixed; bottom: 0; width:100%; text-align: center"> <img src="pyta_logo_markdown.png" height="50"/>
                 </p>
             </div>
+</a>
 </html>

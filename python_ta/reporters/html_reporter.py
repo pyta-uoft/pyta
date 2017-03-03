@@ -14,8 +14,9 @@ class HTMLReporter(PlainReporter):
         self.sort_messages()
 
         template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template('templates/template.txt')
+        output_path = THIS_DIR + '/templates/output.html'
 
-        with open('output.html', 'w') as f:
+        with open(output_path, 'w') as f:
             for msg in self._error_messages:
                 msg_new = msg.msg.replace('\r', '')
                 msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')

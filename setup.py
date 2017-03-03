@@ -18,13 +18,15 @@ setup(
     author_email='david@cs.toronto.edu',
     license='MIT',
     packages=['python_ta', 'python_ta.reporters', 'python_ta.checkers',
-              'python_ta.docstring', 'python_ta.patches'],
+              'python_ta.docstring', 'python_ta.patches',
+              'python_ta.parser'],
     install_requires=[
+        'funcparserlib',
         'pycodestyle',
         'pylint',
         'colorama',
         'six',
-        'jinja2'
+        'jinja2',
     ],
     include_package_data=True,
     zip_safe=False)

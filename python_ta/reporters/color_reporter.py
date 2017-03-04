@@ -5,23 +5,21 @@ from colorama import init
 
 from .plain_reporter import PlainReporter
 
+
 # One-size-fits-all type messages (symbols)
-simple = {"IO-function-not-allowed",
-          "forbidden-import",
-          "invalid-name",
-          "forbidden-global-variables",
-          "blacklisted-name"}
+# simple = {"IO-function-not-allowed",
+#           "forbidden-import",
+#           "invalid-name",
+#           "forbidden-global-variables",
+#           "blacklisted-name",
+#           "unneeded-not"}
 
-# Messages that could be in "simple", but would benefit
-# from added pizazz using col_offsets
-simplesque = {"unneeded-not"}
-
-# Messages without a source code line to highlight
-no_hl = {"missing-docstring"}
+# Messages without a source code line to highlight or
+# that should be highlighted specially
+special = {"missing-docstring",
+           "always-returning-in-a-loop",
+           "too-many-nested-blocks"}
     # the "Invalid module name" subsection of "invalid-name" belongs here
-
-# Other messages (need specialised colouring):
-    # "always-returning-in-a-loop"
 
 
 class ColorReporter(PlainReporter):
@@ -38,76 +36,148 @@ class ColorReporter(PlainReporter):
 
         self.sort_messages()
 
-        # TODO: compile string
-        def print_messages_by_type(messages):
+        result = ""
+
+        def print_messages_by_type(messages, style=False):
+            """
+            Add properly formatted members of messages to result.
+
+            :param dict messages: dictionary of message id: Message object
+            :param bool style: True iff messages is a dict of style messages
+            :return: None
+            """
+            nonlocal result
+
+            # TODO: Is a triply nested function overkill? Switch to method?
+            def add_line(n, linetype):
+                """
+                Format given source code line as specified and add to result.
+                Use linetype='.' to elide line (with proper indentation).
+
+                :param int n: index of line in self._source_lines to add
+                :param str linetype: e/c/o/. for error/context/other/ellipsis
+                :return: None
+                """
+                nonlocal result
+                if n == -1:
+                    n = 0
+                text = self._source_lines[n][:-1]
+                # Pad line number with spaces to even out indent:
+                number = _colourify(Fore.LIGHTBLACK_EX, "{:>3}".format(n+1))
+                # UNCOMMENT TO IGNORE BLANK LINES:
+                # if text.strip() == '':
+                #     return
+
+                if linetype == "e":    # (error)
+                    result += '    ' + _colourify(Style.BRIGHT, number)
+                    if hasattr(msg, "node") and msg.node is not None:
+                        start_col = msg.node.col_offset
+                        end_col = msg.node.end_col_offset
+                    else:
+                        start_col = 0
+                        end_col = len(text)
+                    result += '    ' + text[:start_col]
+                    result += _colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
+                                         text[start_col:end_col])
+                    result += text[end_col:]
+
+                elif linetype == "c":  # (context)
+                    result += '    ' + number
+                    result += '    ' + _colourify(Fore.LIGHTBLACK_EX, text)
+
+                elif linetype == "o":  # (other)
+                    result += '    ' + number
+                    result += '    ' + text
+
+                elif linetype == '.':  # (ellipsis)
+                    result += '    ' + number
+                    result += '    '
+                    spaces = len(text) - len(text.lstrip(' '))
+                    result += spaces * ' ' + '...'
+
+                else:
+                    print("ERROR")
+
+                result += '\n'
+
             for msg_id in messages:
-                code = Fore.RED + Style.BRIGHT + msg_id + Style.RESET_ALL
+                code = _colourify((Fore.BLUE if style
+                                   else Fore.RED) + Style.BRIGHT, msg_id)
                 first_msg = messages[msg_id][0]
-                print(code, '({})  {}\n'.format(first_msg.symbol, first_msg.obj))
+                result += code + ' ({})  {}\n'.format(first_msg.symbol,
+                                                      first_msg.obj) + '\n'
                 for msg in messages[msg_id]:
-                    print(_colourify(Style.BRIGHT, '   [Line {}] {}'.format(msg.line, msg.msg)))
+                    msg_text = msg.msg
+                    if msg.symbol == "bad-whitespace":  # fix Pylint inconsistency
+                        msg_text = msg_text.partition('\n')[0]
+                    result += _colourify(Style.BRIGHT, '   [Line {}] {}'.format(
+                        msg.line, msg_text)) + '\n'
+
                     try:
-                        start = msg.node.lineno     # TODO: change to fromlineno
-                        end = msg.node.end_lineno
-                        # print('   ', msg.node.lineno, msg.node.col_offset,
-                        #      msg.node.end_lineno, msg.node.end_col_offset)
-                        print(_colourify(Style.BRIGHT, '\n    Your Code Starts Here:\n'))
-                        if end - start > 3:     # already enough context
-                            if start != 0:
-                                print(print('    ' + _colourify(Style.BRIGHT + Fore.LIGHTBLACK_EX, str(start)) +
-                                      '    ' + _colourify(Style.BRIGHT + Fore.RED,
-                                                          self._source_lines[start - 1])))
-                                for line in range(start, end):
-                                    print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(line + 1)) +
-                                          '    ' + self._source_lines[line])
-                            else:
-                                print(print('    ' + _colourify(Style.BRIGHT + Fore.LIGHTBLACK_EX,
-                                                                str(start + 1)) +
-                                      '    ' + _colourify(Style.BRIGHT + Fore.YELLOW + Back.RED,
-                                                          self._source_lines[start])))
-                                for line in range(start + 1, end):
-                                    print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(line + 1)) +
-                                          '    ' + self._source_lines[line])
-                        else:   # add surrounding code for context (in grey)
-                            if start - 2 > 0:
-                                print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(start - 2) +
-                                      '    ' + self._source_lines[start - 3]))
-                            if start - 1 > 0:
-                                print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(start - 1) +
-                                      '    ' + self._source_lines[start - 2]))
-                            if start > 0:
-                                print('    ' + _colourify(Style.BRIGHT + Fore.LIGHTBLACK_EX, str(start)) +
-                                      '    ' + _colourify(Style.BRIGHT + Fore.YELLOW + Back.RED,
-                                                          self._source_lines[start - 1][:-1]))
-                                for line in range(start, end):
-                                    print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(line + 1)) +
-                                          '    ' + self._source_lines[line][:-1])
-                            else:
-                                print(print('    ' + _colourify(Style.BRIGHT + Fore.LIGHTBLACK_EX,
-                                                                str(start + 1)) +
-                                            '    ' + _colourify(Style.BRIGHT + Fore.YELLOW + Back.RED,
-                                                                self._source_lines[start])))
-                                for line in range(start + 1, end):
-                                    print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(line + 1)) +
-                                          '    ' + self._source_lines[line])
-                            if end + 1 < len(self._source_lines):
-                                print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(end + 1) +
-                                      '    ' + self._source_lines[end]))
-                            if end + 2 < len(self._source_lines):
-                                print('    ' + _colourify(Fore.LIGHTBLACK_EX, str(end + 2) +
-                                      '    ' + self._source_lines[end + 1]))
+                        if hasattr(msg, "node") and msg.node is not None:
+                            start = msg.node.fromlineno
+                            end = msg.node.end_lineno
+                        else:
+                            # Some message types don't have a node, including:
+                            # - line-too-long
+                            # - bad-whitespace
+                            # - trailing-newlines
+                            start = end = msg.line
+
+                        # print('      ', msg.symbol, msg.node.lineno, msg.node.col_offset,
+                        #       msg.node.end_lineno, msg.node.end_col_offset)
+
+                        # Regular/simple messages
+                        if not (msg.symbol in special or
+                                msg.msg.startswith("Invalid module")):
+                            result += _colourify(Style.BRIGHT,
+                                                 '\n    Your Code Starts Here:\n') + '\n'
+
+                            if end - start <= 3:  # add pre-context code (in grey)
+                                if start - 3 >= 0:
+                                    add_line(start - 3, 'c')
+                                if start - 2 >= 0:
+                                    add_line(start - 2, 'c')
+
+                            add_line(start - 1, 'e')
+                            for line in range(start, end):
+                                add_line(line, 'o')
+
+                            if end - start <= 3:  # add post-context
+                                if end < len(self._source_lines):
+                                    add_line(end, 'c')
+                                if end + 1 < len(self._source_lines):
+                                    add_line(end + 1, 'c')
+
+                        # Special messages (no code or special highlight)
+                        else:
+                            if msg.msg.startswith("Missing function docstring"):
+                                add_line(start - 1, 'e')
+                                add_line(start, '.')
+
+                            # if msg.symbol == "too-many-nested-blocks":
+                            #     pass
+                            #
+                            # if msg.symbol == "always-returning-in-a-loop":
+                            #     pass
 
                     except AttributeError:
+                        # print('      PROBLEM: ', msg.symbol)
                         pass
-                    print('\n')
+                    result += '\n'
 
-        print(_colourify(Style.BRIGHT,
-                         '=== Code errors/forbidden usage (fix these right away!) ==='))
+        result += _colourify(Fore.RED + Style.BRIGHT,
+                             '=== Code errors/forbidden usage '
+                             '(fix these right away!) ===\n')
         print_messages_by_type(self._sorted_error_messages)
 
         if level == 'all':
-            print(_colourify(Style.BRIGHT, '=== Style/convention errors (fix these before submission) ==='))
-            print_messages_by_type(self._sorted_style_messages)
+            result += '\n' + _colourify(Fore.BLUE + Style.BRIGHT,
+                                        '=== Style/convention errors '
+                                        '(fix these before submission) ===\n')
+            print_messages_by_type(self._sorted_style_messages, True)
+
+        print(result)
 
     # Override this method
     def sort_messages(self):
@@ -149,4 +219,4 @@ def _colourify(colour, text):
     :param str text: text to be coloured
     :return str
     """
-    return colour + text + Fore.RESET + Back.RESET + Style.RESET_ALL
+    return colour + text + Style.RESET_ALL  # + Fore.RESET + Back.RESET

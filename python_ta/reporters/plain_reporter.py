@@ -54,7 +54,7 @@ ERROR_CHECKS = [
 
 class PlainReporter(BaseReporter):
     def __init__(self, number_of_messages, source_lines=None):
-        super().__init__(self)
+        super().__init__()
         self._error_messages = []
         self._style_messages = []
         self._number_of_messages = number_of_messages

@@ -17,4 +17,4 @@ class HTMLReporter(ColorReporter):
         output_path = THIS_DIR + '/templates/output.html'
 
         with open(output_path, 'w') as f:
-            f.write(template.render(error=(self._sorted_error_messages), style=(self._sorted_style_messages)))
+            f.write(template.render(error=self._sorted_error_messages, style=self._sorted_style_messages))

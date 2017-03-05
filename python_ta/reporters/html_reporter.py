@@ -14,7 +14,7 @@ class HTMLReporter(PlainReporter):
         self.sort_messages()
 
         template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template('templates/template.txt')
-        output_path = THIS_DIR + '/templates/outputt.html'
+        output_path = THIS_DIR + '/templates/output.html'
 
         with open(output_path, 'w') as f:
             f.write(template.render(error=(self._sorted_error_messages), style=(self._sorted_style_messages)))

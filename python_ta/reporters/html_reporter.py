@@ -17,16 +17,32 @@ class HTMLReporter(PlainReporter):
         output_path = THIS_DIR + '/templates/output.html'
 
         with open(output_path, 'w') as f:
-            for msg in self._error_messages:
-                msg_new = msg.msg.replace('\r', '')
-                msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
-                i = self._error_messages.index(msg)
-                self._error_messages[i] = msg._replace(msg=msg_new)
+            f.write(template.render(error=(self._sorted_error_messages), style=(self._sorted_style_messages)))
 
-            for msg in self._style_messages:
-                msg_new = msg.msg.replace('\r', '')
-                msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
-                i = self._style_messages.index(msg)
-                self._style_messages[i] = msg._replace(msg=msg_new)
+    def sort_messages(self):
+        # Sort the messages by their type
+        def sort_messages_by_type(messages):
+            messages.sort(key=lambda s: s[0])
+            sorted_messages = {}
+            # Count the number of occurrences and sort the msgs according to their id's
+            i = 0
+            while i < len(messages):
+                current_id = messages[i].msg_id
+                count = 1
+                sorted_messages[current_id] = [messages[i]]
+                while i + 1 < len(messages) and messages[i + 1].msg_id == current_id:
+                    count += 1
+                    sorted_messages[current_id].append(messages[i + 1])
+                    i += 1
 
-            f.write(template.render(messages=(self._error_messages + self._style_messages)))
+                obj_new = 'Number of occurrences: {}.'.format(count)
+
+                if self._number_of_messages != 0 and self._number_of_messages < count:
+                    obj_new += ' First {} shown.'.format(self._number_of_messages)
+
+                sorted_messages[current_id][0] = sorted_messages[current_id][0]._replace(obj=obj_new)
+                i += 1
+            return sorted_messages
+
+        self._sorted_error_messages = sort_messages_by_type(self._error_messages)
+        self._sorted_style_messages = sort_messages_by_type(self._style_messages)

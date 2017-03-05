@@ -37,7 +37,32 @@ body {
 	font-size: 12;
 	border-radius: 25px;
 	border: thin solid rgb(122, 122, 122);
-	width: 550px;
+	width: 530px;
 	background-color: rgb(255, 255, 255);
 	padding: 15px;
 }
+
+#code {
+    color: rgb(0, 0, 255);
+    font-weight: bold;
+}
+
+#style {
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+}
+
+#bold {
+    font-weight: bold;
+}
+
+.error_id {
+    color: rgb(0, 0, 255);
+    font-weight: bold;
+}
+
+.style_id {
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+}
+

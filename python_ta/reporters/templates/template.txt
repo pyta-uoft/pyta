@@ -18,17 +18,45 @@ PyTA Error Report
 <div id="inside">
 <p/>
 <div id="core">
+
+<div id="code">
+=== Code errors/forbidden usage (fix these right away!) ===
+</div>
+
 <u1>
-    {% for message in messages %}
-        <p>{{ message.msg_id }} ({{ message.symbol }}) {{ message.obj }}<br/>&emsp;&emsp;{{message.msg }}</p>
+    {% for message in error %}
+        <p><p><span class="error_id">{{ message }}</span> ({{ error[message][0].symbol }}) {{ error[message][0].obj }}
+        {% for indiv in error[message] %}
+        <div id="bold">
+        &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/> &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
+        </div>
+        {% endfor %}
     {% endfor %}
 </u1>
+
+<div id="style">
+=== Style/convention errors (fix these before submission) ===
+</div>
+
+<u1>
+    {% for message in style %}
+        <p><p><span class="style_id">{{ message }}</span> ({{ style[message][0].symbol }}) {{ style[message][0].obj }}
+        {% for indiv in style[message] %}
+        <div id="bold">
+        &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/> &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
+        </div>
+        {% endfor %}
+    {% endfor %}
+</u1>
+
 </div>
 <p/>
 </div>
 </body>
+<a href="http://www.cs.toronto.edu/~david/pyta/">
 <div style="position: relative">
-                <p style="position: fixed; bottom: 0; width:100%; text-align: center"> <img src="pyta_logo_markdown.png" height="50"/>
+                <p style="position: relative; bottom: 0; width:100%; text-align: center"> <img src="pyta_logo_markdown.png" height="50"/>
                 </p>
             </div>
+</a>
 </html>

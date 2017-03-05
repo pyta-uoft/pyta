@@ -18,3 +18,8 @@ class HTMLReporter(ColorReporter):
 
         with open(output_path, 'w') as f:
             f.write(template.render(code=self._sorted_error_messages, style=self._sorted_style_messages))
+
+    @staticmethod
+    def _colourify(colour, text):
+        # super()._colourify(colour, text)
+        return '<span class =".style_error">' + text + '</span>'

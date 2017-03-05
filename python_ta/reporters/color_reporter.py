@@ -32,7 +32,7 @@ class ColorReporter(PlainReporter):
     # Override this method
     def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
-        init(wrap=(sys.platform == 'win32'), strip=False)
+        init(wrap=(sys.platform == 'win32'), strip=False, autoreset=True)
 
         self.sort_messages()
 
@@ -63,13 +63,13 @@ class ColorReporter(PlainReporter):
                     n = 0
                 text = self._source_lines[n][:-1]
                 # Pad line number with spaces to even out indent:
-                number = _colourify(Fore.LIGHTBLACK_EX, "{:>3}".format(n+1))
+                number = self._colourify(Fore.LIGHTBLACK_EX, "{:>3}".format(n+1))
                 # UNCOMMENT TO IGNORE BLANK LINES:
                 # if text.strip() == '':
                 #     return
 
                 if linetype == "e":    # (error)
-                    result += '    ' + _colourify(Style.BRIGHT, number)
+                    result += '    ' + self._colourify(Style.BRIGHT, number)
                     if hasattr(msg, "node") and msg.node is not None:
                         start_col = msg.node.col_offset
                         end_col = msg.node.end_col_offset
@@ -77,13 +77,13 @@ class ColorReporter(PlainReporter):
                         start_col = 0
                         end_col = len(text)
                     result += '    ' + text[:start_col]
-                    result += _colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
+                    result += self._colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
                                          text[start_col:end_col])
                     result += text[end_col:]
 
                 elif linetype == "c":  # (context)
                     result += '    ' + number
-                    result += '    ' + _colourify(Fore.LIGHTBLACK_EX, text)
+                    result += '    ' + self._colourify(Fore.LIGHTBLACK_EX, text)
 
                 elif linetype == "o":  # (other)
                     result += '    ' + number
@@ -101,7 +101,7 @@ class ColorReporter(PlainReporter):
                 result += '\n'
 
             for msg_id in messages:
-                code = _colourify((Fore.BLUE if style
+                code = self._colourify((Fore.BLUE if style
                                    else Fore.RED) + Style.BRIGHT, msg_id)
                 first_msg = messages[msg_id][0]
                 result += code + ' ({})  {}\n'.format(first_msg.symbol,
@@ -110,7 +110,7 @@ class ColorReporter(PlainReporter):
                     msg_text = msg.msg
                     if msg.symbol == "bad-whitespace":  # fix Pylint inconsistency
                         msg_text = msg_text.partition('\n')[0]
-                    result += _colourify(Style.BRIGHT, '   [Line {}] {}'.format(
+                    result += self._colourify(Style.BRIGHT, '   [Line {}] {}'.format(
                         msg.line, msg_text)) + '\n'
 
                     try:
@@ -130,7 +130,7 @@ class ColorReporter(PlainReporter):
                         # Regular/simple messages
                         if not (msg.symbol in special or
                                 msg.msg.startswith("Invalid module")):
-                            result += _colourify(Style.BRIGHT,
+                            result += self._colourify(Style.BRIGHT,
                                                  '\n    Your Code Starts Here:\n') + '\n'
 
                             if end - start <= 3:  # add pre-context code (in grey)
@@ -166,13 +166,13 @@ class ColorReporter(PlainReporter):
                         pass
                     result += '\n'
 
-        result += _colourify(Fore.RED + Style.BRIGHT,
+        result += self._colourify(Fore.RED + Style.BRIGHT,
                              '=== Code errors/forbidden usage '
                              '(fix these right away!) ===\n')
         print_messages_by_type(self._sorted_error_messages)
 
         if level == 'all':
-            result += '\n' + _colourify(Fore.BLUE + Style.BRIGHT,
+            result += '\n' + self._colourify(Fore.BLUE + Style.BRIGHT,
                                         '=== Style/convention errors '
                                         '(fix these before submission) ===\n')
             print_messages_by_type(self._sorted_style_messages, True)
@@ -211,12 +211,13 @@ class ColorReporter(PlainReporter):
     _display = None   # because PyCharm is annoying about this
 
 
-def _colourify(colour, text):
-    """
-    Adds given ANSI colouring tokens to text as well as final colour reset.
+    @staticmethod
+    def _colourify(colour, text):
+        """
+        Adds given ANSI colouring tokens to text as well as final colour reset.
 
-    :param str colour: colorama ANSI code(s)
-    :param str text: text to be coloured
-    :return str
-    """
-    return colour + text + Style.RESET_ALL  # + Fore.RESET + Back.RESET
+        :param str colour: colorama ANSI code(s)
+        :param str text: text to be coloured
+        :return str
+        """
+        return colour + text + Style.RESET_ALL  # + Fore.RESET + Back.RESET

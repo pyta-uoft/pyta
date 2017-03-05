@@ -24,9 +24,9 @@ PyTA Error Report
 </div>
 
 <u1>
-    {% for message in error %}
-        <p><p><span class="error_id">{{ message }}</span> ({{ error[message][0].symbol }}) {{ error[message][0].obj }}
-        {% for indiv in error[message] %}
+    {% for message in code %}
+        <p><p><span class="code_id">{{ message }}</span> ({{ code[message][0].symbol }}) {{ code[message][0].obj }}
+        {% for indiv in code[message] %}
         <div id="bold">
         &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/> &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
         </div>

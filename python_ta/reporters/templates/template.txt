@@ -27,15 +27,14 @@ PyTA Error Report
 <u1>
     {% for message in code %}
         <p><p><span class="code_id">{{ message }}</span> ({{ code[message][0].symbol }}) {{ code[message][0].obj }}
-        
+
         {% for indiv in code[message] %}
         <div id="bold">
         &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
         {% if indiv.snippet != '' %}
-            &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
+            &emsp;&emsp;&emsp;Your Code Starts Here: <p/>
 			{{ indiv.snippet }}
-
-        {% endif %}
+        {% endif %} <br/>
         </div>
         {% endfor %}
     {% endfor %}
@@ -50,7 +49,11 @@ PyTA Error Report
         <p><p><span class="style_id">{{ message }}</span> ({{ style[message][0].symbol }}) {{ style[message][0].obj }}
         {% for indiv in style[message] %}
         <div id="bold">
-        &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/> &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
+        &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
+        {% if indiv.snippet != '' %}
+            &emsp;&emsp;&emsp;Your Code Starts Here: <p/>
+			{{ indiv.snippet }}
+		{% endif %} <br/>
         </div>
         {% endfor %}
     {% endfor %}

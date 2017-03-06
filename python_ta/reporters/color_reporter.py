@@ -113,7 +113,7 @@ class ColorReporter(PlainReporter):
                 try:
                     # Messages with code snippets
                     if not (msg.symbol in no_hl or
-                            msg.msg.startswith("Invalid module")):
+                            msg.msg.startswith("Invalid module") or msg.msg.startswith("Missing module docstring")):
 
                         if hasattr(msg, "node") and msg.node is not None:
                             start = msg.node.fromlineno

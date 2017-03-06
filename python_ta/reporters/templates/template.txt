@@ -22,12 +22,10 @@ PyTA Error Report
 <div id="code">
 === Code errors/forbidden usage (fix these right away!) ===
 </div>
-<!-- <p><a href="http://www.cs.toronto.edu/~david/pyta/#{{ message }}">RANDOM TEXT</a></p> -->
-
 <u1>
     {% for message in code %}
-        <p><p><span class="code_id">{{ message }}</span> ({{ code[message][0].symbol }}) {{ code[message][0].obj }}
-
+        <a id="error_id" href= "http://www.cs.toronto.edu/~david/pyta/&#35{{message}}">
+        <p><p><span class="code_id">{{ message }}</span> ({{ code[message][0].symbol }}) {{ code[message][0].obj }} </a>
         {% for indiv in code[message] %}
         <div id="bold">
         &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
@@ -46,7 +44,8 @@ PyTA Error Report
 
 <u1>
     {% for message in style %}
-        <p><p><span class="style_id">{{ message }}</span> ({{ style[message][0].symbol }}) {{ style[message][0].obj }}
+        <a id="error_id" href= "http://www.cs.toronto.edu/~david/pyta/&#35{{message}}">
+        <p><p><span class="style_id">{{ message }}</span> ({{ style[message][0].symbol }}) {{ style[message][0].obj }} </a>
         {% for indiv in style[message] %}
         <div id="bold">
         &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
@@ -60,6 +59,11 @@ PyTA Error Report
 </u1>
 
 </div>
+<a href="mailto:david@cs.toronto.edu">
+    <div id="report_bug" style="color:black">
+        Found a bug? Report it to Prof. Liu!
+    </div>
+</a>
 <p/>
 </div>
 </body>

@@ -16,7 +16,7 @@ body {
 }
 .title {
 	margin: auto;
-	font-family: Impact;
+	font-family: Impact; sans-serif;
 	font-size: 50;
 	border-radius: 25px;
 	border: thin solid rgb(122, 122, 122);
@@ -33,7 +33,7 @@ body {
 #core {
 	margin: auto;
 	text-align: left;
-	font-family: Lucida Console;
+	font-family: Lucida Console; sans-serif;
 	font-size: 12;
 	border-radius: 25px;
 	border: thin solid rgb(122, 122, 122);
@@ -64,4 +64,22 @@ body {
 .style_id {
     color: rgb(0, 0, 255);
     font-weight: bold;
+}
+
+.grey {
+    color: rgb(119, 119, 120);
+    font-weight: normal;
+    font-family: Lucida Console; monospace
+}
+
+.gbold{
+    color: rgb(90, 91, 92);
+    font-weight: bold;
+    font-family: Lucida Console; monospace
+}
+
+.highlight {
+    font-weight: bold;
+    background-color: rgb(0, 255, 255);
+    font-family: Lucida Console; monospace
 }

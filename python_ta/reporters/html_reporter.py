@@ -44,7 +44,7 @@ class HTMLReporter(ColorReporter):
         #     return
 
         if linetype == "e":  # (error)
-            snippet += _SPACES + self._colourify("grey bold", number)
+            snippet += _SPACES + self._colourify("gbold", number)
             if hasattr(msg, "node") and msg.node is not None:
                 start_col = msg.node.col_offset
                 end_col = msg.node.end_col_offset
@@ -85,5 +85,5 @@ class HTMLReporter(ColorReporter):
     @staticmethod
     def _colourify(colour_class, text):
         # super()._colourify(colour, text)
-        return '<span class=".' + colour_class + '">' + text + '</span>'
+        return '<span class="' + colour_class + '">' + text + '</span>'
 

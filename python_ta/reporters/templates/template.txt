@@ -22,13 +22,20 @@ PyTA Error Report
 <div id="code">
 === Code errors/forbidden usage (fix these right away!) ===
 </div>
+<!-- <p><a href="http://www.cs.toronto.edu/~david/pyta/#{{ message }}">RANDOM TEXT</a></p> -->
 
 <u1>
     {% for message in code %}
         <p><p><span class="code_id">{{ message }}</span> ({{ code[message][0].symbol }}) {{ code[message][0].obj }}
+        
         {% for indiv in code[message] %}
         <div id="bold">
-        &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/> &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
+        &emsp;&emsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
+        {% if indiv.snippet != '' %}
+            &emsp;&emsp;&emsp;Your Code Starts Here: <p/><br/>
+			{{ indiv.snippet }}
+
+        {% endif %}
         </div>
         {% endfor %}
     {% endfor %}

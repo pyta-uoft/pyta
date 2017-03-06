@@ -2,7 +2,7 @@ from pylint.reporters import BaseReporter
 from pylint.utils import Message
 from collections import namedtuple
 
-NewMessage = namedtuple('NewMessage', Message._fields + ('node',))
+NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
 # and forbidden constructs only)
@@ -71,10 +71,10 @@ class PlainReporter(BaseReporter):
         """Add node attribute to last message."""
         if msgid in ERROR_CHECKS:
             if not isinstance(self._error_messages[-1], NewMessage):
-                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node)
+                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '')
         else:
             if not isinstance(self._style_messages[-1], NewMessage):
-                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node)
+                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
 
     def print_messages(self, level='all'):
         # Sort the messages.

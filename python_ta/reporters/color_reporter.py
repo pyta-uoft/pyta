@@ -105,10 +105,12 @@ class ColorReporter(PlainReporter):
                 msg_text = msg.msg
                 if msg.symbol == "bad-whitespace":  # fix Pylint inconsistency
                     msg_text = msg_text.partition('\n')[0]
+                    messages[msg_id][i] = msg._replace(msg=msg_text)
+                    msg = messages[msg_id][i]
 
                 result += self._colourify(Style.BRIGHT,
                                           '   [Line {}] {}'.format(
-                                              msg.line, msg_text)) + '\n'
+                                              msg.line, msg.msg)) + '\n'
 
                 try:
                     # Messages with code snippets

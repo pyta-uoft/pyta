@@ -81,12 +81,14 @@ class HTMLReporter(ColorReporter):
             print("ERROR")
 
         snippet += '<br/>'
+        print(snippet)
         return snippet
 
     @staticmethod
     def _colourify(colour_class, text):
         space_count = len(text) - len(text.lstrip(' '))
-        if (colour_class == "highlight") and (not text.lstrip().isdigit()):
+        text = text.lstrip()
+        if (colour_class == "highlight") and (not text.isdigit()):
             return '<span class="' + colour_class + '">' + text + '</span>'
         else:
             return '<span class="' + colour_class + '">' + (space_count * '&nbsp;') + text + '</span>'

@@ -39,6 +39,8 @@ PyTA Error Report
     {% endfor %}
 </u1>
 
+<br/>
+
 <div id="style">
 === Style/convention errors (fix these before submission) ===
 </div>

@@ -15,6 +15,11 @@
 
 ## `HTMLReporter`
 
+* **BIG PROBLEM:** Since HTML collapses multi-spaces into one, bad whitespace
+isn't rendered correctly. Solution is probably to replace all `' '` with `'&nbsp'`,
+but this will cause problems with slicing (since `'&nbsp'` is 4 characters in
+a Python string).
+
 * Find a way to make the width of the white box (that shows the source code) corresponds with the longest line of the source code. Right now, if the lines of the source code aren't long, the right side of the white box looks empty, but if the lines are too long, the box doesn't fit the lines.
 
 * Not all error messages are explained on the website: http://www.cs.toronto.edu/~david/pyta/:

@@ -100,4 +100,8 @@ bug reports for the `setendings` module.</small>
 
 ## `HTMLReporter`
 
-To be added.
+- HTMLReporter now a subclass of ColorReporter
+- Snippet in the PlainReporter and in the HTMLReporter
+- CSS and the template sheet
+- The location of output.html
+- Bugs

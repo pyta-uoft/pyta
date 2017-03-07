@@ -83,3 +83,9 @@ body {
     background-color: rgb(0, 255, 255);
     font-family: "Lucida Console", monospace;
 }
+
+.black {
+	color: rgb(0, 0, 0);
+	font-weight: normal;
+	font-family: "Lucida Console", monospace;
+}

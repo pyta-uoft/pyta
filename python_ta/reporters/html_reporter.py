@@ -38,7 +38,7 @@ class HTMLReporter(ColorReporter):
             n = 0
         text = self._source_lines[n][:-1]
         # Pad line number with spaces to even out indent:
-        number = "{:>3}".format(n + 1)    # TODO: replace space padding with CSS
+        number = "{:>3}".format(n + 1)
         # UNCOMMENT TO IGNORE BLANK LINES:
         # if text.strip() == '':
         #     return
@@ -53,10 +53,12 @@ class HTMLReporter(ColorReporter):
                 end_col = len(text) - 1
             # if msg.symbol == "trailing-newlines":
             #     print(repr(text))
-            snippet += _SPACES + text[:start_col]
+            snippet += _SPACES + self._colourify("black", text[:start_col])
+            # Because highlight works on the col_offsets of a particular line, the &nbsp spacing in the colourify method
+            # wouldn't work. So treat this case separately.
             snippet += self._colourify("highlight",     # bold, black on cyan
                                        text[start_col:end_col])
-            snippet += text[end_col:]
+            snippet += self._colourify("black", text[end_col:])
 
         elif linetype == "c":  # (context)
             snippet += _SPACES + self._colourify("grey", number)
@@ -70,7 +72,7 @@ class HTMLReporter(ColorReporter):
             snippet += _SPACES + self._colourify("highlight", number)
 
         elif linetype == '.':  # (ellipsis)
-            snippet += _SPACES + number
+            snippet += _SPACES + self._colourify("grey", number)
             snippet += _SPACES
             space_count = len(text) - len(text.lstrip(' '))
             snippet += space_count * '&nbsp;' + '...'
@@ -79,11 +81,12 @@ class HTMLReporter(ColorReporter):
             print("ERROR")
 
         snippet += '<br/>'
-
         return snippet
 
     @staticmethod
     def _colourify(colour_class, text):
-        # super()._colourify(colour, text)
-        return '<span class="' + colour_class + '">' + text + '</span>'
-
+        space_count = len(text) - len(text.lstrip(' '))
+        if (colour_class == "highlight") and (not text.lstrip().isdigit()):
+            return '<span class="' + colour_class + '">' + text + '</span>'
+        else:
+            return '<span class="' + colour_class + '">' + (space_count * '&nbsp;') + text + '</span>'

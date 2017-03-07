@@ -13,12 +13,14 @@
     * `always-returning-in-a-loop`
     * `too-many-nested-blocks`
 
-* The triple-nested functions for `print_messages` might be overkill - consider turning `add_line` into a regular method.
-
 ## `HTMLReporter`
-
-* The source code on the output.html page currently does not have the correct indent. Fix the indentation so that the source code looks exactly like the original source code.
 
 * Find a way to make the width of the white box (that shows the source code) corresponds with the longest line of the source code. Right now, if the lines of the source code aren't long, the right side of the white box looks empty, but if the lines are too long, the box doesn't fit the lines.
 
+* Not all error messages are explained on the website: http://www.cs.toronto.edu/~david/pyta/:
+
+    * `C0305 (trailing-newlines)`
+
 * Use javascript to expand and close the source code of each error messages.
+
+* `python_ta.checkall()` does not work on all examples. An unexpected error occurs and returns **Got unexpected field names: ['snippet']** when `python_ta.check_all("examples.pylint.W0631_undefined_loop_variable", reporter=HTMLReporter)` or `python_ta.check_all("examples.pylint.W0631_undefined_loop_variable")` is called. This is most likely because we added a new attribute, **snippet**, to **NewMessage** in the PlainReporter. 

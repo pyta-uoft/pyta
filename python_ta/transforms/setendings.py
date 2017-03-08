@@ -5,19 +5,19 @@ Top-level functions to mutate the astroid nodes with `end_col_offset` and
 Where possible, the `end_col_offset` property is set by that of the node's last child.
 
     fromlineno
-        - existing attribute.
+        - existing attribute
         - one-indexed
     end_lineno
         - new attribute
         - one-indexed
     col_offset
-        - existing attribute.
+        - existing attribute
         - zero-indexed
-        - located left of the first character.
+        - located left of the first character
     end_col_offset
         - new attribute
         - zero-indexed
-        - located right of the last character (essentially the string length).
+        - located right of the last character (essentially the string length)
 
 In astroid/astroid/transforms.py, functions are registered to types in the
 `transforms` dictionary in the TransformVisitor class. The traversal at
@@ -35,12 +35,12 @@ CONSUMABLES = " \n\t\\"
 
 DEBUG = 0
 
-'''
-These nodes have no children, and their end_lineno and end_col_offset
-attributes are set based on their string representation (according to astroid).
-Goal: eventually replace the transforms for all the nodes in this list with the predicate technique that uses more robust approach using searching, rather than
-simple length of string.
-'''
+
+# These nodes have no children, and their end_lineno and end_col_offset
+# attributes are set based on their string representation (according to astroid).
+# Goal: eventually replace the transforms for all the nodes in this list with the 
+# predicate technique that uses more robust approach using searching, rather than
+# simple length of string.
 NODES_WITHOUT_CHILDREN = [
     astroid.AssignName,
     astroid.Break,
@@ -105,50 +105,27 @@ NODES_WITH_CHILDREN = [
 # Predicate functions, for setting locations based on source code.
 # Predicates can only return a single truthy value, because of how its used in
 # `astroid/transforms.py`
-def _is_close_paren(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include right )"""
-    return s[index] == ')'
+# ====================================================
+def _token_search(token):
+    def _is_token(s, index, node):
+        """(string, int, node) --> bool
+        Fix to include certain tokens such as a paren, bracket, or brace."""
+        return s[index] == token
+    return _is_token
 
-def _is_close_paren_comprehension(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include right ). Node, `Comprehension` is a special case.
-    Could be in a SetComp, ListComp, or GeneratorExp.. in each respective 
-    case, the subsequent char could be either a brace, bracket, or paren.
-    """
-    return s[index] == ')' and isinstance(node.parent, astroid.GeneratorExp)
-
-def _is_open_paren(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include left ("""
-    return s[index] == '('
-
-def _is_close_brace(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include right }"""
-    return s[index] == '}'
-
-def _is_open_brace(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include left {"""
-    return s[index] == '{'
-
-def _is_close_bracket(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include right ]"""
-    return s[index] == ']'
-
-def _is_open_bracket(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include left ["""
-    return s[index] == '['
+def _keyword_search(keyword):
+    def _is_keyword(s, index, node):
+        """(string, int, node) --> function
+        Search for a keyword. Right-to-left.
+        """
+        return s[index : index + len(keyword)] == keyword
+    return _is_keyword
 
 def _is_within_close_bracket(s, index, node):
     """(string, int, node) --> bool
     Fix to include right ]"""
     # print('>>>>>>', s, s[index], index, node.end_col_offset)
     if index >= len(s)-1: return False
-    # return s[index] == ']'
     return s[index] == ']' or s[index+1] == ']'
 
 def _is_within_open_bracket(s, index, node):
@@ -157,18 +134,6 @@ def _is_within_open_bracket(s, index, node):
     # print('>>>>>>', s, index)
     if index < 1: return False
     return s[index-1] == '['
-
-def _is_for(s, index, node):
-    """(string, int, node) --> bool
-    Search for beginning of the `for`. [TODO: search for the whole keyword.]
-    """
-    return s[index] == 'f'
-
-def _is_async(s, index, node):
-    """(string, int, node) --> bool
-    Search for beginning of the `async`. [TODO: search for the whole keyword.]
-    """
-    return s[index] == 'a'
 
 def _is_attr_name(s, index, node):
     """(string, int, node) --> bool
@@ -186,13 +151,6 @@ def _is_arg_name(s, index, node):
     if not node.arg: return False
     return s[index : index+len(node.arg)] == node.arg
 
-def _is_del(s, index, node):
-    """(string, int, node) --> bool
-    Search for the del keyword. Right-to-left.
-    """
-    del_len = 3
-    return s[index : index+del_len] == 'del'
-
 
 # Nodes the require the source code for proper location setting
 # Elements here are in the form
@@ -200,29 +158,29 @@ def _is_del(s, index, node):
 NODES_REQUIRING_SOURCE = [
 
     (astroid.AssignAttr, None, _is_attr_name),  
-    (astroid.AsyncFor, _is_async, None),
-    (astroid.AsyncWith, _is_async, None),
+    (astroid.AsyncFor, _keyword_search('async'), None),
+    (astroid.AsyncWith, _keyword_search('async'), None),
     (astroid.Attribute, None, _is_attr_name),
-    (astroid.Call, None, _is_close_paren),
-    (astroid.DelAttr, _is_del, _is_attr_name),
-    (astroid.DelName, _is_del, None),
-    (astroid.Dict, None, _is_close_brace),
-    (astroid.DictComp, None, _is_close_brace),
+    (astroid.Call, None, _token_search(')')),
+    (astroid.DelAttr, _keyword_search('del'), _is_attr_name),
+    (astroid.DelName, _keyword_search('del'), None),
+    (astroid.Dict, None, _token_search('}')),
+    (astroid.DictComp, None, _token_search('}')),
 
     # FIXME: sometimes start/ending char does not exist.
-    (astroid.Expr, _is_open_paren, _is_close_paren),
-    (astroid.ExtSlice, _is_open_bracket, _is_close_bracket),
-    (astroid.GeneratorExp, _is_open_paren, _is_close_paren),
-    (astroid.Index, _is_open_bracket, _is_close_bracket),
+    (astroid.Expr, _token_search('('), _token_search(')')),
+    (astroid.ExtSlice, _token_search('['), _token_search(']')),
+    (astroid.GeneratorExp, _token_search('('), _token_search(')')),
+    (astroid.Index, _token_search('['), _token_search(']')),
     (astroid.Keyword, _is_arg_name, None),
     
     # TODO: missing *both* outer brackets
-    (astroid.ListComp, _is_open_bracket, _is_close_bracket),
-    (astroid.Set, None, _is_close_brace),
-    (astroid.SetComp, None, _is_close_brace),
+    (astroid.ListComp, _token_search('['), _token_search(']')),
+    (astroid.Set, None, _token_search('}')),
+    (astroid.SetComp, None, _token_search('}')),
     (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
-    (astroid.Subscript, None, _is_close_bracket),
-    (astroid.Tuple, _is_open_paren, _is_close_paren)
+    (astroid.Subscript, None, _token_search(']')),
+    (astroid.Tuple, _token_search('('), _token_search(')'))
 ]
 
 
@@ -297,9 +255,13 @@ def discover_nodes(node):
 
 def fix_slice(source_code):
     """
-    The Slice node column positions are mostly set properly when it has (Const) children, all it needs is to consume leading/trailing whitespace.
+    The Slice node column positions are mostly set properly when it has (Const) 
+    children, all it needs is to consume leading/trailing whitespace.
 
-    The main problem is when Slice node doesn't have children. E.g "[:]", "[::]", "[:][:]", or even "[::][::]", yikes! The existing col_offset of the slice node is set improperly to 0. And the end_col_offset is also wrong. We fix it here.
+    The main problem is when Slice node doesn't have children. 
+    E.g "[:]", "[::]", "[:][:]", or even "[::][::]", yikes! The existing 
+    col_offset of the slice node is set improperly to 0. And the end_col_offset 
+    is also wrong. We fix it here.
     """
     def _consume_subscripts(node):
 

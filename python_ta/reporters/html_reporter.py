@@ -28,6 +28,7 @@ class HTMLReporter(ColorReporter):
                                  strftime("%a. %b. %m %Y, %H:%M:%S"))
         with open(output_path, 'w') as f:
             f.write(template.render(date_time=dt,
+                                    mod_name=self._module_name,
                                     code=self._sorted_error_messages,
                                     style=self._sorted_style_messages))
         print("HTML Python TA report created. Please see output.html "

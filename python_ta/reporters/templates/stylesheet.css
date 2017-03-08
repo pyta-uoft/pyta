@@ -13,9 +13,9 @@ body {
 	background-color: rgb(237, 251, 255);
 	text-align: center;
 }
-#date {
+#preheader {
 	font-size: 12;
-	text-align: right;
+	padding-left: 10px;
 	padding-right: 10px;
 	margin: 5px;
 }

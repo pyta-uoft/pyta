@@ -53,12 +53,13 @@ ERROR_CHECKS = [
 
 
 class PlainReporter(BaseReporter):
-    def __init__(self, number_of_messages, source_lines=None):
+    def __init__(self, number_of_messages, source_lines=None, module_name=''):
         super().__init__()
         self._error_messages = []
         self._style_messages = []
         self._number_of_messages = number_of_messages
         self._source_lines = source_lines or []
+        self._module_name = module_name
 
     def handle_message(self, msg):
         """Handle a new message triggered on the current file."""

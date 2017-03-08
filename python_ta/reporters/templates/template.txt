@@ -9,7 +9,15 @@
 			document.write("<p>" + Date() + "</p>")
 		</script>
 		-->
-		<div id="date"> {{ date_time }} </div>
+		<div id="preheader"> 
+			<!-- TODO: Needs to be fixed. -->
+			<p style="display: inline; text-align:left">
+				Module analysed: {{ mod_name }}
+			</p>
+			<span style="display: inline; text-align:right"> 
+				{{ date_time }}
+			</span>
+		</div>
 	
 	<div id="header">
 		<br/>
@@ -25,7 +33,7 @@
 		<div id="core">
 
 			<div id="code">
-			=== Code errors/forbidden usage (fix these right away!) ===
+				=== Code errors/forbidden usage (fix these right away!) ===
 			</div>
 			<u1>
 				{% for message in code %}

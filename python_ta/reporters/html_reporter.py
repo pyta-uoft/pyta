@@ -25,7 +25,7 @@ class HTMLReporter(ColorReporter):
         # Date/time (24 hour time) format:
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
         dt = "Generated: " + str(datetime.now().
-                                 strftime("%a. %b. %m %Y, %H:%M:%S"))
+                                 strftime("%a. %b. %d %Y, %H:%M:%S"))
         with open(output_path, 'w') as f:
             f.write(template.render(date_time=dt,
                                     mod_name=self._module_name,

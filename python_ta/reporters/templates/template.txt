@@ -1,80 +1,105 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="stylesheet.css">
-<div id="date">
-<script type="text/javascript">
-document.write("<p>" + Date() + "</p>")
-</script>
-</div>
-<div id="header">
-<br/>
-<div class="title">
-PyTA Error Report
-</div>
-</div>
 </head>
-<br/>
 <body>
-<div id="inside">
-<p/>
-<div id="core">
+	
+		<!-- Constantly updated date:
+		<script type="text/javascript">
+			document.write("<p>" + Date() + "</p>")
+		</script>
+		-->
+		<div id="preheader"> 
+			<!-- TODO: Needs to be fixed. -->
+			<p style="display: inline; text-align:left">
+				Module analysed: {{ mod_name }}
+			</p>
+			<span style="display: inline; text-align:right"> 
+				{{ date_time }}
+			</span>
+		</div>
+	
+	<div id="header">
+		<br/>
+		<div class="title">
+			PyTA Error Report
+		</div>
+	</div>
 
-<div id="code">
-=== Code errors/forbidden usage (fix these right away!) ===
-</div>
-<u1>
-    {% for message in code %}
-        <p><p><span class="code_id">{{ message }}</span>
-        <a href= "http://www.cs.toronto.edu/~david/pyta/&#35{{message}}">({{ code[message][0].symbol }})</a>
-        {{ code[message][0].obj }}
-        {% for indiv in code[message] %}
-        <div id="bold">
-        &nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
-        {% if indiv.snippet != '' %}
-            &nbsp;&nbsp;&nbsp;Your Code Starts Here: <p/>
-			{{ indiv.snippet }}
-        {% endif %} <br/>
-        </div>
-        {% endfor %}
-    {% endfor %}
-</u1>
+	<br/>
 
-<br/>
+	<div id="inside">
+		<p/>
+		<div id="core">
 
-<div id="style">
-=== Style/convention errors (fix these before submission) ===
-</div>
+			<div id="code">
+				=== Code errors/forbidden usage (fix these right away!) ===
+			</div>
+			<u1>
+				{% for message in code %}
+					<p/>
+					<p style="font-size: 110%">
+						<span class="code_id">{{ message }}</span>
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">({{ code[message][0].symbol }})</a>
+						{{ code[message][0].obj }}
+					</p>
+					{% for indiv in code[message] %}
+						<div style="font-weight:bold">
+						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
+						{% if indiv.snippet != '' %}
+							&nbsp;&nbsp;&nbsp;Your Code Starts Here: 
+							<p class="snippet">
+								{{ indiv.snippet }}
+							</p>
+						{% endif %}
+						</div>
+					{% endfor %}
+				{% endfor %}
+			</u1>
 
-<u1>
-    {% for message in style %}
-        <p><p><span class="style_id">{{ message }}</span>
-        <a href= "http://www.cs.toronto.edu/~david/pyta/&#35{{message}}">({{ style[message][0].symbol }})</a>
-        {{ style[message][0].obj }}
-        {% for indiv in style[message] %}
-        <div id="bold">
-        &nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
-        {% if indiv.snippet != '' %}
-            &nbsp;&nbsp;&nbsp;Your Code Starts Here: <p/>
-			{{ indiv.snippet }}
-		{% endif %} <br/>
-        </div>
-        {% endfor %}
-    {% endfor %}
-</u1>
+			<br/>
 
-</div>
-<a href="mailto:david@cs.toronto.edu">
-    <div id="report_bug" style="color:black">
-        Found a bug? Report it to Prof. Liu!
-    </div>
-</a>
-<p/>
-</div>
+			<div id="style">
+			=== Style/convention errors (fix these before submission) ===
+			</div>
+
+			<u1>
+				{% for message in style %}
+					<p/>
+					<p style="font-size: 110%">
+						<span class="style_id">{{ message }}</span>
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">({{ style[message][0].symbol }})</a>
+						{{ style[message][0].obj }}
+					</p>
+					{% for indiv in style[message] %}
+						<div style="font-weight:bold">
+						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
+						{% if indiv.snippet != '' %}
+							&nbsp;&nbsp;&nbsp;Your Code Starts Here:
+							<p class="snippet">
+								{{ indiv.snippet }}
+							</p>
+						{% endif %}
+						</div>
+					{% endfor %}
+				{% endfor %}
+			</u1>
+
+		</div>
+		<p/>
+		<a href="mailto:david@cs.toronto.edu">
+			<div id="report_bug">
+				Found a bug? Report it to Prof. Liu!
+			</div>
+		</a>
+		<p/>
+	</div>
 </body>
-<a href="http://www.cs.toronto.edu/~david/pyta/">
-<div style="position: relative">
-                <p style="position: relative; bottom: 0; width:100%; text-align: center"> <img src="pyta_logo_markdown.png" height="50"/>
-                </p>
-            </div>
-</a>
+<div style="position: relative">	
+	<p style="position: relative; bottom: 0; width:100%; text-align: center"> 
+		<a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
+			<img src="pyta_logo_markdown.png" alt="PyTA logo" height="50"/>
+		</a>
+	</p>
+</div>
 </html>

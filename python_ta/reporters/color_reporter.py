@@ -26,8 +26,8 @@ no_hl = {"always-returning-in-a-loop",
 
 class ColorReporter(PlainReporter):
     # Override this method to add instance variables
-    def __init__(self, number_of_messages, source_lines=None):
-        super().__init__(number_of_messages, source_lines)
+    def __init__(self, number_of_messages, source_lines=None, module_name=''):
+        super().__init__(number_of_messages, source_lines, module_name)
         self._sorted_error_messages = {}
         self._sorted_style_messages = {}
 
@@ -172,8 +172,12 @@ class ColorReporter(PlainReporter):
                                         msg, end + 1, 'c')
 
                         result += code_snippet + '\n'
-                        messages[msg_id][i] = messages[msg_id][i]._replace(
-                                snippet=code_snippet)
+                        try:
+                            messages[msg_id][i] = msg._replace(snippet=code_snippet)
+                        except ValueError as e:
+                            # raise ValueError("Non-NewMessage message has "
+                            #                  "no 'snippet' attribute") from e
+                            pass
 
                 except AttributeError:
                     pass

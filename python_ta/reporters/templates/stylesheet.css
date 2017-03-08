@@ -3,16 +3,21 @@
 	border-radius: 25px;
 	border: medium solid rgb(35, 35, 35);
 	background-color: rgb(130, 216, 245);
+	line-height: normal;
 	#padding: 10px;
 }
 body {
-
+    font-size: 100%;
+	font-family: "Lucida Sans", sans-serif;
+	line-height: 105%;
 	background-color: rgb(237, 251, 255);
 	text-align: center;
 }
 #date {
 	font-size: 12;
 	text-align: right;
+	padding-right: 10px;
+	margin: 5px;
 }
 .title {
 	margin: auto;
@@ -33,7 +38,6 @@ body {
 #core {
 	margin: auto;
 	text-align: left;
-	font-family: "Lucida Console", sans-serif;
 	font-size: 12;
 	border-radius: 25px;
 	border: thin solid rgb(122, 122, 122);
@@ -43,16 +47,14 @@ body {
 }
 
 #code {
+	font-size: 120%;
     color: rgb(255, 0, 0);
     font-weight: bold;
 }
 
 #style {
+	font-size: 120%;
     color: rgb(0, 0, 255);
-    font-weight: bold;
-}
-
-#bold {
     font-weight: bold;
 }
 
@@ -66,26 +68,31 @@ body {
     font-weight: bold;
 }
 
+.snippet {
+	font-family: "Lucida Console", monospace;
+	font-weight: normal;
+}
+
 .grey {
     color: rgb(119, 119, 120);
-    font-weight: normal;
-    font-family: "Lucida Console", monospace;
 }
 
 .gbold{
     color: rgb(90, 91, 92);
     font-weight: bold;
-    font-family: "Lucida Console", monospace;
 }
 
 .highlight {
     font-weight: bold;
     background-color: rgb(0, 255, 255);
-    font-family: "Lucida Console", monospace;
 }
 
 .black {
 	color: rgb(0, 0, 0);
-	font-weight: normal;
-	font-family: "Lucida Console", monospace;
+}
+
+#report_bug {
+	font-size: 75%;
+	#padding-top: 25px;
+	#color: black;
 }

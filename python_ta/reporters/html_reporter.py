@@ -1,6 +1,7 @@
 import os
 
 from jinja2 import Environment, FileSystemLoader
+from datetime import datetime
 
 from .color_reporter import ColorReporter
 
@@ -21,8 +22,13 @@ class HTMLReporter(ColorReporter):
         template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template('templates/template.txt')
         output_path = THIS_DIR + '/templates/output.html'
 
+        # Date/time (24 hour time) format:
+        # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
+        dt = "Generated: " + str(datetime.now().
+                                 strftime("%a. %b. %m %Y, %H:%M:%S"))
         with open(output_path, 'w') as f:
-            f.write(template.render(code=self._sorted_error_messages,
+            f.write(template.render(date_time=dt,
+                                    code=self._sorted_error_messages,
                                     style=self._sorted_style_messages))
         print("HTML Python TA report created. Please see output.html "
               "within pyta/python_ta/reporters/templates.")
@@ -79,11 +85,14 @@ class HTMLReporter(ColorReporter):
             snippet += space_count * '&nbsp;' + '...'
 
         else:
-            print("ERROR")
+            print("ERROR: unrecognised _add_line option")
         snippet += '<br/>'
         return snippet
 
     @staticmethod
     def _colourify(colour_class, text):
-        nbsp_text = text.replace(' ', '&nbsp;')
-        return '<span class="' + colour_class + '">' + nbsp_text + '</span>'
+        new_text = text.lstrip(' ')
+        space_count = len(text) - len(new_text)
+        new_text = new_text.replace(' ', '&nbsp;')
+        return ((space_count * '&nbsp;') + '<span class="' + colour_class + '">'
+                + new_text + '</span>')

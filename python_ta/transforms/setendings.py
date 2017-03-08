@@ -107,47 +107,56 @@ NODES_WITH_CHILDREN = [
 # `astroid/transforms.py`
 # ====================================================
 def _token_search(token):
+    """
+    @type token: string
+    @rtype: function
+    """
     def _is_token(s, index, node):
-        """(string, int, node) --> bool
-        Fix to include certain tokens such as a paren, bracket, or brace."""
+        """Fix to include certain tokens such as a paren, bracket, or brace.
+        @type s: string
+        @type index: int
+        @type node: Astroid node
+        @rtype: bool
+        """
         return s[index] == token
     return _is_token
 
 def _keyword_search(keyword):
+    """
+    @type keyword: string
+    @rtype: function
+    """
     def _is_keyword(s, index, node):
-        """(string, int, node) --> function
-        Search for a keyword. Right-to-left.
+        """Search for a keyword. Right-to-left.
+        @type s: string
+        @type index: int
+        @type node: Astroid node
+        @rtype: bool
         """
         return s[index : index + len(keyword)] == keyword
     return _is_keyword
 
 def _is_within_close_bracket(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include right ]"""
+    """Fix to include right ']'."""
     # print('>>>>>>', s, s[index], index, node.end_col_offset)
     if index >= len(s)-1: return False
     return s[index] == ']' or s[index+1] == ']'
 
 def _is_within_open_bracket(s, index, node):
-    """(string, int, node) --> bool
-    Fix to include left ["""
+    """Fix to include left '['."""
     # print('>>>>>>', s, index)
     if index < 1: return False
     return s[index-1] == '['
 
 def _is_attr_name(s, index, node):
-    """(string, int, node) --> bool
-    Search for the name of the attribute. Left-to-right.
-    """
+    """Search for the name of the attribute. Left-to-right."""
     target_len = len(node.attrname)
     if index < target_len: return False
     # print('---> "{}", "{}"'.format(s[index-target_len : index], node.attrname))
     return s[index-target_len+1 : index+1] == node.attrname
 
 def _is_arg_name(s, index, node):
-    """(string, int, node) --> bool
-    Search for the name of the argument. Right-to-left.
-    """
+    """Search for the name of the argument. Right-to-left."""
     if not node.arg: return False
     return s[index : index+len(node.arg)] == node.arg
 
@@ -193,9 +202,11 @@ logging.basicConfig(format=log_format, datefmt=log_date_time_format,
 
 
 def init_register_ending_setters(source_code):
-    """(source_code) -> TransformVisitor
-    Instantiate a visitor to transform the nodes.
+    """Instantiate a visitor to transform the nodes.
     Register the transform functions on an instance of TransformVisitor.
+
+    @type source_code: list of strings
+    @rtype: TransformVisitor
     """
     ending_transformer = TransformVisitor()
 
@@ -225,7 +236,7 @@ def init_register_ending_setters(source_code):
         if end_pred is not None:
             ending_transformer.register_transform(
                 node_class, end_setter_from_source(source_code, end_pred))
-    
+
     # TODO: investigate these nodes, and create tests/transforms/etc when found.
     ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
     ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
@@ -243,6 +254,7 @@ def init_register_ending_setters(source_code):
 def discover_nodes(node):
     """Log to file and console when an elusive node is encountered, so it can
     be classified, and tested..
+    @type node: Astroid node
     """
     # Some formatting for the code output
     output = [line for line in node.statement().as_string().strip().split('\n')]
@@ -262,51 +274,55 @@ def fix_slice(source_code):
     E.g "[:]", "[::]", "[:][:]", or even "[::][::]", yikes! The existing 
     col_offset of the slice node is set improperly to 0. And the end_col_offset 
     is also wrong. We fix it here.
+
+    @type source_code: list of strings
     """
     def _consume_subscripts(node):
+        if node.last_child(): 
+            return
+        if not hasattr(node, 'end_lineno'): 
+            set_without_children(node)
 
-        if not node.last_child():
-            if not hasattr(node, 'end_lineno'): set_without_children(node)
+        line_i = node.parent.fromlineno - 1  # 1-based
+        char_i = node.parent.col_offset  # 0-based
 
-            line_i = node.parent.fromlineno - 1  # 1-based
-            char_i = node.parent.col_offset  # 0-based
+        # To solve the problem created by variations of "a[:][:]",
+        # all sibling Subscript node characters to consume.
+        sibling_buffer = ''
+        for sibling in node.parent.get_children():
+            curr_sibling = 0
+            if not isinstance(sibling, astroid.Subscript): 
+                continue
+            sibling_buffer += sibling.as_string()
+        # print('sibling_buffer:', sibling_buffer)
 
-            # To solve the problem created by variations of "a[:][:]",
-            # all sibling Subscript node characters to consume.
-            sibling_buffer = ''
-            for sibling in node.parent.get_children():
-                curr_sibling = 0
-                if not isinstance(sibling, astroid.Subscript): continue
-                sibling_buffer += sibling.as_string()
-            # print('sibling_buffer:', sibling_buffer)
+        while sibling_buffer and line_i < len(source_code)-1:
+            if char_i == len(source_code[line_i])-1 or source_code[line_i][char_i] == '#': 
+                char_i = 0
+                line_i += 1
 
-            while sibling_buffer and line_i < len(source_code)-1:
-                if char_i == len(source_code[line_i])-1 or source_code[line_i][char_i] == '#': 
-                    char_i = 0
-                    line_i += 1
+            source_char = source_code[line_i][char_i]
 
-                source_char = source_code[line_i][char_i]
+            if source_char == sibling_buffer[0]:
+                char_i += 1
+                sibling_buffer = sibling_buffer[1:]
+            elif source_char in CONSUMABLES: char_i += 1
+            # else:
+            #     break
 
-                if source_char == sibling_buffer[0]:
-                    char_i += 1
-                    sibling_buffer = sibling_buffer[1:]
-                elif source_char in CONSUMABLES: char_i += 1
-                # else:
-                #     break
+        # now we can simply search for the ":" char since this Slice node
+        # has no children.
+        while source_code[line_i][char_i] != ':': 
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#': 
+                char_i = 0
+                line_i += 1
+            else: char_i += 1
 
-            # now we can simply search for the ":" char since this Slice node
-            # has no children.
-            while source_code[line_i][char_i] != ':': 
-                if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#': 
-                    char_i = 0
-                    line_i += 1
-                else: char_i += 1
+        # print('*** Set line/char 2:', line_i, char_i, source_code[line_i])
 
-            # print('*** Set line/char 2:', line_i, char_i, source_code[line_i])
-
-            node.fromlineno = line_i + 1
-            node.end_col_offset = char_i  # temporary. transform fixes. 
-            node.col_offset = char_i
+        node.fromlineno = line_i + 1
+        node.end_col_offset = char_i  # temporary. transform fixes. 
+        node.col_offset = char_i
 
     return _consume_subscripts
 
@@ -419,20 +435,17 @@ def end_setter_from_source(source_code, pred):
     e.g. _is_close_paren
     """
     def set_endings_from_source(node):
-        if not hasattr(node, 'end_col_offset'): set_from_last_child(node)
+        if not hasattr(node, 'end_col_offset'): 
+            set_from_last_child(node)
 
         # Initialize counters. Note: we need to offset lineno,
         # since it's 1-indexed.
         end_col_offset, lineno = node.end_col_offset, node.end_lineno - 1
 
-
         # First, search the remaining part of the current end line.
-        # Include last char in the start of search, incase already set??? no
-        # end_char_location = end_col_offset - 1
         for j in range(end_col_offset, len(source_code[lineno])):
-
-            if source_code[lineno][j] == '#': break  # skip over comment lines
-            
+            if source_code[lineno][j] == '#': 
+                break  # skip over comment lines
             if DEBUG:
                 print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL-END.'\
                     .format(source_code[lineno][j], 
@@ -449,19 +462,15 @@ def end_setter_from_source(source_code, pred):
                     print('end_col_offset ({}-->{}) j = {}'.format(temp, node.end_col_offset, j))
                 return
 
-        # If that doesn't work, search remaining lines, 'i'.
+        # If that doesn't work, search remaining lines
         for i in range(lineno + 1, len(source_code)):
-            
-            # Search each character at index 'j' in line 'i'.
+            # Search each character
             for j in range(len(source_code[i])):
-
-                curr_char = source_code[i][j]
-
-                if curr_char == '#': break  # skip over comment lines
-
+                if source_code[i][j] == '#': 
+                    break  # skip over comment lines
                 if DEBUG:
                     print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE-END.'\
-                        .format(curr_char, 
+                        .format(source_code[i][j], 
                                 source_code[i], 
                                 0, 
                                 j, 
@@ -477,7 +486,8 @@ def end_setter_from_source(source_code, pred):
                         print('end_lineno ({}-->{})'.format(temp_l, node.end_lineno))
                     return
                 # only consume inert characters.
-                elif curr_char not in CONSUMABLES: return
+                elif source_code[i][j] not in CONSUMABLES: 
+                    return
 
     return set_endings_from_source
 
@@ -501,7 +511,6 @@ def start_setter_from_source(source_code, pred):
 
         # First, search the remaining part of the current end line
         for j in range(col_offset, -1, -1):
-
             if DEBUG:
                 print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL-START.'\
                     .format(source_code[lineno][j], 
@@ -518,19 +527,13 @@ def start_setter_from_source(source_code, pred):
                     print('col_offset ({}-->{})'.format(temp, node.col_offset))
                 return
 
-        # If that doesn't work, search remaining lines, 'i'. From bottom-to-top.
+        # If that doesn't work, search remaining lines
         for i in range(lineno - 1, -1, -1):
-
-            # Search each character at index 'j' in line 'i'. From right-to-left.
+            # Search each character, right-to-left
             for j in range(len(source_code[i]) - 1, -1, -1):
-
-                curr_char = source_code[i][j]
-
-                if curr_char== '#': break  # skip over comment lines
-
                 if DEBUG:
                     print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE-START.'\
-                        .format(curr_char, 
+                        .format(source_code[i][j], 
                                 source_code[i], 
                                 lineno - 1, 
                                 j, 
@@ -541,6 +544,7 @@ def start_setter_from_source(source_code, pred):
                     node.end_col_offset, node.end_lineno = j, i + 1
                     return
                 # only consume inert characters.
-                elif curr_char not in CONSUMABLES: return
+                elif source_code[i][j] not in CONSUMABLES: 
+                    return
 
     return set_start_from_source

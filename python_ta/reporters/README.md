@@ -100,8 +100,55 @@ bug reports for the `setendings` module.</small>
 
 ## `HTMLReporter`
 
-- HTMLReporter now a subclass of ColorReporter
-- Snippet in the PlainReporter and in the HTMLReporter
-- CSS and the template sheet
-- The location of output.html
-- Bugs
+The `HTMLReporter` outputs an html file, `output.html`, that shows very
+similar content as the current `ColorReporter`. The `output.html` file was
+located in the parent pyta directory before, but it is now located in
+pyta/python_ta/reporters/templates. When a user calls `python_ta.check_all()`
+with the `HTMLReporter`, a statement is printed in the console to inform
+the user of the location of `output.html`:
+
+```
+HTML Python TA report created. Please see output.html within pyta/python_ta/reporters/templates.
+```
+
+The `HTMLReporter` is no longer a subclass of the `PlainReporter`. It is
+now a subclass of the `ColorReporter` because it requires the same
+`sort_messages()` and `_colour_messages_by_type()` in order to output
+the same coloured content as the `ColorReporter`.
+
+A CSS file, `stylesheet.css`, is located in pyta/python_ta/reporters/templates,
+and is linked to `template.txt`. The `output.html` file is no longer a plain black
+and white page. A title, "PyTA Error Report", is at the top centre of the page.
+The error messages are shown in a white box in the centre of the page, and
+have the same font colours and highlight colours as the `ColorReporter`.
+The fonts are Lucida Console with monospace as the backup or Lucida Console
+with sans serif as the backup.
+
+The theme colour of the web page is blue. The background colour
+and the font colour of the title are in different shades of blue. The date and
+time are at the top right corner; however, more work might be done on it. Please
+see the [TODO list](TODO.md) for more details. If the user clicks on the error
+message symbol, the user will be redirected to the location of the error message
+on the PyTA documentation website. For example, if the user has an error message,
+`W0612 (unused-variable) Number of occurrences: 1`, and clicks on (unused-variable),
+the user will be redirected to http://www.cs.toronto.edu/~david/pyta/#W0612. A
+PyTA logo is located at the bottom of the web page and also redirects the user to
+the PyTA documentation website on click. Slightly above the logo, there is a link
+that allows users to report bugs via email.
+
+
+### Technical Details
+
+In order for the `template.txt` to have access to the coloured and sorted error
+messages, we added an attribute, `snippet`, on line 5 in the `PlainReporter`.
+In `stylesheet.css`, there are several classes that set the font and the
+colour of certain text. In the `HTMLReporter`, the method `_colourify()` takes
+in a colour class (which corresponds to one of the classes in `stylesheet.css`)
+and a text string. The method replaces the whitespaces in the text with _&nbsp;_, and
+returns '<span class="' + colour_class + '">' + text + '</span>'. The method
+`_add_line()` highlights and colours the messages by calling `_colourify()` and
+stores the result in the `snippet` attribute. The `template.txt` simply shows
+the resulted error messages by printing the `snippet` attribute of each messages.
+Even though most examples in pyta/examples run successfully, some examples crash
+the program. This is most likely caused by the attribute `snippet` in the `PlainReporter`.
+Please see the [TODO list](TODO.md) for more details regarding this.

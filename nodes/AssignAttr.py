@@ -16,5 +16,5 @@ Example:
 """
 
 class ClassName():
-    def __init__(self, arg):
-        self.name = arg
+    def __init__(self, name):
+        self.name = name

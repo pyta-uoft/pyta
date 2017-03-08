@@ -33,8 +33,6 @@ import logging
 
 CONSUMABLES = " \n\t\\"
 
-DEBUG = 0
-
 
 # These nodes have no children, and their end_lineno and end_col_offset
 # attributes are set based on their string representation (according to astroid).
@@ -250,7 +248,7 @@ def init_register_ending_setters(source_code):
 # These functions are called on individual nodes to either fix the
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
-
+# ====================================================
 def discover_nodes(node):
     """Log to file and console when an elusive node is encountered, so it can
     be classified, and tested..
@@ -290,11 +288,9 @@ def fix_slice(source_code):
         # all sibling Subscript node characters to consume.
         sibling_buffer = ''
         for sibling in node.parent.get_children():
-            curr_sibling = 0
             if not isinstance(sibling, astroid.Subscript): 
                 continue
             sibling_buffer += sibling.as_string()
-        # print('sibling_buffer:', sibling_buffer)
 
         while sibling_buffer and line_i < len(source_code)-1:
             if char_i == len(source_code[line_i])-1 or source_code[line_i][char_i] == '#': 
@@ -307,8 +303,6 @@ def fix_slice(source_code):
                 char_i += 1
                 sibling_buffer = sibling_buffer[1:]
             elif source_char in CONSUMABLES: char_i += 1
-            # else:
-            #     break
 
         # now we can simply search for the ":" char since this Slice node
         # has no children.
@@ -317,8 +311,6 @@ def fix_slice(source_code):
                 char_i = 0
                 line_i += 1
             else: char_i += 1
-
-        # print('*** Set line/char 2:', line_i, char_i, source_code[line_i])
 
         node.fromlineno = line_i + 1
         node.end_col_offset = char_i  # temporary. transform fixes. 
@@ -365,7 +357,6 @@ def set_from_last_child(node):
       - `node` has col_offset property set.
     """
     last_child = _get_last_child(node)
-
     if not last_child: 
         set_without_children(node)
         return
@@ -446,20 +437,9 @@ def end_setter_from_source(source_code, pred):
         for j in range(end_col_offset, len(source_code[lineno])):
             if source_code[lineno][j] == '#': 
                 break  # skip over comment lines
-            if DEBUG:
-                print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL-END.'\
-                    .format(source_code[lineno][j], 
-                            source_code[lineno], 
-                            end_col_offset, 
-                            j, 
-                            len(source_code[lineno]), 
-                            node ))
-            
             if pred(source_code[lineno], j, node):
                 temp = node.end_col_offset
                 node.end_col_offset = j + 1
-                if DEBUG:
-                    print('end_col_offset ({}-->{}) j = {}'.format(temp, node.end_col_offset, j))
                 return
 
         # If that doesn't work, search remaining lines
@@ -468,22 +448,10 @@ def end_setter_from_source(source_code, pred):
             for j in range(len(source_code[i])):
                 if source_code[i][j] == '#': 
                     break  # skip over comment lines
-                if DEBUG:
-                    print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE-END.'\
-                        .format(source_code[i][j], 
-                                source_code[i], 
-                                0, 
-                                j, 
-                                len(source_code[i]), 
-                                node ))
-
                 if pred(source_code[i], j, node):
                     temp_c = node.end_col_offset
                     temp_l = node.end_lineno
                     node.end_col_offset, node.end_lineno = j + 1, i + 1
-                    if DEBUG:
-                        print('end_col_offset ({}-->{})'.format(temp_c, node.end_col_offset))
-                        print('end_lineno ({}-->{})'.format(temp_l, node.end_lineno))
                     return
                 # only consume inert characters.
                 elif source_code[i][j] not in CONSUMABLES: 
@@ -511,35 +479,15 @@ def start_setter_from_source(source_code, pred):
 
         # First, search the remaining part of the current end line
         for j in range(col_offset, -1, -1):
-            if DEBUG:
-                print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, COL-START.'\
-                    .format(source_code[lineno][j], 
-                            source_code[lineno], 
-                            col_offset, 
-                            j, 
-                            -1, 
-                            node ))
-
             if pred(source_code[lineno], j, node):
                 temp = node.col_offset
                 node.col_offset = j
-                if DEBUG:
-                    print('col_offset ({}-->{})'.format(temp, node.col_offset))
                 return
 
         # If that doesn't work, search remaining lines
         for i in range(lineno - 1, -1, -1):
             # Search each character, right-to-left
             for j in range(len(source_code[i]) - 1, -1, -1):
-                if DEBUG:
-                    print('"{}", "{}", search: {}-{}-{}, {}, set_endings_from_source, LINE-START.'\
-                        .format(source_code[i][j], 
-                                source_code[i], 
-                                lineno - 1, 
-                                j, 
-                                -1, 
-                                node ))
-
                 if pred(source_code[i], j, node):
                     node.end_col_offset, node.end_lineno = j, i + 1
                     return

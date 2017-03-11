@@ -19,7 +19,7 @@ class SetConstFunctionTest(unittest.TestCase):
         type str."""
         module = astroid.parse("""a='sample_string'""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Const) if type(n.value) == str]
         self.assertEqual([str], result)
 
@@ -28,7 +28,7 @@ class SetConstFunctionTest(unittest.TestCase):
         type int."""
         module = astroid.parse("""100""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Const) if type(n.value) == int]
         self.assertEqual([int], result)
 
@@ -37,7 +37,7 @@ class SetConstFunctionTest(unittest.TestCase):
         type float."""
         module = astroid.parse("""100.01""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Const) if type(n.value) == float]
         self.assertEqual([float], result)
 
@@ -46,7 +46,7 @@ class SetConstFunctionTest(unittest.TestCase):
         type boolean."""
         module = astroid.parse("""True""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Const) if type(n.value) == bool]
         self.assertEqual([bool], result)
 
@@ -55,7 +55,7 @@ class SetConstFunctionTest(unittest.TestCase):
         NoneType node."""
         module = astroid.parse("""None""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Const) if type(n.value) == type(None)]
         self.assertEqual([type(None)], result)
 
@@ -70,70 +70,70 @@ class BinOpTests(unittest.TestCase):
     def test_str(self):
         module = astroid.parse("""[1, 2, 'aaa' + 'bbb']""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([str], result)
 
     def test_str_multiplication(self):
         module = astroid.parse("""[1, 2, 'ccc' * 3]""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([str], result)
 
     def test_list_of_str(self):
         module = astroid.parse("""['a', 'b'] + ['c', 'd']""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([List[str]], result)
 
     def test_mixed_list(self):
         module = astroid.parse("""['a', 'b'] + [1, 2]""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([List], result)
 
     def test_list_multiplication(self):
         module = astroid.parse("""[1, True] * 2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([List], result)
 
     def test_list_multiplication2(self):
         module = astroid.parse("""3 * ['abc', 'def', 'gcd']""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([List[str]], result)
 
     def test_tuple_of_int(self):
         module = astroid.parse("""(1, 2) + (3, 4)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([Tuple[int, int, int, int]], result)
 
     def test_mixed_tuple(self):
         module = astroid.parse("""('a', 'b') + (1, 2)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([Tuple[str, str, int, int]], result)
 
     def test_tuple_multiplication(self):
         module = astroid.parse("""(1, 2) * 2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([Tuple[int, int, int, int]], result)
 
     def test_tuple_multiplication2(self):
         module = astroid.parse("""3 * ('abc', 'def', 'gcd')""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([Tuple[str, str, str, str, str, str, str, str, str]],
                          result)
@@ -141,98 +141,98 @@ class BinOpTests(unittest.TestCase):
     def test_int_with_parentheses(self):
         module = astroid.parse("""(2) * 6""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([int], result)
 
     def test_float_with_parentheses(self):
         module = astroid.parse("""(2.2) * 6""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_float_with_power(self):
         module = astroid.parse("""(2.2) ** 1.2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_int_with_power(self):
         module = astroid.parse("""2 ** 3""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([int], result)
 
     def test_int_float_with_power(self):
         module = astroid.parse("""2.2 ** 6""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_modulus0(self):
         module = astroid.parse("""(2.2) % 1.2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_modulus1(self):
         module = astroid.parse("""23 % 3""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([int], result)
 
     def test_modulus2(self):
         module = astroid.parse("""2.2 % 6""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_floordiv0(self):
         module = astroid.parse("""(2.2) // 1.223332""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_floordiv1(self):
         module = astroid.parse("""23 // 300""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([int], result)
 
     def test_floordiv2(self):
         module = astroid.parse("""2.2212 // 600""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_div0(self):
         module = astroid.parse("""2.2212 / 600""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_div1(self):
         module = astroid.parse("""300 / 600""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_div2(self):
         module = astroid.parse("""1200 / 600""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([int], result)
 
@@ -252,7 +252,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""10 + 2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([int], result)
 
@@ -263,7 +263,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""6 + 0.3""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(node_classes.BinOp)]
+        result = [n.type_constraints.type for n in module.nodes_of_class(node_classes.BinOp)]
         self.assertEqual([float], result)
 
     def test_unary(self):
@@ -272,7 +272,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""-2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.UnaryOp)]
         self.assertEqual([int], result)
 
@@ -284,7 +284,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""['hi', 'how', 'is', 'life']""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.List)]
         self.assertEqual([List[str]], result)
 
@@ -296,7 +296,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""[1, 2, 2.5, 3, 'cheese']""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.List)]
         self.assertEqual([List], result)
 
@@ -308,7 +308,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""(1, 2)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Tuple)]
         self.assertEqual([Tuple[int, int]], result)
 
@@ -320,7 +320,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""('GPA', 4.0)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Tuple)]
         self.assertEqual([Tuple[str, float]], result)
 
@@ -336,7 +336,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""{'a':'one', 'b':'two'}""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Dict)]
         self.assertEqual([Dict[str, str]], result)
 
@@ -355,7 +355,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""{'a': 1, 'b': 2}""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Dict)]
         self.assertEqual([Dict[str, int]], result)
 
@@ -367,14 +367,14 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""{'a': 1, 0.25:True}""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Dict)]
         self.assertEqual([Dict], result)
 
     def test_multi_unary(self):
         module = astroid.parse("""-(+(-(+(-1))))""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.UnaryOp)]
         # There are 5 Unary Operators, and each one of them has the
         # type_constraints int.
@@ -387,7 +387,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""1 + 2 + 3 + 4 + 5""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         # There are 4 Binary Operators, and each one of them has the
         # type_constraints int.
@@ -400,7 +400,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""1 + 2 + 3 + 4 - 5.5""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float, int, int, int], result)
 
@@ -411,7 +411,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""1 + 2 + 3 + 4 - (5.5 + 4.5)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BinOp)]
         self.assertEqual([float, int, int, int, float], result)
 
@@ -423,7 +423,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""(1, 2, 3, 4, 5, 6)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Tuple)]
         self.assertEqual([Tuple[int, int, int, int, int, int]], result)
 
@@ -433,7 +433,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""[1, [[2, 2.5], [3, 'a']]]""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.List)]
         self.assertEqual(List, result[0])
 
@@ -446,7 +446,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         module = astroid.parse("""{(0, 1): [3, 4], (1, 1): [3, 2], (1, 0
         ): [7, 8, 5], (1, 2): [0, 0, 0], (1, 3): [2, 3, 4]}""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Dict)]
         self.assertEqual([Dict[Tuple[int, int], List[int]]], result)
 
@@ -460,7 +460,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         module = astroid.parse("""{(['l', 'a'], 'b'): 'c', (4, 7): 2+5,
         (True): False, ('h', ('i', ('2'))): -7, [1, [3, 4]]: ("that's it")}""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Dict)]
         self.assertEqual([Dict], result)
 
@@ -472,7 +472,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""('a', 4.0, 'b', 'c', 'd', True)""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Tuple)]
         self.assertEqual([Tuple[str, float, str, str, str, bool]], result)
 
@@ -482,7 +482,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse("""(1, (2, (3, '4')))""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Tuple)]
         self.assertEqual(Tuple[int, Tuple[int, Tuple[int, str]]], result[0])
 
@@ -493,7 +493,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         module = astroid.parse("""(1, [2, (3, '4')], [True, False,['str1',
         'str2', 6.99, ('bacon', 'salad')]], (False, 'chicken'))""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Tuple)]
         self.assertEqual(Tuple[int, List, List, Tuple[bool, str]], result[0])
 
@@ -504,7 +504,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([List[int]], result)
 
@@ -515,7 +515,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([str], result)
 
@@ -526,7 +526,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([List[bool]], result)
 
@@ -537,7 +537,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([str], result)
 
@@ -548,7 +548,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([str, Tuple[str, str]], result)
 
@@ -559,7 +559,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([type(None)], result)
 
@@ -571,7 +571,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         # problem encountered: we should be able to directly
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([str], result)
 
@@ -582,21 +582,21 @@ class TypeInferenceVisitorTest(unittest.TestCase):
             """
         module = astroid.parse(test_block)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Subscript)]
         self.assertEqual([str, str, List, Tuple[str, List], List], result)
 
     def test_compare0(self):
         module = astroid.parse("""1 < 2""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
     def test_compare1(self):
         module = astroid.parse("""[1, 2, 3] <= [4, 5]""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
@@ -608,42 +608,42 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(code)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
     def test_compare3(self):
         module = astroid.parse("True != False")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
     def test_compare4(self):
         module = astroid.parse("[1, 2, 3] is List")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
     def test_compare5(self):
         module = astroid.parse("[1, 1, 1] is not [1, 1, 1]")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
     def test_compare6(self):
         module = astroid.parse("[1, 1, 1] not in (1, 2)")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.Compare)]
         self.assertEqual([bool], result)
 
     def test_bool0(self):
         module = astroid.parse("""99 or 100""")
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BoolOp)]
         self.assertEqual([int], result)
 
@@ -655,7 +655,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(code)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BoolOp)]
         self.assertEqual([int, int, str], result)
 
@@ -667,7 +667,7 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         """
         module = astroid.parse(code)
         self.type_visitor.visit(module)
-        result = [n.type_constraints for n in module.nodes_of_class(
+        result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.BoolOp)]
         self.assertEqual([str, int, int], result)
 

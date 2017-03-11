@@ -6,58 +6,93 @@ from astroid.node_classes import *
 from typing import Tuple, List, Dict, Set, TupleMeta
 from astroid.transforms import TransformVisitor
 
+
 class NoType:
     pass
 
+
+class TypeInfo:
+    """A class representing the inferred type of a value.
+
+    === Instance attributes ===
+    - type (type): type of the inferred value
+    - context (Dict[str, type]): dictionary of variable names to their types
+    """
+    def __init__(self, type_, context=None):
+        self.type = type_
+        if context is None:
+            self.context = {}
+        else:
+            self.context = context
+
+    def unify(self, other):
+        """Unify two different TypeInfo instances."""
+        pass
+
+
+class InferenceError:
+    """Class representing an error in type inference."""
+    def __init__(self, msg, node):
+        self.msg = msg
+        self.node = node
+
+
+##############################################################################
+# Literals
+##############################################################################
 def set_const_type_constraints(node):
-    """Populate type constraints for astroid nodes num/str/bool/None/bytes."""
-    node.type_constraints = type(node.value)
+    """Populate type constraints for astroid nodes for num/str/bool/None/bytes literals."""
+    node.type_constraints = TypeInfo(type(node.value))
 
 
 def set_tuple_type_constraints(node):
     # node_types contains types of elements inside tuple.
-    node.type_constraints = Tuple[tuple(x.type_constraints for x in node.elts)]
+    node.type_constraints = TypeInfo(
+        Tuple[tuple(x.type_constraints.type for x in node.elts)]
+    )
 
 
 def set_list_type_constraints(node):
     # node_types contains types of elements inside list.
-    node_types = {node_child.type_constraints for node_child in node.elts}
+    node_types = {node_child.type_constraints.type for node_child in node.elts}
     # If list has more than one type, just set node.type_constraints to List.
     # If list has only one type T, set the node.type_constraints to be List[T].
     if len(node_types) == 1:
         # node_types.pop() returns the only element in the set, which is a
         # type object.
-        node.type_constraints = List[node_types.pop()]
+        node.type_constraints = TypeInfo(List[node_types.pop()])
     else:
-        node.type_constraints = List
+        node.type_constraints = TypeInfo(List)
 
 
 def set_dict_type_constraints(node):
     # node_types contains types of elements inside Dict.
-    key_types = {key.type_constraints for key, _ in node.items}
-    value_types = {value.type_constraints for _, value in node.items}
+    key_types = {key.type_constraints.type for key, _ in node.items}
+    value_types = {value.type_constraints.type for _, value in node.items}
 
     # If all the keys have the same type and all the values have the same type,
     # set the type constraint to a Dict of the two types.
     # Else, just use the general Dict type.
     if len(key_types) == 1 and len(value_types) == 1:
-        node.type_constraints = Dict[key_types.pop(), value_types.pop()]
+        node.type_constraints = TypeInfo(Dict[key_types.pop(), value_types.pop()])
     else:
-        node.type_constraints = Dict
+        node.type_constraints = TypeInfo(Dict)
 
 
 def set_binop_type_constraints(node):
     ruled_type = helper_rules_binop(node.left, node.right, node.op)
     if len(ruled_type) == 1:
-        node.type_constraints = ruled_type[0]
+        node.type_constraints = TypeInfo(ruled_type[0])
     else:
-        raise ValueError('Different types of operands found, binop node %s'
-                         'might have a type error.' % node)
+        node.type_constraints = TypeInfo(InferenceError(
+            'Different types of operands found. BinOp node {} might have a type error'.format(node),
+            node
+        ))
 
 
 def helper_rules_binop(par1, par2, operator):
-    operand1 = par1.type_constraints
-    operand2 = par2.type_constraints
+    operand1 = par1.type_constraints.type
+    operand2 = par2.type_constraints.type
     types = [] # result
     # checking if the types could possible be List/Tuple
     left_type = helper_list_tuple_detection(operand1)
@@ -206,7 +241,7 @@ def set_subscript_type_constraints(node):
 def set_compare_type_constraints(node):
     """Compare operators includes:
     '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
-    node.type_constraints = bool
+    node.type_constraints = TypeInfo(bool)
 
 
 def set_boolop_type_constraints(node):
@@ -235,7 +270,7 @@ def set_expr_type_constraints(node):
 
 def set_assign_type_constraints(node):
     first_target = node.targets[0]
-    node.type_constraints = (NoType, {first_target.name: node.value.type_constraints})
+    node.type_constraints = TypeInfo(NoType, {first_target.name: (node.value.type_constraints)})
 
 
 def set_module_type_constraints(node):
@@ -245,7 +280,7 @@ def set_module_type_constraints(node):
             for identifier, type_constraint in s.type_constraints[1].items():
                 if identifier in names:
                     names[identifier] = type_constraint
-    node.type_constraints = (NoType, names)
+    node.type_constraints = TypeInfo(NoType, names)
 
 
 def register_type_constraints_setter():

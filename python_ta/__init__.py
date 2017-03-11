@@ -102,7 +102,8 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                                 # TODO: Fix this test
                                 #'python_ta/checkers/invalid_range_index_checker',
                                 'python_ta/checkers/assigning_to_self_checker',
-                                'python_ta/checkers/always_returning_checker'])
+                                'python_ta/checkers/always_returning_checker',
+                                'python_ta/checkers/type_inference_checker'])
 
     if pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
@@ -155,4 +156,3 @@ def doc(msg_id):
     msg_url = HELP_URL + '#' + msg_id
     print('Opening {} in a browser.'.format(msg_url))
     webbrowser.open(msg_url)
-

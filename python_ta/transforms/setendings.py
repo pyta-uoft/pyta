@@ -137,25 +137,29 @@ def _keyword_search(keyword):
 def _is_within_close_bracket(s, index, node):
     """Fix to include right ']'."""
     # print('>>>>>>', s, s[index], index, node.end_col_offset)
-    if index >= len(s)-1: return False
+    if index >= len(s)-1: 
+        return False
     return s[index] == ']' or s[index+1] == ']'
 
 def _is_within_open_bracket(s, index, node):
     """Fix to include left '['."""
     # print('>>>>>>', s, index)
-    if index < 1: return False
+    if index < 1: 
+        return False
     return s[index-1] == '['
 
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
     target_len = len(node.attrname)
-    if index < target_len: return False
+    if index < target_len: 
+        return False
     # print('---> "{}", "{}"'.format(s[index-target_len : index], node.attrname))
     return s[index-target_len+1 : index+1] == node.attrname
 
 def _is_arg_name(s, index, node):
     """Search for the name of the argument. Right-to-left."""
-    if not node.arg: return False
+    if not node.arg: 
+        return False
     return s[index : index+len(node.arg)] == node.arg
 
 
@@ -269,9 +273,17 @@ def fix_slice(source_code):
     children, all it needs is to consume leading/trailing whitespace.
 
     The main problem is when Slice node doesn't have children. 
-    E.g "[:]", "[::]", "[:][:]", or even "[::][::]", yikes! The existing 
+    E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing 
     col_offset of the slice node is set improperly to 0. And the end_col_offset 
     is also wrong. We fix it here.
+
+    The idea is:
+    • Start at the coords of fist parent Subscript in source code.
+    • While there are children Subscript nodes, use its as_string to consume 
+    these chars from the soruce code, and keep count of position cursor.
+    • Consume the chars, moving cursor, until reach first position of ':'.
+    • The caller function consumes whitespace left/right up to brackets, using
+    predicate functions to check whether a bracket is encountered.
 
     @type source_code: list of strings
     """
@@ -282,10 +294,10 @@ def fix_slice(source_code):
             set_without_children(node)
 
         line_i = node.parent.fromlineno - 1  # 1-based
-        char_i = node.parent.col_offset  # 0-based
+        char_i = node.parent.col_offset      # 0-based
 
         # To solve the problem created by variations of "a[:][:]",
-        # all sibling Subscript node characters to consume.
+        # consume all sibling Subscript node characters
         sibling_buffer = ''
         for sibling in node.parent.get_children():
             if not isinstance(sibling, astroid.Subscript): 
@@ -302,7 +314,8 @@ def fix_slice(source_code):
             if source_char == sibling_buffer[0]:
                 char_i += 1
                 sibling_buffer = sibling_buffer[1:]
-            elif source_char in CONSUMABLES: char_i += 1
+            elif source_char in CONSUMABLES: 
+                char_i += 1
 
         # now we can simply search for the ":" char since this Slice node
         # has no children.
@@ -310,7 +323,8 @@ def fix_slice(source_code):
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#': 
                 char_i = 0
                 line_i += 1
-            else: char_i += 1
+            else: 
+                char_i += 1
 
         node.fromlineno = line_i + 1
         node.end_col_offset = char_i  # temporary. transform fixes. 

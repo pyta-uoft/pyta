@@ -2,7 +2,7 @@ from pylint.reporters import BaseReporter
 from pylint.utils import Message
 from collections import namedtuple
 
-NewMessage = namedtuple('NewMessage', Message._fields + ('node',) + ('snippet',))
+NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
 # and forbidden constructs only)

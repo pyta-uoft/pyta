@@ -1,4 +1,5 @@
 import os
+import webbrowser
 
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
@@ -31,8 +32,10 @@ class HTMLReporter(ColorReporter):
                                     mod_name=self._module_name,
                                     code=self._sorted_error_messages,
                                     style=self._sorted_style_messages))
-        print("HTML Python TA report created. Please see output.html "
-              "within pyta/python_ta/reporters/templates.")
+        print("Opening your report in a browser.")
+        output_url = 'file:///{}/templates/output.html'.format(THIS_DIR)
+        webbrowser.open(output_url)
+
 
     def _add_line(self, msg, n, linetype):
         """

@@ -40,7 +40,7 @@ MessageCode (MessageSymbol)  Number of occurrences: ___.
 
 Please note that _not all_ messages are accompanied by a code snippet.
 However, for those interested, the code snippets of messages that have
-them  are formatted thus: each line is composed of 4 spaces, the right-
+them are formatted thus: each line is composed of 4 spaces, the right-
 aligned (up to 3 digits of padding) line number, another 4 spaces, and
 the line of source code, with original indenting preserved and the relevant
 part of the line highlighted (if the error appears on that line).<sup>2</sup> The default

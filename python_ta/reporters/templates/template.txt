@@ -3,24 +3,18 @@
     <link rel="stylesheet" type="text/css" href="stylesheet.css">
 </head>
 <body>
-	
-		<!-- Constantly updated date:
-		<script type="text/javascript">
-			document.write("<p>" + Date() + "</p>")
-		</script>
-		-->
-		<div id="preheader"> 
+
+		<div id="preheader">
 			<!-- TODO: Needs to be fixed. -->
-			<p style="display: inline; text-align:left">
+			<div id="module">
 				Module analysed: {{ mod_name }}
-			</p>
-			<span style="display: inline; text-align:right"> 
+			</div>
+			<span class="date">
 				{{ date_time }}
 			</span>
 		</div>
-	
+
 	<div id="header">
-		<br/>
 		<div class="title">
 			PyTA Error Report
 		</div>
@@ -29,7 +23,6 @@
 	<br/>
 
 	<div id="inside">
-		<p/>
 		<div id="core">
 
 			<div id="code">
@@ -39,15 +32,14 @@
 				{% for message in code %}
 					<p/>
 					<p style="font-size: 110%">
-						<span class="code_id">{{ message }}</span>
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">({{ code[message][0].symbol }})</a>
+						<span class="code_id">
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">{{ message }} ({{ code[message][0].symbol }})</a> </span>
 						{{ code[message][0].obj }}
 					</p>
 					{% for indiv in code[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
 						{% if indiv.snippet != '' %}
-							&nbsp;&nbsp;&nbsp;Your Code Starts Here: 
 							<p class="snippet">
 								{{ indiv.snippet }}
 							</p>
@@ -57,8 +49,6 @@
 				{% endfor %}
 			</u1>
 
-			<br/>
-
 			<div id="style">
 			=== Style/convention errors (fix these before submission) ===
 			</div>
@@ -67,15 +57,14 @@
 				{% for message in style %}
 					<p/>
 					<p style="font-size: 110%">
-						<span class="style_id">{{ message }}</span>
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">({{ style[message][0].symbol }})</a>
+						<span class="style_id">
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">{{ message }} ({{ style[message][0].symbol }})</a> </span>
 						{{ style[message][0].obj }}
 					</p>
 					{% for indiv in style[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
 						{% if indiv.snippet != '' %}
-							&nbsp;&nbsp;&nbsp;Your Code Starts Here:
 							<p class="snippet">
 								{{ indiv.snippet }}
 							</p>
@@ -86,17 +75,14 @@
 			</u1>
 
 		</div>
-		<p/>
 		<a href="mailto:david@cs.toronto.edu">
 			<div id="report_bug">
 				Found a bug? Report it to Prof. Liu!
 			</div>
 		</a>
-		<p/>
 	</div>
 </body>
-<div style="position: relative">	
-	<p style="position: relative; bottom: 0; width:100%; text-align: center"> 
+<div id="logo">
 		<a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
 			<img src="pyta_logo_markdown.png" alt="PyTA logo" height="50"/>
 		</a>

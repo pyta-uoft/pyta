@@ -3,8 +3,14 @@ from _ast import *
 import astroid.inference
 import astroid
 from astroid.node_classes import *
-from typing import Tuple, List, Dict, Set, TupleMeta
+from typing import *
+from typing import TupleMeta, GenericMeta, UnionMeta, _gorg, _geqv
 from astroid.transforms import TransformVisitor
+from ..typecheck.base import op_to_dunder, TuplePlus, lookup_method, fresh_tvar
+
+
+class TypeInferenceError(Exception):
+    pass
 
 
 class NoType:
@@ -25,12 +31,109 @@ class TypeInfo:
         else:
             self.context = context
 
-    def unify(self, other):
-        """Unify two different TypeInfo instances."""
-        pass
+
+def unify(type1, type2):
+    """Unify two different types."""
+    if isinstance(type1, TypeVar) and isinstance(type2, TypeVar):
+        return {type1.__name__: type2.__name__}
+    elif isinstance(type1, TypeVar):
+        constraints = type1.__constraints__
+        if not constraints:
+            return {type1.__name__: type2}
+
+        for constraint in constraints:
+            try:
+                tmap = unify(type2, constraint)
+            except TypeInferenceError:
+                continue
+            unify_map(tmap, {type1.__name__: type2})
+            return tmap
+        else:
+            raise TypeInferenceError('bad unify')
+    elif isinstance(type2, TypeVar):
+        return unify(type2, type1)
+    elif isinstance(type1, GenericMeta) and isinstance(type2, GenericMeta):
+        if not _geqv(type1, type2):
+            raise TypeInferenceError('bad unify')
+
+        if type1.__args__ is None or type2.__args__ is None:
+            return {}
+
+        tmap = {}
+        for a1, a2 in zip(type1.__args__, type2.__args__):
+            new_tmap = unify(substitute(a1, tmap), substitute(a2, tmap))
+            unify_map(tmap, new_tmap)
+        return tmap
+    # Handle tuples differently
+    elif isinstance(type1, TupleMeta) and isinstance(type2, TupleMeta):
+        tup1, tup2 = type1.__tuple_params__, type2.__tuple_params__
+        i = 0
+        tmap = {}
+        while i < len(tup1) - 1 and i < len(tup2) - 1:
+            new_tmap = unify(tup1[i], tup2[i])
+            unify_map(tmap, new_tmap)
+        if len(tup1) == len(tup2):
+            new_tmap = unify(tup1[i], tup2[i])
+            unify_map(tmap, new_tmap)
+        elif len(tup1) < len(tup2) and isinstance(tup1[i], TypeVar):
+            unify_map(tmap, {tup1[i].__name__: tup2[i:]})
+        elif len(tup2) < len(tup1) and isinstance(tup2[i], TypeVar):
+            unify_map(tmap, {tup2[i].__name__: tup1[i:]})
+        else:
+            raise TypeInferenceError('unable to unify Tuple types')
+        return tmap
+    elif type1 == type2:
+        return {}
+    else:
+        raise TypeInferenceError('bad unify')
 
 
-class InferenceError:
+def substitute(t, type_map):
+    """Make substitutions in t according to type_map, returning resulting type."""
+    if isinstance(t, TypeVar) and t.__name__ in type_map:
+        return type_map[t.__name__]
+    elif isinstance(t, GenericMeta) and t.__args__ is not None:
+        return _gorg(t)[tuple(substitute(t1, type_map) for t1 in t.__args__)]
+    elif isinstance(t, TuplePlus):
+        tup = ()
+        for c in t.__constraints__:
+            tup = tup + type_map[c.__name__]  # assume c is mapped to a (Python) tuple
+        return Tuple[tup]
+    else:
+        return t
+
+
+def unify_call(func_type, *arg_types):
+    """Unify a function call with the given function type and argument types.
+
+    Return a unification map and result type.
+    """
+    param_types, return_type = func_type.__args__, func_type.__result__
+    # Check that the number of parameters matches the number of arguments.
+    if len(param_types) != len(arg_types):
+        raise TypeInferenceError('Wrong number of arguments')
+
+    tmap = {}
+    for arg_type, param_type in zip(arg_types, param_types):
+        new_tmap = unify(arg_type, param_type)
+        unify_map(tmap, new_tmap)
+
+    return tmap, substitute(return_type, tmap)
+
+
+def unify_map(tmap, new_tmap):
+    for k, v in new_tmap.items():
+        if k not in tmap:
+            tmap[k] = v
+        else:
+            v1 = tmap[k]
+            if issubclass(v1, v):
+                tmap[k] = v
+            elif not issubclass(v, v1):
+                tmap[k] = Any
+
+
+class TypeErrorInfo:
     """Class representing an error in type inference."""
     def __init__(self, msg, node):
         self.msg = msg
@@ -62,7 +165,7 @@ def set_list_type_constraints(node):
         # type object.
         node.type_constraints = TypeInfo(List[node_types.pop()])
     else:
-        node.type_constraints = TypeInfo(List)
+        node.type_constraints = TypeInfo(List[Any])
 
 
 def set_dict_type_constraints(node):
@@ -79,122 +182,45 @@ def set_dict_type_constraints(node):
         node.type_constraints = TypeInfo(Dict)
 
 
+def set_index_type_constraints(node):
+    node.type_constraints = node.value.type_constraints
+
+
+def set_expr_type_constraints(node):
+    """Expr nodes take the value of their child
+    """
+    node.type_constraints = node.value.type_constraints
+
+
+def set_name_type_constraints(node):
+    t = fresh_tvar()
+    node.type_constraints = TypeInfo(t, {node.name: t})
+
+
+##############################################################################
+# Operation nodes
+##############################################################################
 def set_binop_type_constraints(node):
-    ruled_type = helper_rules_binop(node.left, node.right, node.op)
-    if len(ruled_type) == 1:
-        node.type_constraints = TypeInfo(ruled_type[0])
+    left_type = node.left.type_constraints.type
+    right_type = node.right.type_constraints.type
+    op_name = op_to_dunder(node.op)
+
+    try:
+        method_type = lookup_method(left_type, op_name)
+    except KeyError:
+        node.type_constraints = TypeInfo(
+            TypeErrorInfo('Method {}.{} not found'.format(left_type, op_name), node)
+        )
+        return
+
+    try:
+        _, return_type = unify_call(method_type, left_type, right_type)
+    except TypeInferenceError as e:
+        node.type_constraints = TypeInfo(
+            TypeErrorInfo('incompatible types {} and {} in BinOp'.format(left_type, right_type), node)
+        )
     else:
-        node.type_constraints = TypeInfo(InferenceError(
-            'Different types of operands found. BinOp node {} might have a type error'.format(node),
-            node
-        ))
-
-
-def helper_rules_binop(par1, par2, operator):
-    operand1 = par1.type_constraints.type
-    operand2 = par2.type_constraints.type
-    types = [] # result
-    # checking if the types could possible be List/Tuple
-    left_type = helper_list_tuple_detection(operand1)
-    right_type = helper_list_tuple_detection(operand2)
-
-    if operator == '+':
-        if operand1 == float and operand2 == int:
-            types.append(float)
-        elif operand1 == int and operand2 == float:
-            types.append(float)
-        elif operand1 == int and operand2 == int:
-            types.append(int)
-        elif operand1 == float and operand2 == float:
-            types.append(float)
-        elif operand1 == str and operand2 == str:
-            types.append(str)
-        elif left_type == 1 and right_type == 1: # Both List
-            if operand1 == operand2:
-                types.append(operand1)
-            else:
-                types.append(List)
-        elif left_type == 0 and right_type == 0: # Both Tuple
-            types.append(Tuple[tuple(operand1.__tuple_params__ +
-                                     operand2.__tuple_params__)])
-
-    elif operator == '-':
-        if operand1 == float and operand2 == int:
-            types.append(float)
-        elif operand1 == int and operand2 == float:
-            types.append(float)
-        elif operand1 == int and operand2 == int:
-            types.append(int)
-        elif operand1 == float and operand2 == float:
-            types.append(float)
-
-    elif operator == '*':
-        if operand1 == float and operand2 == int:
-            types.append(float)
-        elif operand1 == int and operand2 == float:
-            types.append(float)
-        elif operand1 == int and operand2 == int:
-            types.append(int)
-        elif operand1 == float and operand2 == float:
-            types.append(float)
-        elif operand1 == int and operand2 == str:
-            types.append(str)
-        elif operand1 == str and operand2 == int:
-            types.append(str)
-        elif operand1 == int and right_type == 1:
-            types.append(operand2)
-        elif left_type == 1 and operand2 == int:
-            types.append(operand1)
-        elif operand1 == int and operand2 == List:
-            types.append(List)
-        elif operand1 == List and operand2 == int:
-            types.append(List)
-        elif operand1 == int and right_type == 0:
-            types.append(Tuple[tuple(operand2.__tuple_params__ *
-                                     par1.value)])
-        elif left_type == 0 and operand2 == int:
-            types.append(Tuple[tuple(operand1.__tuple_params__ *
-                                     par2.value)])
-
-    elif operator == '**' or operator == '%' or operator == '//':
-        if operand1 == int and operand2 == int:
-            types.append(int)
-        elif operand1 == int and operand2 == float:
-            types.append(float)
-        elif operand1 == float and operand2 == int:
-            types.append(float)
-        elif operand1 == float and operand2 == float:
-            types.append(float)
-
-    elif operator == '/':
-        if operand1 == int and operand2 == int:
-            if par1.value % par2.value == 0:
-                types.append(int)
-            else:
-                types.append(float)
-        elif operand1 == int and operand2 == float:
-            types.append(float)
-        elif operand1 == float and operand2 == int:
-            types.append(float)
-        elif operand1 == float and operand2 == float:
-            types.append(float)
-
-    elif operator == '+=':
-        if operand1 == int and operand2 == int:
-            types.append(int)
-
-    return types
-
-
-def helper_list_tuple_detection(typeConstraints):
-    result = -1
-    if hasattr(typeConstraints, '__origin__'):
-        if typeConstraints.__origin__ == List:
-            result = 1
-    elif hasattr(typeConstraints, '__class__'):
-        if typeConstraints.__class__ == TupleMeta:
-            result = 0
-    return result
+        node.type_constraints = TypeInfo(return_type)
 
 
 def set_unaryop_type_constraints(node):
@@ -202,39 +228,27 @@ def set_unaryop_type_constraints(node):
 
 
 def set_subscript_type_constraints(node):
-    """Subscript nodes have 2 astroid_fields: slice and value, node.slice
-    refers to a Name node and node.value refers to a Index node. In order to
-    set the type_constraints for the Subscript node, we need to find what
-    this node is referring to.
+    if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
+        value_type = node.value.type_constraints.type
+        arg_type = node.slice.type_constraints.type
+        op_name = '__getitem__'
 
-    Consider this code:
-    list_example = [1, 2, 3, 'e']
-    selected_element = list_example[2]
+        try:
+            method_type = lookup_method(left_type, op_name)
+        except KeyError:
+            node.type_constraints = TypeInfo(
+                TypeErrorInfo('Method {}.{} not found'.format(left_type, op_name), node)
+            )
+            return
 
-    After parsing and visiting, we'll have a Subscript Node. No valuable
-    information can be found within its 2 attributes. We can use
-    node.slice.value.value to find its corresponding index(int value),
-    and for the original node that is subscript on(list_example in this
-    case), we can use the lookup() function to find the module, then search
-    for the list node with node.value.name... which is quite complex.
-    Instead, by using node.infer(), we get the node at the corresponding
-    index, and node.type_constraints can be recursively set by next(
-    node.infer()).type_constraints.
-    """
-    inferred = next(node.infer())
-    if hasattr(inferred, 'type_constraints'):
-        node.type_constraints = next(node.infer()).type_constraints
-    else:
-        # Usually for sliced string that does not have the attribute
-        # type_constraints. Consider the list l = ['aaa', 'bbb'], here we
-        # would have 3 nodes that transform visitor had visited, l node and
-        # 2 str node: 'aaa', 'bbb'.
-        # However, if l[0][1] was accessed, it would not have
-        # type_constraints at all, so I set the type_constraints below in
-        # advance.
-        if isinstance(inferred, Const):
-            set_const_type_constraints(inferred)
-            node.type_constraints = inferred.type_constraints
+        try:
+            _, return_type = unify_call(method_type, value_type, arg_type)
+        except TypeInferenceError as e:
+            node.type_constraints = TypeInfo(
+                TypeErrorInfo('incompatible types {} and {} in Subscript'.format(value_type, arg_type), node)
+            )
+        else:
+            node.type_constraints = TypeInfo(return_type)
 
 
 # TODO: Add check in the set_compare_type_constraints as in BinOp.
@@ -262,12 +276,8 @@ def set_boolop_type_constraints(node):
             node.type_constraints = node.values[1].type_constraints
 
 
-def set_expr_type_constraints(node):
-    """Expr nodes take the value of their child
-    """
-    node.type_constraints = node.value.type_constraints
 
-
+# Assignment
 def set_assign_type_constraints(node):
     first_target = node.targets[0]
     node.type_constraints = TypeInfo(NoType, {first_target.name: (node.value.type_constraints)})
@@ -292,9 +302,12 @@ def register_type_constraints_setter():
     type_visitor.register_transform(astroid.Tuple, set_tuple_type_constraints)
     type_visitor.register_transform(astroid.List, set_list_type_constraints)
     type_visitor.register_transform(astroid.Dict, set_dict_type_constraints)
+    type_visitor.register_transform(astroid.Name, set_name_type_constraints)
     type_visitor.register_transform(astroid.BinOp, set_binop_type_constraints)
     type_visitor.register_transform(astroid.UnaryOp,
                                     set_unaryop_type_constraints)
+    type_visitor.register_transform(astroid.Index,
+                                    set_index_type_constraints)
     type_visitor.register_transform(astroid.Subscript,
                                     set_subscript_type_constraints)
     type_visitor.register_transform(astroid.Compare,

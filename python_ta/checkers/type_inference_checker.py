@@ -5,7 +5,7 @@ import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from python_ta.transforms.type_inference_visitor import InferenceError
+from python_ta.transforms.type_inference_visitor import TypeErrorInfo
 
 
 class TypeInferenceChecker(BaseChecker):
@@ -25,7 +25,7 @@ class TypeInferenceChecker(BaseChecker):
     def visit_default(self, node):
         if hasattr(node, 'type_constraints'):
             x = node.type_constraints
-            if isinstance(x.type, InferenceError):
+            if isinstance(x.type, TypeErrorInfo):
                 self.add_message('type-error', args=x.type.msg, node=x.type.node)
             print(node, x.type, x.context)
 

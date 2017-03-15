@@ -16,13 +16,17 @@ no_hl = {"always-returning-in-a-loop",
 
 
 class ColorReporter(PlainReporter):
-    _SPACE = ' '
-
     # Override this method to add instance variables
     def __init__(self, number_of_messages, source_lines=None, module_name=''):
         super().__init__(number_of_messages, source_lines, module_name)
         self._sorted_error_messages = {}
         self._sorted_style_messages = {}
+        self._space = ' '
+        self._colouring = {"black": Fore.BLACK,  # or could be empty
+                           "highlight": Style.BRIGHT + Fore.BLACK + Back.CYAN,
+                           "grey": Fore.LIGHTBLACK_EX,
+                           "gbold": Style.BRIGHT + Fore.LIGHTBLACK_EX,
+                           "reset": Style.RESET_ALL}
 
     # Override this method
     def print_messages(self, level='all'):
@@ -98,7 +102,7 @@ class ColorReporter(PlainReporter):
                     messages[msg_id][i] = msg._replace(msg=msg_text)
                     msg = messages[msg_id][i]
 
-                result += 4 * ColorReporter._SPACE
+                result += 4 * self._space
                 result += self._colourify(Style.BRIGHT, '[Line {}] {}'.format(
                     msg.line, msg.msg)) + '\n'
 
@@ -118,7 +122,7 @@ class ColorReporter(PlainReporter):
                             # - trailing-newlines
                             start = end = msg.line
 
-                        result += '\n' + 4 * ColorReporter._SPACE
+                        result += '\n' + 4 * self._space
                         result += self._colourify(Style.BRIGHT,
                                                   'Your Code Starts Here:\n')
                         result += '\n'
@@ -167,21 +171,24 @@ class ColorReporter(PlainReporter):
     def _add_line(self, msg, n, linetype):
         """
         Format given source code line as specified and return as str.
+        Use linetype='n' to print only the highlighted line number of the line.
         Use linetype='.' to elide line (with proper indentation).
+
+        Called by _colour_messages_by_type, relies on _colourify.
+        Now applicable both to ColorReporter and HTMLReporter.
 
         :param int n: index of line in self._source_lines to add
         :param str linetype: e/c/o/n/. for error/context/other/number-only/ellipsis
         :return: str
         """
         snippet = ""
-        space = ColorReporter._SPACE
-
+        spaces = 4 * self._space
         text = self._source_lines[n].rstrip('\n\r')
         # Pad line number with spaces to even out indent:
-        number = self._colourify(Fore.LIGHTBLACK_EX, "{:>3}".format(n + 1))
+        number = "{:>3}".format(n + 1)
 
         if linetype == "e":  # (error)
-            snippet += 4 * space + self._colourify(Style.BRIGHT, number)
+            snippet += spaces + self._colourify("gbold", number)
             if hasattr(msg, "node") and msg.node is not None:
                 start_col = msg.node.col_offset
                 end_col = msg.node.end_col_offset
@@ -190,45 +197,59 @@ class ColorReporter(PlainReporter):
                 start_col = -len(text.lstrip(' '))  # negative to count from end
                 end_col = len(text)
 
-            snippet += 4 * space + text[:start_col]
-            snippet += self._colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
+            snippet += spaces + self._colourify("black", text[:start_col])
+            snippet += self._colourify("highlight",
                                        text[start_col:end_col])
-            snippet += text[end_col:]
+            snippet += self._colourify("black", text[end_col:])
 
         elif linetype == "c":  # (context)
-            snippet += 4 * space + number
-            snippet += 4 * space + self._colourify(Fore.LIGHTBLACK_EX, text)
+            snippet += spaces + self._colourify("grey", number)
+            snippet += spaces + self._colourify("grey", text)
 
         elif linetype == "o":  # (other)
-            snippet += 4 * space + number
-            snippet += 4 * space + text
+            snippet += spaces + self._colourify("grey", number)
+            snippet += spaces + text
 
         elif linetype == "n":  # (number only)
-            snippet += 4 * space + self._colourify(
-                Style.BRIGHT + Fore.BLACK + Back.CYAN, number)
+            snippet += spaces + self._colourify("highlight", number)
 
         elif linetype == '.':  # (ellipsis)
-            snippet += 4 * space + number
-            snippet += 4 * space
-            spaces = len(text) - len(text.lstrip(' '))
-            snippet += spaces * space
-            snippet += self._colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
-                                       '...')
+            snippet += spaces + self._colourify("gbold", number)
+            snippet += spaces
+            space_c = len(text) - len(text.lstrip(' '))
+            snippet += space_c * self._space
+            # TODO: perhaps a different colouring for the ellipsis?
+            snippet += self._colourify("highlight", '. . .')
 
         else:
-            print("ERROR")
+            print("ERROR: unrecognised _add_line option")
 
-        snippet += '\n'
+        # TODO: Is there a better way of doing this?
+        # (other than making another class-level variable for the newline)
+        snippet += '\n' if spaces == '    ' else '<br/>'
 
         return snippet
 
-    @staticmethod
-    def _colourify(colour, text):
+    def _colourify(self, colour_class, text):
         """
-        Adds given ANSI colouring tokens to text as well as final colour reset.
+        Adds given ANSI colouring tokens (or key to colouring tokens in the
+        class-level dict "_COLOURING") to text as well as final colour reset.
 
-        :param str colour: colorama ANSI code(s)
+        Does not colour indents, except non-space indents.
+        Called by _colour_messages_by_type and _add_line.
+        Now applicable both to ColorReporter and HTMLReporter.
+
+        :param str colour_class: key to colour class or ANSI colour token(s)
         :param str text: text to be coloured
         :return str
         """
-        return colour + text + Style.RESET_ALL  # + Fore.RESET + Back.RESET
+        try:
+            colour = self._colouring[colour_class]
+        except KeyError:
+            colour = colour_class
+
+        new_text = text.lstrip(' ')
+        space_count = len(text) - len(new_text)
+        new_text = new_text.replace(' ', self._space)
+        return ((space_count * self._space) + colour + new_text +
+                self._colouring["reset"])

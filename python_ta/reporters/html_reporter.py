@@ -7,10 +7,19 @@ from datetime import datetime
 from .color_reporter import ColorReporter
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_SPACES = '&nbsp;&nbsp;&nbsp;&nbsp;'  # 4 HTML non-breaking spaces
 
 
 class HTMLReporter(ColorReporter):
+    # Override this method
+    def __init__(self, number_of_messages, source_lines=None, module_name=''):
+        super().__init__(number_of_messages, source_lines, module_name)
+        self._space = '&nbsp;'
+        self._colouring = {"black": '<span class="black">',
+                           "highlight": '<span class="highlight">',
+                           "grey": '<span class="grey">',
+                           "gbold": '<span class="gbold">',
+                           "reset": '</span>'}
+
     # Override this method
     def print_messages(self, level='all'):
         # Sort the messages.
@@ -35,68 +44,3 @@ class HTMLReporter(ColorReporter):
         print("Opening your report in a browser...")
         output_url = 'file:///{}/templates/output.html'.format(THIS_DIR)
         webbrowser.open(output_url)
-
-
-    def _add_line(self, msg, n, linetype):
-        """
-        Format given source code line as specified and return as str.
-        Use linetype='.' to elide line (with proper indentation).
-
-        :param int n: index of line in self._source_lines to add
-        :param str linetype: e/c/o/n/. for error/context/other/number-only/ellipsis
-        :return: str
-        """
-        snippet = ""
-        if n == -1:
-            n = 0
-        text = self._source_lines[n][:-1]
-        # Pad line number with spaces to even out indent:
-        number = "{:>3}".format(n + 1)  # Is this necessary any more?
-
-        if linetype == "e":  # (error)
-            snippet += _SPACES + self._colourify("gbold", number)
-            if hasattr(msg, "node") and msg.node is not None:
-                start_col = msg.node.col_offset
-                end_col = msg.node.end_col_offset
-            else:
-                start_col = 0
-                end_col = len(text)
-            # if msg.symbol == "trailing-newlines":
-            #     print(repr(text))
-            snippet += _SPACES + self._colourify("black", text[:start_col])
-            # Because highlight works on the col_offsets of a particular line,
-            # the &nbsp spacing in the colourify method
-            # wouldn't work. So treat this case separately.
-            snippet += self._colourify("highlight",     # bold, black on cyan
-                                       text[start_col:end_col])
-            snippet += self._colourify("black", text[end_col:])
-
-        elif linetype == "c":  # (context)
-            snippet += _SPACES + self._colourify("grey", number)
-            snippet += _SPACES + self._colourify("grey", text)
-
-        elif linetype == "o":  # (other)
-            snippet += _SPACES + self._colourify("grey", number)
-            snippet += _SPACES + text
-
-        elif linetype == "n":  # (number only)
-            snippet += _SPACES + self._colourify("highlight", number)
-
-        elif linetype == '.':  # (ellipsis)
-            snippet += _SPACES + self._colourify("grey", number)
-            snippet += _SPACES
-            space_count = len(text) - len(text.lstrip(' '))
-            snippet += space_count * '&nbsp;' + '...'
-
-        else:
-            print("ERROR: unrecognised _add_line option")
-        snippet += '<br/>'
-        return snippet
-
-    @staticmethod
-    def _colourify(colour_class, text):
-        new_text = text.lstrip(' ')
-        space_count = len(text) - len(new_text)
-        new_text = new_text.replace(' ', '&nbsp;')
-        return ((space_count * '&nbsp;') + '<span class="' + colour_class + '">'
-                + new_text + '</span>')

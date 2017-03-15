@@ -5,11 +5,10 @@
 <body>
 
 		<div id="preheader">
-			<!-- TODO: Needs to be fixed. -->
 			<div id="module">
 				Module analysed: {{ mod_name }}
 			</div>
-			<span class="date">
+			<span id="date">
 				{{ date_time }}
 			</span>
 		</div>
@@ -33,8 +32,8 @@
 					<p/>
 					<p style="font-size: 110%">
 						<span class="code_id">
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}"target="_blank">{{ message }} ({{ code[message][0].symbol }})</a> </span>
-						{{ code[message][0].obj }}
+						<a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ code[message][0].symbol }})</a> </span>
+						&nbsp;&nbsp;Number of occurrences: {{ code[message]|length }}
 					</p>
 					{% for indiv in code[message] %}
 						<div style="font-weight:bold">
@@ -58,8 +57,8 @@
 					<p/>
 					<p style="font-size: 110%">
 						<span class="style_id">
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ style[message][0].symbol }})</a> </span>
-						{{ style[message][0].obj }}
+						<a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ style[message][0].symbol }})</a> </span>
+						&nbsp;&nbsp;Number of occurrences: {{ style[message]|length }}
 					</p>
 					{% for indiv in style[message] %}
 						<div style="font-weight:bold">

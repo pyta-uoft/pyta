@@ -103,12 +103,13 @@ bug reports for the `setendings` module.</small>
 The `HTMLReporter` outputs an html file, `output.html`, that shows very
 similar content as the current `ColorReporter`. The `output.html` file was
 located in the parent pyta directory before, but it is now located in
-pyta/python_ta/reporters/templates. When a user calls `python_ta.check_all()`
-with the `HTMLReporter`, a statement is printed in the console to inform
-the user of the location of `output.html`:
+pyta/python_ta/reporters/templates. `output.html` is opened in a browser when
+a user calls `python_ta.check_all()` with the `HTMLReporter`. A statement is also
+printed in the console to inform the user that a browser is opening:
 
 ```
-HTML Python TA report created. Please see output.html within pyta/python_ta/reporters/templates.
+Opening your report in a browser...
+
 ```
 
 The `HTMLReporter` is no longer a subclass of the `PlainReporter`. It is
@@ -130,7 +131,7 @@ time are at the top right corner; however, more work might be done on it. Please
 see the [TODO list](TODO.md) for more details. If the user clicks on the error
 message symbol, the user will be redirected to the location of the error message
 on the PyTA documentation website. For example, if the user has an error message,
-`W0612 (unused-variable) Number of occurrences: 1`, and clicks on (unused-variable),
+`W0612 (unused-variable) Number of occurrences: 1`, and clicks on `W0612(unused-variable)`,
 the user will be redirected to http://www.cs.toronto.edu/~david/pyta/#W0612. A
 PyTA logo is located at the bottom of the web page and also redirects the user to
 the PyTA documentation website on click. Slightly above the logo, there is a link
@@ -149,6 +150,3 @@ returns '<span class="' + colour_class + '">' + text + '</span>'. The method
 `_add_line()` highlights and colours the messages by calling `_colourify()` and
 stores the result in the `snippet` attribute. The `template.txt` simply shows
 the resulted error messages by printing the `snippet` attribute of each messages.
-Even though most examples in pyta/examples run successfully, some examples crash
-the program. This is most likely caused by the attribute `snippet` in the `PlainReporter`.
-Please see the [TODO list](TODO.md) for more details regarding this.

@@ -32,7 +32,7 @@ class HTMLReporter(ColorReporter):
                                     mod_name=self._module_name,
                                     code=self._sorted_error_messages,
                                     style=self._sorted_style_messages))
-        print("Opening your report in a browser.")
+        print("Opening your report in a browser...")
         output_url = 'file:///{}/templates/output.html'.format(THIS_DIR)
         webbrowser.open(output_url)
 

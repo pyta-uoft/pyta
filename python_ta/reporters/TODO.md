@@ -21,6 +21,4 @@
 
 * Use javascript to expand and close the source code of each error messages.
 
-* `python_ta.checkall()` does not work on all code now. This is most likely because we added a new attribute, **snippet**, to **NewMessage** in the `PlainReporter`. An unexpected error occurs and returns **ERROR: last_child is missing or is missing attributes.** when we call python_ta.checkall() on the student's code (from Assignment 3). Also, the ColorReporter shows the correct output for pylint.W0631_undefined_loop_variable, but the HTMLReporter doesn't.
-
-* Fix the file name in the header (use CSS `float` properly).
+* `python_ta.checkall()` does not work on all code now. An unexpected error occurs and returns **ERROR: last_child is missing or is missing attributes.** when we call python_ta.checkall() on the student's code (from Assignment 3). Also, the ColorReporter shows the correct output for pylint.W0631_undefined_loop_variable, but the HTMLReporter doesn't.

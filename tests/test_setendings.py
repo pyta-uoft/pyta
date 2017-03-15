@@ -516,6 +516,9 @@ class TestEndingLocation(unittest.TestCase):
                     (13, 13, 2, 3),
                     (13, 13, 10, 11),
                     (14, 14, 6, 11),
+                    (15, 15, 2, 3),
+                    (15, 15, 5, 6),
+                    (15, 15, 9, 10)
                     ]
         module = self.get_file_as_module(PATH + 'Slice.py')
         self.set_and_check(module, astroid.Slice, expected)

@@ -61,12 +61,6 @@ class ColorReporter(PlainReporter):
                     sorted_messages[current_id].append(messages[i + 1])
                     i += 1
 
-                obj_new = 'Number of occurrences: {}.'.format(count)
-
-                if self._number_of_messages != 0 and self._number_of_messages < count:
-                    obj_new += ' First {} shown.'.format(self._number_of_messages)
-
-                sorted_messages[current_id][0] = sorted_messages[current_id][0]._replace(obj=obj_new)
                 i += 1
             return sorted_messages
 
@@ -94,9 +88,9 @@ class ColorReporter(PlainReporter):
 
         for msg_id in messages:
             code = self._colourify(fore_colour + Style.BRIGHT, msg_id)
-            first_msg = messages[msg_id][0]
-            result += code + ' ({})  {}\n'.format(first_msg.symbol,
-                                                  first_msg.obj) + '\n'
+            result += code + ' ({})  '.format(messages[msg_id][0].symbol)
+            result += 'Number of occurrences: {}.\n\n'.format(len(messages[msg_id]))
+
             for i, msg in enumerate(messages[msg_id]):
                 msg_text = msg.msg
                 if msg.symbol == "bad-whitespace":  # fix Pylint inconsistency

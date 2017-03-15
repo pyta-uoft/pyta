@@ -5,15 +5,6 @@ from colorama import init
 
 from .plain_reporter import PlainReporter
 
-
-# One-size-fits-all type messages (symbols)
-# simple = {"IO-function-not-allowed",
-#           "forbidden-import",
-#           "invalid-name",
-#           "forbidden-global-variables",
-#           "blacklisted-name",
-#           "unneeded-not"}
-
 # Messages that should be highlighted specially
 special = {"missing-docstring",
            "trailing-newlines"}
@@ -25,6 +16,8 @@ no_hl = {"always-returning-in-a-loop",
 
 
 class ColorReporter(PlainReporter):
+    _SPACE = ' '
+
     # Override this method to add instance variables
     def __init__(self, number_of_messages, source_lines=None, module_name=''):
         super().__init__(number_of_messages, source_lines, module_name)
@@ -39,8 +32,8 @@ class ColorReporter(PlainReporter):
         self.sort_messages()
 
         result = self._colourify(Fore.RED + Style.BRIGHT,
-                                  '=== Code errors/forbidden usage '
-                                  '(fix these right away!) ===\n')
+                                 '=== Code errors/forbidden usage '
+                                 '(fix these right away!) ===\n')
         result += self._colour_messages_by_type(style=False)
 
         if level == 'all':
@@ -92,12 +85,15 @@ class ColorReporter(PlainReporter):
         """
         result = ""
 
-        messages = (self._sorted_style_messages if style
-                    else self._sorted_error_messages)
+        if style:
+            messages = self._sorted_style_messages
+            fore_colour = Fore.BLUE
+        else:
+            messages = self._sorted_error_messages
+            fore_colour = Fore.RED
 
         for msg_id in messages:
-            code = self._colourify((Fore.BLUE if style
-                                    else Fore.RED) + Style.BRIGHT, msg_id)
+            code = self._colourify(fore_colour + Style.BRIGHT, msg_id)
             first_msg = messages[msg_id][0]
             result += code + ' ({})  {}\n'.format(first_msg.symbol,
                                                   first_msg.obj) + '\n'
@@ -108,17 +104,18 @@ class ColorReporter(PlainReporter):
                     messages[msg_id][i] = msg._replace(msg=msg_text)
                     msg = messages[msg_id][i]
 
-                result += self._colourify(Style.BRIGHT,
-                                          '   [Line {}] {}'.format(
-                                              msg.line, msg.msg)) + '\n'
+                result += 4 * ColorReporter._SPACE
+                result += self._colourify(Style.BRIGHT, '[Line {}] {}'.format(
+                    msg.line, msg.msg)) + '\n'
 
                 try:
                     # Messages with code snippets
                     if not (msg.symbol in no_hl or
-                            msg.msg.startswith("Invalid module") or msg.msg.startswith("Missing module docstring")):
+                            msg.msg.startswith("Invalid module") or
+                            msg.msg.startswith("Missing module docstring")):
 
                         if hasattr(msg, "node") and msg.node is not None:
-                            start = msg.node.fromlineno
+                            start = max(msg.node.fromlineno, 1)
                             end = msg.node.end_lineno
                         else:
                             # Some message types don't have a node, including:
@@ -127,49 +124,37 @@ class ColorReporter(PlainReporter):
                             # - trailing-newlines
                             start = end = msg.line
 
-                        # print('      ', msg.symbol, msg.node.lineno, msg.node.col_offset,
-                        #       msg.node.end_lineno, msg.node.end_col_offset)
-
-                        result += self._colourify(
-                            Style.BRIGHT, '\n    Your Code Starts Here:\n')
+                        result += '\n' + 4 * ColorReporter._SPACE
+                        result += self._colourify(Style.BRIGHT,
+                                                  'Your Code Starts Here:\n')
                         result += '\n'
 
                         code_snippet = ""
-                        if msg.symbol in special:
-                            if msg.symbol == "trailing-newlines":
-                                if start - 3 >= 0:
-                                    code_snippet += self._add_line(
-                                        msg, start - 3, 'c')
-                                if start - 2 >= 0:
-                                    code_snippet += self._add_line(
-                                        msg, start - 2, 'c')
-                                # Actual code line is empty, so just print number:
-                                code_snippet += self._add_line(msg, start - 1, 'n')
 
-                            elif msg.msg.startswith("Missing function docstring"):
-                                code_snippet += self._add_line(
-                                    msg, start - 1, 'e')
-                                code_snippet += self._add_line(msg, start, '.')
-                        else:
-                            if end - start <= 3:  # add pre-context code (in grey)
-                                if start - 3 >= 0:
-                                    code_snippet += self._add_line(
-                                        msg, start - 3, 'c')
-                                if start - 2 >= 0:
-                                    code_snippet += self._add_line(
-                                        msg, start - 2, 'c')
+                        # Non-special prints first error line with 'e', other
+                        # lines with 'o'.
+                        # Special prints each message specially.
+                        # Both print 2 lines of context before and after
+                        # (code boundaries permitting).
 
+                        # Print up to 2 lines before start - 1 for context:
+                        for l in range(max(start - 3, 0), start - 1):
+                            code_snippet += self._add_line(msg, l, 'c')
+
+                        if msg.symbol == "trailing-newlines":
+                            code_snippet += self._add_line(msg, start - 1, 'n')
+                        elif msg.msg.startswith("Missing function docstring"):
+                            code_snippet += self._add_line(
+                                msg, start - 1, 'e')
+                            code_snippet += self._add_line(msg, start, '.')
+                        else:  # so msg isn't in special at all
                             code_snippet += self._add_line(msg, start - 1, 'e')
                             for line in range(start, end):
                                 code_snippet += self._add_line(msg, line, 'o')
 
-                            if end - start <= 3:  # add post-context
-                                if end < len(self._source_lines):
-                                    code_snippet += self._add_line(
-                                        msg, end, 'c')
-                                if end + 1 < len(self._source_lines):
-                                    code_snippet += self._add_line(
-                                        msg, end + 1, 'c')
+                        # Print up to 2 lines after end - 1 for context:
+                        for l in range(end, min(end + 2, len(self._source_lines))):
+                            code_snippet += self._add_line(msg, l, 'c')
 
                         result += code_snippet + '\n'
                         try:
@@ -195,47 +180,46 @@ class ColorReporter(PlainReporter):
         :return: str
         """
         snippet = ""
-        if n == -1:
-            n = 0
-        text = self._source_lines[n][:-1]
+        space = ColorReporter._SPACE
+
+        text = self._source_lines[n].rstrip('\n\r')
         # Pad line number with spaces to even out indent:
         number = self._colourify(Fore.LIGHTBLACK_EX, "{:>3}".format(n + 1))
-        # UNCOMMENT TO IGNORE BLANK LINES:
-        # if text.strip() == '':
-        #     return
 
         if linetype == "e":  # (error)
-            snippet += '    ' + self._colourify(Style.BRIGHT, number)
+            snippet += 4 * space + self._colourify(Style.BRIGHT, number)
             if hasattr(msg, "node") and msg.node is not None:
                 start_col = msg.node.col_offset
                 end_col = msg.node.end_col_offset
             else:
-                start_col = 0
+                # to prevent highlighted indent
+                start_col = -len(text.lstrip(' '))  # negative to count from end
                 end_col = len(text)
-            # if msg.symbol == "trailing-newlines":
-            #     print(repr(text))
-            snippet += '    ' + text[:start_col]
+
+            snippet += 4 * space + text[:start_col]
             snippet += self._colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
                                        text[start_col:end_col])
             snippet += text[end_col:]
 
         elif linetype == "c":  # (context)
-            snippet += '    ' + number
-            snippet += '    ' + self._colourify(Fore.LIGHTBLACK_EX, text)
+            snippet += 4 * space + number
+            snippet += 4 * space + self._colourify(Fore.LIGHTBLACK_EX, text)
 
         elif linetype == "o":  # (other)
-            snippet += '    ' + number
-            snippet += '    ' + text
+            snippet += 4 * space + number
+            snippet += 4 * space + text
 
         elif linetype == "n":  # (number only)
-            snippet += '    ' + self._colourify(
+            snippet += 4 * space + self._colourify(
                 Style.BRIGHT + Fore.BLACK + Back.CYAN, number)
 
         elif linetype == '.':  # (ellipsis)
-            snippet += '    ' + number
-            snippet += '    '
+            snippet += 4 * space + number
+            snippet += 4 * space
             spaces = len(text) - len(text.lstrip(' '))
-            snippet += spaces * ' ' + '...'
+            snippet += spaces * space
+            snippet += self._colourify(Style.BRIGHT + Fore.BLACK + Back.CYAN,
+                                       '...')
 
         else:
             print("ERROR")

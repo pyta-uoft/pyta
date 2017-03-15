@@ -5,6 +5,7 @@
 <body>
 
 		<div id="preheader">
+			<!-- TODO: Needs to be fixed. -->
 			<div id="module">
 				Module analysed: {{ mod_name }}
 			</div>
@@ -32,10 +33,10 @@
 					<p/>
 					<p style="font-size: 110%">
 						<span class="code_id">
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ code[message][0].symbol }})</a> </span>
-						&nbsp;&nbsp;Number of occurrences: {{ code[message][-1] }}
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">{{ message }} ({{ code[message][0].symbol }})</a> </span>
+						{{ code[message][0].obj }}
 					</p>
-					{% for indiv in code[message][:-1] %}
+					{% for indiv in code[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
 						{% if indiv.snippet != '' %}
@@ -57,10 +58,10 @@
 					<p/>
 					<p style="font-size: 110%">
 						<span class="style_id">
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}} target="_blank"">{{ message }} ({{ style[message][0].symbol }})</a> </span>
-						&nbsp;&nbsp;Number of occurrences: {{ style[message][-1] }}
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">{{ message }} ({{ style[message][0].symbol }})</a> </span>
+						{{ style[message][0].obj }}
 					</p>
-					{% for indiv in style[message][:-1] %}
+					{% for indiv in style[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }} <p/>
 						{% if indiv.snippet != '' %}

@@ -74,13 +74,6 @@ class ColorReporter(PlainReporter):
         Return string of properly formatted members of the messages dict
         (error or style) indicated by style.
 
-        NOTE: For each message type's list in _sorted_error_messages and
-        _sorted_style_messages, a last element is added that contains the
-        length of said list. This is necessary for use in the HTMLReporter's
-        template.txt, and is performed after the building of the "result"
-        string so as not to affect the printed result of this class.
-        WHEN MAKING USE OF THESE LISTS, PLEASE OMIT THE LAST ELEMENT.
-
         :param bool style: True iff messages is a dict of style messages
         :return: str
         """
@@ -169,16 +162,12 @@ class ColorReporter(PlainReporter):
                     pass
 
                 result += '\n'
-            messages[msg_id].append(len(messages[msg_id]))  # for HTMLReporter use
         return result
 
     def _add_line(self, msg, n, linetype):
         """
         Format given source code line as specified and return as str.
-        Use linetype='n' to print only the highlighted line number of the line.
         Use linetype='.' to elide line (with proper indentation).
-
-        Called by _colour_messages_by_type, relies on _colourify.
 
         :param int n: index of line in self._source_lines to add
         :param str linetype: e/c/o/n/. for error/context/other/number-only/ellipsis
@@ -237,8 +226,6 @@ class ColorReporter(PlainReporter):
     def _colourify(colour, text):
         """
         Adds given ANSI colouring tokens to text as well as final colour reset.
-
-        Called by _colour_messages_by_type and _add_line.
 
         :param str colour: colorama ANSI code(s)
         :param str text: text to be coloured

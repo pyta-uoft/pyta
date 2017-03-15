@@ -162,13 +162,31 @@ def _is_arg_name(s, index, node):
         return False
     return s[index : index+len(node.arg)] == node.arg
 
-# def _set_slice_start(s, index, node):
-#     """Set slice locations, whether it has slice before it or not"""
-#     return s[index] == ':'
+def _set_slice_start(s, index, node):
+    """Set slice locations, whether it has slice before it or not"""
 
-# def _set_slice_end(s, index, node):
-#     """Set slice locations, whether it has slice before it or not"""
-#     return s[index] == ':'
+    # check slice node has sibling subscript, i.e. if parent contains subscript.
+    # if node.parent.get_children()
+
+    # always start searching for the first [ after the ENDING POSITION of the parent's value node.
+    # i.e. if we are on that line, and index is less than ending position just return false
+    parent_value = node.parent.value
+    if parent_value:
+        parent_value_line = parent_value.fromlineno
+        parent_value_end = parent_value.end_col_offset
+
+        # assert: Slice() node will always be after `end_col_offset` of sibling Subscript()
+        if parent_value_line > node.fromlineno or index < parent_value_end:
+            return False
+
+    # otherwise return the bool check
+    return s[index-1] == '['
+
+def _set_slice_end(s, index, node):
+    """Set slice locations, whether it has slice before it or not"""
+    if index >= len(s)-1: 
+        return False
+    return s[index+1] == ']'
 
 
 # Nodes the require the source code for proper location setting
@@ -197,8 +215,8 @@ NODES_REQUIRING_SOURCE = [
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
-    # (astroid.Slice, _set_slice_start, _set_slice_end),
-    (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
+    (astroid.Slice, _set_slice_start, _set_slice_end),
+    # (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
     (astroid.Subscript, None, _token_search(']')),
     (astroid.Tuple, _token_search('('), _token_search(')'))
 ]
@@ -306,31 +324,43 @@ def fix_slice(source_code):
         line_i = node.parent.fromlineno - 1  # 1-based
         char_i = node.parent.col_offset      # 0-based
 
+        # If Slice() has sibling Subscript() nodes, e.g. the last two Slice in
+        # "n[:][:][:]", we search for the first '[' after the ENDING POSITION 
+        # of the parent's value node.
+        for sibling in node.parent.get_children():
+            if isinstance(sibling, astroid.Subscript): 
+                pass
+
         
+        # The Wrong Buffer approach
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         # To solve the problem created by variations of "a[:][:]...",
         # consume all sibling Subscript node characters
-        sibling_buffer = ''
-        for sibling in node.parent.get_children():
-            if isinstance(sibling, astroid.Subscript): 
-                sibling_buffer += sibling.as_string()
+        # sibling_buffer = ''
+        # for sibling in node.parent.get_children():
+        #     if isinstance(sibling, astroid.Subscript): 
+        #         sibling_buffer += sibling.as_string()
 
-        # print(type(node.parent.value))
+        # # print(type(node.parent.value))
 
         
-        # Search the remaining lines
-        while sibling_buffer and line_i < len(source_code)-1:
-            # at end of line, or skip comment line..
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#': 
-                char_i = 0
-                line_i += 1
+        # # Search the remaining lines
+        # while sibling_buffer and line_i < len(source_code)-1:
+        #     # at end of line, or skip comment line..
+        #     if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#': 
+        #         char_i = 0
+        #         line_i += 1
 
-            # consume stuff from the buffer.
-            if source_code[line_i][char_i] == sibling_buffer[0]:
-                char_i += 1
-                sibling_buffer = sibling_buffer[1:]
-            elif source_code[line_i][char_i] in CONSUMABLES: 
-                char_i += 1
+        #     # consume stuff from the buffer.
+        #     if source_code[line_i][char_i] == sibling_buffer[0]:
+        #         char_i += 1
+        #         sibling_buffer = sibling_buffer[1:]
+        #     elif source_code[line_i][char_i] in CONSUMABLES: 
+        #         char_i += 1
+
+        # The Wrong Buffer approach
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         
 

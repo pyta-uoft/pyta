@@ -33,7 +33,7 @@
 					<p/>
 					<p style="font-size: 110%">
 						<span class="code_id">
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">{{ message }} ({{ code[message][0].symbol }})</a> </span>
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}"target="_blank">{{ message }} ({{ code[message][0].symbol }})</a> </span>
 						{{ code[message][0].obj }}
 					</p>
 					{% for indiv in code[message] %}
@@ -58,7 +58,7 @@
 					<p/>
 					<p style="font-size: 110%">
 						<span class="style_id">
-						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}">{{ message }} ({{ style[message][0].symbol }})</a> </span>
+						<a href= "http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ style[message][0].symbol }})</a> </span>
 						{{ style[message][0].obj }}
 					</p>
 					{% for indiv in style[message] %}

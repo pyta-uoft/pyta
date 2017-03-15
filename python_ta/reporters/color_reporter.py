@@ -218,8 +218,7 @@ class ColorReporter(PlainReporter):
             snippet += spaces
             space_c = len(text) - len(text.lstrip(' '))
             snippet += space_c * self._space
-            # TODO: perhaps a different colouring for the ellipsis?
-            snippet += self._colourify("highlight", '. . .')
+            snippet += self._colourify("black", '. . .')
 
         else:
             print("ERROR: unrecognised _add_line option")
@@ -250,6 +249,7 @@ class ColorReporter(PlainReporter):
 
         new_text = text.lstrip(' ')
         space_count = len(text) - len(new_text)
-        new_text = new_text.replace(' ', self._space)
+        if self._space == '&nbsp;':
+            new_text = new_text.replace(' ', self._space)
         return ((space_count * self._space) + colour + new_text +
                 self._colouring["reset"])

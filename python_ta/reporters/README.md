@@ -4,7 +4,7 @@
 
 As of now, the `ColorReporter` has been configured to print out detailed
 information on each code and style error message produced by PyTA.
-As before, message are separated into code errors and style errors, and
+As before, messages are separated into code errors and style errors, and
 further sorted by type. The new `ColorReporter` colour-codes these
 messages, using red for code error messages (and error codes) and blue
 for style error messages (and error codes).<sup>1</sup>
@@ -100,7 +100,7 @@ bug reports for the `setendings` module.</small>
 
 ## `HTMLReporter`
 
-The `HTMLReporter` outputs an html file, `output.html`, that shows very
+The `HTMLReporter` outputs an HTML file, `output.html`, that shows very
 similar content as the current `ColorReporter`. The `output.html` file was
 located in the parent pyta directory before, but it is now located in
 pyta/python_ta/reporters/templates. `output.html` is opened in a browser when
@@ -113,9 +113,10 @@ Opening your report in a browser...
 ```
 
 The `HTMLReporter` is no longer a subclass of the `PlainReporter`. It is
-now a subclass of the `ColorReporter` because it requires the same
-`sort_messages()` and `_colour_messages_by_type()` in order to output
-the same coloured content as the `ColorReporter`.
+now a subclass of the `ColorReporter` as it uses the exact same methods as the
+`ColorReporter` in order to output the same coloured content as the `ColorReporter`.
+Note that in the ColorReporter, `_add_line()` and `_colourify()` are implemented
+to handle both python syntax and HTML syntax.
 
 A CSS file, `stylesheet.css`, is located in pyta/python_ta/reporters/templates,
 and is linked to `template.txt`. The `output.html` file is no longer a plain black
@@ -141,12 +142,11 @@ that allows users to report bugs via email.
 ### Technical Details
 
 In order for the `template.txt` to have access to the coloured and sorted error
-messages, we added an attribute, `snippet`, on line 5 in the `PlainReporter`.
+messages, we added an attribute, `snippet`, to NewMessage on line 5 in the `PlainReporter`.
 In `stylesheet.css`, there are several classes that set the font and the
-colour of certain text. In the `HTMLReporter`, the method `_colourify()` takes
-in a colour class (which corresponds to one of the classes in `stylesheet.css`)
-and a text string. The method replaces the whitespaces in the text with _&nbsp;_, and
-returns '<span class="' + colour_class + '">' + text + '</span>'. The method
-`_add_line()` highlights and colours the messages by calling `_colourify()` and
-stores the result in the `snippet` attribute. The `template.txt` simply shows
-the resulted error messages by printing the `snippet` attribute of each messages.
+colour of certain text. The class attributes in the `HTMLReporter`, self.\_space
+and self.\_colouring, override the ones in the `ColorReporter` so that `snippet`
+is constructed in HTML syntax and can be directly printed by the `template.txt`.
+Each element in self.\_colouring corresponds to one of the classes in `stylesheet.css`.
+The `template.txt` simply shows the resulted error messages by printing the
+`snippet` attribute of each message.

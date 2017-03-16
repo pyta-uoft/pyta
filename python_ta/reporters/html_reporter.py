@@ -10,15 +10,12 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class HTMLReporter(ColorReporter):
-    # Override this method
-    def __init__(self, number_of_messages, source_lines=None, module_name=''):
-        super().__init__(number_of_messages, source_lines, module_name)
-        self._space = '&nbsp;'
-        self._colouring = {"black": '<span class="black">',
-                           "highlight": '<span class="highlight">',
-                           "grey": '<span class="grey">',
-                           "gbold": '<span class="gbold">',
-                           "reset": '</span>'}
+    _SPACE = '&nbsp;'
+    _COLOURING = {"black": '<span class="black">',
+                  "highlight": '<span class="highlight">',
+                  "grey": '<span class="grey">',
+                  "gbold": '<span class="gbold">',
+                  "reset": '</span>'}
 
     # Override this method
     def print_messages(self, level='all'):

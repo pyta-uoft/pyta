@@ -231,21 +231,15 @@ class ColorReporter(PlainReporter):
             # that the '...' is actually a line-continuation prompt.
 
         elif linetype == 'd':  # (docstring)
-            snippet += spaces + spaces[1:] + spaces  # 11 spaces
+            snippet += self._SPACE * 11  # 11 spaces
             space_c = len(text) - len(text.lstrip(' '))
             snippet += space_c * self._SPACE
             snippet += self._colourify("highlight",
                                        '''""" YOUR DOCSTRING HERE """''')
-
-
-
         else:
             print("ERROR: unrecognised _add_line option")
 
-        # TODO: Is there a better way of doing this?
-        # (other than making another class-level variable for the newline)
         snippet += '\n' if spaces == '    ' else '<br/>'
-
         return snippet
 
     @classmethod
@@ -269,7 +263,7 @@ class ColorReporter(PlainReporter):
 
         new_text = text.lstrip(' ')
         space_count = len(text) - len(new_text)
-        if cls._space == '&nbsp;':
+        if cls._SPACE == '&nbsp;':
             new_text = new_text.replace(' ', cls._SPACE)
         return ((space_count * cls._SPACE) + colour + new_text +
                 cls._COLOURING["reset"])

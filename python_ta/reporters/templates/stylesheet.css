@@ -5,6 +5,7 @@
 	background-color: rgb(130, 216, 245);
 	line-height: normal;
 	padding: 20px;
+    padding-bottom: 22px;
 }
 
 body {
@@ -33,7 +34,6 @@ body {
 #date {
     display: inline;
     float: right;
-    positon: absolute;
 }
 
 .title {
@@ -132,5 +132,5 @@ body {
     position: relative;
     width:100%;
     text-align: center;
-    padding: 10px;
+    padding-top: 10px;
 }

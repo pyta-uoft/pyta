@@ -226,8 +226,7 @@ class ColorReporter(PlainReporter):
             snippet += spaces
             space_c = len(text) - len(text.lstrip(' '))
             snippet += space_c * self._SPACE
-            # TODO: perhaps a different colouring for the ellipsis?
-            snippet += self._colourify("highlight", '. . .')
+            snippet += self._colourify("black", '. . .')
             # Need spaces in between dots to prevent PyCharm thinking
             # that the '...' is actually a line-continuation prompt.
 
@@ -237,6 +236,8 @@ class ColorReporter(PlainReporter):
             snippet += space_c * self._SPACE
             snippet += self._colourify("highlight",
                                        '''""" YOUR DOCSTRING HERE """''')
+
+
 
         else:
             print("ERROR: unrecognised _add_line option")
@@ -268,6 +269,8 @@ class ColorReporter(PlainReporter):
 
         new_text = text.lstrip(' ')
         space_count = len(text) - len(new_text)
-        new_text = new_text.replace(' ', cls._SPACE)
+        if cls._space == '&nbsp;':
+            new_text = new_text.replace(' ', cls._SPACE)
         return ((space_count * cls._SPACE) + colour + new_text +
                 cls._COLOURING["reset"])
+

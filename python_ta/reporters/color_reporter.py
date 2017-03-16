@@ -149,7 +149,6 @@ class ColorReporter(PlainReporter):
                             end = start  # to print context after function header
                         elif msg.msg.startswith("Missing module docstring"):
                             # Perhaps instead of start, use line 0?
-                            print("module:", start)
                             code_snippet += self._add_line(msg, start - 1, 'd')
                             end = 0  # to print context after
                         else:  # so msg isn't in special at all
@@ -157,7 +156,6 @@ class ColorReporter(PlainReporter):
                             for line in range(start, end):
                                 code_snippet += self._add_line(msg, line, 'o')
 
-                        print(end, min(end + 2, len(self._source_lines)))
                         # Print up to 2 lines after end - 1 for context:
                         for l in range(end, min(end + 2, len(self._source_lines))):
                             code_snippet += self._add_line(msg, l, 'c')

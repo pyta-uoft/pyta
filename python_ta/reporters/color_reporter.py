@@ -16,17 +16,19 @@ no_hl = {"always-returning-in-a-loop",
 
 
 class ColorReporter(PlainReporter):
+    _SPACE = ' '
+    _COLOURING = {"black": Fore.BLACK,  # or could be empty
+                  "highlight": Style.BRIGHT + Fore.BLACK + Back.CYAN,
+                  "grey": Fore.LIGHTBLACK_EX,
+                  "gbold": Style.BRIGHT + Fore.LIGHTBLACK_EX,
+                  "reset": Style.RESET_ALL}
+
     # Override this method to add instance variables
     def __init__(self, number_of_messages, source_lines=None, module_name=''):
         super().__init__(number_of_messages, source_lines, module_name)
         self._sorted_error_messages = {}
         self._sorted_style_messages = {}
-        self._space = ' '
-        self._colouring = {"black": Fore.BLACK,  # or could be empty
-                           "highlight": Style.BRIGHT + Fore.BLACK + Back.CYAN,
-                           "grey": Fore.LIGHTBLACK_EX,
-                           "gbold": Style.BRIGHT + Fore.LIGHTBLACK_EX,
-                           "reset": Style.RESET_ALL}
+
 
     # Override this method
     def print_messages(self, level='all'):
@@ -102,15 +104,14 @@ class ColorReporter(PlainReporter):
                     messages[msg_id][i] = msg._replace(msg=msg_text)
                     msg = messages[msg_id][i]
 
-                result += 4 * self._space
+                result += 4 * self._SPACE
                 result += self._colourify(Style.BRIGHT, '[Line {}] {}'.format(
                     msg.line, msg.msg)) + '\n'
 
                 try:
                     # Messages with code snippets
                     if not (msg.symbol in no_hl or
-                            msg.msg.startswith("Invalid module") or
-                            msg.msg.startswith("Missing module docstring")):
+                            msg.msg.startswith("Invalid module")):
 
                         if hasattr(msg, "node") and msg.node is not None:
                             start = max(msg.node.fromlineno, 1)
@@ -122,7 +123,7 @@ class ColorReporter(PlainReporter):
                             # - trailing-newlines
                             start = end = msg.line
 
-                        result += '\n' + 4 * self._space
+                        result += '\n' + 4 * self._SPACE
                         result += self._colourify(Style.BRIGHT,
                                                   'Your Code Starts Here:\n')
                         result += '\n'
@@ -144,7 +145,12 @@ class ColorReporter(PlainReporter):
                         elif msg.msg.startswith("Missing function docstring"):
                             code_snippet += self._add_line(
                                 msg, start - 1, 'e')
-                            code_snippet += self._add_line(msg, start, '.')
+                            code_snippet += self._add_line(msg, start, 'd')
+                            end = start  # to print context after function header
+                        elif msg.msg.startswith("Missing module docstring"):
+                            # Perhaps instead of start, use line 0?
+                            code_snippet += self._add_line(msg, start - 1, 'd')
+                            end = 0  # to print context after
                         else:  # so msg isn't in special at all
                             code_snippet += self._add_line(msg, start - 1, 'e')
                             for line in range(start, end):
@@ -173,16 +179,18 @@ class ColorReporter(PlainReporter):
         Format given source code line as specified and return as str.
         Use linetype='n' to print only the highlighted line number of the line.
         Use linetype='.' to elide line (with proper indentation).
+        Use linetype='d' to show a "YOUR DOCSTRING HERE" message.
 
         Called by _colour_messages_by_type, relies on _colourify.
         Now applicable both to ColorReporter and HTMLReporter.
 
         :param int n: index of line in self._source_lines to add
-        :param str linetype: e/c/o/n/. for error/context/other/number-only/ellipsis
+        :param str linetype: e/c/o/n/./d for
+            error/context/other/number-only/ellipsis/docstring
         :return: str
         """
         snippet = ""
-        spaces = 4 * self._space
+        spaces = 4 * self._SPACE
         text = self._source_lines[n].rstrip('\n\r')
         # Pad line number with spaces to even out indent:
         number = "{:>3}".format(n + 1)
@@ -217,8 +225,19 @@ class ColorReporter(PlainReporter):
             snippet += spaces + self._colourify("gbold", number)
             snippet += spaces
             space_c = len(text) - len(text.lstrip(' '))
-            snippet += space_c * self._space
+            snippet += space_c * self._SPACE
             snippet += self._colourify("black", '. . .')
+            # Need spaces in between dots to prevent PyCharm thinking
+            # that the '...' is actually a line-continuation prompt.
+
+        elif linetype == 'd':  # (docstring)
+            snippet += spaces + spaces[1:] + spaces  # 11 spaces
+            space_c = len(text) - len(text.lstrip(' '))
+            snippet += space_c * self._SPACE
+            snippet += self._colourify("highlight",
+                                       '''""" YOUR DOCSTRING HERE """''')
+
+
 
         else:
             print("ERROR: unrecognised _add_line option")
@@ -229,7 +248,8 @@ class ColorReporter(PlainReporter):
 
         return snippet
 
-    def _colourify(self, colour_class, text):
+    @classmethod
+    def _colourify(cls, colour_class, text):
         """
         Adds given ANSI colouring tokens (or key to colouring tokens in the
         class-level dict "_COLOURING") to text as well as final colour reset.
@@ -243,13 +263,14 @@ class ColorReporter(PlainReporter):
         :return str
         """
         try:
-            colour = self._colouring[colour_class]
+            colour = cls._COLOURING[colour_class]
         except KeyError:
             colour = colour_class
 
         new_text = text.lstrip(' ')
         space_count = len(text) - len(new_text)
-        if self._space == '&nbsp;':
-            new_text = new_text.replace(' ', self._space)
-        return ((space_count * self._space) + colour + new_text +
-                self._colouring["reset"])
+        if cls._space == '&nbsp;':
+            new_text = new_text.replace(' ', cls._SPACE)
+        return ((space_count * cls._SPACE) + colour + new_text +
+                cls._COLOURING["reset"])
+

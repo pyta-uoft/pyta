@@ -2,7 +2,7 @@ from typing import *
 from typing import GenericMeta, TupleMeta, _gorg
 
 
-Num = TypeVar('n', int, float)
+Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])
 tup1 = TypeVar('tup1')
@@ -42,7 +42,7 @@ TYPE_SIGNATURES = {
     List: {
         '__add__': Callable[[List[a], List[a]], List[a]],
         '__mul__': Callable[[List[a], int], List[a]],
-        '__getitem__': Callable[[int], a]
+        '__getitem__': Callable[[List[a], int], a]
     },
     Tuple: {
         '__add__': Callable[[Tuple[tup1], Tuple[tup2]], TuplePlus('tup+', tup1, tup2)],

@@ -149,6 +149,7 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print(e)
+        raise e
 
 
 def doc(msg_id):

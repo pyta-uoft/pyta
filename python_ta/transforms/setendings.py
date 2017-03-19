@@ -136,14 +136,12 @@ def _keyword_search(keyword):
 
 def _is_within_close_bracket(s, index, node):
     """Fix to include right ']'."""
-    # print('>>>>>>', s, s[index], index, node.end_col_offset)
     if index >= len(s)-1: 
         return False
     return s[index] == ']' or s[index+1] == ']'
 
 def _is_within_open_bracket(s, index, node):
     """Fix to include left '['."""
-    # print('>>>>>>', s, index)
     if index < 1: 
         return False
     return s[index-1] == '['
@@ -153,7 +151,6 @@ def _is_attr_name(s, index, node):
     target_len = len(node.attrname)
     if index < target_len: 
         return False
-    # print('---> "{}", "{}"'.format(s[index-target_len : index], node.attrname))
     return s[index-target_len+1 : index+1] == node.attrname
 
 def _is_arg_name(s, index, node):
@@ -162,31 +159,27 @@ def _is_arg_name(s, index, node):
         return False
     return s[index : index+len(node.arg)] == node.arg
 
-def _set_slice_start(s, index, node):
-    """Set slice locations, whether it has slice before it or not"""
+def find_sibling(node, astroid_class):
+    """Tree traversal helper function.
+    Return a list of sibling nodes that match class astroid_class.
+    list is empty if none found.
+    """
+    if not node:
+        return []
+    siblings = list(node.parent.get_children())
+    target_nodes = filter(lambda x: isinstance(x, astroid_class), siblings)
+    return siblings
 
-    # check slice node has sibling subscript, i.e. if parent contains subscript.
-    # if node.parent.get_children()
-
-    # always start searching for the first [ after the ENDING POSITION of the parent's value node.
-    # i.e. if we are on that line, and index is less than ending position just return false
-    parent_value = node.parent.value
-    if parent_value:
-        parent_value_line = parent_value.fromlineno
-        parent_value_end = parent_value.end_col_offset
-
-        # assert: Slice() node will always be after `end_col_offset` of sibling Subscript()
-        if parent_value_line > node.fromlineno or index < parent_value_end:
-            return False
-
-    # otherwise return the bool check
-    return s[index-1] == '['
-
-def _set_slice_end(s, index, node):
-    """Set slice locations, whether it has slice before it or not"""
-    if index >= len(s)-1: 
-        return False
-    return s[index+1] == ']'
+def find_child(node, astroid_class):
+    """Tree traversal helper function.
+    Return a list of child nodes that match class astroid_class.
+    list is empty if none found.
+    """
+    if not node:
+        return []
+    children = list(node.get_children())
+    target_nodes = filter(lambda x: isinstance(x, astroid_class), children)
+    return children
 
 
 # Nodes the require the source code for proper location setting
@@ -215,8 +208,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
-    (astroid.Slice, _set_slice_start, _set_slice_end),
-    # (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
+    (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
     (astroid.Subscript, None, _token_search(']')),
     (astroid.Tuple, _token_search('('), _token_search(')'))
 ]
@@ -297,23 +289,14 @@ def discover_nodes(node):
 def fix_slice(source_code):
     """
     The Slice node column positions are mostly set properly when it has (Const) 
-    children, all it needs is to consume leading/trailing whitespace.
-    Don't include '[' or ']' in the col_offset or end_col_offset.
+    children. The main problem is when Slice node doesn't have children.
+    E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing positions
+    are sometimes set improperly to 0.
+    Note: the location positions don't include '[' or ']'.
 
-    The main problem is when Slice node doesn't have children. 
-    E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing 
-    col_offset of the slice node is set improperly to 0. And the end_col_offset 
-    is also wrong. We fix it here.
-
-    The idea is:
-    • Start at the coords of fist parent Subscript in source code.
-    • While there are children Subscript nodes, use its as_string to consume 
-    these chars from the source code, and keep count of position cursor.
-    • Consume the chars, moving cursor, until reach first position of ':'.
-    • The caller function consumes whitespace left/right up to brackets, using
-    predicate functions to check whether a bracket is encountered.
-
-    @type source_code: list of strings
+    2-step Approach:
+    -- Step 1) use this transform to get to the ':'
+    -- Step 2) use other transforms to then expand outwards to the '[' or ']'
     """
     def _consume_subscripts(node):
         if node.last_child(): 
@@ -324,48 +307,12 @@ def fix_slice(source_code):
         line_i = node.parent.fromlineno - 1  # 1-based
         char_i = node.parent.col_offset      # 0-based
 
-        # If Slice() has sibling Subscript() nodes, e.g. the last two Slice in
-        # "n[:][:][:]", we search for the first '[' after the ENDING POSITION 
-        # of the parent's value node.
-        for sibling in node.parent.get_children():
-            if isinstance(sibling, astroid.Subscript): 
-                pass
+        # Search for the first ":" after ending position of parent's value node.
+        if node.parent.value:
+            line_i = node.parent.value.fromlineno - 1  # convert 1 to 0 index.
+            char_i = node.parent.value.end_col_offset
 
-        
-        # The Wrong Buffer approach
-        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-        # To solve the problem created by variations of "a[:][:]...",
-        # consume all sibling Subscript node characters
-        # sibling_buffer = ''
-        # for sibling in node.parent.get_children():
-        #     if isinstance(sibling, astroid.Subscript): 
-        #         sibling_buffer += sibling.as_string()
-
-        # # print(type(node.parent.value))
-
-        
-        # # Search the remaining lines
-        # while sibling_buffer and line_i < len(source_code)-1:
-        #     # at end of line, or skip comment line..
-        #     if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#': 
-        #         char_i = 0
-        #         line_i += 1
-
-        #     # consume stuff from the buffer.
-        #     if source_code[line_i][char_i] == sibling_buffer[0]:
-        #         char_i += 1
-        #         sibling_buffer = sibling_buffer[1:]
-        #     elif source_code[line_i][char_i] in CONSUMABLES: 
-        #         char_i += 1
-
-        # The Wrong Buffer approach
-        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-        
-
-        # now we can simply search for the ":" char since this Slice node
-        # has no children.
+        # Search the remaining source code for the ":" char.
         while source_code[line_i][char_i] != ':': 
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#': 
                 char_i = 0
@@ -373,10 +320,8 @@ def fix_slice(source_code):
             else: 
                 char_i += 1
 
-        
-
         node.fromlineno = line_i + 1
-        node.end_col_offset = char_i  # temporary value because (_is_within_open_bracket, _is_within_close_bracket) transforms fix it. 
+        node.end_col_offset = char_i
         node.col_offset = char_i
 
     return _consume_subscripts
@@ -538,8 +483,7 @@ def start_setter_from_source(source_code, pred):
     e.g. _is_open_paren
     """
     def set_start_from_source(node):
-        # Initialize counters. Note: we need to offset lineno,
-        # since it's 1-indexed.
+        # Initialize counters. Note: fromlineno is 1-indexed.
         col_offset, lineno = node.col_offset, node.fromlineno - 1
 
         # First, search the remaining part of the current end line

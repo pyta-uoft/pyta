@@ -186,7 +186,6 @@ def find_child(node, astroid_class):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
-
     (astroid.AssignAttr, None, _is_attr_name),  
     (astroid.AsyncFor, _keyword_search('async'), None),
     (astroid.AsyncWith, _keyword_search('async'), None),

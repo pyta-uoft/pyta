@@ -297,7 +297,7 @@ def fix_slice(source_code):
     -- Step 1) use this transform to get to the ':'
     -- Step 2) use other transforms to then expand outwards to the '[' or ']'
     """
-    def _consume_subscripts(node):
+    def _find_colon(node):
         if node.last_child(): 
             return
         if not hasattr(node, 'end_lineno'): 
@@ -323,7 +323,7 @@ def fix_slice(source_code):
         node.end_col_offset = char_i
         node.col_offset = char_i
 
-    return _consume_subscripts
+    return _find_colon
 
 
 def fix_start_attributes(node):

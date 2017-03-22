@@ -1,12 +1,11 @@
 import os
-import sys
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
 from sample_usage.stats_analysis import summary
 from collections import OrderedDict
 
 
-def pyta_statistics(directory):
+def pyta_statistics(directory, config=''):
     """
     Recursively run python_ta.check_all() on the files in the directory and its
     subdirectories to collect the error and style messages.
@@ -16,12 +15,10 @@ def pyta_statistics(directory):
     subdirectories, only files.
 
     @param str directory: The string of the path way of the directory.
-    @rtype: None
+    @param str config: A path to the configuration file to use.
+    @rtype: dict[str, str]
     """
     all_errors = OrderedDict()
-
-    # Add directory to PYTHONPATH so python_ta.check_all can see modules inside
-    sys.path.append(directory)
 
     for root_str, dir_list, file_list in os.walk(directory):
         # check if directory is student directory
@@ -30,8 +27,10 @@ def pyta_statistics(directory):
 
             for file in file_list:
                 if file.endswith('.py'):
-                    python_ta.check_all(os.path.join(student_id, file),
-                                        reporter=StatReporter)
+                    python_ta.check_all(os.path.join(root_str, file),
+                                        reporter=StatReporter,
+                                        config=config,
+                                        number_of_messages=0)
                     # store all the msg objects of this student's files
             all_errors[student_id] = (StatReporter.error_messages,
                                       StatReporter.style_messages)
@@ -40,6 +39,7 @@ def pyta_statistics(directory):
         raise Exception('No student files found in given directory!')
     else:
         _print_stats(*summary(all_errors))
+        return all_errors
 
 
 def _print_stats(individual_stats, summary_stats):
@@ -149,6 +149,9 @@ def _print_stats(individual_stats, summary_stats):
     five_numbers = summary_stats[6][1]
     for stat_type, value in five_numbers:
         print('\t{:21}{}'.format(stat_type + ':', value))
+
+    # Standard Deviation
+    print('\n{}: {}'.format(summary_stats[7][0], summary_stats[7][1]))
 
 
 def _print_top_errors(stats, tabs=1, aggregate=True):

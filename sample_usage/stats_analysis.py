@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from statistics import median
-from math import ceil
+from math import ceil, sqrt
 
 
 def _individual_calc(error_msgs, style_msgs):
@@ -63,6 +63,7 @@ def summary(all_msgs):
     style_num = _frequent_messages(_message_counter(style_errors))
     both_num = _frequent_messages(_message_counter(code_errors + style_errors))
 
+    avg_errors = round((len(code_errors) + len(style_errors)) / num_stu, 2)
     # Calculating the Five Number Summary for all errors (per student)
     stu_errors.sort(reverse=True)
 
@@ -72,6 +73,13 @@ def summary(all_msgs):
     q3 = stu_errors[ceil(0.25 * len(stu_errors)) - 1]
     q1 = stu_errors[ceil(0.75 * len(stu_errors)) - 1]
 
+    # Calculating the Standard Deviation
+    sum_dev = 0
+    for error_dev in stu_errors:
+        sum_dev += (error_dev - avg_errors) ** 2
+
+    std_dev = sqrt(sum_dev / len(stu_errors))
+
     sum_stats = [('Most Frequent Code Errors', error_num),
                  ('Average Code Errors Per Student',
                   round(len(code_errors) / num_stu, 2)),
@@ -79,14 +87,14 @@ def summary(all_msgs):
                  ('Average Style Errors Per Student',
                   round(len(style_errors) / num_stu, 2)),
                  ('Most Frequent Errors of Either Type', both_num),
-                 ('Average Errors of Either Type Per Student',
-                  round((len(code_errors) + len(style_errors)) / num_stu, 2)),
+                 ('Average Errors of Either Type Per Student', avg_errors),
                  ('Five Number Summary of Errors Per Student',
                   [('Most Errors', stu_errors[0]),
                    ('Upper Quartile (Q3)', q3),
                    ('Median', med),
                    ('Lower Quartile (Q1)', q1),
-                   ('Least Errors', stu_errors[-1])])]
+                   ('Least Errors', stu_errors[-1])]),
+                 ('Standard Deviation', round(std_dev, 2))]
 
     return indiv_stats, sum_stats
 

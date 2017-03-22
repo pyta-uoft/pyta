@@ -1,5 +1,4 @@
 """checker for global variables
-
 """
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
@@ -9,13 +8,13 @@ from pylint.checkers.base import CONST_NAME_RGX
 
 
 class GlobalVariablesChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
     name = 'global_variables'
     msgs = {'E9997': ('Global variables should not be used in CSC108/CSC148 - '
                       '%s', 'forbidden-global-variables', '')}
 
-    options = ()
     # this is important so that your checker is executed before others
     priority = -1
 
@@ -43,16 +42,19 @@ class GlobalVariablesChecker(BaseChecker):
 
 
 def is_in_main(node):
-    try:
-        parent = node.statement().parent
-
-        return (
-            isinstance(parent, astroid.node_classes.If) and
-            parent.test.left.name == '__name__' and
-            parent.test.ops[0][1].value == '__main__'
-        )
-    except (AttributeError, IndexError) as e:
+    if not hasattr(node, 'parent'):
         return False
+
+    parent = node.parent
+    try:
+        if (isinstance(parent, astroid.node_classes.If) and
+              parent.test.left.name == '__name__' and
+              parent.test.ops[0][1].value == '__main__'):
+            return True
+        else:
+            return is_in_main(parent)
+    except (AttributeError, IndexError) as e:
+        return is_in_main(parent)
 
 
 def register(linter):

@@ -66,16 +66,13 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     The name of the module should be the name of a module,
     or the path to a Python file.
     """
-    # Reset astroid cache
-    MANAGER.astroid_cache.clear()
-
     if module_name == '':
         m = sys.modules['__main__']
         spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
     else:
         # Check if `module_name` is not the type str, raise error.
         if not isinstance(module_name, str):
-            print("The Module '{}' has an invalid name. Module name must be the "
+            print("The Module '{}' has an invalid name. Module name must be "
                   "type str.".format(module_name))
             return
         module_name = module_name.replace(os.path.sep, '.')
@@ -89,6 +86,11 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     if spec is None:
         print("The Module '{}' could not be found. ".format(module_name))
         return
+
+    # Clear the astroid cache of this module (allows for on-the-fly changes
+    # to be detected in consecutive runs in the interpreter).
+    if spec.name in MANAGER.astroid_cache:
+        del MANAGER.astroid_cache[spec.name]
 
     current_reporter = reporter(number_of_messages)
     linter = lint.PyLinter(reporter=current_reporter)
@@ -130,7 +132,16 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                 else:
                     print('ERROR: string "pylint:" found in comment. No checks will be run.')
                     return
+    except IndentationError as e:
+        print('ERROR: python_ta could not check your code due to an ' +
+              'indentation error at line {}'.format(e.lineno))
+        return
+    except tokenize.TokenError as e:
+        print('ERROR: python_ta could not check your code due to a ' +
+              'syntax error in your file')
+        return
 
+    try:
         linter.check([spec.origin])
         current_reporter.print_messages(level)
 

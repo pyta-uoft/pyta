@@ -1,7 +1,7 @@
 """
 FunctionDef astroid node
 
-A function definition.
+This node represents a function definition.
 
 Attributes:
     - name        (str)
@@ -10,27 +10,28 @@ Attributes:
         - An arguments node. See Arguments.py for more details.
     - doc         (str)
         - The docstring of the function.
-    - body        (List[Node])
+    - body        (List[Statement])
         - The list of nodes inside the function.
-    - decorators  (Decorator)
-        - The decorator to be applied on this function.
-    - returns     (None)
-        - The return annotation.
+    - decorators  (Decorators)
+        - The decorators to be applied to this function.
+    - returns     (Name)
+        - The return annotation. Only python3 has a return annotation.
 
 Example:
     - name        -> "fun"
     - args        -> arg
     - doc         -> "This is a function fun."
-    - body        -> [Assign(party, "yeah!")]
-    - decorators  -> @wrapper
-    - returns     -> return party
+    - body        -> [Assign(AssignName(return_annotation)),
+                     Return(Name(return_annotation)]
+    - decorators  -> [Name(wrapper)]
+    - returns     -> str
 """
 
 @wrapper
-def fun(arg):
+def fun(arg) -> str:
     """
     This is a function fun.
     """
-    party = "yeah!"
-    return party
+    return_annotation = "cool!"
+    return return_annotation
 

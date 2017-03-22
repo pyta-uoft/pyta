@@ -1,14 +1,27 @@
 """
 Index astroid node
 
-Simple subscripting with a single value.
+This node represents simple subscripting with a single value.
 
 Attributes:
-    - value  (Num)
-        - A Num node contains a single value.
+    - value  (Expr)
+        - The Expr node can be Const, UnaryOp, BinOp, etc.
 
-Example:
-    - value  -> Num(0)
+Example 1:
+    - value  -> Const(0)
+
+Example 2:
+    - value -> UnaryOp(-1)
+
+Example 3:
+    - value -> BinOp(1, 2)
 """
 
+# Example 1:
 x[0]
+
+# Example 2:
+x[-1]
+
+# Example 3:
+x[1+2]

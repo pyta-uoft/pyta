@@ -13,6 +13,10 @@
     * `always-returning-in-a-loop`
     * `too-many-nested-blocks`
 
+* In the vaguely distant future, when more people reliably have Python 3.6,
+  change the ints in the LineType class definition into `enum.auto()` calls.
+    * (will need to be imported, of course)
+
 ## `HTMLReporter`
 
 * Not all error messages are explained on the website: http://www.cs.toronto.edu/~david/pyta/:

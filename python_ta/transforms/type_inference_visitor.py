@@ -25,10 +25,7 @@ class TypeInfo:
     """
     def __init__(self, type_, context=None):
         self.type = type_
-        if context is None:
-            self.context = {}
-        else:
-            self.context = context
+        self.context = context or {}
 
 
 def unify(type1, type2):
@@ -83,16 +80,16 @@ def unify(type1, type2):
         return tmap
     # Handle functions differently
     elif isinstance(type1, CallableMeta) and isinstance(type2, CallableMeta):
-        args1, result1 = type1.__args__, type1.__result__
         args2, result2 = type2.__args__, type2.__result__
-        tmap = {}
-        if len(args1) != len(args2):
-            raise TypeInferenceError('unable to unify function types with wrong number of parameters {} and {}'.format(len(args1), len(args2)))
 
-        for arg1, arg2 in zip(args1, args2):
-            new_tmap = unify(arg1, arg2)
-            unify_map(tmap, new_tmap)
-        unify_map(tmap, unify(result1, result2))
+        tmap, rtype = unify_call(type1, *args2)
+        unify_map(tmap, unify(result2, rtype))
+        if hasattr(type1, 'polymorphic_tvars'):
+            for t in type1.polymorphic_tvars:
+                tmap.pop(t.__name__, None)
+        if hasattr(type2, 'polymorphic_tvars'):
+            for t in type2.polymorphic_tvars:
+                tmap.pop(t.__name__, None)
         return tmap
     elif type1 == type2:
         return {}
@@ -114,7 +111,10 @@ def substitute(t, type_map):
     elif isinstance(t, CallableMeta):
         args = list(substitute(t1, type_map) for t1 in t.__args__)
         res = substitute(t.__result__, type_map)
-        return Callable[args, res]
+        new_t = Callable[args, res]
+        if hasattr(t, 'polymorphic_tvars'):
+            new_t.polymorphic_tvars = t.polymorphic_tvars
+        return new_t
     else:
         return t
 
@@ -133,8 +133,14 @@ def unify_call(func_type, *arg_types):
     for arg_type, param_type in zip(arg_types, param_types):
         new_tmap = unify(arg_type, param_type)
         unify_map(tmap, new_tmap)
+    new_rtype = substitute(return_type, tmap)
 
-    return tmap, substitute(return_type, tmap)
+    # Remove TypeVars in original function type from the map
+    if hasattr(func_type, 'polymorphic_tvars'):
+        for t in func_type.polymorphic_tvars:
+            tmap.pop(t.__name__, None)
+
+    return tmap, new_rtype
 
 
 def unify_map(tmap, new_tmap):
@@ -350,6 +356,8 @@ def set_functiondef_type_constraints(node):
             t = TypeErrorInfo(e.args[0], node)
     func_type = Callable[[context[arg] for arg in node.argnames()],
                           context['return']]
+    func_type.polymorphic_tvars = [context[arg] for arg in node.argnames()
+                                   if isinstance(context[arg], TypeVar)]
     node.type_constraints = TypeInfo(NoType, {node.name: func_type})
 
 

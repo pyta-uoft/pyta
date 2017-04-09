@@ -27,7 +27,7 @@ class TypeInferenceChecker(BaseChecker):
             x = node.type_constraints
             if isinstance(x.type, TypeErrorInfo):
                 self.add_message('type-error', args=x.type.msg, node=x.type.node)
-            print(node, x.type, x.context)
+            print(node, x.type)
 
 
 def register(linter):

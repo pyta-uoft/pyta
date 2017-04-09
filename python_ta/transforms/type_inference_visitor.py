@@ -3,13 +3,11 @@ import astroid.inference
 import astroid
 from astroid.node_classes import *
 from typing import *
-from typing import CallableMeta, TupleMeta, GenericMeta, UnionMeta, _gorg, _geqv
+from typing import CallableMeta, TupleMeta, GenericMeta, UnionMeta, _gorg, _geqv, Optional
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder, TuplePlus, lookup_method, fresh_tvar
+from ..typecheck.base import op_to_dunder, TuplePlus, lookup_method, Environment, TypeConstraints, TypeInferenceError
 
-
-class TypeInferenceError(Exception):
-    pass
+TYPE_CONSTRAINTS = TypeConstraints()
 
 
 class NoType:
@@ -21,166 +19,9 @@ class TypeInfo:
 
     === Instance attributes ===
     - type (type): type of the inferred value
-    - context (Dict[str, type]): dictionary of variable names to their types
     """
-    def __init__(self, type_, context=None):
+    def __init__(self, type_: type):
         self.type = type_
-        self.context = context or {}
-
-
-def unify(type1, type2):
-    """Unify two different types."""
-    if isinstance(type1, TypeVar) and isinstance(type2, TypeVar):
-        return {type1.__name__: type2}
-    elif isinstance(type1, TypeVar):
-        constraints = type1.__constraints__
-        if not constraints:
-            return {type1.__name__: type2}
-
-        for constraint in constraints:
-            try:
-                tmap = unify(type2, constraint)
-            except TypeInferenceError:
-                continue
-            unify_map(tmap, {type1.__name__: type2})
-            return tmap
-        else:
-            raise TypeInferenceError('bad unify')
-    elif isinstance(type2, TypeVar):
-        return unify(type2, type1)
-    elif isinstance(type1, GenericMeta) and isinstance(type2, GenericMeta):
-        if not _geqv(type1, type2):
-            raise TypeInferenceError('bad unify')
-
-        if type1.__args__ is None or type2.__args__ is None:
-            return {}
-
-        tmap = {}
-        for a1, a2 in zip(type1.__args__, type2.__args__):
-            new_tmap = unify(substitute(a1, tmap), substitute(a2, tmap))
-            unify_map(tmap, new_tmap)
-        return tmap
-    # Handle tuples differently
-    elif isinstance(type1, TupleMeta) and isinstance(type2, TupleMeta):
-        tup1, tup2 = type1.__tuple_params__, type2.__tuple_params__
-        i = 0
-        tmap = {}
-        while i < len(tup1) - 1 and i < len(tup2) - 1:
-            new_tmap = unify(tup1[i], tup2[i])
-            unify_map(tmap, new_tmap)
-        if len(tup1) == len(tup2):
-            new_tmap = unify(tup1[i], tup2[i])
-            unify_map(tmap, new_tmap)
-        elif len(tup1) < len(tup2) and isinstance(tup1[i], TypeVar):
-            unify_map(tmap, {tup1[i].__name__: tup2[i:]})
-        elif len(tup2) < len(tup1) and isinstance(tup2[i], TypeVar):
-            unify_map(tmap, {tup2[i].__name__: tup1[i:]})
-        else:
-            raise TypeInferenceError('unable to unify Tuple types')
-        return tmap
-    # Handle functions differently
-    elif isinstance(type1, CallableMeta) and isinstance(type2, CallableMeta):
-        args2, result2 = type2.__args__, type2.__result__
-
-        tmap, rtype = unify_call(type1, *args2)
-        unify_map(tmap, unify(result2, rtype))
-        if hasattr(type1, 'polymorphic_tvars'):
-            for t in type1.polymorphic_tvars:
-                tmap.pop(t.__name__, None)
-        if hasattr(type2, 'polymorphic_tvars'):
-            for t in type2.polymorphic_tvars:
-                tmap.pop(t.__name__, None)
-        return tmap
-    elif type1 == type2:
-        return {}
-    else:
-        raise TypeInferenceError('bad unify')
-
-
-def substitute(t, type_map):
-    """Make substitutions in t according to type_map, returning resulting type."""
-    if isinstance(t, TypeVar) and t.__name__ in type_map:
-        return type_map[t.__name__]
-    elif isinstance(t, GenericMeta) and t.__args__ is not None:
-        return _gorg(t)[tuple(substitute(t1, type_map) for t1 in t.__args__)]
-    elif isinstance(t, TuplePlus):
-        tup = ()
-        for c in t.__constraints__:
-            tup = tup + type_map[c.__name__]  # assume c is mapped to a (Python) tuple
-        return Tuple[tup]
-    elif isinstance(t, CallableMeta):
-        args = list(substitute(t1, type_map) for t1 in t.__args__)
-        res = substitute(t.__result__, type_map)
-        new_t = Callable[args, res]
-        if hasattr(t, 'polymorphic_tvars'):
-            new_t.polymorphic_tvars = t.polymorphic_tvars
-        return new_t
-    else:
-        return t
-
-
-def unify_call(func_type, *arg_types):
-    """Unify a function call with the given function type and argument types.
-
-    Return a unification map and result type.
-    """
-    param_types, return_type = func_type.__args__, func_type.__result__
-    # Check that the number of parameters matches the number of arguments.
-    if len(param_types) != len(arg_types):
-        raise TypeInferenceError('Wrong number of arguments')
-
-    tmap = {}
-    for arg_type, param_type in zip(arg_types, param_types):
-        new_tmap = unify(arg_type, param_type)
-        unify_map(tmap, new_tmap)
-    new_rtype = substitute(return_type, tmap)
-
-    # Remove TypeVars in original function type from the map
-    if hasattr(func_type, 'polymorphic_tvars'):
-        for t in func_type.polymorphic_tvars:
-            tmap.pop(t.__name__, None)
-
-    return tmap, new_rtype
-
-
-def unify_map(tmap, new_tmap):
-    for k, v in new_tmap.items():
-        if k not in tmap:
-            tmap[k] = v
-        else:
-            v1 = tmap[k]
-            if isinstance(v1, TypeVar):
-                tmap[k] = v
-            elif isinstance(v, TypeVar):
-                tmap[k] = v1
-            elif issubclass(v1, v):
-                tmap[k] = v
-            elif not issubclass(v, v1):
-                tmap[k] = Any
-
-
-def unify_context(c1, c2, tmap=None):
-    """Unify contexts, with an optional type map."""
-    c = {}
-    tmap1 = {}
-    if tmap is not None:
-        unify_map(tmap1, tmap)
-    for var in c1:
-        c[var] = c1[var]
-        if var in c2:
-            try:
-                tmap2 = unify(c1[var], c2[var])
-                unify_map(tmap1, tmap2)
-            except TypeInferenceError as e:
-                raise TypeInferenceError('Could not unify types {} and {} for variable {}'.format(c1[var], c2[var], var)) from e
-
-    for var in c2:
-        if var not in c1:
-            c[var] = c2[var]
-
-    for var in c:
-        c[var] = substitute(c[var], tmap1)
-    return c, tmap1
 
 
 class TypeErrorInfo:
@@ -246,35 +87,33 @@ def set_expr_type_constraints(node):
 
 
 def set_name_type_constraints(node):
-    t = fresh_tvar()
-    node.type_constraints = TypeInfo(t, {node.name: t})
+    node.type_constraints = TypeInfo(node.frame().type_environment.locals[node.name])
 
 
 ##############################################################################
 # Operation nodes
 ##############################################################################
 def set_binop_type_constraints(node):
-    left_type, left_context = node.left.type_constraints.type, node.left.type_constraints.context
-    right_type, right_context = node.right.type_constraints.type, node.right.type_constraints.context
+    t1 = TYPE_CONSTRAINTS.lookup_concrete(node.left.type_constraints.type)
+    t2 = TYPE_CONSTRAINTS.lookup_concrete(node.right.type_constraints.type)
     op_name = op_to_dunder(node.op)
 
     try:
-        method_type = lookup_method(left_type, op_name)
+        method_type = lookup_method(op_name, t1)
     except KeyError:
         node.type_constraints = TypeInfo(
-            TypeErrorInfo('Method {}.{} not found'.format(left_type, op_name), node)
+            TypeErrorInfo('Method {}.{} not found'.format(t1, op_name), node)
         )
         return
 
     try:
-        tmap, return_type = unify_call(method_type, left_type, right_type)
+        return_type = TYPE_CONSTRAINTS.unify_call(method_type, t1, t2)
     except TypeInferenceError as e:
         node.type_constraints = TypeInfo(
-            TypeErrorInfo('incompatible types {} and {} in BinOp'.format(left_type, right_type), node)
+            TypeErrorInfo('incompatible types {} and {} in BinOp'.format(t1, t2), node)
         )
     else:
-        node.type_constraints = TypeInfo(return_type,
-                                         unify_context(left_context, right_context, tmap)[0])
+        node.type_constraints = TypeInfo(return_type)
 
 
 def set_unaryop_type_constraints(node):
@@ -284,11 +123,12 @@ def set_unaryop_type_constraints(node):
 def set_subscript_type_constraints(node):
     if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
         value_type = node.value.type_constraints.type
+        value_type = TYPE_CONSTRAINTS.lookup_concrete(value_type)
         arg_type = node.slice.type_constraints.type
         op_name = '__getitem__'
 
         try:
-            method_type = lookup_method(value_type, op_name)
+            method_type = lookup_method(op_name, value_type)
         except KeyError:
             node.type_constraints = TypeInfo(
                 TypeErrorInfo('Method {}.{} not found'.format(value_type, op_name), node)
@@ -296,7 +136,7 @@ def set_subscript_type_constraints(node):
             return
 
         try:
-            _, return_type = unify_call(method_type, value_type, arg_type)
+            return_type = TYPE_CONSTRAINTS.unify_call(method_type, value_type, arg_type)
         except TypeInferenceError as e:
             node.type_constraints = TypeInfo(
                 TypeErrorInfo('incompatible types {} and {} in Subscript'.format(value_type, arg_type), node)
@@ -335,66 +175,45 @@ def set_boolop_type_constraints(node):
 ##############################################################################
 def set_assign_type_constraints(node):
     first_target = node.targets[0]
-    t, c = node.value.type_constraints.type, node.value.type_constraints.context
-    node.type_constraints = TypeInfo(NoType, unify_context(c, {first_target.name: t})[0])
+    TYPE_CONSTRAINTS.unify(node.frame().type_environment.locals[first_target.name],
+                           node.value.type_constraints.type)
+    node.type_constraints = TypeInfo(NoType)
 
 
 def set_return_type_constraints(node):
-    t, c = node.value.type_constraints.type, node.value.type_constraints.context
-    node.type_constraints = TypeInfo(NoType, unify_context(c, {'return': t})[0])
+    t = node.value.type_constraints.type
+    TYPE_CONSTRAINTS.unify(node.frame().type_environment.locals['return'], t)
+    node.type_constraints = TypeInfo(NoType)
 
 
 def set_functiondef_type_constraints(node):
-    context = {arg: fresh_tvar() for arg in node.argnames()}
-    context['return'] = fresh_tvar()
-
-    for s in node.body:
-        stmt_context = s.type_constraints.context
-        try:
-            context = unify_context(context, stmt_context)[0]
-        except TypeInferenceError as e:
-            t = TypeErrorInfo(e.args[0], node)
-    func_type = Callable[[context[arg] for arg in node.argnames()],
-                          context['return']]
-    func_type.polymorphic_tvars = [context[arg] for arg in node.argnames()
-                                   if isinstance(context[arg], TypeVar)]
-    node.type_constraints = TypeInfo(NoType, {node.name: func_type})
+    arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals[arg])
+                 for arg in node.argnames()]
+    rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
+    func_type = Callable[arg_types, rtype]
+    func_type.polymorphic_tvars = [arg for arg in arg_types
+                                   if isinstance(arg, TypeVar)]
+    TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.locals[node.name], func_type)
+    node.type_constraints = TypeInfo(NoType)
 
 
 def set_call_type_constraints(node):
-    context = {}
     try:
         func_name = node.func.name
+        func_t = TYPE_CONSTRAINTS.lookup_concrete(node.frame().type_environment.locals[func_name])
     except AttributeError:
-        node.type_constraints = TypeInfo(
-            NoType, context
-        )
+        node.type_constraints = TypeInfo(NoType)
+        return
 
-    arg_types = []
-    for arg in node.args:
-        t, c = arg.type_constraints.type, arg.type_constraints.context
-        arg_types.append(t)
-        context = unify_context(context, c)[0]
-
-    # Add in type for the function
-    ret_type = fresh_tvar()
-    context = unify_context(context,
-                            {func_name: Callable[arg_types, ret_type]})[0]
-    node.type_constraints = TypeInfo(ret_type, context)
+    arg_types = [arg.type_constraints.type for arg in node.args]
+    ret_type = TYPE_CONSTRAINTS.unify_call(func_t, *arg_types)
+    node.type_constraints = TypeInfo(ret_type)
 
 
 def set_module_type_constraints(node):
-    t = NoType
-    context = {}
-    tmap = {}
-    for s in node.body:
-        stmt_context = s.type_constraints.context
-        try:
-            context, new_tmap = unify_context(context, stmt_context, tmap)
-            unify_map(tmap, new_tmap)
-        except TypeInferenceError as e:
-            t = TypeErrorInfo(e.args[0], node)
-    node.type_constraints = TypeInfo(t, context)
+    node.type_constraints = TypeInfo(NoType)
+    print('All sets:', TYPE_CONSTRAINTS._sets)
+    print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
 
 
 def register_type_constraints_setter():
@@ -431,3 +250,18 @@ def register_type_constraints_setter():
     type_visitor.register_transform(astroid.Module,
                                     set_module_type_constraints)
     return type_visitor
+
+
+def _set_locals_environment(node):
+    node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals})
+    if isinstance(node, astroid.FunctionDef):
+        node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
+
+
+def environment_transformer() -> TransformVisitor:
+    """Return a TransformVisitor that sets an environment for every node."""
+    visitor = TransformVisitor()
+
+    visitor.register_transform(astroid.FunctionDef, _set_locals_environment)
+    visitor.register_transform(astroid.Module, _set_locals_environment)
+    return visitor

@@ -13,7 +13,7 @@ def patch_messages():
                         confidence=UNDEFINED):
         old_add_message(self, msg_descr, line, node, args, confidence)
         msg_info = self.msgs_store.check_message_id(msg_descr)
-        self.reporter.handle_node(msg_info.msgid, node)
+        self.reporter.handle_node(msg_info, node)
 
     MessagesHandlerMixIn.add_message = new_add_message
 

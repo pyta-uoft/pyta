@@ -68,13 +68,17 @@ class PlainReporter(BaseReporter):
         else:
             self._style_messages.append(msg)
 
-    def handle_node(self, msgid, node):
+    def handle_node(self, msg, node):
         """Add node attribute to last message."""
-        if msgid in ERROR_CHECKS:
-            if not isinstance(self._error_messages[-1], NewMessage):
+        if msg.msgid in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
+            if (self._error_messages and
+                    self._error_messages[-1].msg_id == msg.msgid and
+                    not isinstance(self._error_messages[-1], NewMessage)):
                 self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '')
         else:
-            if not isinstance(self._style_messages[-1], NewMessage):
+            if (self._style_messages and
+                    self._style_messages[-1].msg_id == msg.msgid and
+                    not isinstance(self._style_messages[-1], NewMessage)):
                 self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
 
     def print_messages(self, level='all'):

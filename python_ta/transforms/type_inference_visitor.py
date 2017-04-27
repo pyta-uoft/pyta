@@ -3,7 +3,7 @@ import astroid.inference
 import astroid
 from astroid.node_classes import *
 from typing import *
-from typing import CallableMeta, TupleMeta, GenericMeta, UnionMeta, _gorg, _geqv, Optional
+from typing import CallableMeta, TupleMeta, GenericMeta, Union, _gorg, _geqv, Optional
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder, TuplePlus, lookup_method, Environment, TypeConstraints, TypeInferenceError
 

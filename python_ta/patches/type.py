@@ -12,7 +12,10 @@ def patch_type_inference_transform():
         env_transformer = environment_transformer()
         env_transformer.visit(ast)
         type_transformer = register_type_constraints_setter()
-        type_transformer.visit(ast)
+        try:
+            type_transformer.visit(ast)
+        except:
+            pass
         return ast
 
     PyLinter.get_ast = new_get_ast

@@ -210,10 +210,6 @@ def literal_substitute(t, type_map):
     elif isinstance(t, TuplePlus):
         subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
         return TuplePlus('tup+', *subbed_args)
-        # tup = ()
-        # for c in t.__constraints__:
-        #     tup = tup + type_map[c.__name__]  # assume c is mapped to a (Python) tuple
-        # return Tuple[tup]
     elif isinstance(t, CallableMeta):
         args = list(literal_substitute(t1, type_map) for t1 in t.__args__)
         res = literal_substitute(t.__result__, type_map)

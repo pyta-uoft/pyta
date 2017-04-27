@@ -14,16 +14,6 @@ class NoType:
     pass
 
 
-class TypeInfo:
-    """A class representing the inferred type of a value.
-
-    === Instance attributes ===
-    - type (type): type of the inferred value
-    """
-    def __init__(self, type_: type):
-        self.type = type_
-
-
 class TypeErrorInfo:
     """Class representing an error in type inference."""
     def __init__(self, msg, node):
@@ -32,6 +22,16 @@ class TypeErrorInfo:
 
     def __str__(self):
         return self.msg
+
+
+class TypeInfo:
+    """A class representing the inferred type of a value.
+
+    === Instance attributes ===
+    - type (Union[type, TypeErrorInfo]): type of the inferred value
+    """
+    def __init__(self, type_: Union[type, TypeErrorInfo]):
+        self.type = type_
 
 
 ##############################################################################
@@ -212,8 +212,8 @@ def set_call_type_constraints(node):
 
 def set_module_type_constraints(node):
     node.type_constraints = TypeInfo(NoType)
-    print('All sets:', TYPE_CONSTRAINTS._sets)
-    print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
+    # print('All sets:', TYPE_CONSTRAINTS._sets)
+    # print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
 
 
 def register_type_constraints_setter():

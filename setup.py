@@ -22,8 +22,10 @@ setup(
               'python_ta.parser', 'python_ta.transforms'],
     install_requires=[
         'funcparserlib',
+        'hypothesis',
         'pycodestyle',
         'pylint',
+        'nose',
         'colorama',
         'six',
         'jinja2',

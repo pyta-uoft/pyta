@@ -6,60 +6,6 @@ from astroid import node_classes
 from python_ta.transforms.type_inference_visitor import *
 
 
-class SetConstFunctionTest(unittest.TestCase):
-    """testers specifically for the function set_const using single nodes."""
-
-    @classmethod
-    def setUpClass(self):
-        # Instantiate a visitor, and register the transform functions to it.
-        self.type_visitor = register_type_constraints_setter()
-
-    def test_const_str(self):
-        """testing if the function set_const has the correct output for node
-        type str."""
-        module = astroid.parse("""a='sample_string'""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.Const) if type(n.value) == str]
-        self.assertEqual([str], result)
-
-    def test_const_int(self):
-        """testing if the function set_const has the correct output for node
-        type int."""
-        module = astroid.parse("""100""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.Const) if type(n.value) == int]
-        self.assertEqual([int], result)
-
-    def test_const_float(self):
-        """testing if the function set_const has the correct output for node
-        type float."""
-        module = astroid.parse("""100.01""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.Const) if type(n.value) == float]
-        self.assertEqual([float], result)
-
-    def test_const_bool(self):
-        """testing if the function set_const has the correct output for node
-        type boolean."""
-        module = astroid.parse("""True""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.Const) if type(n.value) == bool]
-        self.assertEqual([bool], result)
-
-    def test_const_none(self):
-        """testing if the function set_const has the correct output for
-        NoneType node."""
-        module = astroid.parse("""None""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.Const) if type(n.value) == type(None)]
-        self.assertEqual([type(None)], result)
-
-
 class BinOpTests(unittest.TestCase):
 
     @classmethod
@@ -275,30 +221,6 @@ class TypeInferenceVisitorTest(unittest.TestCase):
         result = [n.type_constraints.type for n in module.nodes_of_class(
             node_classes.UnaryOp)]
         self.assertEqual([int], result)
-
-    def test_list_same_type_elements(self):
-        """testing if a list that's been passed into TypeVisitor
-        has the correct type_constraints attribute.
-
-        The list contains only 1 type of elements.
-        """
-        module = astroid.parse("""['hi', 'how', 'is', 'life']""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.List)]
-        self.assertEqual([List[str]], result)
-
-    def test_list_different_type_elements(self):
-        """testing if a list that's been passed into TypeVisitor
-        has the correct type_constraints attribute.
-
-        The list contains different type of elements.
-        """
-        module = astroid.parse("""[1, 2, 2.5, 3, 'cheese']""")
-        self.type_visitor.visit(module)
-        result = [n.type_constraints.type for n in module.nodes_of_class(
-            node_classes.List)]
-        self.assertEqual([List[Any]], result)
 
     def test_tuple_same_type_elements(self):
         """testing if a tuple that's been passed into TypeVisitor

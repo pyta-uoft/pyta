@@ -247,7 +247,7 @@ class TestEndingLocation(unittest.TestCase):
     def test_const(self):
         """
         """
-        expected = [(1, 1, 0, 6), (2, 2, 4, 6)]
+        expected = [(1, 1, 0, 6), (2, 2, 4, 6), (3, 3, 0, 3), (4, 4, 0, 8)]
         module = self.get_file_as_module(PATH + 'const.py')
         self.set_and_check(module, astroid.Const, expected)
 

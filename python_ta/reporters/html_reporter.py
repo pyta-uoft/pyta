@@ -1,34 +1,51 @@
 import os
+import webbrowser
 
 from jinja2 import Environment, FileSystemLoader
+from datetime import datetime
 
-from .plain_reporter import PlainReporter
+from .color_reporter import ColorReporter
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class HTMLReporter(PlainReporter):
-    def __init__(self, number_of_messages):
-        super().__init__(number_of_messages)
+class HTMLReporter(ColorReporter):
+    _SPACE = '&nbsp;'
+    _BREAK = '<br/>'
+    _COLOURING = {'black': '<span class="black">',
+                  'bold': '<span>',
+                  'code-heading': '<span>',
+                  'style-heading': '<span>',
+                  'code-name': '<span>',
+                  'style-name': '<span>',
+                  'highlight': '<span class="highlight">',
+                  'grey': '<span class="grey">',
+                  'gbold': '<span class="gbold">',
+                  'reset': '</span>'}
 
     # Override this method
-    def print_message_ids(self):
+    def print_messages(self, level='all'):
         # Sort the messages.
         self.sort_messages()
+        # Call these two just to fill snippet attribute of Messages
+        # (and also to fix weird bad-whitespace thing):
+        self._colour_messages_by_type(style=False)
+        self._colour_messages_by_type(style=True)
 
         template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template('templates/template.txt')
+        output_path = THIS_DIR + '/templates/output.html'
 
-        with open('output.html', 'w') as f:
-            for msg in self._error_messages:
-                msg_new = msg.msg.replace('\r', '')
-                msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
-                i = self._error_messages.index(msg)
-                self._error_messages[i] = msg._replace(msg=msg_new)
+        # Date/time (24 hour time) format:
+        # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
+        dt = 'Generated: ' + str(datetime.now().
+                                 strftime('%a. %b. %d %Y, %H:%M:%S'))
+        with open(output_path, 'w') as f:
+            f.write(template.render(date_time=dt,
+                                    mod_name=self._module_name,
+                                    code=self._sorted_error_messages,
+                                    style=self._sorted_style_messages))
+        print('Opening your report in a browser...')
+        output_url = 'file:///{}/templates/output.html'.format(THIS_DIR)
+        webbrowser.open(output_url)
 
-            for msg in self._style_messages:
-                msg_new = msg.msg.replace('\r', '')
-                msg_new = msg_new.replace('\n', '<br/>&emsp;&emsp;')
-                i = self._style_messages.index(msg)
-                self._style_messages[i] = msg._replace(msg=msg_new)
-
-            f.write(template.render(messages=(self._error_messages + self._style_messages)))
+    _display = None

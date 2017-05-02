@@ -1,0 +1,136 @@
+#header {
+	height: 70px;
+	border-radius: 25px;
+	border: medium solid rgb(35, 35, 35);
+	background-color: rgb(130, 216, 245);
+	line-height: normal;
+	padding: 20px;
+    padding-bottom: 22px;
+}
+
+body {
+    font-size: 100%;
+	font-family: "Lucida Sans", sans-serif;
+	line-height: 105%;
+	background-color: rgb(237, 251, 255);
+	text-align: center;
+}
+
+#preheader {
+    position: relative;
+	font-size: 12;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 5px;
+	overflow:hidden;
+    white-space: nowrap;
+}
+
+#module {
+    display: inline;
+    float:left;
+}
+
+#date {
+    display: inline;
+    float: right;
+}
+
+.title {
+	margin: auto;
+	font-family: Impact, sans-serif;
+	font-size: 50;
+	border-radius: 25px;
+	border: thin solid rgb(122, 122, 122);
+	width: 500px;
+	color: rgb(42, 77, 173);
+	background-color: rgb(255, 255, 255);
+	padding: 5px;
+}
+
+#inside {
+	border-radius: 25px;
+	border: thin solid rgb(0, 0, 0);
+	background-color: rgb(199, 239, 252);
+	padding-top: 20px;
+}
+
+#core {
+	margin: auto;
+	display: inline-block;
+	text-align: left;
+	font-size: 12;
+	border-radius: 25px;
+	border: thin solid rgb(122, 122, 122);
+	min-width: 50%;
+	background-color: rgb(255, 255, 255);
+	padding: 15px;
+}
+
+#code {
+	font-size: 120%;
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+}
+
+#style {
+	font-size: 120%;
+    color: rgb(0, 0, 255);
+    font-weight: bold;
+}
+
+.code_id {
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+    font-size: 95%;
+}
+
+.code_id a:link {
+    color: rgb(255, 0, 0);
+}
+
+.style_id {
+    color: rgb(0, 0, 255);
+    font-weight: bold;
+    font-size: 95%;
+}
+
+.style_id a:link {
+    color: rgb(0, 0, 255);
+}
+
+.snippet {
+	font-family: "Lucida Console", monospace;
+	font-weight: normal;
+}
+
+.grey {
+    color: rgb(119, 119, 120);
+}
+
+.gbold{
+    color: rgb(90, 91, 92);
+    font-weight: bold;
+}
+
+.highlight {
+    font-weight: bold;
+    background-color: rgb(0, 255, 255);
+}
+
+.black {
+	color: rgb(0, 0, 0);
+}
+
+#report_bug {
+	font-size: 75%;
+	padding: 20px;
+	#color: black;
+}
+
+#logo {
+    position: relative;
+    width:100%;
+    text-align: center;
+    padding-top: 10px;
+}

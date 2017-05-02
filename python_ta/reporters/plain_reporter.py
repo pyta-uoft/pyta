@@ -1,5 +1,8 @@
 from pylint.reporters import BaseReporter
+from pylint.utils import Message
+from collections import namedtuple
 
+NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
 # and forbidden constructs only)
@@ -50,11 +53,13 @@ ERROR_CHECKS = [
 
 
 class PlainReporter(BaseReporter):
-    def __init__(self, number_of_messages):
-        super().__init__(self)
+    def __init__(self, number_of_messages, source_lines=None, module_name=''):
+        super().__init__()
         self._error_messages = []
         self._style_messages = []
         self._number_of_messages = number_of_messages
+        self._source_lines = source_lines or []
+        self._module_name = module_name
 
     def handle_message(self, msg):
         """Handle a new message triggered on the current file."""
@@ -62,6 +67,19 @@ class PlainReporter(BaseReporter):
             self._error_messages.append(msg)
         else:
             self._style_messages.append(msg)
+
+    def handle_node(self, msg, node):
+        """Add node attribute to last message."""
+        if msg.msgid in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
+            if (self._error_messages and
+                    self._error_messages[-1].msg_id == msg.msgid and
+                    not isinstance(self._error_messages[-1], NewMessage)):
+                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '')
+        else:
+            if (self._style_messages and
+                    self._style_messages[-1].msg_id == msg.msgid and
+                    not isinstance(self._style_messages[-1], NewMessage)):
+                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
 
     def print_messages(self, level='all'):
         # Sort the messages.

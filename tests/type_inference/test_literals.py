@@ -2,7 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given
 import hypothesis.strategies as hs
-from typing import List, Any, Dict
+from typing import Any, Dict, List, Tuple
 
 from python_ta.transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
 
@@ -47,23 +47,23 @@ def test_heterogeneous_lists(lst):
     assert [List[Any]] == result
 
 
-@given(PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(),s(),  min_size=1)))
-def test_homogeneous_dict(dict):
+@given(PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1)))
+def test_homogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
     # first turn the raw input into a program in order to parse into an AST "module"
     # module should have been properly transformed using type_inference_visitor methods
-    module = _parse_text(str(dict))
+    module = _parse_text(str(dictionary))
     # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
     # get list of types
-    assert [Dict[type(list(dict.keys())[0]), type(list(dict.values())[0])]] == result
+    assert [Dict[type(list(dictionary.keys())[0]), type(list(dictionary.values())[0])]] == result
 
 
 @given(hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2))
-def test_heterogeneous_dict(dict):
+def test_heterogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
-    assume(not isinstance(list(dict.keys())[0], type(list(dict.keys())[1])))
-    module = _parse_text(str(dict))
+    assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
+    module = _parse_text(str(dictionary))
     # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
     # get list of types

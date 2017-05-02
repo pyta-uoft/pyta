@@ -47,6 +47,20 @@ def test_heterogeneous_lists(lst):
     assert [List[Any]] == result
 
 
+# come up with test case for dictionary with uniform key:value type
+def test_homogeneous_dict(dict):
+    """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
+    # first turn the raw input into a program in order to parse into an AST "module"
+    # module should have been properly transformed using type_inference_visitor methods
+    #module = _parse_text(str(dict))
+    homo =  {'Ryan': 22, 'Jeff': 29, 'Kevin': 25}
+    module = _parse_text(str(homo))
+    # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
+    # get list of types
+    assert [Dict[type(homo.keys()[0]), type(homo.values()[0])]] == result
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)

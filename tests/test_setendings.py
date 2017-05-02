@@ -5,7 +5,7 @@ Run from /pyta/ dir: `python tests/test_setendings.py`
 """
 
 import unittest
-from astroid.bases import NodeNG
+from astroid.node_classes import NodeNG
 from python_ta.transforms.setendings import *
 from colorama import Back, Fore
 
@@ -190,7 +190,7 @@ class TestEndingLocation(unittest.TestCase):
     # def test_binop(self):
     #     """note: value of col_offset = 6, is weird but we didn't set it.
     #     first (depends on pre/postorder) binop is ((1 + 2) + 3), then (1 + 2)
-    #     TODO: add the "( (100) * (42)  )" test 
+    #     TODO: add the "( (100) * (42)  )" test
     #     """
     #     expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
     #     example = '''1 + 2 + 3'''
@@ -499,14 +499,14 @@ class TestEndingLocation(unittest.TestCase):
         encountered, either on left or right side of colon.
         Should capture both brackets..
         """
-        expected = [(1, 1, 2, 3), 
-                    (2, 2, 3, 8), 
-                    (3, 3, 2, 4), 
-                    (4, 4, 3, 13), 
-                    (5, 5, 2, 8), 
-                    (6, 6, 8, 30), 
-                    (7, 8, 2, 2), 
-                    (9, 9, 2, 4), 
+        expected = [(1, 1, 2, 3),
+                    (2, 2, 3, 8),
+                    (3, 3, 2, 4),
+                    (4, 4, 3, 13),
+                    (5, 5, 2, 8),
+                    (6, 6, 8, 30),
+                    (7, 8, 2, 2),
+                    (9, 9, 2, 4),
                     (9, 9, 6, 7),
                     (10, 10, 2, 3),
                     (10, 10, 5, 7),
@@ -533,7 +533,7 @@ class TestEndingLocation(unittest.TestCase):
     def test_subscript(self):
         """
         """
-        expected = [(1, 1, 0, 4), 
+        expected = [(1, 1, 0, 4),
                     (2, 2, 0, 8),
                     (3, 3, 0, 4),
                     (4, 4, 0, 9),

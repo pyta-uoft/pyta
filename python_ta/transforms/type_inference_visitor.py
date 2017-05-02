@@ -73,7 +73,7 @@ def set_dict_type_constraints(node):
     if len(key_types) == 1 and len(value_types) == 1:
         node.type_constraints = TypeInfo(Dict[key_types.pop(), value_types.pop()])
     else:
-        node.type_constraints = TypeInfo(Dict)
+        node.type_constraints = TypeInfo(Dict[Any, Any])
 
 
 def set_index_type_constraints(node):

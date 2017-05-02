@@ -27,6 +27,15 @@ def test_simple_literal(const):
     assert [type(const)] == result
 
 
+# what do we want to give as input? Randomly generated tuples of varying sizes.
+#@given
+def test_tuple():
+    """ Test Tuple nodes representing a tuple of various types."""
+    module = _parse_text(str((2,1,5, "d")))
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Tuple)]
+    assert [Tuple[tuple(type(x) for x in (2,1,5, "d"))]] == result
+
+
 @given(PRIMITIVE_TYPES.flatmap(lambda s: hs.lists(s(), min_size=1)))
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""

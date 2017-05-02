@@ -2,7 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given
 import hypothesis.strategies as hs
-from typing import List, Any
+from typing import List, Any, Dict
 
 from python_ta.transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
 
@@ -59,6 +59,16 @@ def test_homogeneous_dict(dict):
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
     # get list of types
     assert [Dict[type(homo.keys()[0]), type(homo.values()[0])]] == result
+
+
+def test_heterogeneous_dict(dict):
+    """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
+    hetero =  {'Ryan': 22, 29: 'Jeff', 'Kevin': 25}
+    module = _parse_text(str(hetero))
+    # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
+    # get list of types
+    assert [Dict[type(hetero.keys()[0]), type(hetero.values()[0])]] == result
 
 
 def _parse_text(source: str) -> astroid.Module:

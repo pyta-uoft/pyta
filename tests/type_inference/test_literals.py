@@ -100,7 +100,7 @@ def test_string_index(index):
 @hs.composite
 def tuple_and_index(draw, elements=PRIMITIVE_VALUES):
     xs = draw(hs.tuples(elements, elements))
-    i = draw(hs.integers(min_value=0, max_value=1))
+    i = draw(hs.integers())
     return [repr(xs) + "[" + repr(i) + "]", i]
 @given(tuple_and_index())
 def test_tuple_index(index):

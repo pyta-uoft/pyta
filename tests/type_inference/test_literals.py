@@ -85,6 +85,19 @@ def test_heterogeneous_dict(dictionary):
 
 
 @hs.composite
+def string_and_index(draw):
+    xs = draw(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))
+    i = draw(hs.integers(min_value=0, max_value=len(xs) - 1))
+    return ["\"" +str(xs) + "\"" + "[" + str(i) + "]", i]
+@given(string_and_index())
+def test_string_index(index):
+    """Test index nodes representing a subscript"""
+    module = _parse_text(index[0])
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
+    assert [type(index[1])] == result
+
+
+@hs.composite
 def tuple_and_index(draw, elements=PRIMITIVE_VALUES):
     xs = draw(hs.tuples(elements, elements))
     i = draw(hs.integers(min_value=0, max_value=1))
@@ -108,6 +121,7 @@ def test_list_index(index):
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result
+
 
 
 def _parse_text(source: str) -> astroid.Module:

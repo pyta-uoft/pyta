@@ -86,9 +86,9 @@ def test_heterogeneous_dict(dictionary):
 
 @hs.composite
 def string_and_index(draw):
-    xs = draw(INDEX_TYPES)
+    xs = draw(INDEX_VALUES)
     i = draw(hs.integers(min_value=0, max_value=len(str(xs)) - 1))
-    return ["\"" +str(xs) + "\"" + "[" + str(i) + "]", i]
+    return [repr(xs)  + "[" + repr(i) + "]", i]
 @given(string_and_index())
 def test_string_index(index):
     """Test index nodes representing a subscript"""
@@ -101,7 +101,7 @@ def test_string_index(index):
 def tuple_and_index(draw, elements=PRIMITIVE_VALUES):
     xs = draw(hs.tuples(elements, elements))
     i = draw(hs.integers(min_value=0, max_value=1))
-    return [str(xs) + "[" + str(i) + "]", i]
+    return [repr(xs) + "[" + repr(i) + "]", i]
 @given(tuple_and_index())
 def test_tuple_index(index):
     """Test index nodes representing a subscript"""
@@ -114,7 +114,7 @@ def test_tuple_index(index):
 def list_and_index(draw, elements=PRIMITIVE_VALUES):
     xs = draw(hs.lists(elements, min_size=1))
     i = draw(hs.integers(min_value=0, max_value=len(xs) - 1))
-    return [str(xs) + "[" + str(i) + "]", i]
+    return [repr(xs) + "[" + repr(i) + "]", i]
 @given(list_and_index())
 def test_list_index(index):
     """Test index nodes representing a subscript"""
@@ -127,7 +127,7 @@ def test_list_index(index):
 def dict_and_index(draw, elements=PRIMITIVE_VALUES):
     xs = draw(hs.dictionaries(INDEX_VALUES, elements, min_size=1))
     i = draw(INDEX_VALUES)
-    return [str(xs) + "[" + repr(i) + "]", i]
+    return [repr(xs) + "[" + repr(i) + "]", i]
 @given(dict_and_index())
 def test_dict_index(index):
     """Test index nodes representing a subscript"""

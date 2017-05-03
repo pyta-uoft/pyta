@@ -124,24 +124,11 @@ def test_list_index(index):
 
 
 @hs.composite
-def dict_and_num_index(draw, elements=PRIMITIVE_VALUES):
-    xs = draw(hs.dictionaries(hs.integers, elements, min_size=1))
-    i = draw(hs.integers)
-    return [str(xs) + "[" + str(xs) + "]", i]
-@given(dict_and_num_index())
-def test_dict_index(index):
-    """Test index nodes representing a subscript"""
-    module = _parse_text(index[0])
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
-    assert [type(index[1])] == result
-
-
-@hs.composite
-def dict_and_alphanum_index(draw, elements=hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)):
-    xs = draw(hs.dictionaries(elements, elements, min_size=1))
-    i = draw(elements)
-    return [str(xs) + "[" + "\"" +str(xs) + "\"" + "]", i]
-@given(dict_and_alphanum_index())
+def dict_and_index(draw, elements=PRIMITIVE_VALUES):
+    xs = draw(hs.dictionaries(INDEX_VALUES, elements, min_size=1))
+    i = draw(INDEX_VALUES)
+    return [str(xs) + "[" + repr(i) + "]", i]
+@given(dict_and_index())
 def test_dict_index(index):
     """Test index nodes representing a subscript"""
     module = _parse_text(index[0])

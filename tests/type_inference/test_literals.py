@@ -41,6 +41,7 @@ def test_tuple(t_tuple):
     assert [Tuple[tuple(type(x) for x in t_tuple)]] == result
 
 
+
 @given(PRIMITIVE_TYPES.flatmap(lambda s: hs.lists(s(), min_size=1)))
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
@@ -134,6 +135,16 @@ def test_dict_index(index):
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result
+
+
+@given(PRIMITIVE_VALUES)
+def test_expr(expr):
+    """Test visitor for expression node representing a constant"""
+    module = _parse_text(repr(expr))
+    matching = True
+    for n in module.nodes_of_class(astroid.Expr):
+    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
+        assert n.value.type_constraints.type == n.type_constraints.type
 
 
 def _parse_text(source: str) -> astroid.Module:

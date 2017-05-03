@@ -18,7 +18,7 @@ PRIMITIVE_VALUES = PRIMITIVE_TYPES.flatmap(lambda s: s())
 
 INDEX_TYPES = hs.sampled_from([
     hs.integers,
-    hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
+    lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
 ])
 INDEX_VALUES = INDEX_TYPES.flatmap(lambda s: s())
 
@@ -117,6 +117,32 @@ def list_and_index(draw, elements=PRIMITIVE_VALUES):
     return [str(xs) + "[" + str(i) + "]", i]
 @given(list_and_index())
 def test_list_index(index):
+    """Test index nodes representing a subscript"""
+    module = _parse_text(index[0])
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
+    assert [type(index[1])] == result
+
+
+@hs.composite
+def dict_and_num_index(draw, elements=PRIMITIVE_VALUES):
+    xs = draw(hs.dictionaries(hs.integers, elements, min_size=1))
+    i = draw(hs.integers)
+    return [str(xs) + "[" + str(xs) + "]", i]
+@given(dict_and_num_index())
+def test_dict_index(index):
+    """Test index nodes representing a subscript"""
+    module = _parse_text(index[0])
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
+    assert [type(index[1])] == result
+
+
+@hs.composite
+def dict_and_alphanum_index(draw, elements=hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)):
+    xs = draw(hs.dictionaries(elements, elements, min_size=1))
+    i = draw(elements)
+    return [str(xs) + "[" + "\"" +str(xs) + "\"" + "]", i]
+@given(dict_and_alphanum_index())
+def test_dict_index(index):
     """Test index nodes representing a subscript"""
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]

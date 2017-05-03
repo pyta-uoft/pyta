@@ -525,13 +525,12 @@ def _add_parens(source_code):
     def h(node):
         # Initialize counters. Note: fromlineno is 1-indexed.
         while True:
-            col_offset, lineno = node.col_offset - 1, node.fromlineno - 1
+            col_offset, lineno = node.col_offset, node.fromlineno - 1
             end_col_offset, end_lineno = node.end_col_offset, node.end_lineno - 1
-            print(node, col_offset, lineno, end_col_offset, end_lineno)
 
             # First, search the remaining part of the current start line
             prev_char, new_lineno, new_coloffset = None, None, None
-            for j in range(col_offset, -1, -1):
+            for j in range(col_offset - 1, -1, -1):
                 if source_code[lineno][j] in CONSUMABLES:
                     continue
                 else:
@@ -547,6 +546,7 @@ def _add_parens(source_code):
                             continue
                         else:
                             prev_char, new_lineno, new_coloffset = source_code[i][j], i, j
+
                             break
                     if prev_char is not None:
                         break
@@ -563,12 +563,12 @@ def _add_parens(source_code):
                 elif source_code[end_lineno][j] in CONSUMABLES:
                     continue
                 else:
-                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno + 1, j + 1
+                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno, j
                     break
 
             if next_char is None:
                 # Search remaining lines
-                for i in range(lineno + 1, len(source_code)):
+                for i in range(end_lineno + 1, len(source_code)):
                     # Search each character
                     for j in range(len(source_code[i])):
                         if source_code[i][j] == '#':
@@ -576,7 +576,7 @@ def _add_parens(source_code):
                         elif source_code[i][j] in CONSUMABLES:
                             continue
                         else:
-                            next_char, new_end_lineno, new_end_coloffset = source_code[i][j], i, j + 1
+                            next_char, new_end_lineno, new_end_coloffset = source_code[i][j], i, j
                             break
                     if next_char is not None:
                         break
@@ -585,8 +585,8 @@ def _add_parens(source_code):
                 return
 
             # At this point, an enclosing pair of parentheses has been found
-            node.lineno, node.col_offset, node.end_lineno, node.end_col_offset =\
-                new_lineno, new_coloffset, new_end_lineno, new_end_coloffset
+            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset =\
+                new_lineno + 1, new_coloffset, new_end_lineno + 1, new_end_coloffset + 1
 
     return h
 

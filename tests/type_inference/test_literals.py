@@ -2,7 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given
 import hypothesis.strategies as hs
-from typing import List, Any
+from typing import Any, Dict, List, Tuple
 
 from python_ta.transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
 
@@ -27,6 +27,14 @@ def test_simple_literal(const):
     assert [type(const)] == result
 
 
+@given((hs.lists(PRIMITIVE_VALUES, min_size=1)).map(tuple))
+def test_tuple(t_tuple):
+    """ Test Tuple nodes representing a tuple of various types."""
+    module = _parse_text(str(t_tuple))
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Tuple)]
+    assert [Tuple[tuple(type(x) for x in t_tuple)]] == result
+
+
 @given(PRIMITIVE_TYPES.flatmap(lambda s: hs.lists(s(), min_size=1)))
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
@@ -45,6 +53,29 @@ def test_heterogeneous_lists(lst):
     result = [n.type_constraints.type for n in module.nodes_of_class(
         astroid.List)]
     assert [List[Any]] == result
+
+
+@given(PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1)))
+def test_homogeneous_dict(dictionary):
+    """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
+    # first turn the raw input into a program in order to parse into an AST "module"
+    # module should have been properly transformed using type_inference_visitor methods
+    module = _parse_text(str(dictionary))
+    # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
+    # get list of types
+    assert [Dict[type(list(dictionary.keys())[0]), type(list(dictionary.values())[0])]] == result
+
+
+@given(hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2))
+def test_heterogeneous_dict(dictionary):
+    """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
+    assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
+    module = _parse_text(str(dictionary))
+    # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
+    # get list of types
+    assert [Dict[Any, Any]] == result
 
 
 def _parse_text(source: str) -> astroid.Module:

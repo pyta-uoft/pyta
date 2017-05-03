@@ -16,6 +16,12 @@ PRIMITIVE_TYPES = hs.sampled_from([
 ])
 PRIMITIVE_VALUES = PRIMITIVE_TYPES.flatmap(lambda s: s())
 
+INDEX_TYPES = hs.sampled_from([
+    hs.integers,
+    hs.text,
+])
+INDEX_VALUES = INDEX_TYPES.flatmap(lambda s: s())
+
 
 @given(PRIMITIVE_VALUES)
 def test_simple_literal(const):
@@ -78,11 +84,30 @@ def test_heterogeneous_dict(dictionary):
     assert [Dict[Any, Any]] == result
 
 
-def test_index():
+@hs.composite
+def tuple_and_index(draw, elements=PRIMITIVE_VALUES):
+    xs = draw(hs.tuples(elements, elements))
+    i = draw(hs.integers(min_value=0, max_value=1))
+    return [str(xs) + "[" + str(i) + "]", i]
+@given(tuple_and_index())
+def test_tuple_index(index):
     """Test index nodes representing a subscript"""
-    module = _parse_text("[1,2,3][0]")
+    module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
-    assert [type(0)] == result
+    assert [type(index[1])] == result
+
+
+@hs.composite
+def list_and_index(draw, elements=PRIMITIVE_VALUES):
+    xs = draw(hs.lists(elements, min_size=1))
+    i = draw(hs.integers(min_value=0, max_value=len(xs) - 1))
+    return [str(xs) + "[" + str(i) + "]", i]
+@given(list_and_index())
+def test_list_index(index):
+    """Test index nodes representing a subscript"""
+    module = _parse_text(index[0])
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
+    assert [type(index[1])] == result
 
 
 def _parse_text(source: str) -> astroid.Module:

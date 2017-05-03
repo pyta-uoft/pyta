@@ -18,7 +18,7 @@ PRIMITIVE_VALUES = PRIMITIVE_TYPES.flatmap(lambda s: s())
 
 INDEX_TYPES = hs.sampled_from([
     hs.integers,
-    hs.text,
+    hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
 ])
 INDEX_VALUES = INDEX_TYPES.flatmap(lambda s: s())
 
@@ -86,8 +86,8 @@ def test_heterogeneous_dict(dictionary):
 
 @hs.composite
 def string_and_index(draw):
-    xs = draw(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))
-    i = draw(hs.integers(min_value=0, max_value=len(xs) - 1))
+    xs = draw(INDEX_TYPES)
+    i = draw(hs.integers(min_value=0, max_value=len(str(xs)) - 1))
     return ["\"" +str(xs) + "\"" + "[" + str(i) + "]", i]
 @given(string_and_index())
 def test_string_index(index):
@@ -121,7 +121,6 @@ def test_list_index(index):
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result
-
 
 
 def _parse_text(source: str) -> astroid.Module:

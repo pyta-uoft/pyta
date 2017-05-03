@@ -91,7 +91,7 @@ def string_and_index(draw):
     return [repr(xs)  + "[" + repr(i) + "]", i]
 @given(string_and_index())
 def test_string_index(index):
-    """Test index nodes representing a subscript"""
+    """Test index visitor representing a subscript for a string"""
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result
@@ -104,7 +104,7 @@ def tuple_and_index(draw, elements=PRIMITIVE_VALUES):
     return [repr(xs) + "[" + repr(i) + "]", i]
 @given(tuple_and_index())
 def test_tuple_index(index):
-    """Test index nodes representing a subscript"""
+    """Test index visitor representing a subscript for a tuple"""
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result
@@ -117,7 +117,7 @@ def list_and_index(draw, elements=PRIMITIVE_VALUES):
     return [repr(xs) + "[" + repr(i) + "]", i]
 @given(list_and_index())
 def test_list_index(index):
-    """Test index nodes representing a subscript"""
+    """Test index visitor representing a subscript a list"""
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result
@@ -130,7 +130,7 @@ def dict_and_index(draw, elements=PRIMITIVE_VALUES):
     return [repr(xs) + "[" + repr(i) + "]", i]
 @given(dict_and_index())
 def test_dict_index(index):
-    """Test index nodes representing a subscript"""
+    """Test index visitor representing a subscript a dictionary"""
     module = _parse_text(index[0])
     result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
     assert [type(index[1])] == result

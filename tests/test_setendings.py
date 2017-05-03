@@ -248,7 +248,7 @@ class TestEndingLocations(unittest.TestCase):
         """
         """
         expected = [(1, 1, 0, 6), (2, 2, 4, 6), (3, 3, 0, 3), (4, 4, 0, 8), (5, 7, 0, 1)]
-        module = self.get_file_as_module(PATH + 'const.py')
+        module = self.get_file_as_module(PATH + 'Const.py')
         self.set_and_check(module, astroid.Const, expected)
 
     def test_continue(self):
@@ -290,7 +290,7 @@ class TestEndingLocations(unittest.TestCase):
 
     def test_dict(self):
         expected = [(1, 1, 6, 32), (2, 5, 4, 1), (6, 9, 4, 6)]
-        module = self.get_file_as_module(PATH + 'dict.py')
+        module = self.get_file_as_module(PATH + 'Dict.py')
         self.set_and_check(module, astroid.Dict, expected)
 
     def test_dictcomp(self):

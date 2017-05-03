@@ -78,6 +78,13 @@ def test_heterogeneous_dict(dictionary):
     assert [Dict[Any, Any]] == result
 
 
+def test_index():
+    """Test index nodes representing a subscript"""
+    module = _parse_text("[1,2,3][0]")
+    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
+    assert [type(0)] == result
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)

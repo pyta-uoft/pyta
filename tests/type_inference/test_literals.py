@@ -167,6 +167,16 @@ def test_list_expr(expr):
         assert n.value.type_constraints.type == n.type_constraints.type
 
 
+@given(hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2))
+def test_dict_expr(expr):
+    """Test visitor for expression node representing a dictionary"""
+    module = _parse_text(repr(expr))
+    matching = True
+    for n in module.nodes_of_class(astroid.Expr):
+    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
+        assert n.value.type_constraints.type == n.type_constraints.type
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)

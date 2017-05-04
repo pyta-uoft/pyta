@@ -3,7 +3,7 @@ import hypothesis
 import hypothesis.strategies as hs
 from typing import Any, Dict, List, Tuple
 
-
+# Custom strategies for hypothesis testing framework
 PRIMITIVE_TYPES = hs.sampled_from([
     hs.integers,
     hs.booleans,
@@ -29,7 +29,7 @@ HOMO_DICT = PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(), s(),  min_siz
 
 HETERO_DICT = hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2)
 
-
+# Helper functions for testing
 def _verify_type_setting(module, ast_class, expected_type):
     """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
     result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]

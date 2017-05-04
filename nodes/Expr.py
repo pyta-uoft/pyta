@@ -16,6 +16,7 @@ print(1)
 (100 * 42)
 101 * 43
 
+# Extra examples
 0
 6.0
 "a"

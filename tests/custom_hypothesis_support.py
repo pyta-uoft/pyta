@@ -2,35 +2,34 @@ import astroid
 import hypothesis.strategies as hs
 
 # Custom strategies for hypothesis testing framework
-PRIMITIVE_TYPES = hs.sampled_from([
+primitive_types = hs.sampled_from([
     hs.integers,
     hs.booleans,
     lambda: hs.floats(allow_nan=False, allow_infinity=False),
     hs.none,
     hs.text,
 ])
-PRIMITIVE_VALUES = PRIMITIVE_TYPES.flatmap(lambda s: s())
+primitive_values = primitive_types.flatmap(lambda s: s())
 
-INDEX_TYPES = hs.sampled_from([
+index_types = hs.sampled_from([
     hs.integers,
-    lambda: STRING,
+    lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
 ])
-INDEX_VALUES = INDEX_TYPES.flatmap(lambda s: s())
+index_values = index_types.flatmap(lambda s: s())
 
-INTEGER = hs.integers()
+integer = hs.integers()
 
-STRING = hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
+string = (lambda min, **kw: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=min, **kw))
 
-TUPLE =  (hs.lists(PRIMITIVE_VALUES, min_size=1)).map(tuple)
+tuple =  (hs.lists(primitive_values, min_size=1)).map(tuple)
 
-HOMO_LIST = PRIMITIVE_TYPES.flatmap(lambda s: hs.lists(s(), min_size=1))
+homogeneous_list = primitive_types.flatmap(lambda s: hs.lists(s(), min_size=1))
 
-HETERO_LIST = hs.lists(PRIMITIVE_VALUES, min_size=2)
+random_list = hs.lists(primitive_values, min_size=2)
 
-HOMO_DICT = PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1))
+homogeneous_dictionary = primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1))
 
-HETERO_DICT = hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2)
-
+heterogeneous_dictionary = hs.dictionaries(primitive_values, primitive_values, min_size=2)
 
 
 # Helper functions for testing
@@ -44,6 +43,7 @@ def _verify_type_inf_child(module):
     """Helper to verify that AST node has the same type as it's value/child's"""
     for n in module.nodes_of_class(astroid.Expr):
         assert n.value.type_constraints.type == n.type_constraints.type
+
 
 def _index_input_formatter(var_input, index):
     """Helper to format input for testing index type inference visitor."""

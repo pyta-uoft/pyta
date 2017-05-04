@@ -23,54 +23,47 @@ INDEX_TYPES = hs.sampled_from([
 INDEX_VALUES = INDEX_TYPES.flatmap(lambda s: s())
 
 
+def _verify_type_setting(module, ast_class, expected_type):
+    """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
+    result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]
+    assert [expected_type] == result
+
+
 @given(PRIMITIVE_VALUES)
 def test_simple_literal(const):
     """Test Const nodes representing int, bool, float, and None literal values."""
     assume(not isinstance(const, str))
     module = _parse_text(str(const))
-    result = [n.type_constraints.type for n in module.nodes_of_class(
-        astroid.Const)]
-    assert [type(const)] == result
+    _verify_type_setting(module, astroid.Const, type(const))
 
 
 @given((hs.lists(PRIMITIVE_VALUES, min_size=1)).map(tuple))
 def test_tuple(t_tuple):
     """ Test Tuple nodes representing a tuple of various types."""
     module = _parse_text(str(t_tuple))
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Tuple)]
-    assert [Tuple[tuple(type(x) for x in t_tuple)]] == result
+    _verify_type_setting(module, astroid.Tuple, Tuple[tuple(type(x) for x in t_tuple)])
 
 
 @given(PRIMITIVE_TYPES.flatmap(lambda s: hs.lists(s(), min_size=1)))
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
     module = _parse_text(str(lst))
-    result = [n.type_constraints.type for n in module.nodes_of_class(
-        astroid.List)]
-    assert [List[type(lst[0])]] == result
+    _verify_type_setting(module, astroid.List, List[type(lst[0])])
 
 
 @given(hs.lists(PRIMITIVE_VALUES, min_size=2))
 def test_heterogeneous_lists(lst):
     """Test List nodes representing a list of values of different primitive types."""
     assume(not isinstance(lst[0], type(lst[1])))
-
     module = _parse_text(str(lst))
-    result = [n.type_constraints.type for n in module.nodes_of_class(
-        astroid.List)]
-    assert [List[Any]] == result
+    _verify_type_setting(module, astroid.List, List[Any])
 
 
 @given(PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1)))
 def test_homogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
-    # first turn the raw input into a program in order to parse into an AST "module"
-    # module should have been properly transformed using type_inference_visitor methods
     module = _parse_text(str(dictionary))
-    # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
-    # get list of types
-    assert [Dict[type(list(dictionary.keys())[0]), type(list(dictionary.values())[0])]] == result
+    _verify_type_setting(module, astroid.Dict, Dict[type(list(dictionary.keys())[0]), type(list(dictionary.values())[0])])
 
 
 @given(hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2))
@@ -78,10 +71,7 @@ def test_heterogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
     module = _parse_text(str(dictionary))
-    # iterate through nodes of AST that are of class Dictionary and instantiate corresponding list of types
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Dict)]
-    # get list of types
-    assert [Dict[Any, Any]] == result
+    _verify_type_setting(module, astroid.Dict, Dict[Any, Any])
 
 
 @hs.composite

@@ -63,10 +63,16 @@ class PlainReporter(BaseReporter):
         else:
             self._style_messages.append(msg)
 
+    def reset_messages(self):
+        """Reset the reporter's messages, for multiple files."""
+        self._error_messages = []
+        self._style_messages = []
+
     def print_messages(self, level='all'):
-        # Sort the messages.
         self.sort_messages()
         print('=== Code errors/forbidden usage (fix these right away!) ===')
+        if not self._error_messages:
+            print('None!')
         for msg in self._error_messages:
             code = msg.msg_id
             print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
@@ -74,9 +80,13 @@ class PlainReporter(BaseReporter):
         if level == 'all':
             print('\n')
             print('=== Style/convention errors (fix these before submission) ===')
+            if not self._style_messages:
+                print('None!')
             for msg in self._style_messages:
                 code = msg.msg_id
                 print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
+        print('\n')
+        self.reset_messages()
 
     def sort_messages(self):
         # Sort the messages by their type.
@@ -108,5 +118,8 @@ class PlainReporter(BaseReporter):
 
                 message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
                 i += 1
+
+    def show_file_linted(self, filename):
+        print('*'*15, 'File:', filename)
 
     _display = None

@@ -63,7 +63,6 @@ def check_all(files_or_directory='', reporter=ColorReporter, number_of_messages=
 def _load_pylint_plugins(current_reporter, local_config_file, pep8):
     """Register checker plugins for pylint. Return linter.
     """
-    # nigel_note: calls self.set_reporter(reporter)
     linter = lint.PyLinter(reporter=current_reporter)
 
     # Register standard pylint checkers.

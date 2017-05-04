@@ -41,7 +41,6 @@ def test_tuple(t_tuple):
     assert [Tuple[tuple(type(x) for x in t_tuple)]] == result
 
 
-
 @given(PRIMITIVE_TYPES.flatmap(lambda s: hs.lists(s(), min_size=1)))
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
@@ -141,9 +140,7 @@ def test_dict_index(index):
 def test_const_expr(expr):
     """Test visitor for expression node representing a constant"""
     module = _parse_text(repr(expr))
-    matching = True
     for n in module.nodes_of_class(astroid.Expr):
-    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
         assert n.value.type_constraints.type == n.type_constraints.type
 
 
@@ -151,9 +148,7 @@ def test_const_expr(expr):
 def test_tuple_expr(expr):
     """Test visitor for expression node representing a tuple"""
     module = _parse_text(repr(expr))
-    matching = True
     for n in module.nodes_of_class(astroid.Expr):
-    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
         assert n.value.type_constraints.type == n.type_constraints.type
 
 
@@ -161,9 +156,7 @@ def test_tuple_expr(expr):
 def test_list_expr(expr):
     """Test visitor for expression node representing a list"""
     module = _parse_text(repr(expr))
-    matching = True
     for n in module.nodes_of_class(astroid.Expr):
-    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
         assert n.value.type_constraints.type == n.type_constraints.type
 
 
@@ -171,9 +164,7 @@ def test_list_expr(expr):
 def test_dict_expr(expr):
     """Test visitor for expression node representing a dictionary"""
     module = _parse_text(repr(expr))
-    matching = True
     for n in module.nodes_of_class(astroid.Expr):
-    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
         assert n.value.type_constraints.type == n.type_constraints.type
 
 

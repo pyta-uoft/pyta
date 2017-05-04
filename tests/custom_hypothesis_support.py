@@ -29,9 +29,14 @@ HOMO_DICT = PRIMITIVE_TYPES.flatmap(lambda s: hs.dictionaries(s(), s(),  min_siz
 
 HETERO_DICT = hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2)
 
+
+def _verify_type_setting(module, ast_class, expected_type):
+    """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
+    result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]
+    assert [expected_type] == result
+
+
 def _verify_type_inf_child(module):
     """Helper to verify that AST node has the same type as it's value/child's"""
     for n in module.nodes_of_class(astroid.Expr):
         assert n.value.type_constraints.type == n.type_constraints.type
-
-

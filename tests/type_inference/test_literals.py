@@ -136,6 +136,38 @@ def test_dict_index(index):
     assert [type(index[1])] == result
 
 
+@given(PRIMITIVE_VALUES)
+def test_const_expr(expr):
+    """Test visitor for expression node representing a constant"""
+    module = _parse_text(repr(expr))
+    for n in module.nodes_of_class(astroid.Expr):
+        assert n.value.type_constraints.type == n.type_constraints.type
+
+
+@given((hs.lists(PRIMITIVE_VALUES, min_size=1)).map(tuple))
+def test_tuple_expr(expr):
+    """Test visitor for expression node representing a tuple"""
+    module = _parse_text(repr(expr))
+    for n in module.nodes_of_class(astroid.Expr):
+        assert n.value.type_constraints.type == n.type_constraints.type
+
+
+@given(hs.lists(PRIMITIVE_VALUES, min_size=1))
+def test_list_expr(expr):
+    """Test visitor for expression node representing a list"""
+    module = _parse_text(repr(expr))
+    for n in module.nodes_of_class(astroid.Expr):
+        assert n.value.type_constraints.type == n.type_constraints.type
+
+
+@given(hs.dictionaries(PRIMITIVE_VALUES, PRIMITIVE_VALUES, min_size=2))
+def test_dict_expr(expr):
+    """Test visitor for expression node representing a dictionary"""
+    module = _parse_text(repr(expr))
+    for n in module.nodes_of_class(astroid.Expr):
+        assert n.value.type_constraints.type == n.type_constraints.type
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)

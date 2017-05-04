@@ -69,7 +69,6 @@ def _load_pylint_plugins(current_reporter, local_config_file, pep8):
     # Register standard pylint checkers.
     linter.load_default_plugins()
 
-    # TODO: make a module for this like pylint Run's `load_default_plugins`.
     linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
                                 'python_ta/checkers/global_variables_checker',
                                 'python_ta/checkers/dynamic_execution_checker',
@@ -82,7 +81,6 @@ def _load_pylint_plugins(current_reporter, local_config_file, pep8):
     if pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
-    # TODO: make helper function for this, like see Run's...
     if local_config_file != '':
         linter.read_config_file(local_config_file)
     else:

@@ -123,18 +123,23 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     or path(s) to Python file(s) or directory(ies).
     """
     # Check if `module_name` is not the type str, raise error.
-    if not isinstance(module_name, str):
-        print('No checks run. Input to check, `{}`, has invalid type, must be type: str.'.format(module_name))
+    if not isinstance(module_name, list):
+        print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.'.format(module_name))
         return
+    for item in module_name:
+        if not isinstance(item, str):
+            print('No checks run. Part of input to check, `{}`, has invalid type, must be type: str.'.format(item))
+            return
 
     current_reporter = reporter(number_of_messages)
     linter = _load_pylint_plugins(current_reporter, local_config_file, pep8)
     patch_all()  # Monkeypatch pylint
     try:
-        module_name_list = list(filter(None, module_name.split(' ')))
         linter.open()  # initialize stats
 
-        expanded_files, errors = utils.expand_modules(module_name_list, 
+        # print(' '.join(module_name))
+
+        expanded_files, errors = utils.expand_modules(module_name, 
                         linter.config.black_list, linter.config.black_list_re)
         for error in errors:
             current_reporter.show_file_linted(error['mod'])

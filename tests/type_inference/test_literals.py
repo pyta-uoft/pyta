@@ -1,7 +1,6 @@
 import astroid
 import nose
 from hypothesis import assume, given
-import hypothesis.strategies as hs
 import tests.custom_hypothesis_support as cs
 from typing import Any, Dict, List, Tuple
 
@@ -53,56 +52,36 @@ def test_heterogeneous_dict(dictionary):
     cs._verify_type_setting(module, astroid.Dict, Dict[Any, Any])
 
 
-@hs.composite
-def string_and_index(draw):
-    xs = draw(cs.INDEX_VALUES)
-    i = draw(hs.integers(min_value=0, max_value=len(str(xs)) - 1))
-    return [repr(xs)  + "[" + repr(i) + "]", i]
-@given(string_and_index())
-def test_string_index(index):
+@given(cs.STRING, cs.INTEGER)
+def test_string_index(string_input, index):
     """Test index visitor representing a subscript for a string"""
-    module = _parse_text(index[0])
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
-    assert [type(index[1])] == result
+    input_index = cs._index_input_formatter(string_input, index)
+    module = _parse_text(input_index)
+    cs._verify_type_setting(module, astroid.Index, type(index))
 
 
-@hs.composite
-def tuple_and_index(draw, elements=cs.PRIMITIVE_VALUES):
-    xs = draw(hs.tuples(elements, elements))
-    i = draw(hs.integers())
-    return [repr(xs) + "[" + repr(i) + "]", i]
-@given(tuple_and_index())
-def test_tuple_index(index):
+@given(cs.TUPLE, cs.INTEGER)
+def test_tuple_index(tuple_input, index):
     """Test index visitor representing a subscript for a tuple"""
-    module = _parse_text(index[0])
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
-    assert [type(index[1])] == result
+    input_index = cs._index_input_formatter(tuple_input, index)
+    module = _parse_text(input_index)
+    cs._verify_type_setting(module, astroid.Index, type(index))
 
 
-@hs.composite
-def list_and_index(draw, elements=cs.PRIMITIVE_VALUES):
-    xs = draw(hs.lists(elements, min_size=1))
-    i = draw(hs.integers(min_value=0, max_value=len(xs) - 1))
-    return [repr(xs) + "[" + repr(i) + "]", i]
-@given(list_and_index())
-def test_list_index(index):
+@given(cs.HETERO_LIST, cs.INTEGER)
+def test_list_index(list_input, index):
     """Test index visitor representing a subscript a list"""
-    module = _parse_text(index[0])
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
-    assert [type(index[1])] == result
+    input_index = cs._index_input_formatter(list_input, index)
+    module = _parse_text(input_index)
+    cs._verify_type_setting(module, astroid.Index, type(index))
 
 
-@hs.composite
-def dict_and_index(draw, elements=cs.PRIMITIVE_VALUES):
-    xs = draw(hs.dictionaries(cs.INDEX_VALUES, elements, min_size=1))
-    i = draw(cs.INDEX_VALUES)
-    return [repr(xs) + "[" + repr(i) + "]", i]
-@given(dict_and_index())
-def test_dict_index(index):
+@given(cs.HETERO_DICT, cs.INDEX_VALUES)
+def test_dict_index(dict_input, index):
     """Test index visitor representing a subscript a dictionary"""
-    module = _parse_text(index[0])
-    result = [n.type_constraints.type for n in module.nodes_of_class(astroid.Index)]
-    assert [type(index[1])] == result
+    input_index = cs._index_input_formatter(dict_input, index)
+    module = _parse_text(input_index)
+    cs._verify_type_setting(module, astroid.Index, type(index))
 
 
 @given(cs.PRIMITIVE_VALUES)

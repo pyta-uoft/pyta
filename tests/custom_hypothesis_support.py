@@ -33,8 +33,10 @@ homogeneous_list = (lambda min, **kw: primitive_types.flatmap(lambda s: hs.lists
 # function that returns a strategy for generating random lists with minimum length
 random_list = (lambda min, **kw: hs.lists(primitive_values, min_size=min, **kw))
 
+# strategy to generate dictionaries of uniform key:value types
 homogeneous_dictionary = primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1))
 
+# strategy to generate random dictionaries
 heterogeneous_dictionary = hs.dictionaries(primitive_values, primitive_values, min_size=2)
 
 

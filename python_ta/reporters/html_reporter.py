@@ -32,3 +32,5 @@ class HTMLReporter(PlainReporter):
                 self._style_messages[i] = msg._replace(msg=msg_new)
 
             f.write(template.render(messages=(self._error_messages + self._style_messages)))
+
+        self.reset_messages()

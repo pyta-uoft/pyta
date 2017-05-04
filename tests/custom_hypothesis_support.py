@@ -1,7 +1,5 @@
 import astroid
-import hypothesis
 import hypothesis.strategies as hs
-from typing import Any, Dict, List, Tuple
 
 # Custom strategies for hypothesis testing framework
 PRIMITIVE_TYPES = hs.sampled_from([

@@ -148,8 +148,18 @@ def test_const_expr(expr):
 
 
 @given((hs.lists(PRIMITIVE_VALUES, min_size=1)).map(tuple))
-def test_tuple_expre(expr):
+def test_tuple_expr(expr):
     """Test visitor for expression node representing a tuple"""
+    module = _parse_text(repr(expr))
+    matching = True
+    for n in module.nodes_of_class(astroid.Expr):
+    # iterate through list of expression nodes and check whether expression nodes and it's values are matching
+        assert n.value.type_constraints.type == n.type_constraints.type
+
+
+@given(hs.lists(PRIMITIVE_VALUES, min_size=1))
+def test_list_expr(expr):
+    """Test visitor for expression node representing a list"""
     module = _parse_text(repr(expr))
     matching = True
     for n in module.nodes_of_class(astroid.Expr):

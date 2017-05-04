@@ -11,21 +11,27 @@ primitive_types = hs.sampled_from([
 ])
 primitive_values = primitive_types.flatmap(lambda s: s())
 
+# Strategies for generating Indexes
 index_types = hs.sampled_from([
     hs.integers,
     lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
 ])
 index_values = index_types.flatmap(lambda s: s())
 
+# strategy for generating integers
 integer = hs.integers()
 
+# function that returns a strategy for generating strings from english alphabet with minimum length
 string = (lambda min, **kw: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=min, **kw))
 
-tuple =  (hs.lists(primitive_values, min_size=1)).map(tuple)
+# function that returns a strategy for generating tuples from with minimum length
+tuple =  (hs.lists(primitive_values, min_size=2)).map(tuple)
 
-homogeneous_list = primitive_types.flatmap(lambda s: hs.lists(s(), min_size=1))
+# function that returns a strategy for generating lists of uniform type minimum length
+homogeneous_list = (lambda min, **kw: primitive_types.flatmap(lambda s: hs.lists(s(), min_size=min, **kw)))
 
-random_list = hs.lists(primitive_values, min_size=2)
+# function that returns a strategy for generating random lists with minimum length
+random_list = (lambda min, **kw: hs.lists(primitive_values, min_size=min, **kw))
 
 homogeneous_dictionary = primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1))
 

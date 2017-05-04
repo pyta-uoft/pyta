@@ -48,4 +48,6 @@ class HTMLReporter(ColorReporter):
         output_url = 'file:///{}/templates/output.html'.format(THIS_DIR)
         webbrowser.open(output_url)
 
+        self.reset_messages()
+
     _display = None

@@ -57,6 +57,12 @@ class ColorReporter(PlainReporter):
 
         print(result)
 
+        # reset messages
+        self.reset_messages()
+        self._sorted_error_messages.clear()
+        self._sorted_style_messages.clear()
+        
+
     # Override this method
     def sort_messages(self):
         # Sort the messages by their type (message id)
@@ -186,6 +192,8 @@ class ColorReporter(PlainReporter):
         """
         snippet = ''
         spaces = 2 * self._SPACE
+        if not self._source_lines: 
+            return ''
         text = self._source_lines[n].rstrip('\n\r')
         # Pad line number with spaces to even out indent:
         number = '{:>3}'.format(n + 1)

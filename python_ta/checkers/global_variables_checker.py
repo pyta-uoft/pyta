@@ -27,18 +27,28 @@ class GlobalVariablesChecker(BaseChecker):
         self.add_message('forbidden-global-variables', node=node, args=args)
 
     def visit_assign(self, node):
-        if (isinstance(node.frame(), astroid.scoped_nodes.Module) and
-                not is_in_main(node)):
+        """Allow global constant variables (uppercase), but issue messages for 
+        all other globals.
+        """
+        if (isinstance(node.frame(), astroid.scoped_nodes.Module) and not is_in_main(node)):
 
-            regex = str(node.targets[0])
-            s = re.findall('\((.*?)\)', regex)[0]
-            a = re.match(CONST_NAME_RGX, s)
-            # Raise an error only if it's not a constant
-            if a is None:
-                args = "you declared the global variable '{}' on line {}".\
-                    format(s, node.lineno)
-                self.add_message('forbidden-global-variables', node=node,
-                                 args=args)
+            node_list = get_disallowed_global_var_nodes(node)
+            for node in node_list:
+                args = "a global variable '{}' is declared on line {}"\
+                    .format(node.name, node.lineno)
+                self.add_message('forbidden-global-variables', node=node, args=args)
+
+
+def get_disallowed_global_var_nodes(node):
+    """Return a list of all AssignName nodes for a given global, non-constant 
+    variable. 
+    """
+    node_list = []
+    if isinstance(node, astroid.AssignName) and not re.match(CONST_NAME_RGX, node.name):
+        return [node]
+    for child_node in node.get_children():
+        node_list += get_disallowed_global_var_nodes(child_node)
+    return node_list
 
 
 def is_in_main(node):

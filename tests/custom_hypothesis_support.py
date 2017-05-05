@@ -25,10 +25,14 @@ integer = hs.integers()
 # function that returns a strategy for generating strings from english alphabet with minimum length
 string = (lambda **kwargs: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", **kwargs))
 
+
 # function that returns a strategy for generating tuples from with minimum length
+# @hs.defines_strategy
 def tuple_strategy(**kwargs):
-    tuple_elements =  hs.lists(primitive_values, **kwargs)
-    return tuple(tuple_elements)
+    """Return a strategy which generates a tuple of at least min_size elements
+    """
+    generated_tuple = hs.lists(primitive_values, **kwargs).map(tuple)
+    return generated_tuple
 
 
 # function that returns a strategy for generating lists of uniform type minimum length

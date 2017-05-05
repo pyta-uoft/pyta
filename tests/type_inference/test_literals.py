@@ -13,10 +13,6 @@ def test_simple_literal(const):
     assume(not isinstance(const, str))
     module = _parse_text(str(const))
     cs._verify_type_setting(module, astroid.Const, type(const))
-# def test_simple_literal():
-#     """Test Const nodes representing int, bool, float, and None literal values."""
-#     module = _parse_text("ryan = 1\nryan")
-#     cs._verify_type_setting(module, astroid.Const, type(1))
 
 
 @given(cs.tuple_strategy(min_size=2))

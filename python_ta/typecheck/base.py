@@ -233,11 +233,11 @@ class Environment:
     """
     def __init__(self,
                  locals_: Optional[Dict[str, type]] = None,
-                 nonlocals: Optional[Dict[str, type]] = None,
+                 nonlocals_: Optional[Dict[str, type]] = None,
                  globals_: Optional[Dict[str, type]] = None):
         """Initialize an environment."""
         self.locals = locals_ or {}
-        self.nonlocals = nonlocals or {}
+        self.nonlocals = nonlocals_ or {}
         self.globals = globals_ or {}
 
     def __str__(self):

@@ -138,7 +138,7 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     for item in module_name:
         if not isinstance(item, str):  # Issue errors for invalid types
             current_reporter.show_file_linted(item)
-            print('No checks run. Part of input to check, `{}`, has invalid type, must be type: str.\n'.format(item))
+            print('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item))
         else:  # Check other valid files.
             valid_module_names.append(item)
 

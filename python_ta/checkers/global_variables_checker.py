@@ -31,7 +31,6 @@ class GlobalVariablesChecker(BaseChecker):
         all other globals.
         """
         if (isinstance(node.frame(), astroid.scoped_nodes.Module) and not is_in_main(node)):
-
             node_list = get_disallowed_global_var_nodes(node)
             for node in node_list:
                 args = "a global variable '{}' is declared on line {}"\

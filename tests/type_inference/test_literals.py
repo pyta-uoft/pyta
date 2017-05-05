@@ -2,7 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given
 import tests.custom_hypothesis_support as cs
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, TypeVar
 
 from python_ta.transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
 
@@ -112,18 +112,27 @@ def test_dict_expr(expr):
     cs._verify_type_inf_child(module)
 
 
+def test_set_local_env():
+    """Test local environment setting visitors"""
+    module = _parse_text("ryan = 1\nryan")
+    # get list of variable names in locals
+    local_values = [module.type_environment.locals[name] for name in module.type_environment.locals]
+    global_values = [module.type_environment.globals[name] for name in module.type_environment.globals]
+    # verify the type of the value of each variable in the environment
+    for value in local_values:
+        # each value corresponding to a local variable must be a TypeVar
+        assert isinstance(value, TypeVar)
+    for value in global_values:
+        # each value corresponding to a local variable must be a TypeVar
+        assert isinstance(value, TypeVar)
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)
     environment_transformer().visit(module)
     register_type_constraints_setter().visit(module)
     return module
-
-
-def test_local_env():
-    """Test local environment nodes representing local environment variables"""
-    module = _parse_text("ryan = 1\nryan")
-    cs._verify_type_setting(module, astroid.Const, type(1))
 
 
 if __name__ == '__main__':

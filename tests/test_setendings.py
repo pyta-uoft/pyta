@@ -121,7 +121,7 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, astroid.Assert, expected)
 
     def test_assign(self):
-        expected = [(1, 1, 0, 5), (2, 2, 0, 9), (3, 3, 0, 11), (4, 4, 0, 8)]
+        expected = [(1, 1, 0, 5), (2, 2, 0, 9), (3, 3, 0, 11), (4, 4, 0, 8), (5, 5, 0, 6)]
         module = self.get_file_as_module(PATH + 'Assign.py')
         self.set_and_check(module, astroid.Assign, expected)
 

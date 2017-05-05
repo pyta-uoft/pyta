@@ -112,7 +112,7 @@ def test_dict_expr(expr):
     cs._verify_type_inf_child(module)
 
 
-def test_set_local_env():
+def test_set_env():
     """Test local environment setting visitors"""
     module = _parse_text("ryan = 1\nryan")
     # get list of variable names in locals

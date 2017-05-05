@@ -120,8 +120,13 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     The name of the module should be the name of a module,
     or path(s) to Python file(s) or directory(ies).
     """
-    # Check if `module_name` is not the type str, raise error.
-    if not isinstance(module_name, list):
+    # Allow call to check with empty args
+    if module_name == '':
+        m = sys.modules['__main__']
+        spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
+        module_name = [spec.origin]
+    # Enforce API to expect `module_name` type as list
+    elif not isinstance(module_name, list):
         print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.'.format(module_name))
         return
 

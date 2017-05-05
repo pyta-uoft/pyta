@@ -270,6 +270,6 @@ def environment_transformer() -> TransformVisitor:
 
     visitor.register_transform(astroid.FunctionDef, _set_locals_environment)
     visitor.register_transform(astroid.Module, _set_locals_environment)
-    visitor.register_transform(astroid.FunctionDef, _set_globals_environment())
-    visitor.register_transform(astroid.Module, _set_globals_environment())
+    visitor.register_transform(astroid.FunctionDef, _set_globals_environment)
+    visitor.register_transform(astroid.Module, _set_globals_environment)
     return visitor

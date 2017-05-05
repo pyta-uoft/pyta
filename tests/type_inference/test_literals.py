@@ -121,7 +121,7 @@ def _parse_text(source: str) -> astroid.Module:
 
 
 def test_local_env():
-    """Test Const nodes representing int, bool, float, and None literal values."""
+    """Test local environment nodes representing local environment variables"""
     module = _parse_text("ryan = 1\nryan")
     cs._verify_type_setting(module, astroid.Const, type(1))
 

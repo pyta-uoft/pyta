@@ -37,6 +37,11 @@ class ColorReporter(PlainReporter):
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
 
+    def reset_messages(self):
+        super().reset_messages()
+        self._sorted_error_messages.clear()
+        self._sorted_style_messages.clear()
+
     # Override this method
     def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
@@ -46,22 +51,22 @@ class ColorReporter(PlainReporter):
 
         result = self._colourify('code-heading',
                                  '=== Code errors/forbidden usage '
-                                 '(fix these right away!) ===' + self._BREAK)
-        result += self._colour_messages_by_type(style=False)
+                                 '(fix: high priority) ===' + self._BREAK)
+        messages_result = self._colour_messages_by_type(style=False)
+        result += messages_result
+        if not messages_result:
+            result += 'None!\n\n'
 
         if level == 'all':
             result += self._colourify('style-heading',
                                       '=== Style/convention errors '
-                                      '(fix these before submission) ===' + self._BREAK)
-            result += self._colour_messages_by_type(style=True)
+                                      '(fix: before submission) ===' + self._BREAK)
+            messages_result = self._colour_messages_by_type(style=True)
+            result += messages_result
+            if not messages_result:
+                result += 'None!\n\n'
 
         print(result)
-
-        # reset messages
-        self.reset_messages()
-        self._sorted_error_messages.clear()
-        self._sorted_style_messages.clear()
-        
 
     # Override this method
     def sort_messages(self):
@@ -109,8 +114,8 @@ class ColorReporter(PlainReporter):
                     msg = messages[msg_id][i]
 
                 result += 2 * self._SPACE
-                result += self._colourify('bold', '[Line {}] {}'.format(
-                    msg.line, msg.msg)) + self._BREAK
+                result += self._colourify('bold', '[Line {}] {}'
+                            .format(msg.line, msg.msg)) + self._BREAK
 
                 try:
                     # Messages with code snippets
@@ -125,6 +130,7 @@ class ColorReporter(PlainReporter):
                 except AttributeError:
                     pass
                 result += self._BREAK
+
         return result
 
     def _build_snippet(self, msg):

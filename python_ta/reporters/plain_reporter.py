@@ -55,7 +55,8 @@ ERROR_CHECKS = [
 class PlainReporter(BaseReporter):
     def __init__(self, number_of_messages, source_lines=None, module_name=''):
         super().__init__()
-        self.reset_messages()
+        self._error_messages = []
+        self._style_messages = []
         self._number_of_messages = number_of_messages
         self._source_lines = source_lines or []
         self._module_name = module_name
@@ -87,7 +88,7 @@ class PlainReporter(BaseReporter):
 
     def print_messages(self, level='all'):
         self.sort_messages()
-        print('=== Code errors/forbidden usage (fix these right away!) ===')
+        print('=== Code errors/forbidden usage (fix: high priority) ===')
         if not self._error_messages:
             print('None!')
         for msg in self._error_messages:
@@ -96,14 +97,13 @@ class PlainReporter(BaseReporter):
 
         if level == 'all':
             print('\n')
-            print('=== Style/convention errors (fix these before submission) ===')
+            print('=== Style/convention errors (fix: before submission) ===')
             if not self._style_messages:
                 print('None!')
             for msg in self._style_messages:
                 code = msg.msg_id
                 print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
         print('\n')
-        self.reset_messages()
 
     def sort_messages(self):
         # Sort the messages by their type.

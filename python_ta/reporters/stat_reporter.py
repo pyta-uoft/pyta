@@ -28,7 +28,5 @@ class StatReporter(PlainReporter):
         StatReporter.error_messages.extend(self._error_messages)
         StatReporter.style_messages.extend(self._style_messages)
 
-        self.reset_messages()
-
     # to appease PyCharm's NotImplemented complaint
     _display = None

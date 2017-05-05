@@ -83,7 +83,7 @@ def _load_pylint_plugins(current_reporter, local_config_file, pep8):
     return linter
 
 
-def _find_inline_pylint_comment(spec):
+def _verify_pre_check(spec):
     """Check student code for certain issues."""
 
     # Make sure the program doesn't crash for students.
@@ -96,9 +96,7 @@ def _find_inline_pylint_comment(spec):
                 if tok_type != tokenize.COMMENT:
                     continue
                 match = pylint.utils.OPTION_RGX.search(content)
-                if match is None:
-                    continue
-                else:
+                if match is not None:
                     print('ERROR: string "pylint:" found in comment. ' +
                           'No checks will be run.')
                     return False
@@ -126,20 +124,21 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     if not isinstance(module_name, list):
         print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.'.format(module_name))
         return
-    for item in module_name:
-        if not isinstance(item, str):
-            print('No checks run. Part of input to check, `{}`, has invalid type, must be type: str.'.format(item))
-            return
 
     current_reporter = reporter(number_of_messages)
     linter = _load_pylint_plugins(current_reporter, local_config_file, pep8)
     patch_all()  # Monkeypatch pylint
+
+    valid_module_names = []
+    for item in module_name:
+        if not isinstance(item, str):  # Issue errors for invalid types
+            current_reporter.show_file_linted(item)
+            print('No checks run. Part of input to check, `{}`, has invalid type, must be type: str.\n'.format(item))
+        else:  # Check other valid files.
+            valid_module_names.append(item)
+
     try:
-        linter.open()  # initialize stats
-
-        # print(' '.join(module_name))
-
-        expanded_files, errors = utils.expand_modules(module_name, 
+        expanded_files, errors = utils.expand_modules(valid_module_names, 
                         linter.config.black_list, linter.config.black_list_re)
         for error in errors:
             current_reporter.show_file_linted(error['mod'])
@@ -148,15 +147,15 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                       .format(error['ex'], error['mod']))
             else:
                 print('Error: {}\n'.format(error['ex']))
-        print()
 
         for descr in expanded_files:
             modname, filepath, is_arg = descr['name'], descr['path'], descr['isarg']
-            if not _find_inline_pylint_comment(filepath):
-                return
+            if not _verify_pre_check(filepath):
+                continue  # Check the other files
             current_reporter.show_file_linted(modname)
             linter.check(filepath)  # Lint !
             current_reporter.print_messages(level)
+            current_reporter.reset_messages()  # Clear lists for any next file.
 
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')

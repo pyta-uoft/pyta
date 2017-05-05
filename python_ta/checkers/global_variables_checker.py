@@ -31,12 +31,14 @@ class GlobalVariablesChecker(BaseChecker):
                 not is_in_main(node)):
 
             regex = str(node.targets[0])
-            s = re.findall('\((.*?)\)', regex)[0]
-            a = re.match(CONST_NAME_RGX, s)
+            s = re.findall('\((.*?)\)', regex)
+            if not s:
+                return
+            a = re.match(CONST_NAME_RGX, s[0])
             # Raise an error only if it's not a constant
             if a is None:
                 args = "you declared the global variable '{}' on line {}".\
-                    format(s, node.lineno)
+                    format(s[0], node.lineno)
                 self.add_message('forbidden-global-variables', node=node,
                                  args=args)
 

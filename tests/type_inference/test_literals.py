@@ -120,5 +120,11 @@ def _parse_text(source: str) -> astroid.Module:
     return module
 
 
+def test_local_env():
+    """Test Const nodes representing int, bool, float, and None literal values."""
+    module = _parse_text("ryan = 1\nryan")
+    cs._verify_type_setting(module, astroid.Const, type(1))
+
+
 if __name__ == '__main__':
     nose.main()

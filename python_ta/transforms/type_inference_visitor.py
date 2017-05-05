@@ -252,15 +252,11 @@ def register_type_constraints_setter():
     return type_visitor
 
 
-def _set_locals_environment(node):
-    node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals})
+def _set_environment(node):
+    node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals},
+                                        globals_ ={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
     if isinstance(node, astroid.FunctionDef):
         node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
-
-
-def _set_globals_environment(node):
-    node.type_environment = Environment(globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
-    if isinstance(node, astroid.FunctionDef):
         node.type_environment.globals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
 
 
@@ -268,8 +264,6 @@ def environment_transformer() -> TransformVisitor:
     """Return a TransformVisitor that sets an environment for every node."""
     visitor = TransformVisitor()
 
-    visitor.register_transform(astroid.FunctionDef, _set_locals_environment)
-    visitor.register_transform(astroid.Module, _set_locals_environment)
-    visitor.register_transform(astroid.FunctionDef, _set_globals_environment)
-    visitor.register_transform(astroid.Module, _set_globals_environment)
+    visitor.register_transform(astroid.FunctionDef, _set_environment)
+    visitor.register_transform(astroid.Module, _set_environment)
     return visitor

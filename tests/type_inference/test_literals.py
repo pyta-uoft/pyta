@@ -113,18 +113,14 @@ def test_dict_expr(expr):
 
 
 def test_set_env():
-    """Test local environment setting visitors"""
-    module = _parse_text("ryan = 1\nryan")
+    """Test environment setting visitors"""
+    module = _parse_text("george")
     # get list of variable names in locals
     local_values = [module.type_environment.locals[name] for name in module.type_environment.locals]
     global_values = [module.type_environment.globals[name] for name in module.type_environment.globals]
     # verify the type of the value of each variable in the environment
-    for value in local_values:
-        # each value corresponding to a local variable must be a TypeVar
-        assert isinstance(value, TypeVar)
-    for value in global_values:
-        # each value corresponding to a local variable must be a TypeVar
-        assert isinstance(value, TypeVar)
+    for value in local_values: assert isinstance(value, TypeVar)
+    for value in global_values: assert isinstance(value, TypeVar)
 
 
 def _parse_text(source: str) -> astroid.Module:

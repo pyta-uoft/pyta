@@ -2,6 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given
 import tests.custom_hypothesis_support as cs
+import hypothesis.strategies as hs
 from typing import Any, Dict, List, Tuple, TypeVar
 
 from python_ta.transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
@@ -37,14 +38,14 @@ def test_random_lists(lst):
     cs._verify_type_setting(module, astroid.List, List[Any])
 
 
-@given(cs.homogeneous_dictionary)
+@given(cs.homogeneous_dictionary(min_size=1))
 def test_homogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
     module = _parse_text(str(dictionary))
     cs._verify_type_setting(module, astroid.Dict, Dict[type(list(dictionary.keys())[0]), type(list(dictionary.values())[0])])
 
 
-@given(cs.heterogeneous_dictionary)
+@given(cs.heterogeneous_dictionary(min_size=2))
 def test_heterogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
@@ -52,7 +53,7 @@ def test_heterogeneous_dict(dictionary):
     cs._verify_type_setting(module, astroid.Dict, Dict[Any, Any])
 
 
-@given(cs.string(min_size=1), cs.integer)
+@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz"), hs.integers())
 def test_string_index(string_input, index):
     """Test index visitor representing a subscript for a string"""
     input_index = cs._index_input_formatter(string_input, index)
@@ -60,7 +61,7 @@ def test_string_index(string_input, index):
     cs._verify_type_setting(module, astroid.Index, type(index))
 
 
-@given(cs.tuple_strategy(min_size=1), cs.integer)
+@given(cs.tuple_strategy(min_size=1), hs.integers())
 def test_tuple_index(tuple_input, index):
     """Test index visitor representing a subscript for a tuple"""
     input_index = cs._index_input_formatter(tuple_input, index)
@@ -68,7 +69,7 @@ def test_tuple_index(tuple_input, index):
     cs._verify_type_setting(module, astroid.Index, type(index))
 
 
-@given(cs.random_list(min_size=2), cs.integer)
+@given(cs.random_list(min_size=2), hs.integers())
 def test_list_index(list_input, index):
     """Test index visitor representing a subscript a list"""
     input_index = cs._index_input_formatter(list_input, index)
@@ -76,7 +77,7 @@ def test_list_index(list_input, index):
     cs._verify_type_setting(module, astroid.Index, type(index))
 
 
-@given(cs.heterogeneous_dictionary, cs.index_values)
+@given(cs.heterogeneous_dictionary(min_size=2), cs.index_values)
 def test_dict_index(dict_input, index):
     """Test index visitor representing a subscript a dictionary"""
     input_index = cs._index_input_formatter(dict_input, index)
@@ -88,28 +89,28 @@ def test_dict_index(dict_input, index):
 def test_const_expr(expr):
     """Test visitor for expression node representing a constant"""
     module = _parse_text(repr(expr))
-    cs._verify_type_inf_child(module)
+    cs._verify_node_child_typematch(module)
 
 
 @given(cs.tuple_strategy(min_size=2))
 def test_tuple_expr(expr):
     """Test visitor for expression node representing a tuple"""
     module = _parse_text(repr(expr))
-    cs._verify_type_inf_child(module)
+    cs._verify_node_child_typematch(module)
 
 
 @given(cs.random_list(min_size=2))
 def test_list_expr(expr):
     """Test visitor for expression node representing a list"""
     module = _parse_text(repr(expr))
-    cs._verify_type_inf_child(module)
+    cs._verify_node_child_typematch(module)
 
 
-@given(cs.heterogeneous_dictionary)
+@given(cs.heterogeneous_dictionary(min_size=2))
 def test_dict_expr(expr):
     """Test visitor for expression node representing a dictionary"""
     module = _parse_text(repr(expr))
-    cs._verify_type_inf_child(module)
+    cs._verify_node_child_typematch(module)
 
 
 def test_set_env():

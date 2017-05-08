@@ -129,10 +129,7 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
         module_name = [spec.origin]
     # Enforce API to expect 1 file or directory if type is list
     elif isinstance(module_name, str):
-        module_name = list(filter(None, module_name.split(' ')))
-        if len(module_name) > 1:
-            print('No checks run. Input to check only accepts one file or directory in string.\nTo check multiple files or directories, pass in a list of strings,\nfor example, [\'myfile.py\', \'mydirectory\']\n')
-            return
+        module_name = [module_name]
     # otherwise, enforce API to expect `module_name` type as list
     elif not isinstance(module_name, list):
         print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.\n'.format(module_name))

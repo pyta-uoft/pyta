@@ -43,7 +43,7 @@ class NodeNG(object):
         return self._props_check
 
 
-class TestEndingLocation(unittest.TestCase):
+class TestEndingLocations(unittest.TestCase):
     """The method, ending_transformer.visit(module) walks the given astroid
     *tree* and transform each encountered node. Only the nodes which have
     transforms registered will actually be replaced or changed.
@@ -121,7 +121,7 @@ class TestEndingLocation(unittest.TestCase):
         self.set_and_check(module, astroid.Assert, expected)
 
     def test_assign(self):
-        expected = [(1, 1, 0, 5), (2, 2, 0, 9), (3, 3, 0, 11), (4, 4, 0, 8)]
+        expected = [(1, 1, 0, 5), (2, 2, 0, 9), (3, 3, 0, 11), (4, 4, 0, 8), (5, 5, 0, 6)]
         module = self.get_file_as_module(PATH + 'Assign.py')
         self.set_and_check(module, astroid.Assign, expected)
 
@@ -247,7 +247,7 @@ class TestEndingLocation(unittest.TestCase):
     def test_const(self):
         """
         """
-        expected = [(1, 1, 0, 6), (2, 2, 4, 6)]
+        expected = [(1, 1, 0, 6), (2, 2, 4, 6), (3, 3, 0, 3), (4, 4, 0, 8), (5, 7, 0, 1)]
         module = self.get_file_as_module(PATH + 'Const.py')
         self.set_and_check(module, astroid.Const, expected)
 

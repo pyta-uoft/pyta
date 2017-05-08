@@ -260,10 +260,9 @@ def register_type_constraints_setter():
 
 def _set_environment(node):
     node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals},
-                                        globals_ ={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
+                                        globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
     if isinstance(node, astroid.FunctionDef):
         node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
-        node.type_environment.globals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
 
 
 def environment_transformer() -> TransformVisitor:

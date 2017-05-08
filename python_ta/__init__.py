@@ -21,6 +21,7 @@ import tokenize
 import webbrowser
 
 import pylint.lint as lint
+import pylint.utils as utils
 import pylint
 from astroid import MANAGER
 
@@ -57,46 +58,9 @@ def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
            local_config_file=config)
 
 
-def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',
-           local_config_file='', pep8=False):
-    """Check a module for problems, printing a report.
-
-    <level> is used to specify which checks should be made.
-
-    The name of the module should be the name of a module,
-    or the path to a Python file.
+def _load_pylint_plugins(current_reporter, local_config_file, pep8):
+    """Register checker plugins for pylint. Return linter.
     """
-    if module_name == '':
-        m = sys.modules['__main__']
-        spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
-    else:
-        # Check if `module_name` is not the type str, raise error.
-        if not isinstance(module_name, str):
-            print("The Module '{}' has an invalid name. Module name must be "
-                  "type str.".format(module_name))
-            return
-        module_name = module_name.replace(os.path.sep, '.')
-
-        # Detect if the extension .py is added, and if it is, remove it.
-        if module_name.endswith('.py'):
-            module_name = module_name[:-3]
-
-        spec = importlib.util.find_spec(module_name)
-
-    if spec is None:
-        print("The Module '{}' could not be found. ".format(module_name))
-        return
-
-    # Clear the astroid cache of this module (allows for on-the-fly changes
-    # to be detected in consecutive runs in the interpreter).
-    if spec.name in MANAGER.astroid_cache:
-        del MANAGER.astroid_cache[spec.name]
-
-    source_lines = []
-    with open(spec.origin) as f:
-        source_lines = f.readlines()
-    current_reporter = reporter(number_of_messages, source_lines, module_name)
-
     linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
@@ -108,7 +72,6 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
                                 'python_ta/checkers/assigning_to_self_checker',
                                 'python_ta/checkers/always_returning_checker',
                                 'python_ta/checkers/type_inference_checker'])
-
     if pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
@@ -117,43 +80,97 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     else:
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
     linter.load_config_file()
+    return linter
 
-    # Monkeypatch pylint
-    patch_all()
+
+def _verify_pre_check(filepath):
+    """Check student code for certain issues."""
 
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:
         # Check for inline "pylint:" comment, which may indicate a student
         # trying to disable a check.
-        # TODO: Put this into a helper function.
-        with tokenize.open(spec.origin) as f:
+        with tokenize.open(filepath) as f:
             for (tok_type, content, _, _, _) in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
                 match = pylint.utils.OPTION_RGX.search(content)
-                if match is None:
-                    continue
-                else:
-                    print('ERROR: string "pylint:" found in comment. No checks will be run.')
-                    return
+                if match is not None:
+                    print('ERROR: string "pylint:" found in comment. ' +
+                          'No check run on file `{}`\n'.format(filepath))
+                    return False
     except IndentationError as e:
         print('ERROR: python_ta could not check your code due to an ' +
               'indentation error at line {}'.format(e.lineno))
-        return
+        return False
     except tokenize.TokenError as e:
         print('ERROR: python_ta could not check your code due to a ' +
               'syntax error in your file')
+        return False
+    return True
+
+
+def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',
+           local_config_file='', pep8=False):
+    """Check a module for problems, printing a report.
+
+    <level> is used to specify which checks should be made.
+
+    The name of the module should be the name of a module,
+    or path(s) to Python file(s) or directory(ies).
+    """
+    valid_module_names = []
+
+    # Allow call to check with empty args
+    if module_name == '':
+        m = sys.modules['__main__']
+        spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
+        module_name = [spec.origin]
+    # Enforce API to expect 1 file or directory if type is list
+    elif isinstance(module_name, str):
+        module_name = [module_name]
+    # otherwise, enforce API to expect `module_name` type as list
+    elif not isinstance(module_name, list):
+        print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.\n'.format(module_name))
         return
 
+    current_reporter = reporter(number_of_messages)
+    linter = _load_pylint_plugins(current_reporter, local_config_file, pep8)
+    patch_all()  # Monkeypatch pylint
+
+    for item in module_name:
+        if not isinstance(item, str):  # Issue errors for invalid types
+            current_reporter.show_file_linted(item)
+            print('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item))
+        else:  # Check other valid files.
+            valid_module_names.append(item)
+
     try:
-        linter.check([spec.origin])
-        current_reporter.print_messages(level)
+        expanded_files, errors = utils.expand_modules(valid_module_names, 
+                        linter.config.black_list, linter.config.black_list_re)
+        for error in errors:
+            current_reporter.show_file_linted(error['mod'])
+            if isinstance(error['ex'], ImportError):
+                print('Error: {}, which means the file "{}" could not be found.\n'
+                      .format(error['ex'], error['mod']))
+            else:
+                print('Error: {}\n'.format(error['ex']))
+
+        for descr in expanded_files:
+            modname, filepath, is_arg = descr['name'], descr['path'], descr['isarg']
+            current_reporter.show_file_linted(modname)
+            if not _verify_pre_check(filepath):
+                continue  # Check the other files
+            linter.check(filepath)  # Lint !
+            current_reporter.print_messages(level)
+            current_reporter.reset_messages()  # Clear lists for any next file.
 
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
-        print(e)
+        print('Error message: "{}"'.format(e))
         raise e
+
 
 
 def doc(msg_id):

@@ -53,7 +53,7 @@ def _verify_type_setting(module, ast_class, expected_type):
 
 
 def _verify_node_value_typematch(module):
-    """Helper to verify that AST node has the same type as it's child's"""
+    """Helper to verify that AST node has the same type as it's value's"""
     for n in module.nodes_of_class(astroid.Expr):
         assert n.value.type_constraints.type == n.type_constraints.type
 
@@ -61,3 +61,4 @@ def _verify_node_value_typematch(module):
 def _index_input_formatter(var_input, index):
     """Helper to format input for testing index type inference visitor."""
     return repr(var_input) + "[" + repr(index) + "]"
+g

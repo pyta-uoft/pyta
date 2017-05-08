@@ -89,28 +89,28 @@ def test_dict_index(dict_input, index):
 def test_const_expr(expr):
     """Test visitor for expression node representing a constant"""
     module = _parse_text(repr(expr))
-    cs._verify_node_child_typematch(module)
+    cs._verify_node_value_typematch(module)
 
 
 @given(cs.tuple_strategy(min_size=2))
 def test_tuple_expr(expr):
     """Test visitor for expression node representing a tuple"""
     module = _parse_text(repr(expr))
-    cs._verify_node_child_typematch(module)
+    cs._verify_node_value_typematch(module)
 
 
 @given(cs.random_list(min_size=2))
 def test_list_expr(expr):
     """Test visitor for expression node representing a list"""
     module = _parse_text(repr(expr))
-    cs._verify_node_child_typematch(module)
+    cs._verify_node_value_typematch(module)
 
 
 @given(cs.heterogeneous_dictionary(min_size=2))
 def test_dict_expr(expr):
     """Test visitor for expression node representing a dictionary"""
     module = _parse_text(repr(expr))
-    cs._verify_node_child_typematch(module)
+    cs._verify_node_value_typematch(module)
 
 
 def test_set_env():

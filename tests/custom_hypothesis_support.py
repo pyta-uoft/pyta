@@ -52,8 +52,8 @@ def _verify_type_setting(module, ast_class, expected_type):
     assert [expected_type] == result
 
 
-def _verify_node_child_typematch(module):
-    """Helper to verify that AST node has the same type as it's value's"""
+def _verify_node_value_typematch(module):
+    """Helper to verify that AST node has the same type as it's child's"""
     for n in module.nodes_of_class(astroid.Expr):
         assert n.value.type_constraints.type == n.type_constraints.type
 

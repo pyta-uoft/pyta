@@ -241,7 +241,7 @@ class Environment:
         self.globals = globals_ or {}
 
 
-    def get_locals(self, var_name):
+    def get_locals(self):
         """Helper method for accessing local variables in node's environment"""
         # _locals? private attributes?
         return self.locals
@@ -252,7 +252,7 @@ class Environment:
         self.locals[variable_name] = variable_value
 
 
-    def get_globals(self, var_name):
+    def get_globals(self):
         """Helper method for accessing global variables in node's environment"""
         return self.globals
 
@@ -262,7 +262,7 @@ class Environment:
         self.globals[variable_name] = variable_value
 
 
-    def get_nonlocals(self, var_name):
+    def get_nonlocals(self):
         """Helper method for accessing nonlocal variables in node's environment"""
         return self.nonlocalsg
 

@@ -260,6 +260,8 @@ def register_type_constraints_setter():
 
 def _populate_type_env(node):
     """Helper to prevent overlap in populating locals and globals attributes in type environment of given node."""
+    if isinstance(node, astroid.FunctionDef):
+        node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals})
     node.type_environment = Environment(globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
     for var_name in node.locals:
         if var_name in node.type_environment.get_globals():

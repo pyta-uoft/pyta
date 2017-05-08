@@ -60,5 +60,4 @@ def _verify_node_child_typematch(module):
 
 def _index_input_formatter(var_input, index):
     """Helper to format input for testing index type inference visitor."""
-    input_index = repr(var_input) + "[" + repr(index) + "]"
-    return input_index
+    return repr(var_input) + "[" + repr(index) + "]"

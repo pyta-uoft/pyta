@@ -258,11 +258,21 @@ def register_type_constraints_setter():
     return type_visitor
 
 
-def _set_environment(node):
-    node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals},
-                                        globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
+def _populate_type_env(node):
+    """Helper to prevent overlap in populating locals and globals attributes in type environment of given node."""
     if isinstance(node, astroid.FunctionDef):
-        node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
+        node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals})
+    node.type_environment = Environment(globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
+    for var_name in node.locals:
+        if node.type_environment.lookup_in_env(var_name) == -1: var_value = TYPE_CONSTRAINTS.fresh_tvar()
+        else: var_value = node.type_environment.lookup_in_env(var_name)
+        node.type_environment.add_to_locals(var_name, var_value)
+
+
+def _set_environment(node):
+    _populate_type_env(node)
+    if isinstance(node, astroid.FunctionDef):
+        node.type_environment.add_to_locals('return', TYPE_CONSTRAINTS.fresh_tvar())
 
 
 def environment_transformer() -> TransformVisitor:

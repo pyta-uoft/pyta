@@ -19,33 +19,30 @@ index_types = hs.sampled_from([
 ])
 index_values = index_types.flatmap(lambda s: s())
 
-# strategy for generating integers
-integer = hs.integers()
 
-# function that returns a strategy for generating strings from english alphabet with minimum length
-string = (lambda **kwargs: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", **kwargs))
-
-
-# function that returns a strategy for generating tuples from with minimum length
-# @hs.defines_strategy
 def tuple_strategy(**kwargs):
-    """Return a strategy which generates a tuple of at least min_size elements
-    """
-    generated_tuple = hs.lists(primitive_values, **kwargs).map(tuple)
-    return generated_tuple
+    """Return a strategy which generates a tuple."""
+    return hs.lists(primitive_values, **kwargs).map(tuple)
 
 
-# function that returns a strategy for generating lists of uniform type minimum length
-homogeneous_list = (lambda **kwargs: primitive_types.flatmap(lambda s: hs.lists(s(), **kwargs)))
+def homogeneous_list(**kwargs):
+    """Return a strategy which generates a list of uniform type."""
+    return primitive_types.flatmap(lambda s: hs.lists(s(), **kwargs))
 
-# function that returns a strategy for generating random lists with minimum length
-random_list = (lambda **kwargs: hs.lists(primitive_values, **kwargs))
 
-# strategy to generate dictionaries of uniform key:value types
-homogeneous_dictionary = primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  min_size=1))
+def random_list(**kwargs):
+    """Return a strategy which generates a random list."""
+    return hs.lists(primitive_values, **kwargs)
 
-# strategy to generate random dictionaries
-heterogeneous_dictionary = hs.dictionaries(primitive_values, primitive_values, min_size=2)
+
+def homogeneous_dictionary(**kwargs):
+    """Return a strategy which generates a dictionary of uniform key:value type."""
+    return primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
+
+
+def heterogeneous_dictionary(**kwargs):
+    """Return a strategy which generates a dictionary of random key:value type."""
+    return hs.dictionaries(index_values, primitive_values, **kwargs)
 
 
 # Helper functions for testing
@@ -55,8 +52,8 @@ def _verify_type_setting(module, ast_class, expected_type):
     assert [expected_type] == result
 
 
-def _verify_type_inf_child(module):
-    """Helper to verify that AST node has the same type as it's value/child's"""
+def _verify_node_child_typematch(module):
+    """Helper to verify that AST node has the same type as it's value's"""
     for n in module.nodes_of_class(astroid.Expr):
         assert n.value.type_constraints.type == n.type_constraints.type
 

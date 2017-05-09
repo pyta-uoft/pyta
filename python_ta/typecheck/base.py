@@ -241,37 +241,6 @@ class Environment:
         self.globals = globals_ or {}
 
 
-    def get_locals(self):
-        """Helper method for accessing local variables in node's environment"""
-        # _locals? private attributes?
-        return self.locals
-
-
-    def add_to_locals(self, variable_name, variable_value):
-        """Helper to add a pair of variable name and value to the locals environment"""
-        self.locals[variable_name] = variable_value
-
-
-    def get_globals(self):
-        """Helper method for accessing global variables in node's environment"""
-        return self.globals
-
-
-    def add_to_globals(self, variable_name, variable_value):
-        """Helper to add a pair of variable name and value to the globals environment"""
-        self.globals[variable_name] = variable_value
-
-
-    def get_nonlocals(self):
-        """Helper method for accessing nonlocal variables in node's environment"""
-        return self.nonlocalsg
-
-
-    def add_to_nonlocals(self, variable_name, variable_value):
-        """Helper to add a pair of variable name and value to the globals environment"""
-        self.nonlocals[variable_name] = variable_value
-
-
     def lookup_in_env(self, variable_name):
         """Helper to search for a variable in the environment of a node by name."""
         if variable_name in self.locals:
@@ -281,7 +250,7 @@ class Environment:
         elif variable_name in self.nonlocals:
             return self.nonlocals[variable_name]
         else:
-            return -1
+            return KeyError
 
 
     def __str__(self):

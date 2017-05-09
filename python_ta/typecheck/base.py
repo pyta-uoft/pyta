@@ -250,7 +250,7 @@ class Environment:
         elif variable_name in self.nonlocals:
             return self.nonlocals[variable_name]
         else:
-            return KeyError
+            raise gKeyError
 
 
     def __str__(self):

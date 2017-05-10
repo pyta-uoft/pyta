@@ -90,7 +90,7 @@ def set_name_type_constraints(node):
     try:
         node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
     except KeyError:
-        node.frame().type_environment.create_in_env(TYPE_CONSTRAINTS, "globals", node.name)
+        node.frame().type_environment.create_in_env(TYPE_CONSTRAINTS, 'globals', node.name)
         node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
 

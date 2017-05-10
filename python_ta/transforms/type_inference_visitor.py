@@ -87,12 +87,10 @@ def set_expr_type_constraints(node):
 
 
 def set_name_type_constraints(node):
-    if node.name in node.frame().type_environment.locals:
-        node.type_constraints = TypeInfo(node.frame().type_environment.locals[node.name])
-    elif node.name in node.frame().type_environment.globals:
-        node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
-    else:
-        node.frame().type_environment.globals[node.name] = TYPE_CONSTRAINTS.fresh_tvar()
+    try:
+        node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+    except KeyError:
+        node.frame().type_environment.create_in_env(TYPE_CONSTRAINTS, "globals", node.name)
         node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
 

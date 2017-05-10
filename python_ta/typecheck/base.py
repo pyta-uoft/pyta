@@ -254,11 +254,11 @@ class Environment:
 
     def create_in_env(self, type_constraints, environment, variable_name):
         """Helper to create a fresh Type Var and adding the variable to appropriate environment."""
-        if environment == "locals":
+        if environment == 'locals':
             self.locals[variable_name] = type_constraints.fresh_tvar()
-        elif environment == "globals":
+        elif environment == 'globals':
             self.globals[variable_name] = type_constraints.fresh_tvar()
-        elif environment == "nonlocals":
+        elif environment == 'nonlocals':
             self.nonlocals[variable_name] = type_constraints.fresh_tvar()
 
     def __str__(self):

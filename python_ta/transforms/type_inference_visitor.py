@@ -266,13 +266,6 @@ def _populate_local_env(node):
         node.type_environment.locals[var_name] = var_value
 
 
-def _set_environment(node):
-    node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals},
-                                        globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
-    if isinstance(node, astroid.FunctionDef):
-        node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
-
-
 def _set_module_environment(node):
     """Method to set environment of a Module node."""
     node.type_environment = Environment(globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})

@@ -258,6 +258,17 @@ def register_type_constraints_setter():
     return type_visitor
 
 
+def _populate_local_env(node):
+    """Helper to populate locals attributes in type environment of given node."""
+    for var_name in node.locals:
+        try:
+            var_value = node.type_environment.lookup_in_env(var_name)
+            node.type_environment.locals[var_name] = var_value
+        except KeyError:
+            var_value = TYPE_CONSTRAINTS.fresh_tvar()
+            node.type_environment.locals[var_name] = var_value
+
+
 def _set_environment(node):
     node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals},
                                         globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})

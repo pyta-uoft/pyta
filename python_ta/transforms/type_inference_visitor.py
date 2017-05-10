@@ -276,6 +276,24 @@ def _set_environment(node):
         node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
 
 
+def _set_module_environment(node):
+    """Method to set environment of a Module node."""
+    if isinstance(node, astroid.Module):
+        node.type_environment = Environment(globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
+        _populate_local_env(node)
+    else:
+        raise TypeError
+
+
+def _set_funcion_def_environment(node):
+    """Method to set environment of a FunctionDef node."""
+    if isinstance(node, astroid.FunctionDef):
+        _populate_local_env(node)
+        node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
+    else:
+        raise TypeError
+
+
 def environment_transformer() -> TransformVisitor:
     """Return a TransformVisitor that sets an environment for every node."""
     visitor = TransformVisitor()

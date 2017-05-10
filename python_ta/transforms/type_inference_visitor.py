@@ -298,6 +298,6 @@ def environment_transformer() -> TransformVisitor:
     """Return a TransformVisitor that sets an environment for every node."""
     visitor = TransformVisitor()
 
-    visitor.register_transform(astroid.FunctionDef, _set_environment)
-    visitor.register_transform(astroid.Module, _set_environment)
+    visitor.register_transform(astroid.FunctionDef, _set_funcion_def_environment)
+    visitor.register_transform(astroid.Module, _set_module_environment)
     return visitor

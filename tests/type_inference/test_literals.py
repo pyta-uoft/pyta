@@ -128,15 +128,14 @@ def test_set_env():
 def test_single_assign():
     """Test visitor for assignment nodes."""
     module = _parse_text("ryan = 5")
-    # Assign node for this type of expr is be the first node in the body of the module
+    # Assign node for this type of expr is the first node in the body of the module
     target_name = module.body[0].targets[0].name
-    # given a name and value
     target_value = module.body[0].value
-    # lookup the name in the frame's environment
+    # lookup name in the frame's environment
     target_type_var = module.body[0].frame().type_environment.lookup_in_env(target_name)
     # do a concrete look up of the corresponding TypeVar
     target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
-    # compare it to the type of the value
+    # compare it to the type of the assigned value
     assert target_value.type_constraints.type == target_type
 
 

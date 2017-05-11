@@ -67,13 +67,18 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
     if pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
+    if isinstance(local_config, str) and local_config != '':
+        # Use config file at the specified path instead of the default.
+        linter.read_config_file(local_config)
+    else:
+        # Use default config file in the python_ta package.
+        linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
+
+    # Override part of the default config, with a dict of config options.
     if isinstance(local_config, dict):
         for key in local_config:
             linter.global_set_option(key, local_config[key])
-    elif local_config != '':
-        linter.read_config_file(local_config)
-    else:
-        linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
+
     linter.load_config_file()
     return linter
 

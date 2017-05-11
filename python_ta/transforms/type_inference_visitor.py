@@ -274,6 +274,7 @@ def _set_module_environment(node):
 
 def _set_function_def_environment(node):
     """Method to set environment of a FunctionDef node."""
+    node.type_environment = Environment()
     _populate_local_env(node)
     node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
 

@@ -272,7 +272,7 @@ def _set_module_environment(node):
     _populate_local_env(node)
 
 
-def _set_funcion_def_environment(node):
+def _set_function_def_environment(node):
     """Method to set environment of a FunctionDef node."""
     _populate_local_env(node)
     node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
@@ -282,6 +282,6 @@ def environment_transformer() -> TransformVisitor:
     """Return a TransformVisitor that sets an environment for every node."""
     visitor = TransformVisitor()
 
-    visitor.register_transform(astroid.FunctionDef, _set_funcion_def_environment)
+    visitor.register_transform(astroid.FunctionDef, _set_function_def_environment)
     visitor.register_transform(astroid.Module, _set_module_environment)
     return visitor

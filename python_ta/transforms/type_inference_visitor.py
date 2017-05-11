@@ -177,7 +177,7 @@ def set_boolop_type_constraints(node):
 ##############################################################################
 # Statements
 ##############################################################################
-def set_assign_type_constraints(node):
+def set_single_t_assign_type_constraints(node):
     first_target = node.targets[0]
     TYPE_CONSTRAINTS.unify(node.frame().type_environment.locals[first_target.name],
                            node.value.type_constraints.type)
@@ -244,7 +244,7 @@ def register_type_constraints_setter():
     type_visitor.register_transform(astroid.Expr,
                                     set_expr_type_constraints)
     type_visitor.register_transform(astroid.Assign,
-                                    set_assign_type_constraints)
+                                    set_single_t_assign_type_constraints)
     type_visitor.register_transform(astroid.Return,
                                     set_return_type_constraints)
     type_visitor.register_transform(astroid.FunctionDef,

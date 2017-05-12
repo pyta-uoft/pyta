@@ -51,6 +51,40 @@ def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
            local_config=config)
 
 
+def _find_pylintrc():
+    """Search bottom-up for a `.pylintrc` file provided in user location.
+    Return absolute path to the file, or None.
+    • When run in an IDE (like PyCharm), sys.argv contains the full path,
+        - sys.argv[0] is: /Users/fong/Desktop/pyta/f0/f1/f2/new.py
+        - os.getcwd() is: /Users/fong/Desktop/pyta/f0/f1/f2
+    • When run from the Command Line, we need to combine the two,
+        - sys.argv[0] is: `f2/new.py`
+        - os.getcwd() is: /Users/fong/Desktop/pyta/f0/f1
+    For more info see, pylint.config.find_pylintrc
+    """
+    found_pylintrc_location = None
+    # Start at the origin (file) of the call to the `check` function.
+    if sys.argv[0].startswith(os.getcwd()):
+        curr_path = os.path.dirname(sys.argv[0])
+    else:
+        curr_path = os.path.dirname(os.path.join(os.getcwd(), sys.argv[0]))
+
+    # Stop searching for `.pylintrc` file ideally at the root of the user
+    # codebase, but we don't know where that is without passing extra args.
+    # So, at least stop at the user directory, though the file shouldn't be
+    # here. It isn't ideal, but its okay for now. Note: this assumes the file
+    # will always exist in some location, up the tree.
+    stop_at = os.path.expanduser('~')
+    while curr_path != stop_at and found_pylintrc_location is None:
+        # Accept pylintrc as dotfile or not,
+        if os.path.exists(os.path.join(curr_path, '.pylintrc')):
+            found_pylintrc_location = os.path.join(curr_path, '.pylintrc')
+        elif os.path.exists(os.path.join(curr_path, 'pylintrc')):
+            found_pylintrc_location = os.path.join(curr_path, 'pylintrc')
+        curr_path = os.path.abspath(os.path.join(curr_path, '..'))  # parent
+    return found_pylintrc_location
+
+
 def _load_pylint_plugins(current_reporter, local_config, pep8):
     """Register checker plugins for pylint. Return linter."""
     linter = lint.PyLinter(reporter=current_reporter)
@@ -71,13 +105,18 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
         # Use config file at the specified path instead of the default.
         linter.read_config_file(local_config)
     else:
-        # Use default config file in the python_ta package.
-        linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
+        pylintrc_location = _find_pylintrc()
+        if pylintrc_location is not None:
+            # Use config file in user 's codebase location.
+            linter.read_config_file(pylintrc_location)
+        else:
+            # Use default config file in the python_ta package.
+            linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
 
-    # Override part of the default config, with a dict of config options.
-    if isinstance(local_config, dict):
-        for key in local_config:
-            linter.global_set_option(key, local_config[key])
+        # Override part of the default config, with a dict of config options.
+        if isinstance(local_config, dict):
+            for key in local_config:
+                linter.global_set_option(key, local_config[key])
 
     linter.load_config_file()
     return linter

@@ -179,7 +179,7 @@ def set_boolop_type_constraints(node):
 ##############################################################################
 def set_assign_type_constraints(node):
     first_target = node.targets[0]
-    TYPE_CONSTRAINTS.unify(node.frame().type_environment.locals[first_target.name],
+    TYPE_CONSTRAINTS.unify(node.frame().type_environment.lookup_in_env(first_target.name),
                            node.value.type_constraints.type)
     node.type_constraints = TypeInfo(NoType)
 

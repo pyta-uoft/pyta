@@ -23,7 +23,7 @@ def get_file_paths():
     _EXAMPLES_PATH prefix followed by the file name for each element.
     A list of all the file paths will be returned."""
     test_files = []
-    for root, directories, files in os.walk(_EXAMPLES_PATH, topdown=True):
+    for _, _, files in os.walk(_EXAMPLES_PATH, topdown=True):
         for filename in files:
             if filename not in ignored_tests:
                 test_files.append(_EXAMPLES_PATH + filename)

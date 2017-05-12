@@ -55,11 +55,11 @@ def _find_pylintrc():
     """Search bottom-up for a `.pylintrc` file provided in user location.
     Return absolute path to the file, or None.
     • When run in an IDE (like PyCharm), sys.argv contains the full path,
-        - sys.argv[0] is: /Users/fong/Desktop/pyta/f0/f1/f2/new.py
-        - os.getcwd() is: /Users/fong/Desktop/pyta/f0/f1/f2
+        - sys.argv[0] is: /<users>/<user>/<path_to>/dir1/dir2/file.py
+        - os.getcwd() is: /<users>/<user>/<path_to>/dir1/dir2
     • When run from the Command Line, we need to combine the two,
-        - sys.argv[0] is: `f2/new.py`
-        - os.getcwd() is: /Users/fong/Desktop/pyta/f0/f1
+        - sys.argv[0] is: `dir2/file.py`
+        - os.getcwd() is: /<users>/<user>/<path_to>/dir1
     For more info see, pylint.config.find_pylintrc
     """
     found_pylintrc_location = None

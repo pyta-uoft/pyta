@@ -74,10 +74,10 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
         # Use default config file in the python_ta package.
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
 
-    # Override part of the default config, with a dict of config options.
-    if isinstance(local_config, dict):
-        for key in local_config:
-            linter.global_set_option(key, local_config[key])
+        # Override part of the default config, with a dict of config options.
+        if isinstance(local_config, dict):
+            for key in local_config:
+                linter.global_set_option(key, local_config[key])
 
     linter.load_config_file()
     return linter

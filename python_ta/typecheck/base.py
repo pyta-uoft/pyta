@@ -240,5 +240,26 @@ class Environment:
         self.nonlocals = nonlocals_ or {}
         self.globals = globals_ or {}
 
+
+    def lookup_in_env(self, variable_name):
+        """Helper to search for a variable in the environment of a node by name."""
+        if variable_name in self.locals:
+            return self.locals[variable_name]
+        elif variable_name in self.globals:
+            return self.globals[variable_name]
+        elif variable_name in self.nonlocals:
+            return self.nonlocals[variable_name]
+        else:
+            raise KeyError
+
+    def create_in_env(self, type_constraints, environment, variable_name):
+        """Helper to create a fresh Type Var and adding the variable to appropriate environment."""
+        if environment == 'locals':
+            self.locals[variable_name] = type_constraints.fresh_tvar()
+        elif environment == 'globals':
+            self.globals[variable_name] = type_constraints.fresh_tvar()
+        elif environment == 'nonlocals':
+            self.nonlocals[variable_name] = type_constraints.fresh_tvar()
+
     def __str__(self):
         return str(self.locals)

@@ -87,12 +87,10 @@ def set_expr_type_constraints(node):
 
 
 def set_name_type_constraints(node):
-    if node.name in node.frame().type_environment.locals:
-        node.type_constraints = TypeInfo(node.frame().type_environment.locals[node.name])
-    elif node.name in node.frame().type_environment.globals:
-        node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
-    else:
-        node.frame().type_environment.globals[node.name] = TYPE_CONSTRAINTS.fresh_tvar()
+    try:
+        node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+    except KeyError:
+        node.frame().type_environment.create_in_env(TYPE_CONSTRAINTS, 'globals', node.name)
         node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
 
@@ -181,7 +179,7 @@ def set_boolop_type_constraints(node):
 ##############################################################################
 def set_assign_type_constraints(node):
     first_target = node.targets[0]
-    TYPE_CONSTRAINTS.unify(node.frame().type_environment.locals[first_target.name],
+    TYPE_CONSTRAINTS.unify(node.frame().type_environment.lookup_in_env(first_target.name),
                            node.value.type_constraints.type)
     node.type_constraints = TypeInfo(NoType)
 
@@ -258,17 +256,33 @@ def register_type_constraints_setter():
     return type_visitor
 
 
-def _set_environment(node):
-    node.type_environment = Environment(locals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.locals},
-                                        globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
-    if isinstance(node, astroid.FunctionDef):
-        node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
+def _populate_local_env(node):
+    """Helper to populate locals attributes in type environment of given node."""
+    for var_name in node.locals:
+        try:
+            var_value = node.type_environment.lookup_in_env(var_name)
+        except KeyError:
+            var_value = TYPE_CONSTRAINTS.fresh_tvar()
+        node.type_environment.locals[var_name] = var_value
+
+
+def _set_module_environment(node):
+    """Method to set environment of a Module node."""
+    node.type_environment = Environment(globals_={name: TYPE_CONSTRAINTS.fresh_tvar() for name in node.globals})
+    _populate_local_env(node)
+
+
+def _set_function_def_environment(node):
+    """Method to set environment of a FunctionDef node."""
+    node.type_environment = Environment()
+    _populate_local_env(node)
+    node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
 
 
 def environment_transformer() -> TransformVisitor:
     """Return a TransformVisitor that sets an environment for every node."""
     visitor = TransformVisitor()
 
-    visitor.register_transform(astroid.FunctionDef, _set_environment)
-    visitor.register_transform(astroid.Module, _set_environment)
+    visitor.register_transform(astroid.FunctionDef, _set_function_def_environment)
+    visitor.register_transform(astroid.Module, _set_module_environment)
     return visitor

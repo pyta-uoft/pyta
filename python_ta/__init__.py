@@ -110,7 +110,6 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
         # Use config file at the specified path instead of the default.
         linter.read_config_file(local_config)
     else:
-        
         # Start at the origin (file) of the call to the `check` function.
         if sys.argv[0].startswith(os.getcwd()):
             curr_path = os.path.dirname(sys.argv[0])

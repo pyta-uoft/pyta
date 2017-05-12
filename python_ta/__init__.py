@@ -31,6 +31,9 @@ from .patches import patch_all
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
+# Cache the `.pylintrc` absolute path for a given directory absolute path.
+# Config files cached in the dict are already loaded into the linter.
+_PYLINTRC_CACHE = dict()
 
 # check the python version
 if sys.version_info < (3, 4, 0):
@@ -51,9 +54,10 @@ def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
            local_config=config)
 
 
-def _find_pylintrc():
+def _find_pylintrc_bottom_up(curr_dir):
     """Search bottom-up for a `.pylintrc` file provided in user location.
     Return absolute path to the file, or None.
+    `curr_dir` is an absolute path to a directory, containing a file to check.
     • When run in an IDE (like PyCharm), sys.argv contains the full path,
         - sys.argv[0] is: /<users>/<user>/<path_to>/dir1/dir2/file.py
         - os.getcwd() is: /<users>/<user>/<path_to>/dir1/dir2
@@ -63,26 +67,27 @@ def _find_pylintrc():
     For more info see, pylint.config.find_pylintrc
     """
     found_pylintrc_location = None
-    # Start at the origin (file) of the call to the `check` function.
-    if sys.argv[0].startswith(os.getcwd()):
-        curr_path = os.path.dirname(sys.argv[0])
-    else:
-        curr_path = os.path.dirname(os.path.join(os.getcwd(), sys.argv[0]))
-
+    config_was_cached = False
     # Stop searching for `.pylintrc` file ideally at the root of the user
     # codebase, but we don't know where that is without passing extra args.
     # So, at least stop at the user directory, though the file shouldn't be
     # here. It isn't ideal, but its okay for now. Note: this assumes the file
     # will always exist in some location, up the tree.
     stop_at = os.path.expanduser('~')
-    while curr_path != stop_at and found_pylintrc_location is None:
+    while curr_dir != stop_at and found_pylintrc_location is None:
+        # Check for curr_dir in the cache first, for efficiency.
+        if curr_dir in _PYLINTRC_CACHE:
+            found_pylintrc_location = _PYLINTRC_CACHE[curr_dir]
+            config_was_cached = True
         # Accept pylintrc as dotfile or not,
-        if os.path.exists(os.path.join(curr_path, '.pylintrc')):
-            found_pylintrc_location = os.path.join(curr_path, '.pylintrc')
-        elif os.path.exists(os.path.join(curr_path, 'pylintrc')):
+        elif os.path.exists(os.path.join(curr_dir, '.pylintrc')):
+            found_pylintrc_location = os.path.join(curr_dir, '.pylintrc')
+            _PYLINTRC_CACHE[curr_dir] = found_pylintrc_location
+        elif os.path.exists(os.path.join(curr_dir, 'pylintrc')):
             found_pylintrc_location = os.path.join(curr_path, 'pylintrc')
-        curr_path = os.path.abspath(os.path.join(curr_path, '..'))  # parent
-    return found_pylintrc_location
+            _PYLINTRC_CACHE[curr_dir] = found_pylintrc_location
+        curr_dir = os.path.abspath(os.path.join(curr_dir, '..'))  # parent dir
+    return found_pylintrc_location, config_was_cached
 
 
 def _load_pylint_plugins(current_reporter, local_config, pep8):
@@ -105,7 +110,14 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
         # Use config file at the specified path instead of the default.
         linter.read_config_file(local_config)
     else:
-        pylintrc_location = _find_pylintrc()
+        
+        # Start at the origin (file) of the call to the `check` function.
+        if sys.argv[0].startswith(os.getcwd()):
+            curr_path = os.path.dirname(sys.argv[0])
+        else:
+            curr_path = os.path.dirname(os.path.join(os.getcwd(), sys.argv[0]))
+
+        pylintrc_location, _ = _find_pylintrc_bottom_up(curr_path)
         if pylintrc_location is not None:
             # Use config file in user 's codebase location.
             linter.read_config_file(pylintrc_location)
@@ -120,6 +132,19 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
 
     linter.load_config_file()
     return linter
+
+
+def _apply_nearest_config(linter=None, file_abs_path=''):
+    """Apply the nearest `.pylintrc` config file (options) to files that are
+    linted in a recursive call to _check.
+    """
+    curr_dir = file_abs_path
+    if file_abs_path.endswith('.py'):
+        curr_dir = os.path.dirname(file_abs_path)
+    pylintrc_location, config_was_cached = _find_pylintrc_bottom_up(curr_dir)
+    if not config_was_cached:
+        linter.read_config_file(pylintrc_location)
+        linter.load_config_file()
 
 
 def _verify_pre_check(filepath):
@@ -203,6 +228,8 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
 
         for descr in expanded_files:
             modname, filepath, is_arg = descr['name'], descr['path'], descr['isarg']
+            # Load config file, where applicable (e.g. recursively check a dir)
+            _apply_nearest_config(linter, os.path.abspath(filepath))
             current_reporter.show_file_linted(modname)
             if not _verify_pre_check(filepath):
                 continue  # Check the other files

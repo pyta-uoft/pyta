@@ -135,6 +135,21 @@ def test_set_name_unassigned():
         assert name_node.type_constraints.type == name_type_var
 
 
+@given(cs.random_dict_variable_value(min_size=1))
+def test_set_name_assigned(variables_dict):
+    """Test visitor for name nodes representing a variables with assigned values in module."""
+    program = ""
+    # parse dictionary into input program
+    for variable_name in variables_dict:
+        assume(not iskeyword(variable_name))
+        program += variable_name + " = " + repr(variables_dict[variable_name]) + "\n" + variable_name + "\n"
+    module = _parse_text(program)
+    name_nodes = [n for n in module.nodes_of_class(astroid.Name)]
+    for name_node in name_nodes:
+        name_type_var = name_node.frame().type_environment.lookup_in_env(name_node.name)
+        assert name_node.type_constraints.type == name_type_var
+
+
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
 def test_single_assign(variable, value):
     """Test visitor for assignment nodes."""

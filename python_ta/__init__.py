@@ -40,27 +40,19 @@ if sys.version_info < (3, 4, 0):
 def check_errors(module_name='', reporter=ColorReporter, number_of_messages=5,
                  config=''):
     """Check a module for errors, printing a report.
-
-    The name of the module should be the name of a module,
-    or the path to a Python file.
     """
-    _check(module_name=module_name, reporter=reporter, number_of_messages=number_of_messages, level='error', local_config_file=config)
+    _check(module_name=module_name, reporter=reporter, number_of_messages=number_of_messages, level='error', local_config=config)
 
 
 def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
               config=''):
-    """Check a module for errors and style warnings, printing a report.
-
-    The name of the module should be passed in as a string,
-    without a file extension (.py).
-    """
+    """Check a module for errors and style warnings, printing a report."""
     _check(module_name, reporter, number_of_messages, level='all',
-           local_config_file=config)
+           local_config=config)
 
 
-def _load_pylint_plugins(current_reporter, local_config_file, pep8):
-    """Register checker plugins for pylint. Return linter.
-    """
+def _load_pylint_plugins(current_reporter, local_config, pep8):
+    """Register checker plugins for pylint. Return linter."""
     linter = lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
@@ -75,10 +67,18 @@ def _load_pylint_plugins(current_reporter, local_config_file, pep8):
     if pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
-    if local_config_file != '':
-        linter.read_config_file(local_config_file)
+    if isinstance(local_config, str) and local_config != '':
+        # Use config file at the specified path instead of the default.
+        linter.read_config_file(local_config)
     else:
+        # Use default config file in the python_ta package.
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
+
+        # Override part of the default config, with a dict of config options.
+        if isinstance(local_config, dict):
+            for key in local_config:
+                linter.global_set_option(key, local_config[key])
+
     linter.load_config_file()
     return linter
 
@@ -112,13 +112,17 @@ def _verify_pre_check(filepath):
 
 
 def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',
-           local_config_file='', pep8=False):
+           local_config='', pep8=False):
     """Check a module for problems, printing a report.
 
-    <level> is used to specify which checks should be made.
+    The `module_name` can take several inputs:
+    - a string of the directory, or file to check (`.py` extension is optional). 
+    - a list of strings of directories or files.
+    - or not provided, to check the current python file.
 
-    The name of the module should be the name of a module,
-    or path(s) to Python file(s) or directory(ies).
+    `level` is used to specify which checks should be made.
+
+    `local_config` is a dict of config options, or string of a config file name.
     """
     valid_module_names = []
 
@@ -136,7 +140,8 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
         return
 
     current_reporter = reporter(number_of_messages)
-    linter = _load_pylint_plugins(current_reporter, local_config_file, pep8)
+    linter = _load_pylint_plugins(current_reporter, local_config, pep8)
+    
     patch_all()  # Monkeypatch pylint
 
     for item in module_name:
@@ -170,7 +175,6 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print('Error message: "{}"'.format(e))
         raise e
-
 
 
 def doc(msg_id):

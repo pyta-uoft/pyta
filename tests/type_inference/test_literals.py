@@ -4,8 +4,9 @@ from hypothesis import assume, given
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Any, Dict, List, Tuple, TypeVar
-
-from python_ta.transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
+from python_ta.transforms.type_inference_visitor import register_type_constraints_setter,\
+    environment_transformer, TYPE_CONSTRAINTS
+from keyword import iskeyword
 
 
 @given(cs.primitive_values)
@@ -122,6 +123,25 @@ def test_set_env():
     # verify the type of the value of each variable in the environment
     for value in local_values: assert isinstance(value, TypeVar)
     for value in global_values: assert isinstance(value, TypeVar)
+
+
+@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
+def test_single_assign(variable, value):
+    """Test visitor for assignment nodes."""
+    assume(not iskeyword(variable))
+    program = variable + " = " + repr(value)
+    module = _parse_text(program)
+    # Assign node for this type of expr is the first node in the body of the module
+    assign_nodes = [node for node in module.nodes_of_class(astroid.Assign)]
+    current_target = assign_nodes[0]
+    target_name = current_target.targets[0].name
+    target_value = current_target.value
+    # lookup name in the frame's environment
+    target_type_var = current_target.frame().type_environment.lookup_in_env(target_name)
+    # do a concrete look up of the corresponding TypeVar
+    target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
+    # compare it to the type of the assigned value
+    assert target_value.type_constraints.type == target_type
 
 
 def _parse_text(source: str) -> astroid.Module:

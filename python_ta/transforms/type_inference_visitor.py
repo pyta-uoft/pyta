@@ -179,7 +179,7 @@ def set_boolop_type_constraints(node):
 ##############################################################################
 def set_assign_type_constraints(node):
     first_target = node.targets[0]
-    TYPE_CONSTRAINTS.unify(node.frame().type_environment.locals[first_target.name],
+    TYPE_CONSTRAINTS.unify(node.frame().type_environment.lookup_in_env(first_target.name),
                            node.value.type_constraints.type)
     node.type_constraints = TypeInfo(NoType)
 
@@ -272,8 +272,9 @@ def _set_module_environment(node):
     _populate_local_env(node)
 
 
-def _set_funcion_def_environment(node):
+def _set_function_def_environment(node):
     """Method to set environment of a FunctionDef node."""
+    node.type_environment = Environment()
     _populate_local_env(node)
     node.type_environment.locals['return'] = TYPE_CONSTRAINTS.fresh_tvar()
 
@@ -282,6 +283,6 @@ def environment_transformer() -> TransformVisitor:
     """Return a TransformVisitor that sets an environment for every node."""
     visitor = TransformVisitor()
 
-    visitor.register_transform(astroid.FunctionDef, _set_funcion_def_environment)
+    visitor.register_transform(astroid.FunctionDef, _set_function_def_environment)
     visitor.register_transform(astroid.Module, _set_module_environment)
     return visitor

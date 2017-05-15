@@ -130,9 +130,8 @@ def test_set_single_assign(variables_dict):
     """Test single-target assignment statements; verify unification of type variables."""
     program = cs._parse_dictionary_to_program(variables_dict)
     module = _parse_text(program)
-    assign_nodes = [node for node in module.nodes_of_class(astroid.Assign)]
-    for i in range(len(assign_nodes)):
-        current_target = assign_nodes[i]
+    for i in range(len([node for node in module.nodes_of_class(astroid.Assign)])):
+        current_target = [node for node in module.nodes_of_class(astroid.Assign)][i]
         target_name = current_target.targets[0].name
         target_value = current_target.value
         # lookup name in the frame's environment

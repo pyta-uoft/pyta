@@ -1,6 +1,7 @@
 import astroid
 import hypothesis.strategies as hs
-from typing import Any, Dict, List, Tuple
+from hypothesis import assume, given
+from keyword import iskeyword
 
 # Custom strategies for hypothesis testing framework
 primitive_types = hs.sampled_from([
@@ -67,3 +68,12 @@ def _verify_node_value_typematch(module):
 def _index_input_formatter(var_input, index):
     """Helper to format input for testing index type inference visitor."""
     return repr(var_input) + "[" + repr(index) + "]"
+
+
+def _parse_dictionary_to_program(variables_dict):
+    program = ""
+    # parse dictionary into input program
+    for variable_name in variables_dict:
+        assume(not iskeyword(variable_name))
+        program += variable_name + " = " + repr(variables_dict[variable_name]) + "\n"
+    return program

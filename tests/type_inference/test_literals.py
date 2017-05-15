@@ -114,9 +114,11 @@ def test_dict_expr(expr):
     cs._verify_node_value_typematch(module)
 
 
-def test_set_env():
+@given(cs.random_dict_variable_value(min_size=1))
+def test_set_env(variables_dict):
     """Test environment setting visitors"""
-    module = _parse_text("george")
+    program = cs._parse_dictionary_to_program(variables_dict)
+    module = _parse_text(program)
     # get list of variable names in locals
     local_values = [module.type_environment.locals[name] for name in module.type_environment.locals]
     global_values = [module.type_environment.globals[name] for name in module.type_environment.globals]

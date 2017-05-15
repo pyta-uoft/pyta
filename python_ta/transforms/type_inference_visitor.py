@@ -43,10 +43,13 @@ def set_const_type_constraints(node):
 
 
 def set_tuple_type_constraints(node):
-    # node_types contains types of elements inside tuple.
-    node.type_constraints = TypeInfo(
-        Tuple[tuple(x.type_constraints.type for x in node.elts)]
-    )
+    # If tuple is on RHS, find and set Tuple type
+    if node.ctx == astroid.Load:
+        node.type_constraints = TypeInfo(
+                Tuple[tuple(x.type_constraints.type for x in node.elts)])
+    else:
+        # Tuple is on LHS; has no type - yet.
+        node.type_constraints = TypeInfo(NoType)
 
 
 def set_list_type_constraints(node):

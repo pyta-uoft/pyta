@@ -125,6 +125,16 @@ def test_set_env():
     for value in global_values: assert isinstance(value, TypeVar)
 
 
+def test_set_name_unassigned():
+    """Test visitor for name nodes representing a single unassigned variable in module."""
+    program = "george"
+    module = _parse_text(program)
+    name_nodes = [n for n in module.nodes_of_class(astroid.Name)]
+    for name_node in name_nodes:
+        name_type_var = name_node.frame().type_environment.lookup_in_env(name_node.name)
+        assert name_node.type_constraints.type == name_type_var
+
+
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
 def test_single_assign(variable, value):
     """Test visitor for assignment nodes."""

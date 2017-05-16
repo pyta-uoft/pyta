@@ -130,12 +130,11 @@ def test_set_single_assign(variables_dict):
     """Test single-target assignment statements; verify unification of type variables."""
     program = cs._parse_dictionary_to_program(variables_dict)
     module = _parse_text(program)
-    for i in range(len([node for node in module.nodes_of_class(astroid.Assign)])):
-        current_target = [node for node in module.nodes_of_class(astroid.Assign)][i]
-        target_name = current_target.targets[0].name
-        target_value = current_target.value
+    for node in module.nodes_of_class(astroid.AssignName):
+        target_name = node.name
+        target_value = node.parent.value
         # lookup name in the frame's environment
-        target_type_var = current_target.frame().type_environment.lookup_in_env(target_name)
+        target_type_var = node.frame().type_environment.lookup_in_env(target_name)
         # do a concrete look up of the corresponding TypeVar
         target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
         # compare it to the type of the assigned value

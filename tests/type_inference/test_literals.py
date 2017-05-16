@@ -151,11 +151,9 @@ def test_set_multi_assign(variables_list, value):
     """Test environment setting visitors"""
     for variable_name in variables_list:
         assume(not iskeyword(variable_name))
-    program = ""
-    program += (" = ").join(variables_list)
-    program += " = " + repr(value)
+    variables_list.append(repr(value))
+    program = (" = ").join(variables_list)
     module = _parse_text(program)
-    # get list of variable names in locals
     for target_node in module.nodes_of_class(astroid.AssignName):
         target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
         assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == type(value)

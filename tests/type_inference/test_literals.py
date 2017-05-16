@@ -129,8 +129,7 @@ def test_set_name_unassigned(variable_name):
     """Test visitor for name nodes representing a single unassigned variable in module."""
     program = variable_name
     module = _parse_text(program)
-    name_nodes = [n for n in module.nodes_of_class(astroid.Name)]
-    for name_node in name_nodes:
+    for name_node in module.nodes_of_class(astroid.Name):
         name_type_var = name_node.frame().type_environment.lookup_in_env(name_node.name)
         assert name_node.type_constraints.type == name_type_var
 

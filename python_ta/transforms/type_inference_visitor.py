@@ -183,18 +183,16 @@ def set_boolop_type_constraints(node):
 def set_assign_type_constraints(node):
     # multi-assignment; LHS is a tuple of AssignName target nodes as "elements"
     if isinstance(node.targets[0], astroid.Tuple):
-        targets_list = node.targets[0].elts
-        for i in range(len(targets_list)):
-            target_node = targets_list[i]
+        target_type_tuple = zip(node.targets[0].elts, node.value.elts)
+        for target_node, value in target_type_tuple:
             target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-            TYPE_CONSTRAINTS.unify(target_type_var, node.value.elts[i].type_constraints.type)
-        node.type_constraints = TypeInfo(NoType)
+            TYPE_CONSTRAINTS.unify(target_type_var, value.type_constraints.type)
     else:
         # single assignment; a single AssignName target node on LHS
         first_target = node.targets[0]
         TYPE_CONSTRAINTS.unify(node.frame().type_environment.lookup_in_env(first_target.name),
                                node.value.type_constraints.type)
-        node.type_constraints = TypeInfo(NoType)
+    node.type_constraints = TypeInfo(NoType)
 
 
 def set_return_type_constraints(node):

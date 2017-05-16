@@ -146,25 +146,24 @@ def test_single_assign(variable, value):
     assert target_value.type_constraints.type == target_type
 
 
-@given(cs.random_dict_variable_value(min_size=1))
+@given(cs.random_dict_variable_value(min_size=2))
 def test_multi_target_assign(variables_dict):
     """Test multi-target assignment statements; verify unification of type variables."""
-    program = ""
     for variable_name in variables_dict:
         assume(not iskeyword(variable_name))
-        program += variable_name + ", "
+    program = ""
+    separator = ", "
+    program += separator.join(variables_dict.keys())
     program += " = "
-    for variable_name in variables_dict:
-        program += repr(variables_dict[variable_name]) + ", "
+    program += separator.join([repr(value) for value in variables_dict.values()])
     module = _parse_text(program)
     # Assign node for this type of expr is the first node in the body of the module
     assign_nodes = [node for node in module.nodes_of_class(astroid.Assign)]
     targets_list = assign_nodes[0].targets[0].elts
-    for i in range(len(targets_list)-1):
-        target_node = targets_list[i]
-        target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
-        target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
-        assert type(variables_dict[target_node.name]) == target_type
+    target_type_tuple = zip(targets_list, assign_nodes[0].value.elts)
+    for target, value in target_type_tuple:
+        target_type_var = target.frame().type_environment.lookup_in_env(target.name)
+        assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == value.type_constraints.type
 
 
 def _parse_text(source: str) -> astroid.Module:

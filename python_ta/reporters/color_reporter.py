@@ -33,7 +33,7 @@ class ColorReporter(PlainReporter):
 
     # Override this method to add instance variables
     def __init__(self, number_of_messages, source_lines=None, module_name=''):
-        super().__init__(number_of_messages, source_lines, module_name)
+        super().__init__(source_lines, module_name)
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
 

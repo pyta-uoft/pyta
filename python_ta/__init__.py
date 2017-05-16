@@ -36,17 +36,15 @@ if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check_errors(module_name='', reporter=ColorReporter, number_of_messages=5,
-                 config=''):
-    """Check a module for errors, printing a report.
-    """
-    _check(module_name=module_name, reporter=reporter, number_of_messages=number_of_messages, level='error', local_config=config)
+def check_errors(module_name='', reporter=ColorReporter, config=''):
+    """Check a module for errors, printing a report."""
+    _check(module_name=module_name, reporter=reporter, level='error', 
+           local_config=config)
 
 
-def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
-              config=''):
+def check_all(module_name='', reporter=ColorReporter, config=''):
     """Check a module for errors and style warnings, printing a report."""
-    _check(module_name, reporter, number_of_messages, level='all',
+    _check(module_name=module_name, reporter=reporter, level='all',
            local_config=config)
 
 

@@ -53,11 +53,10 @@ ERROR_CHECKS = [
 
 
 class PlainReporter(BaseReporter):
-    def __init__(self, number_of_messages, source_lines=None, module_name=''):
+    def __init__(self, source_lines=None, module_name=''):
         super().__init__()
         self._error_messages = []
         self._style_messages = []
-        self._number_of_messages = number_of_messages
         self._source_lines = source_lines or []
         self._module_name = module_name
 
@@ -117,10 +116,7 @@ class PlainReporter(BaseReporter):
                 messages = []
                 while i + 1 < len(message_list) and message_list[i + 1].msg_id == current_id:
                     count += 1
-                    if self._number_of_messages == 0:
-                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
-                    elif len(messages) < self._number_of_messages - 1:
-                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
+                    messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
                     message_list.pop(i + 1)
 
                 msg_new = message_list[i].msg
@@ -129,9 +125,6 @@ class PlainReporter(BaseReporter):
                     msg_new = message_list[i].msg + '\n    ' + '\n    '.join(messages)
 
                 obj_new = 'Number of occurrences: {}.'.format(count)
-
-                if self._number_of_messages != 0 and self._number_of_messages < count:
-                    obj_new = obj_new + ' First {} shown.'.format(self._number_of_messages)
 
                 message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
                 i += 1

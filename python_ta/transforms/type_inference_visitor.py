@@ -181,23 +181,14 @@ def set_boolop_type_constraints(node):
 # Statements
 ##############################################################################
 def set_assign_type_constraints(node):
-    try:
-        # multi-assignments in single statement
-        if len(node.targets) > 1:
-            for target_node in node.targets:
-                target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                TYPE_CONSTRAINTS.unify(target_type_var, target_node.parent.value.type_constraints.type)
-                node.type_constraints = TypeInfo(NoType)
-        else:
-            # multi-target assignment statement
-            targets_list = node.targets[0].elts
-            for i in range(len(targets_list)):
-                target_node = targets_list[i]
-                target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                TYPE_CONSTRAINTS.unify(target_type_var, node.value.elts[i].type_constraints.type)
+    # multi-assignments in single statement
+    if len(node.targets) > 1:
+        for target_node in node.targets:
+            target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
+            TYPE_CONSTRAINTS.unify(target_type_var, node.value.type_constraints.type)
             node.type_constraints = TypeInfo(NoType)
-    except AttributeError:
-        # single assignment
+    else:
+        # single assignment; a single AssignName target node on LHS
         first_target = node.targets[0]
         TYPE_CONSTRAINTS.unify(node.frame().type_environment.lookup_in_env(first_target.name),
                                node.value.type_constraints.type)

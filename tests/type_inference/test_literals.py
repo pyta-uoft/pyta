@@ -146,14 +146,14 @@ def test_single_assign(variable, value):
     assert target_value.type_constraints.type == target_type
 
 
-@given(hs.lists(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), min_size=1), hs.integers())
+@given(hs.lists(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), min_size=1), cs.primitive_values)
 def test_set_multi_assign(variables_list, value):
     """Test environment setting visitors"""
-    program = ""
     for variable_name in variables_list:
         assume(not iskeyword(variable_name))
-        program += variable_name + " = "
-    program += repr(value)
+    program = ""
+    program += (" = ").join(variables_list)
+    program += " = " + repr(value)
     module = _parse_text(program)
     # get list of variable names in locals
     for target_node in module.nodes_of_class(astroid.AssignName):

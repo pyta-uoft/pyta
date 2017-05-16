@@ -152,10 +152,9 @@ def test_multi_target_assign(variables_dict):
     for variable_name in variables_dict:
         assume(not iskeyword(variable_name))
     program = ""
-    separator = ", "
-    program += separator.join(variables_dict.keys())
+    program += ", ".join(variables_dict.keys())
     program += " = "
-    program += separator.join([repr(value) for value in variables_dict.values()])
+    program += ", ".join([repr(value) for value in variables_dict.values()])
     module = _parse_text(program)
     # Assign node for this type of expr is the first node in the body of the module
     assign_nodes = [node for node in module.nodes_of_class(astroid.Assign)]

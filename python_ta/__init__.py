@@ -20,12 +20,10 @@ import sys
 import tokenize
 import webbrowser
 
-import pylint.lint as lint
-import pylint.utils as utils
-import pylint
+import pylint.lint
+import pylint.utils
 
-from astroid import MANAGER
-from astroid import modutils
+from astroid import MANAGER, modutils
 
 from .reporters import ColorReporter
 from .patches import patch_all
@@ -55,7 +53,7 @@ def check_all(module_name='', reporter=ColorReporter, number_of_messages=5,
 
 def _load_pylint_plugins(current_reporter, local_config, pep8):
     """Register checker plugins for pylint. Return linter."""
-    linter = lint.PyLinter(reporter=current_reporter)
+    linter = pylint.lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
     linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
                                 'python_ta/checkers/global_variables_checker',
@@ -121,10 +119,10 @@ def get_file_paths(rel_path):
     """
     if not os.path.isdir(rel_path):
         yield rel_path  # Don't do anything; return the file name.
-
-    for root, _, files in os.walk(rel_path):
-        for filename in (f for f in files if f.endswith('.py')):
-            yield os.path.join(root, filename)  # Format path, from root.
+    else:
+        for root, _, files in os.walk(rel_path):
+            for filename in (f for f in files if f.endswith('.py')):
+                yield os.path.join(root, filename)  # Format path, from root.
 
 
 def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='all',

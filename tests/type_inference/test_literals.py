@@ -151,9 +151,9 @@ def test_multi_target_assign(variables_dict):
     """Test multi-target assignment statements; verify unification of type variables."""
     for variable_name in variables_dict:
         assume(not iskeyword(variable_name))
-    program = ", ".join(variables_dict.keys())
-    program += " = "
-    program += ", ".join([repr(value) for value in variables_dict.values()])
+    program = (", ".join(variables_dict.keys())
+        + " = "
+        + ", ".join([repr(value) for value in variables_dict.values()]))
     module = _parse_text(program)
     # for each Assign node in program, verify unification of the type variables.
     for node in module.nodes_of_class(astroid.Assign):

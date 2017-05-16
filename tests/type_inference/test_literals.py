@@ -127,23 +127,20 @@ def test_set_env(variables_dict):
     for value in global_values: assert isinstance(value, TypeVar)
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
-def test_single_assign(variable, value):
-    """Test visitor for assignment nodes."""
-    assume(not iskeyword(variable))
-    program = variable + " = " + repr(value)
+@given(cs.random_dict_variable_value(min_size=1))
+def test_set_single_assign(variables_dict):
+    """Test single-target assignment statements; verify unification of type variables."""
+    program = cs._parse_dictionary_to_program(variables_dict)
     module = _parse_text(program)
-    # Assign node for this type of expr is the first node in the body of the module
-    assign_nodes = [node for node in module.nodes_of_class(astroid.Assign)]
-    current_target = assign_nodes[0]
-    target_name = current_target.targets[0].name
-    target_value = current_target.value
-    # lookup name in the frame's environment
-    target_type_var = current_target.frame().type_environment.lookup_in_env(target_name)
-    # do a concrete look up of the corresponding TypeVar
-    target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
-    # compare it to the type of the assigned value
-    assert target_value.type_constraints.type == target_type
+    for node in module.nodes_of_class(astroid.AssignName):
+        target_name = node.name
+        target_value = node.parent.value
+        # lookup name in the frame's environment
+        target_type_var = node.frame().type_environment.lookup_in_env(target_name)
+        # do a concrete look up of the corresponding TypeVar
+        target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
+        # compare it to the type of the assigned value
+        assert target_value.type_constraints.type == target_type
 
 
 def _parse_text(source: str) -> astroid.Module:

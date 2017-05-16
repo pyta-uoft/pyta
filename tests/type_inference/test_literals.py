@@ -124,10 +124,10 @@ def test_set_env():
     for value in local_values: assert isinstance(value, TypeVar)
     for value in global_values: assert isinstance(value, TypeVar)
 
-
-def test_set_name_unassigned():
+@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))
+def test_set_name_unassigned(variable_name):
     """Test visitor for name nodes representing a single unassigned variable in module."""
-    program = "george"
+    program = variable_name
     module = _parse_text(program)
     name_nodes = [n for n in module.nodes_of_class(astroid.Name)]
     for name_node in name_nodes:
@@ -138,14 +138,11 @@ def test_set_name_unassigned():
 @given(cs.random_dict_variable_value(min_size=1))
 def test_set_name_assigned(variables_dict):
     """Test visitor for name nodes representing a variables with assigned values in module."""
-    program = ""
-    # parse dictionary into input program
+    program = cs._parse_dictionary_to_program(variables_dict)
     for variable_name in variables_dict:
-        assume(not iskeyword(variable_name))
-        program += variable_name + " = " + repr(variables_dict[variable_name]) + "\n" + variable_name + "\n"
+        program += variable_name + "\n"
     module = _parse_text(program)
-    name_nodes = [n for n in module.nodes_of_class(astroid.Name)]
-    for name_node in name_nodes:
+    for name_node in module.nodes_of_class(astroid.Name):
         name_type_var = name_node.frame().type_environment.lookup_in_env(name_node.name)
         assert name_node.type_constraints.type == name_type_var
 

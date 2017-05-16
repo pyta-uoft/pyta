@@ -181,6 +181,19 @@ def test_multi_target_assign(variables_dict):
             assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == value.type_constraints.type
 
 
+@given(hs.lists(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), min_size=1), cs.primitive_values)
+def test_set_multi_assign(variables_list, value):
+    """Test environment setting visitors"""
+    for variable_name in variables_list:
+        assume(not iskeyword(variable_name))
+    variables_list.append(repr(value))
+    program = (" = ").join(variables_list)
+    module = _parse_text(program)
+    for target_node in module.nodes_of_class(astroid.AssignName):
+        target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
+        assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == type(value)
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)

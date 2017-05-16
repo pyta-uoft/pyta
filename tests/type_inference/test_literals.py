@@ -149,8 +149,9 @@ def test_single_assign(variable, value):
 @given(cs.random_dict_variable_value(min_size=2))
 def test_multi_target_assign(variables_dict):
     """Test multi-target assignment statements; verify unification of type variables."""
-    program = ""
-    program += ", ".join(variables_dict.keys())
+    for variable_name in variables_dict:
+        assume(not iskeyword(variable_name))
+    program = ", ".join(variables_dict.keys())
     program += " = "
     program += ", ".join([repr(value) for value in variables_dict.values()])
     module = _parse_text(program)

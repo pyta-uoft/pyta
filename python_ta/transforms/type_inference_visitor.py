@@ -191,7 +191,7 @@ def set_assign_type_constraints(node):
         node.type_constraints = TypeInfo(NoType)
     else:
         # single assignment; a single AssignName target node on LHS
-        first_target = node.targets[0]g
+        first_target = node.targets[0]
         TYPE_CONSTRAINTS.unify(node.frame().type_environment.lookup_in_env(first_target.name),
                                node.value.type_constraints.type)
         node.type_constraints = TypeInfo(NoType)

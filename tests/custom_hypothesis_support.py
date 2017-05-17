@@ -23,8 +23,8 @@ index_values = index_types.flatmap(lambda s: s())
 
 def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
-    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", min_size=1).\
-        filter(lambda x: x[0].isalpha and x.isidentifier())
+    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", **kwargs)\
+        .filter(lambda x: x[0].isalpha() and x.isidentifier())
 
 
 def tuple_strategy(**kwargs):

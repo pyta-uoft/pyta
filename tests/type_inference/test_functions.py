@@ -27,6 +27,7 @@ def test_function_def_no_args(function_name, return_value):
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
 def test_function_def_call_no_args(function_name, return_value):
     """Test type setting in environment of a function call for a function with no parameters."""
+    TYPE_CONSTRAINTS.clear_tvars()
     assume(not iskeyword(function_name))
     program = _parse_to_function(function_name, [], return_value) + "\n" + function_name + "()\n"
     module = _parse_text(program)
@@ -37,8 +38,9 @@ def test_function_def_call_no_args(function_name, return_value):
                                                                            min_size=1), cs.primitive_values)
 def test_function_def_call_assign_no_args(function_name, variable_name, return_value):
     """Verify type setting of function call being assigned to variable."""
+    TYPE_CONSTRAINTS.clear_tvars()
     assume(not iskeyword(function_name) and not iskeyword(variable_name))
-    assume(not function_name == variable_name)
+    assume(function_name != variable_name)
     program = _parse_to_function(function_name, [], return_value) + "\n" + variable_name + " = " + function_name + "()\n"
     module = _parse_text(program)
     variable_type_var = module.type_environment.lookup_in_env(variable_name)
@@ -47,6 +49,7 @@ def test_function_def_call_assign_no_args(function_name, variable_name, return_v
 
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
+    TYPE_CONSTRAINTS.clear_tvars()
     module = astroid.parse(source)
     environment_transformer().visit(module)
     register_type_constraints_setter().visit(module)

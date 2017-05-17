@@ -1,6 +1,8 @@
 import astroid
 import hypothesis.strategies as hs
-from hypothesis import assume, given
+from hypothesis import assume
+from python_ta.transforms.type_inference_visitor import register_type_constraints_setter,\
+    environment_transformer
 from keyword import iskeyword
 
 # Custom strategies for hypothesis testing framework
@@ -53,6 +55,14 @@ def heterogeneous_dictionary(**kwargs):
 
 
 # Helper functions for testing
+def _parse_text(source: str) -> astroid.Module:
+    """Parse source code text and output an AST with type inference performed."""
+    module = astroid.parse(source)
+    environment_transformer().visit(module)
+    register_type_constraints_setter().visit(module)
+    return module
+
+
 def _verify_type_setting(module, ast_class, expected_type):
     """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
     result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]

@@ -21,9 +21,9 @@ index_types = hs.sampled_from([
 index_values = index_types.flatmap(lambda s: s())
 
 
-def valid_identifier(**kwargs):
+def valid_identifier():
     """Return a strategy which generates a valid Python Identifier"""
-    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", **kwargs)\
+    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", min_size=1)\
         .filter(lambda x: x[0].isalpha() and x.isidentifier())
 
 

@@ -19,6 +19,7 @@ def test_set_env(variables_dict):
     for value in local_values: assert isinstance(value, TypeVar)
     for value in global_values: assert isinstance(value, TypeVar)
 
+
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))
 def test_set_name_unassigned(variable_name):
     """Test visitor for name nodes representing a single unassigned variable in module."""
@@ -55,6 +56,36 @@ def test_set_single_assign(variables_dict):
         target_type = TYPE_CONSTRAINTS.lookup_concrete(target_type_var)
         # compare it to the type of the assigned value
         assert target_value.type_constraints.type == target_type
+
+
+@given(cs.random_dict_variable_value(min_size=2))
+def test_multi_target_assign(variables_dict):
+    """Test multi-target assignment statements; verify unification of type variables."""
+    for variable_name in variables_dict:
+        assume(not iskeyword(variable_name))
+    program = (", ".join(variables_dict.keys())
+        + " = "
+        + ", ".join([repr(value) for value in variables_dict.values()]))
+    module = _parse_text(program)
+    # for each Assign node in program, verify unification of the type variables.
+    for node in module.nodes_of_class(astroid.Assign):
+        target_type_tuple = zip(node.targets[0].elts, node.value.elts)
+        for target, value in target_type_tuple:
+            target_type_var = target.frame().type_environment.lookup_in_env(target.name)
+            assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == value.type_constraints.type
+
+
+@given(hs.lists(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), min_size=1), cs.primitive_values)
+def test_set_multi_assign(variables_list, value):
+    """Test environment setting visitors"""
+    for variable_name in variables_list:
+        assume(not iskeyword(variable_name))
+    variables_list.append(repr(value))
+    program = (" = ").join(variables_list)
+    module = _parse_text(program)
+    for target_node in module.nodes_of_class(astroid.AssignName):
+        target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
+        assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == type(value)
 
 
 if __name__ == '__main__':

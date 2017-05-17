@@ -208,7 +208,7 @@ def set_functiondef_type_constraints(node):
     func_type = Callable[arg_types, rtype]
     func_type.polymorphic_tvars = [arg for arg in arg_types
                                    if isinstance(arg, TypeVar)]
-    TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.locals[node.name], func_type)
+    TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.lookup_in_env(node.name), func_type)
     node.type_constraints = TypeInfo(NoType)
 
 
@@ -227,8 +227,8 @@ def set_call_type_constraints(node):
 
 def set_module_type_constraints(node):
     node.type_constraints = TypeInfo(NoType)
-    # print('All sets:', TYPE_CONSTRAINTS._sets)
-    # print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
+    print('All sets:', TYPE_CONSTRAINTS._sets)
+    print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
 
 
 def register_type_constraints_setter():

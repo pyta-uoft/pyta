@@ -102,6 +102,12 @@ class TypeConstraints:
         self._count = 0
         self._sets = []
 
+    def clear_tvars(self):
+        """Resets the type constraints kept track of in the program."""
+        self._count = 0
+        self._sets = []
+
+
     def fresh_tvar(self) -> TypeVar:
         """Return a fresh type variable."""
         tvar = TypeVar('_T' + str(self._count))

@@ -203,6 +203,14 @@ class TypeConstraints:
             return _gorg(rep)[tuple(self.lookup_concrete(t1) for t1 in rep.__args__)]
         return rep or tvar
 
+    ### HELPER METHODS
+    def types_in_callable(self, callable_function):
+        """Return a list of TypeVariables corresponding to the Callable function."""
+        types_lst = []
+        for argument in callable_function.__args__:
+            arg_type_lst.append(self.lookup_concrete(argument))
+        return types_lst
+
 
 def literal_substitute(t, type_map):
     """Make substitutions in t according to type_map, returning resulting type."""

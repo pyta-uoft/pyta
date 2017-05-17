@@ -1,11 +1,11 @@
 import astroid
 import nose
-from hypothesis import given
+from hypothesis import given, assume
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import TypeVar
 from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
-
+from keyword import iskeyword
 
 @given(cs.random_dict_variable_value(min_size=1))
 def test_set_env(variables_dict):
@@ -66,7 +66,7 @@ def test_multi_target_assign(variables_dict):
     program = (", ".join(variables_dict.keys())
         + " = "
         + ", ".join([repr(value) for value in variables_dict.values()]))
-    module = _parse_text(program)
+    module = cs._parse_text(program)
     # for each Assign node in program, verify unification of the type variables.
     for node in module.nodes_of_class(astroid.Assign):
         target_type_tuple = zip(node.targets[0].elts, node.value.elts)
@@ -82,7 +82,7 @@ def test_set_multi_assign(variables_list, value):
         assume(not iskeyword(variable_name))
     variables_list.append(repr(value))
     program = (" = ").join(variables_list)
-    module = _parse_text(program)
+    module = cs._parse_text(program)
     for target_node in module.nodes_of_class(astroid.AssignName):
         target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
         assert TYPE_CONSTRAINTS.lookup_concrete(target_type_var) == type(value)

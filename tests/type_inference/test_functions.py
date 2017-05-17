@@ -35,18 +35,5 @@ def test_function_def_call_no_args(function_name, return_value):
     cs._verify_node_value_typematch(module)
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), hs.text(alphabet="abcdefghijklmnopqrstuvwxyz",
-                                                                           min_size=1), cs.primitive_values)
-def test_function_def_call_assign_no_args(function_name, variable_name, return_value):
-    """Verify type setting of function call being assigned to variable."""
-    TYPE_CONSTRAINTS.clear_tvars()
-    assume(not iskeyword(function_name) and not iskeyword(variable_name))
-    assume(function_name != variable_name)
-    program = _parse_to_function(function_name, [], return_value) + "\n" + variable_name + " = " + function_name + "()\n"
-    module = cs._parse_text(program)
-    variable_type_var = module.type_environment.lookup_in_env(variable_name)
-    assert TYPE_CONSTRAINTS.lookup_concrete(variable_type_var) == type(return_value)
-
-
 if __name__ == '__main__':
     nose.main()

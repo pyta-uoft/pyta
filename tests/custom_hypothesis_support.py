@@ -21,6 +21,12 @@ index_types = hs.sampled_from([
 index_values = index_types.flatmap(lambda s: s())
 
 
+def valid_identifier(**kwargs):
+    """Return a strategy which generates a valid Python Identifier"""
+    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", min_size=1).\
+        filter(lambda x: x[0].isalpha and x.isidentifier())
+
+
 def tuple_strategy(**kwargs):
     """Return a strategy which generates a tuple."""
     return hs.lists(primitive_values, **kwargs).map(tuple)

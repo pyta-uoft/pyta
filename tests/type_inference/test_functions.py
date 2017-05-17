@@ -24,6 +24,15 @@ def test_function_def_no_args(function_name, return_value):
     assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
 
 
+@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
+def test_function_def_call_no_args(function_name, return_value):
+    """Test type setting in environment of a function call for a function with no parameters."""
+    assume(not iskeyword(function_name))
+    program = _parse_to_function(function_name, [], return_value) + "\n" + function_name + "()\n"
+    module = _parse_text(program)
+    cs._verify_node_value_typematch(module)
+
+
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
     module = astroid.parse(source)

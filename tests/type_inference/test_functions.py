@@ -32,7 +32,9 @@ def test_function_def_call_no_args(function_name, return_value):
     assume(not iskeyword(function_name))
     program = _parse_to_function(function_name, [], return_value) + "\n" + function_name + "()\n"
     module = cs._parse_text(program)
-    cs._verify_node_value_typematch(module)
+    # there should be a single call node in this program
+    call_node = next(module.nodes_of_class(astroid.Call))
+    assert call_node.type_constraints.type == type(return_value)
 
 
 if __name__ == '__main__':

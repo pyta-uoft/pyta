@@ -20,7 +20,7 @@ def test_function_def_no_args(function_name, return_value):
     """Test FunctionDef node visitors representing function definitions with no parameters and primitive return val."""
     assume(not iskeyword(function_name))
     program = _parse_to_function(function_name, [], return_value)
-    module = _parse_text(program)
+    module = cs._parse_text(program)
     function_type_var = module.type_environment.lookup_in_env(function_name)
     assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
 
@@ -31,7 +31,7 @@ def test_function_def_call_no_args(function_name, return_value):
     TYPE_CONSTRAINTS.clear_tvars()
     assume(not iskeyword(function_name))
     program = _parse_to_function(function_name, [], return_value) + "\n" + function_name + "()\n"
-    module = _parse_text(program)
+    module = cs._parse_text(program)
     cs._verify_node_value_typematch(module)
 
 
@@ -43,18 +43,9 @@ def test_function_def_call_assign_no_args(function_name, variable_name, return_v
     assume(not iskeyword(function_name) and not iskeyword(variable_name))
     assume(function_name != variable_name)
     program = _parse_to_function(function_name, [], return_value) + "\n" + variable_name + " = " + function_name + "()\n"
-    module = _parse_text(program)
+    module = cs._parse_text(program)
     variable_type_var = module.type_environment.lookup_in_env(variable_name)
     assert TYPE_CONSTRAINTS.lookup_concrete(variable_type_var) == type(return_value)
-
-
-def _parse_text(source: str) -> astroid.Module:
-    """Parse source code text and output an AST with type inference performed."""
-    TYPE_CONSTRAINTS.clear_tvars()
-    module = astroid.parse(source)
-    environment_transformer().visit(module)
-    register_type_constraints_setter().visit(module)
-    return module
 
 
 if __name__ == '__main__':

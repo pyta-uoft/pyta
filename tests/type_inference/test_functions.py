@@ -11,7 +11,8 @@ from keyword import iskeyword
 
 def _parse_to_function(function_name, args_list, return_value):
     """Helper to parse given data into function definition."""
-    return "def " + function_name + "(" + ", ".join(args_list) + "):\n\t" + "return " + repr(return_value)
+    return f'def {function_name}({", ".join(args_list)}):' \
+           f'   return {repr(return_value)}'
 
 
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)

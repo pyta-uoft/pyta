@@ -225,10 +225,10 @@ def set_call_type_constraints(node):
     node.type_constraints = TypeInfo(ret_type)
 
 
-def set_module_type_constraints(node):
+def set_gmodule_type_constraints(node):
     node.type_constraints = TypeInfo(NoType)
-    print('All sets:', TYPE_CONSTRAINTS._sets)
-    print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
+    # print('All sets:', TYPE_CONSTRAINTS._sets)
+    # print('Global bindings:', {k: TYPE_CONSTRAINTS.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
 
 
 def register_type_constraints_setter():

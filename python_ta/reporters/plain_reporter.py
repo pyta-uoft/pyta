@@ -53,12 +53,16 @@ ERROR_CHECKS = [
 
 
 class PlainReporter(BaseReporter):
+
+    name = 'plain'
+
     def __init__(self, source_lines=None, module_name=''):
         super().__init__()
         self._error_messages = []
         self._style_messages = []
         self._source_lines = source_lines or []
         self._module_name = module_name
+        self.linter = None
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
@@ -105,6 +109,10 @@ class PlainReporter(BaseReporter):
         print('\n')
 
     def sort_messages(self):
+        max_messages = float('inf')
+        if self.linter and self.linter.config.number_of_messages:
+            max_messages = self.linter.config.number_of_messages
+
         # Sort the messages by their type.
         for message_list in [self._error_messages, self._style_messages]:
             message_list.sort(key=lambda s: s[0])
@@ -116,7 +124,8 @@ class PlainReporter(BaseReporter):
                 messages = []
                 while i + 1 < len(message_list) and message_list[i + 1].msg_id == current_id:
                     count += 1
-                    messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
+                    if len(messages) < max_messages - 1:
+                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
                     message_list.pop(i + 1)
 
                 msg_new = message_list[i].msg
@@ -125,6 +134,9 @@ class PlainReporter(BaseReporter):
                     msg_new = message_list[i].msg + '\n    ' + '\n    '.join(messages)
 
                 obj_new = 'Number of occurrences: {}.'.format(count)
+
+                if max_messages < count and max_messages != float('inf'):
+                    obj_new = obj_new + ' First {} shown.'.format(max_messages)
 
                 message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
                 i += 1

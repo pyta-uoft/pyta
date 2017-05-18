@@ -6,16 +6,17 @@ class StatReporter(PlainReporter):
     error_messages = []
     style_messages = []
 
-    def __init__(self, number_of_messages, source_lines=None):
+    name = 'stat'
+
+    def __init__(self, source_lines=None):
         """Initialize a StatReporter.
 
         Clear the two class-level message lists.
 
-        @type number_of_messages: int
         @type source_lines: List[str]
         @rtype: None
         """
-        super().__init__(number_of_messages, source_lines)
+        super().__init__(source_lines)
         StatReporter.error_messages = []
         StatReporter.style_messages = []
 

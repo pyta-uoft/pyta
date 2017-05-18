@@ -25,27 +25,27 @@ import pylint.utils
 
 from astroid import MANAGER
 
-from .reporters import ColorReporter
+from .reporters import *
 from .patches import patch_all
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
+
+REPORTERS = (ColorReporter, PlainReporter, HTMLReporter, StatReporter)
 
 # check the python version
 if sys.version_info < (3, 4, 0):
     print('You need Python 3.4 or later to run this script')
 
 
-def check_errors(module_name='', reporter=ColorReporter, config=''):
+def check_errors(module_name='', config=''):
     """Check a module for errors, printing a report."""
-    _check(module_name=module_name, reporter=reporter, level='error', 
-           local_config=config)
+    _check(module_name=module_name, level='error', local_config=config)
 
 
-def check_all(module_name='', reporter=ColorReporter, config=''):
+def check_all(module_name='', config=''):
     """Check a module for errors and style warnings, printing a report."""
-    _check(module_name=module_name, reporter=reporter, level='all',
-           local_config=config)
+    _check(module_name=module_name, level='all', local_config=config)
 
 
 def _find_pylintrc_same_locale(curr_dir):
@@ -63,10 +63,14 @@ def _find_pylintrc_same_locale(curr_dir):
     return found_pylintrc_location
 
 
-def _load_pylint_plugins(current_reporter, local_config, pep8):
+def _load_pylint_plugins(linter, local_config):
     """Register checker plugins for pylint. Return linter."""
-    linter = pylint.lint.PyLinter(reporter=current_reporter)
     linter.load_default_plugins()
+
+    # Register custom pyta reporters, `linter._reporters`
+    for reporter in REPORTERS:
+        linter.register_reporter(reporter)
+
     linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
                                 'python_ta/checkers/global_variables_checker',
                                 'python_ta/checkers/dynamic_execution_checker',
@@ -76,27 +80,29 @@ def _load_pylint_plugins(current_reporter, local_config, pep8):
                                 'python_ta/checkers/assigning_to_self_checker',
                                 'python_ta/checkers/always_returning_checker',
                                 'python_ta/checkers/type_inference_checker'])
-    if pep8:
+
+    if linter.config.pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
     if isinstance(local_config, str) and local_config != '':
         # Use config file at the specified path instead of the default.
-        print('### Loaded your configuration file:', local_config)
         linter.read_config_file(local_config)
+        print('### Loaded your configuration file:', local_config)
     else:
         # Use default config file shipped with the python_ta package.
         pylintrc_location = os.path.join(os.path.dirname(__file__), '.pylintrc')
-        print('### Loaded default configuration file:', pylintrc_location)
         linter.read_config_file(pylintrc_location)
+        print('### Loaded default configuration file:', pylintrc_location)
 
         # Override part of the default config, with a dict of config options.
+        # Note: these configs are overridden by config file in user 's codebase
+        # location.
         if isinstance(local_config, dict):
-            print('### Loaded configuration dictionary.')
             for key in local_config:
                 linter.global_set_option(key, local_config[key])
+            print('### Loaded configuration dictionary.')
 
     linter.load_config_file()
-    return linter
 
 
 def _apply_nearest_config(linter=None, file_abs_path=''):
@@ -112,9 +118,9 @@ def _apply_nearest_config(linter=None, file_abs_path=''):
         curr_dir = os.path.dirname(file_abs_path)
     pylintrc_location = _find_pylintrc_same_locale(curr_dir)
     if pylintrc_location is not None:
-        print('### Loaded local configuration file:', pylintrc_location)
         # Always read and load, even if done already (do not cache).
         linter.read_config_file(pylintrc_location)
+        print('### Loaded local configuration file:', pylintrc_location)
         linter.load_config_file()
 
 
@@ -127,7 +133,7 @@ def _verify_pre_check(filepath):
         # Check for inline "pylint:" comment, which may indicate a student
         # trying to disable a check.
         with tokenize.open(filepath) as f:
-            for (tok_type,content,_,_,_) in tokenize.generate_tokens(f.readline):
+            for (tok_type, content, _, _, _) in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
                 match = pylint.utils.OPTION_RGX.search(content)
@@ -145,9 +151,7 @@ def _verify_pre_check(filepath):
         return False
     return True
 
-
-def _check(module_name='', reporter=ColorReporter, number_of_messages=5, 
-           level='all', local_config='', pep8=False):
+def _check(module_name='', level='all', local_config=''):
     """Check a module for problems, printing a report.
 
     The `module_name` can take several inputs:
@@ -174,8 +178,27 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5,
         print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.\n'.format(module_name))
         return
 
-    current_reporter = reporter(number_of_messages)
-    linter = _load_pylint_plugins(current_reporter, local_config, pep8)
+    # see 'type' in pylint/config.py `VALIDATORS` dict.
+    new_options = (
+        ('pep8',
+            {'default': False,
+             'type': 'yn',
+             'metavar': '<yn>',
+             'help': 'Use the pycodestyle checker.'}),
+        ('number-of-messages',
+            {'default': 5,
+             'type': 'int',
+             'metavar': '<number_messages>',
+             'help': 'Display a certain number of messages to the user, without overwhelming them.'}),
+    )
+    
+    # Register new options to a checker here, allowing references to options in `.pylintrc` config file.
+    # These go into: `linter._all_options`, `linter._external_opts`
+    linter = pylint.lint.PyLinter(options=new_options)
+    _load_pylint_plugins(linter, local_config)
+    # Determine the type of reporter from the config setup.
+    linter._load_reporter()
+    current_reporter = linter.reporter
     
     patch_all()  # Monkeypatch pylint
 
@@ -199,16 +222,17 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5,
 
         for descr in expanded_files:
             modname, filepath, is_arg = descr['name'], descr['path'], descr['isarg']
-            # Use config file in user 's codebase location.
-            # Load config file, where applicable (e.g. recursively check a dir)
+            # Load config file in user location
             _apply_nearest_config(linter, os.path.abspath(filepath))
+            # The local config may have set a new reporter
+            linter._load_reporter()
+            current_reporter = linter.reporter
             current_reporter.show_file_linted(modname)
             if not _verify_pre_check(filepath):
                 continue  # Check the other files
             linter.check(filepath)  # Lint !
             current_reporter.print_messages(level)
             current_reporter.reset_messages()  # Clear lists for any next file.
-
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print('Error message: "{}"'.format(e))

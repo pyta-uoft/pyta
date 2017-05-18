@@ -205,11 +205,9 @@ class TypeConstraints:
 
     ### HELPER METHODS
     def types_in_callable(self, callable_function):
-        """Return a list of TypeVariables corresponding to the Callable function."""
-        types_lst = []
-        for argument in callable_function.__args__:
-            arg_type_lst.append(self.lookup_concrete(argument))
-        return types_lst
+        """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
+        types_lst = [arg_type_lst.append(self.lookup_concrete(argument)) for argument in callable_function.__args__]
+        return types_lst[:-1], types_lst[-1]
 
 
 def literal_substitute(t, type_map):

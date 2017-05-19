@@ -75,7 +75,7 @@ def _load_pylint_plugins(linter, local_config):
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
 
         # Override part of the default config, with a dict of config options.
-        # Note: these configs are overridden by config file in user 's codebase
+        # Note: these configs are overridden by config file in user's codebase
         # location.
         if isinstance(local_config, dict):
             for key in local_config:

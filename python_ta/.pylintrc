@@ -3,14 +3,15 @@
 # Make sure to register custom options tuple first in `python_ta/__init__.py`
 # ===========================================================
 # Default max amount of messages for reporter to display.
-number-of-messages = 5
+pyta-number-of-messages = 5
 
 # Set whether to use the pycodestyle checker.
 # Anything for a True/False, <yn> value should use in config file: y, yes, n, no
-pep8=no
+pyta-pep8=no
 
-# Set the output format. Available pyta formats are: color, plain, html, stat
-output-format=color
+# Set the output format. Available pyta formats are: ColorReporter, 
+# PlainReporter, HTMLReporter, StatReporter
+pyta-reporter=ColorReporter
 
 [ELIF]
 

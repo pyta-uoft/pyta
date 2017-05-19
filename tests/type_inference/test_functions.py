@@ -13,6 +13,7 @@ def _parse_to_function(function_name, args_list, return_value):
     return f'def {function_name}({", ".join(args_list)}):' \
            f'   return {repr(return_value)}'
 
+
 def _parse_to_function_no_return(function_name, args_list, return_value):
     """Helper to parse given data into function definition."""
     return f'def {function_name}({", ".join(args_list)}):\n' \

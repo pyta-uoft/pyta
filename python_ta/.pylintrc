@@ -10,7 +10,7 @@ number-of-messages = 5
 pep8=no
 
 # Set the output format. Available pyta formats are: color, plain, html, stat
-output-format=plain
+output-format=color
 
 [ELIF]
 

@@ -39,7 +39,7 @@ def test_function_def_call_no_args(function_name, return_value):
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
 def test_function_def_args_simple_return(function_name, arguments):
-    """Test FunctionDef node visitors representing function definitions with params; return one of it's arguments."""
+    """Test FunctionDef node visitors representing function definitions with paramater(s); return one of its arguments."""
     assume(not iskeyword(function_name) and function_name not in arguments)
     # generate every possible function definition program of aforementioned form.
     for i in range(len(arguments)):

@@ -31,8 +31,6 @@ class ColorReporter(PlainReporter):
                   'gbold': Style.BRIGHT + Fore.LIGHTBLACK_EX,
                   'reset': Style.RESET_ALL}
 
-    name = 'color'
-
     def __init__(self, source_lines=None, module_name=''):
         super().__init__(source_lines, module_name)
         self._sorted_error_messages = defaultdict(list)

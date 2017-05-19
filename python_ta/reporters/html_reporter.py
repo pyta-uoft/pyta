@@ -23,8 +23,6 @@ class HTMLReporter(ColorReporter):
                   'gbold': '<span class="gbold">',
                   'reset': '</span>'}
 
-    name = 'html'
-
     # Override this method
     def print_messages(self, level='all'):
         # Sort the messages.

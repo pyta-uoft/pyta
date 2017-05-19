@@ -6,8 +6,6 @@ class StatReporter(PlainReporter):
     error_messages = []
     style_messages = []
 
-    name = 'stat'
-
     def __init__(self, source_lines=None):
         """Initialize a StatReporter.
 

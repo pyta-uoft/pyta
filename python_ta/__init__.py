@@ -32,6 +32,8 @@ from .patches import patch_all
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
+REPORTERS = (ColorReporter, PlainReporter, HTMLReporter, StatReporter)
+
 
 # check the python version
 if sys.version_info < (3, 4, 0):
@@ -151,9 +153,6 @@ def _check(module_name='', level='all', local_config=''):
         print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.\n'.format(module_name))
         return
 
-    VALIDATORS['ColorReporter'] = ColorReporter
-    VALIDATORS['PlainReporter'] = PlainReporter
-
     # see 'type' in pylint/config.py `VALIDATORS` dict.
     new_options = (
         ('pyta-reporter',
@@ -177,7 +176,9 @@ def _check(module_name='', level='all', local_config=''):
     # These go into: `linter._all_options`, `linter._external_opts`
     linter = pylint.lint.PyLinter(options=new_options)
     _load_pylint_plugins(linter, local_config)
-    
+    # Add reporter object to an internal pylint data structure.
+    for reporter in REPORTERS:
+        VALIDATORS[reporter.__name__] = reporter
     # Determine the type of reporter from the config setup.
     current_reporter = _call_validator(linter.config.pyta_reporter, None, None, None)
     linter.set_reporter(current_reporter)

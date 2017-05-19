@@ -202,12 +202,14 @@ def set_return_type_constraints(node):
 
 
 def set_functiondef_type_constraints(node):
-    arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals[arg])
+    arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.lookup_in_env(arg))
                  for arg in node.argnames()]
     rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
+    asdf = rtype == node.type_environment.locals['return']
     if rtype == node.type_environment.locals['return']:
         func_type = Callable[arg_types, None]
-    func_type = Callable[arg_types, rtype]
+    else:
+        func_type = Callable[arg_types, rtype]
     func_type.polymorphic_tvars = [arg for arg in arg_types
                                    if isinstance(arg, TypeVar)]
     TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.lookup_in_env(node.name), func_type)

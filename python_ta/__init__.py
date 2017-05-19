@@ -31,6 +31,7 @@ from .patches import patch_all
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
+
 REPORTERS = (ColorReporter, PlainReporter, HTMLReporter, StatReporter)
 
 # check the python version
@@ -46,21 +47,6 @@ def check_errors(module_name='', config=''):
 def check_all(module_name='', config=''):
     """Check a module for errors and style warnings, printing a report."""
     _check(module_name=module_name, level='all', local_config=config)
-
-
-def _find_pylintrc_same_locale(curr_dir):
-    """Search for a `.pylintrc` configuration file provided in same (user) 
-    location as the source file to check.
-    Return absolute path to the file, or None.
-    `curr_dir` is an absolute path to a directory, containing a file to check.
-    For more info see, pylint.config.find_pylintrc
-    """
-    found_pylintrc_location = None
-    if os.path.exists(os.path.join(curr_dir, '.pylintrc')):
-        found_pylintrc_location = os.path.join(curr_dir, '.pylintrc')
-    elif os.path.exists(os.path.join(curr_dir, 'pylintrc')):
-        found_pylintrc_location = os.path.join(curr_path, 'pylintrc')
-    return found_pylintrc_location
 
 
 def _load_pylint_plugins(linter, local_config):
@@ -87,12 +73,9 @@ def _load_pylint_plugins(linter, local_config):
     if isinstance(local_config, str) and local_config != '':
         # Use config file at the specified path instead of the default.
         linter.read_config_file(local_config)
-        print('### Loaded your configuration file:', local_config)
     else:
         # Use default config file shipped with the python_ta package.
-        pylintrc_location = os.path.join(os.path.dirname(__file__), '.pylintrc')
-        linter.read_config_file(pylintrc_location)
-        print('### Loaded default configuration file:', pylintrc_location)
+        linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
 
         # Override part of the default config, with a dict of config options.
         # Note: these configs are overridden by config file in user 's codebase
@@ -100,28 +83,8 @@ def _load_pylint_plugins(linter, local_config):
         if isinstance(local_config, dict):
             for key in local_config:
                 linter.global_set_option(key, local_config[key])
-            print('### Loaded configuration dictionary.')
 
     linter.load_config_file()
-
-
-def _apply_nearest_config(linter=None, file_abs_path=''):
-    """Apply the nearest `.pylintrc` config file (options) to files that are
-    linted in a recursive call to _check. Don't search parent directories for
-    a config file.
-    `file_abs_path` is the absolute path to the file being linted.
-    Note: all non-overridden values from previously loaded configuration files 
-    are used in subsequent files that get linted.
-    """
-    curr_dir = file_abs_path
-    if file_abs_path.endswith('.py'):
-        curr_dir = os.path.dirname(file_abs_path)
-    pylintrc_location = _find_pylintrc_same_locale(curr_dir)
-    if pylintrc_location is not None:
-        # Always read and load, even if done already (do not cache).
-        linter.read_config_file(pylintrc_location)
-        print('### Loaded local configuration file:', pylintrc_location)
-        linter.load_config_file()
 
 
 def _verify_pre_check(filepath):
@@ -243,8 +206,6 @@ def _check(module_name='', level='all', local_config=''):
     try:
         for locations in valid_module_names:
             for file_py in get_file_paths(locations):
-                # Load config file in user location
-                _apply_nearest_config(linter, os.path.abspath(file_py))
                 # The local config may have set a new reporter
                 linter._load_reporter()
                 current_reporter = linter.reporter

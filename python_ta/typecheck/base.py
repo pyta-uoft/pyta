@@ -212,8 +212,7 @@ class TypeConstraints:
     ### HELPER METHODS
     def types_in_callable(self, callable_function):
         """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
-        arg_type_lst = []
-        [arg_type_lst.append(self.lookup_concrete(argument)) for argument in callable_function.__args__]
+        arg_type_lst = [self.lookup_concrete(argument) for argument in callable_function.__args__]
         return arg_type_lst[:-1], arg_type_lst[-1]
 
 

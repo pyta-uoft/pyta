@@ -205,7 +205,6 @@ def set_functiondef_type_constraints(node):
     arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.lookup_in_env(arg))
                  for arg in node.argnames()]
     rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
-    asdf = rtype == node.type_environment.locals['return']
     if rtype == node.type_environment.locals['return']:
         func_type = Callable[arg_types, None]
     else:

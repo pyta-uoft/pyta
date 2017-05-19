@@ -203,10 +203,11 @@ def set_return_type_constraints(node):
 def set_functiondef_type_constraints(node):
     arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.lookup_in_env(arg))
                  for arg in node.argnames()]
-    rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
-    if rtype == node.type_environment.locals['return']:
+    # check if return nodes exist; there is a return statement in function body.
+    if len(list(node.nodes_of_class(astroid.Return))) == 0:
         func_type = Callable[arg_types, None]
     else:
+        rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
         func_type = Callable[arg_types, rtype]
     func_type.polymorphic_tvars = [arg for arg in arg_types
                                    if isinstance(arg, TypeVar)]

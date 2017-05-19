@@ -26,7 +26,7 @@ index_values = index_types.flatmap(lambda s: s())
 def valid_identifier():
     """Return a strategy which generates a valid Python Identifier"""
     return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", min_size=1)\
-        .filter(lambda x: x[0].isalpha() and x.isidentifier())
+        .filter(lambda x: x[0].isalpha() and x.isidentifier() and not (iskeyword(x)))
 
 
 def tuple_strategy(**kwargs):
@@ -51,8 +51,7 @@ def homogeneous_dictionary(**kwargs):
 
 def random_dict_variable_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
-    return primitive_types.flatmap(lambda s: hs.dictionaries(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
-                                                             s(), **kwargs))
+    return primitive_types.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
 
 
 def heterogeneous_dictionary(**kwargs):

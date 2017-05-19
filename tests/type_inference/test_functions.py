@@ -20,7 +20,7 @@ def _parse_to_function_no_return(function_name, args_list, return_value):
            f'     {return_value}'
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
+@given(cs.valid_identifier(), cs.primitive_values)
 def test_function_def_no_args(function_name, return_value):
     """Test FunctionDef node visitors representing function definitions with no parameters and primitive return val."""
     assume(not iskeyword(function_name))
@@ -30,7 +30,7 @@ def test_function_def_no_args(function_name, return_value):
     assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), cs.primitive_values)
+@given(cs.valid_identifier(), cs.primitive_values)
 def test_function_def_call_no_args(function_name, return_value):
     """Test type setting in environment of a function call for a function with no parameters."""
     TYPE_CONSTRAINTS.clear_tvars()
@@ -42,11 +42,11 @@ def test_function_def_call_no_args(function_name, return_value):
     assert expr_node.type_constraints.type == type(return_value)
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), hs.lists(cs.valid_identifier(), min_size=0))
-def test_function_def_no_return(function_name, arguments):
+@given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=0), cs.primitive_values)
+def test_function_def_no_return(function_name, arguments, body):
     """Test FunctionDef node visitors representing non-returning function definitions with parameter(s)."""
     assume(not iskeyword(function_name) and function_name not in arguments)
-    for return_value in ['return None', 'None', 'pass']:
+    for return_value in ['return None', repr(body), 'pass']:
         program = _parse_to_function_no_return(function_name, arguments, return_value)
         module = cs._parse_text(program)
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))

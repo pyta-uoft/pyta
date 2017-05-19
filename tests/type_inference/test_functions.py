@@ -4,8 +4,7 @@ from hypothesis import assume, given
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
-from python_ta.transforms.type_inference_visitor import register_type_constraints_setter,\
-    environment_transformer, TYPE_CONSTRAINTS
+from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from keyword import iskeyword
 
 

@@ -102,6 +102,12 @@ class TypeConstraints:
         self._count = 0
         self._sets = []
 
+    def clear_tvars(self):
+        """Resets the type constraints kept track of in the program."""
+        self._count = 0
+        self._sets = []
+
+
     def fresh_tvar(self) -> TypeVar:
         """Return a fresh type variable."""
         tvar = TypeVar('_T' + str(self._count))
@@ -202,6 +208,12 @@ class TypeConstraints:
         elif isinstance(rep, GenericMeta):
             return _gorg(rep)[tuple(self.lookup_concrete(t1) for t1 in rep.__args__)]
         return rep or tvar
+
+    ### HELPER METHODS
+    def types_in_callable(self, callable_function):
+        """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
+        types_lst = [arg_type_lst.append(self.lookup_concrete(argument)) for argument in callable_function.__args__]
+        return types_lst[:-1], types_lst[-1]
 
 
 def literal_substitute(t, type_map):

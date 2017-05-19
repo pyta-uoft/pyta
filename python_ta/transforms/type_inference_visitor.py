@@ -208,7 +208,7 @@ def set_functiondef_type_constraints(node):
     func_type = Callable[arg_types, rtype]
     func_type.polymorphic_tvars = [arg for arg in arg_types
                                    if isinstance(arg, TypeVar)]
-    TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.locals[node.name], func_type)
+    TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.lookup_in_env(node.name), func_type)
     node.type_constraints = TypeInfo(NoType)
 
 

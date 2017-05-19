@@ -147,6 +147,7 @@ def _verify_pre_check(filepath):
         return False
     return True
 
+
 def get_file_paths(rel_path):
     """A generator for iterating python files within a directory.
     `rel_path` is a relative path to a file or directory.

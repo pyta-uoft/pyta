@@ -215,6 +215,8 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
     try:
         for locations in valid_module_names:
             for file_py in get_file_paths(locations):
+                # Load config file in user location
+                _apply_nearest_config(linter, os.path.abspath(file_py))
                 current_reporter.show_file_linted(file_py)
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files

@@ -204,10 +204,14 @@ def _check(module_name='', reporter=ColorReporter, number_of_messages=5, level='
             valid_module_names.append(item)
         elif not os.path.exists(item):
             # For files with dot notation, e.g., `examples.<filename>`
-            filepath = modutils.file_from_modpath(item.split('.'))
-            if os.path.exists(filepath):
-                valid_module_names.append(filepath)
-            else:
+            try:
+                filepath = modutils.file_from_modpath(item.split('.'))
+                if os.path.exists(filepath):
+                    valid_module_names.append(filepath)
+                else:
+                    print('Could not find the file called, `{}`\n'.format(item))
+            except ImportError:
+                current_reporter.show_file_linted(item)
                 print('Could not find the file called, `{}`\n'.format(item))
         else:
             valid_module_names.append(item)  # Check other valid files.

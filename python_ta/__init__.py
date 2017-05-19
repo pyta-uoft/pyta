@@ -23,7 +23,7 @@ import webbrowser
 import pylint.lint
 import pylint.utils
 
-from astroid import MANAGER
+from astroid import MANAGER, modutils
 
 from .reporters import *
 from .patches import patch_all
@@ -151,6 +151,21 @@ def _verify_pre_check(filepath):
         return False
     return True
 
+
+def get_file_paths(rel_path):
+    """A generator for iterating python files within a directory.
+    `rel_path` is a relative path to a file or directory.
+    Returns paths to all files in a directory.
+    TODO: refactor helpers into a new file, `python_ta/utils.py`
+    """
+    if not os.path.isdir(rel_path):
+        yield rel_path  # Don't do anything; return the file name.
+    else:
+        for root, _, files in os.walk(rel_path):
+            for filename in (f for f in files if f.endswith('.py')):
+                yield os.path.join(root, filename)  # Format path, from root.
+
+
 def _check(module_name='', level='all', local_config=''):
     """Check a module for problems, printing a report.
 
@@ -202,37 +217,44 @@ def _check(module_name='', level='all', local_config=''):
     
     patch_all()  # Monkeypatch pylint
 
+    # Filter valid files to check.
     for item in module_name:
         if not isinstance(item, str):  # Issue errors for invalid types
             current_reporter.show_file_linted(item)
             print('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item))
-        else:  # Check other valid files.
+        elif os.path.isdir(item):
             valid_module_names.append(item)
+        elif not os.path.exists(item):
+            # For files with dot notation, e.g., `examples.<filename>`
+            try:
+                filepath = modutils.file_from_modpath(item.split('.'))
+                if os.path.exists(filepath):
+                    valid_module_names.append(filepath)
+                else:
+                    current_reporter.show_file_linted(item)
+                    print('Could not find the file called, `{}`\n'.format(item))
+            except ImportError:
+                current_reporter.show_file_linted(item)
+                print('Could not find the file called, `{}`\n'.format(item))
+        else:
+            valid_module_names.append(item)  # Check other valid files.
 
+    # Try to check file, issue error message for invalid files.
     try:
-        expanded_files, errors = pylint.utils.expand_modules(valid_module_names, 
-                        linter.config.black_list, linter.config.black_list_re)
-        for error in errors:
-            current_reporter.show_file_linted(error['mod'])
-            if isinstance(error['ex'], ImportError):
-                print('Error: {}, which means the file "{}" could not be found.\n'
-                      .format(error['ex'], error['mod']))
-            else:
-                print('Error: {}\n'.format(error['ex']))
+        for locations in valid_module_names:
+            for file_py in get_file_paths(locations):
+                # Load config file in user location
+                _apply_nearest_config(linter, os.path.abspath(file_py))
+                # The local config may have set a new reporter
+                linter._load_reporter()
+                current_reporter = linter.reporter
+                current_reporter.show_file_linted(file_py)
+                if not _verify_pre_check(file_py):
+                    continue  # Check the other files
+                linter.check(file_py)  # Lint !
+                current_reporter.print_messages(level)
+                current_reporter.reset_messages()  # Clear lists for any next file.
 
-        for descr in expanded_files:
-            modname, filepath, is_arg = descr['name'], descr['path'], descr['isarg']
-            # Load config file in user location
-            _apply_nearest_config(linter, os.path.abspath(filepath))
-            # The local config may have set a new reporter
-            linter._load_reporter()
-            current_reporter = linter.reporter
-            current_reporter.show_file_linted(modname)
-            if not _verify_pre_check(filepath):
-                continue  # Check the other files
-            linter.check(filepath)  # Lint !
-            current_reporter.print_messages(level)
-            current_reporter.reset_messages()  # Clear lists for any next file.
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print('Error message: "{}"'.format(e))

@@ -102,6 +102,12 @@ class TypeConstraints:
         self._count = 0
         self._sets = []
 
+    def clear_tvars(self):
+        """Resets the type constraints kept track of in the program."""
+        self._count = 0
+        self._sets = []
+
+
     def fresh_tvar(self) -> TypeVar:
         """Return a fresh type variable."""
         tvar = TypeVar('_T' + str(self._count))
@@ -131,8 +137,8 @@ class TypeConstraints:
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
             self._unify_generic(t1, t2)
         elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
-            rtype = self.unify_call(type1, *type2.__args__)
-            self.unify(result2, type2.__result__)
+            rtype = self.unify_call(t1, *t2.__args__[:-1])
+            self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
         elif t1 != t2:
@@ -162,15 +168,15 @@ class TypeConstraints:
         Return a result type.
         """
         # Check that the number of parameters matches the number of arguments.
-        if len(func_type.__args__) != len(arg_types):
+        if len(func_type.__args__) - 1 != len(arg_types):
             raise TypeInferenceError('Wrong number of arguments')
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar() for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         func_type = literal_substitute(func_type, new_tvars)
-        for arg_type, param_type in zip(arg_types, func_type.__args__):
+        for arg_type, param_type in zip(arg_types, func_type.__args__[:-1]):
             self.unify(arg_type, param_type)
-        return self._type_eval(func_type.__result__)
+        return self._type_eval(func_type.__args__[-1])
 
     def _type_eval(self, t):
         """Evaluate a type. Used for tuples."""
@@ -196,27 +202,36 @@ class TypeConstraints:
             elif (isinstance(t, CallableMeta) or isinstance(t, TuplePlus) or isinstance(t, GenericMeta)) and isinstance(rep, TypeVar):
                 rep = t
 
-        if isinstance(rep, GenericMeta):
+        if isinstance(rep, CallableMeta):
+            return _gorg(rep)[[self.lookup_concrete(t1) for t1 in rep.__args__[:-1]],
+                              self.lookup_concrete(rep.__args__[-1])]
+        elif isinstance(rep, GenericMeta):
             return _gorg(rep)[tuple(self.lookup_concrete(t1) for t1 in rep.__args__)]
         return rep or tvar
+
+    ### HELPER METHODS
+    def types_in_callable(self, callable_function):
+        """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
+        types_lst = [arg_type_lst.append(self.lookup_concrete(argument)) for argument in callable_function.__args__]
+        return types_lst[:-1], types_lst[-1]
 
 
 def literal_substitute(t, type_map):
     """Make substitutions in t according to type_map, returning resulting type."""
     if isinstance(t, TypeVar) and t in type_map:
         return type_map[t]
-    elif isinstance(t, GenericMeta) and t.__args__ is not None:
-        return _gorg(t)[tuple(literal_substitute(t1, type_map) for t1 in t.__args__)]
     elif isinstance(t, TuplePlus):
         subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
         return TuplePlus('tup+', *subbed_args)
     elif isinstance(t, CallableMeta):
-        args = list(literal_substitute(t1, type_map) for t1 in t.__args__)
-        res = literal_substitute(t.__result__, type_map)
+        args = list(literal_substitute(t1, type_map) for t1 in t.__args__[:-1])
+        res = literal_substitute(t.__args__[-1], type_map)
         new_t = Callable[args, res]
         if hasattr(t, 'polymorphic_tvars'):
             new_t.polymorphic_tvars = t.polymorphic_tvars
         return new_t
+    elif isinstance(t, GenericMeta) and t.__args__ is not None:
+        return _gorg(t)[tuple(literal_substitute(t1, type_map) for t1 in t.__args__)]
     else:
         return t
 

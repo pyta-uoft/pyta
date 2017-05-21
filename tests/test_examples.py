@@ -9,7 +9,7 @@ _EXAMPLE_PREFIX_REGEX = '[CEFRW]\d{4}'
 
 
 # The following tests appear to always fail (further investigation needed).
-ignored_tests = [
+IGNORED_TESTS = [
     'E1130_invalid_unary_operand_type.py',
     'E1131_unsupported_binary_operation.py',
     'W0222_signature_differs.py',
@@ -23,9 +23,9 @@ def get_file_paths():
     _EXAMPLES_PATH prefix followed by the file name for each element.
     A list of all the file paths will be returned."""
     test_files = []
-    for root, directories, files in os.walk(_EXAMPLES_PATH, topdown=True):
+    for _, _, files in os.walk(_EXAMPLES_PATH, topdown=True):
         for filename in files:
-            if filename not in ignored_tests:
+            if filename not in IGNORED_TESTS and filename.endswith('.py'):
                 test_files.append(_EXAMPLES_PATH + filename)
     return test_files
 

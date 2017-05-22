@@ -1,7 +1,7 @@
 from pylint.reporters import BaseReporter
 from pylint.utils import Message
 from collections import defaultdict, namedtuple
-from enum import Enum
+from .node_printers import LineType, render_message
 
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
@@ -201,51 +201,14 @@ class PlainReporter(BaseReporter):
         :param Message msg: the message for which a code snippet is built
         :return: str
         """
-        if hasattr(msg, 'node') and msg.node is not None:
-            start = max(msg.node.fromlineno, 1)
-            end = msg.node.end_lineno
-        else:
-            # Some message types don't have a node, including:
-            # - line-too-long
-            # - bad-whitespace
-            # - trailing-newlines
-            start = end = msg.line
-
         code_snippet = ''
 
-        # Non-special prints first error line with 'e', other
-        # lines with 'o'.
-        # Special prints each message specially.
-        # Both print 2 lines of context before and after
-        # (code boundaries permitting).
-
-        # Print up to 2 lines before start - 1 for context:
-        for l in range(max(start - 3, 0), start - 1):
-            code_snippet += self._add_line(msg, l, LineType.CONTEXT)
-
-        if msg.symbol == 'trailing-newlines':
-            code_snippet += self._add_line(msg, start - 1, LineType.NUMBERONLY)
-        elif msg.msg.startswith('Missing function docstring'):
-            code_snippet += self._add_line(
-                msg, start - 1, LineType.ERROR)
-            code_snippet += self._add_line(msg, start, LineType.DOCSTRING)
-            end = start  # to print context after function header
-        elif msg.msg.startswith('Missing module docstring'):
-            # Perhaps instead of start, use line 0?
-            code_snippet += self._add_line(msg, start - 1, LineType.DOCSTRING)
-            end = 0  # to print context after
-        else:  # so msg isn't in special at all
-            code_snippet += self._add_line(msg, start - 1, LineType.ERROR)
-            for line in range(start, end):
-                code_snippet += self._add_line(msg, line, LineType.OTHER)
-
-        # Print up to 2 lines after end - 1 for context:
-        for l in range(end, min(end + 2, len(self._source_lines))):
-            code_snippet += self._add_line(msg, l, LineType.CONTEXT)
+        for line, slice_, line_type, text in render_message(msg, self._source_lines):
+            code_snippet += self._add_line(line, line_type, slice_, text)
 
         return code_snippet
 
-    def _add_line(self, msg, n, linetype):
+    def _add_line(self, n, linetype, slice_, text=''):
         """
         Format given source code line as specified and return as str.
 
@@ -256,70 +219,49 @@ class PlainReporter(BaseReporter):
         :param LineType linetype: enum member indicating way to format line
         :return: str
         """
-        if not self._source_lines:
-            return ''
-
-        snippet = ''
-        spaces = 2 * self._SPACE
-        text = self._source_lines[n]
-        # Pad line number with spaces to even out indent:
-        number = '{:>3}'.format(n + 1)
+        snippet = self._add_line_number(n, linetype)
 
         # Set starting and ending columns.
-        if hasattr(msg, 'node') and msg.node is not None:
-            start_col = msg.node.col_offset
-            end_col = msg.node.end_col_offset
-        else:
-            # to prevent highlighted indent
-            start_col = -len(text.lstrip(' '))  # negative to count from end
-            end_col = len(text)
+        start_col = slice_.start or 0
+        end_col = slice_.stop or len(text)
 
         if linetype == LineType.ERROR:
-            snippet += spaces + self._colourify('gbold', number)
-            snippet += spaces + self._colourify('black', text[:start_col])
-            snippet += self._colourify('highlight',
-                                       text[start_col:end_col])
+            snippet += self._colourify('black', text[:start_col])
+            snippet += self._colourify('highlight', text[slice_])
             snippet += self._colourify('black', text[end_col:])
         elif linetype == LineType.CONTEXT:
-            snippet += spaces + self._colourify('grey', number) + spaces + self._colourify('grey', text)
-
+            snippet += self._colourify('grey', text)
         elif linetype == LineType.OTHER:
-            snippet += spaces + self._colourify('grey', number) + spaces + text
-
-        elif linetype == LineType.NUMBERONLY:
-            snippet += spaces + self._colourify('highlight', number)
-
-        elif linetype == LineType.ELLIPSIS:
-            snippet += spaces + self._colourify('gbold', number)
-            snippet += spaces
-            space_c = len(text) - len(text.lstrip(' '))
-            snippet += space_c * self._SPACE
-            snippet += self._colourify('black', '. . .')
-            # Need spaces in between dots to prevent PyCharm thinking
-            # that the '...' is actually a line-continuation prompt.
-
+            snippet += text
         elif linetype == LineType.DOCSTRING:
-            snippet += self._SPACE * 7  # 2-space indent, 3-space number, 2-space indent
             space_c = len(text) - len(text.lstrip(' '))
             snippet += space_c * self._SPACE
-            snippet += self._colourify('highlight',
-                                       '""" YOUR DOCSTRING HERE """')
+            snippet += self._colourify('highlight', text.lstrip(' '))
 
         snippet += self._BREAK
         return snippet
+
+    def _add_line_number(self, n, linetype):
+        """Return a formatted string displaying a line number."""
+        spaces = 2 * self._SPACE
+        if n is not None:
+            number = '{:>3}'.format(n)
+        else:
+            number = 3 * self._SPACE
+
+        if linetype == LineType.ERROR:
+            return spaces + self._colourify('gbold', number) + spaces
+        elif linetype == LineType.CONTEXT:
+            return spaces + self._colourify('grey', number) + spaces
+        elif linetype == LineType.OTHER:
+            return spaces + self._colourify('grey', number) + spaces
+        elif linetype == LineType.DOCSTRING:
+            return spaces + self._colourify('black', number) + spaces
+        else:
+            return spaces + number + spaces
 
     @classmethod
     def _colourify(cls, colour_class, text):
         return text
 
     _display = None
-
-
-class LineType(Enum):
-    """ An enumeration for _add_line method line types. """
-    ERROR = 1       # line with error
-    CONTEXT = 2     # non-error/other line added for context
-    OTHER = 3       # line included in source but not error
-    NUMBERONLY = 4  # only highlighted line number
-    ELLIPSIS = 5    # code replaced with ellipsis
-    DOCSTRING = 6   # docstring needed warning

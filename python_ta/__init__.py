@@ -32,8 +32,6 @@ from .patches import patch_all
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
-REPORTERS = (ColorReporter, PlainReporter, HTMLReporter, StatReporter)
-
 
 # check the python version
 if sys.version_info < (3, 4, 0):
@@ -50,20 +48,49 @@ def check_all(module_name='', config=''):
     _check(module_name=module_name, level='all', local_config=config)
 
 
-def _load_pylint_plugins(linter, local_config):
+def init_linter(local_config):
     """Register checker plugins for pylint. Return linter."""
+    
+    # Add reporter object to an internal pylint data structure.
+    for reporter in REPORTERS:
+        VALIDATORS[reporter.__name__] = reporter
+    
+    # See 'type' in pylint/config.py `VALIDATORS` dict.
+    new_checker_options = (
+        ('pyta-reporter',
+            {'default': 'ColorReporter',
+             'type': 'string',
+             'metavar': '<pyta_reporter>',
+             'help': 'Output messages with a specific reporter.'}),
+        ('pyta-pep8',
+            {'default': False,
+             'type': 'yn',
+             'metavar': '<yn>',
+             'help': 'Use the pycodestyle checker.'}),
+        ('pyta-number-of-messages',
+            {'default': 5,
+             'type': 'int',
+             'metavar': '<number_messages>',
+             'help': 'Display a certain number of messages to the user, without overwhelming them.'}),
+    )
+
+    custom_checkers = [
+        'python_ta/checkers/forbidden_import_checker',
+        'python_ta/checkers/global_variables_checker',
+        'python_ta/checkers/dynamic_execution_checker',
+        'python_ta/checkers/IO_Function_checker',
+        # TODO: Fix this test
+        #'python_ta/checkers/invalid_range_index_checker',
+        'python_ta/checkers/assigning_to_self_checker',
+        'python_ta/checkers/always_returning_checker',
+        'python_ta/checkers/type_inference_checker'
+    ]
+    
+    # Register new options to a checker here, allowing references to options in `.pylintrc` config file.
+    # These go into: `linter._all_options`, `linter._external_opts`
+    linter = pylint.lint.PyLinter(options=new_checker_options)
     linter.load_default_plugins()
-
-    linter.load_plugin_modules(['python_ta/checkers/forbidden_import_checker',
-                                'python_ta/checkers/global_variables_checker',
-                                'python_ta/checkers/dynamic_execution_checker',
-                                'python_ta/checkers/IO_Function_checker',
-                                # TODO: Fix this test
-                                #'python_ta/checkers/invalid_range_index_checker',
-                                'python_ta/checkers/assigning_to_self_checker',
-                                'python_ta/checkers/always_returning_checker',
-                                'python_ta/checkers/type_inference_checker'])
-
+    linter.load_plugin_modules(custom_checkers)
     if linter.config.pyta_pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
@@ -82,6 +109,14 @@ def _load_pylint_plugins(linter, local_config):
                 linter.global_set_option(key, local_config[key])
 
     linter.load_config_file()
+    return linter
+
+
+def init_reporter(linter):
+    # Determine the type of reporter from the config setup.
+    current_reporter = _call_validator(linter.config.pyta_reporter, None, None, None)
+    linter.set_reporter(current_reporter)
+    return current_reporter
 
 
 def _verify_pre_check(filepath):
@@ -153,35 +188,8 @@ def _check(module_name='', level='all', local_config=''):
         print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.\n'.format(module_name))
         return
 
-    # see 'type' in pylint/config.py `VALIDATORS` dict.
-    new_options = (
-        ('pyta-reporter',
-            {'default': 'ColorReporter',
-             'type': 'string',
-             'metavar': '<pyta_reporter>',
-             'help': 'Output messages with a specific reporter.'}),
-        ('pyta-pep8',
-            {'default': False,
-             'type': 'yn',
-             'metavar': '<yn>',
-             'help': 'Use the pycodestyle checker.'}),
-        ('pyta-number-of-messages',
-            {'default': 5,
-             'type': 'int',
-             'metavar': '<number_messages>',
-             'help': 'Display a certain number of messages to the user, without overwhelming them.'}),
-    )
-    
-    # Register new options to a checker here, allowing references to options in `.pylintrc` config file.
-    # These go into: `linter._all_options`, `linter._external_opts`
-    linter = pylint.lint.PyLinter(options=new_options)
-    _load_pylint_plugins(linter, local_config)
-    # Add reporter object to an internal pylint data structure.
-    for reporter in REPORTERS:
-        VALIDATORS[reporter.__name__] = reporter
-    # Determine the type of reporter from the config setup.
-    current_reporter = _call_validator(linter.config.pyta_reporter, None, None, None)
-    linter.set_reporter(current_reporter)
+    linter = init_linter(local_config)
+    current_reporter = init_reporter(linter)
     
     patch_all()  # Monkeypatch pylint
 
@@ -212,8 +220,7 @@ def _check(module_name='', level='all', local_config=''):
         for locations in valid_module_names:
             for file_py in get_file_paths(locations):
                 # The local config may have set a new reporter
-                current_reporter = _call_validator(linter.config.pyta_reporter, None, None, None)
-                linter.set_reporter(current_reporter)
+                current_reporter = init_reporter(linter)
                 current_reporter.show_file_linted(file_py)
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files

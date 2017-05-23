@@ -53,7 +53,6 @@ ERROR_CHECKS = [
 
 
 class PlainReporter(BaseReporter):
-
     def __init__(self, source_lines=None, module_name=''):
         super().__init__()
         self._error_messages = []
@@ -107,9 +106,8 @@ class PlainReporter(BaseReporter):
         print('\n')
 
     def sort_messages(self):
-        max_messages = float('inf')
-        if self.linter and self.linter.config.pyta_number_of_messages:
-            max_messages = self.linter.config.pyta_number_of_messages
+        # Default set in init_linter() in python_ta/__init__.py
+        max_messages = self.linter.config.pyta_number_of_messages
 
         # Sort the messages by their type.
         for message_list in [self._error_messages, self._style_messages]:

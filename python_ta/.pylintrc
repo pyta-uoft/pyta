@@ -7,11 +7,11 @@ pyta-number-of-messages = 5
 
 # Set whether to use the pycodestyle checker.
 # Anything for a True/False, <yn> value should use in config file: y, yes, n, no
-pyta-pep8=no
+pyta-pep8 = no
 
 # Set the output format. Available pyta formats are: ColorReporter, 
 # PlainReporter, HTMLReporter, StatReporter
-pyta-reporter=ColorReporter
+pyta-reporter = ColorReporter
 
 [ELIF]
 

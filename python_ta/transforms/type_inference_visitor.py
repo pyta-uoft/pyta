@@ -208,7 +208,7 @@ def set_functiondef_type_constraints(node):
     if len(list(node.nodes_of_class(astroid.Return))) == 0:
         func_type = Callable[arg_types, None]
     else:
-        rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
+        rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.lookup_in_env('return'))
         func_type = Callable[arg_types, rtype]
     func_type.polymorphic_tvars = [arg for arg in arg_types
                                    if isinstance(arg, TypeVar)]

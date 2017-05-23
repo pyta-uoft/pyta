@@ -1,12 +1,12 @@
 import astroid
 import nose
-from hypothesis import assume, given
+from hypothesis import assume, given, settings
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
 from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from keyword import iskeyword
-
+settings.load_profile("pyta")
 
 def _parse_to_function(function_name, args_list, return_statement):
     """Helper to parse given data into function definition."""

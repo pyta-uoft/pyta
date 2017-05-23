@@ -1,11 +1,12 @@
 import astroid
 import nose
-from hypothesis import given, assume
+from hypothesis import given, assume, settings
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import TypeVar
 from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from keyword import iskeyword
+settings.load_profile("pyta")
 
 @given(cs.random_dict_variable_value(min_size=1))
 def test_set_env(variables_dict):

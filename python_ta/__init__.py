@@ -97,9 +97,11 @@ def init_linter(local_config):
     if isinstance(local_config, str) and local_config != '':
         # Use config file at the specified path instead of the default.
         linter.read_config_file(local_config)
+        linter.load_config_file()
     else:
         # Use default config file shipped with the python_ta package.
         linter.read_config_file(os.path.join(os.path.dirname(__file__), '.pylintrc'))
+        linter.load_config_file()
 
         # Override part of the default config, with a dict of config options.
         # Note: these configs are overridden by config file in user's codebase
@@ -108,7 +110,6 @@ def init_linter(local_config):
             for key in local_config:
                 linter.global_set_option(key, local_config[key])
 
-    linter.load_config_file()
     return linter
 
 

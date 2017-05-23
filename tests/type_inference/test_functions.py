@@ -14,20 +14,20 @@ def _parse_to_function(function_name, args_list, return_statement):
            f'   return {repr(return_statement)}'
 
 
-def _parse_to_function_no_return(function_name, args_list, return_statement):
+def _parse_to_function_no_return(function_name, args_list, function_body):
     """Helper to parse given data into function definition."""
     return f'def {function_name}({", ".join(args_list)}):\n' \
-           f'     {return_statement}'
+           f'     {function_body}'
 
 
 @given(cs.valid_identifier(), cs.primitive_values)
-def test_function_def_no_args(function_name, return_statement):
+def test_function_def_no_args(function_name, return_value):
     """Test FunctionDef node visitors representing function definitions with no parameters and primitive return type."""
     assume(not iskeyword(function_name))
-    program = _parse_to_function(function_name, [], return_statement)
+    program = _parse_to_function(function_name, [], return_value)
     module = cs._parse_text(program)
     function_type_var = module.type_environment.lookup_in_env(function_name)
-    assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[[], type(return_statement)]
+    assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
 
 
 @given(cs.valid_identifier(), cs.primitive_values)

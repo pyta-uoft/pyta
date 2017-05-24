@@ -29,7 +29,6 @@ https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
 import astroid
 from astroid.transforms import TransformVisitor
-import logging
 
 CONSUMABLES = " \n\t\\"
 
@@ -213,14 +212,6 @@ NODES_REQUIRING_SOURCE = [
 ]
 
 
-# Configure logging
-log_format = '%(asctime)s %(levelname)s %(message)s'
-log_date_time_format = '%Y-%m-%d %H:%M:%S'  # removed millis
-log_filename = 'python_ta/transforms/setendings_log.log'
-logging.basicConfig(format=log_format, datefmt=log_date_time_format,
-                    level=logging.WARNING)
-
-
 def init_register_ending_setters(source_code):
     """Instantiate a visitor to transform the nodes.
     Register the transform functions on an instance of TransformVisitor.
@@ -257,13 +248,6 @@ def init_register_ending_setters(source_code):
             ending_transformer.register_transform(
                 node_class, end_setter_from_source(source_code, end_pred))
 
-    # TODO: investigate these nodes, and create tests/transforms/etc when found.
-    ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
-    ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
-    ending_transformer.register_transform(astroid.Exec, discover_nodes)
-    ending_transformer.register_transform(astroid.Print, discover_nodes)
-    ending_transformer.register_transform(astroid.Repr, discover_nodes)
-
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
 
@@ -276,20 +260,6 @@ def init_register_ending_setters(source_code):
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
 # ====================================================
-def discover_nodes(node):
-    """Log to file and console when an elusive node is encountered, so it can
-    be classified, and tested..
-    @type node: Astroid node
-    """
-    # Some formatting for the code output
-    output = [line for line in node.statement().as_string().strip().split('\n')]
-    output = ['=' * 40] + output + ['=' * 40]
-    message = '>>>>> Found elusive {} node. Context:\n\t{}'.format(node, '\n\t'.join(output))
-    # Print to console, and log for persistence.
-    print('\n' + message)
-    logging.info(message)
-
-
 def fix_slice(source_code):
     """
     The Slice node column positions are mostly set properly when it has (Const) 
@@ -337,9 +307,6 @@ def fix_start_attributes(node):
     """
     assert node.fromlineno is not None, \
             'node {} doesn\'t have fromlineno set.'.format(node)
-
-    # Log when this function is called.
-    logging.info(str(node)[:-2])
 
     try:
         first_child = next(node.get_children())
@@ -632,10 +599,3 @@ def register_transforms(source_code, obj):
         if end_pred is not None:
             obj.register_transform(
                 node_class, end_setter_from_source(source_code, end_pred))
-
-    # TODO: investigate these nodes, and create tests/transforms/etc when found.
-    obj.register_transform(astroid.DictUnpack, discover_nodes)
-    obj.register_transform(astroid.EmptyNode, discover_nodes)
-    obj.register_transform(astroid.Exec, discover_nodes)
-    obj.register_transform(astroid.Print, discover_nodes)
-    obj.register_transform(astroid.Repr, discover_nodes)

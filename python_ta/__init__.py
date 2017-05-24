@@ -202,8 +202,6 @@ def _get_valid_files_to_check(module_name, local_config):
     """Build a list of all files to check. Emitting messages when an input
     cannot be checked. Returns a list of valid files to check.
     """
-    valid_module_names = []
-    
     # Allow call to check with empty args
     if module_name == '':
         m = sys.modules['__main__']
@@ -229,13 +227,13 @@ def _get_valid_files_to_check(module_name, local_config):
             current_reporter.show_file_linted(item)
             print('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item))
         elif os.path.isdir(item):
-            valid_module_names.append(item)
+            yield item
         elif not os.path.exists(item):
             try:
                 # For files with dot notation, e.g., `examples.<filename>`
                 filepath = modutils.file_from_modpath(item.split('.'))
                 if os.path.exists(filepath):
-                    valid_module_names.append(filepath)
+                    yield filepath
                 else:
                     current_reporter.show_file_linted(item)
                     print('Could not find the file called, `{}`\n'.format(item))
@@ -243,8 +241,7 @@ def _get_valid_files_to_check(module_name, local_config):
                 current_reporter.show_file_linted(item)
                 print('Could not find the file called, `{}`\n'.format(item))
         else:
-            valid_module_names.append(item)  # Check other valid files.
-    return valid_module_names
+            yield item  # Check other valid files.
 
 
 def _check(module_name='', level='all', local_config=''):

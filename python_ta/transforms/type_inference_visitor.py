@@ -5,7 +5,6 @@ from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder, lookup_method, Environment, TypeConstraints, TypeInferenceError
-
 TYPE_CONSTRAINTS = TypeConstraints()
 
 
@@ -201,10 +200,14 @@ def set_return_type_constraints(node):
 
 
 def set_functiondef_type_constraints(node):
-    arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals[arg])
+    arg_types = [TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.lookup_in_env(arg))
                  for arg in node.argnames()]
-    rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.locals['return'])
-    func_type = Callable[arg_types, rtype]
+    # check if return nodes exist; there is a return statement in function body.
+    if len(list(node.nodes_of_class(astroid.Return))) == 0:
+        func_type = Callable[arg_types, None]
+    else:
+        rtype = TYPE_CONSTRAINTS.lookup_concrete(node.type_environment.lookup_in_env('return'))
+        func_type = Callable[arg_types, rtype]
     func_type.polymorphic_tvars = [arg for arg in arg_types
                                    if isinstance(arg, TypeVar)]
     TYPE_CONSTRAINTS.unify(node.parent.frame().type_environment.lookup_in_env(node.name), func_type)

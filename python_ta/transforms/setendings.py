@@ -248,13 +248,6 @@ def init_register_ending_setters(source_code):
             ending_transformer.register_transform(
                 node_class, end_setter_from_source(source_code, end_pred))
 
-    # TODO: investigate these nodes, and create tests/transforms/etc when found.
-    ending_transformer.register_transform(astroid.DictUnpack, discover_nodes)
-    ending_transformer.register_transform(astroid.EmptyNode, discover_nodes)
-    ending_transformer.register_transform(astroid.Exec, discover_nodes)
-    ending_transformer.register_transform(astroid.Print, discover_nodes)
-    ending_transformer.register_transform(astroid.Repr, discover_nodes)
-
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
 
@@ -606,10 +599,3 @@ def register_transforms(source_code, obj):
         if end_pred is not None:
             obj.register_transform(
                 node_class, end_setter_from_source(source_code, end_pred))
-
-    # TODO: investigate these nodes, and create tests/transforms/etc when found.
-    obj.register_transform(astroid.DictUnpack, discover_nodes)
-    obj.register_transform(astroid.EmptyNode, discover_nodes)
-    obj.register_transform(astroid.Exec, discover_nodes)
-    obj.register_transform(astroid.Print, discover_nodes)
-    obj.register_transform(astroid.Repr, discover_nodes)

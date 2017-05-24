@@ -4,6 +4,9 @@ from hypothesis import assume
 from python_ta.transforms.type_inference_visitor import register_type_constraints_setter,\
     environment_transformer
 from keyword import iskeyword
+from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
+from hypothesis import settings
+settings.register_profile("pyta", settings(max_examples=10))
 
 # Custom strategies for hypothesis testing framework
 primitive_types = hs.sampled_from([
@@ -62,6 +65,7 @@ def heterogeneous_dictionary(**kwargs):
 # Helper functions for testing
 def _parse_text(source: str) -> astroid.Module:
     """Parse source code text and output an AST with type inference performed."""
+    TYPE_CONSTRAINTS.clear_tvars()
     module = astroid.parse(source)
     environment_transformer().visit(module)
     register_type_constraints_setter().visit(module)

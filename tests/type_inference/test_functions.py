@@ -24,7 +24,6 @@ def _parse_to_function_no_return(function_name, args_list, function_body):
 @given(cs.valid_identifier(), cs.primitive_values)
 def test_function_def_no_args(function_name, return_value):
     """Test FunctionDef node visitors representing function definitions with no parameters and primitive return type."""
-    TYPE_CONSTRAINTS.clear_tvars()
     assume(not iskeyword(function_name))
     program = _parse_to_function(function_name, [], repr(return_value))
     module = cs._parse_text(program)
@@ -35,7 +34,6 @@ def test_function_def_no_args(function_name, return_value):
 @given(cs.valid_identifier(), cs.primitive_values)
 def test_function_def_call_no_args(function_name, return_value):
     """Test type setting in environment of a function call for a function with no parameters."""
-    TYPE_CONSTRAINTS.clear_tvars()
     program = _parse_to_function(function_name, [], repr(return_value)) + "\n" + function_name + "()\n"
     module = cs._parse_text(program)
     # there should be a single Expr node in this program
@@ -47,7 +45,6 @@ def test_function_def_call_no_args(function_name, return_value):
 def test_function_def_no_return(function_name, arguments, body):
     """Test FunctionDef node visitors representing non-returning function definitions with parameter(s)."""
     for return_value in ['return None', repr(body), 'pass']:
-        TYPE_CONSTRAINTS.clear_tvars()
         program = _parse_to_function_no_return(function_name, arguments, repr(return_value))
         module = cs._parse_text(program)
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
@@ -63,7 +60,6 @@ def test_function_def_args_simple_return(function_name, arguments):
     """Test FunctionDef node visitors representing function definitions with paramater(s); return one of its arguments."""
     # generate every possible function definition program of aforementioned form.
     for argument in arguments:
-        TYPE_CONSTRAINTS.clear_tvars()
         program = _parse_to_function(function_name, arguments, argument)
         module = cs._parse_text(program)
         # get the functionDef node - there is only one in this test case.
@@ -84,7 +80,6 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
     assume(not iskeyword(function_name) and function_name not in variables_dict)
     # generate every possible function definition program of aforementioned form.
     for i in range(len(list(variables_dict.keys()))):
-        TYPE_CONSTRAINTS.clear_tvars()
         return_value = list(variables_dict.keys())[i]
         arguments = ", ".join([repr(value) for value in variables_dict.values()])
         program = f'{_parse_to_function(function_name, list(variables_dict.keys()), return_value)}\n' \

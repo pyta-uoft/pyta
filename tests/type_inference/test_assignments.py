@@ -8,6 +8,7 @@ from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from keyword import iskeyword
 settings.load_profile("pyta")
 
+
 @given(cs.random_dict_variable_value(min_size=1))
 def test_set_env(variables_dict):
     """Test environment setting visitors"""

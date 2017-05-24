@@ -5,9 +5,6 @@ from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder, lookup_method, Environment, TypeConstraints, TypeInferenceError
-from hypothesis import settings
-settings.register_profile("pyta", settings(max_examples=10))
-
 TYPE_CONSTRAINTS = TypeConstraints()
 
 

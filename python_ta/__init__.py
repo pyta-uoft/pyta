@@ -23,7 +23,7 @@ import webbrowser
 from pylint import lint, utils
 from pylint.config import VALIDATORS, _call_validator
 
-from astroid import MANAGER, modutils
+from astroid import modutils
 
 from .reporters import REPORTERS
 from .patches import patch_all
@@ -156,7 +156,6 @@ def _init_reporter(linter):
 
 def _verify_pre_check(filepath):
     """Check student code for certain issues."""
-
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:
@@ -269,6 +268,10 @@ def _check(module_name='', level='all', local_config=''):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
                 linter.check(file_py)  # Lint !
+                # TODO: Put this into PlainReporter, merging with show_file_linted
+                with open(file_py) as f:
+                    current_reporter._source_lines = [
+                        line.rstrip() for line in f.readlines()]
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
     except Exception as e:

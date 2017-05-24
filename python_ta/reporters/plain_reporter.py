@@ -1,6 +1,7 @@
 from pylint.reporters import BaseReporter
 from pylint.utils import Message
-from collections import namedtuple
+from collections import defaultdict, namedtuple
+from .node_printers import LineType, render_message
 
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
@@ -52,7 +53,21 @@ ERROR_CHECKS = [
 ]
 
 
+# Messages that should be highlighted specially
+special = {'missing-docstring',
+           'trailing-newlines'}
+
+# Messages without a source code line to highlight
+no_hl = {'always-returning-in-a-loop',
+         'too-many-nested-blocks'}
+    # the "Invalid module name" subsection of "invalid-name" belongs here
+
+
 class PlainReporter(BaseReporter):
+    _SPACE = ' '
+    _BREAK = '\n'
+    _COLOURING = {}
+
     def __init__(self, source_lines=None, module_name=''):
         super().__init__()
         self._error_messages = []
@@ -60,11 +75,15 @@ class PlainReporter(BaseReporter):
         self._source_lines = source_lines or []
         self._module_name = module_name
         self.linter = None
+        self._sorted_error_messages = defaultdict(list)
+        self._sorted_style_messages = defaultdict(list)
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
         self._error_messages = []
         self._style_messages = []
+        self._sorted_error_messages.clear()
+        self._sorted_style_messages.clear()
 
     def handle_message(self, msg):
         """Handle a new message triggered on the current file."""
@@ -86,58 +105,163 @@ class PlainReporter(BaseReporter):
                     not isinstance(self._style_messages[-1], NewMessage)):
                 self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
 
-    def print_messages(self, level='all'):
-        self.sort_messages()
-        print('=== Code errors/forbidden usage (fix: high priority) ===')
-        if not self._error_messages:
-            print('None!')
-        for msg in self._error_messages:
-            code = msg.msg_id
-            print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
-
-        if level == 'all':
-            print('\n')
-            print('=== Style/convention errors (fix: before submission) ===')
-            if not self._style_messages:
-                print('None!')
-            for msg in self._style_messages:
-                code = msg.msg_id
-                print(code, '({})  {}\n    [Line {}] {}'.format(msg.symbol, msg.obj, msg.line, msg.msg))
-        print('\n')
-
     def sort_messages(self):
-        # Default set in init_linter() in python_ta/__init__.py
-        max_messages = self.linter.config.pyta_number_of_messages
-
-        # Sort the messages by their type.
-        for message_list in [self._error_messages, self._style_messages]:
-            message_list.sort(key=lambda s: s[0])
-
-            i = 0
-            while i < len(message_list):
-                current_id = message_list[i].msg_id
-                count = 1
-                messages = []
-                while i + 1 < len(message_list) and message_list[i + 1].msg_id == current_id:
-                    count += 1
-                    if len(messages) < max_messages - 1:
-                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
-                    message_list.pop(i + 1)
-
-                msg_new = message_list[i].msg
-
-                if len(messages) > 0:
-                    msg_new = message_list[i].msg + '\n    ' + '\n    '.join(messages)
-
-                obj_new = 'Number of occurrences: {}.'.format(count)
-
-                if max_messages < count and max_messages != float('inf'):
-                    obj_new = obj_new + ' First {} shown.'.format(max_messages)
-
-                message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
-                i += 1
+        """Sort the messages by their type (message id)."""
+        for msg in self._error_messages:
+            self._sorted_error_messages[msg.msg_id].append(msg)
+        for msg in self._style_messages:
+            self._sorted_style_messages[msg.msg_id].append(msg)
 
     def show_file_linted(self, filename):
         print('*'*15, 'File:', filename)
+
+    def print_messages(self, level='all'):
+        self.sort_messages()
+
+        result = self._colourify('code-heading',
+                                 '=== Code errors/forbidden usage '
+                                 '(fix: high priority) ===' + self._BREAK)
+        messages_result = self._colour_messages_by_type(style=False)
+        if messages_result:
+            result += messages_result
+        else:
+            result += 'None!' + self._BREAK*2
+
+        if level == 'all':
+            result += self._colourify('style-heading',
+                                      '=== Style/convention errors '
+                                      '(fix: before submission) ===' + self._BREAK)
+            messages_result = self._colour_messages_by_type(style=True)
+            if messages_result:
+                result += messages_result
+            else:
+                result += 'None!' + self._BREAK*2
+
+        print(result)
+
+    def _colour_messages_by_type(self, style=False):
+        """
+        Return string of properly formatted members of the messages dict
+        (error or style) indicated by style.
+    
+        :param bool style: True iff messages is a dict of style messages
+        :return: str
+        """
+        if style:
+            messages = self._sorted_style_messages
+            fore_colour = 'style-name'
+        else:
+            messages = self._sorted_error_messages
+            fore_colour = 'code-name'
+
+        max_messages = self.linter.config.pyta_number_of_messages
+
+        result = ''
+        for msg_id in messages:
+            result += self._colourify(fore_colour, msg_id)
+            result += self._colourify('bold', ' ({})  '.format(messages[msg_id][0].symbol))
+            result += 'Number of occurrences: {}.{}'.format(len(messages[msg_id]), self._BREAK)
+            if max_messages != float('inf') and max_messages < len(messages[msg_id]):
+                result += ' First {} shown.'.format(max_messages)
+
+            for i, msg in enumerate(messages[msg_id]):
+                if i == max_messages:
+                    break
+                msg_text = msg.msg
+                if msg.symbol == 'bad-whitespace':  # fix Pylint inconsistency
+                    msg_text = msg_text.partition('\n')[0]
+                    messages[msg_id][i] = msg._replace(msg=msg_text)
+                    msg = messages[msg_id][i]
+
+                result += 2 * self._SPACE
+                result += self._colourify('bold', '[Line {}] {}'
+                            .format(msg.line, msg.msg)) + self._BREAK
+
+                try:
+                    # Messages with code snippets
+                    if not (msg.symbol in no_hl or
+                                msg.msg.startswith('Invalid module')):
+                        code_snippet = self._build_snippet(msg)
+                        result += code_snippet
+                        try:
+                            messages[msg_id][i] = msg._replace(snippet=code_snippet)
+                        except ValueError:
+                            pass
+                except AttributeError:
+                    pass
+                result += self._BREAK
+
+        return result
+
+    def _build_snippet(self, msg):
+        """
+        Generates and returns a code snippet for the given Message object,
+        formatted appropriately according to line type.
+
+        :param Message msg: the message for which a code snippet is built
+        :return: str
+        """
+        code_snippet = ''
+
+        for line, slice_, line_type, text in render_message(msg, self._source_lines):
+            code_snippet += self._add_line(line, line_type, slice_, text)
+
+        return code_snippet
+
+    def _add_line(self, n, linetype, slice_, text=''):
+        """
+        Format given source code line as specified and return as str.
+
+        Called by _colour_messages_by_type, relies on _colourify.
+        Now applicable both to ColorReporter and HTMLReporter.
+
+        :param int n: index of line in self._source_lines to add
+        :param LineType linetype: enum member indicating way to format line
+        :return: str
+        """
+        snippet = self._add_line_number(n, linetype)
+
+        # Set starting and ending columns.
+        start_col = slice_.start or 0
+        end_col = slice_.stop or len(text)
+
+        if linetype == LineType.ERROR:
+            snippet += self._colourify('black', text[:start_col])
+            snippet += self._colourify('highlight', text[slice_])
+            snippet += self._colourify('black', text[end_col:])
+        elif linetype == LineType.CONTEXT:
+            snippet += self._colourify('grey', text)
+        elif linetype == LineType.OTHER:
+            snippet += text
+        elif linetype == LineType.DOCSTRING:
+            space_c = len(text) - len(text.lstrip(' '))
+            snippet += space_c * self._SPACE
+            snippet += self._colourify('highlight', text.lstrip(' '))
+
+        snippet += self._BREAK
+        return snippet
+
+    def _add_line_number(self, n, linetype):
+        """Return a formatted string displaying a line number."""
+        spaces = 2 * self._SPACE
+        if n is not None:
+            number = '{:>3}'.format(n)
+        else:
+            number = 3 * self._SPACE
+
+        if linetype == LineType.ERROR:
+            return spaces + self._colourify('gbold', number) + spaces
+        elif linetype == LineType.CONTEXT:
+            return spaces + self._colourify('grey', number) + spaces
+        elif linetype == LineType.OTHER:
+            return spaces + self._colourify('grey', number) + spaces
+        elif linetype == LineType.DOCSTRING:
+            return spaces + self._colourify('black', number) + spaces
+        else:
+            return spaces + number + spaces
+
+    @classmethod
+    def _colourify(cls, colour_class, text):
+        return text
 
     _display = None

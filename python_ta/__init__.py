@@ -264,7 +264,7 @@ def _check(module_name='', level='all', local_config=''):
             for file_py in _get_file_paths(locations):
                 # Load config file in user location. Construct new linter each 
                 # time, so config options don't bleed to unintended files.
-                linter = _init_linter(file_linted=file_py)
+                linter = _init_linter(config=local_config, file_linted=file_py)
                 # The local config may have set a new reporter
                 current_reporter = _init_reporter(linter)
                 current_reporter.show_file_linted(file_py)

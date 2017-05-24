@@ -15,6 +15,7 @@ primitive_types = hs.sampled_from([
     lambda: hs.floats(allow_nan=False, allow_infinity=False),
     hs.none,
     hs.text,
+    hs.binary
 ])
 primitive_values = primitive_types.flatmap(lambda s: s())
 

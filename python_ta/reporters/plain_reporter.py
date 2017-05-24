@@ -53,13 +53,13 @@ ERROR_CHECKS = [
 
 
 class PlainReporter(BaseReporter):
-    def __init__(self, number_of_messages, source_lines=None, module_name=''):
+    def __init__(self, source_lines=None, module_name=''):
         super().__init__()
         self._error_messages = []
         self._style_messages = []
-        self._number_of_messages = number_of_messages
         self._source_lines = source_lines or []
         self._module_name = module_name
+        self.linter = None
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
@@ -106,6 +106,9 @@ class PlainReporter(BaseReporter):
         print('\n')
 
     def sort_messages(self):
+        # Default set in init_linter() in python_ta/__init__.py
+        max_messages = self.linter.config.pyta_number_of_messages
+
         # Sort the messages by their type.
         for message_list in [self._error_messages, self._style_messages]:
             message_list.sort(key=lambda s: s[0])
@@ -117,9 +120,7 @@ class PlainReporter(BaseReporter):
                 messages = []
                 while i + 1 < len(message_list) and message_list[i + 1].msg_id == current_id:
                     count += 1
-                    if self._number_of_messages == 0:
-                        messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
-                    elif len(messages) < self._number_of_messages - 1:
+                    if len(messages) < max_messages - 1:
                         messages.append('[Line {}] {}'.format(message_list[i + 1].line, message_list[i + 1].msg))
                     message_list.pop(i + 1)
 
@@ -130,8 +131,8 @@ class PlainReporter(BaseReporter):
 
                 obj_new = 'Number of occurrences: {}.'.format(count)
 
-                if self._number_of_messages != 0 and self._number_of_messages < count:
-                    obj_new = obj_new + ' First {} shown.'.format(self._number_of_messages)
+                if max_messages < count and max_messages != float('inf'):
+                    obj_new = obj_new + ' First {} shown.'.format(max_messages)
 
                 message_list[i] = message_list[i]._replace(msg=msg_new, obj=obj_new)
                 i += 1

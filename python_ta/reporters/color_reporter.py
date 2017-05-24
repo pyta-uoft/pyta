@@ -31,9 +31,8 @@ class ColorReporter(PlainReporter):
                   'gbold': Style.BRIGHT + Fore.LIGHTBLACK_EX,
                   'reset': Style.RESET_ALL}
 
-    # Override this method to add instance variables
-    def __init__(self, number_of_messages, source_lines=None, module_name=''):
-        super().__init__(number_of_messages, source_lines, module_name)
+    def __init__(self, source_lines=None, module_name=''):
+        super().__init__(source_lines, module_name)
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
 
@@ -42,7 +41,6 @@ class ColorReporter(PlainReporter):
         self._sorted_error_messages.clear()
         self._sorted_style_messages.clear()
 
-    # Override this method
     def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
         init(wrap=(sys.platform == 'win32'), strip=False)
@@ -68,7 +66,6 @@ class ColorReporter(PlainReporter):
 
         print(result)
 
-    # Override this method
     def sort_messages(self):
         # Sort the messages by their type (message id)
         def sort_messages_by_type(messages, sorted_messages):

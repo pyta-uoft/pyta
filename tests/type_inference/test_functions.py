@@ -12,13 +12,13 @@ settings.load_profile("pyta")
 def _parse_to_function(function_name, args_list, return_statement):
     """Helper to parse given data into function definition."""
     return f'def {function_name}({", ".join(args_list)}):' \
-           f'   return {return_statement}'
+           f'    return {return_statement}'
 
 
 def _parse_to_function_no_return(function_name, args_list, function_body):
     """Helper to parse given data into function definition."""
     return f'def {function_name}({", ".join(args_list)}):\n' \
-           f'     {function_body}'
+           f'    {function_body}'
 
 
 @given(cs.valid_identifier(), cs.primitive_values)

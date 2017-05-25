@@ -1,5 +1,6 @@
 import astroid
 from collections import defaultdict
+from typing import Callable, Any
 
 
 class TypeStore:
@@ -21,9 +22,19 @@ class TypeStore:
                         arg_types.append(class_def.name)
                     else:
                         arg_types.append(annotation.as_string())
-                rtype = function_def.returns.as_string()
-                self.classes[class_def.name][function_def.name] = (arg_types, rtype)
-                self.functions[function_def.name].append((arg_types, rtype))
+                concrete_arg_types = []
+                try:
+                    rtype = eval(function_def.returns.as_string())
+                except NameError:
+                    rtype = function_def.returns.as_string()
+                for arg_type in arg_types:
+                    try:
+                        concrete_arg_type = eval(arg_type)
+                    except NameError:
+                        concrete_arg_type = arg_type
+                    concrete_arg_types.append(concrete_arg_type)
+                self.classes[class_def.name][function_def.name] = (Callable[concrete_arg_types, rtype], class_def.name)
+                self.functions[function_def.name].append((Callable[concrete_arg_types, rtype], function_def.name))
 
 if __name__ == "__main__":
     a = TypeStore()

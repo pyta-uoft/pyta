@@ -35,3 +35,18 @@ class TypeStore:
                     concrete_arg_types.append(concrete_arg_type)
                 self.classes[class_def.name][function_def.name] = (Callable[concrete_arg_types, rtype], class_def.name)
                 self.functions[function_def.name].append(Callable[concrete_arg_types, rtype])
+
+    def look_up_function(self, operator, *args):
+        """Helper method to lookup a function type."""
+        function_type = None
+        if args:
+            funct_types_list = self.functions[operator]
+            found = False
+            for funct_type in funct_types_list:
+                if funct_type.__args__[:-1] == args:
+                    function_type = funct_type
+                    found = True
+                    break
+            if not found:
+                raise TypeError
+        return function_type

@@ -34,4 +34,4 @@ class TypeStore:
                         concrete_arg_type = arg_type
                     concrete_arg_types.append(concrete_arg_type)
                 self.classes[class_def.name][function_def.name] = (Callable[concrete_arg_types, rtype], class_def.name)
-                self.functions[function_def.name].append((Callable[concrete_arg_types, rtype], function_def.name))
+                self.functions[function_def.name].append(Callable[concrete_arg_types, rtype])

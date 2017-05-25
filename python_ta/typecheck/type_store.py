@@ -36,7 +36,7 @@ class TypeStore:
                 self.classes[class_def.name][function_def.name] = (Callable[concrete_arg_types, rtype], class_def.name)
                 self.functions[function_def.name].append(Callable[concrete_arg_types, rtype])
 
-    def look_up_function(self, operator, *args):
+    def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
         function_type = None
         if args:

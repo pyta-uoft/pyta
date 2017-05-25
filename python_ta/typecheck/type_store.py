@@ -35,7 +35,3 @@ class TypeStore:
                     concrete_arg_types.append(concrete_arg_type)
                 self.classes[class_def.name][function_def.name] = (Callable[concrete_arg_types, rtype], class_def.name)
                 self.functions[function_def.name].append((Callable[concrete_arg_types, rtype], function_def.name))
-
-if __name__ == "__main__":
-    a = TypeStore()
-    print(a)

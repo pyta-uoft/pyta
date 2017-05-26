@@ -42,10 +42,10 @@ class TypeStore:
         """Helper method to lookup a function type given the operator and types of arguments."""
         if args:
             found = False
-            funct_types_list = self.functions[operator]
-            for funct_type in funct_types_list:
-                if funct_type.__args__[:-1] == args:
-                    return funct_type
+            func_types_list = self.functions[operator]
+            for func_type in func_types_list:
+                if func_type.__args__[:-1] == args:
+                    return func_type
             if not found:
                 raise KeyError
 

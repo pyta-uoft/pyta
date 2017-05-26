@@ -3,6 +3,7 @@ from pylint.reporters import BaseReporter
 from pylint.utils import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
+from ..utils import filename_to_display, write_stream
 
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
@@ -115,11 +116,7 @@ class PlainReporter(BaseReporter):
             self._sorted_style_messages[msg.msg_id].append(msg)
 
     def show_file_linted(self, filename):
-        print('{} File: {}'.format('*'*15, filename), file=self.out)
-
-    def write(self, string):
-        """Write output to a stream."""
-        print(string, file=self.out)
+        write_stream(filename_to_display(filename), self.out)
 
     def print_messages(self, level='all'):
         self.sort_messages()
@@ -143,7 +140,7 @@ class PlainReporter(BaseReporter):
             else:
                 result += 'None!' + self._BREAK*2
 
-        print(result, file=self.out)
+        write_stream(result, self.out)
 
     def _colour_messages_by_type(self, style=False):
         """

@@ -49,7 +49,7 @@ class TypeStore:
                     found = True
                     break
             if not found:
-                raise TypeError
+                raise KeyError
         return function_type
 
 TYPE_STORE = TypeStore()

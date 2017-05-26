@@ -2,7 +2,8 @@ import astroid
 from collections import defaultdict
 from typing import Callable, Any
 import os
-TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed/builtins.pyi')
+TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
+
 
 class TypeStore:
     def __init__(self):
@@ -39,17 +40,13 @@ class TypeStore:
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
-        function_type = None
         if args:
-            funct_types_list = self.functions[operator]
             found = False
+            funct_types_list = self.functions[operator]
             for funct_type in funct_types_list:
                 if funct_type.__args__[:-1] == args:
-                    function_type = funct_type
-                    found = True
-                    break
+                    return funct_type
             if not found:
                 raise KeyError
-        return function_type
 
 TYPE_STORE = TypeStore()

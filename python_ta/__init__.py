@@ -31,8 +31,9 @@ from .patches import patch_all
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
+DEFAULT_OUTPUT_NAME = '*pyta_output'  # incl star to display first, usually.
+
 # Output messages to the stream: file, or std out (default). 
-global OUTPUT_STREAM
 OUTPUT_STREAM = sys.stdout
 
 # check the python version
@@ -178,7 +179,7 @@ def _init_reporter(linter):
 
 
 def write_stream(string):
-    print(string, OUTPUT_STREAM)
+    print(string, file=OUTPUT_STREAM)
 
 
 def _verify_pre_check(filepath):
@@ -283,18 +284,16 @@ def _init_output(output):
     """
     if output is None:
         return sys.stdout
-
-    print('dir name:', os.path.dirname(output))
-    print('dir exists:', os.path.exists(os.path.dirname(output)))
-    if not os.path.exists(os.path.dirname(output)):
+    # Use expanduser, for paths that contain system-specific or relative syntax, 
+    # e.g. `~`, `../`
+    correct_path = os.path.expanduser(output)
+    if not os.path.exists(os.path.dirname(correct_path)):
         raise IOError('path {} does not exist.'.format(output))
-    if os.path.isdir(output):
-        output = os.path.join(output, 'pyta_output')
-
-    with open(output, 'w') as _:  # erase file, and close it.
+    if os.path.isdir(correct_path):
+        correct_path = os.path.join(correct_path, DEFAULT_OUTPUT_NAME)
+    with open(correct_path, 'w') as _:  # erase file, and close it.
         pass
-    
-    return open(output, 'a')  # return file object, to append messages to
+    return open(correct_path, 'a')  # return file object, to append messages to
 
 
 def _check(module_name='', level='all', local_config='', output=None):
@@ -307,14 +306,11 @@ def _check(module_name='', level='all', local_config='', output=None):
     • `local_config` is a dict of config options or string (config file name).
     • `output` is an absolute path to capture pyta data output. Default std out.
     """
-    print('argv:', sys.argv[0])
-    print('getcwd:', os.getcwd())
-
     # Get output stream: file object, or std out (default).
     global OUTPUT_STREAM
     OUTPUT_STREAM = _init_output(output)
     if OUTPUT_STREAM is not sys.stdout:
-        print('PyTA output to your file:', OUTPUT_STREAM)
+        print('PyTA output to your file:', OUTPUT_STREAM.name)
 
     # Add reporters to an internal pylint data structure, for use with setting
     # custom pyta options in a Tuple.

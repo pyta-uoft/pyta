@@ -106,7 +106,7 @@ def set_binop_type_constraints(node):
 
     try:
         method_type = TYPE_STORE.lookup_function(op_name, t1, t2)
-    except KeyError as e:
+    except KeyError:
         node.type_constraints = TypeInfo(
             TypeErrorInfo('Method {}.{}({}) not found'.format(t1, op_name, t2), node)
         )
@@ -114,7 +114,7 @@ def set_binop_type_constraints(node):
 
     try:
         return_type = TYPE_CONSTRAINTS.unify_call(method_type, t1, t2)
-    except TypeInferenceError as e:
+    except TypeInferenceError:
         node.type_constraints = TypeInfo(
             TypeErrorInfo('incompatible types {} and {} in BinOp'.format(t1, t2), node)
         )

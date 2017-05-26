@@ -74,10 +74,10 @@ def heterogeneous_dictionary(**kwargs):
 
 def boolean_operator():
     """Return a strategy which generates a boolean operator symbol (string)."""
-    hs.one_of(hs.text('+-/*%', min_size=1, max_size=1),
-              hs.text('//', min_size=1, max_size=1),
-              hs.text('**', min_size=1, max_size=1)
-    )
+    return hs.one_of(hs.text('+-/*%', min_size=1, max_size=1),
+              hs.text('//', min_size=2, max_size=2),
+              hs.text('**', min_size=2, max_size=2)
+            )
 
 # Helper functions for testing
 def _parse_text(source: str) -> astroid.Module:

@@ -19,6 +19,15 @@ primitive_types = hs.sampled_from([
 ])
 primitive_values = primitive_types.flatmap(lambda s: s())
 
+non_bool_primitive_types = hs.sampled_from([
+    hs.integers,
+    lambda: hs.floats(allow_nan=False, allow_infinity=False),
+    hs.none,
+    hs.text,
+    hs.binary
+])
+non_bool_primitive_values = non_bool_primitive_types.flatmap(lambda s: s())
+
 # Strategies for generating Indexes
 index_types = hs.sampled_from([
     hs.integers,
@@ -62,6 +71,13 @@ def heterogeneous_dictionary(**kwargs):
     """Return a strategy which generates a dictionary of random key:value type."""
     return hs.dictionaries(index_values, primitive_values, **kwargs)
 
+
+def boolean_operator():
+    """Return a strategy which generates a boolean operator symbol (string)."""
+    hs.one_of(hs.text('+-/*%', min_size=1, max_size=1),
+              hs.text('//', min_size=1, max_size=1),
+              hs.text('**', min_size=1, max_size=1)
+    )
 
 # Helper functions for testing
 def _parse_text(source: str) -> astroid.Module:

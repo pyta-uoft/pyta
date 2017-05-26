@@ -20,7 +20,8 @@ import sys
 import tokenize
 import webbrowser
 
-from pylint import lint, utils
+import pylint.lint
+import pylint.utils
 from pylint.config import VALIDATORS, _call_validator
 
 from astroid import modutils
@@ -71,7 +72,8 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
-    write_stream('### Loaded configuration file: {}'.format(config_location), file_stream=OUTPUT_STREAM)
+    write_stream('### Loaded configuration file: {}'.format(config_location), 
+                 file_stream=OUTPUT_STREAM)
 
 
 def _init_linter(config=None, file_linted=None):
@@ -100,7 +102,8 @@ def _init_linter(config=None, file_linted=None):
             {'default': 5,
              'type': 'int',
              'metavar': '<number_messages>',
-             'help': 'Display a certain number of messages to the user, without overwhelming them.'}),
+             'help': 'Display a certain number of messages to the user, '
+                     'without overwhelming them.'}),
     )
 
     custom_checkers = [
@@ -115,9 +118,10 @@ def _init_linter(config=None, file_linted=None):
         'python_ta/checkers/type_inference_checker'
     ]
 
-    # Register new options to a checker here, allowing references to options in `.pylintrc` config file.
-    # These go into: `linter._all_options`, `linter._external_opts`
-    linter = lint.PyLinter(options=new_checker_options)
+    # Register new options to a checker here to allow references to 
+    # options in `.pylintrc` config file.
+    # Options stored in linter: `linter._all_options`, `linter._external_opts`
+    linter = pylint.lint.PyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
 
@@ -141,7 +145,8 @@ def _init_linter(config=None, file_linted=None):
         if isinstance(config, dict):
             for key in config:
                 linter.global_set_option(key, config[key])
-            write_stream('### Loaded configuration dictionary.', file_stream=OUTPUT_STREAM)
+            write_stream('### Loaded configuration dictionary.', 
+                         file_stream=OUTPUT_STREAM)
 
     # The above configuration may have set the pep8 option.
     if linter.config.pyta_pep8:
@@ -175,7 +180,7 @@ def _verify_pre_check(filepath):
             for (tok_type, content, _, _, _) in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
-                match = utils.OPTION_RGX.search(content)
+                match = pylint.utils.OPTION_RGX.search(content)
                 if match is not None:
                     print('ERROR: string "pylint:" found in comment. ' +
                           'No check run on file `{}`\n'.format(filepath))
@@ -188,6 +193,7 @@ def _verify_pre_check(filepath):
         print('ERROR: python_ta could not check your code due to a ' +
               'syntax error in your file')
         return False
+
     return True
 
 
@@ -264,10 +270,6 @@ def _check(module_name='', level='all', local_config='', output=None):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
                 linter.check(file_py)  # Lint !
-                # TODO: Put this into PlainReporter, merging with show_file_linted
-                with open(file_py) as f:
-                    current_reporter._source_lines = [
-                        line.rstrip() for line in f.readlines()]
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
     except Exception as e:

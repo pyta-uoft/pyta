@@ -116,9 +116,20 @@ class PlainReporter(BaseReporter):
             self._sorted_style_messages[msg.msg_id].append(msg)
 
     def show_file_linted(self, filename):
+        """Displays the file name to user. Also does some miscellaneous work 
+        with the file.
+        """
         write_stream(filename_to_display(filename), self.out)
 
+        # Augment the reporter with the source code.
+        with open(filename) as f:
+            self._source_lines = [
+                line.rstrip() for line in f.readlines()]
+
     def print_messages(self, level='all'):
+        """Print the messages for a linted file, outputting code snipped of
+        user's code.
+        """
         self.sort_messages()
 
         result = self._colourify('code-heading',

@@ -1,12 +1,13 @@
 import astroid
 from collections import defaultdict
 from typing import Callable, Any
-
+import os
+TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed/builtins.pyi')
 
 class TypeStore:
     def __init__(self):
         contents = ''
-        with open('typeshed/builtins.pyi') as f:
+        with open(TYPE_SHED_PATH) as f:
             contents = '\n'.join(f.readlines())
         module = astroid.parse(contents)
         self.classes = defaultdict(dict)
@@ -50,3 +51,5 @@ class TypeStore:
             if not found:
                 raise TypeError
         return function_type
+
+TYPE_STORE = TypeStore()

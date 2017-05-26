@@ -1,7 +1,6 @@
 import nose
 from hypothesis import given, settings
 import tests.custom_hypothesis_support as cs
-from python_ta.typecheck.type_store import *
 from python_ta.transforms.type_inference_visitor import *
 settings.load_profile("pyta")
 

@@ -1,3 +1,4 @@
+import sys
 from pylint.reporters import BaseReporter
 from pylint.utils import Message
 from collections import defaultdict, namedtuple
@@ -69,12 +70,13 @@ class PlainReporter(BaseReporter):
     _COLOURING = {}
 
     def __init__(self, source_lines=None, module_name=''):
+        """Reminder: see pylint BaseReporter for other instance variables init.
+        """
         super().__init__()
         self._error_messages = []
         self._style_messages = []
         self._source_lines = source_lines or []
         self._module_name = module_name
-        self.linter = None
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
 
@@ -113,7 +115,11 @@ class PlainReporter(BaseReporter):
             self._sorted_style_messages[msg.msg_id].append(msg)
 
     def show_file_linted(self, filename):
-        print('*'*15, 'File:', filename)
+        print('{} File: {}'.format('*'*15, filename), file=self.out)
+
+    def write(self, string):
+        """Write output to a stream."""
+        print(string, file=self.out)
 
     def print_messages(self, level='all'):
         self.sort_messages()
@@ -137,7 +143,7 @@ class PlainReporter(BaseReporter):
             else:
                 result += 'None!' + self._BREAK*2
 
-        print(result)
+        print(result, file=self.out)
 
     def _colour_messages_by_type(self, style=False):
         """

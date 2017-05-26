@@ -22,9 +22,8 @@ primitive_values = primitive_types.flatmap(lambda s: s())
 non_bool_primitive_types = hs.sampled_from([
     hs.integers,
     lambda: hs.floats(allow_nan=False, allow_infinity=False),
-    hs.none,
-    hs.text,
-    hs.binary
+    lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
+    lambda: hs.binary(min_size=1)
 ])
 non_bool_primitive_values = non_bool_primitive_types.flatmap(lambda s: s())
 

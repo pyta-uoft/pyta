@@ -72,11 +72,15 @@ def heterogeneous_dictionary(**kwargs):
 
 
 def non_boolean_operator():
-    """Return a strategy which generates a boolean operator symbol (string)."""
-    return hs.one_of(hs.text('+-/*%', min_size=1, max_size=1),
-              hs.text('//', min_size=2, max_size=2),
-              hs.text('**', min_size=2, max_size=2)
-            )
+    """Return a non-boolean operator symbol (string)."""
+    non_bool_operators = ['+', '-', '*', '//', '%', '/', '**']
+    return return_one_of(non_bool_operators)
+
+
+def return_one_of(list_of_strings):
+    """Return a strategy that returns one of given string arguments."""
+    return hs.one_of([hs.text(alphabet=symbol, min_size=1, max_size=1) for symbol in list_of_strings])
+
 
 # Helper functions for testing
 def _parse_text(source: str) -> astroid.Module:

@@ -73,7 +73,7 @@ def heterogeneous_dictionary(**kwargs):
 
 def non_boolean_operator():
     """Return a non-boolean operator symbol (string)."""
-    non_bool_operators = ['+', '-', '*', '//', '%', '/', '**']
+    non_bool_operators = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<', '>>']
     return return_one_of(non_bool_operators)
 
 

@@ -19,13 +19,6 @@ primitive_types = hs.sampled_from([
 ])
 primitive_values = primitive_types.flatmap(lambda s: s())
 
-non_bool_primitive_types = hs.sampled_from([
-    hs.integers,
-    lambda: hs.floats(allow_nan=False, allow_infinity=False),
-    lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
-    lambda: hs.binary(min_size=1)
-])
-non_bool_primitive_values = non_bool_primitive_types.flatmap(lambda s: s())
 
 # Strategies for generating Indexes
 index_types = hs.sampled_from([
@@ -33,6 +26,12 @@ index_types = hs.sampled_from([
     lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
 ])
 index_values = index_types.flatmap(lambda s: s())
+
+
+# Strategies for generating Binary Operators
+non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<', '>>']
+non_bool_ops = [hs.text(alphabet=s, min_size=len(s), max_size=len(s)) for s in non_bool_symbols]
+non_boolean_operator = hs.sampled_from(non_bool_symbols)
 
 
 def valid_identifier():
@@ -69,17 +68,6 @@ def random_dict_variable_value(**kwargs):
 def heterogeneous_dictionary(**kwargs):
     """Return a strategy which generates a dictionary of random key:value type."""
     return hs.dictionaries(index_values, primitive_values, **kwargs)
-
-
-def non_boolean_operator():
-    """Return a non-boolean operator symbol (string)."""
-    non_bool_operators = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<', '>>']
-    return return_one_of(non_bool_operators)
-
-
-def return_one_of(list_of_strings):
-    """Return a strategy that returns one of given string arguments."""
-    return hs.one_of([hs.text(alphabet=symbol, min_size=len(symbol)) for symbol in list_of_strings])
 
 
 # Helper functions for testing

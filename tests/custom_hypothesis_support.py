@@ -79,7 +79,7 @@ def non_boolean_operator():
 
 def return_one_of(list_of_strings):
     """Return a strategy that returns one of given string arguments."""
-    return hs.one_of([hs.text(alphabet=symbol, min_size=1, max_size=2) for symbol in list_of_strings])
+    return hs.one_of([hs.text(alphabet=symbol, min_size=len(symbol)) for symbol in list_of_strings])
 
 
 # Helper functions for testing

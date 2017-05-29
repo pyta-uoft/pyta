@@ -5,6 +5,7 @@ from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder, lookup_method, Environment, TypeConstraints, TypeInferenceError
+from ..typecheck.type_store import TYPE_STORE
 TYPE_CONSTRAINTS = TypeConstraints()
 
 
@@ -104,16 +105,16 @@ def set_binop_type_constraints(node):
     op_name = op_to_dunder(node.op)
 
     try:
-        method_type = lookup_method(op_name, t1)
+        method_type = TYPE_STORE.lookup_function(op_name, t1, t2)
     except KeyError:
         node.type_constraints = TypeInfo(
-            TypeErrorInfo('Method {}.{} not found'.format(t1, op_name), node)
+            TypeErrorInfo('Method {}.{}({}) not found'.format(t1, op_name, t2), node)
         )
         return
 
     try:
         return_type = TYPE_CONSTRAINTS.unify_call(method_type, t1, t2)
-    except TypeInferenceError as e:
+    except TypeInferenceError:
         node.type_constraints = TypeInfo(
             TypeErrorInfo('incompatible types {} and {} in BinOp'.format(t1, t2), node)
         )

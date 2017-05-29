@@ -81,6 +81,7 @@ class PlainReporter(BaseReporter):
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
         self._output_file_name = 'pyta_output'
+        self.current_file = None
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
@@ -149,6 +150,7 @@ class PlainReporter(BaseReporter):
         """Display current filename to user. Also does some miscellaneous work 
         with the file.
         """
+        self.current_file = filename
         print(self.filename_to_display(filename), file=self.out)
 
         # Augment the reporter with the source code.

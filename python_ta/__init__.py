@@ -72,7 +72,7 @@ def _load_config(linter, config_location):
     print('### Loaded configuration file: {}'.format(config_location))
 
 
-def _init_linter(config=None, file_linted=None):
+def reset_linter(config=None, file_linted=None):
     """Construct a new linter. Register config and checker plugins.
     To determine which configuration to use:
     • If the config argument is a string, use the config found at that location,
@@ -248,7 +248,7 @@ def _check(module_name='', level='all', local_config='', output=None):
     # custom pyta options in a Tuple, before (re)setting reporter.
     for reporter in REPORTERS:
         VALIDATORS[reporter.__name__] = reporter
-    linter = _init_linter(config=local_config)
+    linter = reset_linter(config=local_config)
     current_reporter = reset_reporter(linter, output)
 
     # Try to check file, issue error message for invalid files.
@@ -257,7 +257,7 @@ def _check(module_name='', level='all', local_config='', output=None):
             for file_py in current_reporter.get_file_paths(locations):
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
-                linter = _init_linter(config=local_config, file_linted=file_py)
+                linter = reset_linter(config=local_config, file_linted=file_py)
                 # The local config may have set a new reporter
                 current_reporter = reset_reporter(linter)
                 current_reporter.register_file(file_py)

@@ -71,7 +71,7 @@ def heterogeneous_dictionary(**kwargs):
     return hs.dictionaries(index_values, primitive_values, **kwargs)
 
 
-def boolean_operator():
+def non_boolean_operator():
     """Return a strategy which generates a boolean operator symbol (string)."""
     return hs.one_of(hs.text('+-/*%', min_size=1, max_size=1),
               hs.text('//', min_size=2, max_size=2),

@@ -28,12 +28,9 @@ from astroid import modutils
 
 from .reporters import REPORTERS, PlainReporter, ColorReporter
 from .patches import patch_all
-from .utils import *
 
 # Local version of website; will be updated later.
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
-DEFAULT_OUTPUT_NAME = '*pyta_output'  # incl star to display first, usually.
-OUTPUT_STREAM = sys.stdout
 
 # check the python version
 if sys.version_info < (3, 4, 0):
@@ -72,8 +69,7 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
-    write_stream('### Loaded configuration file: {}'.format(config_location), 
-                 file_stream=OUTPUT_STREAM)
+    print('### Loaded configuration file: {}'.format(config_location))
 
 
 def _init_linter(config=None, file_linted=None):
@@ -102,8 +98,7 @@ def _init_linter(config=None, file_linted=None):
             {'default': 5,
              'type': 'int',
              'metavar': '<number_messages>',
-             'help': 'Display a certain number of messages to the user, '
-                     'without overwhelming them.'}),
+             'help': 'Display a certain number of messages to the user, without overwhelming them.'}),
     )
 
     custom_checkers = [
@@ -145,8 +140,7 @@ def _init_linter(config=None, file_linted=None):
         if isinstance(config, dict):
             for key in config:
                 linter.global_set_option(key, config[key])
-            write_stream('### Loaded configuration dictionary.', 
-                         file_stream=OUTPUT_STREAM)
+            print('### Loaded configuration dictionary.')
 
     # The above configuration may have set the pep8 option.
     if linter.config.pyta_pep8:
@@ -156,15 +150,17 @@ def _init_linter(config=None, file_linted=None):
     return linter
 
 
-def _init_reporter(linter):
-    """Initialize a reporter with config options."""
+def reset_reporter(linter, output_filepath=None):
+    """Initialize a reporter with config options.
+    Output is an absolute file path to output into.
+    Cannot use ColorReporter when outputting to a file because the file cannot
+    contain colorama ascii characters -- switches to use PlainReporter."""
     # Determine the type of reporter from the config setup.
     current_reporter = _call_validator(linter.config.pyta_reporter, 
                                        None, None, None)
-    # Output to a file cannot contain colorama ascii characters.
-    if isinstance(current_reporter, ColorReporter) and OUTPUT_STREAM is not sys.stdout:
+    if isinstance(current_reporter, ColorReporter) and output_filepath:
         current_reporter = PlainReporter()
-    current_reporter.set_output(OUTPUT_STREAM)
+    current_reporter.set_output_stream(output_filepath)
     linter.set_reporter(current_reporter)
     return current_reporter
 
@@ -197,7 +193,7 @@ def _verify_pre_check(filepath):
     return True
 
 
-def _get_valid_files_to_check(module_name, local_config):
+def _get_valid_files_to_check(reporter, module_name, local_config):
     """A generator for all valid files to check. Uses a reporter to output 
     messages when an input cannot be checked.
     """
@@ -217,8 +213,8 @@ def _get_valid_files_to_check(module_name, local_config):
     # Filter valid files to check
     for item in module_name:
         if not isinstance(item, str):  # Issue errors for invalid types
-            write_stream(filename_to_display(item), OUTPUT_STREAM)
-            write_stream('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item), OUTPUT_STREAM)
+            print(reporter.filename_to_display(item))
+            print('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item))
         elif os.path.isdir(item):
             yield item
         elif not os.path.exists(os.path.expanduser(item)):
@@ -228,11 +224,11 @@ def _get_valid_files_to_check(module_name, local_config):
                 if os.path.exists(filepath):
                     yield filepath
                 else:
-                    write_stream(filename_to_display(item), OUTPUT_STREAM)
-                    write_stream('Could not find the file called, `{}`\n'.format(item), OUTPUT_STREAM)
+                    print(reporter.filename_to_display(item))
+                    print('Could not find the file called, `{}`\n'.format(item))
             except ImportError:
-                write_stream(filename_to_display(item), OUTPUT_STREAM)
-                write_stream('Could not find the file called 2, `{}`\n'.format(item), OUTPUT_STREAM)
+                print(reporter.filename_to_display(item))
+                print('Could not find the file called 2, `{}`\n'.format(item))
         else:
             yield item  # Check other valid files.
 
@@ -247,26 +243,24 @@ def _check(module_name='', level='all', local_config='', output=None):
     • `local_config` is a dict of config options or string (config file name).
     • `output` is an absolute path to capture pyta data output. Default std out.
     """
-    global OUTPUT_STREAM
-    OUTPUT_STREAM = get_file_object(output)  # file object, or std out (default)
-    if OUTPUT_STREAM is not sys.stdout:
-        print('PyTA wrote your output to the file here:', OUTPUT_STREAM.name)
 
     # Add reporters to an internal pylint data structure, for use with setting
-    # custom pyta options in a Tuple.
+    # custom pyta options in a Tuple, before (re)setting reporter.
     for reporter in REPORTERS:
         VALIDATORS[reporter.__name__] = reporter
+    linter = _init_linter(config=local_config)
+    current_reporter = reset_reporter(linter, output)
 
     # Try to check file, issue error message for invalid files.
     try:
-        for locations in _get_valid_files_to_check(module_name, local_config):
-            for file_py in get_file_paths(locations):
+        for locations in _get_valid_files_to_check(current_reporter, module_name, local_config):
+            for file_py in current_reporter.get_file_paths(locations):
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 linter = _init_linter(config=local_config, file_linted=file_py)
                 # The local config may have set a new reporter
-                current_reporter = _init_reporter(linter)
-                current_reporter.show_file_linted(file_py)
+                current_reporter = reset_reporter(linter)
+                current_reporter.register_file(file_py)
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
                 linter.check(file_py)  # Lint !

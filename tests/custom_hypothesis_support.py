@@ -30,7 +30,6 @@ index_values = index_types.flatmap(lambda s: s())
 
 # Strategies for generating Binary Operators
 non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<', '>>']
-non_bool_ops = [hs.text(alphabet=s, min_size=len(s), max_size=len(s)) for s in non_bool_symbols]
 non_boolean_operator = hs.sampled_from(non_bool_symbols)
 
 

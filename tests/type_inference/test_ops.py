@@ -1,7 +1,8 @@
+import astroid
 import nose
 from hypothesis import given, settings, assume
 import tests.custom_hypothesis_support as cs
-from python_ta.transforms.type_inference_visitor import *
+from python_ta.transforms.type_inference_visitor import TYPE_STORE, op_to_dunder
 settings.load_profile("pyta")
 
 

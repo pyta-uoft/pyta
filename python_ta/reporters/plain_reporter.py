@@ -5,6 +5,7 @@ from pylint.utils import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
+OUTPUT_FILENAME = 'pyta_output'
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
@@ -80,7 +81,7 @@ class PlainReporter(BaseReporter):
         self._module_name = module_name
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
-        self._output_file_name = 'pyta_output'
+        self._output_file_name = None
         self.current_file = None
 
     def reset_messages(self):
@@ -117,7 +118,7 @@ class PlainReporter(BaseReporter):
         for msg in self._style_messages:
             self._sorted_style_messages[msg.msg_id].append(msg)
 
-    def set_output_stream(self, output_filepath=None):
+    def set_output_stream(self):
         """Determine where to output pyta messages.
         • Reset a file for outputting messages into, and store its file object.
         • Default stream to std out.
@@ -126,16 +127,17 @@ class PlainReporter(BaseReporter):
         by the system when the program ends. 
         • Raises IOError.
         """
-        if output_filepath is None:
+        if self.current_file is None:
             # Stream to std out. Use method instead of setting self.out directly
             self.set_output(sys.stdout)
             return
         
         # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
-        correct_path = os.path.expanduser(output_filepath)
+        correct_path = os.path.expanduser(self.current_file)
         if not os.path.exists(os.path.dirname(correct_path)):
-            raise IOError('path {} does not exist.'.format(output_filepath))
+            raise IOError('path {} does not exist.'.format(self.current_file))
         if os.path.isdir(correct_path):
+            self._output_file_name = OUTPUT_FILENAME
             correct_path = os.path.join(correct_path, self._output_file_name)
         with open(correct_path, 'w') as _:  # erase file, and close it.
             pass
@@ -158,22 +160,9 @@ class PlainReporter(BaseReporter):
             self._source_lines = [
                 line.rstrip() for line in f.readlines()]
 
-    def get_file_paths(self, rel_path):
-        """A generator for iterating python files within a directory.
-        `rel_path` is a relative path to a file or directory.
-        Returns paths to all files in a directory.
-        """
-        if not os.path.isdir(rel_path):
-            yield rel_path  # Don't do anything; return the file name.
-        else:
-            for root, _, files in os.walk(rel_path):
-                for filename in (f for f in files if f.endswith('.py')):
-                    yield os.path.join(root, filename)  # Format path, from root.
-
     def print_messages(self, level='all'):
-        """Print the messages for a linted file, outputting code snipped of
-        user's code.
-        """
+        # Set the file object for location to write the messages.
+        self.set_output_stream()
         self.sort_messages()
 
         result = self._colourify('code-heading',

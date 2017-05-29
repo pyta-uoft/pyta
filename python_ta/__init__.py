@@ -160,10 +160,21 @@ def reset_reporter(linter, output_filepath=None):
                                        None, None, None)
     if isinstance(current_reporter, ColorReporter) and output_filepath:
         current_reporter = PlainReporter()
-    current_reporter.set_output_stream(output_filepath)
+    # current_reporter.set_output_stream(output_filepath)
     linter.set_reporter(current_reporter)
     return current_reporter
 
+def get_file_paths(rel_path):
+    """A generator for iterating python files within a directory.
+    `rel_path` is a relative path to a file or directory.
+    Returns paths to all files in a directory.
+    """
+    if not os.path.isdir(rel_path):
+        yield rel_path  # Don't do anything; return the file name.
+    else:
+        for root, _, files in os.walk(rel_path):
+            for filename in (f for f in files if f.endswith('.py')):
+                yield os.path.join(root, filename)  # Format path, from root.
 
 def _verify_pre_check(filepath):
     """Check student code for certain issues."""
@@ -254,12 +265,12 @@ def _check(module_name='', level='all', local_config='', output=None):
     # Try to check file, issue error message for invalid files.
     try:
         for locations in _get_valid_files_to_check(current_reporter, module_name, local_config):
-            for file_py in current_reporter.get_file_paths(locations):
+            for file_py in get_file_paths(locations):
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 linter = reset_linter(config=local_config, file_linted=file_py)
-                # The local config may have set a new reporter
-                current_reporter = reset_reporter(linter)
+                # Assume the local config will NOT set a new reporter.
+                linter.set_reporter(current_reporter)
                 current_reporter.register_file(file_py)
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files

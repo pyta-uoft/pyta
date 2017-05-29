@@ -5,7 +5,7 @@ from python_ta.transforms.type_inference_visitor import *
 settings.load_profile("pyta")
 
 
-@given(cs.non_bool_primitive_values, cs.non_boolean_operator(), cs.non_bool_primitive_values)
+@given(cs.primitive_values, cs.non_boolean_operator, cs.primitive_values)
 def test_binop_non_bool_concrete(left_operand, operator, right_operand):
     """Test type setting of BinOp node(s) with non-boolean operands."""
     try:

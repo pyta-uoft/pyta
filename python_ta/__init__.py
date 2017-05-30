@@ -160,9 +160,10 @@ def reset_reporter(linter, output_filepath=None):
                                        None, None, None)
     if isinstance(current_reporter, ColorReporter) and output_filepath:
         current_reporter = PlainReporter()
-    # current_reporter.set_output_stream(output_filepath)
+    current_reporter.set_output_stream(output_filepath)
     linter.set_reporter(current_reporter)
     return current_reporter
+
 
 def get_file_paths(rel_path):
     """A generator for iterating python files within a directory.
@@ -175,6 +176,7 @@ def get_file_paths(rel_path):
         for root, _, files in os.walk(rel_path):
             for filename in (f for f in files if f.endswith('.py')):
                 yield os.path.join(root, filename)  # Format path, from root.
+
 
 def _verify_pre_check(filepath):
     """Check student code for certain issues."""
@@ -200,7 +202,6 @@ def _verify_pre_check(filepath):
         print('ERROR: python_ta could not check your code due to a ' +
               'syntax error in your file')
         return False
-
     return True
 
 

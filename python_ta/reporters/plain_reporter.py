@@ -81,8 +81,8 @@ class PlainReporter(BaseReporter):
         self._module_name = module_name
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
-        self._output_file_name = None
-        self.current_file = None
+        self._output_filepath = None
+        self.current_file_linted = None
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
@@ -118,7 +118,7 @@ class PlainReporter(BaseReporter):
         for msg in self._style_messages:
             self._sorted_style_messages[msg.msg_id].append(msg)
 
-    def set_output_stream(self):
+    def set_output_stream(self, output_filepath_arg):
         """Determine where to output pyta messages.
         • Reset a file for outputting messages into, and store its file object.
         • Default stream to std out.
@@ -127,20 +127,27 @@ class PlainReporter(BaseReporter):
         by the system when the program ends. 
         • Raises IOError.
         """
-        if self.current_file is None:
+        if output_filepath_arg is None and self._output_filepath is None:
             # Stream to std out. Use method instead of setting self.out directly
             self.set_output(sys.stdout)
             return
-        
+        elif output_filepath_arg is None:
+            return
+
         # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
-        correct_path = os.path.expanduser(self.current_file)
+        correct_path = os.path.expanduser(output_filepath_arg)
         if not os.path.exists(os.path.dirname(correct_path)):
-            raise IOError('path {} does not exist.'.format(self.current_file))
+            raise IOError('path {} does not exist.'.format(output_filepath_arg))
         if os.path.isdir(correct_path):
-            self._output_file_name = OUTPUT_FILENAME
-            correct_path = os.path.join(correct_path, self._output_file_name)
-        with open(correct_path, 'w') as _:  # erase file, and close it.
-            pass
+            correct_path = os.path.join(correct_path, OUTPUT_FILENAME)
+
+        # Save output location and remove it if exists from previous run.
+        self._output_filepath = correct_path
+        # Remove existing file to prepare for appending messages from recursive 
+        # linting of files.
+        if os.path.exists(correct_path):
+            os.remove(correct_path)
+        
         # Use this file object to append messages.
         self.set_output(open(correct_path, 'a'))
 
@@ -152,7 +159,7 @@ class PlainReporter(BaseReporter):
         """Display current filename to user. Also does some miscellaneous work 
         with the file.
         """
-        self.current_file = filename
+        self.current_file_linted = filename
         print(self.filename_to_display(filename), file=self.out)
 
         # Augment the reporter with the source code.
@@ -161,8 +168,6 @@ class PlainReporter(BaseReporter):
                 line.rstrip() for line in f.readlines()]
 
     def print_messages(self, level='all'):
-        # Set the file object for location to write the messages.
-        self.set_output_stream()
         self.sort_messages()
 
         result = self._colourify('code-heading',

@@ -19,12 +19,18 @@ primitive_types = hs.sampled_from([
 ])
 primitive_values = primitive_types.flatmap(lambda s: s())
 
+
 # Strategies for generating Indexes
 index_types = hs.sampled_from([
     hs.integers,
     lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
 ])
 index_values = index_types.flatmap(lambda s: s())
+
+
+# Strategies for generating Binary Operators
+non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<', '>>']
+non_boolean_operator = hs.sampled_from(non_bool_symbols)
 
 
 def valid_identifier():

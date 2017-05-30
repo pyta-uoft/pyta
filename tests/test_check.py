@@ -52,7 +52,7 @@ def test_check_with_config():
         'allowed-import-modules': ['doctest', 'unittest', 'hypothesis', 
                                    'python_ta'],
         # [FORBIDDEN IO]
-        'allowed-io': None,
+        'allowed-io': [],
         # [MESSAGES CONTROL]
         'disable': ['R0401', 'R0901', 'R0903', 'R0904', 'R0911', 'R0916', 
                     'W0402', 'W0403', 'W0410', 'W1501', 'W1502', 'W1505',

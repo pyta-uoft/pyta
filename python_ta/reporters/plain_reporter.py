@@ -1,8 +1,11 @@
+import sys
+import os
 from pylint.reporters import BaseReporter
 from pylint.utils import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
+OUTPUT_FILENAME = 'pyta_output'
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
@@ -69,14 +72,17 @@ class PlainReporter(BaseReporter):
     _COLOURING = {}
 
     def __init__(self, source_lines=None, module_name=''):
+        """Reminder: see pylint BaseReporter for other instance variables init.
+        """
         super().__init__()
         self._error_messages = []
         self._style_messages = []
         self._source_lines = source_lines or []
         self._module_name = module_name
-        self.linter = None
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
+        self._output_filepath = None
+        self.current_file_linted = None
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
@@ -112,8 +118,37 @@ class PlainReporter(BaseReporter):
         for msg in self._style_messages:
             self._sorted_style_messages[msg.msg_id].append(msg)
 
-    def show_file_linted(self, filename):
-        print('*'*15, 'File:', filename)
+    def set_output_filepath(self, output_filepath_arg):
+        """Save location to output pyta messages, if any."""
+        if output_filepath_arg is None:
+            return
+
+        # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
+        correct_path = os.path.expanduser(output_filepath_arg)
+        if not os.path.exists(os.path.dirname(correct_path)):
+            raise IOError('path {} does not exist.'.format(output_filepath_arg))
+        if os.path.isdir(correct_path):
+            correct_path = os.path.join(correct_path, OUTPUT_FILENAME)
+
+        # Save output location and remove it if exists from previous run.
+        self._output_filepath = correct_path
+        # Remove existing file to prepare for appending messages from recursive 
+        # linting of files.
+        if os.path.exists(correct_path):
+            os.remove(correct_path)
+
+    def filename_to_display(self, filename):
+        """Display the file name, currently consistent with pylint format."""
+        return '{} File: {}'.format('*'*15, filename)
+
+    def register_file(self, filename):
+        """Register information of the linted file, for later use by reporter"""
+        self.current_file_linted = filename
+
+        # Augment the reporter with the source code.
+        with open(filename) as f:
+            self._source_lines = [
+                line.rstrip() for line in f.readlines()]
 
     def print_messages(self, level='all'):
         self.sort_messages()
@@ -137,7 +172,13 @@ class PlainReporter(BaseReporter):
             else:
                 result += 'None!' + self._BREAK*2
 
-        print(result)
+        output_stream = sys.stdout
+        if self._output_filepath:
+            output_stream = open(self._output_filepath, 'a')
+        print(self.filename_to_display(self.current_file_linted), file=output_stream)
+        print(result, file=output_stream)
+        if self._output_filepath:
+            output_stream.close()
 
     def _colour_messages_by_type(self, style=False):
         """

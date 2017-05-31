@@ -5,6 +5,7 @@ from pylint.utils import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
+OUTPUT_FILENAME = 'pyta_output'
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
@@ -80,8 +81,8 @@ class PlainReporter(BaseReporter):
         self._module_name = module_name
         self._sorted_error_messages = defaultdict(list)
         self._sorted_style_messages = defaultdict(list)
-        self._output_file_name = 'pyta_output'
-        self.current_file = None
+        self._output_filepath = None
+        self.current_file_linted = None
 
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
@@ -117,63 +118,39 @@ class PlainReporter(BaseReporter):
         for msg in self._style_messages:
             self._sorted_style_messages[msg.msg_id].append(msg)
 
-    def set_output_stream(self, output_filepath=None):
-        """Determine where to output pyta messages.
-        • Reset a file for outputting messages into, and store its file object.
-        • Default stream to std out.
-        • Note: leave the file open during the execution of pyta program 
-        because many writes may happen, and the fd should close automatically 
-        by the system when the program ends. 
-        • Raises IOError.
-        """
-        if output_filepath is None:
-            # Stream to std out. Use method instead of setting self.out directly
-            self.set_output(sys.stdout)
+    def set_output_filepath(self, output_filepath_arg):
+        """Save location to output pyta messages, if any."""
+        if output_filepath_arg is None:
             return
-        
+
         # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
-        correct_path = os.path.expanduser(output_filepath)
+        correct_path = os.path.expanduser(output_filepath_arg)
         if not os.path.exists(os.path.dirname(correct_path)):
-            raise IOError('path {} does not exist.'.format(output_filepath))
+            raise IOError('path {} does not exist.'.format(output_filepath_arg))
         if os.path.isdir(correct_path):
-            correct_path = os.path.join(correct_path, self._output_file_name)
-        with open(correct_path, 'w') as _:  # erase file, and close it.
-            pass
-        # Use this file object to append messages.
-        self.set_output(open(correct_path, 'a'))
+            correct_path = os.path.join(correct_path, OUTPUT_FILENAME)
+
+        # Save output location and remove it if exists from previous run.
+        self._output_filepath = correct_path
+        # Remove existing file to prepare for appending messages from recursive 
+        # linting of files.
+        if os.path.exists(correct_path):
+            os.remove(correct_path)
 
     def filename_to_display(self, filename):
         """Display the file name, currently consistent with pylint format."""
         return '{} File: {}'.format('*'*15, filename)
 
     def register_file(self, filename):
-        """Display current filename to user. Also does some miscellaneous work 
-        with the file.
-        """
-        self.current_file = filename
-        print(self.filename_to_display(filename), file=self.out)
+        """Register information of the linted file, for later use by reporter"""
+        self.current_file_linted = filename
 
         # Augment the reporter with the source code.
         with open(filename) as f:
             self._source_lines = [
                 line.rstrip() for line in f.readlines()]
 
-    def get_file_paths(self, rel_path):
-        """A generator for iterating python files within a directory.
-        `rel_path` is a relative path to a file or directory.
-        Returns paths to all files in a directory.
-        """
-        if not os.path.isdir(rel_path):
-            yield rel_path  # Don't do anything; return the file name.
-        else:
-            for root, _, files in os.walk(rel_path):
-                for filename in (f for f in files if f.endswith('.py')):
-                    yield os.path.join(root, filename)  # Format path, from root.
-
     def print_messages(self, level='all'):
-        """Print the messages for a linted file, outputting code snipped of
-        user's code.
-        """
         self.sort_messages()
 
         result = self._colourify('code-heading',
@@ -195,7 +172,13 @@ class PlainReporter(BaseReporter):
             else:
                 result += 'None!' + self._BREAK*2
 
-        print(result, file=self.out)
+        output_stream = sys.stdout
+        if self._output_filepath:
+            output_stream = open(self._output_filepath, 'a')
+        print(self.filename_to_display(self.current_file_linted), file=output_stream)
+        print(result, file=output_stream)
+        if self._output_filepath:
+            output_stream.close()
 
     def _colour_messages_by_type(self, style=False):
         """

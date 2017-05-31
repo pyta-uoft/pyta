@@ -6,7 +6,8 @@ TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.p
 
 
 class TypeStore:
-    def __init__(self):
+    def __init__(self, type_constraints):
+        self.type_constraints = type_constraints
         contents = ''
         with open(TYPE_SHED_PATH) as f:
             contents = '\n'.join(f.readlines())
@@ -44,9 +45,8 @@ class TypeStore:
             found = False
             func_types_list = self.functions[operator]
             for func_type in func_types_list:
+                # check if args can be unified instead of checking if they are the same!
                 if func_type.__args__[:-1] == args:
                     return func_type
             if not found:
                 raise KeyError
-
-TYPE_STORE = TypeStore()

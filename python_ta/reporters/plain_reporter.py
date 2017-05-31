@@ -118,20 +118,9 @@ class PlainReporter(BaseReporter):
         for msg in self._style_messages:
             self._sorted_style_messages[msg.msg_id].append(msg)
 
-    def set_output_stream(self, output_filepath_arg):
-        """Determine where to output pyta messages.
-        • Reset a file for outputting messages into, and store its file object.
-        • Default stream to std out.
-        • Note: leave the file open during the execution of pyta program 
-        because many writes may happen, and the fd should close automatically 
-        by the system when the program ends. 
-        • Raises IOError.
-        """
-        if output_filepath_arg is None and self._output_filepath is None:
-            # Stream to std out. Use method instead of setting self.out directly
-            self.set_output(sys.stdout)
-            return
-        elif output_filepath_arg is None:
+    def set_output_filepath(self, output_filepath_arg):
+        """Save location to output pyta messages, if any."""
+        if output_filepath_arg is None:
             return
 
         # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
@@ -147,20 +136,14 @@ class PlainReporter(BaseReporter):
         # linting of files.
         if os.path.exists(correct_path):
             os.remove(correct_path)
-        
-        # Use this file object to append messages.
-        self.set_output(open(correct_path, 'a'))
 
     def filename_to_display(self, filename):
         """Display the file name, currently consistent with pylint format."""
         return '{} File: {}'.format('*'*15, filename)
 
     def register_file(self, filename):
-        """Display current filename to user. Also does some miscellaneous work 
-        with the file.
-        """
+        """Register information of the linted file, for later use by reporter"""
         self.current_file_linted = filename
-        print(self.filename_to_display(filename), file=self.out)
 
         # Augment the reporter with the source code.
         with open(filename) as f:
@@ -189,7 +172,13 @@ class PlainReporter(BaseReporter):
             else:
                 result += 'None!' + self._BREAK*2
 
-        print(result, file=self.out)
+        output_stream = sys.stdout
+        if self._output_filepath:
+            output_stream = open(self._output_filepath, 'a')
+        print(self.filename_to_display(self.current_file_linted), file=output_stream)
+        print(result, file=output_stream)
+        if self._output_filepath:
+            output_stream.close()
 
     def _colour_messages_by_type(self, style=False):
         """

@@ -160,7 +160,7 @@ def reset_reporter(linter, output_filepath=None):
                                        None, None, None)
     if isinstance(current_reporter, ColorReporter) and output_filepath:
         current_reporter = PlainReporter()
-    current_reporter.set_output_stream(output_filepath)
+    current_reporter.set_output_filepath(output_filepath)
     linter.set_reporter(current_reporter)
     return current_reporter
 
@@ -240,7 +240,7 @@ def _get_valid_files_to_check(reporter, module_name, local_config):
                     print('Could not find the file called, `{}`\n'.format(item))
             except ImportError:
                 print(reporter.filename_to_display(item))
-                print('Could not find the file called 2, `{}`\n'.format(item))
+                print('Could not find the file called, `{}`\n'.format(item))
         else:
             yield item  # Check other valid files.
 

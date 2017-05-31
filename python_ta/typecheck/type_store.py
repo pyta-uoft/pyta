@@ -46,7 +46,14 @@ class TypeStore:
             func_types_list = self.functions[operator]
             for func_type in func_types_list:
                 # check if args can be unified instead of checking if they are the same!
-                if func_type.__args__[:-1] == args:
-                    return func_type
-            if not found:
+                unified = True
+                for t1, t2 in zip(func_type.__args__[:-1], args):
+                    if not self.type_constraints.can_unify(t1, t2):
+                        unified = False
+                        break
+                if unified:
+                    rtype = self.type_constraints.unify_call(func_type, *args)
+                    if rtype == func_type.__args__[-1]:
+                        return func_type
+            if not (unified or found):
                 raise KeyError

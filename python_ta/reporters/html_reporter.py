@@ -7,9 +7,8 @@ from base64 import b64encode
 
 from .color_reporter import ColorReporter
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES_DIR = os.path.join(THIS_DIR, 'templates')
-TEMPLATE_FILE = os.path.join('templates', 'template.txt')
+TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+TEMPLATE_FILE = 'template.txt'
 OUTPUT_FILE = 'output.html'
 
 class HTMLReporter(ColorReporter):
@@ -35,7 +34,7 @@ class HTMLReporter(ColorReporter):
         self._colour_messages_by_type(style=False)
         self._colour_messages_by_type(style=True)
 
-        template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template(TEMPLATE_FILE)
+        template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(TEMPLATE_FILE)
 
         # Embed resources so the output html can go anywhere, independent of assets.
         with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:

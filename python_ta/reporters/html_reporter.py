@@ -8,8 +8,8 @@ from base64 import b64encode
 from .color_reporter import ColorReporter
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.getcwd()
-TEMPLATE_FILE = '/templates/template.txt'
+TEMPLATES_DIR = os.path.join(THIS_DIR, 'templates')
+TEMPLATE_FILE = os.path.join('templates', 'template.txt')
 OUTPUT_FILE = 'output.html'
 
 class HTMLReporter(ColorReporter):
@@ -37,10 +37,8 @@ class HTMLReporter(ColorReporter):
 
         template = Environment(loader=FileSystemLoader(THIS_DIR)).get_template(TEMPLATE_FILE)
 
-        print(os.getcwd())
-
         # Embed resources so the output html can go anywhere, independent of assets.
-        with open(THIS_DIR + '/templates/pyta_logo_markdown.png', 'rb+') as image_file:
+        with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
             # Encode img binary to base64 (+33% size), decode to remove the "b'"
             pyta_logo_base64_encoded = b64encode(image_file.read()).decode()
 
@@ -48,14 +46,15 @@ class HTMLReporter(ColorReporter):
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
         dt = 'Generated: ' + str(datetime.now().
                                  strftime('%a. %b. %d %Y, %H:%M:%S'))
-        with open(OUTPUT_DIR + '/' + OUTPUT_FILE, 'w') as f:
+        output_path = os.path.join(os.getcwd(), OUTPUT_FILE)
+        with open(output_path, 'w') as f:
             f.write(template.render(date_time=dt,
                                     mod_name=self._module_name,
                                     code=self._sorted_error_messages,
                                     style=self._sorted_style_messages,
                                     pyta_logo=pyta_logo_base64_encoded))
         print('Opening your report in a browser...')
-        output_url = 'file:///{}{}'.format(OUTPUT_DIR, '/' + OUTPUT_FILE)
+        output_url = 'file:///{}'.format(output_path)
         webbrowser.open(output_url)
 
     _display = None

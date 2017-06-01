@@ -1,6 +1,8 @@
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <style type="text/css">
+        {% include "templates/stylesheet.css" %}
+    </style>
 </head>
 <body>
 
@@ -83,7 +85,7 @@
 </body>
 <div id="logo">
 		<a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
-			<img src="pyta_logo_markdown.png" alt="PyTA logo" height="50"/>
+            <img src="data:image/png;base64,{{ pyta_logo }}" alt="PyTA logo" height="50"/>
 		</a>
 	</p>
 </div>

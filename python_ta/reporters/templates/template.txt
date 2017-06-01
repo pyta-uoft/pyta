@@ -51,6 +51,8 @@
 						{% endif %}
 						</div>
 					{% endfor %}
+                {% else %}
+                    {{ no_err_message }}
 				{% endfor %}
 			</u1>
 
@@ -76,7 +78,9 @@
 						{% endif %}
 						</div>
 					{% endfor %}
-				{% endfor %}
+                {% else %}
+                    {{ no_err_message }}
+                {% endfor %}
 			</u1>
 
 		</div>

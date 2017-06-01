@@ -66,6 +66,7 @@ class HTMLReporter(ColorReporter):
                                     pyta_logo=pyta_logo_base64_encoded,
                                     code_err_title=self.code_err_title,
                                     style_err_title=self.style_err_title,
+                                    no_err_message=self.no_err_message,
                                     messages_by_file=self.messages_by_file))
         print('Opening your report in a browser...')
         output_url = 'file:///{}'.format(output_path)

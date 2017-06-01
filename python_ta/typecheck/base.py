@@ -215,6 +215,15 @@ class TypeConstraints:
         arg_type_lst = [self.lookup_concrete(argument) for argument in callable_function.__args__]
         return arg_type_lst[:-1], arg_type_lst[-1]
 
+    def can_unify(self, t1, t2):
+        """Return true iff given argument types can be unified."""
+        if isinstance(t1, TypeVar) or isinstance(t2, TypeVar):
+            return True
+        elif t1 != t2:
+            return False
+        else:
+            return True
+
 
 def literal_substitute(t, type_map):
     """Make substitutions in t according to type_map, returning resulting type."""

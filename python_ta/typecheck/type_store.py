@@ -21,8 +21,8 @@ class _PathLike: pass
 
 
 class TypeStore:
-    def __init__(self):
-        contents = ''
+    def __init__(self, type_constraints):
+        self.type_constraints = type_constraints
         with open(TYPE_SHED_PATH) as f:
             contents = '\n'.join(f.readlines())
         module = astroid.parse(contents)
@@ -61,9 +61,17 @@ class TypeStore:
             found = False
             func_types_list = self.functions[operator]
             for func_type in func_types_list:
-                if func_type.__args__[:-1] == args:
-                    return func_type
-            if not found:
+                # check if args can be unified instead of checking if they are the same!
+                unified = True
+                for t1, t2 in zip(func_type.__args__[:-1], args):
+                    if not self.type_constraints.can_unify(t1, t2):
+                        unified = False
+                        break
+                if unified:
+                    rtype = self.type_constraints.unify_call(func_type, *args)
+                    if rtype == func_type.__args__[-1]:
+                        return func_type
+            if not (unified or found):
                 raise KeyError
 
     def _builtin_to_typing(self, type_name):
@@ -89,5 +97,3 @@ class TypeStore:
             tvar_string = ''
 
         return base_name + tvar_string
-
-TYPE_STORE = TypeStore()

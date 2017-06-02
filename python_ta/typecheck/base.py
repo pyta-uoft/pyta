@@ -230,7 +230,7 @@ class TypeConstraints:
                         return False
                 return True
             else:
-                return False
+                False
         elif t1 != t2:
             return False
         else:

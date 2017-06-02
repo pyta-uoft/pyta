@@ -33,19 +33,13 @@ class TypeStore:
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
                     gen = base.value.as_string()
-                    tvars = base.slice.as_string().split(',')
+                    tvars = base.slice.as_string().strip('()').split(',')
                     if gen == 'Generic':
                         self.classes[class_def.name]['__pyta_tvars'] = tvars
             for function_def in class_def.nodes_of_class(astroid.FunctionDef):
-                poly_tvars = []
                 arg_types = []
-                try:
-                    tvars = self.classes[class_def.name]['__pyta_tvars']
-                    for tvar in tvars:
-                        if isinstance(eval(tvar), TypeVar):
-                            poly_tvars.append(tvar)
-                except Exception:
-                    pass
+                tvars = self.classes[class_def.name].get('__pyta_tvars', [])
+                poly_tvars = [(eval(tvar, globals())) for tvar in tvars]
                 for annotation in function_def.args.annotations:
                     if annotation is None:
                         # assume this is the first parameter 'self'

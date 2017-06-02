@@ -219,6 +219,14 @@ class TypeConstraints:
         """Return true iff given argument types can be unified."""
         if isinstance(t1, TypeVar) or isinstance(t2, TypeVar):
             return True
+        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
+            if not _geqv(t1, t2):
+                return False
+            elif t1.__args__ is not None and t2.__args__ is not None:
+                for a1, a2 in zip(t1.__args__, t2.__args__):
+                    if not self.can_unify(a1, a2):
+                        return False
+                return True
         elif t1 != t2:
             return False
         else:
@@ -263,7 +271,6 @@ class Environment:
         self.locals = locals_ or {}
         self.nonlocals = nonlocals_ or {}
         self.globals = globals_ or {}
-
 
     def lookup_in_env(self, variable_name):
         """Helper to search for a variable in the environment of a node by name."""

@@ -2,6 +2,7 @@ import astroid
 from collections import defaultdict
 from typing import *
 from typing import SupportsBytes
+from python_ta.typecheck.base import create_Callable
 import os
 TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
 
@@ -52,8 +53,8 @@ class TypeStore:
                 rtype = eval(self._builtin_to_typing(
                     function_def.returns.as_string()), globals())
 
-                self.classes[class_def.name][function_def.name] = (Callable[arg_types, rtype], class_def.name)
-                self.functions[function_def.name].append(Callable[arg_types, rtype])
+                self.classes[class_def.name][function_def.name] = (create_Callable(arg_types, rtype, poly_vars=[rtype]), class_def.name)
+                self.functions[function_def.name].append(create_Callable(arg_types, rtype, poly_vars=[rtype]))
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
@@ -68,9 +69,7 @@ class TypeStore:
                         unified = False
                         break
                 if unified:
-                    rtype = self.type_constraints.unify_call(func_type, *args)
-                    if rtype == func_type.__args__[-1]:
-                        return func_type
+                    return func_type
             if not (unified or found):
                 raise KeyError
 
@@ -97,3 +96,5 @@ class TypeStore:
             tvar_string = ''
 
         return base_name + tvar_string
+
+

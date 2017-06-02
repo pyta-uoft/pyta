@@ -37,7 +37,15 @@ class TypeStore:
                     if gen == 'Generic':
                         self.classes[class_def.name]['__pyta_tvars'] = tvars
             for function_def in class_def.nodes_of_class(astroid.FunctionDef):
+                poly_tvars = []
                 arg_types = []
+                try:
+                    tvars = self.classes[class_def.name]['__pyta_tvars']
+                    for tvar in tvars:
+                        if isinstance(eval(tvar), TypeVar):
+                            poly_tvars.append(tvar)
+                except Exception:
+                    pass
                 for annotation in function_def.args.annotations:
                     if annotation is None:
                         # assume this is the first parameter 'self'
@@ -53,8 +61,8 @@ class TypeStore:
                 rtype = eval(self._builtin_to_typing(
                     function_def.returns.as_string()), globals())
 
-                self.classes[class_def.name][function_def.name] = (create_Callable(arg_types, rtype, poly_vars=[rtype]), class_def.name)
-                self.functions[function_def.name].append(create_Callable(arg_types, rtype, poly_vars=[rtype]))
+                self.classes[class_def.name][function_def.name] = (create_Callable(arg_types, rtype, poly_vars=poly_tvars), class_def.name)
+                self.functions[function_def.name].append(create_Callable(arg_types, rtype, poly_vars=poly_tvars))
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""

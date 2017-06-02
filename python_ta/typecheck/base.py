@@ -182,6 +182,8 @@ class TypeConstraints:
         """Evaluate a type. Used for tuples."""
         if isinstance(t, TuplePlus):
             return t.eval_type(self)
+        if isinstance(t, TypeVar):
+            return self.lookup_concrete(t)
         else:
             return t
 

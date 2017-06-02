@@ -173,10 +173,10 @@ class TypeConstraints:
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar() for tvar in getattr(func_type, 'polymorphic_tvars', [])}
-        func_type = literal_substitute(func_type, new_tvars)
-        for arg_type, param_type in zip(arg_types, func_type.__args__[:-1]):
+        new_func_type = literal_substitute(func_type, new_tvars)
+        for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
             self.unify(arg_type, param_type)
-        return self._type_eval(func_type.__args__[-1])
+        return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t):
         """Evaluate a type. Used for tuples."""

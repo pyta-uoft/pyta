@@ -229,6 +229,8 @@ class TypeConstraints:
                     if not self.can_unify(a1, a2):
                         return False
                 return True
+            else:
+                return False
         elif t1 != t2:
             return False
         else:

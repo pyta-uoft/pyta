@@ -11,7 +11,7 @@ def render_message(msg, source_lines):
 
 def render_generic(msg, source_lines=None):
     """Default rendering for a message."""
-    if hasattr(msg, 'node'):
+    if hasattr(msg, 'node') and msg.node is not None:
         node = msg.node
         start_line, start_col = node.fromlineno, node.col_offset
         end_line, end_col = node.end_lineno, node.end_col_offset
@@ -32,7 +32,7 @@ def render_generic(msg, source_lines=None):
     else:
         line = msg.line
         yield from render_context(line - 2, line, source_lines)
-        yield (line, slice(None, None), LineType.ERROR)
+        yield (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
         yield from render_context(line + 1, line + 3, source_lines)
 
 
@@ -65,7 +65,7 @@ def render_trailing_newlines(msg, source_lines=None):
 
 def render_context(start, stop, source_lines):
     """Helper for rendering context lines."""
-    start, stop = max(start, 0), min(stop, len(source_lines))
+    start, stop = max(start, 1), min(stop, len(source_lines))
     yield from ((line, slice(None, None), LineType.CONTEXT, source_lines[line-1])
                 for line in range(start, stop))
 

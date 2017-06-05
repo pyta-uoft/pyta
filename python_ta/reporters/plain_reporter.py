@@ -213,6 +213,10 @@ class PlainReporter(BaseReporter):
                     msg_text = msg_text.partition('\n')[0]
                     messages[msg_id][i] = msg._replace(msg=msg_text)
                     msg = messages[msg_id][i]
+                if msg.symbol == 'bad-continuation':  # fix Pylint inconsistency
+                    msg_text = msg_text.partition('\n')[0]
+                    messages[msg_id][i] = msg._replace(msg=msg_text)
+                    msg = messages[msg_id][i]
 
                 result += 2 * self._SPACE
                 result += self._colourify('bold', '[Line {}] {}'

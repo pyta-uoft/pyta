@@ -179,7 +179,8 @@ def set_boolop_type_constraints(node):
         else:
             left_operand_type = TYPE_CONSTRAINTS.lookup_concrete(node.values[1].type_constraints.type)
             node.type_constraints = TypeInfo(left_operand_type)
-    #TODO: Implement type setting for unary operation 'not'
+    # TODO: Implement type setting for unary operation 'not'
+
 
 ##############################################################################
 # Statements

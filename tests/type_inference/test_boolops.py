@@ -2,6 +2,7 @@ import astroid
 import nose
 from hypothesis import given, settings, assume
 import tests.custom_hypothesis_support as cs
+from python_ta.transforms.type_inference_visitor import TYPE_STORE, op_to_dunder
 settings.load_profile("pyta")
 
 
@@ -34,7 +35,8 @@ def test_binary_boolop(left_operand, operator, right_operand):
     assert boolop_node.type_constraints.type == expected_type
 
 
-# @given(cs.unary_bool_op, cs.bool_value)
+# TODO: Implement Unary boolean operator test case.
+# @given(cs.unary_bool_op, cs.primitive_values)
 # def test_not_boolop_concrete(operator, operand):
 #     """Test type setting of unary BoolOp node(s)"""
 #     try:

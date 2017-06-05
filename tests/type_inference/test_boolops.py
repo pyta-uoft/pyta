@@ -9,9 +9,9 @@ settings.load_profile("pyta")
 def test_binary_boolop(left_operand, operator, right_operand):
     """Test type setting of binary BoolOp node(s)."""
     # negative numbers seen as UnaryOp node; type_constraints for UnaryOps is not supported yet.
-    if isinstance(left_operand, int):
+    if isinstance(left_operand, int) or isinstance(left_operand, float):
         assume(left_operand > 0)
-    if isinstance(right_operand, int):
+    if isinstance(right_operand, int) or isinstance(right_operand, float):
         assume(right_operand > 0)
     # must account for empty string, which is invalid operand; assume seems better than changing strategy.
     if isinstance(left_operand, str):

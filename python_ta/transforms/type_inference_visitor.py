@@ -5,8 +5,9 @@ from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder, lookup_method, Environment, TypeConstraints, TypeInferenceError
-from ..typecheck.type_store import TYPE_STORE
+from ..typecheck.type_store import TypeStore
 TYPE_CONSTRAINTS = TypeConstraints()
+TYPE_STORE = TypeStore(TYPE_CONSTRAINTS)
 
 
 class NoType:

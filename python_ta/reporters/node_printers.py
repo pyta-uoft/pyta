@@ -23,7 +23,7 @@ def render_generic(msg, source_lines=None):
             yield (start_line, slice(start_col, end_col), LineType.ERROR, source_lines[start_line-1])
         else:
             yield (start_line, slice(start_col, None), LineType.ERROR, source_lines[start_line-1])
-            yield from ((line, slice(None, None), LineType.ERROR, source_lines[line-1]) for line in range(start_line, start_col))
+            yield from ((line, slice(None, None), LineType.ERROR, source_lines[line-1]) for line in range(start_line+1, end_line))
             yield (end_line, slice(None, end_col), LineType.ERROR, source_lines[end_line-1])
 
         # Display up to 2 lines after node for context:

@@ -70,9 +70,26 @@ def render_context(start, stop, source_lines):
                 for line in range(start, stop))
 
 
+def render_bad_whitespace(msg, source_lines=None):
+    """Extract column information from caret position within message string"""
+    start, stop = None, None
+    for line in msg.args[-1].split('\n'):
+        if '^' in line:
+            start = line.index('^')
+            stop = start + 1
+            break
+
+    line = msg.line
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(start, stop), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
+
 CUSTOM_MESSAGES = {
     'missing-docstring': render_missing_docstring,
-    'trailing-newlines': render_trailing_newlines
+    'trailing-newlines': render_trailing_newlines,
+    'bad-whitespace': render_bad_whitespace,
 }
 
 

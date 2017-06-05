@@ -98,7 +98,7 @@ class PlainReporter(BaseReporter):
         else:
             self._style_messages.append(msg)
 
-    def handle_node(self, msg, node):
+    def handle_node(self, msg, node, args):
         """Add node attribute to last message."""
         if msg.msgid in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
             if (self._error_messages and

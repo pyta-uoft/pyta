@@ -84,7 +84,12 @@ def op_to_dunder(op):
         return '__and__'
     elif op == 'or':
         return '__or__'
-    #TODO: cannot find builtin for not logical operator.
+    elif op == '&':
+        return "__add__"
+    elif op == '^':
+        return '__xor__'
+    elif op == '|':
+        return '__or__'
     else:
         return ''
 

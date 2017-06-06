@@ -70,6 +70,9 @@ class PlainReporter(BaseReporter):
     _SPACE = ' '
     _BREAK = '\n'
     _COLOURING = {}
+    code_err_title = '=== Code errors/forbidden usage (fix: high priority) ==='
+    style_err_title = '=== Style/convention errors (fix: before submission) ==='
+    no_err_message = 'None!' + _BREAK*2
 
     def __init__(self, source_lines=None, module_name=''):
         """Reminder: see pylint BaseReporter for other instance variables init.
@@ -153,24 +156,20 @@ class PlainReporter(BaseReporter):
     def print_messages(self, level='all'):
         self.sort_messages()
 
-        result = self._colourify('code-heading',
-                                 '=== Code errors/forbidden usage '
-                                 '(fix: high priority) ===' + self._BREAK)
+        result = self._colourify('code-heading', self.code_err_title + self._BREAK)
         messages_result = self._colour_messages_by_type(style=False)
         if messages_result:
             result += messages_result
         else:
-            result += 'None!' + self._BREAK*2
+            result += self.no_err_message
 
         if level == 'all':
-            result += self._colourify('style-heading',
-                                      '=== Style/convention errors '
-                                      '(fix: before submission) ===' + self._BREAK)
+            result += self._colourify('style-heading', self.style_err_title + self._BREAK)
             messages_result = self._colour_messages_by_type(style=True)
             if messages_result:
                 result += messages_result
             else:
-                result += 'None!' + self._BREAK*2
+                result += self.no_err_message
 
         output_stream = sys.stdout
         if self._output_filepath:
@@ -306,3 +305,7 @@ class PlainReporter(BaseReporter):
         return text
 
     _display = None
+
+    def build_template(self):
+        """Override in html_reporter."""
+        pass

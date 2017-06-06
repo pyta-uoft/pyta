@@ -124,6 +124,8 @@ def set_binop_type_constraints(node):
 
 
 def set_unaryop_type_constraints(node):
+    if node.op == 'not':
+        node.type_constraints = bool
     node.type_constraints = node.operand.type_constraints
 
 

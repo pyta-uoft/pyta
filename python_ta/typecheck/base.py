@@ -80,12 +80,8 @@ def op_to_dunder(op):
         return '__div__'
     elif op == '**':
         return '__pow__'
-    elif op == 'and':
-        return '__and__'
-    elif op == 'or':
-        return '__or__'
     elif op == '&':
-        return "__add__"
+        return '__add__'
     elif op == '^':
         return '__xor__'
     elif op == '|':

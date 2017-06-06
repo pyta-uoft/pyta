@@ -3,6 +3,7 @@
     <style type="text/css">
         {% include "stylesheet.css" %}
     </style>
+    <script type="text/javascript" src="script.js"></script>
 </head>
 <body>
 
@@ -35,12 +36,17 @@
 			</div>
 			<u1>
 				{% for message in file.code %}
+				    <div class="container">
+				    <div class="slider">
 					<p style="font-size: 110%">
 						<span class="code_id">
 						    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.code[message][0].symbol }})</a> 
                         </span>
 						&nbsp;&nbsp;Number of occurrences: {{ file.code[message]|length }}
 					</p>
+					</div>
+
+					<div id ="content" class="collapse in">
 					{% for indiv in file.code[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
@@ -51,8 +57,10 @@
 						{% endif %}
 						</div>
 					{% endfor %}
+					</div>
                 {% else %}
                     {{ no_err_message }}
+                </div>
 				{% endfor %}
 			</u1>
 
@@ -62,12 +70,17 @@
 
 			<u1>
 				{% for message in file.style %}
+				    <div class="container">
+				    <div class="slider">
 					<p style="font-size: 110%">
 						<span class="style_id">
 						    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.style[message][0].symbol }})</a> 
                         </span>
 						&nbsp;&nbsp;Number of occurrences: {{ file.style[message]|length }}
 					</p>
+					</div>
+
+					<div id ="content" class = "collapse in">
 					{% for indiv in file.style[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
@@ -76,10 +89,11 @@
 								{{ indiv.snippet }}
 							</p>
 						{% endif %}
-						</div>
 					{% endfor %}
+					</div>
                 {% else %}
                     {{ no_err_message }}
+                </div>
                 {% endfor %}
 			</u1>
 

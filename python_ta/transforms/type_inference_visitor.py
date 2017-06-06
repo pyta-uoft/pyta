@@ -160,21 +160,10 @@ def set_compare_type_constraints(node):
 
 
 def set_boolop_type_constraints(node):
-    """Boolean operators includes: 'and', 'or'
-    Logic of Boolean Operations:
-    x or y --> if x is false, then y, else x
-    x and y --> if x is false, then x, else y
-    """
-    if node.op == 'or':
-        if not node.values[0]:
-            node.type_constraints = node.values[1].type_constraints
-        else:
-            node.type_constraints = node.values[0].type_constraints
-    elif node.op == 'and':
-        if not node.values[0]:
-            node.type_constraints = node.values[0].type_constraints
-        else:
-            node.type_constraints = node.values[1].type_constraints
+    """Boolean operators includes: 'and', 'or';can be "either" of the types."""
+    left_operand_type = node.values[0].type_constraints.type
+    right_operand_type = node.values[1].type_constraints.type
+    node.type_constraints = TypeInfo(Union[left_operand_type, right_operand_type])
 
 
 ##############################################################################

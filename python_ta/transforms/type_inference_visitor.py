@@ -135,7 +135,7 @@ def set_subscript_type_constraints(node):
         op_name = '__getitem__'
 
         try:
-            method_type = lookup_method(op_name, value_type)
+            method_type = TYPE_STORE.lookup_function(op_name, value_type, arg_type)
         except KeyError:
             node.type_constraints = TypeInfo(
                 TypeErrorInfo('Method {}.{} not found'.format(value_type, op_name), node)
@@ -144,7 +144,7 @@ def set_subscript_type_constraints(node):
 
         try:
             return_type = TYPE_CONSTRAINTS.unify_call(method_type, value_type, arg_type)
-        except TypeInferenceError as e:
+        except TypeInferenceError:
             node.type_constraints = TypeInfo(
                 TypeErrorInfo('incompatible types {} and {} in Subscript'.format(value_type, arg_type), node)
             )

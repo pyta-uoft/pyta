@@ -178,15 +178,17 @@ class TypeConstraints:
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar() for tvar in getattr(func_type, 'polymorphic_tvars', [])}
-        func_type = literal_substitute(func_type, new_tvars)
-        for arg_type, param_type in zip(arg_types, func_type.__args__[:-1]):
+        new_func_type = literal_substitute(func_type, new_tvars)
+        for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
             self.unify(arg_type, param_type)
-        return self._type_eval(func_type.__args__[-1])
+        return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t):
         """Evaluate a type. Used for tuples."""
         if isinstance(t, TuplePlus):
             return t.eval_type(self)
+        if isinstance(t, TypeVar):
+            return self.lookup_concrete(t)
         else:
             return t
 
@@ -224,6 +226,16 @@ class TypeConstraints:
         """Return true iff given argument types can be unified."""
         if isinstance(t1, TypeVar) or isinstance(t2, TypeVar):
             return True
+        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
+            if not _geqv(t1, t2):
+                return False
+            elif t1.__args__ is not None and t2.__args__ is not None:
+                for a1, a2 in zip(t1.__args__, t2.__args__):
+                    if not self.can_unify(a1, a2):
+                        return False
+                return True
+            else:
+                False
         elif t1 != t2:
             return False
         else:
@@ -268,7 +280,6 @@ class Environment:
         self.locals = locals_ or {}
         self.nonlocals = nonlocals_ or {}
         self.globals = globals_ or {}
-
 
     def lookup_in_env(self, variable_name):
         """Helper to search for a variable in the environment of a node by name."""

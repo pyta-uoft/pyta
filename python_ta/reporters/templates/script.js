@@ -1,5 +1,4 @@
-$(".slider").click(function () {
-
+$("body").on("click", ".slider", function () {
     $slider = $(this);
     //getting the next element
     $content = $slider.next();
@@ -8,6 +7,5 @@ $(".slider").click(function () {
         //execute this after slideToggle is done
         //change text of slider based on visibility of content div
         });
-    });
 
 });

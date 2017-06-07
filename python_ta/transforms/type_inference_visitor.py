@@ -84,16 +84,17 @@ def set_index_type_constraints(node):
 
 
 def set_slice_type_constraints(node):
-    if node.lower:
-        node.type_constraints = node.lower.type_constraints
-    if node.upper:
-        node.type_constraints = node.upper.type_constraints
+    if node.lower or node.upper:
+        node.type_constraints = slice
 
 
 def set_expr_type_constraints(node):
     """Expr nodes take the value of their child
     """
-    node.type_constraints = node.value.type_constraints
+    if hasattr(node.value, 'slice'):
+        node.type_constraints = node.value.value.type_constraints
+    else:
+        node.type_constraints = node.value.type_constraints
 
 
 def set_name_type_constraints(node):
@@ -138,7 +139,10 @@ def set_subscript_type_constraints(node):
     if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
         value_type = node.value.type_constraints.type
         value_type = TYPE_CONSTRAINTS.lookup_concrete(value_type)
-        arg_type = node.slice.type_constraints.type
+        try:
+            arg_type = node.slice.type_constraints.type
+        except AttributeError:
+            arg_type = node.slice.type_constraints
         op_name = '__getitem__'
 
         try:

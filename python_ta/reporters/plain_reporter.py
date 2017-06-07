@@ -6,7 +6,7 @@ from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
 OUTPUT_FILENAME = 'pyta_output'
-NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
+NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet', 'msg_truncated'))
 
 # Checks to enable for basic_check (trying to find errors
 # and forbidden constructs only)
@@ -101,18 +101,18 @@ class PlainReporter(BaseReporter):
         else:
             self._style_messages.append(msg)
 
-    def handle_node(self, msg, node, args):
+    def handle_node(self, msg, node, msg_truncated):
         """Add node attribute to last message."""
         if msg.msgid in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
             if (self._error_messages and
                     self._error_messages[-1].msg_id == msg.msgid and
                     not isinstance(self._error_messages[-1], NewMessage)):
-                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '')
+                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '', msg_truncated)
         else:
             if (self._style_messages and
                     self._style_messages[-1].msg_id == msg.msgid and
                     not isinstance(self._style_messages[-1], NewMessage)):
-                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
+                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '', msg_truncated)
 
     def sort_messages(self):
         """Sort the messages by their type (message id)."""
@@ -207,15 +207,10 @@ class PlainReporter(BaseReporter):
             for i, msg in enumerate(messages[msg_id]):
                 if i == max_messages:
                     break
-                msg_text = msg.msg
-                if msg.symbol == 'bad-whitespace':  # fix Pylint inconsistency
-                    msg_text = msg_text.partition('\n')[0]
-                    messages[msg_id][i] = msg._replace(msg=msg_text)
-                    msg = messages[msg_id][i]
 
                 result += 2 * self._SPACE
                 result += self._colourify('bold', '[Line {}] {}'
-                            .format(msg.line, msg.msg)) + self._BREAK
+                            .format(msg.line, msg.msg_truncated)) + self._BREAK
 
                 try:
                     # Messages with code snippets

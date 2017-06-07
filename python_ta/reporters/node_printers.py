@@ -73,17 +73,15 @@ def render_context(start, stop, source_lines):
 def render_bad_whitespace(msg, source_lines=None):
     """Extract column information from caret position within message string"""
     start, stop = None, None
-    for line in msg.args[-1].split('\n'):
-        if '^' in line:
-            start = line.index('^')
-            stop = start + 1
-            break
+    last_line = msg.msg.split('\n')[-1]
+    if '^' in last_line:
+        start = last_line.index('^')
+        stop = start + 1
 
     line = msg.line
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(start, stop), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 3, source_lines)
-
 
 
 CUSTOM_MESSAGES = {

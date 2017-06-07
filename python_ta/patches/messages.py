@@ -13,7 +13,10 @@ def patch_messages():
                         confidence=UNDEFINED):
         old_add_message(self, msg_descr, line, node, args, confidence)
         msg_info = self.msgs_store.check_message_id(msg_descr)
-        self.reporter.handle_node(msg_info, node, args)
+        msg_formatted = msg_info.msg
+        if args:
+            msg_formatted %= args  # populate format string, with tuple of str
+        self.reporter.handle_node(msg_info, node, msg_formatted.partition('\n')[0])
 
     MessagesHandlerMixIn.add_message = new_add_message
 

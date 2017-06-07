@@ -6,7 +6,7 @@ from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
 OUTPUT_FILENAME = 'pyta_output'
-NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet', 'msg_truncated'))
+NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
 # and forbidden constructs only)
@@ -101,18 +101,18 @@ class PlainReporter(BaseReporter):
         else:
             self._style_messages.append(msg)
 
-    def handle_node(self, msg, node, msg_truncated):
+    def handle_node(self, msg, node):
         """Add node attribute to last message."""
         if msg.msgid in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
             if (self._error_messages and
                     self._error_messages[-1].msg_id == msg.msgid and
                     not isinstance(self._error_messages[-1], NewMessage)):
-                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '', msg_truncated)
+                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '')
         else:
             if (self._style_messages and
                     self._style_messages[-1].msg_id == msg.msgid and
                     not isinstance(self._style_messages[-1], NewMessage)):
-                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '', msg_truncated)
+                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
 
     def sort_messages(self):
         """Sort the messages by their type (message id)."""
@@ -208,9 +208,11 @@ class PlainReporter(BaseReporter):
                 if i == max_messages:
                     break
 
+                # Use only explanation, without redundant accessory information
+                msg_truncated = msg.msg.split('\n')[0]
                 result += 2 * self._SPACE
                 result += self._colourify('bold', '[Line {}] {}'
-                            .format(msg.line, msg.msg_truncated)) + self._BREAK
+                            .format(msg.line, msg_truncated)) + self._BREAK
 
                 try:
                     # Messages with code snippets

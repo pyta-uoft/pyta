@@ -6,6 +6,7 @@ from python_ta.transforms.type_inference_visitor import register_type_constraint
 from keyword import iskeyword
 from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from hypothesis import settings
+from typing import Any
 settings.register_profile("pyta", settings(max_examples=10))
 
 # Custom strategies for hypothesis testing framework
@@ -108,3 +109,16 @@ def _parse_dictionary_to_program(variables_dict):
         assume(not iskeyword(variable_name))
         program += variable_name + " = " + repr(variables_dict[variable_name]) + "\n"
     return program
+
+def _type_of_list(lst):
+    """Helper that returns type of elements inside the given list."""
+    elt_type = type(lst[0])
+    homogeneous = True
+    for elt in lst:
+        if type(elt) != elt_type:
+            homogeneous = False
+            break
+    if not homogeneous:
+        return Any
+    else:
+        return elt_type

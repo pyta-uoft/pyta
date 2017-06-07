@@ -83,6 +83,13 @@ def set_index_type_constraints(node):
     node.type_constraints = node.value.type_constraints
 
 
+def set_slice_type_constraints(node):
+    if node.lower:
+        node.type_constraints = node.lower.type_constraints
+    if node.upper:
+        node.type_constraints = node.upper.type_constraints
+
+
 def set_expr_type_constraints(node):
     """Expr nodes take the value of their child
     """
@@ -250,6 +257,8 @@ def register_type_constraints_setter():
                                     set_unaryop_type_constraints)
     type_visitor.register_transform(astroid.Index,
                                     set_index_type_constraints)
+    type_visitor.register_transform(astroid.Slice,
+                                    set_slice_type_constraints)
     type_visitor.register_transform(astroid.Subscript,
                                     set_subscript_type_constraints)
     type_visitor.register_transform(astroid.Compare,

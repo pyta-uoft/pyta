@@ -6,6 +6,7 @@ from python_ta.transforms.type_inference_visitor import register_type_constraint
 from keyword import iskeyword
 from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from hypothesis import settings
+from typing import Any
 settings.register_profile("pyta", settings(max_examples=10))
 
 # Custom strategies for hypothesis testing framework

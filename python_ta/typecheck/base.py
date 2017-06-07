@@ -189,9 +189,8 @@ class TypeConstraints:
             return t.eval_type(self)
         if isinstance(t, TypeVar):
             return self.lookup_concrete(t)
-        if isinstance(t, GenericMeta) and hasattr(t, '__args__'):
-            return List[self._type_eval(t.__args__[-1])]
-            # TODO: Need to account for other generics? ie. Dictionaries, Tuples
+        if isinstance(t, GenericMeta) and t.__args__ is not None:
+            return _gorg(t)[self._type_eval(t.__args__[-1])]
         else:
             return t
 

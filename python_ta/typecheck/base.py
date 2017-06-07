@@ -81,7 +81,7 @@ def op_to_dunder(op):
     elif op == '**':
         return '__pow__'
     elif op == '&':
-        return '__add__'
+        return '__and__'
     elif op == '^':
         return '__xor__'
     elif op == '|':

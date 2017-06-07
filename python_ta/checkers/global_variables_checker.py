@@ -44,6 +44,13 @@ class GlobalVariablesChecker(BaseChecker):
 
     def visit_import(self, node):
         """Save the names of imports, to prevent mistaking for global vars."""
+        self._store_name_or_alias(node)
+
+    def visit_importfrom(self, node):
+        """Save the names of imports, to prevent mistaking for global vars."""
+        self._store_name_or_alias(node)
+
+    def _store_name_or_alias(self, node):
         if node.names[0][1] is not None:
             self.import_names.append(node.names[0][1])  # aliased names
         else:

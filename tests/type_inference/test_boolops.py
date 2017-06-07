@@ -7,11 +7,11 @@ from typing import Any, Union
 settings.load_profile("pyta")
 
 
-@given(cs.binary_bool_operator, hs.lists(cs.primitive_values))
+@given(cs.binary_bool_operator, hs.lists(cs.primitive_values, min_size=2))
 def test_homogeneous_binary_boolop(op, operand_list):
     """Test type setting of binary BoolOp node(s) representing expression with same binary boolean operations."""
     # get every permutation?
-    assume(len(operand_list) > 1)
+    assume(len(operand_list) > 0)
     pre_format_program = [repr(operand) for operand in operand_list]
     program = (' ' + op + ' ').join(pre_format_program)
     module = cs._parse_text(program)

@@ -20,7 +20,7 @@ def test_not_bool(operator, operand):
     program = f'{operator} {repr(operand)}\n'
     module = cs._parse_text(program)
     unaryop_node = list(module.nodes_of_class(astroid.UnaryOp))[0]
-    assert isinstance(unaryop_node.type_constraints.type, type(bool))
+    assert unaryop_node.type_constraints.type == bool
 
 
 if __name__ == '__main__':

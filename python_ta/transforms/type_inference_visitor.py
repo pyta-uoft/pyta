@@ -161,21 +161,12 @@ def set_compare_type_constraints(node):
 
 def set_boolop_type_constraints(node):
     """Boolean operators includes: 'and', 'or';can be "either" of the types."""
-    if len(node.values) == 2:
-        left_operand_type = node.values[0].type_constraints.type
-        right_operand_type = node.values[1].type_constraints.type
-        node.type_constraints = TypeInfo(Union[left_operand_type, right_operand_type])
-    else:
-        homogeneous = True
-        operand_type = node.values[0].type_constraints.type
-        for operand in node.values:
-            if operand.type_constraints.type != operand_type:
-                homogeneous = False
-                break
-        if not homogeneous:
+    operand_type = node.values[0].type_constraints.type
+    for operand in node.values:
+        if operand.type_constraints.type != operand_type:
             node.type_constraints = TypeInfo(Any)
-        else:
-            node.type_constraints = TypeInfo(operand_type)
+            return
+    node.type_constraints = TypeInfo(operand_type)
 
 
 ##############################################################################

@@ -33,6 +33,11 @@ non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<
 non_boolean_operator = hs.sampled_from(non_bool_symbols)
 
 
+# Strategy for generating Boolean Operators
+binary_bool_operator = hs.sampled_from(['and', 'or'])
+unary_bool_operator = hs.sampled_from(['not'])
+
+
 def valid_identifier():
     """Return a strategy which generates a valid Python Identifier"""
     return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", min_size=1)\

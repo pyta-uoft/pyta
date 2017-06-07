@@ -61,7 +61,7 @@ class TypeStore:
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
         if args:
-            found = False
+            unified = False
             func_types_list = self.functions[operator]
             for func_type in func_types_list:
                 # check if args can be unified instead of checking if they are the same!
@@ -72,7 +72,7 @@ class TypeStore:
                         break
                 if unified:
                     return func_type
-            if not (unified or found):
+            if not unified:
                 raise KeyError
 
     def _builtin_to_typing(self, type_name):

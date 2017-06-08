@@ -8,7 +8,7 @@ from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
 from pylint.checkers.format import FormatChecker, _EMPTY_LINE
 from python_ta.checkers.global_variables_checker import is_in_main
-from re import match
+from re import match, compile
 
 
 def patch_checkers():
@@ -151,9 +151,10 @@ def _override_regex_to_allow_long_doctest_lines():
                 unsplit = []
 
             # Skip error message for long doctest lines
-            if bool(match('\s*>>>.*?\n', line)):
+            doctest_tokens = compile(r'^\s*>>>.*?\n$')
+            if bool(match(doctest_tokens, line)):
                 continue
-            elif line_i > 0 and bool(match('\s*>>>.*?\n', _split_lines[line_i-1])):
+            elif line_i > 0 and bool(match(doctest_tokens, _split_lines[line_i-1])):
                 continue
 
             i = check_line(line, i)

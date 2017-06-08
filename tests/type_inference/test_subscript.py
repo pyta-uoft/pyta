@@ -7,6 +7,26 @@ import hypothesis.strategies as hs
 settings.load_profile("pyta")
 
 
+@given(cs.homogeneous_list(min_size=1), cs.random_slice_indices())
+def test_subscript_homogeneous_list_slice(input_list, slice):
+    """Test visitor of Subscript node representing slicing of homogeneous list."""
+    input_slice = ':'.join([str(index) if index else '' for index in slice])
+    program = f'{input_list}[{input_slice}]'
+    module = cs._parse_text(program)
+    subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
+    assert subscript_node.type_constraints.type == List[cs._type_of_list(input_list)]
+
+
+@given(cs.random_list(min_size=1), cs.random_slice_indices())
+def test_subscript_heterogeneous_list_slice(input_list, slice):
+    """Test visitor of Subscript node representing slicing of heterogeneous list."""
+    input_slice = ':'.join([str(index) if index else '' for index in slice])
+    program = f'{input_list}[{input_slice}]'
+    module = cs._parse_text(program)
+    subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
+    assert subscript_node.type_constraints.type == List[cs._type_of_list(input_list)]
+
+
 @given(cs.homogeneous_list(min_size=1), hs.integers())
 def test_inference_list_subscript(input_list, index):
     """Test whether visitor properly set the type constraint of Subscript node representing list-index access."""
@@ -84,53 +104,6 @@ def test_subscript_upper_slice_homogeneous(input_list, index):
     module = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
     assert subscript_node.type_constraints.type == List[type(input_list[0])]
-
-
-
-@given(cs.binary_bool_operator, hs.lists(cs.primitive_values, min_size=2))
-def test_homogeneous_binary_boolop(op, operand_list):
-    """Test type setting of binary BoolOp node(s) representing expression with same binary boolean operations."""
-    # get every permutation?
-    assume(len(operand_list) > 0)
-    pre_format_program = [repr(operand) for operand in operand_list]
-    program = (' ' + op + ' ').join(pre_format_program)
-    module = cs._parse_text(program)
-    boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    operand_type = type(operand_list[0])
-    homogeneous = True
-    for operand in operand_list:
-        if type(operand) != operand_type:
-            homogeneous = False
-            break
-    if not homogeneous:
-        expected_type = Any
-    else:
-        expected_type = operand_type
-    assert boolop_node.type_constraints.type == expected_type
-
-
-@given(hs.lists(cs.binary_bool_operator), hs.lists(cs.primitive_values))
-def test_heterogeneous_binary_boolop(op_list, operand_list):
-    """Test type setting of binary BoolOp node(s) representing expression with different binary boolean operations."""
-    assume(len(op_list) > 0 and len(operand_list) == len(op_list) + 1)
-    pre_format_program = [str(pair) if pair != '' else repr(pair) for operand_op_pair in zip(operand_list[:-1], op_list)
-                          for pair in operand_op_pair]
-    pre_format_program.append(repr(operand_list[-1]))
-    program = ' '.join(pre_format_program)
-    module = cs._parse_text(program)
-    boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    operand_type = type(operand_list[0])
-    homogeneous = True
-    for operand in operand_list:
-        if type(operand) != operand_type:
-            homogeneous = False
-            break
-    if not homogeneous:
-        expected_type = Any
-    else:
-        expected_type = operand_type
-    assert boolop_node.type_constraints.type == expected_type
-
 
 
 if __name__ == '__main__':

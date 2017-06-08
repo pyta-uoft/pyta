@@ -6,7 +6,7 @@ from python_ta.transforms.type_inference_visitor import TYPE_STORE, op_to_dunder
 settings.load_profile("pyta")
 
 
-@given(cs.primitive_values, cs.non_boolean_operator, cs.primitive_values)
+@given(cs.primitive_values, cs.non_bool_bin_operator, cs.primitive_values)
 def test_binop_non_bool_concrete(left_operand, operator, right_operand):
     """Test type setting of BinOp node(s) with non-boolean operands."""
     try:

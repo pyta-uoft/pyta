@@ -51,10 +51,11 @@ class GlobalVariablesChecker(BaseChecker):
         self._store_name_or_alias(node)
 
     def _store_name_or_alias(self, node):
-        if node.names[0][1] is not None:
-            self.import_names.append(node.names[0][1])  # aliased names
-        else:
-            self.import_names.append(node.names[0][0])  # no alias
+        for name_tuple in node.names:
+            if name_tuple[1] is not None:
+                self.import_names.append(name_tuple[1])  # aliased names
+            else:
+                self.import_names.append(name_tuple[0])  # no alias
 
     def _inspect_vars(self, node):
         """Allows constant, global variables (i.e. uppercase), but issue 

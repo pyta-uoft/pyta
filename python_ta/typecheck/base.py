@@ -190,7 +190,7 @@ class TypeConstraints:
         if isinstance(t, TypeVar):
             return self.lookup_concrete(t)
         if isinstance(t, GenericMeta) and t.__args__ is not None:
-            return _gorg(t)[self._type_eval(t.__args__[-1])]
+            return _gorg(t)[tuple(self._type_eval(argument) for argument in t.__args__)]
         else:
             return t
 

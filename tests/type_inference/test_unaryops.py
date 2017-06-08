@@ -1,17 +1,18 @@
 import astroid
 import nose
-from hypothesis import given, settings
+from hypothesis import given, settings, assume
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
-@given(cs.non_bool_unary_op, cs.primitive_values)
+@given(cs.non_bool_unary_op, cs.numeric_values)
 def test_unarynop_non_bool_concrete(operator, operand):
     """Test type setting of UnaryOp node(s) with non-boolean operand."""
+    assume(not (isinstance(operand, bool) and isinstance(operand, float)) and operand)
     program = f'{operator} {repr(operand)}\n'
     module = cs._parse_text(program)
     unaryop_node = list(module.nodes_of_class(astroid.UnaryOp))[0]
-    assert isinstance(unaryop_node.type_constraints.type, type(bool))
+    assert unaryop_node.type_constraints.type == type(operand)
 
 
 @given(cs.unary_bool_operator, cs.primitive_values)

@@ -7,49 +7,25 @@ from typing import Any, Union
 settings.load_profile("pyta")
 
 
-@given(cs.binary_bool_operator, hs.lists(cs.primitive_values, min_size=2))
+@given(cs.binary_bool_operator, cs.homogeneous_list(min_size=2))
 def test_homogeneous_binary_boolop(op, operand_list):
-    """Test type setting of binary BoolOp node(s) representing expression with same binary boolean operations."""
-    # get every permutation?
-    assume(len(operand_list) > 0)
+    """Test type setting of binary BoolOp node(s) representing expression with homogeneous operands."""
     pre_format_program = [repr(operand) for operand in operand_list]
     program = (' ' + op + ' ').join(pre_format_program)
     module = cs._parse_text(program)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    operand_type = type(operand_list[0])
-    homogeneous = True
-    for operand in operand_list:
-        if type(operand) != operand_type:
-            homogeneous = False
-            break
-    if not homogeneous:
-        expected_type = Any
-    else:
-        expected_type = operand_type
-    assert boolop_node.type_constraints.type == expected_type
+    assert boolop_node.type_constraints.type == type(operand_list[0])
 
 
-@given(hs.lists(cs.binary_bool_operator), hs.lists(cs.primitive_values))
-def test_heterogeneous_binary_boolop(op_list, operand_list):
-    """Test type setting of binary BoolOp node(s) representing expression with different binary boolean operations."""
-    assume(len(op_list) > 0 and len(operand_list) == len(op_list) + 1)
-    pre_format_program = [str(pair) if pair != '' else repr(pair) for operand_op_pair in zip(operand_list[:-1], op_list)
-                          for pair in operand_op_pair]
-    pre_format_program.append(repr(operand_list[-1]))
-    program = ' '.join(pre_format_program)
+@given(cs.binary_bool_operator, cs.random_list(min_size=2))
+def test_heterogeneous_binary_boolop(op, operand_list):
+    """Test type setting of binary BoolOp node(s) representing expression with heterogeneous operands."""
+    assume(not isinstance(operand_list[0], type(operand_list[1])))
+    pre_format_program = [repr(operand) for operand in operand_list]
+    program = (' ' + op + ' ').join(pre_format_program)
     module = cs._parse_text(program)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    operand_type = type(operand_list[0])
-    homogeneous = True
-    for operand in operand_list:
-        if type(operand) != operand_type:
-            homogeneous = False
-            break
-    if not homogeneous:
-        expected_type = Any
-    else:
-        expected_type = operand_type
-    assert boolop_node.type_constraints.type == expected_type
+    assert boolop_node.type_constraints.type == Any
 
 
 if __name__ == '__main__':

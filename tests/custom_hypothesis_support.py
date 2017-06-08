@@ -50,6 +50,13 @@ def tuple_strategy(**kwargs):
     return hs.lists(primitive_values, **kwargs).map(tuple)
 
 
+def random_slice_indices():
+    """Return a strategy that generates indices of a slice."""
+    index1 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    index2 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    return hs.tuples(index1, index2)
+
+
 def homogeneous_list(**kwargs):
     """Return a strategy which generates a list of uniform type."""
     return primitive_types.flatmap(lambda s: hs.lists(s(), **kwargs))

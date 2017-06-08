@@ -90,10 +90,7 @@ def set_slice_type_constraints(node):
 def set_expr_type_constraints(node):
     """Expr nodes take the value of their child
     """
-    if hasattr(node.value, 'slice'):
-        node.type_constraints = node.value.value.type_constraints
-    else:
-        node.type_constraints = node.value.type_constraints
+    node.type_constraints = node.value.type_constraints
 
 
 def set_name_type_constraints(node):

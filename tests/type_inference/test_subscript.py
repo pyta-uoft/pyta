@@ -13,10 +13,10 @@ def test_subscript_homogeneous_list_slice(input_list, slice):
     program = f'{input_list}[{input_slice}]'
     module = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
-    assert subscript_node.type_constraints.type == List[cs._type_of_list(input_list)]
+    assert subscript_node.type_constraints.type == List[type(input_list[0])]
 
 
-@given(cs.random_list(min_size=1), cs.random_slice_indices())
+@given(cs.random_list(min_size=2), cs.random_slice_indices())
 def test_subscript_heterogeneous_list_slice(input_list, slice):
     """Test visitor of Subscript node representing slicing of heterogeneous list."""
     assume(not isinstance(input_list[0], type(input_list[1])))
@@ -24,7 +24,7 @@ def test_subscript_heterogeneous_list_slice(input_list, slice):
     program = f'{input_list}[{input_slice}]'
     module = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
-    assert subscript_node.type_constraints.type == List[cs._type_of_list(input_list)]
+    assert subscript_node.type_constraints.type == List[Any]
 
 
 if __name__ == '__main__':

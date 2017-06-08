@@ -207,15 +207,12 @@ class PlainReporter(BaseReporter):
             for i, msg in enumerate(messages[msg_id]):
                 if i == max_messages:
                     break
-                msg_text = msg.msg
-                if msg.symbol == 'bad-whitespace':  # fix Pylint inconsistency
-                    msg_text = msg_text.partition('\n')[0]
-                    messages[msg_id][i] = msg._replace(msg=msg_text)
-                    msg = messages[msg_id][i]
 
+                # Use only explanation, without redundant accessory information
+                msg_truncated = msg.msg.split('\n')[0]
                 result += 2 * self._SPACE
                 result += self._colourify('bold', '[Line {}] {}'
-                            .format(msg.line, msg.msg)) + self._BREAK
+                            .format(msg.line, msg_truncated)) + self._BREAK
 
                 try:
                     # Messages with code snippets

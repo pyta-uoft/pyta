@@ -166,15 +166,20 @@ def set_boolop_type_constraints(node):
     x and y --> if x is false, then x, else y
     """
     if node.op == 'or':
-        if not node.values[0]:
-            node.type_constraints = node.values[1].type_constraints
+        if not node.values[0].value:
+            left_operand_type = TYPE_CONSTRAINTS.lookup_concrete(node.values[1].type_constraints.type)
+            node.type_constraints = TypeInfo(left_operand_type)
         else:
-            node.type_constraints = node.values[0].type_constraints
+            right_operand_type =TYPE_CONSTRAINTS.lookup_concrete(node.values[0].type_constraints.type)
+            node.type_constraints = TypeInfo(right_operand_type)
     elif node.op == 'and':
-        if not node.values[0]:
-            node.type_constraints = node.values[0].type_constraints
+        if not node.values[0].value:
+            right_operand_type =TYPE_CONSTRAINTS.lookup_concrete(node.values[0].type_constraints.type)
+            node.type_constraints = TypeInfo(right_operand_type)
         else:
-            node.type_constraints = node.values[1].type_constraints
+            left_operand_type = TYPE_CONSTRAINTS.lookup_concrete(node.values[1].type_constraints.type)
+            node.type_constraints = TypeInfo(left_operand_type)
+    # TODO: Implement type setting for unary operation 'not'
 
 
 ##############################################################################

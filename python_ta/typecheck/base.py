@@ -86,6 +86,18 @@ def op_to_dunder_binary(op):
         return '__xor__'
     elif op == '|':
         return '__or__'
+    elif op == '==':
+        return '__eq__'
+    elif op == '!=':
+        return '__ne__'
+    elif op == '<':
+        return '__lt__'
+    elif op == '<=':
+        return '__le__'
+    elif op == '>':
+        return '__gt__'
+    elif op == '>=':
+        return '__ge__'
     else:
         return ''
 

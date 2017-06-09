@@ -160,7 +160,15 @@ def set_subscript_type_constraints(node):
 def set_compare_type_constraints(node):
     """Compare operators includes:
     '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
-    node.type_constraints = TypeInfo(bool)
+    # do a look up of the operator
+    # unify_call with the node's left and the type of it's ops[1]..
+    # every Compare node has the left value with ctx=Load()
+    # it also has an ops List, with each element being a tuple of the symbol, right value
+    # base case, just do the lookup and unify with node.ops[0][1]
+    # get thar return value and assign it as the node's type_constraint - wrap in TypeInfo
+    function_type = TYPE_STORE.lookup_function(op_to_dunder(node.ops[0][0]), node.left.type_constraints.type, node.ops[0][1].type_constraints.type)
+    return_type = TYPE_CONSTRAINTS.unify_call(function_type, node.left.type_constraints.type, node.ops[0][1].type_constraints.type)
+    node.type_constraints = TypeInfo(return_type)
 
 
 def set_boolop_type_constraints(node):

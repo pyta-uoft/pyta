@@ -54,7 +54,8 @@ def random_slice_indices():
     """Return a strategy that generates indices of a slice."""
     index1 = hs.sampled_from([hs.integers(), hs.none()]).example()
     index2 = hs.sampled_from([hs.integers(), hs.none()]).example()
-    return hs.tuples(index1, index2)
+    index3 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    return hs.tuples(index1, index2, index3)
 
 
 def homogeneous_list(**kwargs):

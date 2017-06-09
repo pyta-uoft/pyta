@@ -28,9 +28,17 @@ index_types = hs.sampled_from([
 index_values = index_types.flatmap(lambda s: s())
 
 
+numeric_types = hs.sampled_from([
+    hs.integers,
+    lambda: hs.floats(allow_nan=False, allow_infinity=False)
+])
+numeric_values = numeric_types.flatmap(lambda s: s())
+
+
 # Strategies for generating Binary Operators
-non_bool_bin_symbols = ['+', '-', '*', '//', '%', '/', '**', '<<', '>>', '&', '^', '|']
-non_bool_bin_operator = hs.sampled_from(non_bool_bin_symbols)
+non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '~', '|', '<<', '>>']
+non_boolean_operator = hs.sampled_from(non_bool_symbols)
+non_bool_unary_op = hs.sampled_from(['-', '+', '~'])
 
 
 # Strategy for generating Boolean Operators

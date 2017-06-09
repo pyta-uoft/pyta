@@ -64,8 +64,8 @@ TYPE_SIGNATURES = {
 }
 
 
-def op_to_dunder(op):
-    """Return the dunder method name corresponding to op."""
+def op_to_dunder_binary(op):
+    """Return the dunder method name corresponding to binary op."""
     if op == '+':
         return '__add__'
     elif op == '-':
@@ -86,6 +86,18 @@ def op_to_dunder(op):
         return '__xor__'
     elif op == '|':
         return '__or__'
+    else:
+        return ''
+
+
+def op_to_dunder_unary(op):
+    """Return the dunder method name corresponding to unary op."""
+    if op == '-':
+        return '__neg__'
+    elif op == '+':
+        return '__pos__'
+    elif op == '~':
+        return '__invert__'
     else:
         return ''
 

@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder, lookup_method, Environment, TypeConstraints, TypeInferenceError
+from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, lookup_method, Environment, TypeConstraints, TypeInferenceError
 from ..typecheck.type_store import TypeStore
 TYPE_CONSTRAINTS = TypeConstraints()
 TYPE_STORE = TypeStore(TYPE_CONSTRAINTS)
@@ -124,7 +124,11 @@ def set_binop_type_constraints(node):
 
 
 def set_unaryop_type_constraints(node):
-    node.type_constraints = node.operand.type_constraints
+    if node.op == 'not':
+        node.type_constraints = TypeInfo(bool)
+    else:
+        unary_function = TYPE_STORE.lookup_function(op_to_dunder_unary(node.op), node.operand.type_constraints.type)
+        node.type_constraints = TypeInfo(TYPE_CONSTRAINTS.unify_call(unary_function, node.operand.type_constraints.type))
 
 
 def set_subscript_type_constraints(node):

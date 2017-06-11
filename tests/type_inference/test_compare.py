@@ -13,7 +13,7 @@ def test_inference_list_subscript(operator, left_value, right_value):
     #TODO: deal with this case later.
     assume(operator != '==' and operator != '>=' and operator != '<=' and operator != '!=')
     program = f'{repr(left_value)} {operator} {repr(right_value)}'
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     compare_node = list(module.nodes_of_class(astroid.Compare))[0]
     assert compare_node.type_constraints.type == bool
 

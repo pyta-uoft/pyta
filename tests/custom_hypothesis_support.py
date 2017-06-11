@@ -6,6 +6,7 @@ from python_ta.transforms.type_inference_visitor import register_type_constraint
 from keyword import iskeyword
 from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from hypothesis import settings
+from typing import Any
 settings.register_profile("pyta", settings(max_examples=10))
 
 # Custom strategies for hypothesis testing framework
@@ -55,6 +56,14 @@ def valid_identifier():
 def tuple_strategy(**kwargs):
     """Return a strategy which generates a tuple."""
     return hs.lists(primitive_values, **kwargs).map(tuple)
+
+
+def random_slice_indices():
+    """Return a strategy that generates indices of a slice."""
+    index1 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    index2 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    index3 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    return hs.tuples(index1, index2, index3)
 
 
 def homogeneous_list(**kwargs):

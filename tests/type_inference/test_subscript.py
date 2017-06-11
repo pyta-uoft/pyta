@@ -1,6 +1,7 @@
 import astroid
 import nose
-from hypothesis import given, settings
+from hypothesis import given, settings, assume
+from typing import Any, List
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 settings.load_profile("pyta")
@@ -22,6 +23,27 @@ def test_inference_dict_subscript(input_dict):
         module = cs._parse_text(program)
         subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
         assert subscript_node.type_constraints.type == type(input_dict[index])
+
+
+@given(cs.homogeneous_list(min_size=1), cs.random_slice_indices())
+def test_subscript_homogeneous_list_slice(input_list, slice):
+    """Test visitor of Subscript node representing slicing of homogeneous list."""
+    input_slice = ':'.join([str(index) if index else '' for index in slice])
+    program = f'{input_list}[{input_slice}]'
+    module = cs._parse_text(program)
+    subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
+    assert subscript_node.type_constraints.type == List[type(input_list[0])]
+
+
+@given(cs.random_list(min_size=2), cs.random_slice_indices())
+def test_subscript_heterogeneous_list_slice(input_list, slice):
+    """Test visitor of Subscript node representing slicing of heterogeneous list."""
+    assume(not isinstance(input_list[0], type(input_list[1])))
+    input_slice = ':'.join([str(index) if index else '' for index in slice])
+    program = f'{input_list}[{input_slice}]'
+    module = cs._parse_text(program)
+    subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
+    assert subscript_node.type_constraints.type == List[Any]
 
 
 if __name__ == '__main__':

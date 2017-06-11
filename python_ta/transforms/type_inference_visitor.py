@@ -201,12 +201,6 @@ class TypeInferer:
             else:
                 node.type_constraints = TypeInfo(return_type)
 
-    # TODO: Add check in the visit_compare as in BinOp.
-    def visit_compare(self, node):
-        """Compare operators includes:
-        '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
-        node.type_constraints = TypeInfo(bool)
-
     def visit_boolop(self, node):
         """Boolean operators are 'and', 'or'; the result type can be either of the argument types."""
         node_type_constraints = {operand_node.type_constraints.type for operand_node in node.values}
@@ -214,6 +208,23 @@ class TypeInferer:
             node.type_constraints = TypeInfo(node_type_constraints.pop())
         else:
             node.type_constraints = TypeInfo(Any)
+
+    # TODO: Add check in the set_compare_type_constraints as in BinOp.
+    def visit_compare(self, node):
+        """Compare operators includes:
+        '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
+        # do a look up of the operator
+        # unify_call with the node's left and the type of it's ops[1]..
+        # every Compare node has the left value with ctx=Load()
+        # it also has an ops List, with each element being a tuple of the symbol, right value
+        # base case, just do the lookup and unify with node.ops[0][1]
+        # get thar return value and assign it as the node's type_constraint - wrap in TypeInfo
+        function_type = self.type_store.lookup_function(op_to_dunder_binary(node.ops[0][0]),
+                                                        node.left.type_constraints.type,
+                                                        node.ops[0][1].type_constraints.type)
+        return_type = self.type_constraints.unify_call(function_type, node.left.type_constraints.type,
+                                                       node.ops[0][1].type_constraints.type)
+        node.type_constraints = TypeInfo(return_type)
 
     ##############################################################################
     # Statements

@@ -10,7 +10,7 @@ def test_unarynop_non_bool_concrete(operator, operand):
     """Test type setting of UnaryOp node(s) with non-boolean operand."""
     assume(not (isinstance(operand, bool) or isinstance(operand, float)) and operand)
     program = f'{operator} {repr(operand)}\n'
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     unaryop_node = list(module.nodes_of_class(astroid.UnaryOp))[0]
     assert unaryop_node.type_constraints.type == type(operand)
 
@@ -19,7 +19,7 @@ def test_unarynop_non_bool_concrete(operator, operand):
 def test_not_bool(operator, operand):
     """Test type setting of UnaryOp node representing boolean operation not _."""
     program = f'{operator} {repr(operand)}\n'
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     unaryop_node = list(module.nodes_of_class(astroid.UnaryOp))[0]
     assert unaryop_node.type_constraints.type == bool
 

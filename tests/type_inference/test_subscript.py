@@ -11,7 +11,7 @@ settings.load_profile("pyta")
 def test_inference_list_subscript(input_list, index):
     """Test whether visitor properly set the type constraint of Subscript node representing list-index access."""
     program = f'{input_list}[{index}]'
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
     assert subscript_node.type_constraints.type == type(input_list[0])
 
@@ -20,7 +20,7 @@ def test_inference_list_subscript(input_list, index):
 def test_inference_dict_subscript(input_dict):
     for index in input_dict:
         program = f'{input_dict}[{index}]'
-        module = cs._parse_text(program)
+        module, _ = cs._parse_text(program)
         subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
         assert subscript_node.type_constraints.type == type(input_dict[index])
 
@@ -30,7 +30,7 @@ def test_subscript_homogeneous_list_slice(input_list, slice):
     """Test visitor of Subscript node representing slicing of homogeneous list."""
     input_slice = ':'.join([str(index) if index else '' for index in slice])
     program = f'{input_list}[{input_slice}]'
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
     assert subscript_node.type_constraints.type == List[type(input_list[0])]
 
@@ -41,7 +41,7 @@ def test_subscript_heterogeneous_list_slice(input_list, slice):
     assume(not isinstance(input_list[0], type(input_list[1])))
     input_slice = ':'.join([str(index) if index else '' for index in slice])
     program = f'{input_list}[{input_slice}]'
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
     assert subscript_node.type_constraints.type == List[Any]
 

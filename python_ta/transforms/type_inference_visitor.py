@@ -211,14 +211,9 @@ class TypeInferer:
 
     # TODO: Add check in the set_compare_type_constraints as in BinOp.
     def visit_compare(self, node):
-        """Compare operators includes:
-        '<', '>', '==', '>=', '<=', '!='. """
-        function_type = self.type_store.lookup_function(op_to_dunder_binary(node.ops[0][0]),
-                                                        node.left.type_constraints.type,
-                                                        node.ops[0][1].type_constraints.type)
-        return_type = self.type_constraints.unify_call(function_type, node.left.type_constraints.type,
-                                                       node.ops[0][1].type_constraints.type)
-        node.type_constraints = TypeInfo(return_type)
+        """Comparison operators are: '<', '>', '==', '<=', '>=', '!=', 'in', 'is'.
+        All comparisons yield boolean values."""
+        node.type_constraints = TypeInfo(bool)
 
     ##############################################################################
     # Statements

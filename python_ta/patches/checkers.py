@@ -105,8 +105,9 @@ def _get_attribute_property_setter(name, klass):
                 return None
 
 def _override_regex_to_allow_long_doctest_lines():
-    """
-    Allow too-long lines for doctests.
+    """Allow too-long lines for doctests.
+    Mostly a copy from `pylint/checkers/format.py`
+    Parts newly added are marked with comment, "[PYTA added]: ..."
     """
 
     def new_check_lines(self, lines, i):
@@ -140,6 +141,7 @@ def _override_regex_to_allow_long_doctest_lines():
             '\v', '\x0b', '\f', '\x0c', '\x1c', '\x1d', '\x1e', '\x85', '\u2028', '\u2029'}
         unsplit = []
         _split_lines = lines.splitlines(True)
+        # [PYTA added]: enumerate to get line_i index.
         for line_i, line in enumerate(_split_lines):
             if line[-1] in unsplit_ends:
                 unsplit.append(line)
@@ -150,7 +152,7 @@ def _override_regex_to_allow_long_doctest_lines():
                 line = ''.join(unsplit)
                 unsplit = []
 
-            # Skip error message for long doctest lines
+            # [PYTA added]: Skip error message for long doctest lines
             doctest_tokens = compile(r'^\s*>>>.*?\n$')
             if match(doctest_tokens, line):
                 continue

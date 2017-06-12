@@ -248,7 +248,7 @@ class TestEndingLocations(unittest.TestCase):
         """
         """
         expected = [(1, 1, 0, 6), (2, 2, 4, 6), (3, 3, 0, 3), (4, 4, 0, 8), 
-        (5, 7, 0, 1), (8, 8, 6, 11), (8, 8, 13, 25), (9, 11, 0, 11)]
+        (5, 7, 0, 1), (8, 8, 6, 11), (8, 8, 13, 25)]
         module = self.get_file_as_module(PATH + 'Const.py')
         self.set_and_check(module, astroid.Const, expected)
 
@@ -572,7 +572,10 @@ class TestEndingLocations(unittest.TestCase):
     #     self.set_and_check(module, astroid.TryFinally, expected)
 
     def test_tuple(self):
-        expected = [(1, 1, 0, 6), (2, 2, 0, 11), (3, 3, 0, 5), (4, 4, 0, 7), (5, 5, 0, 1), (6, 6, 0, 6)]
+        expected = [(1, 1, 0, 6), (2, 2, 0, 11), (3, 3, 0, 5), (4, 4, 0, 7), 
+                    (5, 5, 0, 12), (6, 8, 0, 8), (9, 9, 0, 4), (10, 10, 0, 7)
+                    # , (11, 13, 0, 17)
+                    ]
         module = self.get_file_as_module(PATH + 'Tuple.py')
         self.set_and_check(module, astroid.Tuple, expected)
 

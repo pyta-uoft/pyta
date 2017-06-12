@@ -212,7 +212,7 @@ class TypeInferer:
     def visit_compare(self, node):
         """Comparison operators are: '<', '>', '==', '<=', '>=', '!=', 'in', 'is'.
         All comparisons yield boolean values."""
-        return_types = set({})
+        return_types = {}
         left_value = node.left
         for comparator, right_value in node.ops:
             function_type = self.type_store.lookup_function(op_to_dunder_binary(comparator),

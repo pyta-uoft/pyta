@@ -98,6 +98,7 @@ def op_to_dunder_binary(op):
         return '__gt__'
     elif op == '>=':
         return '__ge__'
+    # TODO: 'is' and 'in'
     else:
         return ''
 

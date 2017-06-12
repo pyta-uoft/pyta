@@ -12,7 +12,7 @@ def test_homogeneous_binary_boolop(op, operand_list):
     """Test type setting of binary BoolOp node(s) representing expression with homogeneous operands."""
     pre_format_program = [repr(operand) for operand in operand_list]
     program = (' ' + op + ' ').join(pre_format_program)
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
     assert boolop_node.type_constraints.type == type(operand_list[0])
 
@@ -23,7 +23,7 @@ def test_heterogeneous_binary_boolop(op, operand_list):
     assume(not isinstance(operand_list[0], type(operand_list[1])))
     pre_format_program = [repr(operand) for operand in operand_list]
     program = (' ' + op + ' ').join(pre_format_program)
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
     assert boolop_node.type_constraints.type == Any
 

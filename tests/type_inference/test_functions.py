@@ -4,7 +4,6 @@ from hypothesis import assume, given, settings
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
-from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from keyword import iskeyword
 settings.load_profile("pyta")
 
@@ -26,16 +25,16 @@ def test_function_def_no_args(function_name, return_value):
     """Test FunctionDef node visitors representing function definitions with no parameters and primitive return type."""
     assume(not iskeyword(function_name))
     program = _parse_to_function(function_name, [], repr(return_value))
-    module = cs._parse_text(program)
+    module, inferer = cs._parse_text(program)
     function_type_var = module.type_environment.lookup_in_env(function_name)
-    assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
+    assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
 
 
 @given(cs.valid_identifier(), cs.primitive_values)
 def test_function_def_call_no_args(function_name, return_value):
     """Test type setting in environment of a function call for a function with no parameters."""
     program = _parse_to_function(function_name, [], repr(return_value)) + "\n" + function_name + "()\n"
-    module = cs._parse_text(program)
+    module, _ = cs._parse_text(program)
     # there should be a single Expr node in this program
     expr_node = next(module.nodes_of_class(astroid.Expr))
     assert expr_node.type_constraints.type == type(return_value)
@@ -46,12 +45,12 @@ def test_function_def_no_return(function_name, arguments, body):
     """Test FunctionDef node visitors representing non-returning function definitions with parameter(s)."""
     for return_value in ['return None', repr(body), 'pass']:
         program = _parse_to_function_no_return(function_name, arguments, repr(return_value))
-        module = cs._parse_text(program)
+        module, inferer = cs._parse_text(program)
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
         expected_arg_type_vars = [function_def_node.type_environment.lookup_in_env(argument) for argument in arguments]
-        expected_arg_types = [TYPE_CONSTRAINTS.lookup_concrete(type_var) for type_var in expected_arg_type_vars]
+        expected_arg_types = [inferer.type_constraints.lookup_concrete(type_var) for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
-        assert TYPE_CONSTRAINTS.lookup_concrete(function_type_var) == Callable[expected_arg_types, None]
+        assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[expected_arg_types, None]
 
 
 
@@ -61,16 +60,16 @@ def test_function_def_args_simple_return(function_name, arguments):
     # generate every possible function definition program of aforementioned form.
     for argument in arguments:
         program = _parse_to_function(function_name, arguments, argument)
-        module = cs._parse_text(program)
+        module, inferer = cs._parse_text(program)
         # get the functionDef node - there is only one in this test case.
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
         expected_arg_type_vars = [function_def_node.type_environment.lookup_in_env(argument) for argument in arguments]
-        expected_arg_types = [TYPE_CONSTRAINTS.lookup_concrete(type_var) for type_var in expected_arg_type_vars]
+        expected_arg_types = [inferer.type_constraints.lookup_concrete(type_var) for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
-        function_type = TYPE_CONSTRAINTS.lookup_concrete(function_type_var)
-        actual_arg_types, actual_return_type = TYPE_CONSTRAINTS.types_in_callable(function_type)
+        function_type = inferer.type_constraints.lookup_concrete(function_type_var)
+        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
-        expected_return_type = TYPE_CONSTRAINTS.lookup_concrete(return_type_var)
+        expected_return_type = inferer.type_constraints.lookup_concrete(return_type_var)
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
 
 
@@ -84,11 +83,11 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         arguments = ", ".join([repr(value) for value in variables_dict.values()])
         program = f'{_parse_to_function(function_name, list(variables_dict.keys()), return_value)}\n' \
                   f'{function_name}({arguments})'
-        module = cs._parse_text(program)
+        module, inferer = cs._parse_text(program)
         # get the Call node - there is only one in this test case.
         call_node = next(module.nodes_of_class(astroid.Call))
         function_call_type = call_node.type_constraints.type
-        assert TYPE_CONSTRAINTS.lookup_concrete(function_call_type) == call_node.args[i].type_constraints.type
+        assert inferer.type_constraints.lookup_concrete(function_call_type) == call_node.args[i].type_constraints.type
 
 
 if __name__ == '__main__':

@@ -1,12 +1,13 @@
 import astroid
 import hypothesis.strategies as hs
 from hypothesis import assume
-from python_ta.transforms.type_inference_visitor import register_type_constraints_setter,\
-    environment_transformer
+from python_ta.transforms.type_inference_visitor import TypeInferer
 from keyword import iskeyword
-from python_ta.transforms.type_inference_visitor import TYPE_CONSTRAINTS
 from hypothesis import settings
+from typing import Any
 settings.register_profile("pyta", settings(max_examples=10))
+from typing import Tuple
+
 
 # Custom strategies for hypothesis testing framework
 primitive_types = hs.sampled_from([
@@ -28,9 +29,17 @@ index_types = hs.sampled_from([
 index_values = index_types.flatmap(lambda s: s())
 
 
+numeric_types = hs.sampled_from([
+    hs.integers,
+    lambda: hs.floats(allow_nan=False, allow_infinity=False)
+])
+numeric_values = numeric_types.flatmap(lambda s: s())
+
+
 # Strategies for generating Binary Operators
-non_bool_bin_symbols = ['+', '-', '*', '//', '%', '/', '**', '<<', '>>', '&', '^', '|']
-non_bool_bin_operator = hs.sampled_from(non_bool_bin_symbols)
+non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '|', '<<', '>>']
+non_boolean_operator = hs.sampled_from(non_bool_symbols)
+non_bool_unary_op = hs.sampled_from(['-', '+', '~'])
 
 
 # Strategy for generating Boolean Operators
@@ -47,6 +56,14 @@ def valid_identifier():
 def tuple_strategy(**kwargs):
     """Return a strategy which generates a tuple."""
     return hs.lists(primitive_values, **kwargs).map(tuple)
+
+
+def random_slice_indices():
+    """Return a strategy that generates indices of a slice."""
+    index1 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    index2 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    index3 = hs.sampled_from([hs.integers(), hs.none()]).example()
+    return hs.tuples(index1, index2, index3)
 
 
 def homogeneous_list(**kwargs):
@@ -75,13 +92,13 @@ def heterogeneous_dictionary(**kwargs):
 
 
 # Helper functions for testing
-def _parse_text(source: str) -> astroid.Module:
+def _parse_text(source: str) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
-    TYPE_CONSTRAINTS.clear_tvars()
     module = astroid.parse(source)
-    environment_transformer().visit(module)
-    register_type_constraints_setter().visit(module)
-    return module
+    type_inferer = TypeInferer()
+    type_inferer.environment_transformer().visit(module)
+    type_inferer.type_inference_transformer().visit(module)
+    return module, type_inferer
 
 
 def _verify_type_setting(module, ast_class, expected_type):

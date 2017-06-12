@@ -1,7 +1,7 @@
 """Patch to add a transform for setting type constraints.
 """
 from pylint.lint import PyLinter
-from ..transforms.type_inference_visitor import register_type_constraints_setter, environment_transformer
+from ..transforms.type_inference_visitor import TypeInferer
 
 
 def patch_type_inference_transform():
@@ -9,9 +9,10 @@ def patch_type_inference_transform():
 
     def new_get_ast(self, filepath, modname):
         ast = old_get_ast(self, filepath, modname)
-        env_transformer = environment_transformer()
+        type_inferer = TypeInferer()
+        env_transformer = type_inferer.environment_transformer()
         env_transformer.visit(ast)
-        type_transformer = register_type_constraints_setter()
+        type_transformer = type_inferer.type_inference_transformer()
         try:
             type_transformer.visit(ast)
         except:

@@ -1,6 +1,6 @@
 import astroid
 from collections import defaultdict
-from python_ta.typecheck.base import parse_annotations
+from python_ta.typecheck.base import parse_annotations, class_callable
 import os
 TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
 
@@ -14,19 +14,27 @@ class TypeStore:
         self.classes = defaultdict(lambda: defaultdict(list))
         self.functions = defaultdict(list)
         for class_def in module.nodes_of_class(astroid.ClassDef):
-            tvars = []
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
                     gen = base.value.as_string()
                     tvars = base.slice.as_string().strip('()').split(',')
                     if gen == 'Generic':
                         self.classes[class_def.name]['__pyta_tvars'] = tvars
-            for function_def in class_def.nodes_of_class(astroid.FunctionDef):
-                f_type = parse_annotations(function_def, tvars)
-                if class_def.name == 'dict':
-                    print(f_type, f_type.polymorphic_tvars)
-                self.classes[class_def.name][function_def.name].append(f_type)
-                self.functions[function_def.name].append(f_type)
+        for function_def in module.nodes_of_class(astroid.FunctionDef):
+            in_class = isinstance(function_def.parent, astroid.ClassDef)
+            if in_class:
+                tvars = self.classes[function_def.parent.name]['__pyta_tvars']
+            else:
+                tvars = []
+            f_type = parse_annotations(function_def, tvars)
+            self.functions[function_def.name].append(f_type)
+            if in_class:
+                self.classes[function_def.parent.name][function_def.name].append(f_type)
+
+        # Add in constructors
+        for klass_name, methods in self.classes.items():
+            if '__init__' in methods:
+                self.functions[klass_name] = [class_callable(init) for init in methods['__init__']]
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
@@ -44,8 +52,3 @@ class TypeStore:
                     return func_type
             if not unified:
                 raise KeyError
-
-
-if __name__ == '__main__':
-    ts = TypeStore(None)
-    print(ts.classes['dict'])

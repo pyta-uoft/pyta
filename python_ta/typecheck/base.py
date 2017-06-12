@@ -1,5 +1,5 @@
 from typing import *
-from typing import CallableMeta, GenericMeta, TupleMeta, _gorg, _geqv, _type_vars, _ForwardRef
+from typing import CallableMeta, GenericMeta, TupleMeta, _gorg, _geqv, _type_vars, _ForwardRef, IO
 import astroid
 
 
@@ -25,9 +25,9 @@ class TupleSubscript(TypeVar, _root=True):
     pass
 
 
-def create_Callable(args, rtype, poly_vars=None):
+def create_Callable(args: Iterable[type], rtype, poly_vars=None):
     poly_vars = poly_vars or []
-    c = Callable[args, rtype]
+    c = Callable[list(args), rtype]
     c.polymorphic_tvars = poly_vars
     return c
 
@@ -401,3 +401,10 @@ _BUILTIN_TO_TYPING = {
     'frozenset': 'FrozenSet',
     'function': 'Callable'
 }
+
+
+def class_callable(init):
+    """Convert an __init__ type signature into a callable for the class."""
+    return create_Callable(
+        init.__args__[1:-1], init.__args__[0], init.polymorphic_tvars
+    )

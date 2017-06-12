@@ -172,6 +172,8 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
+        elif issubclass(t1, t2) or issubclass(t2, t1):
+            pass
         elif t1 != t2:
             raise Exception(str(t1) + ' ' + str(t2))
 
@@ -263,7 +265,13 @@ class TypeConstraints:
                         return False
                 return True
             else:
-                False
+                return False
+        elif isinstance(t1, GenericMeta):
+            return False
+        elif isinstance(t1, GenericMeta):
+            return False
+        elif issubclass(t1, t2) or issubclass(t2, t1):
+            return True
         elif t1 != t2:
             return False
         else:

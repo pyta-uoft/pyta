@@ -7,11 +7,10 @@ import hypothesis.strategies as hs
 settings.load_profile("pyta")
 
 
-@given(hs.integers(), hs.lists(hs.tuples(cs.comparator_operator, hs.integers()), min_size=1))
+@given(cs.primitive_values, hs.lists(hs.tuples(cs.comparator_operator, cs.primitive_values), min_size=1))
 def test_compare_builtins(left_value, operator_value_tuples):
     """Test type settting of Compare node representing comparison between primitive values."""
     for operator, value in operator_value_tuples:
-        assume(operator != '==' and operator != '>=' and operator != '<=' and operator != '!=')
         if operator == 'in' or operator == 'is':
             assume(isinstance(value, GenericMeta))
     program = f'{repr(left_value)} '

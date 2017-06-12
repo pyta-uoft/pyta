@@ -212,7 +212,19 @@ class TypeInferer:
     def visit_compare(self, node):
         """Comparison operators are: '<', '>', '==', '<=', '>=', '!=', 'in', 'is'.
         All comparisons yield boolean values."""
-        node.type_constraints = TypeInfo(bool)
+        return_types = set({})
+        left_value = node.left
+        for comparator, right_value in node.ops:
+            function_type = self.type_store.lookup_function(op_to_dunder_binary(comparator),
+                                                            left_value.type_constraints.type,
+                                                            right_value.type_constraints.type)
+            left_value = right_value
+            return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
+                                                              right_value.type_constraints.type))
+        if len(return_types) == 1:
+            node.type_constraints = TypeInfo(return_types.pop())
+        else:
+            node.type_constraints = TypeInfo(Any)
 
     ##############################################################################
     # Statements

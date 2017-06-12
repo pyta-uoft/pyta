@@ -42,7 +42,7 @@ non_boolean_operator = hs.sampled_from(non_bool_symbols)
 non_bool_unary_op = hs.sampled_from(['-', '+', '~'])
 
 # Strategy for genearting Comparison Operators
-comparator_symbols = ['==', '!=', '<', '<=', '>', '>=']
+comparator_symbols = ['==', '!=', '<', '<=', '>', '>=', 'in', 'is']
 comparator_operator = hs.sampled_from(comparator_symbols)
 
 

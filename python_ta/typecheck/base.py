@@ -1,5 +1,7 @@
 from typing import *
-from typing import CallableMeta, GenericMeta, TupleMeta, _gorg, _geqv, _type_vars
+from typing import CallableMeta, GenericMeta, TupleMeta, _gorg, _geqv, _type_vars, _ForwardRef, IO
+import astroid
+
 
 class TypeInferenceError(Exception):
     pass
@@ -23,9 +25,9 @@ class TupleSubscript(TypeVar, _root=True):
     pass
 
 
-def create_Callable(args, rtype, poly_vars=None):
+def create_Callable(args: Iterable[type], rtype, poly_vars=None):
     poly_vars = poly_vars or []
-    c = Callable[args, rtype]
+    c = Callable[list(args), rtype]
     c.polymorphic_tvars = poly_vars
     return c
 
@@ -318,3 +320,91 @@ class Environment:
 
     def __str__(self):
         return str(self.locals)
+
+
+###############################################################################
+# Parsing type annotations
+###############################################################################
+def parse_annotations(node, class_tvars=None):
+    """Return a type specified by the type annotations for a node."""
+    if isinstance(node, astroid.FunctionDef):
+        arg_types = []
+        if class_tvars is None or not isinstance(node.parent, astroid.ClassDef):
+            self_type = None
+        elif node.parent.name in _BUILTIN_TO_TYPING:
+            self_type = eval(_BUILTIN_TO_TYPING[node.parent.name])[tuple(_node_to_type(tv) for tv in class_tvars)]
+        else:
+            self_type = _node_to_type(node.parent.name)
+
+        for arg, annotation in zip(node.args.args, node.args.annotations):
+            if getattr(arg, 'name', None) == 'self' and annotation is None:
+                arg_types.append(self_type)
+            else:
+                arg_types.append(_node_to_type(annotation))
+
+        rtype = _node_to_type(node.returns)
+        return create_Callable(arg_types, rtype, class_tvars)
+
+
+def _node_to_type(node, locals=None):
+    """Return a type represented by the input node."""
+    locals = locals or _TYPESHED_TVARS
+    if node is None:
+        return Any
+    elif isinstance(node, str):
+        try:
+            return eval(node, globals(), locals)
+        except:
+            return _ForwardRef(node)
+    elif isinstance(node, astroid.Name):
+        try:
+            return eval(node.name, globals(), locals)
+        except:
+            return _ForwardRef(node.name)
+    elif isinstance(node, astroid.Subscript):
+        v = _node_to_type(node.value)
+        s = _node_to_type(node.slice)
+        return v[s]
+    elif isinstance(node, astroid.Index):
+        return _node_to_type(node.value)
+    elif isinstance(node, astroid.Tuple):
+        return tuple(_node_to_type(t) for t in node.elts if not isinstance(t, astroid.Ellipsis))
+    elif isinstance(node, astroid.List):
+        return [_node_to_type(t) for t in node.elts if not isinstance(t, astroid.Ellipsis)]
+    elif isinstance(node, astroid.Const) and node.value is None:
+        return None
+    else:
+        return node
+
+
+_TYPESHED_TVARS = {
+    '_T': TypeVar('_T'),
+    '_T_co': TypeVar('_T_co', covariant=True),
+    '_KT': TypeVar('_KT'),
+    '_VT': TypeVar('_VT'),
+    '_S': TypeVar('_S'),
+    '_T1': TypeVar('_T1'),
+    '_T2': TypeVar('_T2'),
+    '_T3': TypeVar('_T3'),
+    '_T4': TypeVar('_T4'),
+    '_T5': TypeVar('_T5'),
+    '_TT': TypeVar('_TT', bound='type'),
+    'function': Callable[[Any], Any]
+}
+
+
+_BUILTIN_TO_TYPING = {
+    'list': 'List',
+    'dict': 'Dict',
+    'tuple': 'Tuple',
+    'set': 'Set',
+    'frozenset': 'FrozenSet',
+    'function': 'Callable'
+}
+
+
+def class_callable(init):
+    """Convert an __init__ type signature into a callable for the class."""
+    return create_Callable(
+        init.__args__[1:-1], init.__args__[0], init.polymorphic_tvars
+    )

@@ -175,12 +175,10 @@ class TypeInferer:
             unary_function = self.type_store.lookup_function(op_to_dunder_unary(node.op), node.operand.type_constraints.type)
             node.type_constraints = TypeInfo(
                 self.type_constraints.unify_call(unary_function, node.operand.type_constraints.type))
-            node.type_constraints = node.operand.type_constraints
 
     def visit_subscript(self, node):
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
             value_type = node.value.type_constraints.type
-            value_type = self.type_constraints.lookup_concrete(value_type)
             arg_type = node.slice.type_constraints.type
             op_name = '__getitem__'
 

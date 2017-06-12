@@ -5,3 +5,7 @@ x = 10
 (
     7
 )
+print(False, ( ( True ) ))
+( 
+# paren in this comment should not be "used" in node: (
+    10    )

@@ -152,9 +152,9 @@ def _override_regex_to_allow_long_doctest_lines():
 
             # Skip error message for long doctest lines
             doctest_tokens = compile(r'^\s*>>>.*?\n$')
-            if bool(match(doctest_tokens, line)):
+            if match(doctest_tokens, line):
                 continue
-            elif line_i > 0 and bool(match(doctest_tokens, _split_lines[line_i-1])):
+            elif line_i > 0 and match(doctest_tokens, _split_lines[line_i-1]):
                 continue
 
             i = check_line(line, i)

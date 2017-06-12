@@ -209,7 +209,6 @@ class TypeInferer:
         else:
             node.type_constraints = TypeInfo(Any)
 
-    # TODO: Add check in the set_compare_type_constraints as in BinOp.
     def visit_compare(self, node):
         """Comparison operators are: '<', '>', '==', '<=', '>=', '!=', 'in', 'is'.
         All comparisons yield boolean values."""

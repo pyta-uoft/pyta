@@ -41,6 +41,11 @@ non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '|', '<<', '>
 non_boolean_operator = hs.sampled_from(non_bool_symbols)
 non_bool_unary_op = hs.sampled_from(['-', '+', '~'])
 
+# Strategy for genearting Comparison Operators
+comparator_symbols = ['<', '>']
+comparator_operator = hs.sampled_from(comparator_symbols)
+comparator_symbols_equality = ['==', '!=', '>=', '<=', 'is']
+comparator_operator_equality = hs.sampled_from(comparator_symbols_equality)
 
 # Strategy for generating Boolean Operators
 binary_bool_operator = hs.sampled_from(['and', 'or'])

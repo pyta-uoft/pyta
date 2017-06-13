@@ -199,17 +199,32 @@ class TypeInferer:
             else:
                 node.type_constraints = TypeInfo(return_type)
 
-    # TODO: Add check in the visit_compare as in BinOp.
-    def visit_compare(self, node):
-        """Compare operators includes:
-        '<', '>', '==', '>=', '<=', '<>', '!=', 'is' ['not'], ['not'] 'in' """
-        node.type_constraints = TypeInfo(bool)
-
     def visit_boolop(self, node):
         """Boolean operators are 'and', 'or'; the result type can be either of the argument types."""
         node_type_constraints = {operand_node.type_constraints.type for operand_node in node.values}
         if len(node_type_constraints) == 1:
             node.type_constraints = TypeInfo(node_type_constraints.pop())
+        else:
+            node.type_constraints = TypeInfo(Any)
+
+    def visit_compare(self, node):
+        """Comparison operators are: '<', '>', '==', '<=', '>=', '!=', 'in', 'is'.
+        All comparisons yield boolean values."""
+        # TODO: 'in' comparator
+        return_types = set()
+        left_value = node.left
+        for comparator, right_value in node.ops:
+            if comparator == 'is':
+                return_types.add(bool)
+            else:
+                function_type = self.type_store.lookup_function(op_to_dunder_binary(comparator),
+                                                            left_value.type_constraints.type,
+                                                            right_value.type_constraints.type)
+                left_value = right_value
+                return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
+                                                              right_value.type_constraints.type))
+        if len(return_types) == 1:
+            node.type_constraints = TypeInfo(return_types.pop())
         else:
             node.type_constraints = TypeInfo(Any)
 

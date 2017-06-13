@@ -7,8 +7,9 @@ Attributes:
     - target  (Node)
         - Holds the variable(s) the loop assigns to as a single node. The type
           of the node can be Name, List, Tuple, etc.
-    - iter    (List Node)
+    - iter    (Node)
         - A List node representing the iterable.
+        - Can also be a Call node (ie. representing a range function call).
     - body    (List[Statement])
         - The node to be executed.
     - orelse  (List[Statement])
@@ -27,3 +28,7 @@ for i in [1, 2, 3]:
     break
 else:
     pass
+
+# TODO: Add example of for-else loop iterating over generator returned by range
+# call."
+

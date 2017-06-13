@@ -10,9 +10,9 @@ settings.load_profile("pyta")
 @given(cs.primitive_values, hs.lists(hs.tuples(cs.comparator_operator_equality, cs.primitive_values), min_size=1))
 def test_compare_equality(left_value, operator_value_tuples):
     """Test type setting of Compare node representing comparators: ''==', '!=', '>=', '<=', 'is'. """
-    # TODO:'is'
-    for operator, _ in operator_value_tuples:
-        assume(operator != 'is')
+    for operator, value in operator_value_tuples:
+        if isinstance(value, str):
+            assume(len(value) > 2)
     program = f'{repr(left_value)} '
     for operator, value in operator_value_tuples:
         program += ' '.join([operator, repr(value)])
@@ -24,11 +24,10 @@ def test_compare_equality(left_value, operator_value_tuples):
 @given(hs.lists(cs.comparator_operator, min_size=3), cs.homogeneous_list(min_size=4))
 def test_compare_equality(operators, values):
     """Test type setting of Compare node representing comparators: '<', '>', 'in'. """
-    # TODO: 'in'
     for value in values:
         assume(value)
-    for operator in operators:
-        assume(operator != 'in')
+        if isinstance(value, str):
+            assume(len(value) > 2)
     a = list(zip(operators, values))
     pre = []
     for operator, value in a:

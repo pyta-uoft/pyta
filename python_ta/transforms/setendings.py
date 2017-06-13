@@ -208,6 +208,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.SetComp, None, _token_search('}')),
     (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
     (astroid.Subscript, None, _token_search(']')),
+    (astroid.Tuple, None, _token_search(',')),
     (astroid.Tuple, _token_search('('), _token_search(')'))
 ]
 

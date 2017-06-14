@@ -208,7 +208,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.SetComp, None, _token_search('}')),
     (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
     (astroid.Subscript, None, _token_search(']')),
-    (astroid.Tuple, None, _token_search(',')),
+    (astroid.Tuple, None, _token_search(','))
 ]
 
 
@@ -250,8 +250,8 @@ def init_register_ending_setters(source_code):
                 node_class, end_setter_from_source(source_code, end_pred))
 
     # Nodes where extra parentheses are included
-    ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
-    ending_transformer.register_transform(astroid.Tuple, add_parens_to_const(source_code))
+    ending_transformer.register_transform(astroid.Const, add_parens(source_code))
+    ending_transformer.register_transform(astroid.Tuple, add_parens(source_code))
 
     return ending_transformer
 
@@ -486,22 +486,19 @@ def start_setter_from_source(source_code, pred):
     return set_start_from_source
 
 
-def add_parens_to_const(source_code):
+def add_parens(source_code):
     def h(node):
-        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
-            return
-        else:
-            _add_parens(source_code)(node)
+        _add_parens(source_code)(node)
 
     return h
 
 
 def _add_parens(source_code):
     def h(node):
+        loc_curr = loc_prev = (node.fromlineno - 1, node.end_lineno - 1, node.col_offset, node.end_col_offset)
         # Initialize counters. Note: fromlineno is 1-indexed.
         while True:
-            col_offset, lineno = node.col_offset, node.fromlineno - 1
-            end_col_offset, end_lineno = node.end_col_offset, node.end_lineno - 1
+            lineno, end_lineno, col_offset, end_col_offset = loc_curr
 
             # First, search the remaining part of the current start line
             prev_char, new_lineno, new_coloffset = None, None, None
@@ -521,7 +518,6 @@ def _add_parens(source_code):
                             continue
                         else:
                             prev_char, new_lineno, new_coloffset = source_code[i][j], i, j
-
                             break
                     if prev_char is not None:
                         break
@@ -538,7 +534,7 @@ def _add_parens(source_code):
                 elif source_code[end_lineno][j] in CONSUMABLES:
                     continue
                 else:
-                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno, j
+                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno, j+1
                     break
 
             if next_char is None:
@@ -551,7 +547,7 @@ def _add_parens(source_code):
                         elif source_code[i][j] in CONSUMABLES:
                             continue
                         else:
-                            next_char, new_end_lineno, new_end_coloffset = source_code[i][j], i, j
+                            next_char, new_end_lineno, new_end_coloffset = source_code[i][j], i, j+1
                             break
                     if next_char is not None:
                         break
@@ -560,8 +556,17 @@ def _add_parens(source_code):
                 return
 
             # At this point, an enclosing pair of parentheses has been found
-            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset =\
-                new_lineno + 1, new_coloffset, new_end_lineno + 1, new_end_coloffset + 1
+            loc_prev = loc_curr
+            loc_curr = new_lineno, new_end_lineno, new_coloffset, new_end_coloffset
+
+            # Don't set n+1 parens if node is within a call, "(...)"
+            set_by = loc_curr
+            if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
+                set_by = loc_prev
+
+            node.fromlineno, node.end_lineno, node.col_offset, node.end_col_offset = set_by
+            node.fromlineno += 1
+            node.end_lineno += 1
 
     return h
 

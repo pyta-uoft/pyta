@@ -294,7 +294,7 @@ class TypeInferer:
             target_tvars = [node.type_environment.lookup_in_env(target_node.name) for target_node in node.target.elts]
             for i in range(len(rtype.__args__) + 1):
                 self.type_constraints.unify(rtype.__args__[0].__args__[i], target_tvars[i])
-        # TODO:
+        # TODO: Review semantics of scopes; remove overlaps?
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

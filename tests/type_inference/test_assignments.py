@@ -90,5 +90,23 @@ def test_set_multi_assign(variables_list, value):
         assert inferer.type_constraints.lookup_concrete(target_type_var) == value_type
 
 
+@given(cs.random_dict_variable_value(min_size=2))
+def test_assign_complex(variables_dict):
+    """Test whether visitors properly set the type constraint of the a Assign node representing a multi-target-assign
+     with a list as the value.
+    """
+    for variable_name in variables_dict:
+        assume(not iskeyword(variable_name))
+    program = (", ".join(variables_dict.keys())
+               + " = ["
+               + ", ".join([repr(value) for value in variables_dict.values()])
+               + "]\n")
+    module, TypeInferrer = cs._parse_text(program)
+    for node in module.nodes_of_class(astroid.Assign):
+        target_type_tuple = zip(node.targets[0].elts, node.value.elts)
+        for target, value in target_type_tuple:
+            target_type_var = target.frame().type_environment.lookup_in_env(target.name)
+            assert TypeInferrer.type_constraints.lookup_concrete(target_type_var) == value.type_constraints.type
+
 if __name__ == '__main__':
     nose.main()

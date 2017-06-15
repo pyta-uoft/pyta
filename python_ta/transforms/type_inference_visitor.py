@@ -49,15 +49,7 @@ class TypeInferer:
         visitor = TransformVisitor()
         visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
         visitor.register_transform(astroid.Module, self._set_module_environment)
-        visitor.register_transform(astroid.For, self._set_for_environment)
         return visitor
-
-    def _set_for_environment(self, node):
-        """Method to set environment of a For node."""
-        # Need to get the names of all variables in the For(else) statement and add populate environment.
-        names = [node.name for node in node.nodes_of_class(astroid.AssignName)]
-        node.type_environment = Environment(
-            locals_={name: self.type_constraints.fresh_tvar() for name in names})
 
     def _set_module_environment(self, node):
         """Method to set environment of a Module node."""
@@ -285,16 +277,16 @@ class TypeInferer:
         node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):
-        iterable_type = self.type_store.lookup_function('__iter__', node.iter.type_constraints.type)
-        rtype = self.type_constraints.unify_call(iterable_type, node.iter.type_constraints.type)
+        for_node = list(node.nodes_of_class(astroid.For))[0]
+        iterable_type = self.type_store.lookup_function('__iter__', for_node.iter.type_constraints.type)
+        rtype = self.type_constraints.unify_call(iterable_type, for_node.iter.type_constraints.type)
         # there may be one target, or a Generic of targets to unify.:w
-        if isinstance(node.target, astroid.AssignName):
-            self.type_constraints.unify(rtype.__args__[0], node.type_environment.lookup_in_env(node.target.name))
+        if isinstance(for_node.target, astroid.AssignName):
+            self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))
         else:
-            target_tvars = [node.type_environment.lookup_in_env(target_node.name) for target_node in node.target.elts]
+            target_tvars = [node.frame().type_environment.lookup_in_env(target_node.name) for target_node in for_node.target.elts]
             for i in range(len(rtype.__args__) + 1):
                 self.type_constraints.unify(rtype.__args__[0].__args__[i], target_tvars[i])
-        # TODO: Review semantics of scopes; remove overlaps?
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

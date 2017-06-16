@@ -591,8 +591,8 @@ def register_transforms(source_code, obj):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
-        obj.register_transform(astroid.Arguments, fix_start_attributes)
-        obj.register_transform(astroid.Arguments, set_arguments)
+    obj.register_transform(astroid.Arguments, fix_start_attributes)
+    obj.register_transform(astroid.Arguments, set_arguments)
 
     for node_class in NODES_WITH_CHILDREN:
         obj.register_transform(node_class, set_from_last_child)

@@ -85,8 +85,9 @@ def test_set_multi_assign(variables_list, value):
     program = (" = ").join(variables_list)
     module, inferer = cs._parse_text(program)
     for target_node in module.nodes_of_class(astroid.AssignName):
+        value_type = target_node.parent.value.type_constraints.type
         target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
-        assert inferer.type_constraints.lookup_concrete(target_type_var) == type(value)
+        assert inferer.type_constraints.lookup_concrete(target_type_var) == value_type
 
 
 if __name__ == '__main__':

@@ -3,12 +3,12 @@ import nose
 from hypothesis import given, assume, settings
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
-from typing import TypeVar
+from typing import TypeVar, Any
 from keyword import iskeyword
 settings.load_profile("pyta")
 
 
-@given(cs.random_dict_variable_value(min_size=1))
+@given(cs.random_dict_variable_homogeneous_value(min_size=1))
 def test_set_env(variables_dict):
     """Test environment setting visitors"""
     program = cs._parse_dictionary_to_program(variables_dict)
@@ -31,7 +31,7 @@ def test_set_name_unassigned(variable_name):
         assert name_node.type_constraints.type == name_type_var
 
 
-@given(cs.random_dict_variable_value(min_size=1))
+@given(cs.random_dict_variable_homogeneous_value(min_size=1))
 def test_set_name_assigned(variables_dict):
     """Test visitor for name nodes representing a variables with assigned values in module."""
     program = cs._parse_dictionary_to_program(variables_dict)
@@ -43,7 +43,7 @@ def test_set_name_assigned(variables_dict):
         assert name_node.type_constraints.type == name_type_var
 
 
-@given(cs.random_dict_variable_value(min_size=1))
+@given(cs.random_dict_variable_homogeneous_value(min_size=1))
 def test_set_single_assign(variables_dict):
     """Test single-target assignment statements; verify unification of type variables."""
     program = cs._parse_dictionary_to_program(variables_dict)
@@ -59,7 +59,7 @@ def test_set_single_assign(variables_dict):
         assert target_value.type_constraints.type == target_type
 
 
-@given(cs.random_dict_variable_value(min_size=2))
+@given(cs.random_dict_variable_homogeneous_value(min_size=2))
 def test_multi_target_assign(variables_dict):
     """Test multi-target assignment statements; verify unification of type variables."""
     for variable_name in variables_dict:
@@ -90,23 +90,41 @@ def test_set_multi_assign(variables_list, value):
         assert inferer.type_constraints.lookup_concrete(target_type_var) == value_type
 
 
-@given(cs.random_dict_variable_value(min_size=2))
-def test_assign_complex(variables_dict):
-    """Test whether visitors properly set the type constraint of the a Assign node representing a multi-target-assign
-     with a list as the value.
+@given(cs.random_dict_variable_homogeneous_value(min_size=2))
+def test_assign_complex_homogeneous(variables_dict):
+    """test whether visitors properly set the type constraint of the a assign node representing a multi-target-assign
+     with a homogeneous list as the value.
     """
     for variable_name in variables_dict:
         assume(not iskeyword(variable_name))
-    program = (", ".join(variables_dict.keys())
-               + " = ["
+    program = ("x = ["
                + ", ".join([repr(value) for value in variables_dict.values()])
-               + "]\n")
+               + "]\n"
+               + ", ".join(variables_dict.keys())
+               + " = x")
+    module, typeinferrer = cs._parse_text(program)
+    for variable_name in variables_dict:
+        var_type_var = module.type_environment.lookup_in_env(variable_name)
+        assert typeinferrer.type_constraints.lookup_concrete(var_type_var) == type(list(variables_dict.values())[0])
+
+
+@given(hs.lists(cs.valid_identifier(), min_size=2), cs.random_list(min_size=2))
+def test_assign_complex(variables, values):
+    """Test whether visitors properly set the type constraint of the a Assign node representing a multi-target-assign
+     with a homogeneous list as the value.
+    """
+    assume(type(values[0]) != type(values[1]) and len(variables) == len(values))
+    program = ("x = ["
+               + ", ".join([repr(val) for val in values])
+               + "]\n"
+               + ", ".join(variables)
+               + " = x")
     module, TypeInferrer = cs._parse_text(program)
-    for node in module.nodes_of_class(astroid.Assign):
-        target_type_tuple = zip(node.targets[0].elts, node.value.elts)
-        for target, value in target_type_tuple:
-            target_type_var = target.frame().type_environment.lookup_in_env(target.name)
-            assert TypeInferrer.type_constraints.lookup_concrete(target_type_var) == value.type_constraints.type
+    for variable_name in variables:
+        variable_type_var = module.type_environment.lookup_in_env(variable_name)
+        a = TypeInferrer.type_constraints.lookup_concrete(variable_type_var)
+        assert TypeInferrer.type_constraints.lookup_concrete(variable_type_var) == Any
+
 
 if __name__ == '__main__':
     nose.main()

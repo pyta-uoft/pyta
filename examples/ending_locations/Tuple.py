@@ -15,4 +15,6 @@
 fun(2, ((1), ))
 fun(((1), ))
 (1, ), (2, )
-# (x, y) = [7, 8]        # prevent this last comma being used
+(a, b) = [
+          5, 6]
+(x, y) = [7, 8]        # prevent this last comma being used

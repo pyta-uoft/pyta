@@ -239,18 +239,19 @@ class TypeInferer:
     def visit_assign(self, node):
         # multi-assignment; LHS is a tuple of AssignName target nodes as "elements"
         if isinstance(node.targets[0], astroid.Tuple):
-            if isinstance(node.value, astroid.Name):
-                value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
-                value_type = self.type_constraints.lookup_concrete(value_tvar)
-                # we know there are multiple targets, so we can assume multiple values; error handling not done here
-                for target_node in node.targets[0].elts:
-                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_type_var, value_type.__args__[0])
-            else:
+            if isinstance(node.value, astroid.Tuple):
                 target_type_tuple = zip(node.targets[0].elts, node.value.elts)
                 for target_node, value in target_type_tuple:
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
                     self.type_constraints.unify(target_type_var, value.type_constraints.type)
+            else:
+                value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
+                value_type = self.type_constraints.lookup_concrete(value_tvar)
+                func_type = self.type_store.lookup_function('__iter__', value_type)
+                rtype = self.type_constraints.unify_call(func_type, value_type)
+                for target_node in node.targets[0].elts:
+                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
+                    self.type_constraints.unify(target_type_var, rtype.__args__[0])
         else:
             # assignment(s) in single statement
             for target_node in node.targets:

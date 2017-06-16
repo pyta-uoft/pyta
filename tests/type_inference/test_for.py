@@ -12,9 +12,7 @@ def test_for_homogeneous_list(iterable):
      iterating over a homogeneous list.
     """
     program = f'for elt in {iterable}:\n' \
-              f'    x = elt\n' \
-              f'else:\n' \
-              f'    pass\n'
+              f'    x = elt\n'
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
     local_type_var = module.type_environment.lookup_in_env('x')
@@ -29,9 +27,7 @@ def test_for_heterogeneous_list(iterable):
     """
     assume(not isinstance(type(iterable[0]), type(iterable[1])))
     program = f'for elt in {iterable}:\n' \
-              f'    x = elt\n' \
-              f'else:\n' \
-              f'    pass\n'
+              f'    x = elt\n'
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
     local_type_var = module.type_environment.lookup_in_env('x')

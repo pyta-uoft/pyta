@@ -488,13 +488,6 @@ def start_setter_from_source(source_code, pred):
 
 def add_parens(source_code):
     def h(node):
-        _add_parens(source_code)(node)
-
-    return h
-
-
-def _add_parens(source_code):
-    def h(node):
         loc_curr = loc_prev = (node.fromlineno - 1, node.end_lineno - 1, node.col_offset, node.end_col_offset)
         # Initialize counters. Note: fromlineno is 1-indexed.
         while True:

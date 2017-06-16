@@ -17,7 +17,7 @@ def test_for_homogeneous_list(iterable):
     for_node = list(module.nodes_of_class(astroid.For))[0]
     local_type_var = module.type_environment.lookup_in_env('x')
     inferred_type = TypeInferrer.type_constraints.lookup_concrete(local_type_var)
-    assert inferred_type == type(iterable[0])
+    assert inferred_type == iterable[0]
 
 
 @given(cs.random_list(min_size=2))

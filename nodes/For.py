@@ -7,8 +7,8 @@ Attributes:
     - target  (Node)
         - Holds the variable(s) the loop assigns to as a single node. The type
           of the node can be Name, List, Tuple, etc.
-    - iter    (Call)
-        - A function call node which represents the part that iterates over
+    - iter    (Node)
+        - A node which represents the iterable.
           the loop.
     - body    (List[Statement])
         - The node to be executed.

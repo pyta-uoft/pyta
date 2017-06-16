@@ -533,7 +533,7 @@ def add_parens(source_code):
                 elif source_code[end_lineno][j] in CONSUMABLES:
                     continue
                 else:
-                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno, j+1
+                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno, j
                     break
 
             if next_char is None:
@@ -546,7 +546,7 @@ def add_parens(source_code):
                         elif source_code[i][j] in CONSUMABLES:
                             continue
                         else:
-                            next_char, new_end_lineno, new_end_coloffset = source_code[i][j], i, j+1
+                            next_char, new_end_lineno, new_end_coloffset = source_code[i][j], i, j
                             break
                     if next_char is not None:
                         break
@@ -556,7 +556,7 @@ def add_parens(source_code):
 
             # At this point, an enclosing pair of parentheses has been found
             loc_prev = loc_curr
-            loc_curr = new_lineno, new_end_lineno, new_coloffset, new_end_coloffset
+            loc_curr = new_lineno, new_end_lineno, new_coloffset, new_end_coloffset + 1
 
             # Don't set n+1 parens if node is within a call, "(...)"
             set_by = loc_curr

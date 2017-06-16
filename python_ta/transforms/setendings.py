@@ -558,7 +558,8 @@ def add_parens(source_code):
             loc_prev = loc_curr
             loc_curr = new_lineno, new_end_lineno, new_coloffset, new_end_coloffset + 1
 
-            # Don't set n+1 parens if node is within a call, "(...)"
+            # Separate Call node's paren syntax from inclusion in starting and
+            # ending locations of single nodes in its argument list.
             set_by = loc_curr
             if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
                 set_by = loc_prev

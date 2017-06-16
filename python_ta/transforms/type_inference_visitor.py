@@ -239,10 +239,18 @@ class TypeInferer:
     def visit_assign(self, node):
         # multi-assignment; LHS is a tuple of AssignName target nodes as "elements"
         if isinstance(node.targets[0], astroid.Tuple):
-            target_type_tuple = zip(node.targets[0].elts, node.value.elts)
-            for target_node, value in target_type_tuple:
-                target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                self.type_constraints.unify(target_type_var, value.type_constraints.type)
+            if isinstance(node.value, astroid.Name):
+                value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
+                value_type = self.type_constraints.lookup_concrete(value_tvar)
+                # we know there are multiple targets, so we can assume multiple values; error handling not done here
+                for target_node in node.targets[0].elts:
+                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
+                    self.type_constraints.unify(target_type_var, value_type.__args__[0])
+            else:
+                target_type_tuple = zip(node.targets[0].elts, node.value.elts)
+                for target_node, value in target_type_tuple:
+                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
+                    self.type_constraints.unify(target_type_var, value.type_constraints.type)
         else:
             # assignment(s) in single statement
             for target_node in node.targets:

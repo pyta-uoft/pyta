@@ -122,7 +122,6 @@ def test_assign_complex(variables, values):
     module, TypeInferrer = cs._parse_text(program)
     for variable_name in variables:
         variable_type_var = module.type_environment.lookup_in_env(variable_name)
-        a = TypeInferrer.type_constraints.lookup_concrete(variable_type_var)
         assert TypeInferrer.type_constraints.lookup_concrete(variable_type_var) == Any
 
 

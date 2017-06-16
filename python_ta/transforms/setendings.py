@@ -487,6 +487,10 @@ def start_setter_from_source(source_code, pred):
 
 
 def add_parens(source_code):
+    """Search for parenthesis (paren) characters before start and end positions
+    of nodes. Search in both directions at once to ensure paren pairs are always
+    matched.
+    """
     def h(node):
         loc_curr = loc_prev = (node.fromlineno - 1, node.end_lineno - 1, node.col_offset, node.end_col_offset)
         # Initialize counters. Note: fromlineno is 1-indexed.

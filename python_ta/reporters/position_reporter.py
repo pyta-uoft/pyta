@@ -6,9 +6,6 @@ from .plain_reporter import PlainReporter
 
 
 class PositionReporter(PlainReporter):
-    _SPACE = ' '
-    _BREAK = '\n'
-
     def __init__(self, source_lines=None, module_name=''):
         super().__init__(source_lines, module_name)
         self._output = {   

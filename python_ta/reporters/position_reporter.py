@@ -51,7 +51,7 @@ class PositionReporter(PlainReporter):
                         'lineno': msg_instance.line,
                         'end_lineno': msg_instance.line,
                         'col_offset': msg_instance.column,
-                        'end_col_offset': len(self._source_lines[msg_instance.line])
+                        'end_col_offset': len(self._source_lines[msg_instance.line-1])
                     })
             data_per_message.append(msg_data)
         return data_per_message

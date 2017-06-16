@@ -430,6 +430,8 @@ def end_setter_from_source(source_code, pred):
                 temp = node.end_col_offset
                 node.end_col_offset = j + 1
                 return
+            elif source_code[lineno][j] not in CONSUMABLES:
+                return
 
         # If that doesn't work, search remaining lines
         for i in range(lineno + 1, len(source_code)):

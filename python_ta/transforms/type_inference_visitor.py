@@ -285,7 +285,7 @@ class TypeInferer:
             self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))
         else:
             target_tvars = [node.frame().type_environment.lookup_in_env(target_node.name) for target_node in for_node.target.elts]
-            for i in range(len(rtype.__args__) + 1):
+            for i in range(len(target_tvars)):
                 self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
 
     def visit_module(self, node):

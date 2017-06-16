@@ -12,8 +12,6 @@ class PositionReporter(PlainReporter):
             'total_genre_errors': 0,
             'total_genre_styles': 0,
             'total_results': 0,
-            'total_skipped': 0,
-            'skipped': [],
             'results': []
         }
 

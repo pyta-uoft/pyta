@@ -185,30 +185,30 @@ def find_child(node, astroid_class):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
-    (astroid.AssignAttr, None, _is_attr_name),
-    (astroid.AsyncFor, _keyword_search('async'), None),
-    (astroid.AsyncWith, _keyword_search('async'), None),
-    (astroid.Attribute, None, _is_attr_name),
-    (astroid.Call, None, _token_search(')')),
-    (astroid.DelAttr, _keyword_search('del'), _is_attr_name),
-    (astroid.DelName, _keyword_search('del'), None),
-    (astroid.Dict, None, _token_search('}')),
-    (astroid.DictComp, None, _token_search('}')),
+    (astroid.AssignAttr, None, _is_attr_name, True),
+    (astroid.AsyncFor, _keyword_search('async'), None, False),
+    (astroid.AsyncWith, _keyword_search('async'), None, False),
+    (astroid.Attribute, None, _is_attr_name, True),
+    (astroid.Call, None, _token_search(')'), False),
+    (astroid.DelAttr, _keyword_search('del'), _is_attr_name, True),
+    (astroid.DelName, _keyword_search('del'), None, False),
+    (astroid.Dict, None, _token_search('}'), False),
+    (astroid.DictComp, None, _token_search('}'), False),
 
     # FIXME: sometimes start/ending char does not exist.
-    (astroid.Expr, _token_search('('), _token_search(')')),
-    (astroid.ExtSlice, _token_search('['), _token_search(']')),
-    (astroid.GeneratorExp, _token_search('('), _token_search(')')),
-    (astroid.Index, _token_search('['), _token_search(']')),
-    (astroid.Keyword, _is_arg_name, None),
+    (astroid.Expr, _token_search('('), _token_search(')'), False),
+    (astroid.ExtSlice, _token_search('['), _token_search(']'), True),
+    (astroid.GeneratorExp, _token_search('('), _token_search(')'), False),
+    (astroid.Index, _token_search('['), _token_search(']'), False),
+    (astroid.Keyword, _is_arg_name, None, False),
 
     # TODO: missing *both* outer brackets
-    (astroid.ListComp, _token_search('['), _token_search(']')),
-    (astroid.Set, None, _token_search('}')),
-    (astroid.SetComp, None, _token_search('}')),
-    (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
-    (astroid.Subscript, None, _token_search(']')),
-    (astroid.Tuple, None, _token_search(',')),
+    (astroid.ListComp, _token_search('['), _token_search(']'), False),
+    (astroid.Set, None, _token_search('}'), False),
+    (astroid.SetComp, None, _token_search('}'), False),
+    (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket, True),
+    (astroid.Subscript, None, _token_search(']'), True),
+    (astroid.Tuple, None, _token_search(','), False),
 ]
 
 
@@ -241,13 +241,13 @@ def init_register_ending_setters(source_code):
 
     # Nodes where the source code must also be provided.
     # source_code and the predicate functions get stored in the TransformVisitor
-    for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
+    for node_class, start_pred, end_pred, cond in NODES_REQUIRING_SOURCE:
         if start_pred is not None:
             ending_transformer.register_transform(
                 node_class, start_setter_from_source(source_code, start_pred))
         if end_pred is not None:
             ending_transformer.register_transform(
-                node_class, end_setter_from_source(source_code, end_pred))
+                node_class, end_setter_from_source(source_code, end_pred, cond))
 
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
@@ -403,7 +403,7 @@ def _get_last_child(node):
         return skip_to_last_child  # postcondition: node, or None.
 
 
-def end_setter_from_source(source_code, pred):
+def end_setter_from_source(source_code, pred, cond):
     """Returns a *function* that sets ending locations for a node from source.
 
     The basic technique is to do the following:
@@ -429,6 +429,9 @@ def end_setter_from_source(source_code, pred):
             if pred(source_code[lineno], j, node):
                 temp = node.end_col_offset
                 node.end_col_offset = j + 1
+                return
+            # only consume inert characters.
+            elif not cond and source_code[lineno][j] not in CONSUMABLES:
                 return
 
         # If that doesn't work, search remaining lines

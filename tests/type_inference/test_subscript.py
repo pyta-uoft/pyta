@@ -13,7 +13,8 @@ def test_inference_list_subscript(input_list, index):
     program = f'{input_list}[{index}]'
     module, _ = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
-    assert subscript_node.type_constraints.type == type(input_list[0])
+    list_node = list(module.nodes_of_class(astroid.List))[0]
+    assert subscript_node.type_constraints.type == list_node.elts[0].type_constraints.type
 
 
 @given(cs.homogeneous_dictionary(min_size=1))
@@ -22,8 +23,8 @@ def test_inference_dict_subscript(input_dict):
         program = f'{repr(input_dict)}[{repr(index)}]'
         module, _ = cs._parse_text(program)
         subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
-        print(subscript_node.type_constraints.type, input_dict[index])
-        assert subscript_node.type_constraints.type == type(input_dict[index])
+        dict_node = list(module.nodes_of_class(astroid.Dict))[0]
+        assert subscript_node.type_constraints.type == dict_node.
 
 
 @given(cs.homogeneous_list(min_size=1), cs.random_slice_indices())

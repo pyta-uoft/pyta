@@ -276,6 +276,18 @@ class TypeInferer:
         ret_type = self.type_constraints.unify_call(func_t, *arg_types)
         node.type_constraints = TypeInfo(ret_type)
 
+    def visit_for(self, node):
+        for_node = list(node.nodes_of_class(astroid.For))[0]
+        iterable_type = self.type_store.lookup_function('__iter__', for_node.iter.type_constraints.type)
+        rtype = self.type_constraints.unify_call(iterable_type, for_node.iter.type_constraints.type)
+        # there may be one target, or a Generic of targets to unify.
+        if isinstance(for_node.target, astroid.AssignName):
+            self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))
+        else:
+            target_tvars = [node.frame().type_environment.lookup_in_env(target_node.name) for target_node in for_node.target.elts]
+            for i in range(len(target_tvars)):
+                self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
+
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)

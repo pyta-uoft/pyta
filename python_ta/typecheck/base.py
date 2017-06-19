@@ -268,6 +268,10 @@ class TypeConstraints:
                 return True
             else:
                 return False
+        elif isinstance(t1, GenericMeta):
+            return False
+        elif isinstance(t2, GenericMeta):
+            return False
         elif issubclass(t1, t2) or issubclass(t2, t1):
             return True
         elif t1 != t2:

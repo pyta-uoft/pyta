@@ -3,7 +3,7 @@
 import astroid
 from astroid.bases import BUILTINS
 from pylint.utils import OPTION_RGX
-from pylint.checkers.base import NameChecker
+from pylint.checkers.base import NameChecker, ComparisonChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
 from pylint.checkers.format import FormatChecker, _EMPTY_LINE
@@ -15,6 +15,7 @@ def patch_checkers():
     """Run patches to modify built-in pylint checker behaviour."""
     _override_check_protected_attribute_access()
     _override_check_invalid_name_in_main()
+    _override_singleton_comparison()
     _override_attribute_defined_outside_init()
     _override_regex_to_allow_long_doctest_lines()
 
@@ -60,6 +61,55 @@ def _override_check_invalid_name_in_main():
             old_visit_assignname(self, node)
 
     NameChecker.visit_assignname = patched_visit_assignname
+
+
+def _override_singleton_comparison():
+    """
+    `if f.exists != False:`       # should be (if f.exists:)
+    """
+    old_visit_compare = ComparisonChecker.visit_compare
+    old_check_singleton_comparison = ComparisonChecker._check_singleton_comparison
+
+    def new_check_singleton_comparison(self, singleton, root_node):
+        if singleton.value is True:
+            suggestion = "just 'expr', or 'expr is True'" + ' TEMPORARY 1'
+            self.add_message('singleton-comparison',
+                             node=root_node,
+                             args=(True, suggestion))
+        elif singleton.value is False:
+            suggestion = "'not expr' or 'expr is False'"
+            self.add_message('singleton-comparison',
+                             node=root_node,
+                             args=(False, suggestion))
+        elif singleton.value is None:
+            self.add_message('singleton-comparison',
+                             node=root_node,
+                             args=(None, "'expr is None'"))
+
+    def new_visit_compare(self, node):
+        self._check_unidiomatic_typecheck(node)
+        # NOTE: this checker only works with binary comparisons like 'x == 42'
+        # but not 'x == y == 42'
+        if len(node.ops) != 1:
+            return
+
+        left = node.left
+        operator, right = node.ops[0]
+        if (operator in ('<', '<=', '>', '>=', '!=', '==')
+                and isinstance(left, astroid.Const)):
+            self._check_misplaced_constant(node, left, right, operator)
+
+        if operator == '==':
+            if isinstance(left, astroid.Const):
+                self._check_singleton_comparison(left, node)
+            elif isinstance(right, astroid.Const):
+                self._check_singleton_comparison(right, node)
+        if operator in ('is', 'is not'):
+            self._check_literal_comparison(right, node)
+
+    ComparisonChecker.visit_compare = new_visit_compare
+    ComparisonChecker._check_singleton_comparison = new_check_singleton_comparison
+    
 
 
 def _override_attribute_defined_outside_init():

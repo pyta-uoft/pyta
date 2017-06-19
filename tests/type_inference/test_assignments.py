@@ -17,8 +17,10 @@ def test_set_env(variables_dict):
     local_values = [module.type_environment.locals[name] for name in module.type_environment.locals]
     global_values = [module.type_environment.globals[name] for name in module.type_environment.globals]
     # verify the type of the value of each variable in the environment
-    for value in local_values: assert isinstance(value, TypeVar)
-    for value in global_values: assert isinstance(value, TypeVar)
+    for value in local_values:
+        assert isinstance(value, TypeVar)
+    for value in global_values:
+        assert isinstance(value, TypeVar)
 
 
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))

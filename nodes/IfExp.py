@@ -16,7 +16,7 @@ Attributes:
 
 Example:
     - test    -> Const(True)
-    - body    -> Assign(x=1)
+    - body    -> Const(1)
     - orelse  -> Const(0)
 """
 

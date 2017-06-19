@@ -6,15 +6,18 @@ An if statement written in an expression form.
 Attributes:
     - test    (Node)
         - Holds a single node such as Compare.
-    - body    (List[Node])
-        - A list of nodes that will execute if the condition passes.
-    - orelse  (List[Node])
-        - The else clause.
+    - body    (Node)
+        - A Node representing the suite to be executed if the if expression
+          evalutes to True.
+    - orelse  (Node)
+        - The Node representing the suite to be executed if the if expression
+          evaluates to False.
 
 Example:
     - test    -> Const(True)
-    - body    -> [1]
-    - orelse  -> [0]
+    - body    -> Assign(x=1)
+    - orelse  -> Const(0)
 """
 
 x = 1 if True else 0
+

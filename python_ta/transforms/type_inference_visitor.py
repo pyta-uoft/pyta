@@ -303,8 +303,6 @@ class TypeInferer:
                 self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
 
     def visit_ifexp(self, node):
-        #TODO: this expression can take on one of two types depending on the value of the evaluated expression
-        #TODO: we should use Union, but for the time being let's set the type as a single type or Any.
         if node.body.type_constraints.type == node.orelse.type_constraints.type:
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:

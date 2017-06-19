@@ -174,6 +174,8 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
+        elif t1 == Any or t2 == Any:
+            pass
         elif issubclass(t1, t2) or issubclass(t2, t1):
             pass
         elif t1 != t2:
@@ -271,6 +273,10 @@ class TypeConstraints:
         elif isinstance(t1, GenericMeta):
             return False
         elif isinstance(t2, GenericMeta):
+            return False
+        elif t1 == Any or t2 == Any:
+            return True
+        elif (hasattr(t1, 'msg') and ('not found' in t1.msg)) or (hasattr(t2, 'msg') and ('not found' in t2.msg)):
             return False
         elif issubclass(t1, t2) or issubclass(t2, t1):
             return True

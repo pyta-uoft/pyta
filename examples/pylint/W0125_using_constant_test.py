@@ -5,4 +5,4 @@ def is_false():
     if True:
         return False
     else:
-        return True
+        return True  # This line will never be executed

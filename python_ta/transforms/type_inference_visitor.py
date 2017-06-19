@@ -172,9 +172,14 @@ class TypeInferer:
         if node.op == 'not':
             node.type_constraints = TypeInfo(bool)
         else:
-            unary_function = self.type_store.lookup_function(op_to_dunder_unary(node.op), node.operand.type_constraints.type)
-            node.type_constraints = TypeInfo(
-                self.type_constraints.unify_call(unary_function, node.operand.type_constraints.type))
+            try:
+                unary_function = self.type_store.lookup_function(op_to_dunder_unary(node.op), node.operand.type_constraints.type)
+                node.type_constraints = TypeInfo(
+                                self.type_constraints.unify_call(unary_function, node.operand.type_constraints.type))
+            except KeyError:
+                node.type_constraints = TypeInfo(
+                    TypeErrorInfo('Method {}.{}() not found'.format(node.operand, node.op), node)
+                )
 
     def visit_subscript(self, node):
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):

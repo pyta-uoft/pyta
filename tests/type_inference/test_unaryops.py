@@ -12,7 +12,7 @@ def test_unarynop_non_bool_concrete(operator, operand):
     program = f'{operator} {repr(operand)}\n'
     module, _ = cs._parse_text(program)
     unaryop_node = list(module.nodes_of_class(astroid.UnaryOp))[0]
-    assert unaryop_node.type_constraints.type == type(operand)
+    assert unaryop_node.type_constraints.type == unaryop_node.operand.type_constraints.type
 
 
 @given(cs.unary_bool_operator, cs.primitive_values)

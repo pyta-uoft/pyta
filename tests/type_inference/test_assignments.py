@@ -105,9 +105,10 @@ def test_assign_complex_homogeneous(variables_dict):
                + ", ".join(variables_dict.keys())
                + " = x")
     module, typeinferrer = cs._parse_text(program)
+    ass_node = list(module.nodes_of_class(astroid.Assign))[0]
     for variable_name in variables_dict:
-        var_type_var = module.type_environment.lookup_in_env(variable_name)
-        assert typeinferrer.type_constraints.lookup_concrete(var_type_var) == type(list(variables_dict.values())[0])
+        var_tvar = module.type_environment.lookup_in_env(variable_name)
+        assert typeinferrer.type_constraints.lookup_concrete(var_tvar) == ass_node.value.elts[0].type_constraints.type
 
 
 @given(hs.lists(cs.valid_identifier(), min_size=2), cs.random_list(min_size=2))

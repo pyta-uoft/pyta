@@ -74,8 +74,6 @@ NODES_WITH_CHILDREN = [
     astroid.Decorators,
     astroid.Delete,
     astroid.ExceptHandler,
-    astroid.ExtSlice,
-    # astroid.Expr,  # need this here?
     astroid.For,
     astroid.FunctionDef,
     astroid.GeneratorExp,
@@ -194,15 +192,13 @@ NODES_REQUIRING_SOURCE = [
     (astroid.DelName, _keyword_search('del'), None),
     (astroid.Dict, None, _token_search('}')),
     (astroid.DictComp, None, _token_search('}')),
-
-    # FIXME: sometimes start/ending char does not exist.
     (astroid.Expr, _token_search('('), _token_search(')')),
+
+    # TODO: use same behavior as Slice.
     (astroid.ExtSlice, _token_search('['), _token_search(']')),
     (astroid.GeneratorExp, _token_search('('), _token_search(')')),
     (astroid.Index, _token_search('['), _token_search(']')),
     (astroid.Keyword, _is_arg_name, None),
-
-    # TODO: missing *both* outer brackets
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),

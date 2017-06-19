@@ -74,8 +74,6 @@ NODES_WITH_CHILDREN = [
     astroid.Decorators,
     astroid.Delete,
     astroid.ExceptHandler,
-    astroid.ExtSlice,
-    # astroid.Expr,  # need this here?
     astroid.For,
     astroid.FunctionDef,
     astroid.GeneratorExp,

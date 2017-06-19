@@ -10,7 +10,7 @@ pyta-number-of-messages = 5
 pyta-pep8 = no
 
 # Set the output format. Available pyta formats are: ColorReporter, 
-# PlainReporter, HTMLReporter, StatReporter
+# PlainReporter, HTMLReporter, StatReporter, PositionReporter
 pyta-reporter = ColorReporter
 
 [ELIF]

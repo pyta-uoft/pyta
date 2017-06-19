@@ -45,7 +45,7 @@ class HTMLReporter(ColorReporter):
                                style=dict(self._sorted_style_messages))
         self.messages_by_file.append(append_set)
 
-    def build_template(self):
+    def output_blob(self):
         """Output to the template after all messages."""
         
         template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(TEMPLATE_FILE)

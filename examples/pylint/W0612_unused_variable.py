@@ -1,3 +1,3 @@
 def f(x):
-    y = 5  # This variable isn't used
+    y = 5  # Unused variable 'y'
     return x

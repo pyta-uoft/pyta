@@ -174,6 +174,10 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            pass
+        elif t1 == Any or t2 == Any:
+            pass
         elif issubclass(t1, t2) or issubclass(t2, t1):
             pass
         elif t1 != t2:
@@ -268,6 +272,30 @@ class TypeConstraints:
                 return True
             else:
                 return False
+        elif isinstance(t1, GenericMeta):
+            return False
+        elif isinstance(t2, GenericMeta):
+            return False
+        elif t1.__class__.__name__ == '_Union' and t2.__class__.__name__ == 'Union':
+            for union_type in t1.__args__:
+                if union_type in t2.__args__:
+                    return True
+            else:
+                return False
+        elif t1.__class__.__name__ == '_Union':
+            if t2 in t1.__args__:
+                return True
+            else:
+                return False
+        elif t2.__class__.__name__ == '_Union':
+            if t1 in t2.__args__:
+                return True
+            else:
+                return False
+        elif t1 == Any or t2 == Any:
+            return True
+        elif (hasattr(t1, 'msg') and ('not found' in t1.msg)) or (hasattr(t2, 'msg') and ('not found' in t2.msg)):
+            return False
         elif issubclass(t1, t2) or issubclass(t2, t1):
             return True
         elif t1 != t2:

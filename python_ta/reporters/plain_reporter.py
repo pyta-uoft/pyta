@@ -304,6 +304,7 @@ class PlainReporter(BaseReporter):
 
     _display = None
 
-    def build_template(self):
-        """Override in html_reporter."""
+    def output_blob(self):
+        """Override in reporters that output collections of messages once at
+        the end of linting all files, rather than stream to std.out"""
         pass

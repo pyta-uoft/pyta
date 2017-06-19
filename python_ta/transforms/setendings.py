@@ -74,8 +74,6 @@ NODES_WITH_CHILDREN = [
     astroid.Decorators,
     astroid.Delete,
     astroid.ExceptHandler,
-    astroid.ExtSlice,
-    # astroid.Expr,  # need this here?
     astroid.For,
     astroid.FunctionDef,
     astroid.GeneratorExp,
@@ -195,15 +193,13 @@ NODES_REQUIRING_SOURCE = [
     (astroid.DelName, _keyword_search('del'), None),
     (astroid.Dict, None, _token_search('}')),
     (astroid.DictComp, None, _token_search('}')),
-
-    # FIXME: sometimes start/ending char does not exist.
     (astroid.Expr, _token_search('('), _token_search(')')),
+
+    # TODO: use same behavior as Slice.
     (astroid.ExtSlice, _token_search('['), _token_search(']')),
     (astroid.GeneratorExp, _token_search('('), _token_search(')')),
     (astroid.Index, _token_search('['), _token_search(']')),
     (astroid.Keyword, _is_arg_name, None),
-
-    # TODO: missing *both* outer brackets
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
@@ -597,8 +593,8 @@ def register_transforms(source_code, obj):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
-        obj.register_transform(astroid.Arguments, fix_start_attributes)
-        obj.register_transform(astroid.Arguments, set_arguments)
+    obj.register_transform(astroid.Arguments, fix_start_attributes)
+    obj.register_transform(astroid.Arguments, set_arguments)
 
     for node_class in NODES_WITH_CHILDREN:
         obj.register_transform(node_class, set_from_last_child)

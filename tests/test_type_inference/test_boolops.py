@@ -14,7 +14,7 @@ def test_homogeneous_binary_boolop(op, operand_list):
     program = (' ' + op + ' ').join(pre_format_program)
     module, _ = cs._parse_text(program)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    assert boolop_node.type_constraints.type == type(operand_list[0])
+    assert boolop_node.type_constraints.type == boolop_node.values[0].type_constraints.type
 
 
 @given(cs.binary_bool_operator, cs.random_list(min_size=2))

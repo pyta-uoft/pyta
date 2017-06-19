@@ -27,17 +27,23 @@ def test_function_def_no_args(function_name, return_value):
     program = _parse_to_function(function_name, [], repr(return_value))
     module, inferer = cs._parse_text(program)
     function_type_var = module.type_environment.lookup_in_env(function_name)
-    assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[[], type(return_value)]
+    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    return_tvar = function_def_node.type_environment.lookup_in_env('return')
+    return_type = inferer.type_constraints.lookup_concrete(return_tvar)
+    assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[[], return_type]
 
 
 @given(cs.valid_identifier(), cs.primitive_values)
 def test_function_def_call_no_args(function_name, return_value):
     """Test type setting in environment of a function call for a function with no parameters."""
     program = _parse_to_function(function_name, [], repr(return_value)) + "\n" + function_name + "()\n"
-    module, _ = cs._parse_text(program)
+    module, inferer = cs._parse_text(program)
     # there should be a single Expr node in this program
+    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    return_tvar = function_def_node.type_environment.lookup_in_env('return')
+    return_type = inferer.type_constraints.lookup_concrete(return_tvar)
     expr_node = next(module.nodes_of_class(astroid.Expr))
-    assert expr_node.type_constraints.type == type(return_value)
+    assert expr_node.type_constraints.type == return_type
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=0), cs.primitive_values)
@@ -53,11 +59,10 @@ def test_function_def_no_return(function_name, arguments, body):
         assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[expected_arg_types, None]
 
 
-
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
 def test_function_def_args_simple_return(function_name, arguments):
-    """Test FunctionDef node visitors representing function definitions with paramater(s); return one of its arguments."""
-    # generate every possible function definition program of aforementioned form.
+    """Test FunctionDef node visitors representing function definitions with paramater(s):
+     return one of its arguments."""
     for argument in arguments:
         program = _parse_to_function(function_name, arguments, argument)
         module, inferer = cs._parse_text(program)

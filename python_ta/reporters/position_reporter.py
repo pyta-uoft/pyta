@@ -22,16 +22,16 @@ class PositionReporter(PlainReporter):
         data_per_message = []
         for msg_id in sorted_messages:
             msg_data = {
-                'occurances': [],
+                'occurrences': [],
                 'id': msg_id,
                 'title': sorted_messages[msg_id][0].symbol,
                 'msg': sorted_messages[msg_id][0].msg.split('\n')[0],
-                'num_occurances': len(sorted_messages[msg_id])
+                'num_occurrences': len(sorted_messages[msg_id])
             }
             for msg_instance in sorted_messages[msg_id]:
                 if msg_instance.node:
                     msg_data['has_node'] = True
-                    msg_data['occurances'].append({
+                    msg_data['occurrences'].append({
                         'lineno': msg_instance.node.fromlineno,
                         'end_lineno': msg_instance.node.end_lineno,
                         'col_offset': msg_instance.node.col_offset,
@@ -43,9 +43,9 @@ class PositionReporter(PlainReporter):
                     # locations in `node_printers.py` -- Instead, for now use
                     # location of the line.]
                     msg_data['has_node'] = False
-                    if len(self._source_lines) is 0:
+                    if len(self._source_lines) == 0:
                         continue
-                    msg_data['occurances'].append({
+                    msg_data['occurrences'].append({
                         'lineno': msg_instance.line,
                         'end_lineno': msg_instance.line,
                         'col_offset': msg_instance.column,

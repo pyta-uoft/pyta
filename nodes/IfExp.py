@@ -2,6 +2,7 @@
 IfExp astroid node
 
 An if statement written in an expression form.
+(IfExp node represents an expression, not a statement.)
 
 Attributes:
     - test    (Node)

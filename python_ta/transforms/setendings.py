@@ -148,6 +148,7 @@ def _is_within_open_bracket(s, index, node):
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
     target_len = len(node.attrname)
+    slice = s[index-target_len+1 : index+1]
     if index < target_len:
         return False
     return s[index-target_len+1 : index+1] == node.attrname

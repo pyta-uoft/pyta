@@ -277,8 +277,7 @@ class TypeInferer:
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]
-        iterable_type = self.type_store.lookup_function('__iter__', for_node.iter.type_constraints.type)
-        rtype = self.type_constraints.unify_call(iterable_type, for_node.iter.type_constraints.type)
+        rtype = self._lookify_call(node, '__iter__', for_node.iter.type_constraints.type).type
         # there may be one target, or a Generic of targets to unify.
         if isinstance(for_node.target, astroid.AssignName):
             self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))

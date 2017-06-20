@@ -146,27 +146,31 @@ class TypeInferer:
     ##############################################################################
     # Operation nodes
     ##############################################################################
+    def _lookify_call(self, node, func_name, *args):
+        """Helper to lookup a function and unify it with given arguments.
+           Returns the return type of unified function call."""
+        try:
+            func_type = self.type_store.lookup_function(func_name, *args)
+        except KeyError:
+            return_info = TypeInfo(
+                TypeErrorInfo('Function {} not found with given args: {}'.format(func_name, args), node))
+            return return_info
+
+        try:
+            return_type = self.type_constraints.unify_call(func_type, *args)
+        except TypeInferenceError:
+            return_info = TypeInfo(
+                TypeErrorInfo('Bad unify_call of Function {} given args: {}'.format(func_name, *args), node))
+            return return_info
+        else:
+            return_info = TypeInfo(return_type)
+            return return_info
+
     def visit_binop(self, node):
         t1 = self.type_constraints.lookup_concrete(node.left.type_constraints.type)
         t2 = self.type_constraints.lookup_concrete(node.right.type_constraints.type)
         op_name = op_to_dunder_binary(node.op)
-
-        try:
-            method_type = self.type_store.lookup_function(op_name, t1, t2)
-        except KeyError:
-            node.type_constraints = TypeInfo(
-                TypeErrorInfo('Method {}.{}({}) not found'.format(t1, op_name, t2), node)
-            )
-            return
-
-        try:
-            return_type = self.type_constraints.unify_call(method_type, t1, t2)
-        except TypeInferenceError:
-            node.type_constraints = TypeInfo(
-                TypeErrorInfo('incompatible types {} and {} in BinOp'.format(t1, t2), node)
-            )
-        else:
-            node.type_constraints = TypeInfo(return_type)
+        node.type_constraints = self._lookify_call(node, op_name, t1, t2)
 
     def visit_unaryop(self, node):
         if node.op == 'not':

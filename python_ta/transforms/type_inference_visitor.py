@@ -153,18 +153,19 @@ class TypeInferer:
             func_type = self.type_store.lookup_function(func_name, *args)
         except KeyError:
             return_info = TypeInfo(
-                TypeErrorInfo('Function {} not found with given args: {}'.format(func_name, args), node))
+                TypeErrorInfo('Function {} not found with given a {}'.
+                              format(func_name, args), node))
             return return_info
 
         try:
             return_type = self.type_constraints.unify_call(func_type, *args)
         except TypeInferenceError:
             return_info = TypeInfo(
-                TypeErrorInfo('Bad unify_call of Function {} given args: {}'.format(func_name, *args), node))
-            return return_info
+                TypeErrorInfo('Bad unify_call of Function {} given args: {}'.
+                              format(func_name, *args), node))
         else:
             return_info = TypeInfo(return_type)
-            return return_info
+        return return_info
 
     def visit_binop(self, node):
         t1 = self.type_constraints.lookup_concrete(node.left.type_constraints.type)
@@ -176,14 +177,9 @@ class TypeInferer:
         if node.op == 'not':
             node.type_constraints = TypeInfo(bool)
         else:
-            try:
-                unary_function = self.type_store.lookup_function(op_to_dunder_unary(node.op), node.operand.type_constraints.type)
-                node.type_constraints = TypeInfo(
-                                self.type_constraints.unify_call(unary_function, node.operand.type_constraints.type))
-            except KeyError:
-                node.type_constraints = TypeInfo(
-                    TypeErrorInfo('Method {}.{}() not found'.format(node.operand, node.op), node)
-                )
+            op_name = op_to_dunder_unary(node.op)
+            node.type_constraints = self._lookify_call(node, op_name,
+                                            node.operand.type_constraints.type)
 
     def visit_subscript(self, node):
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):

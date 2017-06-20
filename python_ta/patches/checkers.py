@@ -64,27 +64,52 @@ def _override_check_invalid_name_in_main():
 
 
 def _override_singleton_comparison():
-    """
-    `if f.exists != False:`       # should be (if f.exists:)
+    """Override the "singleton-comparison" message, to detect some common 
+    mistakes such as:
+        expr != False
+        expr is not False
+        expr == True
+        expr is False
+        gg is True
+        not expr != True
+        not expr is not True
+        not expr == True
+        not expr is True
+        not expr == False
+        not expr is False
+        not expr != False
+        not expr is not False
+        False != expr
     """
     old_visit_compare = ComparisonChecker.visit_compare
     old_check_singleton_comparison = ComparisonChecker._check_singleton_comparison
 
     def new_check_singleton_comparison(self, singleton, root_node):
-        if singleton.value is True:
-            suggestion = "just 'expr', or 'expr is True'" + ' TEMPORARY 1'
-            self.add_message('singleton-comparison',
-                             node=root_node,
-                             args=(True, suggestion))
-        elif singleton.value is False:
-            suggestion = "'not expr' or 'expr is False'"
-            self.add_message('singleton-comparison',
-                             node=root_node,
-                             args=(False, suggestion))
-        elif singleton.value is None:
-            self.add_message('singleton-comparison',
-                             node=root_node,
-                             args=(None, "'expr is None'"))
+        operator, _ = root_node.ops[0]
+        if hasattr(root_node.parent, 'op') and root_node.parent.op == 'not':
+            expr = 'not ... {} {}'.format(operator, singleton.value)
+            if (operator in ('!=', 'is not') and singleton.value is True) or (operator in ('==', 'is') and singleton.value is False):
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(expr, "just 'expr'"))
+
+            if (operator in ('==', 'is') and singleton.value is True) or (operator in ('!=', 'is not') and singleton.value is False):
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(expr, "just 'not expr'"))
+        else:
+            if singleton.value is True:
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(True, "just 'expr'"))
+            elif singleton.value is False:
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(False, "just 'not expr'"))
+            elif singleton.value is None:
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(None, "'expr is None'"))
 
     def new_visit_compare(self, node):
         self._check_unidiomatic_typecheck(node)
@@ -99,7 +124,7 @@ def _override_singleton_comparison():
                 and isinstance(left, astroid.Const)):
             self._check_misplaced_constant(node, left, right, operator)
 
-        if operator == '==':
+        if operator in ('==', '!=', 'is', 'is not'):
             if isinstance(left, astroid.Const):
                 self._check_singleton_comparison(left, node)
             elif isinstance(right, astroid.Const):
@@ -109,7 +134,6 @@ def _override_singleton_comparison():
 
     ComparisonChecker.visit_compare = new_visit_compare
     ComparisonChecker._check_singleton_comparison = new_check_singleton_comparison
-    
 
 
 def _override_attribute_defined_outside_init():

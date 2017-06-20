@@ -149,27 +149,28 @@ class TypeInferer:
     def _lookify_call(self, node, func_name, *args):
         """Helper to lookup a function and unify it with given arguments.
            Returns the return type of unified function call."""
+        arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
         try:
-            func_type = self.type_store.lookup_function(func_name, *args)
+            func_type = self.type_store.lookup_function(func_name, *arg_types)
         except KeyError:
             return_info = TypeInfo(
                 TypeErrorInfo('Function {} not found with given a {}'.
-                              format(func_name, args), node))
+                              format(func_name, *arg_types), node))
             return return_info
 
         try:
-            return_type = self.type_constraints.unify_call(func_type, *args)
+            return_type = self.type_constraints.unify_call(func_type, *arg_types)
         except TypeInferenceError:
             return_info = TypeInfo(
                 TypeErrorInfo('Bad unify_call of Function {} given args: {}'.
-                              format(func_name, *args), node))
+                              format(func_name,*arg_types), node))
         else:
             return_info = TypeInfo(return_type)
         return return_info
 
     def visit_binop(self, node):
-        t1 = self.type_constraints.lookup_concrete(node.left.type_constraints.type)
-        t2 = self.type_constraints.lookup_concrete(node.right.type_constraints.type)
+        t1 = node.left.type_constraints.type
+        t2 = node.right.type_constraints.type
         op_name = op_to_dunder_binary(node.op)
         node.type_constraints = self._lookify_call(node, op_name, t1, t2)
 
@@ -186,7 +187,6 @@ class TypeInferer:
             value_type = node.value.type_constraints.type
             arg_type = node.slice.type_constraints.type
             op_name = '__getitem__'
-
             node.type_constraints = self._lookify_call(node, op_name,
                                                        value_type, arg_type)
 
@@ -228,8 +228,7 @@ class TypeInferer:
             if isinstance(node.value, astroid.Tuple):
                 target_type_tuple = zip(node.targets[0].elts, node.value.elts)
                 for target_node, value in target_type_tuple:
-                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_type_var, value.type_constraints.type)
+                    self.type_constraints.unify(target_node.name, value.type_constraints.type)
             else:
                 value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
                 value_type = self.type_constraints.lookup_concrete(value_tvar)

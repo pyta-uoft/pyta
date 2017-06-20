@@ -228,7 +228,8 @@ class TypeInferer:
             if isinstance(node.value, astroid.Tuple):
                 target_type_tuple = zip(node.targets[0].elts, node.value.elts)
                 for target_node, value in target_type_tuple:
-                    self.type_constraints.unify(target_node.name, value.type_constraints.type)
+                    target_tvar = node.frame().type_environment.lookup_in_env(target_node.name)
+                    self.type_constraints.unify(target_tvar, value.type_constraints.type)
             else:
                 value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
                 value_type = self.type_constraints.lookup_concrete(value_tvar)

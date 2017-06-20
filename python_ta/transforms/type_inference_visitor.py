@@ -233,8 +233,7 @@ class TypeInferer:
             else:
                 value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
                 value_type = self.type_constraints.lookup_concrete(value_tvar)
-                func_type = self.type_store.lookup_function('__iter__', value_type)
-                rtype = self.type_constraints.unify_call(func_type, value_type)
+                rtype = self._lookify_call(node, '__iter__', value_type).type
                 for target_node in node.targets[0].elts:
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
                     self.type_constraints.unify(target_type_var, rtype.__args__[0])

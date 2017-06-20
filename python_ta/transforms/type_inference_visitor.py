@@ -187,22 +187,8 @@ class TypeInferer:
             arg_type = node.slice.type_constraints.type
             op_name = '__getitem__'
 
-            try:
-                method_type = self.type_store.lookup_function(op_name, value_type, arg_type)
-            except KeyError:
-                node.type_constraints = TypeInfo(
-                    TypeErrorInfo('Method {}.{} not found'.format(value_type, op_name), node)
-                )
-                return
-
-            try:
-                return_type = self.type_constraints.unify_call(method_type, value_type, arg_type)
-            except TypeInferenceError:
-                node.type_constraints = TypeInfo(
-                    TypeErrorInfo('incompatible types {} and {} in Subscript'.format(value_type, arg_type), node)
-                )
-            else:
-                node.type_constraints = TypeInfo(return_type)
+            node.type_constraints = self._lookify_call(node, op_name,
+                                                       value_type, arg_type)
 
     def visit_boolop(self, node):
         """Boolean operators are 'and', 'or'; the result type can be either of the argument types."""

@@ -25,7 +25,7 @@ def test_for_heterogeneous_list(iterable):
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement
      iterating over a heterogeneous list.
     """
-    assume(not isinstance(type(iterable[0]), type(iterable[1])))
+    assume(type(iterable[0]) != type(iterable[1]))
     program = f'for elt in {iterable}:\n' \
               f'    x = elt\n'
     module, TypeInferrer = cs._parse_text(program)
@@ -33,6 +33,7 @@ def test_for_heterogeneous_list(iterable):
     local_type_var = module.type_environment.lookup_in_env('x')
     inferred_type = TypeInferrer.type_constraints.lookup_concrete(local_type_var)
     assert inferred_type == Any
+
 
 def test_inference_func_def_for():
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement

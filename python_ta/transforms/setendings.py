@@ -607,4 +607,4 @@ def register_transforms(source_code, obj):
                 node_class, start_setter_from_source(source_code, start_pred))
         if end_pred is not None:
             obj.register_transform(
-                node_class, end_setter_from_source(source_code, end_pred))
+                node_class, end_setter_from_source(source_code, end_pred, cond))

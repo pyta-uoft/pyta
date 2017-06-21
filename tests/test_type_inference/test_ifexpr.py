@@ -7,7 +7,7 @@ import hypothesis.strategies as hs
 settings.load_profile("pyta")
 
 
-@given(cs.eval_types.flatmap(lambda s: hs.lists(s(), min_size=2, max_size=2)))
+@given(cs.homogeneous_list(min_size=2, max_size=2))
 def test_ifexp_homogeneous(suites):
     """Test the type setting of an IfExp node representing an if statement."""
     program = f'a = {repr(suites[0])}  if True else {repr(suites[1])}\n'
@@ -16,7 +16,7 @@ def test_ifexp_homogeneous(suites):
     assert ifexp_node.type_constraints.type == ifexp_node.body.type_constraints.type
 
 
-@given(hs.lists(cs.eval_values, min_size=2, max_size=2))
+@given(cs.random_list(min_size=2, max_size=2))
 def test_ifexp_heterogeneous(suites):
     """Test the type setting of an IfExp node representing an if statement."""
     assume(type(suites[0]) != type(suites[1]))

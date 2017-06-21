@@ -52,9 +52,11 @@ binary_bool_operator = hs.sampled_from(['and', 'or'])
 unary_bool_operator = hs.sampled_from(['not'])
 
 
-def valid_identifier():
+def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
-    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", min_size=1)\
+    if 'min_size' not in kwargs:
+        kwargs['min_size'] = 4
+    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", **kwargs)\
         .filter(lambda x: x[0].isalpha() and x.isidentifier() and not (iskeyword(x)))
 
 

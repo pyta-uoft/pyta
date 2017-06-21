@@ -601,7 +601,7 @@ def register_transforms(source_code, obj):
         obj.register_transform(node_class, set_without_children)
 
     # Nodes where the source code must also be provided.
-    for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
+    for node_class, start_pred, end_pred, cond in NODES_REQUIRING_SOURCE:
         if start_pred is not None:
             obj.register_transform(
                 node_class, start_setter_from_source(source_code, start_pred))

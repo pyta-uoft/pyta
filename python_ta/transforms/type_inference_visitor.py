@@ -303,7 +303,8 @@ class TypeInferer:
                 self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
 
     def visit_ifexp(self, node):
-        if node.body.type_constraints.type == node.orelse.type_constraints.type:
+        if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type):
+            self.type_constraints.unify(node.body.type_constraints.type, node.orelse.type_constraints.type)
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:
             node.type_constraints = TypeInfo(Any)

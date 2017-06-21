@@ -302,6 +302,13 @@ class TypeInferer:
             for i in range(len(target_tvars)):
                 self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
 
+    def visit_ifexp(self, node):
+        if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type):
+            self.type_constraints.unify(node.body.type_constraints.type, node.orelse.type_constraints.type)
+            node.type_constraints = TypeInfo(node.body.type_constraints.type)
+        else:
+            node.type_constraints = TypeInfo(Any)
+
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)

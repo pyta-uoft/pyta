@@ -81,19 +81,21 @@ def _override_singleton_comparison():
         not expr is not False
         False != expr
     """
-    old_visit_compare = ComparisonChecker.visit_compare
-    old_check_singleton_comparison = ComparisonChecker._check_singleton_comparison
-
     def new_check_singleton_comparison(self, singleton, root_node):
+        """[pyta] certain comparisons involving 'not' generate messages
+        for 'singleton-comparison' in addition to the existing 'unneeded-not'.
+        """
         operator, _ = root_node.ops[0]
         if hasattr(root_node.parent, 'op') and root_node.parent.op == 'not':
             expr = 'not ... {} {}'.format(operator, singleton.value)
-            if (operator in ('!=', 'is not') and singleton.value is True) or (operator in ('==', 'is') and singleton.value is False):
+            if ((operator in ('!=', 'is not') and singleton.value is True) 
+                or (operator in ('==', 'is') and singleton.value is False)):
                 self.add_message('singleton-comparison',
                                  node=root_node,
                                  args=(expr, "just 'expr'"))
 
-            if (operator in ('==', 'is') and singleton.value is True) or (operator in ('!=', 'is not') and singleton.value is False):
+            if ((operator in ('==', 'is') and singleton.value is True) 
+                or (operator in ('!=', 'is not') and singleton.value is False)):
                 self.add_message('singleton-comparison',
                                  node=root_node,
                                  args=(expr, "just 'not expr'"))
@@ -124,6 +126,7 @@ def _override_singleton_comparison():
                 and isinstance(left, astroid.Const)):
             self._check_misplaced_constant(node, left, right, operator)
 
+        # [pyta] added more operators
         if operator in ('==', '!=', 'is', 'is not'):
             if isinstance(left, astroid.Const):
                 self._check_singleton_comparison(left, node)
@@ -132,6 +135,7 @@ def _override_singleton_comparison():
         if operator in ('is', 'is not'):
             self._check_literal_comparison(right, node)
 
+    # [pyta] override the methods related to singleton-comparison.
     ComparisonChecker.visit_compare = new_visit_compare
     ComparisonChecker._check_singleton_comparison = new_check_singleton_comparison
 

@@ -146,40 +146,42 @@ class TypeInferer:
     ##############################################################################
     # Operation nodes
     ##############################################################################
-    def _lookify_call(self, node, func_name, *args):
+    def _handle_call(self, node, func_name, *args):
         """Helper to lookup a function and unify it with given arguments.
            Returns the return type of unified function call."""
         arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
+        if len(arg_types) == 2:
+            func_call = op_to_dunder_binary(func_name)
+        elif len(arg_types) == 1:
+            func_call = op_to_dunder_unary(func_name)
         try:
-            func_type = self.type_store.lookup_function(func_name, *arg_types)
+            func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
-            return_info = TypeInfo(
-                TypeErrorInfo('Function {} not found with given a {}'.
-                              format(func_name, *arg_types), node))
-            return return_info
+            return TypeInfo(
+                TypeErrorInfo('Function {} not found with given args: {}'.
+                              format(func_call, *arg_types), node))
 
         try:
             return_type = self.type_constraints.unify_call(func_type, *arg_types)
         except TypeInferenceError:
-            return_info = TypeInfo(
-                TypeErrorInfo('Bad unify_call of Function {} given args: {}'.
-                              format(func_name,*arg_types), node))
+            return TypeInfo(
+                TypeErrorInfo('Bad unify_call of function {} given args: {}'.
+                              format(func_call, *arg_types), node))
         else:
-            return_info = TypeInfo(return_type)
-        return return_info
+            return TypeInfo(return_type)
 
     def visit_binop(self, node):
         t1 = node.left.type_constraints.type
         t2 = node.right.type_constraints.type
         op_name = op_to_dunder_binary(node.op)
-        node.type_constraints = self._lookify_call(node, op_name, t1, t2)
+        node.type_constraints = self._handle_call(node, op_name, t1, t2)
 
     def visit_unaryop(self, node):
         if node.op == 'not':
             node.type_constraints = TypeInfo(bool)
         else:
             op_name = op_to_dunder_unary(node.op)
-            node.type_constraints = self._lookify_call(node, op_name,
+            node.type_constraints = self._handle_call(node, op_name,
                                             node.operand.type_constraints.type)
 
     def visit_subscript(self, node):
@@ -187,7 +189,7 @@ class TypeInferer:
             value_type = node.value.type_constraints.type
             arg_type = node.slice.type_constraints.type
             op_name = '__getitem__'
-            node.type_constraints = self._lookify_call(node, op_name,
+            node.type_constraints = self._handle_call(node, op_name,
                                                        value_type, arg_type)
 
     def visit_boolop(self, node):
@@ -233,7 +235,7 @@ class TypeInferer:
             else:
                 value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
                 value_type = self.type_constraints.lookup_concrete(value_tvar)
-                rtype = self._lookify_call(node, '__iter__', value_type).type
+                rtype = self._handle_call(node, '__iter__', value_type).type
                 for target_node in node.targets[0].elts:
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
                     self.type_constraints.unify(target_type_var, rtype.__args__[0])
@@ -277,7 +279,7 @@ class TypeInferer:
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]
-        rtype = self._lookify_call(node, '__iter__', for_node.iter.type_constraints.type).type
+        rtype = self._handle_call(node, '__iter__', for_node.iter.type_constraints.type).type
         # there may be one target, or a Generic of targets to unify.
         if isinstance(for_node.target, astroid.AssignName):
             self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))

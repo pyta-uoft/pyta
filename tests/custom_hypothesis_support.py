@@ -95,7 +95,7 @@ def random_dict_variable_homogeneous_value(**kwargs):
         lambda: hs.floats(allow_nan=False, allow_infinity=False),
         hs.booleans,
         hs.none,
-        lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
+        lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
         hs.binary
     ])
     return prim_types_no_nums.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))

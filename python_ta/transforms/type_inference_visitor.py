@@ -154,6 +154,8 @@ class TypeInferer:
             func_call = op_to_dunder_binary(func_name)
         elif len(arg_types) == 1:
             func_call = op_to_dunder_unary(func_name)
+        else:
+            raise Exception('Wrong number of arguments given.")
         try:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
@@ -272,7 +274,7 @@ class TypeInferer:
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]
-        rtype = self._handle_call(node, '__iter__', for_node.iter.type_constraints.type).type
+        rtype = self._handle_call(node, '__iter__', for_node.iter.type_constraints.type, for_node.iter.type_constraints.type, for_node.iter.type_constraints.type).type
         # there may be one target, or a Generic of targets to unify.
         if isinstance(for_node.target, astroid.AssignName):
             self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))

@@ -91,9 +91,11 @@ def homogeneous_dictionary(**kwargs):
 def random_dict_variable_homogeneous_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
     prim_types_no_nums = hs.sampled_from([
+        hs.integers,
+        lambda: hs.floats(allow_nan=False, allow_infinity=False),
         hs.booleans,
         hs.none,
-        hs.text,
+        lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
         hs.binary
     ])
     return prim_types_no_nums.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))

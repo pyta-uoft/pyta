@@ -90,7 +90,13 @@ def homogeneous_dictionary(**kwargs):
 
 def random_dict_variable_homogeneous_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
-    return primitive_types.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
+    primitive_types_no_numbers = hs.sampled_from([
+        hs.booleans,
+        hs.none,
+        hs.text,
+        hs.binary
+    ])
+    return primitive_types_no_numbers.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
 
 
 def heterogeneous_dictionary(**kwargs):

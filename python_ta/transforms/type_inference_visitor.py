@@ -171,26 +171,19 @@ class TypeInferer:
             return TypeInfo(return_type)
 
     def visit_binop(self, node):
-        t1 = node.left.type_constraints.type
-        t2 = node.right.type_constraints.type
-        op_name = op_to_dunder_binary(node.op)
-        node.type_constraints = self._handle_call(node, op_name, t1, t2)
+        node.type_constraints = self._handle_call(node, node.op, node.left.type_constraints.type,
+                                                  node.right.type_constraints.type)
 
     def visit_unaryop(self, node):
         if node.op == 'not':
             node.type_constraints = TypeInfo(bool)
         else:
-            op_name = op_to_dunder_unary(node.op)
-            node.type_constraints = self._handle_call(node, op_name,
-                                            node.operand.type_constraints.type)
+            node.type_constraints = self._handle_call(node, node.op, node.operand.type_constraints.type)
 
     def visit_subscript(self, node):
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
-            value_type = node.value.type_constraints.type
-            arg_type = node.slice.type_constraints.type
-            op_name = '__getitem__'
-            node.type_constraints = self._handle_call(node, op_name,
-                                                       value_type, arg_type)
+            node.type_constraints = self._handle_call(node, '[]', node.value.type_constraints.type,
+                                                      node.slice.type_constraints.type)
 
     def visit_boolop(self, node):
         """Boolean operators are 'and', 'or'; the result type can be either of the argument types."""

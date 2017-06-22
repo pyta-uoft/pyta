@@ -107,7 +107,7 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/dynamic_execution_checker',
         'python_ta/checkers/IO_Function_checker',
         # TODO: Fix this test
-        #'python_ta/checkers/invalid_range_index_checker',
+        'python_ta/checkers/invalid_range_index_checker',
         'python_ta/checkers/assigning_to_self_checker',
         'python_ta/checkers/always_returning_checker',
         'python_ta/checkers/type_inference_checker'

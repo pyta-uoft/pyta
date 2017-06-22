@@ -92,6 +92,7 @@ def random_dict_variable_homogeneous_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
     primitive_types_no_numbers = hs.sampled_from([
         hs.booleans,
+        hs.integers,
         hs.none,
         lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
     ])

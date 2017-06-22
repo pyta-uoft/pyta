@@ -93,10 +93,8 @@ def random_dict_variable_homogeneous_value(**kwargs):
     primitive_types_no_numbers = hs.sampled_from([
         hs.booleans,
         hs.integers,
-        lambda: hs.floats(allow_nan=False, allow_infinity=False),
         hs.none,
         lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
-        hs.binary
     ])
     return primitive_types_no_numbers.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
 

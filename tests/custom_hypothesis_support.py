@@ -56,7 +56,7 @@ def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
     if 'min_size' not in kwargs:
         kwargs['min_size'] = 4
-    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", **kwargs)\
+    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", **kwargs)\
         .filter(lambda x: x[0].isalpha() and x.isidentifier() and not (iskeyword(x)))
 
 
@@ -90,15 +90,7 @@ def homogeneous_dictionary(**kwargs):
 
 def random_dict_variable_homogeneous_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
-    prim_types_no_nums = hs.sampled_from([
-        hs.integers,
-        lambda: hs.floats(allow_nan=False, allow_infinity=False),
-        hs.booleans,
-        hs.none,
-        lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1),
-        hs.binary
-    ])
-    return prim_types_no_nums.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
+    return primitive_types.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
 
 
 def heterogeneous_dictionary(**kwargs):

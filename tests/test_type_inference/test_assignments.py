@@ -1,12 +1,12 @@
 import astroid
 import nose
-from hypothesis import given, assume, settings
+from hypothesis import given, assume, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import TypeVar, Any
 from keyword import iskeyword
 settings.load_profile("pyta")
-
+HealthCheck.too_slow
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))
 def test_set_env(variables_dict):

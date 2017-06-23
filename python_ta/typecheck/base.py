@@ -100,11 +100,9 @@ def op_to_dunder_binary(op):
         return '__gt__'
     elif op == '>=':
         return '__ge__'
-    elif op == '[]':
-        return '__getitem__'
     # TODO: 'is' and 'in'
     else:
-        return ''
+        return op
 
 
 def op_to_dunder_unary(op):
@@ -115,10 +113,8 @@ def op_to_dunder_unary(op):
         return '__pos__'
     elif op == '~':
         return '__invert__'
-    elif op == '__iter__':
-        return '__iter__'
     else:
-        return ''
+        return op
 
 
 def lookup_method(name, caller_type, *args):

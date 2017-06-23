@@ -303,9 +303,9 @@ class TypeInferer:
         if isinstance(node.iter, Name):
             arg_type = self.type_constraints.lookup_concrete(node.parent.type_environment.lookup_in_env(node.iter.name))
         else:
-            arg_type = node.iter.type_constraints.type
+            arg_type = self.type_constraints.lookup_concrete(node.iter.type_constraints.type)
         iterable_type = self.type_store.lookup_function('__iter__', arg_type)
-        rtype = self.type_constraints.unify_call(iterable_type, node.iter.type_constraints.type)
+        rtype = self.type_constraints.unify_call(iterable_type, arg_type)
         if isinstance(node.target, Tuple):
             for target_node in node.target.elts:
                 target_tvar = node.parent.type_environment.lookup_in_env(target_node.name)

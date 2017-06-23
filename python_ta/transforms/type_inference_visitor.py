@@ -49,6 +49,7 @@ class TypeInferer:
         visitor = TransformVisitor()
         visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
         visitor.register_transform(astroid.Module, self._set_module_environment)
+        visitor.register_transform(astroid.ListComp, self._set_listcomp_environment)
         return visitor
 
     def _set_module_environment(self, node):
@@ -62,6 +63,14 @@ class TypeInferer:
         node.type_environment = Environment()
         self._populate_local_env(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar()
+
+    def _set_listcomp_environment(self, node):
+        """Set the environment of a ListComp node representing a list
+        comprehension expression."""
+        node.type_environment = Environment()
+        for name in node.locals:
+            node.type_environment.locals[name] = self.\
+                                                 type_constraints.fresh_tvar()
 
     def _populate_local_env(self, node):
         """Helper to populate locals attributes in type environment of given node."""
@@ -289,6 +298,19 @@ class TypeInferer:
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:
             node.type_constraints = TypeInfo(Any)
+
+    def visit_listcomp(self, node):
+        for gen in node.generators:
+            iterable_type = self.type_store.lookup_function('__iter__', gen.iter.type_constraints.type)
+            rtype = self.type_constraints.unify_call(iterable_type, gen.iter.type_constraints.type)
+            if isinstance(gen.target, Tuple):
+                for target_node in gen.target.elts:
+                    target_tvar = node.type_environment.lookup_in_env(target_node.name)
+                    self.type_constraints.unify(target_tvar, rtype.__args__[0].__args__[0])
+            else:
+                target_tvar = node.type_environment.lookup_in_env(gen.target.name)
+                self.type_constraints.unify(target_tvar, rtype.__args__[0])
+        node.type_constraints = TypeInfo(NoType)
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

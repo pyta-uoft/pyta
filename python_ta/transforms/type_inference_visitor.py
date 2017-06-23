@@ -155,20 +155,20 @@ class TypeInferer:
         elif len(arg_types) == 1:
             func_call = op_to_dunder_unary(func_name)
         else:
-            raise Exception('Wrong number of arguments given.')
+            func_call = func_name
         try:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
             return TypeInfo(
-                TypeErrorInfo('Function {} not found with given args: {}'.
-                              format(func_call, *arg_types), node))
+                TypeErrorInfo(f'Function {func_call} not found with given args:\
+                              {arg_types}', node))
 
         try:
             return_type = self.type_constraints.unify_call(func_type, *arg_types)
         except TypeInferenceError:
             return TypeInfo(
-                TypeErrorInfo('Bad unify_call of function {} given args: {}'.
-                              format(func_call, *arg_types), node))
+                TypeErrorInfo('Bad unify_call of function {func_call} given\
+                              args: {arg_types}', node))
         else:
             return TypeInfo(return_type)
 
@@ -184,7 +184,7 @@ class TypeInferer:
 
     def visit_subscript(self, node):
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
-            node.type_constraints = self._handle_call(node, '[]', node.value.type_constraints.type,
+            node.type_constraints = self._handle_call(node, '__getitem__', node.value.type_constraints.type,
                                                       node.slice.type_constraints.type)
 
     def visit_boolop(self, node):

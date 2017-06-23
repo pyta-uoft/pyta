@@ -299,18 +299,31 @@ class TypeInferer:
         else:
             node.type_constraints = TypeInfo(Any)
 
-    def visit_listcomp(self, node):
-        for gen in node.generators:
-            iterable_type = self.type_store.lookup_function('__iter__', gen.iter.type_constraints.type)
-            rtype = self.type_constraints.unify_call(iterable_type, gen.iter.type_constraints.type)
-            if isinstance(gen.target, Tuple):
-                for target_node in gen.target.elts:
-                    target_tvar = node.type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_tvar, rtype.__args__[0].__args__[0])
-            else:
-                target_tvar = node.type_environment.lookup_in_env(gen.target.name)
-                self.type_constraints.unify(target_tvar, rtype.__args__[0])
+    def visit_comprehension(self, node):
+        if isinstance(node.iter, Name):
+            arg_type = self.type_constraints.lookup_concrete(node.parent.type_environment.lookup_in_env(node.iter.name))
+        else:
+            arg_type = node.iter.type_constraints.type
+        iterable_type = self.type_store.lookup_function('__iter__', arg_type)
+        rtype = self.type_constraints.unify_call(iterable_type, node.iter.type_constraints.type)
+        if isinstance(node.target, Tuple):
+            for target_node in node.target.elts:
+                target_tvar = node.parent.type_environment.lookup_in_env(target_node.name)
+                self.type_constraints.unify(target_tvar, rtype.__args__[0].__args__[0])
+        else:
+            target_tvar = node.parent.type_environment.lookup_in_env(node.target.name)
+            self.type_constraints.unify(target_tvar, rtype.__args__[0])
         node.type_constraints = TypeInfo(NoType)
+
+    def visit_listcomp(self, node):
+        # based on the types of the generators.. can set up the type constraints.
+        # the type of the list comprehension should be a list of the elt's types
+        # if the elt is a name node, look up the name in the listcomp node's env and set the type const as that
+        # if it is an operation node,
+        if isinstance(node.elt, Name):
+            node.type_constraints = TypeInfo(self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env(node.elt.name)))
+        else:
+            node.type_constraints = node.elt.type_constraints
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

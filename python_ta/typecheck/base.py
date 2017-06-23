@@ -102,7 +102,7 @@ def op_to_dunder_binary(op):
         return '__ge__'
     # TODO: 'is' and 'in'
     else:
-        return ''
+        return op
 
 
 def op_to_dunder_unary(op):
@@ -114,7 +114,7 @@ def op_to_dunder_unary(op):
     elif op == '~':
         return '__invert__'
     else:
-        return ''
+        return op
 
 
 def lookup_method(name, caller_type, *args):

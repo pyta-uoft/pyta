@@ -6,7 +6,6 @@ import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
-
 # def test_list_comprehension1():
 #     """Test Comprehension node visitor representing a comprehension expression."""
 #     program = f'a = [num for num in [1,2,3]]'

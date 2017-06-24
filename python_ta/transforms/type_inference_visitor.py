@@ -300,7 +300,9 @@ class TypeInferer:
             node.type_constraints = TypeInfo(Any)
 
     def visit_comprehension(self, node):
-        if isinstance(node.iter, Name):
+        # TODO: use helper!
+        # TODO: Unify the elt.type_constraints.type; if name node, unify with the tvar corresponding to name in ListComp's env...
+        if isinstance(node.iter, astroid.Name):
             arg_type = self.type_constraints.lookup_concrete(node.parent.type_environment.lookup_in_env(node.iter.name))
         else:
             arg_type = self.type_constraints.lookup_concrete(node.iter.type_constraints.type)
@@ -321,9 +323,10 @@ class TypeInferer:
         # if the elt is a name node, look up the name in the listcomp node's env and set the type const as that
         # if it is an operation node,
         if isinstance(node.elt, Name):
-            node.type_constraints = TypeInfo(self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env(node.elt.name)))
+            node.type_constraints = TypeInfo(List[self.type_constraints.lookup_concrete(node.type_environment.
+                                                                                        lookup_in_env(node.elt.name))])
         else:
-            node.type_constraints = node.elt.type_constraints
+            node.type_constraints = TypeInfo(List[node.elt.type_constraints.type])
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

@@ -389,6 +389,8 @@ def parse_annotations(node, class_tvars=None):
 
         rtype = _node_to_type(node.returns)
         return create_Callable(arg_types, rtype, class_tvars)
+    elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
+        return _node_to_type(node.parent.annotation)
 
 
 def _node_to_type(node, locals=None):

@@ -69,8 +69,7 @@ class TypeInferer:
         comprehension expression."""
         node.type_environment = Environment()
         for name in node.locals:
-            node.type_environment.locals[name] = self.\
-                                                 type_constraints.fresh_tvar()
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
 
     def _populate_local_env(self, node):
         """Helper to populate locals attributes in type environment of given node."""
@@ -301,7 +300,6 @@ class TypeInferer:
 
     def visit_comprehension(self, node):
         # TODO: use helper!
-        # TODO: Unify the elt.type_constraints.type; if name node, unify with the tvar corresponding to name in ListComp's env...
         if isinstance(node.iter, astroid.Name):
             arg_type = self.type_constraints.lookup_concrete(node.parent.type_environment.lookup_in_env(node.iter.name))
         else:

@@ -144,23 +144,21 @@ class TypeInferer:
         """
         node.type_constraints = node.value.type_constraints
 
+    def _closest_frame(self, node):
+        """Helper method to find the closest ancestor node with an environment relative to the given node."""
+        closest_scope = node
+        if node.parent:
+            closest_scope = node.parent
+            if hasattr(closest_scope, 'type_environment'):
+                return closest_scope
+            else:
+                return self._closest_frame(closest_scope)
+        else:
+            return closest_scope
+
     def visit_name(self, node):
-        # TODO: Should it be a special case when name nodes' parents/par-parents are _Comp nodes? Do we want to add
-        # TODO: such names into the global environment?
         try:
-            node.type_constraints = TypeInfo(node.parent.type_environment.lookup_in_env(node.name))
-        except AttributeError:
-            try:
-                node.type_constraints = TypeInfo(node.parent.parent.type_environment.lookup_in_env(node.name))
-            except AttributeError:
-                try:
-                    node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
-                except KeyError:
-                    node.frame().type_environment.create_in_env(self.type_constraints, 'globals', node.name)
-                    node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
-            except KeyError:
-                node.parent.parent.type_environment.create_in_env(self.type_constraints, 'globals', node.name)
-                node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
+            node.type_constraints = TypeInfo(self._closest_frame(node).type_environment.lookup_in_env(node.name))
         except KeyError:
             node.parent.type_environment.create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])

@@ -145,13 +145,21 @@ class TypeInferer:
         node.type_constraints = node.value.type_constraints
 
     def visit_name(self, node):
+        # TODO: Should it be a special case when name nodes' parents/par-parents are _Comp nodes? Do we want to add
+        # TODO: such names into the global environment?
         try:
             node.type_constraints = TypeInfo(node.parent.type_environment.lookup_in_env(node.name))
         except AttributeError:
             try:
-                node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+                node.type_constraints = TypeInfo(node.parent.parent.type_environment.lookup_in_env(node.name))
+            except AttributeError:
+                try:
+                    node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+                except KeyError:
+                    node.frame().type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+                    node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
             except KeyError:
-                node.frame().type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+                node.parent.parent.type_environment.create_in_env(self.type_constraints, 'globals', node.name)
                 node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
         except KeyError:
             node.parent.type_environment.create_in_env(self.type_constraints, 'globals', node.name)
@@ -312,7 +320,7 @@ class TypeInferer:
         if isinstance(node.target, astroid.Tuple):
             for target_node in node.target.elts:
                 target_tvar = node.parent.type_environment.lookup_in_env(target_node.name)
-                self.type_constraints.unify(target_tvar, rtype.__args__[0].__args__[0])
+                self.type_constraints.unify(target_tvar, rtype.__args__[0])
         else:
             target_tvar = node.parent.type_environment.lookup_in_env(node.target.name)
             self.type_constraints.unify(target_tvar, rtype.__args__[0])

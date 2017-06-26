@@ -313,10 +313,8 @@ class TypeInferer:
             node.type_constraints = TypeInfo(Any)
 
     def visit_comprehension(self, node):
-        # TODO: use helper!
         arg_type = self.type_constraints.lookup_concrete(node.iter.type_constraints.type)
-        iterable_type = self.type_store.lookup_function('__iter__', arg_type)
-        rtype = self.type_constraints.unify_call(iterable_type, arg_type)
+        rtype = self._handle_call(node, '__iter__', arg_type).type
         if isinstance(node.target, astroid.Tuple):
             for target_node in node.target.elts:
                 target_tvar = node.parent.type_environment.lookup_in_env(target_node.name)

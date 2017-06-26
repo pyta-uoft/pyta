@@ -49,6 +49,7 @@ class TypeInferer:
         visitor = TransformVisitor()
         visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
         visitor.register_transform(astroid.Module, self._set_module_environment)
+        visitor.register_transform(astroid.ListComp, self._set_listcomp_environment)
         return visitor
 
     def _set_module_environment(self, node):
@@ -62,6 +63,13 @@ class TypeInferer:
         node.type_environment = Environment()
         self._populate_local_env(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar()
+
+    def _set_listcomp_environment(self, node):
+        """Set the environment of a ListComp node representing a list
+        comprehension expression."""
+        node.type_environment = Environment()
+        for name in node.locals:
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
 
     def _populate_local_env(self, node):
         """Helper to populate locals attributes in type environment of given node."""
@@ -136,11 +144,23 @@ class TypeInferer:
         """
         node.type_constraints = node.value.type_constraints
 
+    def _closest_frame(self, node):
+        """Helper method to find the closest ancestor node with an environment relative to the given node."""
+        closest_scope = node
+        if node.parent:
+            closest_scope = node.parent
+            if hasattr(closest_scope, 'type_environment'):
+                return closest_scope
+            else:
+                return self._closest_frame(closest_scope)
+        else:
+            return closest_scope
+
     def visit_name(self, node):
         try:
-            node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+            node.type_constraints = TypeInfo(self._closest_frame(node).type_environment.lookup_in_env(node.name))
         except KeyError:
-            node.frame().type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+            self._closest_frame(node).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
     ##############################################################################
@@ -289,6 +309,25 @@ class TypeInferer:
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:
             node.type_constraints = TypeInfo(Any)
+
+    def visit_comprehension(self, node):
+        arg_type = self.type_constraints.lookup_concrete(node.iter.type_constraints.type)
+        rtype = self._handle_call(node, '__iter__', arg_type).type
+        if isinstance(node.target, astroid.Tuple):
+            for target_node in node.target.elts:
+                target_tvar = node.parent.type_environment.lookup_in_env(target_node.name)
+                self.type_constraints.unify(target_tvar, rtype.__args__[0])
+        else:
+            target_tvar = node.parent.type_environment.lookup_in_env(node.target.name)
+            self.type_constraints.unify(target_tvar, rtype.__args__[0])
+        node.type_constraints = TypeInfo(NoType)
+
+    def visit_listcomp(self, node):
+        # based on the types of the generators.. can set up the type constraints.
+        # the type of the list comprehension should be a list of the elt's types
+        # if the elt is a name node, look up the name in the listcomp node's env and set the type const as that
+        # if it is an operation node,
+        node.type_constraints = TypeInfo(List[node.elt.type_constraints.type])
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

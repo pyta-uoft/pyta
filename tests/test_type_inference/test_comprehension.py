@@ -22,10 +22,10 @@ def test_list_comprehension_single_target_name():
            (TypeInferrer.type_constraints.lookup_concrete(assigned_tvar) == List[expected_type])
 
 
-def test_list_comprehension_multi_target_binop_nested():
-    """Test Comprehension node visitor representing a nested comprehension expression with multiple targets and binary
-    operations expressions performed on the targets."""
-    program = f'a = [num1 + num2 for sublist in [[1,2], [3,4]] for num1, num2 in sublist]'
+def test_list_comprehension_single_target_name_nested():
+    """Test Comprehension node visitor representing a nested comprehension expression with a name expression and
+    a single target."""
+    program = f'a = [num for sublist in [[1, 2], [3,4]] for num in sublist]'
     module, TypeInferrer = cs._parse_text(program)
     listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
     target_tvar = listcomp_node.type_environment.lookup_in_env(list(listcomp_node.locals.keys())[0])
@@ -36,10 +36,10 @@ def test_list_comprehension_multi_target_binop_nested():
            (TypeInferrer.type_constraints.lookup_concrete(assigned_tvar) == List[expected_type])
 
 
-def test_list_comprehension_single_target_name_nested():
-    """Test Comprehension node visitor representing a nested comprehension expression with a name expression and
-    a single target."""
-    program = f'a = [num for sublist in [[1, 2], [3,4]] for num in sublist]'
+def test_list_comprehension_multi_target_binop_nested():
+    """Test Comprehension node visitor representing a nested comprehension expression with multiple targets and binary
+    operations expressions performed on the targets."""
+    program = f'a = [num1 + num2 for sublist in [[1,2], [3,4]] for num1, num2 in sublist]'
     module, TypeInferrer = cs._parse_text(program)
     listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
     target_tvar = listcomp_node.type_environment.lookup_in_env(list(listcomp_node.locals.keys())[0])

@@ -160,7 +160,7 @@ class TypeInferer:
         try:
             node.type_constraints = TypeInfo(self._closest_frame(node).type_environment.lookup_in_env(node.name))
         except KeyError:
-            node.parent.type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+            self._closest_frame(node).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
     ##############################################################################

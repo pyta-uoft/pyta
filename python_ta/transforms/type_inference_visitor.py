@@ -146,9 +146,15 @@ class TypeInferer:
 
     def visit_name(self, node):
         try:
-            node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+            node.type_constraints = TypeInfo(node.parent.type_environment.lookup_in_env(node.name))
+        except AttributeError:
+            try:
+                node.type_constraints = TypeInfo(node.frame().type_environment.lookup_in_env(node.name))
+            except KeyError:
+                node.frame().type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+                node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
         except KeyError:
-            node.frame().type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+            node.parent.type_environment.create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
     ##############################################################################
@@ -317,8 +323,7 @@ class TypeInferer:
         # the type of the list comprehension should be a list of the elt's types
         # if the elt is a name node, look up the name in the listcomp node's env and set the type const as that
         # if it is an operation node,
-        node.type_constraints = TypeInfo(List[self.type_constraints.lookup_concrete(node.type_environment.
-                                                                                        lookup_in_env(node.elt.name))])
+        node.type_constraints = TypeInfo(List[node.elt.type_constraints.type])
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

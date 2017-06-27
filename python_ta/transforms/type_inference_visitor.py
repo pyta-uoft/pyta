@@ -135,6 +135,13 @@ class TypeInferer:
         else:
             node.type_constraints = TypeInfo(List[Any])
 
+    def visit_set(self, node):
+        node_types = {node_child.type_constraints.type for node_child in node.elts}
+        if len(node_types) == 1:
+            node.type_constraints = TypeInfo(List[node_types.pop()])
+        else:
+            node.type_constraints = TypeInfo(List[Any])
+
     def visit_dict(self, node):
         # node_types contains types of elements inside Dict.
         key_types = {key.type_constraints.type for key, _ in node.items}

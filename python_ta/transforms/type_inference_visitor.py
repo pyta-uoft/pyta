@@ -338,7 +338,11 @@ class TypeInferer:
         node.type_constraints = TypeInfo(List[node.elt.type_constraints.type])
 
     def visit_dictcomp(self, node):
-        node.type_constraints = TypeInfo(NoType)
+        # TODO: name node stored in .key attribute is visited last, thus we must do a lookup.
+        key_type= self.type_constraints.lookup_concrete(node.key.type_constraints.type)
+        val_type =  node.value.type_constraints.type
+        node.type_constraints = TypeInfo(Dict[key_type, val_type])
+
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)

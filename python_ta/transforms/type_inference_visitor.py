@@ -51,6 +51,7 @@ class TypeInferer:
         visitor.register_transform(astroid.Module, self._set_module_environment)
         visitor.register_transform(astroid.ListComp, self._set_listcomp_environment)
         visitor.register_transform(astroid.DictComp, self._set_dictcomp_environment)
+        visitor.register_transform(astroid.DictComp, self._set_setcomp_environment)
         return visitor
 
     def _set_module_environment(self, node):
@@ -75,6 +76,12 @@ class TypeInferer:
     def _set_dictcomp_environment(self, node):
         """Environment setter for DictComp node representing a dictionary
         comprehension expression."""
+        node.type_environment = Environment()
+        for name in node.locals:
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+
+    def _set_setcomp_environment(self, node):
+        """Environment setter for SetComp node representing a set comprehension expression"""
         node.type_environment = Environment()
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
@@ -342,6 +349,9 @@ class TypeInferer:
         key_type= self.type_constraints.lookup_concrete(node.key.type_constraints.type)
         val_type =  node.value.type_constraints.type
         node.type_constraints = TypeInfo(Dict[key_type, val_type])
+
+    def visit_setcomp(self, node):
+        node.type_constraints = TypeInfo(NoType)
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

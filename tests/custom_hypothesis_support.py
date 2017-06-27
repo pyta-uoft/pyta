@@ -1,12 +1,12 @@
 import astroid
+from astroid.node_classes import NodeNG
 import hypothesis.strategies as hs
 from hypothesis import assume
 from python_ta.transforms.type_inference_visitor import TypeInferer
 from keyword import iskeyword
 from hypothesis import settings
-from typing import Any
 settings.register_profile("pyta", settings(max_examples=10))
-from typing import Tuple
+from typing import Tuple, Union
 
 
 # Custom strategies for hypothesis testing framework
@@ -60,19 +60,6 @@ def valid_identifier(**kwargs):
         .filter(lambda x: x[0].isalpha() and x.isidentifier() and not (iskeyword(x)))
 
 
-def tuple_strategy(**kwargs):
-    """Return a strategy which generates a tuple."""
-    return hs.lists(primitive_values, **kwargs).map(tuple)
-
-
-def random_slice_indices():
-    """Return a strategy that generates indices of a slice."""
-    index1 = hs.sampled_from([hs.integers(), hs.none()]).example()
-    index2 = hs.sampled_from([hs.integers(), hs.none()]).example()
-    index3 = hs.sampled_from([hs.integers(), hs.none()]).example()
-    return hs.tuples(index1, index2, index3)
-
-
 def homogeneous_list(**kwargs):
     """Return a strategy which generates a list of uniform type."""
     return primitive_types.flatmap(lambda s: hs.lists(s(), **kwargs))
@@ -88,41 +75,15 @@ def homogeneous_dictionary(**kwargs):
     return index_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
 
 
+def random_dictionary(**kwargs):
+    """Return a strategy which generates a random list."""
+    return hs.dictionaries(primitive_values, primitive_values, **kwargs)
+
+
 def random_dict_variable_homogeneous_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
     return primitive_types.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
 
-
-def heterogeneous_dictionary(**kwargs):
-    """Return a strategy which generates a dictionary of random key:value type."""
-    return hs.dictionaries(index_values, primitive_values, **kwargs)
-
-
-# Helper functions for testing
-def _parse_text(source: str) -> Tuple[astroid.Module, TypeInferer]:
-    """Parse source code text and output an AST with type inference performed."""
-    module = astroid.parse(source)
-    type_inferer = TypeInferer()
-    type_inferer.environment_transformer().visit(module)
-    type_inferer.type_inference_transformer().visit(module)
-    return module, type_inferer
-
-
-def _verify_type_setting(module, ast_class, expected_type):
-    """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
-    result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]
-    assert [expected_type] == result
-
-
-def _verify_node_value_typematch(module):
-    """Helper to verify that AST node has the same type as it's value's"""
-    for n in module.nodes_of_class(astroid.Expr):
-        assert n.value.type_constraints.type == n.type_constraints.type
-
-
-def _index_input_formatter(var_input, index):
-    """Helper to format input for testing index type inference visitor."""
-    return repr(var_input) + "[" + repr(index) + "]"
 
 homogeneous_iterable = hs.sampled_from([
         lambda: homogeneous_dictionary(min_size=1),
@@ -130,7 +91,7 @@ homogeneous_iterable = hs.sampled_from([
     ]).flatmap(lambda s: s())
 
 heterogeneous_iterable = hs.sampled_from([
-        lambda: heterogeneous_dictionary(min_size=1),
+        lambda: random_dictionary(min_size=1),
         lambda: random_list(min_size=1),
         lambda: hs.sets(primitive_values, min_size=1)
     ]).flatmap(lambda s: s())
@@ -143,3 +104,183 @@ def _parse_dictionary_to_program(variables_dict):
         assume(not iskeyword(variable_name))
         program += variable_name + " = " + repr(variables_dict[variable_name]) + "\n"
     return program
+
+
+# Strategies for generating Python ASTs.
+# These are named after the corresponding nodes.
+@hs.composite
+def binop_node(draw, left=None, op=non_boolean_operator, right=None):
+    left = left or const_node()
+    right = right or const_node()
+    node = astroid.BinOp(draw(op))
+    node.postinit(draw(left), draw(right))
+    return node
+
+
+@hs.composite
+def boolop_node(draw, value=None, op=binary_bool_operator, **kwargs):
+    value = value or const_node()
+    node = astroid.BoolOp(draw(op))
+    if kwargs.get('min_size', 0) < 2:
+        kwargs['min_size'] = 2
+    node.postinit(draw(hs.lists(value, **kwargs)))
+    return node
+
+
+@hs.composite
+def comprehension_node(draw, target=None, iter=None,
+                       ifs=hs.just([])):
+    target = target or const_node(valid_identifier())
+    iter = iter or list_node()
+    node = astroid.Comprehension()
+    node.postinit(draw(target), draw(iter), draw(ifs))
+    return node
+
+
+@hs.composite
+def const_node(draw, value=primitive_values):
+    """Return a Const node with value drawn from <value>."""
+    return astroid.Const(draw(value))
+
+
+@hs.composite
+def dict_node(draw, key=const_node(), value=const_node(), **kwargs):
+    items = draw(hs.dictionaries(key, value, **kwargs)).items()
+    node = astroid.Dict()
+    node.postinit(items)
+    return node
+
+
+@hs.composite
+def expr_node(draw, value=None):
+    value = value or expr
+    node = astroid.Expr()
+    node.postinit(draw(value))
+    return node
+
+
+@hs.composite
+def ifexp_node(draw, test=const_node(hs.booleans()),
+               body=const_node(), orelse=const_node()):
+    test = draw(test)
+    body = draw(body)
+    orelse = draw(orelse)
+    node = astroid.IfExp()
+    node.postinit(test, body, orelse)
+    return node
+
+
+@hs.composite
+def index_node(draw, value=const_node(hs.integers())):
+    node = astroid.Index()
+    node.postinit(draw(value))
+    return node
+
+
+@hs.composite
+def list_node(draw, elt=const_node(), **kwargs):
+    """Return a List node with elements drawn from elt.
+    """
+    node = astroid.List()
+    node.postinit(draw(hs.lists(elt, **kwargs)))
+    return node
+
+
+@hs.composite
+def listcomp_node(draw, elt=const_node(),
+                  generators=hs.lists(comprehension_node(),
+                                            min_size=1, average_size=1)):
+    node = astroid.ListComp()
+    node.postinit(draw(elt), draw(generators))
+    return node
+
+
+@hs.composite
+def slice_node(draw):
+    lower = draw(hs.one_of(const_node(hs.integers()), hs.none()))
+    upper = draw(hs.one_of(const_node(hs.integers()), hs.none()))
+    step = draw(hs.one_of(const_node(hs.integers()), hs.none()))
+    node = astroid.Slice()
+    node.postinit(lower, upper, step)
+    return node
+
+
+@hs.composite
+def subscript_node(draw, value=None, slice=index_node()):
+    value = value or subscriptable_expr
+    node = astroid.Subscript()
+    node.postinit(
+        draw(value),
+        draw(slice)
+    )
+    return node
+
+
+@hs.composite
+def tuple_node(draw, elt=const_node, **kwargs):
+    """Return a Tuple node with elements drawn from elt.
+    """
+    elts = draw(hs.lists(elt(), **kwargs))
+    node = astroid.Tuple()
+    node.postinit(elts)
+    return node
+
+
+@hs.composite
+def unaryop_node(draw, op=hs.one_of(non_bool_unary_op, unary_bool_operator),
+                 operand=const_node()):
+    op = draw(op)
+    operand = draw(operand)
+    node = astroid.UnaryOp(op)
+    node.postinit(operand)
+    return node
+
+
+@hs.composite
+def simple_homogeneous_dict_node(draw, **kwargs):
+    k = draw(primitive_types)
+    v = draw(primitive_types)
+    return dict_node(
+        const_node(k()),
+        const_node(v()),
+        **kwargs
+    ).example()
+
+
+@hs.composite
+def simple_homogeneous_list_node(draw, **kwargs):
+    t = draw(primitive_types)
+    return list_node(const_node(t()), **kwargs).example()
+
+
+expr = hs.one_of(
+    const_node(),
+    dict_node(min_size=1),
+    list_node(min_size=1),
+    tuple_node()
+)
+
+subscriptable_expr = hs.one_of(
+    const_node(hs.text()),
+    dict_node(min_size=1),
+    list_node(min_size=1),
+    tuple_node()
+)
+
+
+# Helper functions for testing
+def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer]:
+    """Parse source code text and output an AST with type inference performed."""
+    if not isinstance(source, str):  # It's an astroid node
+        source = source.as_string()
+    module = astroid.parse(source)
+    type_inferer = TypeInferer()
+    type_inferer.environment_transformer().visit(module)
+    type_inferer.type_inference_transformer().visit(module)
+    return module, type_inferer
+
+
+def _verify_type_setting(module, ast_class, expected_type):
+    """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
+    result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]
+    assert [expected_type] == result

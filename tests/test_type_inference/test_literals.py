@@ -2,116 +2,74 @@ import astroid
 import nose
 from hypothesis import assume, given, settings
 import tests.custom_hypothesis_support as cs
-import hypothesis.strategies as hs
 from typing import Any, Dict, List, Tuple
 settings.load_profile("pyta")
 
 
-@given(cs.primitive_values)
-def test_simple_literal(const):
+@given(cs.const_node())
+def test_simple_literal(node):
     """Test Const nodes representing int, bool, float, and None literal values."""
-    assume(not isinstance(const, str))
-    module, _ = cs._parse_text(str(const))
-    cs._verify_type_setting(module, astroid.Const, type(const))
+    assume(not(isinstance(node.value, str)))
+    module, _ = cs._parse_text(node)
+    cs._verify_type_setting(module, astroid.Const, type(node.value))
 
 
-@given(cs.tuple_strategy(min_size=2))
+@given(cs.tuple_node())
 def test_tuple(t_tuple):
     """ Test Tuple nodes representing a tuple of various types."""
-    module, _ = cs._parse_text(str(t_tuple))
-    cs._verify_type_setting(module, astroid.Tuple, Tuple[tuple(type(x) for x in t_tuple)])
+    module, _ = cs._parse_text(t_tuple)
+    for t_node in module.nodes_of_class(astroid.Tuple):
+        elt_types = tuple(elt.type_constraints.type for elt in t_node.elts)
+        assert t_node.type_constraints.type == Tuple[elt_types]
 
 
-@given(cs.homogeneous_list(min_size=2))
+@given(cs.simple_homogeneous_list_node(min_size=1))
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
-    module, _ = cs._parse_text(str(lst))
-    cs._verify_type_setting(module, astroid.List, List[type(lst[0])])
+    module, _ = cs._parse_text(lst)
+    cs._verify_type_setting(module, astroid.List, List[type(lst.elts[0].value)])
 
 
-@given(cs.random_list(min_size=2))
+@given(cs.list_node(min_size=2))
 def test_random_lists(lst):
     """Test List nodes representing a list of values of different primitive types."""
-    assume(not isinstance(lst[0], type(lst[1])))
-    module, _ = cs._parse_text(str(lst))
+    assume(not isinstance(lst.elts[0].value, type(lst.elts[1].value)))
+    module, _ = cs._parse_text(lst)
     cs._verify_type_setting(module, astroid.List, List[Any])
 
 
-@given(cs.homogeneous_dictionary(min_size=1))
+@given(cs.simple_homogeneous_dict_node(min_size=1))
 def test_homogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
-    module, _ = cs._parse_text(str(dictionary))
-    cs._verify_type_setting(module, astroid.Dict, Dict[type(list(dictionary.keys())[0]), type(list(dictionary.values())[0])])
+    module, _ = cs._parse_text(dictionary)
+    first_key, first_value = next(((k, v) for k, v in dictionary.items))
+    cs._verify_type_setting(module, astroid.Dict, Dict[type(first_key.value), type(first_value.value)])
 
 
-@given(cs.heterogeneous_dictionary(min_size=2))
-def test_heterogeneous_dict(dictionary):
+@given(cs.dict_node(min_size=2))
+def test_heterogeneous_dict(node):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
-    assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
-    module, _ = cs._parse_text(str(dictionary))
+    keys = [item.value for item, _ in node.items]
+    values = [item.value for item, _ in node.items]
+    assume(not isinstance(keys[0], type(keys[1])))
+    assume(not isinstance(values[0], type(values[1])))
+    module, _ = cs._parse_text(node)
     cs._verify_type_setting(module, astroid.Dict, Dict[Any, Any])
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz"), hs.integers())
-def test_string_index(string_input, index):
-    """Test index visitor representing a subscript for a string"""
-    input_index = cs._index_input_formatter(string_input, index)
-    module, _ = cs._parse_text(input_index)
-    cs._verify_type_setting(module, astroid.Index, type(index))
+@given(cs.subscript_node())
+def test_index(node):
+    module, _ = cs._parse_text(node)
+    for index_node in module.nodes_of_class(astroid.Index):
+        assert index_node.type_constraints.type == index_node.value.type_constraints.type
 
 
-@given(cs.tuple_strategy(min_size=1), hs.integers())
-def test_tuple_index(tuple_input, index):
-    """Test index visitor representing a subscript for a tuple"""
-    input_index = cs._index_input_formatter(tuple_input, index)
-    module, _ = cs._parse_text(input_index)
-    cs._verify_type_setting(module, astroid.Index, type(index))
-
-
-@given(cs.random_list(min_size=2), hs.integers())
-def test_list_index(list_input, index):
-    """Test index visitor representing a subscript a list"""
-    input_index = cs._index_input_formatter(list_input, index)
-    module, _ = cs._parse_text(input_index)
-    cs._verify_type_setting(module, astroid.Index, type(index))
-
-
-@given(cs.heterogeneous_dictionary(min_size=2), cs.index_values)
-def test_dict_index(dict_input, index):
-    """Test index visitor representing a subscript a dictionary"""
-    input_index = cs._index_input_formatter(dict_input, index)
-    module, _ = cs._parse_text(input_index)
-    cs._verify_type_setting(module, astroid.Index, type(index))
-
-
-@given(cs.primitive_values)
-def test_const_expr(expr):
-    """Test visitor for expression node representing a constant"""
-    module, _ = cs._parse_text(repr(expr))
-    cs._verify_node_value_typematch(module)
-
-
-@given(cs.tuple_strategy(min_size=2))
-def test_tuple_expr(expr):
-    """Test visitor for expression node representing a tuple"""
-    module, _ = cs._parse_text(repr(expr))
-    cs._verify_node_value_typematch(module)
-
-
-@given(cs.random_list(min_size=2))
-def test_list_expr(expr):
-    """Test visitor for expression node representing a list"""
-    module, _ = cs._parse_text(repr(expr))
-    cs._verify_node_value_typematch(module)
-
-
-@given(cs.heterogeneous_dictionary(min_size=2))
-def test_dict_expr(expr):
-    """Test visitor for expression node representing a dictionary"""
-    module, _ = cs._parse_text(repr(expr))
-    cs._verify_node_value_typematch(module)
+@given(cs.expr_node())
+def test_expr(expr):
+    module, _ = cs._parse_text(expr)
+    for expr_node in module.nodes_of_class(astroid.Expr):
+        assert expr_node.type_constraints.type == expr_node.value.type_constraints.type
 
 
 if __name__ == '__main__':
     nose.main()
-

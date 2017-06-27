@@ -1,7 +1,6 @@
 import astroid
 import nose
 from hypothesis import settings, given
-from typing import Dict
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 

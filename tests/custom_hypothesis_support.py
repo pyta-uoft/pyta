@@ -133,7 +133,7 @@ homogeneous_iterable = hs.sampled_from([
 heterogeneous_iterable = hs.sampled_from([
         lambda: heterogeneous_dictionary(min_size=1),
         lambda: random_list(min_size=1),
-        lambda: hs.sets(min_size=1)
+        lambda: hs.sets(primitive_values, min_size=1)
     ]).flatmap(lambda s: s())
 
 

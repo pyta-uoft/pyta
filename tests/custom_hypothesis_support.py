@@ -52,6 +52,8 @@ binary_bool_operator = hs.sampled_from(['and', 'or'])
 unary_bool_operator = hs.sampled_from(['not'])
 
 
+
+
 def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
     if 'min_size' not in kwargs:
@@ -85,7 +87,7 @@ def random_list(**kwargs):
 
 def homogeneous_dictionary(**kwargs):
     """Return a strategy which generates a dictionary of uniform key:value type."""
-    return primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
+    return primitive_types.flatmap(lambda s: hs.dictionaries(index_values, s(),  **kwargs))
 
 
 def random_dict_variable_homogeneous_value(**kwargs):
@@ -123,6 +125,18 @@ def _verify_node_value_typematch(module):
 def _index_input_formatter(var_input, index):
     """Helper to format input for testing index type inference visitor."""
     return repr(var_input) + "[" + repr(index) + "]"
+
+homogeneous_iterable = hs.sampled_from([
+        lambda: homogeneous_dictionary(min_size=1),
+        lambda: homogeneous_list(min_size=1),
+        lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
+    ]).flatmap(lambda s: s())
+
+heterogeneous_iterable = hs.sampled_from([
+        lambda: heterogeneous_dictionary(min_size=1),
+        lambda: random_list(min_size=1),
+        lambda: hs.sets(min_size=1)
+    ]).flatmap(lambda s: s())
 
 
 def _parse_dictionary_to_program(variables_dict):

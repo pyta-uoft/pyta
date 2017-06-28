@@ -51,7 +51,7 @@ class TypeInferer:
         visitor.register_transform(astroid.Module, self._set_module_environment)
         visitor.register_transform(astroid.ListComp, self._set_listcomp_environment)
         visitor.register_transform(astroid.DictComp, self._set_dictcomp_environment)
-        visitor.register_transform(astroid.DictComp, self._set_setcomp_environment)
+        visitor.register_transform(astroid.SetComp, self._set_setcomp_environment)
         return visitor
 
     def _set_module_environment(self, node):
@@ -353,12 +353,13 @@ class TypeInferer:
 
     def visit_dictcomp(self, node):
         # TODO: name node stored in .key attribute is visited last, thus we must do a lookup.
-        key_type= self.type_constraints.lookup_concrete(node.key.type_constraints.type)
-        val_type =  node.value.type_constraints.type
+        key_type = self.type_constraints.lookup_concrete(node.key.type_constraints.type)
+        val_type = node.value.type_constraints.type
         node.type_constraints = TypeInfo(Dict[key_type, val_type])
 
     def visit_setcomp(self, node):
-        node.type_constraints = TypeInfo(NoType)
+        elt_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
+        node.type_constraints = TypeInfo(Set[elt_type])
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

@@ -27,7 +27,8 @@ def test_set_comprehension_reproduce_heterogeneous(iterable):
     module, TypeInferrer = cs._parse_text(program)
     setcomp_node = list(module.nodes_of_class(astroid.SetComp))[0]
     if hasattr(setcomp_node.generators[0].iter.type_constraints.type, '__args__'):
-        assert setcomp_node.type_constraints.type == Set[setcomp_node.generators[0].iter.type_constraints.type.__args__[0]]
+        assert setcomp_node.type_constraints.type == \
+               Set[setcomp_node.generators[0].iter.type_constraints.type.__args__[0]]
     else:
         assert setcomp_node.type_constraints.type == Set[setcomp_node.generators[0].iter.type_constraints.type]
 

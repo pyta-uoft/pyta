@@ -52,8 +52,6 @@ binary_bool_operator = hs.sampled_from(['and', 'or'])
 unary_bool_operator = hs.sampled_from(['not'])
 
 
-
-
 def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
     if 'min_size' not in kwargs:

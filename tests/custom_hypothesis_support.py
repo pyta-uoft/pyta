@@ -87,7 +87,7 @@ def random_list(**kwargs):
 
 def homogeneous_dictionary(**kwargs):
     """Return a strategy which generates a dictionary of uniform key:value type."""
-    return primitive_types.flatmap(lambda s: hs.dictionaries(index_values, s(),  **kwargs))
+    return index_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
 
 
 def random_dict_variable_homogeneous_value(**kwargs):

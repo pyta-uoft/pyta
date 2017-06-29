@@ -127,7 +127,6 @@ def _index_input_formatter(var_input, index):
 homogeneous_iterable = hs.sampled_from([
         lambda: homogeneous_dictionary(min_size=1),
         lambda: homogeneous_list(min_size=1),
-        lambda: hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1)
     ]).flatmap(lambda s: s())
 
 heterogeneous_iterable = hs.sampled_from([

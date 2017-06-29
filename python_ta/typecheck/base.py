@@ -306,7 +306,6 @@ class TypeConstraints:
 
 def literal_substitute(t, type_map):
     """Make substitutions in t according to type_map, returning resulting type."""
-    # TODO: the type_map has the names of the TypeVars as keys!
     if isinstance(t, TypeVar) and t.__name__ in type_map:
         return type_map[t.__name__]
     elif isinstance(t, TuplePlus):

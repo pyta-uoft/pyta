@@ -337,24 +337,20 @@ class TypeInferer:
         rtype = self._handle_call(node, '__iter__', arg_type).type
         if isinstance(node.target, astroid.Tuple):
             for target_node in node.target.elts:
-                target_tvar = node.parent.type_environment.lookup_in_env(target_node.name)
-                self.type_constraints.unify(target_tvar, rtype.__args__[0])
+                target_tvar = self._closest_frame(node).type_environment.lookup_in_env(target_node.name)
+                self.type_constraints.unify(target_tvar, rtype)
         else:
-            target_tvar = node.parent.type_environment.lookup_in_env(node.target.name)
+            target_tvar = self._closest_frame(node).type_environment.lookup_in_env(node.target.name)
             self.type_constraints.unify(target_tvar, rtype.__args__[0])
         node.type_constraints = TypeInfo(NoType)
 
     def visit_listcomp(self, node):
-        # based on the types of the generators.. can set up the type constraints.
-        # the type of the list comprehension should be a list of the elt's types
-        # if the elt is a name node, look up the name in the listcomp node's env and set the type const as that
-        # if it is an operation node,
-        node.type_constraints = TypeInfo(List[node.elt.type_constraints.type])
+        val_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
+        node.type_constraints = TypeInfo(List[val_type])
 
     def visit_dictcomp(self, node):
-        # TODO: name node stored in .key attribute is visited last, thus we must do a lookup.
         key_type = self.type_constraints.lookup_concrete(node.key.type_constraints.type)
-        val_type = node.value.type_constraints.type
+        val_type = self.type_constraints.lookup_concrete(node.value.type_constraints.type)
         node.type_constraints = TypeInfo(Dict[key_type, val_type])
 
     def visit_setcomp(self, node):

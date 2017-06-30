@@ -102,15 +102,10 @@ class TypeInferer:
 
     def visit_list(self, node):
         # node_types contains types of elements inside list.
-        node_types = {node_child.type_constraints.type for node_child in node.elts}
-        # If list has more than one type, just set node.type_constraints to List.
-        # If list has only one type T, set the node.type_constraints to be List[T].
-        if len(node_types) == 1:
-            # node_types.pop() returns the only element in the set, which is a
-            # type object.
-            node.type_constraints = TypeInfo(List[node_types.pop()])
-        else:
-            node.type_constraints = TypeInfo(List[Any])
+        node_type = node.elts[0].type_constraints.type
+        for elt in node.elts:
+            node_type = self.type_constraints.least_general_unifier(elt.type_constraints.type, node_type)
+        node.type_constraints = TypeInfo(List[node_type])
 
     def visit_dict(self, node):
         # node_types contains types of elements inside Dict.

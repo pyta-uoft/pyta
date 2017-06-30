@@ -52,6 +52,7 @@ def test_homogeneous_dict(dictionary):
 def test_heterogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
+    assume(not isinstance(list(dictionary.values())[0], type(list(dictionary.values())[1])))
     key_types = [type(key) for key in dictionary.keys()]
     val_types = [type(val) for val in dictionary.values()]
     if int in key_types:

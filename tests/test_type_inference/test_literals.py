@@ -33,6 +33,10 @@ def test_homogeneous_lists(lst):
 def test_random_lists(lst):
     """Test List nodes representing a list of values of different primitive types."""
     assume(not isinstance(lst[0], type(lst[1])))
+    # bools and ints become unified; assume we have one or the other for this test case.
+    lst_types = [type(elt) for elt in lst]
+    if int in lst_types:
+        assume(bool not in lst_types)
     module, _ = cs._parse_text(str(lst))
     cs._verify_type_setting(module, astroid.List, List[Any])
 
@@ -101,6 +105,7 @@ def test_tuple_expr(expr):
 @given(cs.random_list(min_size=2))
 def test_list_expr(expr):
     """Test visitor for expression node representing a list"""
+    assume(type(expr[0]) != type(expr[1]))
     module, _ = cs._parse_text(repr(expr))
     cs._verify_node_value_typematch(module)
 

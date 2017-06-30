@@ -40,7 +40,10 @@ def test_subscript_homogeneous_list_slice(input_list, slice):
 @given(cs.random_list(min_size=2), cs.random_slice_indices())
 def test_subscript_heterogeneous_list_slice(input_list, slice):
     """Test visitor of Subscript node representing slicing of heterogeneous list."""
-    assume(not isinstance(input_list[0], type(input_list[1])))
+    assume(type(input_list[0]) != type(input_list[1]))
+    lst_types = [type(elt) for elt in input_list]
+    if int in lst_types:
+        assume(bool not in lst_types)
     input_slice = ':'.join([str(index) if index else '' for index in slice])
     program = f'{input_list}[{input_slice}]'
     module, _ = cs._parse_text(program)

@@ -52,6 +52,12 @@ def test_homogeneous_dict(dictionary):
 def test_heterogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     assume(not isinstance(list(dictionary.keys())[0], type(list(dictionary.keys())[1])))
+    key_types = [type(key) for key in dictionary.keys()]
+    val_types = [type(val) for val in dictionary.values()]
+    if int in key_types:
+        assume(bool not in key_types)
+    if int in val_types:
+        assume(bool not in val_types)
     module, _ = cs._parse_text(str(dictionary))
     cs._verify_type_setting(module, astroid.Dict, Dict[Any, Any])
 

@@ -6,10 +6,10 @@ import hypothesis.strategies as hs
 from typing import TypeVar, Any
 from keyword import iskeyword
 settings.load_profile("pyta")
-settings(surpress_health_check=[HealthCheck.too_slow])
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_env(variables_dict):
     """Test environment setting visitors"""
     program = cs._parse_dictionary_to_program(variables_dict)

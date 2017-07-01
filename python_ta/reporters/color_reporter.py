@@ -20,11 +20,6 @@ class ColorReporter(PlainReporter):
     def __init__(self, source_lines=None, module_name=''):
         super().__init__(source_lines, module_name)
 
-    def reset_messages(self):
-        super().reset_messages()
-        self._sorted_error_messages.clear()
-        self._sorted_style_messages.clear()
-
     def print_messages(self, level='all'):
         # Check if the OS currently running is Windows
         init(wrap=(sys.platform == 'win32'), strip=False)

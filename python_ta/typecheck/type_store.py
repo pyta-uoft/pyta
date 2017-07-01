@@ -2,6 +2,8 @@ import astroid
 from collections import defaultdict
 from python_ta.typecheck.base import parse_annotations, class_callable
 import os
+from typing import Any
+
 TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
 
 
@@ -14,12 +16,19 @@ class TypeStore:
         self.classes = defaultdict(lambda: defaultdict(list))
         self.functions = defaultdict(list)
         for class_def in module.nodes_of_class(astroid.ClassDef):
+            tvars = []
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
                     gen = base.value.as_string()
                     tvars = base.slice.as_string().strip('()').split(',')
                     if gen == 'Generic':
                         self.classes[class_def.name]['__pyta_tvars'] = tvars
+            for node in (nodes[0] for nodes in class_def.locals.values()
+                         if isinstance(nodes[0], astroid.AssignName) and
+                         isinstance(nodes[0].parent, astroid.AnnAssign)):
+                self.classes[class_def.name][node.name] = [
+                    parse_annotations(node, tvars)
+                ]
         for function_def in module.nodes_of_class(astroid.FunctionDef):
             in_class = isinstance(function_def.parent, astroid.ClassDef)
             if in_class:

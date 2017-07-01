@@ -537,9 +537,9 @@ class bool(int, SupportsInt, SupportsFloat):
     def __init__(self, o: object = ...) -> None: ...
 
 class slice:
-    start = ...  # type: Optional[int]
-    step = ...  # type: Optional[int]
-    stop = ...  # type: Optional[int]
+    start: Optional[int] = ...  # type: Optional[int]
+    step: Optional[int] = ...  # type: Optional[int]
+    stop: Optional[int] = ...  # type: Optional[int]
     @overload
     def __init__(self, stop: Optional[int]) -> None: ...
     @overload

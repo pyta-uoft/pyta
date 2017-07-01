@@ -88,8 +88,21 @@ def op_to_dunder_binary(op):
         return '__xor__'
     elif op == '|':
         return '__or__'
+    elif op == '==':
+        return '__eq__'
+    elif op == '!=':
+        return '__ne__'
+    elif op == '<':
+        return '__lt__'
+    elif op == '<=':
+        return '__le__'
+    elif op == '>':
+        return '__gt__'
+    elif op == '>=':
+        return '__ge__'
+    # TODO: 'is' and 'in'
     else:
-        return ''
+        return op
 
 
 def op_to_dunder_unary(op):
@@ -101,7 +114,7 @@ def op_to_dunder_unary(op):
     elif op == '~':
         return '__invert__'
     else:
-        return ''
+        return op
 
 
 def lookup_method(name, caller_type, *args):
@@ -161,6 +174,12 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            pass
+        elif t1 == Any or t2 == Any:
+            pass
+        elif issubclass(t1, t2) or issubclass(t2, t1):
+            pass
         elif t1 != t2:
             raise Exception(str(t1) + ' ' + str(t2))
 
@@ -252,7 +271,33 @@ class TypeConstraints:
                         return False
                 return True
             else:
-                False
+                return False
+        elif isinstance(t1, GenericMeta):
+            return False
+        elif isinstance(t2, GenericMeta):
+            return False
+        elif t1.__class__.__name__ == '_Union' and t2.__class__.__name__ == 'Union':
+            for union_type in t1.__args__:
+                if union_type in t2.__args__:
+                    return True
+            else:
+                return False
+        elif t1.__class__.__name__ == '_Union':
+            if t2 in t1.__args__:
+                return True
+            else:
+                return False
+        elif t2.__class__.__name__ == '_Union':
+            if t1 in t2.__args__:
+                return True
+            else:
+                return False
+        elif t1 == Any or t2 == Any:
+            return True
+        elif (hasattr(t1, 'msg') and ('not found' in t1.msg)) or (hasattr(t2, 'msg') and ('not found' in t2.msg)):
+            return False
+        elif issubclass(t1, t2) or issubclass(t2, t1):
+            return True
         elif t1 != t2:
             return False
         else:
@@ -344,6 +389,8 @@ def parse_annotations(node, class_tvars=None):
 
         rtype = _node_to_type(node.returns)
         return create_Callable(arg_types, rtype, class_tvars)
+    elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
+        return _node_to_type(node.parent.annotation)
 
 
 def _node_to_type(node, locals=None):

@@ -1,6 +1,6 @@
 """
 Top-level functions to mutate the astroid nodes with `end_col_offset` and
-`end_lineno` properties. 
+`end_lineno` properties.
 
 Where possible, the `end_col_offset` property is set by that of the node's last child.
 
@@ -74,8 +74,6 @@ NODES_WITH_CHILDREN = [
     astroid.Decorators,
     astroid.Delete,
     astroid.ExceptHandler,
-    astroid.ExtSlice,
-    # astroid.Expr,  # need this here?
     astroid.For,
     astroid.FunctionDef,
     astroid.GeneratorExp,
@@ -194,21 +192,19 @@ NODES_REQUIRING_SOURCE = [
     (astroid.DelName, _keyword_search('del'), None),
     (astroid.Dict, None, _token_search('}')),
     (astroid.DictComp, None, _token_search('}')),
-
-    # FIXME: sometimes start/ending char does not exist.
     (astroid.Expr, _token_search('('), _token_search(')')),
+
+    # TODO: use same behavior as Slice.
     (astroid.ExtSlice, _token_search('['), _token_search(']')),
     (astroid.GeneratorExp, _token_search('('), _token_search(')')),
     (astroid.Index, _token_search('['), _token_search(']')),
     (astroid.Keyword, _is_arg_name, None),
-
-    # TODO: missing *both* outer brackets
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
     (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
     (astroid.Subscript, None, _token_search(']')),
-    (astroid.Tuple, _token_search('('), _token_search(')'))
+    (astroid.Tuple, None, _token_search(',')),
 ]
 
 
@@ -229,6 +225,7 @@ def init_register_ending_setters(source_code):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
+    ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
     ending_transformer.register_transform(astroid.Arguments, set_arguments)
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
@@ -250,7 +247,7 @@ def init_register_ending_setters(source_code):
 
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
-
+    ending_transformer.register_transform(astroid.Tuple, add_parens_to_const(source_code))
 
     return ending_transformer
 
@@ -262,7 +259,7 @@ def init_register_ending_setters(source_code):
 # ====================================================
 def fix_slice(source_code):
     """
-    The Slice node column positions are mostly set properly when it has (Const) 
+    The Slice node column positions are mostly set properly when it has (Const)
     children. The main problem is when Slice node doesn't have children.
     E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing positions
     are sometimes set improperly to 0.
@@ -326,6 +323,13 @@ def fix_start_attributes(node):
             node.fromlineno = statement.fromlineno
         if node.col_offset is None:
             node.col_offset = statement.col_offset
+
+
+def _set_start_from_first_child(node):
+    """Set the start attributes of this node from its first child."""
+    first_child = next(node.get_children())
+    node.fromlineno = first_child.fromlineno
+    node.col_offset = first_child.col_offset
 
 
 def set_from_last_child(node):
@@ -583,8 +587,8 @@ def register_transforms(source_code, obj):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
-        obj.register_transform(astroid.Arguments, fix_start_attributes)
-        obj.register_transform(astroid.Arguments, set_arguments)
+    obj.register_transform(astroid.Arguments, fix_start_attributes)
+    obj.register_transform(astroid.Arguments, set_arguments)
 
     for node_class in NODES_WITH_CHILDREN:
         obj.register_transform(node_class, set_from_last_child)

@@ -2,19 +2,23 @@
 IfExp astroid node
 
 An if statement written in an expression form.
+(IfExp node represents an expression, not a statement.)
 
 Attributes:
     - test    (Node)
         - Holds a single node such as Compare.
-    - body    (List[Node])
-        - A list of nodes that will execute if the condition passes.
-    - orelse  (List[Node])
-        - The else clause.
+    - body    (Node)
+        - A Node representing the suite to be executed if the if expression
+          evalutes to True.
+    - orelse  (Node)
+        - The Node representing the suite to be executed if the if expression
+          evaluates to False.
 
 Example:
     - test    -> Const(True)
-    - body    -> [1]
-    - orelse  -> [0]
+    - body    -> Const(1)
+    - orelse  -> Const(0)
 """
 
 x = 1 if True else 0
+

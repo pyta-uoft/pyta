@@ -41,15 +41,22 @@ non_bool_symbols = ['+', '-', '*', '//', '%', '/', '**', '&', '^', '|', '<<', '>
 non_boolean_operator = hs.sampled_from(non_bool_symbols)
 non_bool_unary_op = hs.sampled_from(['-', '+', '~'])
 
+# Strategy for genearting Comparison Operators
+comparator_symbols = ['<', '>']
+comparator_operator = hs.sampled_from(comparator_symbols)
+comparator_symbols_equality = ['==', '!=', '>=', '<=', 'is']
+comparator_operator_equality = hs.sampled_from(comparator_symbols_equality)
 
 # Strategy for generating Boolean Operators
 binary_bool_operator = hs.sampled_from(['and', 'or'])
 unary_bool_operator = hs.sampled_from(['not'])
 
 
-def valid_identifier():
+def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
-    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", min_size=1)\
+    if 'min_size' not in kwargs:
+        kwargs['min_size'] = 4
+    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", **kwargs)\
         .filter(lambda x: x[0].isalpha() and x.isidentifier() and not (iskeyword(x)))
 
 
@@ -81,7 +88,7 @@ def homogeneous_dictionary(**kwargs):
     return primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
 
 
-def random_dict_variable_value(**kwargs):
+def random_dict_variable_homogeneous_value(**kwargs):
     """Return a strategy which generates a random dictionary of variable name and value"""
     return primitive_types.flatmap(lambda s: hs.dictionaries(valid_identifier(), s(), **kwargs))
 

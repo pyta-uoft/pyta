@@ -1,4 +1,2 @@
-def fun(x, y, z):
-    return(x + y)
-
-number = fun(1, 2, 3)  # Error on this line, 3 is unused.
+def fun(x, y, z):  # Unused argument 'z'
+    return x + y

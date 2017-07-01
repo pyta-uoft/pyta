@@ -107,7 +107,7 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/dynamic_execution_checker',
         'python_ta/checkers/IO_Function_checker',
         # TODO: Fix this test
-        #'python_ta/checkers/invalid_range_index_checker',
+        'python_ta/checkers/invalid_range_index_checker',
         'python_ta/checkers/assigning_to_self_checker',
         'python_ta/checkers/always_returning_checker',
         'python_ta/checkers/type_inference_checker'
@@ -278,7 +278,7 @@ def _check(module_name='', level='all', local_config='', output=None):
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
-        current_reporter.build_template()
+        current_reporter.output_blob()
     except Exception as e:
         print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
         print('Error message: "{}"'.format(e))

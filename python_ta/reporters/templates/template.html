@@ -1,0 +1,100 @@
+<html>
+   <head>
+      <style type="text/css">
+         {% include "stylesheet.css" %}
+      </style>
+   </head>
+   <div id="preheader">
+      <div id="module">
+         Module analysed: {{ mod_name }}
+      </div>
+      <span id="date">
+      {{ date_time }}
+      </span>
+   </div>
+   <div id="wrap">
+      <div class="title">
+         PyTA Error Report
+      </div>
+   </div>
+   <div id="inside">
+      {% for file in messages_by_file %}
+      <div id="core">
+         <h3> {{ file.filename }} </h3>
+         <div id="code">
+            {{ code_err_title }}
+         </div>
+         {% for message in file.code %}
+         <div class="slider">
+            <p style="font-size: 110%">
+               <span class="code_id">
+               <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.code[message][0].symbol }})</a>
+               </span>
+               &nbsp;&nbsp;Number of occurrences: {{ file.code[message]|length }}
+               <button class="mdl-button mdl-js-button mdl-button--raised"> Expand/Collapse </button>
+            </p>
+         </div>
+         <div id="content" class="collapse in">
+            {% for indiv in file.code[message] %}
+            <div style="font-weight:bold">
+               &nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
+               {% if indiv.snippet != '' %}
+               <pre>
+                        {{ indiv.snippet }}
+                    </pre>
+               {% endif %}
+            </div>
+            {% endfor %}
+         </div>
+         {% else %}
+         {{ no_err_message }}
+         {% endfor %}
+         <br/>
+         <div id="style">
+            {{ style_err_title }}
+         </div>
+         {% for message in file.style %}
+         <div class="slider">
+            <p style="font-size: 110%">
+               <span class="style_id">
+               <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.style[message][0].symbol }})</a>
+               </span>
+               &nbsp;&nbsp;Number of occurrences: {{ file.style[message]|length }}
+               <button class="mdl-button mdl-js-button mdl-button--raised"> Expand/Collapse </button>
+            </p>
+         </div>
+         <div id="content" class="collapse in">
+            {% for indiv in file.style[message] %}
+            <div style="font-weight:bold">
+               &nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
+               {% if indiv.snippet != '' %}
+               <pre>
+                            {{ indiv.snippet }}
+                        </pre>
+               {% endif %}
+            </div>
+            {% endfor %}
+         </div>
+         {% else %}
+         {{ no_err_message }}
+         {% endfor %}
+      </div>
+      {% endfor %}
+   </div>
+   <a href="mailto:david@cs.toronto.edu">
+      <div id="report_bug">
+         Found a bug? Report it to Prof. Liu!
+      </div>
+   </a>
+   <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+           integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+           crossorigin="anonymous"></script>
+   <script type="text/javascript">
+      {% include "script.js" %}
+   </script>
+   <div id="logo">
+      <a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
+      <img src="data:image/png;base64,{{ pyta_logo }}" alt="PyTA logo" height="50"/>
+      </a>
+   </div>
+</html>

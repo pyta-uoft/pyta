@@ -1,7 +1,6 @@
 import astroid
 import nose
 from hypothesis import given, settings, assume
-from typing import GenericMeta
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 settings.load_profile("pyta")

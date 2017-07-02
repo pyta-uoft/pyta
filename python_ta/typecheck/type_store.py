@@ -20,7 +20,7 @@ class TypeStore:
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
                     gen = base.value.as_string()
-                    tvars = base.slice.as_string().strip('()').split(',')
+                    tvars = base.slice.as_string().strip('()').replace(" ", "").split(',')
                     if gen == 'Generic':
                         self.classes[class_def.name]['__pyta_tvars'] = tvars
             for node in (nodes[0] for nodes in class_def.locals.values()

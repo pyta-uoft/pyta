@@ -85,7 +85,7 @@ def random_list(**kwargs):
 
 def homogeneous_dictionary(**kwargs):
     """Return a strategy which generates a dictionary of uniform key:value type."""
-    return primitive_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
+    return index_types.flatmap(lambda s: hs.dictionaries(s(), s(),  **kwargs))
 
 
 def random_dict_variable_homogeneous_value(**kwargs):
@@ -123,6 +123,17 @@ def _verify_node_value_typematch(module):
 def _index_input_formatter(var_input, index):
     """Helper to format input for testing index type inference visitor."""
     return repr(var_input) + "[" + repr(index) + "]"
+
+homogeneous_iterable = hs.sampled_from([
+        lambda: homogeneous_dictionary(min_size=1),
+        lambda: homogeneous_list(min_size=1),
+    ]).flatmap(lambda s: s())
+
+heterogeneous_iterable = hs.sampled_from([
+        lambda: heterogeneous_dictionary(min_size=1),
+        lambda: random_list(min_size=1),
+        lambda: hs.sets(primitive_values, min_size=1)
+    ]).flatmap(lambda s: s())
 
 
 def _parse_dictionary_to_program(variables_dict):

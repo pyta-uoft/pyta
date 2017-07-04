@@ -35,12 +35,17 @@
 			</div>
 			<u1>
 				{% for message in file.code %}
+				    <div class="container">
+				    <div class="slider">
 					<p style="font-size: 110%">
 						<span class="code_id">
 						    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.code[message][0].symbol }})</a> 
                         </span>
 						&nbsp;&nbsp;Number of occurrences: {{ file.code[message]|length }}
 					</p>
+					</div>
+
+					<div id ="content" class="collapse in">
 					{% for indiv in file.code[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
@@ -51,8 +56,10 @@
 						{% endif %}
 						</div>
 					{% endfor %}
+					</div>
                 {% else %}
                     {{ no_err_message }}
+                </div>
 				{% endfor %}
 			</u1>
 
@@ -62,12 +69,17 @@
 
 			<u1>
 				{% for message in file.style %}
+				<div class="container">
+				    <div class="slider">
 					<p style="font-size: 110%">
 						<span class="style_id">
 						    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.style[message][0].symbol }})</a> 
                         </span>
 						&nbsp;&nbsp;Number of occurrences: {{ file.style[message]|length }}
 					</p>
+					</div>
+
+					<div id ="content" class = "collapse in">
 					{% for indiv in file.style[message] %}
 						<div style="font-weight:bold">
 						&nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
@@ -76,8 +88,9 @@
 								{{ indiv.snippet }}
 							</p>
 						{% endif %}
-						</div>
 					{% endfor %}
+					</div>
+			    </div>
                 {% else %}
                     {{ no_err_message }}
                 {% endfor %}
@@ -94,6 +107,12 @@
 		</a>
 	</div>
 </body>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+  <script type="text/javascript" src="python_ta/reporters/templates/script.js"></script>
+
 <div id="logo">
 		<a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
             <img src="data:image/png;base64,{{ pyta_logo }}" alt="PyTA logo" height="50"/>

@@ -178,6 +178,24 @@ def index_node(draw, value=const_node(hs.integers())):
 
 
 @hs.composite
+def set_node(draw, elt=const_node(), **kwargs):
+    """Return a Set node with elements drawn from elt.
+    """
+    node = astroid.Set()
+    node.postinit(draw(hs.sets(elt, **kwargs)))
+    return node
+
+
+@hs.composite
+def setcomp_node(draw, elt=const_node(),
+                  generators=hs.lists(comprehension_node(),
+                                      min_size=1, average_size=1)):
+    node = astroid.SetComp()
+    node.postinit(draw(elt), draw(generators))
+    return node
+
+
+@hs.composite
 def list_node(draw, elt=const_node(), **kwargs):
     """Return a List node with elements drawn from elt.
     """
@@ -271,6 +289,9 @@ subscriptable_expr = hs.one_of(
 # Helper functions for testing
 def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
+    # TODO: Python parses sets as dictionaries by default. How to cast into Set?
+    # if isinstance(source, astroid.Set):
+    #     source = f'set({source.as_string()})'
     if not isinstance(source, str):  # It's an astroid node
         source = source.as_string()
     module = astroid.parse(source)

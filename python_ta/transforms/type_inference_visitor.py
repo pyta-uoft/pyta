@@ -148,7 +148,7 @@ class TypeInferer:
             node_type = node.elts[0].type_constraints.type
             for elt in node.elts:
                 node_type = self.type_constraints.least_general_unifier(elt.type_constraints.type, node_type)
-            node.type_constraints = TypeInfo(List[node_type])
+            node.type_constraints = TypeInfo(Set[node_type])
 
     def visit_dict(self, node):
         if len(node.items) == 0:

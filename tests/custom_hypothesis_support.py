@@ -271,6 +271,11 @@ def simple_homogeneous_list_node(draw, **kwargs):
     return list_node(const_node(t()), **kwargs).example()
 
 
+@hs.composite
+def simple_homogeneous_set_node(draw, **kwargs):
+    t = draw(primitive_types)
+    return set_node(const_node(t()), **kwargs).example()
+
 expr = hs.one_of(
     const_node(),
     dict_node(min_size=1),

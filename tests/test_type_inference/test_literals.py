@@ -48,16 +48,33 @@ def test_random_lists(lst):
     cs._verify_type_setting(module, astroid.List, List[Any])
 
 
-# TODO: Add test cases for Set nodes.
-# @given(cs.set_node())
-# def test_set(node):
-#     """Test Set nodes representing a set of valuesi."""
-#     module, _ = cs._parse_text(node)
-#     set_node = list(module.nodes_of_class(astroid.Set))[0]
-#     if len(set_node.elts) == 0:
-#         assert set_node.type_constraints.type == Set[Any]
-#     else:
-#         cs._verify_type_setting(module, astroid.Set, Set[type(node.elts[0].value)])
+@given(cs.simple_homogeneous_set_node())
+def test_homogeneous_set(node):
+    """Test Set nodes representing a set of homogeneous values."""
+    module, _ = cs._parse_text(node)
+    set_node = list(module.nodes_of_class(astroid.Set))[0]
+    if len(set_node.elts) == 0:
+        assert set_node.type_constraints.type == Set[Any]
+    else:
+        try:
+            cs._verify_type_setting(module, astroid.Set, Set[type(set_node.elts[0].value)])
+        except AttributeError:
+            cs._verify_type_setting(module, astroid.Set, Set[type(set_node.elts[0].operand.value)])
+
+
+@given(cs.set_node(min_size=2))
+def test_random_set(node):
+    """Test Set nodes representing a set of heterogeneous values."""
+    assume(not isinstance(list(node.elts)[0].value, type(list(node.elts)[1].value)))
+    assume(not isinstance(list(node.elts)[1].value, type(list(node.elts)[0].value)))
+    val_types = [type(val.value) for val in node.elts]
+    if int in val_types:
+        assume(bool not in val_types)
+    if bool in val_types:
+        assume(int not in val_types)
+    module, _ = cs._parse_text(node)
+    set_node = list(module.nodes_of_class(astroid.Set))[0]
+    cs._verify_type_setting(module, astroid.Set, Set[Any])
 
 
 @given(cs.simple_homogeneous_dict_node(min_size=1))

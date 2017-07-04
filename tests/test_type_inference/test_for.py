@@ -26,6 +26,11 @@ def test_for_heterogeneous_list(iterable):
      iterating over a heterogeneous list.
     """
     assume(type(iterable[0]) != type(iterable[1]))
+    val_types = [type(val) for val in iterable]
+    if int in val_types:
+        assume(bool not in val_types)
+    if bool in val_types:
+        assume(int not in val_types)
     program = f'for elt in {iterable}:\n' \
               f'    x = elt\n'
     module, TypeInferrer = cs._parse_text(program)

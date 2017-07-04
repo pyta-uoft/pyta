@@ -77,12 +77,14 @@ body {
 	font-size: 120%;
     color: rgb(255, 0, 0);
     font-weight: bold;
+    text-align: left;
 }
 
 #style {
 	font-size: 120%;
     color: rgb(0, 0, 255);
     font-weight: bold;
+    padding-top: 12px;
 }
 
 .code_id {
@@ -141,11 +143,34 @@ pre {
     padding-top: 10px;
 }
 
+#nbsp {
+    padding-left: 20px;
+}
+#info {
+    font-size: 110%;
+}
+
+#fontbold {
+    font-weight: bold;
+}
+
 .slider {
     cursor: pointer;
     font-weight: bold;
+    text-align: right;
 }
 .content {
+    display: none;
+    padding: 5px;
+}
+
+.sliderall {
+    cursor: pointer;
+    font-weight: bold;
+    float: right;
+}
+
+.contentall {
     display: none;
     padding : 5px;
 }

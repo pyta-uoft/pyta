@@ -23,21 +23,29 @@
          <h3> {{ file.filename }} </h3>
          <div id="code">
             {{ code_err_title }}
+            <div class="sliderall">
+               <button class="mdl-button"> Expand All/Collapse All</button>
+            </div>
          </div>
+         <div id="contentall" class="collapse in">
          {% for message in file.code %}
-         <div class="slider">
-            <p style="font-size: 110%">
+            <div id="info">
                <span class="code_id">
                <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.code[message][0].symbol }})</a>
                </span>
-               &nbsp;&nbsp;Number of occurrences: {{ file.code[message]|length }}
-               <button class="mdl-button mdl-js-button mdl-button--raised"> Expand/Collapse </button>
-            </p>
-         </div>
-         <div id="content" class="collapse in">
+               <span id="nbsp">
+               Number of occurrences: {{ file.code[message]|length }}
+               </span>
+            </div>
+            <div class="slider">
+               <button class="mdl-button"> Expand/Collapse </button>
+            </div>
+         <div id="collapse">
             {% for indiv in file.code[message] %}
-            <div style="font-weight:bold">
-               &nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
+            <div id="fontbold">
+               <span id="nbsp">
+               [Line {{ indiv.line }}] {{ indiv.msg }}
+               </span>
                {% if indiv.snippet != '' %}
                <pre>
                         {{ indiv.snippet }}
@@ -49,24 +57,32 @@
          {% else %}
          {{ no_err_message }}
          {% endfor %}
-         <br/>
+         </div>
          <div id="style">
             {{ style_err_title }}
+            <div class="sliderall">
+               <button class="mdl-button"> Expand All/Collapse All</button>
+            </div>
          </div>
+         <div id="contentall" class="collapse in">
          {% for message in file.style %}
-         <div class="slider">
-            <p style="font-size: 110%">
+            <div id="info">
                <span class="style_id">
                <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">{{ message }} ({{ file.style[message][0].symbol }})</a>
                </span>
-               &nbsp;&nbsp;Number of occurrences: {{ file.style[message]|length }}
-               <button class="mdl-button mdl-js-button mdl-button--raised"> Expand/Collapse </button>
-            </p>
+               <span id="nbsp">
+               Number of occurrences: {{ file.style[message]|length }}
+               </span>
+            </div>
+         <div class="slider">
+               <button class="mdl-button"> Expand/Collapse </button>
          </div>
-         <div id="content" class="collapse in">
+         <div id="collapse">
             {% for indiv in file.style[message] %}
-            <div style="font-weight:bold">
-               &nbsp;&nbsp;[Line {{ indiv.line }}] {{ indiv.msg }}
+            <div id="fontbold">
+               <span id="nbsp">
+               [Line {{ indiv.line }}] {{ indiv.msg }}
+               </span>
                {% if indiv.snippet != '' %}
                <pre>
                             {{ indiv.snippet }}
@@ -78,6 +94,7 @@
          {% else %}
          {{ no_err_message }}
          {% endfor %}
+         </div>
       </div>
       {% endfor %}
    </div>
@@ -89,7 +106,7 @@
    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
            crossorigin="anonymous"></script>
-   <script type="text/javascript">
+   <script type="text/javascript" src="jquery-3.2.1.min.js">
       {% include "script.js" %}
    </script>
    <div id="logo">

@@ -38,6 +38,7 @@ def test_homogeneous_lists(lst):
 def test_random_lists(lst):
     """Test List nodes representing a list of values of different primitive types."""
     assume(not isinstance(lst.elts[0].value, type(lst.elts[1].value)))
+    assume(not isinstance(lst.elts[1].value, type(lst.elts[0].value)))
     val_types = [type(val.value) for val in lst.elts]
     if int in val_types:
         assume(bool not in val_types)
@@ -78,6 +79,8 @@ def test_heterogeneous_dict(node):
     values = [item.value for _, item in node.items]
     assume(not isinstance(keys[0], type(keys[1])))
     assume(not isinstance(values[0], type(values[1])))
+    assume(not isinstance(keys[1], type(keys[0])))
+    assume(not isinstance(values[1], type(values[0])))
     key_types = [type(key.value) for key, _ in node.items]
     val_types = [type(val.value) for _, val in node.items]
     if int in key_types:

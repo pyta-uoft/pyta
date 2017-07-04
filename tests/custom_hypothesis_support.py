@@ -294,9 +294,10 @@ subscriptable_expr = hs.one_of(
 # Helper functions for testing
 def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
-    # TODO: Python parses sets as dictionaries by default. How to cast into Set?
-    # if isinstance(source, astroid.Set):
-    #     source = f'set({source.as_string()})'
+    # TODO: apparently no literal syntax for empty set in Python3, also cannot do set()
+    # TODO: Deal with special case later.
+    # if isinstance(source, astroid.Set) and len(list(source.elts)) == 0:
+    #     source = f'{set({})}'
     if not isinstance(source, str):  # It's an astroid node
         source = source.as_string()
     module = astroid.parse(source)

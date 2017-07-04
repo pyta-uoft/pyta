@@ -178,6 +178,10 @@ class TypeConstraints:
             pass
         elif t1 == Any or t2 == Any:
             pass
+        elif isinstance(t1, _ForwardRef) and isinstance(t2, _ForwardRef) and t1 == t2:
+            pass
+        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
+            raise Exception(str(t1) + ' ' + str(t2))
         elif issubclass(t1, t2) or issubclass(t2, t1):
             pass
         elif t1 != t2:
@@ -361,6 +365,10 @@ class TypeConstraints:
             return True
         elif (hasattr(t1, 'msg') and ('not found' in t1.msg)) or (hasattr(t2, 'msg') and ('not found' in t2.msg)):
             return False
+        elif isinstance(t1, _ForwardRef) and isinstance(t2, _ForwardRef) and t1 == t2:
+            return True
+        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
+            return False
         elif issubclass(t1, t2) or issubclass(t2, t1):
             return True
         elif t1 != t2:
@@ -371,8 +379,8 @@ class TypeConstraints:
 
 def literal_substitute(t, type_map):
     """Make substitutions in t according to type_map, returning resulting type."""
-    if isinstance(t, TypeVar) and t in type_map:
-        return type_map[t]
+    if isinstance(t, TypeVar) and t.__name__ in type_map:
+        return type_map[t.__name__]
     elif isinstance(t, TuplePlus):
         subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
         return TuplePlus('tup+', *subbed_args)

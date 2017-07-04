@@ -178,6 +178,24 @@ def index_node(draw, value=const_node(hs.integers())):
 
 
 @hs.composite
+def set_node(draw, elt=const_node(), **kwargs):
+    """Return a Set node with elements drawn from elt.
+    """
+    node = astroid.Set()
+    node.postinit(draw(hs.sets(elt, **kwargs)))
+    return node
+
+
+@hs.composite
+def setcomp_node(draw, elt=const_node(),
+                  generators=hs.lists(comprehension_node(),
+                                      min_size=1, average_size=1)):
+    node = astroid.SetComp()
+    node.postinit(draw(elt), draw(generators))
+    return node
+
+
+@hs.composite
 def list_node(draw, elt=const_node(), **kwargs):
     """Return a List node with elements drawn from elt.
     """
@@ -253,6 +271,11 @@ def simple_homogeneous_list_node(draw, **kwargs):
     return list_node(const_node(t()), **kwargs).example()
 
 
+@hs.composite
+def simple_homogeneous_set_node(draw, **kwargs):
+    t = draw(primitive_types)
+    return set_node(const_node(t()), **kwargs).example()
+
 expr = hs.one_of(
     const_node(),
     dict_node(min_size=1),
@@ -271,6 +294,10 @@ subscriptable_expr = hs.one_of(
 # Helper functions for testing
 def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
+    # TODO: apparently no literal syntax for empty set in Python3, also cannot do set()
+    # TODO: Deal with special case later.
+    # if isinstance(source, astroid.Set) and len(list(source.elts)) == 0:
+    #     source = f'{set({})}'
     if not isinstance(source, str):  # It's an astroid node
         source = source.as_string()
     module = astroid.parse(source)

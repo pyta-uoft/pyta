@@ -133,36 +133,32 @@ class TypeInferer:
             node.type_constraints = TypeInfo(NoType)
 
     def visit_list(self, node):
-        # node_types contains types of elements inside list.
-        node_types = {node_child.type_constraints.type for node_child in node.elts}
-        # If list has more than one type, just set node.type_constraints to List.
-        # If list has only one type T, set the node.type_constraints to be List[T].
-        if len(node_types) == 1:
-            # node_types.pop() returns the only element in the set, which is a
-            # type object.
-            node.type_constraints = TypeInfo(List[node_types.pop()])
-        else:
+        if len(node.elts) == 0:
             node.type_constraints = TypeInfo(List[Any])
+        else:
+            node_type = node.elts[0].type_constraints.type
+            for elt in node.elts:
+                node_type = self.type_constraints.least_general_unifier(elt.type_constraints.type, node_type)
+            node.type_constraints = TypeInfo(List[node_type])
 
     def visit_set(self, node):
-        node_types = {node_child.type_constraints.type for node_child in node.elts}
-        if len(node_types) == 1:
-            node.type_constraints = TypeInfo(List[node_types.pop()])
+        if len(node.elts) == 0:
+            node.type_constraints = TypeInfo(Set[Any])
         else:
-            node.type_constraints = TypeInfo(List[Any])
+            node_type = node.elts[0].type_constraints.type
+            for elt in node.elts:
+                node_type = self.type_constraints.least_general_unifier(elt.type_constraints.type, node_type)
+            node.type_constraints = TypeInfo(Set[node_type])
 
     def visit_dict(self, node):
-        # node_types contains types of elements inside Dict.
-        key_types = {key.type_constraints.type for key, _ in node.items}
-        value_types = {value.type_constraints.type for _, value in node.items}
-
-        # If all the keys have the same type and all the values have the same type,
-        # set the type constraint to a Dict of the two types.
-        # Else, just use the general Dict type.
-        if len(key_types) == 1 and len(value_types) == 1:
-            node.type_constraints = TypeInfo(Dict[key_types.pop(), value_types.pop()])
-        else:
+        if len(node.items) == 0:
             node.type_constraints = TypeInfo(Dict[Any, Any])
+        else:
+            key_type, val_type = node.items[0][0].type_constraints.type, node.items[0][1].type_constraints.type
+            for key_node, val_node in node.items:
+                key_type = self.type_constraints.least_general_unifier(key_node.type_constraints.type, key_type)
+                val_type = self.type_constraints.least_general_unifier(val_node.type_constraints.type, val_type)
+            node.type_constraints = TypeInfo(Dict[key_type, val_type])
 
     def visit_index(self, node):
         node.type_constraints = node.value.type_constraints

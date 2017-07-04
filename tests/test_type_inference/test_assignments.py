@@ -118,6 +118,11 @@ def test_assign_complex(variables, values):
      with a homogeneous list as the value.
     """
     assume(type(values[0]) != type(values[1]) and len(variables) == len(values))
+    val_types = [type(val) for val in values]
+    if int in val_types:
+        assume(bool not in val_types)
+    if bool in val_types:
+        assume(int not in val_types)
     program = ("x = ["
                + ", ".join([repr(val) for val in values])
                + "]\n"

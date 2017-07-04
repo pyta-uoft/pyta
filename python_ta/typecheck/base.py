@@ -221,6 +221,72 @@ class TypeConstraints:
             self.unify(arg_type, param_type)
         return self._type_eval(new_func_type.__args__[-1])
 
+    def least_general_unifier(self, t1, t2):
+        if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
+            i1 = self._find(t1)
+            i2 = self._find(t2)
+            if issubclass(i1, i2):
+                return i2
+            elif issubclass(i2, i1):
+                return i1
+            else:
+                return Any
+        elif isinstance(t1, TypeVar):
+            i1 = self._find(t1)
+            if issubclass(i1, t2):
+                return t2
+            elif issubclass(t2, i1):
+                return i1
+            else:
+                return Any
+        elif isinstance(t2, TypeVar):
+            return self.least_general_unifier(t2, t1)
+        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
+            return self._least_general_unifier_generic(t1, t2)
+        elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
+            rtype = self._least_general_unifier_call(t1, *t2.__args__[:-1])
+            return self.least_general_unifier(rtype, t2.__args__[-1])
+        elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
+            return self._least_general_unifier_tuple(t1, t2)
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            pass
+        elif t1 == Any or t2 == Any:
+            return Any
+        elif issubclass(t1, t2):
+            return t2
+        elif issubclass(t2, t1):
+            return t1
+        elif t1 != t2:
+            return Any
+
+    def _least_general_unifier_generic(self, t1: GenericMeta, t2: GenericMeta):
+        """Unify two generic types."""
+        if not _geqv(t1, t2):
+            raise TypeInferenceError('bad unify')
+        elif t1.__args__ is not None and t2.__args__ is not None:
+            for a1, a2 in zip(t1.__args__, t2.__args__):
+                return self.least_general_unifier(a1, a2)
+
+    def _least_general_unifier_tuple(self, t1: TupleMeta, t2: TupleMeta):
+        tup1, tup2 = t1.__tuple_params__, t2.__tuple_params__
+        if not tup1 or not tup2:
+            return
+        elif len(tup1) != len(tup2):
+            raise TypeInferenceError('unable to unify Tuple types')
+        else:
+            for elem1, elem2 in zip(tup1, tup2):
+                return self.least_general_unifier(elem1, elem2)
+
+    def _least_general_unifier_call(self, func_type, *arg_types):
+        # TODO: Test this helper.
+        if len(func_type.__args__) - 1 != len(arg_types):
+            raise TypeInferenceError('Wrong number of arguments')
+        new_tvars = {tvar: self.fresh_tvar() for tvar in getattr(func_type, 'polymorphic_tvars', [])}
+        new_func_type = literal_substitute(func_type, new_tvars)
+        for i in range(len(list(zip(arg_types, new_func_type.__args__[:-1])))):
+            new_func_type.__args__[i] = self.least_general_unifier(arg_types[i], new_func_type.__args__[i])
+        return self._type_eval(new_func_type.__args__[-1])
+
     def _type_eval(self, t):
         """Evaluate a type. Used for tuples."""
         if isinstance(t, TuplePlus):

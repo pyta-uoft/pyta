@@ -178,6 +178,10 @@ class TypeConstraints:
             pass
         elif t1 == Any or t2 == Any:
             pass
+        elif isinstance(t1, _ForwardRef) and isinstance(t2, _ForwardRef) and t1 == t2:
+            pass
+        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
+            raise Exception(str(t1) + ' ' + str(t2))
         elif issubclass(t1, t2) or issubclass(t2, t1):
             pass
         elif t1 != t2:
@@ -295,6 +299,10 @@ class TypeConstraints:
         elif t1 == Any or t2 == Any:
             return True
         elif (hasattr(t1, 'msg') and ('not found' in t1.msg)) or (hasattr(t2, 'msg') and ('not found' in t2.msg)):
+            return False
+        elif isinstance(t1, _ForwardRef) and isinstance(t2, _ForwardRef) and t1 == t2:
+            return True
+        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
             return False
         elif issubclass(t1, t2) or issubclass(t2, t1):
             return True

@@ -2,7 +2,7 @@ import astroid.inference
 import astroid
 from astroid.node_classes import *
 from typing import *
-from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv
+from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError
 from ..typecheck.type_store import TypeStore
@@ -48,6 +48,7 @@ class TypeInferer:
         """Return a TransformVisitor that sets an environment for every node."""
         visitor = TransformVisitor()
         visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
+        visitor.register_transform(astroid.ClassDef, self._set_classdef_environment)
         visitor.register_transform(astroid.Module, self._set_module_environment)
         visitor.register_transform(astroid.ListComp, self._set_listcomp_environment)
         visitor.register_transform(astroid.DictComp, self._set_dictcomp_environment)
@@ -59,6 +60,14 @@ class TypeInferer:
         node.type_environment = Environment(
             globals_={name: self.type_constraints.fresh_tvar() for name in node.globals})
         self._populate_local_env(node)
+
+    def _set_classdef_environment(self, node):
+        """Method to set environment of a ClassDef node."""
+        node.type_environment = Environment()
+        for name in node.instance_attrs:
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+        for name in node.locals:
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
 
     def _set_function_def_environment(self, node):
         """Method to set environment of a FunctionDef node."""
@@ -279,8 +288,9 @@ class TypeInferer:
         else:
             # assignment(s) in single statement
             for target_node in node.targets:
-                target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
+                if isinstance(target_node, astroid.AssignName):
+                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
+                    self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_return(self, node):
@@ -291,6 +301,11 @@ class TypeInferer:
     def visit_functiondef(self, node):
         arg_types = [self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env(arg))
                      for arg in node.argnames()]
+
+        # Check whether this is a method in a class
+        if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):
+            self.type_constraints.unify(arg_types[0], _ForwardRef(node.parent.name))
+
         # check if return nodes exist; there is a return statement in function body.
         if len(list(node.nodes_of_class(astroid.Return))) == 0:
             func_type = Callable[arg_types, None]
@@ -303,16 +318,19 @@ class TypeInferer:
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):
-        try:
-            func_name = node.func.name
+        func_name = node.func.name
+        if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
+            # This is the constructor of a class
+            func_t = self.type_constraints.lookup_concrete(
+                node.frame().locals[func_name][0].type_environment.locals['__init__'])
+            arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
+            self.type_constraints.unify_call(func_t, *arg_types)
+            node.type_constraints = TypeInfo(_ForwardRef(func_name))
+        else:
             func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])
-        except AttributeError:
-            node.type_constraints = TypeInfo(NoType)
-            return
-
-        arg_types = [arg.type_constraints.type for arg in node.args]
-        ret_type = self.type_constraints.unify_call(func_t, *arg_types)
-        node.type_constraints = TypeInfo(ret_type)
+            arg_types = [arg.type_constraints.type for arg in node.args]
+            ret_type = self.type_constraints.unify_call(func_t, *arg_types)
+            node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]

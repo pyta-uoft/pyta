@@ -371,6 +371,16 @@ class TypeInferer:
         elt_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
         node.type_constraints = TypeInfo(Set[elt_type])
 
+    def visit_classdef(self, node):
+        # for each instance, unify all it's attributes
+        # we cannot visit the AssignAttr nodes and unify because we lose env
+        # best way is to visit each ClassDef node, get all it's instances
+        # and unify accordingly.. actually each attribute should have a
+        # SINGLE TYPE you byungshin.
+        # so we just go through each instance_attrs element and
+        #   do a lookup of the attrname in the ClassDef's env and unify it
+        #   with the parent Assign node's value node's type
+
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)

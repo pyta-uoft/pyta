@@ -1,9 +1,5 @@
-def is_true():
-    """
-    @rtype: bool
-    """
-    temp = 5
-    if not temp > 3:
-        return False
-    else:
-        return True
+number = 5
+if not number >= 0:  # Error on this line
+    number_category = 'negative'
+else:
+    number_category = 'non-negative'

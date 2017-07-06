@@ -37,6 +37,7 @@ class TypeInferer:
     """
     type_constraints = TypeConstraints()
     type_store = TypeStore(type_constraints)
+    type_environments = {}
 
     def __init__(self):
         self.type_constraints.clear_tvars()
@@ -68,6 +69,7 @@ class TypeInferer:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+        self.type_environments[node.name] = node.type_environment
 
     def _set_function_def_environment(self, node):
         """Method to set environment of a FunctionDef node."""
@@ -129,7 +131,7 @@ class TypeInferer:
             node.type_constraints = TypeInfo(
                 Tuple[tuple(x.type_constraints.type for x in node.elts)])
         else:
-            # Tuple is on LHS; will never have a type.
+            # Tuple is on LHS; will never have a type
             node.type_constraints = TypeInfo(NoType)
 
     def visit_list(self, node):
@@ -287,6 +289,27 @@ class TypeInferer:
                 if isinstance(target_node, astroid.AssignName):
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
                     self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
+                elif isinstance(target_node, astroid.AssignAttr):
+                    # TODO: special case for self? shouldn't this already be set
+                    # before in the ClassDef node?
+                    if target_node.expr.name == 'self':
+                        pass
+                        # TODO: check for annotations? should this be done in ClassDef instead?
+                        # just look up the attribute name in closest ancestor, which will be
+                    # TODO: need to find correct Class environment then do the unify
+                    else:
+                        # get tvar of instance which should be a ForwardRef of the Class name
+                        class_type = self.type_constraints.lookup_concrete(self._closest_frame(
+                                        node).type_environment.lookup_in_env(target_node.expr.name))
+                        class_env = self.type_environments[class_type.__str__().partition("'")[-1].rpartition("'")[0]]
+                        # find tvar of attr node in class env
+                        attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(target_node.attrname))
+                        # unify the attribute's type with assigned value's type
+                        try:
+                            self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
+                        except Exception: # TODO: Bad to just catch Exception; change type of exception in base?
+                            pass
+                    node.type_constraints = TypeInfo(NoType)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_return(self, node):
@@ -372,14 +395,7 @@ class TypeInferer:
         node.type_constraints = TypeInfo(Set[elt_type])
 
     def visit_classdef(self, node):
-        # for each instance, unify all it's attributes
-        # we cannot visit the AssignAttr nodes and unify because we lose env
-        # best way is to visit each ClassDef node, get all it's instances
-        # and unify accordingly.. actually each attribute should have a
-        # SINGLE TYPE you byungshin.
-        # so we just go through each instance_attrs element and
-        #   do a lookup of the attrname in the ClassDef's env and unify it
-        #   with the parent Assign node's value node's type
+        node.type_constraints = TypeInfo(NoType)
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

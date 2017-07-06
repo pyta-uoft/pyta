@@ -37,7 +37,6 @@ class TypeInferer:
     """
     type_constraints = TypeConstraints()
     type_store = TypeStore(type_constraints)
-    type_environments = {}
 
     def __init__(self):
         self.type_constraints.clear_tvars()
@@ -69,7 +68,6 @@ class TypeInferer:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
-        self.type_environments[node.name] = node.type_environment
 
     def _set_function_def_environment(self, node):
         """Method to set environment of a FunctionDef node."""
@@ -290,26 +288,20 @@ class TypeInferer:
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
                     self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
                 elif isinstance(target_node, astroid.AssignAttr):
-                    # TODO: special case for self? shouldn't this already be set
-                    # before in the ClassDef node?
+                    # TODO: check for annotations? should this be done in ClassDef instead?
                     if target_node.expr.name == 'self':
+                        # this is a special case and is handled by the Call node visitor.
                         pass
-                        # TODO: check for annotations? should this be done in ClassDef instead?
-                        # just look up the attribute name in closest ancestor, which will be
-                    # TODO: need to find correct Class environment then do the unify
                     else:
-                        # get tvar of instance which should be a ForwardRef of the Class name
                         class_type = self.type_constraints.lookup_concrete(self._closest_frame(
                                         node).type_environment.lookup_in_env(target_node.expr.name))
-                        class_env = self.type_environments[class_type.__str__().partition("'")[-1].rpartition("'")[0]]
-                        # find tvar of attr node in class env
+                        class_env = self._closest_frame(node).locals[class_type.__forward_arg__][0].type_environment
                         attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(target_node.attrname))
-                        # unify the attribute's type with assigned value's type
                         try:
                             self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
                         except Exception: # TODO: Bad to just catch Exception; change type of exception in base?
+                            # TODO: Futhermore, is this the behaviour we want?
                             pass
-                    node.type_constraints = TypeInfo(NoType)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_return(self, node):

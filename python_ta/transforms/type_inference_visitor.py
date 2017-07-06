@@ -335,7 +335,11 @@ class TypeInferer:
             func_t = self.type_constraints.lookup_concrete(
                 node.frame().locals[func_name][0].type_environment.locals['__init__'])
             arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
-            self.type_constraints.unify_call(func_t, *arg_types)
+            try:
+                self.type_constraints.unify_call(func_t, *arg_types)
+            except Exception:
+                # TODO: Same issue as AssignAttr node visitor; bad unify to be fixed later - pass for now.
+                pass
             node.type_constraints = TypeInfo(_ForwardRef(func_name))
         else:
             func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])

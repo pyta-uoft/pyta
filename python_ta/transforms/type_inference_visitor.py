@@ -117,6 +117,18 @@ class TypeInferer:
         return type_visitor
 
     ##############################################################################
+    # Helpers
+    ##############################################################################
+
+    def _find_attribute_type(self, node, class_name, attribute_name):
+        """Given the node, class name and attribute name, return the type of the attribute."""
+        class_type = self.type_constraints.lookup_concrete(self._closest_frame(node, node.expr.name)
+                                                           .type_environment.lookup_in_env(node.expr.name))
+        class_name = class_type.__forward_arg__
+        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+        return self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
+
+    ##############################################################################
     # Literals
     ##############################################################################
     def visit_const(self, node):
@@ -295,11 +307,7 @@ class TypeInferer:
                         # this is a special case and is handled by the Call node visitor.
                         pass
                     else:
-                        class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
-                                        target_node.expr.name).type_environment.lookup_in_env(target_node.expr.name))
-                        class_name = locals[class_type.__forward_arg__][0]
-                        class_env = self._closest_frame(node, class_name).locals[class_name].type_environment
-                        attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(target_node.attrname))
+                        attr_type = self._find_attribute_type(target_node, target_node.expr.name, target_node.attrname)
                         try:
                             self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
                         except Exception: # TODO: Bad to just catch Exception; change type of exception in base?
@@ -343,11 +351,7 @@ class TypeInferer:
         try:
             func_name = node.func.name
         except Exception:
-            class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
-                                            node.func.expr.name).type_environment.lookup_in_env(node.func.expr.name))
-            class_name = class_type.__forward_arg__
-            class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
-            method_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.func.attrname))
+            method_type = self._find_attribute_type(node.func, node.func.expr.name, node.func.attrname)
             node.type_constraints = TypeInfo(method_type)
         else:
             if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
@@ -422,20 +426,8 @@ class TypeInferer:
                                                               .type_environment.lookup_in_env(node.attrname))
         except KeyError:
             if node.expr.name != 'self':
-                class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
-                            node.expr.name).type_environment.lookup_in_env(node.expr.name))
-                class_name = class_type.__forward_arg__
-                class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
-                attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
+                attr_type = self._find_attribute_type(node, node.expr.name, node.attrname)
         node.type_constraints = TypeInfo(attr_type)
-
-# TODO: MAKE HELPER THAT FINDS CLASS NAME GIVEN AN ATTRIBUTE?
-#     class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
-#                                                                            node.expr.name).type_environment.lookup_in_env(
-#         node.expr.name))
-#     class_name = class_type.__forward_arg__
-#     class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
-#     attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

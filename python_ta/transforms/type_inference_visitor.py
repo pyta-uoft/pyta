@@ -157,13 +157,13 @@ class TypeInferer:
         else:
             return closest_scope
 
-    def _find_attribute_type(self, node, class_name, attribute_name):
+    def _find_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""
-        class_type = self.type_constraints.lookup_concrete(self._closest_frame(node, node.expr.name)
-                                                           .type_environment.lookup_in_env(node.expr.name))
+        class_type = self.type_constraints.lookup_concrete(self._closest_frame(node, instance_name)
+                                                           .type_environment.lookup_in_env(instance_name))
         class_name = class_type.__forward_arg__
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
-        return self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
+        return self.type_constraints.lookup_concrete(class_env.lookup_in_env(attribute_name))
 
     ##############################################################################
     # Literals

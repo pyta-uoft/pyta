@@ -185,11 +185,11 @@ class TypeInferer:
 
     def visit_name(self, node):
         try:
-            node.type_constraints = TypeInfo(self._closest_frame(node,
-                                        node.name).type_environment.lookup_in_env(node.name))
+            node.type_constraints = TypeInfo(self._closest_frame(node, node.name)
+                                             .type_environment.lookup_in_env(node.name))
         except KeyError:
-            self._closest_frame(node, node.name).type_environment.create_in_env(self.type_constraints,
-                                                                            'globals', node.name)
+            self._closest_frame(node, node.name).type_environment\
+                .create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
     ##############################################################################
@@ -372,9 +372,11 @@ class TypeInferer:
         rtype = self._handle_call(node, '__iter__', for_node.iter.type_constraints.type).type
         # there may be one target, or a Generic of targets to unify.
         if isinstance(for_node.target, astroid.AssignName):
-            self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))
+            self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment
+                                        .lookup_in_env(for_node.target.name))
         else:
-            target_tvars = [node.frame().type_environment.lookup_in_env(target_node.name) for target_node in for_node.target.elts]
+            target_tvars = [node.frame().type_environment.lookup_in_env(target_node.name) for target_node in for_node
+                            .target.elts]
             for i in range(len(target_tvars)):
                 self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
 
@@ -390,8 +392,8 @@ class TypeInferer:
         rtype = self._handle_call(node, '__iter__', arg_type).type
         if isinstance(node.target, astroid.Tuple):
             for target_node in node.target.elts:
-                target_tvar = self._closest_frame(node, target_node.name).type_environment.lookup_in_env(
-                                    target_node.name)
+                target_tvar = self._closest_frame(node, target_node.name).type_environment\
+                    .lookup_in_env(target_node.name)
                 self.type_constraints.unify(target_tvar, rtype)
         else:
             target_tvar = self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name)
@@ -416,8 +418,8 @@ class TypeInferer:
 
     def visit_attribute(self, node):
         try:
-            attr_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
-                                                    node.attrname).type_environment.lookup_in_env(node.attrname))
+            attr_type = self.type_constraints.lookup_concrete(self._closest_frame(node, node.attrname)
+                                                              .type_environment.lookup_in_env(node.attrname))
         except KeyError:
             if node.expr.name != 'self':
                 class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,

@@ -119,6 +119,43 @@ class TypeInferer:
     ##############################################################################
     # Helpers
     ##############################################################################
+    def _handle_call(self, node, func_name, *args):
+        """Helper to lookup a function and unify it with given arguments.
+           Returns the return type of unified function call."""
+        arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
+        if len(arg_types) == 2:
+            func_call = op_to_dunder_binary(func_name)
+        elif len(arg_types) == 1:
+            func_call = op_to_dunder_unary(func_name)
+        else:
+            func_call = func_name
+        try:
+            func_type = self.type_store.lookup_function(func_call, *arg_types)
+        except KeyError:
+            return TypeInfo(
+                TypeErrorInfo(f'Function {func_call} not found with given args:\
+                              {arg_types}', node))
+
+        try:
+            return_type = self.type_constraints.unify_call(func_type, *arg_types)
+        except TypeInferenceError:
+            return TypeInfo(
+                TypeErrorInfo('Bad unify_call of function {func_call} given\
+                              args: {arg_types}', node))
+        else:
+            return TypeInfo(return_type)
+
+    def _closest_frame(self, node, name):
+        """Helper method to find the closest ancestor node containing name relative to the given node."""
+        closest_scope = node
+        if node.parent:
+            closest_scope = node.parent
+            if hasattr(closest_scope, 'type_environment') and name in closest_scope.type_environment.locals:
+                return closest_scope
+            else:
+                return self._closest_frame(closest_scope, name)
+        else:
+            return closest_scope
 
     def _find_attribute_type(self, node, class_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""
@@ -183,18 +220,6 @@ class TypeInferer:
         """
         node.type_constraints = node.value.type_constraints
 
-    def _closest_frame(self, node, name):
-        """Helper method to find the closest ancestor node containing name relative to the given node."""
-        closest_scope = node
-        if node.parent:
-            closest_scope = node.parent
-            if hasattr(closest_scope, 'type_environment') and name in closest_scope.type_environment.locals:
-                return closest_scope
-            else:
-                return self._closest_frame(closest_scope, name)
-        else:
-            return closest_scope
-
     def visit_name(self, node):
         try:
             node.type_constraints = TypeInfo(self._closest_frame(node, node.name)
@@ -207,32 +232,6 @@ class TypeInferer:
     ##############################################################################
     # Operation nodes
     ##############################################################################
-    def _handle_call(self, node, func_name, *args):
-        """Helper to lookup a function and unify it with given arguments.
-           Returns the return type of unified function call."""
-        arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
-        if len(arg_types) == 2:
-            func_call = op_to_dunder_binary(func_name)
-        elif len(arg_types) == 1:
-            func_call = op_to_dunder_unary(func_name)
-        else:
-            func_call = func_name
-        try:
-            func_type = self.type_store.lookup_function(func_call, *arg_types)
-        except KeyError:
-            return TypeInfo(
-                TypeErrorInfo(f'Function {func_call} not found with given args:\
-                              {arg_types}', node))
-
-        try:
-            return_type = self.type_constraints.unify_call(func_type, *arg_types)
-        except TypeInferenceError:
-            return TypeInfo(
-                TypeErrorInfo('Bad unify_call of function {func_call} given\
-                              args: {arg_types}', node))
-        else:
-            return TypeInfo(return_type)
-
     def visit_binop(self, node):
         node.type_constraints = self._handle_call(node, node.op, node.left.type_constraints.type,
                                                   node.right.type_constraints.type)

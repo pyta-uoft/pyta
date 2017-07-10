@@ -119,6 +119,14 @@ class TypeInferer:
     ##############################################################################
     # Literals
     ##############################################################################
+    def _find_attribute_type(self, node, instance_name, attribute_name):
+        """Given the node, class name and attribute name, return the type of the attribute."""
+        class_type = self.type_constraints.lookup_concrete(self._closest_frame(node, instance_name)
+                                                           .type_environment.lookup_in_env(instance_name))
+        class_name = class_type.__forward_arg__
+        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+        return self.type_constraints.lookup_concrete(class_env.lookup_in_env(attribute_name))
+
     def visit_const(self, node):
         """Populate type constraints for astroid nodes for num/str/bool/None/bytes literals."""
         node.type_constraints = TypeInfo(type(node.value))

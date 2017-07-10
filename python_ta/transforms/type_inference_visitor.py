@@ -179,23 +179,23 @@ class TypeInferer:
         """
         node.type_constraints = node.value.type_constraints
 
-    def _closest_frame(self, node):
-        """Helper method to find the closest ancestor node with an environment relative to the given node."""
+    def _closest_frame(self, node, name):
+        """Helper method to find the closest ancestor node containing name relative to the given node."""
         closest_scope = node
         if node.parent:
             closest_scope = node.parent
-            if hasattr(closest_scope, 'type_environment'):
+            if hasattr(closest_scope, 'type_environment') and name in closest_scope.type_environment.locals:
                 return closest_scope
             else:
-                return self._closest_frame(closest_scope)
+                return self._closest_frame(closest_scope, name)
         else:
             return closest_scope
 
     def visit_name(self, node):
         try:
-            node.type_constraints = TypeInfo(self._closest_frame(node).type_environment.lookup_in_env(node.name))
+            node.type_constraints = TypeInfo((self._closest_frame(node, node.name)).type_environment.lookup_in_env(node.name))
         except KeyError:
-            self._closest_frame(node).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
+            self._closest_frame(node, node.name).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
 
     ##############################################################################
@@ -301,10 +301,8 @@ class TypeInferer:
                         # this is a special case and is handled by the Call node visitor.
                         pass
                     else:
-                        class_type = self.type_constraints.lookup_concrete(self._closest_frame(
-                                        node).type_environment.lookup_in_env(target_node.expr.name))
-                        class_env = self._closest_frame(node).locals[class_type.__forward_arg__][0].type_environment
-                        attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(target_node.attrname))
+                        # every Assign node will have a single Name node associated with it
+                        attr_type = self._find_attribute_type(target_node, target_node.expr.name, target_node.attrname)
                         try:
                             self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
                         except Exception: # TODO: Bad to just catch Exception; change type of exception in base?
@@ -378,10 +376,10 @@ class TypeInferer:
         rtype = self._handle_call(node, '__iter__', arg_type).type
         if isinstance(node.target, astroid.Tuple):
             for target_node in node.target.elts:
-                target_tvar = self._closest_frame(node).type_environment.lookup_in_env(target_node.name)
+                target_tvar = self._closest_frame(node, node.target.name).type_environment.lookup_in_env(target_node.name)
                 self.type_constraints.unify(target_tvar, rtype)
         else:
-            target_tvar = self._closest_frame(node).type_environment.lookup_in_env(node.target.name)
+            target_tvar = self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name)
             self.type_constraints.unify(target_tvar, rtype.__args__[0])
         node.type_constraints = TypeInfo(NoType)
 

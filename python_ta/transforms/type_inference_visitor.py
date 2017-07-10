@@ -390,6 +390,22 @@ class TypeInferer:
         elt_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
         node.type_constraints = TypeInfo(Set[elt_type])
 
+    def visit_classdef(self, node):
+        node.type_constraints = TypeInfo(NoType)
+
+    def visit_attribute(self, node):
+        try:
+            attr_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
+                                                    node.attrname).type_environment.lookup_in_env(node.attrname))
+        except KeyError:
+            if node.expr.name != 'self':
+                class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
+                            node.expr.name).type_environment.lookup_in_env(node.expr.name))
+                class_name = class_type.__forward_arg__
+                class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+                attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
+        node.type_constraints = TypeInfo(attr_type)
+
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)

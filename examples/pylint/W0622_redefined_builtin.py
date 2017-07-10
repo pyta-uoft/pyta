@@ -1,8 +1,4 @@
-from __future__ import print_function
-import builtins
+def my_sum(a, b):
+    return a - b  # D'oh
 
-
-def new_print(var):
-    builtins.print('New print statement!')
-
-print = new_print  # Overrides print function.
+sum = my_sum  # Error on this line: Redefining built-in function

@@ -340,11 +340,32 @@ class TypeInferer:
             arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
             self.type_constraints.unify_call(func_t, *arg_types)
             node.type_constraints = TypeInfo(_ForwardRef(func_name))
+        try:
+            func_name = node.func.name
+        except Exception:
+            class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
+                                            node.func.expr.name).type_environment.lookup_in_env(node.func.expr.name))
+            class_name = class_type.__forward_arg__
+            class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+            method_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.func.attrname))
+            node.type_constraints = TypeInfo(method_type)
         else:
-            func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])
-            arg_types = [arg.type_constraints.type for arg in node.args]
-            ret_type = self.type_constraints.unify_call(func_t, *arg_types)
-            node.type_constraints = TypeInfo(ret_type)
+            if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
+            # This is the constructor of a class
+                func_t = self.type_constraints.lookup_concrete(
+                    node.frame().locals[func_name][0].type_environment.locals['__init__'])
+                arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
+                try:
+                    self.type_constraints.unify_call(func_t, *arg_types)
+                except Exception:
+                    # TODO: Same issue as AssignAttr node visitor; bad unify to be fixed later - pass for now.
+                    pass
+                node.type_constraints = TypeInfo(_ForwardRef(func_name))
+            else:
+                func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])
+                arg_types = [arg.type_constraints.type for arg in node.args]
+                ret_type = self.type_constraints.unify_call(func_t, *arg_types)
+                node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]
@@ -405,6 +426,14 @@ class TypeInferer:
                 class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
                 attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
         node.type_constraints = TypeInfo(attr_type)
+
+# TODO: MAKE HELPER THAT FINDS CLASS NAME GIVEN AN ATTRIBUTE?
+#     class_type = self.type_constraints.lookup_concrete(self._closest_frame(node,
+#                                                                            node.expr.name).type_environment.lookup_in_env(
+#         node.expr.name))
+#     class_name = class_type.__forward_arg__
+#     class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+#     attr_type = self.type_constraints.lookup_concrete(class_env.lookup_in_env(node.attrname))
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

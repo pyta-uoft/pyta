@@ -70,7 +70,7 @@ body {
 	min-width: 50%;
 	background-color: rgb(255, 255, 255);
 	padding: 15px;
-	padding-top: 20px;
+	padding-top: 10px;
 }
 
 #code {
@@ -78,6 +78,7 @@ body {
     color: rgb(255, 0, 0);
     font-weight: bold;
     text-align: left;
+    padding-bottom: 5px;
 }
 
 #style {
@@ -85,6 +86,7 @@ body {
     color: rgb(0, 0, 255);
     font-weight: bold;
     padding-top: 12px;
+    padding-bottom: 5px;
 }
 
 .code_id {
@@ -108,7 +110,6 @@ body {
 }
 
 pre {
-    white-space: normal;
     font-size: 120%;
 }
 
@@ -138,39 +139,32 @@ pre {
 
 #logo {
     position: relative;
-    width:100%;
+    width: 100%;
     text-align: center;
     padding-top: 10px;
 }
 
-#nbsp {
+.nbsp {
     padding-left: 20px;
 }
-#info {
+
+.info {
     font-size: 110%;
+    padding-top: 10px;
 }
 
-#fontbold {
+.fontbold {
     font-weight: bold;
 }
 
 .slider {
     cursor: pointer;
     font-weight: bold;
-    text-align: right;
-}
-.content {
-    display: none;
-    padding: 5px;
+    float: right;
 }
 
 .sliderall {
     cursor: pointer;
     font-weight: bold;
     float: right;
-}
-
-.contentall {
-    display: none;
-    padding : 5px;
 }

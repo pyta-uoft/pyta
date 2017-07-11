@@ -1,8 +1,5 @@
-def is_false():
-    """
-    @rtype: bool
-    """
+def square(number):
     if True:
-        return False
+        return number**2
     else:
-        return True  # This line will never be executed
+        return number**3  # This line will never be executed

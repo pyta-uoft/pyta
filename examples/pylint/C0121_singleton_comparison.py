@@ -1,9 +1,5 @@
-def is_true():
-    """
-    @rtype: bool
-    """
-    temp = 5
-    if temp == None:
-        return False
+def square(number):
+    if number == None:  # Error on this line
+        return None
     else:
-        return True
+        return number**2

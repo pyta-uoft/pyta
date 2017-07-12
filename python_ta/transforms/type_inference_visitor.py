@@ -299,18 +299,9 @@ class TypeInferer:
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
                     self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
                 elif isinstance(target_node, astroid.AssignAttr):
-                    # TODO: check for annotations? should this be done in ClassDef instead?
-                    if target_node.expr.name == 'self':
-                        # this is a special case and is handled by the Call node visitor.
-                        pass
-                    else:
-                        # every Assign node will have a single Name node associated with it
-                        attr_type = self._find_attribute_type(target_node, target_node.expr.name, target_node.attrname)
-                        try:
-                            self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
-                        except Exception: # TODO: Bad to just catch Exception; change type of exception in base?
-                            # TODO: Futhermore, is this the behaviour we want?
-                            pass
+                    # every Assign node will have a single Name node associated with it
+                    attr_type = self._find_attribute_type(target_node, target_node.expr.name, target_node.attrname)
+                    self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_return(self, node):

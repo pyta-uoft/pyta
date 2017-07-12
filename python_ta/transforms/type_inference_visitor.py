@@ -72,6 +72,9 @@ class TypeInferer:
     def _set_function_def_environment(self, node):
         """Method to set environment of a FunctionDef node."""
         node.type_environment = Environment()
+        # self is a special case
+        if node.args.args[0].name == 'self' and isinstance(node.parent, astroid.ClassDef):
+            node.type_environment.locals['self'] = _ForwardRef(node.parent.name)
         self._populate_local_env(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar()
 

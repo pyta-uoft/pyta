@@ -29,21 +29,5 @@ def test_classdef_attribute_assign():
             assert attribute_type == value_type
 
 
-def test_classdef_method_call():
-    """Test whether type of the method call are properly being set"""
-    program = f'class Network:\n' \
-              f'    def __init__(self, name, id):\n' \
-              f'        self.name = name\n' \
-              f'        self.id = id' \
-              f'    def change_name ' \
-              f'\n' \
-              f'rogers = Network(\'Rogers\', 5)\n' \
-              f'rogers.name, rogers.id = \'BoB\', 10\n' \
-              f'\n'
-    module, inferer = cs._parse_text(program)
-    # get the functionDef node - there is only one in this test case.
-    classdef_node = next(module.nodes_of_class(astroid.ClassDef))
-    a = 5
-
 if __name__ == '__main__':
     nose.main()

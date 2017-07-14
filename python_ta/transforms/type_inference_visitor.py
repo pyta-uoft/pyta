@@ -397,6 +397,14 @@ class TypeInferer:
     def visit_classdef(self, node):
         node.type_constraints = TypeInfo(NoType)
 
+    def visit_attribute(self, node):
+        # get the type of the attribute!
+        # we are given the attribute name as well as the expression
+        # from the expression and attribute name with the helper, we can find the type of the attribute
+        attribute_type = self.type_constraints\
+            .lookup_concrete(self._find_attribute_type(node, node.expr.name, node.attrname))
+        node.type_constraints = TypeInfo(attribute_type)
+
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)

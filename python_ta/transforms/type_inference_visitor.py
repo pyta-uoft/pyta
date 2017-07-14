@@ -329,19 +329,27 @@ class TypeInferer:
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):
-        func_name = node.func.name
-        if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
-            # This is the constructor of a class
-            func_t = self.type_constraints.lookup_concrete(
-                node.frame().locals[func_name][0].type_environment.locals['__init__'])
-            arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
-            self.type_constraints.unify_call(func_t, *arg_types)
-            node.type_constraints = TypeInfo(_ForwardRef(func_name))
-        else:
-            func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])
-            arg_types = [arg.type_constraints.type for arg in node.args]
+        try:
+            func_name = node.func.name
+        except AttributeError:  # Method Call
+            func_t = node.func.type_constraints.type
+            arg_types = [self.type_constraints.lookup_concrete(
+                node.frame().type_environment.lookup_in_env(node.func.expr.name))]
+            arg_types += [arg.type_constraints.type for arg in node.args]
             ret_type = self.type_constraints.unify_call(func_t, *arg_types)
             node.type_constraints = TypeInfo(ret_type)
+        else:
+            if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
+                func_t = self.type_constraints \
+                    .lookup_concrete(node.frame().locals[func_name][0].type_environment.locals['__init__'])
+                arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
+                self.type_constraints.unify_call(func_t, *arg_types)
+                node.type_constraints = TypeInfo(_ForwardRef(func_name))
+            else:
+                func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])
+                arg_types = [arg.type_constraints.type for arg in node.args]
+                ret_type = self.type_constraints.unify_call(func_t, *arg_types)
+                node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]

@@ -199,13 +199,10 @@ class TypeInferer:
             node.type_constraints = TypeInfo((self.type_constraints.lookup_concrete(
                 self._closest_frame(node, node.name)).type_environment.lookup_in_env(node.name)))
         except KeyError:
-            self._closest_frame(node, node.name).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
-            node.type_constraints = TypeInfo(self.type_constraints.lookup_concrete(
-                node.frame().type_environment.globals[node.name]))
-            node.type_constraints = TypeInfo((self._closest_frame(node, node.name)).type_environment.lookup_in_env(node.name))
-        except KeyError:
-            self._closest_frame(node, node.name).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
-            node.type_constraints = TypeInfo(node.frame().type_environment.globals[node.name])
+            self._closest_frame(node, node.name).type_environment\
+                .create_in_env(self.type_constraints, 'globals', node.name)
+            node.type_constraints = TypeInfo(self._closest_frame(node, node.name)
+                                             .type_environment.lookup_in_env(node.name))
 
     ##############################################################################
     # Operation nodes

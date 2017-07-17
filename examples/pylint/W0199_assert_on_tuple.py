@@ -1,7 +1,7 @@
-def check(ex1, ex2):
+def check(condition1, condition2):
     """
-    @type x: int
-    @type y: int
+    @type condition1: bool
+    @type condition2: bool
     @rtype: None
     """
-    assert (ex1, ex2)  # Error on this line
+    assert (condition1, condition2)  # Error on this line

@@ -1,4 +1,4 @@
-def my_sum(a, b):
-    return a - b  # D'oh
+id = 100  # Error on this line: Redefining built-in 'id'
 
-sum = my_sum  # Error on this line: Redefining built-in function
+def sum(a, b):  # Error on this line: Redefining built-in 'sum'
+    return a - b  # D'oh

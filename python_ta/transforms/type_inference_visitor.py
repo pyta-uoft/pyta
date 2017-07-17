@@ -338,9 +338,7 @@ class TypeInferer:
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):
-        try:
-            func_name = node.func.name
-        except AttributeError:  # Method Call
+        if isinstance(node.func, astroid.Attribute):
             func_t = node.func.type_constraints.type
             arg_types = [self.type_constraints.lookup_concrete(
                 node.frame().type_environment.lookup_in_env(node.func.expr.name))]
@@ -348,6 +346,7 @@ class TypeInferer:
             ret_type = self.type_constraints.unify_call(func_t, *arg_types)
             node.type_constraints = TypeInfo(ret_type)
         else:
+            func_name = node.func.name
             if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
                 func_t = self.type_constraints \
                     .lookup_concrete(node.frame().locals[func_name][0].type_environment.locals['__init__'])

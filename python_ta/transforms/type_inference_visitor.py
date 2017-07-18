@@ -188,7 +188,10 @@ class TypeInferer:
         closest_scope = node
         if node.parent:
             closest_scope = node.parent
-            if hasattr(closest_scope, 'type_environment') and name in closest_scope.type_environment.locals:
+            if hasattr(closest_scope, 'type_environment') and (
+                            name in closest_scope.type_environment.locals or
+                            name in closest_scope.type_environment.globals or
+                            name in closest_scope.type_environment.nonlocals):
                 return closest_scope
             else:
                 return self._closest_frame(closest_scope, name)
@@ -204,7 +207,6 @@ class TypeInferer:
                 .create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(self._closest_frame(node, node.name)
                                              .type_environment.lookup_in_env(node.name))
-            self._closest_frame(node, node.name).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
 
     ##############################################################################
     # Operation nodes

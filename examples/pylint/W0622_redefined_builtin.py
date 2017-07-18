@@ -1,8 +1,4 @@
-from __future__ import print_function
-import builtins
+id = 100  # Error on this line: Redefining built-in 'id'
 
-
-def new_print(var):
-    builtins.print('New print statement!')
-
-print = new_print  # Overrides print function.
+def sum(a, b):  # Error on this line: Redefining built-in 'sum'
+    return a - b  # D'oh

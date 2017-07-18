@@ -10,4 +10,4 @@ class Parent:
 
 class Child(Parent):
     def __init__(self):
-        ClassA.__init__(self)  # Not a child of class A
+        ClassA.__init__(self)  # `ClassA` is not a parent of `Child`

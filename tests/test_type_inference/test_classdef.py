@@ -29,5 +29,22 @@ def test_classdef_attribute_assign():
             assert attribute_type == value_type
 
 
+def test_classdef_method_call():
+    """Test whether type of the method call are properly being set"""
+    program = f'class Network:\n' \
+              f'    def __init__(self, name):\n' \
+              f'        self.name = name\n' \
+              f'    def get_name(self):\n' \
+              f'        return self.name\n ' \
+              f'\n' \
+              f'rogers = Network("Rogers")\n' \
+              f'rogers.get_name()' \
+              f'\n'
+    module, inferer = cs._parse_text(program)
+    attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
+    expected_rtype = attribute_node.parent.type_constraints.type
+    assert attribute_node.type_constraints.type.__args__[-1] == expected_rtype
+
+
 if __name__ == '__main__':
     nose.main()

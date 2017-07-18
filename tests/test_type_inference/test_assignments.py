@@ -35,6 +35,7 @@ def test_set_name_unassigned(variable_name):
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_name_assigned(variables_dict):
     """Test visitor for name nodes representing a variables with assigned values in module."""
     program = cs._parse_dictionary_to_program(variables_dict)
@@ -47,6 +48,7 @@ def test_set_name_assigned(variables_dict):
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_single_assign(variables_dict):
     """Test single-target assignment statements; verify unification of type variables."""
     program = cs._parse_dictionary_to_program(variables_dict)
@@ -63,6 +65,7 @@ def test_set_single_assign(variables_dict):
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_multi_target_assign(variables_dict):
     """Test multi-target assignment statements; verify unification of type variables."""
     for variable_name in variables_dict:
@@ -94,6 +97,7 @@ def test_set_multi_assign(variables_list, value):
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_assign_complex_homogeneous(variables_dict):
     """test whether visitors properly set the type constraint of the a assign node representing a multi-target-assign
      with a homogeneous list as the value.

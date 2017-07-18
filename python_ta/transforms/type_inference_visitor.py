@@ -4,7 +4,8 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations
+from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment\
+    , TypeConstraints, TypeInferenceError, parse_annotations
 from ..typecheck.type_store import TypeStore
 
 
@@ -313,12 +314,9 @@ class TypeInferer:
         arg_types = [self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env(arg))
                      for arg in node.argnames()]
         if any(annotation is not None for annotation in node.args.annotations):
-            # TODO: UNIFICATION WORK FROM PARSED ANNOTATIONS
             func_type = parse_annotations(node)
-            # TODO: Unify tvars in FunctionDef's environment with given annotations
             [self.type_constraints.unify(arg_type, annotation) for arg_type
                 , annotation in zip(arg_types, func_type.__args__[:-1])]
-            # TODO: Unify FunctionDef's tvar with Callable
             self.type_constraints.unify(self._closest_frame(node, node.name)
                                         .type_environment.lookup_in_env(node.name), func_type)
         else:

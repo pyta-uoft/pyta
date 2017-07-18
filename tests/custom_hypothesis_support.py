@@ -51,6 +51,11 @@ comparator_operator_equality = hs.sampled_from(comparator_symbols_equality)
 binary_bool_operator = hs.sampled_from(['and', 'or'])
 unary_bool_operator = hs.sampled_from(['not'])
 
+# Strategies for generating builtin type names
+annotation_names = ['bool', 'bytearray', 'bytes', 'complex', 'dict', 'enumerate'
+                    , 'float', 'frozenset', 'int', 'list', 'set', 'str', 'tuple']
+annotation = hs.sampled_from(annotation_names)
+
 
 def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""

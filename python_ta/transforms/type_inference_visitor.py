@@ -204,6 +204,7 @@ class TypeInferer:
                 .create_in_env(self.type_constraints, 'globals', node.name)
             node.type_constraints = TypeInfo(self._closest_frame(node, node.name)
                                              .type_environment.lookup_in_env(node.name))
+            self._closest_frame(node, node.name).type_environment.create_in_env(self.type_constraints, 'globals', node.name)
 
     ##############################################################################
     # Operation nodes

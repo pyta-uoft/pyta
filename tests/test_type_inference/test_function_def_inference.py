@@ -90,22 +90,7 @@ def test_functiondef_annotated_simple_return(function_name, arguments, annotatio
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.lookup_concrete(function_type_var)
         actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
-        assert expected_arg_types == actual_arg_types
-
-
-def test_functiondef_annotated_concrete_simple_return():
-    """Test whether type annotations are set properly for a FunctionDef node representing a function definition
-    with type annotations."""
-    program = f'def f(a: str, b: int) -> str:\n' \
-              f'    return a\n' \
-              f''
-    module, inferer = cs._parse_text(program)
-    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
-    # TODO: convert to hypothesis, can iterate over args[i]
-    arg_name = functiondef_node.args.args[0].name
-    actual_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(arg_name))
-    # TODO: hard-coded? better way to test this? WE DO NOT WANT TO USE EVAL (also only works for builtins)
-    assert actual_type.__name__ == functiondef_node.args.annotations[0].name
+        assert expected_arg_types == actual_arg_types and functiondef_node.returns.name == actual_return_type.__name__
 
 
 if __name__ == '__main__':

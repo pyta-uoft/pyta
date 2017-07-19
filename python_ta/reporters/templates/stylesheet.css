@@ -45,7 +45,11 @@ body {
 	width: 500px;
 	color: rgb(42, 77, 173);
 	background-color: rgb(255, 255, 255);
-	padding: 5px;
+	display: inline;
+	padding: 20px;
+}
+.wrap {
+    padding: 10px;
 }
 
 #inside {
@@ -53,6 +57,7 @@ body {
 	border: thin solid rgb(0, 0, 0);
 	background-color: rgb(199, 239, 252);
 	padding-top: 20px;
+	padding-bottom:20px;
 }
 
 #core {
@@ -65,43 +70,47 @@ body {
 	min-width: 50%;
 	background-color: rgb(255, 255, 255);
 	padding: 15px;
+	padding-top: 10px;
 }
 
 #code {
 	font-size: 120%;
     color: rgb(255, 0, 0);
     font-weight: bold;
+    text-align: left;
+    padding-bottom: 5px;
 }
 
 #style {
 	font-size: 120%;
     color: rgb(0, 0, 255);
     font-weight: bold;
+    padding-top: 12px;
+    padding-bottom: 5px;
 }
 
 .code_id {
     color: rgb(255, 0, 0);
     font-weight: bold;
-    font-size: 95%;
 }
 
 .code_id a:link {
     color: rgb(255, 0, 0);
+    font-weight: normal;
 }
 
 .style_id {
     color: rgb(0, 0, 255);
     font-weight: bold;
-    font-size: 95%;
 }
 
 .style_id a:link {
     color: rgb(0, 0, 255);
+    font-weight: normal;
 }
 
-.snippet {
-	font-family: "Lucida Console", monospace;
-	font-weight: normal;
+pre {
+    font-size: 120%;
 }
 
 .grey {
@@ -130,7 +139,32 @@ body {
 
 #logo {
     position: relative;
-    width:100%;
+    width: 100%;
     text-align: center;
     padding-top: 10px;
+}
+
+.nbsp {
+    padding-left: 20px;
+}
+
+.info {
+    font-size: 110%;
+    padding-top: 10px;
+}
+
+.fontbold {
+    font-weight: bold;
+}
+
+.slider {
+    cursor: pointer;
+    font-weight: bold;
+    float: right;
+}
+
+.sliderall {
+    cursor: pointer;
+    font-weight: bold;
+    float: right;
 }

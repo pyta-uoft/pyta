@@ -281,6 +281,58 @@ def simple_homogeneous_set_node(draw, **kwargs):
     t = draw(primitive_types)
     return set_node(const_node(t()), **kwargs).example()
 
+
+@hs.composite
+def name_node(draw, names):
+    if not names:
+        node = astroid.Name(draw(valid_identifier()))
+    else:
+        node = astroid.Name(draw(names))
+    return node
+
+
+@hs.composite
+def arguments_node(draw, annotated=False):
+    n = draw(hs.integers(min_value=1, max_value=5))
+    args = draw(hs.lists(name_node(None), min_size=n, max_size=n))
+    if annotated:
+        # TODO: annotations have to be Name nodes BOI
+        annotations = draw(hs.lists(name_node(annotation), min_size=n, max_size=n))
+    else:
+        annotations = None
+    node = astroid.Arguments()
+    node.postinit(
+        args,
+        None,
+        None,
+        None,
+        annotations
+    )
+    return node
+
+
+@hs.composite
+def functiondef_node(draw, name=None, annotated=False, returns=False):
+    name = name or draw(valid_identifier())
+    args = draw(arguments_node(annotated))
+    body = []
+    returns_node = astroid.Return()
+    arg_node, arg_type_node = draw(hs.sampled_from(list(zip(args.args, args.annotations))))
+    if returns:
+        returns_node.postinit(arg_node)
+    else:
+        returns_node.postinit(const_node(None))
+    body.append(returns_node)
+    node = astroid.FunctionDef(name=name)
+    node.postinit(
+        args,
+        body,
+        None,
+        arg_type_node
+    )
+    return node
+
+
 expr = hs.one_of(
     const_node(),
     dict_node(min_size=1),

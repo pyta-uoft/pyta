@@ -52,9 +52,9 @@ binary_bool_operator = hs.sampled_from(['and', 'or'])
 unary_bool_operator = hs.sampled_from(['not'])
 
 # Strategies for generating builtin type names
-annotation_names = ['bool', 'bytearray', 'bytes', 'complex', 'dict', 'enumerate'
-                    , 'float', 'frozenset', 'int', 'list', 'set', 'str', 'tuple']
-annotation = hs.sampled_from(annotation_names)
+annotation_types = [bool, bytearray, bytes, complex, dict, enumerate
+                    , float, frozenset, int, list, set, str, tuple]
+annotation = hs.sampled_from(annotation_types)
 
 
 def valid_identifier(**kwargs):
@@ -283,11 +283,11 @@ def simple_homogeneous_set_node(draw, **kwargs):
 
 
 @hs.composite
-def name_node(draw, names):
-    if not names:
+def name_node(draw, name=None):
+    if not name:
         node = astroid.Name(draw(valid_identifier()))
     else:
-        node = astroid.Name(draw(names))
+        node = astroid.Name(draw(name))
     return node
 
 
@@ -298,6 +298,8 @@ def arguments_node(draw, annotated=False):
     if annotated:
         # TODO: annotations have to be Name nodes BOI
         annotations = draw(hs.lists(name_node(annotation), min_size=n, max_size=n))
+        for i in range(len(annotations)):
+            annotations[i].name = annotations[i].name.__name__
     else:
         annotations = None
     node = astroid.Arguments()

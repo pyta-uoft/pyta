@@ -46,5 +46,31 @@ def test_classdef_method_call():
     assert attribute_node.type_constraints.type.__args__[-1] == expected_rtype
 
 
+def test_classdef_method_call_annotated_concrete():
+    """Test whether types of the method calls are properly being set given the annotations."""
+    program = f'class Network:\n' \
+              f'    def __init__(self: Network, name: str) -> None:\n' \
+              f'        self.name = name\n' \
+              f'    def get_name(self: Network) -> str:\n' \
+              f'        return self.name\n ' \
+              f'\n' \
+              f'rogers = Network("Rogers")\n' \
+              f'rogers.get_name()' \
+              f'\n'
+    module, inferer = cs._parse_text(program)
+    # for self parameter
+    for functiondef_node in module.nodes_of_class(astroid.FunctionDef):
+        self_name = functiondef_node.args.args[0].name
+        actual_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(self_name))
+        assert actual_type.__forward_arg__ == functiondef_node.args.annotations[0].name
+        for i in range(1, len(functiondef_node.args.annotations)):
+            arg_name = functiondef_node.args.args[i].name
+            actual_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(arg_name))
+            assert actual_type.__name__ == functiondef_node.args.annotations[i].name
+        expected_rtype = inferer.type_constraints\
+            .lookup_concrete(functiondef_node.parent.type_environment.lookup_in_env(functiondef_node.name))
+        assert functiondef_node.returns.name == expected_rtype.__args__[-1].__name__
+
+
 if __name__ == '__main__':
     nose.main()

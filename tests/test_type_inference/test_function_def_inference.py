@@ -67,8 +67,13 @@ def test_function_def_args_simple_return(function_name, arguments):
 def test_functiondef_annotated_simple_return(functiondef_node):
     """Test whether type annotations are set properly for a FunctionDef node representing a function definition
     with type annotations."""
+    arg_names = [arg.name for arg in functiondef_node.args.args]
+    assume(functiondef_node.name not in arg_names)
+    for arg in functiondef_node.args.args:
+        assume(arg_names.count(arg.name) == 1)
     module, inferer = cs._parse_text(functiondef_node)
     functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    # arguments and annotations are not changing, so test this once.
     for i in range(len(functiondef_node.args.annotations)):
         arg_name = functiondef_node.args.args[i].name
         expected_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(arg_name))

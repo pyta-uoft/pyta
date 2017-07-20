@@ -13,14 +13,6 @@ def _parse_to_function(function_name, args_list, return_statement):
            f'    return {return_statement}'
 
 
-def _parse_to_annotated_function(function_name, args_list, return_statement, annotations):
-    """Helper to parse given data into function definition."""
-    args_annotations = zip(args_list, annotations[:-1])
-    pre_process = [f'{arg}: {annotation}' for arg, annotation in args_annotations]
-    return f'def {function_name}({", ".join(pre_process)}) -> {annotations[-1]}:' \
-           f'    return {return_statement}'
-
-
 def _parse_to_function_no_return(function_name, args_list, function_body):
     """Helper to parse given data into function definition."""
     return f'def {function_name}({", ".join(args_list)}):\n' \

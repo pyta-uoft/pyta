@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations
+from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, _node_to_type
 from ..typecheck.type_store import TypeStore
 
 
@@ -417,6 +417,15 @@ class TypeInferer:
         attribute_type = self.type_constraints\
             .lookup_concrete(self._find_attribute_type(node, node.expr.name, node.attrname))
         node.type_constraints = TypeInfo(attribute_type)
+
+    def visit_annassign(self, node):
+        # variable_type = self._find_type(node, node.target.name)
+        variable_type = self.type_constraints.lookup_concrete(
+            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
+        # TODO: Annotations will always be strings, how can we convert to type?
+        # TODO: need a helper like node_to_type?
+        self.type_constraints.unify(variable_type, _node_to_type(node.annotation.name))
+        node.type_constraints = TypeInfo(NoType)
 
     def visit_module(self, node):
         node.type_constraints = TypeInfo(NoType)

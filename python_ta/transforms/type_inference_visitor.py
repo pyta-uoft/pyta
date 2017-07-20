@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError
+from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations
 from ..typecheck.type_store import TypeStore
 
 
@@ -187,7 +187,10 @@ class TypeInferer:
         closest_scope = node
         if node.parent:
             closest_scope = node.parent
-            if hasattr(closest_scope, 'type_environment') and name in closest_scope.type_environment.locals:
+            if hasattr(closest_scope, 'type_environment') and (
+                            name in closest_scope.type_environment.locals or
+                            name in closest_scope.type_environment.globals or
+                            name in closest_scope.type_environment.nonlocals):
                 return closest_scope
             else:
                 return self._closest_frame(closest_scope, name)
@@ -318,20 +321,25 @@ class TypeInferer:
     def visit_functiondef(self, node):
         arg_types = [self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env(arg))
                      for arg in node.argnames()]
-
-        # Check whether this is a method in a class
-        if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):
-            self.type_constraints.unify(arg_types[0], _ForwardRef(node.parent.name))
-
-        # check if return nodes exist; there is a return statement in function body.
-        if len(list(node.nodes_of_class(astroid.Return))) == 0:
-            func_type = Callable[arg_types, None]
+        if any(annotation is not None for annotation in node.args.annotations):
+            func_type = parse_annotations(node)
+            for arg_type, annotation in zip(arg_types, func_type.__args__[:-1]):
+                self.type_constraints.unify(arg_type, annotation)
+            self.type_constraints.unify(self._closest_frame(node, node.name)
+                                        .type_environment.lookup_in_env(node.name), func_type)
         else:
-            rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
-            func_type = Callable[arg_types, rtype]
-        func_type.polymorphic_tvars = [arg for arg in arg_types
-                                       if isinstance(arg, TypeVar)]
-        self.type_constraints.unify(node.parent.frame().type_environment.lookup_in_env(node.name), func_type)
+            # Check whether this is a method in a class
+            if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):
+                self.type_constraints.unify(arg_types[0], _ForwardRef(node.parent.name))
+
+            # check if return nodes exist; there is a return statement in function body.
+            if len(list(node.nodes_of_class(astroid.Return))) == 0:
+                func_type = Callable[arg_types, None]
+            else:
+                rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
+                func_type = Callable[arg_types, rtype]
+            func_type.polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
+            self.type_constraints.unify(self._closest_frame(node, node.name).type_environment.lookup_in_env(node.name), func_type)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):

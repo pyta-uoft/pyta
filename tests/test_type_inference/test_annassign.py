@@ -28,7 +28,7 @@ def test_annassign_concrete():
 
 
 @given(hs.dictionaries(cs.valid_identifier(), cs.annotation, min_size=2))
-def test_annassign_concrete(variables_annotations_dict):
+def test_annassign(variables_annotations_dict):
     """Test whether types are being properly set for an AnnAssign node.
     """
     program = f'class Student:\n'

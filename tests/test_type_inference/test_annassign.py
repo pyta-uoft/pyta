@@ -1,9 +1,8 @@
 import astroid
 import nose
-from hypothesis import given, assume, settings, HealthCheck
+from hypothesis import given, settings
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
-from typing import TypeVar, Any
 from python_ta.typecheck.base import _node_to_type
 settings.load_profile("pyta")
 

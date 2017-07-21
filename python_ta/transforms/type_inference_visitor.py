@@ -411,19 +411,13 @@ class TypeInferer:
         node.type_constraints = TypeInfo(NoType)
 
     def visit_attribute(self, node):
-        # get the type of the attribute!
-        # we are given the attribute name as well as the expression
-        # from the expression and attribute name with the helper, we can find the type of the attribute
         attribute_type = self.type_constraints\
             .lookup_concrete(self._find_attribute_type(node, node.expr.name, node.attrname))
         node.type_constraints = TypeInfo(attribute_type)
 
     def visit_annassign(self, node):
-        # variable_type = self._find_type(node, node.target.name)
         variable_type = self.type_constraints.lookup_concrete(
             self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
-        # TODO: Annotations will always be strings, how can we convert to type?
-        # TODO: need a helper like node_to_type?
         self.type_constraints.unify(variable_type, _node_to_type(node.annotation.name))
         node.type_constraints = TypeInfo(NoType)
 

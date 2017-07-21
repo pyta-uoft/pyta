@@ -448,7 +448,6 @@ def parse_annotations(node, class_tvars=None):
     """Return a type specified by the type annotations for a node."""
     if isinstance(node, astroid.FunctionDef):
         arg_types = []
-        # Special case; Instance method definition based on syntactical conventions.
         no_class_tvars = class_tvars is None
         is_methodcall = isinstance(node.parent, astroid.ClassDef)
         if no_class_tvars and is_methodcall:

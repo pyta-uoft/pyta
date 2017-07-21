@@ -43,7 +43,7 @@ def test_set_name_assigned(variables_dict):
         program += variable_name + "\n"
     module, inferer = cs._parse_text(program)
     for name_node in module.nodes_of_class(astroid.Name):
-        name_type = inferer._find_type(name_node, name_node.name)
+        name_type = inferer.lookup_type(name_node, name_node.name)
         assert name_node.type_constraints.type == name_type
 
 

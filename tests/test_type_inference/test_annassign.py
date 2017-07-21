@@ -38,7 +38,6 @@ def test_annassign(variables_annotations_dict):
                f'        pass\n'
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AnnAssign):
-        # variable_type = self._find_type(node, node.target.name)
         variable_type = inferer.type_constraints.lookup_concrete(
             inferer._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
         annotated_type = variables_annotations_dict[node.target.name]

@@ -122,15 +122,15 @@ class TypeInferer:
     ##############################################################################
     # Literals
     ##############################################################################
-    def _find_attribute_type(self, node, instance_name, attribute_name):
+    def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""
-        class_type = self._find_type(node, instance_name)
+        class_type = self.lookup_type(node, instance_name)
         class_name = class_type.__forward_arg__
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
         return self.type_constraints.lookup_concrete(class_env.lookup_in_env(attribute_name))
 
-    def _find_type(self, node, name):
-        """Given a variable name, return it's concrete type."""
+    def lookup_type(self, node, name):
+        """Given a variable name, return its concrete type in the closest scope relative to given node."""
         tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
         return self.type_constraints.lookup_concrete(tvar)
 
@@ -203,11 +203,11 @@ class TypeInferer:
 
     def visit_name(self, node):
         try:
-            node.type_constraints = TypeInfo(self._find_type(node, node.name))
+            node.type_constraints = TypeInfo(self.lookup_type(node, node.name))
         except KeyError:
             self._closest_frame(node, node.name).type_environment\
                 .create_in_env(self.type_constraints, 'globals', node.name)
-            node.type_constraints = TypeInfo(self._find_type(node, node.name))
+            node.type_constraints = TypeInfo(self.lookup_type(node, node.name))
 
     ##############################################################################
     # Operation nodes
@@ -310,8 +310,8 @@ class TypeInferer:
                 elif isinstance(target_node, astroid.AssignAttr):
                     # every Assign node will have a single Name node associated with it
                     attr_type = self.type_constraints.lookup_concrete(
-                        self._find_attribute_type(target_node, target_node.expr.name, target_node.attrname))
-                    attr_type = self._find_attribute_type(target_node, target_node.expr.name, target_node.attrname)
+                        self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname))
+                    attr_type = self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname)
                     self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
         node.type_constraints = TypeInfo(NoType)
 
@@ -327,7 +327,7 @@ class TypeInferer:
             func_type = parse_annotations(node)
             for arg_type, annotation in zip(arg_types, func_type.__args__[:-1]):
                 self.type_constraints.unify(arg_type, annotation)
-            self.type_constraints.unify(self._find_type(node, node.name), func_type)
+            self.type_constraints.unify(self.lookup_type(node, node.name), func_type)
         else:
             # Check whether this is a method in a class
             if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):
@@ -340,7 +340,7 @@ class TypeInferer:
                 rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
                 func_type = Callable[arg_types, rtype]
             func_type.polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
-            self.type_constraints.unify(self._find_type(node, node.name), func_type)
+            self.type_constraints.unify(self.lookup_type(node, node.name), func_type)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):
@@ -388,9 +388,9 @@ class TypeInferer:
         rtype = self._handle_call(node, '__iter__', arg_type).type
         if isinstance(node.target, astroid.Tuple):
             for target_node in node.target.elts:
-                self.type_constraints.unify(self._find_type(target_node, target_node.name), rtype)
+                self.type_constraints.unify(self.lookup_type(target_node, target_node.name), rtype)
         else:
-            self.type_constraints.unify(self._find_type(node.target, node.target.name), rtype.__args__[0])
+            self.type_constraints.unify(self.lookup_type(node.target, node.target.name), rtype.__args__[0])
         node.type_constraints = TypeInfo(NoType)
 
     def visit_listcomp(self, node):
@@ -414,7 +414,7 @@ class TypeInferer:
         # we are given the attribute name as well as the expression
         # from the expression and attribute name with the helper, we can find the type of the attribute
         attribute_type = self.type_constraints\
-            .lookup_concrete(self._find_attribute_type(node, node.expr.name, node.attrname))
+            .lookup_concrete(self._lookup_attribute_type(node, node.expr.name, node.attrname))
         node.type_constraints = TypeInfo(attribute_type)
 
     def visit_module(self, node):

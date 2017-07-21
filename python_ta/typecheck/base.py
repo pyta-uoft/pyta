@@ -449,11 +449,11 @@ def parse_annotations(node, class_tvars=None):
     if isinstance(node, astroid.FunctionDef):
         arg_types = []
         # Special case; Instance method definition based on syntactical conventions.
-        self_as_first_parameter = class_tvars is None or not isinstance(node.parent, astroid.ClassDef)
-        if (class_tvars is None or not isinstance(node.parent, astroid.ClassDef)) and (
-                        isinstance(node.parent, astroid.ClassDef) and self_as_first_parameter):
+        no_class_tvars = class_tvars is None
+        is_methodcall = isinstance(node.parent, astroid.ClassDef)
+        if no_class_tvars and is_methodcall:
             self_type = _node_to_type(node.parent.name)
-        elif class_tvars is None or not isinstance(node.parent, astroid.ClassDef):
+        elif no_class_tvars or not is_methodcall:
             self_type = None
         elif node.parent.name in _BUILTIN_TO_TYPING:
             self_type = eval(_BUILTIN_TO_TYPING[node.parent.name])[tuple(_node_to_type(tv) for tv in class_tvars)]

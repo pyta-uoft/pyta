@@ -41,10 +41,10 @@ def test_set_name_assigned(variables_dict):
     program = cs._parse_dictionary_to_program(variables_dict)
     for variable_name in variables_dict:
         program += variable_name + "\n"
-    module, _ = cs._parse_text(program)
+    module, inferer = cs._parse_text(program)
     for name_node in module.nodes_of_class(astroid.Name):
-        name_type_var = name_node.frame().type_environment.lookup_in_env(name_node.name)
-        assert name_node.type_constraints.type == name_type_var
+        name_type = inferer.lookup_type(name_node, name_node.name)
+        assert name_node.type_constraints.type == name_type
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))

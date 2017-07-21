@@ -19,6 +19,3 @@ class Student:
     name: str
     age: int
     status: bool
-    def __init__(self):
-        pass
-

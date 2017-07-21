@@ -448,14 +448,13 @@ def parse_annotations(node, class_tvars=None):
     """Return a type specified by the type annotations for a node."""
     if isinstance(node, astroid.FunctionDef):
         arg_types = []
-        arg_annotation_list = list(zip(node.args.args, node.args.annotations))
         # Special case; Instance method definition based on syntactical conventions.
-        if class_tvars is None or not isinstance(node.parent, astroid.ClassDef):
-            if isinstance(node.parent, astroid.ClassDef) and getattr(
-                    arg_annotation_list[0][0], 'name', None) == 'self' and arg_annotation_list[0][1] is None:
-                self_type = _node_to_type(node.parent.name)
-            else:
-                self_type = None
+        self_as_first_parameter = class_tvars is None or not isinstance(node.parent, astroid.ClassDef)
+        if (class_tvars is None or not isinstance(node.parent, astroid.ClassDef)) and (
+                        isinstance(node.parent, astroid.ClassDef) and self_as_first_parameter):
+            self_type = _node_to_type(node.parent.name)
+        elif class_tvars is None or not isinstance(node.parent, astroid.ClassDef):
+            self_type = None
         elif node.parent.name in _BUILTIN_TO_TYPING:
             self_type = eval(_BUILTIN_TO_TYPING[node.parent.name])[tuple(_node_to_type(tv) for tv in class_tvars)]
         else:

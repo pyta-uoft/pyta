@@ -1,9 +1,7 @@
 import astroid
 import nose
-from hypothesis import assume, given, settings
+from hypothesis import settings
 import tests.custom_hypothesis_support as cs
-import hypothesis.strategies as hs
-from typing import Callable
 settings.load_profile("pyta")
 
 
@@ -57,7 +55,6 @@ def test_classdef_method_call_annotated_concrete():
               f'        return self.status\n' \
               f'\n'
     module, inferer = cs._parse_text(program)
-    # for self parameter
     for functiondef_node in module.nodes_of_class(astroid.FunctionDef):
         self_name = functiondef_node.args.args[0].name
         actual_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(self_name))

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>PyTA Error Report</title>
+        <style rel="stylesheet">
+            {% include "stylesheet.css" %}
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1 class="title">PyTA Error Report</h1>
+            <time>{{ date_time }}</time>
+        </header>
+        <main>
+            {% for file in reporter.messages_by_file %}
+            <section>
+                <article class="file-name">
+                    <h2> {{ file.filename }} </h2>
+                </article>
+                <article class="error-output code-errors">
+                    <h2 class="category-heading">
+                        {{ reporter.code_err_title }}
+                        <span class="slider">
+                            <button>Expand/Collapse Section</button>
+                        </span>
+                    </h2>
+                    <div class="content collapsible">
+                        {% for message in file.code %}
+                        <div class="error-instance">
+                            <div class="info">
+                                <span class="error-link code-error-id">
+                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">&#10064; {{ message }} ({{ file.code[message][0].symbol }})</a>
+                                </span>
+                                <span class="occurrences">
+                                {{ file.code[message]|length }} occurrences.
+                                </span>
+                                <span class="slider">
+                                    <button> Expand/Collapse </button>
+                                </span>
+                            </div>
+                            <div class="message-container collapsible">
+                                {% for indiv in file.code[message] %}
+                                <div class="message">
+                                    <h4 class="message-name">
+                                        [Line {{ indiv.line }}] {{ indiv.msg }}
+                                    </h4>
+                                    {% if indiv.snippet != '' %}
+                                    <pre>{{ indiv.snippet }}</pre>
+                                    {% else %}
+                                    <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                        {% endfor %}
+                    </div>
+                </article>
+                <article class="error-output style-errors">
+                    <h2 class="category-heading">
+                        {{ reporter.style_err_title }}
+                        <span class="slider">
+                            <button>Expand/Collapse Section</button>
+                        </span>
+                    </h2>
+                    <div class="content collapsible">
+                        {% for message in file.style %}
+                        <div class="error-instance">
+
+                            <div class="info">
+                                <span class="error-link style-error-id">
+                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">&#10064; {{ message }} ({{ file.style[message][0].symbol }})</a>
+                                </span>
+                                <span class="occurrences">
+                                {{ file.style[message]|length }} occurrences.
+                                </span>
+                                <span class="slider">
+                                   <button> Expand/Collapse </button>
+                                </span>
+                            </div>
+
+                            <div class="message-container collapsible">
+                                {% for indiv in file.style[message] %}
+                                <div class="message">
+                                    <h4 class="message-name">
+                                        [Line {{ indiv.line }}] {{ indiv.msg }}
+                                    </h4>
+                                    {% if indiv.snippet != '' %}
+                                    <pre>{{ indiv.snippet }}</pre>
+                                    {% else %}
+                                    <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                        {% else %}
+                        <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                        {% endfor %}
+                    </div>
+                </article>
+            </section>
+            {% endfor %}
+        </main>
+        <footer>
+            <div id="report-bug">
+                <a href="mailto:david@cs.toronto.edu">Found a bug? Report it to Prof. Liu!</a>
+            </div>
+            <div id="logo">
+                <a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
+                <img src="data:image/png;base64,{{ pyta_logo }}" alt="PyTA logo" height="50"/>
+                </a>
+            </div>
+        </footer>
+        <script type="text/javascript">
+            {% include "jquery-3.2.1.min.js" %}
+        </script>
+        <script type="text/javascript">
+            {% include "script.js" %}
+        </script>
+    </body>
+</html>

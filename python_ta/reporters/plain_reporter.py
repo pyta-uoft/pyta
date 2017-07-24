@@ -70,9 +70,10 @@ class PlainReporter(BaseReporter):
     _SPACE = ' '
     _BREAK = '\n'
     _COLOURING = {}
-    code_err_title = '=== Code errors/forbidden usage (fix: high priority) ==='
-    style_err_title = '=== Style/convention errors (fix: before submission) ==='
-    no_err_message = 'None!' + _BREAK*2
+    code_err_title = 'Code Errors or Forbidden Usage (fix: high priority)'
+    style_err_title = 'Style or Convention Errors (fix: before submission)'
+    no_err_message = 'None!' + _BREAK * 2
+    no_snippet = 'Nothing here.' + _BREAK * 2
 
     def __init__(self, source_lines=None, module_name=''):
         """Reminder: see pylint BaseReporter for other instance variables init.
@@ -142,7 +143,7 @@ class PlainReporter(BaseReporter):
 
     def filename_to_display(self, filename):
         """Display the file name, currently consistent with pylint format."""
-        return '{} File: {}'.format('*'*15, filename)
+        return '{}'.format(filename)
 
     def register_file(self, filename):
         """Register information of the linted file, for later use by reporter"""

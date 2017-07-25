@@ -132,7 +132,7 @@ class TypeInferer:
     def lookup_type(self, node, name):
         """Given a variable name, return its concrete type in the closest scope relative to given node."""
         tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
-        return self.type_constraints.lookup_concrete(tvar)[0]
+        return self.type_constraints.lookup_concrete(tvar)
 
     def visit_const(self, node):
         """Populate type constraints for astroid nodes for num/str/bool/None/bytes literals."""
@@ -206,7 +206,7 @@ class TypeInferer:
             node.type_constraints = TypeInfo(self.lookup_type(node, node.name))
         except KeyError:
             self._closest_frame(node, node.name).type_environment\
-                .create_in_env(self.type_constraints, 'globals', node.name)
+                .create_in_env(self.type_constraints, 'globals', node.name, node)
             node.type_constraints = TypeInfo(self.lookup_type(node, node.name))
 
     ##############################################################################

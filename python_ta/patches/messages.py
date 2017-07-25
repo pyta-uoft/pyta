@@ -24,11 +24,12 @@ def patch_linter_transform():
 
     def new_get_ast(self, filepath, modname):
         ast = old_get_ast(self, filepath, modname)
-        with open(filepath) as f:
-            source_code = f.readlines()
-        ending_transformer = TransformVisitor()
-        register_transforms(source_code, ending_transformer)
-        ending_transformer.visit(ast)
+        if ast is not None:
+            with open(filepath) as f:
+                source_code = f.readlines()
+            ending_transformer = TransformVisitor()
+            register_transforms(source_code, ending_transformer)
+            ending_transformer.visit(ast)
         return ast
 
     PyLinter.get_ast = new_get_ast

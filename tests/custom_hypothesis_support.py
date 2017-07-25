@@ -54,6 +54,7 @@ unary_bool_operator = hs.sampled_from(['not'])
 # Strategies for generating builtin type names
 builtin_types = [bool, bytearray, bytes, complex, dict, enumerate,
                     float, frozenset, int, list, set, str, tuple]
+builtin_type = hs.sampled_from(builtin_types)
 annotation = hs.sampled_from(builtin_types).map(lambda s: s.__name__)
 
 

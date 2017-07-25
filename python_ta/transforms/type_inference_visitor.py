@@ -58,7 +58,7 @@ class TypeInferer:
     def _set_module_environment(self, node):
         """Method to set environment of a Module node."""
         node.type_environment = Environment(
-            globals_={name: self.type_constraints.fresh_tvar() for name in node.globals})
+            globals_={name: self.type_constraints.fresh_tvar(node) for name in node.globals})
         self._populate_local_env(node)
 
     def _set_classdef_environment(self, node):
@@ -230,7 +230,7 @@ class TypeInferer:
                               {arg_types}', node))
 
         try:
-            return_type = self.type_constraints.unify_call(func_type, *arg_types)
+            return_type = self.type_constraints.unify_call(node, func_type, *arg_types)
         except TypeInferenceError:
             return TypeInfo(
                 TypeErrorInfo('Bad unify_call of function {func_call} given\
@@ -292,7 +292,7 @@ class TypeInferer:
                 target_type_tuple = zip(node.targets[0].elts, node.value.elts)
                 for target_node, value in target_type_tuple:
                     target_tvar = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_tvar, value.type_constraints.type)
+                    self.type_constraints.unify(target_tvar, value.type_constraints.type, node)
             else:
                 value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
                 value_type = self.type_constraints.lookup_concrete(value_tvar)
@@ -306,7 +306,7 @@ class TypeInferer:
                 if isinstance(target_node, astroid.AssignName):
                     target_type_var = self.type_constraints.lookup_concrete(
                         node.frame().type_environment.lookup_in_env(target_node.name))
-                    self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
+                    self.type_constraints.unify(target_type_var, node.value.type_constraints.type, node)
                 elif isinstance(target_node, astroid.AssignAttr):
                     # every Assign node will have a single Name node associated with it
                     attr_type = self.type_constraints.lookup_concrete(

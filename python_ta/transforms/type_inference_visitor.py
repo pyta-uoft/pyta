@@ -83,7 +83,7 @@ class TypeInferer:
         comprehension expression."""
         node.type_environment = Environment()
         for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
     def _set_dictcomp_environment(self, node):
         """Environment setter for DictComp node representing a dictionary

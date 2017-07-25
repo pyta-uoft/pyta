@@ -54,12 +54,8 @@ def test_set_single_assign(variables_dict):
     program = cs._parse_dictionary_to_program(variables_dict)
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AssignName):
-        target_name = node.name
         target_value = node.parent.value
-        # lookup name in the frame's environment
-        target_type_var = node.frame().type_environment.lookup_in_env(target_name)
-        # do a concrete look up of the corresponding TypeVar
-        target_type = inferer.type_constraints.lookup_concrete(target_type_var)
+        target_type = inferer.lookup_type(node, node.name)
         # compare it to the type of the assigned value
         assert target_value.type_constraints.type == target_type
 

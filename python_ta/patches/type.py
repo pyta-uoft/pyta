@@ -13,8 +13,11 @@ def patch_type_inference_transform():
             type_inferer = TypeInferer()
             env_transformer = type_inferer.environment_transformer()
             type_transformer = type_inferer.type_inference_transformer()
-            env_transformer.visit(ast)
-            type_transformer.visit(ast)
+            try:
+                env_transformer.visit(ast)
+                type_transformer.visit(ast)
+            except:
+                pass
         return ast
 
     PyLinter.get_ast = new_get_ast

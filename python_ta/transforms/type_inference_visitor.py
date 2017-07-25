@@ -304,8 +304,7 @@ class TypeInferer:
             # assignment(s) in single statement
             for target_node in node.targets:
                 if isinstance(target_node, astroid.AssignName):
-                    target_type_var = self.type_constraints.lookup_concrete(
-                        node.frame().type_environment.lookup_in_env(target_node.name))
+                    target_type_var = self.lookup_type(target_node.name)
                     self.type_constraints.unify(target_type_var, node.value.type_constraints.type, node)
                 elif isinstance(target_node, astroid.AssignAttr):
                     # every Assign node will have a single Name node associated with it
@@ -321,8 +320,7 @@ class TypeInferer:
         node.type_constraints = TypeInfo(NoType)
 
     def visit_functiondef(self, node):
-        arg_types = [self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env(arg))
-                     for arg in node.argnames()]
+        arg_types = [self.lookup_type(arg) for arg in node.argnames()]
         if any(annotation is not None for annotation in node.args.annotations):
             func_type = parse_annotations(node)
             for arg_type, annotation in zip(arg_types, func_type.__args__[:-1]):
@@ -337,7 +335,7 @@ class TypeInferer:
             if len(list(node.nodes_of_class(astroid.Return))) == 0:
                 func_type = Callable[arg_types, None]
             else:
-                rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
+                rtype = self.lookup_type('return')
                 func_type = Callable[arg_types, rtype]
             func_type.polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
             self.type_constraints.unify(self.lookup_type(node, node.name), func_type, node)
@@ -346,8 +344,7 @@ class TypeInferer:
     def visit_call(self, node):
         if isinstance(node.func, astroid.Attribute):
             func_t = node.func.type_constraints.type
-            arg_types = [self.type_constraints.lookup_concrete(
-                node.frame().type_environment.lookup_in_env(node.func.expr.name))]
+            arg_types = [self.lookup_type(node.func.expr.name)]
             arg_types += [arg.type_constraints.type for arg in node.args]
             ret_type = self.type_constraints.unify_call(func_t, *arg_types)
             node.type_constraints = TypeInfo(ret_type)
@@ -360,7 +357,7 @@ class TypeInferer:
                 self.type_constraints.unify_call(func_t, *arg_types)
                 node.type_constraints = TypeInfo(_ForwardRef(func_name))
             else:
-                func_t = self.type_constraints.lookup_concrete(node.frame().type_environment.locals[func_name])
+                func_t = self.lookup_type(func_name)
                 arg_types = [arg.type_constraints.type for arg in node.args]
                 ret_type = self.type_constraints.unify_call(func_t, *arg_types)
                 node.type_constraints = TypeInfo(ret_type)

@@ -96,7 +96,7 @@ class TypeInferer:
         """Environment setter for SetComp node representing a set comprehension expression"""
         node.type_environment = Environment()
         for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
     def _populate_local_env(self, node):
         """Helper to populate locals attributes in type environment of given node."""

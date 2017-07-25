@@ -308,7 +308,10 @@ class TypeConstraints:
             return tvar
 
         i, _ = self._find(tvar)
-        the_set = self._sets[i]
+        _set = self._sets[i]
+        the_set = []
+        for i, _tuple in enumerate(_set):
+            the_set.append(tuple(_tuple)[0])
 
         rep = None
         for t in the_set:
@@ -432,14 +435,14 @@ class Environment:
         else:
             raise KeyError
 
-    def create_in_env(self, type_constraints, environment, variable_name):
+    def create_in_env(self, type_constraints, environment, variable_name, node):
         """Helper to create a fresh Type Var and adding the variable to appropriate environment."""
         if environment == 'locals':
-            self.locals[variable_name] = type_constraints.fresh_tvar()
+            self.locals[variable_name] = type_constraints.fresh_tvar(node)
         elif environment == 'globals':
-            self.globals[variable_name] = type_constraints.fresh_tvar()
+            self.globals[variable_name] = type_constraints.fresh_tvar(node)
         elif environment == 'nonlocals':
-            self.nonlocals[variable_name] = type_constraints.fresh_tvar()
+            self.nonlocals[variable_name] = type_constraints.fresh_tvar(node)
 
     def __str__(self):
         return str(self.locals)

@@ -1,1 +1,2 @@
-print('\d{3}')  # Error on this line
+import re
+re.findall('(\d+)\D*', '123 Main St.')  # Error on this line

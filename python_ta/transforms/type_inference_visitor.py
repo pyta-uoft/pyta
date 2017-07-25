@@ -76,7 +76,7 @@ class TypeInferer:
         if node.args.args and node.args.args[0].name == 'self' and isinstance(node.parent, astroid.ClassDef):
             node.type_environment.locals['self'] = _ForwardRef(node.parent.name)
         self._populate_local_env(node)
-        node.type_environment.locals['return'] = self.type_constraints.fresh_tvar()
+        node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
 
     def _set_listcomp_environment(self, node):
         """Set the environment of a ListComp node representing a list

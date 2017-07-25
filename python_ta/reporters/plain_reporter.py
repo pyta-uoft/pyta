@@ -70,8 +70,8 @@ class PlainReporter(BaseReporter):
     _SPACE = ' '
     _BREAK = '\n'
     _COLOURING = {}
-    code_err_title = 'Code Errors or Forbidden Usage (fix: high priority)'
-    style_err_title = 'Style or Convention Errors (fix: before submission)'
+    code_err_title = '=== Code errors/forbidden usage (fix: high priority) ==='
+    style_err_title = '=== Style/convention errors (fix: before submission) ==='
     no_err_message = 'None!' + _BREAK * 2
     no_snippet = 'Nothing here.' + _BREAK * 2
 
@@ -136,7 +136,7 @@ class PlainReporter(BaseReporter):
 
         # Save output location and remove it if exists from previous run.
         self._output_filepath = correct_path
-        # Remove existing file to prepare for appending messages from recursive 
+        # Remove existing file to prepare for appending messages from recursive
         # linting of files.
         if os.path.exists(correct_path):
             os.remove(correct_path)
@@ -184,7 +184,7 @@ class PlainReporter(BaseReporter):
         """
         Return string of properly formatted members of the messages dict
         (error or style) indicated by style.
-    
+
         :param bool style: True iff messages is a dict of style messages
         :return: str
         """

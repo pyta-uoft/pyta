@@ -25,6 +25,8 @@ class HTMLReporter(ColorReporter):
                   'grey': '<span class="grey">',
                   'gbold': '<span class="gbold">',
                   'reset': '</span>'}
+    code_err_title = 'Code Errors or Forbidden Usage (fix: high priority)'
+    style_err_title = 'Style or Convention Errors (fix: before submission)'
 
     def __init__(self, source_lines=None, module_name=''):
         super().__init__(source_lines, module_name)

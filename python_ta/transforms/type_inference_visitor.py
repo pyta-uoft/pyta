@@ -65,9 +65,9 @@ class TypeInferer:
         """Method to set environment of a ClassDef node."""
         node.type_environment = Environment()
         for name in node.instance_attrs:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
         for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
     def _set_function_def_environment(self, node):
         """Method to set environment of a FunctionDef node."""
@@ -189,6 +189,11 @@ class TypeInferer:
     def _closest_frame(self, node, name):
         """Helper method to find the closest ancestor node containing name relative to the given node."""
         closest_scope = node
+        if hasattr(closest_scope, 'type_environment') and (
+                            name in closest_scope.type_environment.locals or
+                            name in closest_scope.type_environment.globals or
+                        name in closest_scope.type_environment.nonlocals):
+            return closest_scope
         if node.parent:
             closest_scope = node.parent
             if hasattr(closest_scope, 'type_environment') and (
@@ -374,7 +379,7 @@ class TypeInferer:
                 self.type_constraints.unify(rtype.__args__[0], target_tvars[i], node)
 
     def visit_ifexp(self, node):
-        if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type, node):
+        if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type):
             self.type_constraints.unify(node.body.type_constraints.type, node.orelse.type_constraints.type, node)
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:

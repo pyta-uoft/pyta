@@ -90,7 +90,7 @@ class TypeInferer:
         comprehension expression."""
         node.type_environment = Environment()
         for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar()
+            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
     def _set_setcomp_environment(self, node):
         """Environment setter for SetComp node representing a set comprehension expression"""
@@ -104,7 +104,7 @@ class TypeInferer:
             try:
                 var_value = node.type_environment.lookup_in_env(var_name)
             except KeyError:
-                var_value = self.type_constraints.fresh_tvar()
+                var_value = self.type_constraints.fresh_tvar(node)
             node.type_environment.locals[var_name] = var_value
 
     ###########################################################################
@@ -275,7 +275,7 @@ class TypeInferer:
                                                             left_value.type_constraints.type,
                                                             right_value.type_constraints.type)
                 left_value = right_value
-                return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
+                return_types.add(self.type_constraints.unify_call(node, function_type, left_value.type_constraints.type,
                                                               right_value.type_constraints.type))
         if len(return_types) == 1:
             node.type_constraints = TypeInfo(return_types.pop())

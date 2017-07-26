@@ -8,7 +8,7 @@ from .plain_reporter import PlainReporter
 class PositionReporter(PlainReporter):
     def __init__(self, source_lines=None, module_name=''):
         super().__init__(source_lines, module_name)
-        self._output = {   
+        self._output = {
             'total_genre_errors': 0,
             'total_genre_styles': 0,
             'total_results': 0,
@@ -25,7 +25,6 @@ class PositionReporter(PlainReporter):
                 'occurrences': [],
                 'id': msg_id,
                 'title': sorted_messages[msg_id][0].symbol,
-                'msg': sorted_messages[msg_id][0].msg.split('\n')[0],
                 'num_occurrences': len(sorted_messages[msg_id])
             }
             for msg_instance in sorted_messages[msg_id]:
@@ -35,7 +34,8 @@ class PositionReporter(PlainReporter):
                         'lineno': msg_instance.node.fromlineno,
                         'end_lineno': msg_instance.node.end_lineno,
                         'col_offset': msg_instance.node.col_offset,
-                        'end_col_offset': msg_instance.node.end_col_offset
+                        'end_col_offset': msg_instance.node.end_col_offset,
+                        'text': msg_instance.msg.split('\n')[0]
                     })
                 else:
                     # TODO: use more accurate location data.
@@ -49,7 +49,8 @@ class PositionReporter(PlainReporter):
                         'lineno': msg_instance.line,
                         'end_lineno': msg_instance.line,
                         'col_offset': msg_instance.column,
-                        'end_col_offset': len(self._source_lines[msg_instance.line-1])
+                        'end_col_offset': len(self._source_lines[msg_instance.line-1]),
+                        'text': msg_instance.msg.split('\n')[0]
                     })
             data_per_message.append(msg_data)
         return data_per_message

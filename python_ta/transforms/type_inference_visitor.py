@@ -190,8 +190,8 @@ class TypeInferer:
         """Helper method to find the closest ancestor node containing name relative to the given node."""
         closest_scope = node
         if hasattr(closest_scope, 'type_environment') and (
-                            name in closest_scope.type_environment.locals or
-                            name in closest_scope.type_environment.globals or
+                        name in closest_scope.type_environment.locals or
+                        name in closest_scope.type_environment.globals or
                         name in closest_scope.type_environment.nonlocals):
             return closest_scope
         if node.parent:

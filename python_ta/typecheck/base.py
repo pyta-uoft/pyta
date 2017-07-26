@@ -160,8 +160,8 @@ class TypeConstraints:
 
     def unify(self, t1, t2, node):
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            i1, n1 = self._find(t1)
-            i2, n2 = self._find(t2)
+            i1, _ = self._find(t1)
+            i2, _ = self._find(t2)
             if i1 != i2:
                 self._sets[i1].update(self._sets[i2])
                 self._sets.pop(i2)

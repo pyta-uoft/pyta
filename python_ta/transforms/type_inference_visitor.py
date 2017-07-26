@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, _node_to_type
+from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
 from ..typecheck.type_store import TypeStore
 
 
@@ -330,7 +330,7 @@ class TypeInferer:
             func_type = parse_annotations(node)
             for arg_type, annotation in zip(arg_types, func_type.__args__[:-1]):
                 self.type_constraints.unify(arg_type, annotation, node)
-            self.type_constraints.unify(self.lookup_type(node, node.name), func_type, node)
+            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type, node)
         else:
             # Check whether this is a method in a class
             if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):
@@ -340,10 +340,10 @@ class TypeInferer:
             if len(list(node.nodes_of_class(astroid.Return))) == 0:
                 func_type = Callable[arg_types, None]
             else:
-                rtype = self.lookup_type(node, 'return')
-                func_type = Callable[arg_types, rtype]
-            func_type.polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
-            self.type_constraints.unify(self.lookup_type(node, node.name), func_type, node)
+                polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
+                rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
+                func_type = create_Callable(arg_types, rtype, polymorphic_tvars)
+            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type, node)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):

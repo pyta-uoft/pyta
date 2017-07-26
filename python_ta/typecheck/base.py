@@ -150,10 +150,12 @@ class TypeConstraints:
     def _find(self, t):
         """Return the index of the set containing t."""
         for i, type_node_set in enumerate(self._sets):
-            if t in list(zip(*type_node_set))[0]:
-                for _type, _node in type_node_set:
-                    if t == _type:
-                        return i, _node
+            for j, _tuple in enumerate(type_node_set):
+                if t in tuple(_tuple):
+                    if isinstance(tuple(_tuple)[0], astroid.ALL_NODE_CLASSES):
+                        return i, tuple(_tuple)[0]
+                    else:
+                        return i, tuple(_tuple)[1]
         return -1, None
 
     def unify(self, t1, t2, node):
@@ -311,7 +313,10 @@ class TypeConstraints:
         _set = self._sets[i]
         the_set = []
         for i, _tuple in enumerate(_set):
-            the_set.append(tuple(_tuple)[0])
+            if isinstance(tuple(_tuple)[0], astroid.ALL_NODE_CLASSES):
+                the_set.append(tuple(_tuple)[1])
+            else:
+                the_set.append(tuple(_tuple)[0])
 
         rep = None
         for t in the_set:

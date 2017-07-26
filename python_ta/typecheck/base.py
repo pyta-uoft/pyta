@@ -140,35 +140,38 @@ class TypeConstraints:
         self._count = 0
         self._sets = []
 
-
-    def fresh_tvar(self) -> TypeVar:
-        """Return a fresh type variable."""
+    def fresh_tvar(self, node) -> TypeVar:
+        """Return a fresh type variable with the node it was created in."""
         tvar = TypeVar('_T' + str(self._count))
-        self._sets.append({tvar})
+        self._sets.append({(tvar, node)})
         self._count += 1
         return tvar
 
-    def _find(self, t: TypeVar) -> int:
+    def _find(self, t):
         """Return the index of the set containing t."""
-        for i, type_set in enumerate(self._sets):
-            if t in type_set:
-                return i
-        return -1
+        for i, type_node_set in enumerate(self._sets):
+            for j, _tuple in enumerate(type_node_set):
+                if t in tuple(_tuple):
+                    if isinstance(tuple(_tuple)[0], astroid.ALL_NODE_CLASSES):
+                        return i, tuple(_tuple)[0]
+                    else:
+                        return i, tuple(_tuple)[1]
+        return -1, None
 
-    def unify(self, t1, t2):
+    def unify(self, t1, t2, node):
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            i1 = self._find(t1)
-            i2 = self._find(t2)
+            i1, _ = self._find(t1)
+            i2, _ = self._find(t2)
             if i1 != i2:
                 self._sets[i1].update(self._sets[i2])
                 self._sets.pop(i2)
         elif isinstance(t1, TypeVar):
-            i1 = self._find(t1)
-            self._sets[i1].add(t2)
+            i1, n1 = self._find(t1)
+            self._sets[i1].add((t2, node))
         elif isinstance(t2, TypeVar):
-            self.unify(t2, t1)
+            self.unify(t2, t1, node)
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            self._unify_generic(t1, t2)
+            self._unify_generic(t1, t2, node)
         elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
             rtype = self.unify_call(t1, *t2.__args__[:-1])
             self.unify(rtype, t2.__args__[-1])
@@ -187,13 +190,13 @@ class TypeConstraints:
         elif t1 != t2:
             raise Exception(str(t1) + ' ' + str(t2))
 
-    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta):
+    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta, node):
         """Unify two generic types."""
         if not _geqv(t1, t2):
             raise TypeInferenceError('bad unify')
         elif t1.__args__ is not None and t2.__args__ is not None:
             for a1, a2 in zip(t1.__args__, t2.__args__):
-                self.unify(a1, a2)
+                self.unify(a1, a2, node)
 
     def _unify_tuple(self, t1: TupleMeta, t2: TupleMeta):
         tup1, tup2 = t1.__tuple_params__, t2.__tuple_params__
@@ -205,7 +208,7 @@ class TypeConstraints:
             for elem1, elem2 in zip(tup1, tup2):
                 self.unify(elem1, elem2)
 
-    def unify_call(self, func_type, *arg_types):
+    def unify_call(self, node, func_type, *arg_types):
         """Unify a function call with the given function type and argument types.
 
         Return a result type.
@@ -215,10 +218,10 @@ class TypeConstraints:
             raise TypeInferenceError('Wrong number of arguments')
 
         # Substitute polymorphic type variables
-        new_tvars = {tvar: self.fresh_tvar() for tvar in getattr(func_type, 'polymorphic_tvars', [])}
+        new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
-            self.unify(arg_type, param_type)
+            self.unify(arg_type, param_type, node)
         return self._type_eval(new_func_type.__args__[-1])
 
     def least_general_unifier(self, t1, t2):
@@ -303,8 +306,14 @@ class TypeConstraints:
         if not isinstance(tvar, TypeVar):
             return tvar
 
-        i = self._find(tvar)
-        the_set = self._sets[i]
+        i, _ = self._find(tvar)
+        _set = self._sets[i]
+        the_set = []
+        for i, _tuple in enumerate(_set):
+            if isinstance(tuple(_tuple)[0], astroid.ALL_NODE_CLASSES):
+                the_set.append(tuple(_tuple)[1])
+            else:
+                the_set.append(tuple(_tuple)[0])
 
         rep = None
         for t in the_set:
@@ -428,14 +437,14 @@ class Environment:
         else:
             raise KeyError
 
-    def create_in_env(self, type_constraints, environment, variable_name):
+    def create_in_env(self, type_constraints, environment, variable_name, node):
         """Helper to create a fresh Type Var and adding the variable to appropriate environment."""
         if environment == 'locals':
-            self.locals[variable_name] = type_constraints.fresh_tvar()
+            self.locals[variable_name] = type_constraints.fresh_tvar(node)
         elif environment == 'globals':
-            self.globals[variable_name] = type_constraints.fresh_tvar()
+            self.globals[variable_name] = type_constraints.fresh_tvar(node)
         elif environment == 'nonlocals':
-            self.nonlocals[variable_name] = type_constraints.fresh_tvar()
+            self.nonlocals[variable_name] = type_constraints.fresh_tvar(node)
 
     def __str__(self):
         return str(self.locals)

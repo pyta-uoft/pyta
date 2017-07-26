@@ -72,7 +72,8 @@ class PlainReporter(BaseReporter):
     _COLOURING = {}
     code_err_title = '=== Code errors/forbidden usage (fix: high priority) ==='
     style_err_title = '=== Style/convention errors (fix: before submission) ==='
-    no_err_message = 'None!' + _BREAK*2
+    no_err_message = 'None!' + _BREAK * 2
+    no_snippet = 'Nothing here.' + _BREAK * 2
 
     def __init__(self, source_lines=None, module_name=''):
         """Reminder: see pylint BaseReporter for other instance variables init.
@@ -135,14 +136,14 @@ class PlainReporter(BaseReporter):
 
         # Save output location and remove it if exists from previous run.
         self._output_filepath = correct_path
-        # Remove existing file to prepare for appending messages from recursive 
+        # Remove existing file to prepare for appending messages from recursive
         # linting of files.
         if os.path.exists(correct_path):
             os.remove(correct_path)
 
     def filename_to_display(self, filename):
         """Display the file name, currently consistent with pylint format."""
-        return '{} File: {}'.format('*'*15, filename)
+        return '{}'.format(filename)
 
     def register_file(self, filename):
         """Register information of the linted file, for later use by reporter"""
@@ -183,7 +184,7 @@ class PlainReporter(BaseReporter):
         """
         Return string of properly formatted members of the messages dict
         (error or style) indicated by style.
-    
+
         :param bool style: True iff messages is a dict of style messages
         :return: str
         """

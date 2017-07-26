@@ -19,10 +19,7 @@ def test_annassign_concrete():
               f''
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AnnAssign):
-        # variable_type = self._find_type(node, node.target.name)
-        variable_type = inferer.type_constraints.lookup_concrete(
-            inferer._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
-        # TODO: we don't want to evaluate.. Just hard code and test builtins?
+        variable_type = inferer.lookup_type(node, node.target.name)
         annotated_type = _node_to_type(node.annotation.name)
         assert variable_type == annotated_type
 
@@ -38,8 +35,7 @@ def test_annassign(variables_annotations_dict):
                f'        pass\n'
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AnnAssign):
-        variable_type = inferer.type_constraints.lookup_concrete(
-            inferer._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
+        variable_type = inferer.lookup_type(node, node.target.name)
         annotated_type = variables_annotations_dict[node.target.name]
         assert variable_type == annotated_type
 

@@ -163,7 +163,6 @@ class TypeConstraints:
             i1, n1 = self._find(t1)
             i2, n2 = self._find(t2)
             if i1 != i2:
-                # TODO: update the tuple containing the tvar being unified (i2)
                 self._sets[i2].remove((t2, n2))
                 self._sets[i2].add((t2, node))
                 self._sets[i1].update(self._sets[i2])

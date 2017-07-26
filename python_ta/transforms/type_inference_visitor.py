@@ -419,7 +419,7 @@ class TypeInferer:
     def visit_annassign(self, node):
         variable_type = self.type_constraints.lookup_concrete(
             self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
-        self.type_constraints.unify(variable_type, _node_to_type(node.annotation.name))
+        self.type_constraints.unify(node, variable_type, _node_to_type(node.annotation.name))
         node.type_constraints = TypeInfo(NoType)
 
     def visit_module(self, node):

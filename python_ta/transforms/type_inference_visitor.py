@@ -364,7 +364,12 @@ class TypeInferer:
             else:
                 func_t = self.lookup_type(node, func_name)
                 arg_types = [arg.type_constraints.type for arg in node.args]
-                ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
+                try:
+                    ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
+                except:
+                    # TODO: return correct error msg.. how should we interpret the bad unify?
+                    msg = f'U fukd up Boi'
+                    ret_type = TypeErrorInfo(msg, node)
                 node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):

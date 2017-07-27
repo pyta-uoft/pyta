@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
+from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type, BadUnificationError
 from ..typecheck.type_store import TypeStore
 
 
@@ -190,8 +190,8 @@ class TypeInferer:
         """Helper method to find the closest ancestor node containing name relative to the given node."""
         closest_scope = node
         if hasattr(closest_scope, 'type_environment') and (
-                            name in closest_scope.type_environment.locals or
-                            name in closest_scope.type_environment.globals or
+                        name in closest_scope.type_environment.locals or
+                        name in closest_scope.type_environment.globals or
                         name in closest_scope.type_environment.nonlocals):
             return closest_scope
         if node.parent:
@@ -366,11 +366,12 @@ class TypeInferer:
                 arg_types = [arg.type_constraints.type for arg in node.args]
                 try:
                     ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
-                except:
+                except BadUnificationError:
                     # TODO: return correct error msg.. how should we interpret the bad unify?
-                    msg = f'U fukd up Boi'
-                    ret_type = TypeErrorInfo(msg, node)
+                    ret_type = TypeErrorInfo(f'Bad unify_call of function {func_t}'
+                                             f' given args: {", ".join([a.__name__ for a in arg_types])}', node)
                 node.type_constraints = TypeInfo(ret_type)
+                # TODO: Update other visitors to catch BadUnificationError exceptions and return in same format.
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]

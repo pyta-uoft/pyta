@@ -133,55 +133,83 @@ def lookup_method(name, caller_type, *args):
     return TYPE_SIGNATURES[caller_origin][name]
 
 
+def make_set(node):
+    node.parent = node
+    node.rank = 0
+
+
+def _find_rep(node):
+    if node.parent == node:
+        return node
+    else:
+        node.parent = _find_rep(x.parent)
+        return node.parent
+
+
+def _union(node1, node2):
+    rep1 = _find_rep(node1)
+    rep2 = _find_rep(node2)
+    if rep1.rank > rep2.rank:
+       rep2.parent = rep1
+    elif rep1.rank < rep2.rank:
+        rep1.parent = rep2
+    elif rep1 != rep2:  # Unless x and y are already in same set, merge them
+        rep2.parent = rep1
+        rep1.rank = rep1.rank + 1
+
+
+class TNode:
+    def __init__(self, node_type, origin_node):
+        self._type = node_type
+        self._origin = origin_node
+
+    def __str__(self):
+        return self._type.__name__
+
+
 class TypeConstraints:
     """Represents all the type constraints in the program."""
     def __init__(self):
         self._count = 0
         self._sets = []
+        self._tvar_tnode = {}
 
     def clear_tvars(self):
         """Resets the type constraints kept track of in the program."""
         self._count = 0
         self._sets = []
+        self._tvar_tnode = {}
 
     def fresh_tvar(self, node) -> TypeVar:
         """Return a fresh type variable with the node it was created in."""
         tvar = TypeVar('_T' + str(self._count))
-        self._sets.append({(tvar, node)})
+        tnode = make_set(TNode(tvar, node))
+        self._sets.append(tnode)
+        self._tvar_tnode[tvar.__name__] = tnode
         self._count += 1
         return tvar
 
-    def _find(self, t):
-        """Return the index of the set containing t."""
-        for i, type_node_set in enumerate(self._sets):
-            for j, _tuple in enumerate(type_node_set):
-                if t in tuple(_tuple):
-                    if isinstance(tuple(_tuple)[0], astroid.ALL_NODE_CLASSES):
-                        return i, tuple(_tuple)[0]
-                    else:
-                        return i, tuple(_tuple)[1]
-        return -1, None
-
-    def unify(self, t1, t2, node):
+    def unify(self, node1, node2):
+        t1, t2 = node1._type, node2._type
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            i1, _ = self._find(t1)
-            i2, _ = self._find(t2)
-            if i1 != i2:
-                self._sets[i1].update(self._sets[i2])
-                self._sets.pop(i2)
+            n1 = self._find_rep(node1)
+            n2 = self._find_rep(node2)
+            if n1._type != n2._type:
+                _union(n1, n2)
         elif isinstance(t1, TypeVar):
-            i1, n1 = self._find(t1)
-            self._sets[i1].add((t2, node))
+            n1 = self._find_rep(node1)
+            n2 = self._find_rep(node2)
+            _union(n2, n1)
         elif isinstance(t2, TypeVar):
-            self.unify(t2, t1, node)
+            self.unify(node2, node1)
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            self._unify_generic(t1, t2, node)
+            self._unify_generic(node1, node2)
         elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
-            rtype = self.unify_call(t1, *t2.__args__[:-1])
+            rtype = self.unify_call(t1, *(t2).__args__[:-1])
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
-            self._unify_tuple(t1, t2)
-        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            self._unify_tuple(node1, node2)
+        elif t1.__class__.__name__ == '_Union' or node2.__class__.__name__ == '_Union':
             pass
         elif t1 == Any or t2 == Any:
             pass
@@ -191,19 +219,21 @@ class TypeConstraints:
             raise Exception(str(t1) + ' ' + str(t2))
         elif issubclass(t1, t2) or issubclass(t2, t1):
             pass
-        elif t1 != t2:
+        elif t1!= t2:
             raise BadUnificationError(str(t1) + ' ' + str(t2))
 
 
-    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta, node):
-        """Unify two generic types."""
+    def _unify_generic(self, node1, node2):
+        """Unify two generic-typed nodes."""
+        t1, t2 = node1._type, node2._type
         if not _geqv(t1, t2):
             raise TypeInferenceError('bad unify')
         elif t1.__args__ is not None and t2.__args__ is not None:
             for a1, a2 in zip(t1.__args__, t2.__args__):
-                self.unify(a1, a2, node)
+                self.unify(a1, a2)
 
-    def _unify_tuple(self, t1: TupleMeta, t2: TupleMeta):
+    def _unify_tuple(self, node1, node2):
+        t1, t2 = node1._type, node2._type
         tup1, tup2 = t1.__tuple_params__, t2.__tuple_params__
         if not tup1 or not tup2:
             return

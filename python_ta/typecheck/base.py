@@ -3,6 +3,10 @@ from typing import CallableMeta, GenericMeta, TupleMeta, _gorg, _geqv, _type_var
 import astroid
 
 
+class BadUnificationError(Exception):
+    pass
+
+
 class TypeInferenceError(Exception):
     pass
 
@@ -160,8 +164,8 @@ class TypeConstraints:
 
     def unify(self, t1, t2, node):
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            i1, n1 = self._find(t1)
-            i2, n2 = self._find(t2)
+            i1, _ = self._find(t1)
+            i2, _ = self._find(t2)
             if i1 != i2:
                 self._sets[i1].update(self._sets[i2])
                 self._sets.pop(i2)
@@ -188,7 +192,8 @@ class TypeConstraints:
         elif issubclass(t1, t2) or issubclass(t2, t1):
             pass
         elif t1 != t2:
-            raise Exception(str(t1) + ' ' + str(t2))
+            raise BadUnificationError(str(t1) + ' ' + str(t2))
+
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta, node):
         """Unify two generic types."""

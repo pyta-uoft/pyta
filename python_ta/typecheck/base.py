@@ -186,7 +186,7 @@ class TypeConstraints:
         tnode = TNode(tvar, node)
         self._sets.append(tnode)
         make_set(tnode)
-        self._tvar_tnode[tvar.__name__] = tnode
+        self._tvar_tnode[tvar] = tnode
         self._count += 1
         return tvar
 
@@ -195,10 +195,7 @@ class TypeConstraints:
         tnode = TNode(_type, None)
         self._sets.append(tnode)
         make_set(tnode)
-        try:
-            self._tvar_tnode[str(_type).split('.')[1]] = tnode
-        except IndexError:
-            self._tvar_tnode[_type.__name__] = tnode
+        self._tvar_tnode[_type] = tnode
         self._count += 1
         return tnode
 
@@ -206,11 +203,11 @@ class TypeConstraints:
         # TODO: deal with the case where we hae a concrete type that is not in the set yet.
         # TODO: first create it in the environment?.. then add it?
         try:
-            node1 = self._tvar_tnode[t1.__name__]
+            node1 = self._tvar_tnode[t1]
         except KeyError:
             node1 = self.add_concrete_to_sets(t1)
         try:
-            node2 = self._tvar_tnode[t2.__name__]
+            node2 = self._tvar_tnode[t2]
         except KeyError:
             node2 = self.add_concrete_to_sets(t2)
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
@@ -358,7 +355,7 @@ class TypeConstraints:
         if not isinstance(tvar, TypeVar):
             return tvar
 
-        tnode = self._tvar_tnode[tvar.__name__]
+        tnode = self._tvar_tnode[tvar]
         return _find_rep(tnode).type
         #
         # rep = None

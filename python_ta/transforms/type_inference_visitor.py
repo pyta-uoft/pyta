@@ -364,14 +364,8 @@ class TypeInferer:
             else:
                 func_t = self.lookup_type(node, func_name)
                 arg_types = [arg.type_constraints.type for arg in node.args]
-                try:
-                    ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
-                except BadUnificationError:
-                    # TODO: return correct error msg.. how should we interpret the bad unify?
-                    ret_type = TypeErrorInfo(f'Bad unify_call of function {func_t}'
-                                             f' given args: {", ".join([a.__name__ for a in arg_types])}', node)
+                ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
                 node.type_constraints = TypeInfo(ret_type)
-                # TODO: Update other visitors to catch BadUnificationError exceptions and return in same format.
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]

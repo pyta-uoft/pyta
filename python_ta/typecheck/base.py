@@ -135,7 +135,7 @@ def lookup_method(name, caller_type, *args):
 
 def make_set(node):
     node.parent = node
-    node.rank = 0
+    # node.rank = 0
 
 
 def _find_rep(node):
@@ -149,13 +149,15 @@ def _find_rep(node):
 def _union(node1, node2):
     rep1 = _find_rep(node1)
     rep2 = _find_rep(node2)
-    if rep1.rank > rep2.rank:
-       rep2.parent = rep1
-    elif rep1.rank < rep2.rank:
-        rep1.parent = rep2
-    elif rep1 != rep2:  # Unless x and y are already in same set, merge them
-        rep2.parent = rep1
-        rep1.rank = rep1.rank + 1
+    rep2.parent = rep1
+    # TODO: don't do Union by rank for now because it ruins structure.
+    # if rep1.rank > rep2.rank:
+    #    rep2.parent = rep1
+    # elif rep1.rank < rep2.rank:
+    #     rep1.parent = rep2
+    # elif rep1 != rep2:  # Unless x and y are already in same set, merge them
+    #     rep2.parent = rep1
+    #     rep1.rank = rep1.rank + 1
 
 
 class TNode:
@@ -224,7 +226,7 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
-        elif t1.__class__.__name__ == '_Union' or node2.__class__.__name__ == '_Union':
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
             pass
         elif t1 == Any or t2 == Any:
             pass

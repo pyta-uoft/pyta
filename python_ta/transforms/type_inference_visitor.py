@@ -310,7 +310,7 @@ class TypeInferer:
             for target_node in node.targets:
                 if isinstance(target_node, astroid.AssignName):
                     target_type_var = self.lookup_type(target_node, target_node.name)
-                    self.type_constraints.unify(target_type_var, node.value.type_constraints.type, node)
+                    self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
                 elif isinstance(target_node, astroid.AssignAttr):
                     # every Assign node will have a single Name node associated with it
                     attr_type = self.type_constraints.lookup_concrete(
@@ -321,7 +321,7 @@ class TypeInferer:
 
     def visit_return(self, node):
         t = node.value.type_constraints.type
-        self.type_constraints.unify(node.frame().type_environment.locals['return'], t, node)
+        self.type_constraints.unify(node.frame().type_environment.locals['return'], t)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_functiondef(self, node):
@@ -329,8 +329,8 @@ class TypeInferer:
         if any(annotation is not None for annotation in node.args.annotations):
             func_type = parse_annotations(node)
             for arg_type, annotation in zip(arg_types, func_type.__args__[:-1]):
-                self.type_constraints.unify(arg_type, annotation, node)
-            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type, node)
+                self.type_constraints.unify(arg_type, annotation)
+            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
         else:
             # Check whether this is a method in a class
             if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):

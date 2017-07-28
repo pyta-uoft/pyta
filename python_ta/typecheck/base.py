@@ -139,11 +139,9 @@ def make_set(node):
 
 
 def _find_rep(node):
-    if node.parent == node:
-        return node
-    else:
-        node.parent = _find_rep(node.parent)
-        return node.parent
+    while node.parent != node:
+        node = node.parent
+    return node
 
 
 def _union(node1, node2):

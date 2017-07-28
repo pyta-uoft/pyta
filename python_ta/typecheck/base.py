@@ -148,14 +148,6 @@ def _union(node1, node2):
     rep1 = _find_rep(node1)
     rep2 = _find_rep(node2)
     rep2.parent = rep1
-    # TODO: don't do Union by rank for now because it ruins structure.
-    # if rep1.rank > rep2.rank:
-    #    rep2.parent = rep1
-    # elif rep1.rank < rep2.rank:
-    #     rep1.parent = rep2
-    # elif rep1 != rep2:  # Unless x and y are already in same set, merge them
-    #     rep2.parent = rep1
-    #     rep1.rank = rep1.rank + 1
 
 
 class TNode:

@@ -200,8 +200,6 @@ class TypeConstraints:
         return tnode
 
     def unify(self, t1, t2):
-        # TODO: deal with the case where we hae a concrete type that is not in the set yet.
-        # TODO: first create it in the environment?.. then add it?
         try:
             node1 = self._tvar_tnode[t1]
         except KeyError:

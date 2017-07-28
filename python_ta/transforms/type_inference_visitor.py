@@ -297,14 +297,14 @@ class TypeInferer:
                 target_type_tuple = zip(node.targets[0].elts, node.value.elts)
                 for target_node, value in target_type_tuple:
                     target_tvar = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_tvar, value.type_constraints.type, node)
+                    self.type_constraints.unify(target_tvar, value.type_constraints.type)
             else:
                 value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
                 value_type = self.type_constraints.lookup_concrete(value_tvar)
                 rtype = self._handle_call(node, '__iter__', value_type).type
                 for target_node in node.targets[0].elts:
                     target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_type_var, rtype.__args__[0], node)
+                    self.type_constraints.unify(target_type_var, rtype.__args__[0])
         else:
             # assignment(s) in single statement
             for target_node in node.targets:
@@ -316,7 +316,7 @@ class TypeInferer:
                     attr_type = self.type_constraints.lookup_concrete(
                         self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname))
                     attr_type = self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname)
-                    self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type, node)
+                    self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_return(self, node):
@@ -343,7 +343,7 @@ class TypeInferer:
                 polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
                 rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
                 func_type = create_Callable(arg_types, rtype, polymorphic_tvars)
-            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type, node)
+            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
         node.type_constraints = TypeInfo(NoType)
 
     def visit_call(self, node):
@@ -386,7 +386,7 @@ class TypeInferer:
 
     def visit_ifexp(self, node):
         if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type):
-            self.type_constraints.unify(node.body.type_constraints.type, node.orelse.type_constraints.type, node)
+            self.type_constraints.unify(node.body.type_constraints.type, node.orelse.type_constraints.type)
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:
             node.type_constraints = TypeInfo(Any)
@@ -398,7 +398,7 @@ class TypeInferer:
             for target_node in node.target.elts:
                 self.type_constraints.unify(self.lookup_type(target_node, target_node.name), rtype, node)
         else:
-            self.type_constraints.unify(self.lookup_type(node.target, node.target.name), rtype.__args__[0], node)
+            self.type_constraints.unify(self.lookup_type(node.target, node.target.name), rtype.__args__[0])
         node.type_constraints = TypeInfo(NoType)
 
     def visit_listcomp(self, node):
@@ -425,7 +425,7 @@ class TypeInferer:
     def visit_annassign(self, node):
         variable_type = self.type_constraints.lookup_concrete(
             self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
-        self.type_constraints.unify(variable_type, _node_to_type(node.annotation.name), node)
+        self.type_constraints.unify(variable_type, _node_to_type(node.annotation.name))
         node.type_constraints = TypeInfo(NoType)
 
     def visit_module(self, node):

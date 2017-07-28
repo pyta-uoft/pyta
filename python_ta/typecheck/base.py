@@ -214,7 +214,10 @@ class TypeConstraints:
             rep1 = _find_rep(node1)
             rep2 = _find_rep(node2)
             if rep1.type != rep2.type:
-                _union(node1, node2)
+                if isinstance(rep1.type, TypeVar):
+                    _union(node2, node1)
+                else:
+                    _union(node1, node2)
         elif isinstance(t1, TypeVar):
             _union(node2, node1)
         elif isinstance(t2, TypeVar):

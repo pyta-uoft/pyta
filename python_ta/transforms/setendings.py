@@ -146,6 +146,7 @@ def _is_within_open_bracket(s, index, node):
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
     target_len = len(node.attrname)
+    slice = s[index-target_len+1 : index+1]
     if index < target_len:
         return False
     return s[index-target_len+1 : index+1] == node.attrname
@@ -204,7 +205,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.SetComp, None, _token_search('}')),
     (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
     (astroid.Subscript, None, _token_search(']')),
-    (astroid.Tuple, None, _token_search(',')),
+    (astroid.Tuple, None, _token_search(','))
 ]
 
 
@@ -246,8 +247,8 @@ def init_register_ending_setters(source_code):
                 node_class, end_setter_from_source(source_code, end_pred))
 
     # Nodes where extra parentheses are included
-    ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
-    ending_transformer.register_transform(astroid.Tuple, add_parens_to_const(source_code))
+    ending_transformer.register_transform(astroid.Const, add_parens(source_code))
+    ending_transformer.register_transform(astroid.Tuple, add_parens(source_code))
 
     return ending_transformer
 
@@ -426,6 +427,8 @@ def end_setter_from_source(source_code, pred):
                 temp = node.end_col_offset
                 node.end_col_offset = j + 1
                 return
+            elif source_code[lineno][j] not in CONSUMABLES:
+                return
 
         # If that doesn't work, search remaining lines
         for i in range(lineno + 1, len(source_code)):
@@ -482,22 +485,16 @@ def start_setter_from_source(source_code, pred):
     return set_start_from_source
 
 
-def add_parens_to_const(source_code):
+def add_parens(source_code):
+    """Search for parenthesis (paren) characters before start and end positions
+    of nodes. Search in both directions at once to ensure paren pairs are always
+    matched.
+    """
     def h(node):
-        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
-            return
-        else:
-            _add_parens(source_code)(node)
-
-    return h
-
-
-def _add_parens(source_code):
-    def h(node):
+        loc_curr = loc_prev = (node.fromlineno - 1, node.end_lineno - 1, node.col_offset, node.end_col_offset)
         # Initialize counters. Note: fromlineno is 1-indexed.
         while True:
-            col_offset, lineno = node.col_offset, node.fromlineno - 1
-            end_col_offset, end_lineno = node.end_col_offset, node.end_lineno - 1
+            lineno, end_lineno, col_offset, end_col_offset = loc_curr
 
             # First, search the remaining part of the current start line
             prev_char, new_lineno, new_coloffset = None, None, None
@@ -517,7 +514,6 @@ def _add_parens(source_code):
                             continue
                         else:
                             prev_char, new_lineno, new_coloffset = source_code[i][j], i, j
-
                             break
                     if prev_char is not None:
                         break
@@ -556,8 +552,18 @@ def _add_parens(source_code):
                 return
 
             # At this point, an enclosing pair of parentheses has been found
-            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset =\
-                new_lineno + 1, new_coloffset, new_end_lineno + 1, new_end_coloffset + 1
+            loc_prev = loc_curr
+            loc_curr = new_lineno, new_end_lineno, new_coloffset, new_end_coloffset + 1
+
+            # Separate Call node's paren syntax from inclusion in starting and
+            # ending locations of single nodes in its argument list.
+            set_by = loc_curr
+            if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
+                set_by = loc_prev
+
+            node.fromlineno, node.end_lineno, node.col_offset, node.end_col_offset = set_by
+            node.fromlineno += 1
+            node.end_lineno += 1
 
     return h
 

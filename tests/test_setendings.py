@@ -574,8 +574,9 @@ class TestEndingLocations(unittest.TestCase):
     def test_tuple(self):
         expected = [(1, 1, 0, 6), (2, 2, 0, 11), (3, 3, 0, 5), (4, 4, 0, 7),
                     (5, 5, 0, 12), (6, 8, 0, 8), (9, 9, 0, 4), (10, 10, 0, 7),
-                    (11, 13, 0, 17)
-                    ]
+                    (11, 13, 0, 17), (14, 14, 0, 7), (15, 15, 7, 14), 
+                    (16, 16, 4, 11), (17, 17, 0, 12), (17, 17, 0, 5), 
+                    (17, 17, 7, 12), (18, 18, 0, 6), (20, 20, 0, 6)]
         module = self.get_file_as_module(PATH + 'Tuple.py')
         self.set_and_check(module, astroid.Tuple, expected)
 

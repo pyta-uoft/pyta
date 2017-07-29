@@ -242,8 +242,13 @@ def init_register_ending_setters(source_code):
             ending_transformer.register_transform(
                 node_class, start_setter_from_source(source_code, start_pred))
         if end_pred is not None:
-            ending_transformer.register_transform(
-                node_class, end_setter_from_source(source_code, end_pred))
+            # This is for searching for a trailing comma after a tuple's final element
+            if node_class is astroid.Tuple:
+                ending_transformer.register_transform(
+                    node_class, end_setter_from_source(source_code, end_pred, True))
+            else:
+                ending_transformer.register_transform(
+                    node_class, end_setter_from_source(source_code, end_pred))
 
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
@@ -399,7 +404,7 @@ def _get_last_child(node):
         return skip_to_last_child  # postcondition: node, or None.
 
 
-def end_setter_from_source(source_code, pred):
+def end_setter_from_source(source_code, pred, only_consumables=False):
     """Returns a *function* that sets ending locations for a node from source.
 
     The basic technique is to do the following:
@@ -409,6 +414,10 @@ def end_setter_from_source(source_code, pred):
 
     pred is a function that takes a string and index and returns a bool,
     e.g. _is_close_paren
+
+    If only_consumables is True, the search halts when it reaches a non-consumable
+    character that fails pred *on the first line*.
+    TODO: really the behaviour should be the same for all lines searched for.
     """
     def set_endings_from_source(node):
         if not hasattr(node, 'end_col_offset'):
@@ -425,6 +434,8 @@ def end_setter_from_source(source_code, pred):
             if pred(source_code[lineno], j, node):
                 temp = node.end_col_offset
                 node.end_col_offset = j + 1
+                return
+            elif only_consumables and source_code[lineno][j] not in CONSUMABLES:
                 return
 
         # If that doesn't work, search remaining lines
@@ -484,10 +495,8 @@ def start_setter_from_source(source_code, pred):
 
 def add_parens_to_const(source_code):
     def h(node):
-        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
-            return
-        else:
-            _add_parens(source_code)(node)
+        # fix_start_attributes(node)
+        _add_parens(source_code)(node)
 
     return h
 
@@ -495,6 +504,7 @@ def add_parens_to_const(source_code):
 def _add_parens(source_code):
     def h(node):
         # Initialize counters. Note: fromlineno is 1-indexed.
+        prev =  node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
         while True:
             col_offset, lineno = node.col_offset, node.fromlineno - 1
             end_col_offset, end_lineno = node.end_col_offset, node.end_lineno - 1
@@ -502,7 +512,7 @@ def _add_parens(source_code):
             # First, search the remaining part of the current start line
             prev_char, new_lineno, new_coloffset = None, None, None
             for j in range(col_offset - 1, -1, -1):
-                if source_code[lineno][j] in CONSUMABLES:
+                if source_code[lineno][j] in CONSUMABLES or source_code[lineno][j] == ',':
                     continue
                 else:
                     prev_char, new_lineno, new_coloffset = source_code[lineno][j], lineno, j
@@ -513,7 +523,7 @@ def _add_parens(source_code):
                 for i in range(lineno - 1, -1, -1):
                     # Search each character, right-to-left
                     for j in range(len(source_code[i]) - 1, -1, -1):
-                        if source_code[i][j] in CONSUMABLES:
+                        if source_code[i][j] in CONSUMABLES or source_code[i][j] == ',':
                             continue
                         else:
                             prev_char, new_lineno, new_coloffset = source_code[i][j], i, j
@@ -524,7 +534,7 @@ def _add_parens(source_code):
 
             if prev_char != '(':
                 # No enclosing parentheses
-                return
+                break
 
             # Now search for matching ')'
             next_char, new_end_lineno, new_end_coloffset = None, None, None
@@ -553,11 +563,16 @@ def _add_parens(source_code):
                         break
 
             if next_char != ')':
-                return
+                break
 
             # At this point, an enclosing pair of parentheses has been found
+            prev = node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
             node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset =\
                 new_lineno + 1, new_coloffset, new_end_lineno + 1, new_end_coloffset + 1
+
+        # Go back by 1 set of parentheses if inside a function call.
+        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
+            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset = prev
 
     return h
 

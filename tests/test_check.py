@@ -1,8 +1,6 @@
-"""Run from the `pyta` root directory to use the local `python_ta` rather than 
+"""Run from the `pyta` root directory to use the local `python_ta` rather than
 installed `python_ta` package.
 """
-import os
-import sys
 import python_ta
 
 def test_check_on_dir():
@@ -12,7 +10,7 @@ def test_check_on_dir():
         ['examples']
     ]
     for item in _inputs:
-        python_ta.check_all(item)
+        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
 
 def test_check_on_file():
     """Test files"""
@@ -21,10 +19,10 @@ def test_check_on_file():
         ['nodes/Dict.py', 'nodes.Const.py']
     ]
     for item in _inputs:
-        python_ta.check_all(item)
+        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
 
 def test_check_on_bad_input():
-    """Test bad inputs. In all cases, pyta should recover. 
+    """Test bad inputs. In all cases, pyta should recover.
     Any valid files, if any, should be checked.
     """
     _inputs = [
@@ -35,7 +33,7 @@ def test_check_on_bad_input():
         ['file_does_not_exist']
     ]
     for item in _inputs:
-        python_ta.check_all(item)
+        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
 
 def test_check_with_config():
     """Test inputs along with a config arg."""
@@ -49,12 +47,12 @@ def test_check_with_config():
         # [FORMAT]
         'max-line-length': 80,
         # [FORBIDDEN IMPORT]
-        'allowed-import-modules': ['doctest', 'unittest', 'hypothesis', 
+        'allowed-import-modules': ['doctest', 'unittest', 'hypothesis',
                                    'python_ta'],
         # [FORBIDDEN IO]
         'allowed-io': [],
         # [MESSAGES CONTROL]
-        'disable': ['R0401', 'R0901', 'R0903', 'R0904', 'R0911', 'R0916', 
+        'disable': ['R0401', 'R0901', 'R0903', 'R0904', 'R0911', 'R0916',
                     'W0402', 'W0403', 'W0410', 'W1501', 'W1502', 'W1505',
                     'E1300', 'E1301',  'E1302', 'E1304', 'W1300', 'W1301',
                     'W1302', 'W1304', 'E1124',  'E1125', 'E1129', 'E1132',
@@ -68,7 +66,10 @@ def test_check_with_config():
                     'newstyle', 'python3', 'W0512',  'C0403', 'C0401',
                     'C0402', 'E1701', 'E1700', 'W0332', 'C0327',  'C0328',
                     'E0202', 'E0241', 'E0704', 'W0211', 'W0232', 'W0511',
-                    'R0204', 'C0303', 'W0231']
+                    'R0204', 'C0303', 'W0231'],
+
+        # [CUSTOM PYTA OPTIONS]
+        'pyta-reporter': 'HTMLReporter'
     }
     for item in _inputs:
         python_ta.check_all(item, config=CONFIG)

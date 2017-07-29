@@ -97,6 +97,7 @@ NODES_WITH_CHILDREN = [
     astroid.YieldFrom
 ]
 
+
 # Predicate functions, for setting locations based on source code.
 # Predicates can only return a single truthy value, because of how its used in
 # `astroid/transforms.py`
@@ -116,6 +117,7 @@ def _token_search(token):
         return s[index] == token
     return _is_token
 
+
 def _keyword_search(keyword):
     """
     @type keyword: string
@@ -128,20 +130,23 @@ def _keyword_search(keyword):
         @type node: Astroid node
         @rtype: bool
         """
-        return s[index : index + len(keyword)] == keyword
+        return s[index : index+len(keyword)] == keyword
     return _is_keyword
+
 
 def _is_within_close_bracket(s, index, node):
     """Fix to include right ']'."""
-    if index >= len(s)-1:
+    if index >= len(s) - 1:
         return False
-    return s[index] == ']' or s[index+1] == ']'
+    return s[index] == ']' or s[index + 1] == ']'
+
 
 def _is_within_open_bracket(s, index, node):
     """Fix to include left '['."""
     if index < 1:
         return False
     return s[index-1] == '['
+
 
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
@@ -150,33 +155,12 @@ def _is_attr_name(s, index, node):
         return False
     return s[index-target_len+1 : index+1] == node.attrname
 
+
 def _is_arg_name(s, index, node):
     """Search for the name of the argument. Right-to-left."""
     if not node.arg:
         return False
     return s[index : index+len(node.arg)] == node.arg
-
-def find_sibling(node, astroid_class):
-    """Tree traversal helper function.
-    Return a list of sibling nodes that match class astroid_class.
-    list is empty if none found.
-    """
-    if not node:
-        return []
-    siblings = list(node.parent.get_children())
-    target_nodes = filter(lambda x: isinstance(x, astroid_class), siblings)
-    return siblings
-
-def find_child(node, astroid_class):
-    """Tree traversal helper function.
-    Return a list of child nodes that match class astroid_class.
-    list is empty if none found.
-    """
-    if not node:
-        return []
-    children = list(node.get_children())
-    target_nodes = filter(lambda x: isinstance(x, astroid_class), children)
-    return children
 
 
 # Nodes the require the source code for proper location setting
@@ -242,8 +226,13 @@ def init_register_ending_setters(source_code):
             ending_transformer.register_transform(
                 node_class, start_setter_from_source(source_code, start_pred))
         if end_pred is not None:
-            ending_transformer.register_transform(
-                node_class, end_setter_from_source(source_code, end_pred))
+            # This is for searching for a trailing comma after a tuple's final element
+            if node_class is astroid.Tuple:
+                ending_transformer.register_transform(
+                    node_class, end_setter_from_source(source_code, end_pred, True))
+            else:
+                ending_transformer.register_transform(
+                    node_class, end_setter_from_source(source_code, end_pred))
 
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
@@ -399,7 +388,7 @@ def _get_last_child(node):
         return skip_to_last_child  # postcondition: node, or None.
 
 
-def end_setter_from_source(source_code, pred):
+def end_setter_from_source(source_code, pred, only_consumables=False):
     """Returns a *function* that sets ending locations for a node from source.
 
     The basic technique is to do the following:
@@ -409,6 +398,10 @@ def end_setter_from_source(source_code, pred):
 
     pred is a function that takes a string and index and returns a bool,
     e.g. _is_close_paren
+
+    If only_consumables is True, the search halts when it reaches a non-consumable
+    character that fails pred *on the first line*.
+    TODO: really the behaviour should be the same for all lines searched for.
     """
     def set_endings_from_source(node):
         if not hasattr(node, 'end_col_offset'):
@@ -423,8 +416,9 @@ def end_setter_from_source(source_code, pred):
             if source_code[lineno][j] == '#':
                 break  # skip over comment lines
             if pred(source_code[lineno], j, node):
-                temp = node.end_col_offset
                 node.end_col_offset = j + 1
+                return
+            elif only_consumables and source_code[lineno][j] not in CONSUMABLES:
                 return
 
         # If that doesn't work, search remaining lines
@@ -434,8 +428,6 @@ def end_setter_from_source(source_code, pred):
                 if source_code[i][j] == '#':
                     break  # skip over comment lines
                 if pred(source_code[i], j, node):
-                    temp_c = node.end_col_offset
-                    temp_l = node.end_lineno
                     node.end_col_offset, node.end_lineno = j + 1, i + 1
                     return
                 # only consume inert characters.
@@ -464,7 +456,6 @@ def start_setter_from_source(source_code, pred):
         # First, search the remaining part of the current start line
         for j in range(col_offset, -1, -1):
             if pred(source_code[lineno], j, node):
-                temp = node.col_offset
                 node.col_offset = j
                 return
 
@@ -484,10 +475,7 @@ def start_setter_from_source(source_code, pred):
 
 def add_parens_to_const(source_code):
     def h(node):
-        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
-            return
-        else:
-            _add_parens(source_code)(node)
+        _add_parens(source_code)(node)
 
     return h
 
@@ -495,6 +483,7 @@ def add_parens_to_const(source_code):
 def _add_parens(source_code):
     def h(node):
         # Initialize counters. Note: fromlineno is 1-indexed.
+        prev =  node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
         while True:
             col_offset, lineno = node.col_offset, node.fromlineno - 1
             end_col_offset, end_lineno = node.end_col_offset, node.end_lineno - 1
@@ -502,7 +491,7 @@ def _add_parens(source_code):
             # First, search the remaining part of the current start line
             prev_char, new_lineno, new_coloffset = None, None, None
             for j in range(col_offset - 1, -1, -1):
-                if source_code[lineno][j] in CONSUMABLES:
+                if source_code[lineno][j] in CONSUMABLES or source_code[lineno][j] == ',':
                     continue
                 else:
                     prev_char, new_lineno, new_coloffset = source_code[lineno][j], lineno, j
@@ -513,7 +502,7 @@ def _add_parens(source_code):
                 for i in range(lineno - 1, -1, -1):
                     # Search each character, right-to-left
                     for j in range(len(source_code[i]) - 1, -1, -1):
-                        if source_code[i][j] in CONSUMABLES:
+                        if source_code[i][j] in CONSUMABLES or source_code[i][j] == ',':
                             continue
                         else:
                             prev_char, new_lineno, new_coloffset = source_code[i][j], i, j
@@ -524,7 +513,7 @@ def _add_parens(source_code):
 
             if prev_char != '(':
                 # No enclosing parentheses
-                return
+                break
 
             # Now search for matching ')'
             next_char, new_end_lineno, new_end_coloffset = None, None, None
@@ -553,11 +542,16 @@ def _add_parens(source_code):
                         break
 
             if next_char != ')':
-                return
+                break
 
             # At this point, an enclosing pair of parentheses has been found
+            prev = node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
             node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset =\
                 new_lineno + 1, new_coloffset, new_end_lineno + 1, new_end_coloffset + 1
+
+        # Go back by 1 set of parentheses if inside a function call.
+        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
+            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset = prev
 
     return h
 

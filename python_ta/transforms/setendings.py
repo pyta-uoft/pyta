@@ -97,6 +97,7 @@ NODES_WITH_CHILDREN = [
     astroid.YieldFrom
 ]
 
+
 # Predicate functions, for setting locations based on source code.
 # Predicates can only return a single truthy value, because of how its used in
 # `astroid/transforms.py`
@@ -116,6 +117,7 @@ def _token_search(token):
         return s[index] == token
     return _is_token
 
+
 def _keyword_search(keyword):
     """
     @type keyword: string
@@ -128,20 +130,23 @@ def _keyword_search(keyword):
         @type node: Astroid node
         @rtype: bool
         """
-        return s[index : index + len(keyword)] == keyword
+        return s[index : index+len(keyword)] == keyword
     return _is_keyword
+
 
 def _is_within_close_bracket(s, index, node):
     """Fix to include right ']'."""
-    if index >= len(s)-1:
+    if index >= len(s) - 1:
         return False
-    return s[index] == ']' or s[index+1] == ']'
+    return s[index] == ']' or s[index + 1] == ']'
+
 
 def _is_within_open_bracket(s, index, node):
     """Fix to include left '['."""
     if index < 1:
         return False
     return s[index-1] == '['
+
 
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
@@ -150,33 +155,12 @@ def _is_attr_name(s, index, node):
         return False
     return s[index-target_len+1 : index+1] == node.attrname
 
+
 def _is_arg_name(s, index, node):
     """Search for the name of the argument. Right-to-left."""
     if not node.arg:
         return False
     return s[index : index+len(node.arg)] == node.arg
-
-def find_sibling(node, astroid_class):
-    """Tree traversal helper function.
-    Return a list of sibling nodes that match class astroid_class.
-    list is empty if none found.
-    """
-    if not node:
-        return []
-    siblings = list(node.parent.get_children())
-    target_nodes = filter(lambda x: isinstance(x, astroid_class), siblings)
-    return siblings
-
-def find_child(node, astroid_class):
-    """Tree traversal helper function.
-    Return a list of child nodes that match class astroid_class.
-    list is empty if none found.
-    """
-    if not node:
-        return []
-    children = list(node.get_children())
-    target_nodes = filter(lambda x: isinstance(x, astroid_class), children)
-    return children
 
 
 # Nodes the require the source code for proper location setting
@@ -432,7 +416,6 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
             if source_code[lineno][j] == '#':
                 break  # skip over comment lines
             if pred(source_code[lineno], j, node):
-                temp = node.end_col_offset
                 node.end_col_offset = j + 1
                 return
             elif only_consumables and source_code[lineno][j] not in CONSUMABLES:
@@ -445,8 +428,6 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
                 if source_code[i][j] == '#':
                     break  # skip over comment lines
                 if pred(source_code[i], j, node):
-                    temp_c = node.end_col_offset
-                    temp_l = node.end_lineno
                     node.end_col_offset, node.end_lineno = j + 1, i + 1
                     return
                 # only consume inert characters.
@@ -475,7 +456,6 @@ def start_setter_from_source(source_code, pred):
         # First, search the remaining part of the current start line
         for j in range(col_offset, -1, -1):
             if pred(source_code[lineno], j, node):
-                temp = node.col_offset
                 node.col_offset = j
                 return
 
@@ -495,7 +475,6 @@ def start_setter_from_source(source_code, pred):
 
 def add_parens_to_const(source_code):
     def h(node):
-        # fix_start_attributes(node)
         _add_parens(source_code)(node)
 
     return h

@@ -1,46 +1,11 @@
-"""
-Tests for setendings.py, check `end_lineno` and `end_col_offset`
-properties are set.
-Run from /pyta/ dir: `python tests/test_setendings.py`
-"""
+"""Tests for setendings.py.
 
+Checks that `end_lineno` and `end_col_offset` node properties are set.
+"""
 import unittest
-from astroid.node_classes import NodeNG
 from python_ta.transforms.setendings import *
-from colorama import Back, Fore
 
 PATH = 'examples/ending_locations/'
-
-
-class NodeNG(object):
-    """Check `end_col_offset` and `end_lineno` properties are correctly set on
-    the nodes. Use the node method `nodes_of_class`.
-    https://github.com/PyCQA/astroid/blob/master/astroid/node_classes.py#L407
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.reset()
-
-    def reset(self):
-        """Reset between test methods (and once on init).
-        """
-        # Keep a list rather than a set, because "too many" is wrong.
-        self._props_check = []
-
-    def check_endings(self, module, node_class):
-        """Look at the nodes of a certain class, and inspect certain properties.
-        """
-        for node in module.nodes_of_class(node_class):  # generator
-            try:
-                self._props_check.append((node.fromlineno, node.end_lineno,
-                                        node.col_offset, node.end_col_offset))
-            except AttributeError:
-                # raise again to also get traceback along with message.
-                raise AttributeError('''Make sure the properties are set in
-                    setendings.py and the function is registered
-                    with ending_transformer.register_transform()''')
-        return self._props_check
 
 
 class TestEndingLocations(unittest.TestCase):
@@ -51,35 +16,6 @@ class TestEndingLocations(unittest.TestCase):
     We store the correct values as a tuple:
     (fromlineno, end_lineno, col_offset, end_col_offset)
     """
-
-    @classmethod
-    def setUpClass(self):
-        """A class method called before tests in an individual class run.
-        setUpClass is called with the class as the only argument and must be
-        decorated as a classmethod():"""
-        # Check the nodes property correctness.
-        self.nodeng = NodeNG()
-        self.maxDiff = None
-
-    def setUp(self):
-        """Method called to prepare the test fixture. This is called immediately
-        before calling the test method; other than AssertionError or SkipTest,
-        any exception raised by this method will be considered an error rather
-        than a test failure. The default implementation does nothing."""
-        pass
-
-    def tearDown(self):
-        """Method called immediately after the test method has been called and
-        the result recorded. This is called even if the test method raised an
-        exception, so the implementation in subclasses may need to be
-        particularly careful about checking internal state. Any exception,
-        other than AssertionError or SkipTest, raised by this method will be
-        considered an additional error rather than a test failure (thus
-        increasing the total number of reported errors). This method will only
-        be called if the setUp() succeeds, regardless of the outcome of the
-        test method. The default implementation does nothing."""
-        self.nodeng.reset()
-
     def get_file_as_module(self, file_location):
         """Given a filepath (file_location), parse with astroid, and return
         the module.
@@ -103,12 +39,11 @@ class TestEndingLocations(unittest.TestCase):
         """Example is either in a file, or provided as a string literal.
         """
         self.ending_transformer.visit(module)  # Apply all transforms.
-        props = self.nodeng.check_endings(module, node_class)  # Inspect parts.
-        err_str = '\n{}\n'.format('- ' * 35)
-        err_str += ' Compare: [(fromlineno, end_lineno, col_offset, end_col_offset)]\n'
-        err_str += 'Expected: {}\n'.format(Fore.GREEN + str(expected) + Fore.RESET)
-        err_str += '  Actual: {}'.format(Fore.RED + str(props) + Fore.RESET)
-        self.assertEqual(expected, props, err_str)
+        props = [(node.fromlineno, node.end_lineno,
+                  node.col_offset, node.end_col_offset)
+                 for node in module.nodes_of_class(node_class)
+        ]
+        self.assertEqual(expected, props)
 
     # def test_arguments(self):
     #     expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18)]
@@ -532,8 +467,6 @@ class TestEndingLocations(unittest.TestCase):
     #     self.set_and_check(module, astroid.Starred, expected)
 
     def test_subscript(self):
-        """
-        """
         expected = [(1, 1, 0, 4),
                     (2, 2, 0, 8),
                     (3, 3, 0, 4),

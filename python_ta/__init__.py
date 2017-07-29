@@ -26,14 +26,14 @@ from pylint.config import VALIDATORS, _call_validator
 
 from astroid import modutils
 
-from .reporters import REPORTERS, PlainReporter, ColorReporter
+from .reporters import REPORTERS
 from .patches import patch_all
 
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 # check the python version
 if sys.version_info < (3, 6, 0):
-    print('You need Python 3.6 or later to run this script')
+    print('You need Python 3.6 or later to run PythonTA.')
 
 
 def check_errors(module_name='', config='', output=None):
@@ -48,7 +48,49 @@ def check_all(module_name='', config='', output=None):
                   output=output)
 
 
-def _find_pylintrc_same_locale(curr_dir):
+def _check(module_name='', level='all', local_config='', output=None):
+    """Check a module for problems, printing a report.
+
+    The `module_name` can take several inputs:
+      - string of a directory, or file to check (`.py` extension optional).
+      - list of strings of directories or files -- can have multiple.
+      - no argument -- checks the python file containing the function call.
+    `level` is used to specify which checks should be made.
+    `local_config` is a dict of config options or string (config file name).
+    `output` is an absolute path to capture pyta data output. Default std out.
+    """
+    # Add reporters to an internal pylint data structure, for use with setting
+    # custom pyta options in a Tuple, before (re)setting reporter.
+    for reporter in REPORTERS:
+        VALIDATORS[reporter.__name__] = reporter
+    linter = reset_linter(config=local_config)
+    current_reporter = reset_reporter(linter, output)
+    patch_all()  # Monkeypatch pylint (override certain methods)
+
+    # Try to check file, issue error message for invalid files.
+    try:
+        for locations in _get_valid_files_to_check(current_reporter, module_name):
+            for file_py in get_file_paths(locations):
+                if not _verify_pre_check(file_py):
+                    continue  # Check the other files
+                # Load config file in user location. Construct new linter each
+                # time, so config options don't bleed to unintended files.
+                linter = reset_linter(config=local_config, file_linted=file_py)
+                # Assume the local config will NOT set a new reporter.
+                linter.set_reporter(current_reporter)
+                current_reporter.register_file(file_py)
+                linter.check(file_py)  # Lint !
+                current_reporter.print_messages(level)
+                current_reporter.reset_messages()  # Clear lists for any next file.
+        current_reporter.output_blob()
+        return current_reporter
+    except Exception as e:
+        print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
+        print('Error message: "{}"'.format(e))
+        raise e
+
+
+def _find_local_config(curr_dir):
     """Search for a `.pylintrc` configuration file provided in same (user)
     location as the source file to check.
     Return absolute path to the file, or None.
@@ -64,7 +106,7 @@ def _find_pylintrc_same_locale(curr_dir):
 
 
 def _load_config(linter, config_location):
-    """Load configuration into the linter (checker)."""
+    """Load configuration into the linter."""
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
@@ -82,7 +124,6 @@ def reset_linter(config=None, file_linted=None):
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
-
     # Tuple of custom options. See 'type' in pylint/config.py `VALIDATORS` dict.
     new_checker_options = (
         ('pyta-reporter',
@@ -107,7 +148,6 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/global_variables_checker',
         'python_ta/checkers/dynamic_execution_checker',
         'python_ta/checkers/IO_Function_checker',
-        # TODO: Fix this test
         'python_ta/checkers/invalid_range_index_checker',
         'python_ta/checkers/assigning_to_self_checker',
         'python_ta/checkers/always_returning_checker',
@@ -128,11 +168,12 @@ def reset_linter(config=None, file_linted=None):
         # If available, use config file at directory of the file being linted.
         pylintrc_location = None
         if file_linted:
-            pylintrc_location = _find_pylintrc_same_locale(file_linted)
+            pylintrc_location = _find_local_config(file_linted)
 
         # Otherwise, use default config file shipped with python_ta package.
         if not pylintrc_location:
-            pylintrc_location = _find_pylintrc_same_locale(os.path.dirname(__file__))
+            pylintrc_location = _find_local_config(os.path.dirname(__file__))
+
         _load_config(linter, pylintrc_location)
 
         # Override part of the default config, with a dict of config options.
@@ -141,26 +182,22 @@ def reset_linter(config=None, file_linted=None):
         if isinstance(config, dict):
             for key in config:
                 linter.global_set_option(key, config[key])
-            print('### Loaded configuration dictionary.')
 
     # The above configuration may have set the pep8 option.
     if linter.config.pyta_pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
 
-    patch_all()  # Monkeypatch pylint (override certain methods)
     return linter
 
 
 def reset_reporter(linter, output_filepath=None):
     """Initialize a reporter with config options.
+
     Output is an absolute file path to output into.
-    Cannot use ColorReporter when outputting to a file because the file cannot
-    contain colorama ascii characters -- switches to use PlainReporter."""
+    """
     # Determine the type of reporter from the config setup.
     current_reporter = _call_validator(linter.config.pyta_reporter,
                                        None, None, None)
-    if isinstance(current_reporter, ColorReporter) and output_filepath:
-        current_reporter = PlainReporter()
     current_reporter.set_output_filepath(output_filepath)
     linter.set_reporter(current_reporter)
     return current_reporter
@@ -187,7 +224,7 @@ def _verify_pre_check(filepath):
         # Check for inline "pylint:" comment, which may indicate a student
         # trying to disable a check.
         with tokenize.open(os.path.expanduser(filepath)) as f:
-            for (tok_type, content, _, _, _) in tokenize.generate_tokens(f.readline):
+            for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
                 match = pylint.utils.OPTION_RGX.search(content)
@@ -206,7 +243,7 @@ def _verify_pre_check(filepath):
     return True
 
 
-def _get_valid_files_to_check(reporter, module_name, local_config):
+def _get_valid_files_to_check(reporter, module_name):
     """A generator for all valid files to check. Uses a reporter to output
     messages when an input cannot be checked.
     """
@@ -220,7 +257,7 @@ def _get_valid_files_to_check(reporter, module_name, local_config):
         module_name = [module_name]
     # Otherwise, enforce API to expect `module_name` type as list
     elif not isinstance(module_name, list):
-        print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.\n'.format(module_name))
+        print('No checks run. Input to check, `{}`, has invalid type, must be a list of strings.'.format(module_name))
         return
 
     # Filter valid files to check
@@ -244,48 +281,6 @@ def _get_valid_files_to_check(reporter, module_name, local_config):
                 print('Could not find the file called, `{}`\n'.format(item))
         else:
             yield item  # Check other valid files.
-
-
-def _check(module_name='', level='all', local_config='', output=None):
-    """Check a module for problems, printing a report.
-
-    The `module_name` can take several inputs:
-      - string of a directory, or file to check (`.py` extension optional).
-      - list of strings of directories or files -- can have multiple.
-      - no argument -- checks the python file containing the function call.
-    `level` is used to specify which checks should be made.
-    `local_config` is a dict of config options or string (config file name).
-    `output` is an absolute path to capture pyta data output. Default std out.
-    """
-
-    # Add reporters to an internal pylint data structure, for use with setting
-    # custom pyta options in a Tuple, before (re)setting reporter.
-    for reporter in REPORTERS:
-        VALIDATORS[reporter.__name__] = reporter
-    linter = reset_linter(config=local_config)
-    current_reporter = reset_reporter(linter, output)
-
-    # Try to check file, issue error message for invalid files.
-    try:
-        for locations in _get_valid_files_to_check(current_reporter, module_name, local_config):
-            for file_py in get_file_paths(locations):
-                # Load config file in user location. Construct new linter each
-                # time, so config options don't bleed to unintended files.
-                linter = reset_linter(config=local_config, file_linted=file_py)
-                # Assume the local config will NOT set a new reporter.
-                linter.set_reporter(current_reporter)
-                current_reporter.register_file(file_py)
-                if not _verify_pre_check(file_py):
-                    continue  # Check the other files
-                linter.check(file_py)  # Lint !
-                current_reporter.print_messages(level)
-                current_reporter.reset_messages()  # Clear lists for any next file.
-        current_reporter.output_blob()
-        return current_reporter
-    except Exception as e:
-        print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
-        print('Error message: "{}"'.format(e))
-        raise e
 
 
 def doc(msg_id):

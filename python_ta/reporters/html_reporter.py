@@ -9,7 +9,7 @@ from base64 import b64encode
 from .color_reporter import ColorReporter
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-TEMPLATE_FILE = 'template.txt'
+TEMPLATE_FILE = 'template.html'
 OUTPUT_FILE = 'output.html'
 
 class HTMLReporter(ColorReporter):

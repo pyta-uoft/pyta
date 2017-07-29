@@ -59,7 +59,7 @@ class HTMLReporter(ColorReporter):
 
         # Date/time (24 hour time) format:
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
-        dt = str(datetime.now().strftime('%a. %b. %d %Y, %-I:%M:%S %p'))
+        dt = str(datetime.now().strftime('%a. %b. %d %Y, %I:%M:%S %p'))
         output_path = os.path.join(os.getcwd(), OUTPUT_FILE)
         with open(output_path, 'w') as f:
             f.write(template.render(date_time=dt,

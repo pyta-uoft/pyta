@@ -4,6 +4,5 @@ def get_power_function(power):
     return func
 
 
-if __name__ == '__main__':
-    power_func = get_power_function(10)
-    print(power_func(2))  # Prints 1024
+power_func = get_power_function(10)
+print(power_func(2))  # Prints 1024

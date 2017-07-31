@@ -280,8 +280,8 @@ class TypeInferer:
                                                             left_value.type_constraints.type,
                                                             right_value.type_constraints.type)
                 left_value = right_value
-                return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
-                                                              right_value.type_constraints.type, node))
+                return_types.add(self.type_constraints.unify_call(node, function_type, left_value.type_constraints.type,
+                                                              right_value.type_constraints.type))
         if len(return_types) == 1:
             node.type_constraints = TypeInfo(return_types.pop())
         else:

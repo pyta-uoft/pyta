@@ -146,55 +146,61 @@ class TypeConstraints:
         self._count = 0
         self._sets = []
         self._tvar_tnode = {}
+        self._concrete_tnode = {}
 
     def clear_tvars(self):
         """Resets the type constraints kept track of in the program."""
         self._count = 0
         self._sets = []
         self._tvar_tnode = {}
+        self._concrete_tnode = {}
 
     def make_set(self, value, origin_node=None):
         tn = TNode(value, origin_node)
         return tn
 
     def _find_rep(self, node: TNode):
-        while node.parent != node:
+        while node.parent is not None:
             node = node.parent
         return node
 
     def _union(self, node1: TNode, node2: TNode):
         rep1 = self._find_rep(node1)
         rep2 = self._find_rep(node2)
-        if not isinstance(rep1.type, TypeVar):
+        if isinstance(rep1.type, TypeVar) and isinstance(rep2.type, TypeVar):
             rep2.parent = rep1
-        elif not isinstance(rep2.type, TypeVar):
+        elif isinstance(rep2.type, TypeVar):
+            rep2.parent = rep1
+        elif isinstance(rep1.type, TypeVar):
             rep1.parent = rep2
-        else:
-            rep2.parent = rep1
 
     def fresh_tvar(self, node) -> TypeVar:
         """Return a fresh type variable with the node it was created in."""
         tvar = TypeVar('_T' + str(self._count))
-        tnode = TNode(tvar, node)
+        tnode = self.make_set(tvar, origin_node=node)
         self._sets.append(tnode)
-        self.make_set(tnode)
         self._tvar_tnode[tvar] = tnode
         self._count += 1
         return tvar
 
+    def add_concrete_to_sets(self, _type):
+        """Add a concrete type to the type constraints sets."""
+        tnode = self.make_set(_type)
+        self._sets.append(tnode)
+        self._concrete_tnode[_type] = tnode
+        return tnode
+
     def unify(self, t1, t2):
-        node1 = self._tvar_tnode[t1]
-        node2 = self._tvar_tnode[t2]
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            rep1 = self._find_rep(node1)
-            rep2 = self._find_rep(node2)
-            if rep1.type != rep2.type:
-                if isinstance(rep1.type, TypeVar):
-                    self._union(node2, node1)
-                else:
-                    self._union(node1, node2)
+            node1, node2 = self._tvar_tnode[t1], self._tvar_tnode[t2]
+            self._union(node1, node2)
         elif isinstance(t1, TypeVar):
-            self._union(node2, node1)
+            try:
+                node2 = self._concrete_tnode[t2]
+            except KeyError:
+                node2 = self.add_concrete_to_sets(t2)
+            node1 = self._tvar_tnode[t1]
+            self._union(node1, node2)
         elif isinstance(t2, TypeVar):
             self.unify(t2, t1)
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):

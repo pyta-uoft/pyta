@@ -236,7 +236,7 @@ class TypeConstraints:
             for elem1, elem2 in zip(tup1, tup2):
                 self.unify(elem1, elem2)
 
-    def unify_call(self, node, func_type, *arg_types):
+    def unify_call(self, func_type, *arg_types, node=None):
         """Unify a function call with the given function type and argument types.
 
         Return a result type.

@@ -235,7 +235,7 @@ class TypeInferer:
                               {arg_types}', node))
 
         try:
-            return_type = self.type_constraints.unify_call(node, func_type, *arg_types)
+            return_type = self.type_constraints.unify_call(func_type, *arg_types, node=node)
         except TypeInferenceError:
             return TypeInfo(
                 TypeErrorInfo('Bad unify_call of function {func_call} given\
@@ -280,8 +280,8 @@ class TypeInferer:
                                                             left_value.type_constraints.type,
                                                             right_value.type_constraints.type)
                 left_value = right_value
-                return_types.add(self.type_constraints.unify_call(node, function_type, left_value.type_constraints.type,
-                                                              right_value.type_constraints.type))
+                return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
+                                                              right_value.type_constraints.type, node=node))
         if len(return_types) == 1:
             node.type_constraints = TypeInfo(return_types.pop())
         else:
@@ -349,7 +349,7 @@ class TypeInferer:
             func_t = node.func.type_constraints.type
             arg_types = [self.lookup_type(node.func.expr, node.func.expr.name)]
             arg_types += [arg.type_constraints.type for arg in node.args]
-            ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
+            ret_type = self.type_constraints.unify_call(func_t, *arg_types, node=node)
             node.type_constraints = TypeInfo(ret_type)
         else:
             func_name = node.func.name
@@ -357,12 +357,12 @@ class TypeInferer:
                 func_t = self.type_constraints \
                     .lookup_concrete(node.frame().locals[func_name][0].type_environment.locals['__init__'])
                 arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
-                self.type_constraints.unify_call(node, func_t, *arg_types)
+                self.type_constraints.unify_call(func_t, *arg_types)
                 node.type_constraints = TypeInfo(_ForwardRef(func_name))
             else:
                 func_t = self.lookup_type(node, func_name)
                 arg_types = [arg.type_constraints.type for arg in node.args]
-                ret_type = self.type_constraints.unify_call(node, func_t, *arg_types)
+                ret_type = self.type_constraints.unify_call(func_t, *arg_types, node=node)
                 node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):

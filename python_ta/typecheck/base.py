@@ -133,30 +133,11 @@ def lookup_method(name, caller_type, *args):
     return TYPE_SIGNATURES[caller_origin][name]
 
 
-def make_set(node):
-    node.parent = node
-    # node.rank = 0
-
-
-def _find_rep(node):
-    while node.parent != node:
-        node = node.parent
-    return node
-
-
-def _union(node1, node2):
-    rep1 = _find_rep(node1)
-    rep2 = _find_rep(node2)
-    rep2.parent = rep1
-
-
 class TNode:
-    def __init__(self, node_type, origin_node):
+    def __init__(self, node_type, origin_node=None):
         self.type = node_type
         self.origin = origin_node
-
-    def __str__(self):
-        return self._type.__name__
+        self.parent = None
 
 
 class TypeConstraints:
@@ -172,44 +153,48 @@ class TypeConstraints:
         self._sets = []
         self._tvar_tnode = {}
 
+    def make_set(self, value, origin_node=None):
+        tn = TNode(value, origin_node)
+        return tn
+
+    def _find_rep(self, node: TNode):
+        while node.parent != node:
+            node = node.parent
+        return node
+
+    def _union(self, node1: TNode, node2: TNode):
+        rep1 = self._find_rep(node1)
+        rep2 = self._find_rep(node2)
+        if not isinstance(rep1.type, TypeVar):
+            rep2.parent = rep1
+        elif not isinstance(rep2.type, TypeVar):
+            rep1.parent = rep2
+        else:
+            rep2.parent = rep1
+
     def fresh_tvar(self, node) -> TypeVar:
         """Return a fresh type variable with the node it was created in."""
         tvar = TypeVar('_T' + str(self._count))
         tnode = TNode(tvar, node)
         self._sets.append(tnode)
-        make_set(tnode)
+        self.make_set(tnode)
         self._tvar_tnode[tvar] = tnode
         self._count += 1
         return tvar
 
-    def add_concrete_to_sets(self, _type):
-        """Add a concrete type to the type constraints sets."""
-        tnode = TNode(_type, None)
-        self._sets.append(tnode)
-        make_set(tnode)
-        self._tvar_tnode[_type] = tnode
-        self._count += 1
-        return tnode
-
     def unify(self, t1, t2):
-        try:
-            node1 = self._tvar_tnode[t1]
-        except KeyError:
-            node1 = self.add_concrete_to_sets(t1)
-        try:
-            node2 = self._tvar_tnode[t2]
-        except KeyError:
-            node2 = self.add_concrete_to_sets(t2)
+        node1 = self._tvar_tnode[t1]
+        node2 = self._tvar_tnode[t2]
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            rep1 = _find_rep(node1)
-            rep2 = _find_rep(node2)
+            rep1 = self._find_rep(node1)
+            rep2 = self._find_rep(node2)
             if rep1.type != rep2.type:
                 if isinstance(rep1.type, TypeVar):
-                    _union(node2, node1)
+                    self._union(node2, node1)
                 else:
-                    _union(node1, node2)
+                    self._union(node1, node2)
         elif isinstance(t1, TypeVar):
-            _union(node2, node1)
+            self._union(node2, node1)
         elif isinstance(t2, TypeVar):
             self.unify(t2, t1)
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
@@ -232,7 +217,7 @@ class TypeConstraints:
         elif t1 != t2:
             raise BadUnificationError(str(t1) + ' ' + str(t2))
 
-    def _unify_generic(self, t1, t2):
+    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta):
         """Unify two generic-typed nodes."""
         if not _geqv(t1, t2):
             raise TypeInferenceError('bad unify')
@@ -349,23 +334,7 @@ class TypeConstraints:
             return tvar
 
         tnode = self._tvar_tnode[tvar]
-        return _find_rep(tnode).type
-        #
-        # rep = None
-        # for t in the_set:
-        #     if rep is None:
-        #         rep = t
-        #     elif not _type_vars([t]):
-        #         rep = t
-        #     elif (isinstance(t, CallableMeta) or isinstance(t, TuplePlus) or isinstance(t, GenericMeta)) and isinstance(rep, TypeVar):
-        #         rep = t
-        #
-        # if isinstance(rep, CallableMeta):
-        #     return _gorg(rep)[[self.lookup_concrete(t1) for t1 in rep.__args__[:-1]],
-        #                       self.lookup_concrete(rep.__args__[-1])]
-        # elif isinstance(rep, GenericMeta):
-        #     return _gorg(rep)[tuple(self.lookup_concrete(t1) for t1 in rep.__args__)]
-        # return rep or tvar
+        return self._find_rep(tnode).type
 
     ### HELPER METHODS
     def types_in_callable(self, callable_function):

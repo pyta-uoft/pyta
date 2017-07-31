@@ -313,8 +313,6 @@ class TypeInferer:
                     self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
                 elif isinstance(target_node, astroid.AssignAttr):
                     # every Assign node will have a single Name node associated with it
-                    attr_type = self.type_constraints.lookup_concrete(
-                        self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname))
                     attr_type = self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname)
                     self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
         node.type_constraints = TypeInfo(NoType)

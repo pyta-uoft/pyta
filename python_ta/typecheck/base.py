@@ -142,14 +142,12 @@ class TypeConstraints:
         self._count = 0
         self._sets = []
         self._tvar_tnode = {}
-        self._concrete_tnode = {}
 
     def clear_tvars(self):
         """Resets the type constraints kept track of in the program."""
         self._count = 0
         self._sets = []
         self._tvar_tnode = {}
-        self._concrete_tnode = {}
 
     def make_set(self, value, origin_node=None):
         tn = TNode(value, origin_node)
@@ -183,7 +181,6 @@ class TypeConstraints:
         """Add a concrete type to the type constraints sets."""
         tnode = self.make_set(_type)
         self._sets.append(tnode)
-        self._concrete_tnode[_type] = tnode
         return tnode
 
     def unify(self, t1, t2):
@@ -191,9 +188,11 @@ class TypeConstraints:
             node1, node2 = self._tvar_tnode[t1], self._tvar_tnode[t2]
             self._union(node1, node2)
         elif isinstance(t1, TypeVar):
-            try:
-                node2 = self._concrete_tnode[t2]
-            except KeyError:
+            node2 = None
+            for tn in self._sets:
+                if tn.type == t2:
+                    node2 = tn
+            if not node2:
                 node2 = self.add_concrete_to_sets(t2)
             node1 = self._tvar_tnode[t1]
             self._union(node1, node2)

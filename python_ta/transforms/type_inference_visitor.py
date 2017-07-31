@@ -280,8 +280,8 @@ class TypeInferer:
                                                             left_value.type_constraints.type,
                                                             right_value.type_constraints.type)
                 left_value = right_value
-                return_types.add(self.type_constraints.unify_call(node, function_type, left_value.type_constraints.type,
-                                                              right_value.type_constraints.type))
+                return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
+                                                              right_value.type_constraints.type, node))
         if len(return_types) == 1:
             node.type_constraints = TypeInfo(return_types.pop())
         else:
@@ -337,10 +337,10 @@ class TypeInferer:
                 self.type_constraints.unify(arg_types[0], _ForwardRef(node.parent.name), node)
 
             # check if return nodes exist; there is a return statement in function body.
+            polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
             if len(list(node.nodes_of_class(astroid.Return))) == 0:
-                func_type = Callable[arg_types, None]
+                func_type = create_Callable(arg_types, None, polymorphic_tvars)
             else:
-                polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
                 rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
                 func_type = create_Callable(arg_types, rtype, polymorphic_tvars)
             self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)

@@ -19,12 +19,12 @@
                     <h2> {{ file.filename }} </h2>
                 </article>
                 <article class="error-output code-errors">
-                    <h2 class="category-heading">
+                    <h3 class="category-heading">
                         <span>{{ reporter.code_err_title }}</span>
                         <span class="slider">
                             <button>Expand/Collapse Section</button>
                         </span>
-                    </h2>
+                    </h3>
                     <div class="content collapsible">
                         {% for message in file.code %}
                         <div class="error-instance">
@@ -51,7 +51,7 @@
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                     </h4>
                                     {% if indiv.snippet != '' %}
-                                    <pre>{{ indiv.snippet }}</pre>
+                                    <code class="language-python">{{ indiv.snippet }}</code>
                                     {% else %}
                                     <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                     {% endif %}
@@ -65,12 +65,12 @@
                     </div>
                 </article>
                 <article class="error-output style-errors">
-                    <h2 class="category-heading">
+                    <h3 class="category-heading">
                         <span>{{ reporter.style_err_title }}</span>
                         <span class="slider">
                             <button>Expand/Collapse Section</button>
                         </span>
-                    </h2>
+                    </h3>
                     <div class="content collapsible">
                         {% for message in file.style %}
                         <div class="error-instance">
@@ -99,7 +99,7 @@
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                     </h4>
                                     {% if indiv.snippet != '' %}
-                                    <pre>{{ indiv.snippet }}</pre>
+                                    <code class="language-python">{{ indiv.snippet }}</code>
                                     {% else %}
                                     <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                     {% endif %}

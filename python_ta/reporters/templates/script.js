@@ -1,3 +1,3 @@
 $("body").on("click", ".slider", function () {
-    $(this).parent().next().slideToggle(500, function () {});
+    $(this).parent().next().toggleClass("hide-and-maintain-width");
 });

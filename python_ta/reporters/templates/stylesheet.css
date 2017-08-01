@@ -1,4 +1,5 @@
 body {
+    margin: 0;
 	font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Helvetica,Ubuntu,Arial,sans-serif;
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
@@ -12,6 +13,11 @@ header {
     -webkit-font-smoothing: antialiased;
     color: #fff;
     text-align: center;
+}
+
+code {
+    white-space: pre;
+    font-size: 120%;
 }
 
 .title {
@@ -31,6 +37,7 @@ time {
 
 main {
     display: grid;
+    overflow: auto;
 }
 
 section {
@@ -39,44 +46,48 @@ section {
 	display: inline-block;
 	font-size: 12px;
 	min-width: 50%;
-	background: rgb(219, 219, 219);
+	background: rgba(234, 233, 233, 0.25);
     box-shadow: -1px 9px 15px -5px rgba(77,77,77,0.6);
 }
 
 .file-name {
     display: flex;
     padding: 0 15px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0px 1px 2px black;
     background: #141E30;
-    background: linear-gradient(to right, #243B55, #141E30);
-    background: -webkit-linear-gradient(left, #243B55, #141E30);
+    background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
+    background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
 }
 
 .error-output {
-    padding: 0 15px 15px 15px;
+    padding: 0 15px;
 }
 
 .code-errors {
 }
 
 .style-errors {
-    border-top: 3px solid rgba(0,0,0,.2);
+    border-top: 3px solid rgba(255, 255, 255, 0.25);
 }
 
 .category-heading {
     display: flex;  /*Narrow width viewports*/
+    -webkit-font-smoothing: antialiased;
+    color: white;
 }
 
 .error-instance {
     display: grid;
     background: #fff;
-    padding: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1), 0 4px 7px rgba(0, 0, 0, 0.1);
+    padding: 8px 16px;
     margin-bottom: 5px;
     border-radius: 3px;
 }
 
 .error-link {
-    vertical-align: middle;
+    /*vertical-align: middle;*/
 }
 
 .error-link a {
@@ -106,10 +117,6 @@ section {
 .style-error-id a:link {
 }
 
-pre {
-    font-size: 120%;
-}
-
 .line-num {
     font-size: 80%;
     opacity: 0.6;
@@ -126,7 +133,8 @@ pre {
 
 .highlight {
     font-weight: bold;
-    background-color: rgba(228, 255, 0, 0.45);
+    background-color: rgba(228, 255, 0, 0.45) !important;
+    background: rgba(228, 255, 0, 0.45) !important;
 }
 
 .black {
@@ -137,6 +145,15 @@ pre {
     text-align: center;
 	font-size: 75%;
 	padding: 20px;
+}
+#report-bug a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+#report-bug a:hover {
+    text-decoration: underline;
 }
 
 #logo {
@@ -181,12 +198,21 @@ pre {
     /*width: 100%;*/
 }
 
+/*display none caused width of parent to shrink when longer text messages are hidden*/
+.collapsible.hide-and-maintain-width {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
 .content {
+    margin-bottom: 15px;
 }
 
 .message-container{
-    border-top: 1px solid rgba(0, 0, 0, 0.2);
-    margin-top: 5px;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    margin: 8px 0;
 }
 
 .message-name {
@@ -196,4 +222,11 @@ pre {
 .empty-placeholder {
     font-style: italic;
     padding-left: 20px;
+}
+
+footer {
+    background: #2d3441;
+    color: white;
+    padding: 30px;
+    margin-top: 40px;
 }

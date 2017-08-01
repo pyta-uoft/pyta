@@ -13,17 +13,17 @@ TEMPLATE_FILE = 'template.html'
 OUTPUT_FILE = 'output.html'
 
 class HTMLReporter(ColorReporter):
-    _COLOURING = {'black': '<span class="black">',
+    _COLOURING = {'black': '<span class="black syntax-python">',
                   'black-line': '<span class="black line-num">',
                   'bold': '<span>',
                   'code-heading': '<span>',
                   'style-heading': '<span>',
                   'code-name': '<span>',
                   'style-name': '<span>',
-                  'highlight': '<span class="highlight">',
-                  'grey': '<span class="grey">',
+                  'highlight': '<span class="highlight syntax-python">',
+                  'grey': '<span class="grey syntax-python">',
                   'grey-line': '<span class="grey line-num">',
-                  'gbold': '<span class="gbold">',
+                  'gbold': '<span class="gbold syntax-python">',
                   'gbold-line': '<span class="gbold line-num">',
                   'reset': '</span>'}
     code_err_title = 'Code Errors or Forbidden Usage (fix: high priority)'

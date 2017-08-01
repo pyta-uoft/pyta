@@ -13,9 +13,8 @@ TEMPLATE_FILE = 'template.html'
 OUTPUT_FILE = 'output.html'
 
 class HTMLReporter(ColorReporter):
-    _SPACE = '&nbsp;'
-    _BREAK = '<br/>'
     _COLOURING = {'black': '<span class="black">',
+                  'black-line': '<span class="black line-num">',
                   'bold': '<span>',
                   'code-heading': '<span>',
                   'style-heading': '<span>',
@@ -23,7 +22,9 @@ class HTMLReporter(ColorReporter):
                   'style-name': '<span>',
                   'highlight': '<span class="highlight">',
                   'grey': '<span class="grey">',
+                  'grey-line': '<span class="grey line-num">',
                   'gbold': '<span class="gbold">',
+                  'gbold-line': '<span class="gbold line-num">',
                   'reset': '</span>'}
     code_err_title = 'Code Errors or Forbidden Usage (fix: high priority)'
     style_err_title = 'Style or Convention Errors (fix: before submission)'

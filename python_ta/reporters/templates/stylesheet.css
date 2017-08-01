@@ -64,6 +64,7 @@ section {
 }
 
 .category-heading {
+    display: flex;  /*Narrow width viewports*/
 }
 
 .error-instance {
@@ -109,6 +110,11 @@ pre {
     font-size: 120%;
 }
 
+.line-num {
+    font-size: 80%;
+    opacity: 0.6;
+}
+
 .grey {
     color: rgb(119, 119, 120);
 }
@@ -147,10 +153,11 @@ pre {
 
 .info {
     font-size: 110%;
+    display: flex;  /*Narrow width viewports*/
 }
 
 .slider {
-    float: right;
+    margin-left: auto;
 }
 
 .slider button {
@@ -171,7 +178,7 @@ pre {
 }
 
 .collapsible {
-    width: 100%;
+    /*width: 100%;*/
 }
 
 .content {

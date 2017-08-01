@@ -33,7 +33,12 @@
                                     <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">&#10064; {{ message }} ({{ file.code[message][0].symbol }})</a>
                                 </span>
                                 <span class="occurrences">
-                                {{ file.code[message]|length }} occurrences.
+                                {{ file.code[message]|length }}
+                                {% if file.code[message]|length == 1 %}
+                                 occurrence.
+                                {% else %}
+                                 occurrences.
+                                {% endif %}
                                 </span>
                                 <span class="slider">
                                     <button> Expand/Collapse </button>
@@ -75,7 +80,12 @@
                                     <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">&#10064; {{ message }} ({{ file.style[message][0].symbol }})</a>
                                 </span>
                                 <span class="occurrences">
-                                {{ file.style[message]|length }} occurrences.
+                                {{ file.style[message]|length }}
+                                {% if file.style[message]|length == 1 %}
+                                 occurrence.
+                                {% else %}
+                                 occurrences.
+                                {% endif %}
                                 </span>
                                 <span class="slider">
                                    <button> Expand/Collapse </button>

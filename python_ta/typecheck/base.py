@@ -188,12 +188,7 @@ class TypeConstraints:
             node1, node2 = self._tvar_tnode[t1], self._tvar_tnode[t2]
             self._union(node1, node2)
         elif isinstance(t1, TypeVar):
-            node2 = None
-            for tn in self._sets:
-                if tn.type == t2:
-                    node2 = tn
-            if not node2:
-                node2 = self.add_concrete_to_sets(t2)
+            node2 = self.add_concrete_to_sets(t2)
             node1 = self._tvar_tnode[t1]
             self._union(node1, node2)
         elif isinstance(t2, TypeVar):

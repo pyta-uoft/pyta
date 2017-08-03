@@ -297,8 +297,6 @@ class PlainReporter(BaseReporter):
         elif linetype == LineType.OTHER:
             return spaces + self._colourify('grey-line', number) + spaces
         elif linetype == LineType.DOCSTRING:
-            # import sys
-            # sys.exit()
             return spaces + self._colourify('black-line', number) + spaces
         else:
             return spaces + number + spaces
@@ -313,3 +311,8 @@ class PlainReporter(BaseReporter):
         """Override in reporters that output collections of messages once at
         the end of linting all files, rather than stream to std.out"""
         pass
+
+    @classmethod
+    def _vendor_wrap(self, colour_class, text):
+        """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
+        return text

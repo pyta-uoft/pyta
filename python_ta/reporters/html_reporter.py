@@ -6,6 +6,10 @@ from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from base64 import b64encode
 
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
 from .color_reporter import ColorReporter
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -20,7 +24,7 @@ class HTMLReporter(ColorReporter):
                   'style-heading': '<span>',
                   'code-name': '<span>',
                   'style-name': '<span>',
-                  'highlight': '<span class="highlight">',
+                  'highlight': '<span class="highlight-pyta">',
                   'grey': '<span class="grey">',
                   'grey-line': '<span class="grey line-num">',
                   'gbold': '<span class="gbold">',
@@ -69,5 +73,13 @@ class HTMLReporter(ColorReporter):
         print('Opening your report in a browser...')
         output_url = 'file:///{}'.format(output_path)
         webbrowser.open(output_url)
+
+    @classmethod
+    def _vendor_wrap(self, colour_class, text):
+        """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
+        if '-line' not in colour_class:
+            text = highlight(text, PythonLexer(),
+                            HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-'))
+        return text
 
     _display = None

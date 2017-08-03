@@ -51,7 +51,7 @@
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                     </h4>
                                     {% if indiv.snippet != '' %}
-                                    <code class="language-python">{{ indiv.snippet }}</code>
+                                    <code>{{ indiv.snippet }}</code>
                                     {% else %}
                                     <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                     {% endif %}
@@ -99,7 +99,7 @@
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                     </h4>
                                     {% if indiv.snippet != '' %}
-                                    <code class="language-python">{{ indiv.snippet }}</code>
+                                    <code>{{ indiv.snippet }}</code>
                                     {% else %}
                                     <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                     {% endif %}

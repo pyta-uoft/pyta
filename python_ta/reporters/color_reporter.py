@@ -1,4 +1,7 @@
 import sys
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
 from colorama import Fore, Style, Back, init
 from .plain_reporter import PlainReporter
 
@@ -44,6 +47,8 @@ class ColorReporter(PlainReporter):
         space_count = len(text) - len(new_text)
         if cls._SPACE != ' ':
             new_text = new_text.replace(' ', cls._SPACE)
+        if '-line' not in colour_class:
+            new_text = highlight(new_text, PythonLexer(), HtmlFormatter(nowrap=True, lineseparator=''))
         return ((space_count * cls._SPACE) + colour + new_text +
                 cls._COLOURING['reset'])
 

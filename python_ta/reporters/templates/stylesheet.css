@@ -133,9 +133,7 @@ section {
 
 .highlight-pyta {
     font-weight: bold;
-    border: 1px solid #FF0000;
-    background-color: rgba(228, 255, 0, 0.45) !important;
-    background: rgba(228, 255, 0, 0.45) !important;
+    background: rgba(228, 255, 0, 0.4) !important;
 }
 
 .black {
@@ -164,7 +162,7 @@ section {
     padding-top: 10px;
 }
 
-.occurrences {
+.occurrences, .shown {
     line-height: 25px;
     padding-left: 20px;
     vertical-align: middle;

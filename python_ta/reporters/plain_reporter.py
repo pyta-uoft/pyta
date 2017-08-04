@@ -117,9 +117,15 @@ class PlainReporter(BaseReporter):
 
     def sort_messages(self):
         """Sort the messages by their type (message id)."""
+
+        # max_messages = self.linter.config.pyta_number_of_messages
+
         for msg in self._error_messages:
+            # if len(self._sorted_error_messages[msg.msg_id]) < max_messages:
             self._sorted_error_messages[msg.msg_id].append(msg)
+
         for msg in self._style_messages:
+            # if len(self._sorted_style_messages[msg.msg_id]) < max_messages:
             self._sorted_style_messages[msg.msg_id].append(msg)
 
     def set_output_filepath(self, output_filepath_arg):

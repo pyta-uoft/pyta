@@ -40,38 +40,19 @@ class HTMLReporter(ColorReporter):
     def _messages_shown(self, sorted_messages):
         """Trim the amount of messages according to the default number.
         Add information about the number of occurrences vs number shown."""
-
         max_messages = self.linter.config.pyta_number_of_messages
-
         MessageSet = namedtuple('MessageSet', 'shown occurrences messages')
         ret_sorted = defaultdict()
         for message_key in sorted_messages:
-            message_i_instances = []
+            message_list = []
             for message_tuple_i in sorted_messages[message_key]:
                 # Limit the number of messages shown
-                if len(message_i_instances) < max_messages:
-                    message_i_instances.append(message_tuple_i)
-            ret_sorted[message_key] = MessageSet(shown=len(message_i_instances),
+                if len(message_list) < max_messages:
+                    message_list.append(message_tuple_i)
+            ret_sorted[message_key] = MessageSet(shown=len(message_list),
                                                  occurrences=len(sorted_messages[message_key]),
-                                                 messages=message_i_instances)
+                                                 messages=message_list)
         return dict(ret_sorted)
-
-
-
-        # for msg in self._error_messages:
-        #     if len(self._sorted_error_messages[msg.msg_id]) < max_messages:
-        #         self._sorted_error_messages[msg.msg_id].append(msg)
-        #
-        # for msg in self._style_messages:
-        #     if len(self._sorted_style_messages[msg.msg_id]) < max_messages:
-        #         self._sorted_style_messages[msg.msg_id].append(msg)
-
-
-
-        # MessageSet(shown=max_messages,
-        #            occurances=len(sorted_messages),
-        #            sorted_messages=ret_sorted)
-
 
     # Override this method
     def print_messages(self, level='all'):
@@ -97,10 +78,6 @@ class HTMLReporter(ColorReporter):
         with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
             # Encode img binary to base64 (+33% size), decode to remove the "b'"
             pyta_logo_base64_encoded = b64encode(image_file.read()).decode()
-
-        # Set the max number of messages
-        # max_messages = self.linter.config.pyta_number_of_messages
-        # trim_dict = {key: val for i, (key, val) in enumerate(self.messages_by_file.items()) if i < max_messages}
 
         # Date/time (24 hour time) format:
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec

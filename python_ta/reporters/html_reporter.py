@@ -40,14 +40,13 @@ class HTMLReporter(ColorReporter):
     def _messages_shown(self, sorted_messages):
         """Trim the amount of messages according to the default number.
         Add information about the number of occurrences vs number shown."""
-        max_messages = self.linter.config.pyta_number_of_messages
         MessageSet = namedtuple('MessageSet', 'shown occurrences messages')
         ret_sorted = defaultdict()
         for message_key in sorted_messages:
             message_list = []
             for message_tuple_i in sorted_messages[message_key]:
                 # Limit the number of messages shown
-                if len(message_list) < max_messages:
+                if len(message_list) < self.linter.config.pyta_number_of_messages:
                     message_list.append(message_tuple_i)
             ret_sorted[message_key] = MessageSet(shown=len(message_list),
                                                  occurrences=len(sorted_messages[message_key]),

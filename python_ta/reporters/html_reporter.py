@@ -9,8 +9,6 @@ from base64 import b64encode
 from .color_reporter import ColorReporter
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-TEMPLATE_FILE = 'template.html'
-OUTPUT_FILE = 'output.html'
 
 class HTMLReporter(ColorReporter):
     _SPACE = '&nbsp;'
@@ -49,8 +47,8 @@ class HTMLReporter(ColorReporter):
 
     def output_blob(self):
         """Output to the template after all messages."""
-
-        template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(TEMPLATE_FILE)
+        template_f = self.linter.config.pyta_template_file
+        template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(template_f)
 
         # Embed resources so the output html can go anywhere, independent of assets.
         with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
@@ -60,7 +58,7 @@ class HTMLReporter(ColorReporter):
         # Date/time (24 hour time) format:
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
         dt = str(datetime.now().strftime('%a. %b. %d %Y, %I:%M:%S %p'))
-        output_path = os.path.join(os.getcwd(), OUTPUT_FILE)
+        output_path = os.path.join(os.getcwd(), self.linter.config.pyta_output_file)
         with open(output_path, 'w') as f:
             f.write(template.render(date_time=dt,
                                     pyta_logo=pyta_logo_base64_encoded,

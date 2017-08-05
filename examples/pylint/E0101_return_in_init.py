@@ -4,11 +4,6 @@ class Animal:
     === Public Attributes ===
     @type name: str
     """
-    def __init__(self, name):
-        """
-        @type self: Animal
-        @type name: str
-        @rtype: None
-        """
+    def __init__(self: Animal, name: str) -> None:
         self.name = name
         return True  # Error on this line

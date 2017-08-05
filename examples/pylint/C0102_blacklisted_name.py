@@ -1,7 +1,3 @@
-def pos(obj):
-    """
-    @type obj: int
-    @rtype: bool
-    """
+def pos(obj: int) -> bool:
     foo = obj
     return foo < 0

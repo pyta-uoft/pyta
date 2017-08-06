@@ -1,2 +1,3 @@
-foo = 'tests'
-foo.lstrip('java')  # Error on this line
+filename = 'attachment.data'
+basename = filename.strip('data')  # Error on this line
+print(basename)  # Prints 'chment.'

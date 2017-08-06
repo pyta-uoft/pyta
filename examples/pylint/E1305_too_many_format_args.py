@@ -3,5 +3,5 @@ age = '17'
 country = 'England'
 city = 'London'
 
-# too many arguments for the format string:
+# Error on the following line
 s = '{} who is {} lives in {}'.format(name, age, country, city)

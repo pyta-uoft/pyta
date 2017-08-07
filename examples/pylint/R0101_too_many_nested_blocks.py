@@ -1,3 +1,5 @@
+from typing import Any, List
+
 def cross_join(x_list, y_list, z_list):
     """Perform an all-by-all join of all elements in the input lists,
     skipping elements which are None.

@@ -106,7 +106,7 @@ def test_nested_annotated_function_conflicting_body():
     assert functiondef_type.msg == expected_msg
 
 
-def test_annotated_functiondef_conflicting_return_type_none():
+def test_annotated_functiondef_conflicting_return_type():
     """ User defines an annotated function with type errors in it's body;
     a discrepancy in annotated return type versus return type in it's body.
     """

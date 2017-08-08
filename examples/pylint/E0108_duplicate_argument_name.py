@@ -1,6 +1,6 @@
-from typing import Any, List
+from typing import List
 
-def add(lst: List[Any], lst: List[Any]):
+def add(lst: List[int], lst: List[int]) -> int:
     temp = 0
     for item in lst:
         temp += item

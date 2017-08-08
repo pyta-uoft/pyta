@@ -1,4 +1,4 @@
 class MyClass:
     def __init__(self) -> None:
         print(self.a)  # Haven't defined `self.a` yet, can't use
-        self.a: int = 5
+        self.a = 5

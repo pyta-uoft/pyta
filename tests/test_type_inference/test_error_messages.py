@@ -18,5 +18,22 @@ def test_bad_attribute_access():
     assert call_node.type_constraints.type.msg == expected_msg
 
 
+def test_builtin_method_call_bad_self():
+    """ User tries to call a method on an object of the wrong type (self).
+    """
+    program = f'x = 1\n' \
+              f'x.append(1.0)\n'
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    expected_msg = "In the Call node in line 2, when calling the method "append":\
+                    this function expects to be called on an object of the class List, but was called on an object of\
+                    inferred type int."
+                   	# TODO: class versus type
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
+
+
+
 if __name__ == '__main__':
     nose.main()

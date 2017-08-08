@@ -3,5 +3,4 @@ class MyClass:
         self._num = 42
 
 c = MyClass()
-# Should not be accssing the protected attribute:
-print(c._num)
+print(c._num)  # Error on this line: access of protected member `c._num`

@@ -1,7 +1,8 @@
-def dynamic_execution(name):
-    """Append in front of string 'name'"""
-    eval('hello, my name is ' + name)
+def get_power_function(power):
+    """Return a function which takes its argument to the <power>th power."""
+    func = eval("lambda x: x ** {}".format(power))
+    return func
 
-if __name__ == '__main__':
-    dynamic_execution('hayley')
 
+power_func = get_power_function(10)
+print(power_func(2))  # Prints 1024

@@ -122,5 +122,23 @@ def test_annotated_functiondef_conflicting_return_type():
     assert functiondef_type.msg == expected_msg
 
 
+def test_conflicting_inferred_type_variable():
+    """ User calls two functions on an object, which contradicts the inferred type of the variable.
+    """
+    program = f'def return_num(num: int) -> int:\n' \
+              f'    return num\n' \
+              f'\n' \
+              f'def return_str(str: str) -> str:\n' \
+              f'    return str\n' \
+              f'\n' \
+              f'return_num(x)\n' \
+              f'return_str(x)\n'
+    module, inferer = cs._parse_text(program)
+    call_node = list(module.nodes_of_class(astroid.Call))[1]
+    expected_msg = "In the Call node in line 8, there was an error in calling the annotated function "return_str":\
+                     in parameter (1), the annotated type is str but was given an object of inferred type int."
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
 if __name__ == '__main__':
     nose.main()

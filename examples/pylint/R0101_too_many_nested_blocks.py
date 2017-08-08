@@ -1,10 +1,9 @@
-from typing import List, Tuple, TypeVar, Union
+from typing import List, Tuple, TypeVar, Optional
 
 T = TypeVar('T')
-TN = Union[T, None]
 
-def cross_join(x_list: List[TN], y_list: List[TN],
-               z_list: List[TN]) -> List[Tuple[T, T, T]]:
+def cross_join(x_list: List[Optional[T]], y_list: List[Optional[T]],
+               z_list: List[Optional[T]]) -> List[Tuple[T, T, T]]:
     """Perform an all-by-all join of all elements in the input lists.
 
     Note: This function skips elements which are None.

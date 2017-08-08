@@ -45,6 +45,39 @@ def test_builtin_method_call_bad_argument():
     assert call_node.type_constraints.type.msg == expected_msg
 
 
+def test_non_annotated_function_call_bad_arguments():
+    """ User tries to call a non-annotated function on arguments of the wrong type.
+    """
+    program = f'def add_num(num1, num2):\n' \
+              f'    return num1 + num2\n' \
+              f'\n' \
+              f'add_num("bob", 1.0)\n'
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    expected_msg = "In the Call node in line 4, there was an error in calling the function "add_num":\
+                     in parameter (1), the function was expecting an object of inferred type' \
+                     int but was given an object of type str' \
+                     in parameter (1), the function was expecting an object of inferred type' \
+                     int but was given an object of type float"
+                     # TODO: should we use the term inferred?
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
+def test_user_defined_annotated_call_wrong_arguments_type():
+    """ User tries to call an annotated user-defined function on the wrongly-typed arguments.
+    """
+    program = f'def add_3(num1: int, num2: int, num3: int) -> int:\n' \
+              f'    return num1 + num2 + num3\n' \
+              f'\n' \
+              f'add_3(1, "bob", 1.0)\n'
+    module, inferer = cs._parse_text(program)
+    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    expected_msg = "In the Call node in line 4, there was an error in calling the annotated function "add_3":\
+                     in parameter (2), the annotated type is int but was given an object of type str' \
+                     in parameter (3), the annotated type is int but was given an object of type float"
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
 
 
 

@@ -14,7 +14,7 @@ def test_bad_attribute_access():
     call_node = next(module.nodes_of_class(astroid.Call))
     expected_msg = "Attribute access error!\
     				In the Attribute node in line 2:\
-    					the object "x" does not have the attribute "wrong_name"."
+    				the object "x" does not have the attribute "wrong_name"."
     assert call_node.type_constraints.type.msg == expected_msg
 
 

@@ -1,3 +1,3 @@
-from sys import byteorder  # same packages should be grouped
+from sys import byteorder  # Same packages should be grouped
 from math import floor
-from sys import stdin  # same packages should be grouped
+from sys import stdin  # Same packages should be grouped

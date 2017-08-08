@@ -1,3 +1,3 @@
 def pos(obj: int) -> bool:
-    foo = obj
+    foo = obj  # Error on this line: Blacklisted name 'foo'
     return foo < 0

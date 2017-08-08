@@ -1,9 +1,11 @@
-def statement(arg):
-    """Dummy function to demonstrate an example within too_many_statements()"""
+from typing import Any
+
+def statement(arg: Any) -> None:
+    """Dummy function to demonstrate an example within too_many_statements()."""
     pass
 
 
-def too_many_statements(arg):
+def too_many_statements(arg: bool) -> None:
     """There are too many statements in this function."""
     statement_1 = 1
     statement_2 = 2

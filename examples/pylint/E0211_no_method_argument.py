@@ -1,6 +1,6 @@
 class MyClass:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def method():
+    def method() -> None:
         print('Missing argument for method definition')

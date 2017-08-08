@@ -1,1 +1,1 @@
-import re  # Module imported, and not used.
+import re  # Module imported, but not used

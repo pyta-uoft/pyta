@@ -1,2 +1,2 @@
-def raise_bad():
+def raise_bad() -> None:
     raise 1

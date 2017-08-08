@@ -1,8 +1,13 @@
-from typing import Any, List
+from typing import List, Tuple, TypeVar, Union
 
-def cross_join(x_list, y_list, z_list):
-    """Perform an all-by-all join of all elements in the input lists,
-    skipping elements which are None.
+T = TypeVar('T')
+TN = Union[T, None]
+
+def cross_join(x_list: List[TN], y_list: List[TN],
+               z_list: List[TN]) -> List[Tuple[T, T, T]]:
+    """Perform an all-by-all join of all elements in the input lists.
+
+    Note: This function skips elements which are None.
     """
     cross_join_list = []
     for x in x_list:  # Error on this line: "Too many nested blocks"

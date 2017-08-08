@@ -1,4 +1,4 @@
-def func(num):
+def func(num: float) -> None:
     try:
         raise ZeroDivisionError()
     except Exception:

@@ -1,2 +1,2 @@
-def fun(x, y, z):  # Unused argument 'z'
+def fun(x: float, y: float, z: float) -> float:  # Unused argument 'z'
     return x + y

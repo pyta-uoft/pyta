@@ -1,2 +1,2 @@
 import math
-import math  # importing a module twice
+import math  # Importing a module twice

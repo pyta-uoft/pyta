@@ -1,4 +1,4 @@
-def too_many_locals():
+def too_many_locals() -> None:
     """Example function that has to many local variables."""
     local_variable_1 = 1
     local_variable_2 = 2

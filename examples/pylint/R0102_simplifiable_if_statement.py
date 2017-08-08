@@ -1,5 +1,5 @@
 def is_even(num: int) -> bool:
-    """Return `True` if <num> is even, else `False`."""
+    """Return whether <num> is even."""
     if num % 2 == 0:
         return True
     else:

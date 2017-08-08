@@ -6,10 +6,10 @@ class MyDoubleException(Exception):
     pass
 
 
-def binary_capture():
+def binary_capture() -> None:
     try:
         # Not caught. 'or' doesn't do what you think.
         # Need to do: except (MyException, MyDoubleException):
         raise MyDoubleException()
     except MyException or MyDoubleException:
-            print('Will not detect MyDoubleException due to how "or" works')
+        print('Will not detect MyDoubleException due to how "or" works')

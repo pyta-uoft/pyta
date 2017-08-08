@@ -13,7 +13,7 @@ def test_bad_attribute_access():
     module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
     expected_msg = "Attribute access error!\
-    				In the Attribute node in line (2):\
+    				In the Attribute node in line 2:\
     					the object "x" does not have the attribute "wrong_name"."
     assert call_node.type_constraints.type.msg == expected_msg
 
@@ -78,7 +78,18 @@ def test_user_defined_annotated_call_wrong_arguments_type():
     assert call_node.type_constraints.type.msg == expected_msg
 
 
-
+def test_user_defined_annotated_call_wrong_arguments_number():
+    """ User tries to call an annotated function on the wrong number of arguments.
+    """
+    program = f'def add_3(num1: int, num2: int, num3: int) -> int:\n' \
+              f'    return num1 + num2 + num3\n' \
+              f'\n' \
+              f'add_3()\n'
+    module, inferer = cs._parse_text(program)
+    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    expected_msg = "In the Call node in line 4, there was an error in calling the function "add_3":\
+                    the function was expecting 3 arguments, but was given 0."
+    assert call_node.type_constraints.type.msg == expected_msg
 
 
 if __name__ == '__main__':

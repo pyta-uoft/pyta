@@ -32,6 +32,19 @@ def test_builtin_method_call_bad_self():
     assert call_node.type_constraints.type.msg == expected_msg
 
 
+def test_builtin_method_call_bad_argument():
+    """ User tries to call a method on an argument of the wrong type.
+    """
+    program = f'x = 1\n' \
+              f'x.extend(1)\n'
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    expected_msg = "In the Call node in line 2, when calling the method "extend":\
+                    in parameter (1), the function was expecting an object of type iterable \
+                    but was given an object of type int"
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
 
 
 

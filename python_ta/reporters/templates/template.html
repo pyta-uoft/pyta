@@ -8,20 +8,20 @@
             {% include "material.css" %}
         </style>
     </head>
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <header class="mdl-layout__header">
-            <div class="mdl-layout__header-row">
-                <span id="logo">
-                <img src="data:image/png;base64,{{ pyta_logo }}" alt="PyTA logo" height="50"/>
-                </span>
-                <span class="mdl-layout-title">PyTA Error Report <span id="date">({{ date_time }})</span></span>
-                <div class="mdl-layout-spacer"></div>
-                <nav class="mdl-navigation mdl-layout--large-screen-only">
-                    <a class="mdl-navigation__link" href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">Help</a>
-                </nav>
-            </div>
-        </header>
-        <div class="body_">
+    <body>
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+            <header class="mdl-layout__header">
+                <div class="mdl-layout__header-row">
+                    <span id="logo">
+                    <img src="data:image/png;base64,{{ pyta_logo }}" alt="PyTA logo" height="50"/>
+                    </span>
+                    <span class="mdl-layout-title">PyTA Error Report <span id="date">({{ date_time }})</span></span>
+                    <div class="mdl-layout-spacer"></div>
+                    <nav class="mdl-navigation mdl-layout--large-screen-only">
+                        <a class="mdl-navigation__link" href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">Help</a>
+                    </nav>
+                </div>
+            </header>
             <main class="mdl-layout__content">
                 <div class="page-content">
                     {% for file in reporter.messages_by_file %}
@@ -120,11 +120,10 @@
                     <a href="mailto:david@cs.toronto.edu">Found a bug? Report it to Prof. Liu!</a>
                 </div>
             </footer>
-            <script type="text/javascript">
-                {% include "jquery-3.2.1.min.js" %}
-                {% include "script.js" %}
-            </script>
         </div>
-    </div>
-
+    </body>
+    <script type="text/javascript">
+        {% include "jquery-3.2.1.min.js" %}
+        {% include "script.js" %}
+    </script>
 </html>

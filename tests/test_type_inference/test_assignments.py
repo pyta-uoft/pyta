@@ -134,5 +134,20 @@ def test_assign_complex(variables, values):
         assert TypeInferrer.type_constraints.lookup_concrete(variable_type_var) == Any
 
 
+def test_attribute_reassign():
+    """ Test for correct type setting after a redundant assignment of an instance attribute.
+    """
+    program = f'class Student:\n' \
+              f'    def __init__(self, name1):\n' \
+              f'        self.name = name1\n' \
+              f'        self.name = name1\n' \
+              f'\n'
+    module, inferer = cs._parse_text(program)
+    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    actual_type = inferer.lookup_type(functiondef_node, 'name')
+    expected_type = inferer.lookup_type(functiondef_node, 'name1')
+    assert actual_type == expected_type
+
+
 if __name__ == '__main__':
     nose.main()

@@ -69,7 +69,7 @@ def test_check_with_config():
                     'R0204', 'C0303', 'W0231'],
 
         # [CUSTOM PYTA OPTIONS]
-        'pyta-reporter': 'HTMLReporter'
+        'pyta-reporter': 'PlainReporter'
     }
     for item in _inputs:
         python_ta.check_all(item, config=CONFIG)

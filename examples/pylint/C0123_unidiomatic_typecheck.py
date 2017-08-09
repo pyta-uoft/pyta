@@ -3,4 +3,4 @@ def is_int(obj):
     @type obj: object
     @rtype: bool
     """
-    return type(obj) == "<type 'int'>"  # Error on this line
+    return type(obj) == int  # Error on this line

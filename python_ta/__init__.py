@@ -141,6 +141,16 @@ def reset_linter(config=None, file_linted=None):
              'type': 'int',
              'metavar': '<number_messages>',
              'help': 'Display a certain number of messages to the user, without overwhelming them.'}),
+        ('pyta-template-file',
+            {'default': 'template.html',
+             'type': 'string',
+             'metavar': '<pyta_reporter>',
+             'help': 'Template file for html format of htmlreporter output.'}),
+        ('pyta-output-file',
+            {'default': 'output.html',
+             'type': 'string',
+             'metavar': '<pyta_reporter>',
+             'help': 'Output file for htmlreporter.'}),
     )
 
     custom_checkers = [

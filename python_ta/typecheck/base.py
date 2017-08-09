@@ -154,7 +154,7 @@ class TypeConstraints:
         return tn
 
     def _find_rep(self, node: TNode):
-        while node.parent is not None:
+        while node.parent is not None or (node.parent and node != node.parent):
             node = node.parent
         return node
 
@@ -185,8 +185,12 @@ class TypeConstraints:
 
     def unify(self, t1, t2):
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            node1, node2 = self._tvar_tnode[t1], self._tvar_tnode[t2]
-            self._union(node1, node2)
+            if t1 == t2:
+                # TODO: look into implementation of  __eq__ TVARS
+                pass
+            else:
+                node1, node2 = self._tvar_tnode[t1], self._tvar_tnode[t2]
+                self._union(node1, node2)
         elif isinstance(t1, TypeVar):
             node2 = self.add_concrete_to_sets(t2)
             node1 = self._tvar_tnode[t1]

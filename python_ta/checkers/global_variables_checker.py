@@ -76,9 +76,10 @@ def _get_child_disallowed_global_var_nodes(node):
     global, non-constant variable. 
     """
     node_list = []
-    if isinstance(node.parent, astroid.ListComp) or isinstance(node.parent, astroid.Comprehension):
+    scoped_comps = (astroid.ListComp, astroid.Comprehension, astroid.DictComp, astroid.SetComp)
+    if isinstance(node.parent, scoped_comps):
         return node_list
-    if ((isinstance(node, astroid.AssignName) or (isinstance(node, astroid.Name) and not isinstance(node.parent, astroid.Call))) 
+    if ((isinstance(node, astroid.AssignName) or (isinstance(node, astroid.Name) and not isinstance(node.parent, astroid.Call)))
         and not re.match(CONST_NAME_RGX, node.name)):
         return [node]
     for child_node in node.get_children():

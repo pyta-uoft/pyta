@@ -54,12 +54,8 @@ def test_set_single_assign(variables_dict):
     program = cs._parse_dictionary_to_program(variables_dict)
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AssignName):
-        target_name = node.name
         target_value = node.parent.value
-        # lookup name in the frame's environment
-        target_type_var = node.frame().type_environment.lookup_in_env(target_name)
-        # do a concrete look up of the corresponding TypeVar
-        target_type = inferer.type_constraints.lookup_concrete(target_type_var)
+        target_type = inferer.lookup_type(node, node.name)
         # compare it to the type of the assigned value
         assert target_value.type_constraints.type == target_type
 
@@ -136,6 +132,21 @@ def test_assign_complex(variables, values):
     for variable_name in variables:
         variable_type_var = module.type_environment.lookup_in_env(variable_name)
         assert TypeInferrer.type_constraints.lookup_concrete(variable_type_var) == Any
+
+
+def test_attribute_reassign():
+    """ Test for correct type setting after a redundant assignment of an instance attribute.
+    """
+    program = f'class Student:\n' \
+              f'    def __init__(self, name1):\n' \
+              f'        self.name = name1\n' \
+              f'        self.name = name1\n' \
+              f'\n'
+    module, inferer = cs._parse_text(program)
+    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    actual_type = inferer.lookup_type(functiondef_node, 'name')
+    expected_type = inferer.lookup_type(functiondef_node, 'name1')
+    assert actual_type == expected_type
 
 
 if __name__ == '__main__':

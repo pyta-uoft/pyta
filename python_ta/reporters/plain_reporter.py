@@ -52,7 +52,12 @@ ERROR_CHECKS = [
     'E9996',
     'E9991',
     'E0001',
-    'E9999'
+    'E9999',
+    'unexpected-keyword-arg',
+    'not-an-iterable',
+    'nonexistent-operator',
+    'invalid-length-returned',
+    'abstract-method'
 ]
 
 

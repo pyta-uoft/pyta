@@ -32,7 +32,7 @@ max-line-length = 80
 [FORBIDDEN IMPORT]
 
 # Set the whitelist of modules that are allowed to be imported
-allowed-import-modules=doctest, unittest, hypothesis, python_ta
+allowed-import-modules=doctest, unittest, hypothesis, pytest, python_ta, typing
 
 [FORBIDDEN IO]
 
@@ -42,15 +42,18 @@ allowed-io =
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s).
-disable=R0401, R0901, R0903, R0904, R0911, R0916, W0402, W0403, W0410,
+disable=R0401, R0901, R0903, R0904, R0911, R0916, R0801, W0402, W0403, W0410,
     W1501, W1502, W1505, E1300, E1301, E1302, E1304, W1300, W1301, W1302, W1304,
     E1124, E1125, E1129, E1132, W1402, W0105, E1303, W1306, W1307,
-    E0116, E0114, E0112, E0115, E0106, E0113, E0111, E0105, E0100, E0117,
+    E0116, E0114, E0112, E0115, E0106, E0113, E0110, E0111, E0105, E0100, E0117,
     W0150, W0120, W0124, W0108, W0123, W0122, W0110, C0122, C0200, W0141,
     W0640, W0623, W0614, W0604, W0603, W0602, W0601, E0604, E0603, E1200,
     E1201, E1202, W1201, E1205, E1206, similarities, newstyle, python3,
     W0512, C0403, C0401, C0402, E1701, E1700, W0332, C0327, C0328, E0202,
-    E0241, E0704, W0211, W0232, W0511, R0204, C0303, W0231
+    E0241, E0704, W0211, W0232, W0511, R0204, C0303, W0231,
+    E0236, E0238, I0021, C0203, C0204, E0703, I0013, R0203, R0202, E1134,
+    W1202, I0012, I0022, C0302, I0011, I0010, E0012, I0020, E0011, E0240,
+    C0202, E0237, E0301, E1003, R1705, C1801
 
 # Enable single-letter identifiers
 function-rgx = (([a-z][a-z0-9_]{0,30})|(_[a-z0-9_]*))$

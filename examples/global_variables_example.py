@@ -1,5 +1,5 @@
 def function() -> None:
-    """ A test for the global variables checker."""
+    """A test for the global variables checker."""
     # Change "value" to mean the global variable.
     # (the assignment would be local without "global")
     global VALUE

@@ -7,7 +7,8 @@ def loop() -> int:
                     for i in range(0, 5):
                         return 2
                     return 1
-                return 1
+                else:
+                    return 1
         elif j > 1:
             return 1
         else:

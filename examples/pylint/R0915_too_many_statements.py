@@ -1,7 +1,7 @@
 from typing import Any
 
 def statement(arg: Any) -> None:
-    """Dummy function to demonstrate an example within too_many_statements()."""
+    """Dummy function to demonstrate an example within `too_many_statements`."""
     pass
 
 

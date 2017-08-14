@@ -1,4 +1,4 @@
-class Assigning():
+class Assigning:
     def __init__(self, value: int, name: str) -> None:
         self.value = value
         self.name = name

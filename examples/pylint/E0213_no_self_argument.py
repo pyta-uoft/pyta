@@ -1,9 +1,9 @@
 class MyClass:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def methodA(not_self):  # Bad (should be 'self')
+    def methodA(not_self) -> None:  # Bad (should be 'self')
         pass
 
-    def methodB(self):  # Good
+    def methodB(self) -> None:  # Good
         pass

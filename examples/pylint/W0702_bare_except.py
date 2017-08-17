@@ -1,4 +1,4 @@
-def no_catching():
+def no_catching() -> None:
     try:
         raise TypeError()
     except:

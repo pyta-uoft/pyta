@@ -1,6 +1,5 @@
-def is_int(obj):
-    """Check is the given object is of type 'int'
-    @type obj: object
-    @rtype: bool
-    """
+from typing import Union
+
+def is_int(obj: Union[int, float, str]) -> bool:
+    """Check if the given object is of type 'int'."""
     return type(obj) == int  # Error on this line

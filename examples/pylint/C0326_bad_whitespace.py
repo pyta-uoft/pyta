@@ -1,6 +1,3 @@
-def func( temp):  # bad whitespace here
-    """Return whether <temp> is greater than 0
-    @type temp: int
-    @rtype: bool
-    """
+def func( temp: int) -> bool:  # bad whitespace here
+    """Return whether <temp> is greater than 0."""
     return temp > 0

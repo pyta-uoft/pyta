@@ -1,7 +1,7 @@
+from typing import List
 import unittest
 
-
-def is_sorted(lst):
+def is_sorted(lst: List[float]) -> bool:
     """Check if <lst> is sorted in ascending order."""
     return lst == sorted(lst)
 
@@ -9,9 +9,8 @@ def is_sorted(lst):
 class TestStringMethods(unittest.TestCase):
     """Simple tests for example purposes."""
 
-    def test_isupper(self):
+    def test_isupper(self) -> None:
         """Simple tests for example purposes."""
-
         # Valid:
         self.assertTrue(is_sorted([1, 2, 3]))
         self.assertFalse(is_sorted([1, 3, 2]))

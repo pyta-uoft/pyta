@@ -1,14 +1,6 @@
-def positive(obj):
-    """
-    @type obj: int
-    @rtype: bool
-    """
+def positive(obj: int) -> bool:
     return obj > 0
 
 
-def positive(obj):  # Error on this line: Function redefined
-    """
-    @type obj: int
-    @rtype: bool
-    """
+def positive(obj: int) -> bool:  # Error on this line: Function redefined
     return obj >= 0

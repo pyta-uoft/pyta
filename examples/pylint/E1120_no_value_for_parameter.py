@@ -1,12 +1,5 @@
-def get_sum(x, y, z):
-    """
-    Return the sum of x, y and z.
-
-    @type x: int
-    @type y: int
-    @type z: int
-    @rtype: int
-    """
+def get_sum(x: int, y: int, z: int) -> int:
+    """Return the sum of x, y and z."""
     return x + y + z
 
 get_sum(1, 2)  # Error on this line

@@ -1,2 +1,2 @@
-from .. import pyta  # your own modules should be imported last.
+from assignment_1 import solution  # Your own modules should be imported last
 import sys  # "standard modules" should be imported first

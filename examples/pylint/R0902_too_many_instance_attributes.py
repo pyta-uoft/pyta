@@ -1,8 +1,7 @@
 class MyClass(object):
-    """Example with too many instance attributes."""
+    """Class with too many instance attributes."""
 
-    def __init__(self):
-        """Many instance attributes"""
+    def __init__(self) -> None:
         self.animal = 'Dog'
         self.bread = 'Sourdough'
         self.liquid = 'Water'

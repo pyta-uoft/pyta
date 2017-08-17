@@ -1,4 +1,4 @@
-def repeat_except_blocks():
+def repeat_except_blocks() -> None:
     try:
         raise Exception()
     except Exception:

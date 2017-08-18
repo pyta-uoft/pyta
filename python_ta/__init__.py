@@ -24,7 +24,7 @@ import pylint.lint
 import pylint.utils
 from pylint.config import VALIDATORS, _call_validator
 
-from astroid import modutils
+from astroid import modutils, MANAGER
 
 from .reporters import REPORTERS
 from .patches import patch_all
@@ -59,6 +59,8 @@ def _check(module_name='', level='all', local_config='', output=None):
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute path to capture pyta data output. Default std out.
     """
+    MANAGER.astroid_cache.clear()
+
     # Add reporters to an internal pylint data structure, for use with setting
     # custom pyta options in a Tuple, before (re)setting reporter.
     for reporter in REPORTERS:

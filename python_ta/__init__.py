@@ -160,8 +160,9 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/IO_Function_checker',
         'python_ta/checkers/invalid_range_index_checker',
         'python_ta/checkers/assigning_to_self_checker',
-        'python_ta/checkers/always_returning_checker',
-        'python_ta/checkers/type_inference_checker'
+        'python_ta/checkers/always_returning_checker'
+        # TODO: Eventually enable this checker
+        # 'python_ta/checkers/type_inference_checker'
     ]
 
     # Register new options to a checker here to allow references to

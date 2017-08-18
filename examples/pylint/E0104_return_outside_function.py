@@ -1,8 +1,7 @@
-def add(lst):
-    """ Calculates the sum of the elements in the given list.
-    @type lst: list
-    @rtype: bool
-    """
+from typing import List
+
+def add(lst: List[int]) -> None:
+    """Calculate the sum of the elements in the given list."""
     temp = 0
     for item in lst:
         temp += item

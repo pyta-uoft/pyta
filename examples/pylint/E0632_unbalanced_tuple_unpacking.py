@@ -1,6 +1,6 @@
-def set_values():
-    """@rtype: tuple
-    """
+from typing import Tuple
+
+def set_values() -> Tuple[int, int]:
     var1 = 1
     var2 = 2
     return var1, var2

@@ -1,7 +1,3 @@
-def pos(obj):
-    """
-    @type obj: int
-    @rtype: bool
-    """
-    foo = obj
+def pos(obj: int) -> bool:
+    foo = obj  # Error on this line: Blacklisted name 'foo'
     return foo < 0

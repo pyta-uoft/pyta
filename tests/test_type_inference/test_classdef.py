@@ -41,7 +41,8 @@ def test_classdef_method_call():
     module, inferer = cs._parse_text(program)
     attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
     expected_rtype = attribute_node.parent.type_constraints.type
-    assert attribute_node.type_constraints.type.__args__[-1] == expected_rtype
+    actual_rtype = inferer.type_constraints.lookup_concrete(attribute_node.type_constraints.type.__args__[-1])
+    assert actual_rtype == expected_rtype
 
 
 def test_classdef_method_call_annotated_concrete():

@@ -1,4 +1,4 @@
-def lots_of_branches(arg):
+def lots_of_branches(arg: bool) -> None:
     """Example to demonstrate max branching."""
     if arg == 1:
         pass

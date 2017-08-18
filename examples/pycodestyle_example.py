@@ -1,8 +1,7 @@
 temp = "nwsnnnnnnnnwjjj                   jjjjjjjjjjjjjj                         "
 temp = "nwsnnnnnnnnwjjj                   jjjjjjjjjjjjjj                         "
 
-def function1 ():
-    """ A test for the global variables checker
-    @rtype: None
-    """
-    value           = 100
+
+def function1() -> None:
+    """A test for the global variables checker."""
+    value = 100

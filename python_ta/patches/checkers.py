@@ -36,7 +36,9 @@ def _override_check_protected_attribute_access():
     def _check(self, node):
         attrname = node.attrname
         klass = node_frame_class(node)
-        if klass is None or attrname not in klass.instance_attrs:
+        if klass is None or (
+                attrname not in klass.instance_attrs and
+                attrname not in (m.name for m in klass.methods())):
             old_check_protected_attribute_access(self, node)
 
     ClassChecker._check_protected_attribute_access = _check

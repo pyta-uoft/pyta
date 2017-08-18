@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name='python-ta',
-    version='1.2.0rc1',
+    version='1.2.0rc3',
     description='Code checking tool for teaching Python',
     long_description=readme(),
     url='http://github.com/pyta-uoft/pyta',

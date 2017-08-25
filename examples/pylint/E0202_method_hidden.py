@@ -1,9 +1,9 @@
-class Example:
-    def field(self, num: float) -> float:
-        return num
+class Person:
+    """Generic person with a name and a hobby."""
 
-    def __init__(self) -> None:
-        self.field = 'Hiding the function with this string'
+    def __init__(self, name: str, hobby: str) -> None:
+        self.name = name
+        self.hobby = hobby
 
-e = Example()
-e.field(num)   # Error on this line
+    def hobby(self):  # Error on this line
+        return "Working!"

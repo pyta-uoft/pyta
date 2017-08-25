@@ -1,14 +1,30 @@
-class Parent:
-    def __init__(self) -> None:
-        self.num = 2
+class StandardBankAccount:
+    """A standard bank account."""
 
-    def return_num(self, multiple: float) -> float:
-        return self.num * multiple
+    def __init__(self, balance: float) -> None:
+        self._balance = balance
+
+    def withdraw(self, ammount: float = 20) -> float:
+        """Withdraw money from the bank account."""
+        if ammount <= self._balance:
+            self._balance -= ammount
+            return ammount
+        else:
+            return 0
 
 
-class Child(Parent):
-    def __init__(self) -> None:
-        Parent.__init__(self)
+class PremiumBankAccount(StandardBankAccount):
+    """A premium bank account.
 
-    def return_num(self) -> float:  # Method signature differs from Parent
-        return 42
+    A premium bank account has more features than the standard bank account.
+    """
+
+    def withdraw(self, ammount: float) -> float:  # Error on this line
+        """Withdraw money from the bank account."""
+        if ammount <= self._balance - 2:
+            # Charge a $2 transaction fee
+            self._balance -= 2
+            self._balance -= ammount
+            return ammount
+        else:
+            return 0

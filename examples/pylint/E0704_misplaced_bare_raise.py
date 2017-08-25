@@ -1,7 +1,7 @@
-def func() -> None:
+def divide(numerator: float, denominator: float) -> float:
+    """Divide two numbers."""
     try:
-        raise MyException()
-    except MyException:
-        # Do something important here (if needed).
-        # Now, raise again what we just caught.
-        raise
+        return numerator / denominator
+    except ZeroDivisionError:
+        print("Can't divide by 0...")
+    raise  # Error on this line

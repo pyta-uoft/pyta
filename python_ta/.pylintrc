@@ -27,7 +27,7 @@ max-nested-blocks = 3
 [FORMAT]
 
 # Set the maximum line length. The maximum line length in pep8 is 80 characters.
-max-line-length = 100
+max-line-length = 80
 
 [FORBIDDEN IMPORT]
 

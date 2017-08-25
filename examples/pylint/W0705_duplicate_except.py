@@ -1,7 +1,10 @@
-def repeat_except_blocks() -> None:
+from typing import Optional
+
+def divide(numerator: float, denominator: float) -> Optional[float]:
+    """Divide the numerator by the denominator."""
     try:
-        raise Exception()
-    except Exception:
-        print('This is triggered')
-    except Exception:
-        print('Duplicate exception block')
+        return numerator / denominator
+    except ZeroDivisionError:
+        print("Can't divide by 0!")
+    except ZeroDivisionError:
+        print("This duplicate exception block will never be reached!")

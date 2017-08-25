@@ -16,7 +16,8 @@ class StandardBankAccount:
 class PremiumBankAccount(StandardBankAccount):
     """A premium bank account.
 
-    A premium bank account has more features than the standard bank account.
+    This bank account has more features than the standard bank account,
+    but it also costs more.
     """
 
     def withdraw(self, ammount: float) -> float:  # Error on this line

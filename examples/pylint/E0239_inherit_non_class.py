@@ -1,2 +1,3 @@
-class newclass('str'):
+class FancyFloat('float'):
+    """A fancy floating point number."""
     pass

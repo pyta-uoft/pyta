@@ -1,11 +1,8 @@
-class RandomClass():
-    """This class doesn't inherit from BaseException."""
+class NotAnException:
+    """This class does not inherit from BaseException."""
     pass
 
-
 try:
-    n = 5 / 0  # Will throw a ZeroDivisionError
-except RandomClass:
-    print('The above does not inherit from BaseException')
-except ZeroDivisionError:
-    print('Will not be reached due to erroring out earlier')
+    n = 5 / 0
+except NotAnException:  # Error on this line: NotAnException does not inherit
+    pass                # from BaseException

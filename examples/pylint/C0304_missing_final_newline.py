@@ -1,0 +1,1 @@
+print("Hello World!")  # Trailing newline is absent: 

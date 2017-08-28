@@ -1,2 +1,3 @@
 spam = 0
-spam++  # Error on this line: undefined operator `++`
+spam++  # Error on this line
+spam--  # Error on this line

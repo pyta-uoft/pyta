@@ -1,8 +1,11 @@
-text = "It was the best of times"
-answer_to_the_ultimate_question = 42
+num = 256
+assert num is 256
 
-if text is "It was the best of times":  # Error on this line
-    print("Nope, worst of times!")
+num = 257
+assert num is 257  # Assertion fails if typed into a Python interpreter
 
-if answer_to_the_ultimate_question is 42:  # Error on this line
-    print("You have it all figured out!")
+chars = 'this_string_passes'
+assert chars is 'this_string_passes'
+
+chars = 'this string fails'
+assert chars is 'this string fails'  # Assertion fails if typed into a Python interpreter

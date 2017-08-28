@@ -25,7 +25,7 @@ setup(
         'funcparserlib',
         'hypothesis',
         'pycodestyle',
-        'pylint',
+        'pylint>=1.7',
         'nose',
         'colorama',
         'six',

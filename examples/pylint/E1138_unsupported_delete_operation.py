@@ -14,6 +14,7 @@ class NamedList:
     def __contains__(self, name: str) -> bool:
         return name in self._names
 
+
 named_list = NamedList(['a', 'b', 'c'], [1, 2, 3])
 print('c' in named_list)  # Prints True
 del named_list['c']  # Error on this line

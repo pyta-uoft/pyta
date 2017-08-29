@@ -1,5 +1,7 @@
-class A:
+class Animal:
+    """A carbon-based life form that eats and moves around."""
     pass
 
-class B(A, A):  # Only include A once to inherit properly
+class Dog(Animal, Animal):  # Only include Animal once to inherit properly
+    """A man's best friend."""
     pass

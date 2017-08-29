@@ -6,4 +6,5 @@ class Account:
 
     def withdraw(self, ammount: float) -> float:
         """Withdraw some money from an account."""
-        raise NotImplemented  # Error on this line 
+        # Error on the following line: Use `NotImplementedError` instead
+        raise NotImplemented

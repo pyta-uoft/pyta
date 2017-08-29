@@ -1,5 +1,5 @@
 class Animal:
-    """Abstract class which should be implemented by all animals."""
+    """Abstract class to be implemented by all animals."""
 
     def __init__(self, name: str) -> None:
         self._name = name
@@ -10,9 +10,9 @@ class Animal:
 
 
 class Dog(Animal):
-    """Class representing a dog."""
+    """A man's best friend."""
 
-    def make_sound(self, state: str) -> None:  # Error on this line
+    def make_sound(self, state: str) -> None:  # Error: Parameter differs
         if state == 'happy':
             print("Woof Woof!")
         elif state == 'angry':

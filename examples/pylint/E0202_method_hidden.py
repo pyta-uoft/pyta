@@ -5,5 +5,5 @@ class Person:
         self.name = name
         self.hobby = hobby
 
-    def hobby(self):  # Error on this line
-        return "Working!"
+    def hobby(self) -> str:  # Error on this line
+        return "No hobbies; I just work and study!"

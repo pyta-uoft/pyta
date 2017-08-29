@@ -1,5 +1,5 @@
 class Animal:
-    """An animal in the zoo."""
+    """A carbon-based life form that eats and moves around."""
 
     def __init__(self, name: str) -> None:
         self._name = name

@@ -77,5 +77,35 @@ def test_functiondef_annotated_simple_return(functiondef_node):
     assert expected_rtype.__name__ == functiondef_node.returns.name
 
 
+def test_nested_annotated_function_conflicting_body():
+    """ User tries to define an annotated function which has conflicting types within its body.
+    """
+    program = f'def random_func(int1: int) -> None:\n' \
+              f'    int1 + "bob"\n'
+    module, inferer = cs._parse_text(program)
+    functiondef_type = inferer.lookup_type(module, "return_int")
+    expected_msg = f'In the FunctionDef node in line 1, in the annotated Function Definition of "random_func" in line 1:\n' \
+                   f'in parameter (1), "int1", the annotated type is int, which conflicts with the inferred type of ' \
+                   f'str from the function definition body.'
+                    # TODO: where in the body, or is this too convoluted? Extract from sets.
+    assert functiondef_type.msg == expected_msg
+
+
+def test_annotated_functiondef_conflicting_return_type():
+    """ User defines an annotated function with type errors in it's body;
+    a discrepancy in annotated return type versus return type in it's body.
+    """
+    program = f'def return_str(num1: int, str1: str) -> int:\n' \
+              f'    output = num1 + str1\n' \
+              f'    return "bob"\n' \
+              f'\n'
+    module, inferer = cs._parse_text(program)
+    functiondef_type = inferer.lookup_type(module, "return_str")
+    expected_msg = f'In the FunctionDef node in line 1, in the annotated Function Definition of "random_func" in line 1:\n' \
+                   f'the annotated return type is int, which conflicts with the inferred return type of ' \
+                   f'str from the function definition body.'
+    assert functiondef_type.msg == expected_msg
+
+
 if __name__ == '__main__':
     nose.main()

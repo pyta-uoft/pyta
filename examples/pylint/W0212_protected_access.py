@@ -1,6 +1,9 @@
-class MyClass:
-    def __init__(self) -> None:
-        self._num = 42
+class Animal:
+    """A carbon-based life form that eats and moves around."""
 
-c = MyClass()
-print(c._num)  # Error on this line: access of protected member `c._num`
+    def __init__(self, name: str) -> None:
+        self._name = name
+
+
+dog = Animal('Charly')
+print(dog._name)  # Error on this line: Access of protected member `dog._name`

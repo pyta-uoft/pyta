@@ -1,9 +1,9 @@
-class MyClass:
-    def __init__(self) -> None:
-        pass
+class SecretKeeper:
+    """A class which stores a secret as a private attribute."""
 
-    def methodA(not_self) -> None:  # Bad (should be 'self')
-        pass
+    def __init__(self, secret: str) -> None:
+        self._secret = secret
 
-    def methodB(self) -> None:  # Good
-        pass
+    def guess_secret(obj, secret) -> bool:  # Error: 'obj' should be 'self'
+        """Guess the private secret."""
+        return obj._secret == secret

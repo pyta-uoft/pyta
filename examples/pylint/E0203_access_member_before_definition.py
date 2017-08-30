@@ -1,4 +1,6 @@
-class MyClass:
-    def __init__(self) -> None:
-        print(self.a)  # Haven't defined `self.a` yet, can't use
-        self.a = 5
+class Animal:
+    """A carbon-based life form that eats and moves around."""
+
+    def __init__(self, name: str) -> None:
+        print(self._name)  # Haven't defined `self._name` yet, can't use
+        self._name = name

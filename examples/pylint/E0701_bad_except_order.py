@@ -1,7 +1,10 @@
-def func(num: float) -> None:
+from typing import Optional
+
+def divide(numerator: float, denominator: float) -> Optional[float]:
+    """Divide the numerator by the denominator."""
     try:
-        raise ZeroDivisionError()
+        return numerator / denominator
     except Exception:
-        print('This is always triggered')
+        print("Some exception occurd! But I don't know which one?!")
     except ZeroDivisionError:
-        print('Cannot ever be reached')
+        print("This exception block will never be reached!")

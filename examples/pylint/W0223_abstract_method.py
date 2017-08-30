@@ -1,4 +1,5 @@
 class Animal:
+    """Abstract class to be implemented by all animals."""
 
     def __init__(self, name) -> None:
         self.name = name
@@ -7,5 +8,6 @@ class Animal:
         raise NotImplementedError
 
 
-class Cat(Animal):  # Error on this line
+class Cat(Animal):  # Error: Method 'make_sound' is not overridden
+    """A worthy companion."""
     pass

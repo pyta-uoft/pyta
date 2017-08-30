@@ -1,5 +1,8 @@
-def no_catching() -> None:
+from typing import Optional
+
+def divide(numerator: float, denominator: float) -> Optional[float]:
+    """Divide the numerator by the denominator."""
     try:
-        raise TypeError()
+        return numerator / denominator
     except:
-        print('Requires an exception class')
+        print("Some exception occurd! Could have been a KeyboardInterrupt!")

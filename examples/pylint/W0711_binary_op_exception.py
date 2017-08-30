@@ -1,15 +1,6 @@
-class MyException(Exception):
-    pass
-
-
-class MyDoubleException(Exception):
-    pass
-
-
-def binary_capture() -> None:
+def divide_and_square(numerator: float, denominator: float) -> float:
+    """Divide the numerator by the denominator and square the result."""
     try:
-        # Not caught. 'or' doesn't do what you think.
-        # Need to do: except (MyException, MyDoubleException):
-        raise MyDoubleException()
-    except MyException or MyDoubleException:
-        print('Will not detect MyDoubleException due to how "or" works')
+        return (numerator / denominator) ** 2
+    except ZeroDivisionError or OverflowError:  # Error on this line
+        return float('nan')

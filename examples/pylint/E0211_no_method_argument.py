@@ -1,6 +1,8 @@
-class MyClass:
-    def __init__(self) -> None:
-        pass
+class Saxophone:
+    """A jazzy musical instrument."""
 
-    def method() -> None:
-        print('Missing argument for method definition')
+    def __init__(self) -> None:
+        self._sound = "Saxamaphone...."
+
+    def make_sound() -> None:  # Error on this line
+        print("Don't know what sound I can make!")

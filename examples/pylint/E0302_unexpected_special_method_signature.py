@@ -1,14 +1,8 @@
-class A:
-    def __init__(self) -> None:
-        pass
+class Animal:
+    """A carbon-based life form that eats and moves around."""
 
-    def __str__(self) -> str:  # Good, this is what is expected
-        return 'string'
+    def __init__(self, name: str) -> None:
+        self._name = name
 
-
-class B:
-    def __init__(self) -> None:
-        pass
-
-    def __str__(self, a: str) -> str:  # Bad, Python won't know what to put in 'a'
-        return 'string'
+    def __str__(self, unexpected_argument: str) -> str:  # Error on this line
+        return unexpected_argument

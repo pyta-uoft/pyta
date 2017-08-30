@@ -1,4 +1,6 @@
-class MyClass:
+class SomeNumbers:
+    """A class to store some numbers."""
+
     def __init__(self) -> None:
         self.num = 1
 

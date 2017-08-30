@@ -1,2 +1,1 @@
-def raise_bad() -> None:
-    raise 1
+raise 1  # Error on this line

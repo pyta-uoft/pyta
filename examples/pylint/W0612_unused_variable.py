@@ -1,3 +1,4 @@
-def f(x: float) -> float:
-    y = 5  # Unused variable 'y'
-    return x
+def square(number: float) -> float:
+    """Return the square of the number."""
+    exponent = 2  # Unused variable 'exponent'
+    return number ** 2

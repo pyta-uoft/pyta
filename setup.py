@@ -1,5 +1,6 @@
 from setuptools import setup
 
+
 def readme():
     try:
         import pypandoc
@@ -10,7 +11,7 @@ def readme():
 
 setup(
     name='python-ta',
-    version='1.2.0rc3',
+    version='1.2.0',
     description='Code checking tool for teaching Python',
     long_description=readme(),
     url='http://github.com/pyta-uoft/pyta',
@@ -25,7 +26,7 @@ setup(
         'funcparserlib',
         'hypothesis',
         'pycodestyle',
-        'pylint',
+        'pylint>=1.7',
         'nose',
         'colorama',
         'six',

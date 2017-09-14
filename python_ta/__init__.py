@@ -18,7 +18,7 @@ if __name__ == '__main__':
 import builtins
 try:
     del builtins._
-except NameError:
+except AttributeError:
     pass
 
 import importlib.util

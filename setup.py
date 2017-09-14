@@ -11,7 +11,7 @@ def readme():
 
 setup(
     name='python-ta',
-    version='1.2.0',
+    version='1.2.1',
     description='Code checking tool for teaching Python',
     long_description=readme(),
     url='http://github.com/pyta-uoft/pyta',
@@ -22,7 +22,7 @@ setup(
               'python_ta.docstring', 'python_ta.patches', 'python_ta.parser',
               'python_ta.transforms', 'python_ta.typecheck'],
     install_requires=[
-        'astroid',
+        'astroid>=1.5.3',
         'funcparserlib',
         'hypothesis',
         'pycodestyle',

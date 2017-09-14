@@ -14,6 +14,13 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
+# First, remove underscore from builtins if it has been bound in the REPL.
+import builtins
+try:
+    del builtins._
+except NameError:
+    pass
+
 import importlib.util
 import os
 import sys

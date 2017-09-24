@@ -155,7 +155,7 @@ class PlainReporter(BaseReporter):
         self.current_file_linted = filename
 
         # Augment the reporter with the source code.
-        with open(filename) as f:
+        with open(filename, encoding='utf-8') as f:
             self._source_lines = [
                 line.rstrip() for line in f.readlines()]
 

@@ -30,6 +30,7 @@ def test_compare_equality(operators, values):
         assume(value)
         if isinstance(value, str):
             assume(len(value) > 2)
+        assume(isinstance(value, int) or isinstance(value, bool) or isinstance(value, float))
     a = list(zip(operators, values))
     pre = []
     for operator, value in a:

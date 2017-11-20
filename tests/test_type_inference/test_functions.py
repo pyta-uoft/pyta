@@ -99,8 +99,7 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
 def test_incompatible_binop_call():
     """ User tries to call a builtin binary operation on arguments of the wrong type.
     """
-    program = f'a = 5\n' \
-              f'a + "string"\n'
+    program = f'a + "string"\n'
     try:
         module, inferer = cs._parse_text(program)
     except:

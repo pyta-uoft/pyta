@@ -105,6 +105,8 @@ def test_incompatible_binop_call():
         module, inferer = cs._parse_text(program)
     except:
         raise SkipTest()
+    call_node = next(module.nodes_of_class(astroid.Call))
+    expected_msg = f''
 
 
 
@@ -123,7 +125,7 @@ def test_non_annotated_function_call_bad_arguments():
     expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_num":\n' \
                    f'in parameter (1), the function was expecting an object of inferred type ' \
                    f'int but was given an object of type str.\n' \
-                   f'in parameter (1), the function was expecting an object of inferred type ' \
+                   f'in parameter (2), the function was expecting an object of inferred type ' \
                    f'int but was given an object of type float.\n'
                    # TODO: should we use the term inferred?
     assert call_node.type_constraints.type.msg == expected_msg

@@ -96,6 +96,18 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         assert inferer.type_constraints.lookup_concrete(function_call_type) == call_node.args[i].type_constraints.type
 
 
+def test_incompatible_binop_call():
+    """ User tries to call a builtin binary operation on arguments of the wrong type.
+    """
+    program = f'a = 5\n' \
+              f'a + "string"\n'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+
+
+
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """

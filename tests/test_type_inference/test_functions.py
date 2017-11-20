@@ -99,14 +99,13 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
 def test_incompatible_binop_call():
     """ User tries to call a builtin binary operation on arguments of the wrong type.
     """
-    program = f'a + "string"\n'
+    program = f'5 + "string"\n'
     try:
         module, inferer = cs._parse_text(program)
     except:
         raise SkipTest()
-    call_node = next(module.nodes_of_class(astroid.Call))
+    binop_node = next(module.nodes_of_class(astroid.BinOp))
     expected_msg = f''
-
 
 
 def test_non_annotated_function_call_bad_arguments():

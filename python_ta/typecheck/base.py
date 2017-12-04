@@ -65,6 +65,44 @@ TYPE_SIGNATURES = {
     }
 }
 
+def op_to_name_binary(op):
+    """Return the name of the method corresponding to binary op."""
+    if op == '+':
+        return 'addition'
+    elif op == '-':
+        return 'subtraction'
+    elif op == '*':
+        return 'multiplication'
+    elif op == '//':
+        return 'integer division'
+    elif op == '%':
+        return 'modular operation'
+    elif op == '/':
+        return 'division'
+    elif op == '**':
+        return 'exponential operation'
+    elif op == '&':
+        return 'logical AND operation'
+    elif op == '^':
+        return 'logical XOR operation'
+    elif op == '|':
+        return 'logical OR operation'
+    elif op == '==':
+        return 'equality operation'
+    elif op == '!=':
+        return 'inequality operation'
+    elif op == '<':
+        return 'less than operation'
+    elif op == '<=':
+        return 'less than or equal to operation'
+    elif op == '>':
+        return 'greater than operation'
+    elif op == '>=':
+        return 'greater than or equal to operation'
+    # TODO: 'is' and 'in'
+    else:
+        return op
+
 
 def op_to_dunder_binary(op):
     """Return the dunder method name corresponding to binary op."""

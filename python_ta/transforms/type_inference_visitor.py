@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import op_to_name_binary, op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
+from ..typecheck.base import binary_op_hints, op_to_name_binary, op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
 from ..typecheck.type_store import TypeStore
 
 
@@ -232,7 +232,8 @@ class TypeInferer:
         except KeyError:
             return TypeInfo(
                 TypeErrorInfo(f'You can not do {op_to_name_binary(func_name)}\
-                        with a(n) {arg_types[0]} and a(n) {arg_types[1]}', node))
+                        with a(n) {arg_types[0]} and a(n) {arg_types[1]}.\n\
+                        {binary_op_hints(func_name, arg_types)}', node))
 
         try:
             return_type = self.type_constraints.unify_call(func_type, *arg_types, node=node)

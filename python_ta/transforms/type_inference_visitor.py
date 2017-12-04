@@ -231,7 +231,7 @@ class TypeInferer:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
             return TypeInfo(
-                TypeErrorInfo(f'Function {func_call} not found with given args:\
+                TypeErrorInfo(f'Function {op_to_name_binary(func_name)} not found with given args:\
                               {arg_types}', node))
 
         try:

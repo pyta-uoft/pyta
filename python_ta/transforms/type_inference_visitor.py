@@ -231,8 +231,8 @@ class TypeInferer:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
             return TypeInfo(
-                TypeErrorInfo(f'Function {op_to_name_binary(func_name)} not found with given args:\
-                              {arg_types}', node))
+                TypeErrorInfo(f'You can not do {op_to_name_binary(func_name)}\
+                        with a(n) {arg_types[0]} and a(n) {arg_types[1]}', node))
 
         try:
             return_type = self.type_constraints.unify_call(func_type, *arg_types, node=node)

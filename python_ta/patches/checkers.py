@@ -3,7 +3,7 @@
 import astroid
 from astroid.bases import BUILTINS
 from pylint.utils import OPTION_RGX
-from pylint.checkers.base import NameChecker
+from pylint.checkers.base import NameChecker, ComparisonChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
 from pylint.checkers.format import FormatChecker, _EMPTY_LINE
@@ -15,6 +15,7 @@ def patch_checkers():
     """Run patches to modify built-in pylint checker behaviour."""
     _override_check_protected_attribute_access()
     _override_check_invalid_name_in_main()
+    _override_singleton_comparison()
     _override_attribute_defined_outside_init()
     _override_regex_to_allow_long_doctest_lines()
 
@@ -62,6 +63,83 @@ def _override_check_invalid_name_in_main():
             old_visit_assignname(self, node)
 
     NameChecker.visit_assignname = patched_visit_assignname
+
+
+def _override_singleton_comparison():
+    """Override the "singleton-comparison" message, to detect some common 
+    mistakes such as:
+        expr != False
+        expr is not False
+        expr == True
+        expr is False
+        gg is True
+        not expr != True
+        not expr is not True
+        not expr == True
+        not expr is True
+        not expr == False
+        not expr is False
+        not expr != False
+        not expr is not False
+        False != expr
+    """
+    def new_check_singleton_comparison(self, singleton, root_node):
+        """[pyta] certain comparisons involving 'not' generate messages
+        for 'singleton-comparison' in addition to the existing 'unneeded-not'.
+        """
+        operator, _ = root_node.ops[0]
+        if hasattr(root_node.parent, 'op') and root_node.parent.op == 'not':
+            expr = 'not ... {} {}'.format(operator, singleton.value)
+            if ((operator in ('!=', 'is not') and singleton.value is True) 
+                or (operator in ('==', 'is') and singleton.value is False)):
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(expr, "just 'expr'"))
+
+            if ((operator in ('==', 'is') and singleton.value is True) 
+                or (operator in ('!=', 'is not') and singleton.value is False)):
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(expr, "just 'not expr'"))
+        else:
+            if singleton.value is True:
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(True, "just 'expr'"))
+            elif singleton.value is False:
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(False, "just 'not expr'"))
+            elif singleton.value is None:
+                self.add_message('singleton-comparison',
+                                 node=root_node,
+                                 args=(None, "'expr is None'"))
+
+    def new_visit_compare(self, node):
+        self._check_unidiomatic_typecheck(node)
+        # NOTE: this checker only works with binary comparisons like 'x == 42'
+        # but not 'x == y == 42'
+        if len(node.ops) != 1:
+            return
+
+        left = node.left
+        operator, right = node.ops[0]
+        if (operator in ('<', '<=', '>', '>=', '!=', '==')
+                and isinstance(left, astroid.Const)):
+            self._check_misplaced_constant(node, left, right, operator)
+
+        # [pyta] added more operators
+        if operator in ('==', '!=', 'is', 'is not'):
+            if isinstance(left, astroid.Const):
+                self._check_singleton_comparison(left, node)
+            elif isinstance(right, astroid.Const):
+                self._check_singleton_comparison(right, node)
+        if operator in ('is', 'is not'):
+            self._check_literal_comparison(right, node)
+
+    # [pyta] override the methods related to singleton-comparison.
+    ComparisonChecker.visit_compare = new_visit_compare
+    ComparisonChecker._check_singleton_comparison = new_check_singleton_comparison
 
 
 def _override_attribute_defined_outside_init():

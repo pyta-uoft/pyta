@@ -19,7 +19,14 @@ class ForbiddenImportChecker(BaseChecker):
                  'type': 'csv',
                  'metavar': '<modules>',
                  'help': 'Allowed modules to be imported.'}
-                ),)
+                ),
+               ('extra-imports',
+                {'default': (),
+                 'type': 'csv',
+                 'metavar': '<extra-modules>',
+                 'help': 'Extra allowed modules to be imported.'}
+                )
+               )
 
     # this is important so that your checker is executed before others
     priority = -1
@@ -27,7 +34,9 @@ class ForbiddenImportChecker(BaseChecker):
     @check_messages("forbidden-import")
     def visit_import(self, node):
         """visit an Import node"""
-        temp = [name for name in node.names if name[0] not in self.config.allowed_import_modules]
+        temp = [name for name in node.names
+                if name[0] not in self.config.allowed_import_modules and
+                name[0] not in self.config.extra_imports]
 
         if temp != []:
             self.add_message(
@@ -37,7 +46,8 @@ class ForbiddenImportChecker(BaseChecker):
     @check_messages("forbidden-import")
     def visit_importfrom(self, node):
         """visit an ImportFrom node"""
-        if node.modname not in self.config.allowed_import_modules:
+        if node.modname not in self.config.allowed_import_modules and\
+                node.modname not in self.config.extra_imports:
             self.add_message(
                 'forbidden-import', node=node,
                 args=(node.modname, node.lineno))
@@ -50,7 +60,8 @@ class ForbiddenImportChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 if name == "__import__":
-                    if node.args[0].value not in self.config.allowed_import_modules:
+                    if node.args[0].value not in self.config.allowed_import_modules and\
+                                    node.args[0].value not in self.config.extra_imports:
                         args = (node.args[0].value, node.lineno)
                         # add the message
                         self.add_message('forbidden-import', node=node,

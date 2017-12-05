@@ -1,5 +1,6 @@
 import astroid
 import nose
+from nose.tools import nottest
 from hypothesis import given, assume, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
@@ -112,6 +113,7 @@ def test_assign_complex_homogeneous(variables_dict):
         assert typeinferrer.type_constraints.lookup_concrete(var_tvar) == ass_node.value.elts[0].type_constraints.type
 
 
+@nottest
 @given(hs.lists(cs.valid_identifier(), min_size=2), cs.random_list(min_size=2))
 def test_assign_complex(variables, values):
     """Test whether visitors properly set the type constraint of the a Assign node representing a multi-target-assign

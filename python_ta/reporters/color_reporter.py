@@ -7,6 +7,7 @@ class ColorReporter(PlainReporter):
     _SPACE = ' '
     _BREAK = '\n'
     _COLOURING = {'black': Fore.BLACK,  # or could be empty
+                  'black-line': Fore.BLACK,
                   'bold': Style.BRIGHT,
                   'code-heading': Fore.RED + Style.BRIGHT,
                   'style-heading': Fore.BLUE + Style.BRIGHT,
@@ -14,7 +15,9 @@ class ColorReporter(PlainReporter):
                   'style-name': Fore.BLUE + Style.BRIGHT,
                   'highlight': Style.BRIGHT + Fore.BLACK + Back.CYAN,
                   'grey': Fore.LIGHTBLACK_EX,
+                  'grey-line': Fore.LIGHTBLACK_EX,
                   'gbold': Style.BRIGHT + Fore.LIGHTBLACK_EX,
+                  'gbold-line': Style.BRIGHT + Fore.LIGHTBLACK_EX,
                   'reset': Style.RESET_ALL}
 
     def __init__(self, source_lines=None, module_name=''):
@@ -44,7 +47,7 @@ class ColorReporter(PlainReporter):
         space_count = len(text) - len(new_text)
         if cls._SPACE != ' ':
             new_text = new_text.replace(' ', cls._SPACE)
-        return ((space_count * cls._SPACE) + colour + new_text +
+        return ((space_count * cls._SPACE) + colour + cls._vendor_wrap(colour_class, new_text) +
                 cls._COLOURING['reset'])
 
     _display = None   # because PyCharm is annoying about this

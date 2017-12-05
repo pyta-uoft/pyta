@@ -19,34 +19,44 @@
                     <h2> {{ file.filename }} </h2>
                 </article>
                 <article class="error-output code-errors">
-                    <h2 class="category-heading">
-                        {{ reporter.code_err_title }}
+                    <h3 class="category-heading">
+                        <span>{{ reporter.code_err_title }}</span>
                         <span class="slider">
                             <button>Expand/Collapse Section</button>
                         </span>
-                    </h2>
+                    </h3>
                     <div class="content collapsible">
-                        {% for message in file.code %}
+                        {% for message_id in file.code %}
                         <div class="error-instance">
                             <div class="info">
                                 <span class="error-link code-error-id">
-                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">&#10064; {{ message }} ({{ file.code[message][0].symbol }})</a>
+                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ file.code[message_id].messages[0].symbol }})</a>
                                 </span>
                                 <span class="occurrences">
-                                {{ file.code[message]|length }} occurrences.
+                                {{ file.code[message_id].occurrences }}
+                                {% if file.code[message_id].occurrences == 1 %}
+                                 occurrence.
+                                {% else %}
+                                 occurrences.
+                                {% endif %}
+                                </span>
+                                <span class="shown">
+                                {% if file.code[message_id].shown != file.code[message_id].occurrences %}
+                                 (First {{ file.code[message_id].shown }} shown).
+                                {% endif %}
                                 </span>
                                 <span class="slider">
                                     <button> Expand/Collapse </button>
                                 </span>
                             </div>
                             <div class="message-container collapsible">
-                                {% for indiv in file.code[message] %}
+                                {% for indiv in file.code[message_id].messages %}
                                 <div class="message">
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                     </h4>
                                     {% if indiv.snippet != '' %}
-                                    <pre>{{ indiv.snippet }}</pre>
+                                    <code>{{ indiv.snippet }}</code>
                                     {% else %}
                                     <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                     {% endif %}
@@ -60,22 +70,32 @@
                     </div>
                 </article>
                 <article class="error-output style-errors">
-                    <h2 class="category-heading">
-                        {{ reporter.style_err_title }}
+                    <h3 class="category-heading">
+                        <span>{{ reporter.style_err_title }}</span>
                         <span class="slider">
                             <button>Expand/Collapse Section</button>
                         </span>
-                    </h2>
+                    </h3>
                     <div class="content collapsible">
-                        {% for message in file.style %}
+                        {% for message_id in file.style %}
                         <div class="error-instance">
 
                             <div class="info">
                                 <span class="error-link style-error-id">
-                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message}}" target="_blank">&#10064; {{ message }} ({{ file.style[message][0].symbol }})</a>
+                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ file.style[message_id].messages[0].symbol }})</a>
                                 </span>
                                 <span class="occurrences">
-                                {{ file.style[message]|length }} occurrences.
+                                {{ file.style[message_id].occurrences }}
+                                {% if file.style[message_id].occurrences == 1 %}
+                                 occurrence.
+                                {% else %}
+                                 occurrences.
+                                {% endif %}
+                                </span>
+                                <span class="shown">
+                                {% if file.style[message_id].shown != file.style[message_id].occurrences %}
+                                 (First {{ file.style[message_id].shown }} shown).
+                                {% endif %}
                                 </span>
                                 <span class="slider">
                                    <button> Expand/Collapse </button>
@@ -83,13 +103,13 @@
                             </div>
 
                             <div class="message-container collapsible">
-                                {% for indiv in file.style[message] %}
+                                {% for indiv in file.style[message_id].messages %}
                                 <div class="message">
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                     </h4>
                                     {% if indiv.snippet != '' %}
-                                    <pre>{{ indiv.snippet }}</pre>
+                                    <code>{{ indiv.snippet }}</code>
                                     {% else %}
                                     <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                     {% endif %}

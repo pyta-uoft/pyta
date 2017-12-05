@@ -31,6 +31,7 @@ setup(
         'colorama',
         'six',
         'jinja2',
+        'pygments'
     ],
     include_package_data=True,
     zip_safe=False)

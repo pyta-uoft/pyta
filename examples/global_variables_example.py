@@ -13,6 +13,13 @@ ex = 1
 print(ex)
 
 
+# The local variable in a comprehension is okay
+print([x for x in [1, 2, 3]])
+print({x + 1 for x in [1, 2, 3]})
+print({x: x * 3 for x in [1, 2, 3]})
+print(list(x + 1 for x in [1, 2, 3]))
+
+
 def function1() -> None:
     """A test for the global variables checker."""
 

@@ -50,7 +50,7 @@
                                 </span>
                             </div>
                             <div class="message-container collapsible">
-                                {% for indiv in file.code[message_id].messages %}
+                                {% for indiv in file.code[message_id] %}
                                 <div class="message">
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}

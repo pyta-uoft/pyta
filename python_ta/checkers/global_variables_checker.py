@@ -4,7 +4,7 @@ from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 import astroid
 import re
-from pylint.checkers.base import CONST_NAME_RGX
+from pylint.checkers.base import SnakeCaseStyle
 
 
 class GlobalVariablesChecker(BaseChecker):
@@ -70,10 +70,13 @@ class GlobalVariablesChecker(BaseChecker):
 def _get_child_disallowed_global_var_nodes(node):
     """Return a list of all top-level Name or AssignName nodes for a given
     global, non-constant variable.
+
+    TODO: use the configured NamingStyle instead of hard-coded SnakeCaseStyle
+    for the CONST_NAME_RGX value.
     """
     node_list = []
     if ((isinstance(node, (astroid.AssignName, astroid.Name)) and not isinstance(node.parent, astroid.Call)) and
-            not re.match(CONST_NAME_RGX, node.name) and
+            not re.match(SnakeCaseStyle.CONST_NAME_RGX, node.name) and
             node.scope() is node.root()):
         return [node]
 

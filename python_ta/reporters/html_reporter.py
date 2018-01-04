@@ -86,7 +86,7 @@ class HTMLReporter(ColorReporter):
                                     reporter=self))
         print('Opening your report in a browser...')
         output_url = 'file:///{}'.format(output_path)
-        webbrowser.open(output_url)
+        webbrowser.open(output_url, new=2)
 
     @classmethod
     def _vendor_wrap(self, colour_class, text):

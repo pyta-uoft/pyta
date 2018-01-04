@@ -34,7 +34,7 @@ def function1() -> None:
     function2()
 
     # Local variable reflects nonlocal change
-    print(value)
+    value + 3  # 103
 
 
 if __name__ == '__main__':

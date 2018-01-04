@@ -4,7 +4,7 @@ from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 import astroid
 import re
-from pylint.checkers.base import SnakeCaseStyle
+from pylint.checkers.base import UpperCaseStyle
 
 
 class GlobalVariablesChecker(BaseChecker):
@@ -76,7 +76,7 @@ def _get_child_disallowed_global_var_nodes(node):
     """
     node_list = []
     if ((isinstance(node, (astroid.AssignName, astroid.Name)) and not isinstance(node.parent, astroid.Call)) and
-            not re.match(SnakeCaseStyle.CONST_NAME_RGX, node.name) and
+            not re.match(UpperCaseStyle.CONST_NAME_RGX, node.name) and
             node.scope() is node.root()):
         return [node]
 

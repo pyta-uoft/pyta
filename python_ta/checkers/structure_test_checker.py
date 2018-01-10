@@ -8,7 +8,7 @@ from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 
 
-class UsingConstantTestChecker(BaseChecker):
+class UsingStructureTestChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 

@@ -1,4 +1,5 @@
 body {
+    margin: 0;
 	font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Helvetica,Ubuntu,Arial,sans-serif;
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
@@ -12,6 +13,11 @@ header {
     -webkit-font-smoothing: antialiased;
     color: #fff;
     text-align: center;
+}
+
+code {
+    white-space: pre;
+    font-size: 120%;
 }
 
 .title {
@@ -31,6 +37,7 @@ time {
 
 main {
     display: grid;
+    overflow: auto;
 }
 
 section {
@@ -39,43 +46,47 @@ section {
 	display: inline-block;
 	font-size: 12px;
 	min-width: 50%;
-	background: rgb(219, 219, 219);
+	background: rgba(234, 233, 233, 0.25);
     box-shadow: -1px 9px 15px -5px rgba(77,77,77,0.6);
 }
 
 .file-name {
     display: flex;
     padding: 0 15px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0px 1px 2px black;
     background: #141E30;
-    background: linear-gradient(to right, #243B55, #141E30);
-    background: -webkit-linear-gradient(left, #243B55, #141E30);
+    background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
+    background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
 }
 
 .error-output {
-    padding: 0 15px 15px 15px;
+    padding: 0 15px;
 }
 
 .code-errors {
 }
 
 .style-errors {
-    border-top: 3px solid rgba(0,0,0,.2);
+    border-top: 3px solid rgba(255, 255, 255, 0.25);
 }
 
 .category-heading {
+    display: flex;  /*Narrow width viewports*/
+    -webkit-font-smoothing: antialiased;
 }
 
 .error-instance {
     display: grid;
     background: #fff;
-    padding: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1), 0 4px 7px rgba(0, 0, 0, 0.1);
+    padding: 8px 16px;
     margin-bottom: 5px;
     border-radius: 3px;
 }
 
 .error-link {
-    vertical-align: middle;
+    line-height: 25px;
 }
 
 .error-link a {
@@ -105,12 +116,13 @@ section {
 .style-error-id a:link {
 }
 
-pre {
-    font-size: 120%;
+.line-num {
+    font-size: 80%;
+    opacity: 0.6;
 }
 
 .grey {
-    color: rgb(119, 119, 120);
+    color: rgb(87, 87, 87);
 }
 
 .gbold{
@@ -118,9 +130,9 @@ pre {
     font-weight: bold;
 }
 
-.highlight {
+.highlight-pyta {
     font-weight: bold;
-    background-color: rgba(228, 255, 0, 0.45);
+    background: rgba(228, 255, 0, 0.4) !important;
 }
 
 .black {
@@ -132,6 +144,15 @@ pre {
 	font-size: 75%;
 	padding: 20px;
 }
+#report-bug a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+#report-bug a:hover {
+    text-decoration: underline;
+}
 
 #logo {
     position: relative;
@@ -140,17 +161,19 @@ pre {
     padding-top: 10px;
 }
 
-.occurrences {
+.occurrences, .shown {
+    line-height: 25px;
     padding-left: 20px;
     vertical-align: middle;
 }
 
 .info {
     font-size: 110%;
+    display: flex;  /*Narrow width viewports*/
 }
 
 .slider {
-    float: right;
+    margin-left: auto;
 }
 
 .slider button {
@@ -171,15 +194,24 @@ pre {
 }
 
 .collapsible {
-    width: 100%;
+    /*width: 100%;*/
+}
+
+/*display none caused width of parent to shrink when longer text messages are hidden*/
+.collapsible.hide-and-maintain-width {
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .content {
+    margin-bottom: 15px;
 }
 
 .message-container{
-    border-top: 1px solid rgba(0, 0, 0, 0.2);
-    margin-top: 5px;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    margin: 8px 0;
 }
 
 .message-name {
@@ -190,3 +222,303 @@ pre {
     font-style: italic;
     padding-left: 20px;
 }
+
+footer {
+    background: #2d3441;
+    color: white;
+    padding: 30px;
+    margin-top: 40px;
+}
+
+
+
+/*  Pygments css. Edited and reformatted from original output.
+    Unfortunately the class names cannot be improved to semantic names.
+*/
+.pygments-hll {
+    background-color: #ffffcc;
+} /* ? */
+
+.pygments-c {
+    color: #999;
+} /* Comment */
+
+.pygments-err {
+    /*border: 1px solid #FF0000;*/
+} /* Error */
+
+.pygments-k {
+    color: #AA22FF;
+    font-weight: bold;
+} /* Keyword */
+
+.pygments-o {
+    color: #666666;
+} /* Operator */
+
+.pygments-ch {
+    color: #408080;
+} /* Comment.Hashbang */
+
+.pygments-cm {
+    color: #999;
+} /* Comment.Multiline */
+
+.pygments-cp {
+    color: #BC7A00;
+} /* Comment.Preproc */
+
+.pygments-cpf {
+    color: #408080;
+} /* Comment.PreprocFile */
+
+.pygments-c1 {
+    color: #999;
+} /* Comment.Single */
+
+.pygments-cs {
+    color: #999;
+} /* Comment.Special */
+
+.pygments-gd {
+    color: #A00000;
+} /* Generic.Deleted */
+
+.pygments-ge {
+    font-style: italic;
+} /* Generic.Emph */
+
+.pygments-gr {
+    color: #FF0000;
+} /* Generic.Error */
+
+.pygments-gh {
+    color: #000080;
+    font-weight: bold;
+} /* Generic.Heading */
+
+.pygments-gi {
+    color: #00A000;
+} /* Generic.Inserted */
+
+.pygments-go {
+    color: #888888;
+} /* Generic.Output */
+
+.pygments-gp {
+    color: #000080;
+    font-weight: bold;
+} /* Generic.Prompt */
+
+.pygments-gs {
+    font-weight: bold;
+} /* Generic.Strong */
+
+.pygments-gu {
+    color: #800080;
+    font-weight: bold;
+} /* Generic.Subheading */
+
+.pygments-gt {
+    color: #0044DD;
+} /* Generic.Traceback */
+
+.pygments-kc {
+    color: #008000;
+    font-weight: bold;
+} /* Keyword.Constant */
+
+.pygments-kd {
+    color: #008000;
+    font-weight: bold;
+} /* Keyword.Declaration */
+
+.pygments-kn {
+    color: #008000;
+    font-weight: bold;
+} /* Keyword.Namespace */
+
+.pygments-kp {
+    color: #008000;
+} /* Keyword.Pseudo */
+
+.pygments-kr {
+    color: #008000;
+    font-weight: bold;
+} /* Keyword.Reserved */
+
+.pygments-kt {
+    color: #B00040;
+} /* Keyword.Type */
+
+.pygments-m {
+    color: #666666;
+} /* Literal.Number */
+
+.pygments-s {
+    color: #BA2121;
+} /* Literal.String */
+
+.pygments-na {
+    color: #7D9029;
+} /* Name.Attribute */
+
+.pygments-nb {
+    color: #008000;
+} /* Name.Builtin */
+
+.pygments-nc {
+    color: #0000FF;
+    font-weight: bold;
+} /* Name.Class */
+
+.pygments-no {
+    color: #880000;
+} /* Name.Constant */
+
+.pygments-nd {
+    color: #AA22FF;
+} /* Name.Decorator */
+
+.pygments-ni {
+    color: #999999;
+    font-weight: bold;
+} /* Name.Entity */
+
+.pygments-ne {
+    color: #D2413A;
+    font-weight: bold;
+} /* Name.Exception */
+
+.pygments-nf {
+    color: #0000FF;
+} /* Name.Function */
+
+.pygments-nl {
+    color: #A0A000;
+} /* Name.Label */
+
+.pygments-nn {
+    color: #0000FF;
+    font-weight: bold;
+} /* Name.Namespace */
+
+.pygments-nt {
+    color: #008000;
+    font-weight: bold;
+} /* Name.Tag */
+
+.pygments-nv {
+    color: #19177C;
+} /* Name.Variable */
+
+.pygments-ow {
+    color: #AA22FF;
+    font-weight: bold;
+} /* Operator.Word */
+
+.pygments-w {
+    color: #bbbbbb;
+} /* Text.Whitespace */
+
+.pygments-mb {
+    color: #075cc6;
+} /* Literal.Number.Bin */
+
+.pygments-mf {
+    color: #075cc6;
+} /* Literal.Number.Float */
+
+.pygments-mh {
+    color: #075cc6;
+} /* Literal.Number.Hex */
+
+.pygments-mi {
+    color: #075cc6;
+} /* Literal.Number.Integer */
+
+.pygments-mo {
+    color: #075cc6;
+} /* Literal.Number.Oct */
+
+.pygments-sa {
+    color: #059911;
+} /* Literal.String.Affix */
+
+.pygments-sb {
+    color: #059911;
+} /* Literal.String.Backtick */
+
+.pygments-sc {
+    color: #059911;
+} /* Literal.String.Char */
+
+.pygments-dl {
+    color: #059911;
+} /* Literal.String.Delimiter */
+
+.pygments-sd {
+    color: #059911;
+} /* Literal.String.Doc */
+
+.pygments-s2 {
+    color: #059911;
+} /* Literal.String.Double */
+
+.pygments-se {
+    color: #BB6622;
+    font-weight: bold;
+} /* Literal.String.Escape */
+
+.pygments-sh {
+    color: #059911;
+} /* Literal.String.Heredoc */
+
+.pygments-si {
+    color: #BB6688;
+    font-weight: bold;
+} /* Literal.String.Interpol */
+
+.pygments-sx {
+    color: #008000;
+} /* Literal.String.Other */
+
+.pygments-sr {
+    color: #BB6688;
+} /* Literal.String.Regex */
+
+.pygments-s1 {
+    color: #059911;
+} /* Literal.String.Single */
+
+.pygments-ss {
+    color: #19177C;
+} /* Literal.String.Symbol */
+
+.pygments-bp {
+    color: #008000;
+} /* Name.Builtin.Pseudo */
+
+.pygments-fm {
+    color: #0000FF;
+} /* Name.Function.Magic */
+
+.pygments-vc {
+    color: #19177C;
+} /* Name.Variable.Class */
+
+.pygments-vg {
+    color: #19177C;
+} /* Name.Variable.Global */
+
+.pygments-vi {
+    color: #19177C;
+} /* Name.Variable.Instance */
+
+.pygments-vm {
+    color: #19177C;
+} /* Name.Variable.Magic */
+
+.pygments-il {
+    color: #666666;
+} /* Literal.Number.Integer.Long */

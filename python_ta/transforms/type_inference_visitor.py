@@ -2,7 +2,7 @@ import astroid.inference
 import astroid
 from astroid.node_classes import *
 from typing import *
-from typing import CallableMeta, TupleMeta, Union, _gorg, _geqv, _ForwardRef
+from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
 from ..typecheck.type_store import TypeStore

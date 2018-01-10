@@ -155,7 +155,7 @@ class PlainReporter(BaseReporter):
         self.current_file_linted = filename
 
         # Augment the reporter with the source code.
-        with open(filename) as f:
+        with open(filename, encoding='utf-8') as f:
             self._source_lines = [
                 line.rstrip() for line in f.readlines()]
 
@@ -270,9 +270,11 @@ class PlainReporter(BaseReporter):
         end_col = slice_.stop or len(text)
 
         if linetype == LineType.ERROR:
-            snippet += self._colourify('black', text[:start_col])
+            if text[:start_col]:
+                snippet += self._colourify('black', text[:start_col])
             snippet += self._colourify('highlight', text[slice_])
-            snippet += self._colourify('black', text[end_col:])
+            if text[end_col:]:
+                snippet += self._colourify('black', text[end_col:])
         elif linetype == LineType.CONTEXT:
             snippet += self._colourify('grey', text)
         elif linetype == LineType.OTHER:
@@ -294,13 +296,13 @@ class PlainReporter(BaseReporter):
             number = 3 * self._SPACE
 
         if linetype == LineType.ERROR:
-            return spaces + self._colourify('gbold', number) + spaces
+            return spaces + self._colourify('gbold-line', number) + spaces
         elif linetype == LineType.CONTEXT:
-            return spaces + self._colourify('grey', number) + spaces
+            return spaces + self._colourify('grey-line', number) + spaces
         elif linetype == LineType.OTHER:
-            return spaces + self._colourify('grey', number) + spaces
+            return spaces + self._colourify('grey-line', number) + spaces
         elif linetype == LineType.DOCSTRING:
-            return spaces + self._colourify('black', number) + spaces
+            return spaces + self._colourify('black-line', number) + spaces
         else:
             return spaces + number + spaces
 
@@ -314,3 +316,8 @@ class PlainReporter(BaseReporter):
         """Override in reporters that output collections of messages once at
         the end of linting all files, rather than stream to std.out"""
         pass
+
+    @classmethod
+    def _vendor_wrap(self, colour_class, text):
+        """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
+        return text

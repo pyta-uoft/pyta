@@ -25,7 +25,7 @@ def patch_linter_transform():
     def new_get_ast(self, filepath, modname):
         ast = old_get_ast(self, filepath, modname)
         if ast is not None:
-            with open(filepath) as f:
+            with open(filepath, encoding='utf-8') as f:
                 source_code = f.readlines()
             ending_transformer = TransformVisitor()
             register_transforms(source_code, ending_transformer)

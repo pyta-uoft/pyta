@@ -18,7 +18,7 @@ if __name__ == '__main__':
 import builtins
 try:
     del builtins._
-except NameError:
+except AttributeError:
     pass
 
 import importlib.util
@@ -66,7 +66,7 @@ def _check(module_name='', level='all', local_config='', output=None):
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute path to capture pyta data output. Default std out.
     """
-    MANAGER.astroid_cache.clear()
+    MANAGER.clear_cache()
 
     # Add reporters to an internal pylint data structure, for use with setting
     # custom pyta options in a Tuple, before (re)setting reporter.

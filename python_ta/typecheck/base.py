@@ -1,6 +1,16 @@
+import sys
 from typing import *
-from typing import CallableMeta, GenericMeta, TupleMeta, _gorg, _geqv, _type_vars, _ForwardRef, IO
+from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
+import typing
 import astroid
+
+
+# Make _gorg compatible for Python 3.6.2 and 3.6.3.
+def _gorg(x):
+    if sys.version_info < (3, 6, 3):
+        return typing._gorg(x)
+    else:
+        return x._gorg
 
 
 class TypeInferenceError(Exception):
@@ -219,7 +229,7 @@ class TypeConstraints:
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta):
         """Unify two generic-typed nodes."""
-        if not _geqv(t1, t2):
+        if _gorg(t1) is not _gorg(t2):
             raise TypeInferenceError('bad unify')
         elif t1.__args__ is not None and t2.__args__ is not None:
             for a1, a2 in zip(t1.__args__, t2.__args__):
@@ -291,7 +301,7 @@ class TypeConstraints:
 
     def _least_general_unifier_generic(self, t1: GenericMeta, t2: GenericMeta):
         """Unify two generic types."""
-        if not _geqv(t1, t2):
+        if _gorg(t1) is not _gorg(t2):
             raise TypeInferenceError('bad unify')
         elif t1.__args__ is not None and t2.__args__ is not None:
             for a1, a2 in zip(t1.__args__, t2.__args__):
@@ -347,7 +357,7 @@ class TypeConstraints:
         if isinstance(t1, TypeVar) or isinstance(t2, TypeVar):
             return True
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            if not _geqv(t1, t2):
+            if _gorg(t1) is not _gorg(t2):
                 return False
             elif t1.__args__ is not None and t2.__args__ is not None:
                 for a1, a2 in zip(t1.__args__, t2.__args__):

@@ -1,6 +1,7 @@
 import astroid
 import nose
 from hypothesis import assume, given, settings
+from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
@@ -93,6 +94,84 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         call_node = next(module.nodes_of_class(astroid.Call))
         function_call_type = call_node.type_constraints.type
         assert inferer.type_constraints.lookup_concrete(function_call_type) == call_node.args[i].type_constraints.type
+
+
+def test_non_annotated_function_call_bad_arguments():
+    """ User tries to call a non-annotated function on arguments of the wrong type.
+    """
+    program = f'def add_num(num1, num2):\n' \
+              f'    return num1 + num2\n' \
+              f'\n' \
+              f'add_num("bob", 1.0)\n'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    call_node = next(module.nodes_of_class(astroid.Call))
+    expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_num":\n' \
+                   f'in parameter (1), the function was expecting an object of inferred type ' \
+                   f'int but was given an object of type str.\n' \
+                   f'in parameter (1), the function was expecting an object of inferred type ' \
+                   f'int but was given an object of type float.\n'
+                   # TODO: should we use the term inferred?
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
+def test_user_defined_annotated_call_wrong_arguments_type():
+    """ User tries to call an annotated user-defined function on the wrongly-typed arguments.
+    """
+    program = f'def add_3(num1: int, num2: int, num3: int) -> int:\n' \
+              f'    return num1 + num2 + num3\n' \
+              f'\n' \
+              f'add_3(1, "bob", 1.0)\n'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    expected_msg = f'In the Call node in line 4, there was an error in calling the annotated function "add_3":\n' \
+                   f'in parameter (2), the annotated type is int but was given an object of type str.\n' \
+                   f'in parameter (3), the annotated type is int but was given an object of type float.\n'
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
+def test_user_defined_annotated_call_wrong_arguments_number():
+    """ User tries to call an annotated function on the wrong number of arguments.
+    """
+    program = f'def add_3(num1: int, num2: int, num3: int) -> int:\n' \
+              f'    return num1 + num2 + num3\n' \
+              f'\n' \
+              f'add_3()\n'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_3":\n' \
+                   f'the function was expecting 3 arguments, but was given 0.'
+    assert call_node.type_constraints.type.msg == expected_msg
+
+
+def test_conflicting_inferred_type_variable():
+    """ User calls two functions on an object, which contradicts the inferred type of the variable.
+    """
+    program = f'def return_num(num: int) -> int:\n' \
+              f'    return num\n' \
+              f'\n' \
+              f'def return_str(str: str) -> str:\n' \
+              f'    return str\n' \
+              f'\n' \
+              f'return_num(x)\n' \
+              f'return_str(x)\n'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    call_node = list(module.nodes_of_class(astroid.Call))[1]
+    expected_msg = f'In the Call node in line 8, there was an error in calling the annotated function "return_str":\n' \
+                   f'in parameter (1), the annotated type is str but was given an object of inferred type int.'
+                   # TODO: test case redundant because recursive..?
+    assert call_node.type_constraints.type.msg == expected_msg
 
 
 if __name__ == '__main__':

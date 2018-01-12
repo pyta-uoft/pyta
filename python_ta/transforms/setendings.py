@@ -28,6 +28,7 @@ Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
 import astroid
+from astroid.node_classes import NodeNG
 from astroid.transforms import TransformVisitor
 
 CONSUMABLES = " \n\t\\"
@@ -75,6 +76,7 @@ NODES_WITH_CHILDREN = [
     astroid.Delete,
     astroid.ExceptHandler,
     astroid.For,
+    astroid.FormattedValue,
     astroid.FunctionDef,
     astroid.GeneratorExp,
 
@@ -454,7 +456,7 @@ def start_setter_from_source(source_code, pred):
         col_offset, lineno = node.col_offset, node.fromlineno - 1
 
         # First, search the remaining part of the current start line
-        for j in range(col_offset, -1, -1):
+        for j in range(min(len(source_code[lineno]) - 1, col_offset), -1, -1):
             if pred(source_code[lineno], j, node):
                 node.col_offset = j
                 return

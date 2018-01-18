@@ -12,45 +12,33 @@ class UsingStructureTestChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = 'using-constants-test'
+    name = 'using-structure-test'
 
-    msgs = {'W7778': ('using a structure which returns a constant value in a conditional statement'
-                      , 'using-constants-test'
+    msgs = {'E9901': ('Structures have a constant true value, meaning the same branch will always be executed '
+                      '(and the other branch does not have a purpose).'
+                      , 'using-structure-test'
                       , 'Conditional statements should depend on a variable not a constant value.'
                         'This is usually not what the user intended to do'),}
 
     # this is important so that your checker is executed before others
     priority = -1
 
-    def _check_all_constants(self, node):
+    def _check_collection(self, node):
         """
         Precondition: node is a condition in an if statement
-        Returns true if all values in the BinOp tree are constants or if all values in the UnaryOp tree are constants
+        Returns true if all the node is a structure/collection of values
         Returns false otherwise
-        Used in check_if_constant to check for constant test in BinOp/UnaryOp/Const nodes
         """
         if isinstance(node, astroid.List) or isinstance(node, astroid.Tuple) or isinstance(node, astroid.Dict) or \
                 isinstance(node, astroid.Set):
             return True
-        elif isinstance(node, astroid.BinOp):
-            return self._check_all_constants(node.left) and self._check_all_constants(node.right)
-        elif isinstance(node, astroid.UnaryOp):
-            return self._check_all_constants(node.operand)
-        elif isinstance(node, astroid.BoolOp):
-            constant = True
-            for each in node.values:
-                constant = constant and self._check_all_constants(each)
-            return constant
-        else:
-            return False
 
-    @check_messages("using-constants-test")
+    @check_messages("using-structures-test")
     def visit_if(self, node):
-        # check if node is a conditional statement
-        if self._check_all_constants(node.test):
-            self.add_message('using-constants-test', node=node.test)
+        if self._check_collection(node.test):
+            self.add_message('using-structure-test', node=node.test)
 
 
 def register(linter):
     """required method to auto register this checker"""
-    linter.register_checker(UsingConstantTestChecker(linter))
+    linter.register_checker(UsingStructureTestChecker(linter))

@@ -12,9 +12,10 @@ class UsingConstantTestChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = 'using-constants-test'
+    name = 'using-constant-test'
 
-    msgs = {'W7777': ('using a constant value in a conditional statement'
+    msgs = {'E9902': ('This condition is a constant expression, meaning the same branch will always be executed '
+                      '(and the other branch does not have a purpose).'
                       , 'using-constants-test'
                       , 'Conditional statements should depend on a variable not a constant value.'
                         'This is usually not what the user intended to do'),}
@@ -25,7 +26,7 @@ class UsingConstantTestChecker(BaseChecker):
     def _check_all_constants(self, node):
         """
         Precondition: node is a condition in an if statement
-        Returns true if all values in the BinOp tree are constants or if all values in the UnaryOp tree are constants
+        Returns true if all values in this node are constants
         Returns false otherwise
         Used in check_if_constant to check for constant test in BinOp/UnaryOp/Const nodes
         """
@@ -45,7 +46,6 @@ class UsingConstantTestChecker(BaseChecker):
 
     @check_messages("using-constants-test")
     def visit_if(self, node):
-        # check if node is a conditional statement
         if self._check_all_constants(node.test):
             self.add_message('using-constants-test', node=node.test)
 

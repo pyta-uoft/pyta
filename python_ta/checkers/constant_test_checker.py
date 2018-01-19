@@ -37,12 +37,7 @@ class UsingConstantTestChecker(BaseChecker):
         elif isinstance(node, astroid.UnaryOp):
             return self._check_all_constants(node.operand)
         elif isinstance(node, astroid.BoolOp):
-            constant = True
-            for each in node.values:
-                constant = constant and self._check_all_constants(each)
-            return constant
-        else:
-            return False
+            return all(node.values)
 
     @check_messages("using-constants-test")
     def visit_if(self, node):

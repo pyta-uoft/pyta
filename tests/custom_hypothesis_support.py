@@ -324,6 +324,7 @@ def functiondef_node(draw, name=None, annotated=False, returns=False):
         returns_node.postinit(const_node(None))
     body.append(returns_node)
     node = astroid.FunctionDef(name=name)
+    node.parent = astroid.Module('Default', None)
     node.postinit(
         args,
         body,

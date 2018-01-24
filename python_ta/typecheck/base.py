@@ -100,11 +100,11 @@ def op_to_name_binary(op):
     elif op == '**':
         return 'exponential operation'
     elif op == '&':
-        return 'logical AND operation'
+        return 'bitwise AND operation'
     elif op == '^':
-        return 'logical XOR operation'
+        return 'bitwise XOR operation'
     elif op == '|':
-        return 'logical OR operation'
+        return 'bitwise OR operation'
     elif op == '==':
         return 'equality operation'
     elif op == '!=':

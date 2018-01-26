@@ -177,7 +177,7 @@ def op_to_dunder_unary(op):
 
 def _correct_article(noun : str):
     """Helper to return a noun with the correct article."""
-    if noun.lower() == == "a" or "e" or "i" or "o" or "u":
+    if noun.lower() == "a" or "e" or "i" or "o" or "u":
         return "an" + noun
     else:
         return "a" + noun

@@ -80,7 +80,7 @@ def binary_op_hints(op, args):
     """Return an appropriate 'hint' or suggestion given the binary operation and operand types."""
     if op == '+':
         if int in args and str in args:
-            return "Perhaps you wanted to cast the integer into a string or the converse?"
+            return "Perhaps you wanted to cast the integer into a string or vice versa?"
 
 
 def op_to_name_binary(op):

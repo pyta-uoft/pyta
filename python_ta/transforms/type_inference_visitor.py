@@ -237,8 +237,8 @@ class TypeInferer:
         try:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
-            error = f'You cannot {op_to_name_binary(func_name)} with a(n) {arg_types[0].__name__}' \
-                    f' "{node.left.value}" and a(n) {arg_types[1].__name__} "{node.right.value}".'
+            error = f'You cannot {op_to_name_binary(func_name)} with {_correct_article(arg_types[0].__name__)}' \
+                    f' "{node.left.value}" and {_correct_article(arg_types[1].__name__)} "{node.right.value}".'
             hint = f' {binary_op_hints(func_name, arg_types)}'
             return TypeInfo(TypeErrorInfo(error + hint , node))
 

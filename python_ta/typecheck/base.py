@@ -86,37 +86,39 @@ def binary_op_hints(op, args):
 def op_to_name_binary(op):
     """Return the name of the method corresponding to binary op."""
     if op == '+':
-        return 'addition'
+        return 'add'
     elif op == '-':
-        return 'subtraction'
+        return 'subtract'
     elif op == '*':
-        return 'multiplication'
+        return 'multiply'
     elif op == '//':
-        return 'integer division'
+        return 'use integer division with'
     elif op == '%':
-        return 'modular operation'
+        # integer divide?
+        return 'use modulus with'
     elif op == '/':
-        return 'division'
+        return 'divide'
     elif op == '**':
-        return 'exponential operation'
+        return 'exponentiate'
     elif op == '&':
-        return 'bitwise AND operation'
+        return 'use bitwise AND with'
     elif op == '^':
-        return 'bitwise XOR operation'
+        return 'use bitwise XOR with'
     elif op == '|':
-        return 'bitwise OR operation'
+        return 'use bitwise OR with'
     elif op == '==':
-        return 'equality operation'
+        return 'compare for equality between'
     elif op == '!=':
-        return 'inequality operation'
+        return 'compare for inequality between'
     elif op == '<':
-        return 'less than operation'
+        # TODO: compare whether {} is _ than {}
+        return 'compare'
     elif op == '<=':
-        return 'less than or equal to operation'
+        return 'compare'
     elif op == '>':
-        return 'greater than operation'
+        return 'compare'
     elif op == '>=':
-        return 'greater than or equal to operation'
+        return 'compare'
     # TODO: 'is' and 'in'
     else:
         return op

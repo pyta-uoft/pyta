@@ -217,13 +217,6 @@ class TypeInferer:
     ##############################################################################
     # Operation nodes
     ##############################################################################
-    def _correct_article(noun : str):
-        """Helper to return a noun with the correct article."""
-        if noun.lower() == == "a" or "e" or "i" or "o" or "u":
-            return "an" + noun
-        else:
-            return "a" + noun
-
     def _handle_call(self, node, func_name, *args):
         """Helper to lookup a function and unify it with given arguments.
            Returns the return type of unified function call."""

@@ -175,6 +175,14 @@ def op_to_dunder_unary(op):
         return op
 
 
+def _correct_article(noun : str):
+    """Helper to return a noun with the correct article."""
+    if noun.lower() == == "a" or "e" or "i" or "o" or "u":
+        return "an" + noun
+    else:
+        return "a" + noun
+
+
 def lookup_method(name, caller_type, *args):
     """Lookup method with the given name for the given type."""
     if isinstance(caller_type, TupleMeta):

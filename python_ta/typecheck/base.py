@@ -76,52 +76,33 @@ TYPE_SIGNATURES = {
 }
 
 
+OP_TO_NAME_BINARY = {
+      '+' : 'add'
+    , '-' : 'subtract'
+    , '*' : 'multiply'
+    , '//' : 'use integer division with'
+    , '%' : 'use modulus with'
+    , '/' : 'exponentiate'
+    , '&' : 'use bitwise AND with'
+    , '^' : 'use bitwise XOR with'
+    , '|' : 'use bitwise OR with'
+    , '==' : 'compare for equality between'
+    , '!=' : 'compare for inequality between'
+    # TODO : compare whether {} is _ than {} 'compare'
+    , '<' : 'compare'
+    , '<=' : 'compare'
+    , '>' : 'compare'
+    , '>=' : 'compare'
+    # TODO: 'is' and 'in'
+    }
+
+
+# TODO: Convert this into dictionary
 def binary_op_hints(op, args):
     """Return an appropriate 'hint' or suggestion given the binary operation and operand types."""
     if op == '+':
         if int in args and str in args:
             return "Perhaps you wanted to cast the integer into a string or vice versa?"
-
-
-def op_to_name_binary(op):
-    """Return the name of the method corresponding to binary op."""
-    if op == '+':
-        return 'add'
-    elif op == '-':
-        return 'subtract'
-    elif op == '*':
-        return 'multiply'
-    elif op == '//':
-        return 'use integer division with'
-    elif op == '%':
-        # integer divide?
-        return 'use modulus with'
-    elif op == '/':
-        return 'divide'
-    elif op == '**':
-        return 'exponentiate'
-    elif op == '&':
-        return 'use bitwise AND with'
-    elif op == '^':
-        return 'use bitwise XOR with'
-    elif op == '|':
-        return 'use bitwise OR with'
-    elif op == '==':
-        return 'compare for equality between'
-    elif op == '!=':
-        return 'compare for inequality between'
-    elif op == '<':
-        # TODO: compare whether {} is _ than {}
-        return 'compare'
-    elif op == '<=':
-        return 'compare'
-    elif op == '>':
-        return 'compare'
-    elif op == '>=':
-        return 'compare'
-    # TODO: 'is' and 'in'
-    else:
-        return op
 
 
 def op_to_dunder_binary(op):

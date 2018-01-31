@@ -230,8 +230,8 @@ class TypeInferer:
         try:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
-            if func_call in OP_TO_NAME_BINARY:
-                return TypeInfo(f'Function {func_call} not found with given args: {arg_types}', node))
+            if func_call not in OP_TO_NAME_BINARY:
+                return TypeInfo(TypeErrorInfo(f'Function {func_call} not found with given args: {arg_types}', node))
             else:
                 error = f'You cannot {op_to_name_binary(func_name)} {_correct_article(arg_types[0].__name__)}' \
                         f' "{node.left.value}" and {_correct_article(arg_types[1].__name__)} "{node.right.value}".'

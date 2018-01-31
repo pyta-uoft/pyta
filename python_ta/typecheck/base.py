@@ -156,12 +156,12 @@ def op_to_dunder_unary(op):
         return op
 
 
-def _correct_article(noun : str):
+def _correct_article(noun : str) -> None:
     """Helper to return a noun with the correct article."""
-    if noun.lower()[0] in ["a", "e", "i", "o", "u"]:
-        return "an " + noun
+    if noun.lower()[0] in 'aeiou':
+        return 'an ' + noun
     else:
-        return "a " + noun
+        return 'a ' + noun
 
 
 def lookup_method(name, caller_type, *args):

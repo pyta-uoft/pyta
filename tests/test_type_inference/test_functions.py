@@ -120,7 +120,7 @@ def test_non_annotated_function_call_bad_arguments():
     except:
         raise SkipTest()
     call_node = next(module.nodes_of_class(astroid.Call))
-    # TODO: This error is a flawed because the unification error occurs for both arguments due to our current implementation,
+    # TODO: This error is flawed because the unification error occurs for both arguments due to our current implementation,
     # which "chooses" the first valid function type from TypeStore.
     # Should we fix this implementation first or save it for later and hard-code the correct error message for now?
     expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_num":\n' \

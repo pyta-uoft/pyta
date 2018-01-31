@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import _correct_article, binary_op_hints, op_to_name_binary, op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
+from ..typecheck.base import _correct_article, binary_op_hints, OP_TO_NAME_BINARY, op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
 from ..typecheck.type_store import TypeStore
 
 
@@ -230,11 +230,13 @@ class TypeInferer:
         try:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
-            error = f'You cannot {op_to_name_binary(func_name)} {_correct_article(arg_types[0].__name__)}' \
-                    f' "{node.left.value}" and {_correct_article(arg_types[1].__name__)} "{node.right.value}".'
-            hint = f' {binary_op_hints(func_name, arg_types)}'
-            return TypeInfo(TypeErrorInfo(error + hint , node))
-
+            if func_call in OP_TO_NAME_BINARY:
+                return TypeInfo(f'Function {func_call} not found with given args: {arg_types}', node))
+            else:
+                error = f'You cannot {op_to_name_binary(func_name)} {_correct_article(arg_types[0].__name__)}' \
+                        f' "{node.left.value}" and {_correct_article(arg_types[1].__name__)} "{node.right.value}".'
+                hint = f' {binary_op_hints(func_name, arg_types)}'
+                return TypeInfo(TypeErrorInfo(error + hint , node))
         try:
             return_type = self.type_constraints.unify_call(func_type, *arg_types, node=node)
         except TypeInferenceError:
@@ -425,3 +427,4 @@ class TypeInferer:
         node.type_constraints = TypeInfo(NoType)
         # print('All sets:', self.type_constraints._sets)
         # print('Global bindings:', {k: self.type_constraints.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
+

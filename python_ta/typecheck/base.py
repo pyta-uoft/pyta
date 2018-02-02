@@ -156,7 +156,7 @@ def op_to_dunder_unary(op):
         return op
 
 
-def _correct_article(noun : str) -> None:
+def _correct_article(noun : str) -> str:
     """Helper to return a noun with the correct article."""
     if noun.lower()[0] in 'aeiou':
         return 'an ' + noun

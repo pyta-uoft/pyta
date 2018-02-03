@@ -1,12 +1,13 @@
 import astroid
 import nose
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
 from python_ta.transforms.type_inference_visitor import op_to_dunder_binary
 settings.load_profile("pyta")
 
 
 @given(cs.binop_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_binop_non_bool_concrete(node):
     """Test type setting of BinOp node(s) with non-boolean operands."""
     module, inferer = cs._parse_text(node)

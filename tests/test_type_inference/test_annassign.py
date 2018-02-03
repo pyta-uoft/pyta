@@ -1,6 +1,6 @@
 import astroid
 import nose
-from hypothesis import given, settings
+from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from python_ta.typecheck.base import _node_to_type
@@ -25,6 +25,7 @@ def test_annassign_concrete():
 
 
 @given(hs.dictionaries(cs.valid_identifier(), cs.builtin_type, min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_annassign(variables_annotations_dict):
     """Test whether types are being properly set for an AnnAssign node.
     """

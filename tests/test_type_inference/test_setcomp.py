@@ -1,12 +1,13 @@
 import astroid
 import nose
-from hypothesis import settings, given
+from hypothesis import settings, given, HealthCheck
 import tests.custom_hypothesis_support as cs
 from typing import Set, GenericMeta
 settings.load_profile("pyta")
 
 
 @given(cs.homogeneous_iterable)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_comprehension_reproduce_homogeneous(iterable):
     """Test SetComp node visitor representing a comprehension expression reproducing a set of elements of
     a homogeneous iterable."""
@@ -17,6 +18,7 @@ def test_set_comprehension_reproduce_homogeneous(iterable):
 
 
 @given(cs.heterogeneous_iterable)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_comprehension_reproduce_heterogeneous(iterable):
     """Test SetComp node visitor representing a comprehension expression reproducing a set of elements of
     a heterogeneous iterable."""
@@ -27,6 +29,7 @@ def test_set_comprehension_reproduce_heterogeneous(iterable):
 
 
 @given(cs.valid_identifier(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_comprehension_reproduce_string(iterable):
     """Test SetComp node visitor representing a comprehension expression reproducing a set of elements of
     a string."""

@@ -26,6 +26,7 @@ def test_set_env(variables_dict):
 
 
 @given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_name_unassigned(variable_name):
     """Test visitor for name nodes representing a single unassigned variable in module."""
     program = variable_name
@@ -80,6 +81,7 @@ def test_multi_target_assign(variables_dict):
 
 
 @given(hs.lists(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), min_size=1), cs.primitive_values)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_multi_assign(variables_list, value):
     """Test environment setting visitors"""
     for variable_name in variables_list:

@@ -1,12 +1,13 @@
 import astroid
 import nose
-from hypothesis import assume, given, settings
+from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from typing import Any, Dict, List, Set, Tuple
 settings.load_profile("pyta")
 
 
 @given(cs.const_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_simple_literal(node):
     """Test Const nodes representing int, bool, float, and None literal values."""
     assume(not(isinstance(node.value, str)))
@@ -15,6 +16,7 @@ def test_simple_literal(node):
 
 
 @given(cs.tuple_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_tuple(t_tuple):
     """ Test Tuple nodes representing a tuple of various types."""
     module, _ = cs._parse_text(t_tuple)
@@ -24,6 +26,7 @@ def test_tuple(t_tuple):
 
 
 @given(cs.simple_homogeneous_list_node(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
     module, _ = cs._parse_text(lst)
@@ -35,6 +38,7 @@ def test_homogeneous_lists(lst):
 
 
 @given(cs.list_node(min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_random_lists(lst):
     """Test List nodes representing a list of values of different primitive types."""
     assume(not isinstance(lst.elts[0].value, type(lst.elts[1].value)))
@@ -49,6 +53,7 @@ def test_random_lists(lst):
 
 
 @given(cs.simple_homogeneous_set_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_homogeneous_set(node):
     """Test Set nodes representing a set of homogeneous values."""
     module, _ = cs._parse_text(node)
@@ -63,6 +68,7 @@ def test_homogeneous_set(node):
 
 
 @given(cs.set_node(min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_random_set(node):
     """Test Set nodes representing a set of heterogeneous values."""
     assume(not isinstance(list(node.elts)[0].value, type(list(node.elts)[1].value)))
@@ -78,6 +84,7 @@ def test_random_set(node):
 
 
 @given(cs.simple_homogeneous_dict_node(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_homogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
     module, _ = cs._parse_text(dictionary)
@@ -90,6 +97,7 @@ def test_homogeneous_dict(dictionary):
 
 
 @given(cs.dict_node(min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_heterogeneous_dict(node):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     keys = [item.value for item, _ in node.items]
@@ -109,6 +117,7 @@ def test_heterogeneous_dict(node):
 
 
 @given(cs.subscript_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_index(node):
     module, _ = cs._parse_text(node)
     for index_node in module.nodes_of_class(astroid.Index):
@@ -116,6 +125,7 @@ def test_index(node):
 
 
 @given(cs.expr_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_expr(expr):
     module, _ = cs._parse_text(expr)
     for expr_node in module.nodes_of_class(astroid.Expr):

@@ -1,11 +1,12 @@
 import astroid
 import nose
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
 @given(cs.unaryop_node(cs.non_bool_unary_op, cs.const_node(cs.numeric_values)))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_unaryop_non_bool_concrete(node):
     """Test type setting of UnaryOp node(s) with non-boolean operand."""
     assume(not (node.op == '~' and isinstance(node.operand.value, float)))
@@ -15,6 +16,7 @@ def test_unaryop_non_bool_concrete(node):
 
 
 @given(cs.unaryop_node(cs.unary_bool_operator))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_not_bool(node):
     """Test type setting of UnaryOp node representing boolean operation not."""
     module, _ = cs._parse_text(node)

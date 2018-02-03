@@ -1,12 +1,13 @@
 import astroid
 import nose
-from hypothesis import settings, given
+from hypothesis import settings, given, HealthCheck
 from typing import List
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
 @given(cs.homogeneous_iterable)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_list_comprehension_single_target_name_homogeneous_iterable(iterable):
     """Test Comprehension node visitor representing a comprehension expression with a single target and a
     name expression over a homogeneous list."""
@@ -18,6 +19,7 @@ def test_list_comprehension_single_target_name_homogeneous_iterable(iterable):
 
 
 @given(cs.homogeneous_iterable)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_list_comprehension_single_target_name_heterogeneous_iterable(iterable):
     """Test Comprehension node visitor representing a comprehension expression with a single target and a
     name expression over a heterogeneous list."""
@@ -29,6 +31,7 @@ def test_list_comprehension_single_target_name_heterogeneous_iterable(iterable):
 
 
 @given(cs.valid_identifier(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_list_comprehension_single_target_name_string(iterable):
     """Test Comprehension node visitor representing a comprehension expression with a single target and a
     name expression over a string."""

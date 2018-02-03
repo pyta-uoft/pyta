@@ -1,12 +1,13 @@
 import astroid
 import nose
-from hypothesis import given, settings
+from hypothesis import given, settings, HealthCheck
 from typing import List
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
 @given(cs.subscript_node(cs.simple_homogeneous_list_node(min_size=1), cs.index_node()))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_inference_list_subscript(node):
     """Test whether visitor properly set the type constraint of Subscript node representing list-index access."""
     module, _ = cs._parse_text(node)
@@ -16,6 +17,7 @@ def test_inference_list_subscript(node):
 
 
 @given(cs.subscript_node(cs.simple_homogeneous_list_node(min_size=1), cs.slice_node()))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_subscript_homogeneous_list_slice(node):
     """Test visitor of Subscript node representing slicing of homogeneous list."""
     module, _ = cs._parse_text(node)

@@ -76,6 +76,35 @@ TYPE_SIGNATURES = {
 }
 
 
+OP_TO_NAME_BINARY = {
+      '+' : 'add'
+    , '-' : 'subtract'
+    , '*' : 'multiply'
+    , '//' : 'use integer division with'
+    , '%' : 'use modulus with'
+    , '/' : 'exponentiate'
+    , '&' : 'use bitwise AND with'
+    , '^' : 'use bitwise XOR with'
+    , '|' : 'use bitwise OR with'
+    , '==' : 'compare for equality between'
+    , '!=' : 'compare for inequality between'
+    # TODO : compare whether {} is _ than {} 'compare'
+    , '<' : 'compare'
+    , '<=' : 'compare'
+    , '>' : 'compare'
+    , '>=' : 'compare'
+    # TODO: 'is' and 'in'
+    }
+
+
+# TODO: Convert this into dictionary
+def binary_op_hints(op, args):
+    """Return an appropriate 'hint' or suggestion given the binary operation and operand types."""
+    if op == '+':
+        if int in args and str in args:
+            return "Perhaps you wanted to cast the integer into a string or vice versa?"
+
+
 def op_to_dunder_binary(op):
     """Return the dunder method name corresponding to binary op."""
     if op == '+':
@@ -125,6 +154,14 @@ def op_to_dunder_unary(op):
         return '__invert__'
     else:
         return op
+
+
+def _correct_article(noun : str) -> str:
+    """Helper to return a noun with the correct article."""
+    if noun.lower()[0] in 'aeiou':
+        return 'an ' + noun
+    else:
+        return 'a ' + noun
 
 
 def lookup_method(name, caller_type, *args):

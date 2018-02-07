@@ -18,7 +18,9 @@ class UsingStructureTestChecker(BaseChecker):
                       '(and the other branch does not have a purpose).'
                       , 'using-structure-test'
                       , 'Conditional statements should depend on a variable not a constant value.'
-                        'This is usually not what the user intended to do'),}
+                        'This is usually not what the user intended to do')}
+
+    #Collections always return True
 
     # this is important so that your checker is executed before others
     priority = -1

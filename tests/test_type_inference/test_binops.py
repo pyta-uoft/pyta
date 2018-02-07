@@ -7,7 +7,7 @@ settings.load_profile("pyta")
 
 
 @given(cs.binop_node())
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much])
 def test_binop_non_bool_concrete(node):
     """Test type setting of BinOp node(s) with non-boolean operands."""
     module, inferer = cs._parse_text(node)

@@ -9,3 +9,6 @@ if x or 1:
 
 if not (x and (x or 1)):
     print("there is still a constant 1")
+
+if (x and (x and (x and (x and (x and (x and 1)))))):
+    print("there is still a constant 1")

@@ -14,11 +14,12 @@ class UsingConstantTestChecker(BaseChecker):
 
     name = 'using-constant-test'
 
-    msgs = {'E9902': ('This condition is a constant expression, meaning the same branch will always be executed '
-                      '(and the other branch does not have a purpose).'
+    msgs = {'E9902': ('The condition includes at least one constant '
+                      'which will always return True (if non-zero constant) or always '
+                      'return False (if zero)'
                       , 'using-constants-test'
                       , 'Conditional statements should depend on a variable not a constant value.'
-                        'This is usually not what the user intended to do'),}
+                        'This is usually not what the user intended to do')}
 
     # this is important so that your checker is executed before others
     priority = -1
@@ -26,9 +27,8 @@ class UsingConstantTestChecker(BaseChecker):
     def _check_all_constants(self, node):
         """
         Precondition: node is a condition in an if statement
-        Returns true if all values in this node are constants
+        Returns true if at least one of the values in this node is a constant
         Returns false otherwise
-        Used in check_if_constant to check for constant test in BinOp/UnaryOp/Const nodes
         """
         if isinstance(node, astroid.Const):
             return True
@@ -38,6 +38,7 @@ class UsingConstantTestChecker(BaseChecker):
             return self._check_all_constants(node.operand)
         elif isinstance(node, astroid.BoolOp):
             return all(node.values)
+
 
     @check_messages("using-constants-test")
     def visit_if(self, node):

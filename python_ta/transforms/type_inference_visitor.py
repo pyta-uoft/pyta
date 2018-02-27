@@ -221,11 +221,12 @@ class TypeInferer:
         """Helper to lookup a function and unify it with given arguments.
            Returns the return type of unified function call."""
         arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
-        if len(arg_types) == 2:
-            func_dunder = OP_TO_DUNDER_BINARY[func_name]
-        elif len(arg_types) == 1:
-            func_dunder = op_to_dunder_unary(func_name)
-        else:
+        try:
+            if len(arg_types) == 2:
+                func_dunder = OP_TO_DUNDER_BINARY[func_name]
+            elif len(arg_types) == 1:
+                func_dunder = op_to_dunder_unary(func_name)
+        except KeyError:
             func_dunder = func_name
         try:
             func_type = self.type_store.lookup_function(func_dunder, *arg_types)

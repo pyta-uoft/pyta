@@ -222,17 +222,17 @@ class TypeInferer:
            Returns the return type of unified function call."""
         arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
         if len(arg_types) == 2:
-            func_call = OP_TO_DUNDER_BINARY[func_name]
+            func_dunder = OP_TO_DUNDER_BINARY[func_name]
         elif len(arg_types) == 1:
-            func_call = op_to_dunder_unary(func_name)
+            func_dunder = op_to_dunder_unary(func_name)
         else:
-            func_call = func_name
+            func_dunder = func_name
         try:
-            func_type = self.type_store.lookup_function(func_call, *arg_types)
+            func_type = self.type_store.lookup_function(func_dunder, *arg_types)
         except KeyError:
             if func_name not in OP_TO_NAME_BINARY:
                 # TODO: RENAME FUNC_CALL
-                return TypeInfo(TypeErrorInfo(f'Function {func_call} not found with given args: {arg_types}', node))
+                return TypeInfo(TypeErrorInfo(f'Function {func_dunder} not found with given args: {arg_types}', node))
             else:
                 # TODO: use .as_string instead of value
                 error = f'You cannot {OP_TO_NAME_BINARY[func_name]} {_correct_article(arg_types[0].__name__)}' \
@@ -243,7 +243,7 @@ class TypeInferer:
             return_type = self.type_constraints.unify_call(func_type, *arg_types, node=node)
         except TypeInferenceError:
             return TypeInfo(
-                TypeErrorInfo('Bad unify_call of function {func_call} given\
+                TypeErrorInfo('Bad unify_call of function {func_dunder} given\
                               args: {arg_types}', node))
         else:
             return TypeInfo(return_type)

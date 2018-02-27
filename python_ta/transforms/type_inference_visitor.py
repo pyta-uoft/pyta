@@ -4,7 +4,7 @@ from astroid.node_classes import *
 from typing import *
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import _correct_article, binary_op_hints, OP_TO_NAME_BINARY, op_to_dunder_binary, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
+from ..typecheck.base import _correct_article, binary_op_hints, OP_TO_NAME_BINARY, OP_TO_DUNDER_BINARY, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
 from ..typecheck.type_store import TypeStore
 
 
@@ -222,7 +222,7 @@ class TypeInferer:
            Returns the return type of unified function call."""
         arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
         if len(arg_types) == 2:
-            func_call = op_to_dunder_binary(func_name)
+            func_call = OP_TO_DUNDER_BINARY[func_name]
         elif len(arg_types) == 1:
             func_call = op_to_dunder_unary(func_name)
         else:
@@ -231,8 +231,10 @@ class TypeInferer:
             func_type = self.type_store.lookup_function(func_call, *arg_types)
         except KeyError:
             if func_name not in OP_TO_NAME_BINARY:
+                # TODO: RENAME FUNC_CALL
                 return TypeInfo(TypeErrorInfo(f'Function {func_call} not found with given args: {arg_types}', node))
             else:
+                # TODO: use .as_string instead of value
                 error = f'You cannot {OP_TO_NAME_BINARY[func_name]} {_correct_article(arg_types[0].__name__)}' \
                         f' , {node.left.value}, and {_correct_article(arg_types[1].__name__)}, {node.right.value}.'
                 hint = f' {binary_op_hints(func_name, arg_types)}'
@@ -279,7 +281,7 @@ class TypeInferer:
             if comparator == 'is':
                 return_types.add(bool)
             else:
-                function_type = self.type_store.lookup_function(op_to_dunder_binary(comparator),
+                function_type = self.type_store.lookup_function(OP_TO_DUNDER_BINARY[comparator],
                                                             left_value.type_constraints.type,
                                                             right_value.type_constraints.type)
                 left_value = right_value

@@ -105,23 +105,23 @@ def binary_op_hints(op, args):
             return "Perhaps you wanted to cast the integer into a string or vice versa?"
 
 
-OP_TO_DUNDER = {
-    op == '+' : '__add__',
-    op == '-' : '__sub__',
-    op == '*' : '__mul__',
-    op == '//' : '__idiv__',
-    op == '%' : '__mod__',
-    op == '/' : '__div__',
-    op == '**' : '__pow__',
-    op == '&' : '__and__',
-    op == '^' : '__xor__',
-    op == '|' : '__or__',
-    op == '==' : '__eq__',
-    op == '!=' : '__ne__',
-    op == '<' : '__lt__',
-    op == '<=' : '__le__',
-    op == '>' : '__gt__',
-    op == '>=' : '__ge__'
+OP_TO_DUNDER_BINARY = {
+    '+' : '__add__',
+    '-' : '__sub__',
+    '*' : '__mul__',
+    '//' : '__idiv__',
+    '%' : '__mod__',
+    '/' : '__div__',
+    '**' : '__pow__',
+    '&' : '__and__',
+    '^' : '__xor__',
+    '|' : '__or__',
+    '==' : '__eq__',
+    '!=' : '__ne__',
+    '<' : '__lt__',
+    '<=' : '__le__',
+    '>' : '__gt__',
+    '>=' : '__ge__'
     # TODO: 'is' and 'in'
     }
 

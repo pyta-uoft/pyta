@@ -235,7 +235,7 @@ class TypeInferer:
                 return TypeInfo(TypeErrorInfo(f'Function {func_dunder} not found with given args: {arg_types}', node))
             else:
                 error = f'You cannot {OP_TO_NAME_BINARY[func_name]} {_correct_article(arg_types[0].__name__)}' \
-                        f' , {node.left.as_string()}, and {_correct_article(arg_types[1].__name__)}, {node.right.as_string()}.'
+                        f', {node.left.as_string()}, and {_correct_article(arg_types[1].__name__)}, {node.right.as_string()}.'
                 hint = f' {binary_op_hints(func_name, arg_types)}'
                 return TypeInfo(TypeErrorInfo(error + hint , node))
         try:

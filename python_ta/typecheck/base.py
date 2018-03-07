@@ -128,11 +128,11 @@ OP_TO_DUNDER_BINARY = {
 
 def op_to_dunder_unary(op):
     """Return the dunder method name corresponding to unary op."""
-    if op == '-' :
+    if op == '-':
         return '__neg__'
-    elif op == '+' :
+    elif op == '+':
         return '__pos__'
-    elif op == '~' :
+    elif op == '~':
         return '__invert__'
     else:
         return op

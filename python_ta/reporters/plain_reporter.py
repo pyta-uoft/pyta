@@ -67,7 +67,7 @@ special = {'missing-docstring',
 
 # Messages without a source code line to highlight
 no_hl = {'always-returning-in-a-loop',
-         'too-many-nested-blocks'}
+         'invalid-name'}
 # the "Invalid module name" subsection of "invalid-name" belongs here
 
 

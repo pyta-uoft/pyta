@@ -66,9 +66,9 @@ special = {'missing-docstring',
            'trailing-newlines'}
 
 # Messages without a source code line to highlight
-no_hl = {'always-returning-in-a-loop',
+no_hl = {'invalid-name',
          'too-many-nested-blocks'}
-    # the "Invalid module name" subsection of "invalid-name" belongs here
+# the "Invalid module name" subsection of "invalid-name" belongs here
 
 
 class PlainReporter(BaseReporter):

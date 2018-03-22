@@ -222,9 +222,7 @@ class PlainReporter(BaseReporter):
                             .format(msg.line, msg_truncated)) + self._BREAK
 
                 try:
-                    # Messages with code snippets
-                    if not (msg.symbol in no_hl or
-                                msg.msg.startswith('Invalid module')):
+                    if not (msg.msg.startswith('Invalid module')):
                         code_snippet = self._build_snippet(msg)
                         result += code_snippet
                         try:

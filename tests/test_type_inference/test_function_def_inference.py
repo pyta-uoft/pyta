@@ -21,6 +21,7 @@ def _parse_to_function_no_return(function_name, args_list, function_body):
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_inference_args_simple_return(function_name, arguments):
     """Test whether visitor was able to infer type of argument given function called on it in function body."""
     assume(function_name not in arguments)
@@ -38,6 +39,7 @@ def test_inference_args_simple_return(function_name, arguments):
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_args_simple_return(function_name, arguments):
     """Test whether visitor was able to infer type of function given function called on it's arguments."""
     assume(function_name not in arguments)

@@ -264,23 +264,26 @@ def unaryop_node(draw, op=hs.one_of(non_bool_unary_op, unary_bool_operator),
 def simple_homogeneous_dict_node(draw, **kwargs):
     k = draw(primitive_types)
     v = draw(primitive_types)
-    return dict_node(
+    return draw(dict_node(
         const_node(k()),
         const_node(v()),
         **kwargs
-    ).example()
+    ))
 
 
 @hs.composite
 def simple_homogeneous_list_node(draw, **kwargs):
     t = draw(primitive_types)
-    return list_node(const_node(t()), **kwargs).example()
+    return draw(list_node(const_node(t()), **kwargs))
 
 
 @hs.composite
 def simple_homogeneous_set_node(draw, **kwargs):
     t = draw(primitive_types)
-    return set_node(const_node(t()), **kwargs).example()
+    homogeneous_set = draw(set_node(const_node(t()), **kwargs))
+    assume(homogeneous_set.elts != set())
+    return homogeneous_set
+
 
 
 @hs.composite
@@ -324,6 +327,7 @@ def functiondef_node(draw, name=None, annotated=False, returns=False):
         returns_node.postinit(const_node(None))
     body.append(returns_node)
     node = astroid.FunctionDef(name=name)
+    node.parent = astroid.Module('Default', None)
     node.postinit(
         args,
         body,

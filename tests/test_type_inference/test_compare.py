@@ -1,7 +1,7 @@
 import astroid
 import nose
 from nose.tools import nottest
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 settings.load_profile("pyta")
@@ -9,6 +9,7 @@ settings.load_profile("pyta")
 
 @nottest
 @given(cs.primitive_values, hs.lists(hs.tuples(cs.comparator_operator_equality, cs.primitive_values), min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_compare_equality(left_value, operator_value_tuples):
     """Test type setting of Compare node representing comparators: ''==', '!=', '>=', '<=', 'is'. """
     for operator, value in operator_value_tuples:
@@ -24,12 +25,14 @@ def test_compare_equality(left_value, operator_value_tuples):
 
 @nottest
 @given(hs.lists(cs.comparator_operator, min_size=3), cs.homogeneous_list(min_size=4))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_compare_equality(operators, values):
     """Test type setting of Compare node representing comparators: '<', '>', 'in'. """
     for value in values:
         assume(value)
         if isinstance(value, str):
             assume(len(value) > 2)
+        assume(isinstance(value, int) or isinstance(value, bool) or isinstance(value, float))
     a = list(zip(operators, values))
     pre = []
     for operator, value in a:

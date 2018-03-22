@@ -1,11 +1,12 @@
 import astroid
 import nose
-from hypothesis import settings, given
+from hypothesis import settings, given, HealthCheck
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
 @given(cs.simple_homogeneous_dict_node(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_dict_comprehension_reproduce_homogeneous(node):
     """Test DictComp node visitor representing a comprehension expression reproducing the the key, value pairs
     of a homogeneous Dictionary."""
@@ -18,6 +19,7 @@ def test_dict_comprehension_reproduce_homogeneous(node):
 
 
 @given(cs.dict_node(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_dict_comprehension_reproduce_heterogeneous(node):
     """Test DictComp node visitor representing a comprehension expression reproducing the the key, value pairs
     of a heterogeneous Dictionary."""

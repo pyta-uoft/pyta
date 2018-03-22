@@ -1,6 +1,6 @@
 import astroid
 import nose
-from hypothesis import assume, given, settings
+from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
@@ -22,6 +22,7 @@ def _parse_to_function_no_return(function_name, args_list, function_body):
 
 
 @given(cs.valid_identifier(), cs.primitive_values)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_no_args(function_name, return_value):
     """Test FunctionDef node visitors representing function definitions with no parameters and primitive return type."""
     assume(not iskeyword(function_name))
@@ -35,6 +36,7 @@ def test_function_def_no_args(function_name, return_value):
 
 
 @given(cs.valid_identifier(), cs.primitive_values)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_call_no_args(function_name, return_value):
     """Test type setting in environment of a function call for a function with no parameters."""
     program = _parse_to_function(function_name, [], repr(return_value)) + "\n" + function_name + "()\n"
@@ -48,6 +50,7 @@ def test_function_def_call_no_args(function_name, return_value):
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=0), cs.primitive_values)
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_no_return(function_name, arguments, body):
     """Test FunctionDef node visitors representing non-returning function definitions with parameter(s)."""
     for return_value in ['return None', repr(body), 'pass']:
@@ -61,6 +64,7 @@ def test_function_def_no_return(function_name, arguments, body):
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_args_simple_return(function_name, arguments):
     """Test FunctionDef node visitors representing function definitions with paramater(s):
      return one of its arguments."""
@@ -80,6 +84,7 @@ def test_function_def_args_simple_return(function_name, arguments):
 
 
 @given(cs.valid_identifier(), cs.random_dict_variable_homogeneous_value(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_args_simple_function_call(function_name, variables_dict):
     """Test setting f env for function call of function definitions with params that returns one of it's arguments."""
     assume(not iskeyword(function_name) and function_name not in variables_dict)
@@ -96,6 +101,18 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         assert inferer.type_constraints.lookup_concrete(function_call_type) == call_node.args[i].type_constraints.type
 
 
+def test_incompatible_binop_call():
+    """ User tries to call a builtin binary operation on arguments of the wrong type.
+    """
+    program = f'5 + "string"\n'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    binop_node = next(module.nodes_of_class(astroid.BinOp))
+    expected_msg = f''
+
+
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """
@@ -108,10 +125,13 @@ def test_non_annotated_function_call_bad_arguments():
     except:
         raise SkipTest()
     call_node = next(module.nodes_of_class(astroid.Call))
+    # TODO: This error is flawed because the unification error occurs for both arguments due to our current implementation,
+    # which "chooses" the first valid function type from TypeStore.
+    # Should we fix this implementation first or save it for later and hard-code the correct error message for now?
     expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_num":\n' \
                    f'in parameter (1), the function was expecting an object of inferred type ' \
                    f'int but was given an object of type str.\n' \
-                   f'in parameter (1), the function was expecting an object of inferred type ' \
+                   f'in parameter (2), the function was expecting an object of inferred type ' \
                    f'int but was given an object of type float.\n'
                    # TODO: should we use the term inferred?
     assert call_node.type_constraints.type.msg == expected_msg

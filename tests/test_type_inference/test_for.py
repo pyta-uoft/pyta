@@ -1,12 +1,13 @@
 import astroid
 import nose
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume,  HealthCheck
 from typing import Callable, Any
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 
 @given(cs.homogeneous_list(min_size=1))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_for_homogeneous_list(iterable):
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement
      iterating over a homogeneous list.
@@ -21,6 +22,7 @@ def test_for_homogeneous_list(iterable):
 
 
 @given(cs.random_list(min_size=2))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_for_heterogeneous_list(iterable):
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement
      iterating over a heterogeneous list.

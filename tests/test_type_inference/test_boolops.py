@@ -1,6 +1,6 @@
 import astroid
 import nose
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume, HealthCheck
 import hypothesis.strategies as hs
 import tests.custom_hypothesis_support as cs
 from typing import Any
@@ -8,6 +8,7 @@ settings.load_profile("pyta")
 
 
 @given(cs.boolop_node(value=cs.const_node(hs.integers())))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_homogeneous_binary_boolop(node):
     """Test type setting of binary BoolOp node(s) representing expression with homogeneous operands."""
     module, _ = cs._parse_text(node)
@@ -16,6 +17,7 @@ def test_homogeneous_binary_boolop(node):
 
 
 @given(cs.boolop_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_heterogeneous_binary_boolop(node):
     """Test type setting of binary BoolOp node(s) representing expression with heterogeneous operands."""
     assume(type(node.values[0].value) != type(node.values[1].value))

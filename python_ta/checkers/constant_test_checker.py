@@ -37,7 +37,6 @@ class UsingConstantTestChecker(BaseChecker):
         elif isinstance(node, astroid.UnaryOp):
             return self._check_all_constants(node.operand)
         elif isinstance(node, astroid.BoolOp):
-            print(node.values)
             return all(node.values)
 
 

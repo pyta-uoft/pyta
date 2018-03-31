@@ -38,7 +38,7 @@ class DynamicExecutionChecker(BaseChecker):
             if not (name in node.frame() or name in node.root()):
                 # if name in FORBIDDEN_BUILTIN:
                 if name in self.config.forbidden_dynamic_exec:
-                    args = "{} on line {}".format(name, node.lineno)
+                    args = "%s on line %s" % (name, node.lineno)
                     # add the message
                     self.add_message('dynamic-execution-not-allowed', node=node, args=args)
 

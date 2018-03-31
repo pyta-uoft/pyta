@@ -37,7 +37,7 @@ class InvalidRangeIndexChecker(BaseChecker):
                     (len(arg) == 1 and eval_parm[0] < 2) or
                     (len(arg) == 2 and eval_parm[1] - eval_parm[0] < 2)):
 
-                    args = "{}".format(node.lineno)
+                    args = str(node.lineno)
                     self.add_message('invalid-range-index', node=node,
                                  args=args)
                 
@@ -47,7 +47,7 @@ class InvalidRangeIndexChecker(BaseChecker):
                     (eval_parm[0] > eval_parm[1] and eval_parm[2] < 0) or
                     (eval_parm[0] < eval_parm[1] and eval_parm[2] > 0)):
 
-                        args = "{}".format(node.lineno)
+                        args = str(node.lineno)
                         self.add_message('invalid-range-index', node=node,
                                  args=args)
 

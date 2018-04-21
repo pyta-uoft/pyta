@@ -43,35 +43,35 @@ def create_Callable(args: Iterable[type], rtype, poly_vars=None):
 
 
 TYPE_SIGNATURES = {
-    int: {
-        '__add__': create_Callable([int, Num], Num, [Num]),
-        '__sub__': create_Callable([int, Num], Num, [Num]),
-        '__mul__': create_Callable([int, MulNum], MulNum, [MulNum]),
-        '__idiv__': create_Callable([int, Num], Num, [Num]),
-        '__mod__': create_Callable([int, Num], Num, [Num]),
-        '__pow__': create_Callable([int, Num], Num, [Num]),
-        '__div__': create_Callable([int, Num], float, [Num]),
+    int : {
+        '__add__' : create_Callable([int, Num], Num, [Num]),
+        '__sub__' : create_Callable([int, Num], Num, [Num]),
+        '__mul__' : create_Callable([int, MulNum], MulNum, [MulNum]),
+        '__idiv__' : create_Callable([int, Num], Num, [Num]),
+        '__mod__' : create_Callable([int, Num], Num, [Num]),
+        '__pow__' : create_Callable([int, Num], Num, [Num]),
+        '__div__' : create_Callable([int, Num], float, [Num]),
     },
-    float: {
-        '__add__': create_Callable([float, Num], float, [Num]),
-        '__sub__': create_Callable([float, Num], float, [Num]),
-        '__mul__': create_Callable([float, Num], float, [Num]),
-        '__idiv__': create_Callable([float, Num], float, [Num]),
-        '__mod__': create_Callable([float, Num], float, [Num]),
-        '__pow__': create_Callable([float, Num], float, [Num]),
-        '__div__': create_Callable([float, Num], float, [Num]),
+    float : {
+        '__add__' : create_Callable([float, Num], float, [Num]),
+        '__sub__' : create_Callable([float, Num], float, [Num]),
+        '__mul__' : create_Callable([float, Num], float, [Num]),
+        '__idiv__' : create_Callable([float, Num], float, [Num]),
+        '__mod__' : create_Callable([float, Num], float, [Num]),
+        '__pow__' : create_Callable([float, Num], float, [Num]),
+        '__div__' : create_Callable([float, Num], float, [Num]),
     },
-    str: {
-        '__add__': Callable[[str, str], str],
-        '__mul__': Callable[[str, int], str]
+    str : {
+        '__add__' : Callable[[str, str], str],
+        '__mul__' : Callable[[str, int], str]
     },
-    List: {
-        '__add__': create_Callable([List[a], List[a]], List[a], [a]),
-        '__mul__': create_Callable([List[a], int], List[a], [a]),
-        '__getitem__': create_Callable([List[a], int], a, [a])
+    List : {
+        '__add__' : create_Callable([List[a], List[a]], List[a], [a]),
+        '__mul__' : create_Callable([List[a], int], List[a], [a]),
+        '__getitem__' : create_Callable([List[a], int], a, [a])
     },
-    Tuple: {
-        '__add__': create_Callable([tup1, tup2], TuplePlus('tup+', tup1, tup2), [tup1, tup2]),
+    Tuple : {
+        '__add__' : create_Callable([tup1, tup2], TuplePlus('tup+', tup1, tup2), [tup1, tup2]),
     }
 }
 
@@ -93,7 +93,7 @@ OP_TO_NAME_BINARY = {
     , '<=' : 'compare'
     , '>' : 'compare'
     , '>=' : 'compare'
-    # TODO: 'is' and 'in'
+    # TODO : 'is' and 'in'
     }
 
 
@@ -105,43 +105,25 @@ def binary_op_hints(op, args):
             return "Perhaps you wanted to cast the integer into a string or vice versa?"
 
 
-def op_to_dunder_binary(op):
-    """Return the dunder method name corresponding to binary op."""
-    if op == '+':
-        return '__add__'
-    elif op == '-':
-        return '__sub__'
-    elif op == '*':
-        return '__mul__'
-    elif op == '//':
-        return '__idiv__'
-    elif op == '%':
-        return '__mod__'
-    elif op == '/':
-        return '__div__'
-    elif op == '**':
-        return '__pow__'
-    elif op == '&':
-        return '__and__'
-    elif op == '^':
-        return '__xor__'
-    elif op == '|':
-        return '__or__'
-    elif op == '==':
-        return '__eq__'
-    elif op == '!=':
-        return '__ne__'
-    elif op == '<':
-        return '__lt__'
-    elif op == '<=':
-        return '__le__'
-    elif op == '>':
-        return '__gt__'
-    elif op == '>=':
-        return '__ge__'
+OP_TO_DUNDER_BINARY = {
+    '+' : '__add__',
+    '-' : '__sub__',
+    '*' : '__mul__',
+    '//' : '__idiv__',
+    '%' : '__mod__',
+    '/' : '__div__',
+    '**' : '__pow__',
+    '&' : '__and__',
+    '^' : '__xor__',
+    '|' : '__or__',
+    '==' : '__eq__',
+    '!=' : '__ne__',
+    '<' : '__lt__',
+    '<=' : '__le__',
+    '>' : '__gt__',
+    '>=' : '__ge__'
     # TODO: 'is' and 'in'
-    else:
-        return op
+    }
 
 
 def op_to_dunder_unary(op):

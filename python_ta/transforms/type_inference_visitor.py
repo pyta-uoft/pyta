@@ -2,6 +2,7 @@ import astroid.inference
 import astroid
 from astroid.node_classes import *
 from typing import *
+import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import _correct_article, binary_op_hints, OP_TO_NAME_BINARY, OP_TO_DUNDER_BINARY, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
@@ -55,10 +56,11 @@ class TypeInferer:
         visitor.register_transform(astroid.SetComp, self._set_setcomp_environment)
         return visitor
 
-    def _set_module_environment(self, node):
+    def _set_module_environment(self, node: astroid.Module) -> None:
         """Method to set environment of a Module node."""
         node.type_environment = Environment(
-            globals_={name: self.type_constraints.fresh_tvar(node) for name in node.globals})
+            globals_={name: self.type_constraints.fresh_tvar(node)
+                      for name in node.globals})
         self._populate_local_env(node)
 
     def _set_classdef_environment(self, node):
@@ -207,13 +209,54 @@ class TypeInferer:
         else:
             return closest_scope
 
-    def visit_name(self, node):
+    ##############################################################################
+    # Name lookup and assignment
+    ##############################################################################
+    def visit_name(self, node: astroid.Name) -> None:
         try:
             node.type_constraints = TypeInfo(self.lookup_type(node, node.name))
         except KeyError:
-            self._closest_frame(node, node.name).type_environment\
-                .create_in_env(self.type_constraints, 'globals', node.name, node)
-            node.type_constraints = TypeInfo(self.lookup_type(node, node.name))
+            if node.name in self.type_store.classes:
+                node.type_constraints = TypeInfo(Type[__builtins__[node.name]])
+            elif node.name in self.type_store.functions:
+                node.type_constraints = TypeInfo(self.type_store.functions[node.name][0])
+            else:
+                # This is an unbound identifier. Ignore it.
+                node.type_constraints = TypeInfo(Any)
+
+    def visit_assign(self, node: astroid.Assign) -> None:
+        """Update the enclosing scope's type environment for the assignment's binding(s)."""
+        # the type of the expression being assigned
+        expr_type = node.value.type_constraints.type
+
+        for target in node.targets:
+            self._assign_type(target, expr_type)
+
+        node.type_constraints = TypeInfo(NoType)
+
+    def _assign_type(self, target: NodeNG, expr_type: type) -> None:
+        """Update the type environment so that the target is bound to the given type."""
+        if isinstance(target, astroid.AssignName):
+            # A single identifier, e.g. x = ...
+            target_type_var = self.lookup_type(target, target.name)
+            self.type_constraints.unify(target_type_var, expr_type)
+        elif isinstance(target, astroid.AssignAttr):
+            # Attribute mutation, e.g. x.y = ...
+            attr_type = self._lookup_attribute_type(target, target.expr.name, target.attrname)
+            self.type_constraints.unify(attr_type, expr_type)
+        elif isinstance(target, astroid.Tuple):
+            # Unpacking assignment, e.g. x, y = ...
+            if isinstance(expr_type, typing.TupleMeta):
+                # TODO: handle when these collections are different lengths.
+                for subtarget, subtype in zip(target.elts, expr_type.__args__):
+                    target_tvar = self.lookup_type(subtarget, subtarget.name)
+                    self.type_constraints.unify(target_tvar, subtype)
+            else:
+                rtype = self._handle_call(target, '__iter__', expr_type).type
+                for subtarget in target.elts:
+                    target_tvar = self.lookup_type(subtarget, subtarget.name)
+                    self.type_constraints.unify(target_tvar, rtype.__args__[0])
+
 
     ##############################################################################
     # Operation nodes
@@ -295,33 +338,6 @@ class TypeInferer:
     ##############################################################################
     # Statements
     ##############################################################################
-    def visit_assign(self, node):
-        # multi-assignment; LHS is a tuple of AssignName target nodes as "elements"
-        if isinstance(node.targets[0], astroid.Tuple):
-            if isinstance(node.value, astroid.Tuple):
-                target_type_tuple = zip(node.targets[0].elts, node.value.elts)
-                for target_node, value in target_type_tuple:
-                    target_tvar = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_tvar, value.type_constraints.type)
-            else:
-                value_tvar = node.frame().type_environment.lookup_in_env(node.value.name)
-                value_type = self.type_constraints.lookup_concrete(value_tvar)
-                rtype = self._handle_call(node, '__iter__', value_type).type
-                for target_node in node.targets[0].elts:
-                    target_type_var = node.frame().type_environment.lookup_in_env(target_node.name)
-                    self.type_constraints.unify(target_type_var, rtype.__args__[0])
-        else:
-            # assignment(s) in single statement
-            for target_node in node.targets:
-                if isinstance(target_node, astroid.AssignName):
-                    target_type_var = self.lookup_type(target_node, target_node.name)
-                    self.type_constraints.unify(target_type_var, node.value.type_constraints.type)
-                elif isinstance(target_node, astroid.AssignAttr):
-                    # every Assign node will have a single Name node associated with it
-                    attr_type = self._lookup_attribute_type(target_node, target_node.expr.name, target_node.attrname)
-                    self.type_constraints.unify(attr_type, target_node.parent.value.type_constraints.type)
-        node.type_constraints = TypeInfo(NoType)
-
     def visit_return(self, node):
         t = node.value.type_constraints.type
         self.type_constraints.unify(node.frame().type_environment.locals['return'], t)

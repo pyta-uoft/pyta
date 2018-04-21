@@ -1,6 +1,12 @@
 # Typechecking status
 
+
 ## Nodes
+
+### Assign
+
+TODOs:
+    - Check for unpacking tuple assignment where the LHS and RHS have different lengths.
 
 ### Const
 Done.
@@ -17,6 +23,16 @@ TODOs:
     - Lists in assignment ("Store") context
     - Better articulate Any vs. Object
 
+### Name
+
+TODOs:
+    - unify lookup approaches for builtins vs. user-defined variables.
+
 ### Set
 
 TODOs: see List.
+
+
+### Tuple
+
+Done.

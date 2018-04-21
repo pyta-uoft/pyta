@@ -60,10 +60,9 @@ annotation = hs.sampled_from(builtin_types).map(lambda s: s.__name__)
 
 def valid_identifier(**kwargs):
     """Return a strategy which generates a valid Python Identifier"""
-    if 'min_size' not in kwargs:
-        kwargs['min_size'] = 4
-    return hs.text(alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", **kwargs)\
-        .filter(lambda x: x[0].isalpha() and x.isidentifier() and not (iskeyword(x)))
+    return hs.integers(min_value=0, max_value=1000).flatmap(
+        lambda n: hs.just(f'x{n}')
+    )
 
 
 def homogeneous_list(**kwargs):

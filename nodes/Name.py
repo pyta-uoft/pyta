@@ -10,6 +10,10 @@ Attributes:
 
 Example:
     - id   -> "my_var"
+
+Type-checking:
+    - The type of a name is determined by looking it up in the *type environment* of its
+      enclosing scope.
 """
 
 my_var

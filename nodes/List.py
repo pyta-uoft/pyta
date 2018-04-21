@@ -20,6 +20,11 @@ Example 2:
 Example 3:
     - elts  -> [Name('x', Store()), Name('y', Store())]
     - ctx   -> Store
+
+
+Type-checking:
+    Type is List[T], where T is the most specific class that every element
+    of the list is an instance of.
 """
 
 # Example 1

@@ -134,21 +134,14 @@ class TypeInferer:
         tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
         return self.type_constraints.lookup_concrete(tvar)
 
-    def visit_const(self, node):
-        """Populate type constraints for astroid nodes for num/str/bool/None/bytes literals."""
+    def visit_const(self, node: astroid.Const) -> None:
         node.type_constraints = TypeInfo(type(node.value))
 
-    def visit_tuple(self, node):
-        # Tuple is being evaluated rather than assigned to - find types of its elements
-        if node.ctx == astroid.Load:
-            node.type_constraints = TypeInfo(
-                Tuple[tuple(x.type_constraints.type for x in node.elts)])
-        else:
-            # Tuple is on LHS; will never have a type
+    def visit_list(self, node: astroid.List) -> None:
+        if node.ctx == astroid.Store:
+            # List is the target of an assignment; do not give it a type.
             node.type_constraints = TypeInfo(NoType)
-
-    def visit_list(self, node):
-        if len(node.elts) == 0:
+        elif node.elts == []:
             node.type_constraints = TypeInfo(List[Any])
         else:
             node_type = node.elts[0].type_constraints.type
@@ -156,8 +149,8 @@ class TypeInferer:
                 node_type = self.type_constraints.least_general_unifier(elt.type_constraints.type, node_type)
             node.type_constraints = TypeInfo(List[node_type])
 
-    def visit_set(self, node):
-        if len(node.elts) == 0:
+    def visit_set(self, node: astroid.Set) -> None:
+        if node.elts == []:
             node.type_constraints = TypeInfo(Set[Any])
         else:
             node_type = node.elts[0].type_constraints.type
@@ -165,8 +158,8 @@ class TypeInferer:
                 node_type = self.type_constraints.least_general_unifier(elt.type_constraints.type, node_type)
             node.type_constraints = TypeInfo(Set[node_type])
 
-    def visit_dict(self, node):
-        if len(node.items) == 0:
+    def visit_dict(self, node: astroid.Dict) -> None:
+        if node.items == []:
             node.type_constraints = TypeInfo(Dict[Any, Any])
         else:
             key_type, val_type = node.items[0][0].type_constraints.type, node.items[0][1].type_constraints.type
@@ -174,6 +167,14 @@ class TypeInferer:
                 key_type = self.type_constraints.least_general_unifier(key_node.type_constraints.type, key_type)
                 val_type = self.type_constraints.least_general_unifier(val_node.type_constraints.type, val_type)
             node.type_constraints = TypeInfo(Dict[key_type, val_type])
+
+    def visit_tuple(self, node):
+        if node.ctx == astroid.Store:
+            # Tuple is the target of an assignment; do not give it a type.
+            node.type_constraints = TypeInfo(NoType)
+        else:
+            node.type_constraints = TypeInfo(
+                Tuple[tuple(x.type_constraints.type for x in node.elts)])
 
     def visit_index(self, node):
         node.type_constraints = node.value.type_constraints

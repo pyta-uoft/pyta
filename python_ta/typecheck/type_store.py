@@ -74,3 +74,11 @@ class TypeStore:
                     return func_type
             if not unified:
                 raise KeyError
+
+
+if __name__ == '__main__':
+    # Display the TypeStore parsed from typeshed.
+    ts = TypeStore(None)
+    import pprint
+    pprint.pprint(dict(ts.classes['tuple']))
+    pprint.pprint(ts.functions)

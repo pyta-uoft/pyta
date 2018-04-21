@@ -1,3 +1,4 @@
+"""Example for too many nested blocks"""
 from typing import List, Tuple, Optional
 
 def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],

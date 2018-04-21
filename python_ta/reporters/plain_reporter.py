@@ -67,8 +67,8 @@ special = {'missing-docstring',
 
 # Messages without a source code line to highlight
 no_hl = {'always-returning-in-a-loop',
-         'too-many-nested-blocks'}
-    # the "Invalid module name" subsection of "invalid-name" belongs here
+         'invalid-name'}
+# the "Invalid module name" subsection of "invalid-name" belongs here
 
 
 class PlainReporter(BaseReporter):
@@ -222,9 +222,8 @@ class PlainReporter(BaseReporter):
                             .format(msg.line, msg_truncated)) + self._BREAK
 
                 try:
-                    # Messages with code snippets
                     if not (msg.symbol in no_hl or
-                                msg.msg.startswith('Invalid module')):
+                    msg.msg.startswith('Invalid module')):
                         code_snippet = self._build_snippet(msg)
                         result += code_snippet
                         try:

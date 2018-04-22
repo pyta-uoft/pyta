@@ -274,7 +274,7 @@ class TypeConstraints:
 
         # Check that the number of parameters matches the number of arguments.
         if len(func_type.__args__) - 1 != len(arg_types):
-            raise TypeInferenceError('Wrong number of arguments')
+            raise TypeInferenceError(f'Wrong number of arguments: {func_type.__args__}, {arg_types}')
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}

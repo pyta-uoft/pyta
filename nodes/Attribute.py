@@ -2,7 +2,7 @@
 Attribute astroid node
 
 To give attribute access. (This is only for Attribute nodes appearing
-in a Store context. For more information, see the README.)
+in a Load context. For more information, see the README.)
 
 Attributes:
     - expr      (Node)
@@ -13,6 +13,10 @@ Attributes:
 Example:
     - expr      -> Name(id='snake', ctx=Load())
     - attrname  -> "colour"
+
+Type-checking:
+    The type of `expr` is resolved, and attrname is looked up for that type.
+    (Currently in TypeStore only, for built-in types.)
 """
 
 snake.colour

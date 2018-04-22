@@ -263,7 +263,7 @@ class TypeInferer:
     ##############################################################################
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.type_constraints.type
-        if isinstance(callable_t, Type):
+        if not isinstance(callable_t, (CallableMeta, list)):
             func_name = callable_t.__args__[0].__name__
             init_types = self.type_store.classes[func_name]['__init__']
             init_type = init_types[0]  # TODO: handle method overloading (through optional parameters)
@@ -271,7 +271,12 @@ class TypeInferer:
             self.type_constraints.unify_call(init_type, *arg_types)
             node.type_constraints = TypeInfo(callable_t.__args__[0])
         else:
-            arg_types = []
+            # TODO: resolve this case (from method lookup) more gracefully
+            if isinstance(callable_t, list):
+                callable_t = callable_t[0]
+                arg_types = [node.func.expr.type_constraints.type]
+            else:
+                arg_types = []
             arg_types += [arg.type_constraints.type for arg in node.args]
             ret_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
             node.type_constraints = TypeInfo(ret_type)
@@ -424,10 +429,16 @@ class TypeInferer:
     def visit_classdef(self, node):
         node.type_constraints = TypeInfo(NoType)
 
-    def visit_attribute(self, node):
-        attribute_type = self.type_constraints\
-            .lookup_concrete(self._lookup_attribute_type(node, node.expr.name, node.attrname))
-        node.type_constraints = TypeInfo(attribute_type)
+    def visit_attribute(self, node: astroid.Attribute) -> None:
+        expr_type = node.expr.type_constraints.type
+        if expr_type.__name__ not in self.type_store.classes:
+            raise TypeInferenceError('Invalid type')
+        else:
+            attribute_type = self.type_store.classes[expr_type.__name__].get(node.attrname)
+            if attribute_type is None:
+                raise TypeInferenceError(f'Attribute {node.attrname} not found for type {expr_type.__name__}')
+            else:
+                node.type_constraints = TypeInfo(attribute_type)
 
     def visit_annassign(self, node):
         variable_type = self.type_constraints.lookup_concrete(

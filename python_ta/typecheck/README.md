@@ -8,6 +8,13 @@
 TODOs:
     - Check for unpacking tuple assignment where the LHS and RHS have different lengths.
 
+### Call
+
+TODOs:
+    - Handling of "overloaded" functions (with optional arguments)
+    - Improve handling of initializers
+    - Handling inheritance
+
 ### Const
 Done.
 

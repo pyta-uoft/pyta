@@ -21,6 +21,10 @@ Example 2:
     - func      -> Name(id='func', ctx=Load())
     - args      -> [Name(id='a', ctx=Load())]
     - keywords  -> [keyword(arg='b', value=Name(id='c', ctx=Load()))]
+
+Type-checking:
+    The type of func must be a function type; the argument types are matched with the parameter types
+    of the function. The type of the Call expression itself is equal to the return type of the function.
 """
 
 # Example 1

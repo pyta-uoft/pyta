@@ -124,18 +124,6 @@ class TypeInferer:
     ##############################################################################
     # Literals
     ##############################################################################
-    def _lookup_attribute_type(self, node, instance_name, attribute_name):
-        """Given the node, class name and attribute name, return the type of the attribute."""
-        class_type = self.lookup_type(node, instance_name)
-        class_name = class_type.__forward_arg__
-        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
-        return self.type_constraints.lookup_concrete(class_env.lookup_in_env(attribute_name))
-
-    def lookup_type(self, node, name):
-        """Given a variable name, return its concrete type in the closest scope relative to given node."""
-        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
-        return self.type_constraints.lookup_concrete(tvar)
-
     def visit_const(self, node: astroid.Const) -> None:
         node.type_constraints = TypeInfo(type(node.value))
 
@@ -257,10 +245,37 @@ class TypeInferer:
                     target_tvar = self.lookup_type(subtarget, subtarget.name)
                     self.type_constraints.unify(target_tvar, rtype.__args__[0])
 
+    def _lookup_attribute_type(self, node, instance_name, attribute_name):
+        """Given the node, class name and attribute name, return the type of the attribute."""
+        class_type = self.lookup_type(node, instance_name)
+        class_name = class_type.__forward_arg__
+        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+        return self.type_constraints.lookup_concrete(class_env.lookup_in_env(attribute_name))
+
+    def lookup_type(self, node, name):
+        """Given a variable name, return its concrete type in the closest scope relative to given node."""
+        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
+        return self.type_constraints.lookup_concrete(tvar)
+
 
     ##############################################################################
     # Operation nodes
     ##############################################################################
+    def visit_call(self, node: astroid.Call) -> None:
+        callable_t = node.func.type_constraints.type
+        if isinstance(callable_t, Type):
+            func_name = callable_t.__args__[0].__name__
+            init_types = self.type_store.classes[func_name]['__init__']
+            init_type = init_types[0]  # TODO: handle method overloading (through optional parameters)
+            arg_types = [callable_t.__args__[0]] + [arg.type_constraints.type for arg in node.args]
+            self.type_constraints.unify_call(init_type, *arg_types)
+            node.type_constraints = TypeInfo(callable_t.__args__[0])
+        else:
+            arg_types = []
+            arg_types += [arg.type_constraints.type for arg in node.args]
+            ret_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
+            node.type_constraints = TypeInfo(ret_type)
+
     def _handle_call(self, node, func_name, *args):
         """Helper to lookup a function and unify it with given arguments.
            Returns the return type of unified function call."""
@@ -364,27 +379,6 @@ class TypeInferer:
                 func_type = create_Callable(arg_types, rtype, polymorphic_tvars)
             self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
         node.type_constraints = TypeInfo(NoType)
-
-    def visit_call(self, node):
-        if isinstance(node.func, astroid.Attribute):
-            func_t = node.func.type_constraints.type
-            arg_types = [self.lookup_type(node.func.expr, node.func.expr.name)]
-            arg_types += [arg.type_constraints.type for arg in node.args]
-            ret_type = self.type_constraints.unify_call(func_t, *arg_types, node=node)
-            node.type_constraints = TypeInfo(ret_type)
-        else:
-            func_name = node.func.name
-            if isinstance(node.frame().locals.get(func_name)[0], astroid.ClassDef):
-                func_t = self.type_constraints \
-                    .lookup_concrete(node.frame().locals[func_name][0].type_environment.locals['__init__'])
-                arg_types = [_ForwardRef(func_name)] + [arg.type_constraints.type for arg in node.args]
-                self.type_constraints.unify_call(func_t, *arg_types)
-                node.type_constraints = TypeInfo(_ForwardRef(func_name))
-            else:
-                func_t = self.lookup_type(node, func_name)
-                arg_types = [arg.type_constraints.type for arg in node.args]
-                ret_type = self.type_constraints.unify_call(func_t, *arg_types, node=node)
-                node.type_constraints = TypeInfo(ret_type)
 
     def visit_for(self, node):
         for_node = list(node.nodes_of_class(astroid.For))[0]

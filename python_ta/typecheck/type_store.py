@@ -16,6 +16,7 @@ class TypeStore:
         self.type_constraints = type_constraints
         self.classes = defaultdict(lambda: defaultdict(list))
         self.functions = defaultdict(list)
+        self.methods = defaultdict(list)
 
         builder = AstroidBuilder()
         module = builder.file_build(TYPE_SHED_PATH)
@@ -54,9 +55,11 @@ class TypeStore:
             else:
                 tvars = []
             f_type = parse_annotations(function_def, tvars)
-            self.functions[function_def.name].append(f_type)
             if in_class:
                 self.classes[function_def.parent.name][function_def.name].append(f_type)
+                self.methods[function_def.name].append(f_type)
+            else:
+                self.functions[function_def.name].append(f_type)
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
@@ -80,5 +83,5 @@ if __name__ == '__main__':
     # Display the TypeStore parsed from typeshed.
     ts = TypeStore(None)
     import pprint
-    pprint.pprint(dict(ts.classes['tuple']))
-    pprint.pprint(ts.functions)
+    pprint.pprint(dict(ts.classes['slice']))
+    pprint.pprint(ts.functions['slice'])

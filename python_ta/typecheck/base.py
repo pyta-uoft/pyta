@@ -269,6 +269,9 @@ class TypeConstraints:
 
         Return a result type.
         """
+        if func_type == Any:
+            return Any
+
         # Check that the number of parameters matches the number of arguments.
         if len(func_type.__args__) - 1 != len(arg_types):
             raise TypeInferenceError('Wrong number of arguments')

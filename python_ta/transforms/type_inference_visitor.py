@@ -5,7 +5,8 @@ from typing import *
 import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import _correct_article, binary_op_hints, OP_TO_NAME_BINARY, OP_TO_DUNDER_BINARY, op_to_dunder_unary, Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
+from ..typecheck.base import Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
+from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -281,45 +282,40 @@ class TypeInferer:
             ret_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
             node.type_constraints = TypeInfo(ret_type)
 
-    def _handle_call(self, node, func_name, *args):
-        """Helper to lookup a function and unify it with given arguments.
-           Returns the return type of unified function call."""
-        arg_types = [self.type_constraints.lookup_concrete(arg) for arg in args]
-        try:
-            if len(arg_types) == 2:
-                func_dunder = OP_TO_DUNDER_BINARY[func_name]
-            elif len(arg_types) == 1:
-                func_dunder = op_to_dunder_unary(func_name)
-        except KeyError:
-            func_dunder = func_name
-        try:
-            func_type = self.type_store.lookup_function(func_dunder, *arg_types)
-        except KeyError:
-            if func_name not in OP_TO_NAME_BINARY:
-                return TypeInfo(TypeErrorInfo(f'Function {func_dunder} not found with given args: {arg_types}', node))
-            else:
-                error = f'You cannot {OP_TO_NAME_BINARY[func_name]} {_correct_article(arg_types[0].__name__)}' \
-                        f', {node.left.as_string()}, and {_correct_article(arg_types[1].__name__)}, {node.right.as_string()}.'
-                hint = f' {binary_op_hints(func_name, arg_types)}'
-                return TypeInfo(TypeErrorInfo(error + hint , node))
-        try:
-            return_type = self.type_constraints.unify_call(func_type, *arg_types, node=node)
-        except TypeInferenceError:
-            return TypeInfo(
-                TypeErrorInfo('Bad unify_call of function {func_dunder} given\
-                              args: {arg_types}', node))
-        else:
-            return TypeInfo(return_type)
+    def visit_binop(self, node: astroid.BinOp) -> None:
+        method_name = BINOP_TO_METHOD[node.op]
+        arg_types = [node.left.type_constraints.type, node.right.type_constraints.type]
+        node.type_constraints = self._handle_call(node, method_name, *arg_types, error_func=binop_error_message)
 
-    def visit_binop(self, node):
-        node.type_constraints = self._handle_call(node, node.op, node.left.type_constraints.type,
-                                                  node.right.type_constraints.type)
-
-    def visit_unaryop(self, node):
+    def visit_unaryop(self, node: astroid.UnaryOp) -> None:
+        # 'not' is not a function, so this handled as a separate case.
         if node.op == 'not':
             node.type_constraints = TypeInfo(bool)
         else:
-            node.type_constraints = self._handle_call(node, node.op, node.operand.type_constraints.type)
+            method_name = UNARY_TO_METHOD[node.op]
+            node.type_constraints = self._handle_call(node, method_name, node.operand.type_constraints.type, error_func=unaryop_error_message)
+
+    def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
+                     error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeInfo:
+        """Helper to lookup a function and unify it with given arguments.
+           Return the return type of unified function call.
+        """
+        arg_types = [self.type_constraints.lookup_concrete(arg) for arg in arg_types]
+
+        try:
+            func_type = self.type_store.lookup_method(function_name, *arg_types)
+        except KeyError:
+            # No match.
+            if error_func is None:
+                return TypeInfo(TypeErrorInfo(f'Function {function_name} not found with given args: {arg_types}', node))
+            else:
+                return TypeInfo(TypeErrorInfo(error_func(node), node=node))
+
+        try:
+            return TypeInfo(self.type_constraints.unify_call(func_type, *arg_types, node=node))
+        except TypeInferenceError:
+            return TypeInfo(
+                TypeErrorInfo('Bad unify_call of function {function_name} given args: {arg_types}', node))
 
     def visit_subscript(self, node):
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
@@ -344,7 +340,7 @@ class TypeInferer:
             if comparator == 'is':
                 return_types.add(bool)
             else:
-                function_type = self.type_store.lookup_function(OP_TO_DUNDER_BINARY[comparator],
+                function_type = self.type_store.lookup_function(BINOP_TO_METHOD[comparator],
                                                             left_value.type_constraints.type,
                                                             right_value.type_constraints.type)
                 left_value = right_value

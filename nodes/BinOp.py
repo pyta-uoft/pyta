@@ -27,6 +27,9 @@ Examples of operators on primitive types; dunder function -> call and symbol:
 
 Refer to URL below for more information:
 https://docs.python.org/3/library/operator.html?highlight=operator#module-operator
+
+Type-checking:
+    Translate the operator into the corresponding method, and type-check the method call.
 """
 
 1 + 2

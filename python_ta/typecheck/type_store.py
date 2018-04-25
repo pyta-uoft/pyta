@@ -78,6 +78,23 @@ class TypeStore:
             if not unified:
                 raise KeyError
 
+    def lookup_method(self, operator, *args):
+        """Helper method to lookup a method type given the operator and types of arguments."""
+        if args:
+            unified = False
+            func_types_list = self.methods[operator]
+            for func_type in func_types_list:
+                # check if args can be unified instead of checking if they are the same!
+                unified = True
+                for t1, t2 in zip(func_type.__args__[:-1], args):
+                    if not self.type_constraints.can_unify(t1, t2):
+                        unified = False
+                        break
+                if unified:
+                    return func_type
+            if not unified:
+                raise KeyError
+
 
 if __name__ == '__main__':
     # Display the TypeStore parsed from typeshed.

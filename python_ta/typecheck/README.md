@@ -8,12 +8,24 @@
 TODOs:
     - Check for unpacking tuple assignment where the LHS and RHS have different lengths.
 
+### BinOp
+
+Done.
+
+### BoolOp
+
+Done.
+
 ### Call
 
 TODOs:
     - Handling of "overloaded" functions (with optional arguments)
     - Improve handling of initializers
     - Handling inheritance
+
+### Compare
+
+Done.
 
 ### Const
 Done.
@@ -41,5 +53,9 @@ TODOs: see List.
 
 
 ### Tuple
+
+Done.
+
+### UnaryOp
 
 Done.

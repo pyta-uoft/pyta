@@ -15,6 +15,12 @@ Attributes:
 Example:
     - left  -> Const.int(value=0)
     - ops   -> [('<', Const.int(value=1)), ('!=", Const.int(value=1))]
+
+Type-checking:
+    An individual comparison is converted to its corresponding method and type-checked.
+    Multiple comparisons in a single expression are type-checked in left-to-right order.
+    If each comparison returns the same type, that type is set for the entire Compare node.
+    Otherwise, the type of the Compare node is Any.
 """
 
 0 < 1 != 1

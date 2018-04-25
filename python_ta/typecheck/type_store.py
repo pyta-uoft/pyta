@@ -100,5 +100,6 @@ if __name__ == '__main__':
     # Display the TypeStore parsed from typeshed.
     ts = TypeStore(None)
     import pprint
-    pprint.pprint(dict(ts.classes['slice']))
-    pprint.pprint(ts.functions['slice'])
+    pprint.pprint(ts.classes)
+    pprint.pprint(ts.methods)
+    pprint.pprint(ts.functions)

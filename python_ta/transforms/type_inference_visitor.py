@@ -295,6 +295,33 @@ class TypeInferer:
             method_name = UNARY_TO_METHOD[node.op]
             node.type_constraints = self._handle_call(node, method_name, node.operand.type_constraints.type, error_func=unaryop_error_message)
 
+    def visit_boolop(self, node: astroid.BoolOp) -> None:
+        node_type_constraints = {operand_node.type_constraints.type for operand_node in node.values}
+        if len(node_type_constraints) == 1:
+            node.type_constraints = TypeInfo(node_type_constraints.pop())
+        else:
+            node.type_constraints = TypeInfo(Any)
+
+    def visit_compare(self, node: astroid.Compare) -> None:
+        # TODO: 'in' comparator
+        return_types = set()
+        left = node.left
+        for comparator, right in node.ops:
+            if comparator == 'is':
+                return_types.add(bool)
+            else:
+                resolved_type = self._handle_call(
+                    node,
+                    BINOP_TO_METHOD[comparator],
+                    left.type_constraints.type,
+                    right.type_constraints.type
+                )
+                return_types.add(resolved_type.type)
+        if len(return_types) == 1:
+            node.type_constraints = TypeInfo(return_types.pop())
+        else:
+            node.type_constraints = TypeInfo(Any)
+
     def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
                      error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeInfo:
         """Helper to lookup a function and unify it with given arguments.
@@ -321,35 +348,6 @@ class TypeInferer:
         if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
             node.type_constraints = self._handle_call(node, '__getitem__', node.value.type_constraints.type,
                                                       node.slice.type_constraints.type)
-
-    def visit_boolop(self, node):
-        """Boolean operators are 'and', 'or'; the result type can be either of the argument types."""
-        node_type_constraints = {operand_node.type_constraints.type for operand_node in node.values}
-        if len(node_type_constraints) == 1:
-            node.type_constraints = TypeInfo(node_type_constraints.pop())
-        else:
-            node.type_constraints = TypeInfo(Any)
-
-    def visit_compare(self, node):
-        """Comparison operators are: '<', '>', '==', '<=', '>=', '!=', 'in', 'is'.
-        All comparisons yield boolean values."""
-        # TODO: 'in' comparator
-        return_types = set()
-        left_value = node.left
-        for comparator, right_value in node.ops:
-            if comparator == 'is':
-                return_types.add(bool)
-            else:
-                function_type = self.type_store.lookup_function(BINOP_TO_METHOD[comparator],
-                                                            left_value.type_constraints.type,
-                                                            right_value.type_constraints.type)
-                left_value = right_value
-                return_types.add(self.type_constraints.unify_call(function_type, left_value.type_constraints.type,
-                                                              right_value.type_constraints.type, node=node))
-        if len(return_types) == 1:
-            node.type_constraints = TypeInfo(return_types.pop())
-        else:
-            node.type_constraints = TypeInfo(Any)
 
     ##############################################################################
     # Statements
@@ -427,12 +425,16 @@ class TypeInferer:
 
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_type = node.expr.type_constraints.type
-        if expr_type.__name__ not in self.type_store.classes:
+        if isinstance(expr_type, _ForwardRef):
+            type_name =  expr_type.__forward_arg__
+        else:
+            type_name = expr_type.__name__
+        if type_name not in self.type_store.classes:
             raise TypeInferenceError('Invalid type')
         else:
-            attribute_type = self.type_store.classes[expr_type.__name__].get(node.attrname)
+            attribute_type = self.type_store.classes[type_name].get(node.attrname)
             if attribute_type is None:
-                raise TypeInferenceError(f'Attribute {node.attrname} not found for type {expr_type.__name__}')
+                raise TypeInferenceError(f'Attribute {node.attrname} not found for type {type_name}')
             else:
                 node.type_constraints = TypeInfo(attribute_type)
 

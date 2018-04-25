@@ -31,12 +31,14 @@ BINOP_TO_ENGLISH = {
     '&': 'use bitwise AND with',
     '^': 'use bitwise XOR with',
     '|': 'use bitwise OR with',
+    '<<': 'apply a bitshift to the left',
+    '>>': 'apply a bitshift to the right',
     '==': 'compare',
     '!=': 'compare',
-    '<' : 'compare',
-    '<=' : 'compare',
-    '>' : 'compare',
-    '>=' : 'compare',
+    '<': 'compare',
+    '<=': 'compare',
+    '>': 'compare',
+    '>=': 'compare',
     # TODO : 'is' and 'in'
     }
 
@@ -51,6 +53,8 @@ BINOP_TO_METHOD = {
     '&': '__and__',
     '^': '__xor__',
     '|': '__or__',
+    '<<': '__lshift__',
+    '>>': '__rshift__',
     '==': '__eq__',
     '!=': '__ne__',
     '<': '__lt__',

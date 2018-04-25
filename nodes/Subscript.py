@@ -16,6 +16,9 @@ Example:
     - value  -> Name('x', Load())
     - slice  -> Index(0)
     - ctx    -> Load
+
+Type-checking:
+    Delegates to the methods __getitem__, __setitem__, or __delitem__, depending on context.
 """
 
 x[0]

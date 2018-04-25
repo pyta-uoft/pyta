@@ -167,12 +167,6 @@ class TypeInferer:
             node.type_constraints = TypeInfo(
                 Tuple[tuple(x.type_constraints.type for x in node.elts)])
 
-    def visit_index(self, node):
-        node.type_constraints = node.value.type_constraints
-
-    def visit_slice(self, node):
-        node.type_constraints = TypeInfo(slice)
-
     def visit_expr(self, node):
         """Expr nodes take the type of their child
         """
@@ -322,6 +316,24 @@ class TypeInferer:
         else:
             node.type_constraints = TypeInfo(Any)
 
+    ##############################################################################
+    # Subscripting
+    ##############################################################################
+    def visit_index(self, node: astroid.Index) -> None:
+        node.type_constraints = node.value.type_constraints
+
+    def visit_slice(self, node: astroid.Slice) -> None:
+        # TODO: check input types by doing a typecheck for the slice constructor
+        node.type_constraints = TypeInfo(slice)
+
+    def visit_subscript(self, node: astroid.Subscript) -> None:
+        if node.ctx == astroid.Load:
+            node.type_constraints = self._handle_call(node, '__getitem__', node.value.type_constraints.type,
+                                                      node.slice.type_constraints.type)
+        else:
+            node.type_constraints = TypeInfo(NoType)
+
+
     def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
                      error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeInfo:
         """Helper to lookup a function and unify it with given arguments.
@@ -344,10 +356,6 @@ class TypeInferer:
             return TypeInfo(
                 TypeErrorInfo('Bad unify_call of function {function_name} given args: {arg_types}', node))
 
-    def visit_subscript(self, node):
-        if hasattr(node.value, 'type_constraints') and hasattr(node.slice, 'type_constraints'):
-            node.type_constraints = self._handle_call(node, '__getitem__', node.value.type_constraints.type,
-                                                      node.slice.type_constraints.type)
 
     ##############################################################################
     # Statements

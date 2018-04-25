@@ -15,6 +15,9 @@ Example 2:
 
 Example 3:
     - value -> BinOp(1, 2)
+
+Type-checking:
+    Index nodes take the same type as their value.
 """
 
 # Example 1:

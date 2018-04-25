@@ -30,9 +30,13 @@ Done.
 ### Const
 Done.
 
-## Dict
+### Dict
 
 TODOs: see List.
+
+### Index
+
+Done.
 
 ### List
 
@@ -51,6 +55,17 @@ TODOs:
 
 TODOs: see List.
 
+
+### Slice
+
+TODOs:
+    - do proper type-checking of arguments
+
+### Subscript
+
+TODOs:
+    - Handle ExtSlice
+    - Handle subscripting in assignment ("Store") context
 
 ### Tuple
 

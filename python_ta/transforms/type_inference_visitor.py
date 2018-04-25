@@ -447,3 +447,16 @@ class TypeInferer:
         # print('All sets:', self.type_constraints._sets)
         # print('Global bindings:', {k: self.type_constraints.lookup_concrete(t) for k, t in node.type_environment.locals.items()})
 
+
+# Main function (useful for quick debugging)
+def main(source: str) -> Tuple[astroid.Module, TypeInferer]:
+    """Parse a string representing source text, and perform a typecheck.
+
+    Return the astroid Module node (with the type_constraints attribute set
+    on all nodes in the tree) and TypeInferer object.
+    """
+    module = astroid.parse(source)
+    type_inferer = TypeInferer()
+    type_inferer.environment_transformer().visit(module)
+    type_inferer.type_inference_transformer().visit(module)
+    return module, type_inferer

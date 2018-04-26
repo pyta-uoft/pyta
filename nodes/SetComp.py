@@ -21,6 +21,9 @@ Example 2:
     - elt         -> x * y
     - generators  -> [Comprehension(x, [0, 1, 2], []),
                       Comprehension(y, [4, 3, 2], [Compare(x < y)])]
+
+Type-checking:
+    The type of the SetComp is Set[T], where T is the type of elt.
 """
 
 # Example 1

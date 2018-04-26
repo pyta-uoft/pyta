@@ -27,6 +27,10 @@ TODOs:
 
 Done.
 
+### Comprehension
+
+Done.
+
 ### Const
 Done.
 
@@ -34,7 +38,15 @@ Done.
 
 TODOs: see List.
 
+### DictComp
+
+Done.
+
 ### For
+
+Done.
+
+### GeneratorExp
 
 Done.
 
@@ -50,6 +62,10 @@ TODOs:
     - Lists in assignment ("Store") context
     - Better articulate Any vs. Object
 
+### ListComp
+
+Done.
+
 ### Name
 
 TODOs:
@@ -59,6 +75,9 @@ TODOs:
 
 TODOs: see List.
 
+### SetComp
+
+Done.
 
 ### Slice
 

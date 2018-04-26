@@ -21,6 +21,9 @@ Example 2:
     - elt         -> x*y
     - generators  -> [Comprehension(x, [1, 2, 3], []),
                       Comprehension(y, [4, 5, 6], [])]
+
+Type-checking:
+    The type of the ListComp is List[T], where T is the type of elt.
 """
 
 # Example 1

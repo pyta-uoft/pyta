@@ -52,9 +52,10 @@ class TypeInferer:
         visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
         visitor.register_transform(astroid.ClassDef, self._set_classdef_environment)
         visitor.register_transform(astroid.Module, self._set_module_environment)
-        visitor.register_transform(astroid.ListComp, self._set_listcomp_environment)
-        visitor.register_transform(astroid.DictComp, self._set_dictcomp_environment)
-        visitor.register_transform(astroid.SetComp, self._set_setcomp_environment)
+        visitor.register_transform(astroid.ListComp, self._set_comprehension_environment)
+        visitor.register_transform(astroid.DictComp, self._set_comprehension_environment)
+        visitor.register_transform(astroid.SetComp, self._set_comprehension_environment)
+        visitor.register_transform(astroid.GeneratorExp, self._set_comprehension_environment)
         return visitor
 
     def _set_module_environment(self, node: astroid.Module) -> None:
@@ -81,22 +82,10 @@ class TypeInferer:
         self._populate_local_env(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
 
-    def _set_listcomp_environment(self, node):
-        """Set the environment of a ListComp node representing a list
-        comprehension expression."""
-        node.type_environment = Environment()
-        for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
+    def _set_comprehension_environment(self, node):
+        """Set the environment of a comprehension expression.
 
-    def _set_dictcomp_environment(self, node):
-        """Environment setter for DictComp node representing a dictionary
-        comprehension expression."""
-        node.type_environment = Environment()
-        for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
-
-    def _set_setcomp_environment(self, node):
-        """Environment setter for SetComp node representing a set comprehension expression"""
+        Covers ListComp, SetComp, DictComp, and GeneratorExp."""
         node.type_environment = Environment()
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
@@ -350,6 +339,40 @@ class TypeInferer:
         self.type_constraints.unify(contained_type, target_type)
         node.type_constraints = TypeInfo(NoType)
 
+    ##############################################################################
+    # Comprehensions
+    ##############################################################################
+    def visit_comprehension(self, node: astroid.Comprehension) -> None:
+        # TODO: refactor code duplication between this and visit_for.
+        iter_type = self._handle_call(node, '__iter__', node.iter.type_constraints.type).type
+        contained_type = iter_type.__args__[0]
+        if isinstance(node.target, astroid.AssignName):
+            target_type = self.lookup_type(node.target, node.target.name)
+        else:
+            # TODO: check whether the following assumption is valid
+            # Assume that node.target is a tuple.
+            target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
+
+        self.type_constraints.unify(contained_type, target_type)
+        node.type_constraints = TypeInfo(NoType)
+
+    def visit_dictcomp(self, node: astroid.DictComp) -> None:
+        key_type = self.type_constraints.lookup_concrete(node.key.type_constraints.type)
+        val_type = self.type_constraints.lookup_concrete(node.value.type_constraints.type)
+        node.type_constraints = TypeInfo(Dict[key_type, val_type])
+
+    def visit_generatorexp(self, node: astroid.GeneratorExp) -> None:
+        elt_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
+        node.type_constraints = TypeInfo(Generator[elt_type, None, None])
+
+    def visit_listcomp(self, node: astroid.ListComp) -> None:
+        val_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
+        node.type_constraints = TypeInfo(List[val_type])
+
+    def visit_setcomp(self, node: astroid.SetComp) -> None:
+        elt_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
+        node.type_constraints = TypeInfo(Set[elt_type])
+
     def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
                      error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeInfo:
         """Helper to lookup a function and unify it with given arguments.
@@ -409,29 +432,6 @@ class TypeInferer:
             node.type_constraints = TypeInfo(node.body.type_constraints.type)
         else:
             node.type_constraints = TypeInfo(Any)
-
-    def visit_comprehension(self, node):
-        arg_type = self.type_constraints.lookup_concrete(node.iter.type_constraints.type)
-        rtype = self._handle_call(node, '__iter__', arg_type).type
-        if isinstance(node.target, astroid.Tuple):
-            for target_node in node.target.elts:
-                self.type_constraints.unify(self.lookup_type(target_node, target_node.name), rtype, node)
-        else:
-            self.type_constraints.unify(self.lookup_type(node.target, node.target.name), rtype.__args__[0])
-        node.type_constraints = TypeInfo(NoType)
-
-    def visit_listcomp(self, node):
-        val_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
-        node.type_constraints = TypeInfo(List[val_type])
-
-    def visit_dictcomp(self, node):
-        key_type = self.type_constraints.lookup_concrete(node.key.type_constraints.type)
-        val_type = self.type_constraints.lookup_concrete(node.value.type_constraints.type)
-        node.type_constraints = TypeInfo(Dict[key_type, val_type])
-
-    def visit_setcomp(self, node):
-        elt_type = self.type_constraints.lookup_concrete(node.elt.type_constraints.type)
-        node.type_constraints = TypeInfo(Set[elt_type])
 
     def visit_classdef(self, node):
         node.type_constraints = TypeInfo(NoType)

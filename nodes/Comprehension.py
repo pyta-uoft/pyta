@@ -15,6 +15,9 @@ Example:
     - target  -> Name(id='line', ctx=Store())
     - iter    -> Name(id='range(3)', ctx=Load())
     - ifs     -> []
+
+Type-checking:
+    Unify the target against the "contained" type in the iterable.
 """
 
 [x for x in range(3)]

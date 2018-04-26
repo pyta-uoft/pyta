@@ -163,6 +163,8 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
+        elif isinstance(t1, TupleMeta) or isinstance(t2, TupleMeta):
+            raise Exception(str(t1) + ' ' + str(t2))
         elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
             pass
         elif t1 == Any or t2 == Any:
@@ -238,8 +240,6 @@ class TypeConstraints:
         elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
             rtype = self._least_general_unifier_call(t1, *t2.__args__[:-1])
             return self.least_general_unifier(rtype, t2.__args__[-1])
-        elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
-            return self._least_general_unifier_tuple(t1, t2)
         elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
             pass
         elif t1 == Any or t2 == Any:
@@ -256,18 +256,13 @@ class TypeConstraints:
         if _gorg(t1) is not _gorg(t2):
             raise TypeInferenceError('bad unify')
         elif t1.__args__ is not None and t2.__args__ is not None:
-            for a1, a2 in zip(t1.__args__, t2.__args__):
-                return self.least_general_unifier(a1, a2)
-
-    def _least_general_unifier_tuple(self, t1: TupleMeta, t2: TupleMeta):
-        tup1, tup2 = t1.__tuple_params__, t2.__tuple_params__
-        if not tup1 or not tup2:
-            return
-        elif len(tup1) != len(tup2):
-            raise TypeInferenceError('unable to unify Tuple types')
+            if len(t1.__args__) != len(t2.__args__):
+                raise TypeInferenceError('bad unify')
+            else:
+                return _gorg(t1)[tuple(self.least_general_unifier(elem1, elem2)
+                                       for elem1, elem2 in zip(t1.__args__, t2.__args__))]
         else:
-            for elem1, elem2 in zip(tup1, tup2):
-                return self.least_general_unifier(elem1, elem2)
+            raise TypeInferenceError('bad unify')
 
     def _least_general_unifier_call(self, func_type, *arg_types):
         # TODO: Test this helper.

@@ -231,9 +231,10 @@ class TypeInferer:
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
                 # TODO: handle when these collections are different lengths.
-                for subtarget, subtype in zip(target.elts, expr_type.__args__):
-                    target_tvar = self.lookup_type(subtarget, subtarget.name)
-                    self.type_constraints.unify(target_tvar, subtype)
+                self.type_constraints.unify(
+                    Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
+                    expr_type
+                )
             else:
                 rtype = self._handle_call(target, '__iter__', expr_type).type
                 for subtarget in target.elts:
@@ -333,6 +334,21 @@ class TypeInferer:
         else:
             node.type_constraints = TypeInfo(NoType)
 
+    ##############################################################################
+    # Loops
+    ##############################################################################
+    def visit_for(self, node):
+        iter_type = self._handle_call(node, '__iter__', node.iter.type_constraints.type).type
+        contained_type = iter_type.__args__[0]
+        if isinstance(node.target, astroid.AssignName):
+            target_type = self.lookup_type(node.target, node.target.name)
+        else:
+            # TODO: check whether the following assumption is valid
+            # Assume that node.target is a tuple.
+            target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
+
+        self.type_constraints.unify(contained_type, target_type)
+        node.type_constraints = TypeInfo(NoType)
 
     def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
                      error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeInfo:
@@ -386,17 +402,6 @@ class TypeInferer:
                 func_type = create_Callable(arg_types, rtype, polymorphic_tvars)
             self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
         node.type_constraints = TypeInfo(NoType)
-
-    def visit_for(self, node):
-        for_node = list(node.nodes_of_class(astroid.For))[0]
-        rtype = self._handle_call(node, '__iter__', for_node.iter.type_constraints.type).type
-        # there may be one target, or a Generic of targets to unify.
-        if isinstance(for_node.target, astroid.AssignName):
-            self.type_constraints.unify(rtype.__args__[0], node.frame().type_environment.lookup_in_env(for_node.target.name))
-        else:
-            target_tvars = [node.frame().type_environment.lookup_in_env(target_node.name) for target_node in for_node.target.elts]
-            for i in range(len(target_tvars)):
-                self.type_constraints.unify(rtype.__args__[0], target_tvars[i])
 
     def visit_ifexp(self, node):
         if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type):

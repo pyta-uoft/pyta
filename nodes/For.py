@@ -22,6 +22,9 @@ Example:
     Const.int(Value=3)))
     - body    -> [Break()]
     - orelse  -> [Pass()]
+
+Type-checking:
+    Unify the target against the "contained" type in the iterable.
 """
 
 for i in [1, 2, 3]:

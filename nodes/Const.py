@@ -10,6 +10,9 @@ Attributes:
 
 Example:
     - value  -> 1
+
+Type-checking:
+    The type of a Const node is the type of its value attribute.
 """
 
 1

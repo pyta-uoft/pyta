@@ -21,6 +21,11 @@ Example 3:
     - targets  -> [Tuple(elts=[Name(id='a', ctx=Store()),
                   Name(id='b', ctx=Store())]
     - value    -> Name(id='c', ctx=Load())
+
+Type-checking:
+    - Single identifiers are associated with the type of the expression on the RHS of the =.
+    - For (unpacking) tuple assignment, the RHS must be an iterable of the same length as
+      the number of identifiers on the LHS.
 """
 
 # Example 1

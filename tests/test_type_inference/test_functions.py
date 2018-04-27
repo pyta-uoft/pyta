@@ -175,14 +175,17 @@ def test_user_defined_annotated_call_wrong_arguments_number():
 def test_conflicting_inferred_type_variable():
     """ User calls two functions on an object, which contradicts the inferred type of the variable.
     """
-    program = f'def return_num(num: int) -> int:\n' \
-              f'    return num\n' \
-              f'\n' \
-              f'def return_str(str: str) -> str:\n' \
-              f'    return str\n' \
-              f'\n' \
-              f'return_num(x)\n' \
-              f'return_str(x)\n'
+    program = '''
+        def return_num(num: int) -> int:
+            return num
+
+        def return_str(str: str) -> str:
+            return str
+
+        def f(x):
+            return_num(x)
+            return_str(x)
+        '''
     try:
         module, inferer = cs._parse_text(program)
     except:

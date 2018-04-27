@@ -13,6 +13,11 @@ Example 1:
 
 Example 2:
     - elts  -> [Const(int(1)), Const(int(2)), Const(str(hi))]
+
+
+Type-checking:
+    Type is Set[T], where T is the most specific class that every element
+    of the list is an instance of.
 """
 
 # Example 1

@@ -18,6 +18,9 @@ Example:
                      Comprehension(num, range(9)))]
     - locals      -> {'elt': g, 'generators': [Comprehension(ip, num),
                      Comprehension(num, range(9)))]}
+
+Type-checking:
+    The type of the GeneratorComp is Generator[T, None, None], where T is the type of elt.
 """
 
 (g for ip in num for num in range(9))

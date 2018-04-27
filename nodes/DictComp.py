@@ -19,6 +19,9 @@ Example:
     - generators  -> [Comprehension(n, range(3))]
     - locals      -> {'key': str(n), 'value': n,
                      'generators': (for n in range(3))}
+
+Type-checking:
+    The type of the DictComp is Dict[K, V], where K is the type of key and V is the type of value.
 """
 
 {str(n): n for n in range(3)}

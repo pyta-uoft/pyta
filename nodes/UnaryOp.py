@@ -1,8 +1,10 @@
 """
 UnaryOp astroid node
 
-This node represents unary operators such as positive, negative, negation, and
+This node represents unary operators such as positive, negation, and
 inversion (complementing).
+
+See https://docs.python.org/3/reference/expressions.html#unary-arithmetic-and-bitwise-operations.
 
 Attributes:
     - op       (class[UAdd | USub | Not | Invert])
@@ -25,6 +27,9 @@ Example 3:
 Example 4:
     - op       -> Invert
     - operand  -> Num(72)
+
+Type-checking:
+    Translate the operator into the corresponding method, and type-check the method call.
 """
 
 # Example 1:

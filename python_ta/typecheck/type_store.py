@@ -1,4 +1,5 @@
 import astroid
+from astroid.builder import AstroidBuilder
 from collections import defaultdict
 from python_ta.typecheck.base import parse_annotations, class_callable
 import os
@@ -8,13 +9,28 @@ TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.p
 
 
 class TypeStore:
-    def __init__(self, type_constraints):
+    """A representation of the types the entities defined in the current environment."""
+
+    def __init__(self, type_constraints) -> None:
+        """Initialize a type store with all the built-in types from the typeshed module."""
         self.type_constraints = type_constraints
-        with open(TYPE_SHED_PATH) as f:
-            contents = '\n'.join(f.readlines())
-        module = astroid.parse(contents)
         self.classes = defaultdict(lambda: defaultdict(list))
         self.functions = defaultdict(list)
+        self.methods = defaultdict(list)
+
+        builder = AstroidBuilder()
+        module = builder.file_build(TYPE_SHED_PATH)
+
+        self._parse_classes(module)
+        self._parse_functions(module)
+
+        # Add in initializers
+        for klass_name, methods in self.classes.items():
+            if '__init__' in methods:
+                self.functions[klass_name] = [class_callable(init) for init in methods['__init__']]
+
+    def _parse_classes(self, module: astroid.Module) -> None:
+        """Parse the class definitions from typeshed."""
         for class_def in module.nodes_of_class(astroid.ClassDef):
             tvars = []
             for base in class_def.bases:
@@ -29,6 +45,9 @@ class TypeStore:
                 self.classes[class_def.name][node.name] = [
                     parse_annotations(node, tvars)
                 ]
+
+    def _parse_functions(self, module: astroid.Module) -> None:
+        """Parse the function definitions from typeshed."""
         for function_def in module.nodes_of_class(astroid.FunctionDef):
             in_class = isinstance(function_def.parent, astroid.ClassDef)
             if in_class:
@@ -36,14 +55,11 @@ class TypeStore:
             else:
                 tvars = []
             f_type = parse_annotations(function_def, tvars)
-            self.functions[function_def.name].append(f_type)
             if in_class:
                 self.classes[function_def.parent.name][function_def.name].append(f_type)
-
-        # Add in constructors
-        for klass_name, methods in self.classes.items():
-            if '__init__' in methods:
-                self.functions[klass_name] = [class_callable(init) for init in methods['__init__']]
+                self.methods[function_def.name].append(f_type)
+            else:
+                self.functions[function_def.name].append(f_type)
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
@@ -61,3 +77,29 @@ class TypeStore:
                     return func_type
             if not unified:
                 raise KeyError
+
+    def lookup_method(self, operator, *args):
+        """Helper method to lookup a method type given the operator and types of arguments."""
+        if args:
+            unified = False
+            func_types_list = self.methods[operator]
+            for func_type in func_types_list:
+                # check if args can be unified instead of checking if they are the same!
+                unified = True
+                for t1, t2 in zip(func_type.__args__[:-1], args):
+                    if not self.type_constraints.can_unify(t1, t2):
+                        unified = False
+                        break
+                if unified:
+                    return func_type
+            if not unified:
+                raise KeyError
+
+
+if __name__ == '__main__':
+    # Display the TypeStore parsed from typeshed.
+    ts = TypeStore(None)
+    import pprint
+    pprint.pprint(ts.classes)
+    pprint.pprint(ts.methods)
+    pprint.pprint(ts.functions)

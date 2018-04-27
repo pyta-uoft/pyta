@@ -10,6 +10,12 @@ Attributes:
 
 Example:
     - items  -> [('b', 1)]
+
+
+Type-checking:
+    Type is Dict[K, V], where K is the most specific class that every key
+    of the dictionary is an instance of, and V is the most specific class that
+    every value of the dictionary is an instance of.
 """
 
 a = {'b': 1}

@@ -76,76 +76,6 @@ TYPE_SIGNATURES = {
 }
 
 
-OP_TO_NAME_BINARY = {
-      '+' : 'add'
-    , '-' : 'subtract'
-    , '*' : 'multiply'
-    , '//' : 'use integer division with'
-    , '%' : 'use modulus with'
-    , '/' : 'exponentiate'
-    , '&' : 'use bitwise AND with'
-    , '^' : 'use bitwise XOR with'
-    , '|' : 'use bitwise OR with'
-    , '==' : 'compare for equality between'
-    , '!=' : 'compare for inequality between'
-    # TODO : compare whether {} is _ than {} 'compare'
-    , '<' : 'compare'
-    , '<=' : 'compare'
-    , '>' : 'compare'
-    , '>=' : 'compare'
-    # TODO : 'is' and 'in'
-    }
-
-
-# TODO: Convert this into dictionary
-def binary_op_hints(op, args):
-    """Return an appropriate 'hint' or suggestion given the binary operation and operand types."""
-    if op == '+':
-        if int in args and str in args:
-            return "Perhaps you wanted to cast the integer into a string or vice versa?"
-
-
-OP_TO_DUNDER_BINARY = {
-    '+' : '__add__',
-    '-' : '__sub__',
-    '*' : '__mul__',
-    '//' : '__idiv__',
-    '%' : '__mod__',
-    '/' : '__div__',
-    '**' : '__pow__',
-    '&' : '__and__',
-    '^' : '__xor__',
-    '|' : '__or__',
-    '==' : '__eq__',
-    '!=' : '__ne__',
-    '<' : '__lt__',
-    '<=' : '__le__',
-    '>' : '__gt__',
-    '>=' : '__ge__'
-    # TODO: 'is' and 'in'
-    }
-
-
-def op_to_dunder_unary(op):
-    """Return the dunder method name corresponding to unary op."""
-    if op == '-':
-        return '__neg__'
-    elif op == '+':
-        return '__pos__'
-    elif op == '~':
-        return '__invert__'
-    else:
-        return op
-
-
-def _correct_article(noun : str) -> str:
-    """Helper to return a noun with the correct article."""
-    if noun.lower()[0] in 'aeiou':
-        return 'an ' + noun
-    else:
-        return 'a ' + noun
-
-
 def lookup_method(name, caller_type, *args):
     """Lookup method with the given name for the given type."""
     if isinstance(caller_type, TupleMeta):
@@ -233,6 +163,8 @@ class TypeConstraints:
             self.unify(rtype, t2.__args__[-1])
         elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
             self._unify_tuple(t1, t2)
+        elif isinstance(t1, TupleMeta) or isinstance(t2, TupleMeta):
+            raise Exception(str(t1) + ' ' + str(t2))
         elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
             pass
         elif t1 == Any or t2 == Any:
@@ -269,9 +201,12 @@ class TypeConstraints:
 
         Return a result type.
         """
+        if func_type == Any:
+            return Any
+
         # Check that the number of parameters matches the number of arguments.
         if len(func_type.__args__) - 1 != len(arg_types):
-            raise TypeInferenceError('Wrong number of arguments')
+            raise TypeInferenceError(f'Wrong number of arguments: {func_type.__args__}, {arg_types}')
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
@@ -305,8 +240,6 @@ class TypeConstraints:
         elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
             rtype = self._least_general_unifier_call(t1, *t2.__args__[:-1])
             return self.least_general_unifier(rtype, t2.__args__[-1])
-        elif isinstance(t1, TupleMeta) and isinstance(t2, TupleMeta):
-            return self._least_general_unifier_tuple(t1, t2)
         elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
             pass
         elif t1 == Any or t2 == Any:
@@ -323,18 +256,13 @@ class TypeConstraints:
         if _gorg(t1) is not _gorg(t2):
             raise TypeInferenceError('bad unify')
         elif t1.__args__ is not None and t2.__args__ is not None:
-            for a1, a2 in zip(t1.__args__, t2.__args__):
-                return self.least_general_unifier(a1, a2)
-
-    def _least_general_unifier_tuple(self, t1: TupleMeta, t2: TupleMeta):
-        tup1, tup2 = t1.__tuple_params__, t2.__tuple_params__
-        if not tup1 or not tup2:
-            return
-        elif len(tup1) != len(tup2):
-            raise TypeInferenceError('unable to unify Tuple types')
+            if len(t1.__args__) != len(t2.__args__):
+                raise TypeInferenceError('bad unify')
+            else:
+                return _gorg(t1)[tuple(self.least_general_unifier(elem1, elem2)
+                                       for elem1, elem2 in zip(t1.__args__, t2.__args__))]
         else:
-            for elem1, elem2 in zip(tup1, tup2):
-                return self.least_general_unifier(elem1, elem2)
+            raise TypeInferenceError('bad unify')
 
     def _least_general_unifier_call(self, func_type, *arg_types):
         # TODO: Test this helper.

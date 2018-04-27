@@ -25,15 +25,14 @@ def test_set_env(variables_dict):
         assert isinstance(value, TypeVar)
 
 
-@given(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1))
+@given(cs.valid_identifier())
 @settings(suppress_health_check=[HealthCheck.too_slow])
-def test_set_name_unassigned(variable_name):
+def test_set_name_unassigned(identifier):
     """Test visitor for name nodes representing a single unassigned variable in module."""
-    program = variable_name
+    program = identifier
     module, _ = cs._parse_text(program)
     for name_node in module.nodes_of_class(astroid.Name):
-        name_type_var = name_node.frame().type_environment.lookup_in_env(name_node.name)
-        assert name_node.type_constraints.type == name_type_var
+        assert name_node.type_constraints.type == Any
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))

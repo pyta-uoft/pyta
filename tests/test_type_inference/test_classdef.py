@@ -8,6 +8,7 @@ settings.load_profile("pyta")
 
 def test_classdef_attribute_assign():
     """Test whether type of attributes are properly being set."""
+    raise SkipTest()
     program = f'class Network:\n' \
               f'    def __init__(self, name, id):\n' \
               f'        self.name = name\n' \
@@ -30,6 +31,7 @@ def test_classdef_attribute_assign():
 
 def test_classdef_method_call():
     """Test whether type of the method call are properly being set"""
+    raise SkipTest()
     program = f'class Network:\n' \
               f'    def __init__(self, name):\n' \
               f'        self.name = name\n' \
@@ -48,6 +50,7 @@ def test_classdef_method_call():
 
 def test_classdef_method_call_annotated_concrete():
     """Test whether types of the method calls are properly being set given the annotations."""
+    raise SkipTest()
     program = f'class Network:\n' \
               f'    def __init__(self, name: str) -> None:\n' \
               f'        self.name = name\n' \

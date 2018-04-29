@@ -46,6 +46,12 @@ Done.
 
 Done.
 
+### FunctionDef
+
+TODOs:
+    - Distinguish between different types of methods (instance, static, class)
+    - Automatically unify type annotations by implementing a visit method for the Arguments node
+
 ### GeneratorExp
 
 Done.

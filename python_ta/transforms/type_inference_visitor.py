@@ -397,35 +397,54 @@ class TypeInferer:
 
 
     ##############################################################################
+    # Definitions
+    ##############################################################################
+    def visit_functiondef(self, node: astroid.FunctionDef) -> None:
+        node.type_constraints = TypeInfo(NoType)
+
+        # Get the inferred type of the function.
+        inferred_args = [self.lookup_type(node, arg) for arg in node.argnames()]
+
+        if isinstance(node.parent, astroid.ClassDef) and isinstance(inferred_args[0], TypeVar):
+            # TODO: distinguish between instance, class, and static methods.
+            # If node is an instance method, set the first parameter's type to be the class type.
+            self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name))
+
+        if any(node.nodes_of_class(astroid.Return)):
+            inferred_return = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
+        else:
+            inferred_return = None
+
+        # Get any function type annotations.
+        if any(annotation is not None for annotation in node.args.annotations):
+            annotated_type = parse_annotations(node)
+        else:
+            annotated_type = None
+
+        # Combine inferred and annotated types.
+        if annotated_type:
+            combined_args = []
+            for inferred, annotated in zip(inferred_args, annotated_type.__args__[:-1]):
+                t = self.type_constraints.least_general_unifier(inferred, annotated)
+                combined_args.append(t)
+
+            combined_return = self.type_constraints.least_general_unifier(inferred_return, annotated_type.__args__[-1])
+        else:
+            combined_args, combined_return = inferred_args, inferred_return
+
+        # Update the environment storing the function's type.
+        polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
+        func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
+        self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
+
+    def visit_return(self, node: astroid.Return) -> None:
+        t = node.value.type_constraints.type
+        self.type_constraints.unify(self.lookup_type(node, 'return'), t)
+        node.type_constraints = TypeInfo(NoType)
+
+    ##############################################################################
     # Statements
     ##############################################################################
-    def visit_return(self, node):
-        t = node.value.type_constraints.type
-        self.type_constraints.unify(node.frame().type_environment.locals['return'], t)
-        node.type_constraints = TypeInfo(NoType)
-
-    def visit_functiondef(self, node):
-        arg_types = [self.lookup_type(node, arg) for arg in node.argnames()]
-        if any(annotation is not None for annotation in node.args.annotations):
-            func_type = parse_annotations(node)
-            for arg_type, annotation in zip(arg_types, func_type.__args__[:-1]):
-                self.type_constraints.unify(arg_type, annotation)
-            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
-        else:
-            # Check whether this is a method in a class
-            if isinstance(node.parent, astroid.ClassDef) and isinstance(arg_types[0], TypeVar):
-                self.type_constraints.unify(arg_types[0], _ForwardRef(node.parent.name), node)
-
-            # check if return nodes exist; there is a return statement in function body.
-            polymorphic_tvars = [arg for arg in arg_types if isinstance(arg, TypeVar)]
-            if len(list(node.nodes_of_class(astroid.Return))) == 0:
-                func_type = create_Callable(arg_types, None, polymorphic_tvars)
-            else:
-                rtype = self.type_constraints.lookup_concrete(node.type_environment.lookup_in_env('return'))
-                func_type = create_Callable(arg_types, rtype, polymorphic_tvars)
-            self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
-        node.type_constraints = TypeInfo(NoType)
-
     def visit_ifexp(self, node):
         if self.type_constraints.can_unify(node.body.type_constraints.type, node.orelse.type_constraints.type):
             self.type_constraints.unify(node.body.type_constraints.type, node.orelse.type_constraints.type)

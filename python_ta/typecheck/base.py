@@ -217,8 +217,8 @@ class TypeConstraints:
 
     def least_general_unifier(self, t1, t2):
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            i1 = self._find(t1)
-            i2 = self._find(t2)
+            i1 = self._find_rep(self._tvar_tnode[t1]).type
+            i2 = self._find_rep(self._tvar_tnode[t2]).type
             if issubclass(i1, i2):
                 return i2
             elif issubclass(i2, i1):
@@ -226,15 +226,9 @@ class TypeConstraints:
             else:
                 return Any
         elif isinstance(t1, TypeVar):
-            i1 = self._find(t1)
-            if issubclass(i1, t2):
-                return t2
-            elif issubclass(t2, i1):
-                return i1
-            else:
-                return Any
+            return t2
         elif isinstance(t2, TypeVar):
-            return self.least_general_unifier(t2, t1)
+            return t1
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
             return self._least_general_unifier_generic(t1, t2)
         elif isinstance(t1, CallableMeta) and isinstance(t2, CallableMeta):
@@ -436,7 +430,10 @@ def parse_annotations(node, class_tvars=None):
             else:
                 arg_types.append(_node_to_type(annotation))
 
-        rtype = _node_to_type(node.returns)
+        if node.returns:
+            rtype = _node_to_type(node.returns)
+        else:
+            rtype = node.type_environment.lookup_in_env('return')
         return create_Callable(arg_types, rtype, class_tvars)
     elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
         return _node_to_type(node.parent.annotation)

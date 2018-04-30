@@ -23,6 +23,13 @@ TODOs:
     - Improve handling of initializers
     - Handling inheritance
 
+### ClassDef
+
+TODOs:
+    - Look into instance_attrs vs locals for ClassDef nodes
+    - Handle class variables (and corresponding type annotations)
+    - Refactor to remove code duplication in updating TypeStore
+
 ### Compare
 
 Done.
@@ -46,7 +53,17 @@ Done.
 
 Done.
 
+### FunctionDef
+
+TODOs:
+    - Distinguish between different types of methods (instance, static, class)
+    - Automatically unify type annotations by implementing a visit method for the Arguments node
+
 ### GeneratorExp
+
+Done.
+
+### IfExp
 
 Done.
 

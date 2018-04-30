@@ -17,7 +17,7 @@ def test_for_homogeneous_list(iterable):
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
     local_type_var = module.type_environment.lookup_in_env('x')
-    inferred_type = TypeInferrer.type_constraints.lookup_concrete(local_type_var)
+    inferred_type = TypeInferrer.type_constraints.resolve(local_type_var)
     assert inferred_type == for_node.iter.type_constraints.type.__args__[0]
 
 
@@ -38,7 +38,7 @@ def test_for_heterogeneous_list(iterable):
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
     local_type_var = module.type_environment.lookup_in_env('x')
-    inferred_type = TypeInferrer.type_constraints.lookup_concrete(local_type_var)
+    inferred_type = TypeInferrer.type_constraints.resolve(local_type_var)
     assert inferred_type == Any
 
 
@@ -54,9 +54,9 @@ def test_inference_func_def_for():
     for_node = list(module.nodes_of_class(astroid.For))[0]
     function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
     function_type_var = module.type_environment.lookup_in_env(function_def_node.name)
-    function_type = TypeInferrer.type_constraints.lookup_concrete(function_type_var)
+    function_type = TypeInferrer.type_constraints.resolve(function_type_var)
     target_type_var = function_def_node.type_environment.lookup_in_env('num')
-    target_type = TypeInferrer.type_constraints.lookup_concrete(target_type_var)
+    target_type = TypeInferrer.type_constraints.resolve(target_type_var)
     assert (function_type == Callable[[int], int]) and (target_type == int)
 
 

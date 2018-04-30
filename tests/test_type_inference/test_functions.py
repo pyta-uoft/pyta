@@ -31,8 +31,8 @@ def test_function_def_no_args(function_name, return_value):
     function_type_var = module.type_environment.lookup_in_env(function_name)
     function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
     return_tvar = function_def_node.type_environment.lookup_in_env('return')
-    return_type = inferer.type_constraints.lookup_concrete(return_tvar)
-    assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[[], return_type]
+    return_type = inferer.type_constraints.resolve(return_tvar)
+    assert inferer.type_constraints.resolve(function_type_var) == Callable[[], return_type]
 
 
 @given(cs.valid_identifier(), cs.primitive_values)
@@ -44,7 +44,7 @@ def test_function_def_call_no_args(function_name, return_value):
     # there should be a single Expr node in this program
     function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
     return_tvar = function_def_node.type_environment.lookup_in_env('return')
-    return_type = inferer.type_constraints.lookup_concrete(return_tvar)
+    return_type = inferer.type_constraints.resolve(return_tvar)
     expr_node = next(module.nodes_of_class(astroid.Expr))
     assert expr_node.type_constraints.type == return_type
 
@@ -58,9 +58,9 @@ def test_function_def_no_return(function_name, arguments, body):
         module, inferer = cs._parse_text(program)
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
         expected_arg_type_vars = [function_def_node.type_environment.lookup_in_env(argument) for argument in arguments]
-        expected_arg_types = [inferer.type_constraints.lookup_concrete(type_var) for type_var in expected_arg_type_vars]
+        expected_arg_types = [inferer.type_constraints.resolve(type_var) for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
-        assert inferer.type_constraints.lookup_concrete(function_type_var) == Callable[expected_arg_types, None]
+        assert inferer.type_constraints.resolve(function_type_var) == Callable[expected_arg_types, None]
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
@@ -74,12 +74,12 @@ def test_function_def_args_simple_return(function_name, arguments):
         # get the functionDef node - there is only one in this test case.
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
         expected_arg_type_vars = [function_def_node.type_environment.lookup_in_env(argument) for argument in arguments]
-        expected_arg_types = [inferer.type_constraints.lookup_concrete(type_var) for type_var in expected_arg_type_vars]
+        expected_arg_types = [inferer.type_constraints.resolve(type_var) for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
-        function_type = inferer.type_constraints.lookup_concrete(function_type_var)
+        function_type = inferer.type_constraints.resolve(function_type_var)
         actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
-        expected_return_type = inferer.type_constraints.lookup_concrete(return_type_var)
+        expected_return_type = inferer.type_constraints.resolve(return_type_var)
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
 
 
@@ -98,7 +98,7 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         # get the Call node - there is only one in this test case.
         call_node = next(module.nodes_of_class(astroid.Call))
         function_call_type = call_node.type_constraints.type
-        assert inferer.type_constraints.lookup_concrete(function_call_type) == call_node.args[i].type_constraints.type
+        assert inferer.type_constraints.resolve(function_call_type) == call_node.args[i].type_constraints.type
 
 
 def test_incompatible_binop_call():

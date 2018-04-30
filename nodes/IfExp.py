@@ -18,6 +18,10 @@ Example:
     - test    -> Const(True)
     - body    -> Const(1)
     - orelse  -> Const(0)
+
+Type-checking:
+    The type of the expression is the same as the type of the body and orelse expressions
+    (they must have the same type).
 """
 
 x = 1 if True else 0

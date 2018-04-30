@@ -24,8 +24,8 @@ def test_classdef_attribute_assign():
     for attribute_lst in classdef_node.instance_attrs.values():
         for instance in attribute_lst:
             attribute_type = inferer.type_constraints\
-                .lookup_concrete(classdef_node.type_environment.lookup_in_env(instance.attrname))
-            value_type = inferer.type_constraints.lookup_concrete(instance.parent.value.type_constraints.type)
+                .resolve(classdef_node.type_environment.lookup_in_env(instance.attrname))
+            value_type = inferer.type_constraints.resolve(instance.parent.value.type_constraints.type)
             assert attribute_type == value_type
 
 
@@ -44,7 +44,7 @@ def test_classdef_method_call():
     module, inferer = cs._parse_text(program)
     attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
     expected_rtype = attribute_node.parent.type_constraints.type
-    actual_rtype = inferer.type_constraints.lookup_concrete(attribute_node.type_constraints.type.__args__[-1])
+    actual_rtype = inferer.type_constraints.resolve(attribute_node.type_constraints.type.__args__[-1])
     assert actual_rtype == expected_rtype
 
 
@@ -62,14 +62,14 @@ def test_classdef_method_call_annotated_concrete():
     module, inferer = cs._parse_text(program)
     for functiondef_node in module.nodes_of_class(astroid.FunctionDef):
         self_name = functiondef_node.args.args[0].name
-        actual_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(self_name))
+        actual_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(self_name))
         assert actual_type.__forward_arg__ == functiondef_node.parent.name
         for i in range(1, len(functiondef_node.args.annotations)):
             arg_name = functiondef_node.args.args[i].name
-            actual_type = inferer.type_constraints.lookup_concrete(functiondef_node.type_environment.lookup_in_env(arg_name))
+            actual_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(arg_name))
             assert actual_type.__name__ == functiondef_node.args.annotations[i].name
         expected_rtype = inferer.type_constraints\
-            .lookup_concrete(functiondef_node.parent.type_environment.lookup_in_env(functiondef_node.name))
+            .resolve(functiondef_node.parent.type_environment.lookup_in_env(functiondef_node.name))
         assert functiondef_node.returns.name == expected_rtype.__args__[-1].__name__
 
 

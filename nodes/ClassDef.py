@@ -21,6 +21,10 @@ Example:
     - decorators  -> @wrapper
     - bases       -> [Name(id='base1', ctx=Load()),Name(id='base2', ctx=Load())]
     - body        -> [Pass()]
+
+Type-checking:
+    The class name is added to the parent's type environment.
+    The class' instance variables and methods are used to update the global TypeStore.
 """
 
 @wrapper

@@ -269,12 +269,15 @@ class TypeInferer:
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.type_constraints.type
         if not isinstance(callable_t, (CallableMeta, list)):
-            func_name = callable_t.__args__[0].__name__
+            if isinstance(callable_t, _ForwardRef):
+                func_name = callable_t.__forward_arg__
+            else:
+                func_name = callable_t.__args__[0].__name__
             init_types = self.type_store.classes[func_name]['__init__']
             init_type = init_types[0]  # TODO: handle method overloading (through optional parameters)
-            arg_types = [callable_t.__args__[0]] + [arg.type_constraints.type for arg in node.args]
+            arg_types = [callable_t] + [arg.type_constraints.type for arg in node.args]
             self.type_constraints.unify_call(init_type, *arg_types)
-            node.type_constraints = TypeInfo(callable_t.__args__[0])
+            node.type_constraints = TypeInfo(callable_t)
         else:
             # TODO: resolve this case (from method lookup) more gracefully
             if isinstance(callable_t, list):
@@ -283,6 +286,7 @@ class TypeInferer:
             else:
                 arg_types = []
             arg_types += [arg.type_constraints.type for arg in node.args]
+            print(callable_t, arg_types)
             ret_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
             node.type_constraints = TypeInfo(ret_type)
 
@@ -433,7 +437,7 @@ class TypeInferer:
         if any(node.nodes_of_class(astroid.Return)):
             inferred_return = self.type_constraints.resolve(node.type_environment.lookup_in_env('return'))
         else:
-            inferred_return = None
+            inferred_return = type(None)
 
         # Get any function type annotations.
         if any(annotation is not None for annotation in node.args.annotations):
@@ -445,10 +449,15 @@ class TypeInferer:
         if annotated_type:
             combined_args = []
             for inferred, annotated in zip(inferred_args, annotated_type.__args__[:-1]):
+                if annotated is None:
+                    annotated = type(None)
                 t = self.type_constraints.unify(inferred, annotated)
                 combined_args.append(t)
 
-            combined_return = self.type_constraints.unify(inferred_return, annotated_type.__args__[-1])
+            annotated_rtype = annotated_type.__args__[-1]
+            if annotated_rtype is None:
+                annotated_rtype = type(None)
+            combined_return = self.type_constraints.unify(inferred_return, annotated_rtype)
         else:
             combined_args, combined_return = inferred_args, inferred_return
 
@@ -462,12 +471,21 @@ class TypeInferer:
         self.type_constraints.unify(self.lookup_type(node, 'return'), t)
         node.type_constraints = TypeInfo(NoType)
 
+    def visit_classdef(self, node: astroid.ClassDef) -> None:
+        node.type_constraints = TypeInfo(NoType)
+        self.type_constraints.unify(self.lookup_type(node.parent, node.name), _ForwardRef(node.name))
+
+        # Update type_store for this class.
+        # TODO: include node.instance_attrs as well?
+        for attr in node.locals:
+            attr_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
+            self.type_store.classes[node.name][attr].append(attr_type)
+            if isinstance(attr_type, CallableMeta):
+                self.type_store.methods[attr].append(attr_type)
+
     ##############################################################################
     # Statements
     ##############################################################################
-    def visit_classdef(self, node):
-        node.type_constraints = TypeInfo(NoType)
-
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_type = node.expr.type_constraints.type
         if isinstance(expr_type, _ForwardRef):
@@ -481,6 +499,11 @@ class TypeInferer:
             if attribute_type is None:
                 raise TypeInferenceError(f'Attribute {node.attrname} not found for type {type_name}')
             else:
+                attribute_type = attribute_type[0]
+                # Detect an instance method call, and create a bound method signature (first argument removed).
+                # TODO: handle classmethod calls differently.
+                if isinstance(attribute_type, CallableMeta):
+                    attribute_type = Callable[list(attribute_type.__args__[1:-1]), attribute_type.__args__[-1]]
                 node.type_constraints = TypeInfo(attribute_type)
 
     def visit_annassign(self, node):

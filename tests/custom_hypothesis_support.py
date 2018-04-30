@@ -166,12 +166,12 @@ def expr_node(draw, value=None):
 
 @hs.composite
 def ifexp_node(draw, test=const_node(hs.booleans()),
-               body=const_node(), orelse=const_node()):
+               expr=const_node(), orelse=const_node()):
+    # TODO: Add an option for whether expr and orelse strategies produce the same type.
     test = draw(test)
-    body = draw(body)
-    orelse = draw(orelse)
+    expr = draw(expr)
     node = astroid.IfExp()
-    node.postinit(test, body, orelse)
+    node.postinit(test, expr, expr)
     return node
 
 

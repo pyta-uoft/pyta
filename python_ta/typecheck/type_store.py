@@ -70,7 +70,7 @@ class TypeStore:
                 # check if args can be unified instead of checking if they are the same!
                 unified = True
                 for t1, t2 in zip(func_type.__args__[:-1], args):
-                    if not self.type_constraints.can_unify(t1, t2):
+                    if not isinstance(self.type_constraints.unify(t1, t2), type):
                         unified = False
                         break
                 if unified:
@@ -83,10 +83,11 @@ class TypeStore:
         if args:
             unified = False
             func_types_list = self.methods[operator]
+            self_type = args[0]
             for func_type in func_types_list:
-                # check if args can be unified instead of checking if they are the same!
                 unified = True
                 for t1, t2 in zip(func_type.__args__[:-1], args):
+                    # TODO: replace call to can_unify
                     if not self.type_constraints.can_unify(t1, t2):
                         unified = False
                         break
@@ -101,5 +102,5 @@ if __name__ == '__main__':
     ts = TypeStore(None)
     import pprint
     pprint.pprint(ts.classes)
-    pprint.pprint(ts.methods)
+    pprint.pprint(ts.methods['__iter__'])
     pprint.pprint(ts.functions)

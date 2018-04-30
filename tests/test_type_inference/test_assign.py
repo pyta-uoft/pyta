@@ -76,7 +76,7 @@ def test_multi_target_assign(variables_dict):
         target_type_tuple = zip(node.targets[0].elts, node.value.elts)
         for target, value in target_type_tuple:
             target_type_var = target.frame().type_environment.lookup_in_env(target.name)
-            assert inferer.type_constraints.lookup_concrete(target_type_var) == value.type_constraints.type
+            assert inferer.type_constraints.resolve(target_type_var) == value.type_constraints.type
 
 
 @given(hs.lists(hs.text(alphabet="abcdefghijklmnopqrstuvwxyz", min_size=1), min_size=1), cs.primitive_values)
@@ -91,7 +91,7 @@ def test_set_multi_assign(variables_list, value):
     for target_node in module.nodes_of_class(astroid.AssignName):
         value_type = target_node.parent.value.type_constraints.type
         target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
-        assert inferer.type_constraints.lookup_concrete(target_type_var) == value_type
+        assert inferer.type_constraints.resolve(target_type_var) == value_type
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=2))
@@ -111,7 +111,7 @@ def test_assign_complex_homogeneous(variables_dict):
     ass_node = list(module.nodes_of_class(astroid.Assign))[0]
     for variable_name in variables_dict:
         var_tvar = module.type_environment.lookup_in_env(variable_name)
-        assert typeinferrer.type_constraints.lookup_concrete(var_tvar) == ass_node.value.elts[0].type_constraints.type
+        assert typeinferrer.type_constraints.resolve(var_tvar) == ass_node.value.elts[0].type_constraints.type
 
 
 @nottest
@@ -134,7 +134,7 @@ def test_assign_complex(variables, values):
     module, TypeInferrer = cs._parse_text(program)
     for variable_name in variables:
         variable_type_var = module.type_environment.lookup_in_env(variable_name)
-        assert TypeInferrer.type_constraints.lookup_concrete(variable_type_var) == Any
+        assert TypeInferrer.type_constraints.resolve(variable_type_var) == Any
 
 
 def test_attribute_reassign():

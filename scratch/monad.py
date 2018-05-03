@@ -1,6 +1,7 @@
 import typing
 import astroid
 
+
 class Monad():
     def __init__(self, value):
         self.value = value

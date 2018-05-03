@@ -16,6 +16,8 @@ def unify_helper(arg1, arg2, exp_result):
     unify_result = tc.unify(arg1, arg2)
     if exp_result == error_msg:
         eq_(type(unify_result), str)
+    elif isinstance(exp_result, TypeVar):
+        eq_(unify_result, tc.resolve(exp_result))
     else:
         eq_(unify_result, exp_result)
 
@@ -35,22 +37,18 @@ def test_same_prim():
 
 
 def test_diff_prim():
-    unify_helper(bool, int, bool)
     unify_helper(bool, str, error_msg)
     unify_helper(int, str, error_msg)
+    unify_helper(bool, int, error_msg)
     unify_helper(float, int, error_msg)
+    unify_helper(float, str, error_msg)
 
 
-def test_diff_prim_flipped():
+def test_subclasses():
     raise SkipTest(skip_msg)
-    # Simply returns the first argument, rather than the more specific one
+    # Currently no support for subclasses
     unify_helper(int, bool, bool)
-
-
-def test_int_bool():
-    raise SkipTest(skip_msg)
-    # base.py returns the first arg, rather than the subclass
-    unify_helper(int, bool, bool)
+    unify_helper(bool, int, bool)
 
 
 # Unify TypeVars
@@ -62,26 +60,22 @@ def test_same_typevars():
     eq_(tc.resolve(tv1), str)
     eq_(tc.resolve(tv2), str)
     unify_helper(tv1, tv2, tv1)
-    unify_helper(tv2, tv1, tv2)
 
 
 def test_same_typevars_flipped():
-    raise SkipTest(skip_msg)
-    # unify only returns the first TypeVar, without resolving to concrete type
     tc.reset()
     tv1 = setup_typevar(str)
     tv2 = setup_typevar(str)
 
+    eq_(tc.resolve(tv1), str)
+    eq_(tc.resolve(tv2), str)
     unify_helper(tv1, tv2, tv2)
-    unify_helper(tv2, tv1, tv1)
 
 
 def test_diff_typevars():
-    raise SkipTest(skip_msg)
-    # unify raises excpetion in this case, rather than returning error string
     tc.reset()
-    tv_str = setup_typevar(int)
-    tv_int = setup_typevar(str)
+    tv_str = setup_typevar(str)
+    tv_int = setup_typevar(int)
 
     eq_(tc.resolve(tv_str), str)
     eq_(tc.resolve(tv_int), int)
@@ -100,6 +94,8 @@ def test_one_typevar():
 
 
 def test_one_typevar_bool_int():
+    raise SkipTest("skip_msg")
+    # Currently no support for subclasses
     tc.reset()
     tv = setup_typevar(bool)
 
@@ -135,16 +131,13 @@ def test_same_tuple():
 
 
 def test_tuple_subclass():
-    unify_helper(Tuple[bool, bool], Tuple[int, int], Tuple[bool, bool])
-
-
-def test_tuple_subclass_flipped():
     raise SkipTest(skip_msg)
-    # Should be returning Tuple[bool, bool], subclasses not returning in order
+    # Currently no support for subclasses
+    unify_helper(Tuple[bool, bool], Tuple[int, int], Tuple[bool, bool])
     unify_helper(Tuple[int, int], Tuple[bool, bool], Tuple[bool, bool])
 
 
-def test_tuple_str():
+def test_diff_tuple():
     raise SkipTest(skip_msg)
     # _unify_generic not properly checking for error messages, instead attempts
     # to make invalid ForwardRef
@@ -165,21 +158,28 @@ def test_diff_list():
 
 
 # Unify callables
+def test_same_callable():
+    tc.reset()
+    c1 = Callable[[bool], bool]
+    c2 = Callable[[bool], bool]
+
+    eq_(tc.resolve(c1), Callable[[bool], bool])
+    eq_(tc.resolve(c2), Callable[[bool], bool])
+    unify_helper(c1, c2, c1)
+    unify_helper(c1, c2, c2)
+    unify_helper(c2, c1, c1)
+    unify_helper(c2, c1, c2)
+
+
 def test_callable_subclass():
+    raise SkipTest(skip_msg)
+    # No support for subclasses
     c1 = Callable[[bool], bool]
     c2 = Callable[[int], int]
 
     eq_(tc.resolve(c1), Callable[[bool], bool])
     eq_(tc.resolve(c2), Callable[[int], int])
     unify_helper(c1, c2, c1)
-
-
-def test_callable_subclass_flipped():
-    raise SkipTest(skip_msg)
-    # Should be returning Callable[[bool], bool]
-    c1 = Callable[[bool], bool]
-    c2 = Callable[[int], int]
-
     unify_helper(c2, c1, c1)
 
 

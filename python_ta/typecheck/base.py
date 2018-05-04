@@ -6,6 +6,110 @@ import astroid
 from astroid.node_classes import NodeNG
 
 
+class Monad():
+    def __init__(self, value):
+        self.value = value
+
+    def getValue(self):
+        return self.value
+
+    def fmap(self, function):
+        raise NotImplementedError
+
+    def bind(self, function):
+        raise NotImplementedError
+
+    def __rmul__(self, function):
+        return self.fmap(function)
+
+    def __rshift__(self, function):
+        if callable(function):
+            result = self.bind(function)
+            if not isinstance(result, Monad):
+                raise TypeError("Operator '>>' must return a Monad instance.")
+            return result
+        else:
+            if not isinstance(function, Monad):
+                raise TypeError("Operator '>>' must return a Monad instance.")
+            return self.bind(lambda _: function)
+
+
+class TypeResult(Monad):
+    """
+    Represents the result of a type check operation that either succeeded or
+    failed.
+    """
+    def __init__(self, value):
+        raise NotImplementedError
+
+
+class TypeInfo(TypeResult):
+    """
+    Represents the result of a successful type check operation
+    Contains information about the inferred type of a node
+    """
+
+    def __init__(self, type_: type):
+        # if not isinstance(type_, type):
+        #    raise TypeError
+        super(TypeResult, self).__init__(type_)
+
+    def __eq__(self, other):
+        super(TypeResult, self).__eq__(other)
+        if not isinstance(other, TypeResult):
+            return False
+        elif (self.getValue() == other.getValue()):
+            return True
+        else:
+            return False
+
+    def __str__(self):
+        return f'TypeInfo: {self.value}'
+
+    def fmap(self, function):
+        """
+        f:: (type -> type)
+        function must take type and return type
+        """
+        return TypeInfo(function(self.value))
+
+    def bind(self, function):
+        """
+        f :: (type -> TypeResult)
+        function must take type, and return TypeResult
+        """
+        return function(self.getValue())
+
+
+class TypeFail(TypeResult):
+    """
+    Represents the result of a failed type check operation
+    Contains error message
+    """
+    def __init__(self, msg: str):
+        if not isinstance(msg, str):
+            raise TypeError
+        super(TypeResult, self).__init__(msg)
+
+    def __str__(self):
+        return f'TypeFail: {self.value}'
+
+    def __eq__(self, other):
+        super(TypeFail, self).__eq__(other)
+        if not isinstance(other, TypeFail):
+            return False
+        elif (self.getValue() == other.getValue()):
+            return True
+        else:
+            return False
+
+    def fmap(self, _):
+        return self
+
+    def bind(self, _):
+        return self
+
+
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
 def _gorg(x):
     if sys.version_info < (3, 6, 3):
@@ -179,6 +283,7 @@ class TypeConstraints:
     ###########################################################################
     # Creating new nodes ("make set")
     ###########################################################################
+    # TODO: Rename to better distinguish between _TNodes and AST Nodes
     def fresh_tvar(self, node: NodeNG) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node.
         """
@@ -219,75 +324,102 @@ class TypeConstraints:
     ###########################################################################
     # Type unification ("union")
     ###########################################################################
-    def unify(self, t1: type, t2: type) -> Union[str, type]:
+    def unify(self, t1: TypeResult, t2: TypeResult) -> TypeResult:
         """Unify the given types.
 
         Return the result of the unification, or an error message if the types can't be unified.
         """
-        if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            result = self._merge_sets(t1, t2)
-            if not isinstance(result, str):
-                return self.resolve(t1)
-            else:
-                return result
+        if isinstance(t1, TypeFail):
+            return t1 >> (lambda x: TypeFail(x))
+        elif isinstance(t2, TypeFail):
+            return t2 >> (lambda x: TypeFail(x))
 
-        elif isinstance(t1, TypeVar):
-            rep1 = self._find(t1)
-            if rep1.type == t1:
+        elif isinstance(t1.getValue(), TypeVar) and isinstance(t2.getValue(), TypeVar):
+            result = self._merge_sets(t1.getValue(), t2.getValue())
+            if not isinstance(result, str):
+                return TypeInfo(self.resolve(t1.getValue()))
+            else:
+                return TypeFail(result)
+        # Case of two generics
+        # TODO: Change this to use binds instead of always looking up values
+        # Currenly only accounts for lists
+        elif isinstance(t1.getValue(), GenericMeta) and isinstance(
+                t2.getValue(), GenericMeta):
+            # Bind GenericMeta object from each TypeInfo to x and y,
+            # pass to unify_generic
+            return t1 >> (lambda x: t2 >> (lambda y: self._unify_generic(x, y)))
+
+        # Case of generic and non-generic
+        elif isinstance(t1.getValue(), GenericMeta) or isinstance(
+                t2.getValue(), GenericMeta):
+            return TypeFail("Cannot unify generic with primitive")
+
+        elif isinstance(t1.getValue(), TypeVar):
+            rep1 = self._find(t1.getValue())
+            if rep1.type == t1.getValue():
                 # Simply make t2 the set representative for t1.
-                rep1.parent = self._make_set(t2)
+                rep1.parent = self._make_set(t2.getValue())
                 return t2
             else:
-                return self.unify(rep1.type, t2)
-        elif isinstance(t2, TypeVar):
+                return self.unify(TypeInfo(rep1.type), t2)
+        elif isinstance(t2.getValue(), TypeVar):
             return self.unify(t2, t1)
-        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            return self._unify_generic(t1, t2)
-        elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
-            return f'Incompatible types {t1} {t2}'
-        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+
+        # elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+        #     return t1
+        # elif t1 == Any or t2 == Any:
+        #     return t1
+        elif isinstance(t1.getValue(), _ForwardRef) and isinstance(
+                t2.getValue(), _ForwardRef) and t1 == t2:
             return t1
-        elif t1 == Any or t2 == Any:
-            return t1
-        elif isinstance(t1, _ForwardRef) and isinstance(t2, _ForwardRef) and t1 == t2:
-            return t1
-        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
-            return f'Incompatible types {t1} {t2}'
-        elif t1 == t2:
+        elif isinstance(t1.getValue(), _ForwardRef) or isinstance(
+                t1.getValue(), _ForwardRef):
+            return TypeFail("Attempted to unify forwardref  with non-ref")
+
+        # Case of unifying two concrete types
+        elif t1.getValue() == t2.getValue():
             return t1
         elif t1 != t2:
-            return f'Incompatible types {t1} {t2}'
+            return TypeFail(
+                f'Incompatible Types {t1.getValue()} and {t2.getValue()}')
 
-    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> Union[str, GenericMeta]:
-        """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
-        if _gorg(t1) is not _gorg(t2):
-            return f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}'
-        elif t1.__args__ is not None and t2.__args__ is not None:
-            # TODO: check for equal lengths of __args__
-            gorg = _gorg(t1)
-            if gorg == Callable:
-                # TODO: Looking up elements in arrays causes _type_check to be
-                # called from typing.py, which tries to create a ForwardRef
-                # when encountering strings, even though strings are sometimes
-                # error messages
-                return gorg[
-                    [self.unify(a1, a2) for a1, a2 in zip(t1.__args__[:-1], t2.__args__[:-1])],
-                    self.unify(t1.__args__[-1], t2.__args__[-1])
-                ]
-            elif gorg == Tuple:
-                tuple_args = tuple(
-                    self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)
-                )
-                # Handle the special case when t1 or t2 are empty tuples
-                if tuple_args == ((),):
-                    tuple_args = ()
-                return gorg[tuple_args]
+    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
+        """
+        unify_generic :: GenericMeta -> GenericMeta -> TypeResult
+        """
+        # TODO: Change to properly extract values and check generic type
+        g1, g2 = _gorg(t1), _gorg(t2)
+        # Check that t1, t2 are of the same type
+        if g1 == g2:
+            # Check that t1, t2 are of the same length
+            if len(t1.__args__) == len(t2.__args__):
+                result_list = []
+                for i, j in zip(t1.__args__, t2.__args__):
+                    # As __args__ is a list of types, these are wrapped as
+                    # TypeInfo objects before being passed to unify
+                    unify_result = self.unify(TypeInfo(i), TypeInfo(j))
+                    if not isinstance(unify_result, TypeFail):
+                        # If unify result is a success, type is extracted and
+                        # stored in result_list
+                        # TODO: Use binding instead?
+                        result_list.append(unify_result.getValue())
+                    else:
+                        # If, at any point, a TypeFail occurs, the function simply
+                        # returns that TypeFail instance
+                        return unify_result
+                if g1 == List:
+                    return TypeInfo(List[result_list[0]])
+                elif g1 == Tuple:
+                    return TypeInfo(Tuple[tuple(result_list)])
+                elif g1 == Callable:
+                    return TypeInfo(g1[result_list[:-1], result_list[-1]])
+                # Reaches this case when generic is not List, Tuple or Callable
+                else:
+                    return TypeFail("Generic not yet supported")
             else:
-                return gorg[tuple(
-                    self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)
-                )]
+                return TypeFail("Generics must be of same size")
         else:
-            return f'Incompatible types {t1} and {t2}'
+            return TypeFail("Generic types do not match")
 
     def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> None:
         """Merge the two sets that t1 and t2 belong to.

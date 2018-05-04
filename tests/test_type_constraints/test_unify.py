@@ -225,4 +225,3 @@ def test_diff_callable():
     c2 = Callable[[str], str]
 
     unify_helper(c1, c2, error_msg)
-    

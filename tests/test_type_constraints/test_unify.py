@@ -1,8 +1,7 @@
-import astroid
 from typing import *
 from typing import TupleMeta, CallableMeta, _ForwardRef
 from python_ta.transforms.type_inference_visitor import main
-from python_ta.typecheck.base import TypeConstraints, _TNode
+from python_ta.typecheck.base import TypeConstraints
 from nose import SkipTest
 from nose.tools import eq_
 
@@ -15,7 +14,7 @@ tc = TypeConstraints()
 def unify_helper(arg1, arg2, exp_result):
     unify_result = tc.unify(arg1, arg2)
     if exp_result == error_msg:
-        eq_(type(unify_result), str)
+        eq_(type(unify_result), str)  # TODO: check for error messages
     elif isinstance(exp_result, TypeVar):
         eq_(unify_result, tc.resolve(exp_result))
     else:
@@ -23,8 +22,7 @@ def unify_helper(arg1, arg2, exp_result):
 
 
 def setup_typevar(t: type):
-    tn = _TNode(t)
-    tv = tc.fresh_tvar(tn)
+    tv = tc.fresh_tvar(None)
     tc.unify(tv, t)
     return tv
 
@@ -105,6 +103,13 @@ def test_one_typevar_bool_int():
     unify_helper(tv, str, error_msg)
 
 
+def test_two_typevar():
+    tc.reset()
+    tv1 = setup_typevar(bool)
+    tv2 = tc.fresh_tvar(None)
+    unify_helper(tv1, tv2, bool)
+
+
 # Unify ForwardRefs
 def test_same_forward_ref():
     fr1 = _ForwardRef('a')
@@ -142,6 +147,35 @@ def test_diff_tuple():
     # _unify_generic not properly checking for error messages, instead attempts
     # to make invalid ForwardRef
     unify_helper(Tuple[int, int], Tuple[str, str], error_msg)
+
+
+def test_nested_tuples():
+    unify_helper(Tuple[str, Tuple[str, bool]], Tuple[str, Tuple[str, bool]],
+                 Tuple[str, Tuple[str, bool]])
+
+
+def test_typevars_tuple():
+    tv1 = tc.fresh_tvar(None)
+    tv2 = tc.fresh_tvar(None)
+    unify_helper(Tuple[tv1, tv2], Tuple[str, bool], Tuple[str, bool])
+    eq_(tc.resolve(tv1), str)
+    eq_(tc.resolve(tv2), bool)
+
+
+def test_typevars_nested_tuples():
+    raise SkipTest('resolve needs to be recursive for this test to work')
+    t1 = tc.fresh_tvar(None)
+    t2 = Tuple[tv1, bool]
+    unify_helper(tv2, Tuple[Tuple[str, bool], bool],
+                 Tuple[Tuple[str, bool], bool])
+    eq_(tc.resolve(tv1), Tuple[str, bool])
+    eq_(tc.resolve(tv2), Tuple[Tuple[str, bool], bool])
+
+
+def test_diff_nested_tuples():
+    raise SkipTest('error propagation must be implemented for this to work')
+    unify_helper(Tuple[str, Tuple[str, str]],
+                 Tuple[str, Tuple[bool, str]], error_msg)
 
 
 # Unify list

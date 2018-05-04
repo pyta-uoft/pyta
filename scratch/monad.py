@@ -145,8 +145,7 @@ def unify_generic(t1: GenericMeta, t2: GenericMeta):
     """
     unify_generic :: GenericMeta -> GenericMeta -> TypeResult
     """
-    # TODO: Change to properly extract values
-    if isinstance()
+    # TODO: Change to properly extract values and check generic type
     return unify(TypeInfo(t1.__args__[0]), TypeInfo(t2.__args__[0]))
 
 
@@ -169,8 +168,6 @@ if __name__ == '__main__':
     print(f'Unifying {g} and {h}: \n\t{unify(g, h)}\n')
 
     print("\nTuples: ")
-    i = TypeInfo(Tuple[TypeVar('a'), int])
-    print(i)
-    j = TypeInfo(Tuple[TypeVar('a'), int])
-    print(j)
-    print(i == j)
+    i = TypeInfo(Tuple[int, int])
+    j = TypeInfo(Tuple[int, int])
+    print(f'Unifying {i} and {j}: \n\t{unify(i, j)}\n')

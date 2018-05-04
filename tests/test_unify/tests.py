@@ -41,12 +41,15 @@ def test_diff_prim():
     unify_helper(float, int, error_msg)
 
 
+<<<<<<< HEAD
 def test_diff_prim_flipped():
     raise SkipTest(skip_msg)
     # Simply returns the first argument, rather than the more specific one
     unify_helper(int, bool, bool)
 
 
+=======
+>>>>>>> 781def0664c8292033d90c1beb8c4948f027ee59
 def test_int_bool():
     raise SkipTest(skip_msg)
     # base.py returns the first arg, rather than the subclass

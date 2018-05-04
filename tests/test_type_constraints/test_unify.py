@@ -1,8 +1,8 @@
 from typing import *
 import astroid
 import nose
+from nose import SkipTest
 from nose.tools import eq_
-from nose.tools import nottest
 from python_ta.typecheck.base import TypeConstraints
 
 
@@ -37,8 +37,8 @@ def test_unify_typevars_in_tuple():
     eq_(tc.resolve(tvar1), str)
     eq_(tc.resolve(tvar2), bool)
 
-@nottest
 def test_unify_typevars_nested_tuples():
+    raise SkipTest('resolve needs to be recursive for this test to work')
     tc = TypeConstraints()
     tvar1 = tc.fresh_tvar(None)
     tvar2 = Tuple[tvar1, bool]

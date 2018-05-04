@@ -60,7 +60,7 @@ class TypeInfo(TypeResult):
         super(TypeResult, self).__init__(type_)
 
     def fmap(self, function):
-        return TypeInfo(function(value))
+        return TypeInfo(function(self.value))
 
     def __str__(self):
         return f'Inferred Type: {self.value}'
@@ -80,11 +80,26 @@ class TypeFail(TypeResult):
     def __str__(self):
         return f'Error: {self.value}'
 
+    def fmap(self, _):
+        return self
+
+
+def unify(t1: TypeResult, t2: TypeResult):
+    if t1 == t2:
+        return t1
+    else:
+        return TypeFail("Incompatible Types")
+
 
 if __name__ == '__main__':
     a = TypeInfo(bool)
     print(a)
-    b = TypeFail("Error Message")
+    b = TypeFail("Incompatible types")
     print(b)
     c = TypeInfo(str)
     print(c)
+
+    e = f * a
+    print(type(a))
+    print(type(b))
+    print(e.getValue())

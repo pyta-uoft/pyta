@@ -225,9 +225,12 @@ class TypeConstraints:
         Return the result of the unification, or an error message if the types can't be unified.
         """
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            self._merge_sets(t1, t2)
-            # TODO: should we return the most concrete type at this point, i.e., self._find(t1)?
-            return t1
+            result = self._merge_sets(t1, t2)
+            if not isinstance(result, str):
+                return self.resolve(t1)
+            else:
+                return result
+
         elif isinstance(t1, TypeVar):
             rep1 = self._find(t1)
             if rep1.type == t1:
@@ -252,8 +255,6 @@ class TypeConstraints:
             return f'Incompatible types {t1} {t2}'
         elif t1 == t2:
             return t1
-        elif issubclass(t1, t2) or issubclass(t2, t1):
-            return t1
         elif t1 != t2:
             return f'Incompatible types {t1} {t2}'
 
@@ -265,6 +266,10 @@ class TypeConstraints:
             # TODO: check for equal lengths of __args__
             gorg = _gorg(t1)
             if gorg == Callable:
+                # TODO: Looking up elements in arrays causes _type_check to be
+                # called from typing.py, which tries to create a ForwardRef
+                # when encountering strings, even though strings are sometimes
+                # error messages
                 return gorg[
                     [self.unify(a1, a2) for a1, a2 in zip(t1.__args__[:-1], t2.__args__[:-1])],
                     self.unify(t1.__args__[-1], t2.__args__[-1])
@@ -312,9 +317,7 @@ class TypeConstraints:
             if rep1.type == rep2.type:
                 rep2.parent = rep1
             else:
-                raise TypeInferenceError(
-                    f'Incompatible types {rep1.type} and {rep2.type}'
-                )
+                return f'Incompatible types {rep1.type} and {rep2.type}'
 
     ###########################################################################
     # Handling generic polymorphism

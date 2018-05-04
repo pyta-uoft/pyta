@@ -1,8 +1,7 @@
-import astroid
 from typing import *
 from typing import TupleMeta, CallableMeta, _ForwardRef
 from python_ta.transforms.type_inference_visitor import main
-from python_ta.typecheck.base import TypeConstraints, _TNode
+from python_ta.typecheck.base import TypeConstraints
 from nose import SkipTest
 from nose.tools import eq_
 
@@ -193,21 +192,28 @@ def test_diff_list():
 
 
 # Unify callables
+def test_same_callable():
+    tc.reset()
+    c1 = Callable[[bool], bool]
+    c2 = Callable[[bool], bool]
+
+    eq_(tc.resolve(c1), Callable[[bool], bool])
+    eq_(tc.resolve(c2), Callable[[bool], bool])
+    unify_helper(c1, c2, c1)
+    unify_helper(c1, c2, c2)
+    unify_helper(c2, c1, c1)
+    unify_helper(c2, c1, c2)
+
+
 def test_callable_subclass():
+    raise SkipTest(skip_msg)
+    # No support for subclasses
     c1 = Callable[[bool], bool]
     c2 = Callable[[int], int]
 
     eq_(tc.resolve(c1), Callable[[bool], bool])
     eq_(tc.resolve(c2), Callable[[int], int])
     unify_helper(c1, c2, c1)
-
-
-def test_callable_subclass_flipped():
-    raise SkipTest(skip_msg)
-    # Should be returning Callable[[bool], bool]
-    c1 = Callable[[bool], bool]
-    c2 = Callable[[int], int]
-
     unify_helper(c2, c1, c1)
 
 

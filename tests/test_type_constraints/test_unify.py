@@ -160,7 +160,7 @@ def test_typevars_tuple():
 
 
 def test_typevars_nested_tuples():
-    raise SkipTest('resolve needs to be recursive for this test to work')
+    # raise SkipTest('resolve needs to be recursive for this test to work')
     t1 = tc.fresh_tvar(None)
     t2 = Tuple[tv1, bool]
     unify_helper(tv2, Tuple[Tuple[str, bool], bool],

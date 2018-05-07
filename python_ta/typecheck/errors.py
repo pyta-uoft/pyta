@@ -65,6 +65,7 @@ BINOP_TO_METHOD = {
     }
 
 
+# TODO: Think of better ways of representing objects when returning error message.
 ###############################################################################
 # BinOp message
 ###############################################################################

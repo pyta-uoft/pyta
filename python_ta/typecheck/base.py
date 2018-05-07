@@ -1,6 +1,7 @@
 import sys
 from typing import *
 from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
+from monad import Failable, failable_collect
 import typing
 import astroid
 from astroid.node_classes import NodeNG

@@ -326,23 +326,17 @@ class TypeConstraints:
     ###########################################################################
     def unify(self, t1: TypeResult, t2: TypeResult) -> TypeResult:
         """Unify the given types.
-
-        Return the result of the unification, or an error message if the types can't be unified.
+        Return the result of the unification, or an error
+        message if the types can't be unified.
         """
-<<<<<<< HEAD
         # Case of TypeFail instance
         # Propogate error upward
-=======
->>>>>>> 623c3c4f9b37e07655d930674d1dd6bc32092445
         if isinstance(t1, TypeFail):
             return t1 >> (lambda x: TypeFail(x))
         elif isinstance(t2, TypeFail):
             return t2 >> (lambda x: TypeFail(x))
 
-<<<<<<< HEAD
         # Case of TypeVars
-=======
->>>>>>> 623c3c4f9b37e07655d930674d1dd6bc32092445
         elif isinstance(t1.getValue(), TypeVar) and isinstance(t2.getValue(), TypeVar):
             result = self._merge_sets(t1.getValue(), t2.getValue())
             if not isinstance(result, str):

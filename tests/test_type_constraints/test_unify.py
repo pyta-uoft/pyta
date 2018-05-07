@@ -1,5 +1,7 @@
 from typing import *
 from typing import TupleMeta, CallableMeta, _ForwardRef
+# from python_ta.transforms.type_inference_visitor import main
+from python_ta.typecheck.base import *
 from python_ta.transforms.type_inference_visitor import main
 from python_ta.typecheck.base import TypeConstraints
 from nose import SkipTest
@@ -12,17 +14,19 @@ tc = TypeConstraints()
 
 # Helper functions
 def unify_helper(arg1, arg2, exp_result):
-    unify_result = tc.unify(arg1, arg2)
+    unify_result = tc.unify(TypeInfo(arg1), TypeInfo(arg2))
     if exp_result == error_msg:
+        assert isinstance(unify_result, TypeFail)  # TODO: check for error messages
         eq_(type(unify_result), str)  # TODO: check for error messages
     elif isinstance(exp_result, TypeVar):
-        eq_(unify_result, tc.resolve(exp_result))
+        eq_(unify_result, TypeInfo(tc.resolve(exp_result)))
     else:
-        eq_(unify_result, exp_result)
+        eq_(unify_result, TypeInfo(exp_result))
 
 
 def setup_typevar(t: type):
     tv = tc.fresh_tvar(None)
+    tc.unify(TypeInfo(tv), TypeInfo(t))
     tc.unify(tv, t)
     return tv
 

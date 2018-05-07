@@ -284,7 +284,7 @@ class TypeConstraints:
     # Creating new nodes ("make set")
     ###########################################################################
     # TODO: Rename to better distinguish between _TNodes and AST Nodes
-    def fresh_tvar(self, node: NodeNG) -> TypeVar:
+    def fresh_tvar(self, node: Optional[NodeNG] = None) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node.
         """
         tvar = TypeVar(f'_T{self._count}')
@@ -303,7 +303,10 @@ class TypeConstraints:
     # Type lookup ("find")
     ###########################################################################
     def resolve(self, t: type) -> type:
-        """Return the type associated with the given type.
+        """
+        TODO: resolve :: type -> TypeResult
+
+        Return the type associated with the given type.
 
         If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
         Otherwise if the type variable with the smallest name is returned (using < to compare strings).
@@ -325,7 +328,10 @@ class TypeConstraints:
     # Type unification ("union")
     ###########################################################################
     def unify(self, t1: TypeResult, t2: TypeResult) -> TypeResult:
-        """Unify the given types.
+        """
+        TODO: type -> type -> TypeResult
+
+        Unify the given types.
         Return the result of the unification, or an error
         message if the types can't be unified.
         """
@@ -427,6 +433,8 @@ class TypeConstraints:
     def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> None:
         """Merge the two sets that t1 and t2 belong to.
 
+        TODO: _merge_sets :: TypeVar -> TypeVar -> TypeResult
+
         Raise a TypeInferenceError if merging the sets results in incompatible
         concrete types.
         """
@@ -471,7 +479,10 @@ class TypeConstraints:
             return t1 == t2
 
     def unify_call(self, func_type, *arg_types, node=None):
-        """Unify a function call with the given function type and argument types.
+        """
+        TODO: Find out what this does
+
+        Unify a function call with the given function type and argument types.
 
         Return a result type.
         """
@@ -534,6 +545,8 @@ class Environment:
     TODO: currently, only locals is used; this should be fixed as we add
     the nonlocal and global nodes and use scope information to categorize
     a name binding.
+
+    TODO:
     """
     def __init__(self,
                  locals_: Optional[Dict[str, type]] = None,

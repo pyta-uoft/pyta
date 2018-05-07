@@ -6,62 +6,6 @@ import astroid
 from astroid.node_classes import NodeNG
 
 
-class Monad():
-
-    def __init__(self, value):
-        self.value = value
-
-    def getValue(self):
-        return self.value
-
-    def fmap(self, function):
-        raise NotImplementedError
-
-    def bind(self, function):
-        raise NotImplementedError
-
-    def __rmul__(self, function):
-        return self.fmap(function)
-
-    def __rshift__(self, function):
-        if callable(function):
-            result = self.bind(function)
-            if not isinstance(result, Monad):
-                raise TypeError("Operator '>>' must return a Monad instance.")
-            return result
-        else:
-            if not isinstance(function, Monad):
-                raise TypeError("Operator '>>' must return a Monad instance.")
-            return self.bind(lambda _: function)
-            
-    
-# TODO: incorporate this into descendant classes       
-class Failable(Monad):
-
-    def __init__(self, value):
-        self.value = value
-        
-    def __eq__(self, other):
-        if not isinstance(other, Failable): 
-            return False
-        return self.value == other.value
-        
-    def __str__(self):
-        return self.value.__str__()
-        
-    def bind(self, fn):
-        return fn(self.value)
-            
-            
-def failable_map(fn, lst):
-    if lst == []:
-        return Failable([])
-    return lst[0] >> (lambda fst: (failable_map(fn, lst[1:]) >> (lambda rest: Failable([fst] + rest))))
-    
-def failable_collect(lst):
-    return failable_map(lambda x: x, lst)
-
-
 class TypeResult(Failable):
     """
     Represents the result of a type check operation that either succeeded or
@@ -69,7 +13,7 @@ class TypeResult(Failable):
     """
     def __init__(self, value):
         super.__int__(value)
-
+        
 
 class TypeInfo(TypeResult):
     """
@@ -78,35 +22,18 @@ class TypeInfo(TypeResult):
     """
 
     def __init__(self, type_: type):
-        # if not isinstance(type_, type):
-        #    raise TypeError
-        super(TypeResult, self).__init__(type_)
+        super.__init__(type_)
 
-    def __eq__(self, other):
-        super(TypeResult, self).__eq__(other)
+    def __eq__(self, other): # TODO: inherit this
         if not isinstance(other, TypeResult):
             return False
-        return self.getValue() == other.getValue()
+        return super.__eq__(other)
 
     def __str__(self):
         return f'TypeInfo: {self.value}'
 
-    def fmap(self, function):
-        """
-        f:: (type -> type)
-        function must take type and return type
-        """
-        return TypeInfo(function(self.value))
 
-    def bind(self, function):
-        """
-        f :: (type -> TypeResult)
-        function must take type, and return TypeResult
-        """
-        return function(self.getValue())
-
-
-class TypeFail(TypeResult):
+class TypeFail(TypeResult): 
     """
     Represents the result of a failed type check operation
     Contains error message
@@ -116,20 +43,13 @@ class TypeFail(TypeResult):
             raise TypeError
         super(TypeResult, self).__init__(msg)
 
-    def __str__(self):
-        return f'TypeFail: {self.value}'
-
-    def __eq__(self, other):
-        super(TypeFail, self).__eq__(other)
+    def __eq__(self, other): # TODO: inherit this
         if not isinstance(other, TypeFail):
             return False
-        elif self.getValue() == other.getValue():
-            return True
-        else:
-            return False
-
-    def fmap(self, _):
-        return self
+        return super.__eq__(other)
+        
+    def __str__(self):
+        return f'TypeFail: {self.value}'
 
     def bind(self, _):
         return self

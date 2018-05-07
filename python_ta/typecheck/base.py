@@ -329,42 +329,28 @@ class TypeConstraints:
             return TypeFail("?")
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
-        """
-        unify_generic :: GenericMeta -> GenericMeta -> TypeResult
-        """
-        # TODO: Change to properly extract values and check generic type
         g1, g2 = _gorg(t1), _gorg(t2)
-        # Check that t1, t2 are of the same type
-        if g1 == g2:
-            # Check that t1, t2 are of the same length
-            if len(t1.__args__) == len(t2.__args__):
-                result_list = []
-                for i, j in zip(t1.__args__, t2.__args__):
-                    unify_result = self.unify(i, j)
-                    if isinstance(unify_result, TypeFail):
-                        # If, at any point, a TypeFail occurs, the function simply
-                        # returns that TypeFail instance
-                        return unify_result
-                    else:
-                        # If unify result is a success, type is extracted and
-                        # stored in result_list
-                        # TODO: Use binding instead?
-                        # unify_result >> result_list.append(x)
-                        result_list.append(unify_result.getValue())
+        if g1 != g2:
+            return TypeFail(f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}')
+        if len(t1.__args__) != len(t2.__args__):
+            return TypeFail(f'Generic types {_gorg(t1)} and {_gorg(t2)} must have the same number of args')
 
-                if g1 == List:
-                    return TypeInfo(List[result_list[0]])
-                elif g1 == Tuple:
-                    return TypeInfo(Tuple[tuple(result_list)])
-                elif g1 == Callable:
-                    return TypeInfo(g1[result_list[:-1], result_list[-1]])
-                # Reaches this case when generic is not List, Tuple or Callable
-                else:
-                    return TypeFail("Generic not yet supported")
-            else:
-                return TypeFail("Generics must be of same size")
+        unify_result = failable_collect([self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)])
+        if type(unify_result) == TypeFail:
+            return unify_result
+        unified_args = unify_result.getValue()
+
+        if g1 == Tuple:
+            tuple_args = tuple(unified_args)
+            # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
+            if tuple_args == ((),):
+                tuple_args = ()
+            return TypeInfo(Tuple[tuple_args])
+        elif g1 == Callable:
+            return TypeInfo(g1[unified_args[:-1], unified_args[-1]])
         else:
-            return TypeFail("Generic types do not match")
+            return g1[tuple(unified_args)]
+
 
     def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> TypeResult:
         """Merge the two sets that t1 and t2 belong to.

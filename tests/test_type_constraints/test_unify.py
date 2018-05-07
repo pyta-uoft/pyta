@@ -17,7 +17,7 @@ def unify_helper(arg1, arg2, exp_result):
     unify_result = tc.unify(TypeInfo(arg1), TypeInfo(arg2))
     if exp_result == error_msg:
         assert isinstance(unify_result, TypeFail)  # TODO: check for error messages
-        eq_(type(unify_result), str)  # TODO: check for error messages
+        # eq_(type(unify_result), str)  # TODO: check for error messages
     elif isinstance(exp_result, TypeVar):
         eq_(unify_result, TypeInfo(tc.resolve(exp_result)))
     else:
@@ -27,7 +27,6 @@ def unify_helper(arg1, arg2, exp_result):
 def setup_typevar(t: type):
     tv = tc.fresh_tvar(None)
     tc.unify(TypeInfo(tv), TypeInfo(t))
-    tc.unify(tv, t)
     return tv
 
 
@@ -147,7 +146,7 @@ def test_tuple_subclass():
 
 
 def test_diff_tuple():
-    raise SkipTest(skip_msg)
+    # raise SkipTest(skip_msg)
     # _unify_generic not properly checking for error messages, instead attempts
     # to make invalid ForwardRef
     unify_helper(Tuple[int, int], Tuple[str, str], error_msg)
@@ -189,7 +188,7 @@ def test_same_list():
 
 
 def test_diff_list():
-    raise SkipTest(skip_msg)
+    # raise SkipTest(skip_msg)
     # _unify_generic not properly checking for error messages, instead attempts
     # to make invalid ForwardRef
     unify_helper(List[str], List[int], error_msg)
@@ -222,7 +221,7 @@ def test_callable_subclass():
 
 
 def test_diff_callable():
-    raise SkipTest(skip_msg)
+    # raise SkipTest(skip_msg)
     # _unify_generic not properly checking for error messages, instead attempts
     # to make invalid ForwardRef
     c1 = Callable[[bool], bool]

@@ -25,12 +25,12 @@ class Monad():
     def __rshift__(self, function):
         if callable(function):
             result = self.bind(function)
-            if not isinstance(result, Monad):
-                raise TypeError("Operator '>>' must return a Monad instance.")
+            # if not isinstance(result, Monad):
+            #    raise TypeError("Operator '>>' must return a Monad instance.")
             return result
         else:
-            if not isinstance(function, Monad):
-                raise TypeError("Operator '>>' must return a Monad instance.")
+            # if not isinstance(function, Monad):
+            #    raise TypeError("Operator '>>' must return a Monad instance.")
             return self.bind(lambda _: function)
 
 
@@ -302,7 +302,7 @@ class TypeConstraints:
     ###########################################################################
     # Type lookup ("find")
     ###########################################################################
-    def resolve(self, t: type) -> type:
+    def resolve(self, t: type) -> TypeResult:
         """
         TODO: resolve :: type -> TypeResult
 
@@ -313,9 +313,9 @@ class TypeConstraints:
         """
         # TODO: Make this recursive, e.g. if `t` is List[TypeVar('a')], the contained TypeVar should be resolved.
         if isinstance(t, TypeVar):
-            return self._find(t).type
+            return TypeInfo(self._find(t).type)
         else:
-            return t
+            return TypeInfo(t)
 
     def _find(self, tv: TypeVar) -> _TNode:
         """Return the disjoint set node associated with the given type variable."""
@@ -327,7 +327,7 @@ class TypeConstraints:
     ###########################################################################
     # Type unification ("union")
     ###########################################################################
-    def unify(self, t1: TypeResult, t2: TypeResult) -> TypeResult:
+    def unify(self, t1: type, t2: type) -> TypeResult:
         """
         TODO: type -> type -> TypeResult
 
@@ -335,62 +335,52 @@ class TypeConstraints:
         Return the result of the unification, or an error
         message if the types can't be unified.
         """
-        # Case of TypeFail instance
-        # Propogate error upward
-        if isinstance(t1, TypeFail):
-            return t1 >> (lambda x: TypeFail(x))
-        elif isinstance(t2, TypeFail):
-            return t2 >> (lambda x: TypeFail(x))
-
         # Case of TypeVars
-        elif isinstance(t1.getValue(), TypeVar) and isinstance(t2.getValue(), TypeVar):
-            result = self._merge_sets(t1.getValue(), t2.getValue())
-            if not isinstance(result, str):
-                return TypeInfo(self.resolve(t1.getValue()))
+        if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
+            result = self._merge_sets(t1, t2)
+            if not isinstance(result, TypeFail):
+                return self.resolve(t1)
             else:
-                return TypeFail(result)
+                return result
         # Case of two generics
         # TODO: Change this to use binds instead of always looking up values
         # Currenly only accounts for lists
-        elif isinstance(t1.getValue(), GenericMeta) and isinstance(
-                t2.getValue(), GenericMeta):
+        elif isinstance(t1, GenericMeta) and isinstance(
+                t2, GenericMeta):
             # Bind GenericMeta object from each TypeInfo to x and y,
             # pass to unify_generic
-            return t1 >> (lambda x: t2 >> (lambda y: self._unify_generic(x, y)))
+            self._unify_generic(t1, t2)
 
         # Case of generic and non-generic
-        elif isinstance(t1.getValue(), GenericMeta) or isinstance(
-                t2.getValue(), GenericMeta):
+        elif isinstance(t1, GenericMeta) or isinstance(
+                t2, GenericMeta):
             return TypeFail("Cannot unify generic with primitive")
 
-        elif isinstance(t1.getValue(), TypeVar):
-            rep1 = self._find(t1.getValue())
-            if rep1.type == t1.getValue():
+        elif isinstance(t1, TypeVar):
+            rep1 = self._find(t1)
+            if rep1.type == t1:
                 # Simply make t2 the set representative for t1.
-                rep1.parent = self._make_set(t2.getValue())
-                return t2
+                rep1.parent = self._make_set(t2)
+                return TypeInfo(t1)
             else:
-                return self.unify(TypeInfo(rep1.type), t2)
-        elif isinstance(t2.getValue(), TypeVar):
+                return self.unify(rep1.type, t2)
+        elif isinstance(t2, TypeVar):
             return self.unify(t2, t1)
-
-        # elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
-        #     return t1
-        # elif t1 == Any or t2 == Any:
-        #     return t1
-        elif isinstance(t1.getValue(), _ForwardRef) and isinstance(
-                t2.getValue(), _ForwardRef) and t1 == t2:
-            return t1
-        elif isinstance(t1.getValue(), _ForwardRef) or isinstance(
-                t1.getValue(), _ForwardRef):
+        elif isinstance(t1, _ForwardRef) and isinstance(
+                t2, _ForwardRef) and t1 == t2:
+            return TypeInfo(t1)
+        elif isinstance(t1, _ForwardRef) or isinstance(
+                t1, _ForwardRef):
             return TypeFail("Attempted to unify forwardref  with non-ref")
 
         # Case of unifying two concrete types
-        elif t1.getValue() == t2.getValue():
-            return t1
+        elif t1 == t2:
+            return TypeInfo(t1)
         elif t1 != t2:
             return TypeFail(
-                f'Incompatible Types {t1.getValue()} and {t2.getValue()}')
+                f'Incompatible Types {t1} and {t2}')
+        else:
+            return TypeFail("?")
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
         """
@@ -404,21 +394,24 @@ class TypeConstraints:
             if len(t1.__args__) == len(t2.__args__):
                 result_list = []
                 for i, j in zip(t1.__args__, t2.__args__):
-                    # As __args__ is a list of types, these are wrapped as
-                    # TypeInfo objects before being passed to unify
-                    unify_result = self.unify(TypeInfo(i), TypeInfo(j))
-                    if not isinstance(unify_result, TypeFail):
-                        # If unify result is a success, type is extracted and
-                        # stored in result_list
-                        # TODO: Use binding instead?
-                        result_list.append(unify_result.getValue())
-                    else:
+                    unify_result = self.unify(i, j)
+                    print(unify_result)
+                    if isinstance(unify_result, TypeFail):
                         # If, at any point, a TypeFail occurs, the function simply
                         # returns that TypeFail instance
                         return unify_result
+                    else:
+                        # If unify result is a success, type is extracted and
+                        # stored in result_list
+                        # TODO: Use binding instead?
+                        # unify_result >> result_list.append(x)
+                        result_list.append(unify_result.getValue())
+                        print(result_list)
+
                 if g1 == List:
                     return TypeInfo(List[result_list[0]])
                 elif g1 == Tuple:
+                    print(TypeInfo(Tuple[tuple(result_list)]))
                     return TypeInfo(Tuple[tuple(result_list)])
                 elif g1 == Callable:
                     return TypeInfo(g1[result_list[:-1], result_list[-1]])
@@ -430,7 +423,7 @@ class TypeConstraints:
         else:
             return TypeFail("Generic types do not match")
 
-    def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> None:
+    def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> TypeResult:
         """Merge the two sets that t1 and t2 belong to.
 
         TODO: _merge_sets :: TypeVar -> TypeVar -> TypeResult
@@ -440,27 +433,35 @@ class TypeConstraints:
         """
         # TODO: look into implementation of  __eq__ for TypeVar to make sure we can use == here.
         if t1 == t2:
-            return
+            return TypeInfo(t1)
 
         rep1 = self._find(t1)
         rep2 = self._find(t2)
         if isinstance(rep1.type, TypeVar) and isinstance(rep2.type, TypeVar):
             if rep1.type.__name__ < rep2.type.__name__ :
                 rep2.parent = rep1
+                return TypeInfo(rep1.type)
             else:
                 rep1.parent = rep2
+                return TypeInfo(rep2.type)
         elif isinstance(rep2.type, TypeVar):
             rep2.parent = rep1
+            return TypeInfo(rep2.type)
         elif isinstance(rep1.type, TypeVar):
             rep1.parent = rep2
+            return TypeInfo(rep2.type)
         else:
             # In this case both set representatives are concrete types.
             # If they're compatible, we can still unify the sets. Otherwise, an error
             # is raised here.
             if rep1.type == rep2.type:
                 rep2.parent = rep1
+                return TypeInfo(rep1.type)
             else:
-                return f'Incompatible types {rep1.type} and {rep2.type}'
+                return TypeFail(
+                    f'Incompatible types {rep1.type} and {rep2.type}')
+
+
 
     ###########################################################################
     # Handling generic polymorphism

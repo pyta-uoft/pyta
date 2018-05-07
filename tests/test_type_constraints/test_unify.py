@@ -1,7 +1,12 @@
 from typing import *
 from typing import TupleMeta, CallableMeta, _ForwardRef
+<<<<<<< HEAD:tests/test_type_constraints/test_unify.py
 # from python_ta.transforms.type_inference_visitor import main
 from python_ta.typecheck.base import *
+=======
+from python_ta.transforms.type_inference_visitor import main
+from python_ta.typecheck.base import TypeConstraints
+>>>>>>> 1c10418301c17aa44d31806734ecd99f8fc8f39c:tests/test_type_constraints/test_unify.py
 from nose import SkipTest
 from nose.tools import eq_
 
@@ -14,7 +19,11 @@ tc = TypeConstraints()
 def unify_helper(arg1, arg2, exp_result):
     unify_result = tc.unify(TypeInfo(arg1), TypeInfo(arg2))
     if exp_result == error_msg:
+<<<<<<< HEAD:tests/test_type_constraints/test_unify.py
         assert isinstance(unify_result, TypeFail)  # TODO: check for error messages
+=======
+        eq_(type(unify_result), str)  # TODO: check for error messages
+>>>>>>> 1c10418301c17aa44d31806734ecd99f8fc8f39c:tests/test_type_constraints/test_unify.py
     elif isinstance(exp_result, TypeVar):
         eq_(unify_result, TypeInfo(tc.resolve(exp_result)))
     else:
@@ -23,7 +32,11 @@ def unify_helper(arg1, arg2, exp_result):
 
 def setup_typevar(t: type):
     tv = tc.fresh_tvar(None)
+<<<<<<< HEAD:tests/test_type_constraints/test_unify.py
     tc.unify(TypeInfo(tv), TypeInfo(t))
+=======
+    tc.unify(tv, t)
+>>>>>>> 1c10418301c17aa44d31806734ecd99f8fc8f39c:tests/test_type_constraints/test_unify.py
     return tv
 
 

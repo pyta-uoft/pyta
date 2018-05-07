@@ -17,14 +17,12 @@ def unify_helper(arg1, arg2, exp_result):
     """
     unify_helper :: type -> type -> type
     """
-    unify_result = TypeInfo(arg1) >> (lambda t1: TypeInfo(arg2) >> (lambda t2: tc.unify(t1, t2)))
-    print(unify_result)
-    # Non-Monadic: unify_result = tc.unify(TypeInfo(arg1), TypeInfo(arg2))
+    unify_result = TypeInfo(arg1) >> (
+        lambda t1: TypeInfo(arg2) >> (
+            lambda t2: tc.unify(t1, t2)))
     if exp_result == error_msg:
         assert isinstance(unify_result, TypeFail)
-        # eq_(type(unify_result), str)  # TODO: check for error messages
     elif isinstance(exp_result, TypeVar):
-        # exp_result >> (lambda x: eq_(unify_result.resolve(x)))
         eq_(unify_result, tc.resolve(exp_result))
     else:
         eq_(unify_result, TypeInfo(exp_result))
@@ -33,8 +31,6 @@ def unify_helper(arg1, arg2, exp_result):
 def setup_typevar(t: type):
     tv = tc.fresh_tvar(None)
     tc.unify(tv, t)
-    # TypeInfo(tv) >> (lambda t1: TypeInfo(t) >> (lambda t2: tc.unify(t1, t2)))
-    # Non-Monadic: tc.unify(TypeInfotv), TypeInfo(t))
     return tv
 
 
@@ -43,7 +39,6 @@ def resolve_helper(t, exp_type):
     type -> type
     """
     eq_(tc.resolve(t).getValue(), exp_type)
-    # tc.resolve(t) >> (lambda x: eq_(x, exp_type))
 
 
 # Unify primitives
@@ -59,13 +54,6 @@ def test_diff_prim():
     unify_helper(bool, int, error_msg)
     unify_helper(float, int, error_msg)
     unify_helper(float, str, error_msg)
-
-
-def test_subclasses():
-    raise SkipTest(skip_msg)
-    # Currently no support for subclasses
-    unify_helper(int, bool, bool)
-    unify_helper(bool, int, bool)
 
 
 # Unify TypeVars
@@ -85,8 +73,6 @@ def test_same_typevars_flipped():
     tv1 = setup_typevar(str)
     tv2 = setup_typevar(str)
 
-    # Non-Monadic: eq_(tc.resolve(tv1), str)
-    # Non-Monadic: eq_(tc.resolve(tv2), str)
     resolve_helper(tv1, str)
     resolve_helper(tv2, str)
     unify_helper(tv1, tv2, tv2)
@@ -99,8 +85,6 @@ def test_diff_typevars():
 
     resolve_helper(tv_str, str)
     resolve_helper(tv_int, int)
-    # Non-Monadic: eq_(tc.resolve(tv_str), str)
-    # Non-Monadic: eq_(tc.resolve(tv_int), int)
     unify_helper(tv_int, tv_str, error_msg)
 
 
@@ -109,24 +93,10 @@ def test_one_typevar():
     tv = setup_typevar(str)
 
     resolve_helper(tv, str)
-    # Non-Monadic: eq_(tc.resolve(tv), str)
     unify_helper(tv, str, str)
     unify_helper(str, tv, str)
     unify_helper(tv, int, error_msg)
     unify_helper(int, tv, error_msg)
-
-
-def test_one_typevar_bool_int():
-    raise SkipTest("skip_msg")
-    # Currently no support for subclasses
-    tc.reset()
-    tv = setup_typevar(bool)
-
-    resolve_helper(tv, bool)
-    # Non-Monadic: eq_(tc.resolve(tv), bool)
-    unify_helper(tv, int, bool)
-    unify_helper(int, tv, bool)
-    unify_helper(tv, str, error_msg)
 
 
 def test_two_typevar():
@@ -161,13 +131,6 @@ def test_same_tuple():
     unify_helper(Tuple[str, str], Tuple[str, str], Tuple[str, str])
 
 
-def test_tuple_subclass():
-    raise SkipTest(skip_msg)
-    # Currently no support for subclasses
-    unify_helper(Tuple[bool, bool], Tuple[int, int], Tuple[bool, bool])
-    unify_helper(Tuple[int, int], Tuple[bool, bool], Tuple[bool, bool])
-
-
 def test_diff_tuple():
     # raise SkipTest(skip_msg)
     # _unify_generic not properly checking for error messages, instead attempts
@@ -186,8 +149,6 @@ def test_typevars_tuple():
     unify_helper(Tuple[tv1, tv2], Tuple[str, bool], Tuple[str, bool])
     resolve_helper(tv1, str)
     resolve_helper(tv2, bool)
-    # Non-Monadic: eq_(tc.resolve(tv1), str)
-    # Non-Monadic: eq_(tc.resolve(tv2), bool)
 
 
 def test_typevars_nested_tuples():
@@ -198,8 +159,6 @@ def test_typevars_nested_tuples():
                  Tuple[Tuple[str, bool], bool])
     resolve_helper(tv1, Tuple[str, bool])
     resolve_helper(tv2, Tuple[str, bool], Tuple[Tuple[str, bool], bool])
-    # Non-Monadic: eq_(tc.resolve(tv1), Tuple[str, bool])
-    # Non-Monadic: eq_(tc.resolve(tv2), Tuple[Tuple[str, bool], bool])
 
 
 def test_diff_nested_tuples():
@@ -227,25 +186,10 @@ def test_same_callable():
     c1 = Callable[[bool], bool]
     c2 = Callable[[bool], bool]
 
-    # Non-Monadic: eq_(tc.resolve(c1), Callable[[bool], bool])
-    # Non-Monadic: eq_(tc.resolve(c2), Callable[[bool], bool])
-
     unify_helper(c1, c2, c1)
     unify_helper(c1, c2, c2)
     unify_helper(c2, c1, c1)
     unify_helper(c2, c1, c2)
-
-
-def test_callable_subclass():
-    raise SkipTest(skip_msg)
-    # No support for subclasses
-    c1 = Callable[[bool], bool]
-    c2 = Callable[[int], int]
-
-    # Non-Monadic: eq_(tc.resolve(c1), Callable[[bool], bool])
-    # Non-Monadic: eq_(tc.resolve(c2), Callable[[int], int])
-    unify_helper(c1, c2, c1)
-    unify_helper(c2, c1, c1)
 
 
 def test_diff_callable():

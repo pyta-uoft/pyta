@@ -113,6 +113,18 @@ def test_incompatible_binop_call():
     expected_msg = f''
 
 
+def test_incompatible_unaryop_call():
+    """User tries to call a builtin unary operation on an argument of the wrong type.
+    """
+    program = f'~["D"]'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
+    expected_msg = f''
+
+
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """

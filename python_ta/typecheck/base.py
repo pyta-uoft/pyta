@@ -1,10 +1,10 @@
 import sys
 from typing import *
 from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
-from ..util.monad import Failable, failable_collect
 import typing
 import astroid
 from astroid.node_classes import NodeNG
+from ..util.monad import Failable, failable_collect
 
 
 class TypeResult(Failable):

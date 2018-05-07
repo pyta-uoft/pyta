@@ -14,7 +14,7 @@ class TypeResult(Failable):
     failed.
     """
     def __init__(self, value):
-        super.__int__(value)
+        super().__init__(value)
 
 
 class TypeInfo(TypeResult):
@@ -24,12 +24,12 @@ class TypeInfo(TypeResult):
     """
 
     def __init__(self, type_: type):
-        super.__init__(type_)
+        super().__init__(type_)
 
     def __eq__(self, other): # TODO: inherit this
         if not isinstance(other, TypeResult):
             return False
-        return super.__eq__(other)
+        return super().__eq__(other)
 
     def __str__(self):
         return f'TypeInfo: {self.value}'
@@ -43,12 +43,12 @@ class TypeFail(TypeResult):
     def __init__(self, msg: str):
         if not isinstance(msg, str):
             raise TypeError
-        super(TypeResult, self).__init__(msg)
+        super().__init__(msg)
 
     def __eq__(self, other): # TODO: inherit this
         if not isinstance(other, TypeFail):
             return False
-        return super.__eq__(other)
+        return super().__eq__(other)
 
     def __str__(self):
         return f'TypeFail: {self.value}'
@@ -350,7 +350,7 @@ class TypeConstraints:
         elif g1 == Callable:
             return TypeInfo(g1[unified_args[:-1], unified_args[-1]])
         else:
-            return g1[tuple(unified_args)]
+            return TypeInfo(g1[tuple(unified_args)])
 
 
     def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> TypeResult:

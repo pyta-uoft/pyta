@@ -349,7 +349,7 @@ class TypeConstraints:
                 t2, GenericMeta):
             # Bind GenericMeta object from each TypeInfo to x and y,
             # pass to unify_generic
-            self._unify_generic(t1, t2)
+            return self._unify_generic(t1, t2)
 
         # Case of generic and non-generic
         elif isinstance(t1, GenericMeta) or isinstance(
@@ -361,7 +361,7 @@ class TypeConstraints:
             if rep1.type == t1:
                 # Simply make t2 the set representative for t1.
                 rep1.parent = self._make_set(t2)
-                return TypeInfo(t1)
+                return self.resolve(t1)
             else:
                 return self.unify(rep1.type, t2)
         elif isinstance(t2, TypeVar):
@@ -395,7 +395,6 @@ class TypeConstraints:
                 result_list = []
                 for i, j in zip(t1.__args__, t2.__args__):
                     unify_result = self.unify(i, j)
-                    print(unify_result)
                     if isinstance(unify_result, TypeFail):
                         # If, at any point, a TypeFail occurs, the function simply
                         # returns that TypeFail instance
@@ -406,12 +405,10 @@ class TypeConstraints:
                         # TODO: Use binding instead?
                         # unify_result >> result_list.append(x)
                         result_list.append(unify_result.getValue())
-                        print(result_list)
 
                 if g1 == List:
                     return TypeInfo(List[result_list[0]])
                 elif g1 == Tuple:
-                    print(TypeInfo(Tuple[tuple(result_list)]))
                     return TypeInfo(Tuple[tuple(result_list)])
                 elif g1 == Callable:
                     return TypeInfo(g1[result_list[:-1], result_list[-1]])

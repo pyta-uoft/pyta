@@ -17,8 +17,8 @@ def unify_helper(arg1, arg2, exp_result):
     """
     unify_helper :: type -> type -> type
     """
-    unify_result = TypeInfo(arg1)
-    unify_result >> (lambda t1: TypeInfo(arg2) >> (lambda t2: tc.unify(t1, t2)))
+    unify_result = TypeInfo(arg1) >> (lambda t1: TypeInfo(arg2) >> (lambda t2: tc.unify(t1, t2)))
+    print(unify_result)
     # Non-Monadic: unify_result = tc.unify(TypeInfo(arg1), TypeInfo(arg2))
     if exp_result == error_msg:
         assert isinstance(unify_result, TypeFail)
@@ -27,8 +27,6 @@ def unify_helper(arg1, arg2, exp_result):
         # exp_result >> (lambda x: eq_(unify_result.resolve(x)))
         eq_(unify_result, tc.resolve(exp_result))
     else:
-        print(unify_result)
-        print(TypeInfo(exp_result))
         eq_(unify_result, TypeInfo(exp_result))
 
 
@@ -76,8 +74,6 @@ def test_same_typevars():
     tv1 = setup_typevar(str)
     tv2 = setup_typevar(str)
 
-    # Non-Monadic: eq_(tc.resolve(tv1), str)
-    # Non-Monadic: eq_(tc.resolve(tv2), str)
     resolve_helper(tv1, str)
     resolve_helper(tv2, str)
 
@@ -164,7 +160,7 @@ def test_same_tuple():
     unify_helper(Tuple[int, int], Tuple[int, int], Tuple[int, int])
     unify_helper(Tuple[str, str], Tuple[str, str], Tuple[str, str])
 
-"""
+
 def test_tuple_subclass():
     raise SkipTest(skip_msg)
     # Currently no support for subclasses
@@ -260,4 +256,3 @@ def test_diff_callable():
     c2 = Callable[[str], str]
 
     unify_helper(c1, c2, error_msg)
-"""

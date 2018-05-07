@@ -98,6 +98,12 @@ def unaryop_error_message(node: astroid.UnaryOp) -> str:
     )
 
 
+###############################################################################
+# Subscript message
+###############################################################################
+
+
+
 def _correct_article(noun : str) -> str:
     """Helper to return a noun with the correct article."""
     if noun.lower()[0] in 'aeiou':

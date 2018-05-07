@@ -1,7 +1,6 @@
 import sys
 from typing import *
 from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
-from ..util.monad import Failable, failable_collect
 import typing
 import astroid
 from astroid.node_classes import NodeNG
@@ -26,11 +25,6 @@ class TypeInfo(TypeResult):
     def __init__(self, type_: type):
         super().__init__(type_)
 
-    def __eq__(self, other): # TODO: inherit this
-        if not isinstance(other, TypeResult):
-            return False
-        return super().__eq__(other)
-
     def __str__(self):
         return f'TypeInfo: {self.value}'
 
@@ -44,11 +38,6 @@ class TypeFail(TypeResult):
         if not isinstance(msg, str):
             raise TypeError
         super().__init__(msg)
-
-    def __eq__(self, other): # TODO: inherit this
-        if not isinstance(other, TypeFail):
-            return False
-        return super().__eq__(other)
 
     def __str__(self):
         return f'TypeFail: {self.value}'
@@ -67,6 +56,7 @@ def _gorg(x):
 
 class TypeInferenceError(Exception):
     pass
+
 
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
@@ -226,7 +216,6 @@ class TypeConstraints:
         self._nodes = []
         self._tvar_to_tnode = {}
 
-
     ###########################################################################
     # Creating new nodes ("make set")
     ###########################################################################
@@ -251,8 +240,6 @@ class TypeConstraints:
     ###########################################################################
     def resolve(self, t: type) -> TypeResult:
         """
-        TODO: resolve :: type -> TypeResult
-
         Return the type associated with the given type.
 
         If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
@@ -276,8 +263,6 @@ class TypeConstraints:
     ###########################################################################
     def unify(self, t1: type, t2: type) -> TypeResult:
         """
-        TODO: type -> type -> TypeResult
-
         Unify the given types.
         Return the result of the unification, or an error
         message if the types can't be unified.
@@ -289,18 +274,17 @@ class TypeConstraints:
                 return self.resolve(t1)
             else:
                 return result
+
         # Case of two generics
         # TODO: Change this to use binds instead of always looking up values
         # Currenly only accounts for lists
-        elif isinstance(t1, GenericMeta) and isinstance(
-                t2, GenericMeta):
+        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
             # Bind GenericMeta object from each TypeInfo to x and y,
             # pass to unify_generic
             return self._unify_generic(t1, t2)
 
         # Case of generic and non-generic
-        elif isinstance(t1, GenericMeta) or isinstance(
-                t2, GenericMeta):
+        elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
             return TypeFail("Cannot unify generic with primitive")
 
         elif isinstance(t1, TypeVar):
@@ -313,19 +297,17 @@ class TypeConstraints:
                 return self.unify(rep1.type, t2)
         elif isinstance(t2, TypeVar):
             return self.unify(t2, t1)
-        elif isinstance(t1, _ForwardRef) and isinstance(
-                t2, _ForwardRef) and t1 == t2:
+        elif isinstance(t1, _ForwardRef) and \
+             isinstance(t2, _ForwardRef) and t1 == t2:
             return TypeInfo(t1)
-        elif isinstance(t1, _ForwardRef) or isinstance(
-                t1, _ForwardRef):
+        elif isinstance(t1, _ForwardRef) or isinstance(t1, _ForwardRef):
             return TypeFail("Attempted to unify forwardref  with non-ref")
 
         # Case of unifying two concrete types
         elif t1 == t2:
             return TypeInfo(t1)
         elif t1 != t2:
-            return TypeFail(
-                f'Incompatible Types {t1} and {t2}')
+            return TypeFail(f'Incompatible Types {t1} and {t2}')
         else:
             return TypeFail("?")
 
@@ -352,14 +334,10 @@ class TypeConstraints:
         else:
             return TypeInfo(g1[tuple(unified_args)])
 
-
     def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> TypeResult:
         """Merge the two sets that t1 and t2 belong to.
 
-        TODO: _merge_sets :: TypeVar -> TypeVar -> TypeResult
-
-        Raise a TypeInferenceError if merging the sets results in incompatible
-        concrete types.
+        TODO: make sure it's OK to return a TypeResult and not an exception
         """
         # TODO: look into implementation of  __eq__ for TypeVar to make sure we can use == here.
         if t1 == t2:
@@ -368,7 +346,7 @@ class TypeConstraints:
         rep1 = self._find(t1)
         rep2 = self._find(t2)
         if isinstance(rep1.type, TypeVar) and isinstance(rep2.type, TypeVar):
-            if rep1.type.__name__ < rep2.type.__name__ :
+            if rep1.type.__name__ < rep2.type.__name__:
                 rep2.parent = rep1
                 return TypeInfo(rep1.type)
             else:
@@ -388,10 +366,7 @@ class TypeConstraints:
                 rep2.parent = rep1
                 return TypeInfo(rep1.type)
             else:
-                return TypeFail(
-                    f'Incompatible types {rep1.type} and {rep2.type}')
-
-
+                return TypeFail(f'Incompatible types {rep1.type} and {rep2.type}')
 
     ###########################################################################
     # Handling generic polymorphism
@@ -480,9 +455,9 @@ class Environment:
     TODO:
     """
     def __init__(self,
-                 locals_: Optional[Dict[str, type]] = None,
-                 nonlocals_: Optional[Dict[str, type]] = None,
-                 globals_: Optional[Dict[str, type]] = None):
+                 locals_: Optional[Dict[str, type]]=None,
+                 nonlocals_: Optional[Dict[str, type]]=None,
+                 globals_: Optional[Dict[str, type]]=None):
         """Initialize an environment."""
         self.locals = locals_ or {}
         self.nonlocals = nonlocals_ or {}

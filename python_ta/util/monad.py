@@ -22,9 +22,7 @@ class Failable(Monad):
         self.value = value
         
     def __eq__(self, other):
-        if not isinstance(other, Failable): 
-            return False
-        return self.value == other.value
+        return self.__class__ == other.__class__ and self.value == other.value
         
     def __str__(self):
         return self.value.__str__()

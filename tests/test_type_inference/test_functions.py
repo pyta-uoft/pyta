@@ -113,6 +113,18 @@ def test_incompatible_binop_call():
     expected_msg = f''
 
 
+def test_incompatible_subscript_list():
+    """User tries to access an element of a list using the wrong type of index.
+    """
+    program = f'[1,2,3]["one"]'
+    try:
+        module, inferer = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    subscript_node = next(module.nodes_of_class(astroid.Subscript))
+    expected_msg = f''
+
+
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """

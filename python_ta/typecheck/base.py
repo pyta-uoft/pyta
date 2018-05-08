@@ -251,10 +251,10 @@ class TypeConstraints:
             return self._resolve_generic(t)
         else:
             return TypeInfo(t)
-            
+
     def _resolve_generic(self, t: GenericMeta):
         # TODO: Fix duplicate code (see _unify_generic)
-    
+
         resolve_result = failable_collect([self.resolve(arg) for arg in t.__args__])
         if type(resolve_result) == TypeFail:
             return resolve_result
@@ -271,7 +271,7 @@ class TypeConstraints:
             return TypeInfo(Callable[resolved_args[:-1], resolved_args[-1]])
         else:
             return TypeInfo(gorg[tuple(resolved_args)])
-        
+
 
     def _find(self, tv: TypeVar) -> _TNode:
         """Return the disjoint set node associated with the given type variable."""

@@ -283,10 +283,6 @@ class TypeConstraints:
             # pass to unify_generic
             return self._unify_generic(t1, t2)
 
-        # Case of generic and non-generic
-        elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
-            return TypeFail("Cannot unify generic with primitive")
-
         elif isinstance(t1, TypeVar):
             rep1 = self._find(t1)
             if rep1.type == t1:
@@ -300,16 +296,12 @@ class TypeConstraints:
         elif isinstance(t1, _ForwardRef) and \
              isinstance(t2, _ForwardRef) and t1 == t2:
             return TypeInfo(t1)
-        elif isinstance(t1, _ForwardRef) or isinstance(t1, _ForwardRef):
-            return TypeFail("Attempted to unify forwardref  with non-ref")
 
         # Case of unifying two concrete types
         elif t1 == t2:
             return TypeInfo(t1)
-        elif t1 != t2:
-            return TypeFail(f'Incompatible Types {t1} and {t2}')
         else:
-            return TypeFail("?")
+            return TypeFail(f'Incompatible types {t1} and {t2}')
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
         g1, g2 = _gorg(t1), _gorg(t2)

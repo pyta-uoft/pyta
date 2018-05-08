@@ -160,13 +160,13 @@ def test_typevars_tuple():
 
 
 def test_typevars_nested_tuples():
-    raise SkipTest('resolve needs to be recursive for this test to work')
-    t1 = tc.fresh_tvar(None)
-    t2 = Tuple[tv1, bool]
+    # raise SkipTest('resolve needs to be recursive for this test to work')
+    tv1 = tc.fresh_tvar(None)
+    tv2 = Tuple[tv1, bool]
     unify_helper(tv2, Tuple[Tuple[str, bool], bool],
                  Tuple[Tuple[str, bool], bool])
     resolve_helper(tv1, Tuple[str, bool])
-    resolve_helper(tv2, Tuple[str, bool], Tuple[Tuple[str, bool], bool])
+    resolve_helper(tv2, Tuple[Tuple[str, bool], bool])
 
 
 def test_diff_nested_tuples():

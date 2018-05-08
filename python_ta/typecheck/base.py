@@ -241,7 +241,6 @@ class TypeConstraints:
         If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
         Otherwise if the type variable with the smallest name is returned (using < to compare strings).
         """
-        # TODO: Make this recursive, e.g. if `t` is List[TypeVar('a')], the contained TypeVar should be resolved.
         if isinstance(t, TypeVar):
             return TypeInfo(self._find(t).type)
         elif isinstance(t, GenericMeta):

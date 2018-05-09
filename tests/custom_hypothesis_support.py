@@ -369,5 +369,5 @@ def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer
 
 def _verify_type_setting(module, ast_class, expected_type):
     """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
-    result = [n.inf_type.type for n in module.nodes_of_class(ast_class)]
+    result = [n.inf_type.getValue() for n in module.nodes_of_class(ast_class)]
     assert [expected_type] == result, f'{expected_type}, {result}'

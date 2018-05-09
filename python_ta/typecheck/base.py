@@ -252,14 +252,14 @@ class TypeConstraints:
         # TODO: Fix duplicate code (see _unify_generic)
     
         resolve_result = failable_collect([self.resolve(arg) for arg in t.__args__])
-        if type(resolve_result) == TypeFail:
+        if isinstance(resolve_result, TypeFail):
             return resolve_result
         resolved_args = resolve_result.getValue()
 
         gorg = _gorg(t)
         if gorg == Tuple:
             tuple_args = tuple(resolved_args)
-            # Handle the special case when t1 or t2 are empty tuples
+            # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
             if tuple_args == ((),):
                 tuple_args = ()
             return TypeInfo(Tuple[tuple_args])

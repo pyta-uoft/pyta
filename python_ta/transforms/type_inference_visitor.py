@@ -6,7 +6,7 @@ import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type
-from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
+from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message, subscript_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -342,8 +342,8 @@ class TypeInferer:
 
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if node.ctx == astroid.Load:
-            node.type_constraints = self._handle_call(node, '__getitem__', node.value.type_constraints.type,
-                                                      node.slice.type_constraints.type)
+            node.type_constraints = self._handle_call(node, '__getitem__', node.value.type_constraints.type
+                                                      , node.slice.type_constraints.type, error_func=subscript_error_message)
         else:
             node.type_constraints = TypeInfo(NoType)
 

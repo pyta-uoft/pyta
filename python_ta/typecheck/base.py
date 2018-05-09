@@ -8,8 +8,7 @@ from ..util.monad import Failable, failable_collect
 
 
 class TypeResult(Failable):
-    """
-    Represents the result of a type check operation that either succeeded or
+    """Represents the result of a type check operation that either succeeded or
     failed.
     """
     def __init__(self, value):
@@ -17,8 +16,7 @@ class TypeResult(Failable):
 
 
 class TypeInfo(TypeResult):
-    """
-    Represents the result of a successful type check operation
+    """Represents the result of a successful type check operation
     Contains information about the inferred type of a node
     """
 
@@ -30,8 +28,7 @@ class TypeInfo(TypeResult):
 
 
 class TypeFail(TypeResult):
-    """
-    Represents the result of a failed type check operation
+    """Represents the result of a failed type check operation
     Contains error message
     """
     def __init__(self, msg: str):
@@ -239,8 +236,7 @@ class TypeConstraints:
     # Type lookup ("find")
     ###########################################################################
     def resolve(self, t: type) -> TypeResult:
-        """
-        Return the type associated with the given type.
+        """Return the type associated with the given type.
 
         If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
         Otherwise if the type variable with the smallest name is returned (using < to compare strings).
@@ -262,26 +258,13 @@ class TypeConstraints:
     # Type unification ("union")
     ###########################################################################
     def unify(self, t1: type, t2: type) -> TypeResult:
-        """
-        Unify the given types.
+        """Unify the given types.
         Return the result of the unification, or an error
         message if the types can't be unified.
         """
         # Case of TypeVars
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            result = self._merge_sets(t1, t2)
-            if not isinstance(result, TypeFail):
-                return self.resolve(t1)
-            else:
-                return result
-
-        # Case of two generics
-        # TODO: Change this to use binds instead of always looking up values
-        # Currenly only accounts for lists
-        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            # Bind GenericMeta object from each TypeInfo to x and y,
-            # pass to unify_generic
-            return self._unify_generic(t1, t2)
+            return self._merge_sets(t1, t2) >> self.resolve      
 
         elif isinstance(t1, TypeVar):
             rep1 = self._find(t1)
@@ -293,9 +276,26 @@ class TypeConstraints:
                 return self.unify(rep1.type, t2)
         elif isinstance(t2, TypeVar):
             return self.unify(t2, t1)
+            
+        # Case of two generics
+        # TODO: Change this to use binds instead of always looking up values
+        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
+            # Bind GenericMeta object from each TypeInfo to x and y,
+            # pass to unify_generic
+            return self._unify_generic(t1, t2)
+            
+        elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
+            return TypeFail(f'Incompatible types {t1} {t2}')
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            return TypeInfo(t1)
+        elif t1 == Any or t2 == Any:
+            return TypeInfo(t1)
+            
         elif isinstance(t1, _ForwardRef) and \
              isinstance(t2, _ForwardRef) and t1 == t2:
             return TypeInfo(t1)
+        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
+            return TypeFail(f'Incompatible types {t1} and {t2}')
 
         # Case of unifying two concrete types
         elif t1 == t2:
@@ -304,6 +304,7 @@ class TypeConstraints:
             return TypeFail(f'Incompatible types {t1} and {t2}')
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
+        """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
         g1, g2 = _gorg(t1), _gorg(t2)
         if g1 != g2:
             return TypeFail(f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}')
@@ -377,10 +378,7 @@ class TypeConstraints:
             return t1 == t2
 
     def unify_call(self, func_type, *arg_types, node=None):
-        """
-        TODO: Find out what this does
-
-        Unify a function call with the given function type and argument types.
+        """Unify a function call with the given function type and argument types.
 
         Return a result type.
         """
@@ -443,13 +441,11 @@ class Environment:
     TODO: currently, only locals is used; this should be fixed as we add
     the nonlocal and global nodes and use scope information to categorize
     a name binding.
-
-    TODO:
     """
     def __init__(self,
-                 locals_: Optional[Dict[str, type]]=None,
-                 nonlocals_: Optional[Dict[str, type]]=None,
-                 globals_: Optional[Dict[str, type]]=None):
+                 locals_: Optional[Dict[str, type]] = None,
+                 nonlocals_: Optional[Dict[str, type]] = None,
+                 globals_: Optional[Dict[str, type]] = None):
         """Initialize an environment."""
         self.locals = locals_ or {}
         self.nonlocals = nonlocals_ or {}

@@ -31,11 +31,12 @@ class Failable(Monad):
         return fn(self.value)
         
         
-def failable_map(fn, lst): # TODO: allow arbitrary containers like tuples
+def failable_map(fn : Callable[[TypeVar('T')], Failable], lst : List[Failable]): 
+    # TODO: allow arbitrary containers like tuples
     if lst == []:
         return Failable([])
     return lst[0] >> (lambda fst: (failable_map(fn, lst[1:]) >> (lambda rest: Failable([fst] + rest))))
     
     
-def failable_collect(lst):
+def failable_collect(lst : List[Failable]):
     return failable_map(lambda x: x, lst)

@@ -306,13 +306,13 @@ class TypeConstraints:
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
         """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
         g1, g2 = _gorg(t1), _gorg(t2)
-        if g1 is not g2 or (g1.__args__ is None or g2.__args__ is None):
+        if g1 is not g2 or g1.__args__ is None or g2.__args__ is None:
             return TypeFail(f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}')
         if len(t1.__args__) != len(t2.__args__):
             return TypeFail(f'Generic types {_gorg(t1)} and {_gorg(t2)} must have the same number of args')
 
         unify_result = failable_collect([self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)])
-        if type(unify_result) == TypeFail:
+        if isinstance(unify_result, TypeFail):
             return unify_result
         unified_args = unify_result.getValue()
 

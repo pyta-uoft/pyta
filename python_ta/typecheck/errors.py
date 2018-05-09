@@ -3,6 +3,7 @@ from typing import *
 from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
 import typing
 import astroid
+from .base import _gorg
 
 
 ###############################################################################
@@ -103,7 +104,7 @@ def unaryop_error_message(node: astroid.UnaryOp) -> str:
 ###############################################################################
 def subscript_error_message(node: astroid.Subscript) -> str:
     # Accessing an element of a List with an incompatible index type (non-integers)
-    if isinstance(node.value, astroid.node_classes.List):
+    if _gorg(node.value.type_constraints.type) == typing.List:
         return f'You can only access elements of a list using int. ' \
                f'You used a {node.slice.type_constraints.type.__name__}, {node.slice.value.as_string()}.'
 

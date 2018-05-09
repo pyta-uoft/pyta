@@ -4,46 +4,6 @@ from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
 import typing
 import astroid
 from astroid.node_classes import NodeNG
-from ..util.monad import Failable, failable_collect
-
-
-class TypeResult(Failable):
-    """
-    Represents the result of a type check operation that either succeeded or
-    failed.
-    """
-    def __init__(self, value):
-        super().__init__(value)
-
-
-class TypeInfo(TypeResult):
-    """
-    Represents the result of a successful type check operation
-    Contains information about the inferred type of a node
-    """
-
-    def __init__(self, type_: type):
-        super().__init__(type_)
-
-    def __str__(self):
-        return f'TypeInfo: {self.value}'
-
-
-class TypeFail(TypeResult):
-    """
-    Represents the result of a failed type check operation
-    Contains error message
-    """
-    def __init__(self, msg: str):
-        if not isinstance(msg, str):
-            raise TypeError
-        super().__init__(msg)
-
-    def __str__(self):
-        return f'TypeFail: {self.value}'
-
-    def bind(self, _):
-        return self
 
 
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
@@ -56,7 +16,6 @@ def _gorg(x):
 
 class TypeInferenceError(Exception):
     pass
-
 
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
@@ -216,11 +175,11 @@ class TypeConstraints:
         self._nodes = []
         self._tvar_to_tnode = {}
 
+
     ###########################################################################
     # Creating new nodes ("make set")
     ###########################################################################
-    # TODO: Rename to better distinguish between _TNodes and AST Nodes
-    def fresh_tvar(self, node: Optional[NodeNG] = None) -> TypeVar:
+    def fresh_tvar(self, node: NodeNG) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node.
         """
         tvar = TypeVar(f'_T{self._count}')
@@ -238,40 +197,17 @@ class TypeConstraints:
     ###########################################################################
     # Type lookup ("find")
     ###########################################################################
-    def resolve(self, t: type) -> TypeResult:
-        """
-        Return the type associated with the given type.
+    def resolve(self, t: type) -> type:
+        """Return the type associated with the given type.
 
         If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
         Otherwise if the type variable with the smallest name is returned (using < to compare strings).
         """
+        # TODO: Make this recursive, e.g. if `t` is List[TypeVar('a')], the contained TypeVar should be resolved.
         if isinstance(t, TypeVar):
-            return TypeInfo(self._find(t).type)
-        elif isinstance(t, GenericMeta):
-            return self._resolve_generic(t)
+            return self._find(t).type
         else:
-            return TypeInfo(t)
-            
-    def _resolve_generic(self, t: GenericMeta):
-        # TODO: Fix duplicate code (see _unify_generic)
-    
-        resolve_result = failable_collect([self.resolve(arg) for arg in t.__args__])
-        if type(resolve_result) == TypeFail:
-            return resolve_result
-        resolved_args = resolve_result.getValue()
-
-        gorg = _gorg(t)
-        if gorg == Tuple:
-            tuple_args = tuple(resolved_args)
-            # Handle the special case when t1 or t2 are empty tuples
-            if tuple_args == ((),):
-                tuple_args = ()
-            return TypeInfo(Tuple[tuple_args])
-        elif gorg == Callable:
-            return TypeInfo(Callable[resolved_args[:-1], resolved_args[-1]])
-        else:
-            return TypeInfo(gorg[tuple(resolved_args)])
-        
+            return t
 
     def _find(self, tv: TypeVar) -> _TNode:
         """Return the disjoint set node associated with the given type variable."""
@@ -283,104 +219,105 @@ class TypeConstraints:
     ###########################################################################
     # Type unification ("union")
     ###########################################################################
-    def unify(self, t1: type, t2: type) -> TypeResult:
+    def unify(self, t1: type, t2: type) -> Union[str, type]:
+        """Unify the given types.
+
+        Return the result of the unification, or an error message if the types can't be unified.
         """
-        Unify the given types.
-        Return the result of the unification, or an error
-        message if the types can't be unified.
-        """
-        # Case of TypeVars
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
             result = self._merge_sets(t1, t2)
-            if not isinstance(result, TypeFail):
+            if not isinstance(result, str):
                 return self.resolve(t1)
             else:
                 return result
-
-        # Case of two generics
-        # TODO: Change this to use binds instead of always looking up values
-        # Currenly only accounts for lists
-        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            # Bind GenericMeta object from each TypeInfo to x and y,
-            # pass to unify_generic
-            return self._unify_generic(t1, t2)
 
         elif isinstance(t1, TypeVar):
             rep1 = self._find(t1)
             if rep1.type == t1:
                 # Simply make t2 the set representative for t1.
                 rep1.parent = self._make_set(t2)
-                return self.resolve(t1)
+                return t2
             else:
                 return self.unify(rep1.type, t2)
         elif isinstance(t2, TypeVar):
             return self.unify(t2, t1)
-        elif isinstance(t1, _ForwardRef) and \
-             isinstance(t2, _ForwardRef) and t1 == t2:
-            return TypeInfo(t1)
-
-        # Case of unifying two concrete types
+        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
+            return self._unify_generic(t1, t2)
+        elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
+            return f'Incompatible types {t1} {t2}'
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            return t1
+        elif t1 == Any or t2 == Any:
+            return t1
+        elif isinstance(t1, _ForwardRef) and isinstance(t2, _ForwardRef) and t1 == t2:
+            return t1
+        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
+            return f'Incompatible types {t1} {t2}'
         elif t1 == t2:
-            return TypeInfo(t1)
+            return t1
+        elif t1 != t2:
+            return f'Incompatible types {t1} {t2}'
+
+    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> Union[str, GenericMeta]:
+        """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
+        if _gorg(t1) is not _gorg(t2):
+            return f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}'
+        elif t1.__args__ is not None and t2.__args__ is not None:
+            # TODO: check for equal lengths of __args__
+            gorg = _gorg(t1)
+            if gorg == Callable:
+                # TODO: Looking up elements in arrays causes _type_check to be
+                # called from typing.py, which tries to create a ForwardRef
+                # when encountering strings, even though strings are sometimes
+                # error messages
+                return gorg[
+                    [self.unify(a1, a2) for a1, a2 in zip(t1.__args__[:-1], t2.__args__[:-1])],
+                    self.unify(t1.__args__[-1], t2.__args__[-1])
+                ]
+            elif gorg == Tuple:
+                tuple_args = tuple(
+                    self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)
+                )
+                # Handle the special case when t1 or t2 are empty tuples
+                if tuple_args == ((),):
+                    tuple_args = ()
+                return gorg[tuple_args]
+            else:
+                return gorg[tuple(
+                    self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)
+                )]
         else:
-            return TypeFail(f'Incompatible types {t1} and {t2}')
+            return f'Incompatible types {t1} and {t2}'
 
-    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
-        g1, g2 = _gorg(t1), _gorg(t2)
-        if g1 != g2:
-            return TypeFail(f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}')
-        if len(t1.__args__) != len(t2.__args__):
-            return TypeFail(f'Generic types {_gorg(t1)} and {_gorg(t2)} must have the same number of args')
-
-        unify_result = failable_collect([self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)])
-        if type(unify_result) == TypeFail:
-            return unify_result
-        unified_args = unify_result.getValue()
-
-        if g1 == Tuple:
-            tuple_args = tuple(unified_args)
-            # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
-            if tuple_args == ((),):
-                tuple_args = ()
-            return TypeInfo(Tuple[tuple_args])
-        elif g1 == Callable:
-            return TypeInfo(Callable[unified_args[:-1], unified_args[-1]])
-        else:
-            return TypeInfo(g1[tuple(unified_args)])
-
-    def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> TypeResult:
+    def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> None:
         """Merge the two sets that t1 and t2 belong to.
 
-        TODO: make sure it's OK to return a TypeResult and not an exception
+        Raise a TypeInferenceError if merging the sets results in incompatible
+        concrete types.
         """
         # TODO: look into implementation of  __eq__ for TypeVar to make sure we can use == here.
         if t1 == t2:
-            return TypeInfo(t1)
+            return
 
         rep1 = self._find(t1)
         rep2 = self._find(t2)
         if isinstance(rep1.type, TypeVar) and isinstance(rep2.type, TypeVar):
-            if rep1.type.__name__ < rep2.type.__name__:
+            if rep1.type.__name__ < rep2.type.__name__ :
                 rep2.parent = rep1
-                return TypeInfo(rep1.type)
             else:
                 rep1.parent = rep2
-                return TypeInfo(rep2.type)
         elif isinstance(rep2.type, TypeVar):
             rep2.parent = rep1
-            return TypeInfo(rep2.type)
         elif isinstance(rep1.type, TypeVar):
             rep1.parent = rep2
-            return TypeInfo(rep2.type)
         else:
             # In this case both set representatives are concrete types.
             # If they're compatible, we can still unify the sets. Otherwise, an error
             # is raised here.
             if rep1.type == rep2.type:
                 rep2.parent = rep1
-                return TypeInfo(rep1.type)
             else:
-                return TypeFail(f'Incompatible types {rep1.type} and {rep2.type}')
+                return f'Incompatible types {rep1.type} and {rep2.type}'
 
     ###########################################################################
     # Handling generic polymorphism
@@ -399,10 +336,7 @@ class TypeConstraints:
             return t1 == t2
 
     def unify_call(self, func_type, *arg_types, node=None):
-        """
-        TODO: Find out what this does
-
-        Unify a function call with the given function type and argument types.
+        """Unify a function call with the given function type and argument types.
 
         Return a result type.
         """
@@ -465,13 +399,11 @@ class Environment:
     TODO: currently, only locals is used; this should be fixed as we add
     the nonlocal and global nodes and use scope information to categorize
     a name binding.
-
-    TODO:
     """
     def __init__(self,
-                 locals_: Optional[Dict[str, type]]=None,
-                 nonlocals_: Optional[Dict[str, type]]=None,
-                 globals_: Optional[Dict[str, type]]=None):
+                 locals_: Optional[Dict[str, type]] = None,
+                 nonlocals_: Optional[Dict[str, type]] = None,
+                 globals_: Optional[Dict[str, type]] = None):
         """Initialize an environment."""
         self.locals = locals_ or {}
         self.nonlocals = nonlocals_ or {}

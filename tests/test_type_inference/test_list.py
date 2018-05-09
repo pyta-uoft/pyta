@@ -13,7 +13,7 @@ def test_homogeneous_lists(lst):
     module, _ = cs._parse_text(lst)
     list_node = list(module.nodes_of_class(astroid.List))[0]
     if len(list_node.elts) == 0:
-        assert list_node.type_constraints.type == List[Any]
+        assert list_node.inf_type.getValue() == List[Any]
     else:
         cs._verify_type_setting(module, astroid.List, List[type(lst.elts[0].value)])
 

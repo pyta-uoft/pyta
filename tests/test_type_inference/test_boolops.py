@@ -13,7 +13,7 @@ def test_homogeneous_binary_boolop(node):
     """Test type setting of binary BoolOp node(s) representing expression with homogeneous operands."""
     module, _ = cs._parse_text(node)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    assert boolop_node.type_constraints.type == boolop_node.values[0].type_constraints.type
+    assert boolop_node.inf_type.getValue() == boolop_node.values[0].inf_type.getValue()
 
 
 @given(cs.boolop_node())
@@ -23,7 +23,7 @@ def test_heterogeneous_binary_boolop(node):
     assume(type(node.values[0].value) != type(node.values[1].value))
     module, _ = cs._parse_text(node)
     boolop_node = list(module.nodes_of_class(astroid.BoolOp))[0]
-    assert boolop_node.type_constraints.type == Any
+    assert boolop_node.inf_type.getValue() == Any
 
 
 if __name__ == '__main__':

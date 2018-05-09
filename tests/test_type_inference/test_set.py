@@ -13,7 +13,7 @@ def test_homogeneous_set(node):
     module, _ = cs._parse_text(node)
     set_node = list(module.nodes_of_class(astroid.Set))[0]
     if len(set_node.elts) == 0:
-        assert set_node.type_constraints.type == Set[Any]
+        assert set_node.inf_type.getValue() == Set[Any]
     else:
         try:
             cs._verify_type_setting(module, astroid.Set, Set[type(set_node.elts[0].value)])

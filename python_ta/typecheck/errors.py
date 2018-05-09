@@ -89,6 +89,9 @@ def binop_error_message(node: astroid.BinOp) -> str:
     )
 
 
+###############################################################################
+# UnaryOp message
+###############################################################################
 def unaryop_error_message(node: astroid.UnaryOp) -> str:
     op_name = UNARY_TO_ENGLISH[node.op]
     operand = node.operand.type_constraints.type.__name__

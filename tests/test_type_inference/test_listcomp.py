@@ -14,8 +14,8 @@ def test_list_comprehension_single_target_name_homogeneous_iterable(iterable):
     program = f'[num for num in {repr(iterable)}]'
     module, typeinferrer = cs._parse_text(program)
     listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
-    expected_type = List[listcomp_node.generators[0].iter.type_constraints.type.__args__[0]]
-    assert listcomp_node.type_constraints.type == expected_type
+    expected_type = List[listcomp_node.generators[0].iter.inf_type.type.__args__[0]]
+    assert listcomp_node.inf_type.type == expected_type
 
 
 @given(cs.homogeneous_iterable)
@@ -26,8 +26,8 @@ def test_list_comprehension_single_target_name_heterogeneous_iterable(iterable):
     program = f'[num for num in {repr(iterable)}]'
     module, typeinferrer = cs._parse_text(program)
     listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
-    expected_type = List[listcomp_node.generators[0].iter.type_constraints.type.__args__[0]]
-    assert listcomp_node.type_constraints.type == expected_type
+    expected_type = List[listcomp_node.generators[0].iter.inf_type.type.__args__[0]]
+    assert listcomp_node.inf_type.type == expected_type
 
 
 @given(cs.valid_identifier(min_size=1))
@@ -38,8 +38,8 @@ def test_list_comprehension_single_target_name_string(iterable):
     program = f'[num for num in {repr(iterable)}]'
     module, typeinferrer = cs._parse_text(program)
     listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
-    expected_type = List[listcomp_node.generators[0].iter.type_constraints.type]
-    assert listcomp_node.type_constraints.type == expected_type
+    expected_type = List[listcomp_node.generators[0].iter.inf_type.type]
+    assert listcomp_node.inf_type.type == expected_type
 
 
 if __name__ == '__main__':

@@ -122,7 +122,8 @@ def test_incompatible_subscript_list():
     except:
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
-    expected_msg = f''
+    expected_msg = "You can only access elements of a list using integers. You used a string, 'one'."
+    assert(subscript_node.type_constraints.type.msg == expected_msg)
 
 
 def test_non_annotated_function_call_bad_arguments():

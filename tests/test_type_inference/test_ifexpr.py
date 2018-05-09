@@ -12,7 +12,7 @@ def test_ifexp(node):
     """Test the type setting of an IfExp node representing an if statement."""
     module, type_inferer = cs._parse_text(node)
     for ifexp_node in module.nodes_of_class(astroid.IfExp):
-        assert ifexp_node.type_constraints.type == ifexp_node.body.type_constraints.type
+        assert ifexp_node.inf_type.type == ifexp_node.body.inf_type.type
 
 
 if __name__ == '__main__':

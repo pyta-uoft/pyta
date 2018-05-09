@@ -11,7 +11,7 @@ settings.load_profile("pyta")
 def test_index(node):
     module, _ = cs._parse_text(node)
     for index_node in module.nodes_of_class(astroid.Index):
-        assert index_node.type_constraints.type == index_node.value.type_constraints.type
+        assert index_node.inf_type.type == index_node.value.inf_type.type
 
 
 @given(cs.expr_node())
@@ -19,7 +19,7 @@ def test_index(node):
 def test_expr(expr):
     module, _ = cs._parse_text(expr)
     for expr_node in module.nodes_of_class(astroid.Expr):
-        assert expr_node.type_constraints.type == expr_node.value.type_constraints.type
+        assert expr_node.inf_type.type == expr_node.value.inf_type.type
 
 
 if __name__ == '__main__':

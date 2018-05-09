@@ -13,7 +13,7 @@ def test_inference_list_subscript(node):
     module, _ = cs._parse_text(node)
     for subscript_node in module.nodes_of_class(astroid.Subscript):
         list_node = subscript_node.value
-        assert subscript_node.type_constraints.type == list_node.elts[0].type_constraints.type
+        assert subscript_node.inf_type.type == list_node.elts[0].inf_type.type
 
 
 @given(cs.subscript_node(cs.simple_homogeneous_list_node(min_size=1), cs.slice_node()))
@@ -23,7 +23,7 @@ def test_subscript_homogeneous_list_slice(node):
     module, _ = cs._parse_text(node)
     for subscript_node in module.nodes_of_class(astroid.Subscript):
         list_node = subscript_node.value
-        assert subscript_node.type_constraints.type == List[list_node.elts[0].type_constraints.type]
+        assert subscript_node.inf_type.type == List[list_node.elts[0].inf_type.type]
 
 
 # TODO: this test currently fails
@@ -38,7 +38,7 @@ def test_subscript_homogeneous_list_slice(node):
 #         module, _ = cs._parse_text(new_node)
 #         for subscript_node in module.nodes_of_class(astroid.Subscript):
 #             dict_node = subscript_node.value
-#             assert subscript_node.type_constraints.type == list(dict_node.items)[0][1].type_constraints.type
+#             assert subscript_node.inf_type.type == list(dict_node.items)[0][1].inf_type.type
 
 
 # TODO: this test needs to be converted, but will also fail
@@ -50,7 +50,7 @@ def test_subscript_homogeneous_list_slice(node):
 #     program = f'{input_list}[{input_slice}]'
 #     module, _ = cs._parse_text(program)
 #     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
-#     assert subscript_node.type_constraints.type == List[Any]
+#     assert subscript_node.inf_type.type == List[Any]
 
 
 if __name__ == '__main__':

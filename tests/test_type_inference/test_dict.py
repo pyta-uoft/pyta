@@ -13,7 +13,7 @@ def test_homogeneous_dict(dictionary):
     module, _ = cs._parse_text(dictionary)
     dict_node = list(module.nodes_of_class(astroid.Dict))[0]
     if len(dict_node.items) == 0:
-        assert dict_node.type_constraints.type == Dict[Any, Any]
+        assert dict_node.inf_type.type == Dict[Any, Any]
     else:
         first_key, first_value = next(((k, v) for k, v in dictionary.items))
         cs._verify_type_setting(module, astroid.Dict, Dict[type(first_key.value), type(first_value.value)])

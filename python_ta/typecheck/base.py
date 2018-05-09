@@ -241,11 +241,32 @@ class TypeConstraints:
         If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
         Otherwise if the type variable with the smallest name is returned (using < to compare strings).
         """
-        # TODO: Make this recursive, e.g. if `t` is List[TypeVar('a')], the contained TypeVar should be resolved.
         if isinstance(t, TypeVar):
             return TypeInfo(self._find(t).type)
+        elif isinstance(t, GenericMeta):
+            return self._resolve_generic(t)
         else:
             return TypeInfo(t)
+
+    def _resolve_generic(self, t: GenericMeta) -> TypeResult:
+        # TODO: Fix duplicate code (see _unify_generic)
+        resolve_result = failable_collect([self.resolve(arg) for arg in t.__args__])
+        if isinstance(resolve_result, TypeFail):
+            return resolve_result
+
+        resolved_args = resolve_result.getValue()
+
+        gorg = _gorg(t)
+        if gorg == Tuple:
+            tuple_args = tuple(resolved_args)
+            # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
+            if tuple_args == ((),):
+                tuple_args = ()
+            return TypeInfo(Tuple[tuple_args])
+        elif gorg == Callable:
+            return TypeInfo(Callable[resolved_args[:-1], resolved_args[-1]])
+        else:
+            return TypeInfo(gorg[tuple(resolved_args)])
 
     def _find(self, tv: TypeVar) -> _TNode:
         """Return the disjoint set node associated with the given type variable."""
@@ -323,7 +344,7 @@ class TypeConstraints:
                 tuple_args = ()
             return TypeInfo(Tuple[tuple_args])
         elif g1 == Callable:
-            return TypeInfo(g1[unified_args[:-1], unified_args[-1]])
+            return TypeInfo(Callable[unified_args[:-1], unified_args[-1]])
         else:
             return TypeInfo(g1[tuple(unified_args)])
 

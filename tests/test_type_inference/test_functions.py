@@ -122,7 +122,8 @@ def test_incompatible_unaryop_call():
     except:
         raise SkipTest()
     unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
-    expected_msg = f''
+    expected_msg = "You cannot take the bitwise inverse of a List, ['D']."
+    assert(unaryop_node.type_constraints.type.msg == expected_msg)
 
 
 def test_non_annotated_function_call_bad_arguments():

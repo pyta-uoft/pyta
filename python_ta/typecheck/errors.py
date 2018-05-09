@@ -101,7 +101,11 @@ def unaryop_error_message(node: astroid.UnaryOp) -> str:
 ###############################################################################
 # Subscript message
 ###############################################################################
-
+def subscript_error_message(node: astroid.Subscript) -> str:
+    # Accessing an element of a List with an incompatible index type (non-integers)
+    if isinstance(node.value, astroid.node_classes.List):
+        return f'You can only access elements of a list using int. ' \
+               f'You used a {node.slice.type_constraints.type.__name__}, {node.slice.value.as_string()}.'
 
 
 def _correct_article(noun : str) -> str:

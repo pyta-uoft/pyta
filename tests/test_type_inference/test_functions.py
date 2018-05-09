@@ -46,7 +46,7 @@ def test_function_def_call_no_args(function_name, return_value):
     return_tvar = function_def_node.type_environment.lookup_in_env('return')
     return_type = inferer.type_constraints.resolve(return_tvar)
     expr_node = next(module.nodes_of_class(astroid.Expr))
-    assert expr_node.type_constraints.type == return_type
+    assert expr_node.inf_type.type == return_type
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=0), cs.primitive_values)
@@ -97,8 +97,8 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         module, inferer = cs._parse_text(program)
         # get the Call node - there is only one in this test case.
         call_node = next(module.nodes_of_class(astroid.Call))
-        function_call_type = call_node.type_constraints.type
-        assert inferer.type_constraints.resolve(function_call_type) == call_node.args[i].type_constraints.type
+        function_call_type = call_node.inf_type.type
+        assert inferer.type_constraints.resolve(function_call_type) == call_node.args[i].inf_type.type
 
 
 def test_incompatible_binop_call():
@@ -149,7 +149,7 @@ def test_non_annotated_function_call_bad_arguments():
                    f'in parameter (2), the function was expecting an object of inferred type ' \
                    f'int but was given an object of type float.\n'
                    # TODO: should we use the term inferred?
-    assert call_node.type_constraints.type.msg == expected_msg
+    assert call_node.inf_type.type.msg == expected_msg
 
 
 def test_user_defined_annotated_call_wrong_arguments_type():
@@ -167,7 +167,7 @@ def test_user_defined_annotated_call_wrong_arguments_type():
     expected_msg = f'In the Call node in line 4, there was an error in calling the annotated function "add_3":\n' \
                    f'in parameter (2), the annotated type is int but was given an object of type str.\n' \
                    f'in parameter (3), the annotated type is int but was given an object of type float.\n'
-    assert call_node.type_constraints.type.msg == expected_msg
+    assert call_node.inf_type.type.msg == expected_msg
 
 
 def test_user_defined_annotated_call_wrong_arguments_number():
@@ -184,7 +184,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
     call_node = list(module.nodes_of_class(astroid.Call))[0]
     expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_3":\n' \
                    f'the function was expecting 3 arguments, but was given 0.'
-    assert call_node.type_constraints.type.msg == expected_msg
+    assert call_node.inf_type.type.msg == expected_msg
 
 
 def test_conflicting_inferred_type_variable():
@@ -209,7 +209,7 @@ def test_conflicting_inferred_type_variable():
     expected_msg = f'In the Call node in line 8, there was an error in calling the annotated function "return_str":\n' \
                    f'in parameter (1), the annotated type is str but was given an object of inferred type int.'
                    # TODO: test case redundant because recursive..?
-    assert call_node.type_constraints.type.msg == expected_msg
+    assert call_node.inf_type.type.msg == expected_msg
 
 
 if __name__ == '__main__':

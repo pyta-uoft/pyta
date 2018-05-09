@@ -112,7 +112,7 @@ def test_incompatible_binop_call():
     binop_node = next(module.nodes_of_class(astroid.BinOp))
     expected_msg = "You cannot add an int, 5, and a str, 'string'. " \
                    "Perhaps you wanted to cast the integer into a string or vice versa?"
-    assert(binop_node.type_constraints.type.msg == expected_msg)
+    assert binop_node.type_constraints.type.msg == expected_msg
 
 
 def test_non_annotated_function_call_bad_arguments():

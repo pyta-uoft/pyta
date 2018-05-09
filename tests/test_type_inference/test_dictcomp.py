@@ -15,7 +15,7 @@ def test_dict_comprehension_reproduce_homogeneous(node):
     module, _ = cs._parse_text(program)
     dictcomp_node = list(module.nodes_of_class(astroid.DictComp))[0]
     # reproducing the dict with dict. comprehension; the type of the expression will be same as original iterable
-    assert dictcomp_node.type_constraints.type == dictcomp_node.generators[0].iter.type_constraints.type
+    assert dictcomp_node.inf_type.type == dictcomp_node.generators[0].iter.inf_type.type
 
 
 @given(cs.dict_node(min_size=1))
@@ -27,7 +27,7 @@ def test_dict_comprehension_reproduce_heterogeneous(node):
     program = f"{{key: {dictionary}[key] for key in {dictionary}}}"
     module, _ = cs._parse_text(program)
     dictcomp_node = list(module.nodes_of_class(astroid.DictComp))[0]
-    assert dictcomp_node.type_constraints.type == dictcomp_node.generators[0].iter.type_constraints.type
+    assert dictcomp_node.inf_type.type == dictcomp_node.generators[0].iter.inf_type.type
 
 
 if __name__ == '__main__':

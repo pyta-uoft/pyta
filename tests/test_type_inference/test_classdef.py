@@ -25,7 +25,7 @@ def test_classdef_attribute_assign():
         for instance in attribute_lst:
             attribute_type = inferer.type_constraints\
                 .resolve(classdef_node.type_environment.lookup_in_env(instance.attrname))
-            value_type = inferer.type_constraints.resolve(instance.parent.value.inf_type.type)
+            value_type = inferer.type_constraints.resolve(instance.parent.value.inf_type.getValue())
             assert attribute_type == value_type
 
 
@@ -43,8 +43,8 @@ def test_classdef_method_call():
               f'\n'
     module, inferer = cs._parse_text(program)
     attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
-    expected_rtype = attribute_node.parent.inf_type.type
-    actual_rtype = inferer.type_constraints.resolve(attribute_node.inf_type.type.__args__[-1])
+    expected_rtype = attribute_node.parent.inf_type.getValue()
+    actual_rtype = inferer.type_constraints.resolve(attribute_node.inf_type.getValue().__args__[-1])
     assert actual_rtype == expected_rtype
 
 
@@ -86,7 +86,7 @@ def test_bad_attribute_access():
     expected_msg = f'Attribute access error!\n' \
                    f'In the Attribute node in line 2:\n' \
                    f'the object "x" does not have the attribute "wrong_name".'
-    assert call_node.inf_type.type.msg == expected_msg
+    assert call_node.inf_type.getValue() == expected_msg
 
 
 def test_builtin_method_call_bad_self():
@@ -102,7 +102,8 @@ def test_builtin_method_call_bad_self():
     expected_msg = f'In the Call node in line 2, when calling the method "append":\n' \
                    f'this function expects to be called on an object of the class List, but was called on an object of ' \
                    f'inferred type int.'
-    assert call_node.inf_type.type.msg == expected_msg
+    assert call_node.inf_type.getValue() == expected_msg
+    assert call_node.inf_type.getValue() == expected_msg
 
 
 def test_builtin_method_call_bad_argument():
@@ -118,7 +119,7 @@ def test_builtin_method_call_bad_argument():
     expected_msg = f'In the Call node in line 2, when calling the method "extend":\n' \
                    f'in parameter (1), the function was expecting an object of type iterable ' \
                    f'but was given an object of type int.'
-    assert call_node.inf_type.type.msg == expected_msg
+    assert call_node.inf_type.getValue() == expected_msg
 
 
 if __name__ == '__main__':

@@ -264,7 +264,7 @@ class TypeConstraints:
         """
         # Case of TypeVars
         if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            return self._merge_sets(t1, t2) >> self.resolve      
+            return self._merge_sets(t1, t2) >> self.resolve
 
         elif isinstance(t1, TypeVar):
             rep1 = self._find(t1)
@@ -276,21 +276,21 @@ class TypeConstraints:
                 return self.unify(rep1.type, t2)
         elif isinstance(t2, TypeVar):
             return self.unify(t2, t1)
-            
+
         # Case of two generics
         # TODO: Change this to use binds instead of always looking up values
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
             # Bind GenericMeta object from each TypeInfo to x and y,
             # pass to unify_generic
             return self._unify_generic(t1, t2)
-            
+
         elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
             return TypeFail(f'Incompatible types {t1} {t2}')
         elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
             return TypeInfo(t1)
         elif t1 == Any or t2 == Any:
             return TypeInfo(t1)
-            
+
         elif isinstance(t1, _ForwardRef) and \
              isinstance(t2, _ForwardRef) and t1 == t2:
             return TypeInfo(t1)
@@ -377,7 +377,7 @@ class TypeConstraints:
         else:
             return t1 == t2
 
-    def unify_call(self, func_type, *arg_types, node=None):
+    def unify_call(self, func_type, *arg_types, node=None) -> type:
         """Unify a function call with the given function type and argument types.
 
         Return a result type.
@@ -394,12 +394,12 @@ class TypeConstraints:
                 raise TypeInferenceError(f'Incompatible argument types {arg_type} and {param_type}')
         return self._type_eval(new_func_type.__args__[-1])
 
-    def _type_eval(self, t):
+    def _type_eval(self, t) -> type:
         """Evaluate a type. Used for tuples."""
         if isinstance(t, TuplePlus):
             return t.eval_type(self)
         if isinstance(t, TypeVar):
-            return self.resolve(t)
+            return self.resolve(t).getValue()
         if isinstance(t, GenericMeta) and t.__args__ is not None:
             return _gorg(t)[tuple(self._type_eval(argument) for argument in t.__args__)]
         else:
@@ -408,7 +408,7 @@ class TypeConstraints:
     ### HELPER METHODS
     def types_in_callable(self, callable_function):
         """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
-        arg_type_lst = [self.resolve(argument) for argument in callable_function.__args__]
+        arg_type_lst = [self.resolve(argument).getValue() for argument in callable_function.__args__]
         return arg_type_lst[:-1], arg_type_lst[-1]
 
 

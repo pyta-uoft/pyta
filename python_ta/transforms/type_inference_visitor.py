@@ -228,11 +228,19 @@ class TypeInferer:
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
-                # TODO: handle when these collections are different lengths.
-                target.inf_type = self.type_constraints.unify(
-                    Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
-                    expr_type
-                )
+                if len(expr_type.__args__) == len(target.elts):
+                    target.inf_type = self.type_constraints.unify(
+                        Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
+                        expr_type
+                    )
+                    for subtarget, subvalue in zip(target.elts, expr_type.__args__):
+                        subtarget_type = self.lookup_type(subtarget, subtarget.name)
+                        subtarget.inf_type = self.type_constraints.unify(subtarget_type, subvalue)
+                else:
+                    # TODO: Change error message to include more information
+                    target.inf_type = TypeFail("Wrong number of arguments when assigning to Tuple")
+                    for subtarget in target.elts:
+                        subtarget.inf_type = TypeFail("Wrong number of arguments when assigning to Tuple")
             else:
                 iter_type = self._handle_call(target, '__iter__', expr_type).getValue()
                 contained_type = iter_type.__args__[0]

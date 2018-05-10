@@ -11,7 +11,7 @@ def test_builtin_function_name():
     """Test looking up the builtin function `bin`."""
     module, _ = cs._parse_text('bin')
     for node in module.nodes_of_class(astroid.Name):
-        assert node.inf_type.type == Callable[[int], str]
+        assert node.inf_type.getValue() == Callable[[int], str]
 
 
 @settings(suppress_health_check=[HealthCheck.too_slow])
@@ -19,7 +19,7 @@ def test_builtin_class_name():
     """Test looking up the builtin class `int`."""
     module, _ = cs._parse_text('int')
     for node in module.nodes_of_class(astroid.Name):
-        assert node.inf_type.type == Type[int]
+        assert node.inf_type.getValue() == Type[int]
 
 
 if __name__ == '__main__':

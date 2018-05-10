@@ -2,6 +2,7 @@
 
 
 ## Nodes
+TODOs: - Think of better ways of representing objects when returning error messages from typechecking.
 
 ### Assign
 

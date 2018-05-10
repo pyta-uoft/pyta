@@ -220,16 +220,16 @@ class TypeInferer:
         if isinstance(target, astroid.AssignName):
             # A single identifier, e.g. x = ...
             target_type_var = self.lookup_type(target, target.name)
-            self.type_constraints.unify(target_type_var, expr_type)
+            target.inf_type = self.type_constraints.unify(target_type_var, expr_type)
         elif isinstance(target, astroid.AssignAttr):
             # Attribute mutation, e.g. x.y = ...
             attr_type = self._lookup_attribute_type(target, target.expr.name, target.attrname)
-            self.type_constraints.unify(attr_type, expr_type)
+            target.inf_type = self.type_constraints.unify(attr_type, expr_type)
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
                 # TODO: handle when these collections are different lengths.
-                self.type_constraints.unify(
+                target.inf_type = self.type_constraints.unify(
                     Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
                     expr_type
                 )

@@ -325,7 +325,7 @@ class TypeInferer:
         node.inf_type = node.value.inf_type
 
     def visit_slice(self, node: astroid.Slice) -> None:
-        return self.type_constraints.unify(node.lower.inf_type, node.upper.inf_type)
+        node.inf_type = self.type_constraints.unify(node.lower.inf_type, node.upper.inf_type)
 
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if node.ctx == astroid.Load:

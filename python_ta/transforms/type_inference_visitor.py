@@ -326,11 +326,15 @@ class TypeInferer:
 
     def visit_slice(self, node: astroid.Slice) -> None:
         if node.lower and node.upper:
-            node.inf_type = self.type_constraints.unify(node.lower.inf_type, node.upper.inf_type)
+            node.inf_type = self.type_constraints.unify(
+                node.lower.inf_type.getValue(),
+                node.upper.inf_type.getValue())
         elif node.lower:
-            node.inf_type = node.lower.inf_type
+            node.inf_type = node.lower.inf_type.getValue()
+        elif node.upper:
+            node.inf_type = node.upper.inf_type.getValue()
         else:
-            node.inf_type = node.upper.inf_type
+            node.inf_type = TypeInfo(Any)
 
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if node.ctx == astroid.Load:

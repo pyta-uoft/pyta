@@ -35,9 +35,11 @@ def walker(node, indent=''):
     print('{}{} {} (name: {}, value: {}, inf_type: {})'.format(
         indent, CHAR_TUBE, node_name, name, value, inf_type))
 
-    print(indent + FILL + '>>> ' + node.as_string())
+    lines = [line for line in node.as_string().split('\n')]
+    for line in lines:
+        print(indent + FILL + '>>> ' + line)
 
-    for child in node.get_children(): 
+    for child in node.get_children():
         walker(child, indent + FILL + CHAR_PIPE)
 
 

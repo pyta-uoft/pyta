@@ -209,11 +209,12 @@ class TypeInferer:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
         expr_type = node.value.inf_type.getValue()
+        node.inf_type = TypeInfo(NoType)
 
         for target in node.targets:
             self._assign_type(target, expr_type)
-
-        node.inf_type = TypeInfo(NoType)
+            if isinstance(expr_type, typing.TupleMeta) and len(expr_type.__args__) != len(target.elts):
+                node.inf_type = TypeFail("Incorrect number of arguments when assigning to Tuple")
 
     def _assign_type(self, target: NodeNG, expr_type: type) -> None:
         """Update the type environment so that the target is bound to the given type."""
@@ -228,7 +229,6 @@ class TypeInferer:
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
-                # TODO: handle when these collections are different lengths.
                 self.type_constraints.unify(
                     Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
                     expr_type

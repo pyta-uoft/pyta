@@ -99,8 +99,7 @@ Done.
 
 ### Slice
 
-TODOs:
-    - do proper type-checking of arguments
+Done.
 
 ### Subscript
 

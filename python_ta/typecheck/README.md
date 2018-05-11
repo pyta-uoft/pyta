@@ -106,7 +106,6 @@ TODOs:
 
 TODOs:
     - Handle ExtSlice
-    - Handle subscripting in assignment ("Store") context
 
 ### Tuple
 

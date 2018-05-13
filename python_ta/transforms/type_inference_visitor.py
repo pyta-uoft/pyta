@@ -383,6 +383,7 @@ class TypeInferer:
         elif node.ctx == astroid.Del:
             node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type.getValue(),
                                                       node.slice.inf_type.getValue())
+
     ##############################################################################
     # Loops
     ##############################################################################

@@ -29,19 +29,51 @@ def test_subscript_homogeneous_list_slice(node):
         assert subscript_node.inf_type.getValue() == List[list_node.elts[0].inf_type.getValue()]
 
 
-# TODO: this test currently fails
-# @given(cs.simple_homogeneous_dict_node(min_size=1))
-# def test_inference_dict_subscript(node):
-#     """Note that this test only takes in a dictionary because the subscript index
-#     must be the same type as the dictionary's keys in order to type check.
-#     """
-#     for key, _ in node.items:
-#         new_node = astroid.Subscript()
-#         new_node.postinit(node, key)
-#         module, _ = cs._parse_text(new_node)
-#         for subscript_node in module.nodes_of_class(astroid.Subscript):
-#             dict_node = subscript_node.value
-#             assert subscript_node.inf_type.getValue() == list(dict_node.items)[0][1].inf_type. getValue()
+@given(cs.subscript_node(cs.simple_homogeneous_list_node(min_size=1), cs.slice_node()))
+@settings(suppress_health_check=[HealthCheck.too_slow])
+def test_subscript_load_ctx(node):
+    """Test visitor of Subscript node when loaded in an (if) expression."""
+    load_node = astroid.If()
+    load_node.postinit(astroid.Const(True), [node])
+    module, _ = cs._parse_text(load_node)
+    for subscript_node in module.nodes_of_class(astroid.Subscript):
+        list_node = subscript_node.value
+        assert subscript_node.inf_type.getValue() == List[list_node.elts[0].inf_type.getValue()]
+
+
+@given(cs.subscript_node(cs.list_node(min_size=1), cs.index_node()), cs.const_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
+def test_subscript_store_ctx(node, val):
+    """Test visitor of Subscript node within an assignment."""
+    asgn_node = astroid.Assign()
+    asgn_node.postinit([node], val)
+    module, _ = cs._parse_text(asgn_node)
+    for subscript_node in module.nodes_of_class(astroid.Subscript):
+        assert subscript_node.inf_type.getValue() == type(None)
+
+
+@given(cs.subscript_node(cs.list_node(min_size=1), cs.slice_node()), cs.const_node())
+@settings(suppress_health_check=[HealthCheck.too_slow])
+def test_subscript_del_ctx(node, val):
+    """Test visitor of Subscript node within a del statement."""
+    asgn_node = astroid.Assign(node, val)
+    for subscript_node in asgn_node.nodes_of_class(astroid.Subscript):
+        list_node = subscript_node.value
+        assert subscript_node.inf_type.getValue() == type(None)
+
+
+@given(cs.simple_homogeneous_dict_node(min_size=1))
+def test_inference_dict_subscript(node):
+    """Note that this test only takes in a dictionary because the subscript index
+    must be the same type as the dictionary's keys in order to type check.
+    """
+    for key, _ in node.items:
+        new_node = astroid.Subscript()
+        new_node.postinit(node, key)
+        module, _ = cs._parse_text(new_node)
+        for subscript_node in module.nodes_of_class(astroid.Subscript):
+            dict_node = subscript_node.value
+            assert subscript_node.inf_type.getValue() == list(dict_node.items)[0][1].inf_type. getValue()
 
 
 @given(cs.simple_homogeneous_list_node(min_size=1))

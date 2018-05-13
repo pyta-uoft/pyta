@@ -343,7 +343,7 @@ class TypeInferer:
                                                       node.slice.inf_type.getValue())
         elif node.ctx == astroid.Store:
             node.inf_type = self._handle_call(node, '__setitem__', node.value.inf_type.getValue(),
-                                                      node.slice.inf_type.getValue())
+                                                      node.slice.inf_type.getValue(), Any)
         elif node.ctx == astroid.Del:
             node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type.getValue(),
                                                       node.slice.inf_type.getValue())

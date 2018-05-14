@@ -276,7 +276,7 @@ class TypeInferer:
             else:
                 arg_types = []
             arg_types += [arg.inf_type.getValue() for arg in node.args]
-            node.inf_type = TypeInfo(self.type_constraints.unify_call(callable_t, *arg_types, node=node))
+            node.inf_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
@@ -405,7 +405,7 @@ class TypeInferer:
                 return TypeFail(error_func(node))
 
         try:
-            return TypeInfo(self.type_constraints.unify_call(func_type, *arg_types, node=node))
+            return self.type_constraints.unify_call(func_type, *arg_types, node=node)
         except TypeInferenceError:
             return TypeFail(f'Bad unify_call of function {function_name} given args: {arg_types}')
 

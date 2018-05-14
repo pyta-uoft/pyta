@@ -195,7 +195,11 @@ class TypeInferer:
     ##############################################################################
     def visit_name(self, node: astroid.Name) -> None:
         try:
-            node.inf_type = TypeInfo(self.lookup_type(node, node.name))
+            t = self.lookup_type(node, node.name)
+            node.inf_type = TypeInfo(t)
+            if hasattr(t, 'optionals'):
+                node.inf_type.optionals = t.optionals
+                print(node.inf_type.optionals)
         except KeyError:
             if node.name in self.type_store.classes:
                 node.inf_type = TypeInfo(Type[__builtins__[node.name]])
@@ -249,7 +253,8 @@ class TypeInferer:
 
     def lookup_type(self, node, name):
         """Given a variable name, return its concrete type in the closest scope relative to given node."""
-        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
+        cf = self._closest_frame(node, name)
+        tvar = cf.type_environment.lookup_in_env(name)
         return self.type_constraints.resolve(tvar).getValue()
 
 
@@ -267,7 +272,7 @@ class TypeInferer:
             init_type = init_types[0]  # TODO: handle method overloading (through optional parameters)
             arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
             self.type_constraints.unify_call(init_type, *arg_types)
-            node.inf_type = TypeInfo(callable_t)
+            node.inf_type = self.type_constraints.unify_call(init_type, *arg_types)
         else:
             # TODO: resolve this case (from method lookup) more gracefully
             if isinstance(callable_t, list):
@@ -276,7 +281,7 @@ class TypeInferer:
             else:
                 arg_types = []
             arg_types += [arg.inf_type.getValue() for arg in node.args]
-            node.inf_type = TypeInfo(self.type_constraints.unify_call(callable_t, *arg_types, node=node))
+            node.inf_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
@@ -405,7 +410,7 @@ class TypeInferer:
                 return TypeFail(error_func(node))
 
         try:
-            return TypeInfo(self.type_constraints.unify_call(func_type, *arg_types, node=node))
+            return self.type_constraints.unify_call(func_type, *arg_types, node=node)
         except TypeInferenceError:
             return TypeFail(f'Bad unify_call of function {function_name} given args: {arg_types}')
 
@@ -417,7 +422,17 @@ class TypeInferer:
         node.inf_type = TypeInfo(NoType)
 
         # Get the inferred type of the function.
+
+        # Check for type of function arguments
         inferred_args = [self.lookup_type(node, arg) for arg in node.argnames()]
+
+        # Check for any default values:
+        diff_num_args = []
+        diff_num_args.append(inferred_args)
+        if len(node.args.defaults) > 0:
+            for i in range(len(node.args.defaults)):
+                diff_num_args.append(inferred_args[:-1-i])
+        inferred_args = diff_num_args[-1]
 
         if isinstance(node.parent, astroid.ClassDef) and isinstance(inferred_args[0], TypeVar):
             # TODO: distinguish between instance, class, and static methods.
@@ -453,7 +468,11 @@ class TypeInferer:
 
         # Update the environment storing the function's type.
         polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
+        # TODO: Add loop here to check for possible default arguments]
         func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
+        func_type.optionals = []
+        for args in diff_num_args:
+            func_type.optionals.append(create_Callable(args, combined_return, polymorphic_tvars))
         self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
 
     def visit_return(self, node: astroid.Return) -> None:

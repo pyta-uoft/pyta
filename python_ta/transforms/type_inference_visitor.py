@@ -197,9 +197,8 @@ class TypeInferer:
         try:
             t = self.lookup_type(node, node.name)
             node.inf_type = TypeInfo(t)
-            if hasattr(t, 'optionals'):
-                node.inf_type.optionals = t.optionals
-                print(node.inf_type.optionals)
+            if hasattr(t, 'optional_params'):
+                node.inf_type.optional_params = t.optional_params
         except KeyError:
             if node.name in self.type_store.classes:
                 node.inf_type = TypeInfo(Type[__builtins__[node.name]])
@@ -253,8 +252,7 @@ class TypeInferer:
 
     def lookup_type(self, node, name):
         """Given a variable name, return its concrete type in the closest scope relative to given node."""
-        cf = self._closest_frame(node, name)
-        tvar = cf.type_environment.lookup_in_env(name)
+        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
         return self.type_constraints.resolve(tvar).getValue()
 
 
@@ -468,11 +466,11 @@ class TypeInferer:
 
         # Update the environment storing the function's type.
         polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
-        # TODO: Add loop here to check for possible default arguments]
         func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
-        func_type.optionals = []
-        for args in diff_num_args:
-            func_type.optionals.append(create_Callable(args, combined_return, polymorphic_tvars))
+        if len(diff_num_args) > 1:
+            func_type.optional_params = []
+            for args in diff_num_args:
+                func_type.optional_params.append(create_Callable(args, combined_return, polymorphic_tvars))
         self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
 
     def visit_return(self, node: astroid.Return) -> None:

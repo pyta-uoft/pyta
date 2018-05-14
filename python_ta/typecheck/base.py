@@ -405,6 +405,10 @@ class TypeConstraints:
         """
         # Check that the number of parameters matches the number of arguments.
         if len(func_type.__args__) - 1 != len(arg_types):
+            if hasattr(func_type, 'optionals'):
+                for func in func_type.optionals:
+                    if len(func.__args__) - 1 == len(arg_types):
+                        return self.unify_call(func, *arg_types)
             return TypeFail('Wrong number of arguments')
 
         # Substitute polymorphic type variables

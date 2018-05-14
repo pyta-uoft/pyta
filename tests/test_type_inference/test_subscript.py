@@ -49,13 +49,14 @@ def test_subscript_store_ctx(node, val):
         assert subscript_node.inf_type.getValue() == type(None)
 
 
-@given(cs.subscript_node(cs.list_node(min_size=1), cs.slice_node()), cs.const_node())
+@given(cs.subscript_node(cs.list_node(min_size=1), cs.slice_node()))
 @settings(suppress_health_check=[HealthCheck.too_slow])
-def test_subscript_del_ctx(node, val):
+def test_subscript_del_ctx(node):
     """Test visitor of Subscript node within a del statement."""
-    asgn_node = astroid.Assign(node, val)
-    for subscript_node in asgn_node.nodes_of_class(astroid.Subscript):
-        list_node = subscript_node.value
+    del_node = astroid.Delete()
+    del_node.postinit([node])
+    module, _ = cs._parse_text(del_node)
+    for subscript_node in module.nodes_of_class(astroid.Subscript):
         assert subscript_node.inf_type.getValue() == type(None)
 
 

@@ -398,7 +398,7 @@ class TypeConstraints:
         else:
             return t1 == t2
 
-    def unify_call(self, func_type, *arg_types, node=None) -> type:
+    def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.
 
         Return a result type.

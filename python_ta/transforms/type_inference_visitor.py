@@ -209,11 +209,19 @@ class TypeInferer:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
         expr_type = node.value.inf_type.getValue()
+        node.inf_type = TypeInfo(NoType)
 
         for target in node.targets:
             self._assign_type(target, expr_type)
-
-        node.inf_type = TypeInfo(NoType)
+            if isinstance(expr_type, typing.TupleMeta) and isinstance(target, astroid.Tuple):
+                if len(expr_type.__args__) > len(target.elts):
+                    node.inf_type = TypeFail("Too many values in assignment node")
+                elif len(expr_type.__args__) < len(target.elts):
+                    node.inf_type = TypeFail("Too many variables in assignment node")
+            elif isinstance(expr_type, typing.TupleMeta):
+                node.inf_type = TypeFail("Cannot assign multiple values to single variable")
+            elif isinstance(target, astroid.Tuple):
+                node.inf_type = TypeFail("Cannot assign single value to multiple variables")
 
     def _assign_type(self, target: NodeNG, expr_type: type) -> None:
         """Update the type environment so that the target is bound to the given type."""
@@ -228,17 +236,18 @@ class TypeInferer:
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
-                # TODO: handle when these collections are different lengths.
                 self.type_constraints.unify(
                     Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
                     expr_type
                 )
             else:
-                iter_type = self._handle_call(target, '__iter__', expr_type).getValue()
-                contained_type = iter_type.__args__[0]
-                for subtarget in target.elts:
-                    target_tvar = self.lookup_type(subtarget, subtarget.name)
-                    self.type_constraints.unify(target_tvar, contained_type)
+                iter_type_result = self._handle_call(target, '__iter__', expr_type)
+                if not isinstance(iter_type_result, TypeFail):
+                    iter_type = iter_type_result.getValue()
+                    contained_type = iter_type.__args__[0]
+                    for subtarget in target.elts:
+                        target_tvar = self.lookup_type(subtarget, subtarget.name)
+                        self.type_constraints.unify(target_tvar, contained_type)
 
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""

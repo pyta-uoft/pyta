@@ -339,7 +339,7 @@ class TypeInferer:
         step_type = node.step.inf_type.getValue() if node.step else type(None)
         node.inf_type = self._handle_call(node, '__init__', slice, lower_type,
                                           upper_type, step_type)
-        if node.inf_type.getValue() is None:
+        if node.inf_type.getValue() == type(None):
             node.inf_type = TypeInfo(slice)
 
     def visit_subscript(self, node: astroid.Subscript) -> None:

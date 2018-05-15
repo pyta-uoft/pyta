@@ -197,8 +197,6 @@ class TypeInferer:
         try:
             t = self.lookup_type(node, node.name)
             node.inf_type = TypeInfo(t)
-            if hasattr(t, 'optional_params'):
-                node.inf_type.optional_params = t.optional_params
         except KeyError:
             if node.name in self.type_store.classes:
                 node.inf_type = TypeInfo(Type[__builtins__[node.name]])
@@ -476,8 +474,11 @@ class TypeInferer:
         # Update the environment storing the function's type.
         polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
         func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
-        if len(diff_num_args) > 1:
+        if hasattr(func_type, "optional_params"):
+            func_type.optional_params.clear()
+        else:
             func_type.optional_params = []
+        if len(diff_num_args) > 1:
             for args in diff_num_args:
                 func_type.optional_params.append(create_Callable(args, combined_return, polymorphic_tvars))
         self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)

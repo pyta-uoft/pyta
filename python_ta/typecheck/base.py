@@ -404,8 +404,6 @@ class TypeConstraints:
         Return a result type.
         """
         # Check that the number of parameters matches the number of arguments.
-        a = len(func_type.__args__) - 1
-        b = len(arg_types)
         if len(func_type.__args__) - 1 != len(arg_types):
             if hasattr(func_type, 'optional_params'):
                 for func in func_type.optional_params:

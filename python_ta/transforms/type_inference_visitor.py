@@ -252,7 +252,7 @@ class TypeInferer:
             # TODO: previous case must recursively handle this one
             set_call_type = self._handle_call(target, '__setitem__', target.value.inf_type.getValue(),
                               target.slice.inf_type.getValue(), expr_type)
-            if isinstance(set_call_type, TypeErrorInfo):
+            if isinstance(set_call_type, TypeFail):
                 target.inf_type = set_call_type
             else:
                 target.inf_type = TypeInfo(expr_type)

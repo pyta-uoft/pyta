@@ -411,8 +411,8 @@ class TypeConstraints:
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
-            if isinstance(self.unify(arg_type, param_type), str):
-                raise TypeInferenceError(f'Incompatible argument types {arg_type} and {param_type}')
+            if isinstance(self.unify(arg_type, param_type), TypeFail):
+                return self.unify(arg_type, param_type)
         return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
 
     def _type_eval(self, t) -> type:

@@ -469,7 +469,10 @@ class TypeInferer:
         node.inf_type = TypeInfo(NoType)
         for i in range(len(node.annotations)):
             if node.annotations[i] is not None:
-                self.type_constraints.unify(_node_to_type(node.annotations[i]), node.args[i])
+                # TODO Create helper function for modifying type_environment and _tvar_to_tnode?
+                tvar = node.parent.type_environment.locals[node.args[i].name]
+                self.type_constraints._tvar_to_tnode[tvar] = node.annotations[i]
+                node.parent.type_environment.locals[node.args[i].name] = _node_to_type(node.annotations[i])
 
     def visit_return(self, node: astroid.Return) -> None:
         t = node.value.inf_type.getValue()

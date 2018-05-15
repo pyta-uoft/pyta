@@ -75,6 +75,15 @@ def test_inference_dict_subscript(node):
             assert subscript_node.inf_type.getValue() == list(dict_node.items)[0][1].inf_type. getValue()
 
 
+@given(cs.simple_homogeneous_list_node(min_size=1))
+def test_inference_invalid_slice(node):
+    sub_node = astroid.Subscript()
+    sub_node.postinit(node, slice('a', 1, 1))
+    module, _ = cs._parse_text(sub_node)
+    for subscript_node in module.nodes_of_class(astroid.Subscript):
+        assert isinstance(subscript_node.inf_type.getValue(), TypeFail)
+
+
 # TODO: this test needs to be converted, but will also fail
 # @given(cs.random_list(min_size=2), cs.random_slice_indices())
 # def test_subscript_heterogeneous_list_slice(input_list, slice):

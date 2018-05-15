@@ -45,8 +45,9 @@ def test_subscript_store_ctx(node, val):
     asgn_node = astroid.Assign()
     asgn_node.postinit([node], val)
     module, _ = cs._parse_text(asgn_node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
-        assert subscript_node.inf_type.getValue() == type(None)
+    subscript_node = module.body[0].targets[0]
+    val_node = module.body[0].value
+    assert subscript_node.inf_type.getValue() == val_node.inf_type.getValue()
 
 
 @given(cs.subscript_node(cs.list_node(min_size=1), cs.slice_node()))

@@ -291,7 +291,7 @@ class TypeConstraints:
             rep1 = self._find(t1)
             if rep1.type == t1:
                 # Simply make t2 the set representative for t1.
-                rep1.parent = self._make_set(t2)
+                rep1.parent = self._make_set(self.resolve(t2).getValue())
                 return self.resolve(t1)
             else:
                 return self.unify(rep1.type, t2)

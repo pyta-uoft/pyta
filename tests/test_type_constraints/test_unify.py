@@ -190,3 +190,30 @@ def test_diff_callable():
 
     unify_helper(c1, c2, TypeFail(
         f'Incompatible Types {c1} and {c2}'))
+
+
+# Polymorphic types
+def test_simple_polymorphic_call():
+    tc.reset()
+    tv1 = tc.fresh_tvar()
+    tv2 = tc.fresh_tvar()
+    fn1 = Callable[[tv1, tv2], bool]
+    fn2 = Callable[[int, int], bool]
+
+    unify_helper(fn1, fn2, Callable[[int, int], bool])
+
+
+def test_higher_order_polymorphic_call():
+    tc.reset()
+    tv1 = tc.fresh_tvar()
+    tv2 = tc.fresh_tvar()
+    fn1 = Callable[[Callable[[tv1, int], int]], bool]
+    fn2 = Callable[[Callable[[int, int], int]], bool]
+    fn3 = Callable[[tv2], bool]
+
+    unify_helper(fn1, fn2, Callable[[Callable[[int, int], int]], bool])
+    unify_helper(fn1, fn3, Callable[[Callable[[int, int], int]], bool])
+
+    resolve_helper(tv1, int)
+    resolve_helper(tv2, Callable[[int, int], int])
+

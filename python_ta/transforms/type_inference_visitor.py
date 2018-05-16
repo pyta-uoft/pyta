@@ -248,6 +248,14 @@ class TypeInferer:
                     for subtarget in target.elts:
                         target_tvar = self.lookup_type(subtarget, subtarget.name)
                         self.type_constraints.unify(target_tvar, contained_type)
+        elif isinstance(target, astroid.Subscript):
+            # TODO: previous case must recursively handle this one
+            set_call_type = self._handle_call(target, '__setitem__', target.value.inf_type.getValue(),
+                              target.slice.inf_type.getValue(), expr_type)
+            if isinstance(set_call_type, TypeFail):
+                target.inf_type = set_call_type
+            else:
+                target.inf_type = TypeInfo(expr_type)
 
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""
@@ -334,19 +342,24 @@ class TypeInferer:
         node.inf_type = node.value.inf_type
 
     def visit_slice(self, node: astroid.Slice) -> None:
-        # TODO: check input types by doing a typecheck for the slice constructor
-        node.inf_type = TypeInfo(slice)
+        lower_type = node.lower.inf_type.getValue() if node.lower else type(None)
+        upper_type = node.upper.inf_type.getValue() if node.upper else type(None)
+        step_type = node.step.inf_type.getValue() if node.step else type(None)
+        node.inf_type = self._handle_call(node, '__init__', slice, lower_type,
+                                          upper_type, step_type)
+        if node.inf_type.getValue() == type(None):
+            node.inf_type = TypeInfo(slice)
 
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if node.ctx == astroid.Load:
             node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type.getValue(),
-                                                      node.slice.inf_type.getValue())
+                                              node.slice.inf_type.getValue())
         elif node.ctx == astroid.Store:
-            node.inf_type = self._handle_call(node, '__setitem__', node.value.inf_type.getValue(),
-                                                      node.slice.inf_type.getValue())
+            node.inf_type = TypeInfo(NoType) # type assigned when parent Assign node is visited
         elif node.ctx == astroid.Del:
             node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type.getValue(),
-                                                      node.slice.inf_type.getValue())
+                                              node.slice.inf_type.getValue())
+
     ##############################################################################
     # Loops
     ##############################################################################

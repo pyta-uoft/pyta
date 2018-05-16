@@ -3,6 +3,7 @@ from typing import Any
 from nose.tools import eq_
 from python_ta.transforms.type_inference_visitor import TypeInferer
 from python_ta.typecheck.base import TypeFail
+import tests.custom_hypothesis_support as cs
 
 
 def test_single_annotation_int():
@@ -10,10 +11,7 @@ def test_single_annotation_int():
     def foo(x: int):
         return x
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
@@ -24,10 +22,7 @@ def test_single_annotation_str():
     def foo(x: str):
         return x
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), str)
@@ -38,10 +33,7 @@ def test_multiple_annotations():
     def foo(x: int, y: int):
         return x + y
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
@@ -54,10 +46,7 @@ def test_multiple_annotations_diff_type():
         print(y)
         return x
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
@@ -71,10 +60,7 @@ def test_call_wrong_type():
         
     foo("Hello")
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
@@ -90,10 +76,7 @@ def test_call_wrong_type_str():
 
     foo(5)
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), str)
@@ -109,10 +92,7 @@ def test_call_multiple_annotation_wrong_type():
 
     foo("Hello", "Goodbye")
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
@@ -128,10 +108,7 @@ def test_mixed_annotation():
 
     foo(5, "Hello")
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
+    ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
@@ -148,11 +125,8 @@ def test_mixed_annotation_wrong():
 
     foo("Hello", 5)
     '''
-    ti = TypeInferer()
-    ast_mod = astroid.parse(src)
-    ti.environment_transformer().visit(ast_mod)
-    ti.type_inference_transformer().visit(ast_mod)
-
+    ast_mod, ti = cs._parse_text(src)
+    
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
     eq_(ti.lookup_type(func_node, "x"), int)
     eq_(ti.lookup_type(func_node, "y"), Any)

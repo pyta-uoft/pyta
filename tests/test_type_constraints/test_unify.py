@@ -216,4 +216,3 @@ def test_higher_order_polymorphic_call():
 
     resolve_helper(tv1, int)
     resolve_helper(tv2, Callable[[int, int], int])
-

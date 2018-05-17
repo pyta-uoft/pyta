@@ -268,7 +268,7 @@ class TypeInferer:
     ##############################################################################
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.inf_type.getValue()
-        if not isinstance(callable_t, (CallableMeta, list)):
+        if not isinstance(callable_t, (CallableMeta, list)) and callable_t.__origin__ is not Union:
             if isinstance(callable_t, _ForwardRef):
                 func_name = callable_t.__forward_arg__
             else:
@@ -463,6 +463,12 @@ class TypeInferer:
         # Update the environment storing the function's type.
         polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
         func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
+        num_defaults = len(node.args.defaults)
+        if num_defaults > 0:
+            for i in range(num_defaults):
+                opt_args = inferred_args[:-1-i]
+                opt_func_type = create_Callable(opt_args, combined_return, polymorphic_tvars)
+                func_type = Union[func_type, opt_func_type]
         self.type_constraints.unify(self.lookup_type(node.parent, node.name), func_type)
 
     def visit_arguments(self, node: astroid.Arguments) -> None:

@@ -400,7 +400,17 @@ class TypeConstraints:
         Return a result type.
         """
         # Check that the number of parameters matches the number of arguments.
-        if len(func_type.__args__) - 1 != len(arg_types):
+        if func_type.__origin__ is Union:
+            new_func_type = None
+            for c in func_type.__args__:
+                if len(c.__args__) - 1 == len(arg_types):
+                    new_func_type = c
+            if new_func_type is None:
+                # TODO: Should this return a unique error message?
+                return TypeFail('Wrong number of arguments')
+            else:
+                func_type = new_func_type
+        elif len(func_type.__args__) - 1 != len(arg_types):
             return TypeFail('Wrong number of arguments')
 
         # Substitute polymorphic type variables

@@ -51,10 +51,6 @@ def _gorg(x):
         return x._gorg
 
 
-class TypeInferenceError(Exception):
-    pass
-
-
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])
@@ -411,8 +407,9 @@ class TypeConstraints:
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
-            if isinstance(self.unify(arg_type, param_type), str):
-                raise TypeInferenceError(f'Incompatible argument types {arg_type} and {param_type}')
+            unify_result = self.unify(arg_type, param_type)
+            if isinstance(unify_result, TypeFail):
+                return unify_result
         return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
 
     def _type_eval(self, t) -> type:

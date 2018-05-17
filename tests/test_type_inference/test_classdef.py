@@ -78,6 +78,8 @@ def test_bad_attribute_access():
     """
     program = f'x = 1\n' \
               f'x.wrong_name\n'
+    raise SkipTest( 'Outdated attribute access test. ' \
+                    'Previously raised exception from visit_attribute)')
     try:
         module, inferer = cs._parse_text(program)
     except:

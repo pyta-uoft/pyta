@@ -5,7 +5,7 @@ from typing import *
 import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import Environment, TypeConstraints, TypeInferenceError, parse_annotations, create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail
+from ..typecheck.base import Environment, TypeConstraints, parse_annotations, create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -412,12 +412,7 @@ class TypeInferer:
                 return TypeFail(f'Function {function_name} not found with given args: {arg_types}')
             else:
                 return TypeFail(error_func(node))
-
-        try:
-            return self.type_constraints.unify_call(func_type, *arg_types, node=node)
-        except TypeInferenceError:
-            return TypeFail(f'Bad unify_call of function {function_name} given args: {arg_types}')
-
+        return self.type_constraints.unify_call(func_type, *arg_types, node=node)
 
     ##############################################################################
     # Definitions
@@ -492,11 +487,11 @@ class TypeInferer:
         else:
             type_name = expr_type.__name__
         if type_name not in self.type_store.classes:
-            raise TypeInferenceError('Invalid type')
+            node.inf_type = TypeFail('Invalid attribute type')
         else:
             attribute_type = self.type_store.classes[type_name].get(node.attrname)
             if attribute_type is None:
-                raise TypeInferenceError(f'Attribute {node.attrname} not found for type {type_name}')
+                node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {type_name}')
             else:
                 attribute_type = attribute_type[0]
                 # Detect an instance method call, and create a bound method signature (first argument removed).

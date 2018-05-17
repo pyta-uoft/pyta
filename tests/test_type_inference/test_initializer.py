@@ -45,7 +45,8 @@ def test_class_with_multi_init():
 
     foo = Foo(5, 6)
     """
-    raise SkipTest("Should indicate that Foo() is called with the wrong number of arguments")
+
+    # raise SkipTest("Should indicate that Foo() is called with the wrong number of arguments")
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         assert isinstance(call_node.inf_type.getValue(), _ForwardRef)

@@ -9,7 +9,7 @@ tc = TypeConstraints()
 
 
 # Helper functions
-def unify_helper(arg1: type, arg2: type, exp_result: type):
+def unify_helper(arg1: type, arg2: type, exp_result: Union[type, TypeFail]):
     unify_result = TypeInfo(arg1) >> (
         lambda t1: TypeInfo(arg2) >> (
             lambda t2: tc.unify(t1, t2)))

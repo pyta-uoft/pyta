@@ -3,6 +3,7 @@ import nose
 from hypothesis import given, settings, HealthCheck
 from typing import List
 import tests.custom_hypothesis_support as cs
+from python_ta.typecheck.base import TypeFail
 settings.load_profile("pyta")
 
 
@@ -44,10 +45,12 @@ def test_subscript_homogeneous_list_slice(node):
 @given(cs.simple_homogeneous_list_node(min_size=1))
 def test_inference_invalid_slice(node):
     sub_node = astroid.Subscript()
-    sub_node.postinit(node, slice('a', 1, 1))
+    slice = astroid.Slice()
+    slice.postinit(astroid.Const(0), astroid.Const(1))
+    sub_node.postinit(node, slice)
     module, _ = cs._parse_text(sub_node)
     for subscript_node in module.nodes_of_class(astroid.Subscript):
-        assert isinstance(subscript_node.inf_type.getValue(), TypeFail)
+        assert isinstance(subscript_node.inf_type, TypeFail)
 
 
 # TODO: this test needs to be converted, but will also fail

@@ -74,7 +74,7 @@ Error: Type inference contradiction in the parameter 'b' of
 Expected type is 'str' due to the expression
     <line#> | return b + 'abc'
 but passed in an 'int' in the expression
-    <line#> g(f(x))
+    <line#> | g(f(x))
     
 Namely,
 
@@ -86,8 +86,30 @@ is 'int' due to the expression
     <line#> | x
 is 'int' due to the expression
     <line#> | x = 0
-    
 '''
 
 ################################################################################
 
+def f(a, b):
+    if a > 0 and b:
+        a = b
+
+'''
+Error: Type inference contradiction in the parameter 'b' of
+    <line#> | f(a, b)
+Expected type is 'bool' due to the expression
+    <line#> | if a > 0 and b:
+but used as an 'int' in the expression
+    <line#> | a = b
+    
+Namely,
+
+* type of
+    <line#> | b
+is 'int' due to the expression
+    <line#> | a = b
+* type of
+    <line#> | a
+is 'int' due to the expression
+    <line#> a > 0
+'''

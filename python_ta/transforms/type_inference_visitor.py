@@ -60,6 +60,7 @@ class TypeInferer:
         node.type_environment = Environment()
         for name in node.instance_attrs:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
+            self.type_store.classes[node.name][name] = [node.type_environment.locals[name]]
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 

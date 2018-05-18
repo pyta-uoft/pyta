@@ -398,22 +398,22 @@ class TypeConstraints:
         else:
             return t1 == t2
 
-    def unify_call(self, func_type, *arg_types, node=None) -> type:
+    def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.
 
         Return a result type.
         """
         # Check that the number of parameters matches the number of arguments.
         if len(func_type.__args__) - 1 != len(arg_types):
-            raise TypeInferenceError('Wrong number of arguments')
+            return TypeFail('Wrong number of arguments')
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
-            if isinstance(self.unify(arg_type, param_type), str):
-                raise TypeInferenceError(f'Incompatible argument types {arg_type} and {param_type}')
-        return self._type_eval(new_func_type.__args__[-1])
+            if isinstance(self.unify(arg_type, param_type), TypeFail):
+                return self.unify(arg_type, param_type)
+        return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
 
     def _type_eval(self, t) -> type:
         """Evaluate a type. Used for tuples."""

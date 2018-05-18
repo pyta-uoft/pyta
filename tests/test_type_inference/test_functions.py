@@ -386,8 +386,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
     except:
         raise SkipTest()
     call_node = list(module.nodes_of_class(astroid.Call))[0]
-    expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_3":\n' \
-                   f'the function was expecting 3 arguments, but was given 0.'
+    expected_msg = "Wrong number of arguments"
     assert call_node.inf_type.getValue() == expected_msg
 
 

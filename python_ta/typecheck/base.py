@@ -51,10 +51,6 @@ def _gorg(x):
         return x._gorg
 
 
-class TypeInferenceError(Exception):
-    pass
-
-
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])

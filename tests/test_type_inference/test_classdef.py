@@ -8,7 +8,6 @@ settings.load_profile("pyta")
 
 def test_classdef_attribute_assign():
     """Test whether type of attributes are properly being set."""
-    raise SkipTest()
     program = f'class Network:\n' \
               f'    def __init__(self, name, id):\n' \
               f'        self.name = name\n' \
@@ -31,7 +30,6 @@ def test_classdef_attribute_assign():
 
 def test_classdef_method_call():
     """Test whether type of the method call are properly being set"""
-    raise SkipTest()
     program = f'class Network:\n' \
               f'    def __init__(self, name):\n' \
               f'        self.name = name\n' \
@@ -44,13 +42,12 @@ def test_classdef_method_call():
     module, inferer = cs._parse_text(program)
     attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
     expected_rtype = attribute_node.parent.inf_type.getValue()
-    actual_rtype = inferer.type_constraints.resolve(attribute_node.inf_type.getValue().__args__[-1])
+    actual_rtype = inferer.type_constraints.resolve(attribute_node.inf_type.getValue().__args__[-1]).getValue()
     assert actual_rtype == expected_rtype
 
 
 def test_classdef_method_call_annotated_concrete():
     """Test whether types of the method calls are properly being set given the annotations."""
-    raise SkipTest()
     program = f'class Network:\n' \
               f'    def __init__(self, name: str) -> None:\n' \
               f'        self.name = name\n' \
@@ -62,14 +59,14 @@ def test_classdef_method_call_annotated_concrete():
     module, inferer = cs._parse_text(program)
     for functiondef_node in module.nodes_of_class(astroid.FunctionDef):
         self_name = functiondef_node.args.args[0].name
-        actual_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(self_name))
+        actual_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(self_name)).getValue()
         assert actual_type.__forward_arg__ == functiondef_node.parent.name
         for i in range(1, len(functiondef_node.args.annotations)):
             arg_name = functiondef_node.args.args[i].name
-            actual_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(arg_name))
+            actual_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(arg_name)).getValue()
             assert actual_type.__name__ == functiondef_node.args.annotations[i].name
         expected_rtype = inferer.type_constraints\
-            .resolve(functiondef_node.parent.type_environment.lookup_in_env(functiondef_node.name))
+            .resolve(functiondef_node.parent.type_environment.lookup_in_env(functiondef_node.name)).getValue()
         assert functiondef_node.returns.name == expected_rtype.__args__[-1].__name__
 
 
@@ -78,17 +75,13 @@ def test_bad_attribute_access():
     """
     program = f'x = 1\n' \
               f'x.wrong_name\n'
-    raise SkipTest( 'Outdated attribute access test. ' \
-                    'Previously raised exception from visit_attribute)')
     try:
         module, inferer = cs._parse_text(program)
     except:
         raise SkipTest()
-    call_node = next(module.nodes_of_class(astroid.Call))
-    expected_msg = f'Attribute access error!\n' \
-                   f'In the Attribute node in line 2:\n' \
-                   f'the object "x" does not have the attribute "wrong_name".'
-    assert call_node.inf_type.getValue() == expected_msg
+    expr_node = next(module.nodes_of_class(astroid.Expr))
+    expected_msg = 'Attribute wrong_name not found for type int'
+    assert expr_node.inf_type.getValue() == expected_msg
 
 
 def test_builtin_method_call_bad_self():

@@ -23,6 +23,7 @@ Done.
 **TODOs:**
 * Handling of "overloaded" functions (with optional arguments)
 * Improve handling of initializers
+  * Check number of arguments when instantiating a class that uses an initializer with multiple arguments
 * Handling inheritance
 
 ### ClassDef

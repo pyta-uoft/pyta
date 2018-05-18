@@ -272,9 +272,13 @@ class TypeInferer:
                 func_name = callable_t.__forward_arg__
             else:
                 func_name = callable_t.__args__[0].__name__
-            init_types = self.type_store.classes[func_name]['__init__']
-            init_type = init_types[0]  # TODO: handle method overloading (through optional parameters)
+            if '__init__' in self.type_store.classes[func_name]:
+                init_type = self.type_store.classes[func_name]['__init__'][0]
+            else:
+                init_type = Callable[[callable_t], None]
+            # TODO: handle method overloading (through optional parameters)
             arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
+            # TODO: Check for number of arguments if function is an initializer
             self.type_constraints.unify_call(init_type, *arg_types)
             node.inf_type = TypeInfo(callable_t)
         else:

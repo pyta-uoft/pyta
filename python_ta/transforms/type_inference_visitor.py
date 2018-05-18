@@ -278,6 +278,7 @@ class TypeInferer:
                 init_type = Callable[[callable_t], None]
             # TODO: handle method overloading (through optional parameters)
             arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
+            # TODO: Check for number of arguments if function is an initializer
             self.type_constraints.unify_call(init_type, *arg_types)
             node.inf_type = TypeInfo(callable_t)
         else:

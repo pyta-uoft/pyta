@@ -376,6 +376,8 @@ class TypeInferer:
     # Comprehensions
     ##############################################################################
     def visit_comprehension(self, node: astroid.Comprehension) -> None:
+        for if_stmt in node.ifs:
+            self.type_constraints.unify(node.if_stmt.inf_type.getValue(), bool)
         self.visit_for(node)
 
     def visit_dictcomp(self, node: astroid.DictComp) -> None:

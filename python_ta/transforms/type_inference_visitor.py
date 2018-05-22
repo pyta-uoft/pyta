@@ -268,7 +268,13 @@ class TypeInferer:
     ##############################################################################
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.inf_type.getValue()
-        if not isinstance(callable_t, (CallableMeta, list)) and callable_t.__origin__ is not Union:
+        # Check if Union
+        if hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union:
+            is_union = True
+        else:
+            is_union = False
+
+        if not isinstance(callable_t, (CallableMeta, list)) and not is_union:
             if isinstance(callable_t, _ForwardRef):
                 func_name = callable_t.__forward_arg__
             else:

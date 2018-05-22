@@ -8,7 +8,7 @@
 ### Assign
 
 **TODOs:**
-- Check for unpacking tuple assignment where the LHS and RHS have different lengths.
+Done.
 
 ### BinOp
 
@@ -21,7 +21,6 @@ Done.
 ### Call
 
 **TODOs:**
-* Handling of "overloaded" functions (with optional arguments)
 * Improve handling of initializers
   * Check number of arguments when instantiating a class that uses an initializer with multiple arguments
 * Handling inheritance

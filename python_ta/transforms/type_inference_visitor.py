@@ -213,7 +213,9 @@ class TypeInferer:
         node.inf_type = TypeInfo(NoType)
 
         for target in node.targets:
-            self._assign_type(target, expr_type)
+            type_result = self._assign_type(target, expr_type)
+            if isinstance(type_result, TypeFail):
+                node.inf_type = type_result
             if isinstance(expr_type, typing.TupleMeta) and isinstance(target, astroid.Tuple):
                 if len(expr_type.__args__) > len(target.elts):
                     node.inf_type = TypeFail("Too many values in assignment node")
@@ -224,20 +226,20 @@ class TypeInferer:
             elif isinstance(target, astroid.Tuple):
                 node.inf_type = TypeFail("Cannot assign single value to multiple variables")
 
-    def _assign_type(self, target: NodeNG, expr_type: type) -> None:
+    def _assign_type(self, target: NodeNG, expr_type: type) -> TypeResult:
         """Update the type environment so that the target is bound to the given type."""
         if isinstance(target, astroid.AssignName):
             # A single identifier, e.g. x = ...
             target_type_var = self.lookup_type(target, target.name)
-            self.type_constraints.unify(target_type_var, expr_type)
+            return self.type_constraints.unify(target_type_var, expr_type)
         elif isinstance(target, astroid.AssignAttr):
             # Attribute mutation, e.g. x.y = ...
             attr_type = self._lookup_attribute_type(target, target.expr.name, target.attrname)
-            self.type_constraints.unify(attr_type, expr_type)
+            return self.type_constraints.unify(attr_type, expr_type)
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
-                self.type_constraints.unify(
+                return self.type_constraints.unify(
                     Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in target.elts)],
                     expr_type
                 )
@@ -249,6 +251,7 @@ class TypeInferer:
                     for subtarget in target.elts:
                         target_tvar = self.lookup_type(subtarget, subtarget.name)
                         self.type_constraints.unify(target_tvar, contained_type)
+                return iter_type_result
 
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""

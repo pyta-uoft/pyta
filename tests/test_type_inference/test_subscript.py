@@ -46,22 +46,8 @@ def test_subscript_homogeneous_list_slice(node):
 def test_inference_invalid_slice(node):
     sub_node = astroid.Subscript()
     slice = astroid.Slice()
-    slice.postinit(astroid.Const(0), astroid.Const('a'))
+    slice.postinit(astroid.Const(0), astroid.Const(1))
     sub_node.postinit(node, slice)
-    module, _ = cs._parse_text(sub_node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
-        assert isinstance(subscript_node.inf_type, TypeFail)
-
-
-@given(cs.simple_homogeneous_list_node(min_size=1))
-def test_inference_invalid_ext_slice(node):
-    sub_node = astroid.Subscript()
-    slice1 = astroid.Slice()
-    slice1.postinit(astroid.Const(0), astroid.Const(1))
-    slice2 = 'a'
-    ext_slice = astroid.ExtSlice()
-    ext_slice.postinit([slice1, slice2])
-    sub_node.postinit(node, ext_slice)
     module, _ = cs._parse_text(sub_node)
     for subscript_node in module.nodes_of_class(astroid.Subscript):
         assert isinstance(subscript_node.inf_type, TypeFail)

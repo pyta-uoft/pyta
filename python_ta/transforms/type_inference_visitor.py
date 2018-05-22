@@ -342,12 +342,6 @@ class TypeInferer:
         if node.inf_type.getValue() == type(None):
             node.inf_type = TypeInfo(slice)
 
-    def visit_ext_slice(self, node: astroid.ExtSlice):
-        for dim in node.dims:
-            if not isinstance(dim, Slice) and not isinstance(dim, Index):
-                return TypeFail("Invalid complex slice expression")
-        node.inf_type = TypeInfo(NoType)
-
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if node.ctx == astroid.Load:
             node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type.getValue(),

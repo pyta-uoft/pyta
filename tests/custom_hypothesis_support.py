@@ -352,7 +352,7 @@ subscriptable_expr = hs.one_of(
 
 
 # Helper functions for testing
-def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer]:
+def _parse_text(source: Union[str, NodeNG], reset: bool = False) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
     # TODO: apparently no literal syntax for empty set in Python3, also cannot do set()
     # TODO: Deal with special case later.
@@ -362,6 +362,8 @@ def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer
         source = source.as_string()
     module = astroid.parse(source)
     type_inferer = TypeInferer()
+    if reset:
+        type_inferer.reset()
     type_inferer.environment_transformer().visit(module)
     type_inferer.type_inference_transformer().visit(module)
     return module, type_inferer

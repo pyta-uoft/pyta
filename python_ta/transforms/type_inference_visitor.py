@@ -33,6 +33,9 @@ class TypeInferer:
     def __init__(self):
         self.type_constraints.reset()
 
+    def reset(self):
+        self.type_store = TypeStore(self.type_constraints)
+
     ###########################################################################
     # Setting up the environment
     ###########################################################################
@@ -289,7 +292,11 @@ class TypeInferer:
             # TODO: handle method overloading (through optional parameters)
             arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
             # TODO: Check for number of arguments if function is an initializer
-            node.inf_type = self.type_constraints.unify_call(init_type, *arg_types)
+            type_result = self.type_constraints.unify_call(init_type, *arg_types)
+            if isinstance(type_result, TypeFail):
+                node.inf_type = type_result
+            else:
+                node.inf_type = TypeInfo(callable_t)
         else:
             # TODO: resolve this case (from method lookup) more gracefully
             if isinstance(callable_t, list):

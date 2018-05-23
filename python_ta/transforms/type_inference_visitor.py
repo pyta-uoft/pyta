@@ -375,8 +375,6 @@ class TypeInferer:
         if isinstance(node.target, astroid.AssignName):
             target_type = self.lookup_type(node.target, node.target.name)
         else:
-            # TODO: check whether the following assumption is valid
-            # Assume that node.target is a tuple.
             target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
 
         self.type_constraints.unify(contained_type, target_type)
@@ -386,18 +384,7 @@ class TypeInferer:
     # Comprehensions
     ##############################################################################
     def visit_comprehension(self, node: astroid.Comprehension) -> None:
-        # TODO: refactor code duplication between this and visit_for.
-        iter_type = self._handle_call(node, '__iter__', node.iter.inf_type.getValue()).getValue()
-        contained_type = iter_type.__args__[0]
-        if isinstance(node.target, astroid.AssignName):
-            target_type = self.lookup_type(node.target, node.target.name)
-        else:
-            # TODO: check whether the following assumption is valid
-            # Assume that node.target is a tuple.
-            target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
-
-        self.type_constraints.unify(contained_type, target_type)
-        node.inf_type = TypeInfo(NoType)
+        self.visit_for(node)
 
     def visit_dictcomp(self, node: astroid.DictComp) -> None:
         key_type = self.type_constraints.resolve(node.key.inf_type.getValue()).getValue()

@@ -33,6 +33,9 @@ class TypeInferer:
     def __init__(self):
         self.type_constraints.reset()
 
+    def reset(self):
+        self.type_store = TypeStore(self.type_constraints)
+
     ###########################################################################
     # Setting up the environment
     ###########################################################################
@@ -287,8 +290,11 @@ class TypeInferer:
             # TODO: handle method overloading (through optional parameters)
             arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
             # TODO: Check for number of arguments if function is an initializer
-            self.type_constraints.unify_call(init_type, *arg_types)
-            node.inf_type = TypeInfo(callable_t)
+            type_result = self.type_constraints.unify_call(init_type, *arg_types)
+            if isinstance(type_result, TypeFail):
+                node.inf_type = type_result
+            else:
+                node.inf_type = TypeInfo(callable_t)
         else:
             # TODO: resolve this case (from method lookup) more gracefully
             if isinstance(callable_t, list):
@@ -514,8 +520,10 @@ class TypeInferer:
         expr_type = node.expr.inf_type.getValue()
         if isinstance(expr_type, _ForwardRef):
             type_name =  expr_type.__forward_arg__
-        else:
+        elif hasattr(expr_type, '__name__'):
             type_name = expr_type.__name__
+        else:
+            type_name = None
         if type_name not in self.type_store.classes:
             node.inf_type = TypeFail('Invalid attribute type')
         else:

@@ -39,7 +39,7 @@ def test_classdef_method_call():
               f'rogers = Network("Rogers")\n' \
               f'rogers.get_name()' \
               f'\n'
-    module, inferer = cs._parse_text(program)
+    module, inferer = cs._parse_text(program, True)
     attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
     expected_rtype = attribute_node.parent.inf_type.getValue()
     actual_rtype = inferer.type_constraints.resolve(attribute_node.inf_type.getValue().__args__[-1]).getValue()

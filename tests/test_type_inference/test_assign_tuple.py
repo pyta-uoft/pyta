@@ -1,5 +1,6 @@
 import astroid
 from nose.tools import eq_
+from typing import TupleMeta
 import tests.custom_hypothesis_support as cs
 from python_ta.transforms.type_inference_visitor import NoType
 from python_ta.typecheck.base import TypeInfo, TypeFail
@@ -60,9 +61,7 @@ def test_tuple_single_var():
     """
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
-        assert isinstance(assign_node.inf_type, TypeFail)
-        eq_(assign_node.inf_type, TypeFail("Cannot assign multiple values to single variable"))
-
+        eq_(assign_node.inf_type, TypeInfo(NoType))
 
 def test_tuple_single_val():
     program = """

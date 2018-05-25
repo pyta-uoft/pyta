@@ -221,8 +221,6 @@ class TypeInferer:
                     node.inf_type = TypeFail("Too many values in assignment node")
                 elif len(expr_type.__args__) < len(target.elts):
                     node.inf_type = TypeFail("Too many variables in assignment node")
-            elif isinstance(expr_type, typing.TupleMeta):
-                node.inf_type = TypeFail("Cannot assign multiple values to single variable")
             elif isinstance(target, astroid.Tuple):
                 node.inf_type = TypeFail("Cannot assign single value to multiple variables")
 

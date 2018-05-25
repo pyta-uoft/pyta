@@ -70,6 +70,11 @@ def homogeneous_list(**kwargs):
     return primitive_types.flatmap(lambda s: hs.lists(s(), **kwargs))
 
 
+def numeric_list(**kwargs):
+    """Return a strategy which generates a list of uniform numeric types."""
+    return numeric_types.flatmap(lambda s: hs.lists(s(), **kwargs))
+
+
 def random_list(**kwargs):
     """Return a strategy which generates a random list."""
     return hs.lists(primitive_values, **kwargs)

@@ -60,8 +60,8 @@ BINOP_TO_METHOD = {
     '<': '__lt__',
     '<=': '__le__',
     '>': '__gt__',
-    '>=': '__ge__'
-    # TODO: 'is' and 'in'
+    '>=': '__ge__',
+    'in': '__contains__'
     }
 
 

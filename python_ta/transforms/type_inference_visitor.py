@@ -322,12 +322,22 @@ class TypeInferer:
             node.inf_type = TypeInfo(Any)
 
     def visit_compare(self, node: astroid.Compare) -> None:
-        # TODO: 'in' comparator
         return_types = set()
         left = node.left
         for comparator, right in node.ops:
             if comparator == 'is':
                 return_types.add(bool)
+            elif comparator == 'in':
+                resolved_type = self._handle_call(
+                    node,
+                    BINOP_TO_METHOD[comparator],
+                    right.inf_type.getValue(),
+                    left.inf_type.getValue()
+                )
+                if isinstance(resolved_type, TypeFail):
+                    node.inf_type = resolved_type
+                    return
+                return_types.add(resolved_type.getValue())
             else:
                 resolved_type = self._handle_call(
                     node,
@@ -335,6 +345,9 @@ class TypeInferer:
                     left.inf_type.getValue(),
                     right.inf_type.getValue()
                 )
+                if isinstance(resolved_type, TypeFail):
+                    node.inf_type = resolved_type
+                    return
                 return_types.add(resolved_type.getValue())
         if len(return_types) == 1:
             node.inf_type = TypeInfo(return_types.pop())

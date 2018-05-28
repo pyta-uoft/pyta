@@ -125,7 +125,6 @@ Done.
 - Edit unify to:
   - Take as an argument the astroid node in which the unification is taking place
   - Return TypeFail with new attributes
-  - Create _TNodes for arguments in failed unification, if they do not already exist
 - Edit all functions that use resolve, unify, _merge_sets, _assign_type, _handle_call to be properly monadic
 
 ### Other

@@ -196,8 +196,8 @@ class TypeConstraints:
     """
     # The number of type variables stored in the data structure. Used to generate fresh type variables.
     _count: int
-    # The disjoint sets.
-    _nodes: List[Set[_TNode]]
+    # List of _TNodes
+    _nodes: List[_TNode]
     # A mapping of type variable names to nodes.
     _tvar_to_tnode: Dict[str, _TNode]
 

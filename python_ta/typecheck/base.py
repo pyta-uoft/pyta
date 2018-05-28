@@ -4,6 +4,7 @@ from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
 import typing
 import astroid
 from astroid.node_classes import NodeNG
+from itertools import product
 from ..util.monad import Failable, failable_collect
 
 
@@ -304,7 +305,13 @@ class TypeConstraints:
         elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
             return TypeFail(f'Incompatible types {t1} {t2}')
         elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
-            return TypeInfo(t1)
+            t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
+            t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
+            for u1, u2 in product(t1_types, t2_types):
+                res = self.unify(u1, u2)
+                if isinstance(res, TypeInfo):
+                    return res
+            return TypeFail(f'Incompatible types {t1} {t2}')
         elif t1 == Any or t2 == Any:
             return TypeInfo(t1)
 

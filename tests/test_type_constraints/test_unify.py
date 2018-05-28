@@ -16,7 +16,7 @@ def unify_helper(arg1: type, arg2: type, exp_result: Union[type, TypeFail]):
     if isinstance(exp_result, TypeFail):
         assert isinstance(unify_result, TypeFail)
     else:
-        eq_(unify_result, tc.resolve(exp_result))
+        eq_(unify_result.getValue(), tc.resolve(exp_result).getValue())
 
 
 def setup_typevar(t: type):
@@ -220,3 +220,29 @@ def test_higher_order_polymorphic_call():
 
     resolve_helper(tv1, int)
     resolve_helper(tv2, Callable[[int, int], int])
+
+
+# Union types
+def test_simple_union():
+    tc.reset()
+    unify_helper(int, Union[int, str], int)
+
+
+def test_tvar_union():
+    tc.reset()
+    unify_helper(tc.fresh_tvar(), Union[int, str], Union[int, str])
+    unify_helper(Union[int, str], tc.fresh_tvar(), Union[int, str])
+
+
+def test_two_unions():
+    tc.reset()
+    unify_helper(Union[int, str, None], Union[bool, int], int)
+
+
+def test_optional():
+    tc.reset()
+    tv1 = tc.fresh_tvar()
+
+    unify_helper(int, Optional[int], int)
+    unify_helper(type(None), Optional[int], type(None))
+    unify_helper(tv1, Optional[int], Optional[int])

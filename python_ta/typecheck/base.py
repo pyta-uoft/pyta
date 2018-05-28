@@ -357,16 +357,16 @@ class TypeConstraints:
         rep2 = self._find(t2)
         if isinstance(rep1.type, TypeVar) and isinstance(rep2.type, TypeVar):
             if rep1.type.__name__ < rep2.type.__name__:
-                rep2.parent = rep1
+                rep2.parent = self._tvar_to_tnode[t1]
                 return TypeInfo(rep1.type)
             else:
                 rep1.parent = rep2
                 return TypeInfo(rep2.type)
         elif isinstance(rep2.type, TypeVar):
-            rep2.parent = rep1
+            rep2.parent = self._tvar_to_tnode[t1]
             return TypeInfo(rep2.type)
         elif isinstance(rep1.type, TypeVar):
-            rep1.parent = rep2
+            rep1.parent = self._tvar_to_tnode[t2]
             return TypeInfo(rep2.type)
         else:
             # In this case both set representatives are concrete types.

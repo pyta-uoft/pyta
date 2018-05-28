@@ -45,7 +45,7 @@ def test_set_name_assigned(variables_dict):
     module, inferer = cs._parse_text(program)
     for name_node in module.nodes_of_class(astroid.Name):
         name_type = inferer.lookup_type(name_node, name_node.name)
-        assert name_node.inf_type.getValue() == name_type
+        assert inferer.type_constraints.resolve(name_node.inf_type.getValue()).getValue() == name_type
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))

@@ -199,7 +199,7 @@ class TypeInferer:
     ##############################################################################
     def visit_name(self, node: astroid.Name) -> None:
         try:
-            node.inf_type = TypeInfo(self.lookup_type(node, node.name))
+            node.inf_type = TypeInfo(self.lookup_typevar(node, node.name))
         except KeyError:
             if node.name in self.type_store.classes:
                 node.inf_type = TypeInfo(Type[__builtins__[node.name]])
@@ -231,7 +231,7 @@ class TypeInferer:
         """Update the type environment so that the target is bound to the given type."""
         if isinstance(target, astroid.AssignName):
             # A single identifier, e.g. x = ...
-            target_type_var = self.lookup_type(target, target.name)
+            target_type_var = self.lookup_typevar(target, target.name)
             return self.type_constraints.unify(target_type_var, expr_type)
         elif isinstance(target, astroid.AssignAttr):
             # Attribute mutation, e.g. x.y = ...
@@ -266,12 +266,18 @@ class TypeInferer:
         tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
         return self.type_constraints.resolve(tvar).getValue()
 
+    def lookup_typevar(self, node, name):
+        """Given a variable name, return its concrete type in the closest scope relative to given node."""
+        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
+        return tvar
 
     ##############################################################################
     # Operation nodes
     ##############################################################################
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.inf_type.getValue()
+        if isinstance(callable_t, TypeVar):
+            callable_t = self.type_constraints._find(callable_t).type
         # Check if Union
         if hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union:
             is_union = True
@@ -518,6 +524,8 @@ class TypeInferer:
     ##############################################################################
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_type = node.expr.inf_type.getValue()
+        if isinstance(expr_type, TypeVar):
+            expr_type = self.type_constraints._find(expr_type).type
         if isinstance(expr_type, _ForwardRef):
             type_name =  expr_type.__forward_arg__
         elif hasattr(expr_type, '__name__'):

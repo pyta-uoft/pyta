@@ -57,8 +57,7 @@ Done.
 
 ### FunctionDef
 
-**TODOs:**
-- Distinguish between different types of methods (instance, static, class)
+Done
 
 ### GeneratorExp
 

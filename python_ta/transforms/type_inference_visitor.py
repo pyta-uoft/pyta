@@ -447,9 +447,11 @@ class TypeInferer:
         inferred_args = [self.lookup_type(node, arg) for arg in node.argnames()]
 
         if isinstance(node.parent, astroid.ClassDef) and isinstance(inferred_args[0], TypeVar):
-            # TODO: distinguish between instance, class, and static methods.
-            # If node is an instance method, set the first parameter's type to be the class type.
-            self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name))
+            # first argument is special in these cases
+            if node.type == 'method':
+                self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name))
+            elif node.type == 'classmethod':
+                self.type_constraints.unify(inferred_args[0], Type[_ForwardRef(node.parent.name)])
 
         if any(node.nodes_of_class(astroid.Return)):
             inferred_return = self.type_constraints.resolve(node.type_environment.lookup_in_env('return')).getValue()

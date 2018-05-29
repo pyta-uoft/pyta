@@ -108,6 +108,48 @@ def test_functiondef_inside_class():
     assert inferer.lookup_type(funct_defs[2], funct_defs[2].argnames()[0]) == int
 
 
+def test_functiondef_method():
+    program = \
+        '''
+        class A:
+
+            def method(self, x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == _ForwardRef('A')
+
+
+def test_functiondef_classmethod():
+    program = \
+        '''
+        class A:
+
+            @classmethod
+            def method(cls, x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == Type[_ForwardRef('A')]
+
+
+def test_functiondef_staticmethod():
+    program = \
+        '''
+        class A:
+
+            @staticmethod
+            def method(x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == int
+
+
+
 def test_nested_annotated_function_conflicting_body():
     """ User tries to define an annotated function which has conflicting types within its body.
     """

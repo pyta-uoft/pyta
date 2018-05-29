@@ -7,7 +7,6 @@
 
 ### Assign
 
-**TODOs:**
 Done.
 
 ### BinOp
@@ -21,8 +20,6 @@ Done.
 ### Call
 
 **TODOs:**
-* Improve handling of initializers
-  * Check number of arguments when instantiating a class that uses an initializer with multiple arguments
 * Handling inheritance
 
 ### ClassDef
@@ -99,8 +96,7 @@ Done.
 
 ### Slice
 
-**TODOs:**
-- do proper type-checking of arguments
+Done.
 
 ### Subscript
 

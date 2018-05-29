@@ -28,3 +28,7 @@
 
   new: `range.__contains__(self, i: int) -> bool`
 
+* old: `slice.__init__(self, start: Optional[int], stop: Optional[int], step: int = None) -> None`
+
+  new: `slice.__init__(self, start: Optional[int], stop: Optional[int], step: Optional[int]) -> None`
+

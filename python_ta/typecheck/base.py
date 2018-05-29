@@ -398,6 +398,15 @@ class TypeConstraints:
             return True
         elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
             return _gorg(t1) == _gorg(t2) and all(self.can_unify(s1, s2) for s1, s2 in zip(t1.__args__, t2.__args__))
+        # temporarily handle this as a special case
+        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+            t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
+            t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
+            for u1, u2 in product(t1_types, t2_types):
+                res = self.unify(u1, u2)
+                if isinstance(res, TypeInfo):
+                    return True
+            return False
         else:
             return t1 == t2
 

@@ -325,6 +325,17 @@ class TypeConstraints:
         elif t1 == t2:
             return TypeInfo(t1)
         else:
+            has_t1 = False
+            has_t2 = False
+            for i in self._nodes:
+                if i.type == t1:
+                    has_t1 = True
+                if i.type == t2:
+                    has_t2 = True
+            if not has_t1:
+                self._make_set(t1)
+            if not has_t2:
+                self._make_set(t2)
             return TypeFail(f'Incompatible types {t1} and {t2}')
 
     def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:

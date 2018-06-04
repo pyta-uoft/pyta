@@ -10,6 +10,11 @@
 **TODOs:**
 Done.
 
+### Attribute
+
+**TODOs:**
+- Handle class and static methods.
+
 ### BinOp
 
 Done.

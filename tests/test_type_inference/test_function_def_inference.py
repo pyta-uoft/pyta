@@ -80,34 +80,6 @@ def test_functiondef_annotated_simple_return(functiondef_node):
     assert expected_rtype.__name__ == functiondef_node.returns.name
 
 
-def test_functiondef_inside_class():
-    program = \
-        '''
-        class A:
-        
-            def method(self, x):
-                x = 1
-               
-            @classmethod
-            def class_method(cls, x):
-                x = 1
-                
-            @staticmethod
-            def static_method(x):
-                x = 1
-                
-        a = A()
-        a.method(1)
-        a.method(1)
-        a.method(1)
-        '''
-    module, inferer = cs._parse_text(program)
-    funct_defs = list(module.nodes_of_class(astroid.FunctionDef))
-    assert inferer.lookup_type(funct_defs[0], funct_defs[0].argnames()[0]) == _ForwardRef('A')
-    assert inferer.lookup_type(funct_defs[1], funct_defs[1].argnames()[0]) == Type[_ForwardRef('A')]
-    assert inferer.lookup_type(funct_defs[2], funct_defs[2].argnames()[0]) == int
-
-
 def test_functiondef_method():
     program = \
         '''

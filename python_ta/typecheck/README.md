@@ -9,6 +9,11 @@
 
 Done.
 
+### Attribute
+
+**TODOs:**
+- Handle class and static methods.
+
 ### BinOp
 
 Done.
@@ -54,8 +59,7 @@ Done.
 
 ### FunctionDef
 
-**TODOs:**
-- Distinguish between different types of methods (instance, static, class)
+Done
 
 ### GeneratorExp
 

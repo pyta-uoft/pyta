@@ -4,7 +4,7 @@ from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
-from typing import Callable
+from typing import Callable, _ForwardRef, Type
 settings.load_profile("pyta")
 
 
@@ -41,7 +41,7 @@ def test_inference_args_simple_return(function_name, arguments):
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_args_simple_return(function_name, arguments):
-    """Test whether visitor was able to infer type of function given function called on it's arguments."""
+    """Test whether visitor was able to infer type of function given function called on its arguments."""
     assume(function_name not in arguments)
     for argument in arguments:
         program = _parse_to_function_no_return(function_name, arguments, ('return ' + argument + " + " + repr('bob')))
@@ -78,6 +78,48 @@ def test_functiondef_annotated_simple_return(functiondef_node):
     return_node = functiondef_node.body[0].value
     expected_rtype = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(return_node.name)).getValue()
     assert expected_rtype.__name__ == functiondef_node.returns.name
+
+
+def test_functiondef_method():
+    program = \
+        '''
+        class A:
+
+            def method(self, x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == _ForwardRef('A')
+
+
+def test_functiondef_classmethod():
+    program = \
+        '''
+        class A:
+
+            @classmethod
+            def method(cls, x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == Type[_ForwardRef('A')]
+
+
+def test_functiondef_staticmethod():
+    program = \
+        '''
+        class A:
+
+            @staticmethod
+            def method(x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == int
+
 
 
 def test_nested_annotated_function_conflicting_body():

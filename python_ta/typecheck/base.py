@@ -8,6 +8,28 @@ from itertools import product
 from ..util.monad import Failable, failable_collect
 
 
+class _TNode:
+    """A node in the TypeConstraints disjoint set data structure."""
+    type: type
+    parent: Optional['_TNode']
+    adj_list: List[Tuple['_TNode', NodeNG]]
+    ast_node: Optional[NodeNG]
+
+    def __init__(self, node_type: type, ast_node: Optional[NodeNG] = None):
+        self.type = node_type
+        self.parent = None
+        self.adj_list = []
+        self.ast_node = ast_node
+
+    def __eq__(self, other):
+        if not isinstance(other, _TNode):
+            return False
+        if str(self.type) == str(other.type):
+            return True
+        else:
+            return False
+
+
 class TypeResult(Failable):
     """Represents the result of a type check operation that either succeeded or
     failed.
@@ -32,16 +54,32 @@ class TypeFail(TypeResult):
     """Represents the result of a failed type check operation
     Contains error message
     """
-    def __init__(self, msg: str):
-        if not isinstance(msg, str):
-            raise TypeError
-        super().__init__(msg)
+
+    def __init__(self, tnode1: _TNode = None, tnode2: _TNode = None, src_node: NodeNG = None):
+        if isinstance(tnode1, str):
+            self.msg = tnode1
+            self.tnode1 = None
+        else:
+            self.tnode1 = tnode1
+            self.msg = ""
+        self.tnode2 = tnode2
+        self.src_node = src_node
+        super().__init__(self.msg)
 
     def __str__(self):
-        return f'TypeFail: {self.value}'
+        if self.tnode1 is None:
+            return f'TypeFail: {self.msg}'
+        if self.src_node:
+            return 'TypeFail: %s <-> %s at %s' % \
+                   (self.tnode1.type, self.tnode2.type, self.src_node.as_string())
+        else:
+            return 'TypeFail: %s <-> %s' % (self.tnode1.type, self.tnode2.type)
 
     def bind(self, _):
         return self
+
+    def add_msg(self, msg: str):
+        self.msg = msg
 
 
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
@@ -175,18 +213,6 @@ def lookup_method(name, caller_type, *args):
     return TYPE_SIGNATURES[caller_origin][name]
 
 
-class _TNode:
-    """A node in the TypeConstraints disjoint set data structure."""
-    type: type
-    origin: Optional[NodeNG]
-    parent: Optional['_TNode']
-
-    def __init__(self, node_type: type, origin_node: Optional[NodeNG] = None):
-        self.type = node_type
-        self.origin = origin_node
-        self.parent = None
-
-
 class TypeConstraints:
     """Represents all the type constraints in the program.
 
@@ -198,8 +224,8 @@ class TypeConstraints:
     _count: int
     # List of _TNodes
     _nodes: List[_TNode]
-    # A mapping of type variable names to nodes.
-    _tvar_to_tnode: Dict[str, _TNode]
+    # A mapping of types to nodes
+    type_to_tnode: Dict[str, _TNode]
 
     def __init__(self):
         self.reset()
@@ -208,7 +234,7 @@ class TypeConstraints:
         """Reset the type constraints kept track of in the program."""
         self._count = 0
         self._nodes = []
-        self._tvar_to_tnode = {}
+        self.type_to_tnode = {}
 
     ###########################################################################
     # Creating new nodes ("make set")

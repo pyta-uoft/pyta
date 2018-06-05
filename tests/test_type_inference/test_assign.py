@@ -149,7 +149,7 @@ def test_attribute_reassign():
     functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
     actual_type = inferer.lookup_type(functiondef_node, 'name')
     expected_type = inferer.lookup_type(functiondef_node, 'name1')
-    assert actual_type == expected_type
+    assert inferer.type_constraints.can_unify(actual_type, expected_type)
 
 
 if __name__ == '__main__':

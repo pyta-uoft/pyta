@@ -16,7 +16,7 @@ def unify_helper(arg1: type, arg2: type, exp_result: Union[type, TypeFail]):
     if isinstance(exp_result, TypeFail):
         assert isinstance(unify_result, TypeFail)
     else:
-        eq_(unify_result.getValue(), tc.resolve(exp_result).getValue())
+        eq_(tc.resolve(unify_result.getValue()).getValue(), tc.resolve(exp_result).getValue())
 
 
 def setup_typevar(t: type):

@@ -2,6 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
+from python_ta.transforms.type_inference_visitor import TypeFail
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
@@ -182,7 +183,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
         expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
-        assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
+        assert inferer.type_constraints.can_unify(Callable[actual_arg_types, actual_return_type], Callable[expected_arg_types, expected_return_type])
 
 
 @given(cs.valid_identifier(), cs.random_dict_variable_homogeneous_value(min_size=1))
@@ -387,7 +388,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
         raise SkipTest()
     call_node = list(module.nodes_of_class(astroid.Call))[0]
     expected_msg = "Wrong number of arguments"
-    assert call_node.inf_type.getValue() == expected_msg
+    assert isinstance(call_node.inf_type, TypeFail)
 
 
 def test_conflicting_inferred_type_variable():

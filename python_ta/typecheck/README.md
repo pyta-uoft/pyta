@@ -2,8 +2,6 @@
 
 
 ## Nodes
-**TODOs:**
-- Think of better ways of representing objects when returning error messages from typechecking.
 
 ### Assign
 
@@ -118,16 +116,10 @@ Done.
 
 ## Type Inference
 
-### New Error Type
-- Edit TypeFail to include new attributes src_node, tnode1, tnode2
-- Edit _TNode to include new attributes ast_node, ctx_node
-- Edit unify to:
-  - Take as an argument the astroid node in which the unification is taking place
-  - Return TypeFail with new attributes
 - Edit all functions that use resolve, unify, _merge_sets, _assign_type, _handle_call to be properly monadic
-
-### Other
-- Rename _make_set to better reflect functionality
+- Edit all visit functions to use monadic functions
 - Remove duplicated functionality between unify, _unify_generic and unify_call
 - Remove all instances of .getValue()
 - Unify functionality of resolve, _find, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type
+- Update _handle_call to reflect changes to _TNode structure, particularly when looking up methods with multiple type signatures
+- Support for type inference with inheritance 

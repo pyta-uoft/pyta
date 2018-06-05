@@ -45,4 +45,3 @@ def test_wrong_number_init():
     ast_mod, ti = cs._parse_text(program, True)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         assert isinstance(call_node.inf_type, TypeFail)
-        eq_(call_node.inf_type.getValue(), 'Wrong number of arguments')

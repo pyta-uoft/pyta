@@ -17,3 +17,6 @@ __pycache__/
 
 # DS_Store
 *.DS_Store
+
+# .png files in test_type_inference
+tests/test_type_inference/png*

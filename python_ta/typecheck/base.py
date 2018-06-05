@@ -90,6 +90,19 @@ def _gorg(x):
         return x._gorg
 
 
+def _wrap_generic_meta(t, args):
+    if t == Tuple:
+        tuple_args = tuple(args)
+        # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
+        if tuple_args == ((),):
+            tuple_args = ()
+        return TypeInfo(Tuple[tuple_args])
+    elif t == Callable:
+        return TypeInfo(Callable[args[:-1], args[-1]])
+    else:
+        return TypeInfo(t[tuple(args)])
+
+
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])
@@ -245,207 +258,205 @@ class TypeConstraints:
         """
         tvar = TypeVar(f'_T{self._count}')
         self._count += 1
-        self._make_set(tvar, origin_node=node)
+        self._make_set(tvar, ast_node=node)
         return tvar
 
-    def _make_set(self, t: type, origin_node: Optional[NodeNG] = None) -> _TNode:
-        node = _TNode(t, origin_node)
-        self._nodes.append(node)
-        if isinstance(t, TypeVar):
-            self._tvar_to_tnode[t] = node
+    def _make_set(self, t: type, ast_node: Optional[NodeNG] = None, add_to_nodes=True) -> _TNode:
+        node = _TNode(t, ast_node)
+        if add_to_nodes:
+            self._nodes.append(node)
+            self.type_to_tnode[str(t)] = node
+        if not isinstance(t, TypeVar):
+            node.parent = node
         return node
+
+    def get_tnode(self, t: type, add_to_nodes=True) -> _TNode:
+        try:
+            node = self.type_to_tnode[str(t)]
+            return node
+        except KeyError:
+            node = self._make_set(t, None, add_to_nodes)
+            return node
 
     ###########################################################################
     # Type lookup ("find")
     ###########################################################################
-    def resolve(self, t: type) -> TypeResult:
-        """Return the type associated with the given type.
-
-        If t is a type variable that is associated with a concrete (non-TypeVar) type, return the concrete type.
-        Otherwise if the type variable with the smallest name is returned (using < to compare strings).
+    def resolve(self, t: type) -> TypeInfo:
+        """Return the concrete type associated with the given type.
         """
-        if isinstance(t, TypeVar):
-            return TypeInfo(self._find(t).type)
-        elif isinstance(t, GenericMeta):
-            return self._resolve_generic(t)
-        else:
-            return TypeInfo(t)
+        if isinstance(t, GenericMeta):
+            res_args = [self.resolve(arg).getValue() for arg in t.__args__]
+            return _wrap_generic_meta(_gorg(t), res_args)
+        elif isinstance(t, TypeVar):
+            try:
+                par = self.find_parent(self.type_to_tnode[str(t)])
+                if par:
+                    return self.resolve(par.type)
+            except KeyError:
+                return TypeInfo(t)
+        return TypeInfo(t)
 
-    def _resolve_generic(self, t: GenericMeta) -> TypeResult:
-        # TODO: Fix duplicate code (see _unify_generic)
-        resolve_result = failable_collect([self.resolve(arg) for arg in t.__args__])
-        if isinstance(resolve_result, TypeFail):
-            return resolve_result
+    def is_concrete(self, type):
+        if isinstance(type, GenericMeta):
+            return all([self.is_concrete(arg) for arg in type.__args__])
+        return not isinstance(type, TypeVar)
 
-        resolved_args = resolve_result.getValue()
+    def find_parent(self, tn: _TNode) -> _TNode:
+        """Do a bfs starting from tn to find a _TNode that has a parent."""
+        if tn.parent:
+            return tn.parent
+        visited = []
+        node_list = [tn]
+        goal_tnode = None
+        while node_list:
+            cur_node = node_list[0]
+            for e in cur_node.adj_list:
+                if e[0] not in visited and e[0] not in node_list:
+                    if e[0].parent:
+                        goal_tnode = e[0]
+                        break
+                    node_list.append(e[0])
+            visited.append(node_list[0])
+            node_list.remove(node_list[0])
+        if goal_tnode:
+            for tn in visited:
+                tn.parent = goal_tnode
+        return goal_tnode
 
-        gorg = _gorg(t)
-        if gorg == Tuple:
-            tuple_args = tuple(resolved_args)
-            # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
-            if tuple_args == ((),):
-                tuple_args = ()
-            return TypeInfo(Tuple[tuple_args])
-        elif gorg == Callable:
-            return TypeInfo(Callable[resolved_args[:-1], resolved_args[-1]])
-        else:
-            return TypeInfo(gorg[tuple(resolved_args)])
-
-    def _find(self, tv: TypeVar) -> _TNode:
-        """Return the disjoint set node associated with the given type variable."""
-        node = self._tvar_to_tnode[tv]
-        while node.parent is not None or (node.parent and node != node.parent):
-            node = node.parent
-        return node
+    def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: NodeNG):
+        if tn1 != tn2:
+            edge_exists = False
+            for e in tn1.adj_list:
+                if e[0] == tn2:
+                    edge_exists = True
+            if not edge_exists:
+                tn1.adj_list.append((tn2, ast_node))
+                tn2.adj_list.append((tn1, ast_node))
 
     ###########################################################################
     # Type unification ("union")
     ###########################################################################
-    def unify(self, t1: type, t2: type) -> TypeResult:
+    def unify(self, t1: type, t2: type,
+              ast_node: Optional[NodeNG] = None) -> TypeResult:
         """Unify the given types.
-        Return the result of the unification, or an error
-        message if the types can't be unified.
+        Return the result of the unification.
         """
-        # Case of TypeVars
-        if isinstance(t1, TypeVar) and isinstance(t2, TypeVar):
-            return self._merge_sets(t1, t2) >> self.resolve
 
-        elif isinstance(t1, TypeVar):
-            rep1 = self._find(t1)
-            if rep1.type == t1:
-                # Simply make t2 the set representative for t1.
-                rep1.parent = self._make_set(self.resolve(t2).getValue())
-                return self.resolve(t1)
+        # Get associated TNodes
+        tnode1 = self.get_tnode(t1)
+        tnode2 = self.get_tnode(t2)
+
+        # Attempt to resolve to a TNode with concrete type
+        conc_tnode1 = self.find_parent(tnode1)
+        conc_tnode2 = self.find_parent(tnode2)
+
+        # Both types can be resolved
+        if conc_tnode1 is not None and conc_tnode2 is not None:
+            if isinstance(conc_tnode1.type, GenericMeta) and isinstance(conc_tnode2.type, GenericMeta):
+                return self._unify_generic(conc_tnode1, conc_tnode2)
+
+            # TODO: Replace with logic based on concrete tnodes
+            # Legacy code from previous implementation of unify
+            if t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+                t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
+                t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
+                for u1, u2 in product(t1_types, t2_types):
+                    if self.can_unify(u1, u2):
+                        return self.unify(u1, u2)
+                return TypeFail(tnode1, tnode2, ast_node)
+            elif t1 == Any or t2 == Any:
+                return TypeInfo(t1)
+            elif conc_tnode1.type == conc_tnode2.type:
+                tnode1.parent = conc_tnode1
+                tnode2.parent = conc_tnode1
+                self.create_edges(tnode1, tnode2, ast_node)
+                return TypeInfo(conc_tnode1.type)
             else:
-                return self.unify(rep1.type, t2)
-        elif isinstance(t2, TypeVar):
-            return self.unify(t2, t1)
+                return TypeFail(tnode1, tnode2, ast_node)
 
-        # Case of two generics
-        # TODO: Change this to use binds instead of always looking up values
-        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            # Bind GenericMeta object from each TypeInfo to x and y,
-            # pass to unify_generic
-            return self._unify_generic(t1, t2)
+        # One type can be resolved
+        elif conc_tnode1 is not None:
+            tnode2.parent = conc_tnode1
+            self.create_edges(tnode1, tnode2, ast_node)
+            return TypeInfo(conc_tnode1.type)
+        elif conc_tnode2 is not None:
+            return self.unify(t2, t1, ast_node)
 
-        elif isinstance(t1, GenericMeta) or isinstance(t2, GenericMeta):
-            return TypeFail(f'Incompatible types {t1} {t2}')
-        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
-            t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
-            t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
-            for u1, u2 in product(t1_types, t2_types):
-                res = self.unify(u1, u2)
-                if isinstance(res, TypeInfo):
-                    return res
-            return TypeFail(f'Incompatible types {t1} {t2}')
-        elif t1 == Any or t2 == Any:
-            return TypeInfo(t1)
-
+        # TODO: Replace with logic based on concrete tnodes
+        # Legacy code from previous implementation of unify
         elif isinstance(t1, _ForwardRef) and \
-             isinstance(t2, _ForwardRef) and t1 == t2:
+                isinstance(t2, _ForwardRef) and t1 == t2:
             return TypeInfo(t1)
         elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
-            return TypeFail(f'Incompatible types {t1} and {t2}')
+            return TypeFail(tnode1, tnode2, ast_node)
 
-        # Case of unifying two concrete types
-        elif t1 == t2:
-            return TypeInfo(t1)
+        # New implementation of unify
         else:
-            has_t1 = False
-            has_t2 = False
-            for i in self._nodes:
-                if i.type == t1:
-                    has_t1 = True
-                if i.type == t2:
-                    has_t2 = True
-            if not has_t1:
-                self._make_set(t1)
-            if not has_t2:
-                self._make_set(t2)
-            return TypeFail(f'Incompatible types {t1} and {t2}')
+            self.create_edges(tnode1, tnode2, ast_node)
+            return TypeInfo(None)
 
-    def _unify_generic(self, t1: GenericMeta, t2: GenericMeta) -> TypeResult:
+    def _unify_generic(self, tnode1: _TNode, tnode2: _TNode,
+                       ast_node: Optional[NodeNG] = None) -> TypeResult:
         """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
-        g1, g2 = _gorg(t1), _gorg(t2)
-        if g1 is not g2 or t1.__args__ is None or t2.__args__ is None:
-            return TypeFail(f'Incompatible generic types {_gorg(t1)} and {_gorg(t2)}')
-        if len(t1.__args__) != len(t2.__args__):
-            return TypeFail(f'Generic types {_gorg(t1)} and {_gorg(t2)} must have the same number of args')
 
-        unify_result = failable_collect([self.unify(a1, a2) for a1, a2 in zip(t1.__args__, t2.__args__)])
+        conc_tnode1 = self.find_parent(tnode1)
+        conc_tnode2 = self.find_parent(tnode2)
+
+        g1, g2 = _gorg(conc_tnode1.type), _gorg(conc_tnode2.type)
+        if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
+            # TODO: need to store more info here and in the case below
+            return TypeFail(conc_tnode1, conc_tnode2, ast_node)
+        if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
+            return TypeFail(conc_tnode1, conc_tnode2, ast_node)
+
+        unify_result = failable_collect([self.unify(a1, a2) for a1, a2 in
+                                         zip(conc_tnode1.type.__args__,
+                                             conc_tnode2.type.__args__)])
         if isinstance(unify_result, TypeFail):
             return unify_result
         unified_args = unify_result.getValue()
 
-        if g1 == Tuple:
-            tuple_args = tuple(unified_args)
-            # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
-            if tuple_args == ((),):
-                tuple_args = ()
-            return TypeInfo(Tuple[tuple_args])
-        elif g1 == Callable:
-            return TypeInfo(Callable[unified_args[:-1], unified_args[-1]])
-        else:
-            return TypeInfo(g1[tuple(unified_args)])
-
-    def _merge_sets(self, t1: TypeVar, t2: TypeVar) -> TypeResult:
-        """Merge the two sets that t1 and t2 belong to.
-
-        TODO: make sure it's OK to return a TypeResult and not an exception
-        """
-        # TODO: look into implementation of  __eq__ for TypeVar to make sure we can use == here.
-        if t1 == t2:
-            return TypeInfo(t1)
-
-        rep1 = self._find(t1)
-        rep2 = self._find(t2)
-        if isinstance(rep1.type, TypeVar) and isinstance(rep2.type, TypeVar):
-            if rep1.type.__name__ < rep2.type.__name__:
-                rep2.parent = rep1
-                return TypeInfo(rep1.type)
-            else:
-                rep1.parent = rep2
-                return TypeInfo(rep2.type)
-        elif isinstance(rep2.type, TypeVar):
-            rep2.parent = rep1
-            return TypeInfo(rep2.type)
-        elif isinstance(rep1.type, TypeVar):
-            rep1.parent = rep2
-            return TypeInfo(rep2.type)
-        else:
-            # In this case both set representatives are concrete types.
-            # If they're compatible, we can still unify the sets. Otherwise, an error
-            # is raised here.
-            if rep1.type == rep2.type:
-                rep2.parent = rep1
-                return TypeInfo(rep1.type)
-            else:
-                return TypeFail(f'Incompatible types {rep1.type} and {rep2.type}')
+        self.create_edges(tnode1, tnode2, ast_node)
+        return _wrap_generic_meta(g1, unified_args)
 
     ###########################################################################
     # Handling generic polymorphism
     ###########################################################################
     def can_unify(self, t1: type, t2: type) -> bool:
         """Return whether t1 and t2 can unify.
-
-        Don't actually update disjoint set structure though.
-        TODO: this doesn't cover all cases. Could replicate unify, but that seems inefficient.
+           Does not update underlying _TNode graph
         """
-        if isinstance(t1, TypeVar) or isinstance(t2, TypeVar):
-            return True
-        elif isinstance(t1, GenericMeta) and isinstance(t2, GenericMeta):
-            return _gorg(t1) == _gorg(t2) and all(self.can_unify(s1, s2) for s1, s2 in zip(t1.__args__, t2.__args__))
-        # temporarily handle this as a special case
-        elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
-            t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
-            t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
-            for u1, u2 in product(t1_types, t2_types):
-                res = self.unify(u1, u2)
-                if isinstance(res, TypeInfo):
-                    return True
-            return False
-        else:
-            return t1 == t2
+
+        # Get associated _TNodes
+        tnode1 = self.get_tnode(t1, False)
+        tnode2 = self.get_tnode(t2, False)
+
+        # Attempt to resolve to a _TNode with concrete type
+        conc_tnode1 = self.find_parent(tnode1)
+        conc_tnode2 = self.find_parent(tnode2)
+
+        if conc_tnode1 is not None and conc_tnode2 is not None:
+            if conc_tnode1.type == conc_tnode2.type:
+                return True
+            elif isinstance(conc_tnode1.type, GenericMeta) and \
+                 isinstance(conc_tnode2.type, GenericMeta):
+                g1, g2 = _gorg(t1), _gorg(t2)
+                if g1 is not g2 or t1.__args__ is None or t2.__args__ is None:
+                    return False
+                if len(t1.__args__) != len(t2.__args__):
+                    return False
+                return all([self.can_unify(a1, a2) for a1, a2 in
+                            zip(t1.__args__, t2.__args__)])
+            elif t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
+                t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
+                t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
+                for u1, u2 in product(t1_types, t2_types):
+                    if self.can_unify(u1, u2):
+                        return True
+                return False
+            else:
+                return False
+        return True # TODO: need to handle some of the other failing cases in unify
 
     def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.
@@ -470,8 +481,8 @@ class TypeConstraints:
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
-            if isinstance(self.unify(arg_type, param_type), TypeFail):
-                return self.unify(arg_type, param_type)
+            if isinstance(self.unify(arg_type, param_type, node), TypeFail):
+                return self.unify(arg_type, param_type, node)
         return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
 
     def _type_eval(self, t) -> type:
@@ -485,7 +496,7 @@ class TypeConstraints:
         else:
             return t
 
-    ### HELPER METHODS
+    # HELPER METHODS
     def types_in_callable(self, callable_function):
         """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
         arg_type_lst = [self.resolve(argument).getValue() for argument in callable_function.__args__]

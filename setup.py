@@ -33,5 +33,10 @@ setup(
         'jinja2',
         'pygments'
     ],
+    extras_require={
+        'dev': [
+            'graphviz'
+        ]
+    },
     include_package_data=True,
     zip_safe=False)

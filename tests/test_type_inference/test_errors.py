@@ -11,7 +11,7 @@ def test_incompatible_binop_call():
     """
     program = f'5 + "string"\n'
     try:
-        module, inferer = cs._parse_text(program)
+        module, _ = cs._parse_text(program)
     except:
         raise SkipTest()
     binop_node = next(module.nodes_of_class(astroid.BinOp))
@@ -25,7 +25,7 @@ def test_incompatible_unaryop_call():
     """
     program = f'~["D"]'
     try:
-        module, inferer = cs._parse_text(program)
+        module, _ = cs._parse_text(program)
     except:
         raise SkipTest()
     unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
@@ -38,8 +38,7 @@ def test_incompatible_subscript_list():
     """
     program = f'[1,2,3]["one"]'
     try:
-        # TODO: Don't need inferer?
-        module, inferer = cs._parse_text(program)
+        module, _ = cs._parse_text(program)
     except:
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))

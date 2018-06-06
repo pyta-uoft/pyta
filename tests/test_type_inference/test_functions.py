@@ -203,32 +203,6 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         assert inferer.type_constraints.resolve(function_call_type).getValue() == call_node.args[i].inf_type.getValue()
 
 
-def test_incompatible_binop_call():
-    """ User tries to call a builtin binary operation on arguments of the wrong type.
-    """
-    program = f'5 + "string"\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    binop_node = next(module.nodes_of_class(astroid.BinOp))
-    expected_msg = f''
-
-
-def test_incompatible_subscript_list():
-    """User tries to access an element of a list using the wrong type of index.
-    """
-    program = f'[1,2,3]["one"]'
-    try:
-        # TODO: Don't need inferer?
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    subscript_node = next(module.nodes_of_class(astroid.Subscript))
-    expected_msg = "You can only access elements of a list using an int. You used a str, 'one'."
-    assert(subscript_node.inf_type.getValue() == expected_msg)
-
-
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """
@@ -311,37 +285,6 @@ def test_conflicting_inferred_type_variable():
                    f'in parameter (1), the annotated type is str but was given an object of inferred type int.'
                    # TODO: test case redundant because recursive..?
     assert call_node.inf_type.getValue() == expected_msg
-
-
-if __name__ == '__main__':
-    nose.main()
-
-
-def test_incompatible_binop_call():
-    """ User tries to call a builtin binary operation on arguments of the wrong type.
-    """
-    program = f'5 + "string"\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    binop_node = next(module.nodes_of_class(astroid.BinOp))
-    expected_msg = "You cannot add an int, 5, and a str, 'string'. " \
-                   "Perhaps you wanted to cast the integer into a string or vice versa?"
-    assert binop_node.inf_type.getValue() == expected_msg
-
-
-def test_incompatible_unaryop_call():
-    """User tries to call a builtin unary operation on an argument of the wrong type.
-    """
-    program = f'~["D"]'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
-    expected_msg = "You cannot take the bitwise inverse of a List, ['D']."
-    assert unaryop_node.inf_type.getValue() == expected_msg
 
 
 def test_non_annotated_function_call_bad_arguments():

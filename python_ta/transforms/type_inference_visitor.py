@@ -383,13 +383,15 @@ class TypeInferer:
 
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if node.ctx == astroid.Load:
-            node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type.getValue(),
-                                              node.slice.inf_type.getValue())
+            node.inf_type = node.value.inf_type >> (
+                lambda t1: node.slice.inf_type >> (
+                    lambda t2: self._handle_call(node, '__getitem__', t1, t2)))
         elif node.ctx == astroid.Store:
             node.inf_type = TypeInfo(NoType) # type assigned when parent Assign node is visited
         elif node.ctx == astroid.Del:
-            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type.getValue(),
-                                              node.slice.inf_type.getValue())
+            node.inf_type = node.value.inf_type >> (
+                lambda t1: node.slice.inf_type >> (
+                    lambda t2: self._handle_call(node, '__delitem__', t1, t2)))
 
     ##############################################################################
     # Loops

@@ -21,9 +21,7 @@ class _TNode:
         self.adj_list = []
         self.ast_node = ast_node
 
-    def __eq__(self, other):
-        if not isinstance(other, _TNode):
-            return False
+    def __eq__(self, other: '_TNode'):
         if str(self.type) == str(other.type):
             return True
         else:
@@ -273,10 +271,9 @@ class TypeConstraints:
     def get_tnode(self, t: type, add_to_nodes=True) -> _TNode:
         try:
             node = self.type_to_tnode[str(t)]
-            return node
         except KeyError:
             node = self._make_set(t, None, add_to_nodes)
-            return node
+        return node
 
     ###########################################################################
     # Type lookup ("find")
@@ -299,9 +296,10 @@ class TypeConstraints:
     def is_concrete(self, type):
         if isinstance(type, GenericMeta):
             return all([self.is_concrete(arg) for arg in type.__args__])
-        return not isinstance(type, TypeVar)
+        else:
+            return not isinstance(type, TypeVar)
 
-    def find_parent(self, tn: _TNode) -> _TNode:
+    def find_parent(self, tn: _TNode) -> Optional[_TNode]:
         """Do a bfs starting from tn to find a _TNode that has a parent."""
         if tn.parent:
             return tn.parent

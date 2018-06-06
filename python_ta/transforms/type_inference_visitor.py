@@ -279,7 +279,7 @@ class TypeInferer:
         tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
         return self.type_constraints.resolve(tvar).getValue()
 
-    def lookup_typevar(self, node, name):
+    def lookup_typevar(self, node: NodeNG, name: str):
         return self._closest_frame(node, name).type_environment.lookup_in_env(name)
 
     ##############################################################################

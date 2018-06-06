@@ -220,12 +220,13 @@ def test_incompatible_subscript_list():
     """
     program = f'[1,2,3]["one"]'
     try:
+        # TODO: Don't need inferer?
         module, inferer = cs._parse_text(program)
     except:
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
-    expected_msg = "You can only access elements of a list using int. You used a str, 'one'."
-    assert(subscript_node.type_constraints.type.msg == expected_msg)
+    expected_msg = "You can only access elements of a list using an int. You used a str, 'one'."
+    assert(subscript_node.inf_type.getValue() == expected_msg)
 
 
 def test_non_annotated_function_call_bad_arguments():

@@ -319,8 +319,10 @@ class TypeInferer:
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
-        arg_types = [node.left.inf_type.getValue(), node.right.inf_type.getValue()]
-        node.inf_type = self._handle_call(node, method_name, *arg_types, error_func=binop_error_message)
+        arg_inf_types = [node.left.inf_type, node.right.inf_type]
+        node.inf_type = failable_collect(arg_inf_types) >> (
+            lambda args: self._handle_call(node, method_name, *args, error_func=binop_error_message)
+        )
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.

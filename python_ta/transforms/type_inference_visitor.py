@@ -330,7 +330,8 @@ class TypeInferer:
             node.inf_type = TypeInfo(bool)
         else:
             method_name = UNARY_TO_METHOD[node.op]
-            node.inf_type = self._handle_call(node, method_name, node.operand.inf_type.getValue(), error_func=unaryop_error_message)
+            node.inf_type = node.operand.inf_type >> (
+                lambda t: self._handle_call(node, method_name, t, error_func=unaryop_error_message))
 
     def visit_boolop(self, node: astroid.BoolOp) -> None:
         node_type_constraints = {operand_node.inf_type.getValue() for operand_node in node.values}

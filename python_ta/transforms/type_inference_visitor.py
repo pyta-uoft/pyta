@@ -221,23 +221,16 @@ class TypeInferer:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
         if isinstance(node.value, astroid.Name):
-            expr_type = self.lookup_typevar(node, node.value.name)
+            expr_inf_type = TypeInfo(self.lookup_typevar(node, node.value.name))
         else:
-            expr_type = node.value.inf_type.getValue()
+            expr_inf_type = node.value.inf_type
 
         node.inf_type = TypeInfo(NoType)
-
         for target in node.targets:
-            type_result = self._assign_type(target, expr_type, node)
+            type_result = expr_inf_type >> (
+                lambda expr_type: self._assign_type(target, expr_type, node))
             if isinstance(type_result, TypeFail):
                 node.inf_type = type_result
-                if isinstance(expr_type, typing.TupleMeta) and isinstance(target, astroid.Tuple):
-                    if len(expr_type.__args__) > len(target.elts):
-                        node.inf_type.add_msg("Too many values in assignment node")
-                    elif len(expr_type.__args__) < len(target.elts):
-                        node.inf_type.add_msg("Too many variables in assignment node")
-                elif isinstance(target, astroid.Tuple):
-                    node.inf_type.add_msg("Cannot assign single value to multiple variables")
 
     def _assign_type(self, target: NodeNG, expr_type: type, node: astroid.Assign) -> TypeResult:
         """Update the type environment so that the target is bound to the given type."""

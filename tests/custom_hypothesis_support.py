@@ -70,6 +70,11 @@ def homogeneous_list(**kwargs):
     return primitive_types.flatmap(lambda s: hs.lists(s(), **kwargs))
 
 
+def numeric_list(**kwargs):
+    """Return a strategy which generates a list of uniform numeric types."""
+    return numeric_types.flatmap(lambda s: hs.lists(s(), **kwargs))
+
+
 def random_list(**kwargs):
     """Return a strategy which generates a random list."""
     return hs.lists(primitive_values, **kwargs)
@@ -352,7 +357,7 @@ subscriptable_expr = hs.one_of(
 
 
 # Helper functions for testing
-def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer]:
+def _parse_text(source: Union[str, NodeNG], reset: bool = False) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
     # TODO: apparently no literal syntax for empty set in Python3, also cannot do set()
     # TODO: Deal with special case later.
@@ -362,6 +367,8 @@ def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer
         source = source.as_string()
     module = astroid.parse(source)
     type_inferer = TypeInferer()
+    if reset:
+        type_inferer.reset()
     type_inferer.environment_transformer().visit(module)
     type_inferer.type_inference_transformer().visit(module)
     return module, type_inferer
@@ -369,5 +376,5 @@ def _parse_text(source: Union[str, NodeNG]) -> Tuple[astroid.Module, TypeInferer
 
 def _verify_type_setting(module, ast_class, expected_type):
     """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
-    result = [n.type_constraints.type for n in module.nodes_of_class(ast_class)]
+    result = [n.inf_type.getValue() for n in module.nodes_of_class(ast_class)]
     assert [expected_type] == result, f'{expected_type}, {result}'

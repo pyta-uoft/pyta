@@ -85,6 +85,8 @@ class TypeStore:
             func_types_list = self.methods[operator]
             self_type = args[0]
             for func_type in func_types_list:
+                if len(args) != len(func_type.__args__) - 1:
+                    continue
                 unified = True
                 for t1, t2 in zip(func_type.__args__[:-1], args):
                     # TODO: replace call to can_unify

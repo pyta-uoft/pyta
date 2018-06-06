@@ -4,7 +4,7 @@ from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
-from typing import Callable
+from typing import Callable, _ForwardRef, Type
 settings.load_profile("pyta")
 
 
@@ -31,9 +31,9 @@ def test_inference_args_simple_return(function_name, arguments):
         # get the functionDef node - there is only one in this test case.
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
         expected_arg_type_vars = [function_def_node.type_environment.lookup_in_env(argument) for argument in arguments]
-        expected_arg_types = [inferer.type_constraints.resolve(type_var) for type_var in expected_arg_type_vars]
+        expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
-        function_type = inferer.type_constraints.resolve(function_type_var)
+        function_type = inferer.type_constraints.resolve(function_type_var).getValue()
         actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
         assert expected_arg_types == actual_arg_types
 
@@ -41,19 +41,19 @@ def test_inference_args_simple_return(function_name, arguments):
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_args_simple_return(function_name, arguments):
-    """Test whether visitor was able to infer type of function given function called on it's arguments."""
+    """Test whether visitor was able to infer type of function given function called on its arguments."""
     assume(function_name not in arguments)
     for argument in arguments:
         program = _parse_to_function_no_return(function_name, arguments, ('return ' + argument + " + " + repr('bob')))
         module, inferer = cs._parse_text(program)
         function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
         expected_arg_type_vars = [function_def_node.type_environment.lookup_in_env(argument) for argument in arguments]
-        expected_arg_types = [inferer.type_constraints.resolve(type_var) for type_var in expected_arg_type_vars]
+        expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
-        function_type = inferer.type_constraints.resolve(function_type_var)
+        function_type = inferer.type_constraints.resolve(function_type_var).getValue()
         actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
-        expected_return_type = inferer.type_constraints.resolve(return_type_var)
+        expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
 
 
@@ -71,13 +71,55 @@ def test_functiondef_annotated_simple_return(functiondef_node):
     # arguments and annotations are not changing, so test this once.
     for i in range(len(functiondef_node.args.annotations)):
         arg_name = functiondef_node.args.args[i].name
-        expected_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(arg_name))
+        expected_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(arg_name)).getValue()
         # need to do by name because annotations must be name nodes.
         assert expected_type.__name__ == functiondef_node.args.annotations[i].name
     # test return type
     return_node = functiondef_node.body[0].value
-    expected_rtype = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(return_node.name))
+    expected_rtype = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(return_node.name)).getValue()
     assert expected_rtype.__name__ == functiondef_node.returns.name
+
+
+def test_functiondef_method():
+    program = \
+        '''
+        class A:
+
+            def method(self, x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == _ForwardRef('A')
+
+
+def test_functiondef_classmethod():
+    program = \
+        '''
+        class A:
+
+            @classmethod
+            def method(cls, x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == Type[_ForwardRef('A')]
+
+
+def test_functiondef_staticmethod():
+    program = \
+        '''
+        class A:
+
+            @staticmethod
+            def method(x):
+                return x + 1
+        '''
+    module, inferer = cs._parse_text(program)
+    for func_def in module.nodes_of_class(astroid.FunctionDef):
+        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == int
+
 
 
 def test_nested_annotated_function_conflicting_body():
@@ -85,6 +127,9 @@ def test_nested_annotated_function_conflicting_body():
     """
     program = f'def random_func(int1: int) -> None:\n' \
               f'    int1 + "bob"\n'
+
+    raise SkipTest("Outdated annotation test. Previously raised SkipTest during cs._parse_text")
+
     try:
         module, inferer = cs._parse_text(program)
     except:

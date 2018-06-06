@@ -46,5 +46,18 @@ def test_incompatible_subscript_list():
     assert(subscript_node.inf_type.getValue() == expected_msg)
 
 
+def test_incompatible_subscript_tuple():
+    """User tries to access an element of a tuple using the wrong type of index.
+    """
+    program = f'(1,2,3)["one"]'
+    try:
+        module, _ = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    subscript_node = next(module.nodes_of_class(astroid.Subscript))
+    expected_msg = "You can only access elements of a tuple using an int. You used a str, 'one'."
+    assert(subscript_node.inf_type.getValue() == expected_msg)
+
+
 if __name__ == '__main__':
     nose.main()

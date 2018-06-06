@@ -145,19 +145,22 @@ class TypeInferer:
         if node.items == []:
             node.inf_type = TypeInfo(Dict[Any, Any])
         else:
-            key_type, val_type = node.items[0][0].inf_type.getValue(), node.items[0][1].inf_type.getValue()
+            key_inf_type = node.items[0][0].inf_type
+            val_inf_type = node.items[0][1].inf_type
             for key_node, val_node in node.items:
-                if isinstance(key_type, type):
-                    key_type = self.type_constraints.unify(
-                        key_node.inf_type.getValue(), key_type, node).getValue()
-                if isinstance(val_type, type):
-                    val_type = self.type_constraints.unify(
-                        val_node.inf_type.getValue(), val_type, node).getValue()
-            if isinstance(key_type, str):
-                key_type = Any
-            if isinstance(val_type, str):
-                val_type = Any
-            node.inf_type = TypeInfo(Dict[key_type, val_type])
+                key_inf_type = key_inf_type >> (
+                    lambda t1: key_node.inf_type >> (
+                        lambda t2: self.type_constraints.unify(t1, t2, node)))
+                val_inf_type = val_inf_type >> (
+                    lambda t1: val_node.inf_type >> (
+                        lambda t2: self.type_constraints.unify(t1, t2, node)))
+            if isinstance(key_inf_type, TypeFail):
+                key_inf_type = TypeInfo(Any)
+            if isinstance(val_inf_type, TypeFail):
+                val_inf_type = TypeInfo(Any)
+            node.inf_type = key_inf_type >> (
+                lambda k: val_inf_type >> (
+                    lambda v: TypeInfo(Dict[k, v])))
 
     def visit_tuple(self, node):
         if node.ctx == astroid.Store:

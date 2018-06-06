@@ -5,7 +5,7 @@ from typing import *
 import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import Environment, TypeConstraints, parse_annotations, create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail
+from ..typecheck.base import Environment, TypeConstraints, parse_annotations, create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -163,8 +163,7 @@ class TypeInferer:
             # Tuple is the target of an assignment; do not give it a type.
             node.inf_type = TypeInfo(NoType)
         else:
-            node.inf_type = TypeInfo(
-                Tuple[tuple(x.inf_type.getValue() for x in node.elts)])
+            node.inf_type = failable_collect(list(e.inf_type for e in node.elts)) >> (lambda lst: TypeInfo(Tuple[tuple(lst)]))
 
     ##############################################################################
     # Expression types

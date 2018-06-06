@@ -173,8 +173,9 @@ class TypeInferer:
     # Expression types
     ##############################################################################
     def visit_ifexp(self, node: astroid.IfExp) -> None:
-        node.inf_type = self.type_constraints.unify(
-            node.body.inf_type.getValue(), node.orelse.inf_type.getValue(), node)
+        node.inf_type = node.body.inf_type >> (
+            lambda t1: node.orelse.inf_type >> (
+                lambda t2: self.type_constraints.unify(t1, t2, node)))
 
     def visit_expr(self, node):
         """Expr nodes take the type of their child

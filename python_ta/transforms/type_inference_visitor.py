@@ -348,28 +348,19 @@ class TypeInferer:
         for comparator, right in node.ops:
             if comparator == 'is':
                 return_types.add(bool)
-            elif comparator == 'in':
-                resolved_type = self._handle_call(
-                    node,
-                    BINOP_TO_METHOD[comparator],
-                    right.inf_type.getValue(),
-                    left.inf_type.getValue()
-                )
-                if isinstance(resolved_type, TypeFail):
-                    node.inf_type = resolved_type
-                    return
-                return_types.add(resolved_type.getValue())
             else:
-                resolved_type = self._handle_call(
-                    node,
-                    BINOP_TO_METHOD[comparator],
-                    left.inf_type.getValue(),
-                    right.inf_type.getValue()
-                )
+                resolved_type = right.inf_type >> (
+                    lambda r: left.inf_type >> (
+                        lambda l: self._handle_call(
+                            node,
+                            BINOP_TO_METHOD[comparator],
+                            r,
+                            l
+                        )))
                 if isinstance(resolved_type, TypeFail):
                     node.inf_type = resolved_type
                     return
-                return_types.add(resolved_type.getValue())
+                resolved_type >> return_types.add
         if len(return_types) == 1:
             node.inf_type = TypeInfo(return_types.pop())
         else:

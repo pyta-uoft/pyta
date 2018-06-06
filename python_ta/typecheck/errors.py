@@ -110,6 +110,9 @@ def subscript_error_message(node: astroid.Subscript) -> str:
     if _gorg(node.value.inf_type.getValue()) == List:
         return f'You can only access elements of a list using an int. ' \
                f'You used a {node.slice.inf_type.getValue().__name__}, {node.slice.value.as_string()}.'
+    elif _gorg(node.value.inf_type.getValue()) == Tuple:
+        return f'You can only access elements of a tuple using an int. ' \
+               f'You used a {node.slice.inf_type.getValue().__name__}, {node.slice.value.as_string()}.'
     # TODO: Accessing an element of a tuple with an incompatible index type.
 
 

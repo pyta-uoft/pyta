@@ -334,10 +334,12 @@ class TypeInferer:
                 lambda t: self._handle_call(node, method_name, t, error_func=unaryop_error_message))
 
     def visit_boolop(self, node: astroid.BoolOp) -> None:
-        node_type_constraints = {operand_node.inf_type.getValue() for operand_node in node.values}
-        if len(node_type_constraints) == 1:
-            node.inf_type = TypeInfo(node_type_constraints.pop())
-        else:
+        node.inf_type = node.values[0].inf_type
+        for v in node.values:
+            node.inf_type = node.inf_type >> (
+                lambda t1: v.inf_type >> (
+                    lambda t2: self.type_constraints.unify(t1, t2, node)))
+        if isinstance(node.inf_type, TypeFail):
             node.inf_type = TypeInfo(Any)
 
     def visit_compare(self, node: astroid.Compare) -> None:

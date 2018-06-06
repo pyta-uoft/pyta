@@ -132,14 +132,14 @@ class TypeInferer:
         if node.elts == []:
             node.inf_type = TypeInfo(Set[Any])
         else:
-            node_type = node.elts[0].inf_type.getValue()
+            elt_inf_type = node.elts[0].inf_type
             for elt in node.elts:
-                if isinstance(node_type, type):
-                    node_type = self.type_constraints.unify(
-                        elt.inf_type.getValue(), node_type, node).getValue()
-            if isinstance(node_type, str):
-                node_type = Any
-            node.inf_type = TypeInfo(Set[node_type])
+                elt_inf_type = elt_inf_type >> (
+                    lambda t1: elt.inf_type >> (
+                        lambda t2: self.type_constraints.unify(t1, t2, node)))
+            if isinstance(elt_inf_type, TypeFail):
+                elt_inf_type = TypeInfo(Any)
+            node.inf_type = elt_inf_type >> (lambda t: TypeInfo(Set[t]))
 
     def visit_dict(self, node: astroid.Dict) -> None:
         if node.items == []:

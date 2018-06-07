@@ -398,15 +398,13 @@ class TypeInferer:
     ##############################################################################
     def visit_for(self, node):
         iter_type_result = node.iter.inf_type >> (
-            lambda t: self._handle_call(node, '__iter__', t)
-        )
+            lambda t: self._handle_call(node, '__iter__', t))
         if isinstance(node.target, astroid.AssignName):
             target_type = self.lookup_type(node.target, node.target.name)
         else:
             target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
         iter_type_result >> (
-            lambda t: self.type_constraints.unify(t.__args__[0], target_type, node)
-        )
+            lambda t: self.type_constraints.unify(t.__args__[0], target_type, node))
         node.inf_type = iter_type_result if isinstance(iter_type_result, TypeFail) else TypeInfo(NoType)
 
     ##############################################################################
@@ -416,21 +414,23 @@ class TypeInferer:
         self.visit_for(node)
 
     def visit_dictcomp(self, node: astroid.DictComp) -> None:
-        key_type = self.type_constraints.resolve(node.key.inf_type.getValue()).getValue()
-        val_type = self.type_constraints.resolve(node.value.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(Dict[key_type, val_type])
+        key_inf_type = node.key.inf_type >> self.type_constraints.resolve
+        val_inf_type = node.value.inf_type >> self.type_constraints.resolve
+        node.inf_type = key_inf_type >> (
+            lambda k: val_inf_type >> (
+                lambda v: TypeInfo(Dict[k, v])))
 
     def visit_generatorexp(self, node: astroid.GeneratorExp) -> None:
-        elt_type = self.type_constraints.resolve(node.elt.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(Generator[elt_type, None, None])
+        elt_inf_type = node.elt.inf_type >> self.type_constraints.resolve
+        node.inf_type = elt_inf_type >> (lambda e: TypeInfo(Generator[e, None, None]))
 
     def visit_listcomp(self, node: astroid.ListComp) -> None:
-        val_type = self.type_constraints.resolve(node.elt.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(List[val_type])
+        val_inf_type = node.elt.inf_type >> self.type_constraints.resolve
+        node.inf_type = val_inf_type >> (lambda v: TypeInfo(List[v]))
 
     def visit_setcomp(self, node: astroid.SetComp) -> None:
-        elt_type = self.type_constraints.resolve(node.elt.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(Set[elt_type])
+        elt_inf_type = node.elt.inf_type >> self.type_constraints.resolve
+        node.inf_type = elt_inf_type >> (lambda e: TypeInfo(Set[e]))
 
     def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
                      error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeResult:

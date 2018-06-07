@@ -557,12 +557,11 @@ class TypeInferer:
                     attribute_type = Callable[list(attribute_type.__args__[1:-1]), attribute_type.__args__[-1]]
                 node.inf_type = TypeInfo(attribute_type)
 
-
     def visit_annassign(self, node):
-        variable_type = self.type_constraints.resolve(
-            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name)).getValue()
-        self.type_constraints.unify(
-            variable_type, _node_to_type(node.annotation.name), node)
+        var_inf_type = self.type_constraints.resolve(
+            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
+        var_inf_type >> (
+            lambda t: self.type_constraints.unify(t, _node_to_type(node.annotation.name), node))
         node.inf_type = TypeInfo(NoType)
 
     def visit_module(self, node):

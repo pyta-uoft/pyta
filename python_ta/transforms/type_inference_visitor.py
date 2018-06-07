@@ -251,18 +251,17 @@ class TypeInferer:
                 )
             else:
                 iter_type_result = self._handle_call(target, '__iter__', expr_type)
-                if not isinstance(iter_type_result, TypeFail):
-                    iter_type = iter_type_result.getValue()
-                    contained_type = iter_type.__args__[0]
-                    for subtarget in target.elts:
-                        target_tvar = self.lookup_type(subtarget, subtarget.name)
-                        self.type_constraints.unify(
-                            target_tvar, contained_type, node)
+                for subtarget in target.elts:
+                    target_tvar = self.lookup_type(subtarget, subtarget.name)
+                    iter_type_result >> (
+                        lambda t: self.type_constraints.unify(target_tvar, t.__args__[0], node)
+                    )
                 return iter_type_result
         elif isinstance(target, astroid.Subscript):
             # TODO: previous case must recursively handle this one
-            return self._handle_call(target, '__setitem__', target.value.inf_type.getValue(),
-                                     target.slice.inf_type.getValue(), expr_type)
+            return  target.value.inf_type >> (
+                lambda t1: target.slice.inf_type >> (
+                    lambda t2: self._handle_call(target, '__setitem__', t1, t2, expr_type)))
 
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""

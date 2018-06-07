@@ -119,7 +119,6 @@ Done.
 - Edit all functions to be properly monadic
   - Remove all instances of .getValue()
   - type_inference_visitor.py
-    - _assign_type
     - lookup_attribute_type
     - lookup_type
     - visit_call

@@ -522,14 +522,15 @@ class TypeInferer:
         node.inf_type = TypeInfo(NoType)
         self.type_constraints.unify(self.lookup_type(node.parent, node.name),
                                     _ForwardRef(node.name), node)
-
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?
         for attr in node.locals:
-            attr_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr)).getValue()
-            self.type_store.classes[node.name][attr].append(attr_type)
-            if isinstance(attr_type, CallableMeta):
-                self.type_store.methods[attr].append(attr_type)
+            attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
+            attr_inf_type >> (
+                lambda t: self.type_store.classes[node.name][attr].append(t))
+            attr_inf_type >> (
+                lambda t: self.type_store.methods[attr].append(t) if isinstance(t, CallableMeta) else None
+            )
 
     ##############################################################################
     # Statements

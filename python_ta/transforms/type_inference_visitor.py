@@ -397,18 +397,17 @@ class TypeInferer:
     # Loops
     ##############################################################################
     def visit_for(self, node):
-        iter_type_result = self._handle_call(node, '__iter__', node.iter.inf_type.getValue())
-        if not isinstance(iter_type_result, TypeFail):
-            contained_type = iter_type_result.getValue().__args__[0]
-            if isinstance(node.target, astroid.AssignName):
-                target_type = self.lookup_type(node.target, node.target.name)
-            else:
-                target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
-
-            self.type_constraints.unify(contained_type, target_type, node)
-            node.inf_type = TypeInfo(NoType)
+        iter_type_result = node.iter.inf_type >> (
+            lambda t: self._handle_call(node, '__iter__', t)
+        )
+        if isinstance(node.target, astroid.AssignName):
+            target_type = self.lookup_type(node.target, node.target.name)
         else:
-            node.inf_type = iter_type_result
+            target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
+        iter_type_result >> (
+            lambda t: self.type_constraints.unify(t.__args__[0], target_type, node)
+        )
+        node.inf_type = iter_type_result if isinstance(iter_type_result, TypeFail) else TypeInfo(NoType)
 
     ##############################################################################
     # Comprehensions

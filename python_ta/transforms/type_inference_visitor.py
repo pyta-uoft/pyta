@@ -514,12 +514,9 @@ class TypeInferer:
                     arg_tvar, _node_to_type(node.annotations[i]), node)
 
     def visit_return(self, node: astroid.Return) -> None:
-        if not isinstance(node.value.inf_type, TypeFail):
-            t = node.value.inf_type.getValue()
-            self.type_constraints.unify(self.lookup_type(node, 'return'), t, node)
-            node.inf_type = TypeInfo(NoType)
-        else:
-            node.inf_type = node.value.inf_type
+        val_inf_type = node.value.inf_type >> (
+            lambda t: self.type_constraints.unify(self.lookup_type(node, 'return'), t, node))
+        node.inf_type = val_inf_type if isinstance (val_inf_type, TypeFail) else TypeInfo(NoType)
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:
         node.inf_type = TypeInfo(NoType)

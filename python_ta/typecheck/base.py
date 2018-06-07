@@ -481,7 +481,11 @@ class TypeConstraints:
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
             if isinstance(self.unify(arg_type, param_type, node), TypeFail):
                 return self.unify(arg_type, param_type, node)
-        return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
+        type_result = self._type_eval(new_func_type.__args__[-1])
+        if type_result is type(None) and isinstance(new_func_type.__args__[0], _ForwardRef):
+            return TypeInfo(new_func_type.__args__[0])
+        else:
+            return TypeInfo(type_result)
 
     def _type_eval(self, t) -> type:
         """Evaluate a type. Used for tuples."""

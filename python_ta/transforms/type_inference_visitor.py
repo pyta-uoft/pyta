@@ -281,40 +281,29 @@ class TypeInferer:
     ##############################################################################
     # Operation nodes
     ##############################################################################
-    def visit_call(self, node: astroid.Call) -> None:
-        callable_t = node.func.inf_type.getValue()
-        # Check if Union
-        if hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union:
-            is_union = True
-        else:
-            is_union = False
 
-        if not isinstance(callable_t, (CallableMeta, list)) and not is_union:
-            if isinstance(callable_t, _ForwardRef):
-                func_name = callable_t.__forward_arg__
+    def check_init(self, c) -> TypeResult:
+        if isinstance(c, _ForwardRef):
+            class_type = c.__forward_arg__
+            if '__init__' in self.type_store.classes[class_type]:
+                init_func = self.type_store.classes[class_type]['__init__'][0]
             else:
-                func_name = callable_t.__args__[0].__name__
-            if '__init__' in self.type_store.classes[func_name]:
-                init_type = self.type_store.classes[func_name]['__init__'][0]
-            else:
-                init_type = Callable[[callable_t], None]
-            # TODO: handle method overloading (through optional parameters)
-            arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
-            # TODO: Check for number of arguments if function is an initializer
-            type_result = self.type_constraints.unify_call(init_type, *arg_types, node=node)
-            if isinstance(type_result, TypeFail):
-                node.inf_type = type_result
-            else:
-                node.inf_type = TypeInfo(callable_t)
+                # Classes declared without initializer
+                init_func = Callable[[c], None]
+            return TypeInfo(init_func)
         else:
-            # TODO: resolve this case (from method lookup) more gracefully
-            if isinstance(callable_t, list):
-                callable_t = callable_t[0]
-                arg_types = [node.func.expr.inf_type.getValue()]
-            else:
-                arg_types = []
-            arg_types += [arg.inf_type.getValue() for arg in node.args]
-            node.inf_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
+            return TypeInfo(c)
+
+    def visit_call(self, node: astroid.Call) -> None:
+        func_inf_type = node.func.inf_type >> self.check_init
+
+        arg_inf_types = [arg.inf_type for arg in node.args]
+        arg_inf_types = node.func.inf_type >> (
+            lambda t: [TypeInfo(t)] + arg_inf_types if isinstance(t, _ForwardRef) else arg_inf_types)
+
+        node.inf_type = func_inf_type >> (
+            lambda t: failable_collect(arg_inf_types) >> (
+                lambda args: self.type_constraints.unify_call(t, *args, node=node)))
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]

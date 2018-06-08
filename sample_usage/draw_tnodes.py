@@ -13,8 +13,20 @@ USAGE = 'Usage: python draw_tnodes.py <your-file.py>'
 
 def _type_str(type):
     if isinstance(type, TypeVar) or isinstance(type, GenericMeta) or \
-            type is None:
+            type.__class__.__name__ == '_Any' or type is None:
         return str(type).replace('typing.', '')
+    elif type.__class__.__name__ == '_Union':
+        trimmed_args = []
+        for arg in type.__args__:
+            if not isinstance(arg, GenericMeta):
+                trimmed_args.append(_type_str(arg))
+            else:
+                break
+        if len(trimmed_args) == 0:
+            trimmed_args.append(_type_str(type.__args__[0]))
+        if len(trimmed_args) != len(type.__args__):
+            trimmed_args.append('...')
+        return 'Union[%s]' % ', '.join(trimmed_args)
     else:
         return type.__name__
 
@@ -30,7 +42,7 @@ def _find_type_fail(ast_node):
     return None
 
 
-def gen_graph_from_nodes(nodes):
+def gen_graph_from_nodes(nodes, type_fail=None):
     graph = Graph(format='png', strict=True)
     graph.node_attr['fontname'] = 'Courier New'
     graph.edge_attr['fontname'] = 'Courier New'
@@ -45,17 +57,19 @@ def gen_graph_from_nodes(nodes):
         for neighb, ctx_node in node.adj_list:
             graph.edge(_type_str(node.type), _type_str(neighb.type),
                        label=(f' {ctx_node.as_string()}' if ctx_node else ''))
-    graph.view('png')
+    if type_fail:
+        graph.node('tf',
+                   '{TypeFail|src_node: %s}' %
+                   (type_fail.src_node.as_string().replace('<', '\\<').replace('>', '\\>')
+                        if type_fail.src_node else 'None'), shape='record')
+        graph.edge('tf', _type_str(type_fail.tnode1.type), style='dashed')
+        graph.edge('tf', _type_str(type_fail.tnode2.type), style='dashed')
+    graph.view('tnode_graph')
 
 
 def gen_graph_from_source(source: Union[str, NodeNG]):
     module, inferer = _parse_text(source)
-
-    type_fail = _find_type_fail(module)
-    if type_fail:
-        print(str(type_fail))
-
-    gen_graph_from_nodes(inferer.type_constraints._nodes)
+    gen_graph_from_nodes(inferer.type_constraints._nodes, _find_type_fail(module))
 
 
 if __name__ == '__main__':

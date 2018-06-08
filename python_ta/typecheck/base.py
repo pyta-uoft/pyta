@@ -390,8 +390,11 @@ class TypeConstraints:
 
         # New implementation of unify
         else:
-            self.create_edges(tnode1, tnode2, ast_node)
-            return TypeInfo(None)
+            if t1 == t2:
+                return TypeInfo(t1)
+            else:
+                self.create_edges(tnode1, tnode2, ast_node)
+                return TypeInfo(None)
 
     def _unify_generic(self, tnode1: _TNode, tnode2: _TNode,
                        ast_node: Optional[NodeNG] = None) -> TypeResult:

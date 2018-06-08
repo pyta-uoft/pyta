@@ -18,7 +18,9 @@ material going into further detail for the emitted errors.
 
 ## Installation
 
-If you're developing PyTA, simply clone this repo.
+If you're developing PyTA, simply clone this repo. If you are working on type
+inference, note that some debugging tools require [graphviz](http://www.graphviz.org/download/) 
+to be installed on your system.
 
 If you want to just check it out, you can install it using `pip`
 (or possibly `pip3` on OSX, depending on what previous versions of

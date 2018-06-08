@@ -74,7 +74,14 @@ class TypeInferer:
         if node.args.args and node.args.args[0].name == 'self' and isinstance(node.parent, astroid.ClassDef):
             node.type_environment.locals['self'] = _ForwardRef(node.parent.name)
         self._populate_local_env(node)
-        node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
+        ret_node_type = None
+        if any(node.nodes_of_class(astroid.Return)):
+            ret_node = next(node.nodes_of_class(astroid.Return))
+            if hasattr(ret_node.value, 'name') and ret_node.value.name in node.locals:
+                ret_node_type = node.type_environment.locals[ret_node.value.name]
+        if ret_node_type is None:
+            ret_node_type = self.type_constraints.fresh_tvar(node)
+        node.type_environment.locals['return'] = ret_node_type
 
     def _set_comprehension_environment(self, node):
         """Set the environment of a comprehension expression.

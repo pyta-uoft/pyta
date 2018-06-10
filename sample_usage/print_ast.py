@@ -28,10 +28,10 @@ def walker(node, source_lines, indent=''):
         indent, CHAR_TUBE, node_name, name, value))
 
     lines = [line for line in node.as_string().split('\n')]
-    for line in lines: 
+    for line in lines:
         print(indent + FILL + '>>>' + Fore.BLUE + line + Fore.RESET)
 
-    for child in node.get_children(): 
+    for child in node.get_children():
         walker(child, source_lines, indent + FILL + CHAR_PIPE)
 
 
@@ -49,3 +49,4 @@ if __name__ == '__main__':
             walker(node, source_lines, CHAR_PIPE)
             print('┣' + CHAR_TUBE * 60 + '┫')
         print('')
+

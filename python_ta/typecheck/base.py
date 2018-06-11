@@ -279,16 +279,16 @@ class TypeConstraints:
     # Type lookup ("find")
     ###########################################################################
     def resolve(self, t: type) -> TypeInfo:
-        """Return the concrete type associated with the given type.
+        """Return the concrete type or set representative associated with the given type.
         """
         if isinstance(t, GenericMeta):
             res_args = [self.resolve(arg).getValue() for arg in t.__args__]
             return _wrap_generic_meta(_gorg(t), res_args)
         elif isinstance(t, TypeVar):
             try:
-                par = self.find_parent(self.type_to_tnode[str(t)])
-                if par:
-                    return self.resolve(par.type)
+                repr = self.find_repr(self.type_to_tnode[str(t)])
+                if repr and repr.type is not t:
+                    return self.resolve(repr.type)
             except KeyError:
                 return TypeInfo(t)
         return TypeInfo(t)
@@ -299,7 +299,10 @@ class TypeConstraints:
         else:
             return not isinstance(type, TypeVar)
 
-    def find_parent(self, tn: _TNode) -> Optional[_TNode]:
+    def find_repr(self, tn: _TNode) -> Optional[_TNode]:
+        return self.find_parent(tn, True)
+
+    def find_parent(self, tn: _TNode, find_repr: bool = False) -> Optional[_TNode]:
         """Do a bfs starting from tn to find a _TNode that has a parent."""
         if tn.parent:
             return tn.parent
@@ -319,6 +322,13 @@ class TypeConstraints:
         if goal_tnode:
             for tn in visited:
                 tn.parent = goal_tnode
+
+        # Return a set representative, even if it isn't a concrete type
+        if find_repr and not goal_tnode and len(visited) > 1:
+            visited_types = list(tnode.type for tnode in visited)
+            visited_types.sort(key=(lambda t: t.__name__))
+            goal_tnode = self.get_tnode(visited_types[-1])
+
         return goal_tnode
 
     def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: NodeNG):

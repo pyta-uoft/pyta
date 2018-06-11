@@ -5,7 +5,8 @@ from typing import *
 import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import Environment, TypeConstraints, parse_annotations, create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail
+from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
+    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -388,12 +389,20 @@ class TypeInferer:
         if node.inf_type.getValue() == type(None):
             node.inf_type = TypeInfo(slice)
 
+    def visit_extslice(self, node: astroid.ExtSlice):
+        unif_res = failable_collect([dim.inf_type for dim in node.dims])
+        if isinstance(unif_res, TypeFail):
+            return unif_res
+        node.inf_type = TypeInfo(Tuple[tuple(unif_res.getValue())])
+
     def visit_subscript(self, node: astroid.Subscript) -> None:
-        if node.ctx == astroid.Load:
+        if isinstance(node.slice.inf_type, TypeFail):
+            node.inf_type = node.slice.inf_type
+        elif node.ctx == astroid.Load:
             node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type.getValue(),
                                               node.slice.inf_type.getValue())
         elif node.ctx == astroid.Store:
-            node.inf_type = TypeInfo(NoType) # type assigned when parent Assign node is visited
+            node.inf_type = TypeInfo(NoType)
         elif node.ctx == astroid.Del:
             node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type.getValue(),
                                               node.slice.inf_type.getValue())

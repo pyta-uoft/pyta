@@ -72,7 +72,6 @@ def test_tuple_single_val():
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
-        eq_(assign_node.inf_type, TypeFail("Cannot assign single value to multiple variables"))
 
 
 def test_tuple_extra_vars():
@@ -80,7 +79,6 @@ def test_tuple_extra_vars():
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
-        eq_(assign_node.inf_type, TypeFail("Too many variables in assignment node"))
 
 
 def test_tuple_extra_value():
@@ -88,5 +86,4 @@ def test_tuple_extra_value():
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
-        eq_(assign_node.inf_type, TypeFail("Too many values in assignment node"))
 

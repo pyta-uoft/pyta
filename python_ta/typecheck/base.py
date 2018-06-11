@@ -337,8 +337,14 @@ class TypeConstraints:
     def unify(self, t1: type, t2: type,
               ast_node: Optional[NodeNG] = None,
               mod_tnodes = True) -> TypeResult:
-        """Unify the given types.
-        Return the result of the unification.
+        """Attempt to unify two types.
+
+        :param t1: The first of the two types to be unified.
+        :param t2: The second of the two types to be unified.
+        :param ast_node: The astroid node responsible for the unification of t1 & t2.
+        :param mod_tnodes: Whether the _TNode graph is to be updated.
+        :returns: A TypeResult object (TypeFail or TypeInfo) containing information
+            about the success / failure of the type unification.
         """
 
         # Get associated TNodes

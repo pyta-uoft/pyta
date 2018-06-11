@@ -1,7 +1,9 @@
 language: python
 python:
   - "3.6"
-install: "pip install pylint funcparserlib colorama jinja2 pycodestyle hypothesis pygments"
+install:
+  - sudo apt install graphviz
+  - pip install pylint funcparserlib colorama jinja2 pycodestyle hypothesis pygments graphviz
 script:
   - nosetests
 notifications:

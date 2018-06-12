@@ -68,3 +68,4 @@ class AlwaysReturnChecker(BaseChecker):
 
 def register(linter):
     linter.register_checker(AlwaysReturnChecker(linter))
+

@@ -55,7 +55,15 @@ To run the tests, enter `python tests/test_examples.py` in the terminal. (If you
 ## Contributors
 
 Nigel Fong,
+Niayesh Ilkhani,
+Rebecca Kay,
 Christopher Koehler,
+Simeon Krastnikov,
+Ryan Lee,
 Hayley Lin,
+Wendy Liu,
 Shweta Mogalapalli,
+Justin Park,
+Amr Sharaf,
+Alexey Strokach,
 Jasmine Wu

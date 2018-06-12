@@ -59,5 +59,18 @@ def test_incompatible_subscript_tuple():
     assert(subscript_node.inf_type.getValue() == expected_msg)
 
 
+def test_incompatible_subscript_dictionary():
+    """User tries to access an element of a dictionary using the wrong type of key.
+    """
+    program = '''{ "1" : 1, "2" : 2, "3" : 3 }[1]'''
+    try:
+        module, _ = cs._parse_text(program)
+    except:
+        raise SkipTest()
+    subscript_node = next(module.nodes_of_class(astroid.Subscript))
+    expected_msg = "You can only access elements of a tuple using an int. You used a str, 'one'."
+    assert(subscript_node.inf_type.getValue() == expected_msg)
+
+
 if __name__ == '__main__':
     nose.main()

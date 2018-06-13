@@ -103,6 +103,22 @@ def test_inference_invalid_slice(node):
         assert isinstance(subscript_node.inf_type, TypeFail)
 
 
+def test_inference_ext_slice():
+    raise SkipTest('Lookup for class methods must be implemeneted before this test can pass')
+    program = \
+        '''
+        class Foo:
+            def __getitem__(self, tup):
+                return tup[0]
+        
+        foo = Foo()
+        foo[1, 'a']
+        '''
+    module, _ = cs._parse_text(program)
+    subscript_node = list(module.nodes_of_class(astroid.Subscript))[1]
+    assert subscript_node.inf_type.getValue() == int
+
+
 # TODO: this test needs to be converted, but will also fail
 # @given(cs.random_list(min_size=2), cs.random_slice_indices())
 # def test_subscript_heterogeneous_list_slice(input_list, slice):

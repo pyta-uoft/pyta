@@ -102,8 +102,7 @@ Done.
 
 ### Subscript
 
-**TODOs:**
-- Handle ExtSlice
+Done.
 
 ### Tuple
 

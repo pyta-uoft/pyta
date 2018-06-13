@@ -73,8 +73,15 @@ class TypeFail(TypeResult):
         else:
             return 'TypeFail: %s <-> %s' % (self.tnode1.type, self.tnode2.type)
 
-    def bind(self, _):
-        return self
+    def bind(self, fn):
+        try:
+            bind_result = super().bind(fn)
+            if callable(bind_result):
+                return lambda x: self
+            else:
+                return self
+        except:
+            return self
 
     def add_msg(self, msg: str):
         self.msg = msg
@@ -463,7 +470,11 @@ class TypeConstraints:
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
             if isinstance(self.unify(arg_type, param_type, node), TypeFail):
                 return self.unify(arg_type, param_type, node)
-        return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
+        type_result = self._type_eval(new_func_type.__args__[-1])
+        if type_result is type(None) and isinstance(new_func_type.__args__[0], _ForwardRef):
+            return TypeInfo(new_func_type.__args__[0])
+        else:
+            return TypeInfo(type_result)
 
     def _type_eval(self, t) -> type:
         """Evaluate a type. Used for tuples."""

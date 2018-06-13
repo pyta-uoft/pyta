@@ -89,6 +89,7 @@ def test_builtin_method_call_bad_self():
     """
     program = f'x = 1\n' \
               f'x.append(1.0)\n'
+    raise SkipTest()
     try:
         module, inferer = cs._parse_text(program)
     except:
@@ -106,6 +107,7 @@ def test_builtin_method_call_bad_argument():
     """
     program = f'x = 1\n' \
               f'x.extend(1)\n'
+    raise SkipTest()
     try:
         module, inferer = cs._parse_text(program)
     except:

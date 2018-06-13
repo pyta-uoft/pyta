@@ -287,11 +287,11 @@ class TypeInferer:
     ##############################################################################
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.inf_type.getValue()
-        # Check if Union
-        if hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union:
-            is_union = True
-        else:
-            is_union = False
+        is_union = hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union
+
+        # case when callable_t is the type of a class
+        if hasattr(callable_t, '__name__') and callable_t.__name__ == 'Type':
+            callable_t = callable_t.__args__[0]
 
         if not isinstance(callable_t, (CallableMeta, list)) and not is_union:
             if isinstance(callable_t, _ForwardRef):
@@ -530,7 +530,7 @@ class TypeInferer:
     def visit_classdef(self, node: astroid.ClassDef) -> None:
         node.inf_type = TypeInfo(NoType)
         self.type_constraints.unify(self.lookup_type(node.parent, node.name),
-                                    _ForwardRef(node.name), node)
+                                    Type[_ForwardRef(node.name)], node)
 
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?

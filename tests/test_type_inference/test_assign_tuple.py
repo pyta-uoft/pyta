@@ -63,6 +63,7 @@ def test_tuple_single_var():
     for assign_node in module.nodes_of_class(astroid.Assign):
         eq_(assign_node.inf_type, TypeInfo(NoType))
 
+
 def test_tuple_single_val():
     program = """
     a, b = 1

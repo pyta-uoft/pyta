@@ -64,7 +64,7 @@ class TypeInferer:
         node.type_environment = Environment()
         for name in node.instance_attrs:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.instance_attrs[name][0])
-            self.type_store.classes[node.name][name] = [node.type_environment.locals[name]]
+            self.type_store.classes[node.name][name] = [(node.type_environment.locals[name], 'attribute')]
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
 
@@ -520,7 +520,7 @@ class TypeInferer:
             attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
             attr_inf_type >> self.type_store.classes[node.name][attr].append
             attr_inf_type >> (
-                lambda a: self.type_store.methods[attr].append(a) if isinstance(a, CallableMeta) else None)
+                lambda a: self.type_store.methods[attr].append((a, 'attribute')) if isinstance(a, CallableMeta) else None)
 
     ##############################################################################
     # Statements
@@ -536,7 +536,7 @@ class TypeInferer:
         if type_name not in self.type_store.classes:
             node.inf_type = TypeFail('Invalid attribute type')
         else:
-            attribute_type = self.type_store.classes[type_name].get(node.attrname)
+            attribute_type = self.type_store.classes[type_name].get(node.attrname)[0]
             if attribute_type is None:
                 node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {type_name}')
             else:

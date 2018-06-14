@@ -27,7 +27,7 @@ class TypeStore:
         # Add in initializers
         for klass_name, methods in self.classes.items():
             if '__init__' in methods:
-                self.functions[klass_name] = [class_callable(init) for init in methods['__init__']]
+                self.functions[klass_name] = [class_callable(init) for init, _ in methods['__init__']]
 
     def _parse_classes(self, module: astroid.Module) -> None:
         """Parse the class definitions from typeshed."""
@@ -66,7 +66,7 @@ class TypeStore:
         if args:
             unified = False
             func_types_list = self.functions[operator]
-            for func_type in func_types_list:
+            for func_type, _ in func_types_list:
                 # check if args can be unified instead of checking if they are the same!
                 unified = True
                 for t1, t2 in zip(func_type.__args__[:-1], args):
@@ -84,7 +84,7 @@ class TypeStore:
             unified = False
             func_types_list = self.methods[operator]
             self_type = args[0]
-            for func_type in func_types_list:
+            for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue
                 unified = True

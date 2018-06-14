@@ -430,10 +430,10 @@ class TypeConstraints:
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
             return TypeFail(conc_tnode1, conc_tnode2, ast_node)
 
-        unify_result = failable_collect([self.unify(a1, a2, ast_node, mod_tnodes)
+        unify_result = failable_collect(self.unify(a1, a2, ast_node, mod_tnodes)
                                          for a1, a2 in
                                          zip(conc_tnode1.type.__args__,
-                                             conc_tnode2.type.__args__)])
+                                             conc_tnode2.type.__args__))
         if isinstance(unify_result, TypeFail):
             return unify_result
         unified_args = unify_result.getValue()

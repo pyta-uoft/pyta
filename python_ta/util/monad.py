@@ -29,14 +29,14 @@ class Failable(Monad):
         
     def bind(self, fn):
         return fn(self.value)
+
         
-        
-def failable_map(fn : Callable[[TypeVar('T')], Failable], lst : List[Failable]): 
-    # TODO: allow arbitrary containers like tuples
+def failable_map(fn: Callable[[TypeVar('T')], Failable], itr: Iterable[Failable]) -> Failable:
+    lst = list(itr)
     if lst == []:
         return Failable([])
-    return lst[0] >> (lambda fst: (failable_map(fn, lst[1:]) >> (lambda rest: Failable([fst] + rest))))
+    return fn(lst[0]) >> (lambda fst: (failable_map(fn, lst[1:]) >> (lambda rest: Failable([fst] + rest))))
     
     
-def failable_collect(lst : List[Failable]):
-    return failable_map(lambda x: x, lst)
+def failable_collect(itr: Iterable[Failable]) -> Failable:
+    return failable_map(lambda x: x, itr)

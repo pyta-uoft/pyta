@@ -101,6 +101,21 @@ def _wrap_generic_meta(t, args):
         return TypeInfo(t[tuple(args)])
 
 
+def accept_failable(f):
+    def _f(*args, **kwargs):
+        new_args = []
+        for a in args + tuple(kwargs.values()):
+            if isinstance(a, Failable):
+                result = a >> new_args.append
+                if isinstance(result, TypeFail):
+                    return result
+            else:
+                new_args.append(a)
+        return f(*new_args)
+
+    return _f
+
+
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])
@@ -344,6 +359,7 @@ class TypeConstraints:
     ###########################################################################
     # Type unification ("union")
     ###########################################################################
+    @accept_failable
     def unify(self, t1: type, t2: type,
               ast_node: Optional[NodeNG] = None,
               mod_tnodes = True) -> TypeResult:

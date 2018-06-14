@@ -6,7 +6,7 @@ import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
-    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect
+    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -116,56 +116,47 @@ class TypeInferer:
         if node.ctx == astroid.Store:
             # List is the target of an assignment; do not give it a type.
             node.inf_type = TypeInfo(NoType)
-        elif node.elts == []:
+        elif not node.elts:
             node.inf_type = TypeInfo(List[Any])
         else:
-            node_type = node.elts[0].inf_type.getValue()
-            for elt in node.elts:
-                if isinstance(node_type, type):
-                    node_type = self.type_constraints.unify(
-                        elt.inf_type.getValue(), node_type, node).getValue()
-            if isinstance(node_type, str):
-                node_type = Any
-            node.inf_type = TypeInfo(List[node_type])
+            elt_inf_type = self.unify_elements(node.elts, node)
+            node.inf_type = self.wrap_container(List, elt_inf_type)
 
     def visit_set(self, node: astroid.Set) -> None:
-        if node.elts == []:
+        if not node.elts:
             node.inf_type = TypeInfo(Set[Any])
         else:
-            node_type = node.elts[0].inf_type.getValue()
-            for elt in node.elts:
-                if isinstance(node_type, type):
-                    node_type = self.type_constraints.unify(
-                        elt.inf_type.getValue(), node_type, node).getValue()
-            if isinstance(node_type, str):
-                node_type = Any
-            node.inf_type = TypeInfo(Set[node_type])
+            elt_inf_type = self.unify_elements(node.elts, node)
+            node.inf_type = self.wrap_container(Set, elt_inf_type)
 
     def visit_dict(self, node: astroid.Dict) -> None:
-        if node.items == []:
+        if not node.items:
             node.inf_type = TypeInfo(Dict[Any, Any])
         else:
-            key_type, val_type = node.items[0][0].inf_type.getValue(), node.items[0][1].inf_type.getValue()
-            for key_node, val_node in node.items:
-                if isinstance(key_type, type):
-                    key_type = self.type_constraints.unify(
-                        key_node.inf_type.getValue(), key_type, node).getValue()
-                if isinstance(val_type, type):
-                    val_type = self.type_constraints.unify(
-                        val_node.inf_type.getValue(), val_type, node).getValue()
-            if isinstance(key_type, str):
-                key_type = Any
-            if isinstance(val_type, str):
-                val_type = Any
-            node.inf_type = TypeInfo(Dict[key_type, val_type])
+            key_list, val_list = zip(*node.items)
+            key_inf_type = self.unify_elements(key_list, node)
+            val_inf_type = self.unify_elements(val_list, node)
+            node.inf_type = self.wrap_container(Dict, key_inf_type, val_inf_type)
 
     def visit_tuple(self, node):
         if node.ctx == astroid.Store:
             # Tuple is the target of an assignment; do not give it a type.
             node.inf_type = TypeInfo(NoType)
         else:
-            node.inf_type = TypeInfo(
-                Tuple[tuple(x.inf_type.getValue() for x in node.elts)])
+            node.inf_type = self.wrap_container(Tuple, *(e.inf_type for e in node.elts))
+
+    def unify_elements(self, lst: List[NodeNG], node: NodeNG) -> TypeInfo:
+        lst = list(lst)
+        elt_inf_type = lst[0].inf_type
+        for cur_elt in lst:
+            elt_inf_type = self.type_constraints.unify(elt_inf_type, cur_elt.inf_type, node)
+        if isinstance(elt_inf_type, TypeFail):
+            return TypeInfo(Any)
+        return elt_inf_type
+
+    @accept_failable
+    def wrap_container(self, container_type: GenericMeta, *args: List[type]) -> TypeInfo:
+        return TypeInfo(container_type[tuple(args)])
 
     ##############################################################################
     # Expression types

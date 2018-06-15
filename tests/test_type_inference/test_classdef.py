@@ -67,7 +67,11 @@ def test_classdef_method_call_annotated_concrete():
             assert actual_type.__name__ == functiondef_node.args.annotations[i].name
         expected_rtype = inferer.type_constraints\
             .resolve(functiondef_node.parent.type_environment.lookup_in_env(functiondef_node.name)).getValue()
-        assert functiondef_node.returns.name == expected_rtype.__args__[-1].__name__
+        if functiondef_node.name == '__init__':
+            class_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(self_name)).getValue()
+            assert class_type == expected_rtype.__args__[-1]
+        else:
+            assert functiondef_node.returns.name == expected_rtype.__args__[-1].__name__
 
 
 def test_bad_attribute_access():

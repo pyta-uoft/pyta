@@ -1,7 +1,7 @@
 import tests.custom_hypothesis_support as cs
 from nose import SkipTest
 from typing import *
-from python_ta.typecheck.base import TypeConstraints, _TNode
+from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
 
 
@@ -242,6 +242,18 @@ def test_polymorphic_callable5(draw=False):
                     {'typing.Callable[[int, ~_T0], int]', 'typing.Callable[[int, int], int]'},
                     {'typing.Callable[[typing.Callable[[int, ~_T0], int], int], ~_T0]',
                      'typing.Callable[[typing.Callable[[int, int], int], int], ~_T0]'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_can_unify_callable(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    assert not tc.can_unify(Callable[[t0, t0], int], Callable[[str, int], int])
+    # make sure tc is unchanged
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0'}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)

@@ -2,6 +2,7 @@ import astroid
 import nose
 from hypothesis import settings
 from unittest import SkipTest
+from python_ta.typecheck.base import TypeFail
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
@@ -79,10 +80,7 @@ def test_bad_attribute_access():
     """
     program = f'x = 1\n' \
               f'x.wrong_name\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
+    module, inferer = cs._parse_text(program)
     expr_node = next(module.nodes_of_class(astroid.Expr))
     expected_msg = 'Attribute wrong_name not found for type int'
     assert expr_node.inf_type.getValue() == expected_msg
@@ -93,32 +91,21 @@ def test_builtin_method_call_bad_self():
     """
     program = f'x = 1\n' \
               f'x.append(1.0)\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
+    module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
-    expected_msg = f'In the Call node in line 2, when calling the method "append":\n' \
-                   f'this function expects to be called on an object of the class List, but was called on an object of ' \
-                   f'inferred type int.'
-    assert call_node.inf_type.getValue() == expected_msg
+    expected_msg = f'Attribute append not found for type int'
+    assert isinstance(call_node.inf_type, TypeFail)
     assert call_node.inf_type.getValue() == expected_msg
 
 
 def test_builtin_method_call_bad_argument():
     """ User tries to call a method on an argument of the wrong type.
     """
-    program = f'x = 1\n' \
+    program = f'x = [1, 2, 3]\n' \
               f'x.extend(1)\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
+    module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
-    expected_msg = f'In the Call node in line 2, when calling the method "extend":\n' \
-                   f'in parameter (1), the function was expecting an object of type iterable ' \
-                   f'but was given an object of type int.'
-    assert call_node.inf_type.getValue() == expected_msg
+    assert isinstance(call_node.inf_type, TypeFail)
 
 
 if __name__ == '__main__':

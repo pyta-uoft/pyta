@@ -274,40 +274,29 @@ class TypeInferer:
     ##############################################################################
     # Operation nodes
     ##############################################################################
-    def visit_call(self, node: astroid.Call) -> None:
-        callable_t = node.func.inf_type.getValue()
-        is_union = hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union
-
-        # case when callable_t is the type of a class
-        if hasattr(callable_t, '__name__') and callable_t.__name__ == 'Type':
-            callable_t = callable_t.__args__[0]
-
-        if not isinstance(callable_t, (CallableMeta, list)) and not is_union:
-            if isinstance(callable_t, _ForwardRef):
-                func_name = callable_t.__forward_arg__
-            else:
-                func_name = callable_t.__args__[0].__name__
-            if '__init__' in self.type_store.classes[func_name]:
-                init_type = self.type_store.classes[func_name]['__init__'][0][0]
-            else:
-                init_type = Callable[[callable_t], None]
-            # TODO: handle method overloading (through optional parameters)
-            arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
-            # TODO: Check for number of arguments if function is an initializer
-            type_result = self.type_constraints.unify_call(init_type, *arg_types, node=node)
-            if isinstance(type_result, TypeFail):
-                node.inf_type = type_result
-            else:
-                node.inf_type = TypeInfo(callable_t)
+    @accept_failable
+    def get_call_signature(self, c, node: NodeNG) -> TypeResult:
+        if hasattr(c, '__name__') and c.__name__ == 'Type':
+            class_type = c.__args__[0]
+            class_name = c.__args__[0].__forward_arg__
+        elif isinstance(c, _ForwardRef):
+            class_type = c
+            class_name = c.__forward_arg__
         else:
-            # TODO: resolve this case (from method lookup) more gracefully
-            if isinstance(callable_t, list):
-                callable_t = callable_t[0]
-                arg_types = [node.func.expr.inf_type.getValue()]
-            else:
-                arg_types = []
-            arg_types += [arg.inf_type.getValue() for arg in node.args]
-            node.inf_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
+            return TypeInfo(c)
+
+        if '__init__' in self.type_store.classes[class_name]:
+            init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
+            init_func = Callable[init_args[1:-1], init_args[-1]]
+        else:
+            # Classes declared without initializer
+            init_func = Callable[[], class_type]
+        return TypeInfo(init_func)
+
+    def visit_call(self, node: astroid.Call) -> None:
+        func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
+        arg_inf_types = [arg.inf_type for arg in node.args]
+        node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
@@ -500,7 +489,7 @@ class TypeInferer:
         num_defaults = len(node.args.defaults)
         if num_defaults > 0 and not isinstance(func_type, TypeFail):
             for i in range(num_defaults):
-                opt_args = inferred_args[:-1-i]
+                opt_args = combined_args[:-1-i]
                 opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), combined_return, polymorphic_tvars)
                 func_type = func_type >> (
                     lambda f: opt_func_type >> (
@@ -552,25 +541,29 @@ class TypeInferer:
             expr_type = expr_type.__args__[0]
 
         if isinstance(expr_type, _ForwardRef):
-            type_name =  expr_type.__forward_arg__
+            type_name = expr_type.__forward_arg__
         elif hasattr(expr_type, '__name__'):
             type_name = expr_type.__name__
         else:
             type_name = None
+
         if type_name not in self.type_store.classes:
-            node.inf_type = TypeFail('Invalid attribute type')
-        else:
-            attribute_type = self.type_store.classes[type_name].get(node.attrname)[0]
+            type_name = type_name.lower()
+
+        if type_name in self.type_store.classes:
+            attribute_type = self.type_store.classes[type_name].get(node.attrname)
             if attribute_type is None:
                 node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {type_name}')
             else:
-                func_type, method_type = attribute_type
+                func_type, method_type = attribute_type[0]
                 # Detect an instance method call, and create a bound method signature (first argument removed).
                 # TODO: handle classmethod calls differently.
                 if isinstance(func_type, CallableMeta) and inst_expr and \
                         method_type != 'staticmethod':
                     func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
                 node.inf_type = TypeInfo(func_type)
+        else:
+            node.inf_type = TypeFail('Class not found')
 
     def visit_annassign(self, node):
         var_inf_type = self.type_constraints.resolve(

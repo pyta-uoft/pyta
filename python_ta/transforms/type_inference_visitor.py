@@ -528,14 +528,16 @@ class TypeInferer:
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_type = node.expr.inf_type.getValue()
         if isinstance(expr_type, _ForwardRef):
-            type_name =  expr_type.__forward_arg__
+            type_name = expr_type.__forward_arg__
         elif hasattr(expr_type, '__name__'):
             type_name = expr_type.__name__
         else:
             type_name = None
+
         if type_name not in self.type_store.classes:
-            node.inf_type = TypeFail('Invalid attribute type')
-        else:
+            type_name = type_name.lower()
+
+        if type_name in self.type_store.classes:
             attribute_type = self.type_store.classes[type_name].get(node.attrname)
             if attribute_type is None:
                 node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {type_name}')
@@ -546,6 +548,8 @@ class TypeInferer:
                 if isinstance(attribute_type, CallableMeta):
                     attribute_type = Callable[list(attribute_type.__args__[1:-1]), attribute_type.__args__[-1]]
                 node.inf_type = TypeInfo(attribute_type)
+        else:
+            node.inf_type = TypeFail('Class not found')
 
     def visit_annassign(self, node):
         var_inf_type = self.type_constraints.resolve(

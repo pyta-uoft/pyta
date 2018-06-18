@@ -64,7 +64,7 @@ class TypeInferer:
         node.type_environment = Environment()
         for name in node.instance_attrs:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.instance_attrs[name][0])
-            self.type_store.classes[node.name][name] = [node.type_environment.locals[name]]
+            self.type_store.classes[node.name][name] = [(node.type_environment.locals[name], 'attribute')]
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
 
@@ -199,7 +199,7 @@ class TypeInferer:
             if node.name in self.type_store.classes:
                 node.inf_type = TypeInfo(Type[__builtins__[node.name]])
             elif node.name in self.type_store.functions:
-                node.inf_type = TypeInfo(self.type_store.functions[node.name][0])
+                node.inf_type = TypeInfo(self.type_store.functions[node.name][0][0])
             else:
                 # This is an unbound identifier. Ignore it.
                 node.inf_type = TypeInfo(Any)
@@ -281,7 +281,7 @@ class TypeInferer:
             else:
                 func_name = callable_t.__args__[0].__name__
             if '__init__' in self.type_store.classes[func_name]:
-                init_type = self.type_store.classes[func_name]['__init__'][0]
+                init_type = self.type_store.classes[func_name]['__init__'][0][0]
             else:
                 init_type = Callable[[callable_t], None]
             # TODO: handle method overloading (through optional parameters)
@@ -462,7 +462,7 @@ class TypeInferer:
 
         # Get any function type annotations.
         if any(annotation is not None for annotation in node.args.annotations):
-            annotated_type = parse_annotations(node)
+            annotated_type = parse_annotations(node)[0]
         else:
             annotated_type = None
 
@@ -518,15 +518,24 @@ class TypeInferer:
         # TODO: include node.instance_attrs as well?
         for attr in node.locals:
             attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
-            attr_inf_type >> self.type_store.classes[node.name][attr].append
             attr_inf_type >> (
-                lambda a: self.type_store.methods[attr].append(a) if isinstance(a, CallableMeta) else None)
+                lambda a: self.type_store.methods[attr].append((a, node.locals[attr][0].type)) if isinstance(a, CallableMeta) else None)
+            attr_inf_type >> (
+                lambda a: self.type_store.classes[node.name][attr].append((a, node.locals[attr][0].type if isinstance(a, CallableMeta) else 'attribute')))
 
     ##############################################################################
     # Statements
     ##############################################################################
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_type = node.expr.inf_type.getValue()
+
+        inst_expr = True
+
+        # case when expr_type is the type of a class
+        if hasattr(expr_type, '__name__') and expr_type.__name__ == 'Type':
+            inst_expr = False
+            expr_type = expr_type.__args__[0]
+
         if isinstance(expr_type, _ForwardRef):
             type_name =  expr_type.__forward_arg__
         elif hasattr(expr_type, '__name__'):
@@ -536,16 +545,17 @@ class TypeInferer:
         if type_name not in self.type_store.classes:
             node.inf_type = TypeFail('Invalid attribute type')
         else:
-            attribute_type = self.type_store.classes[type_name].get(node.attrname)
+            attribute_type = self.type_store.classes[type_name].get(node.attrname)[0]
             if attribute_type is None:
                 node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {type_name}')
             else:
-                attribute_type = attribute_type[0]
+                func_type, method_type = attribute_type
                 # Detect an instance method call, and create a bound method signature (first argument removed).
                 # TODO: handle classmethod calls differently.
-                if isinstance(attribute_type, CallableMeta):
-                    attribute_type = Callable[list(attribute_type.__args__[1:-1]), attribute_type.__args__[-1]]
-                node.inf_type = TypeInfo(attribute_type)
+                if isinstance(func_type, CallableMeta) and inst_expr and \
+                        method_type != 'staticmethod':
+                    func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
+                node.inf_type = TypeInfo(func_type)
 
     def visit_annassign(self, node):
         var_inf_type = self.type_constraints.resolve(

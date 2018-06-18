@@ -473,6 +473,8 @@ class TypeInferer:
 
         if any(node.nodes_of_class(astroid.Return)):
             inferred_return = self.type_constraints.resolve(node.type_environment.lookup_in_env('return')).getValue()
+        elif node.name == '__init__':
+            inferred_return = inferred_args[0]
         else:
             inferred_return = type(None)
 
@@ -492,7 +494,9 @@ class TypeInferer:
                 combined_args.append(t)
 
             annotated_rtype = annotated_type.__args__[-1]
-            if annotated_rtype is None:
+            if node.name == '__init__':
+                annotated_rtype = inferred_args[0]
+            elif annotated_rtype is None:
                 annotated_rtype = type(None)
             combined_return = self.type_constraints.unify(
                 inferred_return, annotated_rtype, node).getValue()

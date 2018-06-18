@@ -5,6 +5,7 @@ from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable, _ForwardRef, Type
+from nose.tools import eq_
 settings.load_profile("pyta")
 
 
@@ -159,6 +160,48 @@ def test_annotated_functiondef_conflicting_return_type():
                    f'the annotated return type is int, which conflicts with the inferred return type of ' \
                    f'str from the function definition body.'
     assert functiondef_type.msg == expected_msg
+
+
+def test_function_return():
+    program = """
+    def foo(x):
+        return x
+    
+    foo(1)
+    """
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    func_type = call_node.func.inf_type.getValue()
+    t1, t2 = func_type.__args__
+    eq_(t1, t2)
+
+
+def test_function_return_2():
+    program = """
+    def foo(x, y):
+        return x
+    
+    foo(1,2)
+    """
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    func_type = call_node.func.inf_type.getValue()
+    t1, t2, t3 = func_type.__args__
+    eq_(t1, t3)
+
+
+def test_function_return_3():
+    program = """
+    def foo(x, y):
+        return y
+    
+    foo(1,2)
+    """
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    func_type = call_node.func.inf_type.getValue()
+    t1, t2, t3 = func_type.__args__
+    eq_(t2, t3)
 
 
 if __name__ == '__main__':

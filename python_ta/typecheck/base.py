@@ -101,6 +101,29 @@ def _wrap_generic_meta(t, args):
         return TypeInfo(t[tuple(args)])
 
 
+def accept_failable(f):
+    def _f(*args, **kwargs):
+        new_args = []
+        new_kwargs = {}
+        for a in args:
+            if isinstance(a, Failable):
+                if isinstance(a, TypeFail):
+                    return a
+                a >> new_args.append
+            else:
+                new_args.append(a)
+        for kw in kwargs:
+            if isinstance(kwargs[kw], Failable):
+                if isinstance(kwargs[kw], Failable):
+                    return kwargs[kw]
+                new_kwargs += kwargs[kw] >> (lambda t: dict(kw=t))
+            else:
+                new_kwargs[kw] = kwargs[kw]
+        return f(*new_args, **new_kwargs)
+
+    return _f
+
+
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])
@@ -241,6 +264,24 @@ class TypeConstraints:
     def __init__(self):
         self.reset()
 
+    def __deepcopy__(self, memodict={}):
+        tc = TypeConstraints()
+        tc._count = self._count
+        tc._nodes = []
+        tc.type_to_tnode = {}
+        # copy nodes without copying edges
+        for node in self._nodes:
+            node_cpy = _TNode(node.type, node.ast_node)
+            tc._nodes.append(node_cpy)
+            tc.type_to_tnode[node.type] = node_cpy
+        # fill in edges
+        for node in self._nodes:
+            for adj_node, ctx in node.adj_list:
+                tc.type_to_tnode[node.type].adj_list.append((tc.type_to_tnode[adj_node.type], ctx))
+            if node.parent:
+                tc.type_to_tnode[node.type].parent = tc.type_to_tnode[node.parent.type]
+        return tc
+
     def reset(self):
         """Reset the type constraints kept track of in the program."""
         self._count = 0
@@ -278,17 +319,18 @@ class TypeConstraints:
     ###########################################################################
     # Type lookup ("find")
     ###########################################################################
+    @accept_failable
     def resolve(self, t: type) -> TypeInfo:
-        """Return the concrete type associated with the given type.
+        """Return the concrete type or set representative associated with the given type.
         """
         if isinstance(t, GenericMeta):
             res_args = [self.resolve(arg).getValue() for arg in t.__args__]
             return _wrap_generic_meta(_gorg(t), res_args)
         elif isinstance(t, TypeVar):
             try:
-                par = self.find_parent(self.type_to_tnode[str(t)])
-                if par:
-                    return self.resolve(par.type)
+                repr = self.find_repr(self.type_to_tnode[str(t)])
+                if repr and repr.type is not t:
+                    return self.resolve(repr.type)
             except KeyError:
                 return TypeInfo(t)
         return TypeInfo(t)
@@ -299,7 +341,10 @@ class TypeConstraints:
         else:
             return not isinstance(type, TypeVar)
 
-    def find_parent(self, tn: _TNode) -> Optional[_TNode]:
+    def find_repr(self, tn: _TNode) -> Optional[_TNode]:
+        return self.find_parent(tn, True)
+
+    def find_parent(self, tn: _TNode, find_repr: bool = False) -> Optional[_TNode]:
         """Do a bfs starting from tn to find a _TNode that has a parent."""
         if tn.parent:
             return tn.parent
@@ -319,6 +364,13 @@ class TypeConstraints:
         if goal_tnode:
             for tn in visited:
                 tn.parent = goal_tnode
+
+        # Return a set representative, even if it isn't a concrete type
+        if find_repr and not goal_tnode and len(visited) > 1:
+            visited_types = list(tnode.type for tnode in visited)
+            visited_types.sort(key=(lambda t: t.__name__))
+            goal_tnode = self.get_tnode(visited_types[-1])
+
         return goal_tnode
 
     def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: NodeNG):
@@ -334,22 +386,21 @@ class TypeConstraints:
     ###########################################################################
     # Type unification ("union")
     ###########################################################################
+    @accept_failable
     def unify(self, t1: type, t2: type,
-              ast_node: Optional[NodeNG] = None,
-              mod_tnodes = True) -> TypeResult:
+              ast_node: Optional[NodeNG] = None) -> TypeResult:
         """Attempt to unify two types.
 
         :param t1: The first of the two types to be unified.
         :param t2: The second of the two types to be unified.
         :param ast_node: The astroid node responsible for the unification of t1 & t2.
-        :param mod_tnodes: Whether the _TNode graph is to be updated.
         :returns: A TypeResult object (TypeFail or TypeInfo) containing information
             about the success / failure of the type unification.
         """
 
         # Get associated TNodes
-        tnode1 = self.get_tnode(t1, mod_tnodes)
-        tnode2 = self.get_tnode(t2, mod_tnodes)
+        tnode1 = self.get_tnode(t1)
+        tnode2 = self.get_tnode(t2)
 
         # Attempt to resolve to a TNode with concrete type
         conc_tnode1 = self.find_parent(tnode1)
@@ -358,7 +409,7 @@ class TypeConstraints:
         # Both types can be resolved
         if conc_tnode1 is not None and conc_tnode2 is not None:
             if isinstance(conc_tnode1.type, GenericMeta) and isinstance(conc_tnode2.type, GenericMeta):
-                return self._unify_generic(conc_tnode1, conc_tnode2, ast_node, mod_tnodes)
+                return self._unify_generic(conc_tnode1, conc_tnode2, ast_node)
 
             # TODO: Replace with logic based on concrete tnodes
             # Legacy code from previous implementation of unify
@@ -367,27 +418,25 @@ class TypeConstraints:
                 t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
                 for u1, u2 in product(t1_types, t2_types):
                     if self.can_unify(u1, u2):
-                        return self.unify(u1, u2, ast_node, mod_tnodes)
+                        return self.unify(u1, u2, ast_node)
                 return TypeFail(tnode1, tnode2, ast_node)
             elif t1 == Any or t2 == Any:
                 return TypeInfo(t1)
             elif conc_tnode1.type == conc_tnode2.type:
-                if mod_tnodes:
-                    tnode1.parent = conc_tnode1
-                    tnode2.parent = conc_tnode1
-                    self.create_edges(tnode1, tnode2, ast_node)
+                tnode1.parent = conc_tnode1
+                tnode2.parent = conc_tnode1
+                self.create_edges(tnode1, tnode2, ast_node)
                 return TypeInfo(conc_tnode1.type)
             else:
                 return TypeFail(tnode1, tnode2, ast_node)
 
         # One type can be resolved
         elif conc_tnode1 is not None:
-            if mod_tnodes:
-                tnode2.parent = conc_tnode1
-                self.create_edges(tnode1, tnode2, ast_node)
+            tnode2.parent = conc_tnode1
+            self.create_edges(tnode1, tnode2, ast_node)
             return TypeInfo(conc_tnode1.type)
         elif conc_tnode2 is not None:
-            return self.unify(t2, t1, ast_node, mod_tnodes)
+            return self.unify(t2, t1, ast_node)
 
         # TODO: Replace with logic based on concrete tnodes
         # Legacy code from previous implementation of unify
@@ -401,13 +450,11 @@ class TypeConstraints:
         elif t1 == t2:
             return TypeInfo(t1)
         else:
-            if mod_tnodes:
-                self.create_edges(tnode1, tnode2, ast_node)
+            self.create_edges(tnode1, tnode2, ast_node)
             return TypeInfo(None)
 
     def _unify_generic(self, tnode1: _TNode, tnode2: _TNode,
-                       ast_node: Optional[NodeNG] = None,
-                       mod_tnodes = True) -> TypeResult:
+                       ast_node: Optional[NodeNG] = None) -> TypeResult:
         """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
 
         conc_tnode1 = self.find_parent(tnode1)
@@ -420,7 +467,7 @@ class TypeConstraints:
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
             return TypeFail(conc_tnode1, conc_tnode2, ast_node)
 
-        unify_result = failable_collect([self.unify(a1, a2, ast_node, mod_tnodes)
+        unify_result = failable_collect([self.unify(a1, a2, ast_node)
                                          for a1, a2 in
                                          zip(conc_tnode1.type.__args__,
                                              conc_tnode2.type.__args__)])
@@ -428,15 +475,16 @@ class TypeConstraints:
             return unify_result
         unified_args = unify_result.getValue()
 
-        if mod_tnodes:
-            self.create_edges(tnode1, tnode2, ast_node)
+        self.create_edges(tnode1, tnode2, ast_node)
         return _wrap_generic_meta(g1, unified_args)
 
     ###########################################################################
     # Handling generic polymorphism
     ###########################################################################
     def can_unify(self, t1: type, t2: type) -> bool:
-        return isinstance(self.unify(t1, t2, None, False), TypeInfo)
+        """Check if the two types can unify without modifying current TypeConstraints."""
+        tc = self.__deepcopy__()
+        return isinstance(tc.unify(t1, t2, None), TypeInfo)
 
     def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.

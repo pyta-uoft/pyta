@@ -5,8 +5,9 @@ from typing import *
 import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
-from ..typecheck.base import Environment, TypeConstraints, parse_annotations, create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail
-from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message, subscript_error_message
+from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
+    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable
+from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -115,63 +116,53 @@ class TypeInferer:
         if node.ctx == astroid.Store:
             # List is the target of an assignment; do not give it a type.
             node.inf_type = TypeInfo(NoType)
-        elif node.elts == []:
+        elif not node.elts:
             node.inf_type = TypeInfo(List[Any])
         else:
-            node_type = node.elts[0].inf_type.getValue()
-            for elt in node.elts:
-                if isinstance(node_type, type):
-                    node_type = self.type_constraints.unify(
-                        elt.inf_type.getValue(), node_type, node).getValue()
-            if isinstance(node_type, str):
-                node_type = Any
-            node.inf_type = TypeInfo(List[node_type])
+            elt_inf_type = self.unify_elements(node.elts, node)
+            node.inf_type = self.wrap_container(List, elt_inf_type)
 
     def visit_set(self, node: astroid.Set) -> None:
-        if node.elts == []:
+        if not node.elts:
             node.inf_type = TypeInfo(Set[Any])
         else:
-            node_type = node.elts[0].inf_type.getValue()
-            for elt in node.elts:
-                if isinstance(node_type, type):
-                    node_type = self.type_constraints.unify(
-                        elt.inf_type.getValue(), node_type, node).getValue()
-            if isinstance(node_type, str):
-                node_type = Any
-            node.inf_type = TypeInfo(Set[node_type])
+            elt_inf_type = self.unify_elements(node.elts, node)
+            node.inf_type = self.wrap_container(Set, elt_inf_type)
 
     def visit_dict(self, node: astroid.Dict) -> None:
-        if node.items == []:
+        if not node.items:
             node.inf_type = TypeInfo(Dict[Any, Any])
         else:
-            key_type, val_type = node.items[0][0].inf_type.getValue(), node.items[0][1].inf_type.getValue()
-            for key_node, val_node in node.items:
-                if isinstance(key_type, type):
-                    key_type = self.type_constraints.unify(
-                        key_node.inf_type.getValue(), key_type, node).getValue()
-                if isinstance(val_type, type):
-                    val_type = self.type_constraints.unify(
-                        val_node.inf_type.getValue(), val_type, node).getValue()
-            if isinstance(key_type, str):
-                key_type = Any
-            if isinstance(val_type, str):
-                val_type = Any
-            node.inf_type = TypeInfo(Dict[key_type, val_type])
+            key_list, val_list = zip(*node.items)
+            key_inf_type = self.unify_elements(key_list, node)
+            val_inf_type = self.unify_elements(val_list, node)
+            node.inf_type = self.wrap_container(Dict, key_inf_type, val_inf_type)
 
     def visit_tuple(self, node):
         if node.ctx == astroid.Store:
             # Tuple is the target of an assignment; do not give it a type.
             node.inf_type = TypeInfo(NoType)
         else:
-            node.inf_type = TypeInfo(
-                Tuple[tuple(x.inf_type.getValue() for x in node.elts)])
+            node.inf_type = self.wrap_container(Tuple, *(e.inf_type for e in node.elts))
+
+    def unify_elements(self, lst: List[NodeNG], node: NodeNG) -> TypeInfo:
+        lst = list(lst)
+        elt_inf_type = lst[0].inf_type
+        for cur_elt in lst:
+            elt_inf_type = self.type_constraints.unify(elt_inf_type, cur_elt.inf_type, node)
+        if isinstance(elt_inf_type, TypeFail):
+            return TypeInfo(Any)
+        return elt_inf_type
+
+    @accept_failable
+    def wrap_container(self, container_type: GenericMeta, *args: List[type]) -> TypeInfo:
+        return TypeInfo(container_type[tuple(args)])
 
     ##############################################################################
     # Expression types
     ##############################################################################
     def visit_ifexp(self, node: astroid.IfExp) -> None:
-        node.inf_type = self.type_constraints.unify(
-            node.body.inf_type.getValue(), node.orelse.inf_type.getValue(), node)
+        node.inf_type = self.type_constraints.unify(node.body.inf_type, node.orelse.inf_type, node)
 
     def visit_expr(self, node):
         """Expr nodes take the type of their child
@@ -217,24 +208,18 @@ class TypeInferer:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
         if isinstance(node.value, astroid.Name):
-            expr_type = self.lookup_typevar(node, node.value.name)
+            expr_inf_type = TypeInfo(self.lookup_typevar(node, node.value.name))
         else:
-            expr_type = node.value.inf_type.getValue()
+            expr_inf_type = node.value.inf_type
 
         node.inf_type = TypeInfo(NoType)
 
         for target in node.targets:
-            type_result = self._assign_type(target, expr_type, node)
+            type_result = self._assign_type(target, expr_inf_type, node)
             if isinstance(type_result, TypeFail):
                 node.inf_type = type_result
-                if isinstance(expr_type, typing.TupleMeta) and isinstance(target, astroid.Tuple):
-                    if len(expr_type.__args__) > len(target.elts):
-                        node.inf_type.add_msg("Too many values in assignment node")
-                    elif len(expr_type.__args__) < len(target.elts):
-                        node.inf_type.add_msg("Too many variables in assignment node")
-                elif isinstance(target, astroid.Tuple):
-                    node.inf_type.add_msg("Cannot assign single value to multiple variables")
 
+    @accept_failable
     def _assign_type(self, target: NodeNG, expr_type: type, node: astroid.Assign) -> TypeResult:
         """Update the type environment so that the target is bound to the given type."""
         if isinstance(target, astroid.AssignName):
@@ -254,18 +239,15 @@ class TypeInferer:
                 )
             else:
                 iter_type_result = self._handle_call(target, '__iter__', expr_type)
-                if not isinstance(iter_type_result, TypeFail):
-                    iter_type = iter_type_result.getValue()
-                    contained_type = iter_type.__args__[0]
-                    for subtarget in target.elts:
-                        target_tvar = self.lookup_type(subtarget, subtarget.name)
-                        self.type_constraints.unify(
-                            target_tvar, contained_type, node)
+                for subtarget in target.elts:
+                    target_tvar = self.lookup_type(subtarget, subtarget.name)
+                    iter_type_result >> (
+                        lambda t: self.type_constraints.unify(target_tvar, t.__args__[0], node)
+                    )
                 return iter_type_result
         elif isinstance(target, astroid.Subscript):
             # TODO: previous case must recursively handle this one
-            return self._handle_call(target, '__setitem__', target.value.inf_type.getValue(),
-                                     target.slice.inf_type.getValue(), expr_type)
+            return self._handle_call(target, '__setitem__', target.value.inf_type, target.slice.inf_type, expr_type)
 
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""
@@ -287,11 +269,11 @@ class TypeInferer:
     ##############################################################################
     def visit_call(self, node: astroid.Call) -> None:
         callable_t = node.func.inf_type.getValue()
-        # Check if Union
-        if hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union:
-            is_union = True
-        else:
-            is_union = False
+        is_union = hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union
+
+        # case when callable_t is the type of a class
+        if hasattr(callable_t, '__name__') and callable_t.__name__ == 'Type':
+            callable_t = callable_t.__args__[0]
 
         if not isinstance(callable_t, (CallableMeta, list)) and not is_union:
             if isinstance(callable_t, _ForwardRef):
@@ -322,8 +304,7 @@ class TypeInferer:
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
-        arg_types = [node.left.inf_type.getValue(), node.right.inf_type.getValue()]
-        node.inf_type = self._handle_call(node, method_name, *arg_types, error_func=binop_error_message)
+        node.inf_type = self._handle_call(node, method_name, node.left.inf_type, node.right.inf_type, error_func=binop_error_message)
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.
@@ -331,13 +312,11 @@ class TypeInferer:
             node.inf_type = TypeInfo(bool)
         else:
             method_name = UNARY_TO_METHOD[node.op]
-            node.inf_type = self._handle_call(node, method_name, node.operand.inf_type.getValue(), error_func=unaryop_error_message)
+            node.inf_type = self._handle_call(node, method_name, node.operand.inf_type, error_func=unaryop_error_message)
 
     def visit_boolop(self, node: astroid.BoolOp) -> None:
-        node_type_constraints = {operand_node.inf_type.getValue() for operand_node in node.values}
-        if len(node_type_constraints) == 1:
-            node.inf_type = TypeInfo(node_type_constraints.pop())
-        else:
+        node.inf_type = self.unify_elements(node.values, node)
+        if isinstance(node.inf_type, TypeFail):
             node.inf_type = TypeInfo(Any)
 
     def visit_compare(self, node: astroid.Compare) -> None:
@@ -350,24 +329,24 @@ class TypeInferer:
                 resolved_type = self._handle_call(
                     node,
                     BINOP_TO_METHOD[comparator],
-                    right.inf_type.getValue(),
-                    left.inf_type.getValue()
+                    right.inf_type,
+                    left.inf_type
                 )
                 if isinstance(resolved_type, TypeFail):
                     node.inf_type = resolved_type
                     return
-                return_types.add(resolved_type.getValue())
+                resolved_type >> return_types.add
             else:
                 resolved_type = self._handle_call(
                     node,
                     BINOP_TO_METHOD[comparator],
-                    left.inf_type.getValue(),
-                    right.inf_type.getValue()
+                    left.inf_type,
+                    right.inf_type
                 )
                 if isinstance(resolved_type, TypeFail):
                     node.inf_type = resolved_type
                     return
-                return_types.add(resolved_type.getValue())
+                resolved_type >> return_types.add
         if len(return_types) == 1:
             node.inf_type = TypeInfo(return_types.pop())
         else:
@@ -388,32 +367,34 @@ class TypeInferer:
         if node.inf_type.getValue() == type(None):
             node.inf_type = TypeInfo(slice)
 
+    def visit_extslice(self, node: astroid.ExtSlice):
+        unif_res = failable_collect(dim.inf_type for dim in node.dims)
+        if isinstance(unif_res, TypeFail):
+            return unif_res
+        node.inf_type = TypeInfo(Tuple[tuple(unif_res.getValue())])
+
     def visit_subscript(self, node: astroid.Subscript) -> None:
-        if node.ctx == astroid.Load:
-            node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type.getValue(),
-                                              node.slice.inf_type.getValue(), error_func=subscript_error_message)
+        if isinstance(node.slice.inf_type, TypeFail):
+            node.inf_type = node.slice.inf_type
+        elif node.ctx == astroid.Load:
+            node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
         elif node.ctx == astroid.Store:
-            node.inf_type = TypeInfo(NoType) # type assigned when parent Assign node is visited
+            node.inf_type = TypeInfo(NoType)
         elif node.ctx == astroid.Del:
-            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type.getValue(),
-                                              node.slice.inf_type.getValue(), error_func=subscript_error_message)
+            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
 
     ##############################################################################
     # Loops
     ##############################################################################
     def visit_for(self, node):
-        iter_type_result = self._handle_call(node, '__iter__', node.iter.inf_type.getValue())
-        if not isinstance(iter_type_result, TypeFail):
-            contained_type = iter_type_result.getValue().__args__[0]
-            if isinstance(node.target, astroid.AssignName):
-                target_type = self.lookup_type(node.target, node.target.name)
-            else:
-                target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
-
-            self.type_constraints.unify(contained_type, target_type, node)
-            node.inf_type = TypeInfo(NoType)
+        iter_type_result = self._handle_call(node, '__iter__', node.iter.inf_type)
+        if isinstance(node.target, astroid.AssignName):
+            target_type = self.lookup_type(node.target, node.target.name)
         else:
-            node.inf_type = iter_type_result
+            target_type = Tuple[tuple(self.lookup_type(subtarget, subtarget.name) for subtarget in node.target.elts)]
+        iter_type_result >> (
+            lambda t: self.type_constraints.unify(t.__args__[0], target_type, node))
+        node.inf_type = iter_type_result if isinstance(iter_type_result, TypeFail) else TypeInfo(NoType)
 
     ##############################################################################
     # Comprehensions
@@ -422,22 +403,23 @@ class TypeInferer:
         self.visit_for(node)
 
     def visit_dictcomp(self, node: astroid.DictComp) -> None:
-        key_type = self.type_constraints.resolve(node.key.inf_type.getValue()).getValue()
-        val_type = self.type_constraints.resolve(node.value.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(Dict[key_type, val_type])
+        key_inf_type = self.type_constraints.resolve(node.key.inf_type)
+        val_inf_type = self.type_constraints.resolve(node.value.inf_type)
+        node.inf_type = self.wrap_container(Dict, key_inf_type, val_inf_type)
 
     def visit_generatorexp(self, node: astroid.GeneratorExp) -> None:
-        elt_type = self.type_constraints.resolve(node.elt.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(Generator[elt_type, None, None])
+        elt_inf_type = self.type_constraints.resolve(node.elt.inf_type)
+        node.inf_type = self.wrap_container(Generator, elt_inf_type, None, None)
 
     def visit_listcomp(self, node: astroid.ListComp) -> None:
-        val_type = self.type_constraints.resolve(node.elt.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(List[val_type])
+        val_inf_type = self.type_constraints.resolve(node.elt.inf_type)
+        node.inf_type = self.wrap_container(List, val_inf_type)
 
     def visit_setcomp(self, node: astroid.SetComp) -> None:
-        elt_type = self.type_constraints.resolve(node.elt.inf_type.getValue()).getValue()
-        node.inf_type = TypeInfo(Set[elt_type])
+        elt_inf_type = self.type_constraints.resolve(node.elt.inf_type)
+        node.inf_type = self.wrap_container(Set, elt_inf_type)
 
+    @accept_failable
     def _handle_call(self, node: NodeNG, function_name: str, *arg_types: List[type],
                      error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeResult:
         """Helper to lookup a function and unify it with given arguments.
@@ -473,6 +455,8 @@ class TypeInferer:
 
         if any(node.nodes_of_class(astroid.Return)):
             inferred_return = self.type_constraints.resolve(node.type_environment.lookup_in_env('return')).getValue()
+        elif node.name == '__init__':
+            inferred_return = inferred_args[0]
         else:
             inferred_return = type(None)
 
@@ -492,7 +476,9 @@ class TypeInferer:
                 combined_args.append(t)
 
             annotated_rtype = annotated_type.__args__[-1]
-            if annotated_rtype is None:
+            if node.name == '__init__':
+                annotated_rtype = inferred_args[0]
+            elif annotated_rtype is None:
                 annotated_rtype = type(None)
             combined_return = self.type_constraints.unify(
                 inferred_return, annotated_rtype, node).getValue()
@@ -520,25 +506,21 @@ class TypeInferer:
                     arg_tvar, _node_to_type(node.annotations[i]), node)
 
     def visit_return(self, node: astroid.Return) -> None:
-        if not isinstance(node.value.inf_type, TypeFail):
-            t = node.value.inf_type.getValue()
-            self.type_constraints.unify(self.lookup_type(node, 'return'), t, node)
-            node.inf_type = TypeInfo(NoType)
-        else:
-            node.inf_type = node.value.inf_type
+        val_inf_type = self.type_constraints.unify(node.value.inf_type, self.lookup_type(node, 'return'), node)
+        node.inf_type = val_inf_type if isinstance(val_inf_type, TypeFail) else TypeInfo(NoType)
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:
         node.inf_type = TypeInfo(NoType)
         self.type_constraints.unify(self.lookup_type(node.parent, node.name),
-                                    _ForwardRef(node.name), node)
+                                    Type[_ForwardRef(node.name)], node)
 
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?
         for attr in node.locals:
-            attr_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr)).getValue()
-            self.type_store.classes[node.name][attr].append(attr_type)
-            if isinstance(attr_type, CallableMeta):
-                self.type_store.methods[attr].append(attr_type)
+            attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
+            attr_inf_type >> self.type_store.classes[node.name][attr].append
+            attr_inf_type >> (
+                lambda a: self.type_store.methods[attr].append(a) if isinstance(a, CallableMeta) else None)
 
     ##############################################################################
     # Statements
@@ -565,12 +547,10 @@ class TypeInferer:
                     attribute_type = Callable[list(attribute_type.__args__[1:-1]), attribute_type.__args__[-1]]
                 node.inf_type = TypeInfo(attribute_type)
 
-
     def visit_annassign(self, node):
-        variable_type = self.type_constraints.resolve(
-            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name)).getValue()
-        self.type_constraints.unify(
-            variable_type, _node_to_type(node.annotation.name), node)
+        var_inf_type = self.type_constraints.resolve(
+            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
+        self.type_constraints.unify(var_inf_type, _node_to_type(node.annotation.name), node)
         node.inf_type = TypeInfo(NoType)
 
     def visit_module(self, node):

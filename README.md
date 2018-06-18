@@ -12,7 +12,7 @@ necessarily have the most beginner-friendly format. PyTA has two central goals:
    in their careers.
 
 This is a new project started in the Summer of 2016, and takes the form
-of a wrapper around [pylint](pylint.org) (with custom checkers) that operates
+of a wrapper around [pylint](https://pylint.org) (with custom checkers) that operates
 directly on Python modules, as well as a website with some supplementary
 material going into further detail for the emitted errors.
 
@@ -55,7 +55,15 @@ To run the tests, enter `python tests/test_examples.py` in the terminal. (If you
 ## Contributors
 
 Nigel Fong,
+Niayesh Ilkhani,
+Rebecca Kay,
 Christopher Koehler,
+Simeon Krastnikov,
+Ryan Lee,
 Hayley Lin,
+Wendy Liu,
 Shweta Mogalapalli,
+Justin Park,
+Amr Sharaf,
+Alexey Strokach,
 Jasmine Wu

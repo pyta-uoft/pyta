@@ -1,6 +1,8 @@
 import tests.custom_hypothesis_support as cs
+from nose import SkipTest
 from typing import *
-from python_ta.typecheck.base import TypeConstraints, _TNode
+from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
+from sample_usage.draw_tnodes import gen_graph_from_nodes
 
 
 def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
@@ -157,3 +159,101 @@ def test_elt():
     actual_set = tc_to_disjoint(ti.type_constraints)
     expected_set = [{'~_T0', 'typing.List[~_T2]', 'typing.List[int]'}, {'~_T1', int, '~_T2'}]
     compare_list_sets(actual_set, expected_set)
+
+
+tc = TypeConstraints()
+
+
+def test_polymorphic_callable(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    t1 = tc.fresh_tvar()
+    t2 = tc.fresh_tvar()
+    tc.unify(t1, Callable[[int], int])
+    tc.unify(t2, Callable[[t0], t0])
+    tc.unify(t1, t2)
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', int},
+                    {'~_T1', '~_T2', 'typing.Callable[[int], int]',
+                     'typing.Callable[[~_T0], ~_T0]'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_polymorphic_callable2(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    t1 = tc.fresh_tvar()
+    t2 = tc.fresh_tvar()
+    tc.unify(t1, Callable[[t0], int])
+    tc.unify(t2, Callable[[int], t0])
+    tc.unify(t1, t2)
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', int},
+                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], int]',
+                     'typing.Callable[[int], ~_T0]'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_polymorphic_callable3(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    t1 = tc.fresh_tvar()
+    t2 = tc.fresh_tvar()
+    tc.unify(t1, Callable[[t0], t0])
+    tc.unify(t2, t1)
+    tc.unify(t2, Callable[[int], int])
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', int},
+                    {'~_T1', '~_T2', 'typing.Callable[[int], int]',
+                     'typing.Callable[[~_T0], ~_T0]'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_polymorphic_callable4(draw=False):
+    raise SkipTest('Test this after adding functionality for testing correct TypeFail behavior.')
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    t1 = tc.fresh_tvar()
+    t2 = tc.fresh_tvar()
+    tc.unify(t1, Callable[[t0], t0], draw)
+    tc.unify(t2, t1, draw)
+    tc.unify(t2, Callable[[int], str], draw)  # this is a TypeFail
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', int},
+                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_polymorphic_callable5(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    tc.unify(Callable[[Callable[[int, t0], int], int], t0],
+             Callable[[Callable[[int, int], int], int], t0])
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', int},
+                    {'typing.Callable[[int, ~_T0], int]', 'typing.Callable[[int, int], int]'},
+                    {'typing.Callable[[typing.Callable[[int, ~_T0], int], int], ~_T0]',
+                     'typing.Callable[[typing.Callable[[int, int], int], int], ~_T0]'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_can_unify_callable(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    assert not tc.can_unify(Callable[[t0, t0], int], Callable[[str, int], int])
+    # make sure tc is unchanged
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0'}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)

@@ -381,7 +381,7 @@ class TypeInferer:
             node.inf_type = TypeInfo(slice)
 
     def visit_extslice(self, node: astroid.ExtSlice):
-        unif_res = failable_collect([dim.inf_type for dim in node.dims])
+        unif_res = failable_collect(dim.inf_type for dim in node.dims)
         if isinstance(unif_res, TypeFail):
             return unif_res
         node.inf_type = TypeInfo(Tuple[tuple(unif_res.getValue())])

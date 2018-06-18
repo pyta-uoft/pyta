@@ -104,14 +104,22 @@ def _wrap_generic_meta(t, args):
 def accept_failable(f):
     def _f(*args, **kwargs):
         new_args = []
-        for a in args + tuple(kwargs.values()):
+        new_kwargs = {}
+        for a in args:
             if isinstance(a, Failable):
-                result = a >> new_args.append
-                if isinstance(result, TypeFail):
-                    return result
+                if isinstance(a, TypeFail):
+                    return a
+                a >> new_args.append
             else:
                 new_args.append(a)
-        return f(*new_args)
+        for kw in kwargs:
+            if isinstance(kwargs[kw], Failable):
+                if isinstance(kwargs[kw], Failable):
+                    return kwargs[kw]
+                new_kwargs += kwargs[kw] >> (lambda t: dict(kw=t))
+            else:
+                new_kwargs[kw] = kwargs[kw]
+        return f(*new_args, **new_kwargs)
 
     return _f
 
@@ -293,6 +301,7 @@ class TypeConstraints:
     ###########################################################################
     # Type lookup ("find")
     ###########################################################################
+    @accept_failable
     def resolve(self, t: type) -> TypeInfo:
         """Return the concrete type or set representative associated with the given type.
         """

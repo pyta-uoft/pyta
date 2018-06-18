@@ -102,7 +102,8 @@ Done.
 
 ### Subscript
 
-Done.
+**TODOs:**
+- Handle ExtSlice
 
 ### Tuple
 
@@ -115,10 +116,22 @@ Done.
 
 ## Type Inference
 
-- Edit all functions that use resolve, unify, _merge_sets, _assign_type, _handle_call to be properly monadic
-- Edit all visit functions to use monadic functions
+- Edit all functions to be properly monadic
+  - Remove all instances of .getValue()
+  - type_inference_visitor.py
+    - lookup_attribute_type
+    - lookup_type
+    - visit_call
+    - visit_slice
+    - visit_functiondef
+    - visit_attribute
+  - base.py
+    - resolve
+    - _unify_generic
+    - _type_eval
+    - type_in_callable
 - Remove duplicated functionality between unify, _unify_generic and unify_call
-- Remove all instances of .getValue()
-- Unify functionality of resolve, _find, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type
+- Remove duplicated functionality between unify_call and _handle_call
+- Unify functionality of resolve, find_parent, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type
 - Update _handle_call to reflect changes to _TNode structure, particularly when looking up methods with multiple type signatures
 - Support for type inference with inheritance 

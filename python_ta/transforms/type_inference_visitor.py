@@ -6,7 +6,7 @@ import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
-    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable
+    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -256,13 +256,20 @@ class TypeInferer:
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
         return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name)).getValue()
 
-    def lookup_type(self, node, name):
-        """Given a variable name, return its concrete type in the closest scope relative to given node."""
-        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
-        return self.type_constraints.resolve(tvar).getValue()
-
-    def lookup_typevar(self, node: NodeNG, name: str):
+    def lookup_typevar(self, node: NodeNG, name: str) -> TypeVar:
+        """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""
         return self._closest_frame(node, name).type_environment.lookup_in_env(name)
+
+    def lookup_inf_type(self, node: NodeNG, name: str) -> TypeResult:
+        """Given a variable name, return a TypeResult object containing the type in the closest scope relative to given node.
+        """
+        tvar = self.lookup_typevar(node, name)
+        return self.type_constraints.resolve(tvar)
+
+    def lookup_type(self, node, name) -> type:
+        """Given a variable name, return its concrete type in the closest scope relative to given node."""
+        inf_type = self.lookup_inf_type(node, name)
+        return inf_type.getValue()
 
     ##############################################################################
     # Operation nodes
@@ -359,13 +366,13 @@ class TypeInferer:
         node.inf_type = node.value.inf_type
 
     def visit_slice(self, node: astroid.Slice) -> None:
-        lower_type = node.lower.inf_type.getValue() if node.lower else type(None)
-        upper_type = node.upper.inf_type.getValue() if node.upper else type(None)
-        step_type = node.step.inf_type.getValue() if node.step else type(None)
+        lower_type = node.lower.inf_type if node.lower else type(None)
+        upper_type = node.upper.inf_type if node.upper else type(None)
+        step_type = node.step.inf_type if node.step else type(None)
         node.inf_type = self._handle_call(node, '__init__', slice, lower_type,
                                           upper_type, step_type)
-        if node.inf_type.getValue() == type(None):
-            node.inf_type = TypeInfo(slice)
+        node.inf_type = node.inf_type >> (
+            lambda t: TypeInfo(slice) if t == type(None) else TypeInfo(t))
 
     def visit_extslice(self, node: astroid.ExtSlice):
         unif_res = failable_collect(dim.inf_type for dim in node.dims)
@@ -443,59 +450,67 @@ class TypeInferer:
     def visit_functiondef(self, node: astroid.FunctionDef) -> None:
         node.inf_type = TypeInfo(NoType)
 
-        # Get the inferred type of the function.
-        inferred_args = [self.lookup_type(node, arg) for arg in node.argnames()]
+        # Get the inferred type of the function arguments
+        inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
 
-        if isinstance(node.parent, astroid.ClassDef) and isinstance(inferred_args[0], TypeVar):
+        if isinstance(node.parent, astroid.ClassDef):
             # first argument is special in these cases
             if node.type == 'method':
                 self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name), node)
             elif node.type == 'classmethod':
                 self.type_constraints.unify(inferred_args[0], Type[_ForwardRef(node.parent.name)], node)
 
+        # Get inferred return type
         if any(node.nodes_of_class(astroid.Return)):
-            inferred_return = self.type_constraints.resolve(node.type_environment.lookup_in_env('return')).getValue()
+            inferred_return = self.lookup_inf_type(node, 'return')
         elif node.name == '__init__':
             inferred_return = inferred_args[0]
         else:
-            inferred_return = type(None)
+            inferred_return = TypeInfo(type(None))
 
-        # Get any function type annotations.
+        # Get any function type annotations and combine if necessary
         if any(annotation is not None for annotation in node.args.annotations):
             annotated_type = parse_annotations(node)[0]
-        else:
-            annotated_type = None
 
-        # Combine inferred and annotated types.
-        if annotated_type:
             combined_args = []
-            for inferred, annotated in zip(inferred_args, annotated_type.__args__[:-1]):
-                if annotated is None:
-                    annotated = type(None)
-                t = self.type_constraints.unify(inferred, annotated, node).getValue()
-                combined_args.append(t)
+            for inf_arg, ann_arg in zip(inferred_args, annotated_type.__args__[:-1]):
+                if ann_arg is None:
+                    combined_args.append(TypeInfo(type(None)))
+                else:
+                    combined_args.append(self.type_constraints.unify(inf_arg, ann_arg, node))
 
             annotated_rtype = annotated_type.__args__[-1]
             if node.name == '__init__':
                 annotated_rtype = inferred_args[0]
-            elif annotated_rtype is None:
-                annotated_rtype = type(None)
             combined_return = self.type_constraints.unify(
-                inferred_return, annotated_rtype, node).getValue()
+                inferred_return, annotated_rtype, node)
         else:
             combined_args, combined_return = inferred_args, inferred_return
 
         # Update the environment storing the function's type.
-        polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
-        func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
+        polymorphic_tvars = []
+        for arg in combined_args:
+            arg >> (
+                lambda a: polymorphic_tvars.append(a) if isinstance(arg, TypeVar) else a)
+
+        # Create function signature
+        func_type = create_Callable_TypeResult(failable_collect(combined_args), combined_return, polymorphic_tvars)
+
+        # Check for optional arguments, create a Union of function signatures if necessary
         num_defaults = len(node.args.defaults)
-        if num_defaults > 0:
+        if num_defaults > 0 and not isinstance(func_type, TypeFail):
             for i in range(num_defaults):
                 opt_args = inferred_args[:-1-i]
-                opt_func_type = create_Callable(opt_args, combined_return, polymorphic_tvars)
-                func_type = Union[func_type, opt_func_type]
-        self.type_constraints.unify(
-            self.lookup_type(node.parent, node.name), func_type, node)
+                opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), combined_return, polymorphic_tvars)
+                func_type = func_type >> (
+                    lambda f: opt_func_type >> (
+                        lambda opt_f: TypeInfo(Union[f, opt_f])))
+
+        # Final type signature unify
+        func_name = self.lookup_inf_type(node.parent, node.name)
+        result = self.type_constraints.unify(func_name, func_type, node)
+        if isinstance(result, TypeFail):
+            node.inf_type = result
 
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = TypeInfo(NoType)

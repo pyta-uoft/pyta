@@ -150,6 +150,12 @@ def create_Callable(args: Iterable[type], rtype, poly_vars=None):
     return c
 
 
+@accept_failable
+def create_Callable_TypeResult(args: Iterable[type], rtype, poly_vars=None):
+    """Return Callable wrapped in a TypeInfo instance"""
+    return TypeInfo(create_Callable(args, rtype, poly_vars))
+
+
 TYPE_SIGNATURES = {
     int: {
         '__add__': create_Callable([int, Num], Num, [Num]),

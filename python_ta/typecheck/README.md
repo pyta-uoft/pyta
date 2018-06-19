@@ -120,9 +120,6 @@ Done.
   - type_inference_visitor.py
     - lookup_attribute_type
     - lookup_type
-    - visit_call
-    - visit_slice
-    - visit_functiondef
     - visit_attribute
   - base.py
     - resolve

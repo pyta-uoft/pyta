@@ -77,7 +77,7 @@ class UnnecessaryAssignmentChecker(BaseChecker):
 
         for val in values:
             # this will check at the end if there were values unused.
-            if values[val][0] > -1:
+            if values[val][0] > -1 and values[val][2]:
                 errors.append(values[val][1].parent)
                 errorexists = True
 

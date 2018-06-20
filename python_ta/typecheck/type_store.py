@@ -1,7 +1,7 @@
 import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
-from python_ta.typecheck.base import parse_annotations, class_callable
+from python_ta.typecheck.base import parse_annotations, class_callable, accept_failable
 from typing import Callable
 import os
 from typing import Any
@@ -74,6 +74,7 @@ class TypeStore:
                     return func_type
             raise KeyError
 
+    @accept_failable
     def lookup_method(self, operator, *args):
         """Helper method to lookup a method type given the operator and types of arguments."""
         if args:

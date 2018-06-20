@@ -150,6 +150,12 @@ def create_Callable(args: Iterable[type], rtype, poly_vars=None):
     return c
 
 
+@accept_failable
+def create_Callable_TypeResult(args: Iterable[type], rtype, poly_vars=None):
+    """Return Callable wrapped in a TypeInfo instance"""
+    return TypeInfo(create_Callable(args, rtype, poly_vars))
+
+
 TYPE_SIGNATURES = {
     int: {
         '__add__': create_Callable([int, Num], Num, [Num]),
@@ -486,6 +492,7 @@ class TypeConstraints:
         tc = self.__deepcopy__()
         return isinstance(tc.unify(t1, t2, None), TypeInfo)
 
+    @accept_failable
     def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.
 
@@ -619,9 +626,9 @@ def parse_annotations(node, class_tvars=None):
                 arg_types.append(_node_to_type(annotation))
 
         rtype = _node_to_type(node.returns)
-        return create_Callable(arg_types, rtype, class_tvars)
+        return create_Callable(arg_types, rtype, class_tvars), node.type
     elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
-        return _node_to_type(node.parent.annotation)
+        return _node_to_type(node.parent.annotation), 'attribute'
 
 
 def _node_to_type(node, locals=None):

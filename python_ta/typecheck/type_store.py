@@ -2,6 +2,7 @@ import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
 from python_ta.typecheck.base import parse_annotations, class_callable
+from typing import Callable
 import os
 from typing import Any
 
@@ -27,7 +28,7 @@ class TypeStore:
         # Add in initializers
         for klass_name, methods in self.classes.items():
             if '__init__' in methods:
-                self.functions[klass_name] = [class_callable(init) for init in methods['__init__']]
+                self.functions[klass_name] = [class_callable(init) for init, _ in methods['__init__']]
 
     def _parse_classes(self, module: astroid.Module) -> None:
         """Parse the class definitions from typeshed."""
@@ -64,39 +65,27 @@ class TypeStore:
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
         if args:
-            unified = False
             func_types_list = self.functions[operator]
             for func_type in func_types_list:
-                # check if args can be unified instead of checking if they are the same!
-                unified = True
-                for t1, t2 in zip(func_type.__args__[:-1], args):
-                    if not isinstance(self.type_constraints.unify(t1, t2), type):
-                        unified = False
-                        break
-                if unified:
+                if len(args) != len(func_type.__args__) - 1:
+                    continue
+                if self.type_constraints.can_unify(Callable[list(func_type.__args__[:-1]), Any],
+                                                   Callable[list(args), Any]):
                     return func_type
-            if not unified:
-                raise KeyError
+            raise KeyError
 
     def lookup_method(self, operator, *args):
         """Helper method to lookup a method type given the operator and types of arguments."""
         if args:
-            unified = False
             func_types_list = self.methods[operator]
             self_type = args[0]
-            for func_type in func_types_list:
+            for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue
-                unified = True
-                for t1, t2 in zip(func_type.__args__[:-1], args):
-                    # TODO: replace call to can_unify
-                    if not self.type_constraints.can_unify(t1, t2):
-                        unified = False
-                        break
-                if unified:
+                if self.type_constraints.can_unify(Callable[list(func_type.__args__[:-1]), Any],
+                                                   Callable[list(args), Any]):
                     return func_type
-            if not unified:
-                raise KeyError
+            raise KeyError
 
 
 if __name__ == '__main__':

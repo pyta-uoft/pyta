@@ -6,6 +6,7 @@ import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable, _ForwardRef, Type
 from nose.tools import eq_
+from python_ta.transforms.type_inference_visitor import TypeFail
 settings.load_profile("pyta")
 
 
@@ -122,25 +123,15 @@ def test_functiondef_staticmethod():
         assert inferer.lookup_type(func_def, func_def.argnames()[0]) == int
 
 
-
 def test_nested_annotated_function_conflicting_body():
     """ User tries to define an annotated function which has conflicting types within its body.
     """
     program = f'def random_func(int1: int) -> None:\n' \
               f'    int1 + "bob"\n'
 
-    raise SkipTest("Outdated annotation test. Previously raised SkipTest during cs._parse_text")
-
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    functiondef_type = inferer.lookup_type(module, "return_int")
-    expected_msg = f'In the FunctionDef node in line 1, in the annotated Function Definition of "random_func" in line 1:\n' \
-                   f'in parameter (1), "int1", the annotated type is int, which conflicts with the inferred type of ' \
-                   f'str from the function definition body.'
-                    # TODO: where in the body, or is this too convoluted? Extract from sets.
-    assert functiondef_type.msg == expected_msg
+    module, inferer = cs._parse_text(program)
+    binop_node = next(module.nodes_of_class(astroid.BinOp))
+    assert isinstance(binop_node.inf_type, TypeFail)
 
 
 def test_annotated_functiondef_conflicting_return_type():
@@ -151,15 +142,9 @@ def test_annotated_functiondef_conflicting_return_type():
               f'    output = num1 + str1\n' \
               f'    return "bob"\n' \
               f'\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    functiondef_type = inferer.lookup_type(module, "return_str")
-    expected_msg = f'In the FunctionDef node in line 1, in the annotated Function Definition of "random_func" in line 1:\n' \
-                   f'the annotated return type is int, which conflicts with the inferred return type of ' \
-                   f'str from the function definition body.'
-    assert functiondef_type.msg == expected_msg
+    module, inferer = cs._parse_text(program)
+    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    assert isinstance(functiondef_node.inf_type, TypeFail)
 
 
 def test_function_return():

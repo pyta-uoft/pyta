@@ -6,7 +6,7 @@ import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
-    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable
+    create_Callable,_node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -64,7 +64,7 @@ class TypeInferer:
         node.type_environment = Environment()
         for name in node.instance_attrs:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.instance_attrs[name][0])
-            self.type_store.classes[node.name][name] = [node.type_environment.locals[name]]
+            self.type_store.classes[node.name][name] = [(node.type_environment.locals[name], 'attribute')]
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
 
@@ -199,7 +199,7 @@ class TypeInferer:
             if node.name in self.type_store.classes:
                 node.inf_type = TypeInfo(Type[__builtins__[node.name]])
             elif node.name in self.type_store.functions:
-                node.inf_type = TypeInfo(self.type_store.functions[node.name][0])
+                node.inf_type = TypeInfo(self.type_store.functions[node.name][0][0])
             else:
                 # This is an unbound identifier. Ignore it.
                 node.inf_type = TypeInfo(Any)
@@ -256,51 +256,47 @@ class TypeInferer:
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
         return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name)).getValue()
 
-    def lookup_type(self, node, name):
-        """Given a variable name, return its concrete type in the closest scope relative to given node."""
-        tvar = self._closest_frame(node, name).type_environment.lookup_in_env(name)
-        return self.type_constraints.resolve(tvar).getValue()
-
-    def lookup_typevar(self, node: NodeNG, name: str):
+    def lookup_typevar(self, node: NodeNG, name: str) -> TypeVar:
+        """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""
         return self._closest_frame(node, name).type_environment.lookup_in_env(name)
+
+    def lookup_inf_type(self, node: NodeNG, name: str) -> TypeResult:
+        """Given a variable name, return a TypeResult object containing the type in the closest scope relative to given node.
+        """
+        tvar = self.lookup_typevar(node, name)
+        return self.type_constraints.resolve(tvar)
+
+    def lookup_type(self, node, name) -> type:
+        """Given a variable name, return its concrete type in the closest scope relative to given node."""
+        inf_type = self.lookup_inf_type(node, name)
+        return inf_type.getValue()
 
     ##############################################################################
     # Operation nodes
     ##############################################################################
-    def visit_call(self, node: astroid.Call) -> None:
-        callable_t = node.func.inf_type.getValue()
-        is_union = hasattr(callable_t, '__origin__') and callable_t.__origin__ is Union
-
-        # case when callable_t is the type of a class
-        if hasattr(callable_t, '__name__') and callable_t.__name__ == 'Type':
-            callable_t = callable_t.__args__[0]
-
-        if not isinstance(callable_t, (CallableMeta, list)) and not is_union:
-            if isinstance(callable_t, _ForwardRef):
-                func_name = callable_t.__forward_arg__
-            else:
-                func_name = callable_t.__args__[0].__name__
-            if '__init__' in self.type_store.classes[func_name]:
-                init_type = self.type_store.classes[func_name]['__init__'][0]
-            else:
-                init_type = Callable[[callable_t], None]
-            # TODO: handle method overloading (through optional parameters)
-            arg_types = [callable_t] + [arg.inf_type.getValue() for arg in node.args]
-            # TODO: Check for number of arguments if function is an initializer
-            type_result = self.type_constraints.unify_call(init_type, *arg_types, node=node)
-            if isinstance(type_result, TypeFail):
-                node.inf_type = type_result
-            else:
-                node.inf_type = TypeInfo(callable_t)
+    @accept_failable
+    def get_call_signature(self, c, node: NodeNG) -> TypeResult:
+        if hasattr(c, '__name__') and c.__name__ == 'Type':
+            class_type = c.__args__[0]
+            class_name = c.__args__[0].__forward_arg__
+        elif isinstance(c, _ForwardRef):
+            class_type = c
+            class_name = c.__forward_arg__
         else:
-            # TODO: resolve this case (from method lookup) more gracefully
-            if isinstance(callable_t, list):
-                callable_t = callable_t[0]
-                arg_types = [node.func.expr.inf_type.getValue()]
-            else:
-                arg_types = []
-            arg_types += [arg.inf_type.getValue() for arg in node.args]
-            node.inf_type = self.type_constraints.unify_call(callable_t, *arg_types, node=node)
+            return TypeInfo(c)
+
+        if '__init__' in self.type_store.classes[class_name]:
+            init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
+            init_func = Callable[init_args[1:-1], init_args[-1]]
+        else:
+            # Classes declared without initializer
+            init_func = Callable[[], class_type]
+        return TypeInfo(init_func)
+
+    def visit_call(self, node: astroid.Call) -> None:
+        func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
+        arg_inf_types = [arg.inf_type for arg in node.args]
+        node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
@@ -359,13 +355,13 @@ class TypeInferer:
         node.inf_type = node.value.inf_type
 
     def visit_slice(self, node: astroid.Slice) -> None:
-        lower_type = node.lower.inf_type.getValue() if node.lower else type(None)
-        upper_type = node.upper.inf_type.getValue() if node.upper else type(None)
-        step_type = node.step.inf_type.getValue() if node.step else type(None)
+        lower_type = node.lower.inf_type if node.lower else type(None)
+        upper_type = node.upper.inf_type if node.upper else type(None)
+        step_type = node.step.inf_type if node.step else type(None)
         node.inf_type = self._handle_call(node, '__init__', slice, lower_type,
                                           upper_type, step_type)
-        if node.inf_type.getValue() == type(None):
-            node.inf_type = TypeInfo(slice)
+        node.inf_type = node.inf_type >> (
+            lambda t: TypeInfo(slice) if t == type(None) else TypeInfo(t))
 
     def visit_extslice(self, node: astroid.ExtSlice):
         unif_res = failable_collect(dim.inf_type for dim in node.dims)
@@ -443,59 +439,67 @@ class TypeInferer:
     def visit_functiondef(self, node: astroid.FunctionDef) -> None:
         node.inf_type = TypeInfo(NoType)
 
-        # Get the inferred type of the function.
-        inferred_args = [self.lookup_type(node, arg) for arg in node.argnames()]
+        # Get the inferred type of the function arguments
+        inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
 
-        if isinstance(node.parent, astroid.ClassDef) and isinstance(inferred_args[0], TypeVar):
+        if isinstance(node.parent, astroid.ClassDef):
             # first argument is special in these cases
             if node.type == 'method':
                 self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name), node)
             elif node.type == 'classmethod':
                 self.type_constraints.unify(inferred_args[0], Type[_ForwardRef(node.parent.name)], node)
 
+        # Get inferred return type
         if any(node.nodes_of_class(astroid.Return)):
-            inferred_return = self.type_constraints.resolve(node.type_environment.lookup_in_env('return')).getValue()
+            inferred_return = self.lookup_inf_type(node, 'return')
         elif node.name == '__init__':
             inferred_return = inferred_args[0]
         else:
-            inferred_return = type(None)
+            inferred_return = TypeInfo(type(None))
 
-        # Get any function type annotations.
+        # Get any function type annotations and combine if necessary
         if any(annotation is not None for annotation in node.args.annotations):
-            annotated_type = parse_annotations(node)
-        else:
-            annotated_type = None
+            annotated_type = parse_annotations(node)[0]
 
-        # Combine inferred and annotated types.
-        if annotated_type:
             combined_args = []
-            for inferred, annotated in zip(inferred_args, annotated_type.__args__[:-1]):
-                if annotated is None:
-                    annotated = type(None)
-                t = self.type_constraints.unify(inferred, annotated, node).getValue()
-                combined_args.append(t)
+            for inf_arg, ann_arg in zip(inferred_args, annotated_type.__args__[:-1]):
+                if ann_arg is None:
+                    combined_args.append(TypeInfo(type(None)))
+                else:
+                    combined_args.append(self.type_constraints.unify(inf_arg, ann_arg, node))
 
             annotated_rtype = annotated_type.__args__[-1]
             if node.name == '__init__':
                 annotated_rtype = inferred_args[0]
-            elif annotated_rtype is None:
-                annotated_rtype = type(None)
             combined_return = self.type_constraints.unify(
-                inferred_return, annotated_rtype, node).getValue()
+                inferred_return, annotated_rtype, node)
         else:
             combined_args, combined_return = inferred_args, inferred_return
 
         # Update the environment storing the function's type.
-        polymorphic_tvars = [arg for arg in combined_args if isinstance(arg, TypeVar)]
-        func_type = create_Callable(combined_args, combined_return, polymorphic_tvars)
+        polymorphic_tvars = []
+        for arg in combined_args:
+            arg >> (
+                lambda a: polymorphic_tvars.append(a) if isinstance(arg, TypeVar) else a)
+
+        # Create function signature
+        func_type = create_Callable_TypeResult(failable_collect(combined_args), combined_return, polymorphic_tvars)
+
+        # Check for optional arguments, create a Union of function signatures if necessary
         num_defaults = len(node.args.defaults)
-        if num_defaults > 0:
+        if num_defaults > 0 and not isinstance(func_type, TypeFail):
             for i in range(num_defaults):
-                opt_args = inferred_args[:-1-i]
-                opt_func_type = create_Callable(opt_args, combined_return, polymorphic_tvars)
-                func_type = Union[func_type, opt_func_type]
-        self.type_constraints.unify(
-            self.lookup_type(node.parent, node.name), func_type, node)
+                opt_args = combined_args[:-1-i]
+                opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), combined_return, polymorphic_tvars)
+                func_type = func_type >> (
+                    lambda f: opt_func_type >> (
+                        lambda opt_f: TypeInfo(Union[f, opt_f])))
+
+        # Final type signature unify
+        func_name = self.lookup_inf_type(node.parent, node.name)
+        result = self.type_constraints.unify(func_name, func_type, node)
+        if isinstance(result, TypeFail):
+            node.inf_type = result
 
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = TypeInfo(NoType)
@@ -518,34 +522,48 @@ class TypeInferer:
         # TODO: include node.instance_attrs as well?
         for attr in node.locals:
             attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
-            attr_inf_type >> self.type_store.classes[node.name][attr].append
             attr_inf_type >> (
-                lambda a: self.type_store.methods[attr].append(a) if isinstance(a, CallableMeta) else None)
+                lambda a: self.type_store.methods[attr].append((a, node.locals[attr][0].type)) if isinstance(a, CallableMeta) else None)
+            attr_inf_type >> (
+                lambda a: self.type_store.classes[node.name][attr].append((a, node.locals[attr][0].type if isinstance(a, CallableMeta) else 'attribute')))
 
     ##############################################################################
     # Statements
     ##############################################################################
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_type = node.expr.inf_type.getValue()
+
+        inst_expr = True
+
+        # case when expr_type is the type of a class
+        if hasattr(expr_type, '__name__') and expr_type.__name__ == 'Type':
+            inst_expr = False
+            expr_type = expr_type.__args__[0]
+
         if isinstance(expr_type, _ForwardRef):
-            type_name =  expr_type.__forward_arg__
+            type_name = expr_type.__forward_arg__
         elif hasattr(expr_type, '__name__'):
             type_name = expr_type.__name__
         else:
             type_name = None
+
         if type_name not in self.type_store.classes:
-            node.inf_type = TypeFail('Invalid attribute type')
-        else:
+            type_name = type_name.lower()
+
+        if type_name in self.type_store.classes:
             attribute_type = self.type_store.classes[type_name].get(node.attrname)
             if attribute_type is None:
                 node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {type_name}')
             else:
-                attribute_type = attribute_type[0]
+                func_type, method_type = attribute_type[0]
                 # Detect an instance method call, and create a bound method signature (first argument removed).
                 # TODO: handle classmethod calls differently.
-                if isinstance(attribute_type, CallableMeta):
-                    attribute_type = Callable[list(attribute_type.__args__[1:-1]), attribute_type.__args__[-1]]
-                node.inf_type = TypeInfo(attribute_type)
+                if isinstance(func_type, CallableMeta) and inst_expr and \
+                        method_type != 'staticmethod':
+                    func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
+                node.inf_type = TypeInfo(func_type)
+        else:
+            node.inf_type = TypeFail('Class not found')
 
     def visit_annassign(self, node):
         var_inf_type = self.type_constraints.resolve(

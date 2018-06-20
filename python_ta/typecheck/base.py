@@ -492,6 +492,7 @@ class TypeConstraints:
         tc = self.__deepcopy__()
         return isinstance(tc.unify(t1, t2, None), TypeInfo)
 
+    @accept_failable
     def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.
 

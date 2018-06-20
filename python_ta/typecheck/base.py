@@ -88,19 +88,6 @@ def _gorg(x):
         return x._gorg
 
 
-def _wrap_generic_meta(t, args):
-    if t == Tuple:
-        tuple_args = tuple(args)
-        # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
-        if tuple_args == ((),):
-            tuple_args = ()
-        return TypeInfo(Tuple[tuple_args])
-    elif t == Callable:
-        return TypeInfo(Callable[args[:-1], args[-1]])
-    else:
-        return TypeInfo(t[tuple(args)])
-
-
 def accept_failable(f):
     def _f(*args, **kwargs):
         new_args = []
@@ -124,6 +111,25 @@ def accept_failable(f):
     return _f
 
 
+@accept_failable
+def _wrap_generic_meta(t, args):
+    if t == Tuple:
+        tuple_args = tuple(args)
+        # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
+        if tuple_args == ((),):
+            tuple_args = ()
+        return TypeInfo(Tuple[tuple_args])
+    elif t == Callable:
+        return TypeInfo(Callable[args[:-1], args[-1]])
+    else:
+        return TypeInfo(t[tuple(args)])
+
+
+@accept_failable
+def wrap_container(container_type: GenericMeta, *args: List[type]) -> TypeInfo:
+    return TypeInfo(container_type[tuple(args)])
+
+
 Num = TypeVar('number', int, float)
 a = TypeVar('a')
 MulNum = TypeVar('mul_n', int, float, str, List[a])
@@ -132,11 +138,11 @@ tup2 = TypeVar('tup2')
 
 
 class TuplePlus(TypeVar, _root=True):
-    def eval_type(self, type_constraints: 'TypeConstraints'):
+    def eval_type(self, type_constraints: 'TypeConstraints') -> TypeResult:
         t1, t2 = self.__constraints__
-        t1 = type_constraints.resolve(t1)
-        t2 = type_constraints.resolve(t2)
-        return Tuple[t1.__tuple_params__ + t2.__tuple_params__]
+        t1 = type_constraints.resolve(t1).__params__
+        t2 = type_constraints.resolve(t2).__params__
+        return wrap_container(Tuple, t1, t2)
 
 
 class TupleSubscript(TypeVar, _root=True):
@@ -330,8 +336,8 @@ class TypeConstraints:
         """Return the concrete type or set representative associated with the given type.
         """
         if isinstance(t, GenericMeta):
-            res_args = [self.resolve(arg).getValue() for arg in t.__args__]
-            return _wrap_generic_meta(_gorg(t), res_args)
+            res_args = [self.resolve(arg) for arg in t.__args__]
+            return _wrap_generic_meta(_gorg(t), failable_collect(res_args))
         elif isinstance(t, TypeVar):
             try:
                 repr = self.find_repr(self.type_to_tnode[str(t)])
@@ -473,13 +479,10 @@ class TypeConstraints:
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
             return TypeFail(conc_tnode1, conc_tnode2, ast_node)
 
-        unify_result = failable_collect([self.unify(a1, a2, ast_node)
+        unified_args = failable_collect([self.unify(a1, a2, ast_node)
                                          for a1, a2 in
                                          zip(conc_tnode1.type.__args__,
                                              conc_tnode2.type.__args__)])
-        if isinstance(unify_result, TypeFail):
-            return unify_result
-        unified_args = unify_result.getValue()
 
         self.create_edges(tnode1, tnode2, ast_node)
         return _wrap_generic_meta(g1, unified_args)
@@ -518,22 +521,25 @@ class TypeConstraints:
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
             if isinstance(self.unify(arg_type, param_type, node), TypeFail):
                 return self.unify(arg_type, param_type, node)
-        return TypeInfo(self._type_eval(new_func_type.__args__[-1]))
+        return self._type_eval(new_func_type.__args__[-1])
 
-    def _type_eval(self, t) -> type:
+    def _type_eval(self, t) -> TypeResult:
         """Evaluate a type. Used for tuples."""
         if isinstance(t, TuplePlus):
             return t.eval_type(self)
         if isinstance(t, TypeVar):
-            return self.resolve(t).getValue()
+            return self.resolve(t)
         if isinstance(t, GenericMeta) and t.__args__ is not None:
-            return _gorg(t)[tuple(self._type_eval(argument) for argument in t.__args__)]
+            inf_args = (self._type_eval(argument) for argument in t.__args__)
+            return wrap_container(_gorg(t), *inf_args)
         else:
-            return t
+            return TypeInfo(t)
 
     # HELPER METHODS
     def types_in_callable(self, callable_function):
-        """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively."""
+        """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively.
+        Used only for testing purposes
+        """
         arg_type_lst = [self.resolve(argument).getValue() for argument in callable_function.__args__]
         return arg_type_lst[:-1], arg_type_lst[-1]
 

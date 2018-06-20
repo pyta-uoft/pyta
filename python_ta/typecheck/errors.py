@@ -114,6 +114,9 @@ def subscript_error_message(node: astroid.Subscript) -> str:
         return f'You can only access elements of a tuple using an int. ' \
                f'You used a {node.slice.inf_type.getValue().__name__}, {node.slice.value.as_string()}.'
     # TODO: Accessing an element of a Dictionary with an incompatible key type.
+    elif _gorg(node.value.inf_type.getValue()) == Dict:
+        return f'You tried to access an element of this dictionary using an int, 1; however, the type ' \
+               f'of the key is a {node.value.inf_type.getValue().__args__[0].__name__}'
 
 
 def _correct_article(noun : str) -> str:

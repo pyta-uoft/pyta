@@ -3,6 +3,7 @@ import nose
 from hypothesis import settings
 from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
+from nose.tools import eq_
 settings.load_profile("pyta")
 
 
@@ -17,7 +18,7 @@ def test_incompatible_binop_call():
     binop_node = next(module.nodes_of_class(astroid.BinOp))
     expected_msg = "You cannot add an int, 5, and a str, 'string'. " \
                    "Perhaps you wanted to cast the integer into a string or vice versa?"
-    assert binop_node.inf_type.getValue() == expected_msg
+    eq_(binop_node.inf_type.getValue(), expected_msg)
 
 
 def test_incompatible_unaryop_call():
@@ -30,7 +31,7 @@ def test_incompatible_unaryop_call():
         raise SkipTest()
     unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
     expected_msg = "You cannot take the bitwise inverse of a List, ['D']."
-    assert unaryop_node.inf_type.getValue() == expected_msg
+    eq_(unaryop_node.inf_type.getValue(), expected_msg)
 
 
 def test_incompatible_subscript_list():
@@ -43,7 +44,7 @@ def test_incompatible_subscript_list():
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
     expected_msg = "You can only access elements of a list using an int. You used a str, 'one'."
-    assert(subscript_node.inf_type.getValue() == expected_msg)
+    eq_(subscript_node.inf_type.getValue(), expected_msg)
 
 
 def test_incompatible_subscript_tuple():
@@ -56,7 +57,7 @@ def test_incompatible_subscript_tuple():
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
     expected_msg = "You can only access elements of a tuple using an int. You used a str, 'one'."
-    assert(subscript_node.inf_type.getValue() == expected_msg)
+    eq_(subscript_node.inf_type.getValue(), expected_msg)
 
 
 def test_incompatible_subscript_dictionary():
@@ -69,7 +70,7 @@ def test_incompatible_subscript_dictionary():
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
     expected_msg = "You tried to access an element of this dictionary using an int, 1. However, the type of the key is a str."
-    assert(subscript_node.inf_type.getValue() == expected_msg)
+    eq_(subscript_node.inf_type.getValue(), expected_msg)
 
 
 if __name__ == '__main__':

@@ -68,7 +68,7 @@ def test_incompatible_subscript_dictionary():
     except:
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
-    expected_msg = "You can only access elements of a tuple using an int. You used a str, 'one'."
+    expected_msg = "TypeFail: You tried to access an element of this dictionary using an int, 1; however, the type of the key is a str."
     assert(subscript_node.inf_type.getValue() == expected_msg)
 
 

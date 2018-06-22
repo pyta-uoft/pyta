@@ -115,17 +115,11 @@ Done.
 
 ## Type Inference
 
-- Edit all functions to be properly monadic
-  - Remove all instances of .getValue()
-  - type_inference_visitor.py
-    - lookup_attribute_type
-    - lookup_type
-    - visit_attribute
-  - base.py
-    - resolve
-    - _unify_generic
-    - _type_eval
-    - type_in_callable
+### Conversion to Monadic Functions
+
+Done. `lookup_type()` and `types_in_callable()` remain, but should be used purely for testing purposes
+
+### TODOs
 - Remove duplicated functionality between unify, _unify_generic and unify_call
 - Remove duplicated functionality between unify_call and _handle_call
 - Unify functionality of resolve, find_parent, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type

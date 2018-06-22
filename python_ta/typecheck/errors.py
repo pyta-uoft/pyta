@@ -108,14 +108,16 @@ def unaryop_error_message(node: astroid.UnaryOp) -> str:
 def subscript_error_message(node: astroid.Subscript) -> str:
     # Accessing an element of a List with an incompatible index type (non-integers)
     if _gorg(node.value.inf_type.getValue()) == List:
+        slice_type = node.slice.inf_type.getValue().__name__
         return f'You can only access elements of a list using an int. ' \
-               f'You used a {node.slice.inf_type.getValue().__name__}, {node.slice.value.as_string()}.'
+               f'You used {_correct_article(slice_type)}, {node.slice.value.as_string()}.'
     elif _gorg(node.value.inf_type.getValue()) == Tuple:
+        slice_type = node.slice.inf_type.getValue().__name__
         return f'You can only access elements of a tuple using an int. ' \
-               f'You used a {node.slice.inf_type.getValue().__name__}, {node.slice.value.as_string()}.'
+               f'You used {_correct_article(slice_type)}, {node.slice.value.as_string()}.'
     elif _gorg(node.value.inf_type.getValue()) == Dict:
-        return f'You tried to access an element of this dictionary using an int, 1. However, the type ' \
-               f'of the key is a {node.value.inf_type.getValue().__args__[0].__name__}.'
+        return f'You tried to access an element of this dictionary using an int, 1, but ' \
+               f'the keys are of type {node.value.inf_type.getValue().__args__[0].__name__}.'
 
 
 def _correct_article(noun : str) -> str:

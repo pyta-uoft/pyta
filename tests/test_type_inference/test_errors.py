@@ -7,7 +7,7 @@ settings.load_profile("pyta")
 
 
 def test_incompatible_binop_call():
-    """ User tries to call a builtin binary operation on arguments of the wrong type.
+    """User tries to call a builtin binary operation on arguments of the wrong type.
     """
     program = f'5 + "string"\n'
     try:

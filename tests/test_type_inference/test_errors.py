@@ -69,7 +69,7 @@ def test_incompatible_subscript_dictionary():
     except:
         raise SkipTest()
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
-    expected_msg = "You tried to access an element of this dictionary using an int, 1. However, the type of the key is a str."
+    expected_msg = "You tried to access an element of this dictionary using an int, 1, but the keys are of type str."
     eq_(subscript_node.inf_type.getValue(), expected_msg)
 
 

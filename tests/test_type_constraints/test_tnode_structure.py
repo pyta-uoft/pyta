@@ -1,6 +1,7 @@
 import tests.custom_hypothesis_support as cs
 from nose import SkipTest
 from typing import *
+from typing import _ForwardRef
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
 
@@ -162,6 +163,19 @@ def test_elt():
 
 
 tc = TypeConstraints()
+
+
+def test_forward_ref(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    assert isinstance(tc.unify(_ForwardRef('A'), _ForwardRef('B')), TypeFail)
+    assert tc.unify(_ForwardRef('A'), _ForwardRef('A')).getValue() == _ForwardRef('A')
+    assert tc.unify(t0, _ForwardRef('A')).getValue() == _ForwardRef('A')
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', _ForwardRef('A')}, {_ForwardRef('B')}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
 
 
 def test_polymorphic_callable(draw=False):

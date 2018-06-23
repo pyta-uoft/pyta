@@ -43,7 +43,7 @@ class BadLoopIndexingChecker(BaseChecker):
             return False
 
         lst_index_nodes = _index_name_nodes(node, index)
-        return not any(_is_correct_usage__of_index(index_node, iterable) for index_node in lst_index_nodes) \
+        return not any(_is_correct_usage__of_index(index_node, node) for index_node in lst_index_nodes) \
                and lst_index_nodes
 
 
@@ -61,10 +61,14 @@ def _iterable_if_range(node: Optional[NodeNG]) -> Optional[str]:
             # if node is None, returns None
 
 
-def _is_correct_usage__of_index(index_node: astroid.Name, iterable: str) -> bool:
+def _is_correct_usage__of_index(index_node: astroid.Name, for_node: astroid.For) -> bool:
     """Return whether or not <index> was used appropriately in the for loop.
     Return True if used appropriately, False if badly used.
     """
+    # Make sure the index variable hasn't been rebinded
+    if for_node != index_node.lookup(for_node.target.name)[1][0].parent:
+        return False
+    iterable = _iterable_if_range(for_node.iter)
     # Name node is not inside Subscript node iterable[index]
     if not (isinstance(index_node.parent, astroid.Index) and isinstance(index_node.parent.parent, astroid.Subscript)
             and index_node.parent.parent.value.name == iterable):

@@ -38,7 +38,7 @@ class BadLoopIndexingChecker(BaseChecker):
         index = node.target.name
 
         # Check if the iterable of the for-loop is of the form "range(len(lst))"
-        iterable = _is_iterable_is_range(node.iter)
+        iterable = _iterable_if_range(node.iter)
         if iterable is None:
             return False
 
@@ -48,7 +48,7 @@ class BadLoopIndexingChecker(BaseChecker):
 
 
 # Helper functions
-def _is_iterable_is_range(node: Optional[NodeNG]) -> Optional[str]:
+def _iterable_if_range(node: Optional[NodeNG]) -> Optional[str]:
     """Return the string of the iterable if this node is of the form: range(len(iterable)).
     Return None otherwise.
     """
@@ -72,10 +72,7 @@ def _is_correct_usage__of_index(index_node: astroid.Name, iterable: str) -> bool
 
     # Use subscript.ctx attribute to find out what context it is being used in.
     subscript_node = index_node.parent.parent
-    if subscript_node.ctx == astroid.Store:
-        return True
-    else:
-        return False
+    return subscript_node.ctx == astroid.Store
 
 
 def _index_name_nodes(node: astroid.For, index: str) -> List[astroid.Name]:

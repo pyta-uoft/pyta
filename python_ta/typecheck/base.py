@@ -285,13 +285,13 @@ class TypeConstraints:
         for node in self._nodes:
             node_cpy = _TNode(node.type, node.ast_node)
             tc._nodes.append(node_cpy)
-            tc.type_to_tnode[node.type] = node_cpy
+            tc.type_to_tnode[str(node.type)] = node_cpy
         # fill in edges
         for node in self._nodes:
             for adj_node, ctx in node.adj_list:
-                tc.type_to_tnode[node.type].adj_list.append((tc.type_to_tnode[adj_node.type], ctx))
+                tc.type_to_tnode[str(node.type)].adj_list.append((tc.type_to_tnode[str(adj_node.type)], ctx))
             if node.parent:
-                tc.type_to_tnode[node.type].parent = tc.type_to_tnode[node.parent.type]
+                tc.type_to_tnode[str(node.type)].parent = tc.type_to_tnode[str(node.parent.type)]
         return tc
 
     def reset(self):

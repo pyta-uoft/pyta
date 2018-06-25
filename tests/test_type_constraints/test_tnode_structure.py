@@ -230,17 +230,17 @@ def test_polymorphic_callable3(draw=False):
 
 
 def test_polymorphic_callable4(draw=False):
-    raise SkipTest('Test this after adding functionality for testing correct TypeFail behavior.')
     tc.reset()
     t0 = tc.fresh_tvar()
     t1 = tc.fresh_tvar()
     t2 = tc.fresh_tvar()
-    tc.unify(t1, Callable[[t0], t0], draw)
-    tc.unify(t2, t1, draw)
-    tc.unify(t2, Callable[[int], str], draw)  # this is a TypeFail
+    tc.unify(t1, Callable[[t0], t0])
+    tc.unify(t2, t1)
+    assert isinstance(tc.unify(t2, Callable[[int], str]), TypeFail)
     actual_set = tc_to_disjoint(tc)
     expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]'}]
+                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]',
+                     'typing.Callable[[int], str]'}, {str}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)

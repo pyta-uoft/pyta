@@ -32,8 +32,8 @@ def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
 
 
 def compare_list_sets(s1: List[Set[Union[type, str]]], s2: List[Set[Union[type, str]]]):
-    list_sets_1 = s1.copy()
-    list_sets_2 = s2.copy()
+    list_sets_1 = [{str(t) for t in s} for s in s1]
+    list_sets_2 = [{str(t) for t in s} for s in s2]
     assert len(list_sets_1) == len(list_sets_2)
     while list_sets_1:
         set1 = list_sets_1[0]

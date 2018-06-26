@@ -1,10 +1,14 @@
 import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
-from python_ta.typecheck.base import parse_annotations, class_callable, accept_failable
+from python_ta.typecheck.base import parse_annotations, \
+    class_callable, accept_failable, _TYPESHED_TVARS
 from typing import Callable
 import os
+from builtins import *
+from typing import *
 from typing import Any
+from typing import _ForwardRef
 
 TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
 
@@ -40,6 +44,9 @@ class TypeStore:
                     tvars = base.slice.as_string().strip('()').replace(" ", "").split(',')
                     if gen == 'Generic':
                         self.classes[class_def.name]['__pyta_tvars'] = tvars
+            self.classes[class_def.name]['__bases'] = [self.node_to_type(base)
+                                                       for base in class_def.bases]
+            self.classes[class_def.name]['__mro'] = [cls.name for cls in class_def.mro()]
             for node in (nodes[0] for nodes in class_def.locals.values()
                          if isinstance(nodes[0], astroid.AssignName) and
                          isinstance(nodes[0].parent, astroid.AnnAssign)):
@@ -87,6 +94,39 @@ class TypeStore:
                                                    Callable[list(args), Any]):
                     return func_type
             raise KeyError
+
+    def node_to_type(self, node):
+        if isinstance(node, astroid.Name):
+            try:
+                inner_var = globals()[node.name]
+            except KeyError:
+                if node.name in _TYPESHED_TVARS:
+                    inner_var = _TYPESHED_TVARS[node.name]
+                else:
+                    inner_var = _ForwardRef(node.name)
+            return inner_var
+        elif isinstance(node, astroid.Subscript):
+            if hasattr(node.slice.value, 'name') and \
+                    isinstance(node.slice.value, astroid.Tuple):
+                inner_var = tuple([self.node_to_type(elt) for elt in node.slice.value.elts])
+            else:
+                inner_var = self.node_to_type(node.slice.value)
+            try:
+                outer_var = globals()[node.value.name]
+            except KeyError:
+                outer_var = _ForwardRef(node.value.name)
+            return outer_var[inner_var]
+
+    def is_descendant(self, child: type, ancestor: type):
+        child_name = child.__forward_arg__ if isinstance(child, _ForwardRef) \
+            else child.__name__
+        if child_name in self.classes:
+            for base in self.classes[child_name]['__bases']:
+                if self.type_constraints.can_unify(base, ancestor) or \
+                        self.is_descendant(base, ancestor):
+                    self.type_constraints.unify(base, ancestor)
+                    return True
+        return False
 
 
 if __name__ == '__main__':

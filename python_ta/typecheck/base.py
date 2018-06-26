@@ -326,6 +326,8 @@ class TypeConstraints:
         tc._count = self._count
         tc._nodes = []
         tc.type_to_tnode = {}
+        if hasattr(self, 'type_store'):
+            tc.type_store = self.type_store
         # copy nodes without copying edges
         for node in self._nodes:
             node_cpy = _TNode(node.type, node.ast_node)
@@ -492,6 +494,10 @@ class TypeConstraints:
                 tnode1.parent = conc_tnode1
                 tnode2.parent = conc_tnode1
                 self.create_edges(tnode1, tnode2, ast_node)
+                return TypeInfo(ct1)
+            # Handle inheritance
+            elif hasattr(self, 'type_store') and \
+                    self.type_store.is_descendant(ct1, ct2):
                 return TypeInfo(ct1)
             else:
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)

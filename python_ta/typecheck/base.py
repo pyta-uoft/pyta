@@ -479,7 +479,12 @@ class TypeConstraints:
             ct1 = conc_tnode1.type
             ct2 = conc_tnode2.type
 
-            if isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
+            if ct1 == ct2:
+                tnode1.parent = conc_tnode1
+                tnode2.parent = conc_tnode1
+                self.create_edges(tnode1, tnode2, ast_node)
+                return TypeInfo(ct1)
+            elif isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
                 return self._unify_generic(tnode1, tnode2, ast_node)
             elif ct1.__class__.__name__ == '_Union' or ct2.__class__.__name__ == '_Union':
                 ct1_types = ct1.__args__ if ct1.__class__.__name__ == '_Union' else [ct1]
@@ -489,11 +494,6 @@ class TypeConstraints:
                         return self.unify(u1, u2, ast_node)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
             elif ct1 == Any or ct2 == Any:
-                return TypeInfo(ct1)
-            elif ct1 == ct2:
-                tnode1.parent = conc_tnode1
-                tnode2.parent = conc_tnode1
-                self.create_edges(tnode1, tnode2, ast_node)
                 return TypeInfo(ct1)
             # Handle inheritance
             elif hasattr(self, 'type_store') and \

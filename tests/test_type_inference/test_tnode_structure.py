@@ -26,12 +26,12 @@ def _nodes_to_dict(node_list):
     return node_dict
 
 
-def _find_type_fail(ast_node):
-    if isinstance(ast_node.inf_type, TypeFail):
+def find_type_fail(ast_node):
+    if hasattr(ast_node, 'inf_type') and isinstance(ast_node.inf_type, TypeFail):
         return ast_node
     else:
         for child in ast_node.get_children():
-            child_res = _find_type_fail(child)
+            child_res = find_type_fail(child)
             if child_res is not None:
                 return child_res
     return None
@@ -49,7 +49,7 @@ def _verify_inference(program, node_list):
 
 
 def _verify_type_fail(program, exp_node_str):
-    fail_node = _find_type_fail(program)
+    fail_node = find_type_fail(program)
     assert_is_not_none(fail_node, "Typecheck did not fail!")
     eq_(fail_node.as_string(), exp_node_str)
     eq_(fail_node.inf_type.src_node.as_string(), exp_node_str)

@@ -21,11 +21,58 @@ class _TNode:
         self.adj_list = []
         self.ast_node = ast_node
 
+    def __hash__(self):
+        return hash(repr(self))
+
     def __eq__(self, other: '_TNode'):
-        if str(self.type) == str(other.type):
-            return True
+        return str(self.type) == str(other.type)
+
+    def __str__(self):
+        if self.parent and self.ast_node:
+            return f'TNode {self.ast_node.as_string()}: {self.type}, resolved to {self.parent.type}'
+        elif self.ast_node:
+            return f'TNode {self.ast_node.as_string()}: {self.type}'
         else:
-            return False
+            return f'TNode: {self.type}'
+
+    def get_nodes(self):
+        open_nodes = [self]
+        visited_nodes = []
+        while open_nodes:
+            cur_open_node = open_nodes[0]
+            for e in cur_open_node.adj_list:
+                if e[0] not in visited_nodes and e[0] not in open_nodes:
+                    open_nodes.append(e[0])
+            visited_nodes.append(cur_open_node)
+            open_nodes.remove(cur_open_node)
+        return visited_nodes
+
+    def find_path(self, goal_node: '_TNode'):
+        distance = {self: 0}
+        visited = []
+        paths = {self: (self, None)}
+        nodes = self.get_nodes()
+
+        for n in nodes:
+            if n not in visited:
+                if n in distance:
+                    cur_dist = distance[n]
+                else:
+                    cur_dist = 100
+
+                for e in n.adj_list:
+                    cur_dist += 1
+                    if e[0] not in distance or cur_dist < distance[e[0]]:
+                        distance[e[0]] = cur_dist
+                        paths[e[0]] = (n, e[1])
+                visited.append(n)
+
+        final_path = []
+        while paths[goal_node][0] is not self:
+            final_path = [paths[goal_node][1]] + final_path
+            goal_node = paths[goal_node][0]
+        final_path = [paths[goal_node][1]] + final_path
+        return final_path
 
 
 class TypeResult(Failable):
@@ -52,32 +99,105 @@ class TypeFail(TypeResult):
     """Represents the result of a failed type check operation
     Contains error message
     """
-
-    def __init__(self, tnode1: _TNode = None, tnode2: _TNode = None, src_node: NodeNG = None):
-        if isinstance(tnode1, str):
-            self.msg = tnode1
-            self.tnode1 = None
-        else:
-            self.tnode1 = tnode1
-            self.msg = ""
-        self.tnode2 = tnode2
-        self.src_node = src_node
+    def __init__(self, msg: str):
+        self.msg = msg
         super().__init__(self.msg)
 
     def __str__(self):
-        if self.tnode1 is None:
-            return f'TypeFail: {self.msg}'
-        if self.src_node:
-            return 'TypeFail: %s <-> %s at %s' % \
-                   (self.tnode1.type, self.tnode2.type, self.src_node.as_string())
+        return f'TypeFail: {self.msg}'
+
+    def __eq__(self, other):
+        if self.msg is not "" and hasattr(other, 'msg'):
+            return self.msg == other.msg
+        elif hasattr(self, 'src_node') and hasattr(other, 'src_node'):
+            return self.src_node == other.src_node
         else:
-            return 'TypeFail: %s <-> %s' % (self.tnode1.type, self.tnode2.type)
+            return isinstance(other, TypeFail)
 
     def bind(self, _):
         return self
 
     def add_msg(self, msg: str):
         self.msg = msg
+
+    def get_reasons(self):
+        """ Returns list of reasons for type inference failure """
+        raise NotImplementedError
+
+
+class TypeFailUnify(TypeFail):
+    """
+    TypeFailUnify occurs when two types fail to unify.
+    Should be initialized with two valid _TNodes, and the astroid node where the failure occurred
+    """
+    def __init__(self, tnode1: _TNode, tnode2: _TNode, src_node: NodeNG = None):
+        if isinstance(tnode1, _TNode) and isinstance(tnode2, _TNode):
+            self.tnode1 = tnode1
+            self.tnode2 = tnode2
+            self.src_node = src_node
+            super().__init__(str(self))
+        else:
+            raise AttributeError("TypeFail Unify requires two TNodes")
+
+    def __str__(self):
+        string = 'TypeFail: Unable to Unify'
+        if self.tnode1 and self.tnode2:
+            if self.tnode1.ast_node and self.tnode2.ast_node:
+                string += f' {self.tnode1.ast_node.as_string()} <-> {self.tnode2.ast_node.as_string()}'
+            else:
+                string += f' {self.tnode1.type} <-> {self.tnode2.type}'
+        if self.src_node:
+            string += f' at {self.src_node.as_string()}'
+        return string
+
+    def get_reasons(self) -> List:
+        """
+        reasons formatted as:
+        [*Reasons for first type inference, *Reasons for second type inference]
+        """
+        reasons = []
+        for tn in [self.tnode1, self.tnode2]:
+            if tn.parent and tn.ast_node and tn.parent is not tn:
+                reasons += [tn.ast_node, tn.parent.type]
+                reasons += (r for r in tn.find_path(tn.parent))
+            elif tn.ast_node:
+                reasons += [tn.ast_node, tn.type]
+            else:
+                reasons += [tn.type]
+        return reasons
+
+
+class TypeFailFunction(TypeFail):
+    """
+    TypeFailFunction occurs when a function is called with different arguments than expected.
+    Should be initialized with the tnode of the expected function type signature, and astroid
+    node where invalid function call occurred
+    """
+    def __init__(self, func_tnode: _TNode, src_node: NodeNG):
+        self.func_tnode = func_tnode
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self):
+        return f'TypeFail: Invalid function call {self.func_tnode.type}'
+
+    def get_reasons(self) -> List:
+        """
+        reasons formatted as:
+        [TNode of expected function signature,
+        astroid node where invalid function call occurs,
+        astroid node where function is originally defined]
+        """
+        nodes = self.func_tnode.get_nodes()
+        func_def_node = None
+        for n in nodes:
+            if isinstance(n.ast_node, astroid.FunctionDef) and n.ast_node.name == self.src_node.func.name:
+                func_def_node = n.ast_node
+
+        reasons = [self.func_tnode.type, self.src_node]
+        if func_def_node:
+            reasons += [func_def_node]
+        return reasons
 
 
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
@@ -425,14 +545,14 @@ class TypeConstraints:
             ct2 = conc_tnode2.type
 
             if isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
-                return self._unify_generic(conc_tnode1, conc_tnode2, ast_node)
+                return self._unify_generic(tnode1, tnode2, ast_node)
             elif ct1.__class__.__name__ == '_Union' or ct2.__class__.__name__ == '_Union':
                 ct1_types = ct1.__args__ if ct1.__class__.__name__ == '_Union' else [ct1]
                 ct2_types = ct2.__args__ if ct2.__class__.__name__ == '_Union' else [ct2]
                 for u1, u2 in product(ct1_types, ct2_types):
                     if self.can_unify(u1, u2):
                         return self.unify(u1, u2, ast_node)
-                return TypeFail(tnode1, tnode2, ast_node)
+                return TypeFailUnify(tnode1, tnode2, ast_node)
             elif ct1 == Any or ct2 == Any:
                 return TypeInfo(ct1)
             elif ct1 == ct2:
@@ -441,7 +561,7 @@ class TypeConstraints:
                 self.create_edges(tnode1, tnode2, ast_node)
                 return TypeInfo(ct1)
             else:
-                return TypeFail(tnode1, tnode2, ast_node)
+                return TypeFailUnify(tnode1, tnode2, ast_node)
 
         # One type can be resolved
         elif conc_tnode1 is not None:
@@ -468,17 +588,25 @@ class TypeConstraints:
         g1, g2 = _gorg(conc_tnode1.type), _gorg(conc_tnode2.type)
         if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
             # TODO: need to store more info here and in the case below
-            return TypeFail(conc_tnode1, conc_tnode2, ast_node)
+            return TypeFailUnify(conc_tnode1, conc_tnode2, ast_node)
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
-            return TypeFail(conc_tnode1, conc_tnode2, ast_node)
+            return TypeFailUnify(conc_tnode1, conc_tnode2, ast_node)
 
-        unified_args = failable_collect([self.unify(a1, a2, ast_node)
-                                         for a1, a2 in
-                                         zip(conc_tnode1.type.__args__,
-                                             conc_tnode2.type.__args__)])
+        unified_args = []
+        for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
+            result = self.unify(a1, a2, ast_node)
+            if isinstance(result, TypeFailUnify):
+                result = TypeFailUnify(tnode1, tnode2, ast_node)
+                unified_args = [result]
+                break
+            else:
+                unified_args.append(result)
 
-        self.create_edges(tnode1, tnode2, ast_node)
-        return _wrap_generic_meta(g1, unified_args)
+        collected_args = failable_collect(unified_args)
+
+        if not isinstance(collected_args, TypeFail):
+            self.create_edges(tnode1, tnode2, ast_node)
+        return _wrap_generic_meta(g1, collected_args)
 
     ###########################################################################
     # Handling generic polymorphism
@@ -513,7 +641,8 @@ class TypeConstraints:
         new_func_type = literal_substitute(func_type, new_tvars)
         for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
             if isinstance(self.unify(arg_type, param_type, node), TypeFail):
-                return self.unify(arg_type, param_type, node)
+                return TypeFailFunction(self.get_tnode(new_func_type), node)
+                # return self.unify(arg_type, param_type, node)
         return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t) -> TypeResult:

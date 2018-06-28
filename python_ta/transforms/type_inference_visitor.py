@@ -104,7 +104,12 @@ class TypeInferer:
         for klass in astroid.ALL_NODE_CLASSES:
             if hasattr(self, f'visit_{klass.__name__.lower()}'):
                 type_visitor.register_transform(klass, getattr(self, f'visit_{klass.__name__.lower()}'))
+            else:
+                type_visitor.register_transform(klass, self.visit_default)
         return type_visitor
+
+    def visit_default(self, node: NodeNG) -> None:
+        node.inf_type = TypeInfo(NoType)
 
     ##############################################################################
     # Literals

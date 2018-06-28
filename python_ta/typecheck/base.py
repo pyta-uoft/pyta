@@ -18,6 +18,7 @@ class _TNode:
     def __init__(self, node_type: type, ast_node: Optional[NodeNG] = None):
         self.type = node_type
         self.parent = None
+        self.parent_path = None
         self.adj_list = []
         self.ast_node = ast_node
 
@@ -26,6 +27,22 @@ class _TNode:
             return True
         else:
             return False
+
+    def __str__(self):
+        if self.parent and self.ast_node:
+            return f'TNode {self.ast_node.as_string()}: {self.type}, resolved to {self.parent.type}'
+        elif self.ast_node:
+            return f'TNode {self.ast_node.as_string()}: {self.type}'
+        else:
+            return f'TNode: {self.type}'
+
+    def find_path_to_parent(self):
+        final_path = []
+        cur_node = self
+        while cur_node.parent_path:
+            final_path.append(cur_node.parent_path[1])
+            cur_node = cur_node.parent_path[0]
+        return final_path
 
 
 class TypeResult(Failable):
@@ -52,32 +69,38 @@ class TypeFail(TypeResult):
     """Represents the result of a failed type check operation
     Contains error message
     """
-
-    def __init__(self, tnode1: _TNode = None, tnode2: _TNode = None, src_node: NodeNG = None):
-        if isinstance(tnode1, str):
-            self.msg = tnode1
-            self.tnode1 = None
-        else:
-            self.tnode1 = tnode1
-            self.msg = ""
-        self.tnode2 = tnode2
-        self.src_node = src_node
+    def __init__(self, msg: Optional[str] = None):
+        self.msg = msg
         super().__init__(self.msg)
 
     def __str__(self):
-        if self.tnode1 is None:
-            return f'TypeFail: {self.msg}'
-        if self.src_node:
-            return 'TypeFail: %s <-> %s at %s' % \
-                   (self.tnode1.type, self.tnode2.type, self.src_node.as_string())
-        else:
-            return 'TypeFail: %s <-> %s' % (self.tnode1.type, self.tnode2.type)
+        return f'TypeFail: {self.msg}'
 
     def bind(self, _):
         return self
 
     def add_msg(self, msg: str):
         self.msg = msg
+
+
+class TypeFailUnify(TypeFail):
+    """
+    TypeFailUnify occurs when two types fail to unify.
+    Should be initialized with two valid _TNodes, and the astroid node where the failure occurred
+    """
+    def __init__(self, *tnodes: List[_TNode], src_node: NodeNG = None):
+        self.tnodes = tnodes
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self):
+        string = 'TypeFail: Unable to Unify '
+        string += f'{self.tnodes[0].ast_node.as_string()}' if self.tnodes[0].ast_node else f'{self.tnodes[0].type}'
+        string += ' <-> '
+        string += f'{self.tnodes[1].ast_node.as_string()}' if self.tnodes[1].ast_node else f'{self.tnodes[1].type}'
+        if self.src_node:
+            string += f' at {self.src_node.as_string()}'
+        return string
 
 
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
@@ -373,9 +396,17 @@ class TypeConstraints:
                     node_list.append(e[0])
             visited.append(node_list[0])
             node_list.remove(node_list[0])
+
         if goal_tnode:
-            for tn in visited:
-                tn.parent = goal_tnode
+            cur_node = goal_tnode
+            while cur_node:
+                next_node = None
+                for e in cur_node.adj_list:
+                    if not e[0].parent_path and not e[0].parent:
+                        e[0].parent = goal_tnode
+                        e[0].parent_path = (cur_node, e[1])
+                        next_node = e[0]
+                cur_node = next_node
 
         # Return a set representative, even if it isn't a concrete type
         if find_repr and not goal_tnode and len(visited) > 1:
@@ -432,7 +463,7 @@ class TypeConstraints:
                 for u1, u2 in product(ct1_types, ct2_types):
                     if self.can_unify(u1, u2):
                         return self.unify(u1, u2, ast_node)
-                return TypeFail(tnode1, tnode2, ast_node)
+                return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
             elif ct1 == Any or ct2 == Any:
                 return TypeInfo(ct1)
             elif ct1 == ct2:
@@ -441,11 +472,12 @@ class TypeConstraints:
                 self.create_edges(tnode1, tnode2, ast_node)
                 return TypeInfo(ct1)
             else:
-                return TypeFail(tnode1, tnode2, ast_node)
+                return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
 
         # One type can be resolved
         elif conc_tnode1 is not None:
             tnode2.parent = conc_tnode1
+            tnode2.parent_path = (tnode1, ast_node)
             self.create_edges(tnode1, tnode2, ast_node)
             return TypeInfo(conc_tnode1.type)
         elif conc_tnode2 is not None:
@@ -468,9 +500,9 @@ class TypeConstraints:
         g1, g2 = _gorg(conc_tnode1.type), _gorg(conc_tnode2.type)
         if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
             # TODO: need to store more info here and in the case below
-            return TypeFail(conc_tnode1, conc_tnode2, ast_node)
+            return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
-            return TypeFail(conc_tnode1, conc_tnode2, ast_node)
+            return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
 
         unified_args = failable_collect([self.unify(a1, a2, ast_node)
                                          for a1, a2 in

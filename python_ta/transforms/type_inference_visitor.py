@@ -525,7 +525,7 @@ class TypeInferer:
         self.type_constraints.unify(self.lookup_inf_type(node.parent, node.name),
                                     Type[_ForwardRef(node.name)], node)
 
-        self.type_store.classes[node.name]['__bases'] = [self.type_store.node_to_type(base)
+        self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
                                                          for base in node.bases]
         self.type_store.classes[node.name]['__mro'] = [cls.name for cls in node.mro()]
 

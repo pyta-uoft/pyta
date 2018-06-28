@@ -319,6 +319,7 @@ class TypeConstraints:
     type_to_tnode: Dict[str, _TNode]
 
     def __init__(self):
+        self.type_store = None
         self.reset()
 
     def __deepcopy__(self, memodict={}):
@@ -326,8 +327,7 @@ class TypeConstraints:
         tc._count = self._count
         tc._nodes = []
         tc.type_to_tnode = {}
-        if hasattr(self, 'type_store'):
-            tc.type_store = self.type_store
+        tc.type_store = self.type_store
         # copy nodes without copying edges
         for node in self._nodes:
             node_cpy = _TNode(node.type, node.ast_node)
@@ -496,7 +496,7 @@ class TypeConstraints:
             elif ct1 == Any or ct2 == Any:
                 return TypeInfo(ct1)
             # Handle inheritance
-            elif hasattr(self, 'type_store') and \
+            elif self.type_store and \
                     self.type_store.is_descendant(ct1, ct2):
                 return TypeInfo(ct1)
             else:

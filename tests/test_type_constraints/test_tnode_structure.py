@@ -449,8 +449,6 @@ def test_builtin_abst_base_mro(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     x, y = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    from sample_usage.print_ast_from_mod import print_ast
-    print_ast(ast_mod)
     assert ti.type_constraints.resolve(y).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)

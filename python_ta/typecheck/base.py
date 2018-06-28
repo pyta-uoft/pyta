@@ -48,6 +48,12 @@ class TypeInfo(TypeResult):
         return f'TypeInfo: {self.value}'
 
 
+class NoType(TypeResult):
+    """Class representing no inferred type"""
+    def __init__(self):
+        super().__init__(None)
+
+
 class TypeFail(TypeResult):
     """Represents the result of a failed type check operation
     Contains error message
@@ -456,7 +462,7 @@ class TypeConstraints:
             return TypeInfo(t1)
         else:
             self.create_edges(tnode1, tnode2, ast_node)
-            return TypeInfo(None)
+            return NoType()
 
     def _unify_generic(self, tnode1: _TNode, tnode2: _TNode,
                        ast_node: Optional[NodeNG] = None) -> TypeResult:

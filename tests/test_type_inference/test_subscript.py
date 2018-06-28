@@ -49,9 +49,9 @@ def test_homogenous_list_store_ctx():
         '''
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
-        assert assign_node.inf_type.getValue() == NoType
+        assert assign_node.inf_type == NoType()
     for subscript_node in module.nodes_of_class(astroid.Subscript):
-        assert subscript_node.inf_type.getValue() == NoType
+        assert subscript_node.inf_type == NoType()
 
 
 def test_homogenous_list_invalid_store_ctx():
@@ -64,7 +64,7 @@ def test_homogenous_list_invalid_store_ctx():
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
     for subscript_node in module.nodes_of_class(astroid.Subscript):
-        assert subscript_node.inf_type.getValue() == NoType
+        assert subscript_node.inf_type == NoType()
 
 
 @given(cs.subscript_node(cs.list_node(min_size=1), cs.slice_node()))

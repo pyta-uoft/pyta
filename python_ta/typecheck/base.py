@@ -462,7 +462,7 @@ class TypeConstraints:
             ct2 = conc_tnode2.type
 
             if isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
-                return self._unify_generic(conc_tnode1, conc_tnode2, ast_node)
+                return self._unify_generic(tnode1, tnode2, ast_node)
             elif ct1.__class__.__name__ == '_Union' or ct2.__class__.__name__ == '_Union':
                 ct1_types = ct1.__args__ if ct1.__class__.__name__ == '_Union' else [ct1]
                 ct2_types = ct2.__args__ if ct2.__class__.__name__ == '_Union' else [ct2]
@@ -510,10 +510,16 @@ class TypeConstraints:
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
             return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
 
-        unified_args = failable_collect([self.unify(a1, a2, ast_node)
-                                         for a1, a2 in
-                                         zip(conc_tnode1.type.__args__,
-                                             conc_tnode2.type.__args__)])
+        arg_inf_types = []
+        for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
+            result = self.unify(a1, a2, ast_node)
+            if isinstance(result, TypeFail):
+                arg_inf_types = [TypeFailUnify(tnode1, tnode2, src_node=ast_node)]
+                break
+            else:
+                arg_inf_types.append(result)
+
+        unified_args = failable_collect(arg_inf_types)
 
         self.create_edges(tnode1, tnode2, ast_node)
         return _wrap_generic_meta(g1, unified_args)

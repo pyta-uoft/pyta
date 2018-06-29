@@ -40,10 +40,8 @@ class TypeStore:
             tvars = []
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
-                    gen = base.value.as_string()
                     tvars = base.slice.as_string().strip('()').replace(" ", "").split(',')
-                    if gen == 'Generic':
-                        self.classes[class_def.name]['__pyta_tvars'] = tvars
+                    self.classes[class_def.name]['__pyta_tvars'] = tvars
             self.classes[class_def.name]['__bases'] = [_node_to_type(base)
                                                        for base in class_def.bases]
             self.classes[class_def.name]['__mro'] = [cls.name for cls in class_def.mro()]
@@ -59,7 +57,7 @@ class TypeStore:
         for function_def in module.nodes_of_class(astroid.FunctionDef):
             in_class = isinstance(function_def.parent, astroid.ClassDef)
             if in_class:
-                tvars = self.classes[function_def.parent.name]['__pyta_tvars']
+                tvars = self.classes[function_def.parent.name]['__pyta_tvars'][:]
             else:
                 tvars = []
             f_type = parse_annotations(function_def, tvars)

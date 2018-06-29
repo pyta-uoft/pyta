@@ -5,7 +5,6 @@ from python_ta.typecheck.base import parse_annotations, \
     class_callable, accept_failable, _node_to_type
 from typing import Callable
 import os
-from builtins import *
 from typing import *
 from typing import Any
 from typing import _ForwardRef
@@ -88,12 +87,14 @@ class TypeStore:
             for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue
-                if self.type_constraints.can_unify(Callable[list(func_type.__args__[:-1]), Any],
-                                                   Callable[list(args), Any]):
+                if self.type_constraints.can_unify(Callable[list(args), Any],
+                                                   Callable[list(func_type.__args__[:-1]), Any]):
                     return func_type
             raise KeyError
 
-    def is_descendant(self, child: type, ancestor: type):
+    def is_descendant(self, child: type, ancestor: type) -> bool:
+        if ancestor == object:
+            return True
         child_name = child.__forward_arg__ if isinstance(child, _ForwardRef) \
             else child.__name__
         if child_name in self.classes:

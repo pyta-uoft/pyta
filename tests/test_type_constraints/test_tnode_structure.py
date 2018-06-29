@@ -453,4 +453,79 @@ def test_builtin_abst_base_mro(draw=False):
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
-# TODO: more tests for builtin mro
+
+def test_builtin_call_simple_mro(draw=False):
+    src = """
+    class A:
+        pass
+        
+    a = A()
+    x = repr(a)
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    a, x = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == str
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_binop_inheritance(draw=False):
+    raise SkipTest('Auto-casting must be handled for this test to pass')
+    src = """
+    x = 1.0 + 3
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == float
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_comp_inheritance(draw=False):
+    src = """
+    x = (3 == 'abc')
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == bool
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_userdefn_inherits_from_builtin(draw=False):
+    src = """
+    class MyStr(str):
+        pass
+        
+    s = MyStr()
+    x = s.lower()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    s, x = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == str
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_userdefn_overrides_builtin(draw=False):
+    src = """
+    class MyStr(str):
+        def lower(self):
+            return 0
+
+    s = MyStr()
+    x = s.lower()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    _, s, x = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == int
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+# TODO: test builtins with Any in signature

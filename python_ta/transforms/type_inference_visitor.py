@@ -104,7 +104,12 @@ class TypeInferer:
         for klass in astroid.ALL_NODE_CLASSES:
             if hasattr(self, f'visit_{klass.__name__.lower()}'):
                 type_visitor.register_transform(klass, getattr(self, f'visit_{klass.__name__.lower()}'))
+            else:
+                type_visitor.register_transform(klass, self.visit_default)
         return type_visitor
+
+    def visit_default(self, node: NodeNG) -> None:
+        node.inf_type = TypeInfo(NoType)
 
     ##############################################################################
     # Literals
@@ -284,7 +289,7 @@ class TypeInferer:
 
         if '__init__' in self.type_store.classes[class_name]:
             init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
-            init_func = Callable[init_args[1:-1], init_args[-1]]
+            init_func = Callable[init_args[1:-1], init_args[0]]
         else:
             # Classes declared without initializer
             init_func = Callable[[], class_type]

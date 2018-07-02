@@ -285,13 +285,13 @@ class TypeConstraints:
         for node in self._nodes:
             node_cpy = _TNode(node.type, node.ast_node)
             tc._nodes.append(node_cpy)
-            tc.type_to_tnode[node.type] = node_cpy
+            tc.type_to_tnode[str(node.type)] = node_cpy
         # fill in edges
         for node in self._nodes:
             for adj_node, ctx in node.adj_list:
-                tc.type_to_tnode[node.type].adj_list.append((tc.type_to_tnode[adj_node.type], ctx))
+                tc.type_to_tnode[str(node.type)].adj_list.append((tc.type_to_tnode[str(adj_node.type)], ctx))
             if node.parent:
-                tc.type_to_tnode[node.type].parent = tc.type_to_tnode[node.parent.type]
+                tc.type_to_tnode[str(node.type)].parent = tc.type_to_tnode[str(node.parent.type)]
         return tc
 
     def reset(self):
@@ -420,25 +420,26 @@ class TypeConstraints:
 
         # Both types can be resolved
         if conc_tnode1 is not None and conc_tnode2 is not None:
-            if isinstance(conc_tnode1.type, GenericMeta) and isinstance(conc_tnode2.type, GenericMeta):
-                return self._unify_generic(conc_tnode1, conc_tnode2, ast_node)
 
-            # TODO: Replace with logic based on concrete tnodes
-            # Legacy code from previous implementation of unify
-            if t1.__class__.__name__ == '_Union' or t2.__class__.__name__ == '_Union':
-                t1_types = t1.__args__ if t1.__class__.__name__ == '_Union' else [t1]
-                t2_types = t2.__args__ if t2.__class__.__name__ == '_Union' else [t2]
-                for u1, u2 in product(t1_types, t2_types):
+            ct1 = conc_tnode1.type
+            ct2 = conc_tnode2.type
+
+            if isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
+                return self._unify_generic(conc_tnode1, conc_tnode2, ast_node)
+            elif ct1.__class__.__name__ == '_Union' or ct2.__class__.__name__ == '_Union':
+                ct1_types = ct1.__args__ if ct1.__class__.__name__ == '_Union' else [ct1]
+                ct2_types = ct2.__args__ if ct2.__class__.__name__ == '_Union' else [ct2]
+                for u1, u2 in product(ct1_types, ct2_types):
                     if self.can_unify(u1, u2):
                         return self.unify(u1, u2, ast_node)
                 return TypeFail(tnode1, tnode2, ast_node)
-            elif t1 == Any or t2 == Any:
-                return TypeInfo(t1)
-            elif conc_tnode1.type == conc_tnode2.type:
+            elif ct1 == Any or ct2 == Any:
+                return TypeInfo(ct1)
+            elif ct1 == ct2:
                 tnode1.parent = conc_tnode1
                 tnode2.parent = conc_tnode1
                 self.create_edges(tnode1, tnode2, ast_node)
-                return TypeInfo(conc_tnode1.type)
+                return TypeInfo(ct1)
             else:
                 return TypeFail(tnode1, tnode2, ast_node)
 
@@ -450,15 +451,7 @@ class TypeConstraints:
         elif conc_tnode2 is not None:
             return self.unify(t2, t1, ast_node)
 
-        # TODO: Replace with logic based on concrete tnodes
-        # Legacy code from previous implementation of unify
-        elif isinstance(t1, _ForwardRef) and \
-                isinstance(t2, _ForwardRef) and t1 == t2:
-            return TypeInfo(t1)
-        elif isinstance(t1, _ForwardRef) or isinstance(t2, _ForwardRef):
-            return TypeFail(tnode1, tnode2, ast_node)
-
-        # New implementation of unify
+        # Both types are type variables
         elif t1 == t2:
             return TypeInfo(t1)
         else:

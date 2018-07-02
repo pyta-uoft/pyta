@@ -68,7 +68,7 @@ def test_class_dot_classmethod():
             def foo(cls, x):
                 return x + 1
 
-        A.foo(A, 0)
+        A.foo(0)
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):

@@ -7,7 +7,7 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, wrap_container
-from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
+from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message, subscript_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -376,11 +376,11 @@ class TypeInferer:
         if isinstance(node.slice.inf_type, TypeFail):
             node.inf_type = node.slice.inf_type
         elif node.ctx == astroid.Load:
-            node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type)
+            node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
         elif node.ctx == astroid.Store:
             node.inf_type = TypeInfo(NoType)
         elif node.ctx == astroid.Del:
-            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type)
+            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
 
     ##############################################################################
     # Loops

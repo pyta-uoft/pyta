@@ -8,7 +8,8 @@ from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
     wrap_container, NoType, TypeFailLookup
-from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
+from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
+    binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -300,6 +301,11 @@ class TypeInferer:
     def visit_binop(self, node: astroid.BinOp) -> None:
         method_name = BINOP_TO_METHOD[node.op]
         node.inf_type = self._handle_call(node, method_name, node.left.inf_type, node.right.inf_type, error_func=binop_error_message)
+        if isinstance(node.inf_type, TypeFail):
+            method_name = BINOP_TO_REV_METHOD[node.op]
+            r_type = self._handle_call(node, method_name, node.right.inf_type, node.left.inf_type, error_func=binop_error_message)
+            if isinstance(r_type, TypeInfo):
+                node.inf_type = r_type
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.

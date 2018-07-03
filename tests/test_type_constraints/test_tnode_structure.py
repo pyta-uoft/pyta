@@ -1,6 +1,7 @@
 import tests.custom_hypothesis_support as cs
 from nose import SkipTest
 from typing import *
+from typing import _ForwardRef
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
 
@@ -31,8 +32,8 @@ def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
 
 
 def compare_list_sets(s1: List[Set[Union[type, str]]], s2: List[Set[Union[type, str]]]):
-    list_sets_1 = s1.copy()
-    list_sets_2 = s2.copy()
+    list_sets_1 = [{str(t) for t in s} for s in s1]
+    list_sets_2 = [{str(t) for t in s} for s in s2]
     assert len(list_sets_1) == len(list_sets_2)
     while list_sets_1:
         set1 = list_sets_1[0]
@@ -164,6 +165,19 @@ def test_elt():
 tc = TypeConstraints()
 
 
+def test_forward_ref(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    assert isinstance(tc.unify(_ForwardRef('A'), _ForwardRef('B')), TypeFail)
+    assert tc.unify(_ForwardRef('A'), _ForwardRef('A')).getValue() == _ForwardRef('A')
+    assert tc.unify(t0, _ForwardRef('A')).getValue() == _ForwardRef('A')
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', _ForwardRef('A')}, {_ForwardRef('B')}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
 def test_polymorphic_callable(draw=False):
     tc.reset()
     t0 = tc.fresh_tvar()
@@ -216,17 +230,17 @@ def test_polymorphic_callable3(draw=False):
 
 
 def test_polymorphic_callable4(draw=False):
-    raise SkipTest('Test this after adding functionality for testing correct TypeFail behavior.')
     tc.reset()
     t0 = tc.fresh_tvar()
     t1 = tc.fresh_tvar()
     t2 = tc.fresh_tvar()
-    tc.unify(t1, Callable[[t0], t0], draw)
-    tc.unify(t2, t1, draw)
-    tc.unify(t2, Callable[[int], str], draw)  # this is a TypeFail
+    tc.unify(t1, Callable[[t0], t0])
+    tc.unify(t2, t1)
+    assert isinstance(tc.unify(t2, Callable[[int], str]), TypeFail)
     actual_set = tc_to_disjoint(tc)
     expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]'}]
+                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]',
+                     'typing.Callable[[int], str]'}, {str}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)

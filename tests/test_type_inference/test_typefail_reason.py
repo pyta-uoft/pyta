@@ -1,8 +1,18 @@
 import astroid
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail, TypeFailUnify
-from tests.test_type_inference.test_tnode_structure import find_type_fail
 from nose.tools import eq_
+
+
+def find_type_fail(ast_node):
+    if isinstance(ast_node.inf_type, TypeFail):
+        return ast_node
+    else:
+        for child in ast_node.get_children():
+            child_res = find_type_fail(child)
+            if child_res is not None:
+                return child_res
+    return None
 
 
 def verify_typefail_unify(tf: TypeFailUnify, *exp_tnodes, exp_src_type, num_reasons):

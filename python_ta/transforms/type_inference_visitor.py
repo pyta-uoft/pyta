@@ -547,7 +547,7 @@ class TypeInferer:
         else:
             class_name = None
 
-        if class_name not in self.type_store.classes:
+        if class_name is not None and class_name not in self.type_store.classes:
             class_name = class_name.lower()
 
         return class_name, is_inst_expr

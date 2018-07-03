@@ -82,7 +82,7 @@ def test_bad_attribute_access():
               f'x.wrong_name\n'
     module, inferer = cs._parse_text(program)
     expr_node = next(module.nodes_of_class(astroid.Expr))
-    expected_msg = 'Attribute wrong_name not found for type int'
+    expected_msg = 'TypeFail: Invalid attribute lookup x.wrong_name'
     assert expr_node.inf_type.getValue() == expected_msg
 
 
@@ -93,7 +93,7 @@ def test_builtin_method_call_bad_self():
               f'x.append(1.0)\n'
     module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
-    expected_msg = f'Attribute append not found for type int'
+    expected_msg = f'TypeFail: Invalid attribute lookup x.append(1.0)'
     assert isinstance(call_node.inf_type, TypeFail)
     assert call_node.inf_type.getValue() == expected_msg
 

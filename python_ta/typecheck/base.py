@@ -109,6 +109,22 @@ class TypeFailUnify(TypeFail):
         return string
 
 
+class TypeFailLookup(TypeFail):
+    """
+    TypeFailLookup occurs when an attribute variable or method is called, and either the attribute or
+    class is invalid
+    Should be initialized with the astroid function node where the invalid lookup occurred
+    """
+    def __init__(self, class_tnode: type, attr_node: NodeNG, src_node: NodeNG):
+        self.class_tnode = class_tnode
+        self.attr_node = attr_node
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self):
+        return f'TypeFail: Invalid attribute lookup {self.src_node.as_string()}'
+
+
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
 def _gorg(x):
     if sys.version_info < (3, 6, 3):

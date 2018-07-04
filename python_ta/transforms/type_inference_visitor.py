@@ -9,7 +9,7 @@ from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
     wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
-    binop_error_message, unaryop_error_message
+    INPLACE_TO_BINOP, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -209,6 +209,30 @@ class TypeInferer:
             type_result = self._assign_type(target, expr_inf_type, node)
             if isinstance(type_result, TypeFail):
                 node.inf_type = type_result
+
+    def visit_augassign(self, node: astroid.AugAssign) -> None:
+        node.inf_type = NoType()
+
+        # lookup method for augmented arithmetic assignment
+        method_name = BINOP_TO_METHOD[node.op]
+        if isinstance(node.target, astroid.Subscript):
+            binop_result = self._handle_call(node.target, '__setitem__', node.target.value.inf_type,
+                                             node.target.slice.inf_type, node.value.inf_type)
+        else:
+            if isinstance(node.target, astroid.AssignName):
+                target_type = self.lookup_typevar(node.target, node.target.name)
+            elif isinstance(node.target, astroid.AssignAttr):
+                target_type = self._lookup_attribute_type(node.target, node.target.expr.name,
+                                                          node.target.attrname)
+            binop_result = self._handle_call(node, method_name, target_type, node.value.inf_type)
+        if isinstance(binop_result, TypeFail):
+            # on failure, fallback to method corresponding to standard operator
+            method_name = BINOP_TO_METHOD[INPLACE_TO_BINOP[node.op]]
+            binop_result = self._handle_call(node, method_name, target_type, node.value.inf_type)
+
+        type_result = self._assign_type(node.target, binop_result, node)
+        if isinstance(type_result, TypeFail):
+            node.inf_type = type_result
 
     @accept_failable
     def _assign_type(self, target: NodeNG, expr_type: type, node: astroid.Assign) -> TypeResult:

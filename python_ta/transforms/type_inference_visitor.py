@@ -7,7 +7,7 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType
+    wrap_container, NoType, TypeFailLookup
 from ..typecheck.errors import BINOP_TO_METHOD, UNARY_TO_METHOD, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
 
@@ -249,7 +249,7 @@ class TypeInferer:
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""
         class_inf_type = self.lookup_inf_type(node, instance_name)
-        class_name, _ = class_inf_type >> self.get_attribute_class
+        class_name, _, _ = class_inf_type >> self.get_attribute_class
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
         return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
 
@@ -550,16 +550,17 @@ class TypeInferer:
         if class_name is not None and class_name not in self.type_store.classes:
             class_name = class_name.lower()
 
-        return class_name, is_inst_expr
+        return class_name, class_type, is_inst_expr
 
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_inf_type = node.expr.inf_type
-        class_name, inst_expr = expr_inf_type >> self.get_attribute_class
+        class_name, class_type, inst_expr = expr_inf_type >> self.get_attribute_class
 
         if class_name in self.type_store.classes:
             attribute_type = self.type_store.classes[class_name].get(node.attrname)
             if attribute_type is None:
-                node.inf_type = TypeFail(f'Attribute {node.attrname} not found for type {class_name}')
+                class_tnode = self.type_constraints.get_tnode(class_type)
+                node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
             else:
                 func_type, method_type = attribute_type[0]
                 # Detect an instance method call, and create a bound method signature (first argument removed).
@@ -569,7 +570,8 @@ class TypeInferer:
                     func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
                 node.inf_type = TypeInfo(func_type)
         else:
-            node.inf_type = TypeFail('Class not found')
+            class_tnode = self.type_constraints.get_tnode(class_type)
+            node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
 
     def visit_annassign(self, node):
         var_inf_type = self.type_constraints.resolve(

@@ -536,11 +536,15 @@ class TypeConstraints:
             elif ct1 == Any or ct2 == Any:
                 return TypeInfo(ct1)
             # Handle inheritance
-            elif self.type_store and \
-                    self.type_store.is_descendant(ct1, ct2):
-                return TypeInfo(ct1)
-            else:
-                return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
+            elif self.type_store:
+                if ct2 == complex and self.type_store.is_descendant(ct1, SupportsComplex):
+                    return TypeInfo(complex)
+                if ct2 == float and self.type_store.is_descendant(ct1, SupportsFloat):
+                    return TypeInfo(float)
+                if self.type_store.is_descendant(ct1, ct2):
+                    return TypeInfo(ct1)
+
+            return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
 
         # One type can be resolved
         elif conc_tnode1 is not None:

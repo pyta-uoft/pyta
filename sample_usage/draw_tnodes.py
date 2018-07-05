@@ -3,6 +3,7 @@ import astroid
 from astroid.node_classes import NodeNG
 from graphviz import Graph
 from typing import *
+from typing import _ForwardRef
 from python_ta.typecheck.base import _TNode, TypeFail
 from python_ta.transforms.type_inference_visitor import TypeInferer
 from tests.custom_hypothesis_support import _parse_text
@@ -13,7 +14,8 @@ USAGE = 'Usage: python draw_tnodes.py <your-file.py>'
 
 def _type_str(type):
     if isinstance(type, TypeVar) or isinstance(type, GenericMeta) or \
-            type.__class__.__name__ == '_Any' or type is None:
+            type.__class__.__name__ == '_Any' or \
+            isinstance(type, _ForwardRef) or type is None:
         return str(type).replace('typing.', '')
     elif type.__class__.__name__ == '_Union':
         trimmed_args = []

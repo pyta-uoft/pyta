@@ -1,10 +1,13 @@
 import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
-from python_ta.typecheck.base import parse_annotations, class_callable, accept_failable
+from python_ta.typecheck.base import parse_annotations, \
+    class_callable, accept_failable, _node_to_type
 from typing import Callable
 import os
+from typing import *
 from typing import Any
+from typing import _ForwardRef
 
 TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
 
@@ -36,10 +39,11 @@ class TypeStore:
             tvars = []
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
-                    gen = base.value.as_string()
                     tvars = base.slice.as_string().strip('()').replace(" ", "").split(',')
-                    if gen == 'Generic':
-                        self.classes[class_def.name]['__pyta_tvars'] = tvars
+                    self.classes[class_def.name]['__pyta_tvars'] = tvars
+            self.classes[class_def.name]['__bases'] = [_node_to_type(base)
+                                                       for base in class_def.bases]
+            self.classes[class_def.name]['__mro'] = [cls.name for cls in class_def.mro()]
             for node in (nodes[0] for nodes in class_def.locals.values()
                          if isinstance(nodes[0], astroid.AssignName) and
                          isinstance(nodes[0].parent, astroid.AnnAssign)):
@@ -52,7 +56,7 @@ class TypeStore:
         for function_def in module.nodes_of_class(astroid.FunctionDef):
             in_class = isinstance(function_def.parent, astroid.ClassDef)
             if in_class:
-                tvars = self.classes[function_def.parent.name]['__pyta_tvars']
+                tvars = self.classes[function_def.parent.name]['__pyta_tvars'][:]
             else:
                 tvars = []
             f_type = parse_annotations(function_def, tvars)
@@ -83,10 +87,23 @@ class TypeStore:
             for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue
-                if self.type_constraints.can_unify(Callable[list(func_type.__args__[:-1]), Any],
-                                                   Callable[list(args), Any]):
+                if self.type_constraints.can_unify(Callable[list(args), Any],
+                                                   Callable[list(func_type.__args__[:-1]), Any]):
                     return func_type
             raise KeyError
+
+    def is_descendant(self, child: type, ancestor: type) -> bool:
+        if ancestor == object:
+            return True
+        child_name = child.__forward_arg__ if isinstance(child, _ForwardRef) \
+            else child.__name__
+        if child_name in self.classes:
+            for base in self.classes[child_name]['__bases']:
+                if self.type_constraints.can_unify(base, ancestor) or \
+                        self.is_descendant(base, ancestor):
+                    self.type_constraints.unify(base, ancestor)
+                    return True
+        return False
 
 
 if __name__ == '__main__':

@@ -194,10 +194,50 @@ class TupleSubscript(TypeVar, _root=True):
     pass
 
 
-def create_Callable(args: Iterable[type], rtype, poly_vars=None):
-    poly_vars = poly_vars or []
+_TYPESHED_TVARS = {
+    '_T': TypeVar('_T'),
+    '_T_co': TypeVar('_T_co', covariant=True),
+    '_KT': TypeVar('_KT'),
+    '_VT': TypeVar('_VT'),
+    '_S': TypeVar('_S'),
+    '_T1': TypeVar('_T1'),
+    '_T2': TypeVar('_T2'),
+    '_T3': TypeVar('_T3'),
+    '_T4': TypeVar('_T4'),
+    '_T5': TypeVar('_T5'),
+    '_TT': TypeVar('_TT', bound='type'),
+    'function': Callable[[Any], Any]
+}
+
+
+_BUILTIN_TO_TYPING = {
+    'list': 'List',
+    'dict': 'Dict',
+    'tuple': 'Tuple',
+    'set': 'Set',
+    'frozenset': 'FrozenSet',
+    'function': 'Callable'
+}
+
+
+def _get_poly_vars(t: type):
+    if isinstance(t, TypeVar) and t.__name__ in _TYPESHED_TVARS:
+        return set([t.__name__])
+    elif isinstance(t, GenericMeta) and t.__args__:
+        pvars = set()
+        for arg in t.__args__:
+            pvars.update(_get_poly_vars(arg))
+        return pvars
+    return set()
+
+
+def create_Callable(args: Iterable[type], rtype, class_poly_vars=None):
+    poly_vars = class_poly_vars or []
+    poly_vars = set(poly_vars)
     c = Callable[list(args), rtype]
-    c.polymorphic_tvars = poly_vars
+    poly_vars.update(_get_poly_vars(c))
+    c.polymorphic_tvars = set()
+    c.polymorphic_tvars.update(poly_vars)
     return c
 
 
@@ -209,34 +249,34 @@ def create_Callable_TypeResult(args: Iterable[type], rtype, poly_vars=None):
 
 TYPE_SIGNATURES = {
     int: {
-        '__add__': create_Callable([int, Num], Num, [Num]),
-        '__sub__': create_Callable([int, Num], Num, [Num]),
-        '__mul__': create_Callable([int, MulNum], MulNum, [MulNum]),
-        '__idiv__': create_Callable([int, Num], Num, [Num]),
-        '__mod__': create_Callable([int, Num], Num, [Num]),
-        '__pow__': create_Callable([int, Num], Num, [Num]),
-        '__div__': create_Callable([int, Num], float, [Num]),
+        '__add__': create_Callable([int, Num], Num, {Num}),
+        '__sub__': create_Callable([int, Num], Num, {Num}),
+        '__mul__': create_Callable([int, MulNum], MulNum, {MulNum}),
+        '__idiv__': create_Callable([int, Num], Num, {Num}),
+        '__mod__': create_Callable([int, Num], Num, {Num}),
+        '__pow__': create_Callable([int, Num], Num, {Num}),
+        '__div__': create_Callable([int, Num], float, {Num}),
     },
     float: {
-        '__add__': create_Callable([float, Num], float, [Num]),
-        '__sub__': create_Callable([float, Num], float, [Num]),
-        '__mul__': create_Callable([float, Num], float, [Num]),
-        '__idiv__': create_Callable([float, Num], float, [Num]),
-        '__mod__': create_Callable([float, Num], float, [Num]),
-        '__pow__': create_Callable([float, Num], float, [Num]),
-        '__div__': create_Callable([float, Num], float, [Num]),
+        '__add__': create_Callable([float, Num], float, {Num}),
+        '__sub__': create_Callable([float, Num], float, {Num}),
+        '__mul__': create_Callable([float, Num], float, {Num}),
+        '__idiv__': create_Callable([float, Num], float, {Num}),
+        '__mod__': create_Callable([float, Num], float, {Num}),
+        '__pow__': create_Callable([float, Num], float, {Num}),
+        '__div__': create_Callable([float, Num], float, {Num}),
     },
     str: {
         '__add__': Callable[[str, str], str],
         '__mul__': Callable[[str, int], str]
     },
     List: {
-        '__add__': create_Callable([List[a], List[a]], List[a], [a]),
-        '__mul__': create_Callable([List[a], int], List[a], [a]),
-        '__getitem__': create_Callable([List[a], int], a, [a])
+        '__add__': create_Callable([List[a], List[a]], List[a], {a}),
+        '__mul__': create_Callable([List[a], int], List[a], {a}),
+        '__getitem__': create_Callable([List[a], int], a, {a})
     },
     Tuple: {
-        '__add__': create_Callable([tup1, tup2], TuplePlus('tup+', tup1, tup2), [tup1, tup2]),
+        '__add__': create_Callable([tup1, tup2], TuplePlus('tup+', tup1, tup2), {tup1, tup2}),
     }
 }
 
@@ -319,6 +359,7 @@ class TypeConstraints:
     type_to_tnode: Dict[str, _TNode]
 
     def __init__(self):
+        self.type_store = None
         self.reset()
 
     def __deepcopy__(self, memodict={}):
@@ -326,6 +367,7 @@ class TypeConstraints:
         tc._count = self._count
         tc._nodes = []
         tc.type_to_tnode = {}
+        tc.type_store = self.type_store
         # copy nodes without copying edges
         for node in self._nodes:
             node_cpy = _TNode(node.type, node.ast_node)
@@ -477,7 +519,12 @@ class TypeConstraints:
             ct1 = conc_tnode1.type
             ct2 = conc_tnode2.type
 
-            if isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
+            if ct1 == ct2:
+                tnode1.parent = conc_tnode1
+                tnode2.parent = conc_tnode1
+                self.create_edges(tnode1, tnode2, ast_node)
+                return TypeInfo(ct1)
+            elif isinstance(ct1, GenericMeta) and isinstance(ct2, GenericMeta):
                 return self._unify_generic(tnode1, tnode2, ast_node)
             elif ct1.__class__.__name__ == '_Union' or ct2.__class__.__name__ == '_Union':
                 ct1_types = ct1.__args__ if ct1.__class__.__name__ == '_Union' else [ct1]
@@ -488,10 +535,9 @@ class TypeConstraints:
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
             elif ct1 == Any or ct2 == Any:
                 return TypeInfo(ct1)
-            elif ct1 == ct2:
-                tnode1.parent = conc_tnode1
-                tnode2.parent = conc_tnode1
-                self.create_edges(tnode1, tnode2, ast_node)
+            # Handle inheritance
+            elif self.type_store and \
+                    self.type_store.is_descendant(ct1, ct2):
                 return TypeInfo(ct1)
             else:
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
@@ -719,32 +765,6 @@ def _node_to_type(node, locals=None):
         return None
     else:
         return node
-
-
-_TYPESHED_TVARS = {
-    '_T': TypeVar('_T'),
-    '_T_co': TypeVar('_T_co', covariant=True),
-    '_KT': TypeVar('_KT'),
-    '_VT': TypeVar('_VT'),
-    '_S': TypeVar('_S'),
-    '_T1': TypeVar('_T1'),
-    '_T2': TypeVar('_T2'),
-    '_T3': TypeVar('_T3'),
-    '_T4': TypeVar('_T4'),
-    '_T5': TypeVar('_T5'),
-    '_TT': TypeVar('_TT', bound='type'),
-    'function': Callable[[Any], Any]
-}
-
-
-_BUILTIN_TO_TYPING = {
-    'list': 'List',
-    'dict': 'Dict',
-    'tuple': 'Tuple',
-    'set': 'Set',
-    'frozenset': 'FrozenSet',
-    'function': 'Callable'
-}
 
 
 def class_callable(init):

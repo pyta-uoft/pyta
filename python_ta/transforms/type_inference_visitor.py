@@ -27,12 +27,15 @@ class TypeInferer:
     """
     type_constraints = TypeConstraints()
     type_store = TypeStore(type_constraints)
+    type_constraints.type_store = type_store
 
     def __init__(self):
         self.type_constraints.reset()
 
     def reset(self):
+        self.type_constraints.reset()
         self.type_store = TypeStore(self.type_constraints)
+        self.type_constraints.type_store = self.type_store
 
     ###########################################################################
     # Setting up the environment
@@ -277,7 +280,10 @@ class TypeInferer:
     def get_call_signature(self, c, node: NodeNG) -> TypeResult:
         if hasattr(c, '__name__') and c.__name__ == 'Type':
             class_type = c.__args__[0]
-            class_name = c.__args__[0].__forward_arg__
+            if isinstance(class_type, _ForwardRef):
+                class_name = c.__args__[0].__forward_arg__
+            else:
+                class_name = class_type.__name__
         elif isinstance(c, _ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
@@ -519,6 +525,10 @@ class TypeInferer:
         self.type_constraints.unify(self.lookup_inf_type(node.parent, node.name),
                                     Type[_ForwardRef(node.name)], node)
 
+        self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
+                                                         for base in node.bases]
+        self.type_store.classes[node.name]['__mro'] = [cls.name for cls in node.mro()]
+
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?
         for attr in node.locals:
@@ -557,7 +567,11 @@ class TypeInferer:
         class_name, class_type, inst_expr = expr_inf_type >> self.get_attribute_class
 
         if class_name in self.type_store.classes:
-            attribute_type = self.type_store.classes[class_name].get(node.attrname)
+            attribute_type = None
+            for par_class_type in self.type_store.classes[class_name]['__mro']:
+                attribute_type = self.type_store.classes[par_class_type].get(node.attrname)
+                if attribute_type:
+                    break
             if attribute_type is None:
                 class_tnode = self.type_constraints.get_tnode(class_type)
                 node.inf_type = TypeFailLookup(class_tnode, node, node.parent)

@@ -54,3 +54,35 @@ def test_var_chain():
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
     verify_typefail_unify(tf, 'C', 'Z', exp_src_type=astroid.Assign, num_reasons=4)
+
+
+def test_one_list():
+    src = """
+    L1 = [1, 2, 3]
+    L1 = "Hello"
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tf = find_type_fail(ast_mod).inf_type
+    verify_typefail_unify(tf, 'L1', str, exp_src_type=astroid.Assign, num_reasons=1)
+
+
+def test_two_lists():
+    src = """
+    L1 = [1, 2, 3]
+    L2 = ['a', 'b', 'c']
+    L1 = L2
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tf = find_type_fail(ast_mod).inf_type
+    verify_typefail_unify(tf, 'L1', 'L2', exp_src_type=astroid.Assign, num_reasons=2)
+
+
+def test_tuple():
+    src = """
+    T1 = (1, 2)
+    T2 = ('a', 'b')
+    T1 = T2
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tf = find_type_fail(ast_mod).inf_type
+    verify_typefail_unify(tf, 'T1', 'T2', exp_src_type=astroid.Assign, num_reasons=2)

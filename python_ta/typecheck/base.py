@@ -44,6 +44,12 @@ class _TNode:
             cur_node = cur_node.parent_path[0]
         return final_path
 
+    def find_annotation(self) -> Optional[astroid.AnnAssign]:
+        path = self.find_path_to_parent()
+        for p in path:
+            if isinstance(p, astroid.AnnAssign):
+                return p
+
 
 class TypeResult(Failable):
     """Represents the result of a type check operation that either succeeded or
@@ -123,6 +129,20 @@ class TypeFailLookup(TypeFail):
 
     def __str__(self):
         return f'TypeFail: Invalid attribute lookup {self.src_node.as_string()}'
+
+
+class TypeFailAnnotation(TypeFail):
+    def __init__(self, tnode: _TNode, src_node: NodeNG = None, ann_node: NodeNG = None):
+        self.tnode = tnode
+        self.src_node = src_node
+        self.ann_node = ann_node
+        super().__init__(str(self))
+
+    def __str__(self):
+        string = f'TypeFail: Annotation error in {self.src_node.as_string()}. {self.tnode.ast_node.as_string()} is annotated as '
+        string += f'{self.tnode.parent.type.__name__}' if self.tnode.parent else f'{self.tnode.type.__name__}'
+        string += f' at {self.ann_node.as_string()}'
+        return string
 
 
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
@@ -555,6 +575,10 @@ class TypeConstraints:
                     self.type_store.is_descendant(ct1, ct2):
                 return TypeInfo(ct1)
             else:
+                for tn in [tnode1, tnode2]:
+                    ann_t = tn.find_annotation()
+                    if ann_t is not None:
+                        return TypeFailAnnotation(tn, ast_node, ann_t)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
 
         # One type can be resolved

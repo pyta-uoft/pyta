@@ -1,7 +1,8 @@
 import astroid
 import tests.custom_hypothesis_support as cs
-from python_ta.typecheck.base import TypeFail, TypeFailUnify
+from python_ta.typecheck.base import TypeFail, TypeFailUnify, TypeFailAnnotation
 from nose.tools import eq_
+from nose import SkipTest
 
 
 def find_type_fail(ast_node):
@@ -96,3 +97,26 @@ def test_tuple():
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
     verify_typefail_unify(tf, 'T1', 'T2', exp_src_type=astroid.Assign, num_reasons=2)
+
+
+def test_annotation():
+    src = """
+    x: int
+    x = 'Hello'
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tf = find_type_fail(ast_mod).inf_type
+    assert isinstance(tf, TypeFailAnnotation)
+
+
+def test_func_annotation():
+    src = """
+    def f(x: int):
+        return x
+    
+    f('Hello')
+    """
+    raise SkipTest("Requires modifications to unify_call")
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tf = find_type_fail(ast_mod).inf_type
+    assert isinstance(tf, TypeFailAnnotation)

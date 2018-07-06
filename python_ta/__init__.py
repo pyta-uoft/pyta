@@ -172,10 +172,9 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/always_returning_checker',
         'python_ta/checkers/constant_test_checker',
         'python_ta/checkers/structure_test_checker',
-        'python_ta/checkers/type_annotation_checker'
+        'python_ta/checkers/type_annotation_checker',
+        'python_ta/checkers/type_inference_checker'
         # 'python_ta/checkers/simplified_if_checker'
-        # TODO: Eventually enable this checker
-        # 'python_ta/checkers/type_inference_checker'
     ]
 
     # Register new options to a checker here to allow references to

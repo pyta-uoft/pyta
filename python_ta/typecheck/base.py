@@ -106,7 +106,7 @@ class TypeFailUnify(TypeFail):
         super().__init__(str(self))
 
     def __str__(self):
-        string = 'TypeFail: Unable to Unify '
+        string = 'TypeFail: Unable to unify '
         string += f'{self.tnodes[0].ast_node.as_string()}' if self.tnodes[0].ast_node else f'{self.tnodes[0].type}'
         string += ' <-> '
         string += f'{self.tnodes[1].ast_node.as_string()}' if self.tnodes[1].ast_node else f'{self.tnodes[1].type}'

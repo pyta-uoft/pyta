@@ -441,27 +441,18 @@ class TypeConstraints:
             return not isinstance(type, TypeVar)
 
     def find_repr(self, tn: _TNode) -> Optional[_TNode]:
+        """Do a bfs starting from tn to find a _TNode that has a parent, or a unique set representative if
+        no parent is found."""
         return self.find_parent(tn, True)
 
     def find_parent(self, tn: _TNode, find_repr: bool = False) -> Optional[_TNode]:
         """Do a bfs starting from tn to find a _TNode that has a parent."""
-        if tn.parent:
+        if tn.parent is not None:
             return tn.parent
-        visited = []
-        node_list = [tn]
-        goal_tnode = None
-        while node_list:
-            cur_node = node_list[0]
-            for e in cur_node.adj_list:
-                if e[0] not in visited and e[0] not in node_list:
-                    if e[0].parent:
-                        goal_tnode = e[0]
-                        break
-                    node_list.append(e[0])
-            visited.append(node_list[0])
-            node_list.remove(node_list[0])
 
-        if goal_tnode:
+        goal_tnode = self.find_node(tn, (lambda t: t.parent is not None), find_repr)
+
+        if goal_tnode and goal_tnode.parent:
             cur_node = goal_tnode
             while cur_node:
                 next_node = None
@@ -471,6 +462,30 @@ class TypeConstraints:
                         e[0].parent_path = (cur_node, e[1])
                         next_node = e[0]
                 cur_node = next_node
+
+        return goal_tnode
+
+    def find_function_def(self, tn: _TNode) -> Optional[astroid.FunctionDef]:
+        """Do a bfs starting from tn to find a _TNode with a FunctionDef node as its ast_node attribute."""
+        func_tnode = self.find_node(tn, (lambda t: isinstance(t.ast_node, astroid.FunctionDef)), False)
+        if func_tnode:
+            return func_tnode.ast_node
+
+    def find_node(self, tn: _TNode, cond: Callable[[Any], bool], find_repr: bool = False) -> Optional[_TNode]:
+        """Do a bfs starting from tn to find a _TNode that satisfies the passed in condition function."""
+        visited = []
+        node_list = [tn]
+        goal_tnode = None
+        while node_list:
+            cur_node = node_list[0]
+            for e in cur_node.adj_list:
+                if e[0] not in visited and e[0] not in node_list:
+                    if cond(e[0]):
+                        goal_tnode = e[0]
+                        break
+                    node_list.append(e[0])
+            visited.append(node_list[0])
+            node_list.remove(node_list[0])
 
         # Return a set representative, even if it isn't a concrete type
         if find_repr and not goal_tnode and len(visited) > 1:

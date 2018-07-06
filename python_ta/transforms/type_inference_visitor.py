@@ -330,7 +330,7 @@ class TypeInferer:
         return_types = set()
         left = node.left
         for comparator, right in node.ops:
-            if comparator == 'is':
+            if comparator == 'is' or comparator == 'is not':
                 return_types.add(bool)
             elif comparator == 'in':
                 resolved_type = self._handle_call(

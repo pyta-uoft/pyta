@@ -45,6 +45,7 @@ class TypeInferer:
         """Return a TransformVisitor that sets an environment for every node."""
         visitor = TransformVisitor()
         visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
+        visitor.register_transform(astroid.AsyncFunctionDef, self._set_function_def_environment)
         visitor.register_transform(astroid.ClassDef, self._set_classdef_environment)
         visitor.register_transform(astroid.Module, self._set_module_environment)
         visitor.register_transform(astroid.ListComp, self._set_comprehension_environment)
@@ -513,6 +514,9 @@ class TypeInferer:
         result = self.type_constraints.unify(func_name, func_type, node)
         if isinstance(result, TypeFail):
             node.inf_type = result
+
+    def visit_asyncfunctiondef(self, node: astroid.AsyncFunctionDef) -> None:
+        self.visit_functiondef(node)
 
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = NoType()

@@ -91,9 +91,6 @@ class TypeFail(TypeResult):
     def bind(self, _):
         return self
 
-    def add_msg(self, msg: str):
-        self.msg = msg
-
 
 class TypeFailUnify(TypeFail):
     """
@@ -355,18 +352,6 @@ def op_to_dunder_unary(op):
         return op
 
 
-def lookup_method(name, caller_type, *args):
-    """Lookup method with the given name for the given type."""
-    if isinstance(caller_type, TupleMeta):
-        caller_origin = Tuple
-    elif isinstance(caller_type, GenericMeta):
-        caller_origin = _gorg(caller_type)
-    else:
-        caller_origin = caller_type
-
-    return TYPE_SIGNATURES[caller_origin][name]
-
-
 class TypeConstraints:
     """Represents all the type constraints in the program.
 
@@ -422,20 +407,21 @@ class TypeConstraints:
         self._make_set(tvar, ast_node=node)
         return tvar
 
-    def _make_set(self, t: type, ast_node: Optional[NodeNG] = None, add_to_nodes=True) -> _TNode:
+    def _make_set(self, t: type, ast_node: Optional[NodeNG] = None) -> _TNode:
+        """Creates new set with a single TNode"""
         node = _TNode(t, ast_node)
-        if add_to_nodes:
-            self._nodes.append(node)
-            self.type_to_tnode[str(t)] = node
+        self._nodes.append(node)
+        self.type_to_tnode[str(t)] = node
         if not isinstance(t, TypeVar):
             node.parent = node
         return node
 
-    def get_tnode(self, t: type, add_to_nodes=True) -> _TNode:
+    def get_tnode(self, t: type) -> _TNode:
+        """Returns the TNode that represents the given type t, or creates a new one"""
         try:
             node = self.type_to_tnode[str(t)]
         except KeyError:
-            node = self._make_set(t, None, add_to_nodes)
+            node = self._make_set(t, None)
         return node
 
     ###########################################################################

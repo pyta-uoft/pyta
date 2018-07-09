@@ -1,5 +1,5 @@
 """Examples of bad-loop-indexing"""
-
+import python_ta
 
 def sum_items(lst):
     """This is the simplest example. i is only used to index lst."""
@@ -50,3 +50,5 @@ def index_in_if(lst):
     return s
 
 # TODO: keep looking for more examples
+
+python_ta.check_all()

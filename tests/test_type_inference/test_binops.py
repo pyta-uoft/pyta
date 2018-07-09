@@ -1,4 +1,5 @@
 import astroid
+from typing import List
 import nose
 from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
@@ -20,6 +21,16 @@ def test_binop_non_bool_concrete(node):
         exp_return_type = None
     assume(exp_return_type is not None)
     assert binop_node.inf_type.getValue() == exp_return_type
+
+
+def test_binop_reverse():
+    src = """
+    x = 3 * [1,2,3]
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
 if __name__ == '__main__':

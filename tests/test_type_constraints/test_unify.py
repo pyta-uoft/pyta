@@ -197,7 +197,7 @@ def test_simple_polymorphic_call():
     tc.reset()
     tv1 = tc.fresh_tvar()
     tv2 = tc.fresh_tvar()
-    fn1 = create_Callable([tv1, tv2], bool, [tv1, tv2])
+    fn1 = create_Callable([tv1, tv2], bool, {tv1, tv2})
     fn2 = create_Callable([int, int], bool)
 
     unify_helper(fn1, fn2, Callable[[int, int], bool])
@@ -208,12 +208,12 @@ def test_higher_order_polymorphic_call():
     tv1 = tc.fresh_tvar()
     tv2 = tc.fresh_tvar()
 
-    fn0 = create_Callable([tv1, int], int, [tv1])
+    fn0 = create_Callable([tv1, int], int, {tv1})
     fn1 = create_Callable([int, int], int)
 
     fn2 = create_Callable([fn0, int], bool)
     fn3 = create_Callable([fn1, int], bool)
-    fn4 = create_Callable([tv2, int], bool, [tv2])
+    fn4 = create_Callable([tv2, int], bool, {tv2})
 
     unify_helper(fn2, fn3, Callable[[Callable[[int, int], int], int], bool])
     unify_helper(fn2, fn4, Callable[[Callable[[int, int], int], int], bool])

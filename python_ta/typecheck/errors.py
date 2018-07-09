@@ -46,9 +46,9 @@ BINOP_TO_METHOD = {
     '+': '__add__',
     '-': '__sub__',
     '*': '__mul__',
-    '//': '__idiv__',
+    '//': '__floordiv__',
     '%': '__mod__',
-    '/': '__div__',
+    '/': '__truediv__',
     '**': '__pow__',
     '&': '__and__',
     '^': '__xor__',
@@ -62,6 +62,21 @@ BINOP_TO_METHOD = {
     '>': '__gt__',
     '>=': '__ge__',
     'in': '__contains__'
+    }
+
+BINOP_TO_REV_METHOD = {
+    '+': '__radd__',
+    '-': '__rsub__',
+    '*': '__rmul__',
+    '//': '__rfloordiv__',
+    '%': '__rmod__',
+    '/': '__rtruediv__',
+    '**': '__rpow__',
+    '&': '__rand__',
+    '^': '__rxor__',
+    '|': '__ror__',
+    '<<': '__rlshift__',
+    '>>': '__rrshift__',
     }
 
 

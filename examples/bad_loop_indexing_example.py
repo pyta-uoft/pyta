@@ -50,5 +50,6 @@ def index_in_if(lst):
     return s
 
 # TODO: keep looking for more examples
+# TODO: update rebinding examples
 
 python_ta.check_all()

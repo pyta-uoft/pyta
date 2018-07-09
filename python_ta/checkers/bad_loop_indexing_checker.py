@@ -43,11 +43,13 @@ class BadLoopIndexingChecker(BaseChecker):
             return False
 
         # AugAssign is special (i += 2 is actually i = i + 2).
+        # Check if any AssignName nodes in an AugAssign node refers to the iteration variable.
         if any(index_node.lookup(index)[1][0] == node.target for index_node in _augassign_index_nodes(node, index)):
             return False
         # i) For all index_node in augassign_index_nodes, .lookup != node.target, so they are all rebound
         # or ii) there are no AugAssign nodes.
-        return not any(index_node.lookup(index)[1][0] == node.target for index_node in _good_use_index_nodes(node, index)) \
+        return not any(index_node.lookup(index)[1][0] == node.target
+                       for index_node in _good_use_index_nodes(node, index)) \
             and (_index_assign_name_nodes(node, index) or _index_name_nodes(node, index))
 
 

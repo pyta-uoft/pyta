@@ -19,7 +19,7 @@ class TypeErrorInfo:
         self.msg = msg
         self.node = node
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.msg
 
 
@@ -152,6 +152,9 @@ class TypeInferer:
             node.inf_type = wrap_container(Tuple, *(e.inf_type for e in node.elts))
 
     def unify_elements(self, lst: List[NodeNG], node: NodeNG) -> TypeInfo:
+        """Helper function that takes list of nodes, unifies each nodes with the subsequent node in the list,
+        and returns the TypeResult from unifying the last two elements
+        Returns TypeInfo(Any) if there is a TypeFail when unifying nodes in lst"""
         lst = list(lst)
         elt_inf_type = lst[0].inf_type
         for cur_elt in lst:
@@ -278,7 +281,9 @@ class TypeInferer:
     # Operation nodes
     ##############################################################################
     @accept_failable
-    def get_call_signature(self, c, node: NodeNG) -> TypeResult:
+    def get_call_signature(self, c) -> TypeResult:
+        """Helper function to find and return the call signature of the initializer function of a class,
+        when the class a class is used as a callable, usually when instantiating the class"""
         if hasattr(c, '__name__') and c.__name__ == 'Type':
             class_type = c.__args__[0]
             if isinstance(class_type, _ForwardRef):
@@ -300,7 +305,7 @@ class TypeInferer:
         return TypeInfo(init_func)
 
     def visit_call(self, node: astroid.Call) -> None:
-        func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
+        func_inf_type = self.get_call_signature(node.func.inf_type)
         arg_inf_types = [arg.inf_type for arg in node.args]
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
@@ -547,7 +552,8 @@ class TypeInferer:
     ##############################################################################
     # Statements
     ##############################################################################
-    def get_attribute_class(self, t: type) -> Tuple[str, bool]:
+    def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:
+        """Helper function to find the class of the attribute that is being visited"""
         is_inst_expr = True
 
         if hasattr(t, '__name__') and t.__name__ == 'Type':

@@ -1,7 +1,7 @@
 import astroid
-from python_ta.typecheck.base import TypeInfo, TypeFail
 import tests.custom_hypothesis_support as cs
 from nose.tools import eq_
+from python_ta.typecheck.base import TypeFailFunction
 
 
 def test_overload_function():
@@ -49,7 +49,7 @@ def test_too_few_args():
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type, TypeFail("Wrong number of arguments"))
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 def test_too_few_args_2():
@@ -60,7 +60,7 @@ def test_too_few_args_2():
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type, TypeFail("Wrong number of arguments"))
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 def test_too_many_args():
@@ -71,7 +71,8 @@ def test_too_many_args():
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type, TypeFail("Wrong number of arguments"))
+        assert isinstance(call_node.inf_type, TypeFailFunction)
+
 
 def test_too_many_args_2():
     program = """
@@ -81,7 +82,7 @@ def test_too_many_args_2():
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type, TypeFail("Wrong number of arguments"))
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 def test_too_few_args_with_overload():
@@ -92,7 +93,7 @@ def test_too_few_args_with_overload():
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type, TypeFail("Wrong number of arguments"))
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 def test_too_many_args_with_overload():
@@ -103,7 +104,7 @@ def test_too_many_args_with_overload():
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type, TypeFail("Wrong number of arguments"))
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 def test_overload_function_with_annotations():

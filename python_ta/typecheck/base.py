@@ -142,6 +142,29 @@ class TypeFailAnnotation(TypeFail):
         return string
 
 
+class TypeFailFunction(TypeFail):
+    """
+    TypeFailFunction occurs when a function is called with different arguments than expected.
+    Should be initialized with the tnode of the expected function type signature, and astroid
+    node where invalid function call occurred
+
+    :param func_types: Tuple containing one or more valid type signatures
+    :param funcdef_node: FunctionDef astroid node where function is defined
+    :param src_node: Astroid node where invalid function call occurs
+    :param arg_indices: List of argument index numbers,
+    """
+    def __init__(self, func_types: Tuple[CallableMeta], funcdef_node: astroid.FunctionDef, src_node: NodeNG,
+                 arg_indices: List[int] = None):
+        self.func_types = func_types
+        self.funcdef_node = funcdef_node
+        self.src_node = src_node
+        self.arg_indices = arg_indices
+        super().__init__(str(self))
+
+    def __str__(self):
+        return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
+
+
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
 def _gorg(x):
     if sys.version_info < (3, 6, 3):
@@ -623,31 +646,48 @@ class TypeConstraints:
         return isinstance(tc.unify(t1, t2, None), TypeInfo)
 
     @accept_failable
-    def unify_call(self, func_type, *arg_types, node=None) -> TypeResult:
+    def unify_call(self, func_var, *arg_types, node=None) -> TypeResult:
         """Unify a function call with the given function type and argument types.
 
         Return a result type.
         """
+        if isinstance(func_var, CallableMeta):
+            func_type = func_var
+        else:
+            tnode = self.get_tnode(func_var)
+            func_tnode = self.find_parent(tnode)
+            func_type = func_tnode.type
+
         # Check that the number of parameters matches the number of arguments.
         if func_type.__origin__ is Union:
             new_func_type = None
             for c in func_type.__args__:
                 if len(c.__args__) - 1 == len(arg_types):
                     new_func_type = c
+                    break
             if new_func_type is None:
-                # TODO: Should this return a unique error message?
-                return TypeFail('Wrong number of arguments')
+                func_tnode = self.get_tnode(func_var)
+                func_def_tnode = self.find_function_def(func_tnode)
+                return TypeFailFunction(tuple(func_type.__args__), func_def_tnode, node)
             else:
                 func_type = new_func_type
         elif len(func_type.__args__) - 1 != len(arg_types):
-            return TypeFail('Wrong number of arguments')
+            func_tnode = self.get_tnode(func_var)
+            func_def_tnode = self.find_function_def(func_tnode)
+            return TypeFailFunction((func_type, ), func_def_tnode, node)
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
-        for arg_type, param_type in zip(arg_types, new_func_type.__args__[:-1]):
-            if isinstance(self.unify(arg_type, param_type, node), TypeFail):
-                return self.unify(arg_type, param_type, node)
+        results = []
+        for i in range(len(arg_types)):
+            result = self.unify(arg_types[i], new_func_type.__args__[i], node)
+            if isinstance(result, TypeFail):
+                results.append(i)
+        if results:
+            func_tnode = self.get_tnode(func_var)
+            func_def_tnode = self.find_function_def(func_tnode)
+            return TypeFailFunction((new_func_type, ), func_def_tnode, node, results)
         return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t) -> TypeResult:

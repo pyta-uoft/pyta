@@ -192,7 +192,10 @@ def _wrap_generic_meta(t, args):
 
 @accept_failable
 def wrap_container(container_type: GenericMeta, *args: List[type]) -> TypeInfo:
-    return TypeInfo(container_type[tuple(args)])
+    if isinstance(container_type, CallableMeta):
+        return TypeInfo(Callable[list(args[:-1]), args[-1]])
+    else:
+        return TypeInfo(container_type[tuple(args)])
 
 
 Num = TypeVar('number', int, float)

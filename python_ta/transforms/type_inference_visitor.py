@@ -211,7 +211,10 @@ class TypeInferer:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
         if isinstance(node.value, astroid.Name):
-            expr_inf_type = TypeInfo(self.lookup_typevar(node, node.value.name))
+            try:
+                expr_inf_type = TypeInfo(self.lookup_typevar(node, node.value.name))
+            except KeyError:
+                expr_inf_type = TypeInfo(Any)
         else:
             expr_inf_type = node.value.inf_type
 

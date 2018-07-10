@@ -307,23 +307,37 @@ class TypeInferer:
 
     def visit_binop(self, node: astroid.BinOp) -> None:
         left_inf, right_inf = node.left.inf_type, node.right.inf_type
-        method_name = BINOP_TO_METHOD[node.op]
-        rev_method_name = BINOP_TO_REV_METHOD[node.op]
-        l_type = self._handle_call(node, method_name, left_inf, right_inf,
-                                              error_func=binop_error_message)
-        r_type = self._handle_call(node, rev_method_name, right_inf, left_inf,
-                                              error_func=binop_error_message)
 
-        if self.type_store.is_descendant(right_inf.getValue(), left_inf.getValue()):
-            if isinstance(r_type, TypeFail) and isinstance(l_type, TypeInfo):
-                node.inf_type = l_type
-            else:
-                node.inf_type = r_type
+        # attemp to obtain a common arithmetic type
+        arithm_type = self._arithm_convert(left_inf.getValue(), right_inf.getValue())
+        if arithm_type:
+            node.inf_type = TypeInfo(arithm_type)
         else:
-            if isinstance(l_type, TypeFail) and isinstance(r_type, TypeInfo):
-                node.inf_type = r_type
+            method_name = BINOP_TO_METHOD[node.op]
+            rev_method_name = BINOP_TO_REV_METHOD[node.op]
+            l_type = self._handle_call(node, method_name, left_inf, right_inf,
+                                                  error_func=binop_error_message)
+            r_type = self._handle_call(node, rev_method_name, right_inf, left_inf,
+                                                  error_func=binop_error_message)
+
+            if self.type_store.is_descendant(right_inf.getValue(), left_inf.getValue()):
+                if isinstance(r_type, TypeFail) and isinstance(l_type, TypeInfo):
+                    node.inf_type = l_type
+                else:
+                    node.inf_type = r_type
             else:
-                node.inf_type = l_type
+                if isinstance(l_type, TypeFail) and isinstance(r_type, TypeInfo):
+                    node.inf_type = r_type
+                else:
+                    node.inf_type = l_type
+
+    def _arithm_convert(self, t1_: type, t2_: type) -> type:
+        for t1, t2 in [(t1_, t2_), (t2_, t1_)]:
+            if t1 == complex and self.type_store.is_descendant(t2, SupportsComplex):
+                return complex
+            if t1 == float and self.type_store.is_descendant(t2, SupportsFloat):
+                return float
+        return None
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.

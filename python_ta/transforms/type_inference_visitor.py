@@ -377,10 +377,8 @@ class TypeInferer:
 
     def visit_extslice(self, node: astroid.ExtSlice):
         unif_res = failable_collect(dim.inf_type for dim in node.dims)
-        if isinstance(unif_res, TypeFail):
-            node.inf_type = unif_res
-        else:
-            node.inf_type = wrap_container(Tuple, unif_res)
+        node.inf_type = unif_res >> (
+            lambda lst: wrap_container(Tuple, *lst))
 
     def visit_subscript(self, node: astroid.Subscript) -> None:
         if isinstance(node.slice.inf_type, TypeFail):

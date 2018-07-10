@@ -93,8 +93,12 @@ def binary_op_hints(op, args):
 
 def binop_error_message(node: astroid.BinOp) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
-    left_type = node.left.inf_type.getValue().__name__
-    right_type = node.right.inf_type.getValue().__name__
+
+    left_type = node.left.inf_type.getValue().__name__ if isinstance(node.left.inf_type.getValue(), type) else str(
+        node.left.inf_type.getValue())
+    right_type = node.right.inf_type.getValue().__name__ if isinstance(node.right.inf_type.getValue(), type) else str(
+        node.right.inf_type.getValue())
+
     hint = binary_op_hints(node.op, [left_type, right_type]) or ''
 
     return (

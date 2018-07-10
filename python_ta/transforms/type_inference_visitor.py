@@ -289,6 +289,9 @@ class TypeInferer:
         elif isinstance(c, _ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
+        elif c == Any:
+            num_args = len(node.args)
+            return TypeInfo(Callable[[Any] * num_args, Any])
         else:
             return TypeInfo(c)
 
@@ -301,7 +304,7 @@ class TypeInferer:
         return TypeInfo(init_func)
 
     def visit_call(self, node: astroid.Call) -> None:
-        func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
+        func_inf_type = self.get_call_signature(node.func.inf_type, node)
         arg_inf_types = [arg.inf_type for arg in node.args]
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 

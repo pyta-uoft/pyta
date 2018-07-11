@@ -83,7 +83,11 @@ class TypeStore:
         """Helper method to lookup a method type given the operator and types of arguments."""
         if args:
             func_types_list = self.methods[operator]
-            self_type = args[0]
+            # prioritize function types that match the 'self' argument
+            func_types_list = sorted(func_types_list,
+                                     key=lambda f_tp: f_tp[0].__args__ and
+                                                      f_tp[0].__args__[0] == args[0],
+                                     reverse=True)
             for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue

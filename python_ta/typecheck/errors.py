@@ -79,6 +79,12 @@ BINOP_TO_REV_METHOD = {
     '>>': '__rrshift__',
     }
 
+def _get_name(t: type) -> str:
+    if isinstance(t, _ForwardRef):
+        return t.__forward_arg__
+    else:
+        return t.__name__
+
 
 ###############################################################################
 # BinOp message
@@ -93,8 +99,8 @@ def binary_op_hints(op, args):
 
 def binop_error_message(node: astroid.BinOp) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
-    left_type = node.left.inf_type.getValue().__name__
-    right_type = node.right.inf_type.getValue().__name__
+    left_type = _get_name(node.left.inf_type.getValue())
+    right_type = _get_name(node.right.inf_type.getValue())
     hint = binary_op_hints(node.op, [left_type, right_type]) or ''
 
     return (

@@ -33,5 +33,80 @@ def test_binop_reverse():
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
+def test_binop_userdefn():
+    src = """
+    class A:
+        def __add__(self, i):
+            return 1
+
+        def __radd__(self, i):
+            return 1.0
+
+    class B:
+        def __add__(self, i):
+            return 'abc'
+
+        def __radd__(self, i):
+            return True
+
+    a = A()
+    b = B()
+    x = a + b
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    a, b, x = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)][8:]
+    assert ti.type_constraints.resolve(x).getValue() == int
+
+
+def test_binop_reverse_userdefn():
+    src = """
+    class A:
+        def __radd__(self, i):
+            return 1.0
+
+    class B:
+        def __add__(self, i):
+            return 'abc'
+
+        def __radd__(self, i):
+            return True
+
+    a = A()
+    b = B()
+    x = a + b
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    a, b, x = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)][6:]
+    assert ti.type_constraints.resolve(x).getValue() == bool
+
+
+def test_binop_reverse_right_subclasses_left():
+    src = """
+    class A:
+        def __add__(self, i):
+            return 1
+            
+        def __radd__(self, i):
+            return 1.0
+            
+    class B(A):
+        def __add__(self, i):
+            return 'abc'
+    
+        def __radd__(self, i):
+            return True
+            
+    a = A()
+    b = B()
+    x = a + b
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    a, b, x = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)][8:]
+    assert ti.type_constraints.resolve(x).getValue() == bool
+
+
 if __name__ == '__main__':
     nose.main()

@@ -306,13 +306,24 @@ class TypeInferer:
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:
+        left_inf, right_inf = node.left.inf_type, node.right.inf_type
         method_name = BINOP_TO_METHOD[node.op]
-        node.inf_type = self._handle_call(node, method_name, node.left.inf_type, node.right.inf_type, error_func=binop_error_message)
-        if isinstance(node.inf_type, TypeFail):
-            method_name = BINOP_TO_REV_METHOD[node.op]
-            r_type = self._handle_call(node, method_name, node.right.inf_type, node.left.inf_type, error_func=binop_error_message)
-            if isinstance(r_type, TypeInfo):
+        rev_method_name = BINOP_TO_REV_METHOD[node.op]
+        l_type = self._handle_call(node, method_name, left_inf, right_inf,
+                                              error_func=binop_error_message)
+        r_type = self._handle_call(node, rev_method_name, right_inf, left_inf,
+                                              error_func=binop_error_message)
+
+        if self.type_store.is_descendant(right_inf.getValue(), left_inf.getValue()):
+            if isinstance(r_type, TypeFail) and isinstance(l_type, TypeInfo):
+                node.inf_type = l_type
+            else:
                 node.inf_type = r_type
+        else:
+            if isinstance(l_type, TypeFail) and isinstance(r_type, TypeInfo):
+                node.inf_type = r_type
+            else:
+                node.inf_type = l_type
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.

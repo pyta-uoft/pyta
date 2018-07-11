@@ -22,13 +22,13 @@ class _TNode:
         self.adj_list = []
         self.ast_node = ast_node
 
-    def __eq__(self, other: '_TNode'):
+    def __eq__(self, other: '_TNode') -> bool:
         if str(self.type) == str(other.type):
             return True
         else:
             return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.parent and self.ast_node:
             return f'TNode {self.ast_node.as_string()}: {self.type}, resolved to {self.parent.type}'
         elif self.ast_node:
@@ -36,7 +36,11 @@ class _TNode:
         else:
             return f'TNode: {self.type}'
 
-    def find_path_to_parent(self):
+    def find_path_to_parent(self) -> List[NodeNG]:
+        """Finds path from the current node to its parent node, if one exists.
+        Returns a list of astroid nodes, representing the chain of inferences that leads
+        the current node to be resolved to its parent node
+        """
         final_path = []
         cur_node = self
         while cur_node.parent_path:
@@ -45,6 +49,9 @@ class _TNode:
         return final_path
 
     def find_annotation(self) -> Optional[astroid.AnnAssign]:
+        """Gets path from node to parent, and returns an AnnAssign (annotation) node if one exists in the path
+        """
+        # TODO: Add support for annotations within function definitions
         path = self.find_path_to_parent()
         for p in path:
             if isinstance(p, astroid.AnnAssign):
@@ -67,7 +74,7 @@ class TypeInfo(TypeResult):
     def __init__(self, type_: type):
         super().__init__(type_)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'TypeInfo: {self.value}'
 
 
@@ -85,10 +92,10 @@ class TypeFail(TypeResult):
         self.msg = msg
         super().__init__(self.msg)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'TypeFail: {self.msg}'
 
-    def bind(self, _):
+    def bind(self, _) -> 'TypeFail':
         return self
 
 
@@ -102,7 +109,7 @@ class TypeFailUnify(TypeFail):
         self.src_node = src_node
         super().__init__(str(self))
 
-    def __str__(self):
+    def __str__(self) -> str:
         string = 'TypeFail: Unable to Unify '
         string += f'{self.tnodes[0].ast_node.as_string()}' if self.tnodes[0].ast_node else f'{self.tnodes[0].type}'
         string += ' <-> '
@@ -124,18 +131,23 @@ class TypeFailLookup(TypeFail):
         self.src_node = src_node
         super().__init__(str(self))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'TypeFail: Invalid attribute lookup {self.src_node.as_string()}'
 
 
 class TypeFailAnnotation(TypeFail):
+    """
+    TypeFailAnnotation occurs when a type is not used correctly, based on an inference from an annotated type
+    Should be initialized with the _TNode of the expected type, the astroid node where the annotation occurs, and
+    the astroid node where the error occurs
+    """
     def __init__(self, tnode: _TNode, src_node: NodeNG = None, ann_node: NodeNG = None):
         self.tnode = tnode
         self.src_node = src_node
         self.ann_node = ann_node
         super().__init__(str(self))
 
-    def __str__(self):
+    def __str__(self) -> str:
         string = f'TypeFail: Annotation error in {self.src_node.as_string()}. {self.tnode.ast_node.as_string()} is annotated as '
         string += f'{self.tnode.parent.type.__name__}' if self.tnode.parent else f'{self.tnode.type.__name__}'
         string += f' at {self.ann_node.as_string()}'
@@ -173,7 +185,11 @@ def _gorg(x):
         return x._gorg
 
 
-def accept_failable(f):
+def accept_failable(f: Callable) -> Callable:
+    """Wrapper that allows function f to optionally accept instances of type Failable as arguments.
+    If an argument is an instance of Failable, the value is extracted and passed to function f.
+    If any of the arguments are an instance of TypeFail, that instance is returned, and the function f is not called
+    """
     def _f(*args, **kwargs):
         new_args = []
         new_kwargs = {}
@@ -197,7 +213,7 @@ def accept_failable(f):
 
 
 @accept_failable
-def _wrap_generic_meta(t, args):
+def _wrap_generic_meta(t: GenericMeta, args: List[type]) -> TypeResult:
     if t == Tuple:
         tuple_args = tuple(args)
         # Handle the special case when t1 or t2 are empty tuples; TODO: investigate this
@@ -211,7 +227,10 @@ def _wrap_generic_meta(t, args):
 
 
 @accept_failable
-def wrap_container(container_type: GenericMeta, *args: List[type]) -> TypeInfo:
+def wrap_container(container_type: GenericMeta, *args: List[type]) -> TypeResult:
+    """
+    Helper function, takes a list of types args and returns a generic of type container_type, with args as its elements
+    """
     if isinstance(container_type, CallableMeta):
         return TypeInfo(Callable[list(args[:-1]), args[-1]])
     else:
@@ -274,7 +293,7 @@ def _get_poly_vars(t: type):
     return set()
 
 
-def create_Callable(args: Iterable[type], rtype, class_poly_vars=None):
+def create_Callable(args: Iterable[type], rtype: type, class_poly_vars=None) -> Callable:
     poly_vars = class_poly_vars or []
     poly_vars = set(poly_vars)
     c = Callable[list(args), rtype]
@@ -285,7 +304,7 @@ def create_Callable(args: Iterable[type], rtype, class_poly_vars=None):
 
 
 @accept_failable
-def create_Callable_TypeResult(args: Iterable[type], rtype, poly_vars=None):
+def create_Callable_TypeResult(args: Iterable[type], rtype: type, poly_vars=None) -> TypeResult:
     """Return Callable wrapped in a TypeInfo instance"""
     return TypeInfo(create_Callable(args, rtype, poly_vars))
 
@@ -324,7 +343,7 @@ TYPE_SIGNATURES = {
 }
 
 
-def op_to_dunder_binary(op):
+def op_to_dunder_binary(op: str) -> str:
     """Return the dunder method name corresponding to binary op."""
     if op == '+':
         return '__add__'
@@ -363,7 +382,7 @@ def op_to_dunder_binary(op):
         return op
 
 
-def op_to_dunder_unary(op):
+def op_to_dunder_unary(op: str) -> str:
     """Return the dunder method name corresponding to unary op."""
     if op == '-':
         return '__neg__'
@@ -412,7 +431,7 @@ class TypeConstraints:
                 tc.type_to_tnode[str(node.type)].parent = tc.type_to_tnode[str(node.parent.type)]
         return tc
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the type constraints kept track of in the program."""
         self._count = 0
         self._nodes = []
@@ -466,11 +485,11 @@ class TypeConstraints:
                 return TypeInfo(t)
         return TypeInfo(t)
 
-    def is_concrete(self, type):
-        if isinstance(type, GenericMeta):
-            return all([self.is_concrete(arg) for arg in type.__args__])
+    def is_concrete(self, t: type):
+        if isinstance(t, GenericMeta):
+            return all([self.is_concrete(arg) for arg in t.__args__])
         else:
-            return not isinstance(type, TypeVar)
+            return not isinstance(t, TypeVar)
 
     def find_repr(self, tn: _TNode) -> Optional[_TNode]:
         """Do a bfs starting from tn to find a _TNode that has a parent, or a unique set representative if
@@ -527,7 +546,8 @@ class TypeConstraints:
 
         return goal_tnode
 
-    def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: NodeNG):
+    def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: NodeNG) -> None:
+        """Create an edge between the two TNodes, if one does not already exist"""
         if tn1 != tn2:
             edge_exists = False
             for e in tn1.adj_list:
@@ -703,7 +723,7 @@ class TypeConstraints:
             return TypeInfo(t)
 
     # HELPER METHODS
-    def types_in_callable(self, callable_function):
+    def types_in_callable(self, callable_function: Callable) -> Tuple[List[type], type]:
         """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively.
         Used only for testing purposes
         """
@@ -750,7 +770,7 @@ class Environment:
         self.nonlocals = nonlocals_ or {}
         self.globals = globals_ or {}
 
-    def lookup_in_env(self, variable_name):
+    def lookup_in_env(self, variable_name: str) -> type:
         """Helper to search for a variable in the environment of a node by name."""
         if variable_name in self.locals:
             return self.locals[variable_name]
@@ -761,7 +781,7 @@ class Environment:
         else:
             raise KeyError
 
-    def create_in_env(self, type_constraints, environment, variable_name, node):
+    def create_in_env(self, type_constraints, environment, variable_name, node) -> None:
         """Helper to create a fresh Type Var and adding the variable to appropriate environment."""
         if environment == 'locals':
             self.locals[variable_name] = type_constraints.fresh_tvar(node)
@@ -777,7 +797,7 @@ class Environment:
 ###############################################################################
 # Parsing type annotations
 ###############################################################################
-def parse_annotations(node, class_tvars=None):
+def parse_annotations(node: NodeNG, class_tvars=None):
     """Return a type specified by the type annotations for a node."""
     if isinstance(node, astroid.FunctionDef):
         arg_types = []
@@ -804,7 +824,7 @@ def parse_annotations(node, class_tvars=None):
         return _node_to_type(node.parent.annotation), 'attribute'
 
 
-def _node_to_type(node, locals=None):
+def _node_to_type(node: NodeNG, locals=None) -> type:
     """Return a type represented by the input node."""
     locals = locals or _TYPESHED_TVARS
     if node is None:

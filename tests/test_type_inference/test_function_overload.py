@@ -100,7 +100,7 @@ def test_too_many_args_with_overload():
     program = """
        def foo(x, y=None):
            return x + 5
-       foo(5, 6, y)
+       foo(5, 6, 7)
        """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):

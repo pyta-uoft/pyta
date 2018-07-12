@@ -165,6 +165,20 @@ class TypeFailFunction(TypeFail):
         return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
 
 
+class TypeFailReturn(TypeFail):
+    """
+    TypeFailReturn occurs when a astroid.Return node is encountered outside of a function definition
+
+    :param src_node: Invalid astroid.Return node
+    """
+    def __init__(self, src_node):
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f'TypeFail: Return statement not in valid function'
+
+
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
 def _gorg(x):
     if sys.version_info < (3, 6, 3):

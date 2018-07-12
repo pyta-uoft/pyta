@@ -7,7 +7,7 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType, TypeFailLookup, TypeFailFunction
+    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
@@ -541,7 +541,19 @@ class TypeInferer:
                     arg_tvar, _node_to_type(node.annotations[i]), node)
 
     def visit_return(self, node: astroid.Return) -> None:
-        val_inf_type = self.type_constraints.unify(node.value.inf_type, self.lookup_inf_type(node, 'return'), node)
+        return_tvar = self.lookup_typevar(node, 'return')
+        # TODO: Replace with isinstance() once proper TypeFail subclass is created for unbound indentifiers
+        if return_tvar == TypeFail("Unbound identifier"):
+            inf_return = TypeFailReturn(node)
+        else:
+            inf_return = return_tvar
+
+        if node.value is not None:
+            inv_value = node.value.inf_type
+        else:
+            inv_value = TypeInfo(None)
+
+        val_inf_type = self.type_constraints.unify(inv_value, inf_return, node)
         node.inf_type = val_inf_type if isinstance(val_inf_type, TypeFail) else NoType()
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:

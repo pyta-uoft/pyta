@@ -471,7 +471,6 @@ def test_builtin_call_simple_mro(draw=False):
 
 
 def test_builtin_binop_inheritance(draw=False):
-    raise SkipTest('Auto-casting must be handled for this test to pass')
     src = """
     x = 1.0 + 3
     """

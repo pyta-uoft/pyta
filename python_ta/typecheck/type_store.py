@@ -2,7 +2,7 @@ import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
 from python_ta.typecheck.base import parse_annotations, \
-    class_callable, accept_failable, _node_to_type
+    class_callable, accept_failable, _node_to_type, TypeFailFunction
 from typing import Callable
 import os
 from typing import *
@@ -79,18 +79,22 @@ class TypeStore:
             raise KeyError
 
     @accept_failable
-    def lookup_method(self, operator, *args):
+    def lookup_method(self, operator, *args, node):
         """Helper method to lookup a method type given the operator and types of arguments."""
         if args:
             func_types_list = self.methods[operator]
-            self_type = args[0]
+            # prioritize function types that match the 'self' argument
+            func_types_list = sorted(func_types_list,
+                                     key=lambda f_tp: f_tp[0].__args__ and
+                                                      f_tp[0].__args__[0] == args[0],
+                                     reverse=True)
             for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue
                 if self.type_constraints.can_unify(Callable[list(args), Any],
                                                    Callable[list(func_type.__args__[:-1]), Any]):
                     return func_type
-            raise KeyError
+            return TypeFailFunction(tuple(func_types_list), None, node)
 
     def is_descendant(self, child: type, ancestor: type) -> bool:
         if ancestor == object:

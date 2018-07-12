@@ -196,22 +196,20 @@ class TypeInferer:
     # Name lookup and assignment
     ##############################################################################
     def visit_name(self, node: astroid.Name) -> None:
-        try:
-            node.inf_type = self.lookup_inf_type(node, node.name)
-        except KeyError:
-            if node.name in self.type_store.classes:
-                node.inf_type = TypeInfo(Type[__builtins__[node.name]])
-            elif node.name in self.type_store.functions:
-                node.inf_type = TypeInfo(self.type_store.functions[node.name][0][0])
-            else:
-                # This is an unbound identifier. Ignore it.
-                node.inf_type = TypeInfo(Any)
+        lookup_result = self.lookup_inf_type(node, node.name)
+
+        if isinstance(lookup_result, TypeFail) and node.name in self.type_store.classes:
+            node.inf_type = TypeInfo(Type[__builtins__[node.name]])
+        elif isinstance(lookup_result, TypeFail) and node.name in self.type_store.functions:
+            node.inf_type = TypeInfo(self.type_store.functions[node.name][0][0])
+        else:
+            node.inf_type = lookup_result
 
     def visit_assign(self, node: astroid.Assign) -> None:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
         if isinstance(node.value, astroid.Name):
-            expr_inf_type = TypeInfo(self.lookup_typevar(node, node.value.name))
+            expr_inf_type = self.lookup_typevar(node, node.value.name)
         else:
             expr_inf_type = node.value.inf_type
 
@@ -262,9 +260,12 @@ class TypeInferer:
         else:
             return result
 
-    def lookup_typevar(self, node: NodeNG, name: str) -> TypeVar:
+    def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""
-        return self._closest_frame(node, name).type_environment.lookup_in_env(name)
+        try:
+            return TypeInfo(self._closest_frame(node, name).type_environment.lookup_in_env(name))
+        except:
+            return TypeFail("Unbound identifier")
 
     def lookup_inf_type(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return a TypeResult object containing the type in the closest scope relative to given node.

@@ -6,6 +6,7 @@ import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import TypeVar, Any
 from keyword import iskeyword
+from python_ta.typecheck.base import TypeFail
 settings.load_profile("pyta")
 
 
@@ -32,7 +33,7 @@ def test_set_name_unassigned(identifier):
     program = identifier
     module, _ = cs._parse_text(program)
     for name_node in module.nodes_of_class(astroid.Name):
-        assert name_node.inf_type.getValue() == Any
+        assert isinstance(name_node.inf_type, TypeFail)
 
 
 @given(cs.random_dict_variable_homogeneous_value(min_size=1))

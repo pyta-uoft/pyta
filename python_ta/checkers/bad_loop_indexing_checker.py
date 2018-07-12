@@ -1,21 +1,21 @@
-"""checker for bad indexing in a loop.
+"""checker for unnecessary indexing in a loop.
 """
 
 import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from typing import List, Optional
+from typing import List, Optional, Union
 from astroid.node_classes import NodeNG
 
 
-class BadLoopIndexingChecker(BaseChecker):
+class UnnecessaryIndexingChecker(BaseChecker):
     __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
-    name = 'bad_loop_indexing'
+    name = 'unnecessary_indexing'
     # use dashes for connecting words in message symbol
-    msgs = {'E9994': (f'Bad use of loop variable %s in for loop',
-                      'bad-loop-indexing',
+    msgs = {'E9994': (f'Unnecessary loop variable "%s" in for loop',
+                      'unnecessary-indexing',
                       'Used when you have an loop variable in a for loop '
                       'where its only usage is to index the iterable'),
             }
@@ -24,86 +24,67 @@ class BadLoopIndexingChecker(BaseChecker):
     priority = -1
 
     # pass in message symbol as a parameter of check_messages
-    @check_messages("bad-loop-indexing")
+    @check_messages("unnecessary-indexing")
     def visit_for(self, node: astroid.For) -> None:
-        if self._is_bad_loop_indexing(node):
-            args = f"'{node.target.name}'"
-            self.add_message('bad-loop-indexing', node=node.target, args=args)
+        if self._is_unnecessary_indexing(node):
+            args = f'{node.target.name}'
+            self.add_message('unnecessary-indexing', node=node.target, args=args)
 
-    def _is_bad_loop_indexing(self, node: astroid.For) -> bool:
-        """Return whether the usage of the indexing variable in the for loop is ONLY to index the iterable.
-        True if bad, False if not bad.
+    def _is_unnecessary_indexing(self, node: astroid.For) -> bool:
+        """Return whether the usage of the iteration variable in the for loop is ONLY to index the iterable.
+        True if unnecessary usage, False otherwise or if iteration variable not used at all.
         """
-        # Store the iteration variable.
-        index = node.target.name
-
         # Check if the iterable of the for loop is of the form "range(len(lst))".
         iterable = _iterable_if_range(node.iter)
         if iterable is None:
             return False
 
-        # AugAssign is special (i += 2 is actually i = i + 2).
-        # Check if any AssignName nodes in an AugAssign node refers to the iteration variable.
-        if any(index_node.lookup(index)[1][0] == node.target for index_node in _augassign_index_nodes(node, index)):
-            return False
-        # i) For all index_node in augassign_index_nodes, .lookup != node.target, so they are all rebound
-        # or ii) there are no AugAssign nodes.
-        return not any(index_node.lookup(index)[1][0] == node.target
-                       for index_node in _good_use_index_nodes(node, index)) \
-            and (_index_assign_name_nodes(node, index) or _index_name_nodes(node, index))
+        index_nodes = _index_name_nodes(node.target.name, node)
+        return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
 
 
 # Helper functions
 def _iterable_if_range(node: Optional[NodeNG]) -> Optional[str]:
-    """Return the string of the iterable if this node is of the form: range(len(iterable)).
+    """Return the iterable's name if this node is of the form: range(len(iterable)).
     Return None otherwise.
     """
-    # Order of operations is important.
-    if isinstance(node, astroid.Call):
-        if isinstance(node.func, astroid.Name) and node.func.name == 'range' \
-                and isinstance(node.args[0], astroid.Call) \
-                and isinstance(node.args[0].func, astroid.Name) and node.args[0].func.name == 'len':
+    if (isinstance(node, astroid.Call) and
+            isinstance(node.func, astroid.Name) and
+            node.func.name == 'range' and
+            isinstance(node.args[0], astroid.Call) and
+            isinstance(node.args[0].func, astroid.Name) and
+            node.args[0].func.name == 'len' and
+            isinstance(node.args[0].args[0], astroid.Name)):
             return node.args[0].args[0].name
-            # If node is None, returns None.
 
 
-def _is_correct_usage_of_index(index_node: astroid.Name, for_node: astroid.For) -> bool:
-    """Return whether or not <index_node> was used appropriately in <for_node>.
-    Return False if used only to index the iterable or rebound. Otherwise, return True.
+def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
+    """Return whether or not <index_node> is used to subscript the iterable of <for_node>
+    and the subscript item is being loaded from, e.g., s += iterable[index_node].
     """
     iterable = _iterable_if_range(for_node.iter)
     # Name node is not inside Subscript node iterable[index].
     if not (isinstance(index_node.parent, astroid.Index) and isinstance(index_node.parent.parent, astroid.Subscript)
             and index_node.parent.parent.value.name == iterable):
-        return True
+        return False
     # Use subscript.ctx attribute to find out what context it is being used in.
     subscript_node = index_node.parent.parent
-    return subscript_node.ctx == astroid.Store
+    return subscript_node.ctx == astroid.Load
 
 
-def _augassign_index_nodes(for_node: astroid.For, index: str) -> List[astroid.AssignName]:
-    """Return a list of <index> AssignName nodes that are in AugAssign nodes in <for_node>."""
-    return [as_name_node for as_name_node in _index_assign_name_nodes(for_node, index)
-            if isinstance(as_name_node.parent, astroid.AugAssign)]
+def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node: astroid.For) -> bool:
+    """Return whether or not <index_node> is redundant in <for_node>."""
+    if isinstance(index_node, astroid.AssignName):
+        return index_node.lookup(index_node.name)[1][0] != for_node.target or \
+               not isinstance(index_node.parent, astroid.AugAssign)
+    return index_node.lookup(index_node.name)[1][0] != for_node.target or _is_load_subscript(index_node, for_node)
 
 
-def _good_use_index_nodes(for_node: astroid.For, index: str) -> List[astroid.Name]:
-    """Return a list of <index> Name nodes that used not only to index the iterable in <for_node>,
-    e.g., lst[index] = 2, s += index, i = (i+1)//2, and for i in range(lst[i//2])."""
-    return [name_node for name_node in _index_name_nodes(for_node, index)
-            if _is_correct_usage_of_index(name_node, for_node)]
-
-
-def _index_name_nodes(for_node: astroid.For, index: str) -> List[astroid.Name]:
-    """Return a list of <index> Name nodes contained in <for_node>."""
-    return [name_node for name_node in for_node.nodes_of_class(astroid.Name) if name_node.name == index]
-
-
-def _index_assign_name_nodes(for_node: astroid.For, index: str) -> List[astroid.AssignName]:
-    """Return a list of <index> AssignName nodes contained in the body of <for_node>."""
-    return [as_name_node for as_name_node in for_node.nodes_of_class(astroid.AssignName) if as_name_node.name == index
-            and as_name_node != for_node.target]
+def _index_name_nodes(index: str, for_node: astroid.For) -> List[Union[astroid.AssignName, astroid.Name]]:
+    """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
+    return [name_node for name_node in for_node.nodes_of_class((astroid.AssignName, astroid.Name))
+            if name_node.name == index and name_node != for_node.target]
 
 
 def register(linter):
-    linter.register_checker(BadLoopIndexingChecker(linter))
+    linter.register_checker(UnnecessaryIndexingChecker(linter))

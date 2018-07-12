@@ -7,20 +7,10 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType, TypeFailLookup
+    wrap_container, NoType, TypeFailLookup, TypeFailFunction
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
-
-
-class TypeErrorInfo:
-    """Class representing an error in type inference."""
-    def __init__(self, msg, node):
-        self.msg = msg
-        self.node = node
-
-    def __str__(self):
-        return self.msg
 
 
 class TypeInferer:
@@ -465,14 +455,10 @@ class TypeInferer:
 
         """
         arg_inf_types = [self.type_constraints.resolve(arg) for arg in arg_types]
-        try:
-            func_type = self.type_store.lookup_method(function_name, *arg_inf_types)
-        except KeyError as e:
-            # No match.
-            if error_func is None:
-                return TypeFail(f'Function {function_name} not found with given args: {arg_types}')
-            else:
-                return TypeFail(error_func(node))
+        func_type = self.type_store.lookup_method(function_name, *arg_inf_types, node=node)
+
+        if isinstance(func_type, TypeFail) and error_func is not None:
+            return TypeFail(error_func(node))
         return self.type_constraints.unify_call(func_type, *arg_types, node=node)
 
     ##############################################################################

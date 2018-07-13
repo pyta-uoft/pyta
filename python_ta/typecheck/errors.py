@@ -79,11 +79,14 @@ BINOP_TO_REV_METHOD = {
     '>>': '__rrshift__',
     }
 
+
 def _get_name(t: type) -> str:
     if isinstance(t, _ForwardRef):
         return t.__forward_arg__
-    else:
+    elif isinstance(t, type):
         return t.__name__
+    else:
+        return str(t)
 
 
 ###############################################################################

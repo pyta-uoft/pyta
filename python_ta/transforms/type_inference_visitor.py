@@ -471,7 +471,7 @@ class TypeInferer:
         # Get the inferred type of the function arguments
         inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
 
-        if isinstance(node.parent, astroid.ClassDef):
+        if isinstance(node.parent, astroid.ClassDef) and inferred_args:
             # first argument is special in these cases
             if node.type == 'method':
                 self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name), node)

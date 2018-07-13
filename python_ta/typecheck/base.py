@@ -855,6 +855,8 @@ def _node_to_type(node, locals=None):
         return [_node_to_type(t) for t in node.elts if not isinstance(t, astroid.Ellipsis)]
     elif isinstance(node, astroid.Const) and node.value is None:
         return None
+    elif isinstance(node, astroid.Const) and isinstance(node.value, str):
+        return _node_to_type(node.value)
     else:
         return node
 

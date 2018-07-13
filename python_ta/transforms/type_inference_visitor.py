@@ -274,7 +274,7 @@ class TypeInferer:
     # Operation nodes
     ##############################################################################
     @accept_failable
-    def get_call_signature(self, c, node: NodeNG) -> TypeResult:
+    def get_call_signature(self, c: type, node: NodeNG) -> TypeResult:
         if hasattr(c, '__name__') and c.__name__ == 'Type':
             class_type = c.__args__[0]
             if isinstance(class_type, _ForwardRef):
@@ -284,8 +284,12 @@ class TypeInferer:
         elif isinstance(c, _ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
-        else:
+        elif isinstance(c, CallableMeta):
             return TypeInfo(c)
+        elif hasattr(c, '__args__') and all(isinstance(elt, CallableMeta) for elt in c.__args__):
+            return TypeInfo(c)
+        else:
+            return TypeFailFunction((c,), None, node)
 
         if '__init__' in self.type_store.classes[class_name]:
             init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)

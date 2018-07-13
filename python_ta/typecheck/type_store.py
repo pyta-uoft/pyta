@@ -97,7 +97,9 @@ class TypeStore:
             return TypeFailFunction(tuple(func_types_list), None, node)
 
     def is_descendant(self, child: type, ancestor: type) -> bool:
-        if ancestor == object:
+        if child.__class__.__name__ == '_Union' or ancestor.__class__.__name__ == '_Union':
+            return self.type_constraints.can_unify(child, ancestor)
+        if ancestor == object or ancestor == Any or child == Any:
             return True
         child_name = child.__forward_arg__ if isinstance(child, _ForwardRef) \
             else child.__name__

@@ -304,9 +304,9 @@ class TypeInferer:
         left_inf, right_inf = node.left.inf_type, node.right.inf_type
 
         # attemp to obtain a common arithmetic type
-        arithm_type = self._arithm_convert(left_inf.getValue(), right_inf.getValue())
+        arithm_type = self._arithm_convert(left_inf, right_inf)
         if arithm_type:
-            node.inf_type = TypeInfo(arithm_type)
+            node.inf_type = arithm_type
         else:
             method_name = BINOP_TO_METHOD[node.op]
             rev_method_name = BINOP_TO_REV_METHOD[node.op]
@@ -326,12 +326,13 @@ class TypeInferer:
                 else:
                     node.inf_type = l_type
 
-    def _arithm_convert(self, t1_: type, t2_: type) -> type:
+    @accept_failable
+    def _arithm_convert(self, t1_: type, t2_: type) -> Optional[TypeInfo]:
         for t1, t2 in [(t1_, t2_), (t2_, t1_)]:
             if t1 == complex and self.type_store.is_descendant(t2, SupportsComplex):
-                return complex
+                return TypeInfo(complex)
             if t1 == float and self.type_store.is_descendant(t2, SupportsFloat):
-                return float
+                return TypeInfo(float)
         return None
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:

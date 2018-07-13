@@ -564,7 +564,10 @@ class TypeInferer:
 
         self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
                                                          for base in node.bases]
-        self.type_store.classes[node.name]['__mro'] = [cls.name for cls in node.mro()]
+        try:
+            self.type_store.classes[node.name]['__mro'] = [cls.name for cls in node.mro()]
+        except astroid.exceptions.DuplicateBasesError:
+            self.type_store.classes[node.name]['__mro'] = [node.name]
 
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?

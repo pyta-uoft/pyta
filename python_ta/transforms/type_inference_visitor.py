@@ -618,11 +618,10 @@ class TypeInferer:
                     node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
                 else:
                     func_type, method_type = attribute_type[0]
-                    # Detect an instance method call, and create a bound method signature (first argument removed).
-                    # TODO: handle classmethod calls differently.
-                    if isinstance(func_type, CallableMeta) and inst_expr and \
-                            method_type != 'staticmethod':
-                        func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
+                    if isinstance(func_type, CallableMeta):
+                        if method_type == 'method' and inst_expr or \
+                                method_type == 'classmethod':
+                            func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
                     node.inf_type = TypeInfo(func_type)
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)

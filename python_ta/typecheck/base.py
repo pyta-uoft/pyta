@@ -668,9 +668,9 @@ class TypeConstraints:
         if isinstance(func_var, CallableMeta):
             func_type = func_var
         else:
-            tnode = self.get_tnode(func_var)
-            func_tnode = self.find_parent(tnode)
-            func_type = func_tnode.type
+            func_var_tnode = self.get_tnode(func_var)
+            parent_tnode = self.find_parent(func_var_tnode)
+            func_type = parent_tnode.type
 
         # Check that the number of parameters matches the number of arguments.
         if func_type.__origin__ is Union:
@@ -680,28 +680,38 @@ class TypeConstraints:
                     new_func_type = c
                     break
             if new_func_type is None:
-                func_tnode = self.get_tnode(func_var)
-                func_def_tnode = self.find_function_def(func_tnode)
-                return TypeFailFunction(tuple(func_type.__args__), func_def_tnode, node)
+                func_var_tnode = self.get_tnode(func_var)
+                funcdef_node = self.find_function_def(func_var_tnode)
+                return TypeFailFunction(tuple(func_type.__args__), funcdef_node, node)
             else:
                 func_type = new_func_type
         elif len(func_type.__args__) - 1 != len(arg_types):
-            func_tnode = self.get_tnode(func_var)
-            func_def_tnode = self.find_function_def(func_tnode)
-            return TypeFailFunction((func_type, ), func_def_tnode, node)
+            func_var_tnode = self.get_tnode(func_var)
+            funcdef_node = self.find_function_def(func_var_tnode)
+            return TypeFailFunction((func_type, ), funcdef_node, node)
 
         # Substitute polymorphic type variables
         new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
         new_func_type = literal_substitute(func_type, new_tvars)
+
         results = []
         for i in range(len(arg_types)):
             result = self.unify(arg_types[i], new_func_type.__args__[i], node)
             if isinstance(result, TypeFail):
-                results.append(i)
+                func_var_tnode = self.get_tnode(func_var)
+                funcdef_node = self.find_function_def(func_var_tnode)
+                param_annotations = funcdef_node.args.annotations if funcdef_node else None
+                if param_annotations and param_annotations[i] is not None:
+                    tvar = funcdef_node.type_environment.lookup_in_env(funcdef_node.args.args[i].name)
+                    tnode = self.get_tnode(tvar)
+                    return TypeFailAnnotation(tnode, node, funcdef_node)
+                else:
+                    results.append(i)
         if results:
-            func_tnode = self.get_tnode(func_var)
-            func_def_tnode = self.find_function_def(func_tnode)
-            return TypeFailFunction((new_func_type, ), func_def_tnode, node, results)
+            func_var_tnode = self.get_tnode(func_var)
+            funcdef_node = self.find_function_def(func_var_tnode)
+            return TypeFailFunction((new_func_type, ), funcdef_node, node, results)
+
         return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t) -> TypeResult:

@@ -179,6 +179,20 @@ class TypeFailReturn(TypeFail):
         return f'TypeFail: Return statement not in valid function'
 
 
+class TypeFailStarred(TypeFail):
+    """
+    TypeFailStarred occurs when there are multiple starred variables in the target of an assignment
+
+    :param src_node: Invalid astroid.Assign node
+    """
+    def __init__(self, src_node):
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f'TypeFail: Multiple starred variables not valid'
+
+
 # Make _gorg compatible for Python 3.6.2 and 3.6.3.
 def _gorg(x):
     if sys.version_info < (3, 6, 3):

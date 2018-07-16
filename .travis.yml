@@ -3,7 +3,8 @@ python:
   - "3.6"
 install:
   - sudo apt install graphviz
-  - pip install pylint funcparserlib colorama jinja2 pycodestyle hypothesis pygments graphviz
+  - pip install funcparserlib colorama jinja2 pycodestyle hypothesis pygments graphviz
+  - pip install 'astroid==1.6.5' 'pylint==1.9'
 script:
   - nosetests
 notifications:

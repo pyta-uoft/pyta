@@ -657,7 +657,7 @@ class TypeConstraints:
     def can_unify(self, t1: type, t2: type) -> bool:
         """Check if the two types can unify without modifying current TypeConstraints."""
         tc = self.__deepcopy__()
-        return isinstance(tc.unify(t1, t2, None), TypeInfo)
+        return not isinstance(tc.unify(t1, t2, None), TypeFail)
 
     @accept_failable
     def unify_call(self, func_var, *arg_types, node=None) -> TypeResult:

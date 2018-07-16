@@ -11,6 +11,7 @@ def patch_type_inference_transform():
         ast = old_get_ast(self, filepath, modname)
         if ast is not None:
             type_inferer = TypeInferer()
+            type_inferer.reset()
             env_transformer = type_inferer.environment_transformer()
             type_transformer = type_inferer.type_inference_transformer()
             try:

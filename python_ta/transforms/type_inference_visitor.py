@@ -60,6 +60,13 @@ class TypeInferer:
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
 
+        self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
+                                                         for base in node.bases]
+        try:
+            self.type_store.classes[node.name]['__mro'] = [cls.name for cls in node.mro()]
+        except astroid.exceptions.DuplicateBasesError:
+            self.type_store.classes[node.name]['__mro'] = [node.name]
+
     def _set_function_def_environment(self, node):
         """Method to set environment of a FunctionDef node."""
         node.type_environment = Environment()
@@ -643,13 +650,6 @@ class TypeInferer:
         self.type_constraints.unify(self.lookup_inf_type(node.parent, node.name),
                                     Type[_ForwardRef(node.name)], node)
 
-        self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
-                                                         for base in node.bases]
-        try:
-            self.type_store.classes[node.name]['__mro'] = [cls.name for cls in node.mro()]
-        except astroid.exceptions.DuplicateBasesError:
-            self.type_store.classes[node.name]['__mro'] = [node.name]
-
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?
         for attr in node.locals:
@@ -712,7 +712,6 @@ class TypeInferer:
                 node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
         else:
             node.inf_type = result
-
 
     def visit_module(self, node: astroid.Module) -> None:
         node.inf_type = NoType()

@@ -49,7 +49,6 @@ Done.
 **TODOs:**
 - Look into instance_attrs vs locals for ClassDef nodes
 - Handle class variables (and corresponding type annotations)
-- Move the logic for updating `self.type_store` from `visit_classdef` into the `set_*_environment` methods earlier. (Treat `self.type_store` as immutable in the `visit_*` methods.)
 
 ### Compare
 **TODOs**

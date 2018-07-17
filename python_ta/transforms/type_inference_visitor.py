@@ -352,19 +352,23 @@ class TypeInferer:
     ##############################################################################
     @accept_failable
     def get_call_signature(self, c: type, node: NodeNG) -> TypeResult:
-        if hasattr(c, '__name__') and c.__name__ == 'Type':
+        # Callable type; e.g., 'Callable[[int], int]'
+        if isinstance(c, CallableMeta):
+            return TypeInfo(c)
+        # Union of Callables
+        elif c.__class__.__name__ == '_Union' and all(isinstance(elt, CallableMeta) for elt in c.__args__):
+            return TypeInfo(c)
+        # Class types; e.g., 'Type[_ForwardRef('A')]'
+        elif getattr(c, '__name__', None) == 'Type':
             class_type = c.__args__[0]
             if isinstance(class_type, _ForwardRef):
                 class_name = c.__args__[0].__forward_arg__
             else:
                 class_name = class_type.__name__
+        # Class instances; e.g., '_ForwardRef('A')'
         elif isinstance(c, _ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
-        elif isinstance(c, CallableMeta):
-            return TypeInfo(c)
-        elif hasattr(c, '__args__') and all(isinstance(elt, CallableMeta) for elt in c.__args__):
-            return TypeInfo(c)
         else:
             return TypeFailFunction((c,), None, node)
 
@@ -663,9 +667,11 @@ class TypeInferer:
     def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:
         is_inst_expr = True
 
+        # Class type: e.g., 'Type[_ForwardRef('A')]'
         if hasattr(t, '__name__') and t.__name__ == 'Type':
             class_type = t.__args__[0]
             is_inst_expr = False
+        # Instance of class or builtin type; e.g., '_ForwardRef('A')' or 'int'
         else:
             class_type = t
 
@@ -676,6 +682,7 @@ class TypeInferer:
         else:
             class_name = None
 
+        # TODO: the condition below is too general
         if class_name is not None and class_name not in self.type_store.classes:
             class_name = class_name.lower()
 

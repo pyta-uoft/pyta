@@ -231,7 +231,7 @@ class TypeInferer:
             if isinstance(node.target, astroid.AssignName):
                 target_type = self.lookup_typevar(node.target, node.target.name)
             elif isinstance(node.target, astroid.AssignAttr):
-                target_type = self._lookup_attribute_type(node.target, node.target.expr.name,
+                target_type = self._lookup_attribute_type(node.target, node.target.expr.inf_type,
                                                           node.target.attrname)
             binop_result = self._handle_call(node, method_name, target_type, node.value.inf_type)
         if isinstance(binop_result, TypeFail):
@@ -252,7 +252,7 @@ class TypeInferer:
             return self.type_constraints.unify(target_type_var, expr_type, node)
         elif isinstance(target, astroid.AssignAttr):
             # Attribute mutation, e.g. x.y = ...
-            attr_type = self._lookup_attribute_type(target, target.expr.name, target.attrname)
+            attr_type = self._lookup_attribute_type(target, target.expr.inf_type, target.attrname)
             return self.type_constraints.unify(attr_type, expr_type, node)
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
@@ -316,16 +316,12 @@ class TypeInferer:
         assign_result = TypeInfo(value)
         return assign_result
 
-    def _lookup_attribute_type(self, node, instance_name, attribute_name):
-        """Given the node, class name and attribute name, return the type of the attribute."""
-        class_inf_type = self.lookup_inf_type(node, instance_name)
-        result = class_inf_type >> self.get_attribute_class
-        if not isinstance(result, TypeFail):
-            class_name = result[0]
-            class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
-            return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
-        else:
-            return result
+    @accept_failable
+    def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str):
+        """Given the node, class and attribute name, return the type of the attribute."""
+        class_name, _, _ = self.get_attribute_class(class_type)
+        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+        return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
 
     def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""

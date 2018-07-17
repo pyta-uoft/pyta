@@ -5,7 +5,6 @@
 ### TODOs
 - Add type annotations and docstrings
 - Replace `_closest_frame` with astroid's provided `scope_lookup` or equivalent.
-- `_lookup_attribute_type` should take a class type rather than the name of a class.
 - Move `lookup_type` to a test helper file.
 - In `get_call_signature`, add an example to each branch (in a comment) in the first part. Also move the `return` branches to the top.
 - Add support for the `__call__` magic method.

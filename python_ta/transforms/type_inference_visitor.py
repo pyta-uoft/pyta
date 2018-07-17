@@ -7,7 +7,7 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn
+    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
@@ -224,20 +224,64 @@ class TypeInferer:
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if isinstance(expr_type, typing.TupleMeta):
-                elt_inf_types = [self.lookup_inf_type(subtarget, subtarget.name) for subtarget in target.elts]
-                tuple_inf_type = wrap_container(Tuple, *elt_inf_types)
-                return self.type_constraints.unify(tuple_inf_type, expr_type, node)
+                assign_result = self._assign_tuple(target, expr_type, node)
             else:
-                iter_type_result = self._handle_call(target, '__iter__', expr_type)
+                assign_result = self._handle_call(target, '__iter__', expr_type)
                 for subtarget in target.elts:
-                    target_tvar = self.lookup_typevar(subtarget, subtarget.name)
-                    iter_type_result >> (
-                        lambda t: self.type_constraints.unify(target_tvar, t.__args__[0], node)
-                    )
-                return iter_type_result
+                    if isinstance(subtarget, astroid.Starred):
+                        target_tvar = self.lookup_typevar(subtarget.value, subtarget.value.name)
+                        unif_result = assign_result >> (
+                            lambda t: self.type_constraints.unify(target_tvar, List[t.__args__[0]], node))
+                    else:
+                        target_tvar = self.lookup_typevar(subtarget, subtarget.name)
+                        unif_result = assign_result >> (
+                            lambda t: self.type_constraints.unify(target_tvar, t.__args__[0], node))
+
+                    if isinstance(unif_result, TypeFail):
+                        return unif_result
+            return assign_result
         elif isinstance(target, astroid.Subscript):
             # TODO: previous case must recursively handle this one
             return self._handle_call(target, '__setitem__', target.value.inf_type, target.slice.inf_type, expr_type)
+
+    def _assign_tuple(self, target: astroid.Tuple, value: TupleMeta, node: astroid.Assign) -> TypeResult:
+        starred_index = None
+        for i in range(len(target.elts)):
+            if isinstance(target.elts[i], astroid.Starred):
+                if starred_index is None:
+                    starred_index = i
+                else:
+                    return TypeFailStarred(node)
+
+        if starred_index is not None:
+            starred_length = len(value.__args__) - len(target.elts) + 1
+            starred_subvalues = node.value.elts[starred_index:starred_index+starred_length]
+            starred_value = wrap_container(List, self.unify_elements(starred_subvalues, node))
+
+            starred_target = target.elts[starred_index].value
+            starred_target_tvar = self.lookup_typevar(starred_target, starred_target.name)
+
+            unif_result = self.type_constraints.unify(starred_target_tvar, starred_value, node)
+            if isinstance(unif_result, TypeFail):
+                return unif_result
+
+            nonstarred_values = Tuple[value.__args__[:starred_index] + value.__args__[starred_index + starred_length:]]
+            nonstarred_targets = target.elts
+            nonstarred_targets.remove(nonstarred_targets[starred_index])
+            
+        else:
+            nonstarred_values = value
+            nonstarred_targets = target.elts
+
+        nonstarred_target_tuple = wrap_container(
+            Tuple, *[self.lookup_typevar(subtarget, subtarget.name) for subtarget in nonstarred_targets])
+
+        unif_result = self.type_constraints.unify(nonstarred_target_tuple, nonstarred_values, node)
+        if isinstance(unif_result, TypeFail):
+            return unif_result
+
+        assign_result = TypeInfo(value)
+        return assign_result
 
     def _lookup_attribute_type(self, node, instance_name, attribute_name):
         """Given the node, class name and attribute name, return the type of the attribute."""

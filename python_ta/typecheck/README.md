@@ -13,8 +13,7 @@ Done.
 
 ### Attribute
 
-**TODOs:**
-- Handle class and static methods.
+Done.
 
 ### BinOp
 
@@ -26,8 +25,7 @@ Done.
 
 ### Call
 
-**TODOs:**
-* Handling inheritance
+Done.
 
 ### ClassDef
 
@@ -79,9 +77,6 @@ Done.
 
 **TODOs:**
 - Represent the type of an empty list.
-- Flag to require homogeneity (?)
-- Lists in assignment ("Store") context
-- Better articulate Any vs. Object
 
 ### ListComp
 
@@ -128,4 +123,4 @@ Done. `lookup_type()` and `types_in_callable()` remain, but should be used purel
 - Remove duplicated functionality between unify_call and _handle_call
 - Unify functionality of resolve, find_parent, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type
 - Update _handle_call to reflect changes to _TNode structure, particularly when looking up methods with multiple type signatures
-- Support for type inference with inheritance 
+- Support for type inference with inheritance

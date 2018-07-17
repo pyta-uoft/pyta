@@ -118,7 +118,7 @@ class TypeFailLookup(TypeFail):
     class is invalid
     Should be initialized with the astroid function node where the invalid lookup occurred
     """
-    def __init__(self, class_tnode: type, attr_node: NodeNG, src_node: NodeNG):
+    def __init__(self, class_tnode: _TNode, attr_node: NodeNG, src_node: NodeNG):
         self.class_tnode = class_tnode
         self.attr_node = attr_node
         self.src_node = src_node
@@ -241,7 +241,7 @@ def _wrap_generic_meta(t, args):
 @accept_failable
 def wrap_container(container_type: GenericMeta, *args: List[type]) -> TypeInfo:
     if isinstance(container_type, CallableMeta):
-        return TypeInfo(Callable[list(args[:-1]), args[-1]])
+        return TypeInfo(container_type[list(args[:-1]), args[-1]])
     else:
         return TypeInfo(container_type[tuple(args)])
 

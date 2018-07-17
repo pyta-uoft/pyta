@@ -155,6 +155,18 @@ def test_attribute_reassign():
     assert inferer.type_constraints.can_unify(actual_type, expected_type)
 
 
+def test_assign_autoconvert():
+    raise SkipTest('TODO: make this test pass (currently a unification fail)')
+    program = """
+    x = 1
+    x = x + 1.0
+    """
+    module, inferer = cs._parse_text(program, reset=True)
+    x = [inferer.lookup_typevar(node, node.name) for node
+         in module.nodes_of_class(astroid.AssignName)][0]
+    assert inferer.type_constraints.resolve(x).getValue() == float
+
+
 def test_augassign_simple_fallback():
     program = """
     x += 1
@@ -186,6 +198,33 @@ def test_augassign_builtin():
     x = [inferer.lookup_typevar(node, node.name) for node
          in module.nodes_of_class(astroid.AssignName)][0]
     assert inferer.type_constraints.resolve(x).getValue() == List[int]
+
+
+def test_augassign_builtin_autoconvert():
+    raise SkipTest('TODO: make this test pass (currently a unification fail)')
+    program = """
+    x = 1
+    x += 1.0
+    """
+    module, inferer = cs._parse_text(program, reset=True)
+    x = [inferer.lookup_typevar(node, node.name) for node
+         in module.nodes_of_class(astroid.AssignName)][0]
+    assert inferer.type_constraints.resolve(x).getValue() == float
+
+
+def test_augassign_builtin_attribute_autoconvert():
+    raise SkipTest('TODO: make this test pass (currently a unification fail)')
+    program = """
+    class A:
+        def __init__(self):
+            self.x = 1
+            
+    self.x += 1.0
+    """
+    module, inferer = cs._parse_text(program, reset=True)
+    x = [inferer.lookup_typevar(node, node.name) for node
+         in module.nodes_of_class(astroid.AssignAttr)][0]
+    assert inferer.type_constraints.resolve(x).getValue() == float
 
 
 def test_augassign_userdefn():

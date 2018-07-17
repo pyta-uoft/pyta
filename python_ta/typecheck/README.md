@@ -35,8 +35,8 @@ Done.
 Done.
 
 ### BinOp
-**TODOs:**
-- `visit_binop` assumes that if the arithmetic conversion succeeds, the result is that type. This is too permissive; e.g., some binary operations (like `<<`) only work on ints.
+
+Done.
 
 ### BoolOp
 

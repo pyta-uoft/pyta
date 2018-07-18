@@ -114,21 +114,22 @@ class TypeInferer:
             # List is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
         elif not node.elts:
-            node.inf_type = TypeInfo(List[Any])
+            node.inf_type = TypeInfo(List[self.type_constraints.fresh_tvar(node)])
         else:
             elt_inf_type = self._unify_elements(node.elts, node)
             node.inf_type = wrap_container(List, elt_inf_type)
 
     def visit_set(self, node: astroid.Set) -> None:
         if not node.elts:
-            node.inf_type = TypeInfo(Set[Any])
+            node.inf_type = TypeInfo(Set[self.type_constraints.fresh_tvar(node)])
         else:
             elt_inf_type = self._unify_elements(node.elts, node)
             node.inf_type = wrap_container(Set, elt_inf_type)
 
     def visit_dict(self, node: astroid.Dict) -> None:
         if not node.items:
-            node.inf_type = TypeInfo(Dict[Any, Any])
+            node.inf_type = TypeInfo(Dict[self.type_constraints.fresh_tvar(node),
+                                          self.type_constraints.fresh_tvar(node)])
         else:
             key_list, val_list = zip(*node.items)
             key_inf_type = self._unify_elements(key_list, node)

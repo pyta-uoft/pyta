@@ -32,3 +32,14 @@
 
   new: `slice.__init__(self, start: Optional[int], stop: Optional[int], step: Optional[int] = None) -> None`
 
+* old: `class int(SupportsInt, SupportsFloat, SupportsAbs[int]):`
+
+  new: `class int(SupportsInt, SupportsFloat, SupportsComplex, SupportsAbs[int]):`
+  
+* old: `class float(SupportsFloat, SupportsInt, SupportsAbs[float]):`
+
+  new: `class float(SupportsFloat, SupportsInt, SupportsComplex, SupportsAbs[float]):`
+  
+* old: `class complex(SupportsAbs[float])`
+
+  new: `class complex(SupportsComplex, SupportsAbs[float])`

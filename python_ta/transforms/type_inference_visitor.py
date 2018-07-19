@@ -20,10 +20,10 @@ class TypeInferer:
     type_store = TypeStore(type_constraints)
     type_constraints.type_store = type_store
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.type_constraints.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.type_constraints.reset()
         self.type_store = TypeStore(self.type_constraints)
         self.type_constraints.type_store = self.type_store
@@ -51,7 +51,7 @@ class TypeInferer:
                       for name in node.globals})
         self._populate_local_env(node)
 
-    def _set_classdef_environment(self, node):
+    def _set_classdef_environment(self, node: astroid.ClassDef) -> None:
         """Method to set environment of a ClassDef node."""
         node.type_environment = Environment()
         for name in node.instance_attrs:
@@ -67,7 +67,7 @@ class TypeInferer:
         except astroid.exceptions.DuplicateBasesError:
             self.type_store.classes[node.name]['__mro'] = [node.name]
 
-    def _set_function_def_environment(self, node):
+    def _set_function_def_environment(self, node: astroid.FunctionDef) -> None:
         """Method to set environment of a FunctionDef node."""
         node.type_environment = Environment()
         # self is a special case
@@ -76,7 +76,7 @@ class TypeInferer:
         self._populate_local_env(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
 
-    def _set_comprehension_environment(self, node):
+    def _set_comprehension_environment(self, node: astroid.Comprehension) -> None:
         """Set the environment of a comprehension expression.
 
         Covers ListComp, SetComp, DictComp, and GeneratorExp."""
@@ -84,7 +84,7 @@ class TypeInferer:
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
-    def _populate_local_env(self, node):
+    def _populate_local_env(self, node: NodeNG) -> None:
         """Helper to populate locals attributes in type environment of given node."""
         for var_name in node.locals:
             try:
@@ -170,7 +170,7 @@ class TypeInferer:
         """
         node.inf_type = node.value.inf_type
 
-    def _closest_frame(self, node, name):
+    def _closest_frame(self, node: NodeNG, name: str) -> NodeNG:
         """Helper method to find the closest ancestor node containing name relative to the given node.
         """
         closest_scope = node
@@ -243,8 +243,13 @@ class TypeInferer:
             binop_result = self._handle_call(node, method_name, target_type, node.value.inf_type)
         if isinstance(binop_result, TypeFail):
             # on failure, fallback to method corresponding to standard operator
-            method_name = BINOP_TO_METHOD[INPLACE_TO_BINOP[node.op]]
-            binop_result = self._handle_call(node, method_name, target_type, node.value.inf_type)
+            boolop = INPLACE_TO_BINOP[node.op]
+            method_name = BINOP_TO_METHOD[boolop]
+            arithm_type = self._arithm_convert(node, method_name, target_type, node.value.inf_type)
+            if arithm_type:
+                binop_result = arithm_type
+            else:
+                binop_result = self._handle_call(node, method_name, target_type, node.value.inf_type)
 
         type_result = self._assign_type(node.target, binop_result, node)
         if isinstance(type_result, TypeFail):
@@ -285,6 +290,7 @@ class TypeInferer:
             return self._handle_call(target, '__setitem__', target.value.inf_type, target.slice.inf_type, expr_type)
 
     def _assign_tuple(self, target: astroid.Tuple, value: TupleMeta, node: astroid.Assign) -> TypeResult:
+        """Unify tuple of type variables and tuple of types, within context of Assign statement."""
         starred_index = None
         for i in range(len(target.elts)):
             if isinstance(target.elts[i], astroid.Starred):
@@ -324,7 +330,7 @@ class TypeInferer:
         return assign_result
 
     @accept_failable
-    def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str):
+    def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
         class_name, _, _ = self.get_attribute_class(class_type)
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
@@ -343,7 +349,7 @@ class TypeInferer:
         tvar = self.lookup_typevar(node, name)
         return self.type_constraints.resolve(tvar)
 
-    def lookup_type(self, node, name) -> type:
+    def lookup_type(self, node: NodeNG, name: str) -> type:
         """Given a variable name, return its concrete type in the closest scope relative to given node.
         Should be used only for testing purposes.
         """
@@ -355,6 +361,12 @@ class TypeInferer:
     ##############################################################################
     @accept_failable
     def get_call_signature(self, c: type, node: NodeNG) -> TypeResult:
+        """Check for and return initializer function signature when using class name as Callable.
+        Return Callable unmodified otherwise.
+
+        :param c: Class, _ForwardRef to a class, or Callable
+        :param node: astroid.Call node where function call is occurring
+        """
         # Callable type; e.g., 'Callable[[int], int]'
         if isinstance(c, CallableMeta):
             return TypeInfo(c)
@@ -391,12 +403,12 @@ class TypeInferer:
     def visit_binop(self, node: astroid.BinOp) -> None:
         left_inf, right_inf = node.left.inf_type, node.right.inf_type
 
+        method_name = BINOP_TO_METHOD[node.op]
         # attempt to obtain a common arithmetic type
-        arithm_type = self._arithm_convert(left_inf, right_inf)
+        arithm_type = self._arithm_convert(node, method_name, left_inf, right_inf)
         if arithm_type:
             node.inf_type = arithm_type
         else:
-            method_name = BINOP_TO_METHOD[node.op]
             rev_method_name = BINOP_TO_REV_METHOD[node.op]
             l_type = self._handle_call(node, method_name, left_inf, right_inf,
                                                   error_func=binop_error_message)
@@ -415,13 +427,17 @@ class TypeInferer:
                     node.inf_type = l_type
 
     @accept_failable
-    def _arithm_convert(self, t1_: type, t2_: type) -> Optional[TypeInfo]:
+    def _arithm_convert(self, node: NodeNG, method: str, t1_: type, t2_: type) -> Optional[TypeInfo]:
+        common_type = None
         for t1, t2 in [(t1_, t2_), (t2_, t1_)]:
             if t1 is complex and self.type_store.is_descendant(t2, SupportsComplex):
-                return TypeInfo(complex)
+                common_type = complex
             if t1 is float and self.type_store.is_descendant(t2, SupportsFloat):
-                return TypeInfo(float)
-        return None
+                common_type = float
+        if common_type:
+            return self._handle_call(node, method, common_type, common_type)
+        else:
+            return None
 
     def visit_unaryop(self, node: astroid.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.
@@ -661,6 +677,7 @@ class TypeInferer:
 
     @accept_failable
     def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:
+        """Check for and return name and type of class represented by type t."""
         is_inst_expr = True
 
         # Class type: e.g., 'Type[_ForwardRef('A')]'

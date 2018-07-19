@@ -681,7 +681,7 @@ class TypeInferer:
         is_inst_expr = True
 
         # Class type: e.g., 'Type[_ForwardRef('A')]'
-        if hasattr(t, '__name__') and t.__name__ == 'Type':
+        if getattr(t, '__name__', None) == 'Type':
             class_type = t.__args__[0]
             is_inst_expr = False
         # Instance of class or builtin type; e.g., '_ForwardRef('A')' or 'int'
@@ -690,10 +690,8 @@ class TypeInferer:
 
         if isinstance(class_type, _ForwardRef):
             class_name = class_type.__forward_arg__
-        elif hasattr(t, '__name__'):
-            class_name = t.__name__
         else:
-            class_name = None
+            class_name = getattr(t, '__name__', None)
 
         # TODO: the condition below is too general
         if class_name is not None and class_name not in self.type_store.classes:

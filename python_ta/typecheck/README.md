@@ -4,7 +4,6 @@
 
 ### TODOs
 - Add type annotations and docstrings
-- Replace `_closest_frame` with astroid's provided `scope_lookup` or equivalent.
 - Move `lookup_type` to a test helper file.
 - Add support for the `__call__` magic method.
 

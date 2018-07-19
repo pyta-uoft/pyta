@@ -2,7 +2,7 @@ import astroid
 import nose
 from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
-from python_ta.transforms.type_inference_visitor import TypeFail
+from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
@@ -204,18 +204,6 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         assert inferer.type_constraints.resolve(function_call_type).getValue() == call_node.args[i].inf_type.getValue()
 
 
-def test_incompatible_binop_call():
-    """ User tries to call a builtin binary operation on arguments of the wrong type.
-    """
-    program = f'5 + "string"\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    binop_node = next(module.nodes_of_class(astroid.BinOp))
-    expected_msg = f''
-
-
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """
@@ -415,6 +403,16 @@ def test_conflicting_inferred_type_variable():
                    f'in parameter (1), the annotated type is str but was given an object of inferred type int.'
                    # TODO: test case redundant because recursive..?
     assert call_node.inf_type.getValue() == expected_msg
+
+
+def test_non_callable():
+    program = '''
+    x = 1
+    x()
+    '''
+    module, inferer = cs._parse_text(program)
+    call_node = next(module.nodes_of_class(astroid.Call))
+    assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 if __name__ == '__main__':

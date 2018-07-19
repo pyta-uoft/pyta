@@ -1,6 +1,8 @@
 import tests.custom_hypothesis_support as cs
 from nose import SkipTest
+import astroid
 from typing import *
+from typing import _ForwardRef
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
 
@@ -31,8 +33,8 @@ def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
 
 
 def compare_list_sets(s1: List[Set[Union[type, str]]], s2: List[Set[Union[type, str]]]):
-    list_sets_1 = s1.copy()
-    list_sets_2 = s2.copy()
+    list_sets_1 = [{str(t) for t in s} for s in s1]
+    list_sets_2 = [{str(t) for t in s} for s in s2]
     assert len(list_sets_1) == len(list_sets_2)
     while list_sets_1:
         set1 = list_sets_1[0]
@@ -164,6 +166,19 @@ def test_elt():
 tc = TypeConstraints()
 
 
+def test_forward_ref(draw=False):
+    tc.reset()
+    t0 = tc.fresh_tvar()
+    assert isinstance(tc.unify(_ForwardRef('A'), _ForwardRef('B')), TypeFail)
+    assert tc.unify(_ForwardRef('A'), _ForwardRef('A')).getValue() == _ForwardRef('A')
+    assert tc.unify(t0, _ForwardRef('A')).getValue() == _ForwardRef('A')
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [{'~_T0', _ForwardRef('A')}, {_ForwardRef('B')}]
+    compare_list_sets(actual_set, expected_set)
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
 def test_polymorphic_callable(draw=False):
     tc.reset()
     t0 = tc.fresh_tvar()
@@ -216,17 +231,17 @@ def test_polymorphic_callable3(draw=False):
 
 
 def test_polymorphic_callable4(draw=False):
-    raise SkipTest('Test this after adding functionality for testing correct TypeFail behavior.')
     tc.reset()
     t0 = tc.fresh_tvar()
     t1 = tc.fresh_tvar()
     t2 = tc.fresh_tvar()
-    tc.unify(t1, Callable[[t0], t0], draw)
-    tc.unify(t2, t1, draw)
-    tc.unify(t2, Callable[[int], str], draw)  # this is a TypeFail
+    tc.unify(t1, Callable[[t0], t0])
+    tc.unify(t2, t1)
+    assert isinstance(tc.unify(t2, Callable[[int], str]), TypeFail)
     actual_set = tc_to_disjoint(tc)
     expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]'}]
+                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]',
+                     'typing.Callable[[int], str]'}, {str}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -257,3 +272,259 @@ def test_can_unify_callable(draw=False):
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
+
+
+# Inheritance
+
+def test_userdefn_inheritance_simple(draw=False):
+    src = """
+    class A:
+        pass
+
+    class B:
+        pass
+
+    class C(A, B):
+        pass
+
+    a = A()
+    b = B()
+    c = C()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tc = ti.type_constraints
+    a, b, c = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)]
+
+    assert isinstance(tc.unify(a, b), TypeFail)
+    assert tc.unify(c, a).getValue() == _ForwardRef('C')
+    assert isinstance(tc.unify(a, c), TypeFail)  # note that order matters!
+    assert tc.unify(c, b).getValue() == _ForwardRef('C')
+    assert isinstance(tc.unify(b, c), TypeFail)
+
+    actual_set = tc_to_disjoint(tc)
+    expected_set = [
+        {'~_T0', Type[_ForwardRef('A')]},
+        {'~_T1', Type[_ForwardRef('B')]},
+        {'~_T2', Type[_ForwardRef('C')]},
+        {'~_T3', _ForwardRef('A')},
+        {'~_T4', _ForwardRef('B')},
+        {'~_T5', _ForwardRef('C')}
+    ]
+
+    # _TNodes should be unchanged after unification
+    compare_list_sets(actual_set, expected_set)
+
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_userdefn_inheritance_multilevel(draw=False):
+    src = """
+    class A:
+        pass
+
+    class B(A):
+        pass
+
+    class C(B):
+        pass
+
+    a = A()
+    b = B()
+    c = C()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tc = ti.type_constraints
+    a, b, c = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)]
+
+    assert tc.unify(b, a).getValue() == _ForwardRef('B')
+    assert tc.unify(c, b).getValue() == _ForwardRef('C')
+    assert tc.unify(c, a).getValue() == _ForwardRef('C')
+    assert isinstance(ti.type_constraints.unify(b, c), TypeFail)
+
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+def test_builtin_abst_inheritance(draw=False):
+    src = """
+    x = 3
+    # float takes in an argument of type SupportsInt
+    y = float(x)
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    tc = ti.type_constraints
+    actual_set = tc_to_disjoint(tc)
+    assert {'~_T0', int} in actual_set
+    assert {'~_T1', float} in actual_set
+    if draw:
+        gen_graph_from_nodes(tc._nodes)
+
+
+# TODO: more tests for builtin inheritance
+
+
+# Inheritance-based method lookup
+
+def test_userdefn_mro_simple(draw=False):
+    src = """
+    class A:
+        def foo(self):
+            return 0
+            
+    class B(A):
+        pass
+        
+    b = B()
+    x = b.foo()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    _, b, x = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == int
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_userdefn_mro_multilevel(draw=False):
+    src = """
+    class A:
+        def foo(self):
+            return 0
+            
+    class B:
+        pass
+        
+    class C(A):
+        pass
+        
+    class D(B, C):
+        pass
+        
+    d = D()
+    x = d.foo()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    _, d, x = [ti.lookup_typevar(node, node.name) for node
+               in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == int
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_userdefn_mro_diamond(draw=False):
+    src = """
+    class A:
+        pass
+            
+    class B(A):
+        def foo(self):
+            return 'a'
+        
+    class C(A):
+        def foo(self):
+            return 0
+        
+    class D(B,C):
+        pass
+        
+    d = D()
+    x = d.foo() # this is a call to B.foo()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    _, _, d, x = [ti.lookup_typevar(node, node.name) for node
+                  in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == str
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_abst_base_mro(draw=False):
+    src = """
+    x = 3 # x descends from SupportsAbs[int]
+    y = abs(x)
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x, y = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(y).getValue() == int
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_call_simple_mro(draw=False):
+    src = """
+    class A:
+        pass
+        
+    a = A()
+    x = repr(a)
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    a, x = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == str
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_binop_inheritance(draw=False):
+    src = """
+    x = 1.0 + 3
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == float
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_comp_inheritance(draw=False):
+    src = """
+    x = (3 == 'abc')
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == bool
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_userdefn_inherits_from_builtin(draw=False):
+    src = """
+    class MyStr(str):
+        pass
+        
+    s = MyStr()
+    x = s.lower()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    s, x = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == str
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_userdefn_overrides_builtin(draw=False):
+    src = """
+    class MyStr(str):
+        def lower(self):
+            return 0
+
+    s = MyStr()
+    x = s.lower()
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    _, s, x = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == int
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+# TODO: test builtins with Any in signature

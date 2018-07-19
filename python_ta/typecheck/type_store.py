@@ -1,9 +1,13 @@
 import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
-from python_ta.typecheck.base import parse_annotations, class_callable
+from python_ta.typecheck.base import parse_annotations, \
+    class_callable, accept_failable, _node_to_type, TypeFailFunction
+from typing import Callable
 import os
+from typing import *
 from typing import Any
+from typing import _ForwardRef
 
 TYPE_SHED_PATH = os.path.join(os.path.dirname(__file__), 'typeshed', 'builtins.pyi')
 
@@ -35,10 +39,11 @@ class TypeStore:
             tvars = []
             for base in class_def.bases:
                 if isinstance(base, astroid.Subscript):
-                    gen = base.value.as_string()
                     tvars = base.slice.as_string().strip('()').replace(" ", "").split(',')
-                    if gen == 'Generic':
-                        self.classes[class_def.name]['__pyta_tvars'] = tvars
+                    self.classes[class_def.name]['__pyta_tvars'] = tvars
+            self.classes[class_def.name]['__bases'] = [_node_to_type(base)
+                                                       for base in class_def.bases]
+            self.classes[class_def.name]['__mro'] = [cls.name for cls in class_def.mro()]
             for node in (nodes[0] for nodes in class_def.locals.values()
                          if isinstance(nodes[0], astroid.AssignName) and
                          isinstance(nodes[0].parent, astroid.AnnAssign)):
@@ -51,7 +56,7 @@ class TypeStore:
         for function_def in module.nodes_of_class(astroid.FunctionDef):
             in_class = isinstance(function_def.parent, astroid.ClassDef)
             if in_class:
-                tvars = self.classes[function_def.parent.name]['__pyta_tvars']
+                tvars = self.classes[function_def.parent.name]['__pyta_tvars'][:]
             else:
                 tvars = []
             f_type = parse_annotations(function_def, tvars)
@@ -64,39 +69,47 @@ class TypeStore:
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""
         if args:
-            unified = False
             func_types_list = self.functions[operator]
-            for func_type, _ in func_types_list:
-                # check if args can be unified instead of checking if they are the same!
-                unified = True
-                for t1, t2 in zip(func_type.__args__[:-1], args):
-                    if not isinstance(self.type_constraints.unify(t1, t2), type):
-                        unified = False
-                        break
-                if unified:
+            for func_type in func_types_list:
+                if len(args) != len(func_type.__args__) - 1:
+                    continue
+                if self.type_constraints.can_unify(Callable[list(func_type.__args__[:-1]), Any],
+                                                   Callable[list(args), Any]):
                     return func_type
-            if not unified:
-                raise KeyError
+            raise KeyError
 
-    def lookup_method(self, operator, *args):
+    @accept_failable
+    def lookup_method(self, operator, *args, node):
         """Helper method to lookup a method type given the operator and types of arguments."""
         if args:
-            unified = False
             func_types_list = self.methods[operator]
-            self_type = args[0]
+            # prioritize function types that match the 'self' argument
+            func_types_list = sorted(func_types_list,
+                                     key=lambda f_tp: f_tp[0].__args__ and
+                                                      f_tp[0].__args__[0] == args[0],
+                                     reverse=True)
             for func_type, _ in func_types_list:
                 if len(args) != len(func_type.__args__) - 1:
                     continue
-                unified = True
-                for t1, t2 in zip(func_type.__args__[:-1], args):
-                    # TODO: replace call to can_unify
-                    if not self.type_constraints.can_unify(t1, t2):
-                        unified = False
-                        break
-                if unified:
+                if self.type_constraints.can_unify(Callable[list(args), Any],
+                                                   Callable[list(func_type.__args__[:-1]), Any]):
                     return func_type
-            if not unified:
-                raise KeyError
+            return TypeFailFunction(tuple(func_types_list), None, node)
+
+    def is_descendant(self, child: type, ancestor: type) -> bool:
+        if child.__class__.__name__ == '_Union' or ancestor.__class__.__name__ == '_Union':
+            return self.type_constraints.can_unify(child, ancestor)
+        if ancestor == object or ancestor == Any or child == Any:
+            return True
+        child_name = child.__forward_arg__ if isinstance(child, _ForwardRef) \
+            else child.__name__
+        if child_name in self.classes:
+            for base in self.classes[child_name]['__bases']:
+                if self.type_constraints.can_unify(base, ancestor) or \
+                        self.is_descendant(base, ancestor):
+                    self.type_constraints.unify(base, ancestor)
+                    return True
+        return False
 
 
 if __name__ == '__main__':

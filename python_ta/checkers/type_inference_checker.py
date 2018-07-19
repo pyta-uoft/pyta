@@ -5,7 +5,6 @@ import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from python_ta.transforms.type_inference_visitor import TypeErrorInfo
 
 
 class TypeInferenceChecker(BaseChecker):

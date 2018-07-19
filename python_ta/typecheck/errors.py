@@ -44,17 +44,28 @@ BINOP_TO_ENGLISH = {
 
 BINOP_TO_METHOD = {
     '+': '__add__',
+    '+=': '__iadd__',
     '-': '__sub__',
+    '-=': '__isub__',
     '*': '__mul__',
-    '//': '__idiv__',
+    '*=': '__imul__',
+    '//': '__floordiv__',
+    '//=': '__ifloordiv__',
     '%': '__mod__',
-    '/': '__div__',
+    '%=': '__imod__',
+    '/': '__truediv__',
     '**': '__pow__',
+    '**=': '__ipow__',
     '&': '__and__',
+    '&=': '__iand__',
     '^': '__xor__',
+    '^=': '__ixor__',
     '|': '__or__',
+    '|=': '__ior__',
     '<<': '__lshift__',
+    '<<=': '__ilshift__',
     '>>': '__rshift__',
+    '>>==': '__irshift__',
     '==': '__eq__',
     '!=': '__ne__',
     '<': '__lt__',
@@ -64,6 +75,43 @@ BINOP_TO_METHOD = {
     'in': '__contains__'
     }
 
+BINOP_TO_REV_METHOD = {
+    '+': '__radd__',
+    '-': '__rsub__',
+    '*': '__rmul__',
+    '//': '__rfloordiv__',
+    '%': '__rmod__',
+    '/': '__rtruediv__',
+    '**': '__rpow__',
+    '&': '__rand__',
+    '^': '__rxor__',
+    '|': '__ror__',
+    '<<': '__rlshift__',
+    '>>': '__rrshift__',
+    }
+
+
+def _get_name(t: type) -> str:
+    if isinstance(t, _ForwardRef):
+        return t.__forward_arg__
+    elif isinstance(t, type):
+        return t.__name__
+    else:
+        return str(t)
+
+INPLACE_TO_BINOP = {
+    '+=': '+',
+    '-=': '-',
+    '*=': '*',
+    '//=': '//',
+    '%=': '%',
+    '**=': '*',
+    '&=': '&',
+    '^=': '^',
+    '|=': '=',
+    '<<=': '<<',
+    '>>=': '>>'
+}
 
 ###############################################################################
 # BinOp message
@@ -78,8 +126,8 @@ def binary_op_hints(op, args):
 
 def binop_error_message(node: astroid.BinOp) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
-    left_type = node.left.inf_type.getValue().__name__
-    right_type = node.right.inf_type.getValue().__name__
+    left_type = _get_name(node.left.inf_type.getValue())
+    right_type = _get_name(node.right.inf_type.getValue())
     hint = binary_op_hints(node.op, [left_type, right_type]) or ''
 
     return (

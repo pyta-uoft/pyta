@@ -53,5 +53,26 @@ def test_compare_in_error():
     compare_node = list(module.nodes_of_class(astroid.Compare))[0]
     assert isinstance(compare_node.inf_type, TypeFail)
 
+
+def test_compare_is():
+    program = """
+    A = 0
+    A is 1
+    """
+    module, _ = cs._parse_text(program)
+    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    assert compare_node.inf_type.getValue() == bool
+
+
+def test_compare_is():
+    program = """
+    A = 0
+    A is not 1
+    """
+    module, _ = cs._parse_text(program)
+    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    assert compare_node.inf_type.getValue() == bool
+
+
 if __name__ == '__main__':
     nose.main()

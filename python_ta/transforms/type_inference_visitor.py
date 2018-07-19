@@ -20,10 +20,10 @@ class TypeInferer:
     type_store = TypeStore(type_constraints)
     type_constraints.type_store = type_store
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.type_constraints.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.type_constraints.reset()
         self.type_store = TypeStore(self.type_constraints)
         self.type_constraints.type_store = self.type_store
@@ -51,7 +51,7 @@ class TypeInferer:
                       for name in node.globals})
         self._populate_local_env(node)
 
-    def _set_classdef_environment(self, node):
+    def _set_classdef_environment(self, node: astroid.ClassDef) -> None:
         """Method to set environment of a ClassDef node."""
         node.type_environment = Environment()
         for name in node.instance_attrs:
@@ -60,7 +60,7 @@ class TypeInferer:
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
 
-    def _set_function_def_environment(self, node):
+    def _set_function_def_environment(self, node: astroid.FunctionDef) -> None:
         """Method to set environment of a FunctionDef node."""
         node.type_environment = Environment()
         # self is a special case
@@ -69,7 +69,7 @@ class TypeInferer:
         self._populate_local_env(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
 
-    def _set_comprehension_environment(self, node):
+    def _set_comprehension_environment(self, node: astroid.Comprehension) -> None:
         """Set the environment of a comprehension expression.
 
         Covers ListComp, SetComp, DictComp, and GeneratorExp."""
@@ -77,7 +77,7 @@ class TypeInferer:
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
-    def _populate_local_env(self, node):
+    def _populate_local_env(self, node: NodeNG) -> None:
         """Helper to populate locals attributes in type environment of given node."""
         for var_name in node.locals:
             try:
@@ -163,7 +163,7 @@ class TypeInferer:
         """
         node.inf_type = node.value.inf_type
 
-    def _closest_frame(self, node, name):
+    def _closest_frame(self, node: NodeNG, name: str) -> NodeNG:
         """Helper method to find the closest ancestor node containing name relative to the given node.
         """
         closest_scope = node
@@ -283,6 +283,7 @@ class TypeInferer:
             return self._handle_call(target, '__setitem__', target.value.inf_type, target.slice.inf_type, expr_type)
 
     def _assign_tuple(self, target: astroid.Tuple, value: TupleMeta, node: astroid.Assign) -> TypeResult:
+        """Unify tuple of type variables and tuple of types, within context of Assign statement."""
         starred_index = None
         for i in range(len(target.elts)):
             if isinstance(target.elts[i], astroid.Starred):
@@ -322,7 +323,7 @@ class TypeInferer:
         return assign_result
 
     @accept_failable
-    def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str):
+    def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
         class_name, _, _ = self.get_attribute_class(class_type)
         class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
@@ -341,7 +342,7 @@ class TypeInferer:
         tvar = self.lookup_typevar(node, name)
         return self.type_constraints.resolve(tvar)
 
-    def lookup_type(self, node, name) -> type:
+    def lookup_type(self, node: NodeNG, name: str) -> type:
         """Given a variable name, return its concrete type in the closest scope relative to given node.
         Should be used only for testing purposes.
         """
@@ -353,6 +354,12 @@ class TypeInferer:
     ##############################################################################
     @accept_failable
     def get_call_signature(self, c: type, node: NodeNG) -> TypeResult:
+        """Check for and return initializer function signature when using class name as Callable.
+        Return Callable unmodified otherwise.
+
+        :param c: Class, _ForwardRef to a class, or Callable
+        :param node: astroid.Call node where function call is occurring
+        """
         # Callable type; e.g., 'Callable[[int], int]'
         if isinstance(c, CallableMeta):
             return TypeInfo(c)
@@ -670,6 +677,7 @@ class TypeInferer:
 
     @accept_failable
     def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:
+        """Check for and return name and type of class represented by type t."""
         is_inst_expr = True
 
         # Class type: e.g., 'Type[_ForwardRef('A')]'
@@ -721,7 +729,6 @@ class TypeInferer:
                 node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
         else:
             node.inf_type = result
-
 
     def visit_module(self, node: astroid.Module) -> None:
         node.inf_type = NoType()

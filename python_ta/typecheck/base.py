@@ -623,7 +623,7 @@ class TypeConstraints:
                         return self.unify(u1, u2, ast_node)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
             elif ct1 == Any or ct2 == Any:
-                return TypeInfo(ct1)
+                return TypeInfo(ct1) if ct1 != Any else TypeInfo(ct2)
             # Handle inheritance
             elif self.type_store and \
                     self.type_store.is_descendant(ct1, ct2):

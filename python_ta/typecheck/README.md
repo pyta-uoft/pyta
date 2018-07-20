@@ -51,8 +51,8 @@ Done.
 - Handle class variables (and corresponding type annotations)
 
 ### Compare
-**TODOs**
-- `visit_compare` should switch to use logic similar to other container types (if all types unify, use that; else use `Any`).
+
+Done.
 
 ### Comprehension
 

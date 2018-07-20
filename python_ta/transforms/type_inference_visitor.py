@@ -452,38 +452,28 @@ class TypeInferer:
         if isinstance(node.inf_type, TypeFail):
             node.inf_type = TypeInfo(Any)
 
-    def visit_compare(self, node: astroid.Compare) -> None:
-        return_types = set()
-        left = node.left
-        for comparator, right in node.ops:
-            if comparator == 'is' or comparator == 'is not':
-                return_types.add(bool)
-            elif comparator == 'in':
-                resolved_type = self._handle_call(
-                    node,
-                    BINOP_TO_METHOD[comparator],
-                    right.inf_type,
-                    left.inf_type
-                )
-                if isinstance(resolved_type, TypeFail):
-                    node.inf_type = resolved_type
-                    return
-                resolved_type >> return_types.add
-            else:
-                resolved_type = self._handle_call(
-                    node,
-                    BINOP_TO_METHOD[comparator],
-                    left.inf_type,
-                    right.inf_type
-                )
-                if isinstance(resolved_type, TypeFail):
-                    node.inf_type = resolved_type
-                    return
-                resolved_type >> return_types.add
-        if len(return_types) == 1:
-            node.inf_type = TypeInfo(return_types.pop())
+    def _handle_compare(self, node: NodeNG, comparator: str, left: NodeNG, right: NodeNG) -> TypeResult:
+        """Helper function to lookup a comparator, find the equivalent function call,
+        and unify call with given arguments.
+        """
+        if comparator == 'is' or comparator == 'is not':
+            return TypeInfo(bool)
+        elif comparator == 'in':
+            return self._handle_call(node, BINOP_TO_METHOD[comparator],
+                                     right.inf_type, left.inf_type)
         else:
-            node.inf_type = TypeInfo(Any)
+            return self._handle_call(node, BINOP_TO_METHOD[comparator],
+                                     left.inf_type, right.inf_type)
+
+    def visit_compare(self, node: astroid.Compare) -> None:
+        left = node.left
+        compare_type = self._handle_compare(node, node.ops[0][0], left, node.ops[0][1])
+
+        for comparator, right in node.ops[1:]:
+            resolved_type = self._handle_compare(node, comparator, left, right)
+            compare_type = self.type_constraints.unify(compare_type, resolved_type, node)
+
+        node.inf_type = compare_type
 
     ##############################################################################
     # Subscripting

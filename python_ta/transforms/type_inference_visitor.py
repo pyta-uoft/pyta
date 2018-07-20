@@ -339,13 +339,6 @@ class TypeInferer:
         tvar = self.lookup_typevar(node, name)
         return self.type_constraints.resolve(tvar)
 
-    def lookup_type(self, node: NodeNG, name: str) -> type:
-        """Given a variable name, return its concrete type in the closest scope relative to given node.
-        Should be used only for testing purposes.
-        """
-        inf_type = self.lookup_inf_type(node, name)
-        return inf_type.getValue()
-
     ##############################################################################
     # Operation nodes
     ##############################################################################

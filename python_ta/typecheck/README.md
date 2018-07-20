@@ -2,11 +2,7 @@
 
 ## Type Inference
 
-### TODOs
-- Add type annotations and docstrings
-- Move `lookup_type` to a test helper file.
-
-#### Low Priority TODOs
+#### TODOs
 - Remove duplicated functionality between unify, _unify_generic and unify_call
 - Remove duplicated functionality between unify_call and _handle_call
 - Unify functionality of resolve, find_parent, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type

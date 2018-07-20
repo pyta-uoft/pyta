@@ -74,8 +74,8 @@ Done.
 Done.
 
 ### FunctionDef
-**TODOs:**
-- It seems function type annotations are unified in both `visit_functiondef` and `visit_arguments`. If so, remove the logic in `visit_functiondef`.
+
+Done.
 
 ### GeneratorExp
 

@@ -584,46 +584,31 @@ class TypeInferer:
 
         # Get inferred return type
         if any(node.nodes_of_class(astroid.Return)):
-            inferred_return = self.lookup_inf_type(node, 'return')
+            return_node = list(node.nodes_of_class(astroid.Return))[-1]
+            if isinstance(return_node.inf_type, TypeFail):
+                inferred_return = return_node.inf_type
+            else:
+                inferred_return = self.lookup_inf_type(node, 'return')
         elif node.name == '__init__':
             inferred_return = inferred_args[0]
         else:
             inferred_return = TypeInfo(type(None))
 
-        # Get any function type annotations and combine if necessary
-        if any(annotation is not None for annotation in node.args.annotations):
-            annotated_type = parse_annotations(node)[0]
-
-            combined_args = []
-            for inf_arg, ann_arg in zip(inferred_args, annotated_type.__args__[:-1]):
-                if ann_arg is None:
-                    combined_args.append(TypeInfo(type(None)))
-                else:
-                    combined_args.append(self.type_constraints.unify(inf_arg, ann_arg, node))
-
-            annotated_rtype = annotated_type.__args__[-1]
-            if node.name == '__init__':
-                annotated_rtype = inferred_args[0]
-            combined_return = self.type_constraints.unify(
-                inferred_return, annotated_rtype, node)
-        else:
-            combined_args, combined_return = inferred_args, inferred_return
-
         # Update the environment storing the function's type.
         polymorphic_tvars = []
-        for arg in combined_args:
+        for arg in inferred_args:
             arg >> (
                 lambda a: polymorphic_tvars.append(a) if isinstance(arg, TypeVar) else a)
 
         # Create function signature
-        func_type = create_Callable_TypeResult(failable_collect(combined_args), combined_return, polymorphic_tvars)
+        func_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
 
         # Check for optional arguments, create a Union of function signatures if necessary
         num_defaults = len(node.args.defaults)
         if num_defaults > 0 and not isinstance(func_type, TypeFail):
             for i in range(num_defaults):
-                opt_args = combined_args[:-1-i]
-                opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), combined_return, polymorphic_tvars)
+                opt_args = inferred_args[:-1-i]
+                opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), inferred_return, polymorphic_tvars)
                 func_type = func_type >> (
                     lambda f: opt_func_type >> (
                         lambda opt_f: TypeInfo(Union[f, opt_f])))
@@ -639,26 +624,34 @@ class TypeInferer:
 
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = NoType()
-        for i in range(len(node.annotations)):
-            if node.annotations[i] is not None:
+        if any(annotation is not None for annotation in node.annotations):
+            for i in range(len(node.annotations)):
                 arg_tvar = self.lookup_typevar(node, node.args[i].name)
-                self.type_constraints.unify(
-                    arg_tvar, _node_to_type(node.annotations[i]), node)
+
+                if node.annotations[i] is not None:
+                    self.type_constraints.unify(
+                        arg_tvar, _node_to_type(node.annotations[i]), node)
+                else:
+                    self.type_constraints.unify(
+                        arg_tvar, Any, node)
 
     def visit_return(self, node: astroid.Return) -> None:
         return_tvar = self.lookup_typevar(node, 'return')
         # TODO: Replace with isinstance() once proper TypeFail subclass is created for unbound indentifiers
         if return_tvar == TypeFail("Unbound identifier"):
-            inf_return = TypeFailReturn(node)
+            return_target = TypeFailReturn(node)
         else:
-            inf_return = return_tvar
+            return_target = return_tvar
 
-        if node.value is not None:
-            inv_value = node.value.inf_type
+        if node.value is not None and node.parent.returns is not None:
+            return_annotation = _node_to_type(node.parent.returns)
+            return_value = self.type_constraints.unify(node.value.inf_type, return_annotation, node)
+        elif node.value is not None:
+            return_value = node.value.inf_type
         else:
-            inv_value = TypeInfo(None)
+            return_value = TypeInfo(None)
 
-        val_inf_type = self.type_constraints.unify(inv_value, inf_return, node)
+        val_inf_type = self.type_constraints.unify(return_value, return_target, node)
         node.inf_type = val_inf_type if isinstance(val_inf_type, TypeFail) else NoType()
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:

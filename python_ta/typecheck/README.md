@@ -6,7 +6,6 @@
 - Add type annotations and docstrings
 - Replace `_closest_frame` with astroid's provided `scope_lookup` or equivalent.
 - Move `lookup_type` to a test helper file.
-- Add support for the `__call__` magic method.
 
 #### Low Priority TODOs
 - Remove duplicated functionality between unify, _unify_generic and unify_call

@@ -29,6 +29,9 @@ Example 3:
     - lower  -> 1
     - upper  -> -1
     - step   -> 3
+
+Type-checking:
+    Delegate to the __init__ constructor for slice, setting type to 'slice' on success.
 """
 
 a = ['p', 'y']

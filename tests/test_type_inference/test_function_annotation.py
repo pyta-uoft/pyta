@@ -3,6 +3,7 @@ from typing import Any
 from nose.tools import eq_
 from python_ta.typecheck.base import TypeFailAnnotation
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import lookup_type
 
 
 def test_single_annotation_int():
@@ -13,7 +14,7 @@ def test_single_annotation_int():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'x'), int)
 
 
 def test_single_annotation_str():
@@ -24,7 +25,7 @@ def test_single_annotation_str():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), str)
+    eq_(lookup_type(ti, func_node, 'x'), str)
 
 
 def test_multiple_annotations():
@@ -35,8 +36,8 @@ def test_multiple_annotations():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
-    eq_(ti.lookup_type(func_node, 'y'), int)
+    eq_(lookup_type(ti, func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'y'), int)
 
 
 def test_multiple_annotations_diff_type():
@@ -48,8 +49,8 @@ def test_multiple_annotations_diff_type():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
-    eq_(ti.lookup_type(func_node, 'y'), str)
+    eq_(lookup_type(ti, func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'y'), str)
 
 
 def test_call_wrong_type():
@@ -62,7 +63,7 @@ def test_call_wrong_type():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'x'), int)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotation)
@@ -78,7 +79,7 @@ def test_call_wrong_type_str():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), str)
+    eq_(lookup_type(ti, func_node, 'x'), str)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotation)
@@ -94,7 +95,7 @@ def test_call_multiple_annotation_wrong_type():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'x'), int)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotation)
@@ -110,8 +111,8 @@ def test_mixed_annotation():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
-    eq_(ti.lookup_type(func_node, 'y'), Any)
+    eq_(lookup_type(ti, func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'y'), Any)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     eq_(call_node.inf_type.getValue(), Any)
@@ -127,8 +128,8 @@ def test_mixed_annotation_wrong():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(ti.lookup_type(func_node, 'x'), int)
-    eq_(ti.lookup_type(func_node, 'y'), Any)
+    eq_(lookup_type(ti, func_node, 'x'), int)
+    eq_(lookup_type(ti, func_node, 'y'), Any)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotation)

@@ -754,14 +754,6 @@ class TypeConstraints:
         else:
             return TypeInfo(t)
 
-    # HELPER METHODS
-    def types_in_callable(self, callable_function: CallableMeta) -> Tuple[List[type], type]:
-        """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively.
-        Used only for testing purposes
-        """
-        arg_type_lst = [self.resolve(argument).getValue() for argument in callable_function.__args__]
-        return arg_type_lst[:-1], arg_type_lst[-1]
-
 
 def literal_substitute(t: type, type_map: Dict[str, type]) -> type:
     """Make substitutions in t according to type_map, returning resulting type."""

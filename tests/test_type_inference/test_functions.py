@@ -5,6 +5,7 @@ from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
 from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction, TypeFailLookup
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable
 from keyword import iskeyword
@@ -79,7 +80,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.resolve(function_type_var).getValue()
-        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
+        actual_arg_types, actual_return_type = types_in_callable(inferer, function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
         expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
@@ -181,7 +182,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.resolve(function_type_var).getValue()
-        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
+        actual_arg_types, actual_return_type = types_in_callable(inferer, function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
         expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
         assert inferer.type_constraints.can_unify(Callable[actual_arg_types, actual_return_type], Callable[expected_arg_types, expected_return_type])

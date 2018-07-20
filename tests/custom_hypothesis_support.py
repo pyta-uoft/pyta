@@ -5,8 +5,8 @@ from hypothesis import assume
 from python_ta.transforms.type_inference_visitor import TypeInferer
 from keyword import iskeyword
 from hypothesis import settings
+from typing import CallableMeta, Tuple, List, Union
 settings.register_profile("pyta", settings(max_examples=10))
-from typing import Tuple, Union
 
 
 # Custom strategies for hypothesis testing framework
@@ -378,3 +378,19 @@ def _verify_type_setting(module, ast_class, expected_type):
     """Helper to verify nodes visited by type inference visitor of astroid class has been properly transformed."""
     result = [n.inf_type.getValue() for n in module.nodes_of_class(ast_class)]
     assert [expected_type] == result, f'{expected_type}, {result}'
+
+
+def lookup_type(inferer: TypeInferer, node: NodeNG, name: str) -> type:
+    """Given a variable name, return its concrete type in the closest scope relative to given node.
+    Should be used only for testing purposes.
+    """
+    inf_type = inferer.lookup_inf_type(node, name)
+    return inf_type.getValue()
+
+
+def types_in_callable(inferer: TypeInferer, callable_function: CallableMeta) -> Tuple[List[type], type]:
+    """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively.
+    Used only for testing purposes.
+    """
+    arg_type_lst = [inferer.type_constraints.resolve(argument).getValue() for argument in callable_function.__args__]
+    return arg_type_lst[:-1], arg_type_lst[-1]

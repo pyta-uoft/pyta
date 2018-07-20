@@ -170,39 +170,11 @@ class TypeInferer:
         """
         node.inf_type = node.value.inf_type
 
-    def _closest_frame(self, node: NodeNG, name: str) -> NodeNG:
-        """Helper method to find the closest ancestor node containing name relative to the given node.
-        """
-        closest_scope = node
-        if hasattr(closest_scope, 'type_environment') and (
-                        name in closest_scope.type_environment.locals or
-                        name in closest_scope.type_environment.globals or
-                        name in closest_scope.type_environment.nonlocals):
-            return closest_scope
-        if node.parent:
-            closest_scope = node.parent
-            if hasattr(closest_scope, 'type_environment') and (
-                            name in closest_scope.type_environment.locals or
-                            name in closest_scope.type_environment.globals or
-                            name in closest_scope.type_environment.nonlocals):
-                return closest_scope
-            else:
-                return self._closest_frame(closest_scope, name)
-        else:
-            return closest_scope
-
     ##############################################################################
     # Name lookup and assignment
     ##############################################################################
     def visit_name(self, node: astroid.Name) -> None:
-        lookup_result = self.lookup_inf_type(node, node.name)
-
-        if isinstance(lookup_result, TypeFail) and node.name in self.type_store.classes:
-            node.inf_type = TypeInfo(Type[__builtins__[node.name]])
-        elif isinstance(lookup_result, TypeFail) and node.name in self.type_store.functions:
-            node.inf_type = TypeInfo(self.type_store.functions[node.name][0][0])
-        else:
-            node.inf_type = lookup_result
+        node.inf_type = self.lookup_inf_type(node, node.name)
 
     def visit_assign(self, node: astroid.Assign) -> None:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
@@ -221,8 +193,7 @@ class TypeInferer:
                 break
 
     def visit_annassign(self, node: astroid.AnnAssign) -> None:
-        var_inf_type = self.type_constraints.resolve(
-            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
+        var_inf_type = self.lookup_typevar(node.target, node.target.name)
         self.type_constraints.unify(var_inf_type, _node_to_type(node.annotation.name), node)
         node.inf_type = NoType()
 
@@ -333,15 +304,34 @@ class TypeInferer:
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
         class_name, _, _ = self.get_attribute_class(class_type)
-        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+        closest_frame = node.scope().lookup(class_name)[0]
+        class_env = closest_frame.locals[class_name][0].type_environment
         return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
 
     def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""
-        try:
-            return TypeInfo(self._closest_frame(node, name).type_environment.lookup_in_env(name))
-        except:
-            return TypeFail("Unbound identifier")
+        cur_node = node
+
+        while cur_node is not None:
+            # Get first parent node with scope
+            cur_scope = cur_node.scope()
+            try:
+                # Attempt to look up variable in type environment
+                return TypeInfo(cur_scope.type_environment.lookup_in_env(name))
+            except KeyError:
+                # Variable not found in scope of current node, search parent node
+                cur_node = cur_scope.parent
+
+        # If root of astroid tree is reached with no variable found,
+        # search builtins and TypeStore for variable type
+        if name in self.type_store.classes:
+            result = TypeInfo(Type[__builtins__[name]])
+        elif name in self.type_store.functions:
+            result = TypeInfo(self.type_store.functions[name][0][0])
+        else:
+            result = TypeFail("Unbound identifier")
+
+        return result
 
     def lookup_inf_type(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return a TypeResult object containing the type in the closest scope relative to given node.

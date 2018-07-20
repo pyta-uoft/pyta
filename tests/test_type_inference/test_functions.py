@@ -1,8 +1,9 @@
 import astroid
 import nose
+from nose.tools import eq_
 from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
-from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction
+from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction, TypeFailLookup
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
@@ -413,6 +414,57 @@ def test_non_callable():
     module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailFunction)
+
+
+def test_magic_call():
+    program = '''
+    class A:
+        def __init__(self):
+            self.attr = 0
+        
+        def __call__(self):
+            return self.attr
+        
+    a = A()
+    a()
+    a.__call__()
+    '''
+    module, inferer = cs._parse_text(program, reset=True)
+    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+        eq_(call_node.inf_type.getValue(), int)
+
+
+def test_no_magic_call():
+    program = '''
+    class A:
+        def __init__(self):
+            self.attr = 0
+        
+    a = A()
+    a()
+    a.__call__()
+    '''
+    module, inferer = cs._parse_text(program, reset=True)
+    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+        assert isinstance(call_node.inf_type, TypeFailLookup)
+
+
+def test_magic_call_wrong_args():
+    program = '''
+    class A:
+        def __init__(self):
+            self.attr = 0
+
+        def __call__(self, x: int):
+            return self.attr + x
+
+    a = A()
+    a()
+    a.__call__()
+    '''
+    module, inferer = cs._parse_text(program, reset=True)
+    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 if __name__ == '__main__':

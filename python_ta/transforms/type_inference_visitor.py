@@ -370,20 +370,28 @@ class TypeInferer:
                 class_name = c.__args__[0].__forward_arg__
             else:
                 class_name = class_type.__name__
+
+            if '__init__' in self.type_store.classes[class_name]:
+                init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
+                init_func = Callable[init_args[1:-1], init_args[0]]
+            else:
+                # Classes declared without initializer
+                init_func = Callable[[], class_type]
+            return TypeInfo(init_func)
         # Class instances; e.g., '_ForwardRef('A')'
         elif isinstance(c, _ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
+
+            if '__call__' in self.type_store.classes[class_name]:
+                call_args = list(self.type_store.classes[class_name]['__call__'][0][0].__args__)
+                call_func = Callable[call_args[1:-1], call_args[-1]]
+                return TypeInfo(call_func)
+            else:
+                class_tnode = self.type_constraints.get_tnode(class_type)
+                return TypeFailLookup(class_tnode, node, node.parent)
         else:
             return TypeFailFunction((c,), None, node)
-
-        if '__init__' in self.type_store.classes[class_name]:
-            init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
-            init_func = Callable[init_args[1:-1], init_args[0]]
-        else:
-            # Classes declared without initializer
-            init_func = Callable[[], class_type]
-        return TypeInfo(init_func)
 
     def visit_call(self, node: astroid.Call) -> None:
         func_inf_type = self.get_call_signature(node.func.inf_type, node.func)

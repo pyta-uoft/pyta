@@ -5,7 +5,6 @@
 ### TODOs
 - Add type annotations and docstrings
 - Move `lookup_type` to a test helper file.
-- Add support for the `__call__` magic method.
 
 #### Low Priority TODOs
 - Remove duplicated functionality between unify, _unify_generic and unify_call

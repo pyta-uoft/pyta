@@ -527,4 +527,39 @@ def test_userdefn_overrides_builtin(draw=False):
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
 
-# TODO: test builtins with Any in signature
+def test_builtin_generic_inheritance_init(draw=False):
+    src = """
+    x = set([1,2,3])
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == Set[int]
+
+
+def test_builtin_generic_inheritance_method_lookup(draw=False):
+    raise SkipTest('Depends on PR #493')
+    src = """
+    x = set([1,2,3])
+    y = x.difference([2,3])
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x, y = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(y).getValue() == Set[int]
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_generic_inheritance_overloaded_init(draw=False):
+    raise SkipTest('Support for overloaded initializers required')
+    src = """
+    x = set([1,2,3])
+    y = list(x)
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x, y = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(x).getValue() == List[int]
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)

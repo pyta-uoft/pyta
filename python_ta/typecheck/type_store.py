@@ -2,7 +2,7 @@ import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
 from python_ta.typecheck.base import parse_annotations, \
-    class_callable, accept_failable, _node_to_type, TypeFailFunction
+    _gorg, class_callable, accept_failable, _node_to_type, TypeFailFunction
 from typing import Callable
 import os
 from typing import *
@@ -101,12 +101,24 @@ class TypeStore:
             return self.type_constraints.can_unify(child, ancestor)
         if ancestor == object or ancestor == Any or child == Any:
             return True
+
         child_name = child.__forward_arg__ if isinstance(child, _ForwardRef) \
             else child.__name__
-        if child_name in self.classes:
+
+        if hasattr(child, '__mro__') and ancestor in child.__mro__:
+            return True
+        elif hasattr(child, '__orig_bases__'):
+            for base in child.__orig_bases__[1:]:
+                if isinstance(base, GenericMeta) and isinstance(ancestor, GenericMeta) and \
+                   issubclass(_gorg(base), _gorg(ancestor)) and \
+                   all([self.type_constraints.can_unify(a1, a2) for a1, a2 in
+                         zip(base.__args__, ancestor.__args__)]):
+                    return True
+        elif child_name in self.classes:
             for base in self.classes[child_name]['__bases']:
                 if self.type_constraints.can_unify(base, ancestor) or \
                         self.is_descendant(base, ancestor):
+                    # TODO: make sure it is safe to alter type_constraints here
                     self.type_constraints.unify(base, ancestor)
                     return True
         return False

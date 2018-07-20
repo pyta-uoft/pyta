@@ -659,11 +659,12 @@ class TypeConstraints:
         conc_tnode2 = self.find_parent(tnode2)
 
         g1, g2 = _gorg(conc_tnode1.type), _gorg(conc_tnode2.type)
-        if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
-            # TODO: need to store more info here and in the case below
-            return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
-        if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
-            return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
+        if not self.type_store or not self.type_store.is_descendant(conc_tnode1.type, conc_tnode2.type):
+            if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
+                # TODO: need to store more info here and in the case below
+                return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
+            if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
+                return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
 
         arg_inf_types = []
         for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):

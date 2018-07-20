@@ -43,8 +43,6 @@ def test_binop_autoconvert():
     module, inferer = cs._parse_text(program, reset=True)
     x, y, z = [inferer.lookup_typevar(node, node.name) for node
                in module.nodes_of_class(astroid.AssignName)]
-    from sample_usage.draw_tnodes import gen_graph_from_nodes
-    gen_graph_from_nodes(inferer.type_constraints._nodes)
     assert inferer.type_constraints.resolve(x).getValue() == float
     assert inferer.type_constraints.resolve(y).getValue() == complex
     assert inferer.type_constraints.resolve(z).getValue() == complex

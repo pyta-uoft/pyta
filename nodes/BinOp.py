@@ -29,7 +29,16 @@ Refer to URL below for more information:
 https://docs.python.org/3/library/operator.html?highlight=operator#module-operator
 
 Type-checking:
-    Translate the operator into the corresponding method, and type-check the method call.
+    First, attempt to convert the left and right expression to a "common type" as per
+    https://docs.python.org/3.6/reference/expressions.html?#arithmetic-conversions,
+    Translate the operator into the corresponding method, and attempt to type-check
+    the method call using the converted arguments.
+
+    Otherwise, proceed as per
+    https://docs.python.org/3.6/reference/datamodel.html#emulating-numeric-types
+    Note that if both the calls to the standard method (e.g., '__add__') and the
+    reflected method (e.g., '__radd__') fail to type-check, the failure corresponds
+    to the method that was prioritized.
 """
 
 1 + 2

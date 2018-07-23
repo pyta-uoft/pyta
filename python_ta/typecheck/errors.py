@@ -72,7 +72,8 @@ BINOP_TO_METHOD = {
     '<=': '__le__',
     '>': '__gt__',
     '>=': '__ge__',
-    'in': '__contains__'
+    'in': '__contains__',
+    'not in': '__contains__'
     }
 
 BINOP_TO_REV_METHOD = {

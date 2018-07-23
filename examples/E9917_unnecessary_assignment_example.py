@@ -2,6 +2,9 @@
 
 
 def f():
+    """
+    Unnecessary assignment after use of variable.
+    """
     x = 17
     y = 40
     z = y + x
@@ -10,6 +13,9 @@ def f():
 
 
 def g():
+    """
+    Unnecessary augmented assignment.
+    """
     q = 17
     r = q + 3
     for i in range(r):
@@ -18,21 +24,17 @@ def g():
 
 
 def h():
-    s = 7
-    z = s**2
-    s = "hello 00" + str(7)  # unnecessary assignment here.
-    return z
-
-
-def i():
+    """
+    Unnecessary assignment of variable before use of variable.
+    """
     z = 1  # unnecessary assignment here.
     z = -1
     return z
 
 
-def j():
-    x = 20
-    z = [i for i in range(x)]  # unnecessary assignment here.
-    t = 0
-    return t
-
+def m():
+    """
+    Unnecessary assignment because variable n is unused.
+    """
+    n = 17  # unnecessary assignment here.
+    return 17

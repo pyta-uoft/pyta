@@ -46,9 +46,10 @@ class TypeInferer:
 
     def _set_module_environment(self, node: astroid.Module) -> None:
         """Method to set environment of a Module node."""
-        node.type_environment = Environment(
-            globals_={name: self.type_constraints.fresh_tvar(node.globals[name][0])
-                      for name in node.globals})
+        node.type_environment = Environment()
+        for name in node.globals:
+            if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.globals[name]):
+                node.type_environment.globals[name] = self.type_constraints.fresh_tvar(node.globals[name][0])
         self._populate_local_env(node)
 
     def _set_classdef_environment(self, node: astroid.ClassDef) -> None:
@@ -87,11 +88,12 @@ class TypeInferer:
     def _populate_local_env(self, node: NodeNG) -> None:
         """Helper to populate locals attributes in type environment of given node."""
         for var_name in node.locals:
-            try:
-                var_value = node.type_environment.lookup_in_env(var_name)
-            except KeyError:
-                var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
-            node.type_environment.locals[var_name] = var_value
+            if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.locals[var_name]):
+                try:
+                    var_value = node.type_environment.lookup_in_env(var_name)
+                except KeyError:
+                    var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
+                node.type_environment.locals[var_name] = var_value
 
     ###########################################################################
     # Type inference methods

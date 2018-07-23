@@ -121,21 +121,22 @@ class TypeInferer:
             # List is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
         elif not node.elts:
-            node.inf_type = TypeInfo(List[Any])
+            node.inf_type = TypeInfo(List[self.type_constraints.fresh_tvar(node)])
         else:
             elt_inf_type = self._unify_elements(node.elts, node)
             node.inf_type = wrap_container(List, elt_inf_type)
 
     def visit_set(self, node: astroid.Set) -> None:
         if not node.elts:
-            node.inf_type = TypeInfo(Set[Any])
+            node.inf_type = TypeInfo(Set[self.type_constraints.fresh_tvar(node)])
         else:
             elt_inf_type = self._unify_elements(node.elts, node)
             node.inf_type = wrap_container(Set, elt_inf_type)
 
     def visit_dict(self, node: astroid.Dict) -> None:
         if not node.items:
-            node.inf_type = TypeInfo(Dict[Any, Any])
+            node.inf_type = TypeInfo(Dict[self.type_constraints.fresh_tvar(node),
+                                          self.type_constraints.fresh_tvar(node)])
         else:
             key_list, val_list = zip(*node.items)
             key_inf_type = self._unify_elements(key_list, node)
@@ -170,39 +171,11 @@ class TypeInferer:
         """
         node.inf_type = node.value.inf_type
 
-    def _closest_frame(self, node: NodeNG, name: str) -> NodeNG:
-        """Helper method to find the closest ancestor node containing name relative to the given node.
-        """
-        closest_scope = node
-        if hasattr(closest_scope, 'type_environment') and (
-                        name in closest_scope.type_environment.locals or
-                        name in closest_scope.type_environment.globals or
-                        name in closest_scope.type_environment.nonlocals):
-            return closest_scope
-        if node.parent:
-            closest_scope = node.parent
-            if hasattr(closest_scope, 'type_environment') and (
-                            name in closest_scope.type_environment.locals or
-                            name in closest_scope.type_environment.globals or
-                            name in closest_scope.type_environment.nonlocals):
-                return closest_scope
-            else:
-                return self._closest_frame(closest_scope, name)
-        else:
-            return closest_scope
-
     ##############################################################################
     # Name lookup and assignment
     ##############################################################################
     def visit_name(self, node: astroid.Name) -> None:
-        lookup_result = self.lookup_inf_type(node, node.name)
-
-        if isinstance(lookup_result, TypeFail) and node.name in self.type_store.classes:
-            node.inf_type = TypeInfo(Type[__builtins__[node.name]])
-        elif isinstance(lookup_result, TypeFail) and node.name in self.type_store.functions:
-            node.inf_type = TypeInfo(self.type_store.functions[node.name][0][0])
-        else:
-            node.inf_type = lookup_result
+        node.inf_type = self.lookup_inf_type(node, node.name)
 
     def visit_assign(self, node: astroid.Assign) -> None:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
@@ -221,8 +194,7 @@ class TypeInferer:
                 break
 
     def visit_annassign(self, node: astroid.AnnAssign) -> None:
-        var_inf_type = self.type_constraints.resolve(
-            self._closest_frame(node, node.target.name).type_environment.lookup_in_env(node.target.name))
+        var_inf_type = self.lookup_typevar(node.target, node.target.name)
         self.type_constraints.unify(var_inf_type, _node_to_type(node.annotation.name), node)
         node.inf_type = NoType()
 
@@ -333,28 +305,40 @@ class TypeInferer:
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
         class_name, _, _ = self.get_attribute_class(class_type)
-        class_env = self._closest_frame(node, class_name).locals[class_name][0].type_environment
+        closest_frame = node.scope().lookup(class_name)[0]
+        class_env = closest_frame.locals[class_name][0].type_environment
         return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
 
     def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""
-        try:
-            return TypeInfo(self._closest_frame(node, name).type_environment.lookup_in_env(name))
-        except:
-            return TypeFail("Unbound identifier")
+        cur_node = node
+
+        while cur_node is not None:
+            # Get first parent node with scope
+            cur_scope = cur_node.scope()
+            try:
+                # Attempt to look up variable in type environment
+                return TypeInfo(cur_scope.type_environment.lookup_in_env(name))
+            except KeyError:
+                # Variable not found in scope of current node, search parent node
+                cur_node = cur_scope.parent
+
+        # If root of astroid tree is reached with no variable found,
+        # search builtins and TypeStore for variable type
+        if name in self.type_store.classes:
+            result = TypeInfo(Type[__builtins__[name]])
+        elif name in self.type_store.functions:
+            result = TypeInfo(self.type_store.functions[name][0][0])
+        else:
+            result = TypeFail("Unbound identifier")
+
+        return result
 
     def lookup_inf_type(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return a TypeResult object containing the type in the closest scope relative to given node.
         """
         tvar = self.lookup_typevar(node, name)
         return self.type_constraints.resolve(tvar)
-
-    def lookup_type(self, node: NodeNG, name: str) -> type:
-        """Given a variable name, return its concrete type in the closest scope relative to given node.
-        Should be used only for testing purposes.
-        """
-        inf_type = self.lookup_inf_type(node, name)
-        return inf_type.getValue()
 
     ##############################################################################
     # Operation nodes
@@ -380,20 +364,28 @@ class TypeInferer:
                 class_name = c.__args__[0].__forward_arg__
             else:
                 class_name = class_type.__name__
+
+            if '__init__' in self.type_store.classes[class_name]:
+                init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
+                init_func = Callable[init_args[1:-1], init_args[0]]
+            else:
+                # Classes declared without initializer
+                init_func = Callable[[], class_type]
+            return TypeInfo(init_func)
         # Class instances; e.g., '_ForwardRef('A')'
         elif isinstance(c, _ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
+
+            if '__call__' in self.type_store.classes[class_name]:
+                call_args = list(self.type_store.classes[class_name]['__call__'][0][0].__args__)
+                call_func = Callable[call_args[1:-1], call_args[-1]]
+                return TypeInfo(call_func)
+            else:
+                class_tnode = self.type_constraints.get_tnode(class_type)
+                return TypeFailLookup(class_tnode, node, node.parent)
         else:
             return TypeFailFunction((c,), None, node)
-
-        if '__init__' in self.type_store.classes[class_name]:
-            init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
-            init_func = Callable[init_args[1:-1], init_args[0]]
-        else:
-            # Classes declared without initializer
-            init_func = Callable[[], class_type]
-        return TypeInfo(init_func)
 
     def visit_call(self, node: astroid.Call) -> None:
         func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
@@ -452,38 +444,28 @@ class TypeInferer:
         if isinstance(node.inf_type, TypeFail):
             node.inf_type = TypeInfo(Any)
 
-    def visit_compare(self, node: astroid.Compare) -> None:
-        return_types = set()
-        left = node.left
-        for comparator, right in node.ops:
-            if comparator == 'is' or comparator == 'is not':
-                return_types.add(bool)
-            elif comparator == 'in':
-                resolved_type = self._handle_call(
-                    node,
-                    BINOP_TO_METHOD[comparator],
-                    right.inf_type,
-                    left.inf_type
-                )
-                if isinstance(resolved_type, TypeFail):
-                    node.inf_type = resolved_type
-                    return
-                resolved_type >> return_types.add
-            else:
-                resolved_type = self._handle_call(
-                    node,
-                    BINOP_TO_METHOD[comparator],
-                    left.inf_type,
-                    right.inf_type
-                )
-                if isinstance(resolved_type, TypeFail):
-                    node.inf_type = resolved_type
-                    return
-                resolved_type >> return_types.add
-        if len(return_types) == 1:
-            node.inf_type = TypeInfo(return_types.pop())
+    def _handle_compare(self, node: NodeNG, comparator: str, left: NodeNG, right: NodeNG) -> TypeResult:
+        """Helper function to lookup a comparator, find the equivalent function call,
+        and unify call with given arguments.
+        """
+        if comparator == 'is' or comparator == 'is not':
+            return TypeInfo(bool)
+        elif comparator == 'in':
+            return self._handle_call(node, BINOP_TO_METHOD[comparator],
+                                     right.inf_type, left.inf_type)
         else:
-            node.inf_type = TypeInfo(Any)
+            return self._handle_call(node, BINOP_TO_METHOD[comparator],
+                                     left.inf_type, right.inf_type)
+
+    def visit_compare(self, node: astroid.Compare) -> None:
+        left = node.left
+        compare_type = self._handle_compare(node, node.ops[0][0], left, node.ops[0][1])
+
+        for comparator, right in node.ops[1:]:
+            resolved_type = self._handle_compare(node, comparator, left, right)
+            compare_type = self.type_constraints.unify(compare_type, resolved_type, node)
+
+        node.inf_type = compare_type
 
     ##############################################################################
     # Subscripting
@@ -584,46 +566,31 @@ class TypeInferer:
 
         # Get inferred return type
         if any(node.nodes_of_class(astroid.Return)):
-            inferred_return = self.lookup_inf_type(node, 'return')
+            return_node = list(node.nodes_of_class(astroid.Return))[-1]
+            if isinstance(return_node.inf_type, TypeFail):
+                inferred_return = return_node.inf_type
+            else:
+                inferred_return = self.lookup_inf_type(node, 'return')
         elif node.name == '__init__':
             inferred_return = inferred_args[0]
         else:
             inferred_return = TypeInfo(type(None))
 
-        # Get any function type annotations and combine if necessary
-        if any(annotation is not None for annotation in node.args.annotations):
-            annotated_type = parse_annotations(node)[0]
-
-            combined_args = []
-            for inf_arg, ann_arg in zip(inferred_args, annotated_type.__args__[:-1]):
-                if ann_arg is None:
-                    combined_args.append(TypeInfo(type(None)))
-                else:
-                    combined_args.append(self.type_constraints.unify(inf_arg, ann_arg, node))
-
-            annotated_rtype = annotated_type.__args__[-1]
-            if node.name == '__init__':
-                annotated_rtype = inferred_args[0]
-            combined_return = self.type_constraints.unify(
-                inferred_return, annotated_rtype, node)
-        else:
-            combined_args, combined_return = inferred_args, inferred_return
-
         # Update the environment storing the function's type.
         polymorphic_tvars = []
-        for arg in combined_args:
+        for arg in inferred_args:
             arg >> (
                 lambda a: polymorphic_tvars.append(a) if isinstance(arg, TypeVar) else a)
 
         # Create function signature
-        func_type = create_Callable_TypeResult(failable_collect(combined_args), combined_return, polymorphic_tvars)
+        func_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
 
         # Check for optional arguments, create a Union of function signatures if necessary
         num_defaults = len(node.args.defaults)
         if num_defaults > 0 and not isinstance(func_type, TypeFail):
             for i in range(num_defaults):
-                opt_args = combined_args[:-1-i]
-                opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), combined_return, polymorphic_tvars)
+                opt_args = inferred_args[:-1-i]
+                opt_func_type = create_Callable_TypeResult(failable_collect(opt_args), inferred_return, polymorphic_tvars)
                 func_type = func_type >> (
                     lambda f: opt_func_type >> (
                         lambda opt_f: TypeInfo(Union[f, opt_f])))
@@ -639,26 +606,34 @@ class TypeInferer:
 
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = NoType()
-        for i in range(len(node.annotations)):
-            if node.annotations[i] is not None:
+        if any(annotation is not None for annotation in node.annotations):
+            for i in range(len(node.annotations)):
                 arg_tvar = self.lookup_typevar(node, node.args[i].name)
-                self.type_constraints.unify(
-                    arg_tvar, _node_to_type(node.annotations[i]), node)
+
+                if node.annotations[i] is not None:
+                    self.type_constraints.unify(
+                        arg_tvar, _node_to_type(node.annotations[i]), node)
+                else:
+                    self.type_constraints.unify(
+                        arg_tvar, Any, node)
 
     def visit_return(self, node: astroid.Return) -> None:
         return_tvar = self.lookup_typevar(node, 'return')
         # TODO: Replace with isinstance() once proper TypeFail subclass is created for unbound indentifiers
         if return_tvar == TypeFail("Unbound identifier"):
-            inf_return = TypeFailReturn(node)
+            return_target = TypeFailReturn(node)
         else:
-            inf_return = return_tvar
+            return_target = return_tvar
 
-        if node.value is not None:
-            inv_value = node.value.inf_type
+        if node.value is not None and node.parent.returns is not None:
+            return_annotation = _node_to_type(node.parent.returns)
+            return_value = self.type_constraints.unify(node.value.inf_type, return_annotation, node)
+        elif node.value is not None:
+            return_value = node.value.inf_type
         else:
-            inv_value = TypeInfo(None)
+            return_value = TypeInfo(None)
 
-        val_inf_type = self.type_constraints.unify(inv_value, inf_return, node)
+        val_inf_type = self.type_constraints.unify(return_value, return_target, node)
         node.inf_type = val_inf_type if isinstance(val_inf_type, TypeFail) else NoType()
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:
@@ -681,7 +656,7 @@ class TypeInferer:
         is_inst_expr = True
 
         # Class type: e.g., 'Type[_ForwardRef('A')]'
-        if hasattr(t, '__name__') and t.__name__ == 'Type':
+        if getattr(t, '__name__', None) == 'Type':
             class_type = t.__args__[0]
             is_inst_expr = False
         # Instance of class or builtin type; e.g., '_ForwardRef('A')' or 'int'
@@ -690,10 +665,8 @@ class TypeInferer:
 
         if isinstance(class_type, _ForwardRef):
             class_name = class_type.__forward_arg__
-        elif hasattr(t, '__name__'):
-            class_name = t.__name__
         else:
-            class_name = None
+            class_name = getattr(t, '__name__', None)
 
         # TODO: the condition below is too general
         if class_name is not None and class_name not in self.type_store.classes:

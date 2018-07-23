@@ -1,9 +1,11 @@
 import astroid
 import nose
+from nose.tools import eq_
 from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
-from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction
+from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction, TypeFailLookup
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable
 from keyword import iskeyword
@@ -78,7 +80,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.resolve(function_type_var).getValue()
-        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
+        actual_arg_types, actual_return_type = types_in_callable(inferer, function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
         expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
@@ -180,7 +182,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.resolve(function_type_var).getValue()
-        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
+        actual_arg_types, actual_return_type = types_in_callable(inferer, function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
         expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
         assert inferer.type_constraints.can_unify(Callable[actual_arg_types, actual_return_type], Callable[expected_arg_types, expected_return_type])
@@ -413,6 +415,57 @@ def test_non_callable():
     module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailFunction)
+
+
+def test_magic_call():
+    program = '''
+    class A:
+        def __init__(self):
+            self.attr = 0
+        
+        def __call__(self):
+            return self.attr
+        
+    a = A()
+    a()
+    a.__call__()
+    '''
+    module, inferer = cs._parse_text(program, reset=True)
+    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+        eq_(call_node.inf_type.getValue(), int)
+
+
+def test_no_magic_call():
+    program = '''
+    class A:
+        def __init__(self):
+            self.attr = 0
+        
+    a = A()
+    a()
+    a.__call__()
+    '''
+    module, inferer = cs._parse_text(program, reset=True)
+    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+        assert isinstance(call_node.inf_type, TypeFailLookup)
+
+
+def test_magic_call_wrong_args():
+    program = '''
+    class A:
+        def __init__(self):
+            self.attr = 0
+
+        def __call__(self, x: int):
+            return self.attr + x
+
+    a = A()
+    a()
+    a.__call__()
+    '''
+    module, inferer = cs._parse_text(program, reset=True)
+    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+        assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
 if __name__ == '__main__':

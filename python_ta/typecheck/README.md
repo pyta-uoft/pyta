@@ -2,13 +2,7 @@
 
 ## Type Inference
 
-### TODOs
-- Add type annotations and docstrings
-- Replace `_closest_frame` with astroid's provided `scope_lookup` or equivalent.
-- Move `lookup_type` to a test helper file.
-- Add support for the `__call__` magic method.
-
-#### Low Priority TODOs
+#### TODOs
 - Remove duplicated functionality between unify, _unify_generic and unify_call
 - Remove duplicated functionality between unify_call and _handle_call
 - Unify functionality of resolve, find_parent, _closest_frame, lookup_in_env, lookup_type, _lookup_attribute_type
@@ -51,8 +45,8 @@ Done.
 - Handle class variables (and corresponding type annotations)
 
 ### Compare
-**TODOs**
-- `visit_compare` should switch to use logic similar to other container types (if all types unify, use that; else use `Any`).
+
+Done.
 
 ### Comprehension
 
@@ -74,8 +68,8 @@ Done.
 Done.
 
 ### FunctionDef
-**TODOs:**
-- It seems function type annotations are unified in both `visit_functiondef` and `visit_arguments`. If so, remove the logic in `visit_functiondef`.
+
+Done.
 
 ### GeneratorExp
 

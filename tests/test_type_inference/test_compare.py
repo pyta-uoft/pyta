@@ -64,7 +64,7 @@ def test_compare_is():
     assert compare_node.inf_type.getValue() == bool
 
 
-def test_compare_is():
+def test_compare_is_not():
     program = """
     A = 0
     A is not 1

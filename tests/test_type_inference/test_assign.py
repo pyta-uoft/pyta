@@ -4,6 +4,7 @@ from nose import SkipTest
 from nose.tools import nottest
 from hypothesis import given, assume, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
 from python_ta.typecheck.base import TypeFail
 from typing import TypeVar, Any, List
@@ -47,7 +48,7 @@ def test_set_name_assigned(variables_dict):
         program += variable_name + "\n"
     module, inferer = cs._parse_text(program)
     for name_node in module.nodes_of_class(astroid.Name):
-        name_type = inferer.lookup_type(name_node, name_node.name)
+        name_type = lookup_type(inferer, name_node, name_node.name)
         assert name_node.inf_type.getValue() == name_type
 
 
@@ -59,7 +60,7 @@ def test_set_single_assign(variables_dict):
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AssignName):
         target_value = node.parent.value
-        target_type = inferer.lookup_type(node, node.name)
+        target_type = lookup_type(inferer, node, node.name)
         # compare it to the type of the assigned value
         assert target_value.inf_type.getValue() == target_type
 
@@ -150,8 +151,8 @@ def test_attribute_reassign():
               f'\n'
     module, inferer = cs._parse_text(program)
     functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
-    actual_type = inferer.lookup_type(functiondef_node, 'name')
-    expected_type = inferer.lookup_type(functiondef_node, 'name1')
+    actual_type = lookup_type(inferer, functiondef_node, 'name')
+    expected_type = lookup_type(inferer, functiondef_node, 'name1')
     assert inferer.type_constraints.can_unify(actual_type, expected_type)
 
 

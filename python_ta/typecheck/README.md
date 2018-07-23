@@ -14,6 +14,11 @@ Done. `lookup_type()` and `types_in_callable()` remain, but should be used purel
 
 ## Nodes
 
+### AnnAssign
+
+**TODOs:**
+- Add proper support for multi-parameter Tuples using ellipsis
+
 ### Assign
 
 Done.

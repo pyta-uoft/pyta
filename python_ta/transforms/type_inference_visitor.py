@@ -450,7 +450,7 @@ class TypeInferer:
         """
         if comparator == 'is' or comparator == 'is not':
             return TypeInfo(bool)
-        elif comparator == 'in':
+        elif comparator == 'in' or comparator == 'not in':
             return self._handle_call(node, BINOP_TO_METHOD[comparator],
                                      right.inf_type, left.inf_type)
         else:

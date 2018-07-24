@@ -13,7 +13,10 @@ def test_tuple(t_tuple):
     module, _ = cs._parse_text(t_tuple)
     for t_node in module.nodes_of_class(astroid.Tuple):
         elt_types = tuple(elt.inf_type.getValue() for elt in t_node.elts)
-        assert t_node.inf_type.getValue() == Tuple[elt_types]
+        if len(elt_types) > 0:
+            assert t_node.inf_type.getValue() == Tuple[elt_types]
+        else:
+            assert issubclass(t_node.inf_type.getValue(), Tuple)
 
 
 if __name__ == '__main__':

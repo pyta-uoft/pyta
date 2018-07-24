@@ -149,6 +149,8 @@ class TypeInferer:
         if node.ctx == astroid.Store:
             # Tuple is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
+        elif not node.elts:
+            node.inf_type = TypeInfo(Tuple[self.type_constraints.fresh_tvar(node), ...])
         else:
             node.inf_type = wrap_container(Tuple, *(e.inf_type for e in node.elts))
 

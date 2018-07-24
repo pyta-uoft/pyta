@@ -662,6 +662,10 @@ class TypeConstraints:
         if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
             # TODO: need to store more info here and in the case below
             return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
+        if any(arg is Ellipsis for arg in conc_tnode1.type.__args__):
+            tnode1.parent = conc_tnode2
+            tnode1.parent_path = (conc_tnode1, ast_node)
+            return TypeInfo(conc_tnode2.type)
         if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
             return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
 

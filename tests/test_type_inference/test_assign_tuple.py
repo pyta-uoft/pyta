@@ -1,9 +1,10 @@
 import astroid
 from nose.tools import eq_
-from typing import TupleMeta
+from typing import Tuple
 import tests.custom_hypothesis_support as cs
 from python_ta.transforms.type_inference_visitor import NoType
 from python_ta.typecheck.base import TypeInfo, TypeFail
+from tests.custom_hypothesis_support import lookup_type
 
 
 def generate_tuple(length: int, t: type=None):
@@ -88,3 +89,15 @@ def test_tuple_extra_value():
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
 
+
+def test_empty_tuple():
+    program = """
+    t = ()
+    t = (1,)
+    t = (1, 2)
+    """
+    module, ti = cs._parse_text(program)
+    assign_nodes = list(module.nodes_of_class(astroid.Assign))
+    tvar = lookup_type(ti, assign_nodes[1], 't')
+    eq_(tvar, Tuple[int])
+    assert isinstance(assign_nodes[2].inf_type, TypeFail)

@@ -44,24 +44,36 @@ BINOP_TO_ENGLISH = {
 
 BINOP_TO_METHOD = {
     '+': '__add__',
+    '+=': '__iadd__',
     '-': '__sub__',
+    '-=': '__isub__',
     '*': '__mul__',
+    '*=': '__imul__',
     '//': '__floordiv__',
+    '//=': '__ifloordiv__',
     '%': '__mod__',
+    '%=': '__imod__',
     '/': '__truediv__',
     '**': '__pow__',
+    '**=': '__ipow__',
     '&': '__and__',
+    '&=': '__iand__',
     '^': '__xor__',
+    '^=': '__ixor__',
     '|': '__or__',
+    '|=': '__ior__',
     '<<': '__lshift__',
+    '<<=': '__ilshift__',
     '>>': '__rshift__',
+    '>>==': '__irshift__',
     '==': '__eq__',
     '!=': '__ne__',
     '<': '__lt__',
     '<=': '__le__',
     '>': '__gt__',
     '>=': '__ge__',
-    'in': '__contains__'
+    'in': '__contains__',
+    'not in': '__contains__'
     }
 
 BINOP_TO_REV_METHOD = {
@@ -79,12 +91,28 @@ BINOP_TO_REV_METHOD = {
     '>>': '__rrshift__',
     }
 
+
 def _get_name(t: type) -> str:
     if isinstance(t, _ForwardRef):
         return t.__forward_arg__
-    else:
+    elif isinstance(t, type):
         return t.__name__
+    else:
+        return str(t)
 
+INPLACE_TO_BINOP = {
+    '+=': '+',
+    '-=': '-',
+    '*=': '*',
+    '//=': '//',
+    '%=': '%',
+    '**=': '*',
+    '&=': '&',
+    '^=': '^',
+    '|=': '=',
+    '<<=': '<<',
+    '>>=': '>>'
+}
 
 ###############################################################################
 # BinOp message

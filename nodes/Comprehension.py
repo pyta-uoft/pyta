@@ -12,6 +12,9 @@ Attributes:
         - List of test expressions. If None, ifs is an empty list.
 
 Example:
+    * NOTE : The example below is of a Comprehension Node "for x in range(3)" within
+             a ListComprehension Node "[x for x in range(3)]".
+             
     - target  -> Name(id='line', ctx=Store())
     - iter    -> Name(id='range(3)', ctx=Load())
     - ifs     -> []

@@ -10,6 +10,9 @@ Attributes:
 Example:
     - dims  -> [Slice(lower=Num(n=2), upper=Num(n=3), step=None),
                 Index(value=Num(n=1)]
+
+Type-checking:
+    The inferred type is a tuple consisting of the inferred types of the 'dims'.
 """
 
 class Foo(object):

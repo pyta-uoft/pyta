@@ -3,6 +3,7 @@ import nose
 from hypothesis import assume, given, settings, HealthCheck
 from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable, _ForwardRef, Type
 from nose.tools import eq_
@@ -36,7 +37,7 @@ def test_inference_args_simple_return(function_name, arguments):
         expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.resolve(function_type_var).getValue()
-        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
+        actual_arg_types, actual_return_type = types_in_callable(inferer, function_type)
         assert expected_arg_types == actual_arg_types
 
 
@@ -53,7 +54,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         expected_arg_types = [inferer.type_constraints.resolve(type_var).getValue() for type_var in expected_arg_type_vars]
         function_type_var = module.type_environment.lookup_in_env(function_name)
         function_type = inferer.type_constraints.resolve(function_type_var).getValue()
-        actual_arg_types, actual_return_type = inferer.type_constraints.types_in_callable(function_type)
+        actual_arg_types, actual_return_type = types_in_callable(inferer, function_type)
         return_type_var = function_def_node.type_environment.lookup_in_env(argument)
         expected_return_type = inferer.type_constraints.resolve(return_type_var).getValue()
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
@@ -92,7 +93,7 @@ def test_functiondef_method():
         '''
     module, inferer = cs._parse_text(program)
     for func_def in module.nodes_of_class(astroid.FunctionDef):
-        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == _ForwardRef('A')
+        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == _ForwardRef('A')
 
 
 def test_functiondef_classmethod():
@@ -106,7 +107,7 @@ def test_functiondef_classmethod():
         '''
     module, inferer = cs._parse_text(program)
     for func_def in module.nodes_of_class(astroid.FunctionDef):
-        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == Type[_ForwardRef('A')]
+        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == Type[_ForwardRef('A')]
 
 
 def test_functiondef_staticmethod():
@@ -120,7 +121,7 @@ def test_functiondef_staticmethod():
         '''
     module, inferer = cs._parse_text(program)
     for func_def in module.nodes_of_class(astroid.FunctionDef):
-        assert inferer.lookup_type(func_def, func_def.argnames()[0]) == int
+        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == int
 
 
 def test_nested_annotated_function_conflicting_body():

@@ -4,7 +4,7 @@ import nose
 from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.errors import BINOP_TO_METHOD
-from python_ta.typecheck.base import TypeFailFunction
+from python_ta.typecheck.base import TypeFail, TypeFailFunction
 settings.load_profile("pyta")
 
 
@@ -32,6 +32,32 @@ def test_binop_reverse():
     x = [ti.lookup_typevar(node, node.name) for node
          in ast_mod.nodes_of_class(astroid.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
+
+
+def test_binop_autoconvert():
+    program = """
+    x = 1 + 1.0
+    y = 1 + 1j
+    z = 1.0 + 1j
+    """
+    module, inferer = cs._parse_text(program, reset=True)
+    x, y, z = [inferer.lookup_typevar(node, node.name) for node
+               in module.nodes_of_class(astroid.AssignName)]
+    assert inferer.type_constraints.resolve(x).getValue() == float
+    assert inferer.type_constraints.resolve(y).getValue() == complex
+    assert inferer.type_constraints.resolve(z).getValue() == complex
+
+
+def test_binop_autoconvert_fail():
+    program = """
+    x = 1 << 1.0
+    y = 1.0 << 1
+    z = 1j % 2j
+    w = 1j << 2
+    """
+    module, inferer = cs._parse_text(program, reset=True)
+    for binop_node in module.nodes_of_class(astroid.BinOp):
+        assert isinstance(binop_node.inf_type, TypeFail)
 
 
 def test_binop_userdefn():

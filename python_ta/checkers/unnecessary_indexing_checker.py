@@ -51,11 +51,12 @@ def _iterable_if_range(node: Optional[NodeNG]) -> Optional[str]:
     if (isinstance(node, astroid.Call) and
             isinstance(node.func, astroid.Name) and
             node.func.name == 'range' and
-            isinstance(node.args[0], astroid.Call) and
-            isinstance(node.args[0].func, astroid.Name) and
-            node.args[0].func.name == 'len' and
-            isinstance(node.args[0].args[0], astroid.Name)):
-            return node.args[0].args[0].name
+            isinstance(node.args[-1], astroid.Call) and
+            isinstance(node.args[-1].func, astroid.Name) and
+            node.args[-1].func.name == 'len' and
+            (not isinstance(node.args[0], astroid.Const) or node.args[0].value == 0) and
+            isinstance(node.args[-1].args[0], astroid.Name)):
+            return node.args[-1].args[0].name
 
 
 def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:

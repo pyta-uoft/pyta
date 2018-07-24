@@ -8,6 +8,3 @@ def sum_items(lst: List[int]) -> int:
         s += lst[i]
 
     return s
-
-
-range(0, 3)

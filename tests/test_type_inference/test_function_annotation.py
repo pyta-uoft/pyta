@@ -1,9 +1,10 @@
 import astroid
-from typing import Any
+from typing import Any, List, Tuple
 from nose.tools import eq_
 from python_ta.typecheck.base import TypeFailAnnotation
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
+from nose import SkipTest
 
 
 def test_single_annotation_int():
@@ -133,3 +134,52 @@ def test_mixed_annotation_wrong():
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotation)
+
+
+def test_param_subscript_list():
+    src = """
+    def foo(lst: List):
+        return lst
+
+    foo([1, 2, 3])
+    """
+    ast_mod, ti = cs._parse_text(src)
+
+    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    assert issubclass(lookup_type(ti, func_node, 'lst'), List)
+
+    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    eq_(call_node.inf_type.getValue(), List[Any])
+
+
+def test_param_subscript_list_int():
+    src = """
+    def foo(lst: List[int]):
+        return lst
+
+    foo([1, 2, 3])
+    """
+    ast_mod, ti = cs._parse_text(src)
+
+    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    eq_(lookup_type(ti, func_node, 'lst'), List[int])
+
+    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    eq_(call_node.inf_type.getValue(), List[int])
+
+
+def test_param_subscript_tuple():
+    src = """
+    def foo(t: Tuple[int, int]):
+        return t
+
+    foo((0, 1))
+    """
+    raise SkipTest("Requires support for multi-parameter Tuple annotations")
+    ast_mod, ti = cs._parse_text(src)
+
+    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    eq_(lookup_type(ti, func_node, 't'), Tuple[int, int])
+
+    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    eq_(call_node.inf_type.getValue(), Tuple[int, int])

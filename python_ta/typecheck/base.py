@@ -492,12 +492,15 @@ class TypeConstraints:
     # Type lookup ("find")
     ###########################################################################
     @accept_failable
-    def resolve(self, t: type) -> TypeInfo:
+    def resolve(self, t: type) -> TypeResult:
         """Return the concrete type or set representative associated with the given type.
         """
         if isinstance(t, GenericMeta):
-            res_args = [self.resolve(arg) for arg in t.__args__]
-            return _wrap_generic_meta(_gorg(t), failable_collect(res_args))
+            if t.__args__ is not None:
+                res_args = [self.resolve(arg) for arg in t.__args__]
+                return _wrap_generic_meta(_gorg(t), failable_collect(res_args))
+            else:
+                return TypeInfo(t)
         elif isinstance(t, TypeVar):
             try:
                 repr = self.find_repr(self.type_to_tnode[str(t)])

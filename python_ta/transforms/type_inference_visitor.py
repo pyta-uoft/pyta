@@ -7,7 +7,7 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred
+    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     INPLACE_TO_BINOP, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
@@ -197,8 +197,25 @@ class TypeInferer:
 
     def visit_annassign(self, node: astroid.AnnAssign) -> None:
         var_inf_type = self.lookup_typevar(node.target, node.target.name)
-        self.type_constraints.unify(var_inf_type, _node_to_type(node.annotation.name), node)
+        ann_type = self._ann_node_to_type(node.annotation)
+        self.type_constraints.unify(var_inf_type, ann_type, node)
         node.inf_type = NoType()
+
+    def _ann_node_to_type(self, node: astroid.Name) -> type:
+        """Return a type represented by the input node, substituting Any for missing arguments in generic types
+        """
+        ann_node_type = _node_to_type(node)
+        if isinstance(ann_node_type, GenericMeta) and ann_node_type.__args__ is None:
+            if ann_node_type == Dict:
+                ann_type = wrap_container(ann_node_type, Any, Any)
+            elif ann_node_type == Tuple:
+                # TODO: Add proper support for multi-parameter Tuples
+                ann_type = wrap_container(ann_node_type, Any)
+            else:
+                ann_type = wrap_container(ann_node_type, Any)
+        else:
+            ann_type = ann_node_type
+        return ann_type
 
     def visit_augassign(self, node: astroid.AugAssign) -> None:
         node.inf_type = NoType()
@@ -329,6 +346,8 @@ class TypeInferer:
         # search builtins and TypeStore for variable type
         if name in self.type_store.classes:
             result = TypeInfo(Type[__builtins__[name]])
+        elif name.lower() in self.type_store.classes:
+            result = TypeInfo(Type[__builtins__[name.lower()]])
         elif name in self.type_store.functions:
             result = TypeInfo(self.type_store.functions[name][0][0])
         else:
@@ -493,7 +512,18 @@ class TypeInferer:
         if isinstance(node.slice.inf_type, TypeFail):
             node.inf_type = node.slice.inf_type
         elif node.ctx == astroid.Load:
-            node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type)
+            try:
+                value_gorg = node.value.inf_type >> _gorg
+            except AttributeError:
+                value_gorg = None
+
+            if value_gorg == Type:
+                if isinstance(node.slice.value, astroid.Tuple):
+                    node.inf_type = wrap_container(_node_to_type(node.value), *_node_to_type(node.slice.value))
+                else:
+                    node.inf_type = wrap_container(_node_to_type(node.value), _node_to_type(node.slice.value))
+            else:
+                node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type)
         elif node.ctx == astroid.Store:
             node.inf_type = NoType()
         elif node.ctx == astroid.Del:
@@ -613,8 +643,9 @@ class TypeInferer:
                 arg_tvar = self.lookup_typevar(node, node.args[i].name)
 
                 if node.annotations[i] is not None:
+                    ann_type = self._ann_node_to_type(node.annotations[i])
                     self.type_constraints.unify(
-                        arg_tvar, _node_to_type(node.annotations[i]), node)
+                        arg_tvar, ann_type, node)
                 else:
                     self.type_constraints.unify(
                         arg_tvar, Any, node)

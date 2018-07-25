@@ -199,7 +199,11 @@ class TypeInferer:
         var_inf_type = self.lookup_typevar(node.target, node.target.name)
         ann_type = self._ann_node_to_type(node.annotation)
         self.type_constraints.unify(var_inf_type, ann_type, node)
-        node.inf_type = NoType()
+        if node.value:
+            node.targets = [node.target]
+            self.visit_assign(node)
+        else:
+            node.inf_type = NoType()
 
     def _ann_node_to_type(self, node: astroid.Name) -> type:
         """Return a type represented by the input node, substituting Any for missing arguments in generic types

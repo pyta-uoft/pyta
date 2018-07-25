@@ -392,10 +392,10 @@ class TypeInferer:
 
             if '__init__' in self.type_store.classes[class_name]:
                 init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
-                init_func = Callable[init_args[:-1], init_args[0]]
+                init_func = Callable[init_args[1:-1], init_args[0]]
             else:
                 # Classes declared without initializer
-                init_func = Callable[[class_type], class_type]
+                init_func = Callable[[], class_type]
             return TypeInfo(init_func)
         # Class instances; e.g., '_ForwardRef('A')'
         elif isinstance(c, _ForwardRef):
@@ -404,7 +404,7 @@ class TypeInferer:
 
             if '__call__' in self.type_store.classes[class_name]:
                 call_args = list(self.type_store.classes[class_name]['__call__'][0][0].__args__)
-                call_func = Callable[call_args[:-1], call_args[-1]]
+                call_func = Callable[call_args[1:-1], call_args[-1]]
                 return TypeInfo(call_func)
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)
@@ -412,23 +412,9 @@ class TypeInferer:
         else:
             return TypeFailFunction((c,), None, node)
 
-    @accept_failable
-    def get_call_inferred_arg(self, c: type, call_node: NodeNG) -> TypeResult:
-        """Obtain the inferred first argument (e.g., self) for the function, if applicable."""
-        if getattr(c, '__name__', None) == 'Type':
-            return TypeInfo(Any)
-        elif isinstance(c, _ForwardRef):
-            return TypeInfo(Any)
-        if getattr(call_node.func, 'inferred_arg_type', False):
-            return call_node.func.inferred_arg_type
-        return None
-
     def visit_call(self, node: astroid.Call) -> None:
         func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
         arg_inf_types = [arg.inf_type for arg in node.args]
-        inferred_arg = self.get_call_inferred_arg(node.func.inf_type, node)
-        if inferred_arg:
-            arg_inf_types = [inferred_arg] + arg_inf_types
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:
@@ -743,9 +729,12 @@ class TypeInferer:
                     node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
                 else:
                     func_type, method_type = attribute_type[0]
-                    if isinstance(func_type, CallableMeta) and method_type == 'method' \
-                            and (inst_expr or method_type == 'classmethod'):
-                            node.inferred_arg_type = class_type
+                    if isinstance(func_type, CallableMeta) and \
+                            method_type == 'method' and inst_expr or \
+                            method_type == 'classmethod':
+                        func_type = self.type_constraints.fresh_callable(func_type, node)
+                        self.type_constraints.unify(func_type.__args__[0], class_type)
+                        func_type.__args__ = func_type.__args__[1:]
                     node.inf_type = TypeInfo(func_type)
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)

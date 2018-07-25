@@ -309,8 +309,7 @@ def test_userdefn_inheritance_simple(draw=False):
         {'~_T2', Type[_ForwardRef('C')]},
         {'~_T3', _ForwardRef('A')},
         {'~_T4', _ForwardRef('B')},
-        {'~_T5', _ForwardRef('C')},
-        {Any}
+        {'~_T5', _ForwardRef('C')}
     ]
 
     # _TNodes should be unchanged after unification

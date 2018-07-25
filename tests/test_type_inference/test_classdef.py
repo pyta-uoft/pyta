@@ -31,7 +31,6 @@ def test_classdef_attribute_assign():
 
 def test_classdef_method_call():
     """Test whether type of the method call are properly being set"""
-    raise SkipTest('Requires proper unification of function args and parameters')
     program = f'class Network:\n' \
               f'    def __init__(self, name):\n' \
               f'        self.name = name\n' \

@@ -886,6 +886,15 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
         return node
 
 
+def _collect_tvars(type: type) -> List[type]:
+    if isinstance(type, TypeVar):
+        return [type]
+    elif isinstance(type, GenericMeta) and type.__args__:
+        return sum([_collect_tvars(arg) for arg in type.__args__], [])
+    else:
+        return []
+
+
 def class_callable(init: CallableMeta) -> CallableMeta:
     """Convert an __init__ type signature into a callable for the class."""
     return create_Callable(

@@ -2,7 +2,7 @@ import astroid
 from astroid.builder import AstroidBuilder
 from collections import defaultdict
 from python_ta.typecheck.base import parse_annotations, \
-    _gorg, class_callable, accept_failable, _node_to_type, TypeFailFunction
+    _gorg, class_callable, accept_failable, _node_to_type, _collect_tvars, TypeFailFunction
 from typing import Callable
 import os
 from typing import *
@@ -37,12 +37,12 @@ class TypeStore:
         """Parse the class definitions from typeshed."""
         for class_def in module.nodes_of_class(astroid.ClassDef):
             tvars = []
+            self.classes[class_def.name]['__bases'] = []
             for base in class_def.bases:
-                if isinstance(base, astroid.Subscript):
-                    tvars = base.slice.as_string().strip('()').replace(" ", "").split(',')
-                    self.classes[class_def.name]['__pyta_tvars'] = tvars
-            self.classes[class_def.name]['__bases'] = [_node_to_type(base)
-                                                       for base in class_def.bases]
+                base_type = _node_to_type(base)
+                self.classes[class_def.name]['__pyta_tvars'] = \
+                    [tv.__name__ for tv in _collect_tvars(base_type)]
+                self.classes[class_def.name]['__bases'].append(base_type)
             self.classes[class_def.name]['__mro'] = [cls.name for cls in class_def.mro()]
             for node in (nodes[0] for nodes in class_def.locals.values()
                          if isinstance(nodes[0], astroid.AssignName) and

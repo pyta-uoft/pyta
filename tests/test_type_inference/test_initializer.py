@@ -45,3 +45,17 @@ def test_wrong_number_init():
     ast_mod, ti = cs._parse_text(program, True)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         assert isinstance(call_node.inf_type, TypeFail)
+
+
+def test_class_defined_later():
+    program = """
+    class A:
+        def __init__(self):
+            self.attr = B()
+
+    class B:
+        pass
+    """
+    ast_mod, ti = cs._parse_text(program, True)
+    for call_node in ast_mod.nodes_of_class(astroid.Call):
+        assert not isinstance(call_node.inf_type, TypeFail)

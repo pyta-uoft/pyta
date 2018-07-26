@@ -4,7 +4,7 @@ from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
-from python_ta.typecheck.base import _node_to_type, TypeFailUnify, NoType
+from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailUnify, NoType
 from typing import List, Set, Dict, Any, Tuple
 from nose import SkipTest
 from nose.tools import eq_
@@ -203,6 +203,16 @@ def test_invalid_annassign_and_assign():
     module, inferer = cs._parse_text(src, reset=True)
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailUnify)
+
+
+def test_incorrect_dict_annotation():
+    """Use tries to annotate variable as Dict[str,int] or a Tuple, but forgets to specify the generic"""
+    src = """
+    x: [str, int]
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert isinstance(ann_node.inf_type, TypeFail)
 
 
 if __name__ == '__main__':

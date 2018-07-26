@@ -198,14 +198,14 @@ class TypeInferer:
     def visit_annassign(self, node: astroid.AnnAssign) -> None:
         var_inf_type = self.lookup_typevar(node.target, node.target.name)
         ann_type = self._ann_node_to_type(node.annotation)
-        self.type_constraints.unify(var_inf_type, ann_type, node)
+        result = self.type_constraints.unify(var_inf_type, ann_type, node)
         if node.value:
             node.targets = [node.target]
             self.visit_assign(node)
         else:
-            node.inf_type = NoType()
+            node.inf_type = result if isinstance(result, TypeFail) else NoType()
 
-    def _ann_node_to_type(self, node: astroid.Name) -> type:
+    def _ann_node_to_type(self, node: astroid.Name) -> TypeResult:
         """Return a type represented by the input node, substituting Any for missing arguments in generic types
         """
         ann_node_type = _node_to_type(node)
@@ -217,6 +217,8 @@ class TypeInferer:
                 ann_type = wrap_container(ann_node_type, Any)
             else:
                 ann_type = wrap_container(ann_node_type, Any)
+        elif isinstance(ann_node_type, List):
+            return TypeFail("Cannot annotate without specifying generic")
         else:
             ann_type = ann_node_type
         return ann_type

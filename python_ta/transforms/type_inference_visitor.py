@@ -196,7 +196,10 @@ class TypeInferer:
                 break
 
     def visit_annassign(self, node: astroid.AnnAssign) -> None:
-        var_inf_type = self.lookup_typevar(node.target, node.target.name)
+        if isinstance(node.target, astroid.AssignAttr):
+            var_inf_type = self.lookup_typevar(node.target, node.target.attrname)
+        else:
+            var_inf_type = self.lookup_typevar(node.target, node.target.name)
         ann_type = self._ann_node_to_type(node.annotation)
         self.type_constraints.unify(var_inf_type, ann_type, node)
         if node.value:

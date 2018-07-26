@@ -4,7 +4,7 @@ from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
-from python_ta.typecheck.base import _node_to_type, TypeFailUnify
+from python_ta.typecheck.base import _node_to_type, TypeFailUnify, NoType
 from typing import List, Set, Dict, Any, Tuple
 from nose import SkipTest
 from nose.tools import eq_
@@ -182,6 +182,27 @@ def test_annassign_subscript_multi_list():
     assign_node_2 = assign_nodes[1]
     assign_type_2 = lookup_type(inferer, assign_node_2, assign_node_2.targets[0].name)
     eq_(assign_type_2, List[Any])
+
+
+def test_annassign_and_assign():
+    src = """
+    x: List[int] = [1, 2, 3]
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    x = [inferer.lookup_typevar(node, node.name) for node
+         in module.nodes_of_class(astroid.AssignName)][0]
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert ann_node.inf_type == NoType()
+    assert inferer.type_constraints.resolve(x).getValue() == List[int]
+
+
+def test_invalid_annassign_and_assign():
+    src = """
+    x: List[str] = [1, 2, 3]
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert isinstance(ann_node.inf_type, TypeFailUnify)
 
 
 if __name__ == '__main__':

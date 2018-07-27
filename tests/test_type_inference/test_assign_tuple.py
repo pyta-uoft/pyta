@@ -88,3 +88,27 @@ def test_tuple_extra_value():
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
 
+
+def test_tuple_subscript():
+    program = """
+    lst = ['Hello', 'Goodbye']
+    lst[0], lst[1] = 'Bonjour', 'Au revoir'
+    """
+    module, _ = cs._parse_text(program)
+    for assign_node in module.nodes_of_class(astroid.Assign):
+        assert not isinstance(assign_node.inf_type, TypeFail)
+
+
+def test_tuple_attribute():
+    program = """
+    class A:
+        def __init__(self):
+            self.first_attr = 0
+            self.second_attr = 1
+
+    a = A()
+    a.first_attr, a.second_attr = 10, 11
+    """
+    module, _ = cs._parse_text(program)
+    for assign_node in module.nodes_of_class(astroid.Assign):
+        assert not isinstance(assign_node.inf_type, TypeFail)

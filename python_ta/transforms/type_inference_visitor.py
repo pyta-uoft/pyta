@@ -300,28 +300,42 @@ class TypeInferer:
                 else:
                     return TypeFailStarred(node)
 
+        target_tvars = []
+        for subtarget in target.elts:
+            if isinstance(subtarget, astroid.AssignAttr):
+                target_tvars.append(self._lookup_attribute_type(subtarget, subtarget.expr.inf_type, subtarget.attrname))
+            elif isinstance(subtarget, astroid.Starred):
+                if isinstance(subtarget.value, astroid.AssignAttr):
+                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.attrname))
+                else:
+                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.name))
+            elif isinstance(subtarget, astroid.Subscript):
+                target_tvars.append(self._handle_call(subtarget, '__getitem__', subtarget.value.inf_type,
+                                                      subtarget.slice.inf_type))
+            else:
+                target_tvars.append(self.lookup_typevar(subtarget, subtarget.name))
+
         if starred_index is not None:
             starred_length = len(value.__args__) - len(target.elts) + 1
             starred_subvalues = node.value.elts[starred_index:starred_index+starred_length]
             starred_value = wrap_container(List, self._unify_elements(starred_subvalues, node))
 
-            starred_target = target.elts[starred_index].value
-            starred_target_tvar = self.lookup_typevar(starred_target, starred_target.name)
+            starred_target_tvar = target_tvars[starred_index]
 
             unif_result = self.type_constraints.unify(starred_target_tvar, starred_value, node)
             if isinstance(unif_result, TypeFail):
                 return unif_result
 
             nonstarred_values = Tuple[value.__args__[:starred_index] + value.__args__[starred_index + starred_length:]]
-            nonstarred_targets = target.elts
+            nonstarred_targets = target_tvars
             nonstarred_targets.remove(nonstarred_targets[starred_index])
 
         else:
             nonstarred_values = value
-            nonstarred_targets = target.elts
+            nonstarred_targets = target_tvars
 
         nonstarred_target_tuple = wrap_container(
-            Tuple, *[self.lookup_typevar(subtarget, subtarget.name) for subtarget in nonstarred_targets])
+            Tuple, *nonstarred_targets)
 
         unif_result = self.type_constraints.unify(nonstarred_target_tuple, nonstarred_values, node)
         if isinstance(unif_result, TypeFail):

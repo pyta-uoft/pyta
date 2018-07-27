@@ -349,10 +349,15 @@ class TypeInferer:
     @accept_failable
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
-        class_name, _, _ = self.get_attribute_class(class_type)
+
+        class_name, _, _ = self.get_attribute_class(self.type_constraints.resolve(class_type))
         closest_frame = node.scope().lookup(class_name)[0]
-        class_env = closest_frame.locals[class_name][0].type_environment
-        return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
+        if class_name in closest_frame.locals:
+            class_env = closest_frame.locals[class_name][0].type_environment
+            return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
+        else:
+            class_tnode = self.type_constraints.get_tnode(class_type)
+            return TypeFailLookup(class_tnode, node, node.parent)
 
     def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""

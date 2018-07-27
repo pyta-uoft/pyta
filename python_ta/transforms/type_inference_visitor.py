@@ -636,9 +636,9 @@ class TypeInferer:
 
         # Update the environment storing the function's type.
         polymorphic_tvars = []
-        for arg in inferred_args:
+        for arg in inferred_args + [inferred_return]:
             arg >> (
-                lambda a: polymorphic_tvars.append(a) if isinstance(arg, TypeVar) else a)
+                lambda a: polymorphic_tvars.append(a.__name__) if isinstance(a, TypeVar) else None)
 
         # Create function signature
         func_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
@@ -749,10 +749,12 @@ class TypeInferer:
                     node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
                 else:
                     func_type, method_type = attribute_type[0]
-                    if isinstance(func_type, CallableMeta):
-                        if method_type == 'method' and inst_expr or \
-                                method_type == 'classmethod':
-                            func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[-1]]
+                    if isinstance(func_type, CallableMeta) and \
+                            method_type == 'method' and inst_expr or \
+                            method_type == 'classmethod':
+                        func_type = self.type_constraints.fresh_callable(func_type, node)
+                        self.type_constraints.unify(func_type.__args__[0], class_type)
+                        func_type.__args__ = func_type.__args__[1:]
                     node.inf_type = TypeInfo(func_type)
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)

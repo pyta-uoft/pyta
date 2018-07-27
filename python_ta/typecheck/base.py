@@ -722,9 +722,7 @@ class TypeConstraints:
             funcdef_node = self.find_function_def(func_var_tnode)
             return TypeFailFunction((func_type, ), funcdef_node, node)
 
-        # Substitute polymorphic type variables
-        new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
-        new_func_type = literal_substitute(func_type, new_tvars)
+        new_func_type = self.fresh_callable(func_type, node)
 
         results = []
         for i in range(len(arg_types)):
@@ -757,6 +755,11 @@ class TypeConstraints:
             return wrap_container(_gorg(t), *inf_args)
         else:
             return TypeInfo(t)
+
+    def fresh_callable(self, func_type: type, node: Optional[NodeNG]) -> type:
+        """Given a callable, substitute all polymorphic variables with fresh ones"""
+        new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
+        return literal_substitute(func_type, new_tvars)
 
 
 def literal_substitute(t: type, type_map: Dict[str, type]) -> type:

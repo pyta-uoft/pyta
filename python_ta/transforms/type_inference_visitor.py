@@ -559,15 +559,30 @@ class TypeInferer:
     # Loops
     ##############################################################################
     def visit_for(self, node: Union[astroid.For, astroid.Comprehension]) -> None:
-        iter_type_result = self._handle_call(node, '__iter__', node.iter.inf_type)
+        iter_type_result = self._get_iter(node.iter.inf_type, node)
+
         if isinstance(node.target, astroid.AssignName):
-            target_inf_type = self.lookup_inf_type(node.target, node.target.name)
+            target_inf_type = self.lookup_typevar(node.target, node.target.name)
         else:
-            target_inf_type = wrap_container(
-                Tuple, (self.lookup_inf_type(subtarget, subtarget.name) for subtarget in node.target.elts))
-        iter_type_result >> (
-            lambda t: self.type_constraints.unify(t.__args__[0], target_inf_type, node))
+            target_inf_types = list(self.lookup_typevar(target_elt, target_elt.name) for target_elt in node.target.elts)
+            target_inf_type = wrap_container(Tuple, *target_inf_types)
+
+        self.type_constraints.unify(iter_type_result, target_inf_type, node)
+
         node.inf_type = iter_type_result if isinstance(iter_type_result, TypeFail) else NoType()
+
+    @accept_failable
+    def _get_iter(self, iter_type: type, node: NodeNG) -> TypeResult:
+        """Helper function to get type of iterator in for loop"""
+        if isinstance(node.target, astroid.Tuple):
+            if isinstance(iter_type.__args__[0], TupleMeta):
+                iter_arg_type = iter_type.__args__[0].__args__
+            else:
+                iter_arg_type = iter_type.__args__
+            return TypeInfo(Tuple[iter_arg_type])
+        else:
+            iter_call_result = self._handle_call(node, '__iter__', iter_type) >> (lambda t: TypeInfo(t.__args__[0]))
+            return iter_call_result
 
     ##############################################################################
     # Comprehensions

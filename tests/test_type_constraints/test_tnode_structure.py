@@ -538,10 +538,9 @@ def test_builtin_generic_inheritance_init(draw=False):
 
 
 def test_builtin_generic_inheritance_method_lookup(draw=False):
-    raise SkipTest('Depends on PR #493')
     src = """
     x = set([1,2,3])
-    y = x.difference([2,3])
+    y = x.symmetric_difference([2,3])
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     x, y = [ti.lookup_typevar(node, node.name) for node

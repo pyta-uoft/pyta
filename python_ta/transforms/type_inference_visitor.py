@@ -417,7 +417,7 @@ class TypeInferer:
                 init_func = Callable[init_args[1:-1], init_args[0]]
             else:
                 # Classes declared without initializer
-                init_func = Callable[[], class_type]
+                init_func = Callable[..., class_type]
             return TypeInfo(init_func)
         # Class instances; e.g., '_ForwardRef('A')'
         elif isinstance(c, _ForwardRef):

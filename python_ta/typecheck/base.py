@@ -680,8 +680,10 @@ class TypeConstraints:
 
         unified_args = failable_collect(arg_inf_types)
 
-        self.create_edges(tnode1, tnode2, ast_node)
-        return _wrap_generic_meta(g1, unified_args)
+        result = _wrap_generic_meta(g1, unified_args)
+        if not isinstance(result, TypeFail):
+            self.create_edges(tnode1, tnode2, ast_node)
+        return result
 
     ###########################################################################
     # Handling generic polymorphism

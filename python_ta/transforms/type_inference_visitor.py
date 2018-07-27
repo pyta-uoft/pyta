@@ -662,6 +662,17 @@ class TypeInferer:
     def visit_asyncfunctiondef(self, node: astroid.AsyncFunctionDef) -> None:
         self.visit_functiondef(node)
 
+    def visit_lambda(self, node: astroid.Lambda) -> None:
+        inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
+        inferred_return = node.body.inf_type
+
+        polymorphic_tvars = []
+        for arg in inferred_args + [inferred_return]:
+            arg >> (
+                lambda a: polymorphic_tvars.append(a.__name__) if isinstance(a, TypeVar) else None)
+
+        node.inf_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
+
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = NoType()
         if any(annotation is not None for annotation in node.annotations):

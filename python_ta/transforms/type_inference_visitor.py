@@ -49,7 +49,10 @@ class TypeInferer:
         node.type_environment = Environment()
         for name in node.globals:
             if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.globals[name]):
-                node.type_environment.globals[name] = self.type_constraints.fresh_tvar(node.globals[name][0])
+                new_tvar = self.type_constraints.fresh_tvar(node.globals[name][0])
+                if any(isinstance(elt, astroid.ClassDef) for elt in node.globals[name]):
+                    self.type_constraints.unify(new_tvar, Type[_ForwardRef(name)], node)
+                node.type_environment.globals[name] = new_tvar
         self._populate_local_env(node)
 
     def _set_classdef_environment(self, node: astroid.ClassDef) -> None:
@@ -678,8 +681,6 @@ class TypeInferer:
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:
         node.inf_type = NoType()
-        self.type_constraints.unify(self.lookup_inf_type(node.parent, node.name),
-                                    Type[_ForwardRef(node.name)], node)
 
         # Update type_store for this class.
         # TODO: include node.instance_attrs as well?

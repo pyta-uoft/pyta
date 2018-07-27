@@ -234,7 +234,8 @@ class TypeInferer:
         # lookup method for augmented arithmetic assignment
         method_name = BINOP_TO_METHOD[node.op]
         if isinstance(node.target, astroid.Subscript):
-            binop_result = self._handle_call(node.target, '__setitem__', node.target.value.inf_type,
+            target_type = node.target.value.inf_type
+            binop_result = self._handle_call(node.target, '__setitem__', target_type,
                                              node.target.slice.inf_type, node.value.inf_type)
         else:
             if isinstance(node.target, astroid.AssignName):

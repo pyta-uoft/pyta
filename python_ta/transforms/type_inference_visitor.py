@@ -42,6 +42,7 @@ class TypeInferer:
         visitor.register_transform(astroid.DictComp, self._set_comprehension_environment)
         visitor.register_transform(astroid.SetComp, self._set_comprehension_environment)
         visitor.register_transform(astroid.GeneratorExp, self._set_comprehension_environment)
+        visitor.register_transform(astroid.Lambda, self._set_comprehension_environment)
         return visitor
 
     def _set_module_environment(self, node: astroid.Module) -> None:

@@ -46,12 +46,22 @@ def test_empty_list_reassign():
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
+def test_empty_list_reassign_invalid():
+    src = """
+    x = [1]
+    x = ['abc']
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    assgn_node = list(ast_mod.nodes_of_class(astroid.Assign))[1]
+    assert isinstance(assgn_node.inf_type, TypeFail)
+
+
 def test_empty_list_reassign_twice():
     raise SkipTest('This test requires special treatment of Any in generics')
     src = """
-    x = []
-    x = [1]
-    x = [1, 'abc']
+    x = [] # List[~T1]
+    x = [1] # List[int]
+    x = [1, 'abc'] # List[Any] and not List[int]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     x = [ti.lookup_typevar(node, node.name) for node
@@ -71,16 +81,14 @@ def test_empty_list_append():
 
 
 def test_empty_list_append_invalid():
-    raise SkipTest('This test requires special treatment of Any in generics')
     src = """
     x = []
     x.append(1)
     x.append('abc')
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
-    assert isinstance(ti.type_constraints.resolve(x), TypeFail)
+    call_node = list(ast_mod.nodes_of_class(astroid.Call))[1]
+    assert isinstance(call_node.inf_type, TypeFail)
 
 
 def test_list_append():

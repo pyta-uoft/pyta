@@ -3,6 +3,7 @@ from nose import SkipTest
 import astroid
 from typing import *
 from typing import _ForwardRef
+from python_ta.typecheck.base import TypeFailLookup
 import tests.custom_hypothesis_support as cs
 
 
@@ -106,3 +107,15 @@ def test_attribute_self_bind():
     x = [ti.lookup_typevar(node, node.name) for node
          in module.nodes_of_class(astroid.AssignName)][0]
     assert str(ti.type_constraints.resolve(x).getValue()) == "typing.List[int]"
+
+
+def test_assign_attr_typevar():
+    """Make sure auto-binding of self persists"""
+    program = """
+    def f(x, y):
+        x.attr = y
+    """
+    module, ti = cs._parse_text(program, reset=True)
+    assign_node = next(module.nodes_of_class(astroid.Assign))
+    assert isinstance(assign_node.inf_type, TypeFailLookup)
+

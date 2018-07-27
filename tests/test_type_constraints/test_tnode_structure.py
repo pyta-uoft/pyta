@@ -240,8 +240,8 @@ def test_polymorphic_callable4(draw=False):
     assert isinstance(tc.unify(t2, Callable[[int], str]), TypeFail)
     actual_set = tc_to_disjoint(tc)
     expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]',
-                     'typing.Callable[[int], str]'}, {str}]
+                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]'},
+                    {'typing.Callable[[int], str]'}, {str}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)

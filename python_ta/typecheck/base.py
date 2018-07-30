@@ -151,7 +151,7 @@ class TypeFailAnnotation(TypeFail):
 
     def __str__(self) -> str:
         string = f'TypeFail: Annotation error in {self.src_node.as_string()}. {self.tnode.ast_node.as_string()} is annotated as '
-        string += f'{self.tnode.parent.type.__name__}' if self.tnode.parent else f'{self.tnode.type.__name__}'
+        string += f'{_get_name(self.tnode.parent.type)}' if self.tnode.parent else f'{_get_name(self.tnode.type)}'
         string += f' at {self.ann_node.as_string()}'
         return string
 
@@ -305,6 +305,7 @@ _BUILTIN_TO_TYPING = {
 
 
 def _get_poly_vars(t: type) -> Set[str]:
+    """Return a set consisting of the names of all TypeVars within t"""
     if isinstance(t, TypeVar) and t.__name__ in _TYPESHED_TVARS:
         return set([t.__name__])
     elif isinstance(t, GenericMeta) and t.__args__:
@@ -313,6 +314,16 @@ def _get_poly_vars(t: type) -> Set[str]:
             pvars.update(_get_poly_vars(arg))
         return pvars
     return set()
+
+
+def _get_name(t: type) -> str:
+    """If t is associated with a class, return the name of the class; otherwise, return a string repr. of t"""
+    if isinstance(t, _ForwardRef):
+        return t.__forward_arg__
+    elif isinstance(t, type):
+        return t.__name__
+    else:
+        return str(t)
 
 
 def create_Callable(args: Iterable[type], rtype: type, class_poly_vars: List[type] = None) -> CallableMeta:

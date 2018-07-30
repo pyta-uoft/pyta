@@ -735,9 +735,19 @@ class TypeConstraints:
         if isinstance(func_var, CallableMeta):
             func_type = func_var
         else:
+            # Attempt to resolve func_var, if it is not a Callable
             func_var_tnode = self.get_tnode(func_var)
             parent_tnode = self.find_parent(func_var_tnode)
-            func_type = parent_tnode.type
+            if isinstance(func_var_tnode.ast_node, astroid.FunctionDef) and func_var_tnode.ast_node.name == '__init__':
+                # func_var resolves to an initializer method that has not yet been visited,
+                # but is associated with a type variable
+                return TypeInfo(_ForwardRef(node.func.name))
+            elif isinstance(func_var, TypeVar):
+                # func_var resolves to a method that has not yet been visited, but is associated with a type variable
+                return TypeInfo(Any)
+            else:
+                # func_var resolves to a callable
+                func_type = parent_tnode.type
 
         # Check that the number of parameters matches the number of arguments.
         if func_type.__origin__ is Union:

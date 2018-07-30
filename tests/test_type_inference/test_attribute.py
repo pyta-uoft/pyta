@@ -241,3 +241,17 @@ def test_attribute_unification_fail():
     call_node1, call_node2 = module.nodes_of_class(astroid.Call)[1:]
     assert isinstance(call_node.inf_type1, TypeFail)
     assert isinstance(call_node.inf_type2, TypeFail)
+
+
+def test_class_defined_later():
+    program = '''
+        foo = Foo()
+        foo.some_method()
+        
+        class Foo:
+            def some_method(self):
+                return 0
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for call_node in module.nodes_of_class(astroid.Call):
+        assert not isinstance(call_node.inf_type, TypeFail)

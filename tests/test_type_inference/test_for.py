@@ -1,8 +1,11 @@
 import astroid
 import nose
+from nose import SkipTest
+from nose.tools import eq_
 from hypothesis import given, settings, assume,  HealthCheck
-from typing import Callable, Any
+from typing import Callable, Any, Tuple
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import lookup_type
 settings.load_profile("pyta")
 
 
@@ -58,6 +61,72 @@ def test_inference_func_def_for():
     target_type_var = function_def_node.type_environment.lookup_in_env('num')
     target_type = TypeInferrer.type_constraints.resolve(target_type_var).getValue()
     assert (function_type == Callable[[int], int]) and (target_type == int)
+
+
+def test_for_list_tuple():
+    program = """
+        some_list = [('A', 1), ('B', 2)]
+
+        for elt in some_list:
+            x = elt
+        """
+    module, ti = cs._parse_text(program)
+    for assign_node in module.nodes_of_class(astroid.AssignName):
+        if assign_node.name == 'x' or assign_node.name == 'elt':
+            eq_(lookup_type(ti, assign_node, assign_node.name), Tuple[str, int])
+
+
+def test_for_list_tuple_multi_arg():
+    program = """
+        some_list = [('A', 1), ('B', 2)]
+
+        for a, b in some_list:
+            x = a
+            y = b
+        """
+    module, ti = cs._parse_text(program)
+    for assign_node in module.nodes_of_class(astroid.AssignName):
+        if assign_node.name == 'x' or assign_node.name == 'a':
+            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+        elif assign_node.name == 'y' or assign_node.name == 'b':
+            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+
+
+def test_for_zip():
+    program = """
+        some_str_list = ['A', 'B']
+        some_int_list = [1, 2]
+
+        for a, b in zip(some_str_list, some_int_list):
+            x = a
+            y = b
+        """
+    module, ti = cs._parse_text(program)
+    raise SkipTest(f'Type signature of zip inferred incorrectly due to lookup_typevar '
+                   f'using the first available function in type_store.functions[zip]')
+    for assign_node in module.nodes_of_class(astroid.AssignName):
+        if assign_node.name == 'x' or assign_node.name == 'a':
+            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+        elif assign_node.name == 'y' or assign_node.name == 'b':
+            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+
+
+def test_for_dict():
+    program = """
+        some_dict = {'A': 1, 'B': 2}
+
+        for a, b in some_dict.items():
+            x = a
+            y = b
+        """
+    raise SkipTest(f'Return type of some_dict.items() is inferred as ItemsView[str, int],'
+                   f'which does not unify with List[Tuple[str, int]]')
+    module, ti = cs._parse_text(program)
+    for assign_node in module.nodes_of_class(astroid.AssignName):
+        if assign_node.name == 'x' or assign_node.name == 'a':
+            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+        elif assign_node.name == 'y' or assign_node.name == 'b':
+            eq_(lookup_type(ti, assign_node, assign_node.name), int)
 
 
 if __name__ == '__main__':

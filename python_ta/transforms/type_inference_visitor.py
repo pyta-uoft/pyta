@@ -7,7 +7,8 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg
+    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg,\
+    TypeFailAnnotationInvalid
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     INPLACE_TO_BINOP, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
@@ -209,13 +210,20 @@ class TypeInferer:
         if node.value:
             node.targets = [node.target]
             self.visit_assign(node)
+        elif isinstance(ann_type, TypeFail):
+            node.inf_type = ann_type
         else:
             node.inf_type = NoType()
 
-    def _ann_node_to_type(self, node: astroid.Name) -> type:
+    def _ann_node_to_type(self, node: astroid.Name) -> TypeResult:
         """Return a type represented by the input node, substituting Any for missing arguments in generic types
         """
-        ann_node_type = _node_to_type(node)
+        try:
+            ann_node_type = _node_to_type(node)
+        except SyntaxError:
+            # Attempted to create ForwardRef with invalid string
+            return TypeFailAnnotationInvalid(node)
+
         if isinstance(ann_node_type, GenericMeta) and ann_node_type.__args__ is None:
             if ann_node_type == Dict:
                 ann_type = wrap_container(ann_node_type, Any, Any)
@@ -224,8 +232,10 @@ class TypeInferer:
                 ann_type = wrap_container(ann_node_type, Any)
             else:
                 ann_type = wrap_container(ann_node_type, Any)
+        elif not isinstance(ann_node_type, type) and not isinstance(ann_node_type, _ForwardRef):
+            ann_type = TypeFailAnnotationInvalid(node)
         else:
-            ann_type = ann_node_type
+            ann_type = TypeInfo(ann_node_type)
         return ann_type
 
     def visit_augassign(self, node: astroid.AugAssign) -> None:
@@ -670,8 +680,10 @@ class TypeInferer:
 
                 if node.annotations[i] is not None:
                     ann_type = self._ann_node_to_type(node.annotations[i])
-                    self.type_constraints.unify(
+                    result = self.type_constraints.unify(
                         arg_tvar, ann_type, node)
+                    if isinstance(result, TypeFail):
+                        node.inf_type = result
                 else:
                     self.type_constraints.unify(
                         arg_tvar, Any, node)

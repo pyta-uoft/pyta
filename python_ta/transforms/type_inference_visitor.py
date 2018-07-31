@@ -102,13 +102,15 @@ class TypeInferer:
                 node.type_environment.locals[var_name] = var_value
 
     def _populate_local_env_attrs(self, node: NodeNG) -> None:
-        # Store in environment any attributes accessed by a variable
+        """Store in TypeStore the attributes of any unresolved class names"""
         for attr_node in chain(node.nodes_of_class(astroid.Attribute), node.nodes_of_class(astroid.AssignAttr)):
-            class_tvar = node.type_environment.lookup_in_env(attr_node.expr.name)
-            self.type_store.classes[class_tvar.__name__]['__mro'] = [class_tvar.__name__]
-            if not attr_node.attrname in self.type_store.classes[class_tvar.__name__]:
-                self.type_store.classes[class_tvar.__name__][attr_node.attrname] = \
-                    [(self.type_constraints.fresh_tvar(attr_node), 'attribute')]
+            if isinstance(attr_node.expr, astroid.Name) and attr_node.expr.name in node.type_environment.locals:
+                class_type = node.type_environment.lookup_in_env(attr_node.expr.name)
+                if isinstance(class_type, TypeVar):
+                    self.type_store.classes[class_type.__name__]['__mro'] = [class_type.__name__]
+                    if not attr_node.attrname in self.type_store.classes[class_type.__name__]:
+                        self.type_store.classes[class_type.__name__][attr_node.attrname] = \
+                            [(self.type_constraints.fresh_tvar(attr_node), 'attribute')]
 
     ###########################################################################
     # Type inference methods
@@ -360,13 +362,16 @@ class TypeInferer:
     @accept_failable
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
-        if isinstance(class_type, TypeVar):
-            return self.type_constraints.resolve(
-                self.type_store.classes[class_type.__name__][attribute_name][0][0])
         class_name, _, _ = self.get_attribute_class(class_type)
+        if class_name in self.type_store.classes and attribute_name in self.type_store.classes[class_name]:
+            return self.type_constraints.resolve(self.type_store.classes[class_name][attribute_name][0][0])
         closest_frame = node.scope().lookup(class_name)[0]
-        class_env = closest_frame.locals[class_name][0].type_environment
-        return self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
+        try:
+            class_env = closest_frame.locals[class_name][0].type_environment
+            result = self.type_constraints.resolve(class_env.lookup_in_env(attribute_name))
+        except (KeyError, AttributeError):
+            result = TypeFailLookup(self.type_constraints.get_tnode(class_type), node, node.parent)
+        return result
 
     def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""

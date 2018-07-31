@@ -5,6 +5,7 @@ from typing import *
 import typing
 from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
+from itertools import chain
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
     wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg
@@ -79,6 +80,7 @@ class TypeInferer:
         if node.args.args and node.args.args[0].name == 'self' and isinstance(node.parent, astroid.ClassDef):
             node.type_environment.locals['self'] = _ForwardRef(node.parent.name)
         self._populate_local_env(node)
+        self._populate_local_env_attrs(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
 
     def _set_comprehension_environment(self, node: astroid.Comprehension) -> None:
@@ -98,6 +100,15 @@ class TypeInferer:
                 except KeyError:
                     var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
                 node.type_environment.locals[var_name] = var_value
+
+    def _populate_local_env_attrs(self, node: NodeNG) -> None:
+        # Store in environment any attributes accessed by a variable
+        for attr_node in chain(node.nodes_of_class(astroid.Attribute), node.nodes_of_class(astroid.AssignAttr)):
+            class_tvar = node.type_environment.lookup_in_env(attr_node.expr.name)
+            self.type_store.classes[class_tvar.__name__]['__mro'] = [class_tvar.__name__]
+            if not attr_node.attrname in self.type_store.classes[class_tvar.__name__]:
+                self.type_store.classes[class_tvar.__name__][attr_node.attrname] = \
+                    [(self.type_constraints.fresh_tvar(attr_node), 'attribute')]
 
     ###########################################################################
     # Type inference methods
@@ -349,6 +360,9 @@ class TypeInferer:
     @accept_failable
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
+        if isinstance(class_type, TypeVar):
+            return self.type_constraints.resolve(
+                self.type_store.classes[class_type.__name__][attribute_name][0][0])
         class_name, _, _ = self.get_attribute_class(class_type)
         closest_frame = node.scope().lookup(class_name)[0]
         class_env = closest_frame.locals[class_name][0].type_environment
@@ -711,6 +725,10 @@ class TypeInferer:
     def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:
         """Check for and return name and type of class represented by type t."""
         is_inst_expr = True
+
+        # TypeVar; e.g., 'TypeVar('_T1')' corresponding to a function argument
+        if isinstance(t, TypeVar):
+            return t.__name__, t, None
 
         # Class type: e.g., 'Type[_ForwardRef('A')]'
         if getattr(t, '__name__', None) == 'Type':

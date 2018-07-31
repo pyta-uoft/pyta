@@ -106,3 +106,22 @@ def test_attribute_self_bind():
     x = [ti.lookup_typevar(node, node.name) for node
          in module.nodes_of_class(astroid.AssignName)][0]
     assert str(ti.type_constraints.resolve(x).getValue()) == "typing.List[int]"
+
+
+def test_unknown_class_attribute():
+    program = \
+        '''
+        def foo(a, x):
+            a = 4
+            x.name1 + 2
+            x.name2 = 3
+            y = x.name1
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in module.nodes_of_class(astroid.AssignName)][0]
+    from sample_usage.print_ast_from_mod import print_ast
+    print_ast(module)
+    from sample_usage.draw_tnodes import gen_graph_from_nodes
+    gen_graph_from_nodes(ti.type_constraints._nodes)
+    assert str(ti.type_constraints.resolve(x).getValue()) == "typing.List[int]"

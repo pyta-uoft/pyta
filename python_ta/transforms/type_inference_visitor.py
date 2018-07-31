@@ -685,7 +685,7 @@ class TypeInferer:
             return_target = return_tvar
 
         if node.value is not None and node.scope().returns is not None:
-            return_annotation = _node_to_type(node.scope().returns)
+            return_annotation = self._ann_node_to_type(node.scope().returns)
             return_value = self.type_constraints.unify(node.value.inf_type, return_annotation, node)
         elif node.value is not None:
             return_value = node.value.inf_type

@@ -466,7 +466,7 @@ class TypeConstraints:
     # TODO: Rename to better distinguish between _TNodes and AST Nodes
     def fresh_tvar(self, node: Optional[NodeNG] = None) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node."""
-        tvar = TypeVar(f'_T{self._count}')
+        tvar = TypeVar(f'_TV{self._count}')
         self._count += 1
         self._make_set(tvar, ast_node=node)
         return tvar

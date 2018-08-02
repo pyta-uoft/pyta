@@ -786,10 +786,15 @@ class TypeInferer:
                     if isinstance(func_type, CallableMeta) and \
                             method_type == 'method' and inst_expr or \
                             method_type == 'classmethod':
-                        func_type = self.type_constraints.fresh_callable(func_type, node)
-                        self.type_constraints.unify(func_type.__args__[0], class_type)
-                        func_type.__args__ = func_type.__args__[1:]
-                    node.inf_type = TypeInfo(func_type)
+                        # Replace polymorphic type variables with fresh type variables
+                        fresh_func_type = self.type_constraints.fresh_callable(func_type, node)
+                        self.type_constraints.unify(fresh_func_type.__args__[0], class_type)
+                        # Create new Callable to avoid modifying elements of type store
+                        new_func_type = create_Callable_TypeResult(fresh_func_type.__args__[1:-1],
+                                                                   fresh_func_type.__args__[-1])
+                    else:
+                        new_func_type = TypeInfo(func_type)
+                    node.inf_type = new_func_type
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)
                 node.inf_type = TypeFailLookup(class_tnode, node, node.parent)

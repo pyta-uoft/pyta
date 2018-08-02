@@ -629,7 +629,7 @@ class TypeInferer:
                 inferred_return = return_node.inf_type
             else:
                 inferred_return = self.lookup_inf_type(node, 'return')
-        elif node.name == '__init__':
+        elif node.name == '__init__' and inferred_args:
             inferred_return = inferred_args[0]
         else:
             inferred_return = TypeInfo(type(None))

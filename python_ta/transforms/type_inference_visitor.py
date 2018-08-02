@@ -442,6 +442,13 @@ class TypeInferer:
     def visit_binop(self, node: astroid.BinOp) -> None:
         left_inf, right_inf = node.left.inf_type, node.right.inf_type
 
+        if isinstance(left_inf, TypeFail):
+            node.inf_type = left_inf
+            return
+        if isinstance(right_inf, TypeFail):
+            node.inf_type = right_inf
+            return
+
         method_name = BINOP_TO_METHOD[node.op]
         # attempt to obtain a common arithmetic type
         arithm_type = self._arithm_convert(node, method_name, left_inf, right_inf)

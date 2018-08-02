@@ -873,6 +873,11 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
             return eval(node.name, globals(), locals)
         except:
             return _ForwardRef(node.name)
+    elif isinstance(node, astroid.Attribute):
+        try:
+            return eval(node.attrname, globals(), locals)
+        except:
+            return _ForwardRef(node.attrname)
     elif isinstance(node, astroid.Subscript):
         v = _node_to_type(node.value)
         s = _node_to_type(node.slice)

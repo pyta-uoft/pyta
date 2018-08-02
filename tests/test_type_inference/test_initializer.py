@@ -59,3 +59,18 @@ def test_class_defined_later():
     ast_mod, ti = cs._parse_text(program, True)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         assert not isinstance(call_node.inf_type, TypeFail)
+
+
+def test_builtin_overloaded_initializers():
+    program = """
+    range1 = range(10)
+    range2 = range(1, 10, 1)
+    """
+    ast_mod, ti = cs._parse_text(program, True)
+    for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'range1':
+            range1 = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(range1).getValue() == range
+        if assgn_node.name == 'range2':
+            range2 = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(range2).getValue() == range

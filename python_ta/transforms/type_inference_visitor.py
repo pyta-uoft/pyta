@@ -349,6 +349,7 @@ class TypeInferer:
     @accept_failable
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
+        class_type = self.type_constraints.resolve(class_type)
         class_name, _, _ = self.get_attribute_class(class_type)
         closest_frame = node.scope().lookup(class_name)[0]
         class_env = closest_frame.locals[class_name][0].type_environment
@@ -539,7 +540,8 @@ class TypeInferer:
             node.inf_type = node.slice.inf_type
         elif node.ctx == astroid.Load:
             try:
-                value_gorg = node.value.inf_type >> _gorg
+                val_inf_type = self.type_constraints.resolve(node.value.inf_type)
+                value_gorg = val_inf_type >> _gorg
             except AttributeError:
                 value_gorg = None
 
@@ -732,7 +734,7 @@ class TypeInferer:
         return class_name, class_type, is_inst_expr
 
     def visit_attribute(self, node: astroid.Attribute) -> None:
-        expr_inf_type = node.expr.inf_type
+        expr_inf_type = self.type_constraints.resolve(node.expr.inf_type)
         result = self.get_attribute_class(expr_inf_type)
 
         if not isinstance(result, TypeFail):

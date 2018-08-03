@@ -4,7 +4,7 @@ from nose import SkipTest
 from hypothesis import given, settings, HealthCheck
 from typing import List
 import tests.custom_hypothesis_support as cs
-from python_ta.typecheck.base import TypeFail
+from python_ta.typecheck.base import TypeFail, TypeFailFunction
 from python_ta.transforms.type_inference_visitor import NoType
 settings.load_profile("pyta")
 
@@ -117,6 +117,15 @@ def test_inference_ext_slice():
     module, _ = cs._parse_text(program)
     subscript_node = list(module.nodes_of_class(astroid.Subscript))[1]
     assert subscript_node.inf_type.getValue() == int
+
+
+def test_subscript_slice():
+    program = '''
+        x = List[:]
+        '''
+    module, _ = cs._parse_text(program)
+    assign_node = next(module.nodes_of_class(astroid.Assign))
+    assert isinstance(assign_node.inf_type, TypeFailFunction)
 
 
 # TODO: this test needs to be converted, but will also fail

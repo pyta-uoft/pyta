@@ -543,7 +543,7 @@ class TypeInferer:
             except AttributeError:
                 value_gorg = None
 
-            if value_gorg == Type:
+            if value_gorg == Type and isinstance(node.slice, astroid.Index):
                 if isinstance(node.slice.value, astroid.Tuple):
                     node.inf_type = wrap_container(_node_to_type(node.value), *_node_to_type(node.slice.value))
                 else:

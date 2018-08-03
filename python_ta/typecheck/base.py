@@ -768,6 +768,10 @@ def literal_substitute(t: type, type_map: Dict[str, type]) -> type:
     """Make substitutions in t according to type_map, returning resulting type."""
     if isinstance(t, TypeVar) and t.__name__ in type_map:
         return type_map[t.__name__]
+    elif isinstance(t, TypeVar):
+        return TypeVar(t.__name__)
+    elif isinstance(t, _ForwardRef):
+        return _ForwardRef(literal_substitute(t.__forward_arg__, type_map))
     elif isinstance(t, TuplePlus):
         subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
         return TuplePlus('tup+', *subbed_args)

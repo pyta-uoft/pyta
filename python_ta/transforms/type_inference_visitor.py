@@ -51,12 +51,12 @@ class TypeInferer:
         """Method to set environment of a Module node."""
         node.type_environment = Environment()
         for name in node.globals:
-            if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.globals[name]):
-                new_tvar = self.type_constraints.fresh_tvar(node.globals[name][0])
-                if any(isinstance(elt, astroid.ClassDef) for elt in node.globals[name]):
-                    self.type_constraints.unify(new_tvar, Type[_ForwardRef(name)], node)
-                node.type_environment.globals[name] = new_tvar
+            new_tvar = self.type_constraints.fresh_tvar(node.globals[name][0])
+            if any(isinstance(elt, astroid.ClassDef) for elt in node.globals[name]):
+                self.type_constraints.unify(new_tvar, Type[_ForwardRef(name)], node)
+            node.type_environment.globals[name] = new_tvar
         self._populate_local_env(node)
+        self._populate_local_env_attrs(node)
 
     def _set_classdef_environment(self, node: astroid.ClassDef) -> None:
         """Method to set environment of a ClassDef node."""
@@ -95,12 +95,11 @@ class TypeInferer:
     def _populate_local_env(self, node: NodeNG) -> None:
         """Helper to populate locals attributes in type environment of given node."""
         for var_name in node.locals:
-            if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.locals[var_name]):
-                try:
-                    var_value = node.type_environment.lookup_in_env(var_name)
-                except KeyError:
-                    var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
-                node.type_environment.locals[var_name] = var_value
+            try:
+                var_value = node.type_environment.lookup_in_env(var_name)
+            except KeyError:
+                var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
+            node.type_environment.locals[var_name] = var_value
 
     def _populate_local_env_attrs(self, node: NodeNG) -> None:
         """Store in TypeStore the attributes of any unresolved class names"""
@@ -472,6 +471,9 @@ class TypeInferer:
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)
                 return TypeFailLookup(class_tnode, node, node.parent)
+        # Unresolved function types (TypeVars)
+        elif isinstance(c, TypeVar):
+            return c
         else:
             return TypeFailFunction((c,), None, node)
 

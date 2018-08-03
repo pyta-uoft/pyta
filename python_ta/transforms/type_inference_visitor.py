@@ -604,7 +604,13 @@ class TypeInferer:
         iter_type_result = self._handle_call(node, '__iter__', node.iter.inf_type)
         if isinstance(node.target, astroid.AssignName):
             target_inf_type = self.lookup_inf_type(node.target, node.target.name)
-        else:
+        elif isinstance(node.target, astroid.AssignAttr):
+            target_inf_type = self._lookup_attribute_type(node.target, node.target.expr.inf_type, node.target.attrname)
+        elif isinstance(node.target, astroid.Subscript):
+            target_inf_type = iter_type_result >> (
+                lambda t: self._handle_call(node.target, '__setitem__', node.target.value.inf_type,
+                                            node.target.slice.inf_type, t.__args__[0]))
+        elif isinstance(node.target, astroid.Tuple):
             target_inf_type = wrap_container(
                 Tuple, *[self.lookup_inf_type(subtarget, subtarget.name) for subtarget in node.target.elts])
         iter_type_result >> (

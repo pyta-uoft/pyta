@@ -6,6 +6,7 @@ from hypothesis import given, settings, assume,  HealthCheck
 from typing import Callable, Any, Tuple
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
+from python_ta.typecheck.base import NoType
 settings.load_profile("pyta")
 
 
@@ -127,6 +128,34 @@ def test_for_dict():
             eq_(lookup_type(ti, assign_node, assign_node.name), str)
         elif assign_node.name == 'y' or assign_node.name == 'b':
             eq_(lookup_type(ti, assign_node, assign_node.name), int)
+
+
+def test_for_target_attr():
+    program = """
+    class A:
+        def __init__(self):
+            self.attr = 0
+
+    a = A()
+
+    for a.attr in range(5):
+        a.attr
+    """
+    module, ti = cs._parse_text(program)
+    for_node = next(module.nodes_of_class(astroid.For))
+    assert isinstance(for_node.inf_type, NoType)
+
+
+def test_for_target_subscript():
+    program = """
+    lst = [0, 1, 2]
+
+    for lst[0] in lst:
+        lst[0]
+    """
+    module, ti = cs._parse_text(program)
+    for_node = next(module.nodes_of_class(astroid.For))
+    assert isinstance(for_node.inf_type, NoType)
 
 
 if __name__ == '__main__':

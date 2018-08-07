@@ -1,7 +1,7 @@
 import astroid
 import typing
 import tests.custom_hypothesis_support as cs
-from python_ta.typecheck.base import TypeFail, TypeFailUnify, TypeFailAnnotation, TypeFailFunction
+from python_ta.typecheck.base import TypeFail, TypeFailUnify, TypeFailAnnotationUnify, TypeFailFunction
 from nose.tools import eq_
 from nose import SkipTest
 
@@ -113,7 +113,7 @@ def test_annotation():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    assert isinstance(tf, TypeFailAnnotation)
+    assert isinstance(tf, TypeFailAnnotationUnify)
 
 
 def test_func_annotation():
@@ -126,7 +126,7 @@ def test_func_annotation():
     raise SkipTest("Requires modifications to unify_call")
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    assert isinstance(tf, TypeFailAnnotation)
+    assert isinstance(tf, TypeFailAnnotationUnify)
 
 
 def test_function():

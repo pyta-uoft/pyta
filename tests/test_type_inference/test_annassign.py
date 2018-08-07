@@ -4,7 +4,7 @@ from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
-from python_ta.typecheck.base import _node_to_type, TypeFailUnify, NoType
+from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType
 from typing import List, Set, Dict, Any, Tuple
 from nose import SkipTest
 from nose.tools import eq_
@@ -203,6 +203,43 @@ def test_invalid_annassign_and_assign():
     module, inferer = cs._parse_text(src, reset=True)
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailUnify)
+
+
+def test_annotation_not_type():
+    src = """
+    x: [str, int]
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert isinstance(ann_node.inf_type, TypeFailAnnotationInvalid)
+
+
+def test_annotation_forward_ref():
+    src = """
+    x: 'SomeClass'
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert not isinstance(ann_node.inf_type, TypeFail)
+
+
+def test_param_annotation_not_type():
+    src = """
+    def f(x: [str, int]) -> None:
+        return x
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for arg_node in module.nodes_of_class(astroid.Arguments):
+        assert isinstance(arg_node.inf_type, TypeFailAnnotationInvalid)
+
+
+def test_annotation_forward_ref_space():
+    src = """
+    x: 'Some Class'
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert isinstance(ann_node.inf_type, TypeFailAnnotationInvalid)
 
 
 if __name__ == '__main__':

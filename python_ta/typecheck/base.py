@@ -135,9 +135,10 @@ class TypeFailLookup(TypeFail):
         return f'TypeFail: Invalid attribute lookup {self.src_node.as_string()}'
 
 
-class TypeFailAnnotation(TypeFail):
+class TypeFailAnnotationUnify(TypeFail):
     """
-    TypeFailAnnotation occurs when the inferred type contradicts the annotated type.
+    TypeFailAnnotationUnify occurs when a contradiction occurs during the unification of the inferred type
+    and the annotated type.
 
     :param tnode: _TNode of expected type
     :param src_node: astroid node where error occurs
@@ -154,6 +155,20 @@ class TypeFailAnnotation(TypeFail):
         string += f'{_get_name(self.tnode.parent.type)}' if self.tnode.parent else f'{_get_name(self.tnode.type)}'
         string += f' at {self.ann_node.as_string()}'
         return string
+
+
+class TypeFailAnnotationInvalid(TypeFail):
+    """
+    TypeFailAnnotationInvalid occurs when a variable is annotated as something other than a type
+
+    :param src_node: astroid node where annotation is set
+    """
+    def __init__(self, src_node: NodeNG) -> None:
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f'TypeFail: Annotation must be a type'
 
 
 class TypeFailFunction(TypeFail):
@@ -646,7 +661,7 @@ class TypeConstraints:
                 for tn in [tnode1, tnode2]:
                     ann_t = tn.find_annotation()
                     if ann_t is not None:
-                        return TypeFailAnnotation(tn, ast_node, ann_t)
+                        return TypeFailAnnotationUnify(tn, ast_node, ann_t)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
 
         # One type can be resolved
@@ -747,7 +762,7 @@ class TypeConstraints:
                 if param_annotations and param_annotations[i] is not None:
                     tvar = funcdef_node.type_environment.lookup_in_env(funcdef_node.args.args[i].name)
                     tnode = self.get_tnode(tvar)
-                    return TypeFailAnnotation(tnode, node, funcdef_node)
+                    return TypeFailAnnotationUnify(tnode, node, funcdef_node)
                 else:
                     results.append(i)
         if results:

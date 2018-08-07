@@ -4,7 +4,9 @@ from nose import SkipTest
 from python_ta.typecheck.base import TypeFail
 from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import lookup_type
 from typing import Any, List
+from nose.tools import eq_
 settings.load_profile("pyta")
 
 
@@ -100,6 +102,19 @@ def test_list_append():
     x = [ti.lookup_typevar(node, node.name) for node
          in ast_mod.nodes_of_class(astroid.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
+
+
+def test_list_append_list_typevar():
+    src = """
+    def f(x):
+        lst = [x]
+        lst.append(lst)
+        return lst
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    return_node = next(ast_mod.nodes_of_class(astroid.Return))
+    functiondef_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    eq_(lookup_type(ti, return_node, return_node.value.name), List[lookup_type(ti, functiondef_node, 'x')])
 
 
 if __name__ == '__main__':

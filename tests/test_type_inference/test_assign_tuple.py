@@ -112,3 +112,20 @@ def test_tuple_attribute():
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert not isinstance(assign_node.inf_type, TypeFail)
+
+
+def test_tuple_attribute_variable():
+    program = """
+    class A:
+        def __init__(self):
+            self.first_attr = 0
+            self.second_attr = 1
+
+    a = A()
+    some_list = [1, 2]
+    
+    a.first_attr, a.second_attr = some_list
+    """
+    module, _ = cs._parse_text(program)
+    for assign_node in module.nodes_of_class(astroid.Assign):
+        assert not isinstance(assign_node.inf_type, TypeFail)

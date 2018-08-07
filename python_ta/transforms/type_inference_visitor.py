@@ -275,15 +275,19 @@ class TypeInferer:
                 assign_result = self._assign_tuple(target, expr_type, node)
             else:
                 assign_result = self._handle_call(target, '__iter__', expr_type)
-                for subtarget in target.elts:
-                    if isinstance(subtarget, astroid.Starred):
-                        target_tvar = self.lookup_typevar(subtarget.value, subtarget.value.name)
+
+                target_tvars = self._get_tuple_targets(target)
+                starred_target_found = False
+                for tvar, elt in zip(target_tvars, target.elts):
+                    if isinstance(elt, astroid.Starred) and not starred_target_found:
+                        starred_target_found = True
                         unif_result = assign_result >> (
-                            lambda t: self.type_constraints.unify(target_tvar, List[t.__args__[0]], node))
+                            lambda t: self.type_constraints.unify(tvar, List[t.__args__[0]], node))
+                    elif isinstance(elt, astroid.Starred) and starred_target_found:
+                        unif_result = TypeFailStarred(node)
                     else:
-                        target_tvar = self.lookup_typevar(subtarget, subtarget.name)
                         unif_result = assign_result >> (
-                            lambda t: self.type_constraints.unify(target_tvar, t.__args__[0], node))
+                            lambda t: self.type_constraints.unify(tvar, t.__args__[0], node))
 
                     if isinstance(unif_result, TypeFail):
                         return unif_result
@@ -302,20 +306,7 @@ class TypeInferer:
                 else:
                     return TypeFailStarred(node)
 
-        target_tvars = []
-        for subtarget in target.elts:
-            if isinstance(subtarget, astroid.AssignAttr):
-                target_tvars.append(self._lookup_attribute_type(subtarget, subtarget.expr.inf_type, subtarget.attrname))
-            elif isinstance(subtarget, astroid.Starred):
-                if isinstance(subtarget.value, astroid.AssignAttr):
-                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.attrname))
-                else:
-                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.name))
-            elif isinstance(subtarget, astroid.Subscript):
-                target_tvars.append(self._handle_call(subtarget, '__getitem__', subtarget.value.inf_type,
-                                                      subtarget.slice.inf_type))
-            else:
-                target_tvars.append(self.lookup_typevar(subtarget, subtarget.name))
+        target_tvars = self._get_tuple_targets(target)
 
         if starred_index is not None:
             starred_length = len(value.__args__) - len(target.elts) + 1
@@ -345,6 +336,23 @@ class TypeInferer:
 
         assign_result = TypeInfo(value)
         return assign_result
+
+    def _get_tuple_targets(self, t: astroid.Tuple) -> List[type]:
+        target_tvars = []
+        for subtarget in t.elts:
+            if isinstance(subtarget, astroid.AssignAttr):
+                target_tvars.append(self._lookup_attribute_type(subtarget, subtarget.expr.inf_type, subtarget.attrname))
+            elif isinstance(subtarget, astroid.Starred):
+                if isinstance(subtarget.value, astroid.AssignAttr):
+                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.attrname))
+                else:
+                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.name))
+            elif isinstance(subtarget, astroid.Subscript):
+                target_tvars.append(self._handle_call(subtarget, '__getitem__', subtarget.value.inf_type,
+                                                      subtarget.slice.inf_type))
+            else:
+                target_tvars.append(self.lookup_typevar(subtarget, subtarget.name))
+        return target_tvars
 
     @accept_failable
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:

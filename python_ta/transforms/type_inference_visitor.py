@@ -564,7 +564,7 @@ class TypeInferer:
             target_inf_type = self.lookup_inf_type(node.target, node.target.name)
         else:
             target_inf_type = wrap_container(
-                Tuple, (self.lookup_inf_type(subtarget, subtarget.name) for subtarget in node.target.elts))
+                Tuple, *[self.lookup_inf_type(subtarget, subtarget.name) for subtarget in node.target.elts])
         iter_type_result >> (
             lambda t: self.type_constraints.unify(t.__args__[0], target_inf_type, node))
         node.inf_type = iter_type_result if isinstance(iter_type_result, TypeFail) else NoType()

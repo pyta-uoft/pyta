@@ -1,7 +1,7 @@
 import astroid
 from typing import Any, List, Tuple
 from nose.tools import eq_
-from python_ta.typecheck.base import TypeFailAnnotation
+from python_ta.typecheck.base import TypeFailAnnotationUnify
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 from nose import SkipTest
@@ -67,7 +67,7 @@ def test_call_wrong_type():
     eq_(lookup_type(ti, func_node, 'x'), int)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
-    assert isinstance(call_node.inf_type, TypeFailAnnotation)
+    assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
 def test_call_wrong_type_str():
@@ -83,7 +83,7 @@ def test_call_wrong_type_str():
     eq_(lookup_type(ti, func_node, 'x'), str)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
-    assert isinstance(call_node.inf_type, TypeFailAnnotation)
+    assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
 def test_call_multiple_annotation_wrong_type():
@@ -99,7 +99,7 @@ def test_call_multiple_annotation_wrong_type():
     eq_(lookup_type(ti, func_node, 'x'), int)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
-    assert isinstance(call_node.inf_type, TypeFailAnnotation)
+    assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
 def test_mixed_annotation():
@@ -133,7 +133,7 @@ def test_mixed_annotation_wrong():
     eq_(lookup_type(ti, func_node, 'y'), Any)
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
-    assert isinstance(call_node.inf_type, TypeFailAnnotation)
+    assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
 def test_param_subscript_list():

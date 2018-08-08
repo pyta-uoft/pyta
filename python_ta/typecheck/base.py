@@ -135,9 +135,10 @@ class TypeFailLookup(TypeFail):
         return f'TypeFail: Invalid attribute lookup {self.src_node.as_string()}'
 
 
-class TypeFailAnnotation(TypeFail):
+class TypeFailAnnotationUnify(TypeFail):
     """
-    TypeFailAnnotation occurs when the inferred type contradicts the annotated type.
+    TypeFailAnnotationUnify occurs when a contradiction occurs during the unification of the inferred type
+    and the annotated type.
 
     :param tnode: _TNode of expected type
     :param src_node: astroid node where error occurs
@@ -151,9 +152,23 @@ class TypeFailAnnotation(TypeFail):
 
     def __str__(self) -> str:
         string = f'TypeFail: Annotation error in {self.src_node.as_string()}. {self.tnode.ast_node.as_string()} is annotated as '
-        string += f'{self.tnode.parent.type.__name__}' if self.tnode.parent else f'{self.tnode.type.__name__}'
+        string += f'{_get_name(self.tnode.parent.type)}' if self.tnode.parent else f'{_get_name(self.tnode.type)}'
         string += f' at {self.ann_node.as_string()}'
         return string
+
+
+class TypeFailAnnotationInvalid(TypeFail):
+    """
+    TypeFailAnnotationInvalid occurs when a variable is annotated as something other than a type
+
+    :param src_node: astroid node where annotation is set
+    """
+    def __init__(self, src_node: NodeNG) -> None:
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f'TypeFail: Annotation must be a type'
 
 
 class TypeFailFunction(TypeFail):
@@ -305,6 +320,7 @@ _BUILTIN_TO_TYPING = {
 
 
 def _get_poly_vars(t: type) -> Set[str]:
+    """Return a set consisting of the names of all TypeVars within t"""
     if isinstance(t, TypeVar) and t.__name__ in _TYPESHED_TVARS:
         return set([t.__name__])
     elif isinstance(t, GenericMeta) and t.__args__:
@@ -313,6 +329,16 @@ def _get_poly_vars(t: type) -> Set[str]:
             pvars.update(_get_poly_vars(arg))
         return pvars
     return set()
+
+
+def _get_name(t: type) -> str:
+    """If t is associated with a class, return the name of the class; otherwise, return a string repr. of t"""
+    if isinstance(t, _ForwardRef):
+        return t.__forward_arg__
+    elif isinstance(t, type):
+        return t.__name__
+    else:
+        return str(t)
 
 
 def create_Callable(args: Iterable[type], rtype: type, class_poly_vars: List[type] = None) -> CallableMeta:
@@ -466,7 +492,7 @@ class TypeConstraints:
     # TODO: Rename to better distinguish between _TNodes and AST Nodes
     def fresh_tvar(self, node: Optional[NodeNG] = None) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node."""
-        tvar = TypeVar(f'_T{self._count}')
+        tvar = TypeVar(f'_TV{self._count}')
         self._count += 1
         self._make_set(tvar, ast_node=node)
         return tvar
@@ -635,7 +661,7 @@ class TypeConstraints:
                 for tn in [tnode1, tnode2]:
                     ann_t = tn.find_annotation()
                     if ann_t is not None:
-                        return TypeFailAnnotation(tn, ast_node, ann_t)
+                        return TypeFailAnnotationUnify(tn, ast_node, ann_t)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
 
         # One type can be resolved
@@ -736,7 +762,7 @@ class TypeConstraints:
                 if param_annotations and param_annotations[i] is not None:
                     tvar = funcdef_node.type_environment.lookup_in_env(funcdef_node.args.args[i].name)
                     tnode = self.get_tnode(tvar)
-                    return TypeFailAnnotation(tnode, node, funcdef_node)
+                    return TypeFailAnnotationUnify(tnode, node, funcdef_node)
                 else:
                     results.append(i)
         if results:
@@ -768,6 +794,10 @@ def literal_substitute(t: type, type_map: Dict[str, type]) -> type:
     """Make substitutions in t according to type_map, returning resulting type."""
     if isinstance(t, TypeVar) and t.__name__ in type_map:
         return type_map[t.__name__]
+    elif isinstance(t, TypeVar):
+        return TypeVar(t.__name__)
+    elif isinstance(t, _ForwardRef):
+        return _ForwardRef(literal_substitute(t.__forward_arg__, type_map))
     elif isinstance(t, TuplePlus):
         subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
         return TuplePlus('tup+', *subbed_args)

@@ -7,7 +7,8 @@ from typing import CallableMeta, TupleMeta, Union, _ForwardRef
 from astroid.transforms import TransformVisitor
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
-    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg
+    wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg,\
+    TypeFailAnnotationInvalid
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     INPLACE_TO_BINOP, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
@@ -209,13 +210,20 @@ class TypeInferer:
         if node.value:
             node.targets = [node.target]
             self.visit_assign(node)
+        elif isinstance(ann_type, TypeFail):
+            node.inf_type = ann_type
         else:
             node.inf_type = NoType()
 
-    def _ann_node_to_type(self, node: astroid.Name) -> type:
+    def _ann_node_to_type(self, node: astroid.Name) -> TypeResult:
         """Return a type represented by the input node, substituting Any for missing arguments in generic types
         """
-        ann_node_type = _node_to_type(node)
+        try:
+            ann_node_type = _node_to_type(node)
+        except SyntaxError:
+            # Attempted to create ForwardRef with invalid string
+            return TypeFailAnnotationInvalid(node)
+
         if isinstance(ann_node_type, GenericMeta) and ann_node_type.__args__ is None:
             if ann_node_type == Dict:
                 ann_type = wrap_container(ann_node_type, Any, Any)
@@ -224,8 +232,10 @@ class TypeInferer:
                 ann_type = wrap_container(ann_node_type, Any)
             else:
                 ann_type = wrap_container(ann_node_type, Any)
+        elif not isinstance(ann_node_type, type) and not isinstance(ann_node_type, _ForwardRef):
+            ann_type = TypeFailAnnotationInvalid(node)
         else:
-            ann_type = ann_node_type
+            ann_type = TypeInfo(ann_node_type)
         return ann_type
 
     def visit_augassign(self, node: astroid.AugAssign) -> None:
@@ -275,15 +285,19 @@ class TypeInferer:
                 assign_result = self._assign_tuple(target, expr_type, node)
             else:
                 assign_result = self._handle_call(target, '__iter__', expr_type)
-                for subtarget in target.elts:
-                    if isinstance(subtarget, astroid.Starred):
-                        target_tvar = self.lookup_typevar(subtarget.value, subtarget.value.name)
+
+                target_tvars = self._get_tuple_targets(target)
+                starred_target_found = False
+                for tvar, elt in zip(target_tvars, target.elts):
+                    if isinstance(elt, astroid.Starred) and not starred_target_found:
+                        starred_target_found = True
                         unif_result = assign_result >> (
-                            lambda t: self.type_constraints.unify(target_tvar, List[t.__args__[0]], node))
+                            lambda t: self.type_constraints.unify(tvar, List[t.__args__[0]], node))
+                    elif isinstance(elt, astroid.Starred) and starred_target_found:
+                        unif_result = TypeFailStarred(node)
                     else:
-                        target_tvar = self.lookup_typevar(subtarget, subtarget.name)
                         unif_result = assign_result >> (
-                            lambda t: self.type_constraints.unify(target_tvar, t.__args__[0], node))
+                            lambda t: self.type_constraints.unify(tvar, t.__args__[0], node))
 
                     if isinstance(unif_result, TypeFail):
                         return unif_result
@@ -302,20 +316,7 @@ class TypeInferer:
                 else:
                     return TypeFailStarred(node)
 
-        target_tvars = []
-        for subtarget in target.elts:
-            if isinstance(subtarget, astroid.AssignAttr):
-                target_tvars.append(self._lookup_attribute_type(subtarget, subtarget.expr.inf_type, subtarget.attrname))
-            elif isinstance(subtarget, astroid.Starred):
-                if isinstance(subtarget.value, astroid.AssignAttr):
-                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.attrname))
-                else:
-                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.name))
-            elif isinstance(subtarget, astroid.Subscript):
-                target_tvars.append(self._handle_call(subtarget, '__getitem__', subtarget.value.inf_type,
-                                                      subtarget.slice.inf_type))
-            else:
-                target_tvars.append(self.lookup_typevar(subtarget, subtarget.name))
+        target_tvars = self._get_tuple_targets(target)
 
         if starred_index is not None:
             starred_length = len(value.__args__) - len(target.elts) + 1
@@ -346,6 +347,23 @@ class TypeInferer:
         assign_result = TypeInfo(value)
         return assign_result
 
+    def _get_tuple_targets(self, t: astroid.Tuple) -> List[type]:
+        target_tvars = []
+        for subtarget in t.elts:
+            if isinstance(subtarget, astroid.AssignAttr):
+                target_tvars.append(self._lookup_attribute_type(subtarget, subtarget.expr.inf_type, subtarget.attrname))
+            elif isinstance(subtarget, astroid.Starred):
+                if isinstance(subtarget.value, astroid.AssignAttr):
+                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.attrname))
+                else:
+                    target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.name))
+            elif isinstance(subtarget, astroid.Subscript):
+                target_tvars.append(self._handle_call(subtarget, '__getitem__', subtarget.value.inf_type,
+                                                      subtarget.slice.inf_type))
+            else:
+                target_tvars.append(self.lookup_typevar(subtarget, subtarget.name))
+        return target_tvars
+
     @accept_failable
     def _lookup_attribute_type(self, node: NodeNG, class_type: type, attribute_name: str) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
@@ -375,7 +393,7 @@ class TypeInferer:
         elif name.lower() in self.type_store.classes:
             result = TypeInfo(Type[__builtins__[name.lower()]])
         elif name in self.type_store.functions:
-            result = TypeInfo(self.type_store.functions[name][0][0])
+            result = TypeInfo(Union[tuple([func_type for func_type, _ in self.type_store.functions[name]])])
         else:
             result = TypeFail("Unbound identifier")
 
@@ -413,8 +431,11 @@ class TypeInferer:
                 class_name = class_type.__name__
 
             if '__init__' in self.type_store.classes[class_name]:
-                init_args = list(self.type_store.classes[class_name]['__init__'][0][0].__args__)
-                init_func = Callable[init_args[1:-1], init_args[0]]
+                matching_init_funcs = []
+                for func_type, _ in self.type_store.classes[class_name]['__init__']:
+                    new_func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[0]]
+                    matching_init_funcs.append(new_func_type)
+                init_func = Union[tuple(matching_init_funcs)]
             else:
                 # Classes declared without initializer
                 init_func = Callable[[], class_type]
@@ -543,7 +564,7 @@ class TypeInferer:
             except AttributeError:
                 value_gorg = None
 
-            if value_gorg == Type:
+            if value_gorg == Type and isinstance(node.slice, astroid.Index):
                 if isinstance(node.slice.value, astroid.Tuple):
                     node.inf_type = wrap_container(_node_to_type(node.value), *_node_to_type(node.slice.value))
                 else:
@@ -564,7 +585,7 @@ class TypeInferer:
             target_inf_type = self.lookup_inf_type(node.target, node.target.name)
         else:
             target_inf_type = wrap_container(
-                Tuple, (self.lookup_inf_type(subtarget, subtarget.name) for subtarget in node.target.elts))
+                Tuple, *[self.lookup_inf_type(subtarget, subtarget.name) for subtarget in node.target.elts])
         iter_type_result >> (
             lambda t: self.type_constraints.unify(t.__args__[0], target_inf_type, node))
         node.inf_type = iter_type_result if isinstance(iter_type_result, TypeFail) else NoType()
@@ -662,6 +683,17 @@ class TypeInferer:
     def visit_asyncfunctiondef(self, node: astroid.AsyncFunctionDef) -> None:
         self.visit_functiondef(node)
 
+    def visit_lambda(self, node: astroid.Lambda) -> None:
+        inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
+        inferred_return = node.body.inf_type
+
+        polymorphic_tvars = []
+        for arg in inferred_args + [inferred_return]:
+            arg >> (
+                lambda a: polymorphic_tvars.append(a.__name__) if isinstance(a, TypeVar) else None)
+
+        node.inf_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
+
     def visit_arguments(self, node: astroid.Arguments) -> None:
         node.inf_type = NoType()
         if any(annotation is not None for annotation in node.annotations):
@@ -670,8 +702,10 @@ class TypeInferer:
 
                 if node.annotations[i] is not None:
                     ann_type = self._ann_node_to_type(node.annotations[i])
-                    self.type_constraints.unify(
+                    result = self.type_constraints.unify(
                         arg_tvar, ann_type, node)
+                    if isinstance(result, TypeFail):
+                        node.inf_type = result
                 else:
                     self.type_constraints.unify(
                         arg_tvar, Any, node)
@@ -684,7 +718,7 @@ class TypeInferer:
         else:
             return_target = return_tvar
 
-        if node.value is not None and node.scope().returns is not None:
+        if node.value is not None and getattr(node.scope(), 'returns', None) is not None:
             return_annotation = self._ann_node_to_type(node.scope().returns)
             return_value = self.type_constraints.unify(node.value.inf_type, return_annotation, node)
         elif node.value is not None:

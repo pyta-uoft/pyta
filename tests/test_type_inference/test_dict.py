@@ -2,7 +2,9 @@ import astroid
 import nose
 from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
-from typing import Any, Dict
+from tests.custom_hypothesis_support import lookup_type
+from typing import Any, Dict, List
+from nose.tools import eq_
 settings.load_profile("pyta")
 
 
@@ -37,6 +39,16 @@ def test_heterogeneous_dict(node):
         assume(int not in val_types)
     module, _ = cs._parse_text(node)
     cs._verify_type_setting(module, astroid.Dict, Dict[Any, Any])
+
+
+def test_sorted_dict():
+    src = """
+    dict = {'B': 2, 'A': 1}
+    sorted_dict = sorted(dict)
+    """
+    module, ti = cs._parse_text(src)
+    assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
+    eq_(lookup_type(ti, assign_node, assign_node.name), List[str])
 
 
 if __name__ == '__main__':

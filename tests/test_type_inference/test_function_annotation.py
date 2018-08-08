@@ -183,3 +183,29 @@ def test_param_subscript_tuple():
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     eq_(call_node.inf_type.getValue(), Tuple[int, int])
+
+
+def test_return_list():
+    src = """
+    def foo(x) -> List:
+        return [x]
+    
+    foo(0)
+    """
+    ast_mod, ti = cs._parse_text(src)
+
+    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    eq_(call_node.inf_type.getValue(), List[Any])
+
+
+def test_return_list_subscript():
+    src = """
+    def foo(x: int) -> List[int]:
+        return [x]
+
+    foo(0)
+    """
+    ast_mod, ti = cs._parse_text(src)
+
+    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    eq_(call_node.inf_type.getValue(), List[int])

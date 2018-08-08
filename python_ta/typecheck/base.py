@@ -704,9 +704,14 @@ class TypeConstraints:
             else:
                 arg_inf_types.append(result)
 
+        if len(g1.__parameters__) > len(arg_inf_types):
+            for i in range(len(arg_inf_types), len(g1.__parameters__)):
+                arg_inf_types.append(TypeInfo(conc_tnode1.type.__args__[i]))
+
         unified_args = failable_collect(arg_inf_types)
 
         result = _wrap_generic_meta(g1, unified_args)
+
         if not isinstance(result, TypeFail):
             self.create_edges(tnode1, tnode2, ast_node)
         return result

@@ -531,7 +531,10 @@ class TypeConstraints:
             try:
                 repr = self.find_repr(self.type_to_tnode[str(t)])
                 if repr and repr.type is not t:
-                    return self.resolve(repr.type)
+                    if any(elt is t for elt in getattr(repr.type, '__args__', [])):
+                        return TypeInfo(t)
+                    else:
+                        return self.resolve(repr.type)
             except KeyError:
                 return TypeInfo(t)
         return TypeInfo(t)

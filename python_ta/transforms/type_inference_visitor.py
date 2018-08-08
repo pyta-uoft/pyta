@@ -478,6 +478,13 @@ class TypeInferer:
     def visit_call(self, node: astroid.Call) -> None:
         func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
         arg_inf_types = [arg.inf_type for arg in node.args]
+
+        func_params = func_inf_type >> (lambda f: getattr(f, '__args__', [])) \
+            if not isinstance(func_inf_type, TypeFail) else []
+        for param, i in zip(func_params, range(len(arg_inf_types))):
+            if isinstance(param, GenericMeta) and _gorg(param) is Iterable:
+                arg_inf_types[i] = self._handle_call(node, '__iter__', arg_inf_types[i])
+
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
     def visit_binop(self, node: astroid.BinOp) -> None:

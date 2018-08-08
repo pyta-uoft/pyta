@@ -697,7 +697,11 @@ class TypeConstraints:
 
         arg_inf_types = []
         for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
-            result = self.unify(a1, a2, ast_node)
+            if a1 is () or a2 is ():
+                result = TypeInfo(())
+            else:
+                result = self.unify(a1, a2, ast_node)
+
             if isinstance(result, TypeFail):
                 arg_inf_types = [TypeFailUnify(tnode1, tnode2, src_node=ast_node)]
                 break

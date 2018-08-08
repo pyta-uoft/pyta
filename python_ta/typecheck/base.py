@@ -737,7 +737,12 @@ class TypeConstraints:
         else:
             func_var_tnode = self.get_tnode(func_var)
             parent_tnode = self.find_parent(func_var_tnode)
-            func_type = parent_tnode.type
+            if not parent_tnode:
+                # Function type is unresolved, so create a new generic Callable type
+                func_type = create_Callable([self.fresh_tvar(node) for arg in arg_types], self.fresh_tvar(node))
+                self.unify(func_var, func_type)
+            else:
+               func_type = parent_tnode.type
 
         # Check that the number of parameters matches the number of arguments.
         if func_type.__origin__ is Union:

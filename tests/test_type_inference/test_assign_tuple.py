@@ -2,8 +2,10 @@ import astroid
 from nose.tools import eq_
 from typing import TupleMeta
 import tests.custom_hypothesis_support as cs
+from tests.custom_hypothesis_support import lookup_type
 from python_ta.transforms.type_inference_visitor import NoType
 from python_ta.typecheck.base import TypeInfo, TypeFail
+from typing import Tuple
 
 
 def generate_tuple(length: int, t: type=None):
@@ -129,3 +131,17 @@ def test_tuple_attribute_variable():
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
         assert not isinstance(assign_node.inf_type, TypeFail)
+
+
+def test_tuple_empty():
+    program = """
+    def f(x):
+        a = ()
+        b = (x,)
+        a = b
+    """
+    module, ti = cs._parse_text(program)
+    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    eq_(lookup_type(ti, functiondef_node, 'a'), Tuple[()])
+    x_type = lookup_type(ti, functiondef_node, 'x')
+    eq_(lookup_type(ti, functiondef_node, 'b'), Tuple[x_type])

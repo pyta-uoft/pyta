@@ -56,7 +56,7 @@ def test_one_var():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_T0'}]
+    expected_set = [{int, '~_TV0'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -68,7 +68,7 @@ def test_typefail():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_T0'}, {str, '~_T1'}]
+    expected_set = [{int, '~_TV0'}, {str, '~_TV1'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -81,7 +81,7 @@ def test_multi_var_int():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_T0', '~_T1', '~_T2', '~_T3'}]
+    expected_set = [{int, '~_TV0', '~_TV1', '~_TV2', '~_TV3'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -94,7 +94,7 @@ def test_multi_var():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_T0'}, {'~_T1', str}, {'~_T2', bool}, {'~_T3', float}]
+    expected_set = [{int, '~_TV0'}, {'~_TV1', str}, {'~_TV2', bool}, {'~_TV3', float}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -108,7 +108,7 @@ def test_var_chain():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_T0', '~_T1', '~_T2', '~_T3', '~_T4'}]
+    expected_set = [{int, '~_TV0', '~_TV1', '~_TV2', '~_TV3', '~_TV4'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -118,7 +118,7 @@ def test_list_int():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_T0', 'typing.List[int]'}, {int}]
+    expected_set = [{'~_TV0', 'typing.List[int]'}, {int}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -128,7 +128,7 @@ def test_any_list():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_T0', 'typing.List[typing.Any]'}, {int}, {str}]
+    expected_set = [{'~_TV0', 'typing.List[typing.Any]'}, {int}, {str}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -138,7 +138,7 @@ def test_tuple_int():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_T0', 'typing.Tuple[int, int]'}]
+    expected_set = [{'~_TV0', 'typing.Tuple[int, int]'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -148,7 +148,7 @@ def test_tuple_int_str():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_T0', 'typing.Tuple[int, str]'}]
+    expected_set = [{'~_TV0', 'typing.Tuple[int, str]'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -159,7 +159,7 @@ def test_elt():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_T0', 'typing.List[~_T2]', 'typing.List[int]'}, {'~_T1', int, '~_T2'}]
+    expected_set = [{'~_TV0', 'typing.List[~_TV2]', 'typing.List[int]'}, {'~_TV1', int, '~_TV2'}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -173,7 +173,7 @@ def test_forward_ref(draw=False):
     assert tc.unify(_ForwardRef('A'), _ForwardRef('A')).getValue() == _ForwardRef('A')
     assert tc.unify(t0, _ForwardRef('A')).getValue() == _ForwardRef('A')
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0', _ForwardRef('A')}, {_ForwardRef('B')}]
+    expected_set = [{'~_TV0', _ForwardRef('A')}, {_ForwardRef('B')}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -188,9 +188,9 @@ def test_polymorphic_callable(draw=False):
     tc.unify(t2, Callable[[t0], t0])
     tc.unify(t1, t2)
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[int], int]',
-                     'typing.Callable[[~_T0], ~_T0]'}]
+    expected_set = [{'~_TV0', int},
+                    {'~_TV1', '~_TV2', 'typing.Callable[[int], int]',
+                     'typing.Callable[[~_TV0], ~_TV0]'}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -205,9 +205,9 @@ def test_polymorphic_callable2(draw=False):
     tc.unify(t2, Callable[[int], t0])
     tc.unify(t1, t2)
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], int]',
-                     'typing.Callable[[int], ~_T0]'}]
+    expected_set = [{'~_TV0', int},
+                    {'~_TV1', '~_TV2', 'typing.Callable[[~_TV0], int]',
+                     'typing.Callable[[int], ~_TV0]'}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -222,9 +222,9 @@ def test_polymorphic_callable3(draw=False):
     tc.unify(t2, t1)
     tc.unify(t2, Callable[[int], int])
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[int], int]',
-                     'typing.Callable[[~_T0], ~_T0]'}]
+    expected_set = [{'~_TV0', int},
+                    {'~_TV1', '~_TV2', 'typing.Callable[[int], int]',
+                     'typing.Callable[[~_TV0], ~_TV0]'}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -239,9 +239,9 @@ def test_polymorphic_callable4(draw=False):
     tc.unify(t2, t1)
     assert isinstance(tc.unify(t2, Callable[[int], str]), TypeFail)
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0', int},
-                    {'~_T1', '~_T2', 'typing.Callable[[~_T0], ~_T0]',
-                     'typing.Callable[[int], str]'}, {str}]
+    expected_set = [{'~_TV0', int},
+                    {'~_TV1', '~_TV2', 'typing.Callable[[~_TV0], ~_TV0]'},
+                    {'typing.Callable[[int], str]'}, {str}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -253,10 +253,10 @@ def test_polymorphic_callable5(draw=False):
     tc.unify(Callable[[Callable[[int, t0], int], int], t0],
              Callable[[Callable[[int, int], int], int], t0])
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0', int},
-                    {'typing.Callable[[int, ~_T0], int]', 'typing.Callable[[int, int], int]'},
-                    {'typing.Callable[[typing.Callable[[int, ~_T0], int], int], ~_T0]',
-                     'typing.Callable[[typing.Callable[[int, int], int], int], ~_T0]'}]
+    expected_set = [{'~_TV0', int},
+                    {'typing.Callable[[int, ~_TV0], int]', 'typing.Callable[[int, int], int]'},
+                    {'typing.Callable[[typing.Callable[[int, ~_TV0], int], int], ~_TV0]',
+                     'typing.Callable[[typing.Callable[[int, int], int], int], ~_TV0]'}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -268,7 +268,7 @@ def test_can_unify_callable(draw=False):
     assert not tc.can_unify(Callable[[t0, t0], int], Callable[[str, int], int])
     # make sure tc is unchanged
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_T0'}]
+    expected_set = [{'~_TV0'}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -304,12 +304,12 @@ def test_userdefn_inheritance_simple(draw=False):
 
     actual_set = tc_to_disjoint(tc)
     expected_set = [
-        {'~_T0', Type[_ForwardRef('A')]},
-        {'~_T1', Type[_ForwardRef('B')]},
-        {'~_T2', Type[_ForwardRef('C')]},
-        {'~_T3', _ForwardRef('A')},
-        {'~_T4', _ForwardRef('B')},
-        {'~_T5', _ForwardRef('C')}
+        {'~_TV0', Type[_ForwardRef('A')]},
+        {'~_TV1', Type[_ForwardRef('B')]},
+        {'~_TV2', Type[_ForwardRef('C')]},
+        {'~_TV3', _ForwardRef('A')},
+        {'~_TV4', _ForwardRef('B')},
+        {'~_TV5', _ForwardRef('C')}
     ]
 
     # _TNodes should be unchanged after unification
@@ -357,8 +357,8 @@ def test_builtin_abst_inheritance(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     tc = ti.type_constraints
     actual_set = tc_to_disjoint(tc)
-    assert {'~_T0', int} in actual_set
-    assert {'~_T1', float} in actual_set
+    assert {'~_TV0', int} in actual_set
+    assert {'~_TV1', float} in actual_set
     if draw:
         gen_graph_from_nodes(tc._nodes)
 
@@ -527,4 +527,37 @@ def test_userdefn_overrides_builtin(draw=False):
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
 
-# TODO: test builtins with Any in signature
+def test_builtin_generic_inheritance_init(draw=False):
+    src = """
+    x = set([1,2,3])
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    assert ti.type_constraints.resolve(x).getValue() == Set[int]
+
+
+def test_builtin_generic_inheritance_method_lookup(draw=False):
+    src = """
+    x = set([1,2,3])
+    y = x.symmetric_difference([2,3])
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x, y = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(y).getValue() == Set[int]
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)
+
+
+def test_builtin_generic_inheritance_overloaded_init(draw=False):
+    src = """
+    x = set([1,2,3])
+    y = list(x)
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    x, y = [ti.lookup_typevar(node, node.name) for node
+            in ast_mod.nodes_of_class(astroid.AssignName)]
+    assert ti.type_constraints.resolve(y).getValue() == List[int]
+    if draw:
+        gen_graph_from_nodes(ti.type_constraints._nodes)

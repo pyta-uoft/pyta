@@ -135,9 +135,10 @@ class TypeFailLookup(TypeFail):
         return f'TypeFail: Invalid attribute lookup {self.src_node.as_string()}'
 
 
-class TypeFailAnnotation(TypeFail):
+class TypeFailAnnotationUnify(TypeFail):
     """
-    TypeFailAnnotation occurs when the inferred type contradicts the annotated type.
+    TypeFailAnnotationUnify occurs when a contradiction occurs during the unification of the inferred type
+    and the annotated type.
 
     :param tnode: _TNode of expected type
     :param src_node: astroid node where error occurs
@@ -151,9 +152,23 @@ class TypeFailAnnotation(TypeFail):
 
     def __str__(self) -> str:
         string = f'TypeFail: Annotation error in {self.src_node.as_string()}. {self.tnode.ast_node.as_string()} is annotated as '
-        string += f'{self.tnode.parent.type.__name__}' if self.tnode.parent else f'{self.tnode.type.__name__}'
+        string += f'{_get_name(self.tnode.parent.type)}' if self.tnode.parent else f'{_get_name(self.tnode.type)}'
         string += f' at {self.ann_node.as_string()}'
         return string
+
+
+class TypeFailAnnotationInvalid(TypeFail):
+    """
+    TypeFailAnnotationInvalid occurs when a variable is annotated as something other than a type
+
+    :param src_node: astroid node where annotation is set
+    """
+    def __init__(self, src_node: NodeNG) -> None:
+        self.src_node = src_node
+        super().__init__(str(self))
+
+    def __str__(self) -> str:
+        return f'TypeFail: Annotation must be a type'
 
 
 class TypeFailFunction(TypeFail):
@@ -305,6 +320,7 @@ _BUILTIN_TO_TYPING = {
 
 
 def _get_poly_vars(t: type) -> Set[str]:
+    """Return a set consisting of the names of all TypeVars within t"""
     if isinstance(t, TypeVar) and t.__name__ in _TYPESHED_TVARS:
         return set([t.__name__])
     elif isinstance(t, GenericMeta) and t.__args__:
@@ -313,6 +329,16 @@ def _get_poly_vars(t: type) -> Set[str]:
             pvars.update(_get_poly_vars(arg))
         return pvars
     return set()
+
+
+def _get_name(t: type) -> str:
+    """If t is associated with a class, return the name of the class; otherwise, return a string repr. of t"""
+    if isinstance(t, _ForwardRef):
+        return t.__forward_arg__
+    elif isinstance(t, type):
+        return t.__name__
+    else:
+        return str(t)
 
 
 def create_Callable(args: Iterable[type], rtype: type, class_poly_vars: List[type] = None) -> CallableMeta:
@@ -466,7 +492,7 @@ class TypeConstraints:
     # TODO: Rename to better distinguish between _TNodes and AST Nodes
     def fresh_tvar(self, node: Optional[NodeNG] = None) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node."""
-        tvar = TypeVar(f'_T{self._count}')
+        tvar = TypeVar(f'_TV{self._count}')
         self._count += 1
         self._make_set(tvar, ast_node=node)
         return tvar
@@ -492,17 +518,23 @@ class TypeConstraints:
     # Type lookup ("find")
     ###########################################################################
     @accept_failable
-    def resolve(self, t: type) -> TypeInfo:
+    def resolve(self, t: type) -> TypeResult:
         """Return the concrete type or set representative associated with the given type.
         """
         if isinstance(t, GenericMeta):
-            res_args = [self.resolve(arg) for arg in t.__args__]
-            return _wrap_generic_meta(_gorg(t), failable_collect(res_args))
+            if t.__args__ is not None:
+                res_args = [self.resolve(arg) for arg in t.__args__]
+                return _wrap_generic_meta(_gorg(t), failable_collect(res_args))
+            else:
+                return TypeInfo(t)
         elif isinstance(t, TypeVar):
             try:
                 repr = self.find_repr(self.type_to_tnode[str(t)])
                 if repr and repr.type is not t:
-                    return self.resolve(repr.type)
+                    if any(elt is t for elt in getattr(repr.type, '__args__', [])):
+                        return TypeInfo(t)
+                    else:
+                        return self.resolve(repr.type)
             except KeyError:
                 return TypeInfo(t)
         return TypeInfo(t)
@@ -623,7 +655,7 @@ class TypeConstraints:
                         return self.unify(u1, u2, ast_node)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
             elif ct1 == Any or ct2 == Any:
-                return TypeInfo(ct1)
+                return TypeInfo(ct1) if ct1 != Any else TypeInfo(ct2)
             # Handle inheritance
             elif self.type_store and \
                     self.type_store.is_descendant(ct1, ct2):
@@ -632,7 +664,7 @@ class TypeConstraints:
                 for tn in [tnode1, tnode2]:
                     ann_t = tn.find_annotation()
                     if ann_t is not None:
-                        return TypeFailAnnotation(tn, ast_node, ann_t)
+                        return TypeFailAnnotationUnify(tn, ast_node, ann_t)
                 return TypeFailUnify(tnode1, tnode2, src_node=ast_node)
 
         # One type can be resolved
@@ -659,15 +691,20 @@ class TypeConstraints:
         conc_tnode2 = self.find_parent(tnode2)
 
         g1, g2 = _gorg(conc_tnode1.type), _gorg(conc_tnode2.type)
-        if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
-            # TODO: need to store more info here and in the case below
-            return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
-        if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
-            return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
+        if not self.type_store or not self.type_store.is_descendant(conc_tnode1.type, conc_tnode2.type):
+            if g1 is not g2 or conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
+                # TODO: need to store more info here and in the case below
+                return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
+            if len(conc_tnode1.type.__args__) != len(conc_tnode2.type.__args__):
+                return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
 
         arg_inf_types = []
         for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
-            result = self.unify(a1, a2, ast_node)
+            if a1 is () or a2 is ():
+                result = TypeInfo(())
+            else:
+                result = self.unify(a1, a2, ast_node)
+
             if isinstance(result, TypeFail):
                 arg_inf_types = [TypeFailUnify(tnode1, tnode2, src_node=ast_node)]
                 break
@@ -676,8 +713,10 @@ class TypeConstraints:
 
         unified_args = failable_collect(arg_inf_types)
 
-        self.create_edges(tnode1, tnode2, ast_node)
-        return _wrap_generic_meta(g1, unified_args)
+        result = _wrap_generic_meta(g1, unified_args)
+        if not isinstance(result, TypeFail):
+            self.create_edges(tnode1, tnode2, ast_node)
+        return result
 
     ###########################################################################
     # Handling generic polymorphism
@@ -718,9 +757,7 @@ class TypeConstraints:
             funcdef_node = self.find_function_def(func_var_tnode)
             return TypeFailFunction((func_type, ), funcdef_node, node)
 
-        # Substitute polymorphic type variables
-        new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
-        new_func_type = literal_substitute(func_type, new_tvars)
+        new_func_type = self.fresh_callable(func_type, node)
 
         results = []
         for i in range(len(arg_types)):
@@ -732,7 +769,7 @@ class TypeConstraints:
                 if param_annotations and param_annotations[i] is not None:
                     tvar = funcdef_node.type_environment.lookup_in_env(funcdef_node.args.args[i].name)
                     tnode = self.get_tnode(tvar)
-                    return TypeFailAnnotation(tnode, node, funcdef_node)
+                    return TypeFailAnnotationUnify(tnode, node, funcdef_node)
                 else:
                     results.append(i)
         if results:
@@ -754,11 +791,20 @@ class TypeConstraints:
         else:
             return TypeInfo(t)
 
+    def fresh_callable(self, func_type: type, node: Optional[NodeNG]) -> type:
+        """Given a callable, substitute all polymorphic variables with fresh ones"""
+        new_tvars = {tvar: self.fresh_tvar(node) for tvar in getattr(func_type, 'polymorphic_tvars', [])}
+        return literal_substitute(func_type, new_tvars)
+
 
 def literal_substitute(t: type, type_map: Dict[str, type]) -> type:
     """Make substitutions in t according to type_map, returning resulting type."""
     if isinstance(t, TypeVar) and t.__name__ in type_map:
         return type_map[t.__name__]
+    elif isinstance(t, TypeVar):
+        return TypeVar(t.__name__)
+    elif isinstance(t, _ForwardRef):
+        return _ForwardRef(literal_substitute(t.__forward_arg__, type_map))
     elif isinstance(t, TuplePlus):
         subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
         return TuplePlus('tup+', *subbed_args)
@@ -864,6 +910,11 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
             return eval(node.name, globals(), locals)
         except:
             return _ForwardRef(node.name)
+    elif isinstance(node, astroid.Attribute):
+        try:
+            return eval(node.attrname, globals(), locals)
+        except:
+            return _ForwardRef(node.attrname)
     elif isinstance(node, astroid.Subscript):
         v = _node_to_type(node.value)
         s = _node_to_type(node.slice)
@@ -880,6 +931,15 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
         return _node_to_type(node.value)
     else:
         return node
+
+
+def _collect_tvars(type: type) -> List[type]:
+    if isinstance(type, TypeVar):
+        return [type]
+    elif isinstance(type, GenericMeta) and type.__args__:
+        return sum([_collect_tvars(arg) for arg in type.__args__], [])
+    else:
+        return []
 
 
 def class_callable(init: CallableMeta) -> CallableMeta:

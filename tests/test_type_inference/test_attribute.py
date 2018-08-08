@@ -1,4 +1,5 @@
 import nose
+from nose import SkipTest
 import astroid
 from typing import *
 from typing import _ForwardRef
@@ -12,12 +13,12 @@ def test_instance_dot_method():
         class A:
             def foo(self, x):
                 return x + 1
-                
+
         A().foo(0)
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert attribute_node.inf_type.getValue() == Callable[[int], int]
+        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
 def test_instance_dot_classmethod():
@@ -32,7 +33,7 @@ def test_instance_dot_classmethod():
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert attribute_node.inf_type.getValue() == Callable[[int], int]
+        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
 def test_instance_dot_staticmethod():
@@ -47,7 +48,7 @@ def test_instance_dot_staticmethod():
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert attribute_node.inf_type.getValue() == Callable[[int], int]
+        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
 def test_class_dot_method():
@@ -61,7 +62,7 @@ def test_class_dot_method():
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert attribute_node.inf_type.getValue() == Callable[[_ForwardRef('A'), int], int]
+        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[_ForwardRef('A'), int], int]"
 
 
 def test_class_dot_classmethod():
@@ -76,7 +77,7 @@ def test_class_dot_classmethod():
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert attribute_node.inf_type.getValue() == Callable[[int], int]
+        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
 def test_class_dot_staticmethod():
@@ -91,4 +92,152 @@ def test_class_dot_staticmethod():
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert attribute_node.inf_type.getValue() == Callable[[int], int]
+        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
+
+
+def test_attribute_self_bind():
+    """Make sure auto-binding of self persists"""
+    program = \
+        '''
+        x = []
+        f = x.append
+        f(4)
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    x = [ti.lookup_typevar(node, node.name) for node
+         in module.nodes_of_class(astroid.AssignName)][0]
+    assert str(ti.type_constraints.resolve(x).getValue()) == "typing.List[int]"
+
+
+def test_subscript_attribute():
+    program = \
+        '''
+        class A:
+            def __init__(self):
+                self.lst = []
+                self.lst[0] = 1
+                
+        a = A()
+        x = a.lst[0]
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for assgn_node in module.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'x':
+            x = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(x).getValue() == int
+
+
+def test_obj_list_attribute():
+    program = \
+        '''
+        class A:
+            def __init__(self):
+                self.name = 'abc'
+
+        lst = [A(), A()]
+        x = lst[0].name
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for assgn_node in module.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'x':
+            x = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(x).getValue() == str
+
+
+def test_unknown_class_attribute():
+    program = \
+        '''
+        def foo(a, x):
+            y = x.name
+            y = 3
+            z = x.name
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for assgn_node in module.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'z':
+            z = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(z).getValue() == int
+
+
+def test_unknown_class_attribute2():
+    program = \
+        '''
+        def foo(x):
+            return x.name + 2
+            
+        def bar(y):
+            z = foo(y)
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for binop_node in module.nodes_of_class(astroid.BinOp):
+        assert binop_node.inf_type.getValue() == int
+    for assgn_node in module.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'z':
+            z = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(z).getValue() == int
+
+
+def test_unknown_class_subscript_attribute():
+    raise SkipTest("Currently, the inferred type of the z variable is str")
+    program = \
+        '''
+        def foo(x):
+            return x.name[0]
+            
+        def bar(y):
+            z = foo(y)
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for assgn_node in module.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'z':
+            z = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert isinstance(ti.type_constraints.resolve(z).getValue(), TypeVar)
+
+
+def test_unknown_class_subscript_attribute2():
+    program = \
+        '''
+        def foo(x):
+            x.name[0] = 2
+            return x.name[1]
+
+        def bar(y):
+            z = foo(y)
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    for assgn_node in module.nodes_of_class(astroid.AssignName):
+        if assgn_node.name == 'z':
+            z = ti.lookup_typevar(assgn_node, assgn_node.name)
+            assert ti.type_constraints.resolve(z).getValue() == int
+
+
+def test_invalid_builtin_attribute():
+    program = \
+        '''
+        x = 3
+        y = x.name
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    assgn_node = list(module.nodes_of_class(astroid.Assign))[1]
+    assert isinstance(assgn_node.inf_type, TypeFail)
+
+
+def test_attribute_unification_fail():
+    raise SkipTest('This case is not supported yet')
+    program = \
+        '''
+        class A:
+            def __init__(self):
+                self.name = 'abc'
+
+        def f(x):
+            x.name = 3
+
+        a = A()
+        f(a)
+        f(A)
+        '''
+    module, ti = cs._parse_text(program, reset=True)
+    call_node1, call_node2 = module.nodes_of_class(astroid.Call)[1:]
+    assert isinstance(call_node.inf_type1, TypeFail)
+    assert isinstance(call_node.inf_type2, TypeFail)

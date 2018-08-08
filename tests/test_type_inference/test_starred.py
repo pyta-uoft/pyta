@@ -3,7 +3,7 @@ from nose.tools import eq_
 from nose import SkipTest
 from typing import *
 import tests.custom_hypothesis_support as cs
-from python_ta.typecheck.base import TypeInfo, TypeFail
+from python_ta.typecheck.base import TypeFail, TypeFailStarred
 
 
 def test_list():
@@ -14,7 +14,7 @@ def test_list():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), List[int])
         elif name_node.name == 'b':
@@ -29,7 +29,7 @@ def test_range():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), List[int])
         elif name_node.name == 'b':
@@ -44,7 +44,7 @@ def test_tuple():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), List[int])
         elif name_node.name == 'b':
@@ -60,7 +60,7 @@ def test_order():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), int)
         elif name_node.name == 'b':
@@ -77,7 +77,7 @@ def test_order_2():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), int)
         elif name_node.name == 'b':
@@ -92,7 +92,7 @@ def test_mixed_tuple():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), List[Any])
         elif name_node.name == 'b':
@@ -107,7 +107,7 @@ def test_mixed_tuple_order():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), int)
         elif name_node.name == 'b':
@@ -123,7 +123,7 @@ def test_mixed_tuple_three_var():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), int)
         elif name_node.name == 'b':
@@ -142,7 +142,7 @@ def test_mixed_tuple_four_var():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     for name_node in ast_mod.nodes_of_class(astroid.Name):
-        assert not isinstance(name_node, TypeFail)
+        assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             eq_(name_node.inf_type.getValue(), int)
         elif name_node.name == 'b':
@@ -151,3 +151,22 @@ def test_mixed_tuple_four_var():
             eq_(name_node.inf_type.getValue(), int)
         elif name_node.name == 'd':
             eq_(name_node.inf_type.getValue(), str)
+
+
+def test_multi_starred():
+    src = """
+    *a, b, *c = [1, 2, 3, 4, 5]
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    assign_node = next(ast_mod.nodes_of_class(astroid.Assign))
+    assert isinstance(assign_node.inf_type, TypeFailStarred)
+
+
+def test_multi_variable():
+    src = """
+    lst = [1, 2, 3, 4, 5]
+    *a, b, *c = lst
+    """
+    ast_mod, ti = cs._parse_text(src, reset=True)
+    assign_node = list(ast_mod.nodes_of_class(astroid.Assign))[1]
+    assert isinstance(assign_node.inf_type, TypeFailStarred)

@@ -9,12 +9,14 @@ def example_function(x):
 class ExampleClass:
     """Class docstring."""
     class_var = 0
+    inst_attr = "Hello"
 
     def __init__(self):
         """Function docstring."""
-        self.inst_attr = "Hello"
+        self.inst_attr: str
+        self.inst_attr_2 = True
 
-    def inst_method(self, x):
+    def inst_method(self):
         """Function dosctring."""
         return self.inst_attr
 

@@ -17,10 +17,10 @@ class TypeAnnotationChecker(BaseChecker):
             'E9971': ('Function is missing return type annotation',
                       'type-annotation-return',
                       'Presented when a type annotation is missing.'),
-            'E9972': ('Class variable is missing type annotation',
-                      'type-annotation-class-var',
+            'E9972': ('Variable is missing type annotation',
+                      'type-annotation-var',
                       'Presented when a type annotation is missing.'),
-            'E9973': ('Instance variable is missing type annotation',
+            'E9973': ('Instance variable should be annotated in class body',
                       'type-annotation-inst-var',
                       'Presented when a type annotation is missing.'),
            }
@@ -39,14 +39,18 @@ class TypeAnnotationChecker(BaseChecker):
             self.add_message('type-annotation-return', node=node.args)
 
     def visit_classdef(self, node):
-        for attr_key in node.locals:
-            attr_node = node.locals[attr_key][0]
-            if isinstance(attr_node, astroid.AssignName):
-                self.add_message('type-annotation-class-var', node=attr_node)
         for attr_key in node.instance_attrs:
             attr_node = node.instance_attrs[attr_key][0]
-            if isinstance(attr_node, astroid.AssignAttr) and isinstance(attr_node.parent, astroid.Assign):
-                self.add_message('type-annotation-inst-var', node=attr_node)
+            if isinstance(attr_node, astroid.AssignAttr):
+                if attr_key not in node.locals:
+                    self.add_message('type-annotation-inst-var', node=attr_node)
+                elif isinstance(attr_node.parent, astroid.AnnAssign):
+                    self.add_message('type-annotation-inst-var', node=attr_node)
+
+        for attr_key in node.locals:
+            attr_node = node.locals[attr_key][0]
+            if isinstance(attr_node, astroid.AssignName) and not isinstance(attr_node.parent, astroid.AnnAssign):
+                self.add_message('type-annotation-var', node=attr_node)
 
 
 def register(linter):

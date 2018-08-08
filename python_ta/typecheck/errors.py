@@ -3,6 +3,7 @@ from typing import *
 from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
 import typing
 import astroid
+from python_ta.typecheck.base import _get_name
 
 
 ###############################################################################
@@ -72,7 +73,8 @@ BINOP_TO_METHOD = {
     '<=': '__le__',
     '>': '__gt__',
     '>=': '__ge__',
-    'in': '__contains__'
+    'in': '__contains__',
+    'not in': '__contains__'
     }
 
 BINOP_TO_REV_METHOD = {
@@ -89,15 +91,6 @@ BINOP_TO_REV_METHOD = {
     '<<': '__rlshift__',
     '>>': '__rrshift__',
     }
-
-
-def _get_name(t: type) -> str:
-    if isinstance(t, _ForwardRef):
-        return t.__forward_arg__
-    elif isinstance(t, type):
-        return t.__name__
-    else:
-        return str(t)
 
 INPLACE_TO_BINOP = {
     '+=': '+',

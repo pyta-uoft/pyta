@@ -307,13 +307,20 @@ def fix_start_attributes(node):
         # No children. Go to the enclosing statement and use that.
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
-        assert statement.fromlineno is not None and statement.col_offset is not None, \
-            'Statement node {} doesn\'t have start attributes set.'.format(statement)
+        if statement is not node:
+            assert statement.fromlineno is not None and statement.col_offset is not None, \
+                'Statement node {} doesn\'t have start attributes set.'.format(statement)
 
-        if node.fromlineno is None:
-            node.fromlineno = statement.fromlineno
-        if node.col_offset is None:
-            node.col_offset = statement.col_offset
+            if node.fromlineno is None:
+                node.fromlineno = statement.fromlineno
+            if node.col_offset is None:
+                node.col_offset = statement.col_offset
+        else:
+            # Enclosing statement is same as node, also does not have attributes set
+            if node.fromlineno is None:
+                node.fromlineno = 0
+            if node.col_offset is None:
+                node.col_offset = 0
 
 
 def _set_start_from_first_child(node):

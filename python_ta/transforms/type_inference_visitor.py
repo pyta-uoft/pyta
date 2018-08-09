@@ -479,11 +479,15 @@ class TypeInferer:
         func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
         arg_inf_types = [arg.inf_type for arg in node.args]
 
-        func_params = func_inf_type >> (lambda f: getattr(f, '__args__', [])) \
+        # Get list of possible function signatures if func_inf_type is a Union of functions
+        all_func_signatures = func_inf_type >> (lambda f: f.__args__ if f.__class__.__name__ == '_Union' else [f]) \
             if not isinstance(func_inf_type, TypeFail) else []
-        for param, i in zip(func_params, range(len(arg_inf_types))):
-            if isinstance(param, GenericMeta) and _gorg(param) is Iterable:
-                arg_inf_types[i] = self._handle_call(node, '__iter__', arg_inf_types[i])
+        for func in all_func_signatures:
+            # Iterate through possible function signatures, check if any parameters are Iterable
+            func_params = getattr(func, '__args__', [])
+            for param, i in zip(func_params, range(len(arg_inf_types))):
+                if isinstance(param, GenericMeta) and _gorg(param) is Iterable:
+                    arg_inf_types[i] = self._handle_call(node, '__iter__', arg_inf_types[i])
 
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 

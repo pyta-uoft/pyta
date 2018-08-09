@@ -66,6 +66,9 @@ class TypeInferer:
             self.type_store.classes[node.name][name] = [(node.type_environment.locals[name], 'attribute')]
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
+            attr_type = getattr(node.locals[name][0], 'type', None)
+            self.type_store.classes[node.name][name] = \
+                [(node.type_environment.locals[name], attr_type if attr_type is not None else 'attribute')]
 
         self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
                                                          for base in node.bases]
@@ -453,11 +456,15 @@ class TypeInferer:
             if '__init__' in self.type_store.classes[class_name]:
                 matching_init_funcs = []
                 for func_type, _ in self.type_store.classes[class_name]['__init__']:
-                    new_func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[0]]
+                    if isinstance(func_type, CallableMeta):
+                        new_func_type = Callable[list(func_type.__args__[1:-1]), func_type.__args__[0]]
+                    else:
+                        # Class initializer not yet visited, represented by type variable
+                        new_func_type = func_type
                     matching_init_funcs.append(new_func_type)
                 init_func = Union[tuple(matching_init_funcs)]
             else:
-                # Classes declared without initializer
+                # Classes declared without initializer, assumes default initializer of zero parameters
                 init_func = Callable[[], class_type]
             return TypeInfo(init_func)
         # Class instances; e.g., '_ForwardRef('A')'
@@ -472,6 +479,9 @@ class TypeInferer:
             else:
                 class_tnode = self.type_constraints.get_tnode(class_type)
                 return TypeFailLookup(class_tnode, node, node.parent)
+        elif isinstance(c, TypeVar):
+            # Methods not yet visited represented by type variables
+            return TypeInfo(c)
         else:
             return TypeFailFunction((c,), None, node)
 
@@ -772,8 +782,8 @@ class TypeInferer:
             attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
             attr_inf_type >> (
                 lambda a: self.type_store.methods[attr].append((a, node.locals[attr][0].type)) if isinstance(a, CallableMeta) else None)
-            attr_inf_type >> (
-                lambda a: self.type_store.classes[node.name][attr].append((a, node.locals[attr][0].type if isinstance(a, CallableMeta) else 'attribute')))
+            self.type_store.classes[node.name][attr] = attr_inf_type >> (
+                lambda a: [(a, (node.locals[attr][0].type if isinstance(a, CallableMeta) else 'attribute'))])
 
     @accept_failable
     def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:

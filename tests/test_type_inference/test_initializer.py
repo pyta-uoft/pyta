@@ -2,6 +2,7 @@ import astroid
 from typing import _ForwardRef
 import tests.custom_hypothesis_support as cs
 from nose.tools import eq_
+from nose import SkipTest
 from python_ta.transforms.type_inference_visitor import TypeFail
 
 
@@ -74,3 +75,30 @@ def test_builtin_overloaded_initializers():
         if assgn_node.name == 'range2':
             range2 = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(range2).getValue() == range
+
+
+def test_init_defined_later():
+    program = """
+    a = A('Hello')
+    
+    class A:
+        def __init__(self, x):
+            self.attr = x
+    """
+    ast_mod, ti = cs._parse_text(program, True)
+    for call_node in ast_mod.nodes_of_class(astroid.Call):
+        assert not isinstance(call_node.inf_type, TypeFail)
+
+
+def test_wrong_number_init_defined_later():
+    program = """
+    a = A('Hello')
+    
+    class A:
+        def __init__(self):
+            pass
+    """
+    raise SkipTest("Initializers for classes that have not yet been visited will accept any number of arguments")
+    ast_mod, ti = cs._parse_text(program, True)
+    for call_node in ast_mod.nodes_of_class(astroid.Call):
+        assert isinstance(call_node.inf_type, TypeFail)

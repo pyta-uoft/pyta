@@ -43,10 +43,7 @@ def render_missing_docstring(msg, source_lines=None):
         yield from render_context(1, 3, source_lines)
     elif isinstance(msg.node, astroid.ClassDef) or isinstance(msg.node, astroid.FunctionDef):
         start = msg.node.fromlineno
-        if isinstance(msg.node, astroid.ClassDef):
-            end = msg.node.body[0].fromlineno
-        else:
-            end = msg.node.args.end_lineno + 1
+        end = msg.node.body[0].fromlineno
         yield from render_context(start, end, source_lines)
         # Calculate indentation
         body = source_lines[end-1]

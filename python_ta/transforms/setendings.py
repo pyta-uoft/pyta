@@ -140,7 +140,7 @@ def _is_within_close_bracket(s, index, node):
     """Fix to include right ']'."""
     if index >= len(s) - 1:
         return False
-    return s[index] == ']' or s[index + 1] == ']'
+    return s[index + 1] == ']'
 
 
 def _is_within_open_bracket(s, index, node):
@@ -261,30 +261,28 @@ def fix_slice(source_code):
     -- Step 2) use other transforms to then expand outwards to the '[' or ']'
     """
     def _find_colon(node):
-        if node.last_child():
-            return
+        if _get_last_child(node):
+            set_from_last_child(node)
+            return node
         if not hasattr(node, 'end_lineno'):
             set_without_children(node)
 
-        line_i = node.parent.fromlineno - 1  # 1-based
-        char_i = node.parent.col_offset      # 0-based
-
         # Search for the first ":" after ending position of parent's value node.
-        if node.parent.value:
-            line_i = node.parent.value.fromlineno - 1  # convert 1 to 0 index.
-            char_i = node.parent.value.end_col_offset
+        line_i = node.parent.value.end_lineno - 1  # convert 1 to 0 index.
+        char_i = node.parent.value.end_col_offset + 1
 
         # Search the remaining source code for the ":" char.
-        while source_code[line_i][char_i] != ':':
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ':':
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
                 char_i = 0
                 line_i += 1
             else:
                 char_i += 1
 
-        node.fromlineno = line_i + 1
-        node.end_col_offset = char_i
-        node.col_offset = char_i
+        node.fromlineno, node.col_offset = line_i + 1, char_i
+        node.end_lineno, node.end_col_offset = line_i + 1, char_i
+
+        return node
 
     return _find_colon
 
@@ -314,6 +312,7 @@ def fix_start_attributes(node):
             node.fromlineno = statement.fromlineno
         if node.col_offset is None:
             node.col_offset = statement.col_offset
+    return node
 
 
 def _set_start_from_first_child(node):
@@ -321,6 +320,7 @@ def _set_start_from_first_child(node):
     first_child = next(node.get_children())
     node.fromlineno = first_child.fromlineno
     node.col_offset = first_child.col_offset
+    return node
 
 
 def set_from_last_child(node):
@@ -333,7 +333,7 @@ def set_from_last_child(node):
     last_child = _get_last_child(node)
     if not last_child:
         set_without_children(node)
-        return
+        return node
     elif not hasattr(last_child, 'end_lineno'):  # Newly added for Slice() node.
         set_without_children(last_child)
 
@@ -344,6 +344,7 @@ def set_from_last_child(node):
             .format(last_child, node)
 
     node.end_lineno, node.end_col_offset = last_child.end_lineno, last_child.end_col_offset
+    return node
 
 
 def set_without_children(node):
@@ -362,6 +363,7 @@ def set_without_children(node):
     # whitespace possibilities that may not be reflected in it!
     if not hasattr(node, 'end_col_offset'):
         node.end_col_offset = node.col_offset + len(node.as_string())
+    return node
 
 
 def set_arguments(node):
@@ -374,7 +376,7 @@ def set_arguments(node):
     else:  # node does not have children.
         # TODO: this should be replaced with the string parsing strategy
         node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
-
+    return node
 
 def _get_last_child(node):
     """Returns the last child node, or None.
@@ -419,9 +421,9 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
                 break  # skip over comment lines
             if pred(source_code[lineno], j, node):
                 node.end_col_offset = j + 1
-                return
+                return node
             elif only_consumables and source_code[lineno][j] not in CONSUMABLES:
-                return
+                return node
 
         # If that doesn't work, search remaining lines
         for i in range(lineno + 1, len(source_code)):
@@ -431,10 +433,11 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
                     break  # skip over comment lines
                 if pred(source_code[i], j, node):
                     node.end_col_offset, node.end_lineno = j + 1, i + 1
-                    return
+                    return node
                 # only consume inert characters.
                 elif source_code[i][j] not in CONSUMABLES:
-                    return
+                    return node
+        return node
 
     return set_endings_from_source
 
@@ -459,7 +462,7 @@ def start_setter_from_source(source_code, pred):
         for j in range(min(len(source_code[lineno]) - 1, col_offset), -1, -1):
             if pred(source_code[lineno], j, node):
                 node.col_offset = j
-                return
+                return node
 
         # If that doesn't work, search remaining lines
         for i in range(lineno - 1, -1, -1):
@@ -467,10 +470,11 @@ def start_setter_from_source(source_code, pred):
             for j in range(len(source_code[i]) - 1, -1, -1):
                 if pred(source_code[i], j, node):
                     node.end_col_offset, node.end_lineno = j, i + 1
-                    return
+                    return node
                 # only consume inert characters.
                 elif source_code[i][j] not in CONSUMABLES:
-                    return
+                    return node
+        return node
 
     return set_start_from_source
 
@@ -554,6 +558,8 @@ def _add_parens(source_code):
         # Go back by 1 set of parentheses if inside a function call.
         if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
             node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset = prev
+
+        return node
 
     return h
 

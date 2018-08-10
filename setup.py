@@ -22,11 +22,11 @@ setup(
               'python_ta.docstring', 'python_ta.patches', 'python_ta.parser',
               'python_ta.transforms', 'python_ta.typecheck'],
     install_requires=[
-        'astroid>=1.6,<=1.6.5',
+        'astroid>=2.0,<2.1',
         'funcparserlib',
         'hypothesis',
         'pycodestyle',
-        'pylint>=1.8,<=1.9',
+        'pylint>=2.1,<2.2',
         'nose',
         'colorama',
         'six',

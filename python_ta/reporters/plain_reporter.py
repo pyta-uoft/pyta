@@ -66,8 +66,7 @@ special = {'missing-docstring',
            'trailing-newlines'}
 
 # Messages without a source code line to highlight
-no_hl = {'always-returning-in-a-loop',
-         'invalid-name'}
+no_hl = {'invalid-name'}
 # the "Invalid module name" subsection of "invalid-name" belongs here
 
 

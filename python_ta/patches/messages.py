@@ -9,10 +9,10 @@ def patch_messages():
     """Patch MessagesHandlerMixIn to pass the node to reporter."""
     old_add_message = MessagesHandlerMixIn.add_message
 
-    def new_add_message(self, msg_descr, line=None, node=None, args=None,
-                        confidence=UNDEFINED):
-        old_add_message(self, msg_descr, line, node, args, confidence)
-        msg_info = self.msgs_store.check_message_id(msg_descr)
+    def new_add_message(self, msg_id, line=None, node=None, args=None,
+                        confidence=UNDEFINED, col_offset=None):
+        old_add_message(self, msg_id, line, node, args, confidence, col_offset)
+        msg_info = self.msgs_store.get_message_definition(msg_id)
         self.reporter.handle_node(msg_info, node)
 
     MessagesHandlerMixIn.add_message = new_add_message

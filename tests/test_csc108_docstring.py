@@ -29,7 +29,7 @@ def test_collection_all_docstring():
     assert len(parsed_docstring) == 4
     assert parsed_docstring[0][0] == List[Tuple[int, bool]]
     # Comparing with forwardref's fails for some unknown reason (needs investigating).
-    desired_type = Set[typing._ForwardRef('RandomClass')]
+    desired_type = Set[typing.ForwardRef('RandomClass')]
     assert str(desired_type) == str(parsed_docstring[0][1])
     assert parsed_docstring[1] == None.__class__
 

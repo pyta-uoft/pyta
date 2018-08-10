@@ -146,7 +146,7 @@ def test_param_subscript_list():
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    assert issubclass(lookup_type(ti, func_node, 'lst'), List)
+    eq_(lookup_type(ti, func_node, 'lst'), List[Any])
 
     call_node = next(ast_mod.nodes_of_class(astroid.Call))
     eq_(call_node.inf_type.getValue(), List[Any])

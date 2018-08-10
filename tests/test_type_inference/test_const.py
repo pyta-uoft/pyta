@@ -1,6 +1,6 @@
 import astroid
 import nose
-from hypothesis import assume, given, settings, HealthCheck, reproduce_failure
+from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
 

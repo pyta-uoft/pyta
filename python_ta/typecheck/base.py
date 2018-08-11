@@ -698,17 +698,21 @@ class TypeConstraints:
                 return TypeFailUnify(conc_tnode1, conc_tnode2, src_node=ast_node)
 
         arg_inf_types = []
-        for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
-            if a1 is () or a2 is ():
-                result = TypeInfo(())
-            else:
-                result = self.unify(a1, a2, ast_node)
+        if conc_tnode1.type.__args__ is None or conc_tnode2.type.__args__ is None:
+            if self.type_store.is_descendant(conc_tnode1.type, conc_tnode2.type):
+                arg_inf_types.append(TypeInfo(conc_tnode1.type))
+        else:
+            for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
+                if a1 is () or a2 is ():
+                    result = TypeInfo(())
+                else:
+                    result = self.unify(a1, a2, ast_node)
 
-            if isinstance(result, TypeFail):
-                arg_inf_types = [TypeFailUnify(tnode1, tnode2, src_node=ast_node)]
-                break
-            else:
-                arg_inf_types.append(result)
+                if isinstance(result, TypeFail):
+                    arg_inf_types = [TypeFailUnify(tnode1, tnode2, src_node=ast_node)]
+                    break
+                else:
+                    arg_inf_types.append(result)
 
         unified_args = failable_collect(arg_inf_types)
 

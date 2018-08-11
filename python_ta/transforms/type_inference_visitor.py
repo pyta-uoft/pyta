@@ -10,7 +10,7 @@ from ..typecheck.base import Environment, TypeConstraints, _ann_node_to_type, \
     wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg,\
     TypeFailAnnotationInvalid, is_callable
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
-    INPLACE_TO_BINOP, binop_error_message, unaryop_error_message
+    INPLACE_TO_BINOP, binop_error_message, unaryop_error_message, subscript_error_message
 from ..typecheck.type_store import TypeStore
 
 
@@ -576,11 +576,11 @@ class TypeInferer:
                 else:
                     node.inf_type = wrap_container(_node_to_type(node.value), _node_to_type(node.slice.value))
             else:
-                node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type)
+                node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
         elif node.ctx == astroid.Store:
             node.inf_type = NoType()
         elif node.ctx == astroid.Del:
-            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type)
+            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
 
     ##############################################################################
     # Loops

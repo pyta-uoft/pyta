@@ -1,8 +1,6 @@
-import sys
 from typing import *
-import typing
 import astroid
-from python_ta.typecheck.base import _get_name
+from python_ta.typecheck.base import _get_name, _gorg
 
 
 ###############################################################################
@@ -134,11 +132,31 @@ def binop_error_message(node: astroid.BinOp) -> str:
 ###############################################################################
 def unaryop_error_message(node: astroid.UnaryOp) -> str:
     op_name = UNARY_TO_ENGLISH[node.op]
-    operand = node.operand.inf_type.getValue().__name__
+    operand = _get_name(node.operand.inf_type.getValue())
 
     return (
         f'You cannot {op_name} {_correct_article(operand)}, {node.operand.as_string()}.'
     )
+
+
+###############################################################################
+# Subscript message
+###############################################################################
+def subscript_error_message(node: astroid.Subscript) -> str:
+    # Accessing an element of a List with an incompatible index type (non-integers)
+    if _gorg(node.value.inf_type.getValue()) is list:
+        slice_type = _get_name(node.slice.inf_type.getValue())
+        return f'You can only access elements of a list using an int. ' \
+               f'You used {_correct_article(slice_type)}, {node.slice.value.as_string()}.'
+    elif _gorg(node.value.inf_type.getValue()) is tuple:
+        slice_type = _get_name(node.slice.inf_type.getValue())
+        return f'You can only access elements of a tuple using an int. ' \
+               f'You used {_correct_article(slice_type)}, {node.slice.value.as_string()}.'
+    elif _gorg(node.value.inf_type.getValue()) is dict:
+        slice_type = _get_name(node.slice.inf_type.getValue())
+        return f'You tried to access an element of this dictionary using ' \
+               f'{_correct_article(slice_type)}, {node.slice.value.as_string()}, ' \
+               f'but the keys are of type {_get_name(node.value.inf_type.getValue().__args__[0])}.'
 
 
 def _correct_article(noun : str) -> str:

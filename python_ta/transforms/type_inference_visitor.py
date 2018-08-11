@@ -2,11 +2,10 @@ import astroid.inference
 import astroid
 from astroid.node_classes import *
 from typing import *
-import typing
 from typing import Callable, Union, ForwardRef, _GenericAlias
 from astroid.transforms import TransformVisitor
 from itertools import chain
-from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
+from ..typecheck.base import Environment, TypeConstraints, _ann_node_to_type, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
     wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg,\
     TypeFailAnnotationInvalid, is_callable
@@ -222,7 +221,7 @@ class TypeInferer:
             var_inf_type = self.lookup_typevar(node.target, node.target.attrname)
         else:
             var_inf_type = self.lookup_typevar(node.target, node.target.name)
-        ann_type = self._ann_node_to_type(node.annotation)
+        ann_type = _ann_node_to_type(node.annotation)
         self.type_constraints.unify(var_inf_type, ann_type, node)
         if node.value:
             node.targets = [node.target]
@@ -231,30 +230,6 @@ class TypeInferer:
             node.inf_type = ann_type
         else:
             node.inf_type = NoType()
-
-    def _ann_node_to_type(self, node: astroid.Name) -> TypeResult:
-        """Return a type represented by the input node, substituting Any for missing arguments in generic types
-        """
-        try:
-            ann_node_type = _node_to_type(node)
-        except SyntaxError:
-            # Attempted to create ForwardRef with invalid string
-            return TypeFailAnnotationInvalid(node)
-
-        if (isinstance(ann_node_type, _GenericAlias) and
-                ann_node_type is getattr(typing, getattr(ann_node_type, '_name'))):
-            if ann_node_type == Dict:
-                ann_type = wrap_container(ann_node_type, Any, Any)
-            elif ann_node_type == Tuple:
-                # TODO: Add proper support for multi-parameter Tuples
-                ann_type = wrap_container(ann_node_type, Any)
-            else:
-                ann_type = wrap_container(ann_node_type, Any)
-        elif not isinstance(ann_node_type, (type, _GenericAlias)) and not isinstance(ann_node_type, ForwardRef):
-            ann_type = TypeFailAnnotationInvalid(node)
-        else:
-            ann_type = TypeInfo(ann_node_type)
-        return ann_type
 
     def visit_augassign(self, node: astroid.AugAssign) -> None:
         node.inf_type = NoType()
@@ -738,7 +713,7 @@ class TypeInferer:
                 arg_tvar = self.lookup_typevar(node, node.args[i].name)
 
                 if node.annotations[i] is not None:
-                    ann_type = self._ann_node_to_type(node.annotations[i])
+                    ann_type = _ann_node_to_type(node.annotations[i])
                     result = self.type_constraints.unify(
                         arg_tvar, ann_type, node)
                     if isinstance(result, TypeFail):
@@ -756,7 +731,7 @@ class TypeInferer:
             return_target = return_tvar
 
         if node.value is not None and getattr(node.scope(), 'returns', None) is not None:
-            return_annotation = self._ann_node_to_type(node.scope().returns)
+            return_annotation = _ann_node_to_type(node.scope().returns)
             return_value = self.type_constraints.unify(node.value.inf_type, return_annotation, node)
         elif node.value is not None:
             return_value = node.value.inf_type

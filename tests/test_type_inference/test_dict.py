@@ -52,5 +52,16 @@ def test_sorted_dict():
     eq_(ti.type_constraints.resolve(t).getValue(), List[str])
 
 
+def test_any_dict():
+    src = """
+    dictionary = {'B': 2, 'A': 1, '': 3}
+    any_empty = any(dictionary)
+    """
+    module, ti = cs._parse_text(src)
+    assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
+    t = lookup_type(ti, assign_node, assign_node.name)
+    eq_(ti.type_constraints.resolve(t).getValue(), bool)
+
+
 if __name__ == '__main__':
     nose.main()

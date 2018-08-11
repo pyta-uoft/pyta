@@ -738,6 +738,10 @@ class TypeConstraints:
             parent_tnode = self.find_parent(func_var_tnode)
             func_type = parent_tnode.type
 
+        # Check for Callable[..., T]
+        if is_callable(func_type) and func_type.__args__[0] is ...:
+            return TypeInfo(func_type.__args__[-1])
+
         # Check that the number of parameters matches the number of arguments.
         if func_type.__origin__ is Union:
             new_func_type = None

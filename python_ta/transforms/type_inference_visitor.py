@@ -98,12 +98,14 @@ class TypeInferer:
     def _populate_local_env(self, node: NodeNG) -> None:
         """Helper to populate locals attributes in type environment of given node."""
         for var_name in node.locals:
-            if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.locals[var_name]):
-                try:
-                    var_value = node.type_environment.lookup_in_env(var_name)
-                except KeyError:
+            try:
+                var_value = node.type_environment.lookup_in_env(var_name)
+            except KeyError:
+                if any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.locals[var_name]):
+                    var_value = Any
+                else:
                     var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
-                node.type_environment.locals[var_name] = var_value
+            node.type_environment.locals[var_name] = var_value
 
     def _populate_local_env_attrs(self, node: NodeNG) -> None:
         """Store in TypeStore the attributes of any unresolved class names"""
@@ -439,8 +441,11 @@ class TypeInferer:
         :param c: Class, ForwardRef to a class, or Callable
         :param node: astroid.Call node where function call is occurring
         """
+        # Any is interpreted as a function that can take any arguments.
+        if c is Any:
+            return TypeInfo(Callable[..., Any])
         # Callable type; e.g., 'Callable[[int], int]'
-        if is_callable(c):
+        elif is_callable(c):
             return TypeInfo(c)
         # Union of Callables
         elif getattr(c, '__origin__', None) is Union and all(is_callable(elt) for elt in c.__args__):
@@ -809,7 +814,9 @@ class TypeInferer:
         if not isinstance(result, TypeFail):
             class_name, class_type, inst_expr = result
 
-            if class_name in self.type_store.classes:
+            if class_type == Any:
+                node.inf_type = TypeInfo(Any)
+            elif class_name in self.type_store.classes:
                 attribute_type = None
                 for par_class_type in self.type_store.classes[class_name]['__mro']:
                     attribute_type = self.type_store.classes[par_class_type].get(node.attrname)

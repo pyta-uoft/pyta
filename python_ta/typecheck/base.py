@@ -1,6 +1,7 @@
 import sys
 from typing import *
-from typing import Callable, _GenericAlias, ForwardRef, IO
+from typing import Callable, _GenericAlias, ForwardRef, _type_check
+from typing import IO # Needed for type_store
 import typing
 import astroid
 from astroid.node_classes import NodeNG
@@ -909,12 +910,40 @@ def parse_annotations(node: NodeNG, class_tvars: Optional[List[type]] = None) ->
             if getattr(arg, 'name', None) == 'self' and annotation is None:
                 arg_types.append(self_type)
             else:
-                arg_types.append(_node_to_type(annotation))
+                arg_types.append(_ann_node_to_type(annotation).getValue())
 
-        rtype = _node_to_type(node.returns)
+        rtype = _ann_node_to_type(node.returns).getValue()
         return create_Callable(arg_types, rtype, class_tvars), node.type
     elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
-        return _node_to_type(node.parent.annotation), 'attribute'
+        return _ann_node_to_type(node.parent.annotation).getValue(), 'attribute'
+
+
+def _ann_node_to_type(node: astroid.Name) -> TypeResult:
+    """Return a type represented by the input node, substituting Any for missing arguments in generic types
+    """
+    try:
+        ann_node_type = _node_to_type(node)
+    except SyntaxError:
+        # Attempted to create ForwardRef with invalid string
+        return TypeFailAnnotationInvalid(node)
+
+    if (isinstance(ann_node_type, _GenericAlias) and
+            ann_node_type is getattr(typing, getattr(ann_node_type, '_name', '') or '', None)):
+        if ann_node_type == Dict:
+            ann_type = wrap_container(ann_node_type, Any, Any)
+        elif ann_node_type == Tuple:
+            # TODO: Add proper support for multi-parameter Tuples
+            ann_type = wrap_container(ann_node_type, Any)
+        else:
+            ann_type = wrap_container(ann_node_type, Any)
+    else:
+        try:
+            _type_check(ann_node_type, '')
+        except TypeError:
+            return TypeFailAnnotationInvalid(node)
+        else:
+            ann_type = TypeInfo(ann_node_type)
+    return ann_type
 
 
 def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:

@@ -22,7 +22,7 @@ def test_homogeneous_dict(dictionary):
 
 
 @given(cs.dict_node(min_size=2))
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much])
 def test_heterogeneous_dict(node):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     keys = [item.value for item, _ in node.items]
@@ -50,6 +50,17 @@ def test_sorted_dict():
     assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
     t = lookup_type(ti, assign_node, assign_node.name)
     eq_(ti.type_constraints.resolve(t).getValue(), List[str])
+
+
+def test_any_dict():
+    src = """
+    dictionary = {'B': 2, 'A': 1, '': 3}
+    any_empty = any(dictionary)
+    """
+    module, ti = cs._parse_text(src)
+    assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
+    t = lookup_type(ti, assign_node, assign_node.name)
+    eq_(ti.type_constraints.resolve(t).getValue(), bool)
 
 
 if __name__ == '__main__':

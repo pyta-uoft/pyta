@@ -5,7 +5,7 @@ from hypothesis import assume
 from python_ta.transforms.type_inference_visitor import TypeInferer
 from keyword import iskeyword
 from hypothesis import settings
-from typing import CallableMeta, Tuple, List, Union
+from typing import Callable, Tuple, List, Union
 settings.register_profile("pyta", settings(max_examples=10))
 
 
@@ -248,7 +248,7 @@ def subscript_node(draw, value=None, slice=index_node()):
 def tuple_node(draw, elt=const_node, **kwargs):
     """Return a Tuple node with elements drawn from elt.
     """
-    elts = draw(hs.lists(elt(), **kwargs))
+    elts = draw(hs.lists(elt(), **kwargs, min_size=1))
     node = astroid.Tuple()
     node.postinit(elts)
     return node
@@ -388,7 +388,7 @@ def lookup_type(inferer: TypeInferer, node: NodeNG, name: str) -> type:
     return inf_type.getValue()
 
 
-def types_in_callable(inferer: TypeInferer, callable_function: CallableMeta) -> Tuple[List[type], type]:
+def types_in_callable(inferer: TypeInferer, callable_function: Callable) -> Tuple[List[type], type]:
     """Return a tuple of types corresponding to the Callable function's arguments and return value, respectively.
     Used only for testing purposes.
     """

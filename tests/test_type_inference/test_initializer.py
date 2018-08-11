@@ -1,5 +1,5 @@
 import astroid
-from typing import _ForwardRef
+from typing import ForwardRef
 import tests.custom_hypothesis_support as cs
 from nose.tools import eq_
 from python_ta.transforms.type_inference_visitor import TypeFail
@@ -16,8 +16,8 @@ def test_class_with_init():
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        assert isinstance(call_node.inf_type.getValue(), _ForwardRef)
-        eq_(call_node.inf_type.getValue(), _ForwardRef('Foo'))
+        assert isinstance(call_node.inf_type.getValue(), ForwardRef)
+        eq_(call_node.inf_type.getValue(), ForwardRef('Foo'))
 
 
 def test_class_without_init():
@@ -30,8 +30,8 @@ def test_class_without_init():
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        assert isinstance(call_node.inf_type.getValue(), _ForwardRef)
-        eq_(call_node.inf_type.getValue(), _ForwardRef('Foo'))
+        assert isinstance(call_node.inf_type.getValue(), ForwardRef)
+        eq_(call_node.inf_type.getValue(), ForwardRef('Foo'))
 
 
 def test_wrong_number_init():

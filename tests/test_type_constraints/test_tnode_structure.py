@@ -1,11 +1,10 @@
 import tests.custom_hypothesis_support as cs
-from nose import SkipTest
 import astroid
 from typing import *
-from typing import _ForwardRef
+from typing import ForwardRef, _GenericAlias
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
-
+from nose.tools import eq_
 
 def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
     tnode_list = tc._nodes.copy()
@@ -17,7 +16,7 @@ def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
         visited_nodes = []
         while open_nodes:
             cur_open_node = open_nodes[0]
-            if isinstance(cur_open_node.type, TypeVar) or isinstance(cur_open_node.type, GenericMeta):
+            if isinstance(cur_open_node.type, TypeVar) or isinstance(cur_open_node.type, _GenericAlias):
                 new_set.add(str(cur_open_node.type))
             else:
                 new_set.add(cur_open_node.type)
@@ -169,11 +168,11 @@ tc = TypeConstraints()
 def test_forward_ref(draw=False):
     tc.reset()
     t0 = tc.fresh_tvar()
-    assert isinstance(tc.unify(_ForwardRef('A'), _ForwardRef('B')), TypeFail)
-    assert tc.unify(_ForwardRef('A'), _ForwardRef('A')).getValue() == _ForwardRef('A')
-    assert tc.unify(t0, _ForwardRef('A')).getValue() == _ForwardRef('A')
+    assert isinstance(tc.unify(ForwardRef('A'), ForwardRef('B')), TypeFail)
+    assert tc.unify(ForwardRef('A'), ForwardRef('A')).getValue() == ForwardRef('A')
+    assert tc.unify(t0, ForwardRef('A')).getValue() == ForwardRef('A')
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', _ForwardRef('A')}, {_ForwardRef('B')}]
+    expected_set = [{'~_TV0', ForwardRef('A')}, {ForwardRef('B')}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -297,19 +296,19 @@ def test_userdefn_inheritance_simple(draw=False):
                in ast_mod.nodes_of_class(astroid.AssignName)]
 
     assert isinstance(tc.unify(a, b), TypeFail)
-    assert tc.unify(c, a).getValue() == _ForwardRef('C')
+    assert tc.unify(c, a).getValue() == ForwardRef('C')
     assert isinstance(tc.unify(a, c), TypeFail)  # note that order matters!
-    assert tc.unify(c, b).getValue() == _ForwardRef('C')
+    assert tc.unify(c, b).getValue() == ForwardRef('C')
     assert isinstance(tc.unify(b, c), TypeFail)
 
     actual_set = tc_to_disjoint(tc)
     expected_set = [
-        {'~_TV0', Type[_ForwardRef('A')]},
-        {'~_TV1', Type[_ForwardRef('B')]},
-        {'~_TV2', Type[_ForwardRef('C')]},
-        {'~_TV3', _ForwardRef('A')},
-        {'~_TV4', _ForwardRef('B')},
-        {'~_TV5', _ForwardRef('C')}
+        {'~_TV0', Type[ForwardRef('A')]},
+        {'~_TV1', Type[ForwardRef('B')]},
+        {'~_TV2', Type[ForwardRef('C')]},
+        {'~_TV3', ForwardRef('A')},
+        {'~_TV4', ForwardRef('B')},
+        {'~_TV5', ForwardRef('C')}
     ]
 
     # _TNodes should be unchanged after unification
@@ -339,9 +338,9 @@ def test_userdefn_inheritance_multilevel(draw=False):
     a, b, c = [ti.lookup_typevar(node, node.name) for node
                in ast_mod.nodes_of_class(astroid.AssignName)]
 
-    assert tc.unify(b, a).getValue() == _ForwardRef('B')
-    assert tc.unify(c, b).getValue() == _ForwardRef('C')
-    assert tc.unify(c, a).getValue() == _ForwardRef('C')
+    assert tc.unify(b, a).getValue() == ForwardRef('B')
+    assert tc.unify(c, b).getValue() == ForwardRef('C')
+    assert tc.unify(c, a).getValue() == ForwardRef('C')
     assert isinstance(ti.type_constraints.unify(b, c), TypeFail)
 
     if draw:
@@ -449,7 +448,7 @@ def test_builtin_abst_base_mro(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     x, y = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    assert ti.type_constraints.resolve(y).getValue() == int
+    eq_(ti.type_constraints.resolve(y).getValue(), int)
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
@@ -465,7 +464,7 @@ def test_builtin_call_simple_mro(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     a, x = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    assert ti.type_constraints.resolve(x).getValue() == str
+    eq_(ti.type_constraints.resolve(x).getValue(), str)
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
@@ -558,6 +557,6 @@ def test_builtin_generic_inheritance_overloaded_init(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     x, y = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    assert ti.type_constraints.resolve(y).getValue() == List[int]
+    eq_(ti.type_constraints.resolve(y).getValue(), List[int])
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)

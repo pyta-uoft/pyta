@@ -1,5 +1,5 @@
 from typing import *
-from typing import TupleMeta, CallableMeta, _ForwardRef
+from typing import Callable, ForwardRef
 from python_ta.typecheck.base import TypeResult, TypeInfo, TypeFail, TypeConstraints, create_Callable
 from nose import SkipTest
 from nose.tools import eq_
@@ -104,21 +104,21 @@ def test_two_typevar():
 
 # Unify ForwardRefs
 def test_same_forward_ref():
-    fr1 = _ForwardRef('a')
-    fr2 = _ForwardRef('a')
+    fr1 = ForwardRef('a')
+    fr2 = ForwardRef('a')
     unify_helper(fr1, fr2, fr1)
     unify_helper(fr1, fr2, fr2)
 
 
 def test_diff_forward_ref():
     raise SkipTest('The existing error msg does not apply to this situation')
-    fr1 = _ForwardRef('a')
-    fr2 = _ForwardRef('b')
+    fr1 = ForwardRef('a')
+    fr2 = ForwardRef('b')
     unify_helper(fr1, fr2, TypeFail("Attempted to unify forwardref  with non-ref"))
 
 
 def test_one_forward_ref():
-    fr = _ForwardRef('a')
+    fr = ForwardRef('a')
     unify_helper(fr, str, TypeFail("Attempted to unify forwardref  with non-ref"))
 
 

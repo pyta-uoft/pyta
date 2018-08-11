@@ -5,7 +5,7 @@ from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
-from typing import Callable, _ForwardRef, Type
+from typing import Callable, ForwardRef, Type
 from nose.tools import eq_
 from python_ta.transforms.type_inference_visitor import TypeFail
 settings.load_profile("pyta")
@@ -93,7 +93,7 @@ def test_functiondef_method():
         '''
     module, inferer = cs._parse_text(program)
     for func_def in module.nodes_of_class(astroid.FunctionDef):
-        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == _ForwardRef('A')
+        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == ForwardRef('A')
 
 
 def test_functiondef_classmethod():
@@ -107,7 +107,7 @@ def test_functiondef_classmethod():
         '''
     module, inferer = cs._parse_text(program)
     for func_def in module.nodes_of_class(astroid.FunctionDef):
-        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == Type[_ForwardRef('A')]
+        assert lookup_type(inferer, func_def, func_def.argnames()[0]) == Type[ForwardRef('A')]
 
 
 def test_functiondef_staticmethod():

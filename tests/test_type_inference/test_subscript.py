@@ -34,7 +34,7 @@ def test_subscript_homogeneous_list_slice(node):
 def test_subscript_load_ctx(node):
     """Test visitor of Subscript node when loaded in an (if) expression."""
     load_node = astroid.If()
-    load_node.postinit(astroid.Const(True), [node])
+    load_node.postinit(astroid.Const(True), [node], [])
     module, _ = cs._parse_text(load_node)
     for subscript_node in module.nodes_of_class(astroid.Subscript):
         list_node = subscript_node.value

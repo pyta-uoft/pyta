@@ -1,10 +1,12 @@
 language: python
 python:
-  - "3.6"
+  - "3.7"
+dist: xenial
+sudo: true
 install:
-  - sudo apt install graphviz
-  - pip install funcparserlib colorama jinja2 pycodestyle hypothesis pygments graphviz
-  - pip install 'astroid==1.6.5' 'pylint==1.9'
+  - pip install .
+  - sudo apt-get install graphviz
+  - pip install graphviz
 script:
   - nosetests
 notifications:

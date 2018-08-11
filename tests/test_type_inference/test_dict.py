@@ -43,12 +43,13 @@ def test_heterogeneous_dict(node):
 
 def test_sorted_dict():
     src = """
-    dict = {'B': 2, 'A': 1}
-    sorted_dict = sorted(dict)
+    dictionary = {'B': 2, 'A': 1}
+    sorted_dict = sorted(dictionary)
     """
     module, ti = cs._parse_text(src)
     assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
-    eq_(lookup_type(ti, assign_node, assign_node.name), List[str])
+    t = lookup_type(ti, assign_node, assign_node.name)
+    eq_(ti.type_constraints.resolve(t).getValue(), List[str])
 
 
 if __name__ == '__main__':

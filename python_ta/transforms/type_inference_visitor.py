@@ -3,13 +3,13 @@ import astroid
 from astroid.node_classes import *
 from typing import *
 import typing
-from typing import CallableMeta, TupleMeta, Union, _ForwardRef
+from typing import Callable, Union, ForwardRef, _GenericAlias
 from astroid.transforms import TransformVisitor
 from itertools import chain
 from ..typecheck.base import Environment, TypeConstraints, parse_annotations, \
     _node_to_type, TypeResult, TypeInfo, TypeFail, failable_collect, accept_failable, create_Callable_TypeResult, \
     wrap_container, NoType, TypeFailLookup, TypeFailFunction, TypeFailReturn, TypeFailStarred, _gorg,\
-    TypeFailAnnotationInvalid
+    TypeFailAnnotationInvalid, is_callable
 from ..typecheck.errors import BINOP_TO_METHOD, BINOP_TO_REV_METHOD, UNARY_TO_METHOD, \
     INPLACE_TO_BINOP, binop_error_message, unaryop_error_message
 from ..typecheck.type_store import TypeStore
@@ -54,7 +54,7 @@ class TypeInferer:
             if not any(isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.globals[name]):
                 new_tvar = self.type_constraints.fresh_tvar(node.globals[name][0])
                 if any(isinstance(elt, astroid.ClassDef) for elt in node.globals[name]):
-                    self.type_constraints.unify(new_tvar, Type[_ForwardRef(name)], node)
+                    self.type_constraints.unify(new_tvar, Type[ForwardRef(name)], node)
                 node.type_environment.globals[name] = new_tvar
         self._populate_local_env(node)
 
@@ -65,7 +65,10 @@ class TypeInferer:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.instance_attrs[name][0])
             self.type_store.classes[node.name][name] = [(node.type_environment.locals[name], 'attribute')]
         for name in node.locals:
-            node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
+            if name in ['__module__', '__qualname__']:
+                node.type_environment.locals[name] = str
+            else:
+                node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node.locals[name][0])
 
         self.type_store.classes[node.name]['__bases'] = [_node_to_type(base)
                                                          for base in node.bases]
@@ -79,7 +82,7 @@ class TypeInferer:
         node.type_environment = Environment()
         # self is a special case
         if node.args.args and node.args.args[0].name == 'self' and isinstance(node.parent, astroid.ClassDef):
-            node.type_environment.locals['self'] = _ForwardRef(node.parent.name)
+            node.type_environment.locals['self'] = ForwardRef(node.parent.name)
         self._populate_local_env(node)
         self._populate_local_env_attrs(node)
         node.type_environment.locals['return'] = self.type_constraints.fresh_tvar(node)
@@ -173,7 +176,7 @@ class TypeInferer:
     def _unify_elements(self, lst: List[NodeNG], node: NodeNG) -> TypeResult:
         lst = list(lst)
         elt_inf_type = lst[0].inf_type
-        for cur_elt in lst:
+        for cur_elt in lst[1:]:
             elt_inf_type = self.type_constraints.unify(elt_inf_type, cur_elt.inf_type, node)
             if isinstance(elt_inf_type, TypeFail):
                 return TypeInfo(Any)
@@ -206,7 +209,6 @@ class TypeInferer:
             expr_inf_type = node.value.inf_type
 
         node.inf_type = NoType()
-
         for target in node.targets:
             type_result = self._assign_type(target, expr_inf_type, node)
             if isinstance(type_result, TypeFail):
@@ -237,7 +239,8 @@ class TypeInferer:
             # Attempted to create ForwardRef with invalid string
             return TypeFailAnnotationInvalid(node)
 
-        if isinstance(ann_node_type, GenericMeta) and ann_node_type.__args__ is None:
+        if (isinstance(ann_node_type, _GenericAlias) and
+                ann_node_type is getattr(typing, getattr(ann_node_type, '_name'))):
             if ann_node_type == Dict:
                 ann_type = wrap_container(ann_node_type, Any, Any)
             elif ann_node_type == Tuple:
@@ -245,7 +248,7 @@ class TypeInferer:
                 ann_type = wrap_container(ann_node_type, Any)
             else:
                 ann_type = wrap_container(ann_node_type, Any)
-        elif not isinstance(ann_node_type, type) and not isinstance(ann_node_type, _ForwardRef):
+        elif not isinstance(ann_node_type, (type, _GenericAlias)) and not isinstance(ann_node_type, ForwardRef):
             ann_type = TypeFailAnnotationInvalid(node)
         else:
             ann_type = TypeInfo(ann_node_type)
@@ -294,7 +297,7 @@ class TypeInferer:
             return self.type_constraints.unify(attr_type, expr_type, node)
         elif isinstance(target, astroid.Tuple):
             # Unpacking assignment, e.g. x, y = ...
-            if isinstance(expr_type, typing.TupleMeta):
+            if getattr(expr_type, '__origin__', None) is tuple:
                 assign_result = self._assign_tuple(target, expr_type, node)
             else:
                 assign_result = self._handle_call(target, '__iter__', expr_type)
@@ -319,7 +322,7 @@ class TypeInferer:
             # TODO: previous case must recursively handle this one
             return self._handle_call(target, '__setitem__', target.value.inf_type, target.slice.inf_type, expr_type)
 
-    def _assign_tuple(self, target: astroid.Tuple, value: TupleMeta, node: astroid.Assign) -> TypeResult:
+    def _assign_tuple(self, target: astroid.Tuple, value: Any, node: astroid.Assign) -> TypeResult:
         """Unify tuple of type variables and tuple of types, within context of Assign statement."""
         starred_index = None
         for i in range(len(target.elts)):
@@ -433,19 +436,19 @@ class TypeInferer:
         """Check for and return initializer function signature when using class name as Callable.
         Return Callable unmodified otherwise.
 
-        :param c: Class, _ForwardRef to a class, or Callable
+        :param c: Class, ForwardRef to a class, or Callable
         :param node: astroid.Call node where function call is occurring
         """
         # Callable type; e.g., 'Callable[[int], int]'
-        if isinstance(c, CallableMeta):
+        if is_callable(c):
             return TypeInfo(c)
         # Union of Callables
-        elif c.__class__.__name__ == '_Union' and all(isinstance(elt, CallableMeta) for elt in c.__args__):
+        elif getattr(c, '__origin__', None) is Union and all(is_callable(elt) for elt in c.__args__):
             return TypeInfo(c)
-        # Class types; e.g., 'Type[_ForwardRef('A')]'
-        elif getattr(c, '__name__', None) == 'Type':
+        # Class types; e.g., 'Type[ForwardRef('A')]'
+        elif getattr(c, '__origin__', None) is type:
             class_type = c.__args__[0]
-            if isinstance(class_type, _ForwardRef):
+            if isinstance(class_type, ForwardRef):
                 class_name = c.__args__[0].__forward_arg__
             else:
                 class_name = class_type.__name__
@@ -460,8 +463,8 @@ class TypeInferer:
                 # Classes declared without initializer
                 init_func = Callable[[], class_type]
             return TypeInfo(init_func)
-        # Class instances; e.g., '_ForwardRef('A')'
-        elif isinstance(c, _ForwardRef):
+        # Class instances; e.g., 'ForwardRef('A')'
+        elif isinstance(c, ForwardRef):
             class_type = c
             class_name = c.__forward_arg__
 
@@ -476,14 +479,9 @@ class TypeInferer:
             return TypeFailFunction((c,), None, node)
 
     def visit_call(self, node: astroid.Call) -> None:
-        func_inf_type = self.get_call_signature(node.func.inf_type, node.func)
+        f = self.type_constraints.resolve(node.func.inf_type)
+        func_inf_type = self.get_call_signature(f, node.func)
         arg_inf_types = [arg.inf_type for arg in node.args]
-
-        func_params = func_inf_type >> (lambda f: getattr(f, '__args__', [])) \
-            if not isinstance(func_inf_type, TypeFail) else []
-        for param, i in zip(func_params, range(len(arg_inf_types))):
-            if isinstance(param, GenericMeta) and _gorg(param) is Iterable:
-                arg_inf_types[i] = self._handle_call(node, '__iter__', arg_inf_types[i])
 
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
@@ -673,9 +671,9 @@ class TypeInferer:
         if isinstance(node.parent, astroid.ClassDef) and inferred_args:
             # first argument is special in these cases
             if node.type == 'method':
-                self.type_constraints.unify(inferred_args[0], _ForwardRef(node.parent.name), node)
+                self.type_constraints.unify(inferred_args[0], ForwardRef(node.parent.name), node)
             elif node.type == 'classmethod':
-                self.type_constraints.unify(inferred_args[0], Type[_ForwardRef(node.parent.name)], node)
+                self.type_constraints.unify(inferred_args[0], Type[ForwardRef(node.parent.name)], node)
 
         # Get inferred return type
         if any(node.nodes_of_class(astroid.Return)):
@@ -690,10 +688,10 @@ class TypeInferer:
             inferred_return = TypeInfo(type(None))
 
         # Update the environment storing the function's type.
-        polymorphic_tvars = []
+        polymorphic_tvars = set()
         for arg in inferred_args + [inferred_return]:
             arg >> (
-                lambda a: polymorphic_tvars.append(a.__name__) if isinstance(a, TypeVar) else None)
+                lambda a: polymorphic_tvars.add(a.__name__) if isinstance(a, TypeVar) else None)
 
         # Create function signature
         func_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
@@ -721,10 +719,10 @@ class TypeInferer:
         inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
         inferred_return = node.body.inf_type
 
-        polymorphic_tvars = []
+        polymorphic_tvars = set()
         for arg in inferred_args + [inferred_return]:
             arg >> (
-                lambda a: polymorphic_tvars.append(a.__name__) if isinstance(a, TypeVar) else None)
+                lambda a: polymorphic_tvars.add(a.__name__) if isinstance(a, TypeVar) else None)
 
         node.inf_type = create_Callable_TypeResult(failable_collect(inferred_args), inferred_return, polymorphic_tvars)
 
@@ -771,9 +769,9 @@ class TypeInferer:
         for attr in node.locals:
             attr_inf_type = self.type_constraints.resolve(node.type_environment.lookup_in_env(attr))
             attr_inf_type >> (
-                lambda a: self.type_store.methods[attr].append((a, node.locals[attr][0].type)) if isinstance(a, CallableMeta) else None)
+                lambda a: self.type_store.methods[attr].append((a, node.locals[attr][0].type)) if is_callable(a) else None)
             attr_inf_type >> (
-                lambda a: self.type_store.classes[node.name][attr].append((a, node.locals[attr][0].type if isinstance(a, CallableMeta) else 'attribute')))
+                lambda a: self.type_store.classes[node.name][attr].append((a, node.locals[attr][0].type if is_callable(a) else 'attribute')))
 
     @accept_failable
     def get_attribute_class(self, t: type) -> Tuple[str, type, bool]:
@@ -784,16 +782,18 @@ class TypeInferer:
         if isinstance(t, TypeVar):
             return t.__name__, t, None
 
-        # Class type: e.g., 'Type[_ForwardRef('A')]'
-        if getattr(t, '__name__', None) == 'Type':
+        # Class type: e.g., 'Type[ForwardRef('A')]'
+        if getattr(t, '__origin__', None) is type:
             class_type = t.__args__[0]
             is_inst_expr = False
-        # Instance of class or builtin type; e.g., '_ForwardRef('A')' or 'int'
+        # Instance of class or builtin type; e.g., 'ForwardRef('A')' or 'int'
         else:
             class_type = t
 
-        if isinstance(class_type, _ForwardRef):
+        if isinstance(class_type, ForwardRef):
             class_name = class_type.__forward_arg__
+        elif isinstance(class_type, _GenericAlias):
+            class_name = class_type._name
         else:
             class_name = getattr(t, '__name__', None)
 
@@ -806,7 +806,6 @@ class TypeInferer:
     def visit_attribute(self, node: astroid.Attribute) -> None:
         expr_inf_type = self.type_constraints.resolve(node.expr.inf_type)
         result = self.get_attribute_class(expr_inf_type)
-
         if not isinstance(result, TypeFail):
             class_name, class_type, inst_expr = result
 
@@ -821,7 +820,7 @@ class TypeInferer:
                     node.inf_type = TypeFailLookup(class_tnode, node, node.parent)
                 else:
                     func_type, method_type = attribute_type[0]
-                    if isinstance(func_type, CallableMeta) and \
+                    if is_callable(func_type) and \
                             method_type == 'method' and inst_expr or \
                             method_type == 'classmethod':
                         # Replace polymorphic type variables with fresh type variables

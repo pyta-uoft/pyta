@@ -103,8 +103,6 @@ def test_for_zip():
             y = b
         """
     module, ti = cs._parse_text(program)
-    raise SkipTest(f'Type signature of zip inferred incorrectly due to lookup_typevar '
-                   f'using the first available function in type_store.functions[zip]')
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
             eq_(lookup_type(ti, assign_node, assign_node.name), str)

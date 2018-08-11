@@ -1,6 +1,5 @@
 import sys
 from typing import *
-from typing import CallableMeta, GenericMeta, TupleMeta, _ForwardRef, IO
 import typing
 import astroid
 from python_ta.typecheck.base import _get_name

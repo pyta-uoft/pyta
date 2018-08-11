@@ -52,7 +52,8 @@ def test_annassign_subscript_list():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, List)
+    t = inferer.type_constraints.resolve(variable_type)
+    assert t.getValue() == List[Any]
 
 
 def test_annassign_subscript_list_int():
@@ -93,7 +94,7 @@ def test_annassign_subscript_set():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, Set)
+    eq_(variable_type, Set[Any])
 
 
 def test_annassign_subscript_set_int():
@@ -113,7 +114,7 @@ def test_annassign_subscript_dict():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, Dict)
+    eq_(variable_type, Dict[Any, Any])
 
 
 def test_annassign_subscript_dict_int_str():
@@ -133,7 +134,7 @@ def test_annassign_subscript_tuple():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, Tuple)
+    eq_(variable_type, Tuple[Any])
 
 
 def test_annassign_subscript_tuple_int():
@@ -171,7 +172,7 @@ def test_annassign_subscript_multi_list():
 
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-        assert issubclass(variable_type, List)
+        eq_(variable_type, List[Any])
 
     assign_nodes = list(module.nodes_of_class(astroid.Assign))
 

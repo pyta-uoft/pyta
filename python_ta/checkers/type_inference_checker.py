@@ -1,10 +1,10 @@
 """checker for type inference errors.
 """
 
-import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
+from python_ta.typecheck.base import TypeFail
 
 
 class TypeInferenceChecker(BaseChecker):
@@ -12,7 +12,7 @@ class TypeInferenceChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'TypeInferenceChecker'
-    msgs = {'E9900': ('Type error "%s" inferred',
+    msgs = {'E9900': ('Type error: %s',
                       'type-error',
                       'Presented when there is some kind of error with types.'),
            }
@@ -22,10 +22,17 @@ class TypeInferenceChecker(BaseChecker):
 
     @check_messages('type-error')
     def visit_default(self, node):
-        if hasattr(node, 'type_constraints'):
-            x = node.type_constraints
-            if isinstance(x.type, TypeErrorInfo):
-                self.add_message('type-error', args=x.type.msg, node=x.type.node)
+        if hasattr(node, 'inf_type'):
+            x = node.inf_type
+            if isinstance(x, TypeFail):
+                # If a child already has a type fail, this node inherited the
+                # same one, so no need to report it again.
+                for child in node.get_children():
+                    if isinstance(getattr(child, 'inf_type', None), TypeFail):
+                        return
+
+                # Otherwise, this is a new TypeFail that should be reported.
+                self.add_message('type-error', args=x.msg, node=node)
 
 
 def register(linter):

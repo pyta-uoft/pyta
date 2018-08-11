@@ -5,19 +5,20 @@
 # Default max amount of messages for reporter to display.
 pyta-number-of-messages = 5
 
-# Set whether to use the pycodestyle checker.
+# Set whether to use the pycodestyle and type-checking checkers.
 # Anything for a True/False, <yn> value should use in config file: y, yes, n, no
 pyta-pep8 = no
+pyta-type-check = no
 
 # Set the output format. Available pyta formats are: ColorReporter,
 # PlainReporter, HTMLReporter, StatReporter, PositionReporter
 pyta-reporter = HTMLReporter
 
-# Set the location of the template for htmlreporter.
+# Set the location of the template for HTMLreporter.
 pyta-template-file = template.html
 
-# Set the output file name for htmlreporter.
-pyta-output-file = output.html
+# Set the output file name for HTMLreporter.
+pyta-output-file = pyta_report.html
 
 [ELIF]
 
@@ -32,7 +33,7 @@ max-line-length = 80
 [FORBIDDEN IMPORT]
 
 # Set the whitelist of modules that are allowed to be imported
-allowed-import-modules=doctest, unittest, hypothesis, pytest, python_ta, typing
+allowed-import-modules = doctest, unittest, hypothesis, pytest, python_ta, typing
 
 [FORBIDDEN IO]
 

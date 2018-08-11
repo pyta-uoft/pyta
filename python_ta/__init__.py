@@ -40,7 +40,7 @@ HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 # check the python version
 if sys.version_info < (3, 6, 0):
-    print('You need Python 3.6 or later to run PythonTA.')
+    print('[WARNING] You need Python 3.6 or later to run PythonTA.')
 
 
 def check_errors(module_name='', config='', output=None):
@@ -145,6 +145,11 @@ def reset_linter(config=None, file_linted=None):
              'type': 'yn',
              'metavar': '<yn>',
              'help': 'Use the pycodestyle checker.'}),
+        ('pyta-type-check',
+            {'default': False,
+             'type': 'yn',
+             'metavar': '<yn>',
+             'help': 'Enable the type-checker.'}),
         ('pyta-number-of-messages',
             {'default': 5,
              'type': 'int',
@@ -175,8 +180,6 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/type_annotation_checker',
         'python_ta/checkers/unnecessary_indexing_checker'
         # 'python_ta/checkers/simplified_if_checker'
-        # TODO: Eventually enable this checker
-        # 'python_ta/checkers/type_inference_checker'
     ]
 
     # Register new options to a checker here to allow references to
@@ -208,9 +211,11 @@ def reset_linter(config=None, file_linted=None):
             for key in config:
                 linter.global_set_option(key, config[key])
 
-    # The above configuration may have set the pep8 option.
+    # Custom checker configuration.
     if linter.config.pyta_pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
+    if linter.config.pyta_type_check:
+        linter.load_plugin_modules(['python_ta/checkers/type_inference_checker'])
 
     return linter
 

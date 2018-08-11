@@ -22,7 +22,7 @@ def test_homogeneous_dict(dictionary):
 
 
 @given(cs.dict_node(min_size=2))
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much])
 def test_heterogeneous_dict(node):
     """Test Dictionary nodes representing a dictionary with some key:value pairs of different types."""
     keys = [item.value for item, _ in node.items]

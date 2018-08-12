@@ -38,31 +38,20 @@ class UnnecessaryAssignmentChecker(BaseChecker):
         return allerrors
 
     def _checkchain(self, node: astroid.FunctionDef, chainstart: Any)-> List:
-        visited = []    # visited executionblocks
-        errors = []     # list of found errors
-        block = [chainstart]    # list of executionblocks currently on
+        visited = set(())
+        errors = []
+        blocks = [chainstart]
 
-        while any([x not in visited for x in chainstart.find_stubs([])]):
-            # The while loop condition will check that every stub has been visited, which thus shows that the
-            # exectuion paths have been explored.
-
-            for item in block:  # every current execution block should be checked for errors and added to visited
-
-                thisblockerror = self._check_group(node, item)
-                for er in thisblockerror:
-                    if er not in errors:
-                        errors.append(er)
-                visited.append(item)
-
-            listnexts = []  # now the program must go to the next level of executionblocks
-
-            for itemtwo in block:
-
-                for nexts in itemtwo.next:
-
-                    listnexts.append(nexts)
-
-            block = listnexts
+        while blocks != []:
+            next_block = blocks.pop(0)
+            visited.add(id(next_block))
+            thisblockerror = self._check_group(node, next_block)
+            for er in thisblockerror:
+                if er not in errors:
+                    errors.append(er)
+            for follow_up in next_block.next:
+                if id(follow_up) not in visited:
+                    blocks.append(follow_up)
 
         return errors
 

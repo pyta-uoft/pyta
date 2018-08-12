@@ -894,8 +894,10 @@ class Environment:
 ###############################################################################
 # Parsing type annotations
 ###############################################################################
-def parse_annotations(node: NodeNG, class_tvars: Optional[List[type]] = None) -> Tuple[type, str]:
-    """Return a type specified by the type annotations for a node."""
+def parse_annotations(node: NodeNG, class_tvars: Optional[List[type]] = None) -> List[Tuple[type, str]]:
+    """Return types specified by the type annotations for a node.
+    Returns more than one type if there are default arguments.
+    """
     if isinstance(node, astroid.FunctionDef):
         arg_types = []
         no_class_tvars = class_tvars is None
@@ -915,10 +917,19 @@ def parse_annotations(node: NodeNG, class_tvars: Optional[List[type]] = None) ->
             else:
                 arg_types.append(_ann_node_to_type(annotation).getValue())
 
+        # Handle optional arguments
+        alternatives = []
+        for num_optional in range(len(node.args.defaults) + 1):
+            alternatives.append(arg_types[:len(arg_types) -num_optional])
+
         rtype = _ann_node_to_type(node.returns).getValue()
-        return create_Callable(arg_types, rtype, class_tvars), node.type
+
+        callables = [(create_Callable(arg_types, rtype, class_tvars), node.type)
+                     for arg_types in alternatives]
+        return callables
+
     elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
-        return _ann_node_to_type(node.parent.annotation).getValue(), 'attribute'
+        return [_ann_node_to_type(node.parent.annotation).getValue(), 'attribute']
 
 
 def _ann_node_to_type(node: astroid.Name) -> TypeResult:

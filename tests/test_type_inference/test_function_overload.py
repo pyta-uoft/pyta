@@ -136,6 +136,18 @@ def test_flagged_builtin_overload():
             assert ti.type_constraints.resolve(y).getValue() == float
 
 
+def test_builtin_defaults():
+    program = """
+    x = range(1)
+    y = range(1, 10)
+    z = range(1, 10, 3)
+    """
+    ast_mod, ti = cs._parse_text(program)
+    for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
+        x = ti.lookup_typevar(assgn_node, assgn_node.name)
+        eq_(ti.type_constraints.resolve(x).getValue(), range)
+
+
 def test_unresolved_builtin():
     raise SkipTest('Requires proper handling of builtins with multiple signatures')
     program = """

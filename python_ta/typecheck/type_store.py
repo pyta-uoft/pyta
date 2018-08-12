@@ -46,9 +46,8 @@ class TypeStore:
             for node in (nodes[0] for nodes in class_def.locals.values()
                          if isinstance(nodes[0], astroid.AssignName) and
                          isinstance(nodes[0].parent, astroid.AnnAssign)):
-                self.classes[class_def.name][node.name] = [
-                    parse_annotations(node, tvars)
-                ]
+                self.classes[class_def.name][node.name] = parse_annotations(node, tvars)
+
 
     def _parse_functions(self, module: astroid.Module) -> None:
         """Parse the function definitions from typeshed."""
@@ -60,10 +59,10 @@ class TypeStore:
                 tvars = []
             f_type = parse_annotations(function_def, tvars)
             if in_class:
-                self.classes[function_def.parent.name][function_def.name].append(f_type)
-                self.methods[function_def.name].append(f_type)
+                self.classes[function_def.parent.name][function_def.name].extend(f_type)
+                self.methods[function_def.name].extend(f_type)
             else:
-                self.functions[function_def.name].append(f_type)
+                self.functions[function_def.name].extend(f_type)
 
     def lookup_function(self, operator, *args):
         """Helper method to lookup a function type given the operator and types of arguments."""

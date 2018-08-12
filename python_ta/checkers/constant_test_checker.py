@@ -24,7 +24,7 @@ class UsingConstantTestChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def _check_all_constants(self, node):
+    def _check_all_constants(self, node) -> bool:
         """
         Precondition: node is a condition in an if statement
         Returns true if at least one of the values in this node is a constant
@@ -37,7 +37,9 @@ class UsingConstantTestChecker(BaseChecker):
         elif isinstance(node, astroid.UnaryOp):
             return self._check_all_constants(node.operand)
         elif isinstance(node, astroid.BoolOp):
-            return all(node.values)
+            return all(self._check_all_constants(v) for v in node.values)
+        else:
+            return False
 
 
     @check_messages("using-constants-test")

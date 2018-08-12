@@ -39,8 +39,8 @@ from .patches import patch_all
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 # check the python version
-if sys.version_info < (3, 6, 0):
-    print('[WARNING] You need Python 3.6 or later to run PythonTA.')
+if sys.version_info < (3, 7, 0):
+    print('[WARNING] You need Python 3.7 or later to run PythonTA.')
 
 
 def check_errors(module_name='', config='', output=None):
@@ -73,6 +73,7 @@ def _check(module_name='', level='all', local_config='', output=None):
     for reporter in REPORTERS:
         VALIDATORS[reporter.__name__] = reporter
     linter = reset_linter(config=local_config)
+
     current_reporter = reset_reporter(linter, output)
     patch_all()  # Monkeypatch pylint (override certain methods)
 
@@ -94,8 +95,8 @@ def _check(module_name='', level='all', local_config='', output=None):
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:
-        print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
-        print('Error message: "{}"'.format(e))
+        print('[ERROR] Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).')
+        print('[ERROR] Error message: "{}"'.format(e))
         raise e
 
 
@@ -119,7 +120,7 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
-    print('### Loaded configuration file: {}'.format(config_location))
+    print('[INFO] Loaded configuration file: {}'.format(config_location))
 
 
 def reset_linter(config=None, file_linted=None):
@@ -259,16 +260,16 @@ def _verify_pre_check(filepath):
                     continue
                 match = pylint.utils.OPTION_RGX.search(content)
                 if match is not None:
-                    print('ERROR: string "pylint:" found in comment. ' +
-                          'No check run on file `{}`\n'.format(filepath))
+                    print('[ERROR] String "pylint:" found in comment. ' +
+                          'No check run on file `{}.`\n'.format(filepath))
                     return False
     except IndentationError as e:
-        print('ERROR: python_ta could not check your code due to an ' +
-              'indentation error at line {}'.format(e.lineno))
+        print('[ERROR] python_ta could not check your code due to an ' +
+              'indentation error at line {}.'.format(e.lineno))
         return False
     except tokenize.TokenError as e:
-        print('ERROR: python_ta could not check your code due to a ' +
-              'syntax error in your file')
+        print('[ERROR] python_ta could not check your code due to a ' +
+              'syntax error in your file.')
         return False
     return True
 

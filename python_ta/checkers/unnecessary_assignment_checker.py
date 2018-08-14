@@ -24,7 +24,7 @@ class UnnecessaryAssignmentChecker(BaseChecker):
     # the checkers have the same priority though.
     priority = -1
 
-    def _check_unnecessary_assignment(self, node: Any)-> List[Any]:
+    def _check_unnecessary_assignment(self, node: astroid.FunctionDef)-> List[Any]:
         """Returns a list of nodes within the function that are instances of unnecessary assignment."""
 
         lst = []
@@ -41,14 +41,17 @@ class UnnecessaryAssignmentChecker(BaseChecker):
         visited = set(())
         errors = []
         blocks = [chainstart]
-
+        leftovers = []
         while blocks != []:
             next_block = blocks.pop(0)
             visited.add(id(next_block))
-            thisblockerror = self._check_group(node, next_block)
-            for er in thisblockerror:
+            thisblockerror = self._check_group(node, next_block, leftovers)
+            for er in thisblockerror[0]:
                 if er not in errors:
                     errors.append(er)
+
+            leftovers = thisblockerror[1]
+
             for follow_up in next_block.next:
                 if id(follow_up) not in visited:
                     blocks.append(follow_up)
@@ -147,14 +150,14 @@ class UnnecessaryAssignmentChecker(BaseChecker):
 
         return firstlink
 
-    def _check_group(self, node: astroid.FunctionDef, chunk: Any) -> List[Any]:
+    def _check_group(self, node: astroid.FunctionDef, chunk: Any, leftovers: list) -> List[Any]:
         """
         This function will check the given group of nodes within the context
         of the function node to check for unnecessary assignment.
         """
 
         values = {}  # creates a 'notetaker' for when values are assigned and used.
-
+        leftoversgroup = []
         for var in node.locals:  # initializes the values list with all the local variables.
             values[var] = None
 
@@ -189,15 +192,24 @@ class UnnecessaryAssignmentChecker(BaseChecker):
                 # Here we check if the value is being used.
                 values[block.name] = block
 
+                for lo in leftovers:
+                    if lo.name == block.name:
+                        leftovers.pop(leftovers.index(lo))
+
         for val in values:
             # This will check at the end if there were any unused values.
             if isinstance(values[val], astroid.AssignName):
                 if isinstance(values[val].parent, astroid.For):
                     errors.append(values[val])
                 else:
-                    errors.append(values[val].parent)
+                    leftoversgroup.append(values[val])
 
-        return errors
+        checked = []
+        for lo in leftovers:
+            leftoversgroup.append(lo)
+        checked.append(errors)
+        checked.append(leftoversgroup)
+        return checked
 
         # pass in message symbol as a parameter of check_messages
 

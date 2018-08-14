@@ -1,4 +1,5 @@
 from typing import *
+from typing import _GenericAlias
 import astroid
 from python_ta.typecheck.base import _get_name, _gorg, TypeConstraints
 
@@ -147,6 +148,9 @@ def subscript_error_message(node: astroid.Subscript, constraints: TypeConstraint
     subscript_concrete_type = constraints.resolve(node.value.inf_type).getValue()
     if subscript_concrete_type is type(None):
         return f'NoneType is not subscriptable.'
+
+    if not isinstance(subscript_concrete_type, _GenericAlias):
+        subscript_gorg = subscript_concrete_type
     else:
         subscript_gorg = _gorg(subscript_concrete_type)
 

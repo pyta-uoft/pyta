@@ -125,7 +125,7 @@ def test_subscript_slice():
         '''
     module, _ = cs._parse_text(program)
     assign_node = next(module.nodes_of_class(astroid.Assign))
-    assert isinstance(assign_node.inf_type, TypeFailFunction)
+    assert isinstance(assign_node.inf_type, TypeFail)
 
 
 # TODO: this test needs to be converted, but will also fail

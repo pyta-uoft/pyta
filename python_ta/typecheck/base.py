@@ -955,20 +955,11 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
     if node is None:
         return Any
     elif isinstance(node, str):
-        try:
-            return eval(node, globals(), locals)
-        except:
-            return ForwardRef(node)
+        return _eval_node(node, globals(), locals)
     elif isinstance(node, astroid.Name):
-        try:
-            return eval(node.name, globals(), locals)
-        except:
-            return ForwardRef(node.name)
+        return _eval_node(node.name, globals(), locals)
     elif isinstance(node, astroid.Attribute):
-        try:
-            return eval(node.attrname, globals(), locals)
-        except:
-            return ForwardRef(node.attrname)
+        return _eval_node(node.attrname, globals(), locals)
     elif isinstance(node, astroid.Subscript):
         v = _node_to_type(node.value)
         s = _node_to_type(node.slice)
@@ -985,6 +976,20 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
         return _node_to_type(node.value)
     else:
         return node
+
+
+def _eval_node(node_name: str, _globals: Dict[str, type], _locals: Dict[str, type]):
+    """Return a type represented by node_name."""
+    try:
+        eval_type = eval(node_name, _globals, _locals)
+    except:
+        eval_type = ForwardRef(node_name)
+
+    if eval_type in (list, dict, tuple, set):
+        # Annotation set as class type (ie. list) instead of typing generic (ie. List[Any])
+        return eval(f"typing.{node_name.capitalize()}", _globals, _locals)
+    else:
+        return eval_type
 
 
 def _collect_tvars(type: type) -> List[type]:

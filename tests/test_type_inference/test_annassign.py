@@ -5,7 +5,7 @@ import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
 from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType
-from typing import List, Set, Dict, Any, Tuple
+from typing import List, Set, Dict, Any, Tuple, Union
 from nose import SkipTest
 from nose.tools import eq_
 settings.load_profile("pyta")
@@ -241,6 +241,17 @@ def test_annotation_forward_ref_space():
     module, inferer = cs._parse_text(src, reset=True)
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailAnnotationInvalid)
+
+
+def test_annotation_union_list():
+    src = """
+    x: Union[List, int]
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert not isinstance(ann_node.inf_type, TypeFail)
+    x_type = lookup_type(inferer, module, 'x')
+    eq_(x_type, Union[List[Any], int])
 
 
 if __name__ == '__main__':

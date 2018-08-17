@@ -930,6 +930,11 @@ def _ann_node_to_type(node: astroid.Name) -> TypeResult:
         # Attempted to create ForwardRef with invalid string
         return TypeFailAnnotationInvalid(node)
 
+    ann_type = _generic_to_annotation(ann_node_type, node)
+    return ann_type
+
+
+def _generic_to_annotation(ann_node_type: type, node: NodeNG) -> TypeResult:
     if (isinstance(ann_node_type, _GenericAlias) and
             ann_node_type is getattr(typing, getattr(ann_node_type, '_name', '') or '', None)):
         if ann_node_type == Dict:
@@ -939,6 +944,11 @@ def _ann_node_to_type(node: astroid.Name) -> TypeResult:
             ann_type = wrap_container(ann_node_type, Any)
         else:
             ann_type = wrap_container(ann_node_type, Any)
+    elif isinstance(ann_node_type, _GenericAlias):
+        parsed_args = []
+        for arg in ann_node_type.__args__:
+            _generic_to_annotation(arg, node) >> parsed_args.append
+        ann_type = wrap_container(ann_node_type, *parsed_args)
     else:
         try:
             _type_check(ann_node_type, '')

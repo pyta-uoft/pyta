@@ -660,8 +660,8 @@ class TypeConstraints:
             elif ct1 == Any or ct2 == Any:
                 return TypeInfo(ct1) if ct1 != Any else TypeInfo(ct2)
             # Handle inheritance
-            elif self.type_store and \
-                    self.type_store.is_descendant(ct1, ct2):
+            elif self.type_store and ct1 is not None and ct2 is not None \
+                    and self.type_store.is_descendant(ct1, ct2):
                 return TypeInfo(ct1)
             else:
                 for tn in [tnode1, tnode2]:

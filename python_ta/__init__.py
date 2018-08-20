@@ -174,7 +174,6 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/dynamic_execution_checker',
         'python_ta/checkers/IO_Function_checker',
         'python_ta/checkers/invalid_range_index_checker',
-        'python_ta/checkers/assigning_to_self_checker',
         'python_ta/checkers/always_returning_checker',
         'python_ta/checkers/constant_test_checker',
         'python_ta/checkers/structure_test_checker',

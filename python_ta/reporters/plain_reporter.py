@@ -57,7 +57,8 @@ ERROR_CHECKS = [
     'not-an-iterable',
     'nonexistent-operator',
     'invalid-length-returned',
-    'abstract-method'
+    'abstract-method',
+    'self-cls-assignment'
 ]
 
 

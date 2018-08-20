@@ -5,8 +5,9 @@ from unittest import SkipTest
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
-from typing import Callable, ForwardRef, Type
+from typing import Callable, ForwardRef, Type, _GenericAlias
 from nose.tools import eq_
+from python_ta.typecheck.base import _gorg
 from python_ta.transforms.type_inference_visitor import TypeFail
 settings.load_profile("pyta")
 
@@ -76,11 +77,17 @@ def test_functiondef_annotated_simple_return(functiondef_node):
         arg_name = functiondef_node.args.args[i].name
         expected_type = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(arg_name)).getValue()
         # need to do by name because annotations must be name nodes.
-        assert expected_type.__name__ == functiondef_node.args.annotations[i].name
+        if isinstance(expected_type, _GenericAlias):
+            assert _gorg(expected_type).__name__ == functiondef_node.args.annotations[i].name
+        else:
+            assert expected_type.__name__ == functiondef_node.args.annotations[i].name
     # test return type
     return_node = functiondef_node.body[0].value
     expected_rtype = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(return_node.name)).getValue()
-    assert expected_rtype.__name__ == functiondef_node.returns.name
+    if isinstance(expected_rtype, _GenericAlias):
+        assert _gorg(expected_rtype).__name__ == functiondef_node.returns.name
+    else:
+        assert expected_rtype.__name__ == functiondef_node.returns.name
 
 
 def test_functiondef_method():

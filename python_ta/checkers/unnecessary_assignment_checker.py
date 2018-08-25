@@ -37,7 +37,7 @@ class ExecutionBlock:
 
             lst = []
             for x in self.next:
-                if x not in visited:  # All the remaining ExecutionBlocks to go look for stubs at.
+                if x not in newvisited:  # All the remaining ExecutionBlocks to go look for stubs at.
                     lst.append(x)
 
             to_be_returned = sum([x.find_stubs([newvisited]) for x in lst], [])  # Return a flattened list of stubs.

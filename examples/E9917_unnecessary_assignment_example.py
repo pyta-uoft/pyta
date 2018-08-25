@@ -38,3 +38,16 @@ def m():
     """
     n = 17  # unnecessary assignment here.
     return 17
+
+
+def n():
+    """
+    Unnecessary assignment because all paths reassign variable.
+    """
+    b = True
+    c = 4  # Unnecessary assignment here.
+    if b:
+        c = 8
+    else:
+        c = 2
+    return c

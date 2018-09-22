@@ -11,7 +11,7 @@ class ShadowingInCompChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'shadowing_inside_comprehension'
-    msgs = {'E9988': ("Comprehension loop variable '%s' shadows a variable in an outer scope",
+    msgs = {'E9988': ("Comprehension variable '%s' shadows a variable in an outer scope",
                       'shadowing-inside-comprehension',
                       'Used when there is shadowing inside a comprehension'),
             }
@@ -20,16 +20,17 @@ class ShadowingInCompChecker(BaseChecker):
     priority = -1
 
     @check_messages('shadowing-inside-comprehension')
-    def visit_comprehension(self, node):
+    def visit_comprehension(self, node: astroid.Comprehension):
         if isinstance(node.target, astroid.Tuple):
-            for targ in node.target.elts:
-                if targ.name in node.parent.frame().locals:
-                    args = targ.name
+            for target in node.target.elts:
+                if target.name in node.parent.frame().locals:
+                    args = target.name
                     self.add_message('shadowing-inside-comprehension', node=targ, args=args)
-        # else: isinstance(node.target, astroid.AssignName)
-        if node.target.name in node.parent.frame().locals:
-            args = node.target.name
-            self.add_message('shadowing-inside-comprehension', node=node.target, args=args)
+        else:  # isinstance(node.target, astroid.AssignName)
+            if node.target.name in node.parent.frame().locals:
+                args = node.target.name
+                self.add_message('shadowing-inside-comprehension', node=node.target, args=args)
+
 
 def register(linter):
     linter.register_checker(ShadowingInCompChecker(linter))

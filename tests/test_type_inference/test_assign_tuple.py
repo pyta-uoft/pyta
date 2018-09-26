@@ -1,6 +1,5 @@
 import astroid
 from nose.tools import eq_
-from typing import TupleMeta
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 from python_ta.transforms.type_inference_visitor import NoType

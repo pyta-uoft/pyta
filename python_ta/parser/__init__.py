@@ -1,7 +1,6 @@
 import keyword
 import token
 from tokenize import generate_tokens
-import tokenize
 from funcparserlib.parser import some, many, skip, maybe, \
     with_forward_decls, NoParseError, Parser
 
@@ -31,9 +30,9 @@ def name_(string):
 INDENT = some(lambda tok: tok.type == token.INDENT)
 DEDENT = some(lambda tok: tok.type == token.DEDENT)
 NEWLINE = skip(
-    some(lambda tok: tok.type == tokenize.NL or tok.type == token.NEWLINE))
+    some(lambda tok: tok.type == token.NL or tok.type == token.NEWLINE))
 ENDMARKER = skip(some(lambda tok: tok.type == token.ENDMARKER))
-COMMENT = some(lambda tok: tok.type == tokenize.COMMENT)
+COMMENT = some(lambda tok: tok.type == token.COMMENT)
 NUMBER = some(lambda tok: tok.type == token.NUMBER)
 NAME = some(lambda tok: tok.type == token.NAME)
 IDENTIFIER = some(
@@ -48,8 +47,8 @@ ELLIPSIS = skip(some(
 AND = skip(name_('and'))
 AS = skip(name_('as'))
 ASSERT = skip(name_('assert'))
-AWAIT = skip(some(lambda tok: tok.type == token.AWAIT))
-ASYNC = skip(some(lambda tok: tok.type == token.ASYNC))
+AWAIT = skip(name_('await'))
+ASYNC = skip(name_('async'))
 BREAK = skip(name_('break'))
 CLASS = skip(name_('class'))
 CONTINUE = skip(name_('continue'))
@@ -371,11 +370,11 @@ file_input = many(NEWLINE | stmt | (COMMENT + NEWLINE)) + ENDMARKER
 def parse_file(filename):
     with open(filename) as f:
         tokens = [t for t in generate_tokens(f.readline)
-                  if t.type != tokenize.COMMENT and t.type != tokenize.NL]
+                  if t.type != token.COMMENT and t.type != token.NL]
         try:
             file_input.parse(tokens)
         except CustomParseError as err:
-            token = tokens[err.orig_error.state.pos]
-            lineno = token.start[0]
+            tok = tokens[err.orig_error.state.pos]
+            lineno = tok.start[0]
             print('Syntax error at line {}. Details:'.format(lineno))
             print('  ' + err.msg)

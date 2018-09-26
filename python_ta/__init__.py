@@ -39,8 +39,8 @@ from .patches import patch_all
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 # check the python version
-if sys.version_info < (3, 6, 0):
-    print('You need Python 3.6 or later to run PythonTA.')
+if sys.version_info < (3, 7, 0):
+    print('[WARNING] You need Python 3.7 or later to run PythonTA.')
 
 
 def check_errors(module_name='', config='', output=None):
@@ -73,6 +73,7 @@ def _check(module_name='', level='all', local_config='', output=None):
     for reporter in REPORTERS:
         VALIDATORS[reporter.__name__] = reporter
     linter = reset_linter(config=local_config)
+
     current_reporter = reset_reporter(linter, output)
     patch_all()  # Monkeypatch pylint (override certain methods)
 
@@ -94,8 +95,8 @@ def _check(module_name='', level='all', local_config='', output=None):
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:
-        print('Unexpected error encountered - please report this to david@cs.toronto.edu!')
-        print('Error message: "{}"'.format(e))
+        print('[ERROR] Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).')
+        print('[ERROR] Error message: "{}"'.format(e))
         raise e
 
 
@@ -119,7 +120,7 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
-    print('### Loaded configuration file: {}'.format(config_location))
+    print('[INFO] Loaded configuration file: {}'.format(config_location))
 
 
 def reset_linter(config=None, file_linted=None):
@@ -145,6 +146,11 @@ def reset_linter(config=None, file_linted=None):
              'type': 'yn',
              'metavar': '<yn>',
              'help': 'Use the pycodestyle checker.'}),
+        ('pyta-type-check',
+            {'default': False,
+             'type': 'yn',
+             'metavar': '<yn>',
+             'help': 'Enable the type-checker.'}),
         ('pyta-number-of-messages',
             {'default': 5,
              'type': 'int',
@@ -168,7 +174,6 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/dynamic_execution_checker',
         'python_ta/checkers/IO_Function_checker',
         'python_ta/checkers/invalid_range_index_checker',
-        'python_ta/checkers/assigning_to_self_checker',
         'python_ta/checkers/always_returning_checker',
         'python_ta/checkers/constant_test_checker',
         'python_ta/checkers/structure_test_checker',
@@ -176,8 +181,6 @@ def reset_linter(config=None, file_linted=None):
         'python_ta/checkers/unnecessary_indexing_checker',
         'python_ta/checkers/shadowing_in_comp_checker'
         # 'python_ta/checkers/simplified_if_checker'
-        # TODO: Eventually enable this checker
-        # 'python_ta/checkers/type_inference_checker'
     ]
 
     # Register new options to a checker here to allow references to
@@ -209,9 +212,11 @@ def reset_linter(config=None, file_linted=None):
             for key in config:
                 linter.global_set_option(key, config[key])
 
-    # The above configuration may have set the pep8 option.
+    # Custom checker configuration.
     if linter.config.pyta_pep8:
         linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
+    if linter.config.pyta_type_check:
+        linter.load_plugin_modules(['python_ta/checkers/type_inference_checker'])
 
     return linter
 
@@ -255,16 +260,16 @@ def _verify_pre_check(filepath):
                     continue
                 match = pylint.utils.OPTION_RGX.search(content)
                 if match is not None:
-                    print('ERROR: string "pylint:" found in comment. ' +
-                          'No check run on file `{}`\n'.format(filepath))
+                    print('[ERROR] String "pylint:" found in comment. ' +
+                          'No check run on file `{}.`\n'.format(filepath))
                     return False
     except IndentationError as e:
-        print('ERROR: python_ta could not check your code due to an ' +
-              'indentation error at line {}'.format(e.lineno))
+        print('[ERROR] python_ta could not check your code due to an ' +
+              'indentation error at line {}.'.format(e.lineno))
         return False
     except tokenize.TokenError as e:
-        print('ERROR: python_ta could not check your code due to a ' +
-              'syntax error in your file')
+        print('[ERROR] python_ta could not check your code due to a ' +
+              'syntax error in your file.')
         return False
     return True
 

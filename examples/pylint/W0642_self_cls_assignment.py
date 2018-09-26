@@ -8,3 +8,8 @@ class Assigning:
         self = newvalue  # Error on this line
         # Correct approach
         self.name = newname
+
+    @classmethod
+    def new_cls(cls, newtype: type) -> type:
+        cls = newtype
+        return cls

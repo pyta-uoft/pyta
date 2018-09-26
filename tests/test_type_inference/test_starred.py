@@ -31,7 +31,8 @@ def test_range():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), List[int])
+            t = name_node.inf_type.getValue()
+            eq_(ti.type_constraints.resolve(t).getValue(), List[int])
         elif name_node.name == 'b':
             eq_(name_node.inf_type.getValue(), int)
 

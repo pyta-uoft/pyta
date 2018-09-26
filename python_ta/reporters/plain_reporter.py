@@ -57,7 +57,8 @@ ERROR_CHECKS = [
     'not-an-iterable',
     'nonexistent-operator',
     'invalid-length-returned',
-    'abstract-method'
+    'abstract-method',
+    'self-cls-assignment'
 ]
 
 
@@ -66,8 +67,7 @@ special = {'missing-docstring',
            'trailing-newlines'}
 
 # Messages without a source code line to highlight
-no_hl = {'always-returning-in-a-loop',
-         'invalid-name'}
+no_hl = {'invalid-name'}
 # the "Invalid module name" subsection of "invalid-name" belongs here
 
 

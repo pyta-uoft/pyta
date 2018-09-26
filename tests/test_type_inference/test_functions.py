@@ -290,37 +290,6 @@ def test_conflicting_inferred_type_variable():
     assert call_node.inf_type.getValue() == expected_msg
 
 
-if __name__ == '__main__':
-    nose.main()
-
-
-def test_incompatible_binop_call():
-    """ User tries to call a builtin binary operation on arguments of the wrong type.
-    """
-    program = f'5 + "string"\n'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    binop_node = next(module.nodes_of_class(astroid.BinOp))
-    expected_msg = "You cannot add an int, 5, and a str, 'string'. " \
-                   "Perhaps you wanted to cast the integer into a string or vice versa?"
-    assert binop_node.inf_type.getValue() == expected_msg
-
-
-def test_incompatible_unaryop_call():
-    """User tries to call a builtin unary operation on an argument of the wrong type.
-    """
-    program = f'~["D"]'
-    try:
-        module, inferer = cs._parse_text(program)
-    except:
-        raise SkipTest()
-    unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
-    expected_msg = "You cannot take the bitwise inverse of a List, ['D']."
-    assert unaryop_node.inf_type.getValue() == expected_msg
-
-
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """

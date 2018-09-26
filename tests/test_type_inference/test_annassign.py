@@ -4,8 +4,8 @@ from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
-from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType
-from typing import List, Set, Dict, Any, Tuple
+from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType, _gorg
+from typing import List, Set, Dict, Any, Tuple, Union, _GenericAlias
 from nose import SkipTest
 from nose.tools import eq_
 settings.load_profile("pyta")
@@ -42,7 +42,10 @@ def test_annassign(variables_annotations_dict):
     for node in module.nodes_of_class(astroid.AnnAssign):
         variable_type = lookup_type(inferer, node, node.target.name)
         annotated_type = variables_annotations_dict[node.target.name]
-        assert variable_type == annotated_type
+        if isinstance(variable_type, _GenericAlias):
+            assert _gorg(variable_type) == annotated_type
+        else:
+            assert variable_type == annotated_type
 
 
 def test_annassign_subscript_list():
@@ -52,7 +55,8 @@ def test_annassign_subscript_list():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, List)
+    t = inferer.type_constraints.resolve(variable_type)
+    assert t.getValue() == List[Any]
 
 
 def test_annassign_subscript_list_int():
@@ -93,7 +97,7 @@ def test_annassign_subscript_set():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, Set)
+    eq_(variable_type, Set[Any])
 
 
 def test_annassign_subscript_set_int():
@@ -113,7 +117,7 @@ def test_annassign_subscript_dict():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, Dict)
+    eq_(variable_type, Dict[Any, Any])
 
 
 def test_annassign_subscript_dict_int_str():
@@ -133,7 +137,7 @@ def test_annassign_subscript_tuple():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    assert issubclass(variable_type, Tuple)
+    eq_(variable_type, Tuple[Any])
 
 
 def test_annassign_subscript_tuple_int():
@@ -171,7 +175,7 @@ def test_annassign_subscript_multi_list():
 
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-        assert issubclass(variable_type, List)
+        eq_(variable_type, List[Any])
 
     assign_nodes = list(module.nodes_of_class(astroid.Assign))
 
@@ -240,6 +244,17 @@ def test_annotation_forward_ref_space():
     module, inferer = cs._parse_text(src, reset=True)
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailAnnotationInvalid)
+
+
+def test_annotation_union_list():
+    src = """
+    x: Union[List, int]
+    """
+    module, inferer = cs._parse_text(src, reset=True)
+    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+        assert not isinstance(ann_node.inf_type, TypeFail)
+    x_type = lookup_type(inferer, module, 'x')
+    eq_(x_type, Union[List[Any], int])
 
 
 if __name__ == '__main__':

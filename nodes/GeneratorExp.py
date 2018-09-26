@@ -13,14 +13,12 @@ Attributes:
         - The variables in the local scope.
 
 Example:
-    - elt         -> g
-    - generators  -> [Comprehension(ip, num),
-                     Comprehension(num, range(9)))]
-    - locals      -> {'elt': g, 'generators': [Comprehension(ip, num),
-                     Comprehension(num, range(9)))]}
+    - elt         -> Name(name='j')
+    - generators  -> [Comprehension(i, range(4)), Comprehension(j, range(9)))]
+    - locals      -> {'i': [AssignName(name='i')], 'j': [AssignName(name='j')]}
 
 Type-checking:
-    The type of the GeneratorComp is Generator[T, None, None], where T is the type of elt.
+    The type of the GeneratorExp is Generator[T, None, None], where T is the type of elt.
 """
 
-(g for ip in num for num in range(9))
+(j for i in range(4) for j in range(i))

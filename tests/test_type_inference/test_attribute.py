@@ -1,8 +1,7 @@
-import nose
 from nose import SkipTest
+from nose.tools import eq_
 import astroid
 from typing import *
-from typing import _ForwardRef
 from python_ta.typecheck.base import TypeFail
 import tests.custom_hypothesis_support as cs
 
@@ -62,7 +61,7 @@ def test_class_dot_method():
         '''
     module, _ = cs._parse_text(program, reset=True)
     for attribute_node in module.nodes_of_class(astroid.Attribute):
-        assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[_ForwardRef('A'), int], int]"
+        eq_(str(attribute_node.inf_type.getValue()), "typing.Callable[[ForwardRef('A'), int], int]")
 
 
 def test_class_dot_classmethod():
@@ -106,7 +105,7 @@ def test_attribute_self_bind():
     module, ti = cs._parse_text(program, reset=True)
     x = [ti.lookup_typevar(node, node.name) for node
          in module.nodes_of_class(astroid.AssignName)][0]
-    assert str(ti.type_constraints.resolve(x).getValue()) == "typing.List[int]"
+    eq_(str(ti.type_constraints.resolve(x).getValue()), "typing.List[int]")
 
 
 def test_subscript_attribute():

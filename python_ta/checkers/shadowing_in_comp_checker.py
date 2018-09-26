@@ -25,7 +25,7 @@ class ShadowingInCompChecker(BaseChecker):
             for target in node.target.elts:
                 if target.name in node.parent.frame().locals:
                     args = target.name
-                    self.add_message('shadowing-inside-comprehension', node=targ, args=args)
+                    self.add_message('shadowing-inside-comprehension', node=target, args=args)
         else:  # isinstance(node.target, astroid.AssignName)
             if node.target.name in node.parent.frame().locals:
                 args = node.target.name

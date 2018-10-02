@@ -91,6 +91,7 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     iterable = _iterable_if_range(for_node.iter)
     # Name node is not inside Subscript node iterable[index].
     if not (isinstance(index_node.parent, astroid.Index) and isinstance(index_node.parent.parent, astroid.Subscript)
+            and isinstance(index_node.parent.parent.value, astroid.Name)
             and index_node.parent.parent.value.name == iterable):
         return False
     # Use ctx attribute to find out what context the subscript is being used in.

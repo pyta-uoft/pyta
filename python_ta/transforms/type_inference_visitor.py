@@ -634,8 +634,6 @@ class TypeInferer:
         arg_inf_types = [self.type_constraints.resolve(arg) for arg in arg_types]
         func_type = self.type_store.lookup_method(function_name, *arg_inf_types, node=node)
 
-        if isinstance(func_type, TypeFail) and error_func is not None:
-            return TypeFail(error_func(node, self.type_constraints))
         else:
             return self.type_constraints.unify_call(func_type, *arg_types, node=node)
 

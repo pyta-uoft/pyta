@@ -40,18 +40,27 @@ class TypeAnnotationChecker(BaseChecker):
 
     def visit_classdef(self, node):
         for attr_key in node.instance_attrs:
-            attr_node = node.instance_attrs[attr_key][0]
-            if isinstance(attr_node, astroid.AssignAttr):
-                if attr_key not in node.locals:
-                    self.add_message('type-annotation-inst-var', node=attr_node)
-                elif isinstance(attr_node.parent, astroid.AnnAssign):
-                    self.add_message('type-annotation-inst-var', node=attr_node)
+            annotated(attr_key, node)
 
         for attr_key in node.locals:
             attr_node = node.locals[attr_key][0]
             if isinstance(attr_node, astroid.AssignName) and not isinstance(attr_node.parent, astroid.AnnAssign):
                 self.add_message('type-annotation-var', node=attr_node)
 
+
+def annotated(attr_key, node):
+    if attr_key in node.instance_attrs:
+        attr_node = node.instance_attrs[attr_key][0]
+        if len(node.bases) == 0:
+            if isinstance(attr_node, astroid.AssignAttr):
+                if attr_key not in node.locals:
+                    return False
+                elif isinstance(attr_node.parent, astroid.AnnAssign):
+                    return False
+            return True
+        else:
+            return any(annotated(attr_key, parent_node) for parent_name in node.bases
+                       for parent_node in node.parent.globals[parent_name.name])
 
 def register(linter):
     linter.register_checker(TypeAnnotationChecker(linter))

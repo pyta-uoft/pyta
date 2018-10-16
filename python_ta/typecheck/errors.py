@@ -1,7 +1,8 @@
+from __future__ import annotations
 from typing import *
 from typing import _GenericAlias
 import astroid
-from python_ta.typecheck.base import _get_name, _gorg, TypeConstraints
+from python_ta.utils import _get_name, _gorg
 
 
 ###############################################################################
@@ -104,6 +105,22 @@ INPLACE_TO_BINOP = {
     '>>=': '>>'
 }
 
+
+###############################################################################
+# Error message
+###############################################################################
+def error_message(tc: TypeConstraints, tf: TypeFail) -> None:
+    """Return an appropriate error message given an instance of TypeFailFunction."""
+    if isinstance(tf.src_node, astroid.UnaryOp):
+        return unaryop_error_message(tf.src_node, tf.type_constraints)
+    elif isinstance(tf.src_node, astroid.BinOp):
+        return binop_error_message(tf.src_node, tf.type_constraints)
+    elif isinstance(tf.src_node, astroid.Subscript):
+        return subscript_error_message(tf.src_node, tf.type_constraints)
+    else:
+        return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
+
+
 ###############################################################################
 # BinOp message
 ###############################################################################
@@ -115,7 +132,7 @@ def binary_op_hints(op, args):
             return "Perhaps you wanted to cast the integer into a string or vice versa?"
 
 
-def binop_error_message(node: astroid.BinOp, constraints: TypeConstraints) -> str:
+def binop_error_message(node: astroid.BinOp, constraints) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
     left_type = _get_name(constraints.resolve(node.left.inf_type).getValue())
     right_type = _get_name(constraints.resolve(node.right.inf_type).getValue())
@@ -131,7 +148,7 @@ def binop_error_message(node: astroid.BinOp, constraints: TypeConstraints) -> st
 ###############################################################################
 # UnaryOp message
 ###############################################################################
-def unaryop_error_message(node: astroid.UnaryOp, constraints: TypeConstraints) -> str:
+def unaryop_error_message(node: astroid.UnaryOp, constraints) -> str:
     op_name = UNARY_TO_ENGLISH[node.op]
     operand = _get_name(constraints.resolve(node.operand.inf_type).getValue())
 
@@ -143,7 +160,7 @@ def unaryop_error_message(node: astroid.UnaryOp, constraints: TypeConstraints) -
 ###############################################################################
 # Subscript message
 ###############################################################################
-def subscript_error_message(node: astroid.Subscript, constraints: TypeConstraints) -> str:
+def subscript_error_message(node: astroid.Subscript, constraints) -> str:
     # Accessing an element of a List with an incompatible index type (non-integers)
     subscript_concrete_type = constraints.resolve(node.value.inf_type).getValue()
     if subscript_concrete_type is type(None):

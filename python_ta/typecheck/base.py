@@ -7,6 +7,8 @@ import astroid
 from astroid.node_classes import NodeNG
 from itertools import product
 from ..util.monad import Failable, failable_collect
+from python_ta.typecheck.errors import error_message
+from python_ta.utils import _get_name, _gorg
 
 
 class _TNode:
@@ -176,13 +178,15 @@ class TypeFailFunction(TypeFail):
     """
     TypeFailFunction occurs when a function is called with different arguments than expected.
 
+    :param tc: TypeConstraints
     :param func_types: Tuple containing one or more acceptable type signatures
     :param funcdef_node: FunctionDef astroid node where function is defined
     :param src_node: Astroid node where invalid function call occurs
     :param arg_indices: List of argument index numbers,
     """
-    def __init__(self, func_types: Tuple[Callable], funcdef_node: astroid.FunctionDef, src_node: NodeNG,
+    def __init__(self, tc, func_types: Tuple[Callable], funcdef_node: astroid.FunctionDef, src_node: NodeNG,
                  arg_indices: List[int] = None) -> None:
+        self.type_constraints = tc
         self.func_types = func_types
         self.funcdef_node = funcdef_node
         self.src_node = src_node
@@ -190,7 +194,8 @@ class TypeFailFunction(TypeFail):
         super().__init__(str(self))
 
     def __str__(self):
-        return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
+        #return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
+        return error_message(self.type_constraints, self)
 
 
 class TypeFailReturn(TypeFail):
@@ -219,16 +224,6 @@ class TypeFailStarred(TypeFail):
 
     def __str__(self) -> str:
         return f'TypeFail: Multiple starred variables not valid'
-
-
-def _gorg(x):
-    """Make _gorg compatible for Python 3.6.2 and 3.6.3."""
-    if sys.version_info >= (3, 7, 0):
-        return x.__origin__
-    if sys.version_info < (3, 6, 3):
-        return typing._gorg(x)
-    else:
-        return x._gorg
 
 
 def accept_failable(f: Callable) -> Callable:
@@ -332,19 +327,6 @@ def _get_poly_vars(t: type) -> Set[str]:
             pvars.update(_get_poly_vars(arg))
         return pvars
     return set()
-
-
-def _get_name(t: type) -> str:
-    """If t is associated with a class, return the name of the class; otherwise, return a string repr. of t"""
-    if isinstance(t, ForwardRef):
-        return t.__forward_arg__
-    elif isinstance(t, type):
-        return t.__name__
-    elif isinstance(t, _GenericAlias):
-        return '{} of {}'.format(_get_name(t.__origin__),
-                                 ', '.join(_get_name(arg) for arg in t.__args__))
-    else:
-        return str(t)
 
 
 def create_Callable(args: Iterable[type], rtype: type, class_poly_vars: Set[type] = None) -> Callable:
@@ -756,13 +738,13 @@ class TypeConstraints:
             if new_func_type is None:
                 func_var_tnode = self.get_tnode(func_var)
                 funcdef_node = self.find_function_def(func_var_tnode)
-                return TypeFailFunction(tuple(func_type.__args__), funcdef_node, node)
+                return TypeFailFunction(self, tuple(func_type.__args__), funcdef_node, node)
             else:
                 func_type = new_func_type
         elif len(func_type.__args__) - 1 != len(arg_types):
             func_var_tnode = self.get_tnode(func_var)
             funcdef_node = self.find_function_def(func_var_tnode)
-            return TypeFailFunction((func_type, ), funcdef_node, node)
+            return TypeFailFunction(self, (func_type, ), funcdef_node, node)
 
         new_func_type = self.fresh_callable(func_type, node)
         func_params = getattr(new_func_type, '__args__', [None])[:-1]
@@ -776,13 +758,13 @@ class TypeConstraints:
                 if isinstance(func_type, TypeFail):
                     func_var_tnode = self.get_tnode(func_var)
                     funcdef_node = self.find_function_def(func_var_tnode)
-                    return TypeFailFunction((func_type,), funcdef_node, node)
+                    return TypeFailFunction(self, (func_type,), funcdef_node, node)
 
                 iterator_type = self.unify_call(func_type, arg_types[i], node=node)
                 if isinstance(iterator_type, TypeFail):
                     func_var_tnode = self.get_tnode(func_var)
                     funcdef_node = self.find_function_def(func_var_tnode)
-                    return TypeFailFunction((func_type,), funcdef_node, node)
+                    return TypeFailFunction(self, (func_type,), funcdef_node, node)
 
                 arg_types[i] = Iterable[iterator_type.getValue().__args__[0]]
 
@@ -802,7 +784,7 @@ class TypeConstraints:
         if results:
             func_var_tnode = self.get_tnode(func_var)
             funcdef_node = self.find_function_def(func_var_tnode)
-            return TypeFailFunction((new_func_type, ), funcdef_node, node, results)
+            return TypeFailFunction(self, (new_func_type, ), funcdef_node, node, results)
         return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t: type) -> TypeResult:

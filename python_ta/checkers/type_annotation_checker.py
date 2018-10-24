@@ -1,3 +1,6 @@
+"""checker for type annotation.
+"""
+
 import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker

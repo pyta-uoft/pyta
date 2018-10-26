@@ -111,14 +111,13 @@ INPLACE_TO_BINOP = {
 ###############################################################################
 def error_message(tf: TypeFail) -> None:
     """Return an appropriate error message given an instance of TypeFailFunction."""
-    if isinstance(tf.src_node, astroid.UnaryOp):
-        return unaryop_error_message(tf.src_node, tf.type_constraints)
-    elif isinstance(tf.src_node, astroid.BinOp):
-        return binop_error_message(tf.src_node, tf.type_constraints)
-    elif isinstance(tf.src_node, astroid.Subscript):
-        return subscript_error_message(tf.src_node, tf.type_constraints)
-    else:
-        return f'TypeFail: Invalid function call at {tf.src_node.as_string()}'
+    # if isinstance(tf.src_node, astroid.UnaryOp):
+    #     return unaryop_error_message(tf.src_node)
+    # elif isinstance(tf.src_node, astroid.BinOp):
+    #     return binop_error_message(tf.src_node)
+    # elif isinstance(tf.src_node, astroid.Subscript):
+    #     return subscript_error_message(tf.src_node)
+    return f'TypeFail: Invalid function call at {tf.src_node.as_string()}'
 
 
 ###############################################################################
@@ -132,10 +131,10 @@ def binary_op_hints(op, args):
             return "Perhaps you wanted to cast the integer into a string or vice versa?"
 
 
-def binop_error_message(node: astroid.BinOp, constraints) -> str:
+def binop_error_message(node: astroid.BinOp) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
-    left_type = _get_name(constraints.resolve(node.left.inf_type).getValue())
-    right_type = _get_name(constraints.resolve(node.right.inf_type).getValue())
+    left_type = _get_name((node.left.inf_type).getValue())
+    right_type = _get_name((node.right.inf_type).getValue())
     hint = binary_op_hints(node.op, [left_type, right_type]) or ''
 
     return (
@@ -148,9 +147,9 @@ def binop_error_message(node: astroid.BinOp, constraints) -> str:
 ###############################################################################
 # UnaryOp message
 ###############################################################################
-def unaryop_error_message(node: astroid.UnaryOp, constraints) -> str:
+def unaryop_error_message(node: astroid.UnaryOp) -> str:
     op_name = UNARY_TO_ENGLISH[node.op]
-    operand = _get_name(constraints.resolve(node.operand.inf_type).getValue())
+    operand = _get_name((node.operand.inf_type).getValue())
 
     return (
         f'You cannot {op_name} {_correct_article(operand)}, {node.operand.as_string()}.'
@@ -160,9 +159,9 @@ def unaryop_error_message(node: astroid.UnaryOp, constraints) -> str:
 ###############################################################################
 # Subscript message
 ###############################################################################
-def subscript_error_message(node: astroid.Subscript, constraints) -> str:
+def subscript_error_message(node: astroid.Subscript) -> str:
     # Accessing an element of a List with an incompatible index type (non-integers)
-    subscript_concrete_type = constraints.resolve(node.value.inf_type).getValue()
+    subscript_concrete_type = (node.value.inf_type).getValue()
     if subscript_concrete_type is type(None):
         return f'NoneType is not subscriptable.'
 

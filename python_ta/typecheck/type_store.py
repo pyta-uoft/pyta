@@ -100,7 +100,7 @@ class TypeStore:
                 if self.type_constraints.can_unify(Callable[list(args), Any],
                                                    Callable[list(func_type.__args__[:-1]), Any]):
                     return func_type
-            return TypeFailFunction(self.type_constraints, tuple(func_types_list), None, node)
+            return TypeFailFunction(tuple(func_types_list), None, node)
 
     def is_descendant(self, child: type, ancestor: type) -> bool:
         if (getattr(child, '__origin__', None) is Union or

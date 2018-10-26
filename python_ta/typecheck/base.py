@@ -184,9 +184,8 @@ class TypeFailFunction(TypeFail):
     :param src_node: Astroid node where invalid function call occurs
     :param arg_indices: List of argument index numbers,
     """
-    def __init__(self, tc, func_types: Tuple[Callable], funcdef_node: astroid.FunctionDef, src_node: NodeNG,
+    def __init__(self, func_types: Tuple[Callable], funcdef_node: astroid.FunctionDef, src_node: NodeNG,
                  arg_indices: List[int] = None) -> None:
-        self.type_constraints = tc
         self.func_types = func_types
         self.funcdef_node = funcdef_node
         self.src_node = src_node
@@ -195,7 +194,7 @@ class TypeFailFunction(TypeFail):
 
     def __str__(self):
         #return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
-        return error_message(self.type_constraints, self)
+        return error_message(self)
 
 
 class TypeFailReturn(TypeFail):
@@ -738,13 +737,13 @@ class TypeConstraints:
             if new_func_type is None:
                 func_var_tnode = self.get_tnode(func_var)
                 funcdef_node = self.find_function_def(func_var_tnode)
-                return TypeFailFunction(self, tuple(func_type.__args__), funcdef_node, node)
+                return TypeFailFunction(tuple(func_type.__args__), funcdef_node, node)
             else:
                 func_type = new_func_type
         elif len(func_type.__args__) - 1 != len(arg_types):
             func_var_tnode = self.get_tnode(func_var)
             funcdef_node = self.find_function_def(func_var_tnode)
-            return TypeFailFunction(self, (func_type, ), funcdef_node, node)
+            return TypeFailFunction((func_type, ), funcdef_node, node)
 
         new_func_type = self.fresh_callable(func_type, node)
         func_params = getattr(new_func_type, '__args__', [None])[:-1]
@@ -758,13 +757,13 @@ class TypeConstraints:
                 if isinstance(func_type, TypeFail):
                     func_var_tnode = self.get_tnode(func_var)
                     funcdef_node = self.find_function_def(func_var_tnode)
-                    return TypeFailFunction(self, (func_type,), funcdef_node, node)
+                    return TypeFailFunction((func_type,), funcdef_node, node)
 
                 iterator_type = self.unify_call(func_type, arg_types[i], node=node)
                 if isinstance(iterator_type, TypeFail):
                     func_var_tnode = self.get_tnode(func_var)
                     funcdef_node = self.find_function_def(func_var_tnode)
-                    return TypeFailFunction(self, (func_type,), funcdef_node, node)
+                    return TypeFailFunction((func_type,), funcdef_node, node)
 
                 arg_types[i] = Iterable[iterator_type.getValue().__args__[0]]
 
@@ -784,7 +783,7 @@ class TypeConstraints:
         if results:
             func_var_tnode = self.get_tnode(func_var)
             funcdef_node = self.find_function_def(func_var_tnode)
-            return TypeFailFunction(self, (new_func_type, ), funcdef_node, node, results)
+            return TypeFailFunction((new_func_type, ), funcdef_node, node, results)
         return self._type_eval(new_func_type.__args__[-1])
 
     def _type_eval(self, t: type) -> TypeResult:

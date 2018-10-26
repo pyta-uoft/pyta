@@ -109,7 +109,7 @@ INPLACE_TO_BINOP = {
 ###############################################################################
 # Error message
 ###############################################################################
-def error_message(tc: TypeConstraints, tf: TypeFail) -> None:
+def error_message(tf: TypeFail) -> None:
     """Return an appropriate error message given an instance of TypeFailFunction."""
     if isinstance(tf.src_node, astroid.UnaryOp):
         return unaryop_error_message(tf.src_node, tf.type_constraints)

@@ -118,7 +118,7 @@ def error_message(tf: TypeFail) -> None:
     elif isinstance(tf.src_node, astroid.Subscript):
         return subscript_error_message(tf.src_node, tf.type_constraints)
     else:
-        return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
+        return f'TypeFail: Invalid function call at {tf.src_node.as_string()}'
 
 
 ###############################################################################

@@ -178,7 +178,6 @@ class TypeFailFunction(TypeFail):
     """
     TypeFailFunction occurs when a function is called with different arguments than expected.
 
-    :param tc: TypeConstraints
     :param func_types: Tuple containing one or more acceptable type signatures
     :param funcdef_node: FunctionDef astroid node where function is defined
     :param src_node: Astroid node where invalid function call occurs
@@ -193,7 +192,6 @@ class TypeFailFunction(TypeFail):
         super().__init__(str(self))
 
     def __str__(self):
-        #return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
         return error_message(self)
 
 

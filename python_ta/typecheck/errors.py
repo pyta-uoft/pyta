@@ -111,13 +111,14 @@ INPLACE_TO_BINOP = {
 ###############################################################################
 def error_message(tf: TypeFail) -> None:
     """Return an appropriate error message given an instance of TypeFailFunction."""
-    # if isinstance(tf.src_node, astroid.UnaryOp):
-    #     return unaryop_error_message(tf.src_node)
-    # elif isinstance(tf.src_node, astroid.BinOp):
-    #     return binop_error_message(tf.src_node)
-    # elif isinstance(tf.src_node, astroid.Subscript):
-    #     return subscript_error_message(tf.src_node)
-    return f'TypeFail: Invalid function call at {tf.src_node.as_string()}'
+    if isinstance(tf.src_node, astroid.UnaryOp):
+        return unaryop_error_message(tf.src_node)
+    elif isinstance(tf.src_node, astroid.BinOp):
+        return binop_error_message(tf.src_node)
+    elif isinstance(tf.src_node, astroid.Subscript):
+        return subscript_error_message(tf.src_node)
+    else:
+        return f'TypeFail: Invalid function call at {tf.src_node.as_string()}'
 
 
 ###############################################################################

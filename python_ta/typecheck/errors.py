@@ -133,8 +133,8 @@ def binary_op_hints(op, args):
 
 def binop_error_message(node: astroid.BinOp) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
-    left_type = _get_name((node.left.inf_type).getValue())
-    right_type = _get_name((node.right.inf_type).getValue())
+    left_type = _get_name(node.left.inf_type.getValue())
+    right_type = _get_name(node.right.inf_type.getValue())
     hint = binary_op_hints(node.op, [left_type, right_type]) or ''
 
     return (
@@ -149,7 +149,7 @@ def binop_error_message(node: astroid.BinOp) -> str:
 ###############################################################################
 def unaryop_error_message(node: astroid.UnaryOp) -> str:
     op_name = UNARY_TO_ENGLISH[node.op]
-    operand = _get_name((node.operand.inf_type).getValue())
+    operand = _get_name(node.operand.inf_type.getValue())
 
     return (
         f'You cannot {op_name} {_correct_article(operand)}, {node.operand.as_string()}.'

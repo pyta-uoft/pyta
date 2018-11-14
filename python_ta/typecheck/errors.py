@@ -184,6 +184,8 @@ def subscript_error_message(node: astroid.Subscript) -> str:
         return f'You tried to access an element of this dictionary using ' \
                f'{_correct_article(slice_type)}, {node.slice.value.as_string()}, ' \
                f'but the keys are of type {_get_name(subscript_concrete_type.__args__[0])}.'
+    else:
+        return f'You make a type annotation with an incorrect subscript.'
 
 
 def _correct_article(noun : str) -> str:

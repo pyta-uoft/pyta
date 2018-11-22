@@ -42,7 +42,7 @@ class TypeAnnotationChecker(BaseChecker):
         for attr_key in node.instance_attrs:
             attr_node = node.instance_attrs[attr_key][0]
             if isinstance(attr_node, astroid.AssignAttr):
-                if attr_key not in node.locals:
+                if attr_key not in node.locals and all(attr_key not in base.locals for base in node.ancestors()):
                     self.add_message('type-annotation-inst-var', node=attr_node)
                 elif isinstance(attr_node.parent, astroid.AnnAssign):
                     self.add_message('type-annotation-inst-var', node=attr_node)

@@ -1,6 +1,5 @@
-"""checker for target of for loop in subscript form.
+"""Checker for target of for loop in subscript form.
 """
-
 import astroid
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
@@ -12,7 +11,7 @@ class ForTargetSubscriptChecker(BaseChecker):
     # name is the same as file name but without _checker part
     name = 'for_target_subscript'
     # use dashes for connecting words in message symbol
-    msgs = {'E9984': ('For loop variable "%s" should not be in subscript form in CSC108/CSC148.',
+    msgs = {'E9984': ('For loop variable "%s" should not be a part of a larger object.',
                       'for-target-subscript',
                       'Used when you have a loop variable in a for loop '
                       'that is in subscript form'),
@@ -27,7 +26,7 @@ class ForTargetSubscriptChecker(BaseChecker):
             self.add_message('for-target-subscript',
                              node=node.target, args=node.target.as_string())
         # if there are multiple targets
-        if isinstance(node.target, astroid.Tuple):
+        elif isinstance(node.target, astroid.Tuple):
             for target in node.target.elts:
                 if isinstance(target, astroid.Subscript):
                     self.add_message('for-target-subscript',

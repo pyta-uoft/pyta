@@ -314,7 +314,10 @@ class PlainReporter(BaseReporter):
     def output_blob(self):
         """Override in reporters that output collections of messages once at
         the end of linting all files, rather than stream to std.out"""
-        pass
+        if self.current_file_linted is None:
+            # There were no files checked.
+            print('[ERROR]: No files were checked.')
+            return
 
     @classmethod
     def _vendor_wrap(self, colour_class, text):

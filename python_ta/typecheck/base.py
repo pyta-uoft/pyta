@@ -7,6 +7,8 @@ import astroid
 from astroid.node_classes import NodeNG
 from itertools import product
 from ..util.monad import Failable, failable_collect
+from python_ta.typecheck.errors import error_message
+from python_ta.utils import _get_name, _gorg
 
 
 class _TNode:
@@ -190,7 +192,7 @@ class TypeFailFunction(TypeFail):
         super().__init__(str(self))
 
     def __str__(self):
-        return f'TypeFail: Invalid function call at {self.src_node.as_string()}'
+        return error_message(self)
 
 
 class TypeFailReturn(TypeFail):
@@ -219,16 +221,6 @@ class TypeFailStarred(TypeFail):
 
     def __str__(self) -> str:
         return f'TypeFail: Multiple starred variables not valid'
-
-
-def _gorg(x):
-    """Make _gorg compatible for Python 3.6.2 and 3.6.3."""
-    if sys.version_info >= (3, 7, 0):
-        return x.__origin__
-    if sys.version_info < (3, 6, 3):
-        return typing._gorg(x)
-    else:
-        return x._gorg
 
 
 def accept_failable(f: Callable) -> Callable:
@@ -332,19 +324,6 @@ def _get_poly_vars(t: type) -> Set[str]:
             pvars.update(_get_poly_vars(arg))
         return pvars
     return set()
-
-
-def _get_name(t: type) -> str:
-    """If t is associated with a class, return the name of the class; otherwise, return a string repr. of t"""
-    if isinstance(t, ForwardRef):
-        return t.__forward_arg__
-    elif isinstance(t, type):
-        return t.__name__
-    elif isinstance(t, _GenericAlias):
-        return '{} of {}'.format(_get_name(t.__origin__),
-                                 ', '.join(_get_name(arg) for arg in t.__args__))
-    else:
-        return str(t)
 
 
 def create_Callable(args: Iterable[type], rtype: type, class_poly_vars: Set[type] = None) -> Callable:

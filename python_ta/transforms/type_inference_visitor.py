@@ -475,10 +475,8 @@ class TypeInferer:
             node.inf_type = arithm_type
         else:
             rev_method_name = BINOP_TO_REV_METHOD[node.op]
-            l_type = self._handle_call(node, method_name, left_inf, right_inf,
-                                                  error_func=binop_error_message)
-            r_type = self._handle_call(node, rev_method_name, right_inf, left_inf,
-                                                  error_func=binop_error_message)
+            l_type = self._handle_call(node, method_name, left_inf, right_inf)
+            r_type = self._handle_call(node, rev_method_name, right_inf, left_inf)
 
             if self.type_store.is_descendant(right_inf.getValue(), left_inf.getValue()):
                 if isinstance(r_type, TypeFail) and isinstance(l_type, TypeInfo):
@@ -510,7 +508,7 @@ class TypeInferer:
             node.inf_type = TypeInfo(bool)
         else:
             method_name = UNARY_TO_METHOD[node.op]
-            node.inf_type = self._handle_call(node, method_name, node.operand.inf_type, error_func=unaryop_error_message)
+            node.inf_type = self._handle_call(node, method_name, node.operand.inf_type)
 
     def visit_boolop(self, node: astroid.BoolOp) -> None:
         node.inf_type = self._unify_elements(node.values, node)
@@ -570,17 +568,17 @@ class TypeInferer:
             except AttributeError:
                 value_gorg = None
 
-            if value_gorg == Type and isinstance(node.slice, astroid.Index):
+            if value_gorg is type and isinstance(node.slice, astroid.Index):
                 if isinstance(node.slice.value, astroid.Tuple):
                     node.inf_type = wrap_container(_node_to_type(node.value), *_node_to_type(node.slice.value))
                 else:
                     node.inf_type = wrap_container(_node_to_type(node.value), _node_to_type(node.slice.value))
             else:
-                node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
+                node.inf_type = self._handle_call(node, '__getitem__', node.value.inf_type, node.slice.inf_type)
         elif node.ctx == astroid.Store:
             node.inf_type = NoType()
         elif node.ctx == astroid.Del:
-            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type, error_func=subscript_error_message)
+            node.inf_type = self._handle_call(node, '__delitem__', node.value.inf_type, node.slice.inf_type)
 
     ##############################################################################
     # Loops
@@ -626,18 +624,14 @@ class TypeInferer:
         node.inf_type = wrap_container(Set, elt_inf_type)
 
     @accept_failable
-    def _handle_call(self, node: NodeNG, function_name: str, *arg_types: type,
-                     error_func: Optional[Callable[[NodeNG], str]] = None) -> TypeResult:
+    def _handle_call(self, node: NodeNG, function_name: str, *arg_types: type) -> TypeResult:
         """Helper to lookup a function and unify it with given arguments.
            Return the return type of unified function call.
         """
         arg_inf_types = [self.type_constraints.resolve(arg) for arg in arg_types]
         func_type = self.type_store.lookup_method(function_name, *arg_inf_types, node=node)
 
-        if isinstance(func_type, TypeFail) and error_func is not None:
-            return TypeFail(error_func(node, self.type_constraints))
-        else:
-            return self.type_constraints.unify_call(func_type, *arg_types, node=node)
+        return self.type_constraints.unify_call(func_type, *arg_types, node=node)
 
     ##############################################################################
     # Definitions

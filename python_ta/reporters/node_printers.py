@@ -37,7 +37,7 @@ def render_generic(msg, source_lines=None):
 
 
 def render_missing_docstring(msg, source_lines=None):
-    """Render a missing docstring message"""
+    """Render a missing docstring message."""
     if isinstance(msg.node, astroid.Module):
         yield (None, slice(None, None), LineType.DOCSTRING, '"""YOUR DOCSTRING HERE"""')
         yield from render_context(1, 3, source_lines)
@@ -54,6 +54,7 @@ def render_missing_docstring(msg, source_lines=None):
 
 
 def render_trailing_newlines(msg, source_lines=None):
+    """Render a trailing newlines message."""
     start_line = msg.line - 1
     yield from render_context(start_line - 2, start_line, source_lines)
     yield from ((line, slice(None, None), LineType.OTHER, source_lines[line-1])
@@ -68,7 +69,7 @@ def render_context(start, stop, source_lines):
 
 
 def render_bad_whitespace(msg, source_lines=None):
-    """Extract column information from caret position within message string"""
+    """Extract column information from caret position within message string."""
     start, stop = None, None
     last_line = msg.msg.split('\n')[-1]
     if '^' in last_line:
@@ -81,10 +82,22 @@ def render_bad_whitespace(msg, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
+def render_type_annotation_return(msg, source_lines=None):
+    """Render a type annotation return message."""
+    start_line, end_line = msg.node.fromlineno, msg.node.end_lineno
+    # Display up to 2 lines before node for context:
+    yield from render_context(start_line - 2, start_line, source_lines)
+    yield from ((line, slice(None, None), LineType.ERROR, source_lines[line-1]) for line in
+                range(start_line, end_line + 1))
+    # Display up to 2 lines after node for context:
+    yield from render_context(end_line + 1, end_line + 3, source_lines)
+
+
 CUSTOM_MESSAGES = {
     'missing-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
     'bad-whitespace': render_bad_whitespace,
+    'type-annotation-return': render_type_annotation_return
 }
 
 

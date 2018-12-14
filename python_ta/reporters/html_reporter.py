@@ -68,6 +68,11 @@ class HTMLReporter(ColorReporter):
 
     def output_blob(self):
         """Output to the template after all messages."""
+        if self.current_file_linted is None:
+            # There were no files checked.
+            print('[ERROR]: No files were checked.')
+            return
+
         template_f = self.linter.config.pyta_template_file
         template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(template_f)
 

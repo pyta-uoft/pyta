@@ -73,4 +73,9 @@ class PositionReporter(PlainReporter):
 
     def output_blob(self):
         """Output python dict to JSON."""
+        if self.current_file_linted is None:
+            # There were no files checked.
+            print('[ERROR]: No files were checked.')
+            return
+
         print(json.dumps(self._output, indent=4))

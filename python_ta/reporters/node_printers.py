@@ -93,11 +93,34 @@ def render_type_annotation_return(msg, source_lines=None):
     yield from render_context(end_line + 1, end_line + 3, source_lines)
 
 
+def render_too_many_function_args(msg, source_lines=None):
+    """Render a type annotation return message."""
+    node = msg.node.args  # the arguments node
+    print(node)
+    start_line, start_col = node[0].fromlineno, node[0].col_offset
+    end_line, end_col = node[-1].end_lineno, node[-1].end_col_offset
+
+    # Display up to 2 lines before node for context:
+    yield from render_context(start_line - 2, start_line, source_lines)
+
+    if start_line == end_line:
+        yield (start_line, slice(start_col, end_col), LineType.ERROR, source_lines[start_line - 1])
+    else:
+        yield (start_line, slice(start_col, None), LineType.ERROR, source_lines[start_line - 1])
+        yield from ((line, slice(None, None), LineType.ERROR, source_lines[line - 1]) for line in
+                    range(start_line + 1, end_line))
+        yield (end_line, slice(None, end_col), LineType.ERROR, source_lines[end_line - 1])
+
+    # Display up to 2 lines after node for context:
+    yield from render_context(end_line + 1, end_line + 3, source_lines)
+
+
 CUSTOM_MESSAGES = {
     'missing-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
     'bad-whitespace': render_bad_whitespace,
-    'type-annotation-return': render_type_annotation_return
+    'type-annotation-return': render_type_annotation_return,
+    'too-many-function-args': render_too_many_function_args
 }
 
 

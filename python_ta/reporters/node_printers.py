@@ -96,7 +96,6 @@ def render_type_annotation_return(msg, source_lines=None):
 def render_too_many_function_args(msg, source_lines=None):
     """Render a type annotation return message."""
     node = msg.node.args  # the arguments node
-    print(node)
     start_line, start_col = node[0].fromlineno, node[0].col_offset
     end_line, end_col = node[-1].end_lineno, node[-1].end_col_offset
 

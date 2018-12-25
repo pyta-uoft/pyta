@@ -84,7 +84,7 @@ def render_bad_whitespace(msg, source_lines=None):
 
 def render_type_annotation_return(msg, source_lines=None):
     """Render a type annotation return message."""
-    start_line, end_line = msg.node.fromlineno, msg.node.end_lineno
+    start_line, end_line = msg.node.parent.fromlineno, msg.node.end_lineno
     # Display up to 2 lines before node for context:
     yield from render_context(start_line - 2, start_line, source_lines)
     yield from ((line, slice(None, None), LineType.ERROR, source_lines[line-1]) for line in

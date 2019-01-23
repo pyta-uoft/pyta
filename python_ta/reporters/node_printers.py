@@ -90,7 +90,7 @@ def render_type_annotation_return(msg, source_lines=None):
 
     # Display up to 2 lines before node for context:
     yield from render_context(start_line - 2, start_line, source_lines)
-    yield from ((line, slice(start_col + 4, end_col + 1), LineType.ERROR, source_lines[line-1]) for line in
+    yield from ((line, slice(None, end_col + 1), LineType.ERROR, source_lines[line-1]) for line in
                 range(start_line, end_line + 1))
     # Display up to 2 lines after node for context:
     yield from render_context(end_line + 1, end_line + 3, source_lines)

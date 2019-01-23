@@ -169,6 +169,7 @@ def _is_arg_name(s, index, node):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
+    (astroid.Arguments, _token_search('('), _token_search(')')),
     (astroid.AssignAttr, None, _is_attr_name),
     (astroid.AsyncFor, _keyword_search('async'), None),
     (astroid.AsyncWith, _keyword_search('async'), None),

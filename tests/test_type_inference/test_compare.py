@@ -7,24 +7,19 @@ import hypothesis.strategies as hs
 settings.load_profile("pyta")
 
 
-@given(cs.primitive_values, hs.lists(hs.tuples(cs.comparator_operator_equality, cs.primitive_values), min_size=1))
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@given(hs.integers(), hs.lists(hs.tuples(cs.comparator_operator_equality, hs.integers()), min_size=1))
 def test_compare_equality(left_value, operator_value_tuples):
     """Test type setting of Compare node representing comparators: ''==', '!=', '>=', '<=', 'is'. """
+    program = f'{repr(left_value)}'
     for operator, value in operator_value_tuples:
-        if isinstance(value, str):
-            assume(len(value) > 2)
-    program = f'{repr(left_value)} '
-    for operator, value in operator_value_tuples:
-        program += ' '.join([operator, repr(value)])
+        program += ' ' + ' '.join([operator, repr(value)])
     module, _ = cs._parse_text(program)
     compare_node = list(module.nodes_of_class(astroid.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
 @given(hs.lists(cs.comparator_operator, min_size=3), cs.numeric_list(min_size=4))
-@settings(suppress_health_check=[HealthCheck.too_slow])
-def test_compare_equality(operators, values):
+def test_compare_inequality(operators, values):
     """Test type setting of Compare node representing comparators: '<', '>'. """
     a = list(zip(operators, values))
     pre = []

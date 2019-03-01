@@ -198,8 +198,7 @@ def set_node(draw, elt=const_node(), **kwargs):
 
 @hs.composite
 def setcomp_node(draw, elt=const_node(),
-                  generators=hs.lists(comprehension_node(),
-                                      min_size=1, average_size=1)):
+                 generators=hs.lists(comprehension_node(), min_size=1)):
     node = astroid.SetComp()
     node.postinit(draw(elt), draw(generators))
     return node
@@ -216,8 +215,7 @@ def list_node(draw, elt=const_node(), **kwargs):
 
 @hs.composite
 def listcomp_node(draw, elt=const_node(),
-                  generators=hs.lists(comprehension_node(),
-                                            min_size=1, average_size=1)):
+                  generators=hs.lists(comprehension_node(), min_size=1)):
     node = astroid.ListComp()
     node.postinit(draw(elt), draw(generators))
     return node

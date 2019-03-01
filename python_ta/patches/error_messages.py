@@ -4,10 +4,10 @@ from importlib import import_module
 # global
 patch_data = {
     'pylint.checkers.base':
-        {'PassChecker':
-             {'W0107': 'Unnecessary pass statement (you should remove this)'}
-         }
-}
+        {'PassChecker': {'W0107': 'Unnecessary pass statement (you should remove this)'}},
+    'pylint.checkers.design_analysis':
+        {'MisdesignChecker': {'R0913': 'Too many parameters (%s/%s)'}}
+    }
 
 
 # We are assuming only the first elements of the tuple values in <msgs> are being patched.

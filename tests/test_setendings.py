@@ -5,7 +5,7 @@ Checks that `end_lineno` and `end_col_offset` node properties are set.
 import unittest
 from python_ta.transforms.setendings import *
 
-PATH = '../examples/ending_locations/'
+PATH = 'examples/ending_locations/'
 
 
 class TestEndingLocations(unittest.TestCase):

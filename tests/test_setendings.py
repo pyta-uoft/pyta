@@ -122,15 +122,13 @@ class TestEndingLocations(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'Await.py')
     #     self.set_and_check(module, astroid.Await, expected)
 
-    # def test_binop(self):
-    #     """note: value of col_offset = 6, is weird but we didn't set it.
-    #     first (depends on pre/postorder) binop is ((1 + 2) + 3), then (1 + 2)
-    #     TODO: add the "( (100) * (42)  )" test
-    #     """
-    #     expected = [(1, 1, 6, 9), (1, 1, 0, 5)]
-    #     example = '''1 + 2 + 3'''
-    #     module = self.get_string_as_module(example)
-    #     self.set_and_check(module, astroid.BinOp, expected)
+    def test_binop(self):
+        """note: value of col_offset = 6, is weird but we didn't set it.
+        first (depends on pre/postorder) binop is ((1 + 2) + 3), then (1 + 2)
+        """
+        expected = [(1, 1, 6, 9), (1, 1, 0, 5), (2, 2, 2, 10), (3, 3, 0, 11), (4, 4, 2, 14)]
+        module = self.get_file_as_module(PATH + 'Binop.py')
+        self.set_and_check(module, astroid.BinOp, expected)
 
     # def test_boolop(self):
     #     """

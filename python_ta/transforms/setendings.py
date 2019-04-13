@@ -215,6 +215,7 @@ def init_register_ending_setters(source_code):
     ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
     ending_transformer.register_transform(astroid.Arguments, set_arguments)
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
+    ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
 
     for node_class in NODES_WITHOUT_CHILDREN:
         ending_transformer.register_transform(node_class, set_without_children)
@@ -239,7 +240,7 @@ def init_register_ending_setters(source_code):
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
     ending_transformer.register_transform(astroid.Tuple, add_parens_to_const(source_code))
-
+    ending_transformer.register_transform(astroid.BinOp, fix_binop(source_code))
     return ending_transformer
 
 
@@ -320,6 +321,77 @@ def fix_start_attributes(node):
             if node.col_offset is None:
                 node.col_offset = 0
     return node
+
+
+def fix_binop(source_code):
+    def _find_first_non_whitespace(node):
+        line_left = node.fromlineno - 1  # convert 1-index to 0-index
+        char_left = node.col_offset - 1  # just left of starting character
+        line_right = node.end_lineno - 1
+        char_right = node.end_col_offset  # 1st character after the last character in the node
+
+        # look for the first non-whitespace to the left of the BinOp node
+
+        while char_left >= 0 and source_code[line_left][char_left] == ' ':
+            if char_left == 0:
+                line_left -= 1
+                # diff way of finding non-whtspce
+                non_wtspce = -1
+                while char_left < len(source_code[line_left]):
+                    if source_code[line_left][char_left] not in [' ', '\\', '#']:
+                        non_wtspce = char_left
+                    if char_left == len(source_code[line_left]) - 1 or source_code[line_left][char_left] in ['\\', '#']:
+                        if non_wtspce == -1:
+                            char_left = 0
+                            line_left -= 1
+                        else:
+                            char_left = non_wtspce
+                            break
+                    else:  # ' '
+                        char_left += 1
+            else:
+                char_left -= 1
+            try:
+                source_code[line_left][char_left]
+            except IndexError:
+                print(node, line_left, char_left)
+                print(source_code[line_left], line_left)
+                print(source_code[line_left][char_left], char_left)
+        # first non-whitespace is not '('
+        if source_code[line_left][char_left] != '(':
+            return
+        # else: char_left is set at '('
+
+        # look at first non-whitespace to the right of the BinOp node *\*
+        print(line_right, char_right)
+        print(source_code[line_right], len(source_code[line_right]))
+        if char_right == len(source_code[line_right]):
+            line_right += 1
+            char_right = 0
+        while char_right < len(source_code[line_right]) and source_code[line_right][char_right] in [' ', '\\', '#']:
+            if source_code[line_right][char_right] == ' ':
+                if char_right == len(source_code[line_right]):
+                    line_right += 1
+                    char_right = 0
+                else:
+                    char_right += 1
+            elif source_code[line_right][char_right] in ['\\', '#']:
+                line_right += 1
+                char_right = 0
+        # if no more right char or first non-whitespace is not ')'
+        try:
+            source_code[line_right][char_right]
+        except IndexError:
+            print(node, line_right, char_right)
+            print(source_code[line_right], len(source_code[line_right]), line_right)
+            print(source_code[line_right][char_right], char_right)
+        if source_code[line_right][char_right] != ')':
+            return
+        # else: char_right is set at ')'
+        node.fromlineno, node.end_lineno = line_left + 1, line_right + 1
+        node.col_offset, node.end_col_offset = char_left, char_right + 1  # since char_right is set at ')'
+        return node
+    return _find_first_non_whitespace
 
 
 def _set_start_from_first_child(node):

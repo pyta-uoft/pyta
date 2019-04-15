@@ -3,17 +3,20 @@ from importlib import import_module
 
 # global
 patch_data = {
-    'pylint.checkers.base':
-        {'PassChecker':
+    'pylint.checkers.base': {
+        'PassChecker':
              {'W0107': 'Unnecessary pass statement (you should remove this)'}
-         },
-    'pylint.checkers.refactoring':
-        {'RefactoringChecker':
+    },
+    'pylint.checkers.refactoring': {
+        'RefactoringChecker':
              {'R1710': 'Since this function can return a non-None value, you should '
                        'explicitly write "return None" whenever None is returned by '
                        'this function. (Possibly including possibly at the end of the function body.)'
-              }
-         }
+             }
+    },
+    'pylint.checkers.design_analysis': {
+        'MisdesignChecker': {'R0913': 'Too many parameters (%s/%s)'}
+    }
 }
 
 
@@ -32,6 +35,3 @@ def patch_error_messages():
                     checker.msgs[error_id] = tuple(lst_msg)
             else:
                 print('no msgs attribute!')
-
-
-# TODO: patch more pylint error messages

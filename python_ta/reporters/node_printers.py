@@ -96,11 +96,19 @@ def render_type_annotation_return(msg, source_lines=None):
     yield from render_context(end_line + 1, end_line + 3, source_lines)
 
 
+def render_too_many_arguments(msg, source_lines=None):
+    """Render a too many arguments message."""
+    # msg is an Functiondef node so replace it with its Arguments node
+    msg = msg._replace(node=msg.node.args)
+    yield from render_generic(msg, source_lines)
+
+
 CUSTOM_MESSAGES = {
     'missing-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
     'bad-whitespace': render_bad_whitespace,
-    'type-annotation-return': render_type_annotation_return
+    'type-annotation-return': render_type_annotation_return,
+    'too-many-arguments': render_too_many_arguments
 }
 
 

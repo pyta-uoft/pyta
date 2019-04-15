@@ -213,7 +213,6 @@ def init_register_ending_setters(source_code):
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))
-    ending_transformer.register_transform(astroid.Arguments, set_arguments)
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
 
     for node_class in NODES_WITHOUT_CHILDREN:
@@ -289,22 +288,43 @@ def fix_slice(source_code):
 
 def fix_arguments(source_code):
     """For an Arguments node"""
-    def _find(node):
-        if _get_last_child(node):
-            return fix_start_attributes(node)
-        # no children
-        line_i = node.parent.fromlineno - 1  # convert 1 to 0 index.
+    def _find(node: astroid.Arguments) -> astroid.Arguments:
+        children = list(node.get_children())
+        if children:
+            fix_start_attributes(node)
+
+        line_i = node.parent.fromlineno
         char_i = node.parent.col_offset
+        for child in children:
+            if line_i is None:
+                line_i = child.end_lineno
+                char_i = child.end_col_offset
+            elif (line_i < child.end_lineno or
+                  line_i == child.end_lineno and char_i < child.end_col_offset) :
+                line_i = child.end_lineno
+                char_i = child.end_col_offset
+
+        line_i -= 1  # Switch to 0-indexing
+
         # left bracket if parent is FunctionDef, colon if Lambda
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ')' \
-                and source_code[line_i][char_i] != ':':
+        if isinstance(node.parent, astroid.FunctionDef):
+            end_char = ')'
+        else:
+            end_char = ':'
+
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != end_char:
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
                 char_i = 0
                 line_i += 1
             else:
                 char_i += 1
-        node.fromlineno, node.col_offset = line_i + 1, char_i
+
         node.end_lineno, node.end_col_offset = line_i + 1, char_i
+
+        # no children
+        if children == []:
+            node.fromlineno, node.col_offset = line_i + 1, char_i
+
         return node
     return _find
 
@@ -394,18 +414,6 @@ def set_without_children(node):
         node.end_col_offset = node.col_offset + len(node.as_string())
     return node
 
-
-def set_arguments(node):
-    """astroid.Arguments node is missing the col_offset, and has children only
-    sometimes.
-    Arguments node can be found in nodes: FunctionDef, Lambda.
-    """
-    if _get_last_child(node):
-        set_from_last_child(node)
-    else:  # node does not have children.
-        # TODO: this should be replaced with the string parsing strategy
-        node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
-    return node
 
 def _get_last_child(node):
     """Returns the last child node, or None.
@@ -619,7 +627,6 @@ def register_transforms(source_code, obj):
 
     # Ad hoc transformations
     obj.register_transform(astroid.Arguments, fix_arguments(source_code))
-    obj.register_transform(astroid.Arguments, set_arguments)
 
     for node_class in NODES_WITH_CHILDREN:
         obj.register_transform(node_class, set_from_last_child)

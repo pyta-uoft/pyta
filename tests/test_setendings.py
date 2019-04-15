@@ -46,7 +46,7 @@ class TestEndingLocations(unittest.TestCase):
         self.assertEqual(expected, props)
 
     def test_arguments(self):
-        expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18), (11, 11, 6, 21)]
+        expected = [(1, 2, 8, 30), (5, 5, 14, 14), (8, 8, 12, 12), (9, 9, 14, 18), (11, 11, 6, 48)]
         module = self.get_file_as_module(PATH + 'Arguments.py')
         self.set_and_check(module, astroid.Arguments, expected)
 

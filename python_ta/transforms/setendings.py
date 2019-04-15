@@ -212,7 +212,7 @@ def init_register_ending_setters(source_code):
 
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
-    ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
+    ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))
     ending_transformer.register_transform(astroid.Arguments, set_arguments)
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
 
@@ -285,6 +285,28 @@ def fix_slice(source_code):
         return node
 
     return _find_colon
+
+
+def fix_arguments(source_code):
+    """For an Arguments node"""
+    def _find(node):
+        if _get_last_child(node):
+            return fix_start_attributes(node)
+        # no children
+        line_i = node.parent.fromlineno - 1  # convert 1 to 0 index.
+        char_i = node.parent.col_offset
+        # left bracket if parent is FunctionDef, colon if Lambda
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ')' \
+                and source_code[line_i][char_i] != ':':
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
+                char_i = 0
+                line_i += 1
+            else:
+                char_i += 1
+        node.fromlineno, node.col_offset = line_i + 1, char_i
+        node.end_lineno, node.end_col_offset = line_i + 1, char_i
+        return node
+    return _find
 
 
 def fix_start_attributes(node):
@@ -596,7 +618,7 @@ def register_transforms(source_code, obj):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
-    obj.register_transform(astroid.Arguments, fix_start_attributes)
+    obj.register_transform(astroid.Arguments, fix_arguments(source_code))
     obj.register_transform(astroid.Arguments, set_arguments)
 
     for node_class in NODES_WITH_CHILDREN:

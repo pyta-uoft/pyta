@@ -14,3 +14,10 @@ j[:][:]
 k[::]
 l[:]     [:]
 x = m[  :  ]
+
+
+from typing import List
+
+
+def add(numbers: List[int]) -> List[int]:
+    return numbers + [1]

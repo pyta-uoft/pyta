@@ -136,20 +136,6 @@ def _keyword_search(keyword):
     return _is_keyword
 
 
-def _is_within_close_bracket(s, index, node):
-    """Fix to include right ']'."""
-    if index >= len(s) - 1:
-        return False
-    return s[index + 1] == ']'
-
-
-def _is_within_open_bracket(s, index, node):
-    """Fix to include left '['."""
-    if index < 1:
-        return False
-    return s[index-1] == '['
-
-
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
     target_len = len(node.attrname)
@@ -188,8 +174,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
-    (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
-    (astroid.Subscript, None, _token_search(']')),
+    (astroid.Slice, _token_search('['), None),
     (astroid.Tuple, None, _token_search(',')),
 ]
 
@@ -253,37 +238,33 @@ def fix_slice(source_code):
     children. The main problem is when Slice node doesn't have children.
     E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing positions
     are sometimes set improperly to 0.
-    Note: the location positions don't include '[' or ']'.
-
-    2-step Approach:
-    -- Step 1) use this transform to get to the ':'
-    -- Step 2) use other transforms to then expand outwards to the '[' or ']'
     """
-    def _find_colon(node):
+    def _find_square_brackets(node):
         if _get_last_child(node):
             set_from_last_child(node)
-            return node
-        if not hasattr(node, 'end_lineno'):
-            set_without_children(node)
+            line_i = node.end_lineno - 1  # convert 1 to 0 index.
+            char_i = node.end_col_offset
+            has_children = True
+        else:
+            line_i = node.parent.value.end_lineno - 1  # convert 1 to 0 index.
+            char_i = node.parent.value.end_col_offset
+            has_children = False
 
-        # Search for the first ":" after ending position of parent's value node.
-        line_i = node.parent.value.end_lineno - 1  # convert 1 to 0 index.
-        char_i = node.parent.value.end_col_offset + 1
-
-        # Search the remaining source code for the ":" char.
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ':':
+        # Search the remaining source code for the "]" char.
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ']':
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
                 char_i = 0
                 line_i += 1
             else:
                 char_i += 1
 
-        node.fromlineno, node.col_offset = line_i + 1, char_i
-        node.end_lineno, node.end_col_offset = line_i + 1, char_i
+        if not has_children:
+            node.fromlineno, node.col_offset = line_i + 1, char_i
+        node.end_lineno, node.end_col_offset = line_i + 1, char_i + 1
 
         return node
 
-    return _find_colon
+    return _find_square_brackets
 
 
 def fix_arguments(source_code):

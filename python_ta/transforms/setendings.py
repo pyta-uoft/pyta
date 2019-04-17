@@ -331,11 +331,10 @@ def fix_binop(source_code):
         char_right = node.end_col_offset  # 1st character after the last character in the node
 
         # look for the first non-whitespace to the left of the BinOp node
-
         while char_left >= 0 and source_code[line_left][char_left] == ' ':
             if char_left == 0:
                 line_left -= 1
-                # diff way of finding non-whtspce
+                # there are non non-whitespace characters on the same line as the node
                 non_wtspce = -1
                 while char_left < len(source_code[line_left]):
                     if source_code[line_left][char_left] not in [' ', '\\', '#']:
@@ -349,22 +348,15 @@ def fix_binop(source_code):
                             break
                     else:  # ' '
                         char_left += 1
-            else:
+            else:  # there is a non-whitespace character on the same line as the node
                 char_left -= 1
-            try:
-                source_code[line_left][char_left]
-            except IndexError:
-                print(node, line_left, char_left)
-                print(source_code[line_left], line_left)
-                print(source_code[line_left][char_left], char_left)
+
         # first non-whitespace is not '('
         if source_code[line_left][char_left] != '(':
             return
         # else: char_left is set at '('
 
-        # look at first non-whitespace to the right of the BinOp node *\*
-        print(line_right, char_right)
-        print(source_code[line_right], len(source_code[line_right]))
+        # look for the first non-whitespace to the right of the BinOp node
         if char_right == len(source_code[line_right]):
             line_right += 1
             char_right = 0
@@ -378,19 +370,18 @@ def fix_binop(source_code):
             elif source_code[line_right][char_right] in ['\\', '#']:
                 line_right += 1
                 char_right = 0
+
         # if no more right char or first non-whitespace is not ')'
-        try:
-            source_code[line_right][char_right]
-        except IndexError:
-            print(node, line_right, char_right)
-            print(source_code[line_right], len(source_code[line_right]), line_right)
-            print(source_code[line_right][char_right], char_right)
         if source_code[line_right][char_right] != ')':
             return
         # else: char_right is set at ')'
+
+        # update node
         node.fromlineno, node.end_lineno = line_left + 1, line_right + 1
         node.col_offset, node.end_col_offset = char_left, char_right + 1  # since char_right is set at ')'
+
         return node
+
     return _find_first_non_whitespace
 
 

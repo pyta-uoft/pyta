@@ -431,30 +431,27 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, astroid.SetComp, expected)
 
     def test_slice(self):
-        """Note: col_offset and end_col_offset are set to the first constant
-        encountered, either on left or right side of colon.
-        Should capture both brackets..
-        """
-        expected = [(1, 1, 2, 3),
-                    (2, 2, 3, 8),
-                    (3, 3, 2, 4),
-                    (4, 4, 3, 13),
-                    (5, 5, 2, 8),
-                    (6, 6, 8, 30),
-                    (7, 8, 2, 2),
-                    (9, 9, 2, 4),
-                    (9, 9, 6, 7),
-                    (10, 10, 2, 3),
-                    (10, 10, 5, 7),
-                    (11, 11, 2, 3),
-                    (11, 11, 5, 6),
-                    (12, 12, 2, 4),
-                    (13, 13, 2, 3),
-                    (13, 13, 10, 11),
-                    (14, 14, 6, 11),
-                    (15, 15, 2, 3),
-                    (15, 15, 5, 6),
-                    (15, 15, 9, 10)
+        """Note: includes square brackets."""
+        expected = [(1, 1, 1, 4),
+                    (2, 2, 2, 9),
+                    (3, 3, 1, 5),
+                    (4, 4, 2, 14),
+                    (5, 5, 1, 9),
+                    (6, 6, 7, 31),
+                    (7, 8, 1, 3),
+                    (9, 9, 1, 5),
+                    (9, 9, 5, 8),
+                    (10, 10, 1, 4),
+                    (10, 10, 4, 8),
+                    (11, 11, 1, 4),
+                    (11, 11, 4, 7),
+                    (12, 12, 1, 5),
+                    (13, 13, 1, 4),
+                    (13, 13, 9, 12),
+                    (14, 14, 5, 12),
+                    (15, 15, 1, 4),
+                    (15, 15, 4, 7),
+                    (15, 15, 8, 11)
                     ]
         module = self.get_file_as_module(PATH + 'Slice.py')
         self.set_and_check(module, astroid.Slice, expected)
@@ -485,7 +482,9 @@ class TestEndingLocations(unittest.TestCase):
                     (14, 14, 0, 5),
                     (15, 15, 0, 12),
                     (15, 15, 0, 4),
-                    (16, 16, 4, 12)
+                    (16, 16, 4, 12),
+                    (22, 22, 17, 26),
+                    (22, 22, 31, 40)
                     ]
         module = self.get_file_as_module(PATH + 'Subscript.py')
         self.set_and_check(module, astroid.Subscript, expected)

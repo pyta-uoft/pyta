@@ -136,20 +136,6 @@ def _keyword_search(keyword):
     return _is_keyword
 
 
-def _is_within_close_bracket(s, index, node):
-    """Fix to include right ']'."""
-    if index >= len(s) - 1:
-        return False
-    return s[index + 1] == ']'
-
-
-def _is_within_open_bracket(s, index, node):
-    """Fix to include left '['."""
-    if index < 1:
-        return False
-    return s[index-1] == '['
-
-
 def _is_attr_name(s, index, node):
     """Search for the name of the attribute. Left-to-right."""
     target_len = len(node.attrname)
@@ -188,8 +174,7 @@ NODES_REQUIRING_SOURCE = [
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
-    (astroid.Slice, _is_within_open_bracket, _is_within_close_bracket),
-    (astroid.Subscript, None, _token_search(']')),
+    (astroid.Slice, _token_search('['), None),
     (astroid.Tuple, None, _token_search(',')),
 ]
 
@@ -212,8 +197,7 @@ def init_register_ending_setters(source_code):
 
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
-    ending_transformer.register_transform(astroid.Arguments, fix_start_attributes)
-    ending_transformer.register_transform(astroid.Arguments, set_arguments)
+    ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
     ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
 
@@ -255,37 +239,76 @@ def fix_slice(source_code):
     children. The main problem is when Slice node doesn't have children.
     E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing positions
     are sometimes set improperly to 0.
-    Note: the location positions don't include '[' or ']'.
-
-    2-step Approach:
-    -- Step 1) use this transform to get to the ':'
-    -- Step 2) use other transforms to then expand outwards to the '[' or ']'
     """
-    def _find_colon(node):
+    def _find_square_brackets(node):
         if _get_last_child(node):
             set_from_last_child(node)
-            return node
-        if not hasattr(node, 'end_lineno'):
-            set_without_children(node)
+            line_i = node.end_lineno - 1  # convert 1 to 0 index.
+            char_i = node.end_col_offset
+            has_children = True
+        else:
+            line_i = node.parent.value.end_lineno - 1  # convert 1 to 0 index.
+            char_i = node.parent.value.end_col_offset
+            has_children = False
 
-        # Search for the first ":" after ending position of parent's value node.
-        line_i = node.parent.value.end_lineno - 1  # convert 1 to 0 index.
-        char_i = node.parent.value.end_col_offset + 1
-
-        # Search the remaining source code for the ":" char.
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ':':
+        # Search the remaining source code for the "]" char.
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ']':
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
                 char_i = 0
                 line_i += 1
             else:
                 char_i += 1
 
-        node.fromlineno, node.col_offset = line_i + 1, char_i
-        node.end_lineno, node.end_col_offset = line_i + 1, char_i
+        if not has_children:
+            node.fromlineno, node.col_offset = line_i + 1, char_i
+        node.end_lineno, node.end_col_offset = line_i + 1, char_i + 1
 
         return node
 
-    return _find_colon
+    return _find_square_brackets
+
+
+def fix_arguments(source_code):
+    """For an Arguments node"""
+    def _find(node: astroid.Arguments) -> astroid.Arguments:
+        children = list(node.get_children())
+        if children:
+            fix_start_attributes(node)
+
+        line_i = node.parent.fromlineno
+        char_i = node.parent.col_offset
+        for child in children:
+            if line_i is None:
+                line_i = child.end_lineno
+                char_i = child.end_col_offset
+            elif (line_i < child.end_lineno or
+                  line_i == child.end_lineno and char_i < child.end_col_offset) :
+                line_i = child.end_lineno
+                char_i = child.end_col_offset
+
+        line_i -= 1  # Switch to 0-indexing
+
+        # left bracket if parent is FunctionDef, colon if Lambda
+        if isinstance(node.parent, astroid.FunctionDef):
+            end_char = ')'
+        else:
+            end_char = ':'
+
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != end_char:
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
+                char_i = 0
+                line_i += 1
+            else:
+                char_i += 1
+
+        node.end_lineno, node.end_col_offset = line_i + 1, char_i
+
+        # no children
+        if children == []:
+            node.fromlineno, node.col_offset = line_i + 1, char_i
+
+        return node
+    return _find
 
 
 def fix_start_attributes(node):
@@ -435,18 +458,6 @@ def set_without_children(node):
         node.end_col_offset = node.col_offset + len(node.as_string())
     return node
 
-
-def set_arguments(node):
-    """astroid.Arguments node is missing the col_offset, and has children only
-    sometimes.
-    Arguments node can be found in nodes: FunctionDef, Lambda.
-    """
-    if _get_last_child(node):
-        set_from_last_child(node)
-    else:  # node does not have children.
-        # TODO: this should be replaced with the string parsing strategy
-        node.end_lineno, node.end_col_offset = node.fromlineno, node.col_offset
-    return node
 
 def _get_last_child(node):
     """Returns the last child node, or None.
@@ -659,8 +670,7 @@ def register_transforms(source_code, obj):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
-    obj.register_transform(astroid.Arguments, fix_start_attributes)
-    obj.register_transform(astroid.Arguments, set_arguments)
+    obj.register_transform(astroid.Arguments, fix_arguments(source_code))
 
     for node_class in NODES_WITH_CHILDREN:
         obj.register_transform(node_class, set_from_last_child)

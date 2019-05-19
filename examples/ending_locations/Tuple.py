@@ -18,3 +18,4 @@ fun(((1),))
 (a, b) = [
           5, 6]
 (x, y) = [7, 8]  # prevent this last comma being used
+()

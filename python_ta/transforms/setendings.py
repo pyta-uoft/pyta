@@ -347,9 +347,13 @@ def fix_start_attributes(node):
 
 def _set_start_from_first_child(node):
     """Set the start attributes of this node from its first child."""
-    first_child = next(node.get_children())
-    node.fromlineno = first_child.fromlineno
-    node.col_offset = first_child.col_offset
+    try:
+        first_child = next(node.get_children())
+    except StopIteration:
+        pass
+    else:
+        node.fromlineno = first_child.fromlineno
+        node.col_offset = first_child.col_offset
     return node
 
 

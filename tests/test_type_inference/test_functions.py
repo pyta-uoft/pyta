@@ -86,7 +86,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         assert Callable[actual_arg_types, actual_return_type] == Callable[expected_arg_types, expected_return_type]
 
 
-@given(cs.valid_identifier(), cs.random_dict_variable_homogeneous_value(min_size=1))
+@given(cs.valid_identifier(), cs.random_dict_variable_homogeneous_value(min_size=1, max_size=4))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_function_def_args_simple_function_call(function_name, variables_dict):
     """Test setting f env for function call of function definitions with params that returns one of it's arguments."""

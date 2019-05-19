@@ -49,7 +49,6 @@ NODES_WITHOUT_CHILDREN = [
     astroid.Global,
     astroid.Import,
     astroid.ImportFrom,
-    astroid.List,
     astroid.Name,
     astroid.Nonlocal,
     astroid.Pass,
@@ -79,13 +78,12 @@ NODES_WITH_CHILDREN = [
     astroid.FormattedValue,
     astroid.FunctionDef,
     astroid.GeneratorExp,
-
-    # TODO: need to fix elif (start) col_offset
     astroid.If,
     astroid.IfExp,
     astroid.Index,
     astroid.Keyword,
     astroid.Lambda,
+    astroid.List,
     astroid.Module,
     astroid.Raise,
     astroid.Return,
@@ -157,6 +155,7 @@ def _is_arg_name(s, index, node):
 NODES_REQUIRING_SOURCE = [
     (astroid.AssignAttr, None, _is_attr_name),
     (astroid.AsyncFor, _keyword_search('async'), None),
+    (astroid.AsyncFunctionDef, _keyword_search('async'), None),
     (astroid.AsyncWith, _keyword_search('async'), None),
     (astroid.Attribute, None, _is_attr_name),
     (astroid.Call, None, _token_search(')')),
@@ -169,8 +168,10 @@ NODES_REQUIRING_SOURCE = [
     # TODO: use same behavior as Slice.
     (astroid.ExtSlice, _token_search('['), _token_search(']')),
     (astroid.GeneratorExp, _token_search('('), _token_search(')')),
+    (astroid.If, _keyword_search('elif'), None),
     (astroid.Index, _token_search('['), _token_search(']')),
     (astroid.Keyword, _is_arg_name, None),
+    (astroid.List, _token_search('['), _token_search(']')),
     (astroid.ListComp, _token_search('['), _token_search(']')),
     (astroid.Set, None, _token_search('}')),
     (astroid.SetComp, None, _token_search('}')),
@@ -197,6 +198,7 @@ def init_register_ending_setters(source_code):
 
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
+    ending_transformer.register_transform(astroid.FunctionDef, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))

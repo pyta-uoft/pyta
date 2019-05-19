@@ -69,12 +69,14 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'AssignAttr.py')
         self.set_and_check(module, astroid.AssignAttr, expected)
 
-    # def test_assignname(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 5)]
-    #     module = self.get_file_as_module(PATH + 'AssignName.py')
-    #     self.set_and_check(module, astroid.Assign, expected)
+    def test_assignname(self):
+        expected = [
+            (1, 1, 0, 1),
+            (2, 2, 0, 1), (2, 2, 4, 5),
+            (3, 3, 0, 1), (3, 3, 3, 4),
+        ]
+        module = self.get_file_as_module(PATH + 'AssignName.py')
+        self.set_and_check(module, astroid.AssignName, expected)
 
     def test_asyncfor(self):
         """Note: col_offset property always set after the 'async' keyword.
@@ -83,19 +85,15 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'AsyncFor.py')
         self.set_and_check(module, astroid.AsyncFor, expected)
 
-    # def test_asyncfunctiondef(self):
-    #     """
-    #     """
-    #     expected = [(1, 2, 6, 12)]
-    #     module = self.get_file_as_module(PATH + 'AsyncFunctionDef.py')
-    #     self.set_and_check(module, astroid.AsyncFunctionDef, expected)
+    def test_asyncfunctiondef(self):
+        expected = [(4, 5, 0, 27)]
+        module = self.get_file_as_module(PATH + 'AsyncFunctionDef.py')
+        self.set_and_check(module, astroid.AsyncFunctionDef, expected)
 
-    # def test_asyncwith(self):
-    #     """
-    #     """
-    #     expected = [(2, 3, 10, 12)]
-    #     module = self.get_file_as_module(PATH + 'AsyncWith.py')
-    #     self.set_and_check(module, astroid.AsyncWith, expected)
+    def test_asyncwith(self):
+        expected = [(2, 3, 4, 12)]
+        module = self.get_file_as_module(PATH + 'AsyncWith.py')
+        self.set_and_check(module, astroid.AsyncWith, expected)
 
     def test_attribute(self):
         """Note: Setting the attribute node by its last child doesn't include
@@ -105,22 +103,15 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Attribute.py')
         self.set_and_check(module, astroid.Attribute, expected)
 
-    # def test_augassign(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 6)]
-    #     module = self.get_file_as_module(PATH + 'AugAssign.py')
-    #     self.set_and_check(module, astroid.AugAssign, expected)
+    def test_augassign(self):
+        expected = [(1, 1, 0, 6)]
+        module = self.get_file_as_module(PATH + 'AugAssign.py')
+        self.set_and_check(module, astroid.AugAssign, expected)
 
-    # def test_await(self):
-    #     """Note: col_offset property always set before the 'await' keyword.
-    #     Aside: this example shows the case where setting end_col_offset by the
-    #     child (i.e. arguments.Name) doesn't capture some information like the
-    #     parenthesis in the parent arguments.Call node.
-    #     """
-    #     expected = [(5, 5, 4, 25)]
-    #     module = self.get_file_as_module(PATH + 'Await.py')
-    #     self.set_and_check(module, astroid.Await, expected)
+    def test_await(self):
+        expected = [(5, 5, 4, 27)]
+        module = self.get_file_as_module(PATH + 'Await.py')
+        self.set_and_check(module, astroid.Await, expected)
 
     def test_binop(self):
         expected = [
@@ -132,46 +123,39 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'BinOp.py')
         self.set_and_check(module, astroid.BinOp, expected)
 
-    # def test_boolop(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 4, 13)]
-    #     module = self.get_file_as_module(PATH + 'BoolOp.py')
-    #     self.set_and_check(module, astroid.BoolOp, expected)
+    def test_boolop(self):
+        expected = [(1, 1, 4, 13), (2, 2, 0, 32), (2, 2, 0, 23)]
+        module = self.get_file_as_module(PATH + 'BoolOp.py')
+        self.set_and_check(module, astroid.BoolOp, expected)
 
-    # def test_break(self):
-    #     """
-    #     """
-    #     expected = [(2, 2, 4, 9)]
-    #     module = self.get_file_as_module(PATH + 'Break.py')
-    #     self.set_and_check(module, astroid.Break, expected)
+    def test_break(self):
+        expected = [(2, 2, 4, 9)]
+        module = self.get_file_as_module(PATH + 'Break.py')
+        self.set_and_check(module, astroid.Break, expected)
 
     def test_call(self):
-        """Note: the end_col_offset is 1 left of the last ')'.
-        >>>print(1, 2, 3,
-        >>>     4)
-        """
         expected = [(1, 2, 0, 9)]
         module = self.get_file_as_module(PATH + 'Call.py')
         self.set_and_check(module, astroid.Call, expected)
 
-    # def test_classdef(self):
-    #     """Note: this is set to the last statement in the class definition.
-    #     """
-    #     expected = [(1, 2, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'ClassDef.py')
-    #     self.set_and_check(module, astroid.ClassDef, expected)
+    def test_classdef(self):
+        expected = [(1, 3, 0, 8)]
+        module = self.get_file_as_module(PATH + 'ClassDef.py')
+        self.set_and_check(module, astroid.ClassDef, expected)
 
-    # def test_compare(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 5)]
-    #     module = self.get_file_as_module(PATH + 'Compare.py')
-    #     self.set_and_check(module, astroid.Compare, expected)
+    def test_compare(self):
+        expected = [
+            (1, 1, 0, 10),
+            (2, 2, 0, 5),
+            (3, 3, 0, 12),
+            (4, 4, 0, 26)
+        ]
+        module = self.get_file_as_module(PATH + 'Compare.py')
+        self.set_and_check(module, astroid.Compare, expected)
 
     def test_comprehension(self):
         """
-        Could be in a SetComp, ListComp, or GeneratorExp.. in each respective
+        Could be in a SetComp, ListComp, or GeneratorExp. In each respective
         case, the subsequent char could be either a brace, bracket, or paren.
         Aside: col_offset should start from beginning of the 'for'.
         """
@@ -180,16 +164,12 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, astroid.Comprehension, expected)
 
     def test_const(self):
-        """
-        """
         expected = [(1, 1, 0, 6), (2, 2, 4, 6), (3, 3, 0, 3), (4, 4, 0, 8),
         (5, 7, 0, 1), (8, 8, 6, 11), (8, 8, 13, 25)]
         module = self.get_file_as_module(PATH + 'Const.py')
         self.set_and_check(module, astroid.Const, expected)
 
     def test_continue(self):
-        """
-        """
         expected = [(2, 2, 4, 12)]
         module = self.get_file_as_module(PATH + 'Continue.py')
         self.set_and_check(module, astroid.Continue, expected)
@@ -230,8 +210,6 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, astroid.Dict, expected)
 
     def test_dictcomp(self):
-        """Buggy
-        """
         expected = [(1, 1, 0, 29), (2, 2, 0, 37), (3, 7, 0, 1)]
         module = self.get_file_as_module(PATH + 'DictComp.py')
         self.set_and_check(module, astroid.DictComp, expected)
@@ -243,10 +221,10 @@ class TestEndingLocations(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'DictUnpack.py')
     #     self.set_and_check(module, astroid.DictUnpack, expected)
 
-    # def test_ellipsis(self):
-    #     expected = [(1, 1, 0, 3)]
-    #     module = self.get_file_as_module(PATH + 'Ellipsis.py')
-    #     self.set_and_check(module, astroid.Ellipsis, expected)
+    def test_ellipsis(self):
+        expected = [(1, 1, 0, 3)]
+        module = self.get_file_as_module(PATH + 'Ellipsis.py')
+        self.set_and_check(module, astroid.Ellipsis, expected)
 
     # def test_emptynode(self):
     #     """NODE EXAMPLE DOES NOT EXIST
@@ -255,10 +233,10 @@ class TestEndingLocations(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'EmptyNode.py')
     #     self.set_and_check(module, astroid.EmptyNode, expected)
 
-    # def test_excepthandler(self):
-    #     expected = [(3, 4, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'ExceptHandler.py')
-    #     self.set_and_check(module, astroid.ExceptHandler, expected)
+    def test_excepthandler(self):
+        expected = [(3, 4, 0, 8)]
+        module = self.get_file_as_module(PATH + 'ExceptHandler.py')
+        self.set_and_check(module, astroid.ExceptHandler, expected)
 
     # def test_exec(self):
     #     """NODE EXAMPLE DOES NOT EXIST
@@ -267,69 +245,58 @@ class TestEndingLocations(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'Exec.py')
     #     self.set_and_check(module, astroid.Exec, expected)
 
-    # def test_expr(self):
-    #     """TODO: test all the Expr nodes in 'Slice.py'
-    #     """
-    #     expected = [(1, 1, 0, 12), (2, 2, 0, 13), (3, 3, 0, 11), (4, 4, 0, 17)]
-    #     module = self.get_file_as_module(PATH + 'Expr.py')
-    #     self.set_and_check(module, astroid.Expr, expected)
+    def test_expr(self):
+        expected = [(1, 1, 0, 12), (2, 2, 0, 13), (3, 3, 0, 11),
+                    (4, 4, 0, 17), (5, 5, 0, 31)]
+        module = self.get_file_as_module(PATH + 'Expr.py')
+        self.set_and_check(module, astroid.Expr, expected)
 
     def test_extslice(self):
-        """
-        """
         expected = [(1, 1, 1, 8), (2, 2, 2, 14), (3, 3, 1, 8), (4, 4, 2, 15), (5, 6, 1, 8)]
         module = self.get_file_as_module(PATH + 'ExtSlice.py')
         self.set_and_check(module, astroid.ExtSlice, expected)
 
-    # def test_for(self):
-    #     expected = [(1, 2, 0, 9)]
-    #     module = self.get_file_as_module(PATH + 'For.py')
-    #     self.set_and_check(module, astroid.For, expected)
+    def test_for(self):
+        expected = [(1, 4, 0, 8)]
+        module = self.get_file_as_module(PATH + 'For.py')
+        self.set_and_check(module, astroid.For, expected)
 
-    # def test_functiondef(self):
-    #     expected = [(1, 2, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'FunctionDef.py')
-    #     self.set_and_check(module, astroid.FunctionDef, expected)
+    def test_functiondef(self):
+        """Note: this node includes the decorator."""
+        expected = [(1, 7, 0, 28)]
+        module = self.get_file_as_module(PATH + 'FunctionDef.py')
+        self.set_and_check(module, astroid.FunctionDef, expected)
 
     def test_generatorexp(self):
         expected = [(1, 1, 0, 37), (2, 2, 0, 43)]
         module = self.get_file_as_module(PATH + 'GeneratorExp.py')
         self.set_and_check(module, astroid.GeneratorExp, expected)
 
-    # def test_global(self):
-    #     """
-    #     """
-    #     expected = [(2, 2, 4, 12)]
-    #     module = self.get_file_as_module(PATH + 'Global.py')
-    #     self.set_and_check(module, astroid.Global, expected)
+    def test_global(self):
+        expected = [(2, 2, 4, 15)]
+        module = self.get_file_as_module(PATH + 'Global.py')
+        self.set_and_check(module, astroid.Global, expected)
 
-    # def test_if(self):
-    #     """
-    #     """
-    #     expected = [(1, 4, 0, 8), (3, 4, 5, 8)]
-    #     module = self.get_file_as_module(PATH + 'If.py')
-    #     self.set_and_check(module, astroid.If, expected)
+    def test_if(self):
+        """Note: each elif is represented as a separate If node."""
+        expected = [(1, 8, 0, 9), (3, 8, 0, 9),  (5, 8, 0, 9)]
+        module = self.get_file_as_module(PATH + 'If.py')
+        self.set_and_check(module, astroid.If, expected)
 
-    # def test_ifexp(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 4, 20)]
-    #     module = self.get_file_as_module(PATH + 'IfExp.py')
-    #     self.set_and_check(module, astroid.IfExp, expected)
+    def test_ifexp(self):
+        expected = [(1, 1, 4, 20)]
+        module = self.get_file_as_module(PATH + 'IfExp.py')
+        self.set_and_check(module, astroid.IfExp, expected)
 
-    # def test_import(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 14)]
-    #     module = self.get_file_as_module(PATH + 'Import.py')
-    #     self.set_and_check(module, astroid.Import, expected)
+    def test_import(self):
+        expected = [(1, 1, 0, 21), (2, 2, 0, 30), (3, 3, 0, 28)]
+        module = self.get_file_as_module(PATH + 'Import.py')
+        self.set_and_check(module, astroid.Import, expected)
 
-    # def test_importfrom(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 47)]
-    #     module = self.get_file_as_module(PATH + 'ImportFrom.py')
-    #     self.set_and_check(module, astroid.ImportFrom, expected)
+    def test_importfrom(self):
+        expected = [(1, 1, 0, 46), (2, 2, 0, 65), (3, 3, 0, 31), (4, 4, 0, 32)]
+        module = self.get_file_as_module(PATH + 'ImportFrom.py')
+        self.set_and_check(module, astroid.ImportFrom, expected)
 
     def test_index(self):
         """Should include the enclosing brackets, e.g. "[1]" instead of "1".
@@ -345,54 +312,40 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Keyword.py')
         self.set_and_check(module, astroid.Keyword, expected)
 
-    # def test_lambda(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 6, 15), (2, 2, 7, 25)]
-    #     module = self.get_file_as_module(PATH + 'Lambda.py')
-    #     self.set_and_check(module, astroid.Lambda, expected)
+    def test_lambda(self):
+        expected = [(1, 1, 6, 15), (2, 2, 7, 25)]
+        module = self.get_file_as_module(PATH + 'Lambda.py')
+        self.set_and_check(module, astroid.Lambda, expected)
 
-    # def test_list(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 2)]
-    #     module = self.get_file_as_module(PATH + 'List.py')
-    #     self.set_and_check(module, astroid.List, expected)
+    def test_list(self):
+        expected = [(1, 1, 0, 2), (2, 2, 0, 9), (3, 3, 0, 6), (4, 9, 0, 1)]
+        module = self.get_file_as_module(PATH + 'List.py')
+        self.set_and_check(module, astroid.List, expected)
 
-    # def test_listcomp(self):
-    #     """Buggy
-    #     """
-    #     expected = [(1, 1, 0, 24), (2, 2, 0, 49)]
-    #     module = self.get_file_as_module(PATH + 'ListComp.py')
-    #     self.set_and_check(module, astroid.ListComp, expected)
+    def test_listcomp(self):
+        expected = [(1, 1, 0, 24), (2, 2, 0, 49)]
+        module = self.get_file_as_module(PATH + 'ListComp.py')
+        self.set_and_check(module, astroid.ListComp, expected)
 
-    # def test_module(self):
-    #     """
-    #     """
-    #     expected = [(0, 2, 0, 1)]
-    #     module = self.get_file_as_module(PATH + 'Module.py')
-    #     self.set_and_check(module, astroid.Module, expected)
+    def test_module(self):
+        expected = [(0, 3, 0, 11)]
+        module = self.get_file_as_module(PATH + 'Module.py')
+        self.set_and_check(module, astroid.Module, expected)
 
-    # def test_name(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 6)]
-    #     module = self.get_file_as_module(PATH + 'Name.py')
-    #     self.set_and_check(module, astroid.Name, expected)
+    def test_name(self):
+        expected = [(1, 1, 0, 6)]
+        module = self.get_file_as_module(PATH + 'Name.py')
+        self.set_and_check(module, astroid.Name, expected)
 
-    # def test_nonlocal(self):
-    #     """
-    #     """
-    #     expected = [(3, 3, 4, 14)]
-    #     module = self.get_file_as_module(PATH + 'Nonlocal.py')
-    #     self.set_and_check(module, astroid.Nonlocal, expected)
+    def test_nonlocal(self):
+        expected = [(4, 4, 8, 21)]
+        module = self.get_file_as_module(PATH + 'Nonlocal.py')
+        self.set_and_check(module, astroid.Nonlocal, expected)
 
-    # def test_pass(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 4)]
-    #     module = self.get_file_as_module(PATH + 'Pass.py')
-    #     self.set_and_check(module, astroid.Pass, expected)
+    def test_pass(self):
+        expected = [(3, 3, 8, 12)]
+        module = self.get_file_as_module(PATH + 'Pass.py')
+        self.set_and_check(module, astroid.Pass, expected)
 
     # def test_print(self):
     #     """NODE EXAMPLE DOES NOT EXIST
@@ -401,10 +354,10 @@ class TestEndingLocations(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'Print.py')
     #     self.set_and_check(module, astroid.Print, expected)
 
-    # def test_raise(self):
-    #     expected = [(1, 1, 0, 23)]
-    #     module = self.get_file_as_module(PATH + 'Raise.py')
-    #     self.set_and_check(module, astroid.Raise, expected)
+    def test_raise(self):
+        expected = [(3, 3, 8, 24), (5, 5, 8, 36)]
+        module = self.get_file_as_module(PATH + 'Raise.py')
+        self.set_and_check(module, astroid.Raise, expected)
 
     # def test_repr(self):
     #     """NODE EXAMPLE DOES NOT EXIST
@@ -413,12 +366,10 @@ class TestEndingLocations(unittest.TestCase):
     #     module = self.get_file_as_module(PATH + 'Repr.py')
     #     self.set_and_check(module, astroid.Repr, expected)
 
-    # def test_return(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'Return.py')
-    #     self.set_and_check(module, astroid.Return, expected)
+    def test_return(self):
+        expected = [(3, 3, 8, 14), (5, 5, 8, 42)]
+        module = self.get_file_as_module(PATH + 'Return.py')
+        self.set_and_check(module, astroid.Return, expected)
 
     def test_set(self):
         expected = [(1, 1, 0, 3), (2, 2, 0, 6), (3, 3, 0, 12)]
@@ -456,12 +407,10 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Slice.py')
         self.set_and_check(module, astroid.Slice, expected)
 
-    # def test_starred(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 2)]
-    #     module = self.get_file_as_module(PATH + 'Starred.py')
-    #     self.set_and_check(module, astroid.Starred, expected)
+    def test_starred(self):
+        expected = [(1, 1, 0, 2), (4, 4, 6, 8)]
+        module = self.get_file_as_module(PATH + 'Starred.py')
+        self.set_and_check(module, astroid.Starred, expected)
 
     def test_subscript(self):
         expected = [(1, 1, 0, 4),
@@ -489,19 +438,15 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Subscript.py')
         self.set_and_check(module, astroid.Subscript, expected)
 
-    # def test_tryexcept(self):
-    #     """
-    #     """
-    #     expected = [(1, 4, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'TryExcept.py')
-    #     self.set_and_check(module, astroid.TryExcept, expected)
+    def test_tryexcept(self):
+        expected = [(1, 4, 0, 8)]
+        module = self.get_file_as_module(PATH + 'TryExcept.py')
+        self.set_and_check(module, astroid.TryExcept, expected)
 
-    # def test_tryfinally(self):
-    #     """
-    #     """
-    #     expected = [(1, 6, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'TryFinally.py')
-    #     self.set_and_check(module, astroid.TryFinally, expected)
+    def test_tryfinally(self):
+        expected = [(1, 6, 0, 8)]
+        module = self.get_file_as_module(PATH + 'TryFinally.py')
+        self.set_and_check(module, astroid.TryFinally, expected)
 
     def test_tuple(self):
         expected = [(1, 1, 0, 6), (2, 2, 0, 11), (3, 3, 0, 5), (4, 4, 0, 7),
@@ -514,40 +459,30 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module(PATH + 'Tuple.py')
         self.set_and_check(module, astroid.Tuple, expected)
 
-    # def test_unaryop(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'UnaryOp.py')
-    #     self.set_and_check(module, astroid.UnaryOp, expected)
+    def test_unaryop(self):
+        expected = [(1, 1, 0, 8), (2, 2, 0, 2), (3, 3, 0, 2), (4, 4, 0, 3)]
+        module = self.get_file_as_module(PATH + 'UnaryOp.py')
+        self.set_and_check(module, astroid.UnaryOp, expected)
 
-    # def test_while(self):
-    #     """
-    #     """
-    #     expected = [(1, 2, 0, 9)]
-    #     module = self.get_file_as_module(PATH + 'While.py')
-    #     self.set_and_check(module, astroid.While, expected)
+    def test_while(self):
+        expected = [(1, 5, 0, 13)]
+        module = self.get_file_as_module(PATH + 'While.py')
+        self.set_and_check(module, astroid.While, expected)
 
-    # def test_with(self):
-    #     """
-    #     """
-    #     expected = [(1, 2, 0, 8)]
-    #     module = self.get_file_as_module(PATH + 'With.py')
-    #     self.set_and_check(module, astroid.With, expected)
+    def test_with(self):
+        expected = [(1, 3, 0, 19)]
+        module = self.get_file_as_module(PATH + 'With.py')
+        self.set_and_check(module, astroid.With, expected)
 
-    # def test_yield(self):
-    #     """
-    #     """
-    #     expected = [(1, 1, 0, 5)]
-    #     module = self.get_file_as_module(PATH + 'Yield.py')
-    #     self.set_and_check(module, astroid.Yield, expected)
+    def test_yield(self):
+        expected = [(2, 2, 4, 11)]
+        module = self.get_file_as_module(PATH + 'Yield.py')
+        self.set_and_check(module, astroid.Yield, expected)
 
-    # def test_yieldfrom(self):
-    #     """
-    #     """
-    #     expected = [(2, 2, 4, 16)]
-    #     module = self.get_file_as_module(PATH + 'YieldFrom.py')
-    #     self.set_and_check(module, astroid.YieldFrom, expected)
+    def test_yieldfrom(self):
+        expected = [(2, 2, 4, 23)]
+        module = self.get_file_as_module(PATH + 'YieldFrom.py')
+        self.set_and_check(module, astroid.YieldFrom, expected)
 
 
 if __name__ == '__main__':

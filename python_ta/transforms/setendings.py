@@ -196,6 +196,7 @@ def init_register_ending_setters(source_code):
             lambda node: node.fromlineno is None or node.col_offset is None)
 
     # Ad hoc transformations
+    ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))
     ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
@@ -221,8 +222,9 @@ def init_register_ending_setters(source_code):
                     node_class, end_setter_from_source(source_code, end_pred))
 
     # Nodes where extra parentheses are included
-    ending_transformer.register_transform(astroid.Const, add_parens_to_const(source_code))
-    ending_transformer.register_transform(astroid.Tuple, add_parens_to_const(source_code))
+    ending_transformer.register_transform(astroid.BinOp, add_parens(source_code))
+    ending_transformer.register_transform(astroid.Const, add_parens(source_code))
+    ending_transformer.register_transform(astroid.Tuple, add_parens(source_code))
 
     return ending_transformer
 
@@ -501,7 +503,7 @@ def start_setter_from_source(source_code, pred):
     return set_start_from_source
 
 
-def add_parens_to_const(source_code):
+def add_parens(source_code):
     def h(node):
         _add_parens(source_code)(node)
 

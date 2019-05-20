@@ -1,11 +1,5 @@
 # TODOs for node documentation
 
-## BinOp
-
-Investigate whether the `op` attribute for `BinOp` can really be any node,
-or only certain classes.
-For example, there's no `Add` astroid node, so what is really stored?
-
 ## BoolOp
 
 Same question as `BinOp` about the `op` attribute.

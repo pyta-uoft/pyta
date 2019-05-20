@@ -1,30 +1,5 @@
 # TODOs for node documentation
 
-## Assign
-
-The type of `targets` can probably be more specific to just a small
-set of node classes (e.g., `Name`?).
-
-It would be good to show different examples of the different nodes that could appear on the left,
-as well as an example of multiple assignment:
-
-```python
-x = y = z = 1 + 2
-```
-
-## AsyncFor
-
-Example for `orelse` is wrong (the `else` is currently tied to the `if` rather than the `for` loop.
-
-## AsyncFunctionDef
-
-The example does not use the `async` keyword, and so does not actually illustrate an `AsyncFunctionDef`.
-
-## Attribute
-
-The descriptions for both the node itself and both of its attributes need work.
-
-
 ## AugAssign
 
 Like `Assign`, would be good to show an example of augmented assignment with multiple targets.

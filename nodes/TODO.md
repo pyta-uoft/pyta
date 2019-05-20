@@ -1,10 +1,5 @@
 # TODOs for node documentation
 
-## AugAssign
-
-Like `Assign`, would be good to show an example of augmented assignment with multiple targets.
-(Didn't even know this is possible.)
-
 ## BinOp
 
 Investigate whether the `op` attribute for `BinOp` can really be any node,

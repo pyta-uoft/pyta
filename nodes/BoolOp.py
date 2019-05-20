@@ -27,6 +27,11 @@ Type-checking:
     Otherwise, the type of the BoolOp is Any.
 """
 
+# Example 1
 None or 1
+
+# Example 2
 None or 1 or 2
+
+# Example 3
 None or 1 and 2

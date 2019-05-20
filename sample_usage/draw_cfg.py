@@ -5,7 +5,7 @@ import graphviz
 from python_ta.cfg import CFGVisitor, ControlFlowGraph, CFGBlock
 
 
-USAGE = 'USAGE: python draw_cfg.py <your-file.py>'
+USAGE = 'USAGE: python -m sample_usage.draw_cfg <your-file.py>'
 GRAPH_OPTIONS = {
     'format': 'jpg',
     'node_attr': {

@@ -1,13 +1,5 @@
 # TODOs for node documentation
 
-## BoolOp
-
-Same question as `BinOp` about the `op` attribute.
-
-Also, it seems like there should be more investigation into `values`.
-If this is a list, does that mean `BoolOp` doesn't just represent binary operations?
-We should give an example for other cases then.
-
 ## Compare
 
 Same general question as `BinOp` and `BoolOp` about what is actually being stored in `ops`.

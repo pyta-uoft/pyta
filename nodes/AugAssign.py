@@ -20,11 +20,11 @@ Type-checking:
     if necessary (as in BinOp).
 
 
-Example 1:
+Example:
     - target  -> AssignName(name='x')
     - value   -> Const(value=1)
     - op      -> '+='
 """
 
-# Example 1:
+# Example:
 x += 1

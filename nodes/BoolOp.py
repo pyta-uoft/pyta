@@ -5,9 +5,9 @@ A boolean operation, 'or' or 'and'.
 
 Attributes:
     - values  ([Expr])
-        - A list of values involved
+        - A list of the argument expressions
     - op      (str)
-        - The operator, Or or And.
+        - The operator, 'or' or 'and'.
 
 Example 1:
     - values  -> [Const(value=None), Const(value=1)]

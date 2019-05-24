@@ -5,7 +5,7 @@ import sys
 import astroid
 from colorama import Back, Fore
 
-USAGE = 'Usage: python print_ast.py <your-file.py>'
+USAGE = 'Usage: python -m sample_usage.print_ast <your-file.py>'
 FILL = '  '
 # Unicode Box Drawing Characters.
 CHAR_PIPE = '┃'
@@ -28,10 +28,10 @@ def walker(node, source_lines, indent=''):
         indent, CHAR_TUBE, node_name, name, value))
 
     lines = [line for line in node.as_string().split('\n')]
-    for line in lines: 
+    for line in lines:
         print(indent + FILL + '>>>' + Fore.BLUE + line + Fore.RESET)
 
-    for child in node.get_children(): 
+    for child in node.get_children():
         walker(child, source_lines, indent + FILL + CHAR_PIPE)
 
 

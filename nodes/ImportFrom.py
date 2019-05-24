@@ -19,17 +19,17 @@ Example 1:
 
 Example 2:
     - modname  -> "sample_usage.pyta_stats"
-    - names    -> [("pyta_statistics", None), ("_print_stats", None)]
+    - names    -> [["pyta_statistics", None], ["_print_stats", None]]
     - level    -> None
 
 Example 3:
     - modname  -> ""
-    - names    -> [("level_is_2", "l2")]
+    - names    -> [["level_is_2", "l2"]]
     - level    -> 2
 
 Example 4:
     - modname  -> ""
-    - names    -> [("level_is_3", "l3")]
+    - names    -> [["level_is_3", "l3"]]
     - level    -> 3
 """
 

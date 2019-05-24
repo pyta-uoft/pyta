@@ -9,10 +9,10 @@ Attributes:
           type expression.
 
 Example 1:
-    - elts  -> []
+    - elts  -> [Const(value=0)]
 
 Example 2:
-    - elts  -> [Const(int(1)), Const(int(2)), Const(str(hi))]
+    - elts  -> [Const(value=1), Const(value=2), Const(value='hi')]
 
 
 Type-checking:

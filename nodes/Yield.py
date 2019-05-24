@@ -13,10 +13,10 @@ Example 1:
     - value  -> None
 
 Example 2:
-    - value  -> Const(NoneType)
+    - value  -> Const(value=None)
 
 Example 3:
-    - value  -> Name('x', Load())
+    - value  -> Name(name='x')
 """
 
 # Example 1

@@ -13,9 +13,9 @@ Attributes:
         - The code to be performed until the with statement closes.
 
 Example:
-    - items  -> [Call(open, sys.argv[1]) Name('f', Load()),
-                 Call(open, 'input.txt') Name('i', Load())]
-    - body   -> [Node(Pass)]
+    - items  -> [Call(open, sys.argv[1]) Name(name='f'),
+                 Call(open, 'input.txt') Name(name='i')]
+    - body   -> [Pass()]
 """
 
 with open(sys.argv[1]) as f, open('input.txt') as i:

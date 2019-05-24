@@ -15,9 +15,9 @@ Attributes:
           whether any exceptions were raised.
 
 Example:
-    - body       -> TryExcept(body=[Pass], handlers=ExceptHandler[body=Pass],
+    - body       -> TryExcept(body=[Pass()], handlers=ExceptHandler[body=Pass()],
                                orelse=[])]
-    - finalbody  -> [Pass]
+    - finalbody  -> [Pass()]
 """
 
 try:

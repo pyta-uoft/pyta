@@ -13,8 +13,8 @@ Attributes:
 
 Example:
     - test    -> Const(True)
-    - body    -> [Node(Break)]
-    - orelse  -> [Node(Pass)]
+    - body    -> [Break()]
+    - orelse  -> [Pass()]
 """
 
 while True:

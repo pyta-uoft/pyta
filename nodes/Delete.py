@@ -13,7 +13,7 @@ Example 1:
     - targets  -> [DelName(x)]
 
 Example 2:
-    - targets  -> [DelName(x), DelAttr(Name("self", Del()), "attr"),
+    - targets  -> [DelName(x), DelAttr(Name("self"), "attr"),
                   Subscript(Name(y), Index(0), Del)]
 """
 

@@ -11,11 +11,11 @@ Attributes:
 
 Example 1:
     - targets  -> [AssignName(id='x')]
-    - value    -> Num(n=3)
+    - value    -> Const(n=3)
 
 Example 2:
     - targets  -> [AssignName(id='a'), AssignName(id='b')]
-    - value    -> Num(n=1)
+    - value    -> Const(n=1)
 
 Example 3:
     - targets  -> [Tuple(elts=[AssignName(id='a'), AssignName(id='b'),

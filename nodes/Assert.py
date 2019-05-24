@@ -12,8 +12,8 @@ Attributes:
           AssertionError is shown.
 
 Example:
-    - test  -> x == 0
-    - fail  -> "x isn't 0!" # AssertionError and this message if condition is
+    - test  -> Compare(left=Name(name='x'), ops=[['==', Const(value=0)]])
+    - fail  -> Const("x isn't 0!") # AssertionError and this message if condition is
                False
 """
 

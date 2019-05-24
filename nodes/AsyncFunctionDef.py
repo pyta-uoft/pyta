@@ -19,13 +19,15 @@ Attributes:
         - The return annotation.
 
 Example:
-    - name        -> animal
-    - args        -> arguments(args=[], vararg=None, kwonlyargs=
-                     [arg(arg='arg')],kw_defaults=[], kwarg=None, defaults=[])
-    - doc         -> "This is function animal."
-    - body        -> [Assign(dog, "an animal")]
-    - decorators  -> @wrapper
-    - returns     -> return dog
+    - name        -> 'animal'
+    - args        -> Arguments(args=[AssignName(name='arg')], vararg=None, kwonlyargs=[],
+                               kw_defaults=[], kwarg=None, defaults=[])
+    - doc         -> Const(value="This is function animal.")
+    - body        -> [Assign(targets=[AssignName(name='dog')],
+                             value=Const(value="an animal")],
+                             Return(value=Name(name='dog'))]
+    - decorators  -> Decorators(nodes=[Name(name='wrapper')])
+    - returns     -> None
 """
 
 @wrapper

@@ -58,3 +58,36 @@ class CFGVisitor:
         self.cfg.link_or_merge(end_else, after_if_block)
 
         self._current_block = after_if_block
+
+    def visit_while(self, node: astroid.While) -> None:
+        old_curr = self._current_block
+
+        # Handle "test" block
+        # condition implies old_curr = empty start node
+        if old_curr.statements == [] and old_curr.predecessors == []:
+            old_curr.statements.append(node.test)
+            test_block = old_curr
+        else:
+            test_block = self.cfg.create_block()
+            test_block.statements.append(node.test)
+            self.cfg.link_or_merge(old_curr, test_block)
+
+        # Handle "body" branch
+        body_block = self.cfg.create_block(test_block)
+        self._current_block = body_block
+        for child in node.body:
+            child.accept(self)
+        end_body = self._current_block
+        self.cfg.link_or_merge(end_body, test_block)
+
+        # Handle "else" branch
+        else_block = self.cfg.create_block(test_block)
+        self._current_block = else_block
+        for child in node.orelse:
+            child.accept(self)
+        end_else = self._current_block
+
+        after_while_block = self.cfg.create_block()
+        self.cfg.link_or_merge(end_else, after_while_block)
+
+        self._current_block = after_while_block

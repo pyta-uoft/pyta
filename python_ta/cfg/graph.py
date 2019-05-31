@@ -31,9 +31,12 @@ class ControlFlowGraph:
         An "empty" node for this purpose is when source has no statements.
         """
         if source.statements == []:
-            for edge in source.predecessors:
-                edge.target = target
-                target.predecessors.append(edge)
+            if source.predecessors == []:   # implies source == empty start node
+                self.start = target
+            else:
+                for edge in source.predecessors:
+                    edge.target = target
+                    target.predecessors.append(edge)
         else:
             CFGEdge(source, target)
 
@@ -51,6 +54,21 @@ class ControlFlowGraph:
 
         for edge in block.successors:
             yield from self._get_blocks(edge.target, visited)
+
+    def get_edges(self) -> Generator[CFGEdge, None, None]:
+        """Generate a sequence of all edges in this graph."""
+        yield from self._get_edges(self.start, set())
+
+    def _get_edges(self, block: CFGBlock,
+                   visited: Set[int]) -> Generator[CFGEdge, None, None]:
+        if block.id in visited:
+            return
+
+        visited.add(block.id)
+
+        for edge in block.successors:
+            yield edge
+            yield from self._get_edges(edge.target, visited)
 
 
 class CFGBlock:

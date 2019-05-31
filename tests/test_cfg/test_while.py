@@ -201,6 +201,7 @@ def test_while_with_if_else() -> None:
 def test_while_with_if_else_and_statements() -> None:
     src="""
     while n > 10:
+        print(m)
         if (n > 20):
             print(y)
         else:
@@ -213,7 +214,7 @@ def test_while_with_if_else_and_statements() -> None:
     cfg = build_cfg(src)
     expected_blocks = [
         ["n > 10"],
-        ["n > 20"],
+        ["print(m)", "n > 20"],
         ["print(y)"],
         ["print(x)", "print(j)"],
         ["print(j)"],
@@ -223,74 +224,13 @@ def test_while_with_if_else_and_statements() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["n > 10"], ["n > 20"]],
-        [["n > 20"], ["print(y)"]],
+        [["n > 10"], ["print(m)", "n > 20"]],
+        [["print(m)", "n > 20"], ["print(y)"]],
         [["print(y)"], ["print(x)", "print(j)"]],
         [["print(x)", "print(j)"], ["n > 10"]],
-        [["n > 20"], ["print(j)"]],
+        [["print(m)", "n > 20"], ["print(j)"]],
         [["print(j)"], ["print(x)", "print(j)"]],
         [["n > 10"], ["print(x)"]],
         [["print(x)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
-
-
-def test_while_with_break() -> None:
-    src="""
-    while n > 10:
-        break
-    else:
-        print(n - 1)
-    print(n)
-    """
-    cfg = build_cfg(src)
-
-    expected_blocks = [
-        ["n > 10"],
-        ["break"],
-        ["print(n)"],
-        [],
-        ["print(n - 1)"]
-    ]
-    assert expected_blocks == _extract_blocks(cfg)
-
-
-def test_while_with_break_in_if() -> None:
-    src="""
-    while n > 10:
-        if n > 20:
-            break
-        else:
-            n -= 1
-        print(n + 1)
-    else:
-        print(n - 1)
-    print(n)
-    """
-    cfg = build_cfg(src)
-
-    expected_blocks = [
-        ["n > 10"],
-        ["n > 20"],
-        ["break"],
-        ["print(n)"],
-        [],
-        ["n -= 1"],
-        ["print(n + 1)"],
-        ["print(n - 1)"],
-    ]
-    assert expected_blocks == _extract_blocks(cfg)
-
-    expected_edges = [
-        [["n > 10"], ["n > 20"]],
-        [["n > 20"], ["break"]],
-        [["break"], ["print(n)"]],
-        [["print(n)"], []],
-        [["n > 20"], ["n -= 1"]],
-        [["n -= 1"], ["print(n + 1)"]],
-        [["print(n + 1)"], ["n > 10"]],
-        [["n > 10"], ["print(n - 1)"]],
-        [["print(n - 1)"], ["print(n)"]],
-    ]
-    assert expected_edges == _extract_edges(cfg)
-

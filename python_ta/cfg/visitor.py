@@ -63,14 +63,9 @@ class CFGVisitor:
         old_curr = self._current_block
 
         # Handle "test" block
-        # condition implies old_curr = empty start node
-        if old_curr.statements == [] and old_curr.predecessors == []:
-            old_curr.statements.append(node.test)
-            test_block = old_curr
-        else:
-            test_block = self.cfg.create_block()
-            test_block.statements.append(node.test)
-            self.cfg.link_or_merge(old_curr, test_block)
+        test_block = self.cfg.create_block()
+        test_block.statements.append(node.test)
+        self.cfg.link_or_merge(old_curr, test_block)
 
         # Handle "body" branch
         body_block = self.cfg.create_block(test_block)

@@ -31,7 +31,7 @@ class ControlFlowGraph:
         An "empty" node for this purpose is when source has no statements.
         """
         if source.statements == []:
-            if source.predecessors == []:   # implies source == empty start node
+            if source is self.start:
                 self.start = target
             else:
                 for edge in source.predecessors:

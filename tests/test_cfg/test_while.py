@@ -72,7 +72,7 @@ def test_simple_while_with_else() -> None:
 
 
 def test_simple_while_with_surrounding_blocks() -> None:
-    src="""
+    src = """
     n = 10
     while n > 10:
         print(n - 1)
@@ -104,9 +104,9 @@ def test_simple_while_with_surrounding_blocks() -> None:
 
 
 def test_while_with_if() -> None:
-    src="""
+    src = """
     while n > 10:
-        if (n > 20):
+        if n > 20:
             print(y)
     else:
         print(x)
@@ -133,9 +133,9 @@ def test_while_with_if() -> None:
 
 
 def test_while_with_if_and_statements() -> None:
-    src="""
+    src = """
     while n > 10:
-        if (n > 20):
+        if n > 20:
             print(y)
         print(k)
         print(j)
@@ -166,9 +166,9 @@ def test_while_with_if_and_statements() -> None:
 
 
 def test_while_with_if_else() -> None:
-    src="""
+    src = """
     while n > 10:
-        if (n > 20):
+        if n > 20:
             print(y)
         else:
             print(j)
@@ -199,10 +199,10 @@ def test_while_with_if_else() -> None:
 
 
 def test_while_with_if_else_and_statements() -> None:
-    src="""
+    src = """
     while n > 10:
         print(m)
-        if (n > 20):
+        if n > 20:
             print(y)
         else:
             print(j)

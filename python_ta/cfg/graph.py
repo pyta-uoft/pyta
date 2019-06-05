@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Generator, Optional, List, Set
-from astroid.node_classes import NodeNG
+from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
 class ControlFlowGraph:
@@ -29,7 +29,12 @@ class ControlFlowGraph:
         """Link source to target, or merge source into target if source is empty.
 
         An "empty" node for this purpose is when source has no statements.
+
+        source with a jump statement cannot be further linked or merged to
+        another target.
         """
+        if source.jump:
+            return
         if source.statements == []:
             if source is self.start:
                 self.start = target
@@ -84,6 +89,9 @@ class CFGBlock:
     predecessors: List[CFGEdge]
     # This block's out-edges (to blocks that can execute immediately after this one).
     successors: List[CFGEdge]
+    # A jump is a statement that branches the control flow (ex: break, continue, return)
+    # `jump != None` implies that a jump is in self.statements
+    jump: Optional[Break, Continue, Return]
 
     def __init__(self, id_: int) -> None:
         """Initialize a new CFGBlock."""
@@ -91,6 +99,12 @@ class CFGBlock:
         self.statements = []
         self.predecessors = []
         self.successors = []
+        self.jump = None
+
+    def add_statement(self, statement: NodeNG) -> None:
+        if self.jump:
+            return
+        self.statements.append(statement)
 
 
 class CFGEdge:

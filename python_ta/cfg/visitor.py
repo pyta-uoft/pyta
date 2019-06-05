@@ -1,18 +1,25 @@
 import astroid
 from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
+from typing import List, Tuple
 
 
 class CFGVisitor:
     """An astroid visitor that creates a control flow graph for a given Python module.
+
+    Private Attributes:
+    _scope: A stack of the scopes the visitor is currently in. The top element refers
+            to the current scope. (scope_type [for, while],  start_block, end_block)
     """
     cfg: ControlFlowGraph
     _current_block: CFGBlock
+    _scope: List[Tuple[str, CFGBlock, CFGBlock]]
 
     def __init__(self) -> None:
         super().__init__()
         self.cfg = ControlFlowGraph()
         self._current_block = self.cfg.start
+        self._scope = []
 
     def __getattr__(self, attr: str):
         if attr.startswith('visit_'):
@@ -22,7 +29,7 @@ class CFGVisitor:
 
     def visit_generic(self, node: NodeNG) -> None:
         """By default, add the expression to the end of the current block."""
-        self._current_block.statements.append(node)
+        self._current_block.add_statement(node)
 
     def visit_module(self, module: astroid.Module) -> None:
         self.cfg = ControlFlowGraph()
@@ -33,7 +40,7 @@ class CFGVisitor:
         self.cfg.link_or_merge(self._current_block, self.cfg.end)
 
     def visit_if(self, node: astroid.If) -> None:
-        self._current_block.statements.append(node.test)
+        self._current_block.add_statement(node.test)
         old_curr = self._current_block
 
         # Handle "then" branch.
@@ -64,8 +71,13 @@ class CFGVisitor:
 
         # Handle "test" block
         test_block = self.cfg.create_block()
-        test_block.statements.append(node.test)
+        test_block.add_statement(node.test)
         self.cfg.link_or_merge(old_curr, test_block)
+
+        after_while_block = self.cfg.create_block()
+
+        # add while scope
+        self._scope.append(('while', test_block, after_while_block))
 
         # Handle "body" branch
         body_block = self.cfg.create_block(test_block)
@@ -75,6 +87,9 @@ class CFGVisitor:
         end_body = self._current_block
         self.cfg.link_or_merge(end_body, test_block)
 
+        # step outside loop
+        self._scope.pop()
+
         # Handle "else" branch
         else_block = self.cfg.create_block(test_block)
         self._current_block = else_block
@@ -82,7 +97,17 @@ class CFGVisitor:
             child.accept(self)
         end_else = self._current_block
 
-        after_while_block = self.cfg.create_block()
         self.cfg.link_or_merge(end_else, after_while_block)
-
         self._current_block = after_while_block
+
+    def visit_break(self, node: astroid.Break) -> None:
+        old_curr = self._current_block
+        old_curr.add_statement(node)
+        loop_scope = None
+        for scope in self._scope:
+            if scope[0] in ['while', 'for']:
+                loop_scope = scope
+        if not loop_scope:
+            raise SyntaxError('\'break\' outside loop')
+        self.cfg.link_or_merge(old_curr, loop_scope[2])
+        self._current_block.jump = node

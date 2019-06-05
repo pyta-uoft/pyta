@@ -16,13 +16,13 @@ Attributes:
           which must evaluate to an integer. Default: None.
 
 Example 1:
-    - lower  -> 0
-    - upper  -> 2
+    - lower  -> None
+    - upper  -> None
     - step   -> None
 
 Example 2:
-    - lower  -> 1
-    - upper  -> 2
+    - lower  -> Const(value=1)
+    - upper  -> None
     - step   -> None
 
 Example 3:

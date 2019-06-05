@@ -8,13 +8,13 @@ Attributes:
         - Any expression node.
     - right  (Expr)
         - Any expression node.
-    - op     (Expr)
+    - op     (str)
         - The operator to be performed on left and right.
 
-Example:
-    - left   -> Name(Num(n=1), ctx=Load())
-    - right  -> Name(Num(n=2), ctx=Load())
-    - op     -> Add()
+Example 1:
+    - left   -> Const(value=1)
+    - right  -> Const(value=2)
+    - op     -> '+'
 
 Examples of operators on primitive types; dunder function -> call and symbol:
     - __add__   -> +

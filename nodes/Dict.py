@@ -9,7 +9,7 @@ Attributes:
           nodes.
 
 Example:
-    - items  -> [('b', 1)]
+    - items  -> [[Const(value='b'), Const(value=1)]]
 
 
 Type-checking:

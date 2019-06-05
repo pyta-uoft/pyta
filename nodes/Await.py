@@ -8,7 +8,7 @@ Attributes:
         - What the expression waits for.
 
 Example:
-    - value  -> Call(func=Name(id='async_coroutine', ctx=Load()), args=[],
+    - value  -> Call(func=Name(id='async_coroutine'), args=[],
                 keywords=[])
 """
 

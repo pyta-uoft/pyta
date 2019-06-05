@@ -13,8 +13,8 @@ Attributes:
           Load, Store, or Del.
 
 Example:
-    - value  -> Name('x', Load())
-    - slice  -> Index(0)
+    - value  -> Name(name='x')
+    - slice  -> Index(value=Const(value=0))
     - ctx    -> Load
 
 Type-checking:

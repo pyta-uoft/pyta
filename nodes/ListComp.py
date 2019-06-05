@@ -14,11 +14,11 @@ Attributes:
           in this list comprehension.
 
 Example 1:
-    - elt         -> l+l
+    - elt         -> l+l    # BinOp
     - generators  -> [Comprehension(l, "str", [])]
 
 Example 2:
-    - elt         -> x*y
+    - elt         -> x*y    # BinOp
     - generators  -> [Comprehension(x, [1, 2, 3], []),
                       Comprehension(y, [4, 5, 6], [])]
 

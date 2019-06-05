@@ -234,3 +234,173 @@ def test_while_with_if_else_and_statements() -> None:
         [["print(x)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_break() -> None:
+    src="""
+    while n > 10:
+        break
+    else:
+        print(n - 1)
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["break"],
+        ["print(n)"],
+        [],
+        ["print(n - 1)"]
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["break"]],
+        [["break"], ["print(n)"]],
+        [["print(n)"], []],
+        [["n > 10"], ["print(n - 1)"]],
+        [["print(n - 1)"], ["print(n)"]]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_break_in_if() -> None:
+    src="""
+    while n > 10:
+        if n > 20:
+            print(n)
+            break
+        else:
+            n -= 1
+        print(n + 1)
+    else:
+        print(n - 1)
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["print(n)", "break"],
+        ["print(n)"],
+        [],
+        ["n -= 1"],
+        ["print(n + 1)"],
+        ["print(n - 1)"],
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["print(n)", "break"]],
+        [["print(n)", "break"], ["print(n)"]],
+        [["print(n)"], []],
+        [["n > 20"], ["n -= 1"]],
+        [["n -= 1"], ["print(n + 1)"]],
+        [["print(n + 1)"], ["n > 10"]],
+        [["n > 10"], ["print(n - 1)"]],
+        [["print(n - 1)"], ["print(n)"]],
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_break_in_if_else() -> None:
+    src = """
+        while n > 10:
+            if n > 20:
+                print(n)
+            else:
+                break
+            n -= 1
+        """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["print(n)"],
+        ["n -= 1"],
+        ["break"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["print(n)"]],
+        [["print(n)"], ["n -= 1"]],
+        [["n -= 1"], ["n > 10"]],
+        [["n > 20"], ["break"]],
+        [["break"], []],
+        [["n > 10"], []]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_nested_while() -> None:
+    src = """
+    while n > 10:
+        while n > 20:
+            print(n)
+        else:
+            print(n - 1)
+    else:
+        print(n + 1)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["print(n)"],
+        ["print(n - 1)"],
+        ["print(n + 1)"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["print(n)"]],
+        [["print(n)"], ["n > 20"]],
+        [["n > 20"], ["print(n - 1)"]],
+        [["print(n - 1)"], ["n > 10"]],
+        [["n > 10"], ["print(n + 1)"]],
+        [["print(n + 1)"], []]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_nested_while_with_break() -> None:
+    src = """
+    while n > 10:
+        while n > 20:
+            break
+        print(n - 1)
+        break
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["break"],
+        ["print(n - 1)", "break"],
+        ["print(n)"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["break"]],
+        [["break"], ["print(n - 1)", "break"]],
+        [["print(n - 1)", "break"], ["print(n)"]],
+        [["print(n)"], []],
+        [["n > 20"], ["print(n - 1)", "break"]],
+        [["n > 10"], ["print(n)"]]
+    ]
+    assert expected_edges == _extract_edges(cfg)

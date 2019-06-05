@@ -26,7 +26,6 @@ class CFGVisitor:
 
     def visit_module(self, module: astroid.Module) -> None:
         self.cfg = ControlFlowGraph()
-        self._current_block = self.cfg.start
 
         for child in module.body:
             child.accept(self)

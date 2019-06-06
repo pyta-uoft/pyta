@@ -237,7 +237,7 @@ def test_while_with_if_else_and_statements() -> None:
 
 
 def test_while_with_break() -> None:
-    src="""
+    src = """
     while n > 10:
         break
     else:
@@ -266,7 +266,7 @@ def test_while_with_break() -> None:
 
 
 def test_while_with_break_in_if() -> None:
-    src="""
+    src = """
     while n > 10:
         if n > 20:
             print(n)

@@ -237,7 +237,7 @@ def test_while_with_if_else_and_statements() -> None:
 
 
 def test_while_with_break() -> None:
-    src="""
+    src = """
     while n > 10:
         break
     else:
@@ -266,7 +266,7 @@ def test_while_with_break() -> None:
 
 
 def test_while_with_break_in_if() -> None:
-    src="""
+    src = """
     while n > 10:
         if n > 20:
             print(n)
@@ -402,5 +402,141 @@ def test_nested_while_with_break() -> None:
         [["print(n)"], []],
         [["n > 20"], ["print(n - 1)", "break"]],
         [["n > 10"], ["print(n)"]]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_continue() -> None:
+    src = """
+    while n > 10:
+        continue
+    else:
+        print(n - 1)
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["continue"],
+        ["print(n - 1)"],
+        ["print(n)"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["continue"]],
+        [["continue"], ["n > 10"]],
+        [["n > 10"], ["print(n - 1)"]],
+        [["print(n - 1)"], ["print(n)"]],
+        [["print(n)"], []]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_continue_in_if() -> None:
+    src = """
+    while n > 10:
+        if n > 20:
+            print(n)
+            continue
+        else:
+            n -= 1
+        print(n + 1)
+    else:
+        print(n - 1)
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["print(n)", "continue"],
+        ["n -= 1"],
+        ["print(n + 1)"],
+        ["print(n - 1)"],
+        ["print(n)"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["print(n)", "continue"]],
+        [["print(n)", "continue"], ["n > 10"]],
+        [["n > 20"], ["n -= 1"]],
+        [["n -= 1"], ["print(n + 1)"]],
+        [["print(n + 1)"], ["n > 10"]],
+        [["n > 10"], ["print(n - 1)"]],
+        [["print(n - 1)"], ["print(n)"]],
+        [["print(n)"], []]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_continue_in_if_else() -> None:
+    src = """
+        while n > 10:
+            if n > 20:
+                print(n)
+            else:
+                continue
+            n -= 1
+        """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["print(n)"],
+        ["n -= 1"],
+        ["continue"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["print(n)"]],
+        [["print(n)"], ["n -= 1"]],
+        [["n -= 1"], ["n > 10"]],
+        [["n > 20"], ["continue"]],
+        [["continue"], ["n > 10"]],
+        [["n > 10"], []]
+    ]
+    assert expected_edges == _extract_edges(cfg)
+
+
+def test_nested_while_with_continue() -> None:
+    src = """
+    while n > 10:
+        while n > 20:
+            continue
+        print(n - 1)
+        continue
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["continue"],
+        ["print(n - 1)", "continue"],
+        ["print(n)"],
+        []
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["continue"]],
+        [["continue"], ["n > 20"]],
+        [["n > 20"], ["print(n - 1)", "continue"]],
+        [["print(n - 1)", "continue"], ["n > 10"]],
+        [["n > 10"], ["print(n)"]],
+        [["print(n)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)

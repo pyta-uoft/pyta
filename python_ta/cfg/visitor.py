@@ -1,7 +1,7 @@
 import astroid
 from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 class CFGVisitor:
@@ -101,13 +101,27 @@ class CFGVisitor:
         self._current_block = after_while_block
 
     def visit_break(self, node: astroid.Break) -> None:
+        self._visit_continue_or_break(node)
+
+    def visit_continue(self, node: astroid.Continue) -> None:
+        self._visit_continue_or_break(node)
+
+    def _visit_continue_or_break(self, node: Union[astroid.Break,
+                                                   astroid.Continue]) -> None:
         old_curr = self._current_block
         old_curr.add_statement(node)
+        loop_scope = self._get_loop_scope(node)
+        target_block = loop_scope[2] if isinstance(node, astroid.Break) else loop_scope[1]
+        self.cfg.link_or_merge(old_curr, target_block)
+        self._current_block.set_jump(node)
+
+    def _get_loop_scope(self, node: Union[astroid.Break, astroid.Continue]) -> \
+            Tuple[str, CFGBlock, CFGBlock]:
         loop_scope = None
         for scope in self._scope:
             if scope[0] in ['while', 'for']:
                 loop_scope = scope
         if not loop_scope:
-            raise SyntaxError('\'break\' outside loop')
-        self.cfg.link_or_merge(old_curr, loop_scope[2])
-        self._current_block.jump = node
+            raise SyntaxError(f'\'{node.as_string()}\' outside loop')
+        return loop_scope
+

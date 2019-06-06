@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Generator, Optional, List, Set
+from typing import Generator, Optional, List, Set, Union
 from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
@@ -102,9 +102,12 @@ class CFGBlock:
         self.jump = None
 
     def add_statement(self, statement: NodeNG) -> None:
-        if self.jump:
-            return
-        self.statements.append(statement)
+        if not self.jump:
+            self.statements.append(statement)
+
+    def set_jump(self, node: Union[Break, Continue, Return]) -> None:
+        if not self.jump:
+            self.jump = node
 
 
 class CFGEdge:

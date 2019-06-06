@@ -102,9 +102,8 @@ class CFGBlock:
         self.jump = None
 
     def add_statement(self, statement: NodeNG) -> None:
-        if self.jump:
-            return
-        self.statements.append(statement)
+        if not self.jump:
+            self.statements.append(statement)
 
 
 class CFGEdge:

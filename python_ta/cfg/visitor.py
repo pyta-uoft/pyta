@@ -1,25 +1,26 @@
 import astroid
 from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 
 class CFGVisitor:
     """An astroid visitor that creates a control flow graph for a given Python module.
 
     Private Attributes:
-    _scope: A stack of the scopes the visitor is currently in. The top element refers
-            to the current scope. (scope_type [for, while],  start_block, end_block)
+    _control_boundaries: A stack of the boundaries the visitor is currently in.
+        The top of the stack corresponds to the end of the list.
+        (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
     cfg: ControlFlowGraph
     _current_block: CFGBlock
-    _scope: List[Tuple[str, CFGBlock, CFGBlock]]
+    _control_boundaries: List[Tuple[NodeNG, Dict[str, CFGBlock]]]
 
     def __init__(self) -> None:
         super().__init__()
         self.cfg = ControlFlowGraph()
         self._current_block = self.cfg.start
-        self._scope = []
+        self._control_boundaries = []
 
     def __getattr__(self, attr: str):
         if attr.startswith('visit_'):
@@ -76,8 +77,9 @@ class CFGVisitor:
 
         after_while_block = self.cfg.create_block()
 
-        # add while scope
-        self._scope.append(('while', test_block, after_while_block))
+        # step into while
+        self._control_boundaries.append(
+            (node, {astroid.Break.__name__: after_while_block}))
 
         # Handle "body" branch
         body_block = self.cfg.create_block(test_block)
@@ -87,8 +89,8 @@ class CFGVisitor:
         end_body = self._current_block
         self.cfg.link_or_merge(end_body, test_block)
 
-        # step outside loop
-        self._scope.pop()
+        # step out of while
+        self._control_boundaries.pop()
 
         # Handle "else" branch
         else_block = self.cfg.create_block(test_block)
@@ -102,12 +104,12 @@ class CFGVisitor:
 
     def visit_break(self, node: astroid.Break) -> None:
         old_curr = self._current_block
-        old_curr.add_statement(node)
-        loop_scope = None
-        for scope in self._scope:
-            if scope[0] in ['while', 'for']:
-                loop_scope = scope
-        if not loop_scope:
-            raise SyntaxError('\'break\' outside loop')
-        self.cfg.link_or_merge(old_curr, loop_scope[2])
-        self._current_block.jump = node
+        for boundary, exits in reversed(self._control_boundaries):
+            if isinstance(boundary, astroid.While):
+                self.cfg.link_or_merge(old_curr, exits[type(node).__name__])
+                old_curr.add_statement(node)
+                break
+        else:
+            raise SyntaxError(f'\'{type(node).__name__}\' outside loop')
+        unreachable_block = self.cfg.create_block()
+        self._current_block = unreachable_block

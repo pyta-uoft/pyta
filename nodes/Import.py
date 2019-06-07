@@ -9,13 +9,13 @@ Attributes:
         - List of tuples of the names of the module that is being imported.
 
 Example 1:
-    - names  -> [('astroid', 'ast')]
+    - names  -> [['astroid', 'ast']]
 
 Example 2:
-    - names  -> [('sample_usage.pyta_stats', None)]
+    - names  -> [['sample_usage.pyta_stats', None]]
 
 Example 3:
-    - names  -> [('astroid', None), ('sample_usage', None)]
+    - names  -> [['astroid', None], ['sample_usage', None]]
 """
 
 # Example 1:

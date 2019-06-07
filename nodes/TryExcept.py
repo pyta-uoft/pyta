@@ -17,14 +17,14 @@ Attributes:
           raise any exceptions.
 
 Example 1:
-    - body      -> [Pass]
+    - body      -> [Pass()]
     - handlers  -> [ExceptHandler(body=[Pass])]
     - orelse    -> []
 
 Example 2:
-    - body      -> [Pass]
+    - body      -> [Pass()]
     - handlers  -> [ExceptHandler(body=[Pass])]
-    - orelse    -> [Pass]
+    - orelse    -> [Pass()]
 """
 
 # Example 1

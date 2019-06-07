@@ -18,10 +18,10 @@ Attributes:
         break statement.
 
  Example:
-     - target  -> Name(id='a', ctx=Store())
-     - iter    -> Name(id='b', ctx=Load())
-     - body    -> [If(test=Compare(left=Name(id='a', ctx=Load()), ops=[Gt()],
-                  comparators=[Num(n=5)], [Break()]
+     - target  -> AssignName(name='a')
+     - iter    -> Name(name='b')
+     - body    -> [If(test=Compare(left=Name(id='a'), ops=[['>', Const(value=5)]]),
+                   body=[Break()], orelse=[])]
      - orelse  -> [Continue()]
 """
 

@@ -38,6 +38,8 @@ class UsingConstantTestChecker(BaseChecker):
             return self._check_all_constants(node.operand)
         elif isinstance(node, astroid.BoolOp):
             return all(self._check_all_constants(v) for v in node.values)
+        elif isinstance(node, astroid.Compare):
+            return all(self._check_all_constants(operand) for operand in node.get_children())
         else:
             return False
 

@@ -19,12 +19,13 @@ Attributes:
 
 Example:
     - name        -> "fun"
-    - args        -> arg
+    - args        -> Arguments(args=[AssignName(name='arg')])
     - doc         -> "This is a function fun."
-    - body        -> [Assign(AssignName(return_annotation)),
-                     Return(Name(return_annotation)]
-    - decorators  -> [Name(wrapper)]
-    - returns     -> str
+    - body        -> [Assign(targets=AssignName(name='return_annotation')
+                             value=Const(value='cool!')),
+                     Return(value=Name(name='return_annotation')]
+    - decorators  -> Decorator(nodes=[Name(name='wrapper')])
+    - returns     -> Name(name='str')
 
 Type-checking:
     We infer types for the arguments and return type based on the function body;

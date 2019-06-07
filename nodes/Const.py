@@ -6,13 +6,17 @@ computed values.
 
 Attributes:
     - value  (num | str | bool | None | bytes)
-        - A single node.
+        - A literal constant
 
-Example:
+Example 1:
     - value  -> 1
+
+Example 2:
+    - value  -> b'6'
 
 Type-checking:
     The type of a Const node is the type of its value attribute.
 """
 
 1
+b'6'

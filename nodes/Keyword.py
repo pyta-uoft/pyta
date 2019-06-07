@@ -11,7 +11,7 @@ Attributes:
 
 Example:
     - arg    -> "object"
-    - value  -> Num(2)
+    - value  -> Const(value=2)
 """
 
 str(object=2)

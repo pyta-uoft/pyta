@@ -7,6 +7,7 @@ class ControlFlowGraph:
     """A graph representing the control flow of a Python program."""
     start: CFGBlock
     end: CFGBlock
+    # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
 
     def __init__(self) -> None:

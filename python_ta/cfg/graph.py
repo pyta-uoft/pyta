@@ -28,7 +28,8 @@ class ControlFlowGraph:
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
         """Link source to target."""
-        CFGEdge(source, target)
+        if not source.is_jump():
+            CFGEdge(source, target)
 
     def link_or_merge(self, source: CFGBlock, target: CFGBlock) -> None:
         """Link source to target, or merge source into target if source is empty.

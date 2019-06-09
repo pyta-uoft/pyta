@@ -26,6 +26,10 @@ class ControlFlowGraph:
             CFGEdge(pred, new_block)
         return new_block
 
+    def link(self, source: CFGBlock, target: CFGBlock) -> None:
+        """Link source to target."""
+        CFGEdge(source, target)
+
     def link_or_merge(self, source: CFGBlock, target: CFGBlock) -> None:
         """Link source to target, or merge source into target if source is empty.
 

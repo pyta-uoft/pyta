@@ -78,8 +78,7 @@ class CFGVisitor:
         after_while_block = self.cfg.create_block()
 
         # step into while
-        self._control_boundaries.append(
-            (node, {astroid.Break.__name__: after_while_block}))
+        self._control_boundaries.append((node, {astroid.Break.__name__: after_while_block}))
 
         # Handle "body" branch
         body_block = self.cfg.create_block(test_block)
@@ -106,7 +105,7 @@ class CFGVisitor:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
             if isinstance(boundary, astroid.While):
-                self.cfg.link_or_merge(old_curr, exits[type(node).__name__])
+                self.cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break
         else:

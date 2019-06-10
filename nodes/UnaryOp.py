@@ -13,20 +13,20 @@ Attributes:
         - The single expression to be operated on.
 
 Example 1:
-    - op       -> Not
-    - operand  -> None
+    - op       -> 'not'
+    - operand  -> Const(value=None)
 
 Example 2:
-    - op       -> UAdd
-    - operand  -> Num(5)
+    - op       -> '+'
+    - operand  -> Const(value=5)
 
 Example 3:
-    - op       -> USub
-    - operand  -> Name('x', Load())
+    - op       -> '-'
+    - operand  -> Name(name='x')
 
 Example 4:
-    - op       -> Invert
-    - operand  -> Num(72)
+    - op       -> '~'
+    - operand  -> Const(value=72)
 
 Type-checking:
     Translate the operator into the corresponding method, and type-check the method call.

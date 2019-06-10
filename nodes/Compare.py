@@ -13,8 +13,8 @@ Attributes:
         - The list of operators to be performed on left.
 
 Example:
-    - left  -> Const.int(value=0)
-    - ops   -> [('<', Const.int(value=1)), ('!=", Const.int(value=1))]
+    - left  -> Const(value=0)
+    - ops   -> [('<', Const(value=1)), ('!=", Const(value=1))]
 
 Type-checking:
     An individual comparison is converted to its corresponding method and type-checked.

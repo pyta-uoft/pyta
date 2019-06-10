@@ -11,7 +11,7 @@ Attributes:
         - A list of names of the decorators
 
 Example:
-    - nodes  -> [Name(wrapper), Name(decor)]
+    - nodes  -> [Name(name='wrapper'), Name(name='decor')]
 """
 
 @wrapper

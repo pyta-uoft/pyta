@@ -15,8 +15,10 @@ Attributes:
         - The code to be performed until the with statement closes.
 
 Example:
-    - items  -> [Call(open('/foo/bar', 'r'), Name('f', Load())]
-    - body   -> [Node(Pass)]
+    - items  -> [Call(func=Name(name='open'),
+                      args=[Const(value='/foo/bar'), Const(value='r')]),
+                 AssignName(name='f')]]
+    - body   -> [Pass()]
 """
 
 async def fun():

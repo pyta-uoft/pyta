@@ -11,7 +11,7 @@ Attributes:
         - The name of the attribute being deleted.
 
 Example:
-    - expr      -> Name(id="self")
+    - expr      -> Name(name="self")
     - attrname  -> "attr"
 """
 

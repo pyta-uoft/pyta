@@ -12,7 +12,7 @@ Attributes:
           or an Expr node containing a generator expression).
 
 Example:
-    - value  -> Call(range, Name('g', Load()))
+    - value  -> Call(range, Name('g'))
 """
 
 def fun(g):

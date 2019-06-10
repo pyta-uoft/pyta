@@ -16,7 +16,7 @@ Attributes:
         - The nodes will execute if the loop finished normally rather than via a
         break statement.
 
-Example:
+Example 1:
     - target  -> AssignName(i)
     - iter    -> List(Const.int(Value=1), Const.int(Value=2),
     Const.int(Value=3)))
@@ -26,12 +26,13 @@ Example:
 Type-checking:
     Unify the target against the "contained" type in the iterable.
 """
-
+# Example 1
 for i in [1, 2, 3]:
     break
 else:
     pass
 
+# Example 2
 for i in range(3):
     break
 else:

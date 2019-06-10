@@ -5,12 +5,11 @@ An augmented assignment, which is the combination, in a single statement, of a
 binary operation and an assignment statement.
 
 Attributes:
-    - target  (List[Name | Subscript | Attribute])
-        - A list of nodes. Multiple nodes represent assigning the same value.
-          to each.
+    - target  (Name | Subscript | Attribute)
+        - A single node
     - value   (Node)
         - A single node to be assigned to target.
-    - op      (Expr)
+    - op      (str)
         - The operator to be performed on target.
 
 Type-checking:
@@ -22,9 +21,10 @@ Type-checking:
 
 
 Example:
-    - target  -> [Name(id='x', ctx=Store())]
-    - value   -> Num(n=1)
-    - op      -> Add()
+    - target  -> AssignName(name='x')
+    - value   -> Const(value=1)
+    - op      -> '+='
 """
 
+# Example:
 x += 1

@@ -18,8 +18,8 @@ Attributes:
 Example:
     - name        -> 'Foo'
     - doc         -> ''
-    - decorators  -> @wrapper
-    - bases       -> [Name(id='base1', ctx=Load()),Name(id='base2', ctx=Load())]
+    - decorators  -> Decorator(@wrapper)
+    - bases       -> [Name(name='base1'),Name(name='base2')]
     - body        -> [Pass()]
 
 Type-checking:

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Generator, Optional, List, Set, Union
+from typing import Generator, Optional, List, Set
 from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
@@ -7,6 +7,7 @@ class ControlFlowGraph:
     """A graph representing the control flow of a Python program."""
     start: CFGBlock
     end: CFGBlock
+    # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
 
     def __init__(self) -> None:
@@ -25,6 +26,11 @@ class ControlFlowGraph:
             CFGEdge(pred, new_block)
         return new_block
 
+    def link(self, source: CFGBlock, target: CFGBlock) -> None:
+        """Link source to target."""
+        if not source.is_jump():
+            CFGEdge(source, target)
+
     def link_or_merge(self, source: CFGBlock, target: CFGBlock) -> None:
         """Link source to target, or merge source into target if source is empty.
 
@@ -33,7 +39,7 @@ class ControlFlowGraph:
         source with a jump statement cannot be further linked or merged to
         another target.
         """
-        if source.jump:
+        if source.is_jump():
             return
         if source.statements == []:
             if source is self.start:
@@ -89,9 +95,6 @@ class CFGBlock:
     predecessors: List[CFGEdge]
     # This block's out-edges (to blocks that can execute immediately after this one).
     successors: List[CFGEdge]
-    # A jump is a statement that branches the control flow (ex: break, continue, return)
-    # `jump != None` implies that a jump is in self.statements
-    jump: Optional[Break, Continue, Return]
 
     def __init__(self, id_: int) -> None:
         """Initialize a new CFGBlock."""
@@ -99,15 +102,17 @@ class CFGBlock:
         self.statements = []
         self.predecessors = []
         self.successors = []
-        self.jump = None
 
     def add_statement(self, statement: NodeNG) -> None:
-        if not self.jump:
+        if not self.is_jump():
             self.statements.append(statement)
 
-    def set_jump(self, node: Union[Break, Continue, Return]) -> None:
-        if not self.jump:
-            self.jump = node
+    def is_jump(self) -> bool:
+        """Returns True if the block has a statement that branches
+        the control flow (ex: `break`)"""
+        if len(self.statements) < 1:
+            return False
+        return isinstance(self.statements[-1], Break)
 
 
 class CFGEdge:

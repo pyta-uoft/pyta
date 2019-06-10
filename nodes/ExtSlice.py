@@ -8,8 +8,8 @@ Attributes:
         - Holds a Slice node.
 
 Example:
-    - dims  -> [Slice(lower=Num(n=2), upper=Num(n=3), step=None),
-                Index(value=Num(n=1)]
+    - dims  -> [Slice(lower=Const(value=2), upper=Const(value=3), step=None),
+                Index(value=Const(value=1)]
 
 Type-checking:
     The inferred type is a tuple consisting of the inferred types of the 'dims'.

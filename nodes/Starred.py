@@ -12,11 +12,11 @@ Attributes:
           Load or Store.
 
 Example 1: (nested in Tuple node)
-    - value  -> Name('a', Store())
+    - value  -> AssignName('a')
     - ctx    -> Store
 
 Example 2: (nested in Call node)
-    - value  -> Name('x', Load())
+    - value  -> Name('x')
     - ctx    -> Load
 """
 

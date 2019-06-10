@@ -13,18 +13,18 @@ Attributes:
           If None, keywords is an empty list.
 
 Example 1:
-    - func      -> Name(name='ord', ctx=Load())
-    - args      -> Name(name='c', ctx=Load())
+    - func      -> Name(name='ord')
+    - args      -> Name(name='c')
     - keywords  -> []
 
 Example 2:
-    - func      -> Name(name='func', ctx=Load())
-    - args      -> [Name(name='a', ctx=Load())]
-    - keywords  -> [keyword(arg='b', value=Name(id='c', ctx=Load()))]
+    - func      -> Name(name='func')
+    - args      -> [Name(name='a')]
+    - keywords  -> [keyword(arg='b', value=Name(id='c'))]
 
 Example 3:
-    -func       -> Attribute(expr=Name(name='self', ctx=Load()), attrname='method')
-    -args       -> Name(name='x', ctx=Load())
+    -func       -> Attribute(expr=Name(name='self'), attrname='method')
+    -args       -> Name(name='x')
     -keywords   -> []
 
 Type-checking:

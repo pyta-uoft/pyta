@@ -14,11 +14,11 @@ Example 1:
     - ctx   -> Load
 
 Example 2:
-    - elts  -> [Num(1), Num(2), Num(3)]
+    - elts  -> [Const(value=1), Const(value=2), Const(value=3)]
     - ctx   -> Load
 
 Example 3:
-    - elts  -> [Name('x', Store()), Name('y', Store())]
+    - elts  -> [AssignName(name='x'), AssignName(name='y')]
     - ctx   -> Store
 
 

@@ -12,9 +12,9 @@ Attributes:
         - A list of nodes.
 
 Example:
-    - type  -> ValueError
-    - name  -> 'e'
-    - body  -> [pass]
+    - type  -> Name(name='ValueError')
+    - name  -> AssignName(name='e')
+    - body  -> [Pass()]
 
 """
 

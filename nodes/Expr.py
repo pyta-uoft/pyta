@@ -9,7 +9,8 @@ Attributes:
         - Value holds nodes like Name, Lambda, Yield or YieldFrom.
 
 Example:
-    - value  -> print(1)
+    - value  -> Call(func=Name(name='print'),
+                     args=[Const(value=1)])
 """
 
 print(1)

@@ -13,9 +13,10 @@ Attributes:
           representation so it appears as If nodes within orelse.
 
 Example:
-    - test    -> Compare(Name(n), [(3,)])
+    - test    -> Compare(left=Name(name='n'), ops=[['==', Const(value=0)]])
     - body    -> [Pass()]
-    - orelse  -> [If(n > 0, pass, n = 3)]
+    - orelse  -> [If(Name(name='something'), Pass(),
+                     If(Compare(n > 0), Pass(), n=3]))]
 """
 
 if n == 0:

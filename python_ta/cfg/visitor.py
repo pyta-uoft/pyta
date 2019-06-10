@@ -1,7 +1,7 @@
 import astroid
 from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Union
 
 
 class CFGVisitor:
@@ -78,7 +78,8 @@ class CFGVisitor:
         after_while_block = self.cfg.create_block()
 
         # step into while
-        self._control_boundaries.append((node, {astroid.Break.__name__: after_while_block}))
+        self._control_boundaries.append((node, {astroid.Break.__name__: after_while_block,
+                                                astroid.Continue.__name__: test_block}))
 
         # Handle "body" branch
         body_block = self.cfg.create_block(test_block)
@@ -102,6 +103,12 @@ class CFGVisitor:
         self._current_block = after_while_block
 
     def visit_break(self, node: astroid.Break) -> None:
+        self._visit_continue_or_break(node)
+
+    def visit_continue(self, node:astroid.Continue) -> None:
+        self._visit_continue_or_break(node)
+
+    def _visit_continue_or_break(self, node: Union[astroid.Break, astroid.Continue]) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
             if isinstance(boundary, astroid.While):

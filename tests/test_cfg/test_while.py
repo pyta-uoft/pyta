@@ -540,3 +540,43 @@ def test_nested_while_with_continue() -> None:
         [["print(n)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
+
+
+def test_while_with_continue_break() -> None:
+    src = """
+    while n > 10:
+        if n > 20:
+            break
+            print(unreachable)
+        elif n > 25:
+            continue
+        print(k)
+    print(n)
+    """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ["n > 10"],
+        ["n > 20"],
+        ["break"],
+        ["print(n)"],
+        [],
+        ["n > 25"],
+        ["continue"],
+        ["print(k)"]
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+    expected_edges = [
+        [["n > 10"], ["n > 20"]],
+        [["n > 20"], ["break"]],
+        [["break"], ["print(n)"]],
+        [["print(n)"], []],
+        [["n > 20"], ["n > 25"]],
+        [["n > 25"], ["continue"]],
+        [["continue"], ["n > 10"]],
+        [["n > 25"], ["print(k)"]],
+        [["print(k)"], ["n > 10"]],
+        [["n > 10"], ["print(n)"]]
+    ]
+    assert expected_edges == _extract_edges(cfg)

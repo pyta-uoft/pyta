@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Generator, Optional, List, Set
-from astroid.node_classes import NodeNG, Continue, Break, Return
+from astroid.node_classes import NodeNG, Continue, Break
 
 
 class ControlFlowGraph:
@@ -112,7 +112,7 @@ class CFGBlock:
         the control flow (ex: `break`)"""
         if len(self.statements) < 1:
             return False
-        return isinstance(self.statements[-1], Break)
+        return isinstance(self.statements[-1], (Break, Continue))
 
 
 class CFGEdge:

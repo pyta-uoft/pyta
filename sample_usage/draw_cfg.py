@@ -41,7 +41,7 @@ def main(filepath: str) -> None:
     visitor = CFGVisitor()
     mod.accept(visitor)
 
-    display(visitor.cfg, filename)
+    display(visitor.cfgs[0], filename)
 
 
 if __name__ == '__main__':

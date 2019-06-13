@@ -3,7 +3,7 @@ import astroid
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
-def build_cfgs(src: str) -> ControlFlowGraph:
+def build_cfgs(src: str) -> List[ControlFlowGraph]:
     mod = astroid.parse(src)
     t = CFGVisitor()
     mod.accept(t)

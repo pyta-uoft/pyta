@@ -130,7 +130,7 @@ class CFGVisitor:
     def visit_break(self, node: astroid.Break) -> None:
         self._visit_continue_or_break(node)
 
-    def visit_continue(self, node:astroid.Continue) -> None:
+    def visit_continue(self, node: astroid.Continue) -> None:
         self._visit_continue_or_break(node)
 
     def _visit_continue_or_break(self, node: Union[astroid.Break, astroid.Continue]) -> None:
@@ -145,3 +145,11 @@ class CFGVisitor:
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 
+    def visit_return(self, node: astroid.Return) -> None:
+        if type(self._current_cfg.start.statements[0]).__name__ != astroid.FunctionDef.__name__:
+            raise SyntaxError(f'\'{type(node).__name__}\' outside function')
+        old_curr = self._current_block
+        self._current_cfg.link(old_curr, self._current_cfg.end)
+        old_curr.add_statement(node)
+        unreachable_block = self._current_cfg.create_block()
+        self._current_block = unreachable_block

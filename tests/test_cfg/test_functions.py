@@ -1,9 +1,9 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union
 import astroid
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
-def build_cfgs(src: str) -> List[ControlFlowGraph]:
+def build_cfgs(src: str) -> Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]:
     mod = astroid.parse(src)
     t = CFGVisitor()
     mod.accept(t)
@@ -25,18 +25,20 @@ def test_simple_function() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 2
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['\ndef func(x:int)->None:\n    print(x + 1)'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
         ['\ndef func(x:int)->None:\n    print(x + 1)'],
         ['print(x + 1)'],
         []
     ]
-    assert expected_blocks_function == _extract_blocks(cfgs[1])
+    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
 
 def test_simple_function_with_surrounding_statements() -> None:
@@ -49,18 +51,20 @@ def test_simple_function_with_surrounding_statements() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 2
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['x = 10', '\ndef func(x:int)->None:\n    print(x + 1)', 'print(x)'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
         ['\ndef func(x:int)->None:\n    print(x + 1)'],
         ['print(x + 1)'],
         []
     ]
-    assert expected_blocks_function == _extract_blocks(cfgs[1])
+    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
 
 def test_multiple_simple_functions() -> None:
@@ -74,26 +78,28 @@ def test_multiple_simple_functions() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 3
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['\ndef func(x:int)->None:\n    print(x + 1)',
          '\ndef func2(y:int)->None:\n    print(y - 1)'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_func = [
         ['\ndef func(x:int)->None:\n    print(x + 1)'],
         ['print(x + 1)'],
         []
     ]
-    assert expected_blocks_func == _extract_blocks(cfgs[1])
+    assert expected_blocks_func == _extract_blocks(cfgs[keys[1]])
 
     expected_blocks_func2 = [
         ['\ndef func2(y:int)->None:\n    print(y - 1)'],
         ['print(y - 1)'],
         []
     ]
-    assert expected_blocks_func2 == _extract_blocks(cfgs[2])
+    assert expected_blocks_func2 == _extract_blocks(cfgs[keys[2]])
 
 
 def test_function_with_while() -> None:
@@ -107,12 +113,14 @@ def test_function_with_while() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 2
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['\ndef func(x:int)->None:\n    while x > 10:\n        '
          'print(x)\n    else:\n        print(j)'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
         ['\ndef func(x:int)->None:\n    while x > 10:\n        '
@@ -122,4 +130,4 @@ def test_function_with_while() -> None:
         ['print(j)'],
         []
     ]
-    assert expected_blocks_function == _extract_blocks(cfgs[1])
+    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])

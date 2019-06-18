@@ -12,14 +12,14 @@ class CFGVisitor:
         The top of the stack corresponds to the end of the list.
         (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
-    cfgs: List[ControlFlowGraph]
+    cfgs: Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]
     _current_cfg: ControlFlowGraph
     _current_block: CFGBlock
     _control_boundaries: List[Tuple[NodeNG, Dict[str, CFGBlock]]]
 
     def __init__(self) -> None:
         super().__init__()
-        self.cfgs = []
+        self.cfgs = {}
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
@@ -35,8 +35,8 @@ class CFGVisitor:
         self._current_block.add_statement(node)
 
     def visit_module(self, module: astroid.Module) -> None:
-        self.cfgs.append(ControlFlowGraph())
-        self._current_cfg = self.cfgs[0]
+        self.cfgs[module] = ControlFlowGraph()
+        self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
 
         for child in module.body:
@@ -49,8 +49,8 @@ class CFGVisitor:
         previous_block = self._current_block
         previous_block.add_statement(func)
 
-        self.cfgs.append(ControlFlowGraph())
-        self._current_cfg = self.cfgs[-1]
+        self.cfgs[func] = ControlFlowGraph()
+        self._current_cfg = self.cfgs[func]
 
         self._current_block = self._current_cfg.start
         self._current_block.add_statement(func)

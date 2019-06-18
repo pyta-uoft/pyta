@@ -1,7 +1,7 @@
 import astroid
 from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Optional
 
 
 class CFGVisitor:
@@ -13,8 +13,8 @@ class CFGVisitor:
         (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
     cfgs: Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]
-    _current_cfg: ControlFlowGraph
-    _current_block: CFGBlock
+    _current_cfg: Optional[ControlFlowGraph]
+    _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[NodeNG, Dict[str, CFGBlock]]]
 
     def __init__(self) -> None:
@@ -45,18 +45,17 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
 
     def visit_functiondef(self, func: astroid.FunctionDef) -> None:
+        self._current_block.add_statement(func)
+
         previous_cfg = self._current_cfg
         previous_block = self._current_block
-        previous_block.add_statement(func)
 
         self.cfgs[func] = ControlFlowGraph()
         self._current_cfg = self.cfgs[func]
 
-        self._current_block = self._current_cfg.start
-        self._current_block.add_statement(func)
+        self._current_cfg.start.add_statement(func.args)
 
-        body_block = self._current_cfg.create_block(self._current_block)
-        self._current_block = body_block
+        self._current_block = self._current_cfg.create_block(self._current_cfg.start)
 
         for child in func.body:
             child.accept(self)

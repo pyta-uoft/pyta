@@ -34,7 +34,7 @@ def test_simple_function() -> None:
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)'],
+        ['x:int'],
         ['print(x + 1)'],
         []
     ]
@@ -60,7 +60,7 @@ def test_simple_function_with_surrounding_statements() -> None:
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)'],
+        ['x:int'],
         ['print(x + 1)'],
         []
     ]
@@ -88,14 +88,14 @@ def test_multiple_simple_functions() -> None:
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_func = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)'],
+        ['x:int'],
         ['print(x + 1)'],
         []
     ]
     assert expected_blocks_func == _extract_blocks(cfgs[keys[1]])
 
     expected_blocks_func2 = [
-        ['\ndef func2(y:int)->None:\n    print(y - 1)'],
+        ['y:int'],
         ['print(y - 1)'],
         []
     ]
@@ -123,8 +123,7 @@ def test_function_with_while() -> None:
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['\ndef func(x:int)->None:\n    while x > 10:\n        '
-         'print(x)\n    else:\n        print(j)'],
+        ['x:int'],
         ['x > 10'],
         ['print(x)'],
         ['print(j)'],

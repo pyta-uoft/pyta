@@ -105,7 +105,7 @@ class CFGVisitor:
     def visit_break(self, node: astroid.Break) -> None:
         self._visit_continue_or_break(node)
 
-    def visit_continue(self, node:astroid.Continue) -> None:
+    def visit_continue(self, node: astroid.Continue) -> None:
         self._visit_continue_or_break(node)
 
     def _visit_continue_or_break(self, node: Union[astroid.Break, astroid.Continue]) -> None:

@@ -52,6 +52,8 @@ class CFGVisitor:
         self.cfgs.append(ControlFlowGraph())
         self._current_cfg = self.cfgs[-1]
 
+        self._control_boundaries.append((func, {astroid.Return.__name__: self._current_cfg.end}))
+
         self._current_block = self._current_cfg.start
         self._current_block.add_statement(func)
 
@@ -60,6 +62,8 @@ class CFGVisitor:
 
         for child in func.body:
             child.accept(self)
+
+        self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_block = previous_block
@@ -128,28 +132,23 @@ class CFGVisitor:
         self._current_block = after_while_block
 
     def visit_break(self, node: astroid.Break) -> None:
-        self._visit_continue_or_break(node)
+        self._visit_jump(node)
 
     def visit_continue(self, node:astroid.Continue) -> None:
-        self._visit_continue_or_break(node)
+        self._visit_jump(node)
 
-    def _visit_continue_or_break(self, node: Union[astroid.Break, astroid.Continue]) -> None:
+    def visit_return(self, node: astroid.Return) -> None:
+        self._visit_jump(node)
+
+    def _visit_jump(self, node: Union[astroid.Break, astroid.Continue, astroid.Return]) -> None:
         old_curr = self._current_block
+        req_boundary = astroid.FunctionDef if isinstance(node, astroid.Return) else astroid.While
         for boundary, exits in reversed(self._control_boundaries):
-            if isinstance(boundary, astroid.While):
+            if isinstance(boundary, req_boundary):
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break
         else:
             raise SyntaxError(f'\'{type(node).__name__}\' outside loop')
-        unreachable_block = self._current_cfg.create_block()
-        self._current_block = unreachable_block
-
-    def visit_return(self, node: astroid.Return) -> None:
-        if type(self._current_cfg.start.statements[0]).__name__ != astroid.FunctionDef.__name__:
-            raise SyntaxError(f'\'{type(node).__name__}\' outside function')
-        old_curr = self._current_block
-        self._current_cfg.link(old_curr, self._current_cfg.end)
-        old_curr.add_statement(node)
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block

@@ -149,6 +149,7 @@ class CFGVisitor:
                 old_curr.add_statement(node)
                 break
         else:
-            raise SyntaxError(f'\'{type(node).__name__}\' outside loop')
+            raise SyntaxError(f'\'{type(node).__name__}\' outside'
+                              f' {"function" if isinstance(node, astroid.Return) else "loop"}')
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block

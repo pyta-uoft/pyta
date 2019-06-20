@@ -44,8 +44,17 @@ class CFGVisitor:
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
 
+    def visit_classdef(self, node: astroid.ClassDef) -> None:
+        self._current_block.add_statement(node)
+
+        for child in node.body:
+            if isinstance(child, astroid.FunctionDef):
+                print(child.name)
+                child.accept(self)
+
     def visit_functiondef(self, func: astroid.FunctionDef) -> None:
-        self._current_block.add_statement(func)
+        if not isinstance(func.parent, astroid.ClassDef):
+            self._current_block.add_statement(func)
 
         previous_cfg = self._current_cfg
         previous_block = self._current_block

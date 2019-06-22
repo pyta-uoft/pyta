@@ -104,11 +104,11 @@ class CFGVisitor:
 
     def visit_for(self, node: astroid.For) -> None:
         old_curr = self._current_block
+        old_curr.add_statement(node.iter)
 
         # Handle "test" block
         test_block = self.cfg.create_block()
         test_block.add_statement(node.target)
-        test_block.add_statement(node.iter)
         self.cfg.link_or_merge(old_curr, test_block)
 
         after_for_block = self.cfg.create_block()

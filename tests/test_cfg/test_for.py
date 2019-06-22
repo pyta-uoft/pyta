@@ -32,16 +32,18 @@ def test_simple_for_no_else() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["print(i)"],
         []  # end block
     ]
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["print(i)"]],
-        [["print(i)"], ["i", "range(10)"]],
-        [["i", "range(10)"], []]
+        [["range(10)"], ["i"]],
+        [["i"], ["print(i)"]],
+        [["print(i)"], ["i"]],
+        [["i"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
 
@@ -53,16 +55,18 @@ def test_simple_for_two_targ() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["(i, j)", "zip(range(10), range(20))"],
+        ["zip(range(10), range(20))"],
+        ["(i, j)"],
         ["print(i, j)"],
         []  # end block
     ]
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["(i, j)", "zip(range(10), range(20))"], ["print(i, j)"]],
-        [["print(i, j)"], ["(i, j)", "zip(range(10), range(20))"]],
-        [["(i, j)", "zip(range(10), range(20))"], []]
+        [["zip(range(10), range(20))"], ["(i, j)"]],
+        [["(i, j)"], ["print(i, j)"]],
+        [["print(i, j)"], ["(i, j)"]],
+        [["(i, j)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
 
@@ -76,7 +80,8 @@ def test_simple_for_with_else() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["print(i)"],
         ["print(i + 1)"],
         []
@@ -84,9 +89,10 @@ def test_simple_for_with_else() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["print(i)"]],
-        [["print(i)"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i + 1)"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["print(i)"]],
+        [["print(i)"], ["i"]],
+        [["i"], ["print(i + 1)"]],
         [["print(i + 1)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -104,8 +110,8 @@ def test_simple_for_with_surrounding_blocks() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["n = 10"],
-        ["i", "range(n)"],
+        ["n = 10", "range(n)"],
+        ["i"],
         ["print(i - 1)"],
         ["print(i + 1)"],
         ["print(i)"],
@@ -114,10 +120,10 @@ def test_simple_for_with_surrounding_blocks() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["n = 10"], ["i", "range(n)"]],
-        [["i", "range(n)"], ["print(i - 1)"]],
-        [["print(i - 1)"], ["i", "range(n)"]],
-        [["i", "range(n)"], ["print(i + 1)"]],
+        [["n = 10", "range(n)"], ["i"]],
+        [["i"], ["print(i - 1)"]],
+        [["print(i - 1)"], ["i"]],
+        [["i"], ["print(i + 1)"]],
         [["print(i + 1)"], ["print(i)"]],
         [["print(i)"], []]
     ]
@@ -134,7 +140,8 @@ def test_for_with_if() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(y)"],
         ["print(x)"],
@@ -143,11 +150,12 @@ def test_for_with_if() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(y)"]],
-        [["print(y)"], ["i", "range(10)"]],
-        [["i > 5"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(x)"]],
+        [["print(y)"], ["i"]],
+        [["i > 5"], ["i"]],
+        [["i"], ["print(x)"]],
         [["print(x)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -165,7 +173,8 @@ def test_for_with_if_and_statements() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(y)"],
         ["print(k)", "print(j)"],
@@ -175,12 +184,13 @@ def test_for_with_if_and_statements() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(y)"]],
         [["print(y)"], ["print(k)", "print(j)"]],
-        [["print(k)", "print(j)"], ["i", "range(10)"]],
+        [["print(k)", "print(j)"], ["i"]],
         [["i > 5"], ["print(k)", "print(j)"]],
-        [["i", "range(10)"], ["print(x)"]],
+        [["i"], ["print(x)"]],
         [["print(x)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -198,7 +208,8 @@ def test_for_with_if_else() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(y)"],
         ["print(j)"],
@@ -208,12 +219,13 @@ def test_for_with_if_else() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(y)"]],
-        [["print(y)"], ["i", "range(10)"]],
+        [["print(y)"], ["i"]],
         [["i > 5"], ["print(j)"]],
-        [["print(j)"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(x)"]],
+        [["print(j)"], ["i"]],
+        [["i"], ["print(x)"]],
         [["print(x)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -234,7 +246,8 @@ def test_for_with_if_else_and_statements() -> None:
     """
     cfg = build_cfg(src)
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["print(m)", "i > 5"],
         ["print(y)"],
         ["print(x)", "print(j)"],
@@ -245,13 +258,14 @@ def test_for_with_if_else_and_statements() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["print(m)", "i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["print(m)", "i > 5"]],
         [["print(m)", "i > 5"], ["print(y)"]],
         [["print(y)"], ["print(x)", "print(j)"]],
-        [["print(x)", "print(j)"], ["i", "range(10)"]],
+        [["print(x)", "print(j)"], ["i"]],
         [["print(m)", "i > 5"], ["print(j)"]],
         [["print(j)"], ["print(x)", "print(j)"]],
-        [["i", "range(10)"], ["print(x)"]],
+        [["i"], ["print(x)"]],
         [["print(x)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -268,7 +282,8 @@ def test_for_with_break() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["break"],
         ["print(i)"],
         [],
@@ -277,10 +292,11 @@ def test_for_with_break() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["break"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["break"]],
         [["break"], ["print(i)"]],
         [["print(i)"], []],
-        [["i", "range(10)"], ["print(i - 1)"]],
+        [["i"], ["print(i - 1)"]],
         [["print(i - 1)"], ["print(i)"]]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -302,7 +318,8 @@ def test_for_with_break_in_if() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(i)", "break"],
         ["print(i)"],
@@ -314,14 +331,15 @@ def test_for_with_break_in_if() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(i)", "break"]],
         [["print(i)", "break"], ["print(i)"]],
         [["print(i)"], []],
         [["i > 5"], ["i -= 1"]],
         [["i -= 1"], ["print(i + 1)"]],
-        [["print(i + 1)"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i - 1)"]],
+        [["print(i + 1)"], ["i"]],
+        [["i"], ["print(i - 1)"]],
         [["print(i - 1)"], ["print(i)"]],
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -339,7 +357,8 @@ def test_for_with_break_in_if_else() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(i)"],
         ["i -= 1"],
@@ -349,13 +368,14 @@ def test_for_with_break_in_if_else() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(i)"]],
         [["print(i)"], ["i -= 1"]],
-        [["i -= 1"], ["i", "range(10)"]],
+        [["i -= 1"], ["i"]],
         [["i > 5"], ["break"]],
         [["break"], []],
-        [["i", "range(10)"], []]
+        [["i"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
 
@@ -373,8 +393,10 @@ def test_nested_for() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
-        ["i", "range(5)"],
+        ["range(10)"],
+        ["i"],
+        ["range(5)"],
+        ["i"],
         ["print(i)"],
         ["print(i - 1)"],
         ["print(i + 1)"],
@@ -383,12 +405,14 @@ def test_nested_for() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i", "range(5)"]],
-        [["i", "range(5)"], ["print(i)"]],
-        [["print(i)"], ["i", "range(5)"]],
-        [["i", "range(5)"], ["print(i - 1)"]],
-        [["print(i - 1)"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i + 1)"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["range(5)"]],
+        [["range(5)"], ["i"]],
+        [["i"], ["print(i)"]],
+        [["print(i)"], ["i"]],
+        [["i"], ["print(i - 1)"]],
+        [["print(i - 1)"], ["i"]],
+        [["i"], ["print(i + 1)"]],
         [["print(i + 1)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -406,8 +430,10 @@ def test_nested_for_with_break() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
-        ["i", "range(5)"],
+        ["range(10)"],
+        ["i"],
+        ["range(5)"],
+        ["i"],
         ["break"],
         ["print(i - 1)", "break"],
         ["print(i)"],
@@ -416,13 +442,15 @@ def test_nested_for_with_break() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i", "range(5)"]],
-        [["i", "range(5)"], ["break"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["range(5)"]],
+        [["range(5)"], ["i"]],
+        [["i"], ["break"]],
         [["break"], ["print(i - 1)", "break"]],
         [["print(i - 1)", "break"], ["print(i)"]],
         [["print(i)"], []],
-        [["i", "range(5)"], ["print(i - 1)", "break"]],
-        [["i", "range(10)"], ["print(i)"]]
+        [["i"], ["print(i - 1)", "break"]],
+        [["i"], ["print(i)"]]
     ]
     assert expected_edges == _extract_edges(cfg)
 
@@ -438,7 +466,8 @@ def test_for_with_continue() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["continue"],
         ["print(i - 1)"],
         ["print(i)"],
@@ -447,9 +476,10 @@ def test_for_with_continue() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["continue"]],
-        [["continue"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i - 1)"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["continue"]],
+        [["continue"], ["i"]],
+        [["i"], ["print(i - 1)"]],
         [["print(i - 1)"], ["print(i)"]],
         [["print(i)"], []]
     ]
@@ -472,7 +502,8 @@ def test_for_with_continue_in_if() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(i)", "continue"],
         ["i -= 1"],
@@ -484,13 +515,14 @@ def test_for_with_continue_in_if() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(i)", "continue"]],
-        [["print(i)", "continue"], ["i", "range(10)"]],
+        [["print(i)", "continue"], ["i"]],
         [["i > 5"], ["i -= 1"]],
         [["i -= 1"], ["print(i + 1)"]],
-        [["print(i + 1)"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i - 1)"]],
+        [["print(i + 1)"], ["i"]],
+        [["i"], ["print(i - 1)"]],
         [["print(i - 1)"], ["print(i)"]],
         [["print(i)"], []]
     ]
@@ -509,7 +541,8 @@ def test_for_with_continue_in_if_else() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["print(i)"],
         ["i -= 1"],
@@ -519,13 +552,14 @@ def test_for_with_continue_in_if_else() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["print(i)"]],
         [["print(i)"], ["i -= 1"]],
-        [["i -= 1"], ["i", "range(10)"]],
+        [["i -= 1"], ["i"]],
         [["i > 5"], ["continue"]],
-        [["continue"], ["i", "range(10)"]],
-        [["i", "range(10)"], []]
+        [["continue"], ["i"]],
+        [["i"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
 
@@ -542,8 +576,10 @@ def test_nested_for_with_continue() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
-        ["i", "range(5)"],
+        ["range(10)"],
+        ["i"],
+        ["range(5)"],
+        ["i"],
         ["continue"],
         ["print(i - 1)", "continue"],
         ["print(i)"],
@@ -552,12 +588,14 @@ def test_nested_for_with_continue() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i", "range(5)"]],
-        [["i", "range(5)"], ["continue"]],
-        [["continue"], ["i", "range(5)"]],
-        [["i", "range(5)"], ["print(i - 1)", "continue"]],
-        [["print(i - 1)", "continue"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i)"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["range(5)"]],
+        [["range(5)"], ["i"]],
+        [["i"], ["continue"]],
+        [["continue"], ["i"]],
+        [["i"], ["print(i - 1)", "continue"]],
+        [["print(i - 1)", "continue"], ["i"]],
+        [["i"], ["print(i)"]],
         [["print(i)"], []]
     ]
     assert expected_edges == _extract_edges(cfg)
@@ -577,7 +615,8 @@ def test_for_with_continue_break() -> None:
     cfg = build_cfg(src)
 
     expected_blocks = [
-        ["i", "range(10)"],
+        ["range(10)"],
+        ["i"],
         ["i > 5"],
         ["break"],
         ["print(i)"],
@@ -589,15 +628,16 @@ def test_for_with_continue_break() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [
-        [["i", "range(10)"], ["i > 5"]],
+        [["range(10)"], ["i"]],
+        [["i"], ["i > 5"]],
         [["i > 5"], ["break"]],
         [["break"], ["print(i)"]],
         [["print(i)"], []],
         [["i > 5"], ["i > 2"]],
         [["i > 2"], ["continue"]],
-        [["continue"], ["i", "range(10)"]],
+        [["continue"], ["i"]],
         [["i > 2"], ["print(k)"]],
-        [["print(k)"], ["i", "range(10)"]],
-        [["i", "range(10)"], ["print(i)"]]
+        [["print(k)"], ["i"]],
+        [["i"], ["print(i)"]]
     ]
     assert expected_edges == _extract_edges(cfg)

@@ -119,3 +119,34 @@ class CFGVisitor:
             raise SyntaxError(f'\'{type(node).__name__}\' outside loop')
         unreachable_block = self.cfg.create_block()
         self._current_block = unreachable_block
+
+    def visit_tryexcept(self, node: astroid.TryExcept) -> None:
+        old_curr = self._current_block
+        after_tryexcept_block = self.cfg.create_block()
+
+        handlers = []
+        for handler in node.handlers:
+            self._current_block = self.cfg.create_block()
+            handler.accept(self)
+            handlers.append(self._current_block)
+
+        # Handle "try" block
+        for child in node.body:
+            self._current_block = self.cfg.create_block(old_curr)
+            child.accept(self)
+            old_curr = self._current_block
+            # Handle "except" blocks
+            for handler in handlers:
+                self.cfg.link_or_merge(old_curr, handler)
+                self.cfg.link_or_merge(handler, after_tryexcept_block)
+            # Unhandled exception
+            raise_block = self.cfg.create_block(old_curr)
+            raise_block.add_statement(astroid.Raise())
+
+        # Handle "else" block
+        self._current_block = self.cfg.create_block(old_curr)
+        for child in node.orelse:
+            child.accept(self)
+
+        self.cfg.link_or_merge(self._current_block, after_tryexcept_block)
+        self._current_block = after_tryexcept_block

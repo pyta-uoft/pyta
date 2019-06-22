@@ -57,7 +57,6 @@ def test_simple_for_two_targ() -> None:
         ["print(i, j)"],
         []  # end block
     ]
-    print(_extract_blocks(cfg))
     assert expected_blocks == _extract_blocks(cfg)
 
     expected_edges = [

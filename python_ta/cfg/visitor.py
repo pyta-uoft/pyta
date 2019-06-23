@@ -49,7 +49,6 @@ class CFGVisitor:
 
         for child in node.body:
             if isinstance(child, astroid.FunctionDef):
-                print(child.name)
                 child.accept(self)
 
     def visit_functiondef(self, func: astroid.FunctionDef) -> None:

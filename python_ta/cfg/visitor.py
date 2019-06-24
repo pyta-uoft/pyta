@@ -158,7 +158,7 @@ class CFGVisitor:
         false_block = self._current_cfg.create_block()
 
         self._control_boundaries.append((node, {'or': false_block,
-                                               'and': true_block}))
+                                                'and': true_block}))
 
         # early exit block
         early_block = false_block if node.op == 'and' else true_block

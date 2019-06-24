@@ -180,7 +180,8 @@ class CFGVisitor:
             if isinstance(boundary, astroid.BoolOp):
                 self._current_cfg.link_or_merge(late_block, exits[node.op])
                 self._current_block = early_block
+                break
             elif isinstance(boundary, astroid.If):
                 self._current_cfg.link_or_merge(true_block, exits['Then'])
                 self._current_cfg.link_or_merge(false_block, exits['Else'])
-            break
+                break

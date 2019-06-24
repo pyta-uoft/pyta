@@ -22,11 +22,22 @@ def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
 
 
 def _extract_edges(cfg: ControlFlowGraph) -> List[List[List[str]]]:
+    """Edge extraction for boolean 'and' expressions visits the `false`
+    edge first. While for boolean 'or' expressions, the 'true' edge is visited
+    first."""
     edges = [[edge.source.statements, edge.target.statements] for edge in cfg.get_edges()]
     expanded_edges = [[[source.as_string() for source in edge[0]],
                       [target.as_string() for target in edge[1]]]
                       for edge in edges]
     return expanded_edges
+
+
+"""
+Notes:
+    - Tests for `if` and `while` are exactly the same. There should not be any
+      difference between the CFG of a boolean expression in an `if` condition or
+      a `while` condition.
+"""
 
 
 def test_if_simple_or() -> None:

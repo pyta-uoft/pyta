@@ -149,18 +149,20 @@ def test_simple_function_with_return() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 2
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['\ndef func(x:int)->None:\n    print(x + 1)\n    return'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)\n    return'],
+        ['x:int'],
         ['print(x + 1)', 'return'],
         []
     ]
-    assert expected_blocks_function == _extract_blocks(cfgs[1])
+    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
 
 def test_function_with_if_and_return() -> None:
@@ -175,34 +177,34 @@ def test_function_with_if_and_return() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 2
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['\ndef func(x:int)->None:\n    if x > 10:\n        '
          'return\n    else:\n        print(x - 1)\n    print(x)'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['\ndef func(x:int)->None:\n    if x > 10:\n        '
-         'return\n    else:\n        print(x - 1)\n    print(x)'],
+        ['x:int'],
         ['x > 10'],
         ['return'],
         [],
         ['print(x - 1)'],
         ['print(x)']
     ]
-    assert expected_blocks_function == _extract_blocks(cfgs[1])
+    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
     expected_edges_function = [
-        [['\ndef func(x:int)->None:\n    if x > 10:\n        '
-         'return\n    else:\n        print(x - 1)\n    print(x)'], ['x > 10']],
+        [['x:int'], ['x > 10']],
         [['x > 10'], ['return']],
         [['return'], []],
         [['x > 10'], ['print(x - 1)']],
         [['print(x - 1)'], ['print(x)']],
         [['print(x)'], []]
     ]
-    assert expected_edges_function == _extract_edges(cfgs[1])
+    assert expected_edges_function == _extract_edges(cfgs[keys[1]])
 
 
 def test_function_with_while_if_and_return() -> None:
@@ -219,18 +221,18 @@ def test_function_with_while_if_and_return() -> None:
     cfgs = build_cfgs(src)
     assert len(cfgs) == 2
 
+    keys = list(cfgs)
+
     expected_blocks_module = [
         ['\ndef func(x:int)->None:\n    while x > 10:\n        if x > 20:\n            '
          'return\n        print(x + 1)\n    else:\n        '
          'print(x - 1)\n    print(x)'],
         []
     ]
-    assert expected_blocks_module == _extract_blocks(cfgs[0])
+    assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['\ndef func(x:int)->None:\n    while x > 10:\n        if x > 20:\n            '
-         'return\n        print(x + 1)\n    else:\n        '
-         'print(x - 1)\n    print(x)'],
+        ['x:int'],
         ['x > 10'],
         ['x > 20'],
         ['return'],
@@ -239,12 +241,10 @@ def test_function_with_while_if_and_return() -> None:
         ['print(x - 1)'],
         ['print(x)']
     ]
-    assert expected_blocks_function == _extract_blocks(cfgs[1])
+    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
     expected_edges_function = [
-        [['\ndef func(x:int)->None:\n    while x > 10:\n        if x > 20:\n            '
-          'return\n        print(x + 1)\n    else:\n        '
-          'print(x - 1)\n    print(x)'], ['x > 10']],
+        [['x:int'], ['x > 10']],
         [['x > 10'], ['x > 20']],
         [['x > 20'], ['return']],
         [['return'], []],
@@ -254,5 +254,4 @@ def test_function_with_while_if_and_return() -> None:
         [['print(x - 1)'], ['print(x)']],
         [['print(x)'], []]
     ]
-    assert expected_edges_function == _extract_edges(cfgs[1])
-    assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
+    assert expected_edges_function == _extract_edges(cfgs[keys[1]])

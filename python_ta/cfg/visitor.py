@@ -154,45 +154,33 @@ class CFGVisitor:
         self._current_block = unreachable_block
 
     def visit_boolop(self, node: astroid.BoolOp) -> None:
-            self._current_block.add_statement(node)
+        true_block = self._current_cfg.create_block()
+        false_block = self._current_cfg.create_block()
 
-            true_block = self._current_cfg.create_block()
-            false_block = self._current_cfg.create_block()
+        self._control_boundaries.append((node, {'or': false_block,
+                                               'and': true_block}))
 
-            self._control_boundaries.append((node, {'or': false_block,
-                                                    'and': true_block}))
+        # early exit block
+        early_block = false_block if node.op == 'and' else true_block
+        # latest exit block
+        late_block = true_block if node.op == 'and' else false_block
 
-            for operand in node.values:
-                if self._current_block.statements == []:
-                    old_curr = self._current_block
-                    self._current_block = self._current_cfg.create_block()
-                    self._current_cfg.link_or_merge(old_curr, self._current_block)
-                else:
-                    self._current_block = self._current_cfg.create_block(self._current_block)
+        for operand in node.values:
+            if self._current_block.statements != []:
+                self._current_block = self._current_cfg.create_block(self._current_block)
+            operand.accept(self)
+            if not isinstance(operand, astroid.BoolOp):
+                self._current_cfg.link_or_merge(self._current_block, early_block)
 
-                operand.accept(self)
-                if node.op == 'and':
-                    self._current_cfg.link_or_merge(self._current_block, false_block)
-                else:
-                    self._current_cfg.link_or_merge(self._current_block, true_block)
-            if node.op == 'and':
-                self._current_cfg.link_or_merge(self._current_block, true_block)
-            else:
-                self._current_cfg.link_or_merge(self._current_block, false_block)
+        self._current_cfg.link_or_merge(self._current_block, late_block)
 
-            self._control_boundaries.pop()
+        self._control_boundaries.pop()
 
-            for boundary, exits in reversed(self._control_boundaries):
-                if isinstance(boundary, astroid.BoolOp):
-                    if node.op == 'and':
-                        self._current_cfg.link_or_merge(true_block, exits[node.op])
-                    else:
-                        self._current_cfg.link_or_merge(false_block, exits[node.op])
-
-                    break
-                if isinstance(boundary, astroid.If):
-                    self._current_cfg.link_or_merge(true_block, exits['Then'])
-                    self._current_cfg.link_or_merge(false_block, exits['Else'])
-                    break
-            else:
-                raise SyntaxError(f'\'{type(node).__name__}\' not in if/while condition')
+        for boundary, exits in reversed(self._control_boundaries):
+            if isinstance(boundary, astroid.BoolOp):
+                self._current_cfg.link_or_merge(late_block, exits[node.op])
+                self._current_block = early_block
+            elif isinstance(boundary, astroid.If):
+                self._current_cfg.link_or_merge(true_block, exits['Then'])
+                self._current_cfg.link_or_merge(false_block, exits['Else'])
+            break

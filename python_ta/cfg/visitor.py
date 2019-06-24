@@ -1,7 +1,7 @@
 import astroid
 from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Optional
 
 
 class CFGVisitor:
@@ -12,14 +12,14 @@ class CFGVisitor:
         The top of the stack corresponds to the end of the list.
         (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
-    cfgs: List[ControlFlowGraph]
-    _current_cfg: ControlFlowGraph
-    _current_block: CFGBlock
+    cfgs: Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]
+    _current_cfg: Optional[ControlFlowGraph]
+    _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[NodeNG, Dict[str, CFGBlock]]]
 
     def __init__(self) -> None:
         super().__init__()
-        self.cfgs = []
+        self.cfgs = {}
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
@@ -35,8 +35,8 @@ class CFGVisitor:
         self._current_block.add_statement(node)
 
     def visit_module(self, module: astroid.Module) -> None:
-        self.cfgs.append(ControlFlowGraph())
-        self._current_cfg = self.cfgs[0]
+        self.cfgs[module] = ControlFlowGraph()
+        self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
 
         for child in module.body:
@@ -45,25 +45,20 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
 
     def visit_functiondef(self, func: astroid.FunctionDef) -> None:
-        previous_cfg = self._current_cfg
-        previous_block = self._current_block
-        previous_block.add_statement(func)
-
-        self.cfgs.append(ControlFlowGraph())
-        self._current_cfg = self.cfgs[-1]
-
-        self._control_boundaries.append((func, {astroid.Return.__name__: self._current_cfg.end}))
-
-        self._current_block = self._current_cfg.start
         self._current_block.add_statement(func)
 
-        body_block = self._current_cfg.create_block(self._current_block)
-        self._current_block = body_block
+        previous_cfg = self._current_cfg
+        previous_block = self._current_block
+
+        self.cfgs[func] = ControlFlowGraph()
+        self._current_cfg = self.cfgs[func]
+
+        self._current_cfg.start.add_statement(func.args)
+
+        self._current_block = self._current_cfg.create_block(self._current_cfg.start)
 
         for child in func.body:
             child.accept(self)
-
-        self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_block = previous_block
@@ -131,6 +126,42 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(end_else, after_while_block)
         self._current_block = after_while_block
 
+    def visit_for(self, node: astroid.For) -> None:
+        old_curr = self._current_block
+        old_curr.add_statement(node.iter)
+
+        # Handle "test" block
+        test_block = self.cfg.create_block()
+        test_block.add_statement(node.target)
+        self.cfg.link_or_merge(old_curr, test_block)
+
+        after_for_block = self.cfg.create_block()
+
+        # step into for
+        self._control_boundaries.append((node, {astroid.Break.__name__: after_for_block,
+                                                astroid.Continue.__name__: test_block}))
+
+        # Handle "body" branch
+        body_block = self.cfg.create_block(test_block)
+        self._current_block = body_block
+        for child in node.body:
+            child.accept(self)
+        end_body = self._current_block
+        self.cfg.link_or_merge(end_body, test_block)
+
+        # step out of for
+        self._control_boundaries.pop()
+
+        # Handle "else" branch
+        else_block = self.cfg.create_block(test_block)
+        self._current_block = else_block
+        for child in node.orelse:
+            child.accept(self)
+        end_else = self._current_block
+
+        self.cfg.link_or_merge(end_else, after_for_block)
+        self._current_block = after_for_block
+
     def visit_break(self, node: astroid.Break) -> None:
         self._visit_jump(node)
 
@@ -153,3 +184,4 @@ class CFGVisitor:
                               f' {"function" if isinstance(node, astroid.Return) else "loop"}')
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
+

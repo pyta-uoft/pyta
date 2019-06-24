@@ -7,7 +7,7 @@ def build_cfg(src: str) -> ControlFlowGraph:
     mod = astroid.parse(src)
     t = CFGVisitor()
     mod.accept(t)
-    return t.cfgs[0]
+    return t.cfgs[mod]
 
 
 def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:

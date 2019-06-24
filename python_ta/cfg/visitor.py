@@ -53,12 +53,16 @@ class CFGVisitor:
         self.cfgs[func] = ControlFlowGraph()
         self._current_cfg = self.cfgs[func]
 
+        self._control_boundaries.append((func, {astroid.Return.__name__: self._current_cfg.end}))
+
         self._current_cfg.start.add_statement(func.args)
 
         self._current_block = self._current_cfg.create_block(self._current_cfg.start)
 
         for child in func.body:
             child.accept(self)
+
+        self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_block = previous_block

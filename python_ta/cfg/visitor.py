@@ -178,9 +178,7 @@ class CFGVisitor:
     def _visit_jump(self, node: Union[astroid.Break, astroid.Continue, astroid.Return]) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
-            if type(node).__name__ not in exits:
-                continue
-            if isinstance(boundary, (astroid.For, astroid.While, astroid.FunctionDef)):
+            if type(node).__name__ in exits:
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break

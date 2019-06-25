@@ -23,7 +23,7 @@ class ControlFlowGraph:
         new_block = CFGBlock(self.block_count)
         self.block_count += 1
         if pred:
-            CFGEdge(pred, new_block)
+            self.link_or_merge(pred, new_block)
         return new_block
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
@@ -107,7 +107,7 @@ class CFGBlock:
         if not self.is_jump():
             self.statements.append(statement)
 
-    @property        
+    @property
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]

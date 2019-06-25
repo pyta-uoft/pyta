@@ -78,6 +78,26 @@ def test_if_simple_and() -> None:
     assert expected_blocks == _extract_blocks(cfg)
 
 
+def test_surrounding_statements() -> None:
+    src = """
+        x = False
+        if x and y:
+            _then
+        else:
+            _else
+        """
+    cfg = build_cfg(src)
+
+    expected_blocks = [
+        ['x = False', 'x'],
+        ['_else'],
+        [],
+        ['y'],
+        ['_then'],
+    ]
+    assert expected_blocks == _extract_blocks(cfg)
+
+
 def test_if_multiple_or() -> None:
     src = """
     if x or y or z:

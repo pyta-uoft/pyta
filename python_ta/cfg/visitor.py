@@ -202,11 +202,10 @@ class CFGVisitor:
         late_block = true_block if node.op == 'and' else false_block
 
         for operand in node.values:
-            if self._current_block.statements != []:
-                self._current_block = self._current_cfg.create_block(self._current_block)
             operand.accept(self)
             if not isinstance(operand, astroid.BoolOp):
                 self._current_cfg.link_or_merge(self._current_block, early_block)
+            self._current_block = self._current_cfg.create_block(self._current_block)
 
         self._current_cfg.link_or_merge(self._current_block, late_block)
 

@@ -61,12 +61,16 @@ class CFGVisitor:
         self.cfgs[func] = ControlFlowGraph()
         self._current_cfg = self.cfgs[func]
 
+        self._control_boundaries.append((func, {astroid.Return.__name__: self._current_cfg.end}))
+
         self._current_cfg.start.add_statement(func.args)
 
         self._current_block = self._current_cfg.create_block(self._current_cfg.start)
 
         for child in func.body:
             child.accept(self)
+
+        self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_block = previous_block
@@ -171,20 +175,24 @@ class CFGVisitor:
         self._current_block = after_for_block
 
     def visit_break(self, node: astroid.Break) -> None:
-        self._visit_continue_or_break(node)
+        self._visit_jump(node)
 
-    def visit_continue(self, node: astroid.Continue) -> None:
-        self._visit_continue_or_break(node)
+    def visit_continue(self, node:astroid.Continue) -> None:
+        self._visit_jump(node)
 
-    def _visit_continue_or_break(self, node: Union[astroid.Break, astroid.Continue]) -> None:
+    def visit_return(self, node: astroid.Return) -> None:
+        self._visit_jump(node)
+
+    def _visit_jump(self, node: Union[astroid.Break, astroid.Continue, astroid.Return]) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
-            if isinstance(boundary, (astroid.While, astroid.For)):
+            if type(node).__name__ in exits:
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break
         else:
-            raise SyntaxError(f'\'{type(node).__name__}\' outside loop')
+            raise SyntaxError(f'\'{type(node).__name__}\' outside'
+                              f' {"function" if isinstance(node, astroid.Return) else "loop"}')
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 

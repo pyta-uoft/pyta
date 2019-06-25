@@ -135,35 +135,35 @@ class CFGVisitor:
         old_curr.add_statement(node.iter)
 
         # Handle "test" block
-        test_block = self.cfg.create_block()
+        test_block = self._current_cfg.create_block()
         test_block.add_statement(node.target)
-        self.cfg.link_or_merge(old_curr, test_block)
+        self._current_cfg.link_or_merge(old_curr, test_block)
 
-        after_for_block = self.cfg.create_block()
+        after_for_block = self._current_cfg.create_block()
 
         # step into for
         self._control_boundaries.append((node, {astroid.Break.__name__: after_for_block,
                                                 astroid.Continue.__name__: test_block}))
 
         # Handle "body" branch
-        body_block = self.cfg.create_block(test_block)
+        body_block = self._current_cfg.create_block(test_block)
         self._current_block = body_block
         for child in node.body:
             child.accept(self)
         end_body = self._current_block
-        self.cfg.link_or_merge(end_body, test_block)
+        self._current_cfg.link_or_merge(end_body, test_block)
 
         # step out of for
         self._control_boundaries.pop()
 
         # Handle "else" branch
-        else_block = self.cfg.create_block(test_block)
+        else_block = self._current_cfg.create_block(test_block)
         self._current_block = else_block
         for child in node.orelse:
             child.accept(self)
         end_else = self._current_block
 
-        self.cfg.link_or_merge(end_else, after_for_block)
+        self._current_cfg.link_or_merge(end_else, after_for_block)
         self._current_block = after_for_block
 
     def visit_break(self, node: astroid.Break) -> None:

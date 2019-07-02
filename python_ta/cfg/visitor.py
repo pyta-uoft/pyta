@@ -78,7 +78,7 @@ class CFGVisitor:
 
     def visit_if(self, node: astroid.If) -> None:
         self._current_block.add_statement(node.test)
-        self._current_block.add_flag(Flag.IF_START)
+        self._current_block.add_flag()
         old_curr = self._current_block
 
         # Handle "then" branch.
@@ -98,7 +98,7 @@ class CFGVisitor:
                 child.accept(self)
             end_else = self._current_block
 
-        after_if_block = self._current_cfg.create_block(flag=Flag.IF_END)
+        after_if_block = self._current_cfg.create_block()
         self._current_cfg.link_or_merge(end_if, after_if_block)
         self._current_cfg.link_or_merge(end_else, after_if_block)
 

@@ -145,5 +145,3 @@ class CFGEdge:
 class Flag(enum.Enum):
     LOOP_START = 'LOOP_START'
     LOOP_END = 'LOOP_END'
-    IF_START = 'IF_START'
-    IF_END = 'IF_END'

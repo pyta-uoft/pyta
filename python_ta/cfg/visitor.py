@@ -78,7 +78,6 @@ class CFGVisitor:
 
     def visit_if(self, node: astroid.If) -> None:
         self._current_block.add_statement(node.test)
-        self._current_block.add_flag()
         old_curr = self._current_block
 
         # Handle "then" branch.

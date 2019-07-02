@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Generator, Optional, List, Set
-from astroid.node_classes import NodeNG, Continue, Break
+from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
 class ControlFlowGraph:
@@ -107,7 +107,7 @@ class CFGBlock:
         if not self.is_jump():
             self.statements.append(statement)
 
-    @property        
+    @property
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]
@@ -115,7 +115,7 @@ class CFGBlock:
     def is_jump(self) -> bool:
         """Returns True if the block has a statement that branches
         the control flow (ex: `break`)"""
-        return isinstance(self.jump, (Break, Continue))
+        return isinstance(self.jump, (Break, Continue, Return))
 
 
 class CFGEdge:

@@ -1,6 +1,6 @@
 import astroid
 from astroid.node_classes import NodeNG
-from .graph import ControlFlowGraph, CFGBlock
+from .graph import ControlFlowGraph, CFGBlock, Flag
 from typing import List, Tuple, Dict, Union, Optional
 
 
@@ -78,6 +78,7 @@ class CFGVisitor:
 
     def visit_if(self, node: astroid.If) -> None:
         self._current_block.add_statement(node.test)
+        self._current_block.add_flag(Flag.IF_START)
         old_curr = self._current_block
 
         # Handle "then" branch.
@@ -97,7 +98,7 @@ class CFGVisitor:
                 child.accept(self)
             end_else = self._current_block
 
-        after_if_block = self._current_cfg.create_block()
+        after_if_block = self._current_cfg.create_block(flag=Flag.IF_END)
         self._current_cfg.link_or_merge(end_if, after_if_block)
         self._current_cfg.link_or_merge(end_else, after_if_block)
 
@@ -107,11 +108,11 @@ class CFGVisitor:
         old_curr = self._current_block
 
         # Handle "test" block
-        test_block = self._current_cfg.create_block()
+        test_block = self._current_cfg.create_block(flag=Flag.LOOP_START)
         test_block.add_statement(node.test)
         self._current_cfg.link_or_merge(old_curr, test_block)
 
-        after_while_block = self._current_cfg.create_block()
+        after_while_block = self._current_cfg.create_block(flag=Flag.LOOP_END)
 
         # step into while
         self._control_boundaries.append((node, {astroid.Break.__name__: after_while_block,
@@ -143,11 +144,11 @@ class CFGVisitor:
         old_curr.add_statement(node.iter)
 
         # Handle "test" block
-        test_block = self._current_cfg.create_block()
+        test_block = self._current_cfg.create_block(flag=Flag.LOOP_START)
         test_block.add_statement(node.target)
         self._current_cfg.link_or_merge(old_curr, test_block)
 
-        after_for_block = self._current_cfg.create_block()
+        after_for_block = self._current_cfg.create_block(flag=Flag.LOOP_END)
 
         # step into for
         self._control_boundaries.append((node, {astroid.Break.__name__: after_for_block,

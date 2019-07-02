@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Generator, Optional, List, Set
 from astroid.node_classes import NodeNG, Continue, Break
+import enum
 
 
 class ControlFlowGraph:
@@ -15,7 +16,7 @@ class ControlFlowGraph:
         self.end = CFGBlock(1)
         self.block_count = 2
 
-    def create_block(self, pred: Optional[CFGBlock] = None) -> CFGBlock:
+    def create_block(self, pred: Optional[CFGBlock] = None, flag: Optional[Flag] = None) -> CFGBlock:
         """Create a new CFGBlock for this graph.
 
         If pred is specified, set that block as a predecessor of the new block.
@@ -24,6 +25,8 @@ class ControlFlowGraph:
         self.block_count += 1
         if pred:
             CFGEdge(pred, new_block)
+        if flag:
+            new_block.flags = flag
         return new_block
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
@@ -95,6 +98,7 @@ class CFGBlock:
     predecessors: List[CFGEdge]
     # This block's out-edges (to blocks that can execute immediately after this one).
     successors: List[CFGEdge]
+    flags: List[Flag]
 
     def __init__(self, id_: int) -> None:
         """Initialize a new CFGBlock."""
@@ -102,12 +106,13 @@ class CFGBlock:
         self.statements = []
         self.predecessors = []
         self.successors = []
+        self.flags = []
 
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():
             self.statements.append(statement)
 
-    @property        
+    @property
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]
@@ -116,6 +121,10 @@ class CFGBlock:
         """Returns True if the block has a statement that branches
         the control flow (ex: `break`)"""
         return isinstance(self.jump, (Break, Continue))
+
+    def add_flag(self, flag: Flag) -> None:
+        if flag not in self.flags:
+            self.flags.append(flag)
 
 
 class CFGEdge:
@@ -131,3 +140,10 @@ class CFGEdge:
         self.target = target
         self.source.successors.append(self)
         self.target.predecessors.append(self)
+
+
+class Flag(enum.Enum):
+    LOOP_START = 'LOOP_START'
+    LOOP_END = 'LOOP_END'
+    IF_START = 'IF_START'
+    IF_END = 'IF_END'

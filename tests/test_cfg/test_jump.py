@@ -58,8 +58,8 @@ def test_link_return_to_block() -> None:
     keys = list(cfgs)
     cfg = cfgs[keys[1]]
 
-    cont_block = cfg.start.successors[0].target
-    assert cont_block.statements[0].as_string() == 'return'
+    return_block = cfg.start.successors[0].target
+    assert return_block.statements[0].as_string() == 'return'
 
-    new_block = cfg.create_block(cont_block)
+    new_block = cfg.create_block(return_block)
     assert new_block.predecessors == []

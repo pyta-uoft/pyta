@@ -23,7 +23,7 @@ class ControlFlowGraph:
         new_block = CFGBlock(self.block_count)
         self.block_count += 1
         if pred:
-            CFGEdge(pred, new_block)
+            self.link(pred, new_block)
         return new_block
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:

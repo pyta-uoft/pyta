@@ -38,6 +38,7 @@ class CFGVisitor:
         self.cfgs[module] = ControlFlowGraph()
         self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
+        module.cfg_block = self._current_cfg.start
 
         for child in module.body:
             child.accept(self)
@@ -64,6 +65,7 @@ class CFGVisitor:
         self._control_boundaries.append((func, {astroid.Return.__name__: self._current_cfg.end}))
 
         self._current_cfg.start.add_statement(func.args)
+        func.cfg_block = self._current_cfg.start
 
         self._current_block = self._current_cfg.create_block(self._current_cfg.start)
 
@@ -78,6 +80,7 @@ class CFGVisitor:
 
     def visit_if(self, node: astroid.If) -> None:
         self._current_block.add_statement(node.test)
+        node.cfg_block = self._current_block
         old_curr = self._current_block
 
         # Handle "then" branch.
@@ -109,6 +112,7 @@ class CFGVisitor:
         # Handle "test" block
         test_block = self._current_cfg.create_block()
         test_block.add_statement(node.test)
+        node.cfg_block = test_block
         self._current_cfg.link_or_merge(old_curr, test_block)
 
         after_while_block = self._current_cfg.create_block()
@@ -141,6 +145,7 @@ class CFGVisitor:
     def visit_for(self, node: astroid.For) -> None:
         old_curr = self._current_block
         old_curr.add_statement(node.iter)
+        node.cfg_block = old_curr
 
         # Handle "test" block
         test_block = self._current_cfg.create_block()

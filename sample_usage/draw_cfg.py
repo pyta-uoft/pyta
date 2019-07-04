@@ -1,5 +1,7 @@
 import os.path
-from typing import Set
+from typing import Dict, Set
+import astroid
+from astroid.node_classes import NodeNG
 from astroid.builder import AstroidBuilder
 import graphviz
 from python_ta.cfg import CFGVisitor, ControlFlowGraph, CFGBlock
@@ -15,23 +17,39 @@ GRAPH_OPTIONS = {
 }
 
 
-def display(cfg: ControlFlowGraph, filename: str, view: bool = True) -> None:
+def display(cfgs: Dict[NodeNG, ControlFlowGraph],
+            filename: str, view: bool = True) -> None:
     graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
-    _visit(cfg, cfg.start, graph, set())
+    for node, cfg in cfgs.items():
+        if isinstance(node, astroid.Module):
+            subgraph_label = '__main__'
+        elif isinstance(node, astroid.FunctionDef):
+            subgraph_label = node.name
+        else:
+            continue
+        with graph.subgraph(name=f'cluster_{id(node)}') as c:
+            _visit(cfg, cfg.start, c, set())
+            c.attr(label=subgraph_label)
+
     graph.render(filename, view=view)
 
 
 def _visit(cfg: ControlFlowGraph, block: CFGBlock,
            graph: graphviz.Digraph, visited: Set[int]) -> None:
-    if block.id in visited:
+    node_id = f'{graph.name}_{block.id}'
+    if node_id in visited:
         return
 
-    label = '\l'.join([s.as_string() for s in block.statements])
-    graph.node(str(block.id), label=label)
-    visited.add(block.id)
+    label = '\n'.join([s.as_string() for s in block.statements]) + '\n'
+    # Need to escape backslashes explicitly.
+    label = label.replace('\\', '\\\\')
+    # \l is used for left alignment.
+    label = label.replace('\n', '\\l')
+    graph.node(node_id, label=label)
+    visited.add(node_id)
 
     for edge in block.successors:
-        graph.edge(str(block.id), str(edge.target.id))
+        graph.edge(node_id, f'{graph.name}_{edge.target.id}')
         _visit(cfg, edge.target, graph, visited)
 
 
@@ -41,7 +59,7 @@ def main(filepath: str) -> None:
     visitor = CFGVisitor()
     mod.accept(visitor)
 
-    display(visitor.cfg, filename)
+    display(visitor.cfgs, filename)
 
 
 if __name__ == '__main__':

@@ -106,8 +106,9 @@ class CFGBlock:
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():
             self.statements.append(statement)
+            statement.cfg_block = self
 
-    @property        
+    @property
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]

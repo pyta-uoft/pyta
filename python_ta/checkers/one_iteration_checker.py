@@ -69,15 +69,19 @@ class OneIterationChecker(BaseChecker):
             - <_pred> is the start block of the loop.
             - <block>.statements[0] is a child node of the astroid.For/While node.
 
-        Assumption: Since every path from the root to <block> must pass through
+        Assumption:
+            - Since every path from the root to <block> must pass through
         <_pred>, we only need to check one of the paths to see if
         <_pred> is the predecessor of <block>.
+
         """
         if block is _pred:
             return True
         elif block.predecessors == []:
             return False
         else:
+            # The left-most predecessor ensures we won't step into an
+            # unreachable block of a nested loop.
             return self.is_predecessor(block.predecessors[0].source, _pred)
 
 

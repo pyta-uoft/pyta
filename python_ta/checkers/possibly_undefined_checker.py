@@ -48,7 +48,7 @@ class PossiblyUndefinedChecker(BaseChecker):
             (1) dictionary with key:value as CFGBlock:(in_set, out_set).
         """
         facts = {}
-        blocks = self._get_blocks_rpo(node)
+        blocks = self._get_blocks_po(node)
 
         all_assigns = self._get_assigns(blocks)
         for block in blocks:
@@ -63,27 +63,13 @@ class PossiblyUndefinedChecker(BaseChecker):
                 facts[b]['in'] = set()
             else:
                 facts[b]['in'] = set.intersection(*outs)
-            gen, kill = self.gen_and_kill(b)
-            temp = gen.union(facts[b]['in'].difference(kill))
+            temp = self._transfer(b, facts[b]['in'], all_assigns)
             if temp != facts[b]['out']:
                 facts[b]['out'] = temp
                 successors = set([succ.target for succ in b.successors])
                 worklist = list(set(worklist).union(successors))
 
-        for block in blocks:
-            gen = set()
-            kill = set()
-            for statement in block.statements:
-                if isinstance(statement, astroid.Assign):
-                    gen.update(self._get_targets(statement))
-                elif isinstance(statement, astroid.AnnAssign) and hasattr(
-                        statement.target, 'name'):
-                    gen.add(statement.target)
-                elif isinstance(statement, astroid.Delete):
-                    kill.update(self._get_targets(statement))
-                self._analyze_statement(statement, gen.union(facts[block]['in'].difference(kill)), all_assigns)
-
-    def gen_and_kill(self, block: CFGBlock) -> Tuple[Set[str], Set[str]]:
+    def _transfer(self, block: CFGBlock, in_facts: Set[str], all_assigns: Set[str]) -> Set[str]:
         gen = set()
         kill = set()
         for statement in block.statements:
@@ -93,13 +79,16 @@ class PossiblyUndefinedChecker(BaseChecker):
                 gen.add(statement.target)
             elif isinstance(statement, astroid.Delete):
                 kill.update(self._get_targets(statement))
-        return gen, kill
+            self._analyze_statement(statement, gen.union(in_facts.difference(kill)), all_assigns)
+        return gen.union(in_facts.difference(kill))
 
-    def _analyze_statement(self, node: NodeNG, facts: Set[str], vars: Set[str]):
+    def _analyze_statement(self, node: NodeNG, facts: Set[str], vars: Set[str]) -> None:
         if isinstance(node, astroid.Name):
             name = node.name
             if name in vars and name not in facts and not self._is_function_name(node):
                 self.possibly_undefined.add(node)
+            elif node in self.possibly_undefined:
+                self.possibly_undefined.remove(node)
         else:
             for child in node.get_children():
                 self._analyze_statement(child, facts, vars)
@@ -145,19 +134,14 @@ class PossiblyUndefinedChecker(BaseChecker):
         if isinstance(node.parent, astroid.Call) and node == node.parent.func:
             return True
 
-    def _get_blocks_rpo(self, node: Union[astroid.Module, astroid.FunctionDef]) -> List[CFGBlock]:
+    def _get_blocks_po(self, node: Union[astroid.Module, astroid.FunctionDef]) -> List[CFGBlock]:
         """Return the sequence of all blocks in this graph in the order of
-        a reverse post-order traversal."""
-        blocks = self._get_blocks(node.cfg_block, set())
-        # blocks.reverse()
-        return blocks
+        a post-order traversal."""
+        return self._get_blocks(node.cfg_block, set())
 
     def _get_blocks(self, block: CFGBlock, visited) -> List[CFGBlock]:
         if block.id in visited:
             return []
-        elif block.successors == []:
-            visited.add(block.id)
-            return [block]
         else:
             visited.add(block.id)
             blocks = []

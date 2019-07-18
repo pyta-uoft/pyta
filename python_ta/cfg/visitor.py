@@ -217,25 +217,34 @@ class CFGVisitor:
             if not isinstance(child, astroid.TryExcept):
                 self._current_block = self._current_cfg.create_block(old_curr)
             child.accept(self)
-            # Exception raised
-            # Catch exception
+
+            # Get rid of blank box
+            preds = self._current_block.predecessors
+            succs = self._current_block.successors
+
+            for pred in preds:
+                source = pred.source
+                for succ in succs:
+                    target = succ.source
+                    self._current_cfg.link(source, target)
+
+            # Exception occurs
+            # Handle exception
             for handler in handlers:
-                self._current_cfg.link(self._current_block, handler)
-            # Can't catch exception
-            # Still possible to catch if there is an handler in outer block
-            if isinstance(node.parent, astroid.TryExcept):
-                self._current_cfg.link(self._current_block, after_tryexcept_block)
-            # No outer block
-            else:
-                self._current_cfg.link(self._current_block, self._current_cfg.end)
+                if not isinstance(child, astroid.TryExcept):
+                    self._current_cfg.link(self._current_block, handler)
+                else:
+                    preds = self._current_block.predecessors
+                    for pred in preds:
+                        source = pred.source
+                        self._current_cfg.link(source, handler)
             old_curr = self._current_block
 
-        # No exception raised
+        # No exception occurs
         # If there is an else block
         if node.orelse:
-            self._current_block = self._current_cfg.create_block(old_curr)
             for child in node.orelse:
                 child.accept(self)
 
-        self._current_cfg.link(self._current_block, after_tryexcept_block)
+        self._current_cfg.link_or_merge(self._current_block, after_tryexcept_block)
         self._current_block = after_tryexcept_block

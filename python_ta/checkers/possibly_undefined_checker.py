@@ -82,16 +82,16 @@ class PossiblyUndefinedChecker(BaseChecker):
             self._analyze_statement(statement, gen.union(in_facts.difference(kill)), all_assigns)
         return gen.union(in_facts.difference(kill))
 
-    def _analyze_statement(self, node: NodeNG, facts: Set[str], vars: Set[str]) -> None:
+    def _analyze_statement(self, node: NodeNG, facts: Set[str], local_vars: Set[str]) -> None:
         if isinstance(node, astroid.Name):
             name = node.name
-            if name in vars and name not in facts and not self._is_function_name(node):
+            if name in local_vars and name not in facts and not self._is_function_name(node):
                 self.possibly_undefined.add(node)
             elif node in self.possibly_undefined:
                 self.possibly_undefined.remove(node)
         else:
             for child in node.get_children():
-                self._analyze_statement(child, facts, vars)
+                self._analyze_statement(child, facts, local_vars)
 
     def _get_targets(self, statement: Union[astroid.Assign, astroid.Delete]) -> Set[str]:
         targets = set()

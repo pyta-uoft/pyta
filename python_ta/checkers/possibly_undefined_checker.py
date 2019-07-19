@@ -1,4 +1,4 @@
-"""checker for a loop that can only ever run for one iteration.
+"""checker for variables that might not be defined in the program.
 """
 from typing import Union
 import astroid
@@ -7,7 +7,7 @@ from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock
 from astroid.node_classes import NodeNG
-from typing import Set, Dict, Tuple, List
+from typing import Set, List
 
 
 class PossiblyUndefinedChecker(BaseChecker):
@@ -40,12 +40,11 @@ class PossiblyUndefinedChecker(BaseChecker):
     def _check_possibly_undefined(self, node: astroid.Name) -> bool:
         """Returns True if there exists a path from the start block to node where
         a variable used by node might not be defined."""
-        b = node in self.possibly_undefined
-        return b
+        return node in self.possibly_undefined
 
     def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
-        """Return a Tuple of
-            (1) dictionary with key:value as CFGBlock:(in_set, out_set).
+        """Runs the data flow algorithm on a `Module` or `Function` CFG, which in turn
+        appends `Name` nodes to `possibly_undefined` if it might not be defined.
         """
         facts = {}
         blocks = self._get_blocks_po(node)
@@ -107,8 +106,11 @@ class PossiblyUndefinedChecker(BaseChecker):
         """Returns a set of all local and parameter variables that could be
         defined in the program (either a function or module).
 
-        IF a variable 'v' is assigned in the function and there is no global/nonlocal
+        IF a variable 'v' is defined in the function and there is no global/nonlocal
         statement applied to 'v' THEN 'v' is a local variable.
+
+        Note that `local` in the context of a module level analysis, refers to global
+        variables.
         """
         assigns = set()
         kills = set()

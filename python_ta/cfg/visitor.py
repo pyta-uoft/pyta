@@ -49,7 +49,6 @@ class CFGVisitor:
         self._current_block.add_statement(node)
 
         for child in node.body:
-            if isinstance(child, astroid.FunctionDef):
                 child.accept(self)
 
     def visit_functiondef(self, func: astroid.FunctionDef) -> None:

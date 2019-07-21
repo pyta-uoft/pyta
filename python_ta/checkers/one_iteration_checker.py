@@ -26,12 +26,12 @@ class OneIterationChecker(BaseChecker):
     # pass in message symbol as a parameter of check_messages
     @check_messages('one-iteration')
     def visit_for(self, node):
-        if hasattr(node, 'cfg_block') and self._check_one_iteration(node):
+        if self._check_one_iteration(node):
             self.add_message('one-iteration', node=node)
 
     @check_messages('one-iteration')
     def visit_while(self, node):
-        if hasattr(node, 'cfg_block') and self._check_one_iteration(node):
+        if self._check_one_iteration(node):
             self.add_message('one-iteration', node=node)
 
     def _check_one_iteration(self, node: Union[astroid.For, astroid.While]) -> bool:
@@ -77,12 +77,11 @@ class OneIterationChecker(BaseChecker):
         """
         if block is _pred:
             return True
-        elif block.predecessors == []:
-            return False
         else:
-            # The left-most predecessor ensures we won't step into an
-            # unreachable block of a nested loop.
-            return self.is_predecessor(block.predecessors[0].source, _pred)
+            for pred in block.predecessors:
+                if self.is_predecessor(pred.source, _pred):
+                    return True
+            return False
 
 
 def register(linter):

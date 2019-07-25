@@ -54,7 +54,8 @@ class OneIterationChecker(BaseChecker):
 
         for pred in preds:
             pred = pred.source
-            if node.parent_of(pred.statements[0]) and \
+            stmt = pred.statements[0]
+            if node.parent_of(stmt) and stmt is not node.iter and \
                     self.is_predecessor(pred, start.cfg_block):
                 return False
         return True

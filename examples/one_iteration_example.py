@@ -14,11 +14,11 @@ def loop() -> int:
         else:
             j += 1
             break
-    i = 0
-    while i < 10:  # loop iterates only once
-        if i > 2:
-            break
-        else:
-            i += 1
-        return 4
-    return 0  # loop 1 will always end up returning
+        i = 0
+        while i < 10:  # loop iterates only once
+            if i > 2:
+                break
+            else:
+                i += 1
+            return 4
+        return 0  # loop 1 will always end up returning

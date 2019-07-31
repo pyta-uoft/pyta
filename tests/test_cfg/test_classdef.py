@@ -3,8 +3,7 @@ import astroid
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
-def build_cfgs(src: str) -> Dict[
-    Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]:
+def build_cfgs(src: str) -> Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]:
     mod = astroid.parse(src)
     t = CFGVisitor()
     mod.accept(t)

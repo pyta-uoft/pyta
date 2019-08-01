@@ -9,11 +9,13 @@ class ControlFlowGraph:
     end: CFGBlock
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
+    unreachable_blocks: List[CFGBlock]
 
     def __init__(self) -> None:
-        self.start = CFGBlock(0)
-        self.end = CFGBlock(1)
-        self.block_count = 2
+        self.block_count = 0
+        self.unreachable_blocks = []
+        self.start = self.create_block()
+        self.end = self.create_block()
 
     def create_block(self, pred: Optional[CFGBlock] = None) -> CFGBlock:
         """Create a new CFGBlock for this graph.
@@ -21,6 +23,8 @@ class ControlFlowGraph:
         If pred is specified, set that block as a predecessor of the new block.
         """
         new_block = CFGBlock(self.block_count)
+        self.unreachable_blocks.append(new_block)
+
         self.block_count += 1
         if pred:
             self.link_or_merge(pred, new_block)
@@ -95,6 +99,8 @@ class CFGBlock:
     predecessors: List[CFGEdge]
     # This block's out-edges (to blocks that can execute immediately after this one).
     successors: List[CFGEdge]
+    # Whether there exists a path from the start block to this block.
+    is_unreachable: bool
 
     def __init__(self, id_: int) -> None:
         """Initialize a new CFGBlock."""
@@ -102,6 +108,7 @@ class CFGBlock:
         self.statements = []
         self.predecessors = []
         self.successors = []
+        self.is_unreachable = True
 
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():

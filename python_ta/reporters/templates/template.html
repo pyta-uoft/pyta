@@ -55,7 +55,7 @@
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                         <span class="slider">
-                                            <button> Expand/Collapse </button>
+                                            <button style="float: right; background: #458B00;"> Expand/Collapse </button>
                                         </span>
                                     </h4>
                                     {% if indiv.snippet != '' %}
@@ -112,12 +112,17 @@
                                 <div class="message">
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
+                                        <span class="slider">
+                                            <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                        </span>
                                     </h4>
-                                    {% if indiv.snippet != '' %}
-                                    <code>{{ indiv.snippet }}</code>
-                                    {% else %}
-                                    <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                    {% endif %}
+                                    <div class="collapsible">
+                                      {% if indiv.snippet != '' %}
+                                      <code>{{ indiv.snippet }}</code>
+                                      {% else %}
+                                      <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                      {% endif %}
+                                    </div>
                                 </div>
                                 {% endfor %}
                             </div>

@@ -42,6 +42,7 @@ class CFGVisitor:
 
         for child in module.body:
             child.accept(self)
+
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_cfg.update_block_reachability()
 

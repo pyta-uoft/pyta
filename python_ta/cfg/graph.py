@@ -85,6 +85,11 @@ class ControlFlowGraph:
             yield edge
             yield from self._get_edges(edge.target, visited)
 
+    def update_block_reachability(self) -> None:
+        for block in self.get_blocks():
+            block.is_unreachable = False
+            self.unreachable_blocks.remove(block)
+
 
 class CFGBlock:
     """A node in a control flow graph.

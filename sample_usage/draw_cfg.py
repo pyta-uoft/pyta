@@ -46,7 +46,7 @@ def _visit(block: CFGBlock,
     # \l is used for left alignment.
     label = label.replace('\n', '\\l')
 
-    fill_color = 'grey93' if block.is_unreachable else 'white'
+    fill_color = 'grey93' if not block.reachable else 'white'
 
     graph.node(node_id, label=label, fillcolor=fill_color, style='filled')
     visited.add(node_id)

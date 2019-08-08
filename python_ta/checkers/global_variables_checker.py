@@ -62,8 +62,12 @@ class GlobalVariablesChecker(BaseChecker):
         if isinstance(node.frame(), astroid.scoped_nodes.Module) and not is_in_main(node):
             node_list = _get_child_disallowed_global_var_nodes(node)
             for node in node_list:
-                args = "a global variable '{}' is assigned to on line {}"\
-                    .format(node.name, node.lineno)
+                if isinstance(node, astroid.AssignName):
+                    args = "a global variable '{}' is assigned to on line {}"\
+                        .format(node.name, node.lineno)
+                else:
+                    args = "a global variable '{}' is used on line {}" \
+                        .format(node.name, node.lineno)
                 self.add_message('forbidden-global-variables', node=node, args=args)
 
 

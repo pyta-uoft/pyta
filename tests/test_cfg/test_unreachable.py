@@ -16,11 +16,11 @@ def build_cfg(src: str, is_function: Optional[bool] = False) -> ControlFlowGraph
 
 def extract_blocks(cfg: ControlFlowGraph) -> Tuple[Set, Set]:
     """Returns (unreachable_set, reachable_set)"""
-    is_unreachable = (set(), set())
+    reachable = (set(), set())
     for block in get_blocks(cfg.end):
         string = block.statements[0].as_string() if len(block.statements) > 0 else ''
-        is_unreachable[block.is_unreachable].add(string)
-    return is_unreachable
+        reachable[block.reachable].add(string)
+    return reachable
 
 
 def get_blocks(end_block: CFGBlock) -> Generator[CFGBlock, None, None]:
@@ -52,7 +52,7 @@ def test_while_loop_simple() -> None:
         print(unreachable)
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'print(unreachable)'} == unreachable
     assert {'n > 10', 'print(n)', ''} == reachable
 
@@ -69,7 +69,7 @@ def test_while_loop_complex() -> None:
     print(outloop)
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'n > 20', 'print(n - 1)', 'print(5)'} == unreachable
     assert {'n > 10', 'print(n)', '', 'print(outloop)'} == reachable
 
@@ -89,7 +89,7 @@ def test_nested_while_loop() -> None:
     print(outloop)
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'x > 10', 'print(x)', 'continue', 'print(x - 1)'} == unreachable
     assert {'n > 10', 'n > 20', '', 'print(n)', 'break', 'print(outloop)'} == reachable
 
@@ -103,7 +103,7 @@ def test_for_loop_simple() -> None:
     print(outloop)
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'print(unreachable)'} == unreachable
     assert {'n', 'print(n)', '', 'range(1, 10)', 'print(outloop)'} == reachable
 
@@ -119,7 +119,7 @@ def test_for_loop_complex() -> None:
             print(5)
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'n > 20', 'print(n - 1)', 'print(5)'} == unreachable
     assert {'n', 'range(1, 10)', '', 'print(n)'} == reachable
 
@@ -134,7 +134,7 @@ def test_nested_for_loop() -> None:
     print(outloop)
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'j', 'range(10)', 'continue'} == unreachable
     assert {'n', 'range(1, 10)', '', 'print(n)', 'print(outloop)'} == reachable
 
@@ -146,7 +146,7 @@ def test_function_simple() -> None:
         print(n)
     """
     cfg = build_cfg(src, is_function=True)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'print(n)'} == unreachable
     assert {'n', '', 'return'} == reachable
 
@@ -160,7 +160,7 @@ def test_function_complex() -> None:
             print(j)
     """
     cfg = build_cfg(src, is_function=True)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'j', 'range(1, 10)', 'continue', 'print(j)'} == unreachable
     assert {'n', '', 'return'} == reachable
 
@@ -177,7 +177,7 @@ def test_while_with_if() -> None:
         print('after')
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'print(\'bye\')'} == unreachable
     assert {'n > 10', 'print(n)', '', 'print(\'hi\')', 'break', 'print(\'after\')'} == reachable
 
@@ -197,7 +197,7 @@ def test_while_with_if_complex() -> None:
         print('after')
     """
     cfg = build_cfg(src)
-    reachable, unreachable = extract_blocks(cfg)
+    unreachable, reachable = extract_blocks(cfg)
     assert {'print(\'bye\')', 'print(\'unr\')'} == unreachable
     assert {'n > 10', 'print(n)', '', 'print(\'hi\')', 'break', 'print(\'after\')',
             'continue', 'n > 25'} == reachable

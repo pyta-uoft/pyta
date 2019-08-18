@@ -16,6 +16,8 @@ of a wrapper around [pylint](https://pylint.org) (with custom checkers) that ope
 directly on Python modules, as well as a website with some supplementary
 material going into further detail for the emitted errors.
 
+For greater details on the errors PyTA checks for: [Help Documentation](https://www.cs.toronto.edu/~david/pyta/).
+
 ## Installation
 
 If you're developing PyTA, simply clone this repo. If you are working on type

@@ -24,11 +24,15 @@ class PossiblyUndefinedChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    possibly_undefined = set()
+    def __init__(self, linter=None):
+        BaseChecker.__init__(linter)
+        self._possibly_undefined = set()
 
     @check_messages('possibly-undefined')
     def visit_name(self, node):
-        if self._check_possibly_undefined(node):
+        """Adds message if there exists a path from the start block to node where
+        a variable used by node might not be defined."""
+        if node in self._possibly_undefined:
             self.add_message('possibly-undefined', node=node)
 
     def visit_module(self, node):
@@ -37,11 +41,6 @@ class PossiblyUndefinedChecker(BaseChecker):
     def visit_functiondef(self, node):
         self._analyze(node)
 
-    def _check_possibly_undefined(self, node: astroid.Name) -> bool:
-        """Returns True if there exists a path from the start block to node where
-        a variable used by node might not be defined."""
-        return node in self.possibly_undefined
-
     def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
         """Runs the data flow algorithm on a `Module` or `Function` CFG, which in turn
         appends `Name` nodes to `possibly_undefined` if it might not be defined.
@@ -49,12 +48,12 @@ class PossiblyUndefinedChecker(BaseChecker):
         facts = {}
         blocks = self._get_blocks_po(node)
 
-        all_assigns = self._get_assigns(blocks)
+        all_assigns = self._get_assigns(node)
         for block in blocks:
             facts[block] = {}
             facts[block]['out'] = all_assigns.copy()
 
-        worklist = blocks[:]
+        worklist = blocks
         while len(worklist) != 0:
             b = worklist.pop()
             outs = [facts[p.source]['out'] for p in b.predecessors if p.source in facts]
@@ -73,40 +72,28 @@ class PossiblyUndefinedChecker(BaseChecker):
         kill = set()
         for statement in block.statements:
             if isinstance(statement, astroid.Assign):
-                gen.update(self._get_targets(statement))
+                gen.update(set(node.name for node in statement.nodes_of_class(astroid.AssignName)))
             elif isinstance(statement, astroid.AnnAssign) and hasattr(statement.target, 'name'):
                 gen.add(statement.target)
             elif isinstance(statement, astroid.Delete):
-                kill.update(self._get_targets(statement))
+                kill.update(set(node.name for node in statement.nodes_of_class(astroid.AssignName)))
             self._analyze_statement(statement, gen.union(in_facts.difference(kill)), all_assigns)
         return gen.union(in_facts.difference(kill))
 
-    def _analyze_statement(self, node: NodeNG, facts: Set[str], local_vars: Set[str]) -> None:
-        if isinstance(node, astroid.Name):
+    def _analyze_statement(self, statement: NodeNG, facts: Set[str], local_vars: Set[str]) -> None:
+        nodes = statement.nodes_of_class(astroid.Name)
+        for node in nodes:
             name = node.name
-            if name in local_vars and name not in facts and not self._is_function_name(node):
-                self.possibly_undefined.add(node)
-            elif node in self.possibly_undefined:
-                self.possibly_undefined.remove(node)
-        else:
-            for child in node.get_children():
-                self._analyze_statement(child, facts, local_vars)
+            if not self._is_function_name(node) and name in local_vars and name not in facts:
+                self._possibly_undefined.add(node)
+            elif node in self._possibly_undefined:
+                self._possibly_undefined.remove(node)
 
-    def _get_targets(self, statement: Union[astroid.Assign, astroid.Delete]) -> Set[str]:
-        targets = set()
-        for target in statement.targets:
-            try:
-                # only AssignName node has a `name` attribute.
-                targets.add(target.name)
-            except AttributeError:
-                pass
-        return targets
-
-    def _get_assigns(self, blocks: List[CFGBlock]) -> Set[str]:
+    def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:
         """Returns a set of all local and parameter variables that could be
         defined in the program (either a function or module).
 
-        IF a variable 'v' is defined in the function and there is no global/nonlocal
+        IF a variable 'v' is defined in a function and there is no global/nonlocal
         statement applied to 'v' THEN 'v' is a local variable.
 
         Note that `local` in the context of a module level analysis, refers to global
@@ -114,27 +101,23 @@ class PossiblyUndefinedChecker(BaseChecker):
         """
         assigns = set()
         kills = set()
-        for block in blocks:
-            for statement in block.statements:
-                if isinstance(statement, astroid.Arguments):
-                    for arg in statement.args:
-                        assigns.add(arg)
-                elif isinstance(statement, astroid.Assign):
-                    for target in statement.targets:
-                        try:
-                            assigns.add(target.name)
-                        except AttributeError:
-                            # exception raised if `target` is AssignAttr or Starred node
-                            pass
-                elif isinstance(statement, (astroid.Global, astroid.Nonlocal)):
-                    for name in statement.names:
-                        kills.add(name)
+        for statement in self._get_child_nodes(node, (astroid.Arguments, astroid.Assign,
+                                                     astroid.Global, astroid.node_classes.Nonlocal),
+                                              astroid.FunctionDef):
+            if isinstance(statement, astroid.Arguments):
+                for arg in statement.args:
+                    assigns.add(arg)
+            elif isinstance(statement, astroid.Assign):
+                for target in statement.nodes_of_class(astroid.Name):
+                    assigns.add(target.name)
+            elif isinstance(statement, (astroid.Global, astroid.Nonlocal)):
+                for name in statement.names:
+                    kills.add(name)
 
         return assigns.difference(kills)
 
     def _is_function_name(self, node: astroid.Name) -> bool:
-        if isinstance(node.parent, astroid.Call) and node == node.parent.func:
-            return True
+        return isinstance(node.parent, astroid.Call) and node == node.parent.func
 
     def _get_blocks_po(self, node: Union[astroid.Module, astroid.FunctionDef]) -> List[CFGBlock]:
         """Return the sequence of all blocks in this graph in the order of
@@ -144,14 +127,32 @@ class PossiblyUndefinedChecker(BaseChecker):
     def _get_blocks(self, block: CFGBlock, visited) -> List[CFGBlock]:
         if block.id in visited:
             return []
-        else:
-            visited.add(block.id)
-            blocks = []
-            for succ in block.successors:
-                blocks.extend(self._get_blocks(succ.target, visited))
-            blocks.append(block)
-            return blocks
 
+        visited.add(block.id)
+        blocks = []
+
+        for succ in block.successors:
+            blocks.extend(self._get_blocks(succ.target, visited))
+        blocks.append(block)
+
+        return blocks
+
+    def _get_child_nodes(self, node: NodeNG, klasses, skip_klasses=None):
+        """The exact same method as NodeNG.nodes_of_class (20/08/19) except now
+        you can specify more than one node type to look for or ignore."""
+        if isinstance(node, klasses):
+            yield node
+
+        if skip_klasses is None:
+            for child_node in node.get_children():
+                yield from self._get_child_nodes(child_node, klasses, skip_klasses)
+
+            return
+
+        for child_node in node.get_children():
+            if isinstance(child_node, skip_klasses):
+                continue
+            yield from self._get_child_nodes(child_node, klasses, skip_klasses)
 
 def register(linter):
     linter.register_checker(PossiblyUndefinedChecker(linter))

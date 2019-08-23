@@ -9,7 +9,7 @@ class ControlFlowGraph:
     end: CFGBlock
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
-    # blocks (at least one statement) that will never be executed in runtime.
+    # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
 
     def __init__(self) -> None:

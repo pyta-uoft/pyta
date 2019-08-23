@@ -9,6 +9,7 @@ class ControlFlowGraph:
     end: CFGBlock
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
+    # blocks (at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
 
     def __init__(self) -> None:
@@ -52,6 +53,9 @@ class ControlFlowGraph:
                 for edge in source.predecessors:
                     edge.target = target
                     target.predecessors.append(edge)
+            # source is a utility block that helps build the cfg but it does not
+            # represent any part of the program so it is redundant.
+            self.unreachable_blocks.remove(source)
         else:
             CFGEdge(source, target)
 

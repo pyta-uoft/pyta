@@ -67,5 +67,7 @@ Shweta Mogalapalli,
 Ignas Panero Armoska,
 Justin Park,
 Amr Sharaf,
+Kavin Singh,
 Alexey Strokach,
-Jasmine Wu
+Jasmine Wu,
+Philippe Yu

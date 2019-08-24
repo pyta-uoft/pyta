@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Generator, Optional, List, Set
-from astroid.node_classes import NodeNG, Continue, Break
+from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
 class ControlFlowGraph:
@@ -9,11 +9,14 @@ class ControlFlowGraph:
     end: CFGBlock
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
+    # blocks (with at least one statement) that will never be executed in runtime.
+    unreachable_blocks: Set[CFGBlock]
 
     def __init__(self) -> None:
-        self.start = CFGBlock(0)
-        self.end = CFGBlock(1)
-        self.block_count = 2
+        self.block_count = 0
+        self.unreachable_blocks = set()
+        self.start = self.create_block()
+        self.end = self.create_block()
 
     def create_block(self, pred: Optional[CFGBlock] = None) -> CFGBlock:
         """Create a new CFGBlock for this graph.
@@ -21,9 +24,11 @@ class ControlFlowGraph:
         If pred is specified, set that block as a predecessor of the new block.
         """
         new_block = CFGBlock(self.block_count)
+        self.unreachable_blocks.add(new_block)
+
         self.block_count += 1
         if pred:
-            CFGEdge(pred, new_block)
+            self.link_or_merge(pred, new_block)
         return new_block
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
@@ -48,6 +53,9 @@ class ControlFlowGraph:
                 for edge in source.predecessors:
                     edge.target = target
                     target.predecessors.append(edge)
+            # source is a utility block that helps build the cfg but it does not
+            # represent any part of the program so it is redundant.
+            self.unreachable_blocks.remove(source)
         else:
             CFGEdge(source, target)
 
@@ -81,6 +89,11 @@ class ControlFlowGraph:
             yield edge
             yield from self._get_edges(edge.target, visited)
 
+    def update_block_reachability(self) -> None:
+        for block in self.get_blocks():
+            block.reachable = True
+            self.unreachable_blocks.remove(block)
+
 
 class CFGBlock:
     """A node in a control flow graph.
@@ -95,6 +108,8 @@ class CFGBlock:
     predecessors: List[CFGEdge]
     # This block's out-edges (to blocks that can execute immediately after this one).
     successors: List[CFGEdge]
+    # Whether there exists a path from the start block to this block.
+    reachable: bool
 
     def __init__(self, id_: int) -> None:
         """Initialize a new CFGBlock."""
@@ -102,6 +117,7 @@ class CFGBlock:
         self.statements = []
         self.predecessors = []
         self.successors = []
+        self.reachable = False
 
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():
@@ -116,7 +132,7 @@ class CFGBlock:
     def is_jump(self) -> bool:
         """Returns True if the block has a statement that branches
         the control flow (ex: `break`)"""
-        return isinstance(self.jump, (Break, Continue))
+        return isinstance(self.jump, (Break, Continue, Return))
 
 
 class CFGEdge:

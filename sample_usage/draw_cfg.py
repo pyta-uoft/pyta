@@ -28,13 +28,16 @@ def display(cfgs: Dict[NodeNG, ControlFlowGraph],
         else:
             continue
         with graph.subgraph(name=f'cluster_{id(node)}') as c:
-            _visit(cfg, cfg.start, c, set())
+            visited = set()
+            _visit(cfg.start, c, visited)
+            for block in cfg.unreachable_blocks:
+                _visit(block, c, visited)
             c.attr(label=subgraph_label)
 
     graph.render(filename, view=view)
 
 
-def _visit(cfg: ControlFlowGraph, block: CFGBlock,
+def _visit(block: CFGBlock,
            graph: graphviz.Digraph, visited: Set[int]) -> None:
     node_id = f'{graph.name}_{block.id}'
     if node_id in visited:
@@ -45,12 +48,15 @@ def _visit(cfg: ControlFlowGraph, block: CFGBlock,
     label = label.replace('\\', '\\\\')
     # \l is used for left alignment.
     label = label.replace('\n', '\\l')
-    graph.node(node_id, label=label)
+
+    fill_color = 'grey93' if not block.reachable else 'white'
+
+    graph.node(node_id, label=label, fillcolor=fill_color, style='filled')
     visited.add(node_id)
 
     for edge in block.successors:
         graph.edge(node_id, f'{graph.name}_{edge.target.id}')
-        _visit(cfg, edge.target, graph, visited)
+        _visit(edge.target, graph, visited)
 
 
 def main(filepath: str) -> None:

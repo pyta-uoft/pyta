@@ -52,8 +52,9 @@ class OneIterationChecker(BaseChecker):
             return False
 
         for pred in preds:
-            stmt = pred.source.statements[0]
-            if node.parent_of(stmt):
+            pred = pred.source
+            stmt = pred.statements[0]
+            if node.parent_of(stmt) and pred.reachable:
                 if isinstance(node, astroid.For) and stmt is node.iter:
                     continue
                 return False

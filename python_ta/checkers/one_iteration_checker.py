@@ -5,7 +5,6 @@ import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from python_ta.cfg.graph import CFGBlock
 
 
 class OneIterationChecker(BaseChecker):
@@ -53,36 +52,12 @@ class OneIterationChecker(BaseChecker):
             return False
 
         for pred in preds:
-            pred = pred.source
-            stmt = pred.statements[0]
-            if node.parent_of(stmt) and stmt is not node.iter and \
-                    self.is_predecessor(pred, start.cfg_block):
+            stmt = pred.source.statements[0]
+            if node.parent_of(stmt):
+                if isinstance(node, astroid.For) and stmt is node.iter:
+                    continue
                 return False
         return True
-
-    def is_predecessor(self, block: CFGBlock, _pred: CFGBlock) -> bool:
-        """Returns True if <_pred> is a predecessor of <block>.
-
-        A block <d> is predecessor of block <e> if there exists a path from <d>
-        to <e>.
-
-        Preconditions:
-            - <_pred> is the start block of the loop.
-            - <block>.statements[0] is a child node of the astroid.For/While node.
-
-        Assumption:
-            - Since every path from the root to <block> must pass through
-        <_pred>, we only need to check one of the paths to see if
-        <_pred> is the predecessor of <block>.
-
-        """
-        if block is _pred:
-            return True
-        else:
-            for pred in block.predecessors:
-                if self.is_predecessor(pred.source, _pred):
-                    return True
-            return False
 
 
 def register(linter):

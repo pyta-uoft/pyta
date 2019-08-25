@@ -25,7 +25,6 @@ class PossiblyUndefinedChecker(BaseChecker):
     priority = -1
 
     def __init__(self, linter=None):
-        """Last updated: 24/08/19"""
         super().__init__(linter=linter)
         self._possibly_undefined = set()
 

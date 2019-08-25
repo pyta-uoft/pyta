@@ -24,11 +24,10 @@ class PossiblyUndefinedChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    # def __init__(self, linter=None):
-    #     BaseChecker.__init__(linter)
-    #     self._possibly_undefined = set()
-
-    _possibly_undefined = set()
+    def __init__(self, linter=None):
+        """Last update: 24/08/19"""
+        super().__init__(linter=linter)
+        self._possibly_undefined = set()
 
     @check_messages('possibly-undefined')
     def visit_name(self, node):

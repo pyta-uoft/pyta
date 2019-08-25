@@ -34,11 +34,30 @@ class OneIterationChecker(BaseChecker):
             self.add_message('one-iteration', node=node)
 
     def _check_one_iteration(self, node: Union[astroid.For, astroid.While]) -> bool:
-        """Return whether the given loop is guaranteed to stop after one iteration."""
-        # TODO: Complete this method.
-        # print(node.cfg_block)
+        """Return whether the given loop is guaranteed to stop after one iteration.
 
-        return False
+        More precisely, Returns False if there exists a direct predecessor
+        block `p` to the start of the loop block `s` such that the
+        first statement in `p` is a child node of <node> and that there exists a
+        path from `s` to `p.
+
+        Note: For `while` loops, 'start of the loop block' refers to the block with
+        the test condition (or the first of the blocks that make up test condition).
+        For `for` loops, it refers to the block with the assignment target.
+        """
+        start = node.target if isinstance(node, astroid.For) else node
+        preds = start.cfg_block.predecessors
+
+        if preds == []:
+            return False
+
+        for pred in preds:
+            stmt = pred.source.statements[0]
+            if node.parent_of(stmt) and pred.source.reachable:
+                if isinstance(node, astroid.For) and stmt is node.iter:
+                    continue
+                return False
+        return True
 
 
 def register(linter):

@@ -73,7 +73,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):
                 continue
-            for node in self._get_child_nodes(statement, (astroid.AssignName, astroid.DelName),
+            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
                     gen.add(node.name)
@@ -103,7 +103,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         """
         assigns = set()
         kills = set()
-        for statement in self._get_child_nodes(node, (astroid.AssignName, astroid.Global,
+        for statement in node.nodes_of_class((astroid.AssignName, astroid.Global,
                                                       astroid.node_classes.Nonlocal),
                                                astroid.FunctionDef):
             if isinstance(statement, astroid.AssignName):
@@ -134,23 +134,6 @@ class PossiblyUndefinedChecker(BaseChecker):
         blocks.append(block)
 
         return blocks
-
-    def _get_child_nodes(self, node: NodeNG, klasses, skip_klasses=None):
-        """The exact same method as NodeNG.nodes_of_class (20/08/19) except now
-        you can specify more than one node type to look for or ignore."""
-        if isinstance(node, klasses):
-            yield node
-
-        if skip_klasses is None:
-            for child_node in node.get_children():
-                yield from self._get_child_nodes(child_node, klasses, skip_klasses)
-
-            return
-
-        for child_node in node.get_children():
-            if isinstance(child_node, skip_klasses):
-                continue
-            yield from self._get_child_nodes(child_node, klasses, skip_klasses)
 
 
 def register(linter):

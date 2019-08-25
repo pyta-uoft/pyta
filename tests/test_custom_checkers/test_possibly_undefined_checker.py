@@ -281,3 +281,29 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_name(name_node_y)
             self.checker.visit_name(name_node_x)
+
+    def test_message_with_nested_func(self):
+        """This example targets the part of the checker implementation that traverses
+        the ast using Node.nodes_of_class or anything equivalent."""
+        src = """
+        def func(x):
+            if True:
+                y = 10
+            else:
+                def func2():
+                    y = 20
+            print(y)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        _, name_node_y = mod.nodes_of_class(astroid.Name)
+
+        self.checker.visit_functiondef(func_node)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='possibly-undefined',
+                    node=name_node_y,
+                )
+        ):
+            self.checker.visit_name(name_node_y)

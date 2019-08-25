@@ -43,7 +43,7 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
         """Runs the data flow algorithm on a `Module` or `Function` CFG, which in turn
-        appends `Name` nodes to `possibly_undefined` if it might not be defined.
+        appends `Name` nodes to `self.possibly_undefined` if it might not be defined.
         """
         facts = {}
         blocks = self._get_blocks_po(node)
@@ -64,21 +64,21 @@ class PossiblyUndefinedChecker(BaseChecker):
             temp = self._transfer(b, facts[b]['in'], all_assigns)
             if temp != facts[b]['out']:
                 facts[b]['out'] = temp
-                successors = set([succ.target for succ in b.successors])
+                successors = set(succ.target for succ in b.successors)
                 worklist = list(set(worklist).union(successors))
 
     def _transfer(self, block: CFGBlock, in_facts: Set[str], all_assigns: Set[str]) -> Set[str]:
         gen = set()
         kill = set()
         for statement in block.statements:
-            if isinstance(statement, astroid.Assign):
-                gen.update(set(node.name for node in statement.nodes_of_class(astroid.AssignName)))
-            elif isinstance(statement, astroid.AnnAssign) and hasattr(statement.target, 'name'):
-                gen.add(statement.target.name)
-            elif isinstance(statement, astroid.Arguments):
-                gen.update(set(node.name for node in statement.args))
-            elif isinstance(statement, astroid.Delete):
-                kill.update(set(node.name for node in statement.nodes_of_class(astroid.DelName)))
+            if isinstance(statement, astroid.FunctionDef):
+                continue
+            for node in self._get_child_nodes(statement, (astroid.AssignName, astroid.DelName),
+                                              astroid.FunctionDef):
+                if isinstance(node, astroid.AssignName):
+                    gen.add(node.name)
+                else:
+                    kill.add(node.name)
             self._analyze_statement(statement, gen.union(in_facts.difference(kill)), all_assigns)
         return gen.union(in_facts.difference(kill))
 

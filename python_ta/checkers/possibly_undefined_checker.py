@@ -24,9 +24,11 @@ class PossiblyUndefinedChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def __init__(self, linter=None):
-        BaseChecker.__init__(linter)
-        self._possibly_undefined = set()
+    # def __init__(self, linter=None):
+    #     BaseChecker.__init__(linter)
+    #     self._possibly_undefined = set()
+
+    _possibly_undefined = set()
 
     @check_messages('possibly-undefined')
     def visit_name(self, node):
@@ -74,9 +76,11 @@ class PossiblyUndefinedChecker(BaseChecker):
             if isinstance(statement, astroid.Assign):
                 gen.update(set(node.name for node in statement.nodes_of_class(astroid.AssignName)))
             elif isinstance(statement, astroid.AnnAssign) and hasattr(statement.target, 'name'):
-                gen.add(statement.target)
+                gen.add(statement.target.name)
+            elif isinstance(statement, astroid.Arguments):
+                gen.update(set(node.name for node in statement.args))
             elif isinstance(statement, astroid.Delete):
-                kill.update(set(node.name for node in statement.nodes_of_class(astroid.AssignName)))
+                kill.update(set(node.name for node in statement.nodes_of_class(astroid.DelName)))
             self._analyze_statement(statement, gen.union(in_facts.difference(kill)), all_assigns)
         return gen.union(in_facts.difference(kill))
 
@@ -96,20 +100,16 @@ class PossiblyUndefinedChecker(BaseChecker):
         IF a variable 'v' is defined in a function and there is no global/nonlocal
         statement applied to 'v' THEN 'v' is a local variable.
 
-        Note that `local` in the context of a module level analysis, refers to global
-        variables.
+        Note that `local variable` in the context of a module level analysis,
+        refers to global variables.
         """
         assigns = set()
         kills = set()
-        for statement in self._get_child_nodes(node, (astroid.Arguments, astroid.Assign,
-                                                     astroid.Global, astroid.node_classes.Nonlocal),
-                                              astroid.FunctionDef):
-            if isinstance(statement, astroid.Arguments):
-                for arg in statement.args:
-                    assigns.add(arg)
-            elif isinstance(statement, astroid.Assign):
-                for target in statement.nodes_of_class(astroid.Name):
-                    assigns.add(target.name)
+        for statement in self._get_child_nodes(node, (astroid.AssignName, astroid.Global,
+                                                      astroid.node_classes.Nonlocal),
+                                               astroid.FunctionDef):
+            if isinstance(statement, astroid.AssignName):
+                assigns.add(statement.name)
             elif isinstance(statement, (astroid.Global, astroid.Nonlocal)):
                 for name in statement.names:
                     kills.add(name)
@@ -153,6 +153,7 @@ class PossiblyUndefinedChecker(BaseChecker):
             if isinstance(child_node, skip_klasses):
                 continue
             yield from self._get_child_nodes(child_node, klasses, skip_klasses)
+
 
 def register(linter):
     linter.register_checker(PossiblyUndefinedChecker(linter))

@@ -1,4 +1,4 @@
-"""checker for a loop that can only ever run for one iteration.
+"""checker for a while loop that does not mutate any condition variable in its body.
 """
 import astroid
 from pylint.interfaces import IAstroidChecker
@@ -26,11 +26,11 @@ class PossibleInfiniteLoopChecker(BaseChecker):
     # pass in message symbol as a parameter of check_messages
     @check_messages('possible-infinite-loop')
     def visit_while(self, node):
-        if self._check_loop_variable_mutation(node):
+        if not self._check_loop_variable_mutation(node):
             self.add_message('possible-infinite-loop', node=node)
 
     def _check_loop_variable_mutation(self, node: astroid.While) -> bool:
-        """Returns whether the variable used in the loop condition is mutated in
+        """Returns True if the variable used in the loop condition is mutated in
         any path of the loop body.
         """
         test_block = node.cfg_block
@@ -38,32 +38,28 @@ class PossibleInfiniteLoopChecker(BaseChecker):
         for node in node.test.nodes_of_class(astroid.Name, (astroid.Call, astroid.Attribute)):
             names.add(node.name)
 
-        then_block = test_block.successors[0].target
         after_loop_block = test_block.successors[1].target
-        self._visit_blocks(then_block, after_loop_block, names)
 
-        return bool(len(names))
+        return self._visit_blocks(test_block, after_loop_block, names)
 
-    def _visit_blocks(self, start_block: CFGBlock, end_block: CFGBlock, names: Set[str]) -> None:
+    def _visit_blocks(self, start_block: CFGBlock, end_block: CFGBlock, names: Set[str]) -> bool:
         """Visits every reachable block that succeeds `start_block` and preceeds `end_block`
-        and if any `AssignName` nodes are found that matches the elements in `names`,
-        it is removed from the set.
+        and Returns True if at least one `AssignName` node is found that matches the
+        elements in `names`.
 
         Precondition:
             - `start_block` is the test block of the while loop.
             - `end_block` is the after while block.
         """
-        for block in self._get_blocks(start_block, visited={end_block.id}):
+        then_block = start_block.successors[0].target
+        for block in self._get_blocks(then_block, visited={end_block.id, start_block.id}):
             if len(names) == 0:
-                return None
+                return False
             for statement in block.statements:
-                for node in statement.nodes_of_class(astroid.AssignName):
+                for node in statement.nodes_of_class((astroid.AssignName, astroid.Name)):
                     if node.name in names:
-                        names.remove(node.name)
-                for node in statement.nodes_of_class(astroid.Name):
-                    if node.name in names:
-                        names.remove(node.name)
-        return None
+                        return True
+        return False
 
     def _get_blocks(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:
         if block.id in visited:

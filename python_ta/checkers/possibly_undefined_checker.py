@@ -26,7 +26,7 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     def __init__(self, linter=None):
         super().__init__(linter=linter)
-        self._possibly_undefined = set()
+        self._possibly_undefined: Set[astroid.Name] = set()
 
     @check_messages('possibly-undefined')
     def visit_name(self, node):

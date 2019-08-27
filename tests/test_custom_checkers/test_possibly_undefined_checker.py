@@ -184,7 +184,28 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_name(name_node_x)
 
-    def test_message_with_del(self):
+    def test_message_with_del_simple(self):
+        src = """
+        def test(x):
+            y = 0
+            del y
+            print(y)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        _, name_node_y = mod.nodes_of_class(astroid.Name)
+
+        self.checker.visit_functiondef(func_node)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='possibly-undefined',
+                    node=name_node_y,
+                ),
+        ):
+            self.checker.visit_name(name_node_y)
+
+    def test_message_with_del_complex(self):
         src = """
         def test(x):
             y = 10

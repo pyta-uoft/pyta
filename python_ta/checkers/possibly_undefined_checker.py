@@ -67,29 +67,26 @@ class PossiblyUndefinedChecker(BaseChecker):
                 successors = set(succ.target for succ in b.successors)
                 worklist = list(set(worklist).union(successors))
 
-    def _transfer(self, block: CFGBlock, in_facts: Set[str], all_assigns: Set[str]) -> Set[str]:
+    def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:
         gen = set()
         kill = set()
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):
                 continue
-            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName),
+            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
                     gen.add(node.name)
-                else:
+                elif isinstance(node, astroid.DelName):
                     kill.add(node.name)
-            self._analyze_statement(statement, gen.union(in_facts.difference(kill)), all_assigns)
-        return gen.union(in_facts.difference(kill))
-
-    def _analyze_statement(self, statement: NodeNG, facts: Set[str], local_vars: Set[str]) -> None:
-        nodes = statement.nodes_of_class(astroid.Name)
-        for node in nodes:
-            name = node.name
-            if not self._is_function_name(node) and name in local_vars and name not in facts:
-                self._possibly_undefined.add(node)
-            elif node in self._possibly_undefined:
-                self._possibly_undefined.remove(node)
+                else:
+                    name = node.name
+                    if not self._is_function_name(node) and name in local_vars \
+                            and name not in gen.union(in_facts).difference(kill):
+                        self._possibly_undefined.add(node)
+                    elif node in self._possibly_undefined:
+                        self._possibly_undefined.remove(node)
+        return gen.union(in_facts).difference(kill)
 
     def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:
         """Returns a set of all local and parameter variables that could be
@@ -103,14 +100,12 @@ class PossiblyUndefinedChecker(BaseChecker):
         """
         assigns = set()
         kills = set()
-        for statement in node.nodes_of_class((astroid.AssignName, astroid.Global,
-                                                      astroid.node_classes.Nonlocal),
-                                               astroid.FunctionDef):
-            if isinstance(statement, astroid.AssignName):
-                assigns.add(statement.name)
-            elif isinstance(statement, (astroid.Global, astroid.Nonlocal)):
-                for name in statement.names:
-                    kills.add(name)
+        for k, v in node.scope().locals.items():
+            if any(isinstance(elem, astroid.AssignName) for elem in v):
+                assigns.add(k)
+        for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global), astroid.FunctionDef):
+            for name in statement.names:
+                kills.add(name)
 
         return assigns.difference(kills)
 

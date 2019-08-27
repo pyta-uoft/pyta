@@ -105,7 +105,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         for name, nodes in node.scope().locals.items():
             if any(isinstance(elem, astroid.AssignName) for elem in nodes):
                 assigns.add(name)
-        for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global), astroid.FunctionDef):
+        for statement in node.nodes_of_class(astroid.Nonlocal, astroid.FunctionDef):
             for name in statement.names:
                 kills.add(name)
 

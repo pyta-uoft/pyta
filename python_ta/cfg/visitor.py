@@ -44,6 +44,7 @@ class CFGVisitor:
             child.accept(self)
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
+        self._current_cfg.update_block_reachability()
 
     def visit_classdef(self, node: astroid.ClassDef) -> None:
         for child in node.body:
@@ -71,6 +72,8 @@ class CFGVisitor:
         self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
+        self._current_cfg.update_block_reachability()
+
         self._current_block = previous_block
         self._current_cfg = previous_cfg
 
@@ -196,4 +199,3 @@ class CFGVisitor:
                               f' {"function" if isinstance(node, astroid.Return) else "loop"}')
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
-

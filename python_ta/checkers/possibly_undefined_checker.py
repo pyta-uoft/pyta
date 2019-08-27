@@ -6,7 +6,6 @@ from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock
-from astroid.node_classes import NodeNG
 from typing import Set, List
 
 
@@ -44,6 +43,9 @@ class PossiblyUndefinedChecker(BaseChecker):
     def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
         """Runs the data flow algorithm on a `Module` or `Function` CFG, which in turn
         appends `Name` nodes to `self.possibly_undefined` if it might not be defined.
+
+        Data flow algorithms retrieved from:
+        https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
         facts = {}
         blocks = self._get_blocks_po(node)
@@ -68,7 +70,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                 worklist = list(set(worklist).union(successors))
 
     def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:
-        gen = set()
+        gen = in_facts.copy()
         kill = set()
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):
@@ -82,11 +84,11 @@ class PossiblyUndefinedChecker(BaseChecker):
                 else:
                     name = node.name
                     if not self._is_function_name(node) and name in local_vars \
-                            and name not in gen.union(in_facts).difference(kill):
+                            and name not in gen.difference(kill):
                         self._possibly_undefined.add(node)
                     elif node in self._possibly_undefined:
                         self._possibly_undefined.remove(node)
-        return gen.union(in_facts).difference(kill)
+        return gen.difference(kill)
 
     def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:
         """Returns a set of all local and parameter variables that could be

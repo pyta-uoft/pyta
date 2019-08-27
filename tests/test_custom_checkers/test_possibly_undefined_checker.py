@@ -124,9 +124,9 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         def test(x):
             x = 10
             if True:
-                y = 10
-            else:
                 global y
+            else:
+                y = 10
             print(y)
         """
         mod = astroid.parse(src)

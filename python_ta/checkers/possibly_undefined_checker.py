@@ -70,7 +70,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                 worklist = list(set(worklist).union(successors))
 
     def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:
-        gen = in_facts.copy()
+        gen = in_facts
         kill = set()
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):

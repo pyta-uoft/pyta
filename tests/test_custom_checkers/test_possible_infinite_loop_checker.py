@@ -3,308 +3,103 @@ import astroid
 from python_ta.checkers.possible_infinite_loop_checker import \
     PossibleInfiniteLoopChecker
 from python_ta.cfg import CFGVisitor
+from python_ta.transforms.type_inference_visitor import TypeInferer
 
 
 class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = PossibleInfiniteLoopChecker
 
-    def test_no_messages_simple(self):
+    def test_no_message_simple(self):
         src = """
-        def test(x):
-            x = 10
-            if True:
-                return x
-            return x
+        x = 20
+        while x > 10:
+            x -= 1
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        name_node_a, name_node_b = mod.nodes_of_class(astroid.Name)
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
 
+        while_node, *_ = mod.nodes_of_class(astroid.While)
         with self.assertNoMessages():
-            self.checker.visit_module(mod)
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_a)
-            self.checker.visit_name(name_node_b)
+            self.checker.visit_while(while_node)
 
-    def test_no_messages_with_args(self):
+    def test_no_message_func_call(self):
         src = """
-        def test(x):
-            if True:
-                x = 10
+        x = 'lol'
+        while len(x) > 10:
+            print(10)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
+
+        while_node, *_ = mod.nodes_of_class(astroid.While)
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+    def test_message_immutable_type(self):
+        src = """
+        x = 'lol'
+        while  x == '123':
             print(x)
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, name_node_x = mod.nodes_of_class(astroid.Name)
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
 
-        with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_x)
-
-    def test_no_messages_if_else(self):
-        src = """
-        def test(x):
-            if True:
-                y = 10
-            else:
-                y = 20
-            print(y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_y)
-
-    def test_no_messages_if_else_with_ann_assign(self):
-        src = """
-        def test(x):
-            if True:
-                y: int = 10
-            else:
-                y = 20
-            print(y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_y)
-
-    def test_no_messages_complex(self):
-        src = """
-        def test(x):
-            if True:
-                y = 10
-            else:
-                for j in range(10):
-                    if j > 10:
-                        y = 10
-                        break
-                else:
-                    y = 10
-            return y
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_y)
-
-    def test_no_messages_with_nonlocal(self):
-        src = """
-        def test(x):
-            x = 10
-            nonlocal y
-            if True:
-                y = 10
-            print(y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        __, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_y)
-
-    def test_no_messages_with_global(self):
-        src = """
-        def test(x):
-            x = 10
-            if True:
-                y = 10
-            else:
-                global y
-            print(y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
-            self.checker.visit_name(name_node_y)
-
-    def test_no_messages_with_class_def(self):
-        """This example is a false negative due to how class definitions are
-        represented in the control flow graph."""
-        src = """
-        class A:
-            y = 10
-
-        if True:
-            x = 10
-        else:
-            y = 20
-        print(y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        self.checker.visit_module(mod)
-        with self.assertNoMessages():
-            self.checker.visit_name(name_node_y)
+        while_node, *_ = mod.nodes_of_class(astroid.While)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='possible-infinite-loop',
+                    node=while_node,
+                ),
+        ):
+            self.checker.visit_while(while_node)
 
     def test_message_simple(self):
         src = """
-        x = 10
-        if True:
-            y = 10
-        else:
-            x = 10
-        print(x and y)
+        x = 'lol'
+        while  x == '123':
+            print(10)
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        _, name_node_x, name_node_y = mod.nodes_of_class(astroid.Name)
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
 
-        self.checker.visit_module(mod)
+        while_node, *_ = mod.nodes_of_class(astroid.While)
         with self.assertAddsMessages(
                 pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
+                    msg_id='possible-infinite-loop',
+                    node=while_node,
                 ),
         ):
-            self.checker.visit_name(name_node_y)
+            self.checker.visit_while(while_node)
 
-        with self.assertNoMessages():
-            self.checker.visit_name(name_node_x)
-
-    def test_message_with_del(self):
+    def test_message_mutable_type(self):
         src = """
-        def test(x):
-            y = 10
-            if True:
-                x = 20
-            else:
-                del y
-            print(y)
+        x = [1, 2, 3]
+        while  x:
+            print(10)
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
 
-        self.checker.visit_functiondef(func_node)
+        while_node, *_ = mod.nodes_of_class(astroid.While)
         with self.assertAddsMessages(
                 pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
+                    msg_id='possible-infinite-loop',
+                    node=while_node,
                 ),
         ):
-            self.checker.visit_name(name_node_y)
-
-    def test_message_complex(self):
-        src = """
-        def test(x):
-            if True:
-                y = 10
-            else:
-                for j in range(10):
-                    if j > 10:
-                        break
-                else:
-                    y = 10
-            return y
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        self.checker.visit_functiondef(func_node)
-        with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                ),
-        ):
-            self.checker.visit_name(name_node_y)
-
-    def test_message_with_args(self):
-        src = """
-        def test(x):
-            if True:
-                del x
-            print(x)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, name_node_x = mod.nodes_of_class(astroid.Name)
-
-        self.checker.visit_functiondef(func_node)
-        with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_x,
-                ),
-        ):
-            self.checker.visit_name(name_node_x)
-
-    def test_multiple_messages_simple(self):
-        src = """
-        if True:
-            y: int = 10
-        else:
-            x = 10
-        print(x and y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        _, _, name_node_x, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        self.checker.visit_module(mod)
-        with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                ),
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_x,
-                )
-        ):
-            self.checker.visit_name(name_node_y)
-            self.checker.visit_name(name_node_x)
-
-    def test_message_with_nested_func(self):
-        """This example targets the part of the checker implementation that traverses
-        the ast using Node.nodes_of_class or anything equivalent."""
-        src = """
-        def func(x):
-            if True:
-                y = 10
-            else:
-                def func2():
-                    y = 20
-            print(y)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
-
-        self.checker.visit_functiondef(func_node)
-        with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                )
-        ):
-            self.checker.visit_name(name_node_y)
+            self.checker.visit_while(while_node)

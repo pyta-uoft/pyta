@@ -4,7 +4,7 @@ import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from typing import Set, Generator
+from typing import Set, Generator, Dict
 from python_ta.cfg import CFGBlock
 
 
@@ -34,15 +34,20 @@ class PossibleInfiniteLoopChecker(BaseChecker):
         any path of the loop body.
         """
         test_block = node.cfg_block
-        names: Set[str] = set()
+        # True iff the inf_type is an immutable type.
+        names: Dict[str, bool] = {}
         for node in node.test.nodes_of_class(astroid.Name, (astroid.Call, astroid.Attribute)):
-            names.add(node.name)
+            names[node.name] = type(node.inf_type).__name__ in \
+                               ('str', 'int', 'float', 'bool', 'tuple', 'frozenset')
 
         after_loop_block = test_block.successors[1].target
 
+        if len(names) < 1:
+            return True
+
         return self._visit_blocks(test_block, after_loop_block, names)
 
-    def _visit_blocks(self, start_block: CFGBlock, end_block: CFGBlock, names: Set[str]) -> bool:
+    def _visit_blocks(self, start_block: CFGBlock, end_block: CFGBlock, names: Dict[str, bool]) -> bool:
         """Visits every reachable block that succeeds `start_block` and preceeds `end_block`
         and Returns True if at least one `AssignName` node is found that matches the
         elements in `names`.
@@ -53,12 +58,12 @@ class PossibleInfiniteLoopChecker(BaseChecker):
         """
         then_block = start_block.successors[0].target
         for block in self._get_blocks(then_block, visited={end_block.id, start_block.id}):
-            if len(names) == 0:
-                return False
             for statement in block.statements:
                 for node in statement.nodes_of_class((astroid.AssignName, astroid.Name)):
                     if node.name in names:
-                        return True
+                        if isinstance(node, astroid.AssignName) and not names[node.name] \
+                                or isinstance(node, astroid.Name) and names[node.name]:
+                            return True
         return False
 
     def _get_blocks(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:

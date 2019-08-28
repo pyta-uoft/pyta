@@ -66,8 +66,7 @@ class PossiblyUndefinedChecker(BaseChecker):
             temp = self._transfer(b, facts[b]['in'], all_assigns)
             if temp != facts[b]['out']:
                 facts[b]['out'] = temp
-                successors = set(succ.target for succ in b.successors)
-                worklist = list(set(worklist).union(successors))
+                worklist.extend([succ.target for succ in b.successors])
 
     def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:
         gen = in_facts

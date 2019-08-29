@@ -84,7 +84,6 @@ class ControlFlowGraph:
             return
 
         visited.add(block.id)
-
         for succ in block.successors:
             yield from self._get_blocks_postorder(succ.target, visited)
 

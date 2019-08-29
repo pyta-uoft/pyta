@@ -61,7 +61,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         worklist = blocks
         while len(worklist) != 0:
             b = worklist.pop()
-            outs = [out_facts[p.source] for p in b.predecessors if p.source in facts]
+            outs = [out_facts[p.source] for p in b.predecessors if p.source in out_facts]
             if outs == []:
                 in_facts = set()
             else:

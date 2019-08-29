@@ -48,9 +48,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
         out_facts = {}
-        cfg = ControlFlowGraph()
-        cfg.start = node.cfg_block
-        blocks = list(cfg.get_blocks_postorder())
+        blocks = list(node.cfg.get_blocks_postorder())
         blocks.reverse()
 
         all_assigns = self._get_assigns(node)

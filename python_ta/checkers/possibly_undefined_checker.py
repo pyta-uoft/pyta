@@ -5,8 +5,8 @@ import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
-from python_ta.cfg.graph import CFGBlock
-from typing import Set, List
+from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
+from typing import Set
 
 
 class PossiblyUndefinedChecker(BaseChecker):
@@ -48,7 +48,10 @@ class PossiblyUndefinedChecker(BaseChecker):
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
         facts = {}
-        blocks = self._get_blocks_po(node)
+        cfg = ControlFlowGraph()
+        cfg.start = node.cfg_block
+        blocks = list(cfg.get_blocks_postorder())
+        blocks.reverse()
 
         all_assigns = self._get_assigns(node)
         for block in blocks:
@@ -60,16 +63,16 @@ class PossiblyUndefinedChecker(BaseChecker):
             b = worklist.pop()
             outs = [facts[p.source]['out'] for p in b.predecessors if p.source in facts]
             if outs == []:
-                facts[b]['in'] = set()
+                in_facts = set()
             else:
-                facts[b]['in'] = set.intersection(*outs)
-            temp = self._transfer(b, facts[b]['in'], all_assigns)
+                in_facts = set.intersection(*outs)
+            temp = self._transfer(b, in_facts, all_assigns)
             if temp != facts[b]['out']:
                 facts[b]['out'] = temp
                 worklist.extend([succ.target for succ in b.successors])
 
     def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:
-        gen = in_facts
+        gen = in_facts.copy()
         kill = set()
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):
@@ -112,24 +115,6 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     def _is_function_name(self, node: astroid.Name) -> bool:
         return isinstance(node.parent, astroid.Call) and node == node.parent.func
-
-    def _get_blocks_po(self, node: Union[astroid.Module, astroid.FunctionDef]) -> List[CFGBlock]:
-        """Return the sequence of all blocks in this graph in the order of
-        a post-order traversal."""
-        return self._get_blocks(node.cfg_block, set())
-
-    def _get_blocks(self, block: CFGBlock, visited) -> List[CFGBlock]:
-        if block.id in visited:
-            return []
-
-        visited.add(block.id)
-        blocks = []
-
-        for succ in block.successors:
-            blocks.extend(self._get_blocks(succ.target, visited))
-        blocks.append(block)
-
-        return blocks
 
 
 def register(linter):

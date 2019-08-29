@@ -44,12 +44,10 @@ class PossibleInfiniteLoopChecker(BaseChecker):
             return
 
         for n in node.nodes_of_class((astroid.AssignName, astroid.Name), (astroid.FunctionDef)):
-            if n is node.test or n.parent is node.test:
+            if n is node.test or n.parent is node.test or isinstance(n.parent, astroid.Call) and n is n.parent.func:
                 continue
-            if isinstance(n.parent, astroid.Call) and n is n.parent.func:
-                continue
-            if n.name in names:
-                if isinstance(n, astroid.Name) and not names[n.name] or isinstance(n, astroid.AssignName):
+            if n.name in names and (isinstance(n, astroid.Name) and not names[n.name]\
+                    or isinstance(n, astroid.AssignName)):
                     return
 
         self.add_message('possible-infinite-loop', node=node)

@@ -47,7 +47,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         Data flow algorithms retrieved from:
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
-        facts = {}
+        out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
         blocks = list(cfg.get_blocks_postorder())
@@ -55,20 +55,20 @@ class PossiblyUndefinedChecker(BaseChecker):
 
         all_assigns = self._get_assigns(node)
         for block in blocks:
-            facts[block] = {}
-            facts[block]['out'] = all_assigns.copy()
+            out_facts[block] = {}
+            out_facts[block] = all_assigns.copy()
 
         worklist = blocks
         while len(worklist) != 0:
             b = worklist.pop()
-            outs = [facts[p.source]['out'] for p in b.predecessors if p.source in facts]
+            outs = [out_facts[p.source] for p in b.predecessors if p.source in facts]
             if outs == []:
                 in_facts = set()
             else:
                 in_facts = set.intersection(*outs)
             temp = self._transfer(b, in_facts, all_assigns)
-            if temp != facts[b]['out']:
-                facts[b]['out'] = temp
+            if temp != out_facts[b]:
+                out_facts[b] = temp
                 worklist.extend([succ.target for succ in b.successors])
 
     def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:

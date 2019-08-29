@@ -107,6 +107,46 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_while(while_node)
 
+    def test_no_message_nonlocal_var(self):
+        src = """
+        def nonl(j):
+            def func():
+                nonlocal j
+                j = 10
+                while j:
+                    mutate_j()
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
+
+        while_node, *_ = mod.nodes_of_class(astroid.While)
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+    def test_message_simple(self):
+        src = """
+        x = 'lol'
+        while  x == '123':
+            print(10)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        type_inferer = TypeInferer()
+        type_inferer.environment_transformer().visit(mod)
+        type_inferer.type_inference_transformer().visit(mod)
+
+        while_node, *_ = mod.nodes_of_class(astroid.While)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='possible-infinite-loop',
+                    node=while_node,
+                ),
+        ):
+            self.checker.visit_while(while_node)
+
     def test_message_simple(self):
         src = """
         x = 'lol'

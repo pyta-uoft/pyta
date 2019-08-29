@@ -31,7 +31,8 @@ class PossibleInfiniteLoopChecker(BaseChecker):
         """
         # [var_name, True iff the inf_type is an immutable type].
         names: Dict[str, bool] = {}
-        local_vars = node.scope().locals
+        local_vars = self._get_local_vars(node)
+
         for n in node.test.nodes_of_class(astroid.Name, (astroid.Call, astroid.Attribute)):
             if n.name not in local_vars or not any(isinstance(o, astroid.AssignName) for o in local_vars[n.name]):
                 continue
@@ -51,6 +52,19 @@ class PossibleInfiniteLoopChecker(BaseChecker):
                     return
 
         self.add_message('possible-infinite-loop', node=node)
+
+    def _get_local_vars(self, node: astroid.While):
+        """Returns the local variables in the enclosing scope."""
+        v = node.scope().locals
+        for n in node.scope().nodes_of_class(astroid.Nonlocal, astroid.FunctionDef):
+            if isinstance(n, astroid.Nonlocal):
+                # nonlocal declaration must happen before usage
+                for name in n.names:
+                    try:
+                        del v[name]
+                    except KeyError:
+                        pass
+        return v
 
 
 def register(linter):

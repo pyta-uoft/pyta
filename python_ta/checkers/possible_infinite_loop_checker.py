@@ -56,14 +56,12 @@ class PossibleInfiniteLoopChecker(BaseChecker):
     def _get_local_vars(self, node: astroid.While):
         """Returns the local variables in the enclosing scope."""
         v = node.scope().locals
-        for n in node.scope().nodes_of_class(astroid.Nonlocal, astroid.FunctionDef):
-            if isinstance(n, astroid.Nonlocal):
-                # nonlocal declaration must happen before usage
-                for name in n.names:
-                    try:
-                        del v[name]
-                    except KeyError:
-                        pass
+        for n in node.scope().nodes_of_class((astroid.Nonlocal, astroid.Global), astroid.FunctionDef):
+            for name in n.names:
+                try:
+                    del v[name]
+                except KeyError:
+                    pass
         return v
 
 

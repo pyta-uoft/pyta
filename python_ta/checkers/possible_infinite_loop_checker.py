@@ -29,22 +29,27 @@ class PossibleInfiniteLoopChecker(BaseChecker):
         """Adds a message if the variable used in the loop condition is not mutated in
         any path of the loop body.
         """
-        # True iff the inf_type is an immutable type.
+        # [var_name, True iff the inf_type is an immutable type].
         names: Dict[str, bool] = {}
+        local_vars = node.scope().locals
         for n in node.test.nodes_of_class(astroid.Name, (astroid.Call, astroid.Attribute)):
+            if n.name not in local_vars or not any(isinstance(o, astroid.AssignName) for o in local_vars[n.name]):
+                continue
+
             val = n.inf_type.getValue()
             t = val.__name__ if type(val) is type else ''
             names[n.name] = t in ('str', 'int', 'float', 'bool', 'tuple', 'frozenset')
 
         if len(names) < 1:
-            return True
+            return
 
         for n in node.nodes_of_class((astroid.AssignName, astroid.Name), (astroid.FunctionDef)):
             if n is node.test or n.parent is node.test:
                 continue
+            if isinstance(n.parent, astroid.Call) and n is n.parent.func:
+                continue
             if n.name in names:
-                if isinstance(n, astroid.Name) and not names[n.name] \
-                        or isinstance(n, astroid.AssignName) and names[n.name]:
+                if isinstance(n, astroid.Name) and not names[n.name] or isinstance(n, astroid.AssignName):
                     return
 
         self.add_message('possible-infinite-loop', node=node)

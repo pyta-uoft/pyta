@@ -39,7 +39,6 @@ class CFGVisitor:
         self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
         module.cfg_block = self._current_cfg.start
-        module.cfg = self._current_cfg
 
         for child in module.body:
             child.accept(self)
@@ -64,7 +63,6 @@ class CFGVisitor:
 
         self._current_cfg.start.add_statement(func.args)
         func.cfg_block = self._current_cfg.start
-        func.cfg = self._current_cfg
 
         self._current_block = self._current_cfg.create_block(self._current_cfg.start)
 

@@ -3,11 +3,10 @@
 from typing import Union
 import astroid
 from pylint.interfaces import IAstroidChecker
-from pylint.checkers import BaseChecker
+from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 from typing import Set
-
 
 class PossiblyUndefinedChecker(BaseChecker):
 
@@ -55,7 +54,6 @@ class PossiblyUndefinedChecker(BaseChecker):
 
         all_assigns = self._get_assigns(node)
         for block in blocks:
-            out_facts[block] = {}
             out_facts[block] = all_assigns.copy()
 
         worklist = blocks
@@ -85,7 +83,8 @@ class PossiblyUndefinedChecker(BaseChecker):
                     kill.add(node.name)
                 else:
                     name = node.name
-                    if not self._is_function_name(node) and name in local_vars \
+                    if not (name in astroid.Module.scope_attrs or utils.is_builtin(name))\
+                            and name in local_vars \
                             and name not in gen.difference(kill):
                         self._possibly_undefined.add(node)
                     elif node in self._possibly_undefined:
@@ -112,9 +111,6 @@ class PossiblyUndefinedChecker(BaseChecker):
                 kills.add(name)
 
         return assigns.difference(kills)
-
-    def _is_function_name(self, node: astroid.Name) -> bool:
-        return isinstance(node.parent, astroid.Call) and node == node.parent.func
 
 
 def register(linter):

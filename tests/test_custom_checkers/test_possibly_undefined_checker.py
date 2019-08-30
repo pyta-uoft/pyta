@@ -159,12 +159,12 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_name(name_node_y)
 
-    def test_no_message_with_func_name(self):
+    def test_message_with_func_name(self):
         src = """
         if True:
             pass
         else:
-            y = 20
+            y = lambda: 20
         y()
         """
         mod = astroid.parse(src)
@@ -172,7 +172,12 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         *_, name_node_y = mod.nodes_of_class(astroid.Name)
 
         self.checker.visit_module(mod)
-        with self.assertNoMessages():
+        with self.assertAddsMessages(
+            pylint.testutils.Message(
+                msg_id='possibly-undefined',
+                node=name_node_y,
+            ),
+        ):
             self.checker.visit_name(name_node_y)
 
     def test_message_simple(self):

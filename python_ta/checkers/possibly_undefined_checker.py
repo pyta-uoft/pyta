@@ -83,7 +83,9 @@ class PossiblyUndefinedChecker(BaseChecker):
                     kill.add(node.name)
                 else:
                     name = node.name
-                    if not (name in astroid.Module.scope_attrs or utils.is_builtin(name))\
+                    # comment out 'self.config....' check when running tests
+                    if not (name in astroid.Module.scope_attrs or utils.is_builtin(name) or
+                            name in self.config.additional_builtins ) \
                             and name in local_vars \
                             and name not in gen.difference(kill):
                         self._possibly_undefined.add(node)

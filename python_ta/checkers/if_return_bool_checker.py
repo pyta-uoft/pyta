@@ -12,9 +12,9 @@ class IfReturnBoolChecker(BaseChecker):
     # use dashes for connecting words in message symbol
     msgs = {'E9990': ('This can be simplified to something like `return {if-condition}`.',
                       'if_return_bool',
-                      'Reported if there is only one statment in an If statment that '
-                      'is a boolean return statement'),
-           }
+                      'Reported if there is only one statement in both `If` branches'
+                      ' that is a boolean return statement.'),
+            }
 
     # this is important so that your checker is executed before others
     priority = -1

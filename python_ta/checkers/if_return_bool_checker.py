@@ -28,13 +28,11 @@ class IfReturnBoolChecker(BaseChecker):
         # should we require if body/orelse to have only one statement
         # any statment after return is unreachable anyways?
         for n in (node.body[0], node.orelse[0]):
-            if isinstance(n, astroid.Return) \
-                    and isinstance(n.value, astroid.Const) \
-                    and n.value.value in (True, False):
-                continue
-            break
-        else:
-            self.add_message('if_return_bool', node=node)
+            if not(isinstance(n, astroid.Return)
+                    and isinstance(n.value, astroid.Const)
+                    and n.value.value in (True, False)):
+                return
+        self.add_message('if_return_bool', node=node)
 
 
 def register(linter):

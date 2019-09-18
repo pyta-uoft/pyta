@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Generator, Optional, List, Set
+from typing import Generator, Optional, List, Set, Tuple, Union
 from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
@@ -36,7 +36,7 @@ class ControlFlowGraph:
         if not source.is_jump():
             CFGEdge(source, target)
 
-    def link_or_merge(self, source: CFGBlock, target: CFGBlock) -> None:
+    def link_or_merge(self, source: CFGBlock, target: Union[CFGBlock, Tuple[CFGBlock]]) -> None:
         """Link source to target, or merge source into target if source is empty.
 
         An "empty" node for this purpose is when source has no statements.
@@ -53,11 +53,33 @@ class ControlFlowGraph:
                 for edge in source.predecessors:
                     edge.target = target
                     target.predecessors.append(edge)
-            # source is a utility block that helps build the cfg but it does not
+            # source is a utility block that helps build the cfg that does not
             # represent any part of the program so it is redundant.
             self.unreachable_blocks.remove(source)
         else:
             CFGEdge(source, target)
+
+    def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]):
+        """Link source to multiple target, or merge source into targets if source is empty.
+
+        An "empty" node for this purpose is when source has no statements.
+
+        source with a jump statement cannot be further linked or merged to
+        another target.
+
+        Pre-condition:
+            - source != cfg.start
+        """
+        if source.statements == []:
+            for edge in source.predecessors:
+                for t in targets:
+                    CFGEdge(edge.source, t)
+                edge.source.successors.remove(edge)
+            source.predecessors = []
+            self.unreachable_blocks.remove(source)
+        else:
+            for target in targets:
+                self.link(source, target)
 
     def get_blocks(self) -> Generator[CFGBlock, None, None]:
         """Generate a sequence of all blocks in this graph."""

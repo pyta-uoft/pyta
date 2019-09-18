@@ -199,3 +199,39 @@ class CFGVisitor:
                               f' {"function" if isinstance(node, astroid.Return) else "loop"}')
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
+
+    def visit_tryexcept(self, node: astroid.TryExcept) -> None:
+        previous_block = self._current_block
+        self._current_block = self._current_cfg.create_block()
+        self._current_cfg.link_or_merge(previous_block, self._current_block)
+        node.cfg_block = self._current_block
+
+        for child in node.body:
+            child.accept(self)
+
+        handlers = []
+
+        end_body = self._current_block
+        end_block = self._current_cfg.create_block()
+        for handler in node.handlers:
+            h = self._current_cfg.create_block()
+            h.statements.append(handler)
+            self._current_block = h
+            for child in handler.body:
+                child.accept(self)
+            end_handler = self._current_block
+            self._current_cfg.link_or_merge(end_handler, end_block)
+            handlers.append(h)
+
+        orelse_block = self._current_cfg.create_block()
+        self._current_block = orelse_block
+        for child in node.orelse:
+            child.accept(self)
+        end_orelse = self._current_block
+
+        to_linked = handlers
+        to_linked.append(orelse_block)
+        self._current_cfg.multiple_link_or_merge(end_body, to_linked)
+        self._current_cfg.link_or_merge(end_orelse, end_block)
+        self._current_block = end_block
+

@@ -201,18 +201,16 @@ class CFGVisitor:
         self._current_block = unreachable_block
 
     def visit_tryexcept(self, node: astroid.TryExcept) -> None:
-        previous_block = self._current_block
-        self._current_block = self._current_cfg.create_block()
-        self._current_cfg.link_or_merge(previous_block, self._current_block)
+        self._current_block = self._current_cfg.create_block(self._current_block)
         node.cfg_block = self._current_block
 
         for child in node.body:
             child.accept(self)
+        end_body = self._current_block
+
+        end_block = self._current_cfg.create_block()
 
         handlers = []
-
-        end_body = self._current_block
-        end_block = self._current_cfg.create_block()
         for handler in node.handlers:
             h = self._current_cfg.create_block()
             h.statements.append(handler)
@@ -223,15 +221,19 @@ class CFGVisitor:
             self._current_cfg.link_or_merge(end_handler, end_block)
             handlers.append(h)
 
-        orelse_block = self._current_cfg.create_block()
-        self._current_block = orelse_block
-        for child in node.orelse:
-            child.accept(self)
-        end_orelse = self._current_block
+        after_body = handlers
+        else_block = self._current_cfg.create_block()
+        after_body.append(else_block)
 
-        to_linked = handlers
-        to_linked.append(orelse_block)
-        self._current_cfg.multiple_link_or_merge(end_body, to_linked)
-        self._current_cfg.link_or_merge(end_orelse, end_block)
+        self._current_cfg.multiple_link_or_merge(end_body, after_body)
+
+        if node.orelse == []:
+            self._current_cfg.link_or_merge(else_block, end_block)
+        else:
+            self._current_block = else_block
+            for child in node.orelse:
+                child.accept(self)
+            self._current_cfg.link_or_merge(self._current_block, end_block)
+
         self._current_block = end_block
 

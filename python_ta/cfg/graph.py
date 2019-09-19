@@ -114,7 +114,8 @@ class ControlFlowGraph:
     def update_block_reachability(self) -> None:
         for block in self.get_blocks():
             block.reachable = True
-            self.unreachable_blocks.remove(block)
+            if block in self.unreachable_blocks:
+                self.unreachable_blocks.remove(block)
 
 
 class CFGBlock:

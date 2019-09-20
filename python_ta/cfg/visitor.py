@@ -214,6 +214,7 @@ class CFGVisitor:
         for handler in node.handlers:
             h = self._current_cfg.create_block()
             self._current_block = h
+            handler.cfg_block = h
             for child in handler.body:
                 child.accept(self)
             end_handler = self._current_block

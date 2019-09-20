@@ -27,7 +27,7 @@ def test_simple() -> None:
     """
     expected_blocks = [
         ['print(True)'],
-        ['except Exception:\n    pass', 'pass'],
+        ['pass'],
         []  # end block
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
@@ -45,7 +45,7 @@ def test_before_after() -> None:
     expected_blocks = [
         ['x = 0'],
         ['print(x)'],
-        ['except Exception:\n    pass', 'pass'],
+        ['pass'],
         ['print(\'after\')'],
         []  # end block
     ]
@@ -65,9 +65,9 @@ def test_multiple_exceptions() -> None:
     """
     expected_blocks = [
         ['print(True)'],
-        ['except Exception:\n    pass', 'pass'],
+        ['pass'],
         [],  # end block
-        ['except KeyError as k:\n    pass', 'pass'],
+        ['pass'],
         ['print(\'else\')']
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
@@ -87,7 +87,7 @@ def test_compound_statement() -> None:
     expected_blocks = [
         ['x = 0', 'x > 10'],
         ['print(x)'],
-        ['except Exception:\n    pass', 'pass'],
+        ['pass'],
         [],  # end block
         ['print(x - 1)']
     ]
@@ -108,8 +108,8 @@ def test_nested() -> None:
     expected_blocks = [
         ['x = 0'],
         ['x = 10'],
-        ['except KeyError:\n    pass', 'pass'],
-        ['except Exception:\n    pass', 'pass'],
+        ['pass'],
+        ['pass'],
         [],  # end block
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
@@ -140,16 +140,13 @@ def test_complex() -> None:
         ['x = 10'],
         ['x > 5'],
         ['x -= 1'],
-        ['except KeyError:\n    pass', 'pass'],
-        ['except Exception:\n    if x > 10:\n        '
-         'print(True)\n    else:\n        print(False)', 'x > 10'],
+        ['pass'],
+        ['x > 10'],
         ['print(True)'],
         ['print(\'after\')'],
         [],  # end block
         ['print(False)'],
         ['x = 15'],
-        ['except KeyError:\n    pass', 'pass'],
+        ['pass'],
     ]
-    ext = _extract_blocks(build_cfg(src))
-    print(ext)
-    assert ext == expected_blocks
+    assert _extract_blocks(build_cfg(src)) == expected_blocks

@@ -8,6 +8,7 @@ from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 from typing import Set
 
+
 class PossiblyUndefinedChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
@@ -21,6 +22,19 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     # this is important so that your checker is executed before others
     priority = -1
+    options = (
+        (
+            "additional-builtins",
+            {
+                "default": (),
+                "type": "csv",
+                "metavar": "<comma separated list>",
+                "help": "List of additional names supposed to be defined in "
+                        "builtins. Remember that you should avoid defining new builtins "
+                        "when possible.",
+            },
+        ),
+    )
 
     def __init__(self, linter=None):
         super().__init__(linter=linter)

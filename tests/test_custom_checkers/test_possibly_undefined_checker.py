@@ -7,6 +7,9 @@ from python_ta.cfg import CFGVisitor
 class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = PossiblyUndefinedChecker
 
+    def setUp(self):
+        self.setup_method()
+
     def test_no_messages_simple(self):
         src = """
         def test(x):

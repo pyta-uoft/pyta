@@ -22,19 +22,6 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     # this is important so that your checker is executed before others
     priority = -1
-    options = (
-        (
-            "additional-builtins",
-            {
-                "default": (),
-                "type": "csv",
-                "metavar": "<comma separated list>",
-                "help": "List of additional names supposed to be defined in "
-                        "builtins. Remember that you should avoid defining new builtins "
-                        "when possible.",
-            },
-        ),
-    )
 
     def __init__(self, linter=None):
         super().__init__(linter=linter)
@@ -98,8 +85,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                 else:
                     name = node.name
                     # comment out 'self.config....' check when running tests
-                    if not (name in astroid.Module.scope_attrs or utils.is_builtin(name) or
-                            name in self.config.additional_builtins ) \
+                    if not (name in astroid.Module.scope_attrs or utils.is_builtin(name)) \
                             and name in local_vars \
                             and name not in gen.difference(kill):
                         self._possibly_undefined.add(node)

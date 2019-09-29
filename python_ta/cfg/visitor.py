@@ -210,7 +210,7 @@ class CFGVisitor:
 
         end_block = self._current_cfg.create_block()
 
-        after_body = []
+        handlers = []
         for handler in node.handlers:
             h = self._current_cfg.create_block()
             self._current_block = h
@@ -219,16 +219,21 @@ class CFGVisitor:
                 child.accept(self)
             end_handler = self._current_block
             self._current_cfg.link_or_merge(end_handler, end_block)
-            after_body.append(h)
+            handlers.append(h)
+
+        after_body = handlers
+        else_block = self._current_cfg.create_block()
+        after_body.append(else_block)
+
         self._current_cfg.multiple_link_or_merge(end_body, after_body)
 
         if node.orelse == []:
-            self._current_cfg.link_or_merge(after_body[-1], end_block)
+            self._current_cfg.link_or_merge(else_block, end_block)
         else:
-            else_block = self._current_cfg.create_block(after_body[-1])
             self._current_block = else_block
             for child in node.orelse:
                 child.accept(self)
             self._current_cfg.link_or_merge(self._current_block, end_block)
 
         self._current_block = end_block
+

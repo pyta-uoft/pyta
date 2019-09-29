@@ -59,7 +59,7 @@ class ControlFlowGraph:
         else:
             CFGEdge(source, target)
 
-    def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
+    def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]):
         """Link source to multiple target, or merge source into targets if source is empty.
 
         An "empty" node for this purpose is when source has no statements.
@@ -67,7 +67,7 @@ class ControlFlowGraph:
         source with a jump statement cannot be further linked or merged to
         another target.
 
-        Precondition:
+        Pre-condition:
             - source != cfg.start
         """
         if source.statements == []:

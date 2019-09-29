@@ -142,9 +142,6 @@ class CFGBlock:
         self.successors = []
         self.reachable = False
 
-    def __bool__(self) -> bool:
-        return self.statements != []
-
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():
             self.statements.append(statement)

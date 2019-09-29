@@ -201,7 +201,9 @@ class CFGVisitor:
         self._current_block = unreachable_block
 
     def visit_tryexcept(self, node: astroid.TryExcept) -> None:
-        self._current_block = self._current_block and self._current_cfg.create_block(self._current_block)
+        if self._current_block.statements != []:
+            self._current_block = self._current_cfg.create_block(self._current_block)
+
         node.cfg_block = self._current_block
 
         for child in node.body:

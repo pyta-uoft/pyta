@@ -108,8 +108,13 @@ class PossiblyUndefinedChecker(BaseChecker):
         for name, nodes in node.scope().locals.items():
             if any(isinstance(elem, astroid.AssignName) for elem in nodes):
                 assigns.add(name)
-        for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global), astroid.FunctionDef):
+        for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global,
+                                              astroid.ImportFrom), astroid.FunctionDef):
             for name in statement.names:
+                if type(name) is tuple:
+                    # name[1] is the alias of the imported object/var name[0]
+                    # name[1] == str or None
+                    name = name[1] or name[0]
                 kills.add(name)
 
         return assigns.difference(kills)

@@ -109,7 +109,7 @@ class PossiblyUndefinedChecker(BaseChecker):
             if any(isinstance(elem, astroid.AssignName) for elem in nodes):
                 assigns.add(name)
         for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global,
-                                              astroid.ImportFrom), astroid.FunctionDef):
+                                              astroid.ImportFrom, astroid.Import), astroid.FunctionDef):
             for name in statement.names:
                 if type(name) is tuple:
                     # name[1] is the alias of the imported object/var name[0]

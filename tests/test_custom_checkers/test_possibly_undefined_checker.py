@@ -31,6 +31,27 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
     def test_no_messages_with_import(self):
         src = """
+        import j
+
+        y = 0
+        if y > 10:
+            j = 10
+        else:
+            y = 5
+        print(j)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(
+            astroid.Name)
+        with self.assertNoMessages():
+            self.checker.visit_module(mod)
+            self.checker.visit_name(name_node_y)
+            self.checker.visit_name(name_node_print)
+            self.checker.visit_name(name_node_j)
+
+    def test_no_messages_with_import_from(self):
+        src = """
         from random import j
         
         y = 0

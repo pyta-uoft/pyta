@@ -96,6 +96,21 @@ class ControlFlowGraph:
         for edge in block.successors:
             yield from self._get_blocks(edge.target, visited)
 
+    def get_blocks_postorder(self) -> Generator[CFGBlock, None, None]:
+        """Return the sequence of all blocks in this graph in the order of
+        a post-order traversal."""
+        yield from self._get_blocks_postorder(self.start, set())
+
+    def _get_blocks_postorder(self, block: CFGBlock, visited) -> Generator[CFGBlock, None, None]:
+        if block.id in visited:
+            return
+
+        visited.add(block.id)
+        for succ in block.successors:
+            yield from self._get_blocks_postorder(succ.target, visited)
+
+        yield block
+
     def get_edges(self) -> Generator[CFGEdge, None, None]:
         """Generate a sequence of all edges in this graph."""
         yield from self._get_edges(self.start, set())

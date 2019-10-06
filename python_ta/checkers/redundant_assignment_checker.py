@@ -51,12 +51,11 @@ class RedundantAssignmentChecker(BaseChecker):
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
         blocks = list(cfg.get_blocks())
-        blocks.reverse()
 
         all_assigns = self._get_assigns(node)
         for block in blocks:
-            # out_facts[block] = all_assigns.copy()
-            in_facts[block] = {}
+            in_facts[block] = all_assigns.copy()
+            # in_facts[block] = set()
 
         worklist = blocks
         while len(worklist) != 0:
@@ -66,10 +65,10 @@ class RedundantAssignmentChecker(BaseChecker):
                 out_facts = set()
             else:
                 out_facts = set.intersection(*ins)
-            temp = self._transfer(b, out_facts, all_assigns)
+            temp = self._transfer(b, out_facts)
             if temp != in_facts[b]:
                 in_facts[b] = temp
-                worklist.extend([pred.source for pred in b.predecssors])
+                worklist.extend([pred.source for pred in b.predecessors])
 
     def _transfer(self, block: CFGBlock, out_facts: Set[str]) -> Set[str]:
         gen = out_facts.copy()
@@ -80,12 +79,12 @@ class RedundantAssignmentChecker(BaseChecker):
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
-                    if node.name in gen.difference(kill):
+                    if node.name in gen:
                         self._redundant_assignment.add(node.parent)
-                        continue
                     gen.add(node.name)
                 else:
                     kill.add(node.name)
+                    gen = gen.difference(kill)
         return gen.difference(kill)
 
     def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:

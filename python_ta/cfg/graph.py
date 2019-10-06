@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Generator, Optional, List, Set
+from typing import Generator, Optional, List, Set, Tuple, Union
 from astroid.node_classes import NodeNG, Continue, Break, Return
 
 
@@ -53,11 +53,33 @@ class ControlFlowGraph:
                 for edge in source.predecessors:
                     edge.target = target
                     target.predecessors.append(edge)
-            # source is a utility block that helps build the cfg but it does not
+            # source is a utility block that helps build the cfg that does not
             # represent any part of the program so it is redundant.
             self.unreachable_blocks.remove(source)
         else:
             CFGEdge(source, target)
+
+    def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
+        """Link source to multiple target, or merge source into targets if source is empty.
+
+        An "empty" node for this purpose is when source has no statements.
+
+        source with a jump statement cannot be further linked or merged to
+        another target.
+
+        Precondition:
+            - source != cfg.start
+        """
+        if source.statements == []:
+            for edge in source.predecessors:
+                for t in targets:
+                    CFGEdge(edge.source, t)
+                edge.source.successors.remove(edge)
+            source.predecessors = []
+            self.unreachable_blocks.remove(source)
+        else:
+            for target in targets:
+                self.link(source, target)
 
     def get_blocks(self) -> Generator[CFGBlock, None, None]:
         """Generate a sequence of all blocks in this graph."""
@@ -73,6 +95,21 @@ class ControlFlowGraph:
 
         for edge in block.successors:
             yield from self._get_blocks(edge.target, visited)
+
+    def get_blocks_postorder(self) -> Generator[CFGBlock, None, None]:
+        """Return the sequence of all blocks in this graph in the order of
+        a post-order traversal."""
+        yield from self._get_blocks_postorder(self.start, set())
+
+    def _get_blocks_postorder(self, block: CFGBlock, visited) -> Generator[CFGBlock, None, None]:
+        if block.id in visited:
+            return
+
+        visited.add(block.id)
+        for succ in block.successors:
+            yield from self._get_blocks_postorder(succ.target, visited)
+
+        yield block
 
     def get_edges(self) -> Generator[CFGEdge, None, None]:
         """Generate a sequence of all edges in this graph."""
@@ -92,7 +129,8 @@ class ControlFlowGraph:
     def update_block_reachability(self) -> None:
         for block in self.get_blocks():
             block.reachable = True
-            self.unreachable_blocks.remove(block)
+            if block in self.unreachable_blocks:
+                self.unreachable_blocks.remove(block)
 
 
 class CFGBlock:

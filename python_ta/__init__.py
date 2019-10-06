@@ -170,6 +170,7 @@ def reset_linter(config=None, file_linted=None):
 
     custom_checkers = [
         'python_ta/checkers/forbidden_import_checker',
+        'python_ta/checkers/possibly_undefined_checker',
         'python_ta/checkers/global_variables_checker',
         'python_ta/checkers/dynamic_execution_checker',
         'python_ta/checkers/IO_Function_checker',

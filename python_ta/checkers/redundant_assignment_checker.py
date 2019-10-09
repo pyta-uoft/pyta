@@ -89,6 +89,7 @@ class RedundantAssignmentChecker(BaseChecker):
                         self._redundant_assignment.add(node.parent)
                     elif node.parent in self._redundant_assignment:
                         self._redundant_assignment.remove(node.parent)
+
                     if node.name in kill:
                         kill.remove(node.name)
                     gen.add(node.name)

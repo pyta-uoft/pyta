@@ -18,7 +18,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        assign_1 = mod.nodes_of_class(astroid.Assign)
+        assign_1, *_ = mod.nodes_of_class(astroid.Assign)
 
         with self.assertNoMessages():
             self.checker.visit_module(mod)
@@ -67,6 +67,53 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assign(assign_x)
 
+    def test_message_loop_complex(self):
+        src = """
+        y = 0
+        x = 10
+        for y in range(1, 10):
+            x = func(y)
+            print(x)
+        x = 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        assign_y, assign_x1, assign_x2, assign_x3 = mod.nodes_of_class(astroid.Assign)
+
+        self.checker.visit_module(mod)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='redundant-assignment',
+                    node=assign_y,
+                ),
+                pylint.testutils.Message(
+                    msg_id='redundant-assignment',
+                    node=assign_x1,
+                ),
+        ):
+            self.checker.visit_assign(assign_y)
+            self.checker.visit_assign(assign_x1)
+            self.checker.visit_assign(assign_x2)
+            self.checker.visit_assign(assign_x3)
+
+    def test_message_loop_complex(self):
+        src = """
+        x = 10
+        for y in range(1, 10):
+            x = func(y)
+            print(x)
+        x = x - 1
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        assign_x1, assign_x2, assign_x3 = mod.nodes_of_class(astroid.Assign)
+
+        self.checker.visit_module(mod)
+        with self.assertNoMessages():
+            self.checker.visit_assign(assign_x1)
+            self.checker.visit_assign(assign_x2)
+            self.checker.visit_assign(assign_x3)
+
     def test_no_message_loop(self):
         src = """
         y = 5
@@ -84,7 +131,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
     def test_no_message_loop_(self):
         src = """
         y = 0
-        for x in range(1, 10):
+        for y in range(1, 10):
             x = 10
         """
         mod = astroid.parse(src)

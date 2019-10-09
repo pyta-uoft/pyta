@@ -15,7 +15,7 @@ class RedundantAssignmentChecker(BaseChecker):
     # name is the same as file name but without _checker part
     name = 'redundant_assignment'
     # use dashes for connecting words in message symbol
-    msgs = {'E9969': ('Description',
+    msgs = {'E9959': ('Description',
                       'redundant-assignment',
                       'Description'),
            }
@@ -29,8 +29,15 @@ class RedundantAssignmentChecker(BaseChecker):
 
     @check_messages('redundant-assignment')
     def visit_assign(self, node):
-        """Adds message if there exists a path from the start block to node where
-        a variable used by node might not be defined."""
+        """Adds message if the assignment statement is <redundant>, i.e. it satisfies
+        the following two properties:
+
+            1. Every path from a definition of a variable `v` to it's first usage
+            goes through at least one re-definition of `v`.
+
+            2. Removing the statement from the program does not in any way change
+            the behavior of the program.
+        """
         if node in self._redundant_assignment:
             self.add_message('redundant-assignment', node=node)
 
@@ -47,27 +54,26 @@ class RedundantAssignmentChecker(BaseChecker):
         Data flow algorithms retrieved from:
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
-        in_facts = {}
+        out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
-        blocks = list(cfg.get_blocks())
+        worklist = list(cfg.get_blocks_postorder())
+        worklist.reverse()
 
         all_assigns = self._get_assigns(node)
-        for block in blocks:
-            in_facts[block] = all_assigns.copy()
-            # in_facts[block] = set()
+        for block in worklist:
+            out_facts[block] = all_assigns.copy()
 
-        worklist = blocks
         while len(worklist) != 0:
             b = worklist.pop()
-            ins = [in_facts[p.target] for p in b.successors if p.target in in_facts]
-            if ins == []:
-                out_facts = set()
+            outs = [out_facts[p.target] for p in b.successors if p.target in out_facts]
+            if outs == []:
+                in_facts = set()
             else:
-                out_facts = set.intersection(*ins)
-            temp = self._transfer(b, out_facts)
-            if temp != in_facts[b]:
-                in_facts[b] = temp
+                in_facts = set.intersection(*outs)
+            temp = self._transfer(b, in_facts)
+            if temp != out_facts[b]:
+                out_facts[b] = temp
                 worklist.extend([pred.source for pred in b.predecessors])
 
     def _transfer(self, block: CFGBlock, out_facts: Set[str]) -> Set[str]:
@@ -79,12 +85,15 @@ class RedundantAssignmentChecker(BaseChecker):
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
-                    if node.name in gen:
+                    if node.name in gen.difference(kill):
                         self._redundant_assignment.add(node.parent)
+                    elif node.parent in self._redundant_assignment:
+                        self._redundant_assignment.remove(node.parent)
+                    if node.name in kill:
+                        kill.remove(node.name)
                     gen.add(node.name)
                 else:
                     kill.add(node.name)
-                    gen = gen.difference(kill)
         return gen.difference(kill)
 
     def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:

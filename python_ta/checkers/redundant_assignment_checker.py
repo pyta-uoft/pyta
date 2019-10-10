@@ -15,9 +15,11 @@ class RedundantAssignmentChecker(BaseChecker):
     # name is the same as file name but without _checker part
     name = 'redundant_assignment'
     # use dashes for connecting words in message symbol
-    msgs = {'E9959': ('Description',
+    msgs = {'E9959': ('This assignment statement is redundant;' \
+                      ' You can remove it from the program.',
                       'redundant-assignment',
-                      'Description'),
+                      'This assignment statement is redundant;' \
+                      ' You can remove it from the program.')
            }
 
     # this is important so that your checker is executed before others
@@ -90,8 +92,7 @@ class RedundantAssignmentChecker(BaseChecker):
                     elif node.parent in self._redundant_assignment:
                         self._redundant_assignment.remove(node.parent)
 
-                    if node.name in kill:
-                        kill.remove(node.name)
+                    kill.discard(node.name)
                     gen.add(node.name)
                 else:
                     kill.add(node.name)

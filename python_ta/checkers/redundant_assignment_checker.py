@@ -1,9 +1,9 @@
-"""checker for redundant assignment in the program.
+"""checker for redundant assignment statements in the program.
 """
 from typing import Union
 import astroid
 from pylint.interfaces import IAstroidChecker
-from pylint.checkers import BaseChecker
+from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 from typing import Set
@@ -83,7 +83,9 @@ class RedundantAssignmentChecker(BaseChecker):
         kill = set()
         for statement in reversed(block.statements):
             if isinstance(statement, astroid.FunctionDef):
-                continue
+                for node in statement.nodes_of_class((astroid.DelName, astroid.Name, astroid.Global, astroid.Nonlocal)):
+                    if not (node.name in astroid.Module.scope_attrs or utils.is_builtin(node.name)):
+                        kill.add(node.name)
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
@@ -96,6 +98,7 @@ class RedundantAssignmentChecker(BaseChecker):
                     gen.add(node.name)
                 else:
                     kill.add(node.name)
+
         return gen.difference(kill)
 
     def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:

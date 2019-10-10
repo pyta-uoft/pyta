@@ -162,3 +162,20 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         self.checker.visit_module(mod)
         with self.assertNoMessages():
             self.checker.visit_assign(assign_x)
+
+    def test_no_message_scope(self):
+        src = """
+        x = 25
+        def func():
+            def func2():
+                print(x - 1)
+            func2()
+        x = 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        assign_x, *_ = mod.nodes_of_class(astroid.Assign)
+
+        self.checker.visit_module(mod)
+        with self.assertNoMessages():
+            self.checker.visit_assign(assign_x)

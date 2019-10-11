@@ -83,7 +83,8 @@ class RedundantAssignmentChecker(BaseChecker):
         gen = out_facts.copy()
         kill = set()
         for statement in reversed(block.statements):
-            if isinstance(statement, astroid.Expr) and isinstance(statement.value, astroid.Call):
+            if isinstance(statement, astroid.Expr) and isinstance(statement.value, astroid.Call) and \
+                    isinstance(statement.value.func, astroid.Name):
                 for func in (scope.locals.get(statement.value.func.name) or []):
                     if isinstance(func, astroid.FunctionDef) and not gen.issubset(set(func.locals)):
                         kill = kill.union(gen)

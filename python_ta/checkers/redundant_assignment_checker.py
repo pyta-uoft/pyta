@@ -2,11 +2,12 @@
 """
 from typing import Union
 import astroid
+from astroid.node_classes import NodeNG
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
-from typing import Set
+from typing import Set, List
 
 
 class RedundantAssignmentChecker(BaseChecker):
@@ -73,19 +74,20 @@ class RedundantAssignmentChecker(BaseChecker):
                 in_facts = set()
             else:
                 in_facts = set.intersection(*outs)
-            temp = self._transfer(b, in_facts)
+            temp = self._transfer(b, in_facts, node)
             if temp != out_facts[b]:
                 out_facts[b] = temp
                 worklist.extend([pred.source for pred in b.predecessors])
 
-    def _transfer(self, block: CFGBlock, out_facts: Set[str]) -> Set[str]:
+    def _transfer(self, block: CFGBlock, out_facts: Set[str], scope: Union[astroid.Module, astroid.FunctionDef]) -> Set[str]:
         gen = out_facts.copy()
         kill = set()
         for statement in reversed(block.statements):
-            if isinstance(statement, astroid.FunctionDef):
-                for node in statement.nodes_of_class((astroid.DelName, astroid.Name, astroid.Global, astroid.Nonlocal)):
-                    if not (node.name in astroid.Module.scope_attrs or utils.is_builtin(node.name)):
-                        kill.add(node.name)
+            if isinstance(statement, astroid.Expr) and isinstance(statement.value, astroid.Call):
+                for func in (scope.locals.get(statement.value.func.name) or []):
+                    if isinstance(func, astroid.FunctionDef) and not gen.issubset(set(func.locals)):
+                        kill = kill.union(gen)
+
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):

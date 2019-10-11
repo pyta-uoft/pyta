@@ -96,7 +96,30 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_assign(assign_x2)
             self.checker.visit_assign(assign_x3)
 
-    def test_message_loop_complex(self):
+    def test_message_scope(self):
+        src = """
+        x = 25
+        def func():
+            def func2():
+                print(x - 1)
+            func2()
+        x = 10
+        func()
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        assign_x, *_ = mod.nodes_of_class(astroid.Assign)
+
+        self.checker.visit_module(mod)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='redundant-assignment',
+                    node=assign_x,
+                )
+        ):
+            self.checker.visit_assign(assign_x)
+
+    def test_no_message_loop_complex(self):
         src = """
         x = 10
         for y in range(1, 10):
@@ -170,6 +193,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
             def func2():
                 print(x - 1)
             func2()
+        func()
         x = 10
         """
         mod = astroid.parse(src)

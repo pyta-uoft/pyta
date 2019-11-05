@@ -1,4 +1,12 @@
-"""checker for redundant assignment statements in the program.
+"""Checker for redundant assignment statements in the program.
+
+An assignment statement is redundant if it satisfies the following two properties:
+
+    1. Every path from a definition of a variable `v` to its first usage
+    goes through at least one re-definition of `v`.
+
+    2. Removing the statement from the program does not in any way change
+    the behavior of the program.
 """
 from typing import Union
 import astroid
@@ -31,23 +39,14 @@ class RedundantAssignmentChecker(BaseChecker):
         self._redundant_assignment: Set[astroid.Assign] = set()
 
     @check_messages('redundant-assignment')
-    def visit_assign(self, node):
-        """Adds message if the assignment statement is <redundant>, i.e. it satisfies
-        the following two properties:
-
-            1. Every path from a definition of a variable `v` to it's first usage
-            goes through at least one re-definition of `v`.
-
-            2. Removing the statement from the program does not in any way change
-            the behavior of the program.
-        """
+    def visit_assign(self, node: astroid.Assign):
         if node in self._redundant_assignment:
             self.add_message('redundant-assignment', node=node)
 
-    def visit_module(self, node):
+    def visit_module(self, node: astroid.Module):
         self._analyze(node)
 
-    def visit_functiondef(self, node):
+    def visit_functiondef(self, node: astroid.FunctionDef):
         self._analyze(node)
 
     def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
@@ -83,12 +82,13 @@ class RedundantAssignmentChecker(BaseChecker):
         gen = out_facts.copy()
         kill = set()
         for statement in reversed(block.statements):
+            if isinstance(statement, astroid.FunctionDef):
+                continue
             if isinstance(statement, astroid.Expr) and isinstance(statement.value, astroid.Call) and \
                     isinstance(statement.value.func, astroid.Name):
                 for func in (scope.locals.get(statement.value.func.name) or []):
                     if isinstance(func, astroid.FunctionDef) and not gen.issubset(set(func.locals)):
                         kill = kill.union(gen)
-
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
@@ -116,7 +116,7 @@ class RedundantAssignmentChecker(BaseChecker):
         """
         assigns = set()
         kills = set()
-        for name, nodes in node.scope().locals.items():
+        for name, nodes in node.locals.items():
             if any(isinstance(elem, astroid.AssignName) for elem in nodes):
                 assigns.add(name)
         for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global), astroid.FunctionDef):

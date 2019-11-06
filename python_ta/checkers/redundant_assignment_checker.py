@@ -56,6 +56,8 @@ class RedundantAssignmentChecker(BaseChecker):
         Data flow algorithms retrieved from:
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
+        # stores all the variables that will be re-defined before any usage at a
+        # particular program point.
         out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
@@ -87,7 +89,7 @@ class RedundantAssignmentChecker(BaseChecker):
             if isinstance(statement, astroid.Expr) and isinstance(statement.value, astroid.Call) and \
                     isinstance(statement.value.func, astroid.Name):
                 for func in (scope.locals.get(statement.value.func.name) or []):
-                    if isinstance(func, astroid.FunctionDef) and not gen.issubset(set(func.locals)):
+                    if isinstance(func, astroid.FunctionDef) and not set(func.locals).issubset(gen):
                         kill = kill.union(gen)
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                               astroid.FunctionDef):

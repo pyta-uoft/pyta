@@ -56,7 +56,7 @@ class RedundantAssignmentChecker(BaseChecker):
         Data flow algorithms retrieved from:
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
-        # stores all the variables that will be re-defined before any usage at a
+        # Stores all the variable names that will be re-defined before any usage at a
         # particular program point.
         out_facts = {}
         cfg = ControlFlowGraph()
@@ -75,23 +75,21 @@ class RedundantAssignmentChecker(BaseChecker):
                 in_facts = set()
             else:
                 in_facts = set.intersection(*outs)
-            temp = self._transfer(b, in_facts, node)
+            temp = self._transfer(b, in_facts)
             if temp != out_facts[b]:
                 out_facts[b] = temp
                 worklist.extend([pred.source for pred in b.predecessors])
 
-    def _transfer(self, block: CFGBlock, out_facts: Set[str], scope: Union[astroid.Module, astroid.FunctionDef]) -> Set[str]:
+    def _transfer(self, block: CFGBlock, out_facts: Set[str]) -> Set[str]:
         gen = out_facts.copy()
         kill = set()
         for statement in reversed(block.statements):
             if isinstance(statement, astroid.FunctionDef):
+                # `nodes_of_class` below does block looking for required nodes
+                # in function definitions, hence this case.
                 continue
-            if isinstance(statement, astroid.Expr) and isinstance(statement.value, astroid.Call) and \
-                    isinstance(statement.value.func, astroid.Name):
-                for func in (scope.locals.get(statement.value.func.name) or []):
-                    if isinstance(func, astroid.FunctionDef) and not set(func.locals).issubset(gen):
-                        kill = kill.union(gen)
-            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
+            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name,
+                                                  astroid.Nonlocal, astroid.Global),
                                               astroid.FunctionDef):
                 if isinstance(node, astroid.AssignName):
                     if node.name in gen.difference(kill):
@@ -121,10 +119,6 @@ class RedundantAssignmentChecker(BaseChecker):
         for name, nodes in node.locals.items():
             if any(isinstance(elem, astroid.AssignName) for elem in nodes):
                 assigns.add(name)
-        for statement in node.nodes_of_class((astroid.Nonlocal, astroid.Global), astroid.FunctionDef):
-            for name in statement.names:
-                kills.add(name)
-
         return assigns.difference(kills)
 
 

@@ -1,6 +1,8 @@
-x = 0
-if x > 10:
+x = 0   # redundant assignment
+y = 10
+if y > 10:
+    print(y)
     x = 5
 else:
-    y = 5
-print(x + y)    # y might not be defined
+    x = 10
+print(x)

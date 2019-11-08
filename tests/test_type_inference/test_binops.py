@@ -1,7 +1,7 @@
 import astroid
 from typing import List
-import nose
-from nose.tools import eq_
+
+from tests.test_type_inference.utils import eq_
 from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.errors import BINOP_TO_METHOD
@@ -134,7 +134,3 @@ def test_binop_reverse_right_subclasses_left():
     a, b, x = [ti.lookup_typevar(node, node.name) for node
                in ast_mod.nodes_of_class(astroid.AssignName)][8:]
     eq_(ti.type_constraints.resolve(x).getValue(), List[int])
-
-
-if __name__ == '__main__':
-    nose.main()

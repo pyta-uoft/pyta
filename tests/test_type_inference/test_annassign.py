@@ -1,13 +1,12 @@
 import astroid
-import nose
 from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
 from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType, _gorg
 from typing import List, Set, Dict, Any, Tuple, Union, _GenericAlias
-from nose import SkipTest
-from nose.tools import eq_
+from pytest import skip
+from tests.test_type_inference.utils import eq_
 settings.load_profile("pyta")
 
 
@@ -156,7 +155,7 @@ def test_annassign_subscript_tuple_multi_param():
     
     t = (1, 'Hello')
     """
-    raise SkipTest("Requires support for multi-parameter Tuple annotations")
+    skip("Requires support for multi-parameter Tuple annotations")
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
@@ -255,7 +254,3 @@ def test_annotation_union_list():
         assert not isinstance(ann_node.inf_type, TypeFail)
     x_type = lookup_type(inferer, module, 'x')
     eq_(x_type, Union[List[Any], int])
-
-
-if __name__ == '__main__':
-    nose.main()

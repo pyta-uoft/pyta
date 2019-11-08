@@ -1,7 +1,7 @@
 import astroid
-import nose
+
 from hypothesis import settings
-from unittest import SkipTest
+from pytest import skip
 from python_ta.typecheck.base import TypeFail
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
@@ -106,7 +106,3 @@ def test_builtin_method_call_bad_argument():
     module, inferer = cs._parse_text(program)
     call_node = next(module.nodes_of_class(astroid.Call))
     assert isinstance(call_node.inf_type, TypeFail)
-
-
-if __name__ == '__main__':
-    nose.main()

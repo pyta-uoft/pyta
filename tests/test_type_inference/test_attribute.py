@@ -1,10 +1,9 @@
-from nose import SkipTest
-from nose.tools import eq_
+from tests.test_type_inference.utils import eq_
 import astroid
 from typing import *
 from python_ta.typecheck.base import TypeFail
 import tests.custom_hypothesis_support as cs
-
+from pytest import skip
 
 def test_instance_dot_method():
     program = \
@@ -177,7 +176,7 @@ def test_unknown_class_attribute2():
 
 
 def test_unknown_class_subscript_attribute():
-    raise SkipTest("Currently, the inferred type of the z variable is str")
+    skip("Currently, the inferred type of the z variable is str")
     program = \
         '''
         def foo(x):
@@ -222,7 +221,7 @@ def test_invalid_builtin_attribute():
 
 
 def test_attribute_unification_fail():
-    raise SkipTest('This case is not supported yet')
+    skip('This case is not supported yet')
     program = \
         '''
         class A:

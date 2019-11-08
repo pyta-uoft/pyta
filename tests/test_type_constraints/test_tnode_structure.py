@@ -4,7 +4,7 @@ from typing import *
 from typing import ForwardRef, _GenericAlias
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
-from nose.tools import eq_
+from tests.test_type_inference.utils import eq_
 
 def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
     tnode_list = tc._nodes.copy()

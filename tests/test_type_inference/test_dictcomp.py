@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import settings, given, HealthCheck
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
@@ -28,7 +28,3 @@ def test_dict_comprehension_reproduce_heterogeneous(node):
     module, _ = cs._parse_text(program)
     dictcomp_node = list(module.nodes_of_class(astroid.DictComp))[0]
     assert dictcomp_node.inf_type.getValue() == dictcomp_node.generators[0].iter.inf_type.getValue()
-
-
-if __name__ == '__main__':
-    nose.main()

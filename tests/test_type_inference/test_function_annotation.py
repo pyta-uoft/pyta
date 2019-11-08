@@ -1,10 +1,10 @@
 import astroid
 from typing import Any, List, Tuple
-from nose.tools import eq_
+from tests.test_type_inference.utils import eq_
 from python_ta.typecheck.base import TypeFailAnnotationUnify
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
-from nose import SkipTest
+from pytest import skip
 
 
 def test_single_annotation_int():
@@ -175,7 +175,7 @@ def test_param_subscript_tuple():
 
     foo((0, 1))
     """
-    raise SkipTest("Requires support for multi-parameter Tuple annotations")
+    skip("Requires support for multi-parameter Tuple annotations")
     ast_mod, ti = cs._parse_text(src)
 
     func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))

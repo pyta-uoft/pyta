@@ -1,7 +1,7 @@
 import astroid
 import tests.custom_hypothesis_support as cs
-from nose import SkipTest
-from nose.tools import eq_
+from pytest import skip
+from tests.test_type_inference.utils import eq_
 from typing import TypeVar
 from python_ta.typecheck.base import TypeFailFunction
 
@@ -149,7 +149,7 @@ def test_builtin_defaults():
 
 
 def test_unresolved_builtin():
-    raise SkipTest('Requires proper handling of builtins with multiple signatures')
+    skip('Requires proper handling of builtins with multiple signatures')
     program = """
     def f(x, y):
         return x + y
@@ -165,7 +165,7 @@ def test_unresolved_builtin():
 
 
 def test_unresolved_builtin2():
-    raise SkipTest('Requires proper handling of builtins with multiple signatures')
+    skip('Requires proper handling of builtins with multiple signatures')
     program = """
     def f(x, y):
         return x + y

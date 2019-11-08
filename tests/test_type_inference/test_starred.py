@@ -1,6 +1,6 @@
 import astroid
-from nose.tools import eq_
-from nose import SkipTest
+from tests.test_type_inference.utils import eq_
+from pytest import skip
 from typing import *
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail, TypeFailStarred

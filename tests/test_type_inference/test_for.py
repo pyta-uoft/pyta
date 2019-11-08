@@ -1,7 +1,7 @@
 import astroid
-import nose
-from nose import SkipTest
-from nose.tools import eq_
+
+from pytest import skip
+from tests.test_type_inference.utils import eq_
 from hypothesis import given, settings, assume,  HealthCheck
 from typing import Callable, Any, Tuple
 import tests.custom_hypothesis_support as cs
@@ -118,7 +118,7 @@ def test_for_dict():
             x = a
             y = b
         """
-    raise SkipTest(f'Return type of some_dict.items() is inferred as ItemsView[str, int],'
+    skip(f'Return type of some_dict.items() is inferred as ItemsView[str, int],'
                    f'which does not unify with List[Tuple[str, int]]')
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
@@ -154,7 +154,3 @@ def test_for_target_subscript():
     module, ti = cs._parse_text(program)
     for_node = next(module.nodes_of_class(astroid.For))
     assert isinstance(for_node.inf_type, NoType)
-
-
-if __name__ == '__main__':
-    nose.main()

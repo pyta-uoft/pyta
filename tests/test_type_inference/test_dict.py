@@ -1,10 +1,10 @@
 import astroid
-import nose
+
 from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 from typing import Any, Dict, List
-from nose.tools import eq_
+from tests.test_type_inference.utils import eq_
 settings.load_profile("pyta")
 
 
@@ -61,7 +61,3 @@ def test_any_dict():
     assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
     t = lookup_type(ti, assign_node, assign_node.name)
     eq_(ti.type_constraints.resolve(t).getValue(), bool)
-
-
-if __name__ == '__main__':
-    nose.main()

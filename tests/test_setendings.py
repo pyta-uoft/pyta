@@ -486,4 +486,5 @@ class TestEndingLocations(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()  # run tests
+    unittest.main()     # run tests
+

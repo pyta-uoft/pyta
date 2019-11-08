@@ -1,4 +1,4 @@
-from nose.tools import eq_
+from tests.test_type_inference.utils import eq_
 import astroid
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail

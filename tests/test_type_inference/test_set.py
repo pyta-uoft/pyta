@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from typing import Any, Set
@@ -35,7 +35,3 @@ def test_random_set(node):
     module, _ = cs._parse_text(node)
     set_node = list(module.nodes_of_class(astroid.Set))[0]
     cs._verify_type_setting(module, astroid.Set, Set[Any])
-
-
-if __name__ == '__main__':
-    nose.main()

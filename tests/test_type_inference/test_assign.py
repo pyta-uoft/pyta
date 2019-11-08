@@ -1,7 +1,4 @@
 import astroid
-import nose
-from nose import SkipTest
-from nose.tools import nottest
 from hypothesis import given, assume, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
@@ -10,6 +7,8 @@ from python_ta.typecheck.base import TypeFail
 from typing import TypeVar, Any, List
 from keyword import iskeyword
 from python_ta.typecheck.base import TypeFail
+from pytest import skip
+import pytest
 settings.load_profile("pyta")
 
 
@@ -118,7 +117,7 @@ def test_assign_complex_homogeneous(variables_dict):
         assert typeinferrer.type_constraints.resolve(var_tvar).getValue() == ass_node.value.elts[0].inf_type.getValue()
 
 
-@nottest
+@pytest.mark.skip(reason="Not a test")
 @given(hs.lists(cs.valid_identifier(), min_size=2), cs.random_list(min_size=2))
 def test_assign_complex(variables, values):
     """Test whether visitors properly set the type constraint of the a Assign node representing a multi-target-assign
@@ -157,7 +156,7 @@ def test_attribute_reassign():
 
 
 def test_assign_autoconvert():
-    raise SkipTest('TODO: make this test pass (currently a unification fail)')
+    skip('TODO: make this test pass (currently a unification fail)')
     program = """
     x = 1
     x = x + 1.0
@@ -202,7 +201,7 @@ def test_augassign_builtin():
 
 
 def test_augassign_builtin_autoconvert():
-    raise SkipTest('TODO: make this test pass (currently a unification fail)')
+    skip('TODO: make this test pass (currently a unification fail)')
     program = """
     x = 1
     x += 1.0
@@ -214,7 +213,7 @@ def test_augassign_builtin_autoconvert():
 
 
 def test_augassign_builtin_attribute_autoconvert():
-    raise SkipTest('TODO: make this test pass (currently a unification fail)')
+    skip('TODO: make this test pass (currently a unification fail)')
     program = """
     class A:
         def __init__(self):
@@ -229,7 +228,7 @@ def test_augassign_builtin_attribute_autoconvert():
 
 
 def test_augassign_userdefn():
-    raise SkipTest('Support for attribute-based inference required for this test to pass')
+    skip('Support for attribute-based inference required for this test to pass')
     program = """
     class A:
         def __init__(self, val):
@@ -253,7 +252,7 @@ def test_augassign_userdefn():
 
 
 def test_augassign_userdefn_fallback():
-    raise SkipTest('Support for attribute-based inference required for this test to pass')
+    skip('Support for attribute-based inference required for this test to pass')
     program = """
     class A:
         def __init__(self, val):
@@ -287,7 +286,3 @@ def test_augassign_userdefn_fail():
     module, inferer = cs._parse_text(program, reset=True)
     for aug_node in module.nodes_of_class(astroid.AugAssign):
         assert isinstance(aug_node.inf_type, TypeFail)
-
-
-if __name__ == '__main__':
-    nose.main()

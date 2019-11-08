@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import settings, given, HealthCheck
 from typing import List
 import tests.custom_hypothesis_support as cs
@@ -40,7 +40,3 @@ def test_list_comprehension_single_target_name_string(iterable):
     listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
     expected_type = List[listcomp_node.generators[0].iter.inf_type.getValue()]
     assert listcomp_node.inf_type.getValue() == expected_type
-
-
-if __name__ == '__main__':
-    nose.main()

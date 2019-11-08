@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import given, settings, HealthCheck
 from typing import Any
 import tests.custom_hypothesis_support as cs
@@ -13,7 +13,3 @@ def test_ifexp(node):
     module, type_inferer = cs._parse_text(node)
     for ifexp_node in module.nodes_of_class(astroid.IfExp):
         assert ifexp_node.inf_type.getValue() == ifexp_node.body.inf_type.getValue()
-
-
-if __name__ == '__main__':
-    nose.main()

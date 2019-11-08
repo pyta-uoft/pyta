@@ -28,7 +28,6 @@ setup(
         'hypothesis',
         'pycodestyle',
         'pylint>=2.1,<2.2',
-        'nose',
         'colorama',
         'six',
         'jinja2',

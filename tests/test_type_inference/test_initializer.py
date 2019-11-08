@@ -1,7 +1,7 @@
 import astroid
 from typing import ForwardRef
 import tests.custom_hypothesis_support as cs
-from nose.tools import eq_
+from tests.test_type_inference.utils import eq_
 from python_ta.transforms.type_inference_visitor import TypeFail
 
 

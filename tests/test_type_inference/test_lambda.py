@@ -1,6 +1,6 @@
 import tests.custom_hypothesis_support as cs
-from nose import SkipTest
-from nose.tools import eq_
+from pytest import skip
+from tests.test_type_inference.utils import eq_
 import astroid
 from python_ta.typecheck.base import TypeInfo, TypeFail
 
@@ -70,7 +70,7 @@ def test_lambda_polymorphic_simple():
 
 
 def test_lambda_polymorphic_builtin_lookup():
-    raise SkipTest('This requires proper handling of unresolved calls to'
+    skip('This requires proper handling of unresolved calls to'
                    'builtin methods with multiple variants')
     src = """
     f = lambda x, y: x + y

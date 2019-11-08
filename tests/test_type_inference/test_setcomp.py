@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import settings, given, HealthCheck
 import tests.custom_hypothesis_support as cs
 from typing import Set, _GenericAlias
@@ -37,6 +37,3 @@ def test_set_comprehension_reproduce_string(iterable):
     module, _ = cs._parse_text(program)
     setcomp_node = list(module.nodes_of_class(astroid.SetComp))[0]
     assert setcomp_node.inf_type.getValue() == Set[setcomp_node.generators[0].iter.inf_type.getValue()]
-
-if __name__ == '__main__':
-    nose.main()

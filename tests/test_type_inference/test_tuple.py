@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from typing import Tuple
@@ -14,7 +14,3 @@ def test_tuple(t_tuple):
     for t_node in module.nodes_of_class(astroid.Tuple):
         elt_types = tuple(elt.inf_type.getValue() for elt in t_node.elts)
         assert t_node.inf_type.getValue() == Tuple[elt_types]
-
-
-if __name__ == '__main__':
-    nose.main()

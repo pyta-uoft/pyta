@@ -7,5 +7,7 @@ install:
   - pip install .
   - sudo apt-get install graphviz
   - pip install graphviz
+script:
+  - nosetests
 notifications:
   email: false

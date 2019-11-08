@@ -9,7 +9,6 @@ from tests.custom_hypothesis_support import types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable
 from keyword import iskeyword
-from pytest import skip
 settings.load_profile("pyta")
 
 

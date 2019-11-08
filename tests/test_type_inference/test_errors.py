@@ -1,7 +1,6 @@
 import astroid
 
 from hypothesis import settings
-from pytest import skip
 import tests.custom_hypothesis_support as cs
 from tests.test_type_inference.utils import eq_
 from pytest import skip

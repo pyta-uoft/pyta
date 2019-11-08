@@ -6,8 +6,8 @@ import python_ta
 def test_check_on_dir():
     """The function, check_all() should handle a top-level dir as input."""
     _inputs = [
-        ['nodes'],
-        ['examples']
+        ['../nodes'],
+        ['../examples']
     ]
     for item in _inputs:
         python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})

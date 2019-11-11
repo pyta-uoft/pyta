@@ -85,7 +85,7 @@ class RedundantAssignmentChecker(BaseChecker):
         kill = set()
         for statement in reversed(block.statements):
             if isinstance(statement, astroid.FunctionDef):
-                # `nodes_of_class` below does block looking for required nodes
+                # `nodes_of_class` below doesnt block looking for required nodes
                 # in function definitions, hence this case.
                 continue
             for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name,
@@ -99,6 +99,8 @@ class RedundantAssignmentChecker(BaseChecker):
 
                     kill.discard(node.name)
                     gen.add(node.name)
+                elif isinstance(node, (astroid.Nonlocal, astroid.Global)):
+                    kill.difference_update(set(node.names))
                 else:
                     kill.add(node.name)
 

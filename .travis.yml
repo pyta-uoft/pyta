@@ -8,6 +8,6 @@ install:
   - sudo apt-get install graphviz
   - pip install graphviz
 script:
-  - pytest
+  - pytest tests
 notifications:
   email: false

@@ -35,7 +35,8 @@ setup(
     ],
     extras_require={
         'dev': [
-            'graphviz'
+            'graphviz',
+            'pytest'
         ]
     },
     python_requires='~=3.7',

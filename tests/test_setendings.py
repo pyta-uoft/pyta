@@ -4,8 +4,13 @@ Checks that `end_lineno` and `end_col_offset` node properties are set.
 """
 import unittest
 from python_ta.transforms.setendings import *
+import os
 
-PATH = '../examples/ending_locations/'
+path = os.getcwd()
+os.chdir(path[0:path.index('pyta') + 4])
+
+
+PATH = 'examples/ending_locations/'
 
 
 class TestEndingLocations(unittest.TestCase):
@@ -16,7 +21,11 @@ class TestEndingLocations(unittest.TestCase):
     We store the correct values as a tuple:
     (fromlineno, end_lineno, col_offset, end_col_offset)
     """
+    print(globals())
+    print('FILE' + __file__)
+
     def get_file_as_module(self, file_location):
+
         """Given a filepath (file_location), parse with astroid, and return
         the module.
         """

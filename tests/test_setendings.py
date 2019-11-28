@@ -4,10 +4,10 @@ Checks that `end_lineno` and `end_col_offset` node properties are set.
 """
 import unittest
 from python_ta.transforms.setendings import *
+import os.path as path
 
-
-REPO_PATH = __file__[0:__file__.index('pyta') + 4]
-
+file = path.abspath(__file__)
+REPO_PATH = file[0:file.index('pyta') + 4]
 PATH = REPO_PATH + '/examples/ending_locations/'
 
 

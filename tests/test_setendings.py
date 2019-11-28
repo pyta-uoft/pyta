@@ -6,9 +6,10 @@ import unittest
 from python_ta.transforms.setendings import *
 import os.path as path
 
-FILE_PATH = path.abspath(__file__)
-REPO_PATH = FILE_PATH[0:FILE_PATH.index('pyta') + 4]
-PATH = REPO_PATH + '/examples/ending_locations/'
+# FILE_PATH = path.abspath(__file__)
+# REPO_PATH = FILE_PATH[0:FILE_PATH.index('pyta') + 4]
+PATH = 'examples/ending_locations/'
+# PATH = path.abspath('examples/ending_locations/')
 
 
 class TestEndingLocations(unittest.TestCase):

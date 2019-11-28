@@ -78,7 +78,7 @@ class RedundantAssignmentChecker(BaseChecker):
             temp = self._transfer(b, in_facts)
             if temp != out_facts[b]:
                 out_facts[b] = temp
-                worklist.extend([pred.source for pred in b.predecessors])
+                worklist.extend([pred.source for pred in b.predecessors if pred.source.reachable])
 
     def _transfer(self, block: CFGBlock, out_facts: Set[str]) -> Set[str]:
         gen = out_facts.copy()

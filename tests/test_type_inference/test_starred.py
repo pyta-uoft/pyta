@@ -1,5 +1,5 @@
 import astroid
-from tests.test_type_inference.utils import eq_
+
 from pytest import skip
 from typing import *
 import tests.custom_hypothesis_support as cs
@@ -16,9 +16,9 @@ def test_list():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), List[int])
+            assert name_node.inf_type.getValue() == List[int]
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
 
 
 def test_range():
@@ -32,9 +32,9 @@ def test_range():
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
             t = name_node.inf_type.getValue()
-            eq_(ti.type_constraints.resolve(t).getValue(), List[int])
+            assert ti.type_constraints.resolve(t).getValue() == List[int]
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
 
 
 def test_tuple():
@@ -47,9 +47,9 @@ def test_tuple():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), List[int])
+            assert name_node.inf_type.getValue() == List[int]
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
 
 
 def test_order():
@@ -63,11 +63,11 @@ def test_order():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), List[int])
+            assert name_node.inf_type.getValue() == List[int]
         elif name_node.name == 'c':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
 
 
 def test_order_2():
@@ -80,9 +80,9 @@ def test_order_2():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), List[int])
+            assert name_node.inf_type.getValue() == List[int]
 
 
 def test_mixed_tuple():
@@ -95,9 +95,9 @@ def test_mixed_tuple():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), List[Any])
+            assert name_node.inf_type.getValue() == List[Any]
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), bool)
+            assert name_node.inf_type.getValue() == bool
 
 
 def test_mixed_tuple_order():
@@ -110,9 +110,9 @@ def test_mixed_tuple_order():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), List[Any])
+            assert name_node.inf_type.getValue() == List[Any]
 
 
 def test_mixed_tuple_three_var():
@@ -126,11 +126,11 @@ def test_mixed_tuple_three_var():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), List[Any])
+            assert name_node.inf_type.getValue() == List[Any]
         elif name_node.name == 'c':
-            eq_(name_node.inf_type.getValue(), str)
+            assert name_node.inf_type.getValue() == str
 
 
 def test_mixed_tuple_four_var():
@@ -145,13 +145,13 @@ def test_mixed_tuple_four_var():
     for name_node in ast_mod.nodes_of_class(astroid.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == 'a':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
         elif name_node.name == 'b':
-            eq_(name_node.inf_type.getValue(), List[str])
+            assert name_node.inf_type.getValue() == List[str]
         elif name_node.name == 'c':
-            eq_(name_node.inf_type.getValue(), int)
+            assert name_node.inf_type.getValue() == int
         elif name_node.name == 'd':
-            eq_(name_node.inf_type.getValue(), str)
+            assert name_node.inf_type.getValue() == str
 
 
 def test_multi_starred():

@@ -6,7 +6,7 @@ import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable, ForwardRef, Type, _GenericAlias
-from tests.test_type_inference.utils import eq_
+
 from python_ta.typecheck.base import _gorg
 from python_ta.transforms.type_inference_visitor import TypeFail
 settings.load_profile("pyta")
@@ -166,7 +166,7 @@ def test_function_return():
     call_node = next(module.nodes_of_class(astroid.Call))
     func_type = call_node.func.inf_type.getValue()
     t1, t2 = func_type.__args__
-    eq_(t1, t2)
+    assert t1 == t2
 
 
 def test_function_return_2():
@@ -180,7 +180,7 @@ def test_function_return_2():
     call_node = next(module.nodes_of_class(astroid.Call))
     func_type = call_node.func.inf_type.getValue()
     t1, t2, t3 = func_type.__args__
-    eq_(t1, t3)
+    assert t1 == t3
 
 
 def test_function_return_3():
@@ -194,4 +194,4 @@ def test_function_return_3():
     call_node = next(module.nodes_of_class(astroid.Call))
     func_type = call_node.func.inf_type.getValue()
     t1, t2, t3 = func_type.__args__
-    eq_(t2, t3)
+    assert t2 == t3

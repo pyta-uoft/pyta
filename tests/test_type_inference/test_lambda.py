@@ -1,6 +1,6 @@
 import tests.custom_hypothesis_support as cs
 from pytest import skip
-from tests.test_type_inference.utils import eq_
+
 import astroid
 from python_ta.typecheck.base import TypeInfo, TypeFail
 
@@ -62,7 +62,7 @@ def test_lambda_polymorphic_simple():
     ast_mod, ti = cs._parse_text(src, reset=True)
     for lambda_node in ast_mod.nodes_of_class(astroid.Lambda):
         x = ti.lookup_inf_type(lambda_node, 'x').getValue()
-        eq_(str(lambda_node.inf_type.getValue()), f'typing.Callable[[{x}], {x}]')
+        assert str(lambda_node.inf_type.getValue()) == f'typing.Callable[[{x}], {x}]'
     for var_node in ast_mod.nodes_of_class(astroid.AssignName):
         if var_node.name == 'y':
             y = ti.lookup_typevar(var_node, 'y')

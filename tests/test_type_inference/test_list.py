@@ -6,7 +6,7 @@ from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 from typing import Any, List
-from tests.test_type_inference.utils import eq_
+
 settings.load_profile("pyta")
 
 
@@ -114,4 +114,4 @@ def test_list_append_list_typevar():
     ast_mod, ti = cs._parse_text(src, reset=True)
     return_node = next(ast_mod.nodes_of_class(astroid.Return))
     functiondef_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    eq_(lookup_type(ti, return_node, return_node.value.name), List[lookup_type(ti, functiondef_node, 'x')])
+    assert lookup_type(ti, return_node, return_node.value.name) == List[lookup_type(ti, functiondef_node, 'x')]

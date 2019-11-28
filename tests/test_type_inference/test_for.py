@@ -1,7 +1,7 @@
 import astroid
 
 from pytest import skip
-from tests.test_type_inference.utils import eq_
+
 from hypothesis import given, settings, assume,  HealthCheck
 from typing import Callable, Any, Tuple
 import tests.custom_hypothesis_support as cs
@@ -74,7 +74,7 @@ def test_for_list_tuple():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'elt':
-            eq_(lookup_type(ti, assign_node, assign_node.name), Tuple[str, int])
+            assert lookup_type(ti, assign_node, assign_node.name) == Tuple[str, int]
 
 
 def test_for_list_tuple_multi_arg():
@@ -88,9 +88,9 @@ def test_for_list_tuple_multi_arg():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
-            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+            assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == 'y' or assign_node.name == 'b':
-            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+            assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
 def test_for_zip():
@@ -105,9 +105,9 @@ def test_for_zip():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
-            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+            assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == 'y' or assign_node.name == 'b':
-            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+            assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
 def test_for_dict():
@@ -123,9 +123,9 @@ def test_for_dict():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
-            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+            assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == 'y' or assign_node.name == 'b':
-            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+            assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
 def test_for_target_attr():

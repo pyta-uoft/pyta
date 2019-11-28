@@ -2,7 +2,7 @@ import astroid
 
 from hypothesis import settings
 import tests.custom_hypothesis_support as cs
-from tests.test_type_inference.utils import eq_
+
 from pytest import skip
 settings.load_profile("pyta")
 
@@ -16,7 +16,7 @@ def test_incompatible_binop_call():
     binop_node = next(module.nodes_of_class(astroid.BinOp))
     expected_msg = "You cannot add an int, 5, and a str, 'string'. " \
                    "Perhaps you wanted to cast the integer into a string or vice versa?"
-    eq_(binop_node.inf_type.getValue(), expected_msg)
+    assert binop_node.inf_type.getValue() == expected_msg
 
 
 def test_incompatible_unaryop_call():
@@ -27,7 +27,7 @@ def test_incompatible_unaryop_call():
     module, _ = cs._parse_text(program)
     unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
     expected_msg = "You cannot take the bitwise inverse of a list of str, ['D']."
-    eq_(unaryop_node.inf_type.getValue(), expected_msg)
+    assert unaryop_node.inf_type.getValue() == expected_msg
 
 
 def test_incompatible_subscript_list():
@@ -38,7 +38,7 @@ def test_incompatible_subscript_list():
     module, _ = cs._parse_text(program)
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
     expected_msg = "You can only access elements of a list using an int. You used a str, 'one'."
-    eq_(subscript_node.inf_type.getValue(), expected_msg)
+    assert subscript_node.inf_type.getValue() == expected_msg
 
 
 def test_incompatible_subscript_tuple():
@@ -49,7 +49,7 @@ def test_incompatible_subscript_tuple():
     module, _ = cs._parse_text(program)
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
     expected_msg = "You can only access elements of a tuple using an int. You used a str, 'one'."
-    eq_(subscript_node.inf_type.getValue(), expected_msg)
+    assert subscript_node.inf_type.getValue() == expected_msg
 
 
 def test_incompatible_subscript_dictionary():
@@ -60,4 +60,4 @@ def test_incompatible_subscript_dictionary():
     module, _ = cs._parse_text(program)
     subscript_node = next(module.nodes_of_class(astroid.Subscript))
     expected_msg = "You tried to access an element of this dictionary using an int, 1, but the keys are of type str."
-    eq_(subscript_node.inf_type.getValue(), expected_msg)
+    assert subscript_node.inf_type.getValue() == expected_msg

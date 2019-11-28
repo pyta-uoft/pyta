@@ -1,7 +1,7 @@
 import astroid
 import tests.custom_hypothesis_support as cs
 from pytest import skip
-from tests.test_type_inference.utils import eq_
+
 from typing import TypeVar
 from python_ta.typecheck.base import TypeFailFunction
 
@@ -16,7 +16,7 @@ def test_overload_function():
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type.getValue(), int)
+        assert call_node.inf_type.getValue() == int
 
 
 def test_overload_function_2():
@@ -29,7 +29,7 @@ def test_overload_function_2():
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type.getValue(), int)
+        assert call_node.inf_type.getValue() == int
 
 
 def test_overload_function_with_gap():
@@ -40,7 +40,7 @@ def test_overload_function_with_gap():
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type.getValue(), int)
+        assert call_node.inf_type.getValue() == int
 
 
 def test_too_few_args():
@@ -118,7 +118,7 @@ def test_overload_function_with_annotations():
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
-        eq_(call_node.inf_type.getValue(), int)
+        assert call_node.inf_type.getValue() == int
 
 
 def test_flagged_builtin_overload():
@@ -145,7 +145,7 @@ def test_builtin_defaults():
     ast_mod, ti = cs._parse_text(program)
     for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
         x = ti.lookup_typevar(assgn_node, assgn_node.name)
-        eq_(ti.type_constraints.resolve(x).getValue(), range)
+        assert ti.type_constraints.resolve(x).getValue() == range
 
 
 def test_unresolved_builtin():

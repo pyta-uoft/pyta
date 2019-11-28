@@ -1,6 +1,6 @@
 import astroid
 
-from tests.test_type_inference.utils import eq_
+
 from hypothesis import assume, given, settings, HealthCheck
 from pytest import skip
 from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction, TypeFailLookup
@@ -401,7 +401,7 @@ def test_magic_call():
     '''
     module, inferer = cs._parse_text(program, reset=True)
     for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
-        eq_(call_node.inf_type.getValue(), int)
+        assert call_node.inf_type.getValue() == int
 
 
 def test_no_magic_call():

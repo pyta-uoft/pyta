@@ -4,7 +4,7 @@ from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 from typing import Any, Dict, List
-from tests.test_type_inference.utils import eq_
+
 settings.load_profile("pyta")
 
 
@@ -49,7 +49,7 @@ def test_sorted_dict():
     module, ti = cs._parse_text(src)
     assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
     t = lookup_type(ti, assign_node, assign_node.name)
-    eq_(ti.type_constraints.resolve(t).getValue(), List[str])
+    assert ti.type_constraints.resolve(t).getValue() == List[str]
 
 
 def test_any_dict():
@@ -60,4 +60,4 @@ def test_any_dict():
     module, ti = cs._parse_text(src)
     assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
     t = lookup_type(ti, assign_node, assign_node.name)
-    eq_(ti.type_constraints.resolve(t).getValue(), bool)
+    assert ti.type_constraints.resolve(t).getValue() == bool

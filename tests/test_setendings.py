@@ -6,10 +6,9 @@ import unittest
 from python_ta.transforms.setendings import *
 import os.path as path
 
-# FILE_PATH = path.abspath(__file__)
-# REPO_PATH = FILE_PATH[0:FILE_PATH.index('pyta') + 4]
-PATH = 'examples/ending_locations/'
-# PATH = path.abspath('examples/ending_locations/')
+# Gives absolute path to root directory
+REPO_PATH = path.normpath(path.join(path.abspath(__file__), '../..'))
+PATH = REPO_PATH + '/examples/ending_locations/'
 
 
 class TestEndingLocations(unittest.TestCase):
@@ -25,6 +24,7 @@ class TestEndingLocations(unittest.TestCase):
         """Given a filepath (file_location), parse with astroid, and return
         the module.
         """
+        print(path)
         with open(file_location) as f:
             content = f.read()
         return self.get_string_as_module(content)

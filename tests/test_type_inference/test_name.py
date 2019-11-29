@@ -1,6 +1,6 @@
 from typing import Callable, Type
 import astroid
-import nose
+
 from hypothesis import settings
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
@@ -18,7 +18,3 @@ def test_builtin_class_name():
     module, _ = cs._parse_text('int')
     for node in module.nodes_of_class(astroid.Name):
         assert node.inf_type.getValue() == Type[int]
-
-
-if __name__ == '__main__':
-    nose.main()

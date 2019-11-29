@@ -1,8 +1,8 @@
 from typing import *
 from typing import Callable, ForwardRef
 from python_ta.typecheck.base import TypeResult, TypeInfo, TypeFail, TypeConstraints, create_Callable
-from nose import SkipTest
-from nose.tools import eq_
+from pytest import skip
+
 
 skip_msg = "Skipped"
 tc = TypeConstraints()
@@ -16,7 +16,7 @@ def unify_helper(arg1: type, arg2: type, exp_result: Union[type, TypeFail]):
     if isinstance(exp_result, TypeFail):
         assert isinstance(unify_result, TypeFail)
     else:
-        eq_(tc.resolve(unify_result.getValue()).getValue(), tc.resolve(exp_result).getValue())
+        assert tc.resolve(unify_result.getValue()).getValue() == tc.resolve(exp_result).getValue()
 
 
 def setup_typevar(t: type):
@@ -26,7 +26,7 @@ def setup_typevar(t: type):
 
 
 def resolve_helper(t: type, exp_type: type):
-    eq_(tc.resolve(t).getValue(), exp_type)
+    assert tc.resolve(t).getValue() == exp_type
 
 
 # Unify primitives
@@ -111,7 +111,7 @@ def test_same_forward_ref():
 
 
 def test_diff_forward_ref():
-    raise SkipTest('The existing error msg does not apply to this situation')
+    skip('The existing error msg does not apply to this situation')
     fr1 = ForwardRef('a')
     fr2 = ForwardRef('b')
     unify_helper(fr1, fr2, TypeFail("Attempted to unify forwardref  with non-ref"))

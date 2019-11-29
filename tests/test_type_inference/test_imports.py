@@ -1,4 +1,4 @@
-from nose.tools import eq_
+
 import astroid
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail
@@ -16,7 +16,7 @@ def test_imported_module_attribute():
     for assgn_node in ast_mod.nodes_of_class(astroid.Assign):
         if assgn_node.targets[0].name == 'y':
             y = ti.lookup_typevar(assgn_node, 'y')
-            eq_(ti.type_constraints.resolve(y).getValue(), Any)
+            assert ti.type_constraints.resolve(y).getValue() == Any
         if assgn_node.targets[0].name == 'z':
             assert isinstance(assgn_node.inf_type, TypeFail)
 
@@ -33,7 +33,7 @@ def test_imported_module_attribute_persists_any():
     for assgn_node in ast_mod.nodes_of_class(astroid.Assign):
         if assgn_node.targets[0].name == 'z':
             z = ti.lookup_typevar(assgn_node, 'z')
-            eq_(ti.type_constraints.resolve(z).getValue(), Any)
+            assert ti.type_constraints.resolve(z).getValue() == Any
 
 
 def test_from_import_variable():
@@ -47,7 +47,7 @@ def test_from_import_variable():
     for assgn_node in ast_mod.nodes_of_class(astroid.Assign):
         if assgn_node.targets[0].name == 'y':
             y = ti.lookup_typevar(assgn_node, 'y')
-            eq_(ti.type_constraints.resolve(y).getValue(), Any)
+            assert ti.type_constraints.resolve(y).getValue() == Any
         if assgn_node.targets[0].name == 'z':
             assert isinstance(assgn_node.inf_type, TypeFail)
 
@@ -63,7 +63,7 @@ def test_from_import_attribute():
     for assgn_node in ast_mod.nodes_of_class(astroid.Assign):
         if assgn_node.targets[0].name == 'y':
             y = ti.lookup_typevar(assgn_node, 'y')
-            eq_(ti.type_constraints.resolve(y).getValue(), Any)
+            assert ti.type_constraints.resolve(y).getValue() == Any
         if assgn_node.targets[0].name == 'z':
             assert isinstance(assgn_node.inf_type, TypeFail)
 
@@ -79,16 +79,16 @@ def test_imported_module_function():
     ast_mod, ti = cs._parse_text(src, reset=True)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         if call_node.func.attrname == 'func1':
-            eq_(call_node.inf_type.getValue(), Any)
+            assert call_node.inf_type.getValue() == Any
         if call_node.func.attrname == 'func2':
             assert isinstance(call_node.inf_type, TypeFail)
     for assgn_node in ast_mod.nodes_of_class(astroid.Assign):
         if assgn_node.targets[0].name == 'x':
             x = ti.lookup_typevar(assgn_node, 'x')
-            eq_(ti.type_constraints.resolve(x).getValue(), Any)
+            assert ti.type_constraints.resolve(x).getValue() == Any
         if assgn_node.targets[0].name == 'y':
             y = ti.lookup_typevar(assgn_node, 'y')
-            eq_(ti.type_constraints.resolve(y).getValue(), int)
+            assert ti.type_constraints.resolve(y).getValue() == int
 
 
 def test_from_import_function():
@@ -102,13 +102,13 @@ def test_from_import_function():
     ast_mod, ti = cs._parse_text(src, reset=True)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         if call_node.func.name == 'func1':
-            eq_(call_node.inf_type.getValue(), Any)
+            assert call_node.inf_type.getValue() == Any
         if call_node.func.name == 'func2':
             assert isinstance(call_node.inf_type, TypeFail)
     for assgn_node in ast_mod.nodes_of_class(astroid.Assign):
         if assgn_node.targets[0].name == 'x':
             x = ti.lookup_typevar(assgn_node, 'x')
-            eq_(ti.type_constraints.resolve(x).getValue(), Any)
+            assert ti.type_constraints.resolve(x).getValue() == Any
         if assgn_node.targets[0].name == 'y':
             y = ti.lookup_typevar(assgn_node, 'y')
-            eq_(ti.type_constraints.resolve(y).getValue(), int)
+            assert ti.type_constraints.resolve(y).getValue() == int

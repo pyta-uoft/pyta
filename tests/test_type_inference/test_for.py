@@ -1,7 +1,7 @@
 import astroid
-import nose
-from nose import SkipTest
-from nose.tools import eq_
+
+from pytest import skip
+
 from hypothesis import given, settings, assume,  HealthCheck
 from typing import Callable, Any, Tuple
 import tests.custom_hypothesis_support as cs
@@ -74,7 +74,7 @@ def test_for_list_tuple():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'elt':
-            eq_(lookup_type(ti, assign_node, assign_node.name), Tuple[str, int])
+            assert lookup_type(ti, assign_node, assign_node.name) == Tuple[str, int]
 
 
 def test_for_list_tuple_multi_arg():
@@ -88,9 +88,9 @@ def test_for_list_tuple_multi_arg():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
-            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+            assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == 'y' or assign_node.name == 'b':
-            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+            assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
 def test_for_zip():
@@ -105,9 +105,9 @@ def test_for_zip():
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
-            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+            assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == 'y' or assign_node.name == 'b':
-            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+            assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
 def test_for_dict():
@@ -118,14 +118,14 @@ def test_for_dict():
             x = a
             y = b
         """
-    raise SkipTest(f'Return type of some_dict.items() is inferred as ItemsView[str, int],'
+    skip(f'Return type of some_dict.items() is inferred as ItemsView[str, int],'
                    f'which does not unify with List[Tuple[str, int]]')
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
         if assign_node.name == 'x' or assign_node.name == 'a':
-            eq_(lookup_type(ti, assign_node, assign_node.name), str)
+            assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == 'y' or assign_node.name == 'b':
-            eq_(lookup_type(ti, assign_node, assign_node.name), int)
+            assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
 def test_for_target_attr():
@@ -154,7 +154,3 @@ def test_for_target_subscript():
     module, ti = cs._parse_text(program)
     for_node = next(module.nodes_of_class(astroid.For))
     assert isinstance(for_node.inf_type, NoType)
-
-
-if __name__ == '__main__':
-    nose.main()

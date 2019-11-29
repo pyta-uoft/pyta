@@ -1,13 +1,12 @@
 import astroid
-import nose
 from hypothesis import given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
 from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType, _gorg
 from typing import List, Set, Dict, Any, Tuple, Union, _GenericAlias
-from nose import SkipTest
-from nose.tools import eq_
+from pytest import skip
+
 settings.load_profile("pyta")
 
 
@@ -68,11 +67,11 @@ def test_annassign_subscript_list_int():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, List[int])
+    assert variable_type == List[int]
 
     assign_node = next(module.nodes_of_class(astroid.Assign))
     assign_type = lookup_type(inferer, assign_node, assign_node.targets[0].name)
-    eq_(assign_type, List[int])
+    assert assign_type == List[int]
 
 
 def test_annassign_subscript_list_int_wrong():
@@ -84,7 +83,7 @@ def test_annassign_subscript_list_int_wrong():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, List[int])
+    assert variable_type == List[int]
 
     assign_node = next(module.nodes_of_class(astroid.Assign))
     assert isinstance(assign_node.inf_type, TypeFailUnify)
@@ -97,7 +96,7 @@ def test_annassign_subscript_set():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Set[Any])
+    assert variable_type == Set[Any]
 
 
 def test_annassign_subscript_set_int():
@@ -107,7 +106,7 @@ def test_annassign_subscript_set_int():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Set[int])
+    assert variable_type == Set[int]
 
 
 def test_annassign_subscript_dict():
@@ -117,7 +116,7 @@ def test_annassign_subscript_dict():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Dict[Any, Any])
+    assert variable_type == Dict[Any, Any]
 
 
 def test_annassign_subscript_dict_int_str():
@@ -127,7 +126,7 @@ def test_annassign_subscript_dict_int_str():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Dict[int, str])
+    assert variable_type == Dict[int, str]
 
 
 def test_annassign_subscript_tuple():
@@ -137,7 +136,7 @@ def test_annassign_subscript_tuple():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Tuple[Any])
+    assert variable_type == Tuple[Any]
 
 
 def test_annassign_subscript_tuple_int():
@@ -147,7 +146,7 @@ def test_annassign_subscript_tuple_int():
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Tuple[int, int])
+    assert variable_type == Tuple[int, int]
 
 
 def test_annassign_subscript_tuple_multi_param():
@@ -156,11 +155,11 @@ def test_annassign_subscript_tuple_multi_param():
     
     t = (1, 'Hello')
     """
-    raise SkipTest("Requires support for multi-parameter Tuple annotations")
+    skip("Requires support for multi-parameter Tuple annotations")
     module, inferer = cs._parse_text(program)
     ann_node = next(module.nodes_of_class(astroid.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-    eq_(variable_type, Tuple[int, int])
+    assert variable_type == Tuple[int, int]
 
 
 def test_annassign_subscript_multi_list():
@@ -175,17 +174,17 @@ def test_annassign_subscript_multi_list():
 
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
-        eq_(variable_type, List[Any])
+        assert variable_type == List[Any]
 
     assign_nodes = list(module.nodes_of_class(astroid.Assign))
 
     assign_node_1 = assign_nodes[0]
     assign_type_1 = lookup_type(inferer, assign_node_1, assign_node_1.targets[0].name)
-    eq_(assign_type_1, List[Any])
+    assert assign_type_1 == List[Any]
 
     assign_node_2 = assign_nodes[1]
     assign_type_2 = lookup_type(inferer, assign_node_2, assign_node_2.targets[0].name)
-    eq_(assign_type_2, List[Any])
+    assert assign_type_2 == List[Any]
 
 
 def test_annassign_and_assign():
@@ -254,8 +253,4 @@ def test_annotation_union_list():
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert not isinstance(ann_node.inf_type, TypeFail)
     x_type = lookup_type(inferer, module, 'x')
-    eq_(x_type, Union[List[Any], int])
-
-
-if __name__ == '__main__':
-    nose.main()
+    assert x_type == Union[List[Any], int]

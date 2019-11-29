@@ -1,8 +1,8 @@
 import astroid
-import nose
-from nose.tools import eq_
+
+
 from hypothesis import assume, given, settings, HealthCheck
-from unittest import SkipTest
+from pytest import skip
 from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction, TypeFailLookup
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import types_in_callable
@@ -104,9 +104,9 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         assert inferer.type_constraints.resolve(function_call_type).getValue() == call_node.args[i].inf_type.getValue()
 
 import astroid
-import nose
+
 from hypothesis import assume, given, settings, HealthCheck
-from unittest import SkipTest
+from pytest import skip
 import tests.custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
@@ -216,7 +216,7 @@ def test_non_annotated_function_call_bad_arguments():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = next(module.nodes_of_class(astroid.Call))
     # TODO: This error is flawed because the unification error occurs for both arguments due to our current implementation,
     # which "chooses" the first valid function type from TypeStore.
@@ -240,7 +240,7 @@ def test_user_defined_annotated_call_wrong_arguments_type():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = list(module.nodes_of_class(astroid.Call))[0]
     expected_msg = f'In the Call node in line 4, there was an error in calling the annotated function "add_3":\n' \
                    f'in parameter (2), the annotated type is int but was given an object of type str.\n' \
@@ -258,7 +258,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = list(module.nodes_of_class(astroid.Call))[0]
     expected_msg = f'In the Call node in line 4, there was an error in calling the function "add_3":\n' \
                    f'the function was expecting 3 arguments, but was given 0.'
@@ -282,7 +282,7 @@ def test_conflicting_inferred_type_variable():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = list(module.nodes_of_class(astroid.Call))[1]
     expected_msg = f'In the Call node in line 8, there was an error in calling the annotated function "return_str":\n' \
                    f'in parameter (1), the annotated type is str but was given an object of inferred type int.'
@@ -293,7 +293,7 @@ def test_conflicting_inferred_type_variable():
 def test_non_annotated_function_call_bad_arguments():
     """ User tries to call a non-annotated function on arguments of the wrong type.
     """
-    raise SkipTest('Skipping this test until error messages are fixed')
+    skip('Skipping this test until error messages are fixed')
     program = f'def add_num(num1, num2):\n' \
               f'    return num1 + num2\n' \
               f'\n' \
@@ -301,7 +301,7 @@ def test_non_annotated_function_call_bad_arguments():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = next(module.nodes_of_class(astroid.Call))
     # TODO: This error is flawed because the unification error occurs for both arguments due to our current implementation,
     # which "chooses" the first valid function type from TypeStore.
@@ -318,7 +318,7 @@ def test_non_annotated_function_call_bad_arguments():
 def test_user_defined_annotated_call_wrong_arguments_type():
     """ User tries to call an annotated user-defined function on the wrongly-typed arguments.
     """
-    raise SkipTest('Skipping this test until error messages are fixed')
+    skip('Skipping this test until error messages are fixed')
     program = f'def add_3(num1: int, num2: int, num3: int) -> int:\n' \
               f'    return num1 + num2 + num3\n' \
               f'\n' \
@@ -326,7 +326,7 @@ def test_user_defined_annotated_call_wrong_arguments_type():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = list(module.nodes_of_class(astroid.Call))[0]
     expected_msg = f'In the Call node in line 4, there was an error in calling the annotated function "add_3":\n' \
                    f'in parameter (2), the annotated type is int but was given an object of type str.\n' \
@@ -344,7 +344,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = list(module.nodes_of_class(astroid.Call))[0]
     expected_msg = "Wrong number of arguments"
     assert isinstance(call_node.inf_type, TypeFail)
@@ -353,7 +353,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
 def test_conflicting_inferred_type_variable():
     """ User calls two functions on an object, which contradicts the inferred type of the variable.
     """
-    raise SkipTest('Skipping this test until error messages are fixed')
+    skip('Skipping this test until error messages are fixed')
     program = '''
         def return_num(num: int) -> int:
             return num
@@ -368,7 +368,7 @@ def test_conflicting_inferred_type_variable():
     try:
         module, inferer = cs._parse_text(program)
     except:
-        raise SkipTest()
+        skip()
     call_node = list(module.nodes_of_class(astroid.Call))[1]
     expected_msg = f'In the Call node in line 8, there was an error in calling the annotated function "return_str":\n' \
                    f'in parameter (1), the annotated type is str but was given an object of inferred type int.'
@@ -401,7 +401,7 @@ def test_magic_call():
     '''
     module, inferer = cs._parse_text(program, reset=True)
     for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
-        eq_(call_node.inf_type.getValue(), int)
+        assert call_node.inf_type.getValue() == int
 
 
 def test_no_magic_call():
@@ -435,7 +435,3 @@ def test_magic_call_wrong_args():
     module, inferer = cs._parse_text(program, reset=True)
     for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
         assert isinstance(call_node.inf_type, TypeFailFunction)
-
-
-if __name__ == '__main__':
-    nose.main()

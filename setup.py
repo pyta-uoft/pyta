@@ -28,7 +28,6 @@ setup(
         'hypothesis',
         'pycodestyle',
         'pylint>=2.1,<2.2',
-        'nose',
         'colorama',
         'six',
         'jinja2',
@@ -36,7 +35,8 @@ setup(
     ],
     extras_require={
         'dev': [
-            'graphviz'
+            'graphviz',
+            'pytest'
         ]
     },
     python_requires='~=3.7',

@@ -2,8 +2,9 @@ import astroid
 import typing
 import tests.custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail, TypeFailUnify, TypeFailAnnotationUnify, TypeFailFunction
-from nose.tools import eq_
-from nose import SkipTest
+
+from pytest import skip
+
 
 
 def find_type_fail(ast_node):
@@ -21,21 +22,21 @@ def verify_typefail_unify(tf: TypeFailUnify, *exp_tnodes, exp_src_type, num_reas
     assert isinstance(tf, TypeFailUnify)
     for tn, exp_r in zip(tf.tnodes, exp_tnodes):
         if tn.ast_node:
-            eq_(tn.ast_node.name, exp_r)
+            assert tn.ast_node.name == exp_r
         else:
-            eq_(tn.type, exp_r)
+            assert tn.type == exp_r
     assert isinstance(tf.src_node, exp_src_type)
 
     reasons = []
     for tn in tf.tnodes:
         reasons += tn.find_path_to_parent()
-    eq_(len(reasons), num_reasons)
+    assert len(reasons) == num_reasons
 
 
 def verify_typefail_function(tf: TypeFailFunction, act_func_call: str):
     assert isinstance(tf, TypeFailFunction)
     assert isinstance(tf.src_node, astroid.Call)
-    eq_(tf.src_node.as_string(), act_func_call)
+    assert tf.src_node.as_string() == act_func_call
 
 
 def test_var_assign():
@@ -123,7 +124,7 @@ def test_func_annotation():
     
     f('Hello')
     """
-    raise SkipTest("Requires modifications to unify_call")
+    skip("Requires modifications to unify_call")
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
     assert isinstance(tf, TypeFailAnnotationUnify)
@@ -151,7 +152,7 @@ def test_function_index():
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
     verify_typefail_function(tf, 'f(1, \'two\')')
-    eq_(tf.arg_indices, [1])
+    assert tf.arg_indices == [1]
 
 
 def test_function_multi_index():
@@ -164,7 +165,7 @@ def test_function_multi_index():
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
     verify_typefail_function(tf, 'f(\'one\', \'two\')')
-    eq_(tf.arg_indices, [0, 1])
+    assert tf.arg_indices == [0, 1]
 
 
 def test_function_numargs():

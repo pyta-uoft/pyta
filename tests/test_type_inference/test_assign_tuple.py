@@ -1,5 +1,5 @@
 import astroid
-from nose.tools import eq_
+
 import tests.custom_hypothesis_support as cs
 from tests.custom_hypothesis_support import lookup_type
 from python_ta.transforms.type_inference_visitor import NoType
@@ -37,21 +37,21 @@ def test_tuple_same_length_int():
     program = generate_tuple_assign(10, int, True)
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
-        eq_ (assign_node.inf_type, NoType())
+        assert assign_node.inf_type == NoType()
 
 
 def test_tuple_same_length_bool():
     program = generate_tuple_assign(10, bool, True)
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
-        eq_ (assign_node.inf_type, NoType())
+        assert assign_node.inf_type == NoType()
 
 
 def test_tuple_same_length_str():
     program = generate_tuple_assign(10, str, True)
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
-        eq_ (assign_node.inf_type, NoType())
+        assert assign_node.inf_type == NoType()
 
 
 def test_tuple_single_var():
@@ -62,7 +62,7 @@ def test_tuple_single_var():
     """
     module, _ = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.Assign):
-        eq_(assign_node.inf_type, NoType())
+        assert assign_node.inf_type == NoType()
 
 
 def test_tuple_single_val():
@@ -141,6 +141,6 @@ def test_tuple_empty():
     """
     module, ti = cs._parse_text(program)
     functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
-    eq_(lookup_type(ti, functiondef_node, 'a'), Tuple[()])
+    assert lookup_type(ti, functiondef_node, 'a') == Tuple[()]
     x_type = lookup_type(ti, functiondef_node, 'x')
-    eq_(lookup_type(ti, functiondef_node, 'b'), Tuple[x_type])
+    assert lookup_type(ti, functiondef_node, 'b') == Tuple[x_type]

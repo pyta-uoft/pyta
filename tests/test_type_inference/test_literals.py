@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 from typing import Any, Dict, List, Set, Tuple
@@ -20,7 +20,3 @@ def test_expr(expr):
     module, _ = cs._parse_text(expr)
     for expr_node in module.nodes_of_class(astroid.Expr):
         assert expr_node.inf_type.getValue() == expr_node.value.inf_type.getValue()
-
-
-if __name__ == '__main__':
-    nose.main()

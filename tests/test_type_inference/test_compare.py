@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from python_ta.typecheck.base import TypeFail
 from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
@@ -89,7 +89,3 @@ def test_compare_not_in_fail():
     module, _ = cs._parse_text(program)
     compare_node = list(module.nodes_of_class(astroid.Compare))[0]
     assert isinstance(compare_node.inf_type, TypeFail)
-
-
-if __name__ == '__main__':
-    nose.main()

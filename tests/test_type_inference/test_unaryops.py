@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import given, settings, assume, HealthCheck
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
@@ -23,7 +23,3 @@ def test_not_bool(node):
     for unaryop_node in module.nodes_of_class(astroid.UnaryOp):
         if unaryop_node.op == 'not':
             assert unaryop_node.inf_type.getValue() == bool
-
-
-if __name__ == '__main__':
-    nose.main()

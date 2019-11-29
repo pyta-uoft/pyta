@@ -50,7 +50,7 @@ def create_checker(test_file, checker_name):
                 found_pylint_message = True
                 break
         if not found_pylint_message:
-            print('Failed: ' + test_file)  # Nosetest doesn't say which file
+            print('Failed: ' + test_file)  # test doesn't say which file
         assert found_pylint_message
     return new_test_func
 

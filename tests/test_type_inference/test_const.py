@@ -1,5 +1,5 @@
 import astroid
-import nose
+
 from hypothesis import assume, given, settings, HealthCheck
 import tests.custom_hypothesis_support as cs
 settings.load_profile("pyta")
@@ -16,7 +16,3 @@ def test_const(node):
     assume(not isinstance(node.value, str))
     module, _ = cs._parse_text(node)
     cs._verify_type_setting(module, astroid.Const, type(node.value))
-
-
-if __name__ == '__main__':
-    nose.main()

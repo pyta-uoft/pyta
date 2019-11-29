@@ -4,7 +4,7 @@ from typing import *
 from typing import ForwardRef, _GenericAlias
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
-from nose.tools import eq_
+
 
 def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
     tnode_list = tc._nodes.copy()
@@ -448,7 +448,7 @@ def test_builtin_abst_base_mro(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     x, y = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    eq_(ti.type_constraints.resolve(y).getValue(), int)
+    assert ti.type_constraints.resolve(y).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
@@ -464,7 +464,7 @@ def test_builtin_call_simple_mro(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     a, x = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    eq_(ti.type_constraints.resolve(x).getValue(), str)
+    assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
@@ -557,6 +557,6 @@ def test_builtin_generic_inheritance_overloaded_init(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     x, y = [ti.lookup_typevar(node, node.name) for node
             in ast_mod.nodes_of_class(astroid.AssignName)]
-    eq_(ti.type_constraints.resolve(y).getValue(), List[int])
+    assert ti.type_constraints.resolve(y).getValue() == List[int]
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)

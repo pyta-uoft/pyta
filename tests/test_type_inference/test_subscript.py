@@ -1,6 +1,6 @@
 import astroid
-import nose
-from nose import SkipTest
+
+from pytest import skip
 from hypothesis import given, settings, HealthCheck
 from typing import List
 import tests.custom_hypothesis_support as cs
@@ -104,7 +104,7 @@ def test_inference_invalid_slice(node):
 
 
 def test_inference_ext_slice():
-    raise SkipTest('Lookup for class methods must be implemeneted before this test can pass')
+    skip('Lookup for class methods must be implemeneted before this test can pass')
     program = \
         '''
         class Foo:
@@ -138,7 +138,3 @@ def test_subscript_slice():
 #     module, _ = cs._parse_text(program)
 #     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
 #     assert subscript_node.inf_type.getValue() == List[Any]
-
-
-if __name__ == '__main__':
-    nose.main()

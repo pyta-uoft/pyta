@@ -3,7 +3,7 @@ import astroid
 from pytest import skip
 from hypothesis import given, settings, HealthCheck
 from typing import List
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail, TypeFailFunction
 from python_ta.transforms.type_inference_visitor import NoType
 settings.load_profile("pyta")

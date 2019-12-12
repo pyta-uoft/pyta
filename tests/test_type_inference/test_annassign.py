@@ -1,7 +1,7 @@
 import astroid
 from hypothesis import given, settings, HealthCheck
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type
 import hypothesis.strategies as hs
 from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType, _gorg
 from typing import List, Set, Dict, Any, Tuple, Union, _GenericAlias

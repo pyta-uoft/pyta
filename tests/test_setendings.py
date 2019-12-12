@@ -169,7 +169,7 @@ class TestEndingLocations(unittest.TestCase):
 
     def test_const(self):
         expected = [(1, 1, 0, 6), (2, 2, 4, 6), (3, 3, 0, 3), (4, 4, 0, 8),
-        (5, 7, 0, 1), (8, 8, 6, 11), (8, 8, 13, 25)]
+        (5, 7, 0, 1), (8, 8, 6, 11), (8, 8, 13, 25), (9, 9, 0, 3)]
         module = self.get_file_as_module('Const.py')
         self.set_and_check(module, astroid.Const, expected)
 
@@ -224,11 +224,6 @@ class TestEndingLocations(unittest.TestCase):
     #     expected = []
     #     module = self.get_file_as_module('DictUnpack.py')
     #     self.set_and_check(module, astroid.DictUnpack, expected)
-
-    def test_ellipsis(self):
-        expected = [(1, 1, 0, 3)]
-        module = self.get_file_as_module('Ellipsis.py')
-        self.set_and_check(module, astroid.Ellipsis, expected)
 
     # def test_emptynode(self):
     #     """NODE EXAMPLE DOES NOT EXIST

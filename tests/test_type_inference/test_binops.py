@@ -3,7 +3,7 @@ from typing import List
 
 
 from hypothesis import given, settings, assume, HealthCheck
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from python_ta.typecheck.errors import BINOP_TO_METHOD
 from python_ta.typecheck.base import TypeFail, TypeFailFunction
 settings.load_profile("pyta")

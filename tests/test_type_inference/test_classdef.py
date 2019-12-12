@@ -3,7 +3,7 @@ import astroid
 from hypothesis import settings
 from pytest import skip
 from python_ta.typecheck.base import TypeFail
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 

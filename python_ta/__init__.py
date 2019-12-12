@@ -261,7 +261,7 @@ def _verify_pre_check(filepath):
             for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
-                match = pylint.utils.OPTION_RGX.search(content)
+                match = pylint.constants.OPTION_RGX.search(content)
                 if match is not None:
                     print('[ERROR] String "pylint:" found in comment. ' +
                           'No check run on file `{}.`\n'.format(filepath))

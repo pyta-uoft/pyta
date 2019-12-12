@@ -1,5 +1,6 @@
 """Patch pylint message-handling behaviour."""
-from pylint.utils import MessagesHandlerMixIn, UNDEFINED
+from pylint.message import MessagesHandlerMixIn
+from pylint.interfaces import UNDEFINED
 from pylint.lint import PyLinter
 from astroid.transforms import TransformVisitor
 from python_ta.transforms.setendings import register_transforms
@@ -12,7 +13,7 @@ def patch_messages():
     def new_add_message(self, msg_id, line=None, node=None, args=None,
                         confidence=UNDEFINED, col_offset=None):
         old_add_message(self, msg_id, line, node, args, confidence, col_offset)
-        msg_info = self.msgs_store.get_message_definition(msg_id)
+        msg_info = self.msgs_store.get_message_definitions(msg_id)[0]
         self.reporter.handle_node(msg_info, node)
 
     MessagesHandlerMixIn.add_message = new_add_message

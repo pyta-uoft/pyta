@@ -2,7 +2,7 @@
 import astroid
 from typing import *
 from python_ta.typecheck.base import TypeFail
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from pytest import skip
 
 def test_instance_dot_method():

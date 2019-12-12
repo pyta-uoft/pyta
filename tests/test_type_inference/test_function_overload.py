@@ -1,5 +1,5 @@
 import astroid
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from pytest import skip
 
 from typing import TypeVar

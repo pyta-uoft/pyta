@@ -1,6 +1,7 @@
 import astroid.inference
 import astroid
 from astroid.node_classes import *
+import typing
 from typing import *
 from typing import Callable, Union, ForwardRef, _GenericAlias
 from astroid.transforms import TransformVisitor
@@ -490,13 +491,20 @@ class TypeInferer:
                     node.inf_type = l_type
 
     @accept_failable
-    def _arithm_convert(self, node: NodeNG, method: str, t1_: type, t2_: type) -> Optional[TypeInfo]:
-        common_type = None
-        for t1, t2 in [(t1_, t2_), (t2_, t1_)]:
-            if t1 is complex and self.type_store.is_descendant(t2, SupportsComplex):
-                common_type = complex
-            if t1 is float and self.type_store.is_descendant(t2, SupportsFloat):
-                common_type = float
+    def _arithm_convert(self, node: NodeNG, method: str, t1: type, t2: type) -> Optional[TypeInfo]:
+        if t1 is complex and t2 is complex:
+            common_type = complex
+        elif ((t1 is complex and issubclass(t2, typing.SupportsFloat)) or
+                (t2 is complex and issubclass(t1, typing.SupportsFloat))):
+            # TODO: handle complex better. Looks like int, float don't
+            # support typing.SupportsComplex.
+            common_type = complex
+        elif ((t1 is float and issubclass(t2, typing.SupportsFloat)) or
+                (t2 is float and issubclass(t1, typing.SupportsFloat))):
+            common_type = float
+        else:
+            common_type = None
+
         if common_type:
             return self._handle_call(node, method, common_type, common_type)
         else:

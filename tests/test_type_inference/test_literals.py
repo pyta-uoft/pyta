@@ -1,7 +1,7 @@
 import astroid
 
 from hypothesis import assume, given, settings, HealthCheck
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from typing import Any, Dict, List, Set, Tuple
 settings.load_profile("pyta")
 

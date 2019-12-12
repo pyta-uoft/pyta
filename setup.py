@@ -11,7 +11,7 @@ def readme():
 
 setup(
     name='python-ta',
-    version='1.4.2',
+    version='1.5.0b2',
     description='Code checking tool for teaching Python',
     long_description=readme(),
     url='http://github.com/pyta-uoft/pyta',
@@ -23,11 +23,11 @@ setup(
               'python_ta.docstring', 'python_ta.patches', 'python_ta.parser',
               'python_ta.transforms', 'python_ta.typecheck', 'python_ta.util'],
     install_requires=[
-        'astroid>=2.0,<2.1',
+        'astroid>=2.3,<2.4',
         'funcparserlib',
         'hypothesis',
         'pycodestyle',
-        'pylint>=2.1,<2.2',
+        'pylint>=2.4,<2.5',
         'colorama',
         'six',
         'jinja2',
@@ -40,6 +40,9 @@ setup(
             'pytest'
         ]
     },
-    python_requires='~=3.7',
+    setup_requires=[
+        'pypandoc'
+    ],
+    python_requires='~=3.8',
     include_package_data=True,
     zip_safe=False)

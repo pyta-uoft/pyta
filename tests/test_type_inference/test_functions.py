@@ -4,8 +4,8 @@ import astroid
 from hypothesis import assume, given, settings, HealthCheck
 from pytest import skip
 from python_ta.transforms.type_inference_visitor import TypeFail, TypeFailFunction, TypeFailLookup
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import types_in_callable
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable
 from keyword import iskeyword
@@ -107,7 +107,7 @@ import astroid
 
 from hypothesis import assume, given, settings, HealthCheck
 from pytest import skip
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 from typing import Callable
 from keyword import iskeyword

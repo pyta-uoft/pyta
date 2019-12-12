@@ -198,6 +198,7 @@ def init_register_ending_setters(source_code):
 
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
+    ending_transformer.register_transform(astroid.ClassDef, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.FunctionDef, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))

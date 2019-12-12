@@ -72,6 +72,9 @@ class TypeInfo(TypeResult):
     def __init__(self, type_: type) -> None:
         super().__init__(type_)
 
+    def __repr__(self) -> str:
+        return f'TypeInfo({repr(self.value)})'
+
     def __str__(self) -> str:
         return f'TypeInfo: {self.value}'
 
@@ -682,7 +685,7 @@ class TypeConstraints:
 
         arg_inf_types = []
         for a1, a2 in zip(conc_tnode1.type.__args__, conc_tnode2.type.__args__):
-            if a1 is () or a2 is ():
+            if a1 == () or a2 == ():
                 result = TypeInfo(())
             else:
                 result = self.unify(a1, a2, ast_node)
@@ -742,7 +745,6 @@ class TypeConstraints:
             func_var_tnode = self.get_tnode(func_var)
             funcdef_node = self.find_function_def(func_var_tnode)
             return TypeFailFunction((func_type, ), funcdef_node, node)
-
         new_func_type = self.fresh_callable(func_type, node)
         func_params = getattr(new_func_type, '__args__', [None])[:-1]
         arg_types = list(arg_types)
@@ -963,7 +965,10 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
     elif isinstance(node, astroid.Subscript):
         v = _node_to_type(node.value)
         s = _node_to_type(node.slice)
-        return v[s]
+        if isinstance(v, ForwardRef):
+            return literal_substitute(v, {v.__forward_arg__: s})
+        else:
+            return v[s]
     elif isinstance(node, astroid.Index):
         return _node_to_type(node.value)
     elif isinstance(node, astroid.Tuple):
@@ -974,6 +979,8 @@ def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
         return None
     elif isinstance(node, astroid.Const) and isinstance(node.value, str):
         return _node_to_type(node.value)
+    elif isinstance(node, astroid.Const) and node.value is Ellipsis:
+        return Ellipsis
     else:
         return node
 

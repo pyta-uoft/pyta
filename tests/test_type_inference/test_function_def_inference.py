@@ -2,8 +2,8 @@ import astroid
 
 from hypothesis import assume, given, settings, HealthCheck
 from pytest import skip
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type, types_in_callable
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
 from typing import Callable, ForwardRef, Type, _GenericAlias
 

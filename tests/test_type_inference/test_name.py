@@ -2,7 +2,7 @@ from typing import Callable, Type
 import astroid
 
 from hypothesis import settings
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 settings.load_profile("pyta")
 
 

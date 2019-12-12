@@ -1,7 +1,7 @@
 import astroid
 
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type
 from python_ta.transforms.type_inference_visitor import NoType
 from python_ta.typecheck.base import TypeInfo, TypeFail
 from typing import Tuple

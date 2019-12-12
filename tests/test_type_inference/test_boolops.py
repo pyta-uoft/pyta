@@ -3,7 +3,7 @@ import astroid
 from pytest import skip
 from hypothesis import given, settings, assume, HealthCheck
 import hypothesis.strategies as hs
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from typing import Any
 settings.load_profile("pyta")
 

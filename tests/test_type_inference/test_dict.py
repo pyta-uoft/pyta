@@ -1,8 +1,8 @@
 import astroid
 
 from hypothesis import assume, given, settings, HealthCheck
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type
 from typing import Any, Dict, List
 
 settings.load_profile("pyta")

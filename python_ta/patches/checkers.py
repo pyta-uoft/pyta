@@ -2,12 +2,11 @@
 """
 import astroid
 from astroid.bases import BUILTINS
-from pylint.utils import OPTION_RGX
+from pylint.constants import OPTION_RGX
 from pylint.checkers.base import NameChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
 from pylint.checkers.format import FormatChecker, _EMPTY_LINE
-from pylint.checkers.variables import VariablesChecker
 from python_ta.checkers.global_variables_checker import is_in_main
 from re import match, compile
 
@@ -18,8 +17,6 @@ def patch_checkers():
     _override_check_invalid_name_in_main()
     _override_attribute_defined_outside_init()
     _override_regex_to_allow_long_doctest_lines()
-    _override_name_checker_to_ignore_annotations()
-    _override_type_checking_import()
 
 
 def _override_check_protected_attribute_access():
@@ -170,37 +167,3 @@ def _override_regex_to_allow_long_doctest_lines():
             check_line(''.join(unsplit), i)
 
     FormatChecker.check_lines = new_check_lines
-
-
-def _override_name_checker_to_ignore_annotations():
-    old_visit_name = VariablesChecker.visit_name
-
-    def new_visit_name(self, node):
-        stmt = node.statement()
-        if self._postponed_evaluation_enabled:
-            if isinstance(stmt, astroid.AnnAssign) and stmt.annotation:
-                for n in stmt.annotation.nodes_of_class(astroid.Name):
-                    if node is n:
-                        return
-            elif isinstance(stmt, astroid.FunctionDef):
-                for n in stmt.args.nodes_of_class(astroid.Name):
-                    if node is n:
-                        return
-        return old_visit_name(self, node)
-
-    VariablesChecker.visit_name = new_visit_name
-
-
-def _override_type_checking_import():
-    old_is_type_checking_import = VariablesChecker._is_type_checking_import
-
-    @staticmethod
-    def new_is_type_checking_import(node):
-        if isinstance(node, astroid.Import) and 'typing' in node.names:
-            return True
-        elif isinstance(node, astroid.ImportFrom) and node.modname == 'typing':
-            return True
-        else:
-            return old_is_type_checking_import(node)
-
-    VariablesChecker._is_type_checking_import = new_is_type_checking_import

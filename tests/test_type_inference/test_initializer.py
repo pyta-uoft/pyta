@@ -1,6 +1,6 @@
 import astroid
 from typing import ForwardRef
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 
 from python_ta.transforms.type_inference_visitor import TypeFail
 

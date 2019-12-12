@@ -2,8 +2,8 @@ import astroid
 from typing import Any, List, Tuple
 
 from python_ta.typecheck.base import TypeFailAnnotationUnify
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type
 from pytest import skip
 
 

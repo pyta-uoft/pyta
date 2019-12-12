@@ -36,13 +36,13 @@ def test_simple_function() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)'],
+        ['\ndef func(x: int) -> None:\n    print(x + 1)'],
         []
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['x:int'],
+        ['x: int'],
         ['print(x + 1)'],
         []
     ]
@@ -62,13 +62,13 @@ def test_simple_function_with_surrounding_statements() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['x = 10', '\ndef func(x:int)->None:\n    print(x + 1)', 'print(x)'],
+        ['x = 10', '\ndef func(x: int) -> None:\n    print(x + 1)', 'print(x)'],
         []
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['x:int'],
+        ['x: int'],
         ['print(x + 1)'],
         []
     ]
@@ -89,21 +89,21 @@ def test_multiple_simple_functions() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)',
-         '\ndef func2(y:int)->None:\n    print(y - 1)'],
+        ['\ndef func(x: int) -> None:\n    print(x + 1)',
+         '\ndef func2(y: int) -> None:\n    print(y - 1)'],
         []
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_func = [
-        ['x:int'],
+        ['x: int'],
         ['print(x + 1)'],
         []
     ]
     assert expected_blocks_func == _extract_blocks(cfgs[keys[1]])
 
     expected_blocks_func2 = [
-        ['y:int'],
+        ['y: int'],
         ['print(y - 1)'],
         []
     ]
@@ -124,14 +124,14 @@ def test_function_with_while() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['\ndef func(x:int)->None:\n    while x > 10:\n        '
+        ['\ndef func(x: int) -> None:\n    while x > 10:\n        '
          'print(x)\n    else:\n        print(j)'],
         []
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['x:int'],
+        ['x: int'],
         ['x > 10'],
         ['print(x)'],
         ['print(j)'],
@@ -152,13 +152,13 @@ def test_simple_function_with_return() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['\ndef func(x:int)->None:\n    print(x + 1)\n    return'],
+        ['\ndef func(x: int) -> None:\n    print(x + 1)\n    return'],
         []
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['x:int'],
+        ['x: int'],
         ['print(x + 1)', 'return'],
         []
     ]
@@ -180,14 +180,14 @@ def test_function_with_if_and_return() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['\ndef func(x:int)->None:\n    if x > 10:\n        '
+        ['\ndef func(x: int) -> None:\n    if x > 10:\n        '
          'return\n    else:\n        print(x - 1)\n    print(x)'],
         []
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['x:int'],
+        ['x: int'],
         ['x > 10'],
         ['return'],
         [],
@@ -197,7 +197,7 @@ def test_function_with_if_and_return() -> None:
     assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
     expected_edges_function = [
-        [['x:int'], ['x > 10']],
+        [['x: int'], ['x > 10']],
         [['x > 10'], ['return']],
         [['return'], []],
         [['x > 10'], ['print(x - 1)']],
@@ -224,7 +224,7 @@ def test_function_with_while_if_and_return() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['\ndef func(x:int)->None:\n    while x > 10:\n        if x > 20:\n            '
+        ['\ndef func(x: int) -> None:\n    while x > 10:\n        if x > 20:\n            '
          'return\n        print(x + 1)\n    else:\n        '
          'print(x - 1)\n    print(x)'],
         []
@@ -232,7 +232,7 @@ def test_function_with_while_if_and_return() -> None:
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
     expected_blocks_function = [
-        ['x:int'],
+        ['x: int'],
         ['x > 10'],
         ['x > 20'],
         ['return'],
@@ -244,7 +244,7 @@ def test_function_with_while_if_and_return() -> None:
     assert expected_blocks_function == _extract_blocks(cfgs[keys[1]])
 
     expected_edges_function = [
-        [['x:int'], ['x > 10']],
+        [['x: int'], ['x > 10']],
         [['x > 10'], ['x > 20']],
         [['x > 20'], ['return']],
         [['return'], []],

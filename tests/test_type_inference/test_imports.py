@@ -1,6 +1,6 @@
 
 import astroid
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail
 from typing import Any
 

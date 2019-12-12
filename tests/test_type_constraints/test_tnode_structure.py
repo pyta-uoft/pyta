@@ -1,7 +1,8 @@
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 import astroid
 from typing import *
 from typing import ForwardRef, _GenericAlias
+import pytest
 from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
 from sample_usage.draw_tnodes import gen_graph_from_nodes
 
@@ -350,7 +351,7 @@ def test_userdefn_inheritance_multilevel(draw=False):
 def test_builtin_abst_inheritance(draw=False):
     src = """
     x = 3
-    # float takes in an argument of type SupportsInt
+    # float takes in an argument of type SupportsFloat
     y = float(x)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
@@ -440,6 +441,7 @@ def test_userdefn_mro_diamond(draw=False):
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
 
+@pytest.mark.skip(reason='Cannot yet handle Generic Protocols (SupportsAbs[T])')
 def test_builtin_abst_base_mro(draw=False):
     src = """
     x = 3 # x descends from SupportsAbs[int]

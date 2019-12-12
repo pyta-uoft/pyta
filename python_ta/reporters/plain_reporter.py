@@ -1,7 +1,7 @@
 import sys
 import os
 from pylint.reporters import BaseReporter
-from pylint.utils import Message
+from pylint.message import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 

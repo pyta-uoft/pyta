@@ -4,8 +4,8 @@ from pytest import skip
 
 from hypothesis import given, settings, assume,  HealthCheck
 from typing import Callable, Any, Tuple
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type
 from python_ta.typecheck.base import NoType
 settings.load_profile("pyta")
 

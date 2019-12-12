@@ -3,8 +3,8 @@ import astroid
 from pytest import skip
 from python_ta.typecheck.base import TypeFail
 from hypothesis import assume, given, settings, HealthCheck
-import tests.custom_hypothesis_support as cs
-from tests.custom_hypothesis_support import lookup_type
+from .. import custom_hypothesis_support as cs
+from ..custom_hypothesis_support import lookup_type
 from typing import Any, List
 
 settings.load_profile("pyta")

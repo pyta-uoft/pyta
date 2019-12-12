@@ -2,7 +2,7 @@ import astroid
 
 from pytest import skip
 from typing import *
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail, TypeFailStarred
 
 

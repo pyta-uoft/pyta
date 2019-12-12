@@ -1,6 +1,6 @@
 import astroid
 import typing
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 from python_ta.typecheck.base import TypeFail, TypeFailUnify, TypeFailAnnotationUnify, TypeFailFunction
 
 from pytest import skip

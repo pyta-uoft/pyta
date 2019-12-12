@@ -1,7 +1,7 @@
 language: python
 python:
-  - "3.7"
-dist: xenial
+  - "3.8"
+dist: bionic
 sudo: true
 install:
   - pip install .

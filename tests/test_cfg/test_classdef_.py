@@ -78,7 +78,7 @@ def test_class_with_one_method() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['c: int', 'd: str', '\ndef __init__(self)->None:\n    '
+        ['c: int', 'd: str', '\ndef __init__(self) -> None:\n    '
                              'self.c = 10\n    self.d = \'string\''],
         []
     ]
@@ -112,9 +112,9 @@ def test_class_with_multiple_method() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['c: int', 'd: str', '\ndef __init__(self)->None:\n    '
+        ['c: int', 'd: str', '\ndef __init__(self) -> None:\n    '
                              'self.c = 10\n    self.d = \'string\'',
-         '\ndef runner(self)->str:\n    '
+         '\ndef runner(self) -> str:\n    '
          'return \'run\''],
         []
     ]

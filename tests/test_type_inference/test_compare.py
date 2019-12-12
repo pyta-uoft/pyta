@@ -2,7 +2,7 @@ import astroid
 
 from python_ta.typecheck.base import TypeFail
 from hypothesis import given, settings, assume, HealthCheck
-import tests.custom_hypothesis_support as cs
+from .. import custom_hypothesis_support as cs
 import hypothesis.strategies as hs
 settings.load_profile("pyta")
 

@@ -118,6 +118,8 @@ class TypeStore:
 
         if hasattr(child, '__mro__') and ancestor in child.__mro__:
             return True
+        elif hasattr(ancestor, '__mro__') and Protocol in ancestor.__mro__ and issubclass(child, ancestor):
+            return True
         elif hasattr(child, '__orig_bases__'):
             for base in child.__orig_bases__:
                 if isinstance(base, _GenericAlias) and isinstance(ancestor, _GenericAlias) and \

@@ -257,7 +257,7 @@ def fix_slice(source_code):
 
         # Search the remaining source code for the "]" char.
         while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ']':
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#':
                 char_i = 0
                 line_i += 1
             else:
@@ -299,7 +299,7 @@ def fix_arguments(source_code):
             end_char = ':'
 
         while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != end_char:
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] is '#':
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#':
                 char_i = 0
                 line_i += 1
             else:

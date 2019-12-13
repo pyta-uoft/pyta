@@ -235,3 +235,11 @@ class CFGVisitor:
         self._current_cfg.multiple_link_or_merge(end_body, after_body)
         self._current_block = end_block
 
+    def visit_with(self, node: astroid.With) -> None:
+        for context_node, name in node.items:
+            self._current_block.add_statement(context_node)
+            if name is not None:
+                self._current_block.add_statement(name)
+
+        for child in node.body:
+            child.accept(self)

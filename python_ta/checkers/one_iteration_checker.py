@@ -46,6 +46,9 @@ class OneIterationChecker(BaseChecker):
         For `for` loops, it refers to the block with the assignment target.
         """
         start = node.target if isinstance(node, astroid.For) else node
+        if not hasattr(start, 'cfg_block'):
+            return False
+
         preds = start.cfg_block.predecessors
 
         if preds == []:

@@ -1,37 +1,38 @@
 from pylint.interfaces import IRawChecker
 import pycodestyle
-import io
-from contextlib import redirect_stdout
 from pylint.checkers import BaseChecker
+
+# Ignored PEP8 checks (duplicated with pylint)
+IGNORED_CHECKS = [
+    'E501'
+]
 
 
 class PycodestyleChecker(BaseChecker):
     __implements__ = IRawChecker
 
     name = 'pep8_errors'
-    msgs = {'E9989': ('Found pep8 errors (and warnings)'
-                      '%s', 'pep8-errors', '')}
+    msgs = {'E9989': ('Found PEP8 style error at %s', 'pep8-errors', '')}
 
     options = ()
     # this is important so that your checker is executed before others
     priority = -1
 
     def process_module(self, node):
-        style_checker = pycodestyle.Checker(node.stream().name)
+        style_guide = pycodestyle.StyleGuide(paths=[node.stream().name], reporter=JSONReport, ignore=IGNORED_CHECKS)
+        report = style_guide.check_files()
 
-        # catch the output of check_all() in pycodestyle
-        with io.StringIO() as buf, redirect_stdout(buf):
-            style_checker.check_all()
-            output = buf.getvalue()
+        for line_num, msg in report.get_file_results():
+            self.add_message('pep8-errors', line=line_num, args=msg)
 
-        # Handle the case of multiple error messages
-        lst = output.split('\n')
 
-        for line in lst:
-            if line != '':
-                line = line.split(':')
-                self.add_message('pep8-errors', line=line[1],
-                                 args=line[3])
+class JSONReport(pycodestyle.StandardReport):
+    def get_file_results(self):
+        self._deferred_print.sort()
+        return [
+            (line_number, f'line {line_number}, column {offset}: {text}')
+            for line_number, offset, _, text, _ in self._deferred_print
+        ]
 
 
 def register(linter):

@@ -104,7 +104,9 @@ def render_too_many_arguments(msg, source_lines=None):
 
 
 CUSTOM_MESSAGES = {
-    'missing-docstring': render_missing_docstring,
+    'missing-module-docstring': render_missing_docstring,
+    'missing-class-docstring': render_missing_docstring,
+    'missing-function-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
     'bad-whitespace': render_bad_whitespace,
     'type-annotation-return': render_type_annotation_return,

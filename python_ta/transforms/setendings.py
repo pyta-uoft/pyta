@@ -319,9 +319,6 @@ def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
     Comprehension, ExtSlice, Index, Keyword, Module, Slice.
     """
-    assert node.fromlineno is not None, \
-            'node {} doesn\'t have fromlineno set.'.format(node)
-
     try:
         first_child = next(node.get_children())
         if node.fromlineno is None:
@@ -334,9 +331,6 @@ def fix_start_attributes(node):
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
         if statement is not node:
-            assert statement.fromlineno is not None and statement.col_offset is not None, \
-                'Statement node {} doesn\'t have start attributes set.'.format(statement)
-
             if node.fromlineno is None:
                 node.fromlineno = statement.fromlineno
             if node.col_offset is None:
@@ -376,13 +370,10 @@ def set_from_last_child(node):
     elif not hasattr(last_child, 'end_lineno'):  # Newly added for Slice() node.
         set_without_children(last_child)
 
-    assert (last_child is not None and
-            last_child.end_lineno is not None and
-            last_child.end_col_offset is not None),\
-            'ERROR: last_child ({}) of node ({}) is missing attributes.'\
-            .format(last_child, node)
-
-    node.end_lineno, node.end_col_offset = last_child.end_lineno, last_child.end_col_offset
+    if last_child.end_lineno is not None:
+        node.end_lineno = last_child.end_lineno
+    if last_child.end_col_offset is not None:
+        node.end_col_offset = last_child.end_col_offset
     return node
 
 

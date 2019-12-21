@@ -1,5 +1,6 @@
 class SecretKeeper:
     """A class which stores a secret as a private attribute."""
+    _secret: str
 
     def __init__(self, secret: str) -> None:
         self._secret = secret

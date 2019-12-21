@@ -1,5 +1,6 @@
 class Animal:
     """Abstract class to be implemented by all animals."""
+    _name: str
 
     def __init__(self, name: str) -> None:
         self._name = name

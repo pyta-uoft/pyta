@@ -20,16 +20,21 @@ For greater details on the errors PyTA checks for: [Help Documentation](https://
 
 ## Installation
 
-If you're developing PyTA, simply clone this repo. If you are working on type
-inference, note that some debugging tools require [graphviz](http://www.graphviz.org/download/) 
-to be installed on your system.
+If you're interested in using PyTA, you can install it using `pip` (or `pip3`, on OSX/Linux):
 
-If you want to just check it out, you can install it using `pip`
-(or possibly `pip3` on OSX, depending on what previous versions of
-`pip` and Python you have installed):
-
-```
+```console
 > pip install python-ta
+```
+
+If you're developing PyTA, first clone this repo, and then run `pip install -e .[dev]` from inside your local copy of the repo.
+Note that some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.
+
+### Tests
+
+To run the test suite, run the following command from inside the `python_ta` directory:
+
+```console
+> python -m pytest tests  # Or python3 on OSX/Linux
 ```
 
 ## Demo
@@ -44,14 +49,6 @@ included as a library). In the Python interpreter, try running:
 [Some output should be shown]
 >>> python_ta.doc('E9999')
 ```
-
-
-## Tests
-
-We have a test suite which checks every example file to see if PyTA actually
-picks up on the error the file is supposed to illustrate.
-
-To run the tests, enter `python tests/test_examples.py` in the terminal. (If you're on a Mac, you'll likely need to do `python3 tests/test_examples.py` instead.)
 
 
 ## Contributors

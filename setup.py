@@ -32,8 +32,10 @@ setup(
     ],
     extras_require={
         'dev': [
+            'coveralls',
             'graphviz',
-            'pytest'
+            'pytest',
+            'pytest-cov'
         ]
     },
     python_requires='~=3.8',

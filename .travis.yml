@@ -4,10 +4,11 @@ python:
 dist: bionic
 sudo: true
 install:
-  - pip install .
   - sudo apt-get install graphviz
-  - pip install graphviz
+  - pip install -e .[dev]
 script:
-  - python -m pytest tests
+  - python -m pytest --cov python_ta --cov-report term-missing tests
+after_success:
+  - coveralls
 notifications:
   email: false

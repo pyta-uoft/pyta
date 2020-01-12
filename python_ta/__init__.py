@@ -92,6 +92,8 @@ def _check(module_name='', level='all', local_config='', output=None):
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
+                print('[INFO] File: {} was checked using the configuration file: {}'.format(
+                    file_py, linter.config_file))
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:
@@ -120,7 +122,6 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
-    print('[INFO] Loaded configuration file: {}'.format(config_location))
 
 
 def reset_linter(config=None, file_linted=None):

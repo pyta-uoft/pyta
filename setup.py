@@ -34,6 +34,7 @@ setup(
         'dev': [
             'coveralls',
             'graphviz',
+            'inflection',
             'pytest',
             'pytest-cov'
         ]

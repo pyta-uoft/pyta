@@ -15,8 +15,8 @@ def test_check_on_dir():
 def test_check_on_file():
     """Test files"""
     _inputs = [
-        ['nodes/Name.py'],
-        ['nodes/Dict.py', 'nodes.Const.py']
+        ['nodes/name.py'],
+        ['nodes/dict.py', 'nodes/const.py']
     ]
     for item in _inputs:
         python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
@@ -28,8 +28,8 @@ def test_check_on_bad_input():
     _inputs = [
         [222],
         222,
-        ['nodes/Dict.py nodes/Const.py'],
-        [222, 'examples/inline_config_comment.py', 'nodes/Dict.py'],
+        ['nodes/dict.py nodes/const.py'],
+        [222, 'examples/inline_config_comment.py', 'nodes/dict.py'],
         ['file_does_not_exist']
     ]
     for item in _inputs:
@@ -38,7 +38,7 @@ def test_check_on_bad_input():
 def test_check_with_config():
     """Test inputs along with a config arg."""
     _inputs = [
-        ['nodes/Const.py'],
+        ['nodes/const.py'],
         ['nodes']
     ]
     CONFIG = {

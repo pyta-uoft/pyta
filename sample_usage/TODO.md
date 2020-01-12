@@ -7,7 +7,7 @@
     AnnAssign Node:
         An AttributeError is raised because the transformer did not add
         'end_lineno' attribute to the AnnAssign node. In the current example
-        found in `nodes/AnnAssign.py`, only the last statement has the
+        found in `nodes/ann_assign.py`, only the last statement has the
         'end_lineno' attribute added to it.
     
     DictUnpack Node:

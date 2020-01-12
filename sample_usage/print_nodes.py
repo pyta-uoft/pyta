@@ -3,6 +3,7 @@
 import astroid
 import colorama
 from colorama import Fore, Back, Style
+import inflection
 import python_ta.transforms.setendings as setendings
 import os 
 
@@ -74,7 +75,8 @@ def print_node(filename, node_class):
 if __name__ == '__main__':
     for node_class in astroid.ALL_NODE_CLASSES:
         print('=== {} ==='.format(node_class.__name__))
-        file_location = 'nodes/' + node_class.__name__ + '.py'
+        file_location = 'nodes/' + \
+            inflection.underscore(node_class.__name__) + '.py'
         try:
             print_node(file_location, node_class)
         except FileNotFoundError:

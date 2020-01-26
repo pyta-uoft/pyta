@@ -2,6 +2,7 @@ import os
 import os.path
 import subprocess
 import re
+import pytest
 
 
 _EXAMPLES_PATH = 'examples/pylint/'
@@ -13,7 +14,11 @@ IGNORED_TESTS = [
     'E1130_invalid_unary_operand_type.py',
     'E1131_unsupported_binary_operation.py',
     'W0222_signature_differs.py',
-    'R0912_too_many_branches.py'
+    'R0912_too_many_branches.py',
+    'E0118_used_prior_global_declaration.py', #This one and below have been added 01/16/2019
+    'W0125_using_constant_test.py',
+    'W0631_undefined_loop_variable.py',
+    'W1503_redundant_unittest_assert.py'
 ]
 
 
@@ -55,14 +60,14 @@ def create_checker(test_file, checker_name):
     return new_test_func
 
 
-def test_examples_files():
+@pytest.mark.parametrize("test_file", get_file_paths())
+def test_examples_files(test_file):
     """Creates all the new unit tests dynamically from the testing directory."""
-    for test_file in get_file_paths():
-        base_name = os.path.basename(test_file)
-        if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
-            assert False
-        if not base_name.lower().endswith('.py'):
-            assert False
-        checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.
-        test_function = create_checker(test_file, checker_name)
-        yield test_function
+    base_name = os.path.basename(test_file)
+    if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
+        assert False
+    if not base_name.lower().endswith('.py'):
+        assert False
+    checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.
+    test_function = create_checker(test_file, checker_name)
+    test_function()

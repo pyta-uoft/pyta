@@ -90,3 +90,34 @@ def test_my_sum_one_pre_violation() -> None:
 
     msg = str(excinfo.value)
     assert 'len(numbers) > 2' in msg
+
+# Checking to see if functions we defined are in-scope for preconditions
+
+
+def is_even(lst: List[int]) -> bool:
+    return all([(not x & 1) for x in lst])
+
+
+@check_contracts
+def _is_even_sum(numbers: List[int]) -> int:
+    """Return the sum of a list of numbers.
+
+    Precondition: is_even(numbers)
+    """
+    return sum(numbers)
+
+
+def test_is_even_sum_valid() -> None:
+    """Calling _is_even_sum on a valid input."""
+    assert _is_even_sum([2, 4, 6]) == 12
+
+
+def test_is_even_sum_violation() -> None:
+    """Calling _is_even_sum one a value of the right type,
+    but that violates the docstring precondition.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        _is_even_sum([1, 2])
+
+    msg = str(excinfo.value)
+    assert 'is_even(numbers)' in msg

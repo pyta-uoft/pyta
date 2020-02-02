@@ -3,6 +3,10 @@ import typing
 import wrapt
 
 
+class InvalidPrecondition(Exception):
+    """Exception raised when precondition is invalid
+    """
+
 @wrapt.decorator
 def check_contracts(wrapped, _instance, args, kwargs):
     params = wrapped.__code__.co_varnames[:wrapped.__code__.co_argcount]
@@ -10,26 +14,26 @@ def check_contracts(wrapped, _instance, args, kwargs):
     for arg, param in zip(args, params):
         if param in annotations:
             assert check_type_annotation(annotations[param], arg),\
-                   f'Argument {repr(arg)} did not match type annotation for parameter "{param}: {annotations[param]}"'
+                f'Argument {repr(arg)} did not match type annotation for parameter "{param}: {annotations[param]}"'
 
     preconditions = parse_preconditions(wrapped.__doc__ or '')
     function_locals = dict(zip(params, args))
     for precondition in preconditions:
         try:
-            check = eval(precondition, globals(), function_locals)
+            check = eval(precondition, wrapped.__globals__, function_locals)
         except:
             # TODO: Decide what to do here, e.g. "Invalid precondition"
-            pass
+            raise InvalidPrecondition(
+                f'Error evaluating precondition: {precondition}')
         else:
             assert check,\
-                   f'Precondition "{precondition}" violated for arguments {function_locals}'
+                f'Precondition "{precondition}" violated for arguments {function_locals}'
     r = wrapped(*args, **kwargs)
     if 'return' in annotations:
         return_type = annotations['return']
         assert check_type_annotation(return_type, r),\
             f'Return value {r} does not match annotated return type {return_type.__name__}'
     return r
-
 
 def check_type_annotation(annotation: Optional[type], v: Any) -> bool:
     """Return whether v is compatible with the given type annotation."""

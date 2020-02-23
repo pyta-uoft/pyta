@@ -81,4 +81,5 @@ def test_change_age_invalid_in_method() -> None:
     Expects normal behavior.
     """
     age = p1.decrease_and_increase_age(10)
-    assert age == 10 
+    assert age == 10
+    

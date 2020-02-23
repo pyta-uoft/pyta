@@ -4,10 +4,9 @@ import inspect
 import wrapt
 
 
-class InvalidCondition(Exception):
-    """Exception raised when a condition is invalid
+class InvalidAssertion(Exception):
+    """Exception raised when a Assertion is invalid
     """
-
 
 @wrapt.decorator
 def check_contracts(wrapped, instance, args, kwargs):
@@ -20,6 +19,18 @@ def add_class_contracts(wrapped, args, kwargs):
     rep_invariants = parse_conditions(
         wrapped.__doc__ or '', parse_token="Representation Invariant")
     setattr(wrapped, "__representation_invariants__", rep_invariants)
+
+    def new_setattr(self, name, value):
+        super_class = wrapped.__mro__[1]
+        super_class.__setattr__(self, name, value)
+        curframe = inspect.currentframe()
+        callframe = inspect.getouterframes(curframe, 2)
+        if callframe[1][3] not in wrapped.__dict__:
+            # Only validating if the attribute is not being set in a instance/class method
+            validate_invariants(wrapped, self)
+
+    wrapped.__setattr__ = new_setattr
+
     return wrapped(*args, **kwargs)
 
 
@@ -52,17 +63,30 @@ def check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def validate_conditions(wrapped, function_locals, conditions):
-    for condition in conditions:
+def validate_invariants(cls, instance):
+    for invariant in type(instance).__representation_invariants__:
         try:
-            check = eval(condition, wrapped.__globals__, function_locals)
+            check = eval(invariant, {"self": instance})
         except:
-            # TODO: Decide what to do here, e.g. "Invalid condition"
-            raise InvalidCondition(
-                f'Error evaluating condition: {condition}')
+            # TODO: Decide what to do here, e.g. "Invalid invariant"
+            raise InvalidAssertion(
+                f'Error evaluating invariant: {invariant}')
         else:
             assert check,\
-                f'Condition "{condition}" violated for arguments {function_locals}'
+                f'Invariant "{invariant}" violated.'
+
+
+def validate_conditions(wrapped, function_locals, assertions):
+    for assertion in assertions:
+        try:
+            check = eval(assertion, wrapped.__globals__, function_locals)
+        except:
+            # TODO: Decide what to do here, e.g. "Invalid assertion"
+            raise InvalidAssertion(
+                f'Error evaluating assertion: {assertion}')
+        else:
+            assert check,\
+                f'Assertion "{assertion}" violated for arguments {function_locals}'
 
 
 def check_type_annotation(annotation: Optional[type], v: Any) -> bool:

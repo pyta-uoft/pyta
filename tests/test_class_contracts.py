@@ -11,7 +11,8 @@ class Person():
     - self.age > 0
     - len(self.name) > 0
     """
-
+    
+    @check_contracts
     def __init__(self, name, age):
         self.name = name
         self.age = age
@@ -26,6 +27,12 @@ class Person():
         """
         Precondition: age < 150
         """
+        self.age = age
+        return age
+    
+    @check_contracts
+    def decrease_and_increase_age(self, age: int) -> int:
+        self.age = -10
         self.age = age
         return age
 
@@ -46,7 +53,7 @@ def test_change_name_valid() -> None:
     """
     Change the name using a valid name.
     """
-    p1.change_name("Ignas")
+    p1.name = "Ignas"
     assert p1.name == "Ignas"
 
 def test_change_name_invalid() -> None:
@@ -63,6 +70,15 @@ def test_change_age_invalid_under() -> None:
     Change the age to a negative number. Expect an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
-        p1.change_age(-10)
+        p1.change_name("David") # Changing it back to a valid value.
+        p1.age = -10
     msg = str(excinfo.value)
     assert 'self.age > 0' in msg
+
+def test_change_age_invalid_in_method() -> None:
+    """
+    Call a method that changes age to something invalid but back to something valid.
+    Expects normal behavior.
+    """
+    age = p1.decrease_and_increase_age(10)
+    assert age == 10 

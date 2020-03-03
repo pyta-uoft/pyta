@@ -26,7 +26,7 @@ class GlobalVariablesChecker(BaseChecker):
         args = "the keyword 'global' is used on line {}".format(node.lineno)
         self.add_message('forbidden-global-variables', node=node, args=args)
 
-    def visit_assign(self, node):
+    def visit_assignname(self, node):
         """Allow global constant variables (uppercase), but issue messages for
         all other globals.
         """

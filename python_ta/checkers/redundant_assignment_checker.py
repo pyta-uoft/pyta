@@ -43,6 +43,11 @@ class RedundantAssignmentChecker(BaseChecker):
         if node in self._redundant_assignment:
             self.add_message('redundant-assignment', node=node)
 
+    @check_messages('redundant-assignment')
+    def visit_augassign(self, node: astroid.AugAssign):
+        if node in self._redundant_assignment:
+            self.add_message('redundant-assignment', node=node)
+
     def visit_module(self, node: astroid.Module):
         self._analyze(node)
 
@@ -97,7 +102,12 @@ class RedundantAssignmentChecker(BaseChecker):
                     elif node.parent in self._redundant_assignment:
                         self._redundant_assignment.remove(node.parent)
 
-                    kill.discard(node.name)
+                    # When node.parent is an AugAssign, the name counts as a use of the variable,
+                    # and so is added to kill.
+                    if isinstance(node.parent, astroid.AugAssign):
+                        kill.add(node.name)
+                    else:
+                        kill.discard(node.name)
                     gen.add(node.name)
                 elif isinstance(node, (astroid.Nonlocal, astroid.Global)):
                     kill.difference_update(set(node.names))

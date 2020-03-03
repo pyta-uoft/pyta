@@ -203,3 +203,55 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         self.checker.visit_module(mod)
         with self.assertNoMessages():
             self.checker.visit_assign(assign_x)
+
+    def test_augassign_simple_no_message(self):
+        src = """
+        y_pos = 5
+        y_pos += 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+
+        self.checker.visit_module(mod)
+        with self.assertNoMessages():
+            for node in mod.nodes_of_class(astroid.Assign):
+                self.checker.visit_assign(node)
+            for node in mod.nodes_of_class(astroid.AugAssign):
+                self.checker.visit_augassign(node)
+
+    def test_augassign_multiple_no_message(self):
+        src = """
+        y_pos = 5
+        y_pos += 10
+        y_pos += 10
+        y_pos += 10
+        y_pos += 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+
+        self.checker.visit_module(mod)
+        with self.assertNoMessages():
+            for node in mod.nodes_of_class(astroid.Assign):
+                self.checker.visit_assign(node)
+            for node in mod.nodes_of_class(astroid.AugAssign):
+                self.checker.visit_augassign(node)
+
+    def test_augassign_redundant(self):
+        src = """
+        y_pos = 5
+        y_pos += 10
+        y_pos = 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        augassign_node, *_ = mod.nodes_of_class(astroid.AugAssign)
+
+        self.checker.visit_module(mod)
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='redundant-assignment',
+                    node=augassign_node,
+                )
+        ):
+            self.checker.visit_augassign(augassign_node)

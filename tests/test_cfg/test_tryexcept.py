@@ -32,6 +32,21 @@ def test_simple() -> None:
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
+def test_named_exception() -> None:
+    src = """
+    try:
+        print(True)
+    except Exception as e:
+        pass
+    """
+    expected_blocks = [
+        ['print(True)'],
+        ['e', 'pass'],
+        []  # end block
+    ]
+    assert _extract_blocks(build_cfg(src)) == expected_blocks
+
+
 
 def test_before_after() -> None:
     src = """
@@ -67,7 +82,7 @@ def test_multiple_exceptions() -> None:
         ['print(True)'],
         ['pass'],
         [],  # end block
-        ['pass'],
+        ['k', 'pass'],
         ['print(\'else\')']
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks

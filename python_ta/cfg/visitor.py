@@ -217,6 +217,8 @@ class CFGVisitor:
             h = self._current_cfg.create_block()
             self._current_block = h
             handler.cfg_block = h
+            if handler.name is not None:   # The name assigned to the caught exception.
+                handler.name.accept(self)
             for child in handler.body:
                 child.accept(self)
             end_handler = self._current_block

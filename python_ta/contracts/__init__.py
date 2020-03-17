@@ -30,9 +30,7 @@ def add_class_contracts(wrapped, args, kwargs):
         frame_members = dict((name, member) for name,
                              member in inspect.getmembers(callframe[1].frame))
         frame_locals = frame_members['f_locals']
-        if 'self' in frame_locals and self is frame_locals['self']:
-            return
-        else:
+        if self is not frame_locals.get('self'):
             # Only validating if the attribute is not being set in a instance/class method
             check_invariants(self)
 

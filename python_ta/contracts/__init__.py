@@ -32,7 +32,8 @@ def add_class_contracts(wrapped, args, kwargs):
         frame_locals = frame_members['f_locals']
         if self is not frame_locals.get('self'):
             # Only validating if the attribute is not being set in a instance/class method
-            check_invariants(self)
+            init = getattr(wrapped, "__init__")
+            check_invariants(self, init.__globals__)
 
     for attr in wrapped.__dict__:
         if callable(getattr(wrapped, attr)):
@@ -62,7 +63,8 @@ def check_function_contracts(wrapped, instance, args, kwargs):
     r = wrapped(*args, **kwargs)
 
     if instance and hasattr(type(instance), "__representation_invariants__"):
-        check_invariants(instance)
+        init = getattr(instance, "__init__")
+        check_invariants(instance, init.__globals__)
 
     if 'return' in annotations:
         return_type = annotations['return']
@@ -71,13 +73,13 @@ def check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def check_invariants(instance):
+def check_invariants(instance, global_scope):
     """
     Checks to see if the representation invariants for the instance are satisfied.
     """
     for invariant in type(instance).__representation_invariants__:
         try:
-            check = eval(invariant, {"self": instance})
+            check = eval(invariant, global_scope, {"self": instance})
         except:
             # TODO: Decide what to do here, e.g. "Invalid invariant"
             raise InvalidAssertion(

@@ -27,9 +27,16 @@ def add_class_contracts(wrapped, args, kwargs):
         super_class.__setattr__(self, name, value)
         curframe = inspect.currentframe()
         callframe = inspect.getouterframes(curframe, 2)
-        if callframe[1][3] not in wrapped.__dict__:
+        frame_members = dict((name, member) for name,
+                             member in inspect.getmembers(callframe[1].frame))
+        frame_locals = frame_members['f_locals']
+        if self is not frame_locals.get('self'):
             # Only validating if the attribute is not being set in a instance/class method
             check_invariants(self)
+
+    for attr in wrapped.__dict__:
+        if callable(getattr(wrapped, attr)):
+            setattr(wrapped, attr, check_contracts(getattr(wrapped, attr)))
 
     wrapped.__setattr__ = new_setattr
 

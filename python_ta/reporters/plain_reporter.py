@@ -93,12 +93,16 @@ class PlainReporter(BaseReporter):
         self._output_filepath = None
         self.current_file_linted = None
 
+    def reset_sorted_messages(self):
+        """Reset the reporter's sorted messages, for multiple files."""
+        self._sorted_error_messages.clear()
+        self._sorted_style_messages.clear()
+
     def reset_messages(self):
         """Reset the reporter's messages, for multiple files."""
         self._error_messages = []
         self._style_messages = []
-        self._sorted_error_messages.clear()
-        self._sorted_style_messages.clear()
+        self.reset_sorted_messages()
 
     def handle_message(self, msg):
         """Handle a new message triggered on the current file."""
@@ -122,6 +126,7 @@ class PlainReporter(BaseReporter):
 
     def sort_messages(self):
         """Sort the messages by their type (message id)."""
+        self.reset_sorted_messages()
         for msg in self._error_messages:
             self._sorted_error_messages[msg.msg_id].append(msg)
         for msg in self._style_messages:

@@ -59,6 +59,10 @@ def add_class_contracts(wrapped, args, kwargs):
             setattr(wrapped, attr, instance_method_wrapper(
                 getattr(wrapped, attr), rep_invariants))
 
+    for attr in wrapped.__dict__:
+        if callable(getattr(wrapped, attr)):
+            setattr(wrapped, attr, check_contracts(getattr(wrapped, attr)))
+
     wrapped.__setattr__ = new_setattr
 
     return wrapped(*args, **kwargs)

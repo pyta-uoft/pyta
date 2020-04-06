@@ -32,9 +32,13 @@ def instance_method_wrapper(wrapped, rep_invariants=None):
 
 
 def add_class_contracts(wrapped, args, kwargs):
+    if "__representation_invariants__" in wrapped.__dict__:
+        # This means it has already been decorated
+        return wrapped(*args, **kwargs)
+
     rep_invariants = []
 
-    # Iterating over all inhertied classes except Object
+    # Iterating over all inherited classes except Object
     for cls in wrapped.__mro__[:-1]:
         rep_invariants.extend(parse_assertions(
             cls.__doc__ or '', parse_token="Representation Invariant"))
@@ -58,10 +62,6 @@ def add_class_contracts(wrapped, args, kwargs):
         if callable(getattr(wrapped, attr)):
             setattr(wrapped, attr, instance_method_wrapper(
                 getattr(wrapped, attr), rep_invariants))
-
-    for attr in wrapped.__dict__:
-        if callable(getattr(wrapped, attr)):
-            setattr(wrapped, attr, check_contracts(getattr(wrapped, attr)))
 
     wrapped.__setattr__ = new_setattr
 

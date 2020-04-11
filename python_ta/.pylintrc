@@ -20,6 +20,9 @@ pyta-template-file = template.html
 # Set the output file name for HTMLreporter.
 pyta-output-file = pyta_report.html
 
+# Set whether you wish to opt-in to anonymous data submission
+pyta-upload-permission = no
+
 [ELIF]
 
 # Set maximum allowed if nesting.

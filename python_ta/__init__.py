@@ -26,6 +26,8 @@ import os
 import sys
 import tokenize
 import webbrowser
+import requests
+import uuid
 
 import pylint.lint
 import pylint.utils
@@ -77,6 +79,9 @@ def _check(module_name='', level='all', local_config='', output=None):
     current_reporter = reset_reporter(linter, output)
     patch_all()  # Monkeypatch pylint (override certain methods)
 
+    #Paths to files for upload
+    f_paths = []
+
     # Try to check file, issue error message for invalid files.
     try:
         for locations in _get_valid_files_to_check(current_reporter, module_name):
@@ -92,8 +97,31 @@ def _check(module_name='', level='all', local_config='', output=None):
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
+                f_paths.append(file_py) # Appending paths for (potential) upload
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
                     file_py, linter.config_file))
+
+        if linter.config.pyta_upload_permission:
+            files = []
+            for path in f_paths:
+                f = open(path, 'rb')
+                files.append(f)
+            upload = {str(i):f for i,f in enumerate(files)}
+            cfg = open(linter.config_file, 'rb')
+            upload['config'] = cfg
+            try:
+                requests.post(
+                    url='http://127.0.0.1:5000',
+                    files=upload,
+                    # Sending just the mac address portion of the UUID
+                    data={'id': str(uuid.uuid1())[24:]})
+                for f in upload.values(): # Closing files after uploading
+                    f.close()
+            except Exception as e:
+                print('[ERROR] Upload failed')
+                print('[ERROR] Error message: "{}"'.format(e))
+                pass
+
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:
@@ -167,6 +195,11 @@ def reset_linter(config=None, file_linted=None):
              'type': 'string',
              'metavar': '<pyta_reporter>',
              'help': 'Output file for htmlreporter.'}),
+        ('pyta-upload-permission',
+         {'default': False,
+          'type': 'yn',
+          'metavar': '<yn>',
+          'help': 'Permission to anonymously submit data'})
     )
 
     custom_checkers = [

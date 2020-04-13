@@ -36,12 +36,16 @@ def add_class_contracts(wrapped, args, kwargs):
         # This means it has already been decorated
         return wrapped(*args, **kwargs)
 
-    rep_invariants = []
+    rep_invariants = set()
 
     # Iterating over all inherited classes except Object
     for cls in wrapped.__mro__[:-1]:
-        rep_invariants.extend(parse_assertions(
-            cls.__doc__ or '', parse_token="Representation Invariant"))
+        if "__representation_invariants__" in cls.__dict__:
+            rep_invariants = rep_invariants.union(
+                cls.__representation_invariants__)
+        else:
+            rep_invariants.update(parse_assertions(
+                cls.__doc__ or '', parse_token="Representation Invariant"))
 
     setattr(wrapped, "__representation_invariants__", rep_invariants)
 

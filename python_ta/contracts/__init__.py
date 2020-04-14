@@ -17,13 +17,40 @@ def check_contracts(wrapped, instance, args, kwargs):
         return check_function_contracts(wrapped, instance, args, kwargs)
 
 
+def instance_method_wrapper(wrapped, rep_invariants=None):
+    if rep_invariants is None:
+        return check_contracts
+
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs):
+        r = check_function_contracts(wrapped, instance, args, kwargs)
+        init = getattr(instance, "__init__")
+        check_invariants(instance, rep_invariants, init.__globals__)
+        return r
+
+    return wrapper(wrapped)
+
+
 def add_class_contracts(wrapped, args, kwargs):
-    rep_invariants = parse_assertions(
-        wrapped.__doc__ or '', parse_token="Representation Invariant")
+    if "__representation_invariants__" in wrapped.__dict__:
+        # This means it has already been decorated
+        return wrapped(*args, **kwargs)
+
+    rep_invariants = set()
+
+    # Iterating over all inherited classes except Object
+    for cls in wrapped.__mro__[:-1]:
+        if "__representation_invariants__" in cls.__dict__:
+            rep_invariants = rep_invariants.union(
+                cls.__representation_invariants__)
+        else:
+            rep_invariants.update(parse_assertions(
+                cls.__doc__ or '', parse_token="Representation Invariant"))
+
     setattr(wrapped, "__representation_invariants__", rep_invariants)
 
     def new_setattr(self, name, value):
-        super_class = wrapped.__mro__[1]
+        super_class = wrapped.__mro__[-1]
         super_class.__setattr__(self, name, value)
         curframe = inspect.currentframe()
         callframe = inspect.getouterframes(curframe, 2)
@@ -32,11 +59,13 @@ def add_class_contracts(wrapped, args, kwargs):
         frame_locals = frame_members['f_locals']
         if self is not frame_locals.get('self'):
             # Only validating if the attribute is not being set in a instance/class method
-            check_invariants(self)
+            init = getattr(wrapped, "__init__")
+            check_invariants(self, rep_invariants, init.__globals__)
 
     for attr in wrapped.__dict__:
         if callable(getattr(wrapped, attr)):
-            setattr(wrapped, attr, check_contracts(getattr(wrapped, attr)))
+            setattr(wrapped, attr, instance_method_wrapper(
+                getattr(wrapped, attr), rep_invariants))
 
     wrapped.__setattr__ = new_setattr
 
@@ -61,9 +90,6 @@ def check_function_contracts(wrapped, instance, args, kwargs):
 
     r = wrapped(*args, **kwargs)
 
-    if instance and hasattr(type(instance), "__representation_invariants__"):
-        check_invariants(instance)
-
     if 'return' in annotations:
         return_type = annotations['return']
         assert check_type_annotation(return_type, r),\
@@ -71,13 +97,13 @@ def check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def check_invariants(instance):
+def check_invariants(instance, rep_invariants, global_scope):
     """
     Checks to see if the representation invariants for the instance are satisfied.
     """
-    for invariant in type(instance).__representation_invariants__:
+    for invariant in rep_invariants:
         try:
-            check = eval(invariant, {"self": instance})
+            check = eval(invariant, global_scope, {"self": instance})
         except:
             # TODO: Decide what to do here, e.g. "Invalid invariant"
             raise InvalidAssertion(

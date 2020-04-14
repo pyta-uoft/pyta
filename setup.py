@@ -28,7 +28,7 @@ setup(
         'six',
         'jinja2',
         'pygments',
-        'wrapt'
+        'wrapt>=1.12.0'
     ],
     extras_require={
         'dev': [

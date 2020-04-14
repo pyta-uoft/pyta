@@ -2,6 +2,10 @@ import pytest
 from python_ta.contracts import check_contracts
 
 
+def is_valid_name(name):
+    return name.isalpha()
+
+
 @check_contracts
 class Person:
     """
@@ -10,6 +14,7 @@ class Person:
     Representation Invariants: 
     - self.age > 0
     - len(self.name) > 0
+    - is_valid_name(self.name)
     """
 
     def __init__(self, name, age):
@@ -58,7 +63,7 @@ def test_change_name_valid() -> None:
     assert p1.name == "Ignas"
 
 
-def test_change_name_invalid() -> None:
+def test_change_name_invalid_len() -> None:
     """
     Change the name using a valid name.
     """
@@ -66,6 +71,16 @@ def test_change_name_invalid() -> None:
         p1.change_name("")
     msg = str(excinfo.value)
     assert 'len(self.name) > 0' in msg
+
+def test_change_name_invalid_nonalpha() -> None:
+    """
+    Change name to contain non-alphabet characters. Expect an exception.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        p1.change_name("David")  # Changing it back to a valid value.
+        p1.name = "$$"
+    msg = str(excinfo.value)
+    assert 'is_valid_name(self.name)' in msg
 
 
 def test_change_age_invalid_under() -> None:

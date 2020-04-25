@@ -1,4 +1,5 @@
 from typing import Any, List, Optional
+import sys
 import typing
 import inspect
 import wrapt
@@ -9,10 +10,24 @@ class InvalidAssertion(Exception):
     """
 
 
+def check_all_contracts(module_name=''):
+    if module_name == '':
+        module = sys.modules['__main__']
+    else:
+        module = sys.modules[module_name]
+
+    for name, value in inspect.getmembers(module):
+        if inspect.isfunction(value):
+            module.__dict__[name] = check_contracts(value)
+        elif inspect.isclass(value):
+            add_class_invariants(value)
+
+
 @wrapt.decorator
 def check_contracts(wrapped, instance, args, kwargs):
-    if instance is None and inspect.isclass(wrapped):
-        return add_class_contracts(wrapped, args, kwargs)
+    if instance and inspect.isclass(instance):
+        # This is a class method, so there is no instance.
+        return check_function_contracts(wrapped, None, args, kwargs)
     else:
         return check_function_contracts(wrapped, instance, args, kwargs)
 
@@ -23,30 +38,37 @@ def instance_method_wrapper(wrapped, rep_invariants=None):
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
-        r = check_function_contracts(wrapped, instance, args, kwargs)
-        init = getattr(instance, "__init__")
-        check_invariants(instance, rep_invariants, init.__globals__)
+        if instance and inspect.isclass(instance):
+            # This is a class method, so there is no instance.
+            return check_function_contracts(wrapped, None, args, kwargs)
+        else:
+            r = check_function_contracts(wrapped, instance, args, kwargs)
+
+        print(instance)
+        if instance:
+            init = getattr(instance, "__init__")
+            check_invariants(instance, rep_invariants, init.__globals__)
         return r
 
     return wrapper(wrapped)
 
 
-def add_class_contracts(wrapped, args, kwargs):
-    if "__representation_invariants__" in wrapped.__dict__:
+def add_class_invariants(klass):
+    if "__representation_invariants__" in klass.__dict__:
         # This means it has already been decorated
-        return wrapped(*args, **kwargs)
+        return
 
     rep_invariants = []
 
     # Iterating over all inherited classes except Object
-    for cls in wrapped.__mro__[:-1]:
+    for cls in klass.__mro__[:-1]:
         rep_invariants.extend(parse_assertions(
             cls.__doc__ or '', parse_token="Representation Invariant"))
 
-    setattr(wrapped, "__representation_invariants__", rep_invariants)
+    setattr(klass, "__representation_invariants__", rep_invariants)
 
     def new_setattr(self, name, value):
-        super_class = wrapped.__mro__[-1]
+        super_class = klass.__mro__[-1]
         super_class.__setattr__(self, name, value)
         curframe = inspect.currentframe()
         callframe = inspect.getouterframes(curframe, 2)
@@ -55,17 +77,20 @@ def add_class_contracts(wrapped, args, kwargs):
         frame_locals = frame_members['f_locals']
         if self is not frame_locals.get('self'):
             # Only validating if the attribute is not being set in a instance/class method
-            init = getattr(wrapped, "__init__")
+            init = getattr(klass, "__init__")
             check_invariants(self, rep_invariants, init.__globals__)
 
-    for attr in wrapped.__dict__:
-        if callable(getattr(wrapped, attr)):
-            setattr(wrapped, attr, instance_method_wrapper(
-                getattr(wrapped, attr), rep_invariants))
+    for attr in klass.__dict__:
+        value = klass.__dict__[attr]
+        if inspect.isroutine(value):
+            if isinstance(value, staticmethod) or isinstance(value, classmethod):
+                # Don't check rep invariants for staticmethod and classmethod
+                setattr(klass, attr, check_contracts(value))
+            else:
+                setattr(klass, attr, instance_method_wrapper(
+                    value, rep_invariants))
 
-    wrapped.__setattr__ = new_setattr
-
-    return wrapped(*args, **kwargs)
+    klass.__setattr__ = new_setattr
 
 
 def check_function_contracts(wrapped, instance, args, kwargs):

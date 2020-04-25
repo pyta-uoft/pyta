@@ -1,60 +1,117 @@
 import pytest
-from python_ta.contracts import check_contracts
+from python_ta.contracts import check_all_contracts
 
-
-@check_contracts
-class Animal:
+class Employee:
     """
-    Represents animals
+    Represents an employee
 
     Representation Invariants:
-    - self.num_legs >= 2
-    - len(self.diet) > 0
+    - len(self.name) > 0
+    - self.wage >= 15
     """
 
-    def __init__(self, num_legs, diet):
-        self.num_legs = num_legs
-        self.diet = diet
+    def __init__(self, name, wage):
+        self.name = name
+        self.wage = wage
+
+    def change_wages(self, new_wage):
+        """
+        Precondition: self.wage < new_wage
+        """
+        self.wage = new_wage
 
 
-@check_contracts
-class Bird(Animal):
+class Developer(Employee):
     """
+    Represents a sofware developer
+
     Representation Invariants:
-    - self.wing_span > 0
+    - self.preferred_language == "Python" or self.preferred_language == "Java"
     """
 
-    def __init__(self, num_legs, diet, wing_span):
-        super().__init__(num_legs, diet)
-        self.wing_span = wing_span
+    def __init__(self, name, wage, preferred_language):
+        Employee.__init__(self, name, wage)
+        self.preferred_language = preferred_language
 
 
-birdie = Bird(2, "Omnivore", 10.3)
-
-
-def test_change_wingspan_valid() -> None:
+class TeamMember:
     """
-    Change the wing_span to a valid value.
+    Represents a person on a team
+
+    Representation Invariants:
+    - len(self.team) > 0
     """
-    birdie.wing_span = 9.5
+
+    def __init__(self, team):
+        self.team = team
 
 
-def test_change_diet_invalid() -> None:
+class TeamLead(Developer, TeamMember):
     """
-    Change diet to something invalid. Expect exception.
+    Represents a team lead
+
+    Representation Invariants:
+    - self.wage >= 30
+    """
+
+    def __init__(self, name, wage, preferred_language, team):
+        Developer.__init__(self, name, wage, preferred_language)
+        TeamMember.__init__(self, team)
+
+# Decorating everything in this file
+check_all_contracts(__name__)
+
+@pytest.fixture
+def developer():
+    return Developer("Ibrahim", 35, "Python")
+
+
+@pytest.fixture
+def teamlead():
+    return TeamLead("David", 50, "Python", "PyTA")
+
+
+def test_change_developer_wage_lower(developer) -> None:
+    """
+    Change the wage to a lower amount, expect an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
-        birdie.diet = ""
+        developer.change_wages(25)
     msg = str(excinfo.value)
-    assert 'len(self.diet)' in msg
+    assert 'self.wage < new_wage' in msg
 
 
-def test_change_wingspan_invalid() -> None:
+def test_increase_teamlead_wages(teamlead):
     """
-    Change wingspan to something invalid. Expect exception.
+    Increases the wages of the team lead.
+    """
+    teamlead.change_wages(75)
+    assert teamlead.wage == 75
+
+
+def test_decrease_teamlead_wages(teamlead):
+    """
+    Decrease the wages of the team lead to below 30. Expect an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
-        birdie.diet = "Omnivore"  # Change it back to a valid value
-        birdie.wing_span = 0
+        teamlead.wage = 20
     msg = str(excinfo.value)
-    assert 'self.wing_span > 0' in msg
+    assert 'self.wage >= 30' in msg
+
+
+def test_change_teamlead_language(teamlead):
+    """
+    Change the preferred language to a wrong value. Expect an exception.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        teamlead.preferred_language = "C++"
+    msg = str(excinfo.value)
+    assert 'self.preferred_language == "Python" or self.preferred_language == "Java"' in msg
+
+
+def test_change_teamlead_name(teamlead):
+    """
+    Change the name of the teamlead.
+    """
+    teamlead.name = "Ignas"
+    assert teamlead.name == "Ignas"

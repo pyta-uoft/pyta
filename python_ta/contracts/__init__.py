@@ -38,16 +38,9 @@ def instance_method_wrapper(wrapped, rep_invariants=None):
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
-        if instance and inspect.isclass(instance):
-            # This is a class method, so there is no instance.
-            return check_function_contracts(wrapped, None, args, kwargs)
-        else:
-            r = check_function_contracts(wrapped, instance, args, kwargs)
-
-        print(instance)
-        if instance:
-            init = getattr(instance, "__init__")
-            check_invariants(instance, rep_invariants, init.__globals__)
+        r = check_function_contracts(wrapped, instance, args, kwargs)
+        init = getattr(instance, "__init__")
+        check_invariants(instance, rep_invariants, init.__globals__)
         return r
 
     return wrapper(wrapped)
@@ -58,12 +51,16 @@ def add_class_invariants(klass):
         # This means it has already been decorated
         return
 
-    rep_invariants = []
+    rep_invariants = set()
 
     # Iterating over all inherited classes except Object
     for cls in klass.__mro__[:-1]:
-        rep_invariants.extend(parse_assertions(
-            cls.__doc__ or '', parse_token="Representation Invariant"))
+        if "__representation_invariants__" in cls.__dict__:
+             rep_invariants = rep_invariants.union(
+                 cls.__representation_invariants__)
+        else:
+            rep_invariants.update(parse_assertions(
+                cls.__doc__ or '', parse_token="Representation Invariant"))
 
     setattr(klass, "__representation_invariants__", rep_invariants)
 

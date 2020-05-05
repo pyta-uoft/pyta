@@ -21,7 +21,7 @@ pyta-template-file = template.html
 pyta-output-file = pyta_report.html
 
 # Set whether you wish to opt-in to anonymous data submission
-pyta-upload-permission = no
+pyta-upload-permission = yes
 
 [ELIF]
 

@@ -106,15 +106,15 @@ def _check(module_name='', level='all', local_config='', output=None):
             for path in f_paths:
                 f = open(path, 'rb')
                 files.append(f)
-            upload = {str(i):f for i,f in enumerate(files)}
-            cfg = open(linter.config_file, 'rb')
-            upload['config'] = cfg
+            upload = {str(i):f for i,f in enumerate(files)} #dummy keys for files since requests require passing a dict
+            if linter.config_file != _find_local_config(os.path.dirname(__file__)): # If default config used, don't include in files
+                cfg = open(linter.config_file, 'rb')
+                upload['config'] = cfg
             try:
                 requests.post(
                     url='http://127.0.0.1:5000',
                     files=upload,
-                    # Sending just the mac address portion of the UUID
-                    data={'id': str(uuid.uuid1())[24:]})
+                    data={'id': str(uuid.uuid1())})
                 for f in upload.values(): # Closing files after uploading
                     f.close()
             except Exception as e:

@@ -1,6 +1,7 @@
 import pytest
 from python_ta.contracts import check_all_contracts
 
+
 class Employee:
     """
     Represents an employee
@@ -58,8 +59,10 @@ class TeamLead(Developer, TeamMember):
         Developer.__init__(self, name, wage, preferred_language)
         TeamMember.__init__(self, team)
 
+
 # Decorating everything in this file
 check_all_contracts(__name__)
+
 
 @pytest.fixture
 def developer():
@@ -115,3 +118,13 @@ def test_change_teamlead_name(teamlead):
     """
     teamlead.name = "Ignas"
     assert teamlead.name == "Ignas"
+
+
+def test_change_teamlead_team_invalid(teamlead):
+    """
+    Changes the team of the teamlead to something invalid. Excpects an exception.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        teamlead.team = ''
+    msg = str(excinfo.value)
+    assert 'len(self.team) > 0' in msg

@@ -10,11 +10,8 @@ class InvalidAssertion(Exception):
     """
 
 
-def check_all_contracts(module_name=''):
-    if module_name == '':
-        module = sys.modules['__main__']
-    else:
-        module = sys.modules[module_name]
+def check_all_contracts(module_name='__main__'):
+    module = sys.modules[module_name]
 
     for name, value in inspect.getmembers(module):
         if inspect.isfunction(value):
@@ -56,8 +53,8 @@ def add_class_invariants(klass):
     # Iterating over all inherited classes except Object
     for cls in klass.__mro__[:-1]:
         if "__representation_invariants__" in cls.__dict__:
-             rep_invariants = rep_invariants.union(
-                 cls.__representation_invariants__)
+            rep_invariants = rep_invariants.union(
+                cls.__representation_invariants__)
         else:
             rep_invariants.update(parse_assertions(
                 cls.__doc__ or '', parse_token="Representation Invariant"))

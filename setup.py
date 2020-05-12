@@ -19,11 +19,11 @@ setup(
               'python_ta.docstring', 'python_ta.patches', 'python_ta.parser',
               'python_ta.transforms', 'python_ta.typecheck', 'python_ta.util'],
     install_requires=[
-        'astroid>=2.3,<2.4',
+        'astroid>=2.4,<2.5',
         'funcparserlib',
         'hypothesis',
         'pycodestyle',
-        'pylint>=2.4,<2.5',
+        'pylint>=2.5,<2.6',
         'colorama',
         'six',
         'jinja2',

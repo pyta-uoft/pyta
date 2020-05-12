@@ -52,7 +52,7 @@ def test_my_sum_list_int_argument() -> None:
 
 def test_my_sum_empty_list_argument() -> None:
     """Calling _my_sum with an empty list passes type check."""
-    _my_sum([1])
+    _my_sum([])
 
 
 def test_my_sum_list_mixed_argument() -> None:

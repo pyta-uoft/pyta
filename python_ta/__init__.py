@@ -14,6 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
+__version__ = "1.6.0b2" # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 try:
@@ -28,6 +29,7 @@ import tokenize
 import webbrowser
 import requests
 import uuid
+import hashlib
 
 import pylint.lint
 import pylint.utils
@@ -43,7 +45,6 @@ HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 # check the python version
 if sys.version_info < (3, 7, 0):
     print('[WARNING] You need Python 3.7 or later to run PythonTA.')
-
 
 def check_errors(module_name='', config='', output=None):
     """Check a module for errors, printing a report."""
@@ -102,6 +103,7 @@ def _check(module_name='', level='all', local_config='', output=None):
                     file_py, linter.config_file))
 
         if linter.config.pyta_upload_permission:
+            unique_id = hash_uuid(str(uuid.uuid1())[24:]) # Hashing just the mac address portion of the uuid
             files = []
             for path in f_paths:
                 f = open(path, 'rb')
@@ -114,8 +116,9 @@ def _check(module_name='', level='all', local_config='', output=None):
                 requests.post(
                     url='http://127.0.0.1:5000',
                     files=upload,
-                    data={'id': str(uuid.uuid1())})
-                for f in upload.values(): # Closing files after uploading
+                    data={'id': unique_id,
+                          'version': __version__})
+                for f in files: # Closing files after uploading
                     f.close()
             except Exception as e:
                 print('[ERROR] Upload failed')
@@ -129,6 +132,15 @@ def _check(module_name='', level='all', local_config='', output=None):
         print('[ERROR] Error message: "{}"'.format(e))
         raise e
 
+def hash_uuid(uid):
+    """
+    Hashes a given string. Used for the user's mac-address
+    for privacy protection.
+    """
+    hash_gen = hashlib.sha512()
+    encoded = uid.encode('utf-8')
+    hash_gen.update(encoded)
+    return hash_gen.hexdigest()
 
 def _find_local_config(curr_dir):
     """Search for a `.pylintrc` configuration file provided in same (user)

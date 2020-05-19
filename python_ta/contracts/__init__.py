@@ -55,6 +55,12 @@ def add_class_invariants(klass: type) -> None:
 
         Check representation invariants for this class when not within an instance method of the class.
         """
+        cls_annotations = typing.get_type_hints(klass)
+
+        if name in cls_annotations:
+            assert check_type_annotation(cls_annotations[name], value),\
+                f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"'
+
         super(klass, self).__setattr__(name, value)
         curframe = inspect.currentframe()
         callframe = inspect.getouterframes(curframe, 2)

@@ -17,6 +17,9 @@ class Person:
     - is_valid_name(self.name)
     """
 
+    age: int
+    name: str
+
     def __init__(self, name, age):
         self.name = name
         self.age = age
@@ -124,6 +127,12 @@ def test_same_method_names(person) -> None:
         change_age(person, -10)
     msg = str(excinfo.value)
     assert 'self.age > 0' in msg
+
+def test_wrong_name_type(person) -> None:
+    """Change name to an int. Expect an exception."""
+
+    with pytest.raises(AssertionError):
+        person.name = 5
 
 
 def test_create_margherita_invalid() -> None:

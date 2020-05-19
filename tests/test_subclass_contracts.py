@@ -61,7 +61,7 @@ class TeamLead(Developer, TeamMember):
 
 
 # Decorating everything in this file
-check_all_contracts(__name__)
+check_all_contracts(__name__, decorate_main = False)
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 import pytest
 import math
 from python_ta.contracts import check_all_contracts
+from typing import List
 
 
 def is_valid_name(name):
@@ -19,10 +20,12 @@ class Person:
 
     age: int
     name: str
+    fav_foods: List[str]
 
-    def __init__(self, name, age):
+    def __init__(self, name, age, fav_food):
         self.name = name
         self.age = age
+        self.fav_foods = fav_food
 
     def change_name(self, name: str) -> str:
         self.name = name
@@ -39,6 +42,9 @@ class Person:
         self.age = -10
         self.age = age
         return age
+    
+    def add_fav_food(self, food):
+        self.fav_foods.append(food)
 
 
 def change_age(person, new_age):
@@ -77,7 +83,7 @@ check_all_contracts(__name__, decorate_main = False)
 
 @pytest.fixture
 def person():
-    return Person("David", 31)
+    return Person("David", 31, ["Sushi"])
 
 
 def test_change_age_invalid_over(person) -> None:
@@ -128,11 +134,17 @@ def test_same_method_names(person) -> None:
     msg = str(excinfo.value)
     assert 'self.age > 0' in msg
 
-def test_wrong_name_type(person) -> None:
-    """Change name to an int. Expect an exception."""
+def test_wrong_food_type(person) -> None:
+    """Change fav food to an int. Expect an exception."""
 
     with pytest.raises(AssertionError):
-        person.name = 5
+        person.fav_foods = 5
+
+def test_wrong_food_type_instance_method(person) -> None:
+    """Violates type annotation within an instance method. Expect exception."""
+
+    with pytest.raises(AssertionError):
+        person.add_fav_food(5)
 
 
 def test_create_margherita_invalid() -> None:

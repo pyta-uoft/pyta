@@ -130,12 +130,24 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
             _check_invariants(instance, rep_invariants, init.__globals__)
+            _check_class_type_annotations(instance)
         except AssertionError as e:
             raise AssertionError(str(e)) from None
         else:
             return r
 
     return wrapper(wrapped)
+
+def _check_class_type_annotations(instance):
+    """Checks that the type annotations for the class still hold
+    """
+    klass = instance.__class__
+    cls_annotations = typing.get_type_hints(klass)
+
+    for attr, annotation in cls_annotations.items():
+        value = getattr(instance, attr)
+        assert check_type_annotation(annotation, value),\
+            f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"'
 
 
 def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) -> None:

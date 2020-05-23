@@ -5,14 +5,14 @@ import inspect
 import wrapt
 
 
-def check_all_contracts(*args, **kwargs) -> None:
+def check_all_contracts(*args, decorate_main=True) -> None:
     """Automatically check contracts for all functions and classes in the given module.
 
     When called with no arguments, the current module's functions and classes are checked.
     """
 
     modules = []
-    if kwargs.get("decorate_main", True):
+    if decorate_main:
         modules.append(sys.modules["__main__"])
 
     for module_name in args:
@@ -138,8 +138,8 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
 
     return wrapper(wrapped)
 
-def _check_class_type_annotations(instance):
-    """Checks that the type annotations for the class still hold
+def _check_class_type_annotations(instance: Any) -> None:
+    """Check that the type annotations for the class still hold.
     """
     klass = instance.__class__
     cls_annotations = typing.get_type_hints(klass)

@@ -55,7 +55,9 @@ class Pizza:
     """
     Representation Invariants:
     - len(self.ingredients) > 0
-    - 0 < self.radius <= 10
+    - 0 \
+        < self.radius \
+            <= 10
     """
 
     def __init__(self, radius, ingredients):
@@ -149,12 +151,15 @@ def test_wrong_food_type_instance_method(person) -> None:
 
 def test_create_margherita_invalid() -> None:
     """
-    Calculate circle area with invalid r. Expect an exception.
+    Create circle area with invalid r. Also tests multiline conditions.
+    Expect an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
         Pizza.margherita(0)
     msg = str(excinfo.value)
-    assert '0 < self.radius <= 10' in msg
+    assert '0 \
+        < self.radius \
+            <= 10' in msg
 
 
 def test_circle_area_valid() -> None:

@@ -5,18 +5,28 @@ import inspect
 import wrapt
 
 
-def check_all_contracts(module_name: str = '__main__') -> None:
+def check_all_contracts(*args, decorate_main=True) -> None:
     """Automatically check contracts for all functions and classes in the given module.
 
     When called with no arguments, the current module's functions and classes are checked.
     """
-    module = sys.modules[module_name]
 
-    for name, value in inspect.getmembers(module):
-        if inspect.isfunction(value):
-            module.__dict__[name] = check_contracts(value)
-        elif inspect.isclass(value):
-            add_class_invariants(value)
+    modules = []
+    if decorate_main:
+        modules.append(sys.modules["__main__"])
+
+    for module_name in args:
+        modules.append(sys.modules.get(module_name, None))
+
+    for module in modules:
+        if not module:
+            # Module name was passed in incorrectly.
+            continue
+        for name, value in inspect.getmembers(module):
+            if inspect.isfunction(value):
+                module.__dict__[name] = check_contracts(value)
+            elif inspect.isclass(value):
+                add_class_invariants(value)
 
 
 @wrapt.decorator
@@ -55,6 +65,12 @@ def add_class_invariants(klass: type) -> None:
 
         Check representation invariants for this class when not within an instance method of the class.
         """
+        cls_annotations = typing.get_type_hints(klass)
+
+        if name in cls_annotations:
+            assert check_type_annotation(cls_annotations[name], value),\
+                f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"'
+
         super(klass, self).__setattr__(name, value)
         curframe = inspect.currentframe()
         callframe = inspect.getouterframes(curframe, 2)
@@ -114,12 +130,24 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
             _check_invariants(instance, rep_invariants, init.__globals__)
+            _check_class_type_annotations(instance)
         except AssertionError as e:
             raise AssertionError(str(e)) from None
         else:
             return r
 
     return wrapper(wrapped)
+
+def _check_class_type_annotations(instance: Any) -> None:
+    """Check that the type annotations for the class still hold.
+    """
+    klass = instance.__class__
+    cls_annotations = typing.get_type_hints(klass)
+
+    for attr, annotation in cls_annotations.items():
+        value = getattr(instance, attr)
+        assert check_type_annotation(annotation, value),\
+            f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"'
 
 
 def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) -> None:

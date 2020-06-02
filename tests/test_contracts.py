@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import pytest
 from python_ta.contracts import check_contracts
 
@@ -8,6 +8,15 @@ def test_nullary_return_int() -> None:
     @check_contracts
     def nullary() -> int:
         return 1
+
+    nullary()
+
+
+def test_nullary_return_dict() -> None:
+    """Calling a nullary function with the correct return type (Dict)."""
+    @check_contracts
+    def nullary() -> Dict[str, int]:
+        return {'one': 1}
 
     nullary()
 
@@ -26,6 +35,16 @@ def test_nullary_return_wrong_type() -> None:
     @check_contracts
     def nullary() -> str:
         return 1
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
+def test_nullary_return_dict_wrong() -> None:
+    """Calling a nullary function with the incorrect return type (Dict)."""
+    @check_contracts
+    def nullary() -> Dict[str, int]:
+        return {1: 1}
 
     with pytest.raises(AssertionError):
         nullary()

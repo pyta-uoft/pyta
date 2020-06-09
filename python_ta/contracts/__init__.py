@@ -1,4 +1,5 @@
 from typing import Any, Callable, List, Optional, Set
+from typeguard import check_type
 import sys
 import typing
 import inspect
@@ -68,8 +69,11 @@ def add_class_invariants(klass: type) -> None:
         cls_annotations = typing.get_type_hints(klass)
 
         if name in cls_annotations:
-            assert check_type_annotation(cls_annotations[name], value),\
-                f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"'
+            try:
+                check_type(name, value, cls_annotations[name])
+            except TypeError:
+                raise AssertionError(
+                    f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"')
 
         super(klass, self).__setattr__(name, value)
         curframe = inspect.currentframe()
@@ -102,8 +106,12 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     # Check function parameter types
     for arg, param in zip(args_with_self, params):
         if param in annotations:
-            assert check_type_annotation(annotations[param], arg),\
-                f'{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter "{param}: {annotations[param]}"'
+            try:
+                check_type(param, arg, annotations[param])
+            except TypeError:
+                raise AssertionError(
+                    f'{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter \
+                        "{param}: {annotations[param]}"')
 
     # Check function preconditions
     preconditions = parse_assertions(wrapped.__doc__ or '')
@@ -114,8 +122,11 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     r = wrapped(*args, **kwargs)
     if 'return' in annotations:
         return_type = annotations['return']
-        assert check_type_annotation(return_type, r),\
-            f'{wrapped.__name__} return value {r} does not match annotated return type {return_type.__name__}'
+        try:
+            check_type('return', r, return_type)
+        except TypeError:
+            raise AssertionError(
+                f'{wrapped.__name__} return value {r} does not match annotated return type {return_type}')
 
     return r
 
@@ -146,8 +157,11 @@ def _check_class_type_annotations(instance: Any) -> None:
 
     for attr, annotation in cls_annotations.items():
         value = getattr(instance, attr)
-        assert check_type_annotation(annotation, value),\
-            f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"'
+        try:
+            check_type(attr, value, annotation)
+        except TypeError:
+            raise AssertionError(
+                f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"')
 
 
 def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) -> None:
@@ -174,27 +188,6 @@ def _check_assertions(wrapped: Callable[..., Any], function_locals: dict, assert
         else:
             assert check,\
                 f'{wrapped.__name__} precondition "{assertion}" violated for arguments {function_locals}.'
-
-
-def check_type_annotation(annotation: Optional[type], v: Any) -> bool:
-    """Return whether v is compatible with the given type annotation.
-    """
-    if annotation is None:
-        return v is None
-
-    # TODO: Use typing.get_origin and typing.get_args in Python 3.8
-    origin = getattr(annotation, '__origin__', None)
-
-    if origin is None:
-        return isinstance(v, annotation)
-    else:
-        origin_args = annotation.__args__
-        if not isinstance(v, origin):
-            return False
-        elif origin is list:
-            return all(check_type_annotation(origin_args[0], x) for x in v)
-        else:
-            return True
 
 
 def parse_assertions(docstring: str, parse_token: str = 'Precondition') -> List[str]:

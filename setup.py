@@ -29,7 +29,8 @@ setup(
         'jinja2',
         'pygments',
         'wrapt>=1.12.0',
-        'typeguard>=2.7.1'
+        'typeguard>=2.7.1',
+        'requests'
     ],
     extras_require={
         'dev': [

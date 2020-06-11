@@ -23,6 +23,10 @@ pyta-output-file = pyta_report.html
 # Set whether you wish to opt-in to anonymous data submission
 pyta-upload-permission = yes
 
+# Server address for data submission participation
+pyta-server-address = http://127.0.0.1:5000
+
+
 [ELIF]
 
 # Set maximum allowed if nesting.

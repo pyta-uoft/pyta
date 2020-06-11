@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "1.6.0b2" # Version number
+__version__ = "1.6.0b2"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 try:
@@ -27,10 +27,7 @@ import os
 import sys
 import tokenize
 import webbrowser
-import requests
-import uuid
-import hashlib
-
+import datetime
 import pylint.lint
 import pylint.utils
 from pylint.config import VALIDATORS, _call_validator
@@ -40,11 +37,14 @@ from astroid import modutils, MANAGER
 from .reporters import REPORTERS
 from .patches import patch_all
 
+from python_ta.upload import upload_to_server
+
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
 # check the python version
 if sys.version_info < (3, 7, 0):
     print('[WARNING] You need Python 3.7 or later to run PythonTA.')
+
 
 def check_errors(module_name='', config='', output=None):
     """Check a module for errors, printing a report."""
@@ -80,12 +80,11 @@ def _check(module_name='', level='all', local_config='', output=None):
     current_reporter = reset_reporter(linter, output)
     patch_all()  # Monkeypatch pylint (override certain methods)
 
-    #Paths to files for upload
-    f_paths = []
-
     # Try to check file, issue error message for invalid files.
     try:
+        time_stamp = datetime.datetime.utcnow()
         for locations in _get_valid_files_to_check(current_reporter, module_name):
+            f_paths = []  # Paths to files for upload
             for file_py in get_file_paths(locations):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
@@ -98,33 +97,20 @@ def _check(module_name='', level='all', local_config='', output=None):
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
-                f_paths.append(file_py) # Appending paths for (potential) upload
+                f_paths.append(file_py)  # Appending paths for (potential) upload
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
                     file_py, linter.config_file))
 
-        if linter.config.pyta_upload_permission:
-            unique_id = hash_uuid(str(uuid.uuid1())[24:]) # Hashing just the mac address portion of the uuid
-            files = []
-            for path in f_paths:
-                f = open(path, 'rb')
-                files.append(f)
-            upload = {str(i):f for i,f in enumerate(files)} #dummy keys for files since requests require passing a dict
-            if linter.config_file != _find_local_config(os.path.dirname(__file__)): # If default config used, don't include in files
-                cfg = open(linter.config_file, 'rb')
-                upload['config'] = cfg
-            try:
-                requests.post(
-                    url='http://127.0.0.1:5000',
-                    files=upload,
-                    data={'id': unique_id,
-                          'version': __version__})
-                for f in files: # Closing files after uploading
-                    f.close()
-            except Exception as e:
-                print('[ERROR] Upload failed')
-                print('[ERROR] Error message: "{}"'.format(e))
-                pass
-
+            if linter.config.pyta_upload_permission:
+                errs = [err for err in current_reporter.messages_by_file if err.filename in f_paths]
+                upload_to_server(paths=f_paths,
+                                 errors=errs,
+                                 config=linter.config_file,
+                                 url=linter.config.pyta_server_address,
+                                 default=_find_local_config(os.path.dirname(__file__)),
+                                 version=__version__,
+                                 time=time_stamp)  # If default config used, don't include in files)
+                print('[INFO] Upload successful')
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:
@@ -132,15 +118,6 @@ def _check(module_name='', level='all', local_config='', output=None):
         print('[ERROR] Error message: "{}"'.format(e))
         raise e
 
-def hash_uuid(uid):
-    """
-    Hashes a given string. Used for the user's mac-address
-    for privacy protection.
-    """
-    hash_gen = hashlib.sha512()
-    encoded = uid.encode('utf-8')
-    hash_gen.update(encoded)
-    return hash_gen.hexdigest()
 
 def _find_local_config(curr_dir):
     """Search for a `.pylintrc` configuration file provided in same (user)
@@ -211,7 +188,12 @@ def reset_linter(config=None, file_linted=None):
          {'default': False,
           'type': 'yn',
           'metavar': '<yn>',
-          'help': 'Permission to anonymously submit data'})
+          'help': 'Permission to anonymously submit data'}),
+        ('pyta-server-address',
+         {'default': '127.0.0.1:5000',
+          'type': 'string',
+          'metavar': '<server-url>',
+          'help': 'Server address to submit anonymous data'})
     )
 
     custom_checkers = [

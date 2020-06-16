@@ -5,14 +5,14 @@ import json
 
 
 def errors_to_json(errors):
+    """Convert PyTA errors from MessageSet format to json."""
     error_info = ['msg_id', 'msg', 'symbol', 'module', 'category', 'line']
     error_types = ['code', 'style']
     err_as_dict = {}
     for msg_set in errors:  # This iterates over the (filename, code, style) MessageSets
-        err_as_dict = {}
         for error_type in error_types:  # This iterates over the code and style attributes
             current_type = getattr(msg_set, error_type)  # Gets either the code or style dictionary
-            for key in current_type.keys():  # Iterates over the error codes of caught errors
+            for key in current_type.keys():  # Iterates over the error id's of caught errors
                 err_as_dict[key] = []
                 info_set = current_type.get(key)
                 for msg in info_set.messages:  # Iterates over the messages for each error of the given code
@@ -21,14 +21,18 @@ def errors_to_json(errors):
     return json.dumps(err_as_dict)
 
 
-def upload_to_server(paths, errors, config, url, default, version, time):
+def upload_to_server(errors, config, url, default, version, time, paths=None):
+    """Send POST request to server with formatted data."""
     unique_id = hash_uuid(str(uuid.uuid1())[24:])  # Hashing just the mac address portion of the uuid
     files = []
-    for path in paths:
-        f = open(path, 'rb')
-        files.append(f)
-    upload = {str(i): f for i, f in enumerate(files)}  # dummy keys for files since requests require passing a dict
-    if config != default:
+    if paths:
+        for path in paths:
+            f = open(path, 'rb')
+            files.append(f)
+    upload = {str(i): f for i, f in enumerate(files)}  # requests.post() requires passing a dict
+    # upload is an empty dict in the case that paths is empty
+    if config != default:  # Need to clarify; 'default' currently refers to the config file in ../pyta.
+        # This is a path comparison, not an option comparison.
         cfg = open(config, 'rb')
         upload['config'] = cfg
     json_errors = errors_to_json(errors)

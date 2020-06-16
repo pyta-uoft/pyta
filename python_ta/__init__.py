@@ -101,15 +101,23 @@ def _check(module_name='', level='all', local_config='', output=None):
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
                     file_py, linter.config_file))
 
-            if linter.config.pyta_upload_permission:
+            if linter.config.pyta_error_permission or linter.config.pyta_file_permission:
                 errs = [err for err in current_reporter.messages_by_file if err.filename in f_paths]
-                upload_to_server(paths=f_paths,
-                                 errors=errs,
-                                 config=linter.config_file,
-                                 url=linter.config.pyta_server_address,
-                                 default=_find_local_config(os.path.dirname(__file__)),
-                                 version=__version__,
-                                 time=time_stamp)  # If default config used, don't include in files)
+                if linter.config.pyta_file_permission:
+                    upload_to_server(errors=errs,
+                                     config=linter.config_file,
+                                     url=linter.config.pyta_server_address,
+                                     default=_find_local_config(os.path.dirname(__file__)),
+                                     version=__version__,
+                                     time=time_stamp,
+                                     paths=f_paths)
+                else:
+                    upload_to_server(errors=errs,
+                                     config=linter.config_file,
+                                     url=linter.config.pyta_server_address,
+                                     default=_find_local_config(os.path.dirname(__file__)),
+                                     version=__version__,
+                                     time=time_stamp)
                 print('[INFO] Upload successful')
         current_reporter.output_blob()
         return current_reporter
@@ -184,13 +192,18 @@ def reset_linter(config=None, file_linted=None):
              'type': 'string',
              'metavar': '<pyta_reporter>',
              'help': 'Output file for htmlreporter.'}),
-        ('pyta-upload-permission',
-         {'default': False,
+        ('pyta-error-permission',
+         {'default': True,
           'type': 'yn',
           'metavar': '<yn>',
-          'help': 'Permission to anonymously submit data'}),
+          'help': 'Permission to anonymously submit errors'}),
+        ('pyta-file-permission',
+         {'default': True,
+          'type': 'yn',
+          'metavar': '<yn>',
+          'help': 'Permission to anonymously submit files and errors'}),
         ('pyta-server-address',
-         {'default': '127.0.0.1:5000',
+         {'default': 'http://127.0.0.1:5000',
           'type': 'string',
           'metavar': '<server-url>',
           'help': 'Server address to submit anonymous data'})

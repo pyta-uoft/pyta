@@ -27,7 +27,6 @@ import os
 import sys
 import tokenize
 import webbrowser
-import datetime
 import pylint.lint
 import pylint.utils
 from pylint.config import VALIDATORS, _call_validator
@@ -82,7 +81,6 @@ def _check(module_name='', level='all', local_config='', output=None):
 
     # Try to check file, issue error message for invalid files.
     try:
-        time_stamp = datetime.datetime.utcnow()
         for locations in _get_valid_files_to_check(current_reporter, module_name):
             f_paths = []  # Paths to files for upload
             for file_py in get_file_paths(locations):
@@ -102,22 +100,20 @@ def _check(module_name='', level='all', local_config='', output=None):
                     file_py, linter.config_file))
 
             if linter.config.pyta_error_permission or linter.config.pyta_file_permission:
-                errs = [err for err in current_reporter.messages_by_file if err.filename in f_paths]
+                errs = [msg for msg in current_reporter.messages_by_file if msg.filename in f_paths]
                 if linter.config.pyta_file_permission:
                     upload_to_server(errors=errs,
-                                     config=linter.config_file,
+                                     config=linter.config.__dict__,
+                                     default=reset_linter().config.__dict__,
                                      url=linter.config.pyta_server_address,
-                                     default=_find_local_config(os.path.dirname(__file__)),
                                      version=__version__,
-                                     time=time_stamp,
                                      paths=f_paths)
                 else:
                     upload_to_server(errors=errs,
-                                     config=linter.config_file,
+                                     config=linter.config.__dict__,
+                                     default=reset_linter().config.__dict__,
                                      url=linter.config.pyta_server_address,
-                                     default=_find_local_config(os.path.dirname(__file__)),
-                                     version=__version__,
-                                     time=time_stamp)
+                                     version=__version__)
                 print('[INFO] Upload successful')
         current_reporter.output_blob()
         return current_reporter

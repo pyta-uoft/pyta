@@ -26,7 +26,7 @@ pyta-error-permission = yes
 
 # Set whether you wish to opt-in to anonymous data submission.
 # This option will upload the file checked with PyTA, alongside which errors were caught.
-pyta-file-permission = no
+pyta-file-permission = yes
 
 # Server address for data submission participation
 pyta-server-address = http://127.0.0.1:5000

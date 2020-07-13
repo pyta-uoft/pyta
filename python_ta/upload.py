@@ -2,9 +2,10 @@ import uuid
 import hashlib
 import requests
 import json
+from typing import Dict
 
 
-def errors_to_json(errors):
+def errors_to_dict(errors):
     """Convert PyTA errors from MessageSet format to json."""
     error_info = ['msg_id', 'msg', 'symbol', 'module', 'category', 'line']
     error_types = ['code', 'style']
@@ -18,12 +19,12 @@ def errors_to_json(errors):
                 for msg in info_set.messages:  # Iterates over the messages for each error of the given code
                     info = {k: getattr(msg, k) for k in error_info}
                     err_as_dict[key].append(info)
-    return json.dumps(err_as_dict)
+    return err_as_dict
 
 
-def upload_to_server(errors, config, url, default, version, time, paths=None):
+def upload_to_server(errors, config: Dict[str, str], default: Dict[str, str], url: str, version: str, paths=None):
     """Send POST request to server with formatted data."""
-    unique_id = hash_uuid(str(uuid.uuid1())[24:])  # Hashing just the mac address portion of the uuid
+    unique_id = get_hashed_id()  # Hashing just the mac address portion of the uuid
     files = []
     if paths:
         for path in paths:
@@ -31,19 +32,18 @@ def upload_to_server(errors, config, url, default, version, time, paths=None):
             files.append(f)
     upload = {str(i): f for i, f in enumerate(files)}  # requests.post() requires passing a dict
     # upload is an empty dict in the case that paths is empty
-    if config != default:  # Need to clarify; 'default' currently refers to the config file in ../pyta.
-        # This is a path comparison, not an option comparison.
-        cfg = open(config, 'rb')
-        upload['config'] = cfg
-    json_errors = errors_to_json(errors)
+    errors_dict = errors_to_dict(errors)
+    to_json = {'errors': errors_dict}
+    if config != default:  # checks for (dictionary) equality of settings between config used and default config
+        to_json['cfg'] = config
+    payload = json.dumps(to_json)
     try:
         response = requests.post(
             url=url,
             files=upload,
             data={'id': unique_id,
                   'version': version,
-                  'time': time,
-                  'errors': json_errors
+                  'payload': payload
                   }
         )
         response.raise_for_status()
@@ -75,12 +75,13 @@ def upload_to_server(errors, config, url, default, version, time, paths=None):
         f.close()
 
 
-def hash_uuid(uid):
+def get_hashed_id():
     """
     Hashes a given string. Used for the user's mac-address
     for privacy protection.
     """
+    mac = str(uuid.uuid1())[24:]
     hash_gen = hashlib.sha512()
-    encoded = uid.encode('utf-8')
+    encoded = mac.encode('utf-8')
     hash_gen.update(encoded)
     return hash_gen.hexdigest()

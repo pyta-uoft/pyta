@@ -103,8 +103,8 @@ def _check(module_name='', level='all', local_config='', output=None):
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
                     file_py, linter.config_file))
             if linter.config.pyta_error_permission:
-                errs = [msg for msg in current_reporter.messages_by_file if msg.filename in f_paths]
-            if f_paths != [] and errs != []:  # Only call upload_to_server() if there's something to upload
+                errs = [msg for msg in current_reporter.messages_by_file]
+            if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
                 # Checks if default configuration was used without changing options through the local_config argument
                 if linter.config_file[-19:-10] != "python_ta" or local_config != '':
                     config = linter.config.__dict__

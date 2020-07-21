@@ -10,7 +10,9 @@ def test_check_on_dir():
         ['examples']
     ]
     for item in _inputs:
-        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
+        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter',
+                                          'pyta-error-permission': 'no',
+                                          'pyta-file-permission': 'no'})
 
 def test_check_on_file():
     """Test files"""
@@ -19,7 +21,9 @@ def test_check_on_file():
         ['nodes/dict.py', 'nodes/const.py']
     ]
     for item in _inputs:
-        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
+        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter',
+                                          'pyta-error-permission': 'no',
+                                          'pyta-file-permission': 'no'})
 
 def test_check_on_bad_input():
     """Test bad inputs. In all cases, pyta should recover.
@@ -33,7 +37,9 @@ def test_check_on_bad_input():
         ['file_does_not_exist']
     ]
     for item in _inputs:
-        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter'})
+        python_ta.check_all(item, config={'pyta-reporter': 'PlainReporter',
+                                          'pyta-error-permission': 'no',
+                                          'pyta-file-permission': 'no'})
 
 def test_check_with_config():
     """Test inputs along with a config arg."""
@@ -69,7 +75,9 @@ def test_check_with_config():
                     'R0204', 'C0303', 'W0231'],
 
         # [CUSTOM PYTA OPTIONS]
-        'pyta-reporter': 'PlainReporter'
+        'pyta-reporter': 'PlainReporter',
+        'pyta-error-permission': 'no',
+        'pyta-file-permission': 'no'
     }
     for item in _inputs:
         python_ta.check_all(item, config=CONFIG)

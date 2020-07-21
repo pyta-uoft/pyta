@@ -27,6 +27,7 @@ import os
 import sys
 import tokenize
 import webbrowser
+
 import pylint.lint
 import pylint.utils
 from pylint.config import VALIDATORS, _call_validator
@@ -35,8 +36,8 @@ from astroid import modutils, MANAGER
 
 from .reporters import REPORTERS
 from .patches import patch_all
-
 from python_ta.upload import upload_to_server
+
 
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
@@ -82,7 +83,9 @@ def _check(module_name='', level='all', local_config='', output=None):
     # Try to check file, issue error message for invalid files.
     try:
         for locations in _get_valid_files_to_check(current_reporter, module_name):
-            f_paths = []  # Paths to files for upload
+            f_paths = []  # Paths to files for data submission
+            errs = []  # Errors caught in files for data submission
+            config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
@@ -95,26 +98,21 @@ def _check(module_name='', level='all', local_config='', output=None):
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
-                f_paths.append(file_py)  # Appending paths for (potential) upload
+                if linter.config.pyta_file_permission:
+                    f_paths.append(file_py)  # Appending paths for upload
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
                     file_py, linter.config_file))
-
-            if linter.config.pyta_error_permission or linter.config.pyta_file_permission:
+            if linter.config.pyta_error_permission:
                 errs = [msg for msg in current_reporter.messages_by_file if msg.filename in f_paths]
-                if linter.config.pyta_file_permission:
-                    upload_to_server(errors=errs,
-                                     config=linter.config.__dict__,
-                                     default=reset_linter().config.__dict__,
-                                     url=linter.config.pyta_server_address,
-                                     version=__version__,
-                                     paths=f_paths)
-                else:
-                    upload_to_server(errors=errs,
-                                     config=linter.config.__dict__,
-                                     default=reset_linter().config.__dict__,
-                                     url=linter.config.pyta_server_address,
-                                     version=__version__)
-                print('[INFO] Upload successful')
+            if f_paths != [] and errs != []:  # Only call upload_to_server() if there's something to upload
+                # Checks if default configuration was used without changing options through the local_config argument
+                if linter.config_file[-19:-10] != "python_ta" or local_config != '':
+                    config = linter.config.__dict__
+                upload_to_server(errors=errs,
+                                 paths=f_paths,
+                                 config=config,
+                                 url=linter.config.pyta_server_address,
+                                 version=__version__)
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:

@@ -36,7 +36,7 @@ from astroid import modutils, MANAGER
 
 from .reporters import REPORTERS
 from .patches import patch_all
-from python_ta.upload import upload_to_server
+from .upload import upload_to_server
 
 
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
@@ -187,12 +187,12 @@ def reset_linter(config=None, file_linted=None):
              'metavar': '<pyta_reporter>',
              'help': 'Output file for htmlreporter.'}),
         ('pyta-error-permission',
-         {'default': True,
+         {'default': False,
           'type': 'yn',
           'metavar': '<yn>',
           'help': 'Permission to anonymously submit errors'}),
         ('pyta-file-permission',
-         {'default': True,
+         {'default': False,
           'type': 'yn',
           'metavar': '<yn>',
           'help': 'Permission to anonymously submit files and errors'}),

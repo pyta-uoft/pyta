@@ -18,7 +18,7 @@ material going into further detail for the emitted errors.
 
 For greater details on the errors PyTA checks for: [Help Documentation](https://www.cs.toronto.edu/~david/pyta/).
 
-For help getting started using PyTA: [Quick Start](https://www.cs.toronto.edu/~david/pyta/quick_start.html)
+For help getting started using PyTA: [Quick Start](https://www.cs.toronto.edu/~david/pyta/quick_start.html).
 
 ## Installation
 

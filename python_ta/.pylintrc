@@ -7,7 +7,7 @@ pyta-number-of-messages = 5
 
 # Set whether to use the pycodestyle and type-checking checkers.
 # Anything for a True/False, <yn> value should use in config file: y, yes, n, no
-pyta-pep8 = no
+pyta-pep8 = yes
 pyta-type-check = no
 
 # Set the output format. Available pyta formats are: ColorReporter,

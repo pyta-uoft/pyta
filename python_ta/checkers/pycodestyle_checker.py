@@ -2,9 +2,25 @@ from pylint.interfaces import IRawChecker
 import pycodestyle
 from pylint.checkers import BaseChecker
 
-# Ignored PEP8 checks (duplicated with pylint)
+# Ignored pycodestyle checks (mostly duplicated with pylint)
 IGNORED_CHECKS = [
-    'E501'
+    'E111',  # pylint W0311
+    'E114',  # pylint W0311
+    'E117',  # pylint W0311
+    'E401',  # pylint C0410
+    'E402',  # pylint C0413
+    'E501',  # pylint C0301
+    'E701',  # pylint C0321
+    'E702',  # pylint C0321
+    'E703',  # pylint W0301
+    'E711',  # pylint C0121
+    'E712',  # pylint C0121
+    'E722',  # pylint W0702
+    'W291',  # pylint C0303
+    'W292',  # pylint C0304
+    'W293',  # pylint C0303
+    'W391',  # pylint C0305
+    'W503'   # this one just conflicts with pycodestyle W504
 ]
 
 
@@ -12,7 +28,7 @@ class PycodestyleChecker(BaseChecker):
     __implements__ = IRawChecker
 
     name = 'pep8_errors'
-    msgs = {'E9989': ('Found PEP8 style error at %s', 'pep8-errors', '')}
+    msgs = {'E9989': ('Found pycodestyle (PEP8) style error at %s', 'pep8-errors', '')}
 
     options = ()
     # this is important so that your checker is executed before others

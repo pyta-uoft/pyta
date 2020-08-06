@@ -54,6 +54,8 @@ included as a library). In the Python interpreter, try running:
 ## Contributors
 
 Nigel Fong,
+Adam Gleizer,
+Ibrahim Hasan,
 Niayesh Ilkhani,
 Rebecca Kay,
 Christopher Koehler,

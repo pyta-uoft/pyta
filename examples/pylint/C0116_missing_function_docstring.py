@@ -1,7 +1,7 @@
 """C0116: Missing function docstring."""
-def f() -> None:
-    pass
+def mystery(x):
+    # Error on this line (no docstring)
+    return (lambda y : x+y)
 
-
-async def g():
-    pass
+new_mystery = mystery(2)
+print("What could be the output of new_mystery(2)?")

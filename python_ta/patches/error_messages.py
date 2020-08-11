@@ -161,6 +161,24 @@ patch_data = {
             'C0330': 'Wrong %s indentation%s%s.\n%s%s. This error occured because of an '
                      'inconsistent use of number of spaces for indentation.'
         }
+    },
+    'pylint.checkers.imports': {
+        'ImportsChecker': {
+            'E0401': 'Unable to import %s. Check the spelling of the module name, or '
+                     'whether the module is in the correct directory.',
+            'W0401': 'Wildcard imports add all objects from the import module into the '
+                     'global namespace, which may cause problems. You should only '
+                     'import from %s what you need.',
+            'W0404': 'Module %r was reimported on line %s. A module should not be '
+                     'imported more than once.',
+            'W0410': 'Python 2.5 and greater requires \'__future__\' imports to be the '
+                     'first non-docstring statement in the module.',
+            'C0410': 'Different modules should not be imported on a single line. You '
+                     'should import each module on line %s on separate lines.',
+            'C0414': 'Aliasing an import as the name of the package is useless.',
+            'C0415': 'Import statements should be in the toplevel of the module. You '
+                     'should move the import on line %s to the top of the file.'
+        }
     }
 }
 

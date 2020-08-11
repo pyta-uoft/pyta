@@ -179,6 +179,12 @@ patch_data = {
             'C0415': 'Import statements should be in the toplevel of the module. You '
                      'should move the import on line %s to the top of the file.'
         }
+    },
+    'pylint.checkers.misc': {
+        'EncodingChecker': {
+            'W0511': 'The warning %s was found.'
+
+        }
     }
 }
 

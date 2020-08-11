@@ -185,6 +185,12 @@ patch_data = {
             'W0511': 'The warning %s was found.'
 
         }
+    },
+    'pylint.checkers.newstyle': {
+        'NewStyleConflictChecker': {
+            'E1003': 'The first argument to \'super\' should be the current class, '
+                     'the argument %r is not valid.'
+        }
     }
 }
 

@@ -6,6 +6,10 @@ import inspect
 import wrapt
 
 
+# Can set to True to enable debug messages.
+DEBUG_CONTRACTS = True
+
+
 def check_all_contracts(*args, decorate_main=True) -> None:
     """Automatically check contracts for all functions and classes in the given module.
 
@@ -57,7 +61,7 @@ def add_class_invariants(klass: type) -> None:
         if '__representation_invariants__' in cls.__dict__:
             rep_invariants = rep_invariants.union(cls.__representation_invariants__)
         else:
-            rep_invariants.update(parse_assertions(cls.__doc__ or '', parse_token='Representation Invariant'))
+            rep_invariants.update(parse_assertions(cls, parse_token='Representation Invariant'))
 
     setattr(klass, '__representation_invariants__', rep_invariants)
 
@@ -70,6 +74,7 @@ def add_class_invariants(klass: type) -> None:
 
         if name in cls_annotations:
             try:
+                _debug(f'Checking type of attribute {attr} for {klass.__qualname__} instance')
                 check_type(name, value, cls_annotations[name])
             except TypeError:
                 raise AssertionError(
@@ -107,6 +112,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     for arg, param in zip(args_with_self, params):
         if param in annotations:
             try:
+                _debug(f'Checking type of parameter {param} in call to {wrapped.__qualname__}')
                 check_type(param, arg, annotations[param])
             except TypeError:
                 raise AssertionError(
@@ -114,7 +120,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                         "{param}: {annotations[param]}"')
 
     # Check function preconditions
-    preconditions = parse_assertions(wrapped.__doc__ or '')
+    preconditions = parse_assertions(wrapped)
     function_locals = dict(zip(params, args_with_self))
     _check_assertions(wrapped, function_locals, preconditions)
 
@@ -123,6 +129,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     if 'return' in annotations:
         return_type = annotations['return']
         try:
+            _debug(f'Checking return type from call to {wrapped.__qualname__}')
             check_type('return', r, return_type)
         except TypeError:
             raise AssertionError(
@@ -158,6 +165,7 @@ def _check_class_type_annotations(instance: Any) -> None:
     for attr, annotation in cls_annotations.items():
         value = getattr(instance, attr)
         try:
+            _debug(f'Checking type of attribute {attr} for {klass.__qualname__} instance')
             check_type(attr, value, annotation)
         except TypeError:
             raise AssertionError(
@@ -169,9 +177,10 @@ def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) ->
     """
     for invariant in rep_invariants:
         try:
+            _debug(f'Checking representation invariant for {instance.__class__.__qualname__}: {invariant}')
             check = eval(invariant, global_scope, {'self': instance})
         except:
-            print(f'[python_ta] Warning: could not evaluate invariant: {invariant}', file=sys.stderr)
+            _debug(f'Warning: could not evaluate representation invariant: {invariant}')
         else:
             assert check,\
                 f'Representation invariant "{invariant}" violated.'
@@ -182,16 +191,18 @@ def _check_assertions(wrapped: Callable[..., Any], function_locals: dict, assert
     """
     for assertion in assertions:
         try:
+            _debug(f'Checking precondition for {wrapped.__qualname__}: {assertion}')
             check = eval(assertion, wrapped.__globals__, function_locals)
         except:
-            print(f'[python_ta] Warning: could not evaluate invariant: {assertion}', file=sys.stderr)
+            _debug(f'Warning: could not evaluate precondition: {assertion}')
         else:
             assert check,\
                 f'{wrapped.__name__} precondition "{assertion}" violated for arguments {function_locals}.'
 
 
-def parse_assertions(docstring: str, parse_token: str = 'Precondition') -> List[str]:
-    """Return a list of preconditions/representation invariants parsed from the given docstring.
+def parse_assertions(obj: Any, parse_token: str = 'Precondition') -> List[str]:
+    """Return a list of preconditions/representation invariants parsed from the given entity's docstring.
+
     Uses parse_token to determine what to look for. parse_token defaults to Precondition.
 
     Currently only supports two forms:
@@ -201,6 +212,7 @@ def parse_assertions(docstring: str, parse_token: str = 'Precondition') -> List[
        line is of the form "- <cond>". Each line is considered a separate condition.
        The lines can be separated by blank lines, but no other text.
     """
+    docstring = getattr(obj, '__doc__') or ''
     lines = [line.strip() for line in docstring.split('\n')]
     assertion_lines = [i
                        for i, line in enumerate(lines)
@@ -210,15 +222,29 @@ def parse_assertions(docstring: str, parse_token: str = 'Precondition') -> List[
         return []
 
     first = assertion_lines[0]
+
     if lines[first].startswith(parse_token + ':'):
         return [lines[first][len(parse_token + ':'):].strip()]
     elif lines[first].startswith(parse_token + 's:'):
         assertions = []
         for line in lines[first + 1:]:
             if line.startswith('-'):
-                assertions.append(line[1:].strip())
+                assertion = line[1:].strip()
+                _debug(f'Adding assertion to {obj.__qualname__}: {assertion}')
+                assertions.append(assertion)
             elif line != '':
                 break
         return assertions
     else:
         return []
+
+
+def _debug(msg: str) -> None:
+    """Display a debugging message.
+
+    Do nothing if DEBUG_CONTRACTS is False.
+    """
+    if not DEBUG_CONTRACTS:
+        return
+
+    print('[PyTA]', msg, file=sys.stderr)

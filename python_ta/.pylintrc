@@ -20,6 +20,16 @@ pyta-template-file = template.html
 # Set the output file name for HTMLreporter.
 pyta-output-file = pyta_report.html
 
+#Set whether you wish to opt-in to anonymous data collection of errors reported when you run PyTA.
+pyta-error-permission = no
+
+#Set whether you wish to opt-in to anonymous data collection of the files you run PyTA on.
+pyta-file-permission = no
+
+# Server address for data submission participation.
+pyta-server-address = http://127.0.0.1:5000
+
+
 [ELIF]
 
 # Set maximum allowed if nesting.

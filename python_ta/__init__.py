@@ -14,6 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
+__version__ = "1.6.0b2"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 try:
@@ -35,6 +36,8 @@ from astroid import modutils, MANAGER
 
 from .reporters import REPORTERS
 from .patches import patch_all
+from .upload import upload_to_server
+
 
 HELP_URL = 'http://www.cs.toronto.edu/~david/pyta/'
 
@@ -80,6 +83,9 @@ def _check(module_name='', level='all', local_config='', output=None):
     # Try to check file, issue error message for invalid files.
     try:
         for locations in _get_valid_files_to_check(current_reporter, module_name):
+            f_paths = []  # Paths to files for data submission
+            errs = []  # Errors caught in files for data submission
+            config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
@@ -92,8 +98,21 @@ def _check(module_name='', level='all', local_config='', output=None):
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.
+                if linter.config.pyta_file_permission:
+                    f_paths.append(file_py)  # Appending paths for upload
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
                     file_py, linter.config_file))
+            if linter.config.pyta_error_permission:
+                errs = [msg for msg in current_reporter.messages_by_file]
+            if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
+                # Checks if default configuration was used without changing options through the local_config argument
+                if linter.config_file[-19:-10] != "python_ta" or local_config != '':
+                    config = linter.config.__dict__
+                upload_to_server(errors=errs,
+                                 paths=f_paths,
+                                 config=config,
+                                 url=linter.config.pyta_server_address,
+                                 version=__version__)
         current_reporter.output_blob()
         return current_reporter
     except Exception as e:
@@ -167,6 +186,21 @@ def reset_linter(config=None, file_linted=None):
              'type': 'string',
              'metavar': '<pyta_reporter>',
              'help': 'Output file for htmlreporter.'}),
+        ('pyta-error-permission',
+         {'default': False,
+          'type': 'yn',
+          'metavar': '<yn>',
+          'help': 'Permission to anonymously submit errors'}),
+        ('pyta-file-permission',
+         {'default': False,
+          'type': 'yn',
+          'metavar': '<yn>',
+          'help': 'Permission to anonymously submit files and errors'}),
+        ('pyta-server-address',
+         {'default': 'http://127.0.0.1:5000',
+          'type': 'string',
+          'metavar': '<server-url>',
+          'help': 'Server address to submit anonymous data'})
     )
 
     custom_checkers = [

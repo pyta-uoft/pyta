@@ -18,6 +18,8 @@ material going into further detail for the emitted errors.
 
 For greater details on the errors PyTA checks for: [Help Documentation](https://www.cs.toronto.edu/~david/pyta/).
 
+For help getting started using PyTA: [Quick Start](https://www.cs.toronto.edu/~david/pyta/quick_start.html).
+
 ## Installation
 
 If you're interested in using PyTA, you can install it using `pip` (or `pip3`, on OSX/Linux):
@@ -31,7 +33,7 @@ Note that some debugging tools require [graphviz](https://www.graphviz.org/downl
 
 ### Tests
 
-To run the test suite, run the following command from inside the `python_ta` directory:
+To run the test suite, run the following command from inside the `pyta` directory:
 
 ```console
 > python -m pytest tests  # Or python3 on OSX/Linux

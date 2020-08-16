@@ -14,11 +14,13 @@ patch_data = {
              'W0102': 'Dangerous default value %s as argument. '
                       'Using mutable values as a default argument '
                       'is a common cause of confusing and unwanted behaviour.',
-             'W0104': 'This statement doesn\'t have any effect, and could be '
-                      'removed without changing the behaviour of the program.',
+             'W0104': 'Right now, this expression isn\'t being used by the rest '
+                      'of your code. You should either remove this expression or '
+                      'save it in a variable to use it later.',
              'W0106': 'Expression "%s" isn\'t assigned to a variable.',
-             'W0108': 'The lambda function isn\'t necessary since the lambda '
-                      'arguments are only being passed into a function call.',
+             'W0108': 'This lambda function isn\'t necessary since you can pass '
+                      'the arguments directly to the function you\'re calling in '
+                      'the lambda\'s body.',
              'W0109': 'Duplicate key %r in dictionary. '
                       'When constructing a dictionary, the last value assigned '
                       'to a key takes precedence, making previous ones redundant.',
@@ -31,11 +33,11 @@ patch_data = {
                       'than \'assert (x,y)\'.'
              },
         'ComparisonChecker':
-            {'R0123': 'tHE \'is\' keyword compares two objects location in memory rather '
-                      'than value equality. When performing comparison with a literal, '
+            {'R0123': 'The \'is\' operator compares the ids of its two arguments, not '
+                      'their values. When performing comparison with a literal, '
                       'this is usually not what you want. Did you mean \'==\'?',
              'C0123': 'You should use \'isinstance\' rather than \'type\' to '
-                      'perform a typecheck.'
+                      'check the type of a value.'
              },
         'NameChecker':
             {'C0102': 'Black listed name "%s". You should give your variables '
@@ -49,17 +51,14 @@ patch_data = {
                       'A pass statement should only be used to represent '
                       'an \"empty\" code block, where nothing happens.'},
         'BasicErrorChecker':
-            {'E0101': '__init__ is called by the special method __new__ '
-                      'when a new object is instantiated, and will raise '
-                      'a TypeError if __init__ returns anything other than None.',
-             'E0102': '%s already defined line %s. '
+            {'E0101': '__init__ is called only to initialize the attributes of a new object. '
+                      'It should not return anything.',
+             'E0102': '%s was already defined line %s. '
                       'You should make sure all functions, methods and classes '
                       'defined have different names.',
              'E0103': 'The %r keyword should only be used inside a loop.',
              'E0104': 'The \'return\' keyword is used to end the execution of a function '
-                      'and return a result, so you should only use it inside of a function. '
-                      'Note that if no return statement is written, Python implicitly '
-                      'ends the execution of a function with return None',
+                      'and return a result, so you should only use it inside of a function.',
              'E0108': 'Duplicate parameter name %s in function definition. '
              }
     },
@@ -71,45 +70,53 @@ patch_data = {
              }
     },
     'pylint.checkers.design_analysis': {
-        'MisdesignChecker': {'R0912': 'The function has too many branches (%s out of a default limit '
-                                      'of %s). You should try to reduce the complexity of the function '
-                                      'by splitting it up.',
-                             'R0913': 'The function has too many parameters (%s out of a default limit '
-                                      'of %s). You should try to reduce the complexity of the function '
+        'MisdesignChecker': {'R0912': 'This function has too many branches (%s, exceeding limit %s). '
+                                      'You should try to reduce the complexity of the function '
+                                      'by splitting it up into helper functions.',
+                             'R0913': 'This function has too many parameters (%s, exceeding limit %s). '
+                                      'You should try to reduce the complexity of the function '
                                       'by splitting up it, or combining related objects as a single one.',
-                             'R0914': 'The function has too many local variables (%s out of a default limit '
-                                      'of /%s).',
-                             'R0915': 'The function or method has too many statements (%s out of a default limit '
-                                      'of /%s). It should be split up into smaller functions or methods.',
-                             'R0916': 'The if statement contains too many boolean expressions '
-                                      '(%s out of a default limit of %s). You should see if you can reduce '
+                             'R0914': 'This function has too many local variables (%s, exceeding limit %s). '
+                                      'You should try to reduce the complexity of the function '
+                                      'by splitting up it, or combining related objects as a single one.',
+                             'R0915': 'This function has too many statements ((%s, exceeding limit %s). '
+                                      'It should be split up into smaller functions.',
+                             'R0916': 'This if statement contains too many boolean expressions '
+                                      '(%s, exceeding limit %s). You should see if you can reduce '
                                       'the amount of expressions, or split it into branches.',
                              }
     },
     'pylint.checkers.classes': {
-        'ClassChecker': {'E0203': 'You can\'t use class member %r prior to it\'s assignment '
+        'ClassChecker': {'E0203': 'You can\'t use instance attribute %r prior to its assignment '
                                   'on line %s.',
-                         'E0211': 'Every class method requires at least one parameter, '
-                                  'which we conventionally name \'self\'.',
+                         'E0211': 'Every instance method requires at least one parameter, since the '
+                                  'first parameter refers to the object on which this method is called. '
+                                  'Python\'s convention is to name this parameter \'self\'.',
                          'E0213': 'The first parameter of a method should always be called \'self\'. '
-                                  'This is a strongly adhered to convention.',
-                         'E0241': 'The class %r should not inherit from the same class multiple times.',
-                         'R0201': 'Method does not make use of \'self\', so you should rewrite the '
-                                  'method as a function and move it outside the class.',
-                         'R0205': 'Class %r inherits from \'object\', which can be omitted in Python3.',
-                         'W0211': 'Static method %r shouldn\'t contain \'self\' as the first parameter, '
-                                  'since this suggests we are expecting a class instance as the first argument.',
+                                  'Even though this isn\'t technically required, it is a strong convention '
+                                  'used by all Python programmers.',
+                         'E0241': 'This class %r should not inherit from the same class multiple times.',
+                         'R0201': 'This method does not make use of \'self\', so you should remove the self '
+                                  'parameter and move this method outside of the class (turning it into a '
+                                  'top-level function.',
+                         'R0205': 'Class %r inherits from \'object\'. '
+                                  'All classes inherit from object by default, so you do not need to specify '
+                                  'this in the class header.',
+                         'W0211': 'The static method %r contains \'self\' as the first parameter. '
+                                  'Static methods shouldn\'t have this, since this suggests we are expecting '
+                                  'a class instance as the first argument.',
                          'W0212': 'Since %s starts with an underscore, it should be considered '
                                   '"private", and not accessed outside of the class in which it is '
                                   'defined.',
-                         'W0221': 'Method must take the same number of arguments as %s %r method.',
-                         'W0222': 'The method parameters must have the same name, order, and default '
+                         'W0221': 'This method must take the same number of arguments as %s %r method.',
+                         'W0222': 'This method\'s parameters must have the same name, order, and default '
                                   'arguments as %s %r method.',
-                         'W0233': 'The abstract method %r in class %r must be overridden within a '
-                                  'concrete class.',
-                         'W0231': 'Child class should call the \'__init__\' method from it\'s base class %r.',
-                         'W0233': 'Child class should call the \'__init__\' method of the parent class '
-                                  'rather than some unrelated class.',
+                         'W0223': 'The abstract method %r in class %r must be overridden within a '
+                                  'concrete subclass.',
+                         'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
+                                  'it\'s base class %r.',
+                         'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
+                                  'the parent class rather than some unrelated class.',
                          },
         'SpecialMethodsChecker': {
             'E0302': 'The special method %r expects to take %s parameters, but %d %s given.',
@@ -117,47 +124,43 @@ patch_data = {
     },
     'pylint.checkers.exceptions': {
         'ExceptionsChecker': {
-            'E0701': '\'except\' blocks are analyzed top to bottom, so generic exception types should '
+            'E0701': '\'except\' blocks are checked top to bottom, so generic exception types should '
                      'come after specific exception types. Otherwise, the block for the specific '
                      'exception type will never be reached. (%s)',
-            'E0702': '\'raise\' is used to raise Exceptions. Anything else will lead to an error. '
+            'E0702': '\'raise\' is used to raise exceptions. Anything else will lead to an error. '
                      '(Raising %s)',
-            'E0704': '\'raise\' may only be called without an expression inside an \'except\' block.',
-            'E0710': '\'raise\' expects an object derived from the BaseException class. Attempting to '
-                     'raise any other object will lead to an error.',
-            'E0711': '\'NotImplemented\' is strictly used as a return value for binary special methods '
-                     '(e.g __eq__), indicating that they\'re not implemented. You mean to raise '
-                     '\'NotImplementedError\', which indicates that the abstract method must be '
-                     'implemented by the derived class.',
-            'E0712': '\'except\' expects an object derived from the BaseException class. Attempting to '
-                     'raise any other object will lead to an error.',
-            'W0702': 'It\'s bad practice to use the \'except\' keyword without passing an expression, '
-                     'since any and all expressions will be caught, which may lead to bugs.',
+            'E0704': 'This \'raise\' statement must have an exception class or instance.',
+            'E0710': 'This \'raise\' statement is using a class that is not a subclass of BaseException.',
+            'E0711': 'You mean to raise \'NotImplementedError\', which indicates that the abstract method '
+                     'must be implemented by the derived class. \'NotImplemented\' is strictly used as a '
+                     'return value for binary special methods (e.g __eq__), indicating that they\'re not implemented.',
+            'E0712': '\'except\' expects a class that is a subclass of the BaseException class.',
+            'W0702': 'It\'s bad practice to use the \'except\' keyword without passing an exception, '
+                     'since any and all expressions will be caught, which may lead to undetected errors '
+                     'in your code.',
             'W0703': 'It\'s bad practice to use \'except: Exception\' since any and all expressions '
-                     'will be caught, which may lead to bugs.',
-            'W0705': '\'except\' blocks are analyzed top to bottom, so if we try to catch the same '
+                     'will be caught, which may lead to undetected errors in your code.',
+            'W0705': '\'except\' blocks are checked top to bottom, so if we try to catch the same '
                      'exception multiple times, only the first \'except\' block for the exception '
                      'will be reached.',
-            'W0706': 'If the \'except\' block uses \'raise\' as it\'s first or only operator, it '
+            'W0706': 'If the \'except\' block uses \'raise\' as its first or only operator, it '
                      'will just raise back the exception immediately.',
-            'W0711': '\'except\' can catch multiple exceptions, but they have to be passed in as a '
-                     'tuple. Your exception to catch is a result of a binary operation (%s), '
-                     'which will result in only one of the exceptions being caught by the  \'except\' block.',
+            'W0711': '\'except\' can handle multiple exceptions, but they have to be written as a '
+                     'tuple. For example, use \'except (A, B)\' instead of \'except A %s B\'',
             'W0716': '%s is not a valid operation on exceptions.'
         }
     },
     'pylint.checkers.format': {
         'FormatChecker': {
-            'W0301': '\';\' in Python is used to put multiple statements on a single line, so this '
-                     'semicolon is unnecessary. In general, there is no good reason to ever use a \';\' '
-                     'in Python.',
-            'W0312': 'This code is indented with both %ss and %ss. You should stick to just one, '
-                     'but note that spaces are preferred.',
-            'C0301': 'This line is %s characters long, exceeding our default limit of %s characters.',
+            'W0301': 'You should remove this semicolon. In Python, statements are separated by '
+                     'starting each one on a new line.',
+            'W0312': 'This code is indented with both %ss and %ss. You should use spaces to indent your code.',
+            'C0301': 'This line is %s characters long, exceeding the limit of %s characters.',
             'C0303': 'Trailing whitespace is poor formatting, and should be removed.',
-            'C0304': 'It\'s proper practice to have the final line in your file be a newline, '
-                     'which it is not.',
-            'C0321': 'Writing multiple statements on a single line is discouraged by PEP8.',
+            'C0304': 'By convention, each Python file should end with a blank line. To fix this, '
+                     'go down to the bottom of your file and press Enter/Return to add an empty line.',
+            'C0321': 'Writing multiple statements on a single line makes your code harder to read and '
+                     'understand, and should be avoided.',
             'C0330': 'Wrong %s indentation%s%s.\n%s%s. This error occured because of an '
                      'inconsistent use of number of spaces for indentation.'
         }
@@ -165,19 +168,22 @@ patch_data = {
     'pylint.checkers.imports': {
         'ImportsChecker': {
             'E0401': 'Unable to import %s. Check the spelling of the module name, or '
-                     'whether the module is in the correct directory.',
-            'W0401': 'Wildcard imports add all objects from the import module into the '
-                     'global namespace, which may cause problems. You should only '
-                     'import from %s what you need.',
+                     'whether the module is installed (if it is a module you did not write), '
+                     'or whether the module is in the same directory as this file '
+                     '(if it is a module you did write).',
+            'W0401': 'Wildcard (*) imports add all objects from the imported module as '
+                     'global variables, which may result in name collisions. You should only '
+                     'import from %s what you need, or import the whole module '
+                     '("import module") and use dot notation to access the module\'s functions/classes.',
             'W0404': 'Module %r was reimported on line %s. A module should not be '
                      'imported more than once.',
-            'W0410': 'Python 2.5 and greater requires \'__future__\' imports to be the '
-                     'first non-docstring statement in the module.',
+            'W0410': 'Imports of \'__future__\' must be the first non-docstring statement in the module.',
             'C0410': 'Different modules should not be imported on a single line. You '
                      'should import each module on line %s on separate lines.',
-            'C0414': 'Aliasing an import as the name of the package is useless.',
-            'C0415': 'Import statements should be in the toplevel of the module. You '
-                     'should move the import on line %s to the top of the file.'
+            'C0414': 'The \'import as\' is used to import a module and give it a different name in this file. '
+                     'If you don\'t want to rename the module, simply use \'import\' instead.',
+            'C0415': 'Import statements should be in the top of the module, or within an '
+                     '\'if name == "__main__" block. You should move the import on line %s to the top of the file.'
         }
     },
     'pylint.checkers.misc': {
@@ -188,8 +194,8 @@ patch_data = {
     },
     'pylint.checkers.newstyle': {
         'NewStyleConflictChecker': {
-            'E1003': 'The first argument to \'super\' should be the current class, '
-                     'the argument %r is not valid.'
+            'E1003': 'The first argument to \'super\' should be the current class. '
+                     'The argument %r is not valid.'
         }
     }
 }

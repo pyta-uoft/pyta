@@ -1,1 +1,1 @@
-print("Hello World!")  # Trailing newline is absent: 
+print("Hello World!")  # Trailing newline is absent:

@@ -8,8 +8,7 @@ class DivisionException(Exception):
 
 def divide(numerator: int, denominator: int) -> float:
     """Divide the numerator by the denominator."""
-    try:
+    if denominator == 0:
+        raise DivisionException("You can't do {n} / % {d}", numerator, denominator)
+    else:
         return numerator / denominator
-    # Error on the following line, in particular the first argument
-    except DivisionException("You can't do {n} / % {d}", numerator, denominator):
-        raise

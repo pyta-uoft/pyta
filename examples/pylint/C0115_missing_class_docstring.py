@@ -1,6 +1,4 @@
 """C0115: Missing class docstring."""
-class Person:
+class A:
     # Error on this line (no docstring)
-    def __init__(self, name, surname):
-        self.name = name
-        self.surname = surname
+    pass

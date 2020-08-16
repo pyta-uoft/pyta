@@ -1,4 +1,4 @@
 try:
     1 / 0
-except:
+except ZeroDivisionError:
     raise

@@ -1,4 +1,3 @@
-def myPiFuction() -> None:
-    print('pi is' + str(np.pi))
+print('hello')
 
-import numpy as np  # Error on this line
+import math as m  # Error on this line

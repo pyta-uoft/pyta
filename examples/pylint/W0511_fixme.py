@@ -1,3 +1,3 @@
-def fishyFunction() -> None:
+def fishy_function() -> None:
     # FIXME
-    print('meow')
+    # Implement this function

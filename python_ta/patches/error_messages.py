@@ -4,120 +4,123 @@ from importlib import import_module
 # global
 patch_data = {
     'pylint.checkers.base': {
-        'BasicChecker':
-            {'E0111': 'reversed() can only be called on sequence types. This '
-                      'typically occurs because you\'re trying to reverse '
-                      'something that isn\'t a str, list, or tuple.',
-             'W0101': 'Code after a return or raise statement will '
-                      'never be run, so either the function is '
-                      'returning early or you should remove it.',
-             'W0102': 'Dangerous default value %s as argument. '
-                      'Using mutable values as a default argument '
-                      'is a common cause of confusing and unwanted behaviour.',
-             'W0104': 'Right now, this expression isn\'t being used by the rest '
-                      'of your code. You should either remove this expression or '
-                      'save it in a variable to use it later.',
-             'W0106': 'Expression "%s" isn\'t assigned to a variable.',
-             'W0108': 'This lambda function isn\'t necessary since you can pass '
-                      'the arguments directly to the function you\'re calling in '
-                      'the lambda\'s body.',
-             'W0109': 'Duplicate key %r in dictionary. '
-                      'When constructing a dictionary, the last value assigned '
-                      'to a key takes precedence, making previous ones redundant.',
-             'W0122': 'Using `exec()` to evaluate a code-block represented as a '
-                      'str can be potentially dangerous, and is typically a sign of poor design.',
-             'W0123': 'Using `eval()` to evaluate an expression represented as a '
-                      'str can be potentially dangerous, and is typically a sign of poor design.',
-             'W0199': 'Calling assert on a tuple will only evaluate to false if '
-                      'it is empty. It\'s likely you intended \'assert x, y\' rather '
-                      'than \'assert (x,y)\'.'
-             },
-        'ComparisonChecker':
-            {'R0123': 'The \'is\' operator compares the ids of its two arguments, not '
-                      'their values. When performing comparison with a literal, '
-                      'this is usually not what you want. Did you mean \'==\'?',
-             'C0123': 'You should use \'isinstance\' rather than \'type\' to '
-                      'check the type of a value.'
-             },
-        'NameChecker':
-            {'C0102': 'Black listed name "%s". You should give your variables '
-                      'meaningful rather than generic names.',
-             'C0103': '%s name "%s" doesn\'t conform to %s. '
-                      'Please refer to the PyTA Help Documentation for more information '
-                      'on Python Naming Conventions.'
-             },
-        'PassChecker':
-            {'W0107': 'Unnecessary pass statement (you should remove this). '
-                      'A pass statement should only be used to represent '
-                      'an \"empty\" code block, where nothing happens.'},
-        'BasicErrorChecker':
-            {'E0101': '__init__ is called only to initialize the attributes of a new object. '
-                      'It should not return anything.',
-             'E0102': '%s was already defined line %s. '
-                      'You should make sure all functions, methods and classes '
-                      'defined have different names.',
-             'E0103': 'The %r keyword should only be used inside a loop.',
-             'E0104': 'The \'return\' keyword is used to end the execution of a function '
-                      'and return a result, so you should only use it inside of a function.',
-             'E0108': 'Duplicate parameter name %s in function definition. '
-             }
+        'BasicChecker': {
+            'E0111': 'reversed() can only be called on sequence types. This '
+                     'typically occurs because you\'re trying to reverse '
+                     'something that isn\'t a str, list, or tuple.',
+            'W0101': 'Code after a return or raise statement will '
+                     'never be run, so either the function is '
+                     'returning early or you should remove it.',
+            'W0102': 'Dangerous default value %s as argument. '
+                     'Using mutable values as a default argument '
+                     'is a common cause of confusing and unwanted behaviour.',
+            'W0104': 'This statement doesn\'t have any effect, and could be '
+                     'removed without changing the behaviour of the program.'
+            'W0106': 'Right now, expression %s isn\'t being used by the rest '
+                     'of your code. You should either remove this expression or '
+                     'save it in a variable to use it later.',
+            'W0108': 'This lambda function isn\'t necessary since you can pass '
+                     'the arguments directly to the function you\'re calling in '
+                     'the lambda\'s body.',
+            'W0109': 'Duplicate key %r in dictionary. '
+                     'When constructing a dictionary, the last value assigned '
+                     'to a key takes precedence, making previous ones redundant.',
+            'W0122': 'Using `exec()` to evaluate a code-block represented as a '
+                     'str can be potentially dangerous, and is typically a sign of poor design.',
+            'W0123': 'Using `eval()` to evaluate an expression represented as a '
+                     'str can be potentially dangerous, and is typically a sign of poor design.',
+            'W0199': 'Calling assert on a tuple will only evaluate to false if '
+                     'it is empty. It\'s likely you intended \'assert x, y\' rather '
+                     'than \'assert (x,y)\'.'
+        },
+        'ComparisonChecker': {
+            'R0123': 'The \'is\' operator compares the ids of its two arguments, not '
+                     'their values. When performing comparison with a literal, '
+                     'this is usually not what you want. Did you mean \'==\'?',
+            'C0123': 'You should use \'isinstance\' rather than \'type\' to '
+                     'check the type of a value.'
+        },
+        'NameChecker': {
+            'C0102': 'Black listed name "%s". You should give your variables '
+                     'meaningful rather than generic names.',
+            'C0103': '%s name "%s" doesn\'t conform to %s. '
+                     'Please refer to the PyTA Help Documentation for more information '
+                     'on Python Naming Conventions.'
+        },
+        'PassChecker': {
+            'W0107': 'Unnecessary pass statement (you should remove this). '
+                     'A pass statement should only be used to represent '
+                     'an \"empty\" code block, where nothing happens.'
+        },
+        'BasicErrorChecker': {
+            'E0101': '__init__ is called only to initialize the attributes of a new object. '
+                     'It should not return anything.',
+            'E0102': '%s was already defined line %s. '
+                     'You should make sure all functions, methods and classes '
+                     'defined have different names.',
+            'E0103': 'The %r keyword should only be used inside a loop.',
+            'E0104': 'The \'return\' keyword is used to end the execution of a function '
+                     'and return a result, so you should only use it inside of a function.',
+            'E0108': 'Duplicate parameter name %s in function definition. '
+        }
     },
     'pylint.checkers.refactoring': {
-        'RefactoringChecker':
-            {'R1710': 'Since this function can return a non-None value, you should '
-                      'explicitly write "return None" whenever None is returned by '
-                      'this function. (Possibly including at the end of the function body.)'
-             }
+        'RefactoringChecker': {
+            'R1710': 'Since this function can return a non-None value, you should '
+                     'explicitly write "return None" whenever None is returned by '
+                     'this function. (Possibly including at the end of the function body.)'
+        }
     },
     'pylint.checkers.design_analysis': {
-        'MisdesignChecker': {'R0912': 'This function has too many branches (%s, exceeding limit %s). '
-                                      'You should try to reduce the complexity of the function '
-                                      'by splitting it up into helper functions.',
-                             'R0913': 'This function has too many parameters (%s, exceeding limit %s). '
-                                      'You should try to reduce the complexity of the function '
-                                      'by splitting up it, or combining related objects as a single one.',
-                             'R0914': 'This function has too many local variables (%s, exceeding limit %s). '
-                                      'You should try to reduce the complexity of the function '
-                                      'by splitting up it, or combining related objects as a single one.',
-                             'R0915': 'This function has too many statements ((%s, exceeding limit %s). '
-                                      'It should be split up into smaller functions.',
-                             'R0916': 'This if statement contains too many boolean expressions '
-                                      '(%s, exceeding limit %s). You should see if you can reduce '
-                                      'the amount of expressions, or split it into branches.',
-                             }
+        'MisdesignChecker': {
+            'R0912': 'This function has too many branches (%s, exceeding limit %s). '
+                     'You should try to reduce the complexity of the function '
+                     'by splitting it up into helper functions.',
+            'R0913': 'This function has too many parameters (%s, exceeding limit %s). '
+                     'You should try to reduce the complexity of the function '
+                     'by splitting up it, or combining related objects as a single one.',
+            'R0914': 'This function has too many local variables (%s, exceeding limit %s). '
+                     'You should try to reduce the complexity of the function '
+                     'by splitting up it, or combining related objects as a single one.',
+            'R0915': 'This function has too many statements ((%s, exceeding limit %s). '
+                     'It should be split up into smaller functions.',
+            'R0916': 'This if statement contains too many boolean expressions '
+                     '(%s, exceeding limit %s). You should see if you can reduce '
+                     'the amount of expressions, or split it into branches.',
+        }
     },
     'pylint.checkers.classes': {
-        'ClassChecker': {'E0203': 'You can\'t use instance attribute %r prior to its assignment '
-                                  'on line %s.',
-                         'E0211': 'Every instance method requires at least one parameter, since the '
-                                  'first parameter refers to the object on which this method is called. '
-                                  'Python\'s convention is to name this parameter \'self\'.',
-                         'E0213': 'The first parameter of a method should always be called \'self\'. '
-                                  'Even though this isn\'t technically required, it is a strong convention '
-                                  'used by all Python programmers.',
-                         'E0241': 'This class %r should not inherit from the same class multiple times.',
-                         'R0201': 'This method does not make use of \'self\', so you should remove the self '
-                                  'parameter and move this method outside of the class (turning it into a '
-                                  'top-level function.',
-                         'R0205': 'Class %r inherits from \'object\'. '
-                                  'All classes inherit from object by default, so you do not need to specify '
-                                  'this in the class header.',
-                         'W0211': 'The static method %r contains \'self\' as the first parameter. '
-                                  'Static methods shouldn\'t have this, since this suggests we are expecting '
-                                  'a class instance as the first argument.',
-                         'W0212': 'Since %s starts with an underscore, it should be considered '
-                                  '"private", and not accessed outside of the class in which it is '
-                                  'defined.',
-                         'W0221': 'This method must take the same number of arguments as %s %r method.',
-                         'W0222': 'This method\'s parameters must have the same name, order, and default '
-                                  'arguments as %s %r method.',
-                         'W0223': 'The abstract method %r in class %r must be overridden within a '
-                                  'concrete subclass.',
-                         'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
-                                  'it\'s base class %r.',
-                         'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
-                                  'the parent class rather than some unrelated class.',
-                         },
+        'ClassChecker': {
+            'E0203': 'You can\'t use instance attribute %r prior to its assignment '
+                     'on line %s.',
+            'E0211': 'Every instance method requires at least one parameter, since the '
+                     'first parameter refers to the object on which this method is called. '
+                     'Python\'s convention is to name this parameter \'self\'.',
+             'E0213': 'The first parameter of a method should always be called \'self\'. '
+                      'Even though this isn\'t technically required, it is a strong convention '
+                      'used by all Python programmers.',
+             'E0241': 'This class %r should not inherit from the same class multiple times.',
+             'R0201': 'This method does not make use of \'self\', so you should remove the self '
+                      'parameter and move this method outside of the class (turning it into a '
+                      'top-level function.',
+             'R0205': 'Class %r inherits from \'object\'. '
+                      'All classes inherit from object by default, so you do not need to specify '
+                      'this in the class header.',
+             'W0211': 'The static method %r contains \'self\' as the first parameter. '
+                      'Static methods shouldn\'t have this, since this suggests we are expecting '
+                      'a class instance as the first argument.',
+             'W0212': 'Since %s starts with an underscore, it should be considered '
+                      '"private", and not accessed outside of the class in which it is defined.',
+             'W0221': 'This method must take the same number of arguments as %s %r method.',
+             'W0222': 'This method\'s parameters must have the same name, order, and default '
+                      'arguments as %s %r method.',
+             'W0223': 'The abstract method %r in class %r must be overridden within a '
+                      'concrete subclass.',
+             'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
+                      'it\'s base class %r.',
+             'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
+                      'the parent class rather than some unrelated class.',
+        },
         'SpecialMethodsChecker': {
             'E0302': 'The special method %r expects to take %s parameters, but %d %s given.',
         },
@@ -147,7 +150,7 @@ patch_data = {
                      'will just raise back the exception immediately.',
             'W0711': '\'except\' can handle multiple exceptions, but they have to be written as a '
                      'tuple. For example, use \'except (A, B)\' instead of \'except A %s B\'',
-            'W0716': '%s is not a valid operation on exceptions.'
+            'W0716': 'This is not a valid operation on exceptions. %s'
         }
     },
     'pylint.checkers.format': {
@@ -187,7 +190,6 @@ patch_data = {
     'pylint.checkers.misc': {
         'EncodingChecker': {
             'W0511': 'The warning %s was found.'
-
         }
     },
     'pylint.checkers.newstyle': {

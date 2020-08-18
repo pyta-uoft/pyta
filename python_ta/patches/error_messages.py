@@ -181,9 +181,7 @@ patch_data = {
             'C0410': 'Different modules should not be imported on a single line. You '
                      'should import each module on line %s on separate lines.',
             'C0414': 'The \'import as\' is used to import a module and give it a different name in this file. '
-                     'If you don\'t want to rename the module, simply use \'import\' instead.',
-            'C0415': 'Import statements should be in the top of the module, or within an '
-                     '\'if name == "__main__" block. You should move the import on line %s to the top of the file.'
+                     'If you don\'t want to rename the module, simply use \'import\' instead.'
         }
     },
     'pylint.checkers.misc': {

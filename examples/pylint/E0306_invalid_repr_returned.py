@@ -7,4 +7,4 @@ class Company:
         self._employees = employees
 
     def __repr__(self) -> str:
-        return self._employees  # Error on this line
+        return {'employees': self._employees}  # Error on this line

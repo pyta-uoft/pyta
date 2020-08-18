@@ -1,2 +1,2 @@
-# Error on line below
-print('Hello')          # Trailing whitespace
+# Error on line below, there are spaces after the print statement.
+print('Hello')       

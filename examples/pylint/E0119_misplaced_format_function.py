@@ -1,1 +1,1 @@
-['My name is {}']  # Error on this line
+print('My name is {}').format('Adam')  # Error on this line

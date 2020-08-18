@@ -133,11 +133,11 @@ patch_data = {
             'E0702': '\'raise\' is used to raise exceptions. Anything else will lead to an error. '
                      '(Raising %s)',
             'E0704': 'This \'raise\' statement must have an exception class or instance.',
-            'E0710': 'This \'raise\' statement is using a class that is not a subclass of BaseException.',
+            'E0710': 'This \'raise\' statement is using a class that is not a subclass of Exception.',
             'E0711': 'You mean to raise \'NotImplementedError\', which indicates that the abstract method '
                      'must be implemented by the derived class. \'NotImplemented\' is strictly used as a '
                      'return value for binary special methods (e.g __eq__), indicating that they\'re not implemented.',
-            'E0712': '\'except\' expects a class that is a subclass of the BaseException class.',
+            'E0712': '\'except\' expects a class that is a subclass of the Exception class (%s is not).',
             'W0702': 'It\'s bad practice to use the \'except\' keyword without passing an exception, '
                      'since any and all expressions will be caught, which may lead to undetected errors '
                      'in your code.',

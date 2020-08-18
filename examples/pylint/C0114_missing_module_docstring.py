@@ -1,2 +1,2 @@
-# C0114: missing module docstring.
+# Error on this line (no docstring)
 ...

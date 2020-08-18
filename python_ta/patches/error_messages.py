@@ -144,7 +144,7 @@ patch_data = {
             'W0703': 'It\'s bad practice to use \'except: %s\' since any and all expressions '
                      'will be caught, which may lead to undetected errors in your code.',
             'W0705': '\'except\' blocks are checked top to bottom, so if we try to catch the same '
-                     'exception multiple times, only the first \'except\' block for the exception '
+                     'exception %s multiple times, only the first \'except\' block for the exception '
                      'will be reached.',
             'W0706': 'If the \'except\' block uses \'raise\' as its first or only operator, it '
                      'will just raise back the exception immediately.',

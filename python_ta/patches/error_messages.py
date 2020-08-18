@@ -138,7 +138,7 @@ patch_data = {
             'W0702': 'It\'s bad practice to use the \'except\' keyword without passing an exception, '
                      'since any and all expressions will be caught, which may lead to undetected errors '
                      'in your code.',
-            'W0703': 'It\'s bad practice to use \'except: Exception\' since any and all expressions '
+            'W0703': 'It\'s bad practice to use \'except: %s\' since any and all expressions '
                      'will be caught, which may lead to undetected errors in your code.',
             'W0705': '\'except\' blocks are checked top to bottom, so if we try to catch the same '
                      'exception multiple times, only the first \'except\' block for the exception '

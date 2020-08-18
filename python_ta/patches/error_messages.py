@@ -15,7 +15,7 @@ patch_data = {
                      'Using mutable values as a default argument '
                      'is a common cause of confusing and unwanted behaviour.',
             'W0104': 'This statement doesn\'t have any effect, and could be '
-                     'removed without changing the behaviour of the program.'
+                     'removed without changing the behaviour of the program.',
             'W0106': 'Right now, expression %s isn\'t being used by the rest '
                      'of your code. You should either remove this expression or '
                      'save it in a variable to use it later.',

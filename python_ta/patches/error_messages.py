@@ -119,7 +119,7 @@ patch_data = {
              'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
                       'it\'s base class %r.',
              'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
-                      'the parent class rather than some unrelated class.',
+                      'the parent class rather than some unrelated class %r.',
         },
         'SpecialMethodsChecker': {
             'E0302': 'The special method %r expects to take %s parameters, but %d %s given.',

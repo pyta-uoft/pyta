@@ -6,7 +6,7 @@ with open('README.md') as fh:
 
 setup(
     name='python-ta',
-    version='1.6.0b2',
+    version='1.6.0',
     description='Code checking tool for teaching Python',
     long_description=long_description,
     long_description_content_type='text/markdown',

@@ -106,8 +106,6 @@ patch_data = {
                      'Even though this isn\'t technically required, it is a strong convention '
                      'used by all Python programmers.',
             'E0241': 'This class %r should not inherit from the same class multiple times.',
-            'E0301': 'An \'__iter__\' method must return an iterator, i.e an object with a '
-                     '\'__next\' method.',
             'R0201': 'This method does not make use of \'self\', so you should remove the self '
                      'parameter and move this method outside of the class (turning it into a '
                      'top-level function.',
@@ -130,6 +128,8 @@ patch_data = {
                      'the parent class rather than some unrelated class %r.',
         },
         'SpecialMethodsChecker': {
+            'E0301': 'An \'__iter__\' method must return an iterator, i.e an object with a '
+                     '%s method.',
             'E0302': 'The special method %r expects to take %s parameters, but %d %s given.',
         },
     },

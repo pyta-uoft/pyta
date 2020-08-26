@@ -6,16 +6,16 @@
 # Basic checker
 
 - init-is-generator (E0100): disabled
-- return-in-init (E0101): improve message
-- function-redefined (E0102): improve message
-- not-in-loop (E0103): improve message
-- return-outside-function (E0104): improve message
+- return-in-init (E0101): good
+- function-redefined (E0102): good
+- not-in-loop (E0103): good
+- return-outside-function (E0104): good
 - yield-outside-function (E0105): disabled
 - return-arg-in-generator (E0106): disabled
 - nonexistent-operator (E0107): good
-- duplicate-argument-name (E0108): improve message (argument -> parameter)
+- duplicate-argument-name (E0108): good
 - abstract-class-instantiated (E0110): disabled (though could enable if we used `abc.ABCMeta`)
-- bad-reversed-sequence (E0111): *create*
+- bad-reversed-sequence (E0111): good
 - too-many-star-expressions (E0112): disabled
 - invalid-star-assignment-target (E0113): disabled
 - star-needs-assignment-target (E0114): disabled
@@ -23,59 +23,59 @@
 - continue-in-finally (E0116): disabled
 - nonlocal-without-binding (E0117): disabled
 - used-prior-global-declaration (E0118): disabled
-- misplaced-format-function (E0119): *create*
-- unreachable (W0101): improve message
-- dangerous-default-value (W0102): improve message
-- pointless-statement (W0104): improve message
+- misplaced-format-function (E0119): improve message
+- unreachable (W0101): good
+- dangerous-default-value (W0102): good
+- pointless-statement (W0104): good
 - pointless-string-statement (W0105): *create*
-- expression-not-assigned (W0106): improve message
-- unnecessary-pass (W0107): improve message
-- unnecessary-lambda (W0108): *create*
-- duplicate-key (W0109): improve message
+- expression-not-assigned (W0106): good
+- unnecessary-pass (W0107): good
+- unnecessary-lambda (W0108): good
+- duplicate-key (W0109): good
 - assign-to-new-keyword (W0111): disabled
 - useless-else-on-loop (W0120): disabled
-- eval-used (W0123): *create*
-- exec-used (W0122): *create*
-- confusing-with-statement (W0124): *create*
+- eval-used (W0123): good
+- exec-used (W0122): good
+- confusing-with-statement (W0124): good
 - using-constant-test (W0125): disabled (superceded by E9902)
-- missing-parentheses-for-call-in-test (W0126): *create*
-- self-assigning-variable (W0127): *create*
+- missing-parentheses-for-call-in-test (W0126): good
+- self-assigning-variable (W0127): good
 - redeclared-assigned-name (W0128): *create*
-- comparison-with-callable (W0143): *create*
+- comparison-with-callable (W0143): improve message
 - lost-exception (W0150): disabled
-- assert-on-tuple (W0199): improve message
-- literal-comparison (R0123): improve message
-- comparison-with-itself (R0124): *create*
-- blacklisted-name (C0102): improve message
-- invalid-name (C0103): improve message
+- assert-on-tuple (W0199): good
+- literal-comparison (R0123): good
+- comparison-with-itself (R0124): good
+- blacklisted-name (C0102): good
+- invalid-name (C0103): good
 - empty-docstring (C0112): good
-- missing-module-docstring (C0114): *create*
-- missing-function-docstring (C0116): *create*
-- missing-class-docstring (C0115): *create*
+- missing-module-docstring (C0114): good
+- missing-function-docstring (C0116): good
+- missing-class-docstring (C0115): good
 - singleton-comparison (C0121): good
 - misplaced-comparison-constant (C0122): disabled
-- unidiomatic-typecheck (C0123):
+- unidiomatic-typecheck (C0123): good
 
 ## Classes checker
 
-- access-member-before-definition (E0203): improve message (member -> attribute)
+- access-member-before-definition (E0203): good
 - method-hidden (E0202): good
-- no-method-argument (E0211): improve message
-- no-self-argument (E0213): improve message
+- no-method-argument (E0211): good
+- no-self-argument (E0213): good
 - invalid-slots-object (E0236): disabled
 - assigning-non-slot (E0237): disabled
 - invalid-slots (E0238): disabled
 - inherit-non-class (E0239): good
 - inconsistent-mro (E0240): disabled
-- duplicate-bases (E0241): improve message
+- duplicate-bases (E0241): good
 - class-variable-slots-conflict (E0242): disabled
-- non-iterator-returned (E0301): *create*
-- unexpected-special-method-signature (E0302): improve message
-- invalid-length-returned (E0303): *create*
-- invalid-bool-returned (E0304): *create*
+- non-iterator-returned (E0301): good
+- unexpected-special-method-signature (E0302): good
+- invalid-length-returned (E0303): good
+- invalid-bool-returned (E0304): good
 - invalid-index-returned (E0305): disabled
-- invalid-repr-returned (E0306): *create*
-- invalid-str-returned (E0307): *create*
+- invalid-repr-returned (E0306): good
+- invalid-str-returned (E0307): good
 - invalid-bytes-returned (E0308): disabled
 - invalid-hash-returned (E0309): disabled
 - invalid-length-hint-returned (E0310): disabled
@@ -83,20 +83,20 @@
 - invalid-getnewargs-returned (E0312): disabled
 - invalid-getnewargs-ex-returned (E0313): disabled
 - attribute-defined-outside-init (W0201): good
-- bad-staticmethod-argument (W0211): create
-- protected-access (W0212): improve message
+- bad-staticmethod-argument (W0211): good
+- protected-access (W0212): good
 - no-init (W0232): disabled
-- arguments-differ (W0221): improve message
-- signature-differs (W0222): improve message
-- abstract-method (W0223): improve message
-- super-init-not-called (W0231): *create* (maybe? if not, add to disable)
-- non-parent-init-called (W0233): improve message
+- arguments-differ (W0221): good
+- signature-differs (W0222): good
+- abstract-method (W0223): good
+- super-init-not-called (W0231): good
+- non-parent-init-called (W0233): good
 - useless-super-delegation (W0235): disabled
 - invalid-overridden-method (W0236): disabled
-- no-self-use (R0201): improve message
+- no-self-use (R0201): good
 - no-classmethod-decorator (R0202): disabled
 - no-staticmethod-decorator (R0203): disabled
-- useless-object-inheritance (R0205): *create*
+- useless-object-inheritance (R0205): good
 - property-with-parameters (R0206): disabled
 - bad-classmethod-argument (C0202): disabled
 - bad-mcs-method-argument (C0203): disabled
@@ -111,61 +111,61 @@
 - too-few-public-methods (R0903): disabled
 - too-many-public-methods (R0904): disabled
 - too-many-return-statements (R0911): disabled
-- too-many-branches (R0912): *create*
-- too-many-arguments (R0913): improve message (arguments -> parameter)
-- too-many-locals (R0914): improve message
-- too-many-statements (R0915): improve message
-- too-many-boolean-expressions (R0916): *create*
+- too-many-branches (R0912): good
+- too-many-arguments (R0913): good
+- too-many-locals (R0914): good
+- too-many-statements (R0915): good
+- too-many-boolean-expressions (R0916): good
 
 ## Exceptions checker
 
-- bad-except-order (E0701): improve message
-- raising-bad-type (E0702): improve message
+- bad-except-order (E0701): good
+- raising-bad-type (E0702): good
 - bad-exception-context (E0703): disabled
-- misplaced-bare-raise (E0704): improve message
-- raising-non-exception (E0710): improve message
-- notimplemented-raised (E0711): improve message
-- catching-non-exception (E0712): improve message
-- bare-except (W0702): improve message
-- broad-except (W0703): improve message
-- duplicate-except (W0705): improve message
-- try-except-raise (W0706): *create*
-- binary-op-exception (W0711): improve message
-- raising-format-tuple (W0715): *create*
-- wrong-exception-operation (W0716): *create*
+- misplaced-bare-raise (E0704): good
+- raising-non-exception (E0710): good
+- notimplemented-raised (E0711): good
+- catching-non-exception (E0712): good
+- bare-except (W0702): good
+- broad-except (W0703): good
+- duplicate-except (W0705): good
+- try-except-raise (W0706): good
+- binary-op-exception (W0711): good
+- raising-format-tuple (W0715): good
+- wrong-exception-operation (W0716): good
 
 ## Format checker
 
-- unnecessary-semicolon (W0301): improve message
+- unnecessary-semicolon (W0301): good
 - bad-indentation (W0311): good
-- mixed-indentation (W0312): improve message
-- line-too-long (C0301): improve message
-- too-many-lines (C0302): improve message
-- trailing-whitespace (C0303): improve message
-- missing-final-newline (C0304): improve message
-- multiple-statements (C0321): improve message
+- mixed-indentation (W0312): good
+- line-too-long (C0301): good
+- too-many-lines (C0302): *create*
+- trailing-whitespace (C0303): good
+- missing-final-newline (C0304): good
+- multiple-statements (C0321): good
 - superfluous-parens (C0325): good
 - bad-whitespace (C0326): good
 - mixed-line-endings (C0327): disabled
 - unexpected-line-ending-format (C0328): disabled
-- bad-continuation (C0330): improve message
+- bad-continuation (C0330): good
 
 ## Imports checker
 
-- import-error (E0401): improve message
+- import-error (E0401): good
 - relative-beyond-top-level (E0402): disabled
-- wildcard-import (W0401): improve message
+- wildcard-import (W0401): good
 - deprecated-module (W0402): disabled
-- reimported (W0404): improve message
+- reimported (W0404): good
 - import-self (W0406): good
 - preferred-module (W0407): disabled
-- misplaced-future (W0410): *create*
+- misplaced-future (W0410): good
 - cyclic-import (R0401): *create*
-- multiple-imports (C0410): improve message
+- multiple-imports (C0410): good
 - wrong-import-order (C0411): good
 - ungrouped-imports (C0412): good
 - wrong-import-position (C0413): good
-- useless-import-alias (C0414): *create*
+- useless-import-alias (C0414): good
 - import-outside-toplevel (C0415): *create*
 
 ## Logging checker
@@ -179,12 +179,12 @@
 
 ## Miscellaneous checker
 
-- fixme (W0511): *create*
+- fixme (W0511): good
 - use-symbolic-message-instead (I0023): disabled
 
 ## Newstyle checker
 
-- bad-super-call (E1003): *create*
+- bad-super-call (E1003): good
 
 ## Refactoring checker
 

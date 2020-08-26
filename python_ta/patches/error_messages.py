@@ -71,11 +71,58 @@ patch_data = {
         }
     },
     'pylint.checkers.refactoring': {
-        'RefactoringChecker': {
-            'R1710': 'Since this function can return a non-None value, you should '
-                     'explicitly write "return None" whenever None is returned by '
-                     'this function. (Possibly including at the end of the function body.)'
-        }
+        'RefactoringChecker':
+            {'R1701': 'These multiple calls to \'isinstance\' can be merged into \'isinstance((%s, (%s)).',
+             'R1702': 'Your code has too many nested blocks (%s, exceeding limit %s). '
+                      'You should try to break it down to reduce how complex it is.',
+             'R1704': 'Redefining parameter with the local name %r',
+             'R1705': 'The %s following the \'if\' branch containing a \'return\' statement '
+                      'is unnecessary. If the \'if\' condition fails then you can '
+                      'execute the \'else\' block in the rest of the function body.',
+             'R1707': 'A tuple is created by the \',\' symbol, not parenthesis. To make the '
+                      'intention of making a tuple clear, you should never create it by a '
+                      'trailing comma, and wrap it in parenthesis.',
+             'R1710': 'Since this function can return a non-None value, you should '
+                      'explicitly write "return None" whenever None is returned by '
+                      'this function. (Possibly including at the end of the function body.)',
+             'R1712': 'Rather than using a temporary variable, try using tuple unpacking '
+                      'to swap variables. i.e: to swap variables \'a\' and \'b\', simply do '
+                      '\'a, b = b, a\'.',
+             'R1713': 'If you want to concatenate an iterable collection of characters to a '
+                      'string \'s\', use \'s.join(characters)\'.',
+             'R1714': 'To check if your variable is equal to one of many values, merge the '
+                      'comparisons into %r rather than check for equality against each value.',
+             'R1715': 'If you want to get a value from a dictionary if a key is present but '
+                      'return a default value if the key is not, you should use the builtin \'dict.get\'.',
+             'R1716': 'You can simplify this boolean operation into a chained comparison. '
+                      'i.e: instead of \'a < b and b < c\', use \'a < b < c\'.',
+             'R1720': 'The \'%s\' following the \'if\' statement(s) that raise exceptions is '
+                      'unnecessary. If the \'if\' condition(s) fail then you can execute the '
+                      '\'else\' block in the rest of the function body.',
+             'R1721': 'Instead of using a comprehension that doesn\'t alter any of the elements to '
+                      'convert the container type, use the appropriate constructor to get your desired type.',
+             'R1723': 'The \'%s\' following the \'if\' statement(s) that contain a \'break\' statement '
+                      'is unnecessary. If the \'if\' condition(s) fail then you can execute the '
+                      '\'else\' block in the rest of the function body.',
+             'R1724': 'The \'%s\' following the \'if\' statement(s) that contain a \'continue\' statement '
+                      'is unnecessary. If the \'if\' condition(s) fail then you can execute the '
+                      '\'else\' block in the rest of the function body.'
+             },
+        'NotChecker':
+            {'C0113': 'Consider changing "%s" to "%s". Removing the negation simplifies the expression, '
+                      'making it easier to read.'
+             },
+        'RecommandationChecker':  # Not a typo, or at least the typo is on Pylint's end
+            {'C0200': 'If you need to reference both an index and the value contained at the index, use '
+                      'the \'enumerate\' builtin rather than iterating with \'range\' and \'len\'. '
+                      'i.e: \'for i, n in enumerate(array)\'.',
+             'C0201': 'Rather than using \'.keys()\' to iterate over the keys of a dictionary, '
+                      'you can simply iterate over the dictionary itself.'
+             },
+        'LenChecker':
+            {'C1801': 'When checking if a sequence is empty, your condition should have an explicit '
+                      'comparison to check the length of the sequence.'
+            }
     },
     'pylint.checkers.design_analysis': {
         'MisdesignChecker': {
@@ -205,7 +252,7 @@ patch_data = {
             'E1003': 'The first argument to \'super\' should be the current class. '
                      'The argument %r is not valid.'
         }
-    }
+    },
 }
 
 

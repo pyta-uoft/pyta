@@ -29,6 +29,12 @@ patch_data = {
                      'str can be potentially dangerous, and is typically a sign of poor design.',
             'W0123': 'Using `eval()` to evaluate an expression represented as a '
                      'str can be potentially dangerous, and is typically a sign of poor design.',
+            'W0124': 'When a \'with\' statement returns multiple values, binding only some of those '
+                     'values with \'as\' can be confusing. This is because it isn\'t clear if '
+                     'a tuple is being returned, or if the one-line syntax for multiple \'with\' '
+                     'statements is being used.',
+            'W0126': 'Your conditional statement references a function but is missing the parenthesis '
+                     'to call the function. This will cause the condition to always evaluate to True.',
             'W0199': 'Calling assert on a tuple will only evaluate to false if '
                      'it is empty. It\'s likely you intended \'assert x, y\' rather '
                      'than \'assert (x,y)\'.'
@@ -96,30 +102,32 @@ patch_data = {
             'E0211': 'Every instance method requires at least one parameter, since the '
                      'first parameter refers to the object on which this method is called. '
                      'Python\'s convention is to name this parameter \'self\'.',
-             'E0213': 'The first parameter of a method should always be called \'self\'. '
-                      'Even though this isn\'t technically required, it is a strong convention '
-                      'used by all Python programmers.',
-             'E0241': 'This class %r should not inherit from the same class multiple times.',
-             'R0201': 'This method does not make use of \'self\', so you should remove the self '
-                      'parameter and move this method outside of the class (turning it into a '
-                      'top-level function.',
-             'R0205': 'Class %r inherits from \'object\'. '
-                      'All classes inherit from object by default, so you do not need to specify '
-                      'this in the class header.',
-             'W0211': 'The static method %r contains \'self\' as the first parameter. '
-                      'Static methods shouldn\'t have this, since this suggests we are expecting '
-                      'a class instance as the first argument.',
-             'W0212': 'Since %s starts with an underscore, it should be considered '
-                      '"private", and not accessed outside of the class in which it is defined.',
-             'W0221': 'This method must take the same number of arguments as %s %r method.',
-             'W0222': 'This method\'s parameters must have the same name, order, and default '
-                      'arguments as %s %r method.',
-             'W0223': 'The abstract method %r in class %r must be overridden within a '
-                      'concrete subclass.',
-             'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
-                      'it\'s base class %r.',
-             'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
-                      'the parent class rather than some unrelated class %r.',
+            'E0213': 'The first parameter of a method should always be called \'self\'. '
+                     'Even though this isn\'t technically required, it is a strong convention '
+                     'used by all Python programmers.',
+            'E0241': 'This class %r should not inherit from the same class multiple times.',
+            'E0301': 'An \'__iter__\' method must return an iterator, i.e an object with a '
+                     '\'__next\' method.',
+            'R0201': 'This method does not make use of \'self\', so you should remove the self '
+                     'parameter and move this method outside of the class (turning it into a '
+                     'top-level function.',
+            'R0205': 'Class %r inherits from \'object\'. '
+                     'All classes inherit from object by default, so you do not need to specify '
+                     'this in the class header.',
+            'W0211': 'The static method %r contains \'self\' as the first parameter. '
+                     'Static methods shouldn\'t have this, since this suggests we are expecting '
+                     'a class instance as the first argument.',
+            'W0212': 'Since %s starts with an underscore, it should be considered '
+                     '"private", and not accessed outside of the class in which it is defined.',
+            'W0221': 'This method must take the same number of arguments as %s %r method.',
+            'W0222': 'This method\'s parameters must have the same name, order, and default '
+                     'arguments as %s %r method.',
+            'W0223': 'The abstract method %r in class %r must be overridden within a '
+                     'concrete subclass.',
+            'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
+                     'it\'s base class %r.',
+            'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
+                     'the parent class rather than some unrelated class %r.',
         },
         'SpecialMethodsChecker': {
             'E0302': 'The special method %r expects to take %s parameters, but %d %s given.',

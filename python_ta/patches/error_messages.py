@@ -253,6 +253,12 @@ patch_data = {
                      'The argument %r is not valid.'
         }
     },
+    'pylint.checkers.stdlib': {
+        'StdlibChecker': {
+            'W1501': '"%s" is not a valid mode for open. Common modes are \'r\' for reading a file, '
+                     'and \'w\' for writing to a file.'
+        }
+    }
 }
 
 

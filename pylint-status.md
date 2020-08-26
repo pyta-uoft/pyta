@@ -188,34 +188,34 @@
 
 ## Refactoring checker
 
-- consider-merging-isinstance (R1701): *create*
-- too-many-nested-blocks (R1702): improve message
+- consider-merging-isinstance (R1701): good
+- too-many-nested-blocks (R1702): good
 - simplifiable-if-statement (R1703): disabled
-- redefined-argument-from-local (R1704): improve message (argument -> parameter)
-- no-else-return (R1705): *create*
+- redefined-argument-from-local (R1704): good
+- no-else-return (R1705): good
 - consider-using-ternary (R1706): disabled
-- trailing-comma-tuple (R1707): improve message
+- trailing-comma-tuple (R1707): good
 - stop-iteration-return (R1708): disabled
 - simplify-boolean-expression (R1709): disabled
 - inconsistent-return-statements (R1710): good
 - useless-return (R1711): disabled
-- consider-swap-variables (R1712): *create*
-- consider-using-join (R1713): *create*
-- consider-using-in (R1714): *create*
-- consider-using-get (R1715): *create*
-- chained-comparison (R1716): *create*
+- consider-swap-variables (R1712): good
+- consider-using-join (R1713): good
+- consider-using-in (R1714): good
+- consider-using-get (R1715): good
+- chained-comparison (R1716): good
 - consider-using-dict-comprehension (R1717): disabled
 - consider-using-set-comprehension (R1718): disabled
 - simplifiable-if-expression (R1719): disabled
 - consider-using-sys-exit (R1722): disabled
-- no-else-raise (R1720): *create*
-- unnecessary-comprehension (R1721): *create*
-- no-else-break (R1723): *create*
-- no-else-continue (R1724): *create*
-- unneeded-not (C0113): improve message
-- consider-using-enumerate (C0200): *create*
-- consider-iterating-dictionary (C0201): improve message
-- len-as-condition (C1801): *create*
+- no-else-raise (R1720): good
+- unnecessary-comprehension (R1721): good
+- no-else-break (R1723): good
+- no-else-continue (R1724): good
+- unneeded-not (C0113): good
+- consider-using-enumerate (C0200): good
+- consider-iterating-dictionary (C0201): good
+- len-as-condition (C1801): good
 
 ## Stdlib checker
 

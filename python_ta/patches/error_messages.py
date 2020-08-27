@@ -258,6 +258,26 @@ patch_data = {
             'W1501': '"%s" is not a valid mode for open. Common modes are \'r\' for reading a file, '
                      'and \'w\' for writing to a file.'
         }
+    },
+    'pylint.checkers.strings': {
+        'StringFormatChecker': {
+            'E1307': 'The argument %r does not match type %r specified by the format string.',
+            'E1310': 'Suspicious argument in %s.%s call. Strip will remove any characters contained '
+                     'in its argument, so duplicate characters are either unintended, or redundant.',
+            'W1308': 'Duplicate string formatting argument %r. Rather than repeating the argument, '
+                     'use named formatting variables so that the argument only has to be passed once.',
+            'W1309': 'Using an f-string that does not have any format variables'
+        },
+        'StringConstantChecker': {
+            'W1401': 'The string \'%s\' contains a backslash, but is not part of an escape sequence. '
+                     'If this is not a typo, then you should make this explicit by escaping the '
+                     'backslash with another backslash.',
+            'W1402': 'Unicode escape being used in byte string \'%s\'. Since this is not a '
+                     'unicode string, inserting unicode characters will have no effect. If '
+                     'you just want to write \'\\u\', you should make this explicit by escaping '
+                     'the backslash with another backslash.',
+            'W1404': 'Implicit string concatenation found in %s. It\'s likely you\'re missing a comma.'
+        }
     }
 }
 

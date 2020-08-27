@@ -220,7 +220,7 @@
 ## Stdlib checker
 
 - invalid-envvar-value (E1507): disabled
-- bad-open-mode (W1501): *create*
+- bad-open-mode (W1501): good
 - boolean-datetime (W1502): disabled
 - redundant-unittest-assert (W1503): disabled
 - deprecated-method (W1505): disabled
@@ -239,50 +239,50 @@
 - missing-format-string-key (E1304): disabled
 - too-many-format-args (E1305): good
 - too-few-format-args (E1306): good
-- bad-string-format-type (E1307): *create*
-- bad-str-strip-call (E1310): improve message
+- bad-string-format-type (E1307): good
+- bad-str-strip-call (E1310): good
 - bad-format-string-key (W1300): disabled
 - unused-format-string-key (W1301): *create*
 - bad-format-string (W1302): disabled
 - missing-format-argument-key (W1303): good
-- unused-format-string-argument (W1304): *create*
+- unused-format-string-argument (W1304): good
 - missing-format-attribute (W1306): disabled
 - invalid-format-index (W1307): disabled
-- f-string-without-interpolation (W1309): *create*
-- implicit-str-concat (W1404): *create*
+- f-string-without-interpolation (W1309): good
+- implicit-str-concat (W1404): good
 - format-combined-specification (W1305): good
-- duplicate-string-formatting-argument (W1308): *create*
-- anomalous-backslash-in-string (W1401): improve message
-- anomalous-unicode-escape-in-string (W1402): *create*
+- duplicate-string-formatting-argument (W1308): good
+- anomalous-backslash-in-string (W1401): good
+- anomalous-unicode-escape-in-string (W1402): good
 
 # Typecheck checker
 
-- no-member (E1101): improve message
-- not-callable (E1102): improve message
+- no-member (E1101): good
+- not-callable (E1102): good
 - assignment-from-no-return (E1111): good
 - no-value-for-parameter (E1120): good
 - too-many-function-args (E1121): good
 - unexpected-keyword-arg (E1123): good
 - redundant-keyword-arg (E1124): disabled
 - missing-kwoa (E1125): disabled
-- invalid-sequence-index (E1126): improve message
-- invalid-slice-index (E1127): improve message
+- invalid-sequence-index (E1126): good
+- invalid-slice-index (E1127): good
 - assignment-from-none (E1128): good
-- not-context-manager (E1129): *create*
-- invalid-unary-operand-type (E1130): improve message (note: message missing in Pylint docs, could submit PR)
-- unsupported-binary-operation (E1131): improve message (same note as previous)
+- not-context-manager (E1129): good
+- invalid-unary-operand-type (E1130): good (note: message missing in Pylint docs, could submit PR)
+- unsupported-binary-operation (E1131): good (same note as previous)
 - unsupported-assignment-operation (E1137): good
 - repeated-keyword (E1132): disabled
-- not-an-iterable (E1133): improve message
+- not-an-iterable (E1133): good
 - not-a-mapping (E1134): *create*
 - unsupported-membership-test (E1135): good
-- unsubscriptable-object (E1136): improve message
+- unsubscriptable-object (E1136): good
 - unsupported-delete-operation (E1138): good
 - invalid-metaclass (E1139): disabled
-- unhashable-dict-key (E1140): *create*
-- dict-iter-missing-items (E1141): *create*
+- unhashable-dict-key (E1140): good
+- dict-iter-missing-items (E1141): good
 - keyword-arg-before-vararg (W1113): disabled
-- arguments-out-of-order (W1114): *create*
+- arguments-out-of-order (W1114): good
 - non-str-assignment-to-dunder-name (W1115): disabled
 - c-extension-no-member (I1101): disabled
 

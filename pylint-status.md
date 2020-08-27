@@ -288,25 +288,25 @@
 
 ## Variables checker
 
-- used-before-assignment (E0601): improve message
+- used-before-assignment (E0601): good
 - undefined-variable (E0602): good
 - undefined-all-variable (E0603): disabled
 - invalid-all-object (E0604): disabled
-- no-name-in-module (E0611): improve message
-- unpacking-non-sequence (E0633): improve message
+- no-name-in-module (E0611): good
+- unpacking-non-sequence (E0633): good
 - global-variable-undefined (W0601): disabled
 - global-variable-not-assigned (W0602): disabled
-- global-statement (W0603): *create*
-- global-at-module-level (W0604): *create*
-- unused-import (W0611): improve message
-- unused-variable (W0612): improve message
-- unused-argument (W0613): improve message
+- global-statement (W0603): good
+- global-at-module-level (W0604): good
+- unused-import (W0611): good
+- unused-variable (W0612): good
+- unused-argument (W0613): good
 - unused-wildcard-import (W0614): disabled
-- redefined-outer-name (W0621): improve message
-- redefined-builtin (W0622): improve message
+- redefined-outer-name (W0621): good
+- redefined-builtin (W0622): good
 - redefine-in-handler (W0623): *create*
-- undefined-loop-variable (W0631): improve message
-- unbalanced-tuple-unpacking (W0632): *create*
+- undefined-loop-variable (W0631): good
+- unbalanced-tuple-unpacking (W0632): good
 - cell-var-from-loop (W0640): disabled
-- possibly-unused-variable (W0641): *create* (but investigate relationship with E9969)
-- self-cls-assignment (W0642): *create*
+- possibly-unused-variable (W0641): improve message (but investigate relationship with E9969)
+- self-cls-assignment (W0642): good

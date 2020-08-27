@@ -302,6 +302,33 @@ patch_data = {
         'IterableChecker': {
             'E1133': 'Can not iterate over %s as it is non-iterable (doesn\'t implement an \'__iter__\' method).'
         }
+    },
+    'pylint.checkers.variables': {
+        'VariablesChecker': {
+            'E0601': 'The variable %r is (possibly) being accessed prior to it having a value assigned.',
+            'E0611': 'Can\'t find the name %r to import from module %r.',
+            'E0633': 'Trying to assign multiple values from%s, but it is not a sequence.',
+            'W0603': 'Using the \'global\' keyword is discouraged since mutating global variables '
+                     'may lead to obscure errors in your code.',
+            'W0604': 'Every global variable can be referenced from the module level, so using '
+                     'the \'global\' keyword at the module level has no effect.',
+            'W0611': 'The import %s is unused. You should include it when you use it '
+                     'to avoid unnecessary imports in your code.',
+            'W0612': 'The variable %s is unused. This may indicate that you are using the wrong variable '
+                     'in someplace on accident. Otherwise, it can be removed without altering the program.',
+            'W0613': 'The parameter %r is unused. This may indicate you misspelled a parameter name '
+                     'in the function body. Otherwise, the parameter can be removed from the function '
+                     'without altering the program.',
+            'W0621': 'The variable name %r already refers to a variable in the outer scope defined on '
+                     'line %s. This makes your code harder to read due to having to keep track of '
+                     'which variable we\'re referencing.',
+            'W0622': '%r is the name of a built-in function, and should not be overridden.',
+            'W0631': 'Variables defined by a loop are only accessible within the loop, meaning '
+                     'the variable %r is possibly undefined.',
+            'W0632': 'The sequence%s is being used to assign %d variables but holds %d values.',
+            'W0642': '%s is a local variable within the method. As such, assignment to the name '
+                     'doesn\'t effect anything outside of the method scope, it just locally rebinds the name.'
+        }
     }
 }
 

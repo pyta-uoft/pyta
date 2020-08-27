@@ -270,7 +270,8 @@
 - assignment-from-none (E1128): good
 - not-context-manager (E1129): *create*
 - invalid-unary-operand-type (E1130): improve message (note: message missing in Pylint docs, could submit PR)
-- unsupported-binary-operation (E1131): improve message (same note as previous)unsupported-assignment-operation (E1137): good
+- unsupported-binary-operation (E1131): improve message (same note as previous)
+- unsupported-assignment-operation (E1137): good
 - repeated-keyword (E1132): disabled
 - not-an-iterable (E1133): improve message
 - not-a-mapping (E1134): *create*

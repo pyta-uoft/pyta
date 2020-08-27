@@ -278,6 +278,30 @@ patch_data = {
                      'the backslash with another backslash.',
             'W1404': 'Implicit string concatenation found in %s. It\'s likely you\'re missing a comma.'
         }
+    },
+    'pylint.checkers.typecheck': {
+        'TypeChecker': {
+            'E1101': '%s %r doesn\'t have the method/attribute %r%s.',
+            'E1102': '%s is not callable. You may have put unnecessary parenthesis following a variable.',
+            'E1126': 'Objects can only be indexed by ints, slices, or objects with an \'__index\' method. '
+                     'The value you\'re attempting to index is none of these.',
+            'E1127': 'The index you\'re slicing with must be an int, \'None\', or an object with an '
+                     '\'__index__\' method.',
+            'E1129': 'Expressions within a \'with\' statement must implement \'__enter__\' and \'__exit__\' '
+                     'methods, which %s does not.',
+            'E1130': '%s. The unary operand is incompatible with the value you\'re '
+                     'applying it to\'s type.',
+            'E1131': '%s. The binary operation can\'t be performed on the two operands provided.',
+            'E1136': '%s does not support indexing.',
+            'E1140': 'Dictionary keys must be immutable.',
+            'E1141': 'When iterating through the (key, value) pairs of a dictionary, you need to iterate '
+                     'over \'dict.items()\' rather that \'dict\',.',
+            'W1114': 'Your arguments aren\'t in the same order as the parameters in the function '
+                     'definition.'
+        },
+        'IterableChecker': {
+            'E1133': 'Can not iterate over %s as it is non-iterable (doesn\'t implement an \'__iter__\' method).'
+        }
     }
 }
 

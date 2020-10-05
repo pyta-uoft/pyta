@@ -178,7 +178,7 @@ def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) ->
     for invariant in rep_invariants:
         try:
             _debug(f'Checking representation invariant for {instance.__class__.__qualname__}: {invariant}')
-            check = eval(invariant, global_scope, {'self': instance})
+            check = eval(invariant, {**global_scope, 'self': instance})
         except:
             _debug(f'Warning: could not evaluate representation invariant: {invariant}')
         else:

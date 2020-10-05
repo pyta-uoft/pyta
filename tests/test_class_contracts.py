@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 import pytest
 import math
 from python_ta.contracts import check_all_contracts
-from typing import List
+from typing import List, Set
 
 
 def is_valid_name(name):
@@ -77,6 +78,16 @@ class Pizza:
         Precondition: r > 0
         """
         return r ** 2 * math.pi
+
+
+@dataclass
+class SetWrapper:
+    """A wrapper around a set.
+
+    Representation Invariants:
+        - all(x in self.set for x in {1, 2, 3})
+    """
+    set: Set[int]
 
 
 # Decorating everything in this file
@@ -178,3 +189,21 @@ def test_circle_area_invalid() -> None:
         Pizza.circle_area(0)
     msg = str(excinfo.value)
     assert 'r > 0' in msg
+
+
+def test_set_wrapper_valid() -> None:
+    """
+    Test the SetWrapper representation invariant on a valid instance.
+    """
+    my_set = SetWrapper(set={1, 2, 3})
+    assert my_set.set == {1, 2, 3}
+
+
+def test_set_wrapper_invalid() -> None:
+    """
+    Test the SetWrapper representation invariant on a valid instance.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        SetWrapper(set={1, 2, -3})
+    msg = str(excinfo.value)
+    assert 'all(x in self.set for x in {1, 2, 3})' in msg

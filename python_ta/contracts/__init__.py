@@ -7,7 +7,7 @@ import wrapt
 
 
 # Can set to True to enable debug messages.
-DEBUG_CONTRACTS = True
+DEBUG_CONTRACTS = False
 
 
 def check_all_contracts(*args, decorate_main=True) -> None:

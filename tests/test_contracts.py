@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Set
 import pytest
 from python_ta.contracts import check_contracts
 
@@ -140,3 +140,29 @@ def test_is_even_sum_violation() -> None:
 
     msg = str(excinfo.value)
     assert 'is_even(numbers)' in msg
+
+
+@check_contracts
+def search(numbers: Set[int]) -> bool:
+    """Search for a number in a set.
+
+    Illustrates a preconditions with a double comprehension.
+
+    Preconditions:
+        - all({n + m > 0 for n in numbers for m in numbers})
+    """
+    return 1 in numbers
+
+
+def test_search_valid() -> None:
+    """Test search on a valid input."""
+    assert search({1, 2})
+
+
+def test_search_invalid() -> None:
+    """Test search on an invalid input."""
+    with pytest.raises(AssertionError) as excinfo:
+        search({-1, -2})
+
+    msg = str(excinfo.value)
+    assert 'all({n + m > 0 for n in numbers for m in numbers})' in msg

@@ -192,7 +192,7 @@ def _check_assertions(wrapped: Callable[..., Any], function_locals: dict, assert
     for assertion in assertions:
         try:
             _debug(f'Checking precondition for {wrapped.__qualname__}: {assertion}')
-            check = eval(assertion, wrapped.__globals__, function_locals)
+            check = eval(assertion, {**wrapped.__globals__, **function_locals})
         except:
             _debug(f'Warning: could not evaluate precondition: {assertion}')
         else:

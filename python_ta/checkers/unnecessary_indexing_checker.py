@@ -1,6 +1,6 @@
 """checker for unnecessary indexing in a loop.
 """
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import astroid
 from astroid.node_classes import NodeNG
@@ -109,13 +109,29 @@ def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node:
         return index_node.lookup(index_node.name)[1][0] != for_node.target or \
                not isinstance(index_node.parent, astroid.AugAssign)
     else:
-        return index_node.lookup(index_node.name)[1][0] != for_node.target or _is_load_subscript(index_node, for_node)
+        return _scope_lookup(index_node) != for_node.target or _is_load_subscript(index_node, for_node)
 
 
 def _index_name_nodes(index: str, for_node: astroid.For) -> List[Union[astroid.AssignName, astroid.Name]]:
     """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
     return [name_node for name_node in for_node.nodes_of_class((astroid.AssignName, astroid.Name))
             if name_node.name == index and name_node != for_node.target]
+
+
+def _scope_lookup(node: astroid.Name) -> Optional[NodeNG]:
+    """Look up the given name node's assigment node.
+
+    This is a replacement for astroid's LocalsDictNodeNG._scope_lookup method, which doesn't
+    seem to handle nested comprehensions (?).
+    """
+    scope = node.scope()
+    while node.name not in scope and not isinstance(scope, astroid.Module):
+        scope = scope.parent.scope()
+
+    if node.name in scope:
+        return scope[node.name]
+    else:
+        return None
 
 
 def register(linter):

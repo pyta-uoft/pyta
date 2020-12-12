@@ -10,6 +10,10 @@ import wrapt
 DEBUG_CONTRACTS = False
 
 
+class PyTAContractError(Exception):
+    """Error raised when a PyTA contract assertion is violated."""
+
+
 def check_all_contracts(*args, decorate_main=True) -> None:
     """Automatically check contracts for all functions and classes in the given module.
 
@@ -43,7 +47,7 @@ def check_contracts(wrapped, instance, args, kwargs):
             return _check_function_contracts(wrapped, None, args, kwargs)
         else:
             return _check_function_contracts(wrapped, instance, args, kwargs)
-    except AssertionError as e:
+    except PyTAContractError as e:
         raise AssertionError(str(e)) from None
 
 
@@ -90,7 +94,7 @@ def add_class_invariants(klass: type) -> None:
             if klass_mod is not None:
                 try:
                     _check_invariants(self, rep_invariants, klass_mod.__dict__)
-                except AssertionError as e:
+                except PyTAContractError as e:
                     raise AssertionError(str(e)) from None
 
     for attr, value in klass.__dict__.items():
@@ -116,9 +120,9 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 _debug(f'Checking type of parameter {param} in call to {wrapped.__qualname__}')
                 check_type(param, arg, annotations[param])
             except TypeError:
-                raise AssertionError(
-                    f'{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter \
-                        "{param}: {annotations[param]}"')
+                raise PyTAContractError(
+                    f'{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter '
+                    f'"{param}: {annotations[param]}"')
 
     # Check function preconditions
     preconditions = parse_assertions(wrapped)
@@ -133,7 +137,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             _debug(f'Checking return type from call to {wrapped.__qualname__}')
             check_type('return', r, return_type)
         except TypeError:
-            raise AssertionError(
+            raise PyTAContractError(
                 f'{wrapped.__name__} return value {r} does not match annotated return type {return_type}')
 
     return r
@@ -151,7 +155,7 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
             if klass_mod is not None:
                 _check_invariants(instance, rep_invariants, klass_mod.__dict__)
             _check_class_type_annotations(instance)
-        except AssertionError as e:
+        except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
             return r
@@ -184,8 +188,8 @@ def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) ->
         except:
             _debug(f'Warning: could not evaluate representation invariant: {invariant}')
         else:
-            assert check,\
-                f'Representation invariant "{invariant}" violated.'
+            if not check:
+                raise PyTAContractError(f'Representation invariant "{invariant}" violated.')
 
 
 def _check_assertions(wrapped: Callable[..., Any], function_locals: dict, assertions: List[str]) -> None:
@@ -198,8 +202,9 @@ def _check_assertions(wrapped: Callable[..., Any], function_locals: dict, assert
         except:
             _debug(f'Warning: could not evaluate precondition: {assertion}')
         else:
-            assert check,\
-                f'{wrapped.__name__} precondition "{assertion}" violated for arguments {function_locals}.'
+            if not check:
+                raise PyTAContractError(f'{wrapped.__name__} precondition "{assertion}" '
+                                        f'violated for arguments {function_locals}.')
 
 
 def parse_assertions(obj: Any, parse_token: str = 'Precondition') -> List[str]:

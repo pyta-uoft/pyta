@@ -86,11 +86,12 @@ def add_class_invariants(klass: type) -> None:
         frame_locals = callframe[1].frame.f_locals
         if self is not frame_locals.get('self'):
             # Only validating if the attribute is not being set in a instance/class method
-            init = getattr(klass, '__init__')
-            try:
-                _check_invariants(self, rep_invariants, init.__globals__)
-            except AssertionError as e:
-                raise AssertionError(str(e)) from None
+            klass_mod = sys.modules.get(klass.__module__)
+            if klass_mod is not None:
+                try:
+                    _check_invariants(self, rep_invariants, klass_mod.__dict__)
+                except AssertionError as e:
+                    raise AssertionError(str(e)) from None
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):
@@ -144,10 +145,11 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
-        init = getattr(instance, '__init__')
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-            _check_invariants(instance, rep_invariants, init.__globals__)
+            klass_mod = sys.modules.get(type(instance).__module__)
+            if klass_mod is not None:
+                _check_invariants(instance, rep_invariants, klass_mod.__dict__)
             _check_class_type_annotations(instance)
         except AssertionError as e:
             raise AssertionError(str(e)) from None

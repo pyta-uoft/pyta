@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 import pytest
 import math
 from python_ta.contracts import check_all_contracts
-from typing import List
+from typing import List, Set
 
 
 def is_valid_name(name):
@@ -79,8 +80,14 @@ class Pizza:
         return r ** 2 * math.pi
 
 
-# Decorating everything in this file
-check_all_contracts(__name__, decorate_main = False)
+@dataclass
+class SetWrapper:
+    """A wrapper around a set.
+
+    Representation Invariants:
+        - all(x in self.set for x in {1, 2, 3})
+    """
+    set: Set[int]
 
 
 @pytest.fixture
@@ -178,3 +185,105 @@ def test_circle_area_invalid() -> None:
         Pizza.circle_area(0)
     msg = str(excinfo.value)
     assert 'r > 0' in msg
+
+
+def test_set_wrapper_valid() -> None:
+    """
+    Test the SetWrapper representation invariant on a valid instance.
+    """
+    my_set = SetWrapper(set={1, 2, 3})
+    assert my_set.set == {1, 2, 3}
+
+
+def test_set_wrapper_invalid() -> None:
+    """
+    Test the SetWrapper representation invariant on a valid instance.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        SetWrapper(set={1, 2, -3})
+    msg = str(excinfo.value)
+    assert 'all(x in self.set for x in {1, 2, 3})' in msg
+
+
+class NoInit:
+    """A class with no initializer.
+
+    Representation Invariants:
+        - abs(1) < 0  # This is always False
+    """
+    def method(self) -> int:
+        """Method to test that representation invariant is checked on method calls."""
+        return 1
+
+
+def test_no_init_setattr() -> None:
+    """
+    Check that a built-in function (abs) can be called successfully
+    from a representation invariant of a class with no __init__ method, when setting an attribute.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        n = NoInit()
+        n.attr = 1
+
+    msg = str(excinfo.value)
+    assert 'abs(1) < 0' in msg
+
+
+def test_no_init_method() -> None:
+    """
+    Check that a built-in function (abs) can be called successfully
+    from a representation invariant of a class with no __init__ method, when calling a method.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        n = NoInit()
+        n.method()
+
+    msg = str(excinfo.value)
+    assert 'abs(1) < 0' in msg
+
+
+class NoInit2:
+    """A class with no initializer.
+
+    Representation Invariants:
+        - is_valid_name('123')  # This is always False
+    """
+
+    def method(self) -> int:
+        """Method to test that representation invariant is checked on method calls."""
+        return 1
+
+
+def test_no_init_setattr2() -> None:
+    """
+    Check that a user-defined function (is_valid_name) can be called successfully
+    from a representation invariant of a class with no __init__ method, when setting an attribute.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        n = NoInit2()
+        n.attr = 1
+
+    msg = str(excinfo.value)
+    assert "is_valid_name('123')" in msg
+
+
+def test_no_init_method2() -> None:
+    """
+    Check that a user-defined function (is_valid_name) can be called successfully
+    from a representation invariant of a class with no __init__ method, when calling a method.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        n = NoInit2()
+        n.method()
+
+    msg = str(excinfo.value)
+    assert "is_valid_name('123')" in msg
+
+
+def setup_module() -> None:
+    """Pytest hook for setting up the module"""
+    check_all_contracts(__name__, decorate_main=False)
+
+
+if __name__ == '__main__':
+    pytest.main(['test_class_contracts.py'])

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "1.6.0"  # Version number
+__version__ = "1.6.2b1"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
@@ -47,6 +47,10 @@ if sys.version_info < (3, 7, 0):
     print('[WARNING] You need Python 3.7 or later to run PythonTA.')
 
 
+# Flag to determine if we've previously patched pylint
+PYLINT_PATCHED = False
+
+
 def check_errors(module_name='', config='', output=None):
     """Check a module for errors, printing a report."""
     return _check(module_name=module_name, level='error', local_config=config,
@@ -70,7 +74,6 @@ def _check(module_name='', level='all', local_config='', output=None):
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute path to capture pyta data output. Default std out.
     """
-    MANAGER.clear_cache()
 
     # Add reporters to an internal pylint data structure, for use with setting
     # custom pyta options in a Tuple, before (re)setting reporter.
@@ -79,7 +82,11 @@ def _check(module_name='', level='all', local_config='', output=None):
     linter = reset_linter(config=local_config)
 
     current_reporter = reset_reporter(linter, output)
-    patch_all()  # Monkeypatch pylint (override certain methods)
+
+    global PYLINT_PATCHED
+    if not PYLINT_PATCHED:
+        patch_all()  # Monkeypatch pylint (override certain methods)
+        PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
     try:
@@ -96,6 +103,9 @@ def _check(module_name='', level='all', local_config='', output=None):
                 # Assume the local config will NOT set a new reporter.
                 linter.set_reporter(current_reporter)
                 current_reporter.register_file(file_py)
+                module_name = os.path.splitext(os.path.basename(file_py))[0]
+                if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
+                    del MANAGER.astroid_cache[module_name]
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
                 current_reporter.reset_messages()  # Clear lists for any next file.

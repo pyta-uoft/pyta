@@ -85,7 +85,7 @@ class HTMLReporter(ColorReporter):
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
         dt = str(datetime.now().strftime('%a. %b. %d %Y, %I:%M:%S %p'))
         output_path = os.path.join(os.getcwd(), self.linter.config.pyta_output_file)
-        with open(output_path, 'w') as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             f.write(template.render(date_time=dt,
                                     # pyta_logo=pyta_logo_base64_encoded,
                                     reporter=self))

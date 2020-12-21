@@ -5,15 +5,11 @@ from importlib import import_module
 patch_data = {
     'pylint.checkers.base': {
         'BasicChecker': {
-            'E0111': 'reversed() can only be called on sequence types. This '
-                     'typically occurs because you\'re trying to reverse '
-                     'something that isn\'t a str, list, or tuple.',
-            'W0101': 'Code after a return or raise statement will '
-                     'never be run, so either the function is '
-                     'returning early or you should remove it.',
-            'W0102': 'Dangerous default value %s as argument. '
-                     'Using mutable values as a default argument '
-                     'is a common cause of confusing and unwanted behaviour.',
+            'E0111': 'reversed() can only be called on sequence types like a str, list, or tuple.',
+            'W0101': 'Code after a return or raise statement will never be run, so you should '
+                     'either remove this code or review the above return/raise statement(s).',
+            'W0102': 'Mutable values (like %s) should not be used as a default arguments for functions. '
+                     'This is a common cause of confusing and unwanted behaviour.',
             'W0104': 'This statement doesn\'t have any effect, and could be '
                      'removed without changing the behaviour of the program.',
             'W0106': 'Right now, expression %s isn\'t being used by the rest '
@@ -22,28 +18,21 @@ patch_data = {
             'W0108': 'This lambda function isn\'t necessary since you can pass '
                      'the arguments directly to the function you\'re calling in '
                      'the lambda\'s body.',
-            'W0109': 'Duplicate key %r in dictionary. '
-                     'When constructing a dictionary, the last value assigned '
-                     'to a key takes precedence, making previous ones redundant.',
-            'W0122': 'Using `exec()` to evaluate a code-block represented as a '
-                     'str can be potentially dangerous, and is typically a sign of poor design.',
-            'W0123': 'Using `eval()` to evaluate an expression represented as a '
-                     'str can be potentially dangerous, and is typically a sign of poor design.',
-            'W0124': 'When a \'with\' statement returns multiple values, binding only some of those '
-                     'values with \'as\' can be confusing. This is because it isn\'t clear if '
-                     'a tuple is being returned, or if the one-line syntax for multiple \'with\' '
-                     'statements is being used.',
-            'W0126': 'Your conditional statement references a function but is missing the parenthesis '
+            'W0109': 'Duplicate key %r in dictionary literal.',
+            'W0122': 'Using exec() to evaluate code represented as a string '
+                     'can be potentially dangerous, and is typically a sign of poor design.',
+            'W0123': 'Using eval() to evaluate code represented as a string '
+                     'can be potentially dangerous, and is typically a sign of poor design.',
+            'W0126': 'This if condition references a function but is missing the parentheses '
                      'to call the function. This will cause the condition to always evaluate to True.',
-            'W0199': 'Calling assert on a tuple will only evaluate to false if '
+            'W0199': 'Calling assert on a tuple will only evaluate to False if '
                      'it is empty. It\'s likely you intended \'assert x, y\' rather '
                      'than \'assert (x,y)\'.'
         },
         'ComparisonChecker': {
-            'R0123': 'The \'is\' operator compares the ids of its two arguments, not '
-                     'their values. When performing comparison with a literal, '
-                     'this is usually not what you want. Did you mean \'==\'?',
-            'C0123': 'You should use \'isinstance\' rather than \'type\' to '
+            'R0123': 'When performing a comparison with a literal, use \'==\' instead of \'is\'. '
+                     'Exceptions: use \'is\' when comparing to None.',
+            'C0123': 'You should use \'isinstance(x, my_type)\' instead of \'type(x) == my_type\' to '
                      'check the type of a value.'
         },
         'NameChecker': {
@@ -51,12 +40,10 @@ patch_data = {
                      'meaningful rather than generic names.',
             'C0103': '%s name "%s" doesn\'t conform to %s. '
                      'Please refer to the PyTA Help Documentation for more information '
-                     'on Python Naming Conventions.'
+                     'on Python naming conventions.'
         },
         'PassChecker': {
-            'W0107': 'Unnecessary pass statement (you should remove this). '
-                     'A pass statement should only be used to represent '
-                     'an \"empty\" code block, where nothing happens.'
+            'W0107': 'Unnecessary pass statement (you can just remove this).'
         },
         'BasicErrorChecker': {
             'E0101': '__init__ is called only to initialize the attributes of a new object. '
@@ -66,62 +53,43 @@ patch_data = {
                      'defined have different names.',
             'E0103': 'The %r keyword should only be used inside a loop.',
             'E0104': 'The \'return\' keyword is used to end the execution of a function '
-                     'and return a result, so you should only use it inside of a function.',
-            'E0108': 'Duplicate parameter name %s in function definition. '
+                     'and return a result, so you should only use it inside of a function body.',
+            'E0108': 'Duplicate parameter name %s in function definition.'
         }
     },
     'pylint.checkers.refactoring': {
         'RefactoringChecker':
-            {'R1701': 'These multiple calls to \'isinstance\' can be merged into \'isinstance((%s, (%s)).',
+            {'R1701': 'These multiple calls to isinstance can be merged into isinstance(%s, (%s)).',
              'R1702': 'Your code has too many nested blocks (%s, exceeding limit %s). '
-                      'You should try to break it down to reduce how complex it is.',
-             'R1704': 'Redefining parameter with the local name %r',
-             'R1705': 'The %s following the \'if\' branch containing a \'return\' statement '
-                      'is unnecessary. If the \'if\' condition fails then you can '
-                      'execute the \'else\' block in the rest of the function body.',
-             'R1707': 'A tuple is created by the \',\' symbol, not parenthesis. To make the '
-                      'intention of making a tuple clear, you should never create it by a '
-                      'trailing comma, and wrap it in parenthesis.',
+                      'You should try to break it down into helper functions.',
+             'R1704': 'This local variable %r should have a name different from all function parameters.',
+             'R1707': 'If you mean to create a tuple here, surround the tuple expression with parentheses.',
              'R1710': 'Since this function can return a non-None value, you should '
                       'explicitly write "return None" whenever None is returned by '
                       'this function. (Possibly including at the end of the function body.)',
-             'R1712': 'Rather than using a temporary variable, try using tuple unpacking '
-                      'to swap variables. i.e: to swap variables \'a\' and \'b\', simply do '
-                      '\'a, b = b, a\'.',
-             'R1713': 'If you want to concatenate an iterable collection of characters to a '
-                      'string \'s\', use \'s.join(characters)\'.',
-             'R1714': 'To check if your variable is equal to one of many values, merge the '
-                      'comparisons into %r rather than check for equality against each value.',
-             'R1715': 'If you want to get a value from a dictionary if a key is present but '
-                      'return a default value if the key is not, you should use the builtin \'dict.get\'.',
+             'R1712': 'Use parallel assignment to swap the values of variables. '
+                      'For example: to swap variables \'a\' and \'b\', simply do \'a, b = b, a\'.',
+             'R1713': 'If you want to concatenate a sequence of strings, use the str.join method.',
+             'R1714': 'To check whether this variable is equal to one of many values, merge the '
+                      'comparisons into a single check: %r.',
+             'R1715': 'To lookup a value from a dictionary if a key is present and '
+                      'use a default value if the key is not, use the built-in dict.get method.',
              'R1716': 'You can simplify this boolean operation into a chained comparison. '
-                      'i.e: instead of \'a < b and b < c\', use \'a < b < c\'.',
-             'R1720': 'The \'%s\' following the \'if\' statement(s) that raise exceptions is '
-                      'unnecessary. If the \'if\' condition(s) fail then you can execute the '
-                      '\'else\' block in the rest of the function body.',
-             'R1721': 'Instead of using a comprehension that doesn\'t alter any of the elements to '
-                      'convert the container type, use the appropriate constructor to get your desired type.',
-             'R1723': 'The \'%s\' following the \'if\' statement(s) that contain a \'break\' statement '
-                      'is unnecessary. If the \'if\' condition(s) fail then you can execute the '
-                      '\'else\' block in the rest of the function body.',
-             'R1724': 'The \'%s\' following the \'if\' statement(s) that contain a \'continue\' statement '
-                      'is unnecessary. If the \'if\' condition(s) fail then you can execute the '
-                      '\'else\' block in the rest of the function body.'
+                      'Instead of \'a < b and b < c\', use \'a < b < c\'.',
+             'R1721': 'When you want to convert a collection from one type into another, use the appropriate '
+                      'type constructor instead of a comprehension. E.g., use \'list(range(1, 10))\' instead of '
+                      '\'[x for x in range(1, 10)]\'.'
              },
         'NotChecker':
-            {'C0113': 'Consider changing "%s" to "%s". Removing the negation simplifies the expression, '
-                      'making it easier to read.'
+            {'C0113': 'Change "%s" to "%s". Removing the negation simplifies the expression.'
              },
         'RecommandationChecker':  # Not a typo, or at least the typo is on Pylint's end
-            {'C0200': 'If you need to reference both an index and the value contained at the index, use '
-                      'the \'enumerate\' builtin rather than iterating with \'range\' and \'len\'. '
-                      'i.e: \'for i, n in enumerate(array)\'.',
-             'C0201': 'Rather than using \'.keys()\' to iterate over the keys of a dictionary, '
+            {'C0201': 'Rather than using \'.keys()\' to iterate over the keys of a dictionary, '
                       'you can simply iterate over the dictionary itself.'
              },
         'LenChecker':
-            {'C1801': 'When checking if a sequence is empty, your condition should have an explicit '
-                      'comparison to check the length of the sequence.'
+            {'C1801': 'When checking if a collection is empty, either check equality with an empty instance '
+                      'of the collection type (e.g., == []) or explicitly check that the len is equal to 0.'
             }
     },
     'pylint.checkers.design_analysis': {
@@ -137,7 +105,7 @@ patch_data = {
                      'by splitting up it, or combining related objects as a single one.',
             'R0915': 'This function has too many statements ((%s, exceeding limit %s). '
                      'It should be split up into smaller functions.',
-            'R0916': 'This if statement contains too many boolean expressions '
+            'R0916': 'This if condition contains too many boolean expressions '
                      '(%s, exceeding limit %s). You should see if you can reduce '
                      'the amount of expressions, or split it into branches.',
         }
@@ -146,37 +114,31 @@ patch_data = {
         'ClassChecker': {
             'E0203': 'You can\'t use instance attribute %r prior to its assignment '
                      'on line %s.',
-            'E0211': 'Every instance method requires at least one parameter, since the '
-                     'first parameter refers to the object on which this method is called. '
-                     'Python\'s convention is to name this parameter \'self\'.',
-            'E0213': 'The first parameter of a method should always be called \'self\'. '
-                     'Even though this isn\'t technically required, it is a strong convention '
-                     'used by all Python programmers.',
+            'E0211': 'Every instance method requires at least one parameter \'self\', '
+                     'referring to the object on which this method is called. ',
+            'E0213': 'The first parameter of a method should always be called \'self\'. ',
             'E0241': 'This class %r should not inherit from the same class multiple times.',
             'R0201': 'This method does not make use of \'self\', so you should remove the self '
                      'parameter and move this method outside of the class (turning it into a '
-                     'top-level function.',
-            'R0205': 'Class %r inherits from \'object\'. '
-                     'All classes inherit from object by default, so you do not need to specify '
-                     'this in the class header.',
-            'W0211': 'The static method %r contains \'self\' as the first parameter. '
-                     'Static methods shouldn\'t have this, since this suggests we are expecting '
-                     'a class instance as the first argument.',
-            'W0212': 'Since %s starts with an underscore, it should be considered '
-                     '"private", and not accessed outside of the class in which it is defined.',
+                     'top-level function).',
+            'R0205': 'All classes inherit from object by default, so you do not need to specify '
+                     'this in the header for %r.',
+            'W0211': 'The static method %r should not have \'self\' as the first parameter.',
+            'W0212': 'Since %s starts with an underscore, it is considered private and so '
+                     'should not be accessed outside of the class in which it is defined.',
             'W0221': 'This method must take the same number of arguments as %s %r method.',
             'W0222': 'This method\'s parameters must have the same name, order, and default '
                      'arguments as %s %r method.',
             'W0223': 'The abstract method %r in class %r must be overridden within a '
                      'concrete subclass.',
             'W0231': 'Subclass \'__init__\' method should call the \'__init__\' method from '
-                     'it\'s base class %r.',
+                     'its superclass %r.',
             'W0233': 'Subclass \'__init__\' method should call the \'__init__\' method of '
-                     'the parent class rather than some unrelated class %r.',
+                     'the superclass rather than some unrelated class %r.',
         },
         'SpecialMethodsChecker': {
             'E0301': 'An \'__iter__\' method must return an iterator, i.e an object with a '
-                     '%s method.',
+                     '\'__next__\' method.',
             'E0302': 'The special method %r expects to take %s parameters, but %d %s given.',
         },
     },
@@ -189,9 +151,7 @@ patch_data = {
                      '(Raising %s)',
             'E0704': 'This \'raise\' statement must have an exception class or instance.',
             'E0710': 'This \'raise\' statement is using a class that is not a subclass of Exception.',
-            'E0711': 'You mean to raise \'NotImplementedError\', which indicates that the abstract method '
-                     'must be implemented by the derived class. \'NotImplemented\' is strictly used as a '
-                     'return value for binary special methods (e.g __eq__), indicating that they\'re not implemented.',
+            'E0711': 'You mean to raise \'NotImplementedError\', which indicates that a method is abstract. ',
             'E0712': '\'except\' expects a class that is a subclass of the Exception class (%s is not).',
             'W0702': 'It\'s bad practice to use the \'except\' keyword without passing an exception, '
                      'since any and all expressions will be caught, which may lead to undetected errors '
@@ -201,7 +161,7 @@ patch_data = {
             'W0705': '\'except\' blocks are checked top to bottom, so if we try to catch the same '
                      'exception %s multiple times, only the first \'except\' block for the exception '
                      'will be reached.',
-            'W0706': 'If the \'except\' block uses \'raise\' as its first or only operator, it '
+            'W0706': 'If the \'except\' block uses \'raise\' as its first or only statement, it '
                      'will just raise back the exception immediately.',
             'W0711': '\'except\' can handle multiple exceptions, but they have to be written as a '
                      'tuple. For example, use \'except (A, B)\' instead of \'except A %s B\'',
@@ -217,9 +177,9 @@ patch_data = {
             'C0303': 'Trailing whitespace is poor formatting, and should be removed.',
             'C0304': 'By convention, each Python file should end with a blank line. To fix this, '
                      'go down to the bottom of your file and press Enter/Return to add an empty line.',
-            'C0321': 'Writing multiple statements on a single line makes your code harder to read and '
-                     'understand, and should be avoided.',
-            'C0330': 'Wrong %s indentation%s%s.\n%s%s. This error occured because of an '
+            'C0321': 'Avoid writing multiple statements on a single line. '
+                     'This makes your code harder to understand.',
+            'C0330': 'Wrong %s indentation%s%s.\n%s%s. This error occurred because of an '
                      'inconsistent use of number of spaces for indentation.'
         }
     },
@@ -233,18 +193,12 @@ patch_data = {
                      'global variables, which may result in name collisions. You should only '
                      'import from %s what you need, or import the whole module '
                      '("import module") and use dot notation to access the module\'s functions/classes.',
-            'W0404': 'Module %r was reimported on line %s. A module should not be '
+            'W0404': 'Module %r was re-imported on line %s. A module should not be '
                      'imported more than once.',
             'W0410': 'Imports of \'__future__\' must be the first non-docstring statement in the module.',
-            'C0410': 'Different modules should not be imported on a single line. You '
-                     'should import each module on line %s on separate lines.',
+            'C0410': 'Import each module on line %s on separately, one per line.',
             'C0414': 'The \'import as\' is used to import a module and give it a different name in this file. '
                      'If you don\'t want to rename the module, simply use \'import\' instead.'
-        }
-    },
-    'pylint.checkers.misc': {
-        'EncodingChecker': {
-            'W0511': 'The warning %s was found.'
         }
     },
     'pylint.checkers.newstyle': {
@@ -255,18 +209,16 @@ patch_data = {
     },
     'pylint.checkers.stdlib': {
         'StdlibChecker': {
-            'W1501': '"%s" is not a valid mode for open. Common modes are \'r\' for reading a file, '
+            'W1501': '"%s" is not a valid mode for opening a file. Common modes are \'r\' for reading a file '
                      'and \'w\' for writing to a file.'
         }
     },
     'pylint.checkers.strings': {
         'StringFormatChecker': {
             'E1307': 'The argument %r does not match type %r specified by the format string.',
-            'E1310': 'Suspicious argument in %s.%s call. Strip will remove any characters contained '
-                     'in its argument, so duplicate characters are either unintended, or redundant.',
-            'W1308': 'Duplicate string formatting argument %r. Rather than repeating the argument, '
-                     'use named formatting variables so that the argument only has to be passed once.',
-            'W1309': 'Using an f-string that does not have any format variables'
+            'W1309': 'This f-string does not have any {...} expressions, and so the "f" can be removed.',
+                     'E1310': 'Suspicious argument in %s.%s call. Strip will remove any characters contained '
+                     'in its argument, so duplicate characters are either unintended, or redundant.'
         },
         'StringConstantChecker': {
             'W1401': 'The string \'%s\' contains a backslash, but is not part of an escape sequence. '
@@ -276,46 +228,41 @@ patch_data = {
                      'unicode string, inserting unicode characters will have no effect. If '
                      'you just want to write \'\\u\', you should make this explicit by escaping '
                      'the backslash with another backslash.',
-            'W1404': 'Implicit string concatenation found in %s. It\'s likely you\'re missing a comma.'
+            'W1404': 'This %s has two consecutive string literals. You are likely missing a '
+                     'comma between them.'
         }
     },
     'pylint.checkers.typecheck': {
         'TypeChecker': {
             'E1101': '%s %r doesn\'t have the method/attribute %r%s.',
-            'E1102': '%s is not callable. You may have put unnecessary parenthesis following a variable.',
-            'E1126': 'Objects can only be indexed by ints, slices, or objects with an \'__index\' method. '
-                     'The value you\'re attempting to index is none of these.',
-            'E1127': 'The index you\'re slicing with must be an int, \'None\', or an object with an '
+            'E1102': '%s is not callable. You may have written unnecessary parentheses following a variable.',
+            'E1126': 'Objects can only be indexed by ints, slices, or objects with an \'__index__\' method.',
+            'E1127': 'The index in a slice must be an int, \'None\', or an object with an '
                      '\'__index__\' method.',
-            'E1129': 'Expressions within a \'with\' statement must implement \'__enter__\' and \'__exit__\' '
-                     'methods, which %s does not.',
-            'E1130': '%s. The unary operand is incompatible with the value you\'re '
-                     'applying it to\'s type.',
+            'E1129': 'The object after the \'with\' keyword must be an instance of a type that implements the '
+                     '\'__enter__\' and \'__exit__\', methods, which type %s does not.',
             'E1131': '%s. The binary operation can\'t be performed on the two operands provided.',
             'E1136': '%s does not support indexing.',
             'E1140': 'Dictionary keys must be immutable.',
-            'E1141': 'When iterating through the (key, value) pairs of a dictionary, you need to iterate '
-                     'over \'dict.items()\' rather that \'dict\',.',
-            'W1114': 'Your arguments aren\'t in the same order as the parameters in the function '
+            'E1141': 'If you want to iterate through the (key, value) pairs of a dictionary, you need to write '
+                     '\'for key, value in my_dict.items()\'.',
+            'W1114': 'The arguments in this function call aren\'t in the same order as the parameters in the function '
                      'definition.'
         },
         'IterableChecker': {
-            'E1133': 'Can not iterate over %s as it is non-iterable (doesn\'t implement an \'__iter__\' method).'
+            'E1133': 'Can not iterate over %s as it is not an instance of an iterable type.'
         }
     },
     'pylint.checkers.variables': {
         'VariablesChecker': {
-            'E0601': 'The variable %r is (possibly) being accessed prior to it having a value assigned.',
+            'E0601': 'The variable %r may be accessed prior to it having a value assigned.',
             'E0611': 'Can\'t find the name %r to import from module %r.',
             'E0633': 'Trying to assign multiple values from%s, but it is not a sequence.',
-            'W0603': 'Using the \'global\' keyword is discouraged since mutating global variables '
-                     'may lead to obscure errors in your code.',
             'W0604': 'Every global variable can be referenced from the module level, so using '
                      'the \'global\' keyword at the module level has no effect.',
-            'W0611': 'The import %s is unused. You should include it when you use it '
-                     'to avoid unnecessary imports in your code.',
-            'W0612': 'The variable %s is unused. This may indicate that you are using the wrong variable '
-                     'in someplace on accident. Otherwise, it can be removed without altering the program.',
+            'W0611': 'The import %s is unused, and so can be removed.',
+            'W0612': 'The variable %s is unused and can be removed. If you intended to use it, '
+                     'there may be a typo elsewhere in the code.',
             'W0613': 'The parameter %r is unused. This may indicate you misspelled a parameter name '
                      'in the function body. Otherwise, the parameter can be removed from the function '
                      'without altering the program.',
@@ -325,9 +272,9 @@ patch_data = {
             'W0622': '%r is the name of a built-in function, and should not be overridden.',
             'W0631': 'Variables defined by a loop are only accessible within the loop, meaning '
                      'the variable %r is possibly undefined.',
-            'W0632': 'The sequence%s is being used to assign %d variables but holds %d values.',
-            'W0642': '%s is a local variable within the method. As such, assignment to the name '
-                     'doesn\'t effect anything outside of the method scope, it just locally rebinds the name.'
+            'W0632': 'The sequence%s is being used to assign %d variables but contains %d values.',
+            'W0642': '%s is a local variable within the function. Reassigning this variable '
+                     'doesn\'t mutate any objects, and so has no effect after the function ends.'
         }
     }
 }

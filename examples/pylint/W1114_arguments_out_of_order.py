@@ -1,4 +1,10 @@
-def f(x, y, z):
-    return x+y+z
+def f(x: int, y: int, z: int) -> int:
+    return x + y + z
 
-print(f(y=1, z=2, x=3))  # Error on this line
+
+def g(n: int) -> int:
+    x = n
+    y = n * 2
+    z = n * 3
+
+    return f(y, z, x)  # Error on this line

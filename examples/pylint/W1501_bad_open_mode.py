@@ -1,3 +1,2 @@
-def foo(file_path):
-    with open(file_path, 'z') as fh:  # Error on this line
-        pass
+with open('my_file.txt', 'z'):  # Error on this line
+    pass

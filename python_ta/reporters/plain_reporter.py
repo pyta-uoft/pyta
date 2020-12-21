@@ -58,7 +58,8 @@ ERROR_CHECKS = [
     'nonexistent-operator',
     'invalid-length-returned',
     'abstract-method',
-    'self-cls-assignment'
+    'self-cls-assignment',
+    'dict-iter-missing-items'
 ]
 
 

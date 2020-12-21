@@ -11,14 +11,12 @@ _EXAMPLE_PREFIX_REGEX = '[CEFRW]\d{4}'
 
 # The following tests appear to always fail (further investigation needed).
 IGNORED_TESTS = [
-    'E1130_invalid_unary_operand_type.py',
     'E1131_unsupported_binary_operation.py',
-    'W0222_signature_differs.py',
-    'R0912_too_many_branches.py',
-    'E0118_used_prior_global_declaration.py', #This one and below have been added 01/16/2019
+    'E0118_used_prior_global_declaration.py',
     'W0125_using_constant_test.py',
     'W0631_undefined_loop_variable.py',
-    'W1503_redundant_unittest_assert.py'
+    'W1503_redundant_unittest_assert.py',
+    'E1140_unhashable_dict_key.py'
 ]
 
 

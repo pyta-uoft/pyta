@@ -285,5 +285,23 @@ def setup_module() -> None:
     check_all_contracts(__name__, decorate_main=False)
 
 
+class OverrideLen:
+    """A class that overrides its len method.
+    """
+    x: int
+
+    def __init__(self) -> None:
+        self.x = 1
+
+    def __len__(self) -> int:
+        return self.x
+
+
+def test_override_len_simple() -> None:
+    """Test that we can instantiate OverrideLen, which has a custom __len__ implementation.
+    """
+    OverrideLen()
+
+
 if __name__ == '__main__':
     pytest.main(['test_class_contracts.py'])

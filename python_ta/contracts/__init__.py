@@ -111,7 +111,7 @@ def add_class_invariants(klass: type) -> None:
 def _check_function_contracts(wrapped, instance, args, kwargs):
     params = wrapped.__code__.co_varnames[:wrapped.__code__.co_argcount]
     annotations = typing.get_type_hints(wrapped)
-    args_with_self = (instance,) + args if instance else args
+    args_with_self = args if instance is None else (instance,) + args
 
     # Check function parameter types
     for arg, param in zip(args_with_self, params):

@@ -5,6 +5,7 @@ Checks that `end_lineno` and `end_col_offset` node properties are set.
 import unittest
 from python_ta.transforms.setendings import *
 import os.path as path
+import sys
 
 # Gives absolute path to root directory
 PATH = path.normpath(path.join(path.abspath(__file__), '..', '..', 'examples', 'ending_locations'))
@@ -251,6 +252,8 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, astroid.Expr, expected)
 
     def test_extslice(self):
+        if sys.version_info >= (3, 9):
+            self.skipTest('ExtSlice node is deprecated in Python 3.9')
         expected = [(1, 1, 1, 8), (2, 2, 2, 14), (3, 3, 1, 8), (4, 4, 2, 15), (5, 6, 1, 8)]
         module = self.get_file_as_module('ext_slice.py')
         self.set_and_check(module, astroid.ExtSlice, expected)
@@ -300,6 +303,8 @@ class TestEndingLocations(unittest.TestCase):
     def test_index(self):
         """Should include the enclosing brackets, e.g. "[1]" instead of "1".
         """
+        if sys.version_info >= (3, 9):
+            self.skipTest('Index node is deprecated in Python 3.9')
         expected = [(1, 1, 1, 5), (2, 2, 2, 10), (3, 3, 2, 15)]
         module = self.get_file_as_module('index.py')
         self.set_and_check(module, astroid.Index, expected)

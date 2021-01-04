@@ -27,6 +27,8 @@ within the _transform method.
 Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
+import sys
+
 import astroid
 from astroid.node_classes import NodeNG
 from astroid.transforms import TransformVisitor
@@ -209,6 +211,9 @@ def init_register_ending_setters(source_code):
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
 
+    if sys.version_info >= (3, 9):
+        ending_transformer.register_transform(astroid.Subscript, fix_subscript(source_code))
+
     # Nodes where the source code must also be provided.
     # source_code and the predicate functions get stored in the TransformVisitor
     for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
@@ -270,6 +275,39 @@ def fix_slice(source_code):
         return node
 
     return _find_square_brackets
+
+
+def fix_subscript(source_code):
+    """For a Subscript node.
+
+    Need to include this because the index/extended slice is a value rather than
+    a separate Index/ExtSlice in Python 3.9.
+    """
+    def _fix_end(node: astroid.Subscript) -> astroid.Subscript:
+        if isinstance(node.slice, astroid.Slice):
+            # In this case, the subscript node already contains the final ].
+            return node
+
+        # Search the remaining source code for the "]" char.
+        if _get_last_child(node):
+            set_from_last_child(node)
+            line_i = node.end_lineno - 1  # convert 1 to 0 index.
+            char_i = node.end_col_offset
+        else:
+            line_i = node.value.end_lineno - 1  # convert 1 to 0 index.
+            char_i = node.value.end_col_offset
+
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ']':
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#':
+                char_i = 0
+                line_i += 1
+            else:
+                char_i += 1
+
+        node.end_lineno, node.end_col_offset = line_i + 1, char_i + 1
+        return node
+
+    return _fix_end
 
 
 def fix_arguments(source_code):

@@ -927,7 +927,9 @@ def _ann_node_to_type(node: astroid.Name) -> TypeResult:
 
 
 def _generic_to_annotation(ann_node_type: type, node: NodeNG) -> TypeResult:
-    if (isinstance(ann_node_type, _GenericAlias) and
+    is_generic = isinstance(ann_node_type, _GenericAlias) or \
+                 (sys.version_info >= (3, 9) and hasattr(ann_node_type, '__origin__'))
+    if (is_generic and
             ann_node_type is getattr(typing, getattr(ann_node_type, '_name', '') or '', None)):
         if ann_node_type == Dict:
             ann_type = wrap_container(ann_node_type, Any, Any)
@@ -936,7 +938,7 @@ def _generic_to_annotation(ann_node_type: type, node: NodeNG) -> TypeResult:
             ann_type = wrap_container(ann_node_type, Any)
         else:
             ann_type = wrap_container(ann_node_type, Any)
-    elif isinstance(ann_node_type, _GenericAlias):
+    elif is_generic:
         parsed_args = []
         for arg in ann_node_type.__args__:
             _generic_to_annotation(arg, node) >> parsed_args.append

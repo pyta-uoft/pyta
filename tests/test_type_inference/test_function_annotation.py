@@ -1,4 +1,5 @@
 import astroid
+import sys
 from typing import Any, List, Tuple
 
 from python_ta.typecheck.base import TypeFailAnnotationUnify

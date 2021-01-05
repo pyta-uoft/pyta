@@ -5,7 +5,8 @@ from pytest import skip
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
-from typing import Callable, ForwardRef, Type, _GenericAlias
+import sys
+from typing import Callable, ForwardRef, Type, _GenericAlias, Generic
 
 from python_ta.typecheck.base import _gorg
 from python_ta.transforms.type_inference_visitor import TypeFail
@@ -79,6 +80,8 @@ def test_functiondef_annotated_simple_return(functiondef_node):
         # need to do by name because annotations must be name nodes.
         if isinstance(expected_type, _GenericAlias):
             assert _gorg(expected_type).__name__ == functiondef_node.args.annotations[i].name
+        elif sys.version_info >= (3, 9) and hasattr(expected_type, '__origin__'):
+            assert expected_type.__origin__.__name__ == functiondef_node.args.annotations[i].name
         else:
             assert expected_type.__name__ == functiondef_node.args.annotations[i].name
     # test return type
@@ -86,6 +89,8 @@ def test_functiondef_annotated_simple_return(functiondef_node):
     expected_rtype = inferer.type_constraints.resolve(functiondef_node.type_environment.lookup_in_env(return_node.name)).getValue()
     if isinstance(expected_rtype, _GenericAlias):
         assert _gorg(expected_rtype).__name__ == functiondef_node.returns.name
+    elif sys.version_info >= (3, 9) and hasattr(expected_rtype, '__origin__'):
+        assert expected_rtype.__origin__.__name__ == functiondef_node.args.annotations[i].name
     else:
         assert expected_rtype.__name__ == functiondef_node.returns.name
 

@@ -8,6 +8,7 @@ settings.load_profile("pyta")
 
 
 @given(hs.integers(), hs.lists(hs.tuples(cs.comparator_operator_equality, hs.integers()), min_size=1))
+@settings(deadline=None)
 def test_compare_equality(left_value, operator_value_tuples):
     """Test type setting of Compare node representing comparators: ''==', '!=', '>=', '<=', 'is'. """
     program = f'{repr(left_value)}'
@@ -19,6 +20,7 @@ def test_compare_equality(left_value, operator_value_tuples):
 
 
 @given(hs.lists(cs.comparator_operator, min_size=3), cs.numeric_list(min_size=4))
+@settings(deadline=None)
 def test_compare_inequality(operators, values):
     """Test type setting of Compare node representing comparators: '<', '>'. """
     a = list(zip(operators, values))

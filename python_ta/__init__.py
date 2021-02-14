@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "1.6.2b1"  # Version number
+__version__ = "1.6.4a1"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
@@ -318,6 +318,15 @@ def _verify_pre_check(filepath):
     except tokenize.TokenError as e:
         print('[ERROR] python_ta could not check your code due to a ' +
               'syntax error in your file.')
+        return False
+    except UnicodeDecodeError:
+        print('[ERROR] python_ta could not check your code due to an ' +
+              'invalid character. Please check the following lines '
+              'in your file and all characters that are marked with a �.')
+        with open(os.path.expanduser(filepath), encoding='utf-8', errors='replace') as f:
+            for i, line in enumerate(f):
+                if '�' in line:
+                    print(f'  Line {i}: {line}', end='')
         return False
     return True
 

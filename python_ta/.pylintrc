@@ -40,6 +40,9 @@ max-nested-blocks = 3
 # Set the maximum line length. The maximum line length in pep8 is 80 characters.
 max-line-length = 80
 
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines = ^\s*((# )?<?https?://\S+>?)|(>>>.*)$
+
 [FORBIDDEN IMPORT]
 
 # Set the whitelist of modules that are allowed to be imported
@@ -59,13 +62,13 @@ disable=
     E0236, E0237, E0238, E0240, E0242, E0305, E0308, E0309, E0310, E0311, E0312, E0313,
     E0402,
     E0603, E0604,
-    E0703,
+    E0703, W0707,
     E1124, E1125, E1132, E1139,
     E1200, E1201, E1205, E1206,
     E1300, E1301, E1302, E1303, E1304,
     E1507,
     E1700, E1701,
-    W0111, W0120, W0125, W0150,
+    W0111, W0120, W0125, W0150, W0177,
     W0232, W0235, W0236,
     W0601, W0602, W0614, W0640,
     W1113, W1115,
@@ -77,6 +80,7 @@ disable=
     R0202, R0203, R0206,
     R0901, R0903, R0904, R0911,
     R1703, R1705, R1706, R1708, R1709, R1711, R1717, R1718, R1719, R1720, R1722, R1723, R1724,
+    R1728, R1730, R1731,
     F0202,
     W0402, W0407,
     W0603,

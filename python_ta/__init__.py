@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "1.6.4a1"  # Version number
+__version__ = "1.8.0a1"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
@@ -31,7 +31,8 @@ import webbrowser
 
 import pylint.lint
 import pylint.utils
-from pylint.config import VALIDATORS, _call_validator
+from pylint.utils.pragma_parser import OPTION_PO
+from pylint.config.option import VALIDATORS, _call_validator
 
 from astroid import modutils, MANAGER
 
@@ -215,20 +216,18 @@ def reset_linter(config=None, file_linted=None):
     )
 
     custom_checkers = [
-        'python_ta/checkers/forbidden_import_checker',
-        'python_ta/checkers/possibly_undefined_checker',
-        'python_ta/checkers/global_variables_checker',
-        'python_ta/checkers/IO_Function_checker',
-        'python_ta/checkers/invalid_range_index_checker',
-        # 'python_ta/checkers/always_returning_checker',
-        'python_ta/checkers/one_iteration_checker',
-        'python_ta/checkers/constant_test_checker',
-        'python_ta/checkers/structure_test_checker',
-        'python_ta/checkers/type_annotation_checker',
-        'python_ta/checkers/unnecessary_indexing_checker',
-        'python_ta/checkers/shadowing_in_comp_checker',
-        'python_ta/checkers/redundant_assignment_checker'
-        # 'python_ta/checkers/simplified_if_checker'
+        'python_ta.checkers.forbidden_import_checker',
+        'python_ta.checkers.possibly_undefined_checker',
+        'python_ta.checkers.global_variables_checker',
+        'python_ta.checkers.IO_Function_checker',
+        'python_ta.checkers.invalid_range_index_checker',
+        'python_ta.checkers.one_iteration_checker',
+        'python_ta.checkers.constant_test_checker',
+        'python_ta.checkers.structure_test_checker',
+        'python_ta.checkers.type_annotation_checker',
+        'python_ta.checkers.unnecessary_indexing_checker',
+        'python_ta.checkers.shadowing_in_comp_checker',
+        'python_ta.checkers.redundant_assignment_checker'
     ]
 
     # Register new options to a checker here to allow references to
@@ -262,9 +261,9 @@ def reset_linter(config=None, file_linted=None):
 
     # Custom checker configuration.
     if linter.config.pyta_pep8:
-        linter.load_plugin_modules(['python_ta/checkers/pycodestyle_checker'])
+        linter.load_plugin_modules(['python_ta.checkers.pycodestyle_checker'])
     if linter.config.pyta_type_check:
-        linter.load_plugin_modules(['python_ta/checkers/type_inference_checker'])
+        linter.load_plugin_modules(['python_ta.checkers.type_inference_checker'])
 
     return linter
 
@@ -306,7 +305,7 @@ def _verify_pre_check(filepath):
             for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
-                match = pylint.constants.OPTION_RGX.search(content)
+                match = OPTION_PO.search(content)
                 if match is not None:
                     print('[ERROR] String "pylint:" found in comment. ' +
                           'No check run on file `{}.`\n'.format(filepath))

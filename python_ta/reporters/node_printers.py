@@ -68,20 +68,6 @@ def render_context(start, stop, source_lines):
                 for line in range(start, stop))
 
 
-def render_bad_whitespace(msg, source_lines=None):
-    """Extract column information from caret position within message string."""
-    start, stop = None, None
-    last_line = msg.msg.split('\n')[-1]
-    if '^' in last_line:
-        start = last_line.index('^')
-        stop = start + 1
-
-    line = msg.line
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(start, stop), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
-
-
 def render_type_annotation_return(msg, source_lines=None):
     """Render a type annotation return message."""
     node = msg.node
@@ -108,7 +94,6 @@ CUSTOM_MESSAGES = {
     'missing-class-docstring': render_missing_docstring,
     'missing-function-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
-    'bad-whitespace': render_bad_whitespace,
     'type-annotation-return': render_type_annotation_return,
     'too-many-arguments': render_too_many_arguments
 }

@@ -36,7 +36,7 @@ patch_data = {
                      'check the type of a value.'
         },
         'NameChecker': {
-            'C0102': 'Black listed name "%s". You should give your variables '
+            'C0104': 'Disallowed name "%s". You should give your variables '
                      'meaningful rather than generic names.',
             'C0103': '%s name "%s" doesn\'t conform to %s. '
                      'Please refer to the PyTA Help Documentation for more information '
@@ -83,7 +83,7 @@ patch_data = {
         'NotChecker':
             {'C0113': 'Change "%s" to "%s". Removing the negation simplifies the expression.'
              },
-        'RecommandationChecker':  # Not a typo, or at least the typo is on Pylint's end
+        'RecommendationChecker':
             {'C0201': 'Rather than using \'.keys()\' to iterate over the keys of a dictionary, '
                       'you can simply iterate over the dictionary itself.'
              },
@@ -172,15 +172,12 @@ patch_data = {
         'FormatChecker': {
             'W0301': 'You should remove this semicolon. In Python, statements are separated by '
                      'starting each one on a new line.',
-            'W0312': 'This code is indented with both %ss and %ss. You should use spaces to indent your code.',
             'C0301': 'This line is %s characters long, exceeding the limit of %s characters.',
             'C0303': 'Trailing whitespace is poor formatting, and should be removed.',
             'C0304': 'By convention, each Python file should end with a blank line. To fix this, '
                      'go down to the bottom of your file and press Enter/Return to add an empty line.',
             'C0321': 'Avoid writing multiple statements on a single line. '
                      'This makes your code harder to understand.',
-            'C0330': 'Wrong %s indentation%s%s.\n%s%s. This error occurred because of an '
-                     'inconsistent use of number of spaces for indentation.'
         }
     },
     'pylint.checkers.imports': {

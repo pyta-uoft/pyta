@@ -1,7 +1,7 @@
 import astroid
 
 from hypothesis import assume, given, settings, HealthCheck
-from pytest import skip
+import pytest
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type, types_in_callable
 import hypothesis.strategies as hs
@@ -25,6 +25,7 @@ def _parse_to_function_no_return(function_name, args_list, function_body):
            f'    {function_body}'
 
 
+@pytest.mark.skip('This test is flaky')
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_inference_args_simple_return(function_name, arguments):

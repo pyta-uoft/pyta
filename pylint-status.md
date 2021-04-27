@@ -43,11 +43,12 @@
 - redeclared-assigned-name (W0128): *create*
 - comparison-with-callable (W0143): improve message
 - lost-exception (W0150): disabled
+- nan-comparison (W0177): disabled
 - assert-on-tuple (W0199): good
 - literal-comparison (R0123): good
 - comparison-with-itself (R0124): good
-- blacklisted-name (C0102): good
 - invalid-name (C0103): good
+- disallowed-name (C0104): good  (renamed from blacklisted-name in Pylint 2.8)
 - empty-docstring (C0112): good
 - missing-module-docstring (C0114): good
 - missing-function-docstring (C0116): good
@@ -123,6 +124,7 @@
 - raising-bad-type (E0702): good
 - bad-exception-context (E0703): disabled
 - misplaced-bare-raise (E0704): good
+- raise-missing-from (W0707): disabled
 - raising-non-exception (E0710): good
 - notimplemented-raised (E0711): good
 - catching-non-exception (E0712): good
@@ -138,17 +140,17 @@
 
 - unnecessary-semicolon (W0301): good
 - bad-indentation (W0311): good
-- mixed-indentation (W0312): good
+- ~~mixed-indentation (W0312): good~~ (removed in pylint 2.6)
 - line-too-long (C0301): good
 - too-many-lines (C0302): *create*
 - trailing-whitespace (C0303): good
 - missing-final-newline (C0304): good
 - multiple-statements (C0321): good
 - superfluous-parens (C0325): good
-- bad-whitespace (C0326): good
+- ~~bad-whitespace (C0326): good~~ (removed in pylint 2.6)
 - mixed-line-endings (C0327): disabled
 - unexpected-line-ending-format (C0328): disabled
-- bad-continuation (C0330): good
+- ~~bad-continuation (C0330): good~~ (removed in pylint 2.6)
 
 ## Imports checker
 
@@ -209,9 +211,16 @@
 - simplifiable-if-expression (R1719): disabled
 - consider-using-sys-exit (R1722): disabled
 - no-else-raise (R1720): good
-- unnecessary-comprehension (R1721): good
+- unnecessary-comprehension (R1721): improve message
 - no-else-break (R1723): good
 - no-else-continue (R1724): good
+- super-with-arguments (R1725): *create*
+- simplifiable-condition (R1726): *create*
+- condition-evals-to-constant (R1727): *create*
+- consider-using-generator (R1728): disabled
+- consider-using-min-builtin (R1730): disabled
+- consider-using-max-builtin (R1731): disabled
+- consider-using-with (R1732): *create*
 - unneeded-not (C0113): good
 - consider-using-enumerate (C0200): good
 - consider-iterating-dictionary (C0201): good

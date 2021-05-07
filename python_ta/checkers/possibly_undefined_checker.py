@@ -1,6 +1,6 @@
 """checker for variables that might not be defined in the program.
 """
-from typing import Union
+from typing import Union, Generator
 import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker, utils
@@ -76,8 +76,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):
                 continue
-            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
-                                              astroid.FunctionDef):
+            for node in self.get_nodes(statement):
                 if isinstance(node, astroid.AssignName):
                     gen.add(node.name)
                 elif isinstance(node, astroid.DelName):
@@ -118,6 +117,26 @@ class PossiblyUndefinedChecker(BaseChecker):
                 kills.add(name)
 
         return assigns.difference(kills)
+   
+    def get_nodes(self, statement: astroid.node_classes.NodeNG) -> Generator[astroid.node_classes.NodeNG, None, None]:
+        visited = set()
+        node_types = (astroid.AssignName, astroid.DelName, astroid.Name)
+   
+        # Comprehension targets are assigned before expression is evaluated.
+        yield from self._get_nodes(statement, astroid.AssignName, astroid.Comprehension, visited)
+        # RHS is evaluated before assigned in an assignment statement
+        yield from self._get_nodes(statement, astroid.Name, astroid.Assign, visited)
+   
+        for node in statement.nodes_of_class(node_types, astroid.FunctionDef):
+            if node not in visited:
+                yield node
+
+    def _get_nodes(self, statement, node_types, exprs, visited):
+        for node in statement.nodes_of_class(exprs, astroid.FunctionDef):
+            for inner_node in node.nodes_of_class(node_types, astroid.FunctionDef):
+                if inner_node not in visited:
+                    visited.add(inner_node)
+                    yield inner_node
 
 
 def register(linter):

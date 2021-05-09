@@ -39,6 +39,18 @@ To run the test suite, run the following command from inside the `pyta` director
 > python -m pytest tests  # Or python3 on OSX/Linux
 ```
 
+## Generating the docs
+
+The PyTA documentation is generated using [Sphinx](https://www.sphinx-doc.org/en/master/index.html).
+To generate the documentation locally, run the commands:
+
+```console
+> cd docs
+> make html
+```
+
+Then open the file `docs/_build/index.html` in your web browser!
+
 ## Demo
 
 You can currently see a proof of concept in this repository. Clone it,

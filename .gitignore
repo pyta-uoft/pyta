@@ -23,3 +23,6 @@ __pycache__/
 
 # .png files in test_type_inference
 tests/test_type_inference/png*
+
+# Sphinx documentation build files
+docs/_build

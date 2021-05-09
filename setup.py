@@ -37,8 +37,11 @@ setup(
             'coveralls',
             'graphviz',
             'inflection',
+            'myst-parser',
             'pytest',
-            'pytest-cov'
+            'pytest-cov',
+            'sphinx',
+            'sphinx-rtd-theme'
         ]
     },
     python_requires='~=3.8',

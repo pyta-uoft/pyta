@@ -7,7 +7,7 @@ from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 from typing import Set
-
+from itertools import chain
 
 class PossiblyUndefinedChecker(BaseChecker):
 
@@ -117,27 +117,20 @@ class PossiblyUndefinedChecker(BaseChecker):
                 kills.add(name)
 
         return assigns.difference(kills)
-   
+
     def get_nodes(self, statement: astroid.node_classes.NodeNG) -> Generator[astroid.node_classes.NodeNG, None, None]:
-        visited = set()
-        node_types = (astroid.AssignName, astroid.DelName, astroid.Name)
-   
-        # Comprehension targets are assigned before expression is evaluated.
-        yield from self._get_nodes(statement, astroid.AssignName, astroid.Comprehension, visited)
-        # RHS is evaluated before assigned in an assignment statement
-        yield from self._get_nodes(statement, astroid.Name, astroid.Assign, visited)
-   
-        for node in statement.nodes_of_class(node_types, astroid.FunctionDef):
-            if node not in visited:
-                yield node
-
-    def _get_nodes(self, statement, node_types, exprs, visited):
-        for node in statement.nodes_of_class(exprs, astroid.FunctionDef):
-            for inner_node in node.nodes_of_class(node_types, astroid.FunctionDef):
-                if inner_node not in visited:
-                    visited.add(inner_node)
-                    yield inner_node
-
+        multiple_nodes = lambda nodes : chain.from_iterable(self.get_nodes(node) for node in nodes)
+        if isinstance(statement, astroid.Assign):
+            # RHS is evaluated before assigned in an assignment statement
+            yield from self.get_nodes(statement.value)
+            yield from multiple_nodes(statement.targets) # statement.targets is a list of nodes
+        elif isinstance(statement, (astroid.ListComp, astroid.SetComp)):
+            # Comprehension targets are assigned before expression is evaluated.
+            yield from multiple_nodes(statement.generators)  # statement.generators is a list of nodes
+            yield from self.get_nodes(statement.elt)
+        else:
+            yield from statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
+                                                astroid.FunctionDef)
 
 def register(linter):
     linter.register_checker(PossiblyUndefinedChecker(linter))

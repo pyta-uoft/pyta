@@ -6,18 +6,30 @@ expression from None to a function Call, or even cause the function to exit
 without returning anything.
 
 Attributes:
-    - value  (Expr | None)
+    - value  (NodeNG (Expr) | None)
         - Optionally, the value to be returned, which can be any possible
           expression.
 
 Example 1:
-    - value  -> None
+    - Return(value=None)
 
 Example 2:
-    - value  -> Const(NoneType)
+    - Return(value=Const(value=None))
 
 Example 3:
-    - value  -> ListComp(x**2, Comprehension(x, range(10), []))
+    - Return(value=ListComp(
+          elt=BinOp(
+             op='**',
+             left=Name(name='x'),
+             right=Const(value=2)),
+          generators=[Comprehension(
+                is_async=0,
+                target=AssignName(name='x'),
+                iter=Call(
+                   func=Name(name='range'),
+                   args=[Const(value=10)],
+                   keywords=None),
+                ifs=[])]))
 """
 
 # Example 1

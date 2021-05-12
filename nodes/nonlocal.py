@@ -13,7 +13,7 @@ Attributes:
         - The raw names of variables to be rebound as nonlocal.
 
 Example:
-    - names  -> ['x', 'y']
+    - Nonlocal(names=['x', 'y'])
 """
 
 def outer():

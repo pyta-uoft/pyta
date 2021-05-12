@@ -4,15 +4,18 @@ Set astroid node
 This node represents the Python set object.
 
 Attributes:
-    - elts  (List[Expr])
+    - elts  (List[NodeNG (Expr)])
         - The elements in this set, which can be any immutable/hashable
           type expression.
 
 Example 1:
-    - elts  -> [Const(value=0)]
+    - Set(elts=[Const(value=0)])
 
 Example 2:
-    - elts  -> [Const(value=1), Const(value=2), Const(value='hi')]
+    - Set(elts=[
+      Const(value=1),
+      Const(value=2),
+      Const(value='hi')])
 
 
 Type-checking:

@@ -12,12 +12,26 @@ Attributes:
           Load or Store.
 
 Example 1: (nested in Tuple node)
-    - value  -> AssignName('a')
-    - ctx    -> Store
+    - Assign(
+       targets=[Tuple(
+             ctx=<Context.Store: 2>,
+             elts=[Starred( # Starred Node
+                   ctx=<Context.Store: 2>,
+                   value=AssignName(name='a')),
+                AssignName(name='b')])],
+       value=Call(
+          func=Name(name='range'),
+          args=[Const(value=5)],
+          keywords=None))
+
 
 Example 2: (nested in Call node)
-    - value  -> Name('x')
-    - ctx    -> Load
+    - Call(
+       func=Name(name='print'),
+       args=[Starred( # Starred Node
+             ctx=<Context.Load: 1>,
+             value=Name(name='x'))],
+       keywords=None)
 """
 
 # Example 1

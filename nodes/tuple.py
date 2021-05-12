@@ -4,22 +4,30 @@ Tuple astroid node
 This node represents the Python tuple objects.
 
 Attributes:
-    - elts  (List[Expr])
+    - elts  (List[NodeNG (Expr)])
         - The elements in this tuple, which can be any expression.
     - ctx   (class[expr_context])
         - The context in which this list is to be used, either Load or Store.
 
 Example 1:
-    - elts  -> []
-    - ctx   -> Load
+    - Tuple(
+       ctx=<Context.Load: 1>,
+       elts=[])
 
 Example 2:
-    - elts  -> [Const(value=1), Const(value=2)]
-    - ctx   -> Load
+    - Tuple(
+       ctx=<Context.Load: 1>,
+       elts=[Const(value=1), Const(value=2)])
 
-Example 3:
-    - elts  -> [AssignName(name='x'), AssignName(name='y')]
-    - ctx   -> Store
+Example 3: (nested in Assign)
+    - Assign(
+       targets=[Tuple( # Tuple node
+             ctx=<Context.Store: 2>,
+             elts=[AssignName(name='x'), AssignName(name='y')])],
+       value=List(
+          ctx=<Context.Load: 1>,
+          elts=[Const(value=7), Const(value=8)]))
+
 """
 
 # Example 1:

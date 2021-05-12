@@ -12,10 +12,25 @@ Attributes:
     - body   (List[Statement])
         - The code to be performed until the with statement closes.
 
-Example:
-    - items  -> [Call(open, sys.argv[1]) Name(name='f'),
-                 Call(open, 'input.txt') Name(name='i')]
-    - body   -> [Pass()]
+Example 1:
+    - With(
+       items=[[Call(
+                func=Name(name='open'),
+                args=[Subscript(
+                      ctx=<Context.Load: 1>,
+                      value=Attribute(
+                         attrname='argv',
+                         expr=Name(name='sys')),
+                      slice=Const(value=1))],
+                keywords=None),
+             AssignName(name='f')],
+          [Call(
+                func=Name(name='open'),
+                args=[Const(value='input.txt')],
+                keywords=None),
+             AssignName(name='i')]],
+       body=[Pass()])
+
 """
 
 with open(sys.argv[1]) as f, open('input.txt') as i:

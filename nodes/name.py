@@ -9,7 +9,7 @@ Attributes:
         - The name of the variable.
 
 Example:
-    - name   -> "my_var"
+    - Name(name='my_var')
 
 Type-checking:
     - The type of a name is determined by looking it up in the *type environment* of its

@@ -10,13 +10,13 @@ Attributes:
         - Optionally, the value to be yielded.
 
 Example 1:
-    - value  -> None
+    - Yield(value=None)
 
 Example 2:
-    - value  -> Const(value=None)
+    - Yield(value=Const(value=None))
 
 Example 3:
-    - value  -> Name(name='x')
+    - Yield(value=Name(name='x'))
 """
 
 # Example 1

@@ -17,14 +17,22 @@ Attributes:
           raise any exceptions.
 
 Example 1:
-    - body      -> [Pass()]
-    - handlers  -> [ExceptHandler(body=[Pass])]
-    - orelse    -> []
+    - TryExcept(
+       body=[Pass()],
+       handlers=[ExceptHandler(
+             type=None,
+             name=None,
+             body=[Pass()])],
+       orelse=[])
 
 Example 2:
-    - body      -> [Pass()]
-    - handlers  -> [ExceptHandler(body=[Pass])]
-    - orelse    -> [Pass()]
+    - TryExcept(
+       body=[Pass()],
+       handlers=[ExceptHandler(
+             type=None,
+             name=None,
+             body=[Pass()])],
+       orelse=[Pass()])
 """
 
 # Example 1

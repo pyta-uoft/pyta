@@ -9,24 +9,28 @@ See https://docs.python.org/3/reference/expressions.html#unary-arithmetic-and-bi
 Attributes:
     - op       (class[UAdd | USub | Not | Invert])
         - The unary operation to be performed on the operand.
-    - operand  (Expr | None)
+    - operand  (NodeNG (Expr) | None)
         - The single expression to be operated on.
 
 Example 1:
-    - op       -> 'not'
-    - operand  -> Const(value=None)
+    - UnaryOp(
+       op='not',
+       operand=Const(value=None))
 
 Example 2:
-    - op       -> '+'
-    - operand  -> Const(value=5)
+    - UnaryOp(
+       op='+',
+       operand=Const(value=5)
 
 Example 3:
-    - op       -> '-'
-    - operand  -> Name(name='x')
+    - UnaryOp(
+       op='-',
+       operand=Name(name='x'))
 
 Example 4:
-    - op       -> '~'
-    - operand  -> Const(value=72)
+    - UnaryOp(
+       op='~',
+       operand=Const(value=72))
 
 Type-checking:
     Translate the operator into the corresponding method, and type-check the method call.

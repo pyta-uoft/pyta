@@ -15,9 +15,15 @@ Attributes:
           whether any exceptions were raised.
 
 Example:
-    - body       -> TryExcept(body=[Pass()], handlers=ExceptHandler[body=Pass()],
-                               orelse=[])]
-    - finalbody  -> [Pass()]
+    - TryFinally(
+       body=[TryExcept(
+             body=[Pass()],
+             handlers=[ExceptHandler(
+                   type=None,
+                   name=None,
+                   body=[Pass()])],
+             orelse=[])],
+       finalbody=[Pass()])
 """
 
 try:

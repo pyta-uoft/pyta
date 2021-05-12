@@ -1,16 +1,19 @@
 """
 DelName astroid node
 
-Represents when an object is being deleted.
+The name of an object being deleted.
 This is a Name astroid node that specifically appears in the Del
 (being deleted) context.
 
 Attributes:
-    - name  (Name)
-        - The node being deleted.
+    - name: Optional[str]
+        - The name of the object being deleted.
 
-Example:
-    - name  -> DelName(name='x')
+DelName can be initialized without a name (defaulting to None)
+
+Example 1:
+    - DelName(name='x')
 """
 
+# Example 1
 del x

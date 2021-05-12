@@ -4,17 +4,18 @@ BinOp astroid node
 A binary operation (like addition or division).
 
 Attributes:
-    - left   (Expr)
-        - Any expression node.
-    - right  (Expr)
-        - Any expression node.
+    - left   (NodeNG)
+        - What is being applied to the operator on the left side.
     - op     (str)
         - The operator to be performed on left and right.
+    - right  (NodeNG)
+        - What is being applied to the operator on the right side.
 
 Example 1:
-    - left   -> Const(value=1)
-    - right  -> Const(value=2)
-    - op     -> '+'
+    - BinOp(
+           op='+',
+           left=Const(value=1),
+           right=Const(value=2))
 
 Examples of operators on primitive types; dunder function -> call and symbol:
     - __add__   -> +

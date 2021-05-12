@@ -7,14 +7,15 @@ Expressions are always evaluated at most once (PRIOR to comparison) and the valu
 Multi-comparison expressions are logically equivalent to the conjunction of the individual value comparisons.
 
 Attributes:
-    - left  (value)
+    - left  (NodeNG)
         - The first value in the comparison.
-    - ops   (List[Tuple(str, value)])
+    - ops   (List[Tuple(str, NodeNG)])
         - The list of operators to be performed on left.
 
 Example:
-    - left  -> Const(value=0)
-    - ops   -> [('<', Const(value=1)), ('!=", Const(value=1))]
+    - Compare(
+           left=Const(value=0),
+           ops=[['<', Const(value=1)], ['!=', Const(value=1)]])
 
 Type-checking:
     An individual comparison is converted to its corresponding method and type-checked.

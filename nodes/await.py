@@ -4,12 +4,14 @@ Await astroid node
 An await expression. Only valid in the body of an AsyncFunctionDef.
 
 Attributes:
-    - value  (Node)
+    - value  (NodeNG)
         - What the expression waits for.
 
 Example:
-    - value  -> Call(func=Name(id='async_coroutine'), args=[],
-                keywords=[])
+    - Await(value=Call(
+                        func=Name(name='async_coroutine'),
+                        args=[],
+                        keywords=None))
 """
 
 def async_coroutine():

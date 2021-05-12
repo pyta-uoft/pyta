@@ -5,12 +5,12 @@ An augmented assignment, which is the combination, in a single statement, of a
 binary operation and an assignment statement.
 
 Attributes:
-    - target  (Name | Subscript | Attribute)
-        - A single node
-    - value   (Node)
-        - A single node to be assigned to target.
     - op      (str)
         - The operator to be performed on target.
+    - target  (NodeNG)
+        - What is being assigned to.
+    - value   (NodeNG)
+        - A single node to be assigned to target.
 
 Type-checking:
     See https://docs.python.org/3.6/reference/datamodel.html#emulating-numeric-types.
@@ -21,9 +21,10 @@ Type-checking:
 
 
 Example:
-    - target  -> AssignName(name='x')
-    - value   -> Const(value=1)
-    - op      -> '+='
+    - AugAssign(
+               op='+=',
+               target=AssignName(name='x'),
+               value=Const(value=1))
 """
 
 # Example:

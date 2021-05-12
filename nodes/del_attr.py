@@ -5,14 +5,15 @@ This node represents an attribute of an object being deleted.
 This is an astroid Attribute node specifically in the Del (being deleted) context.
 
 Attributes:
-    - expr      (Name)
-        - The node object whose attribute is being deleted.
     - attrname  (str)
         - The name of the attribute being deleted.
+    - expr      (Name)
+        - The node object whose attribute is being deleted.
 
 Example:
-    - expr      -> Name(name="self")
-    - attrname  -> "attr"
+    - DelAttr(
+         attrname='attr',
+         expr=Name(name='self'))
 """
 
 class Foo():

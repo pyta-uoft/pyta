@@ -124,7 +124,7 @@ class PossiblyUndefinedChecker(BaseChecker):
             # RHS is evaluated before assigned in an assignment statement
             yield from self.get_nodes(statement.value)
             yield from multiple_nodes(statement.targets) # statement.targets is a list of nodes
-        elif isinstance(statement, (astroid.ListComp, astroid.SetComp)):
+        elif isinstance(statement, (astroid.ListComp, astroid.SetComp, astroid.DictComp, astroid.GeneratorExp)):
             # Comprehension targets are assigned before expression is evaluated.
             yield from multiple_nodes(statement.generators)  # statement.generators is a list of nodes
             yield from self.get_nodes(statement.elt)

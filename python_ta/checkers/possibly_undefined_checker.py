@@ -1,13 +1,13 @@
 """checker for variables that might not be defined in the program.
 """
-from typing import Union
+from typing import Union, Generator
 import astroid
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 from typing import Set
-
+from itertools import chain
 
 class PossiblyUndefinedChecker(BaseChecker):
 
@@ -76,8 +76,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         for statement in block.statements:
             if isinstance(statement, astroid.FunctionDef):
                 continue
-            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
-                                              astroid.FunctionDef):
+            for node in self.get_nodes(statement):
                 if isinstance(node, astroid.AssignName):
                     gen.add(node.name)
                 elif isinstance(node, astroid.DelName):
@@ -119,6 +118,19 @@ class PossiblyUndefinedChecker(BaseChecker):
 
         return assigns.difference(kills)
 
+    def get_nodes(self, statement: astroid.node_classes.NodeNG) -> Generator[astroid.node_classes.NodeNG, None, None]:
+        multiple_nodes = lambda nodes : chain.from_iterable(self.get_nodes(node) for node in nodes)
+        if isinstance(statement, astroid.Assign):
+            # RHS is evaluated before assigned in an assignment statement
+            yield from self.get_nodes(statement.value)
+            yield from multiple_nodes(statement.targets) # statement.targets is a list of nodes
+        elif isinstance(statement, (astroid.ListComp, astroid.SetComp, astroid.DictComp, astroid.GeneratorExp)):
+            # Comprehension targets are assigned before expression is evaluated.
+            yield from multiple_nodes(statement.generators)  # statement.generators is a list of nodes
+            yield from self.get_nodes(statement.elt)
+        else:
+            yield from statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
+                                                astroid.FunctionDef)
 
 def register(linter):
     linter.register_checker(PossiblyUndefinedChecker(linter))

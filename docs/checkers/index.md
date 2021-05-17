@@ -670,6 +670,9 @@ This error occurs when your code imports a module which is not allowed (usually 
 an assignment/exercise).
 
 ```{literalinclude} /../examples/custom_checkers/e9999_forbidden_import.py
+---
+lines: 1-3
+---
 ```
 
 ### Import error (E0401) [](#E0401)
@@ -1381,6 +1384,9 @@ those indexes to access elements from the list.
 Example:
 
 ```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
+---
+lines: 5-11
+---
 ```
 
 We can simplify the above code by changing the loop to go over the elements of the list directly:
@@ -1410,7 +1416,6 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
 
 
 **Note**:
-
 If the iteration variable of a for loop is shadowed by the iteration variable inside a list
 comprehension, this checker may not work properly and report a false error.
 
@@ -1434,6 +1439,9 @@ loop variable and the list being iterated over.
 Examples:
 
 ```{literalinclude} /../examples/custom_checkers/e9984_for_target_subscript.py
+---
+lines: 5-10
+---
 ```
 
 To fix this, always use a brand-new variable name with a for loop.
@@ -1482,7 +1490,7 @@ error by renaming the variable in the comprehension.
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/e9969_possibly_undefined.py
+```{literalinclude} /../examples/custom_checkers/e9988_shadowing_in_comprehension.py
 ---
 lines: 10-12
 ---
@@ -1548,7 +1556,7 @@ These errors are based on the Python code style guidelines ("PEP8") published by
 These errors do not affect the functionality of your code, but can affect its readability.
 The error messages display how to fix them (e.g., by adding spaces or adding/removing blank lines).
 
-See also: [PEP 8 -- Style Guide for Python Code]
+See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
 
 ## Miscellaneous
 
@@ -2203,5 +2211,3 @@ function and method calls or definitions.
 [The story of None, True and False]: http://python-history.blogspot.ca/2013/11/story-of-none-true-false.html
 
 [Global Variables Are Bad]: https://wiki.c2.com/?GlobalVariablesAreBad
-
-[PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)

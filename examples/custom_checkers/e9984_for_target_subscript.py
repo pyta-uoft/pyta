@@ -1,4 +1,4 @@
-"""Example for E9984: for-target-subscript."""
+"""Examples for E9984: for-target-subscript."""
 from typing import List, Tuple
 
 

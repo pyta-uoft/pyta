@@ -1,4 +1,17 @@
+"""Examples for E9996 one-iteration."""
+
+
+def buggy_search(numbers: list[int], x: int) -> bool:
+    """Return whether numbers contains x (buggy version)."""
+    for number in numbers:
+        if number == x:
+            return True
+        else:
+            return False
+
+
 def loop() -> int:
+    """A more complex example."""
     for j in range(0, 10):  # loop 1 iterates only once
         if j < 2:
             j += 1

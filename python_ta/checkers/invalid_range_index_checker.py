@@ -42,7 +42,6 @@ class InvalidRangeIndexChecker(BaseChecker):
                                  args=args)
 
                 if len(arg) == 3:
-                    print(eval_parm)
                     if (abs(eval_parm[2]) >= abs(eval_parm[0] - eval_parm[1]) or
                     eval_parm[2] == 0 or
                     (eval_parm[0] > eval_parm[1] and eval_parm[2] < 0) or

@@ -16,14 +16,13 @@ class IOFunctionChecker(BaseChecker):
     name = 'IO_Function'
     msgs = {'E9998': ('Used input/output function %s',
                       'forbidden-IO-function',
-                      'Used when you use the I/O functions "print", "open" or'
-                      '"input". These functions except where specified by your instructor.'),
+                      'Used when you use the I/O functions "print", "open" or "input". These '
+                      'functions should not be used except where specified by your instructor.'),
            }
     options = (('forbidden-io-functions',
                 {'default': FORBIDDEN_BUILTIN,
                  'type': 'csv', 'metavar': '<builtin function names>',
-                 'help': 'List of builtins function names that should not be '
-                         'used, separated by a comma'}
+                 'help': 'List of built-in function names that should not be used.'}
                 ),
                ('allowed-io',
                 {'default': (),

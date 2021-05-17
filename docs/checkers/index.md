@@ -1347,7 +1347,7 @@ Example:
 
 ### Loop iterates only once (E9996) [](#E9996)
 
-This error occurs when the loop will only ever iterate once. This occurs when every possible
+This error occurs when a loop will only ever iterate once. This occurs when every possible
 execution path through the loop body ends in a `return` statement (or another type of statement
 that ends the loop, like `break`).
 
@@ -1362,6 +1362,23 @@ def all_even(nums: list[int]) -> bool:
         else:
             return False
 ```
+
+In this example, the return value of `all_even` is based only on the first number in `nums`, and none
+of the other list elements are checked. This version would incorrectly return `True` on the list `[2, 3]`.
+Here is a corrected version of this function:
+
+```python
+def all_even(nums: list[int]) -> bool:
+    """Return whether nums contains only even numbers."""
+    for num in nums:      # This loop will only ever run for one iteration before returning. 
+        if num % 2 != 0:
+            return False
+
+    return True
+```
+
+By moving the `return True` to outside the loop, we ensure that the only way `True` is returned is
+when there are only even numbers in the list.
 
 ### Invalid Range Index (E9993) [](#E9993)
 
@@ -1449,7 +1466,6 @@ For example:
 
 ```python
 def example1(lst: List[int]) -> int:
-    """For loop target is an element of a list."""
     s = 0
     for number in lst:  # Fixed
         s += number

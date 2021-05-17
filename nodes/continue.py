@@ -8,7 +8,7 @@ Attributes:
     # No attributes.
 
 Example:
-    - Continue()
+    Continue()
 """
 
 for i in range(3):

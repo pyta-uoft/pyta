@@ -7,11 +7,14 @@ the function being decorated. A Decorators node is a child node of FunctionDef
 node.
 
 Attributes:
-    - nodes  (List[Union[Name, Call]])
+    - nodes  (Optional[list[Name | Call]])
         - A list of decorators this node contains.
 
 Example:
-    - Decorators(nodes=[Name(name='wrapper'), Name(name='decor')])
+    Decorators(
+        nodes=[
+            Name(name='wrapper'),
+            Name(name='decor')])
 """
 
 @wrapper

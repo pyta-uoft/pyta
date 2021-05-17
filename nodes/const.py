@@ -6,13 +6,13 @@ computed values.
 
 Attributes:
     - value  (object)
-        - The value that the constant represents.
+        - The value that the constant represents. These are Python literals.
 
 Example 1:
-    - Const(value=1)
+    Const(value=1)
 
 Example 2:
-    - Const(value=b'6')
+    Const(value=b'6')
 
 Type-checking:
     The type of a Const node is the type of its value attribute.

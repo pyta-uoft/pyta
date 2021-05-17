@@ -5,15 +5,15 @@ To assign a value to the relationship attribute. (This is the astroid
 Attribute node in the specific Load context.)
 
 Attributes:
-    - attrname  (str)
+    - attrname  (Optional[str])
         - The name of the attribute that is assigned.
-    - expr      (NodeNG)
+    - expr      (Optional[NodeNG])
         - The node object whose attribute is assigned.
 
 Example:
-    - AssignAttr(
-         attrname='name',
-         expr=Name(name='self'))
+    AssignAttr(
+        attrname='name',
+        expr=Name(name='self'))
 """
 
 class ClassName():

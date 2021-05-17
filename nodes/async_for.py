@@ -9,17 +9,18 @@ Subclass of For astroid node. This node iterates over async code with a for-loop
 Attributes:
     # Derives directly from "For" node; see "For" node for attributes.
 
- Example:
-     - AsyncFor(
-               target=AssignName(name='a'),
-               iter=Name(name='b'),
-               body=[If(
-                     test=Compare(
-                        left=Name(name='a'),
-                        ops=[['>', Const(value=5)]]),
-                     body=[Break()],
-                     orelse=[Continue()])],
-               orelse=[])
+Example:
+    AsyncFor(
+        target=AssignName(name='a'),
+        iter=Name(name='b'),
+        body=[
+            If(
+                test=Compare(
+                left=Name(name='a'),
+                ops=[['>', Const(value=5)]]),
+                body=[Break()],
+                orelse=[])],
+        orelse=[Continue()])
 
 """
 

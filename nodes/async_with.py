@@ -10,14 +10,17 @@ Attributes:
     - # Derives directly from "With" node; see "with" node for attributes.
 
 Example:
-    - AsyncWith(
-           items=[[Call(
+    AsyncWith(
+        items=[
+            [
+                Call(
                     func=Name(name='open'),
                     args=[Const(value='/foo/bar'), Const(value='r')],
                     keywords=None),
-                 AssignName(name='f')]],
-           body=[Pass()])
+                AssignName(name='f')]],
+        body=[Pass()])
 """
+
 
 async def fun():
     async with open('/foo/bar', 'r') as f:

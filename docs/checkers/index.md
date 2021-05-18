@@ -667,9 +667,12 @@ may import at all.
 ### Forbidden imports (E9999) [](#E9999)
 
 This error occurs when your code imports a module which is not allowed (usually for the purpose of
-an assignments/exercise).
+an assignment/exercise).
 
-```{literalinclude} /../examples/custom_checkers/E9999_forbidden_imports.py
+```{literalinclude} /../examples/custom_checkers/e9999_forbidden_import.py
+---
+lines: 1-3
+---
 ```
 
 ### Import error (E0401) [](#E0401)
@@ -1300,37 +1303,110 @@ other object will lead to an error.
 
 ## Custom errors
 
+### Global variables (E9997) [](#E9997)
+
+When writing Python programs, your variables should always be defined within functions.
+(A *global variable* is a variable that isn't defined within a function.)
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/E9997_global_variables.py
+---
+lines: 16-20
+---
+```
+
+Global variables should be avoided because they can be changed by other functions, which causes
+unpredictable behaviour in your program. You can indicate that a global variable shouldn't be
+changed by naming it using the `ALL_CAPS` naming style:
+
+```python
+EX = 1
+
+
+def add_ex(n: int) -> int:
+  """Add EX to n."""
+  return EX + n
+```
+
+We call variables that are named using this style **constants**, and expect that they don't change
+when we run our code. PythonTA allows global constants, and so would not report the
+`forbidden-global-variables` error on our second example. 
+
+**See also**: [Global Variables Are Bad]
+
 ### Forbidden IO function (E9998) [](#E9998)
 
 Input / output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
 required. If `print` calls are used to debug the code, they should be removed prior to submission.
+
+Example:
 
 ```{literalinclude} /../examples/custom_checkers/E9998_forbidden_io_function.py
 ```
 
 ### Loop iterates only once (E9996) [](#E9996)
 
-This error occurs when the loop will only ever iterate once. This usually occurs when every possible
-execution path through the loop body ends in a `return` or `break` statement.
+This error occurs when a loop will only ever iterate once. This occurs when every possible
+execution path through the loop body ends in a `return` statement (or another type of statement
+that ends the loop, like `break`).
+
+Example:
 
 ```python
-def all_even(nums: List[int]) -> bool:
+def all_even(nums: list[int]) -> bool:
     """Return whether nums contains only even numbers."""
-    for num in nums:
+    for num in nums:      # This loop will only ever run for one iteration before returning. 
         if num % 2 == 0:
             return True
         else:
             return False
 ```
 
-### Unnecessary Indexing (E9994) {E9994}
+In this example, the return value of `all_even` is based only on the first number in `nums`, and none
+of the other list elements are checked. This version would incorrectly return `True` on the list `[2, 3]`.
+Here is a corrected version of this function:
 
-The iteration variable in a for loop was used unnecessarily.
+```python
+def all_even(nums: list[int]) -> bool:
+    """Return whether nums contains only even numbers."""
+    for num in nums:      # This loop will only ever run for one iteration before returning. 
+        if num % 2 != 0:
+            return False
 
-```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
+    return True
 ```
 
-Corrected version:
+By moving the `return True` to outside the loop, we ensure that the only way `True` is returned is
+when there are only even numbers in the list.
+
+### Invalid Range Index (E9993) [](#E9993)
+
+This error occurs when we call the `range` function but with argument(s) that would cause the range
+to be empty or only have one element.
+
+Examples:
+
+```{literalinclude} /../examples/custom_checkers/e9993_invalid_range_index.py
+```
+
+When such `range`s are used with a loop, the loop will iterate either zero or one time, which is
+almost certainly not what we intended! This usually indicates an error with how `range` is called.
+
+### Unnecessary Indexing (E9994) [](#E9994)
+
+This error occurs when we use a for loop that goes over a range of indexes for a list, but only use
+those indexes to access elements from the list.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
+---
+lines: 5-11
+---
+```
+
+We can simplify the above code by changing the loop to go over the elements of the list directly:
 
 ```python
 def sum_items(lst: List[int]) -> int:
@@ -1342,8 +1418,21 @@ def sum_items(lst: List[int]) -> int:
     return s
 ```
 
+In general, we should only loop over indexes (`for i in range(len(lst))`) if we are using the index
+for some purpose other than indexing into the list.
+One common example is if we want to loop over two lists in parallel:
+
+```python
+def print_sum(lst1: List[int], lst2: List[int]) -> None:
+    """Print the sums of each corresponding pair of items in lst1 and lst2.
+    Precondition: lst1 and lst2 have the same length.
+    """
+    for i in range(len(lst1)):
+        print(lst1[i] + lst2[i])
+```
+
+
 **Note**:
-Only for Python 3:
 If the iteration variable of a for loop is shadowed by the iteration variable inside a list
 comprehension, this checker may not work properly and report a false error.
 
@@ -1358,6 +1447,132 @@ def f(lst):
             s += x
     return s
 ```
+
+### For Target Subscript (E9984) [](#E9984)
+
+This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the
+loop variable and the list being iterated over.
+
+Examples:
+
+```{literalinclude} /../examples/custom_checkers/e9984_for_target_subscript.py
+---
+lines: 5-10
+---
+```
+
+To fix this, always use a brand-new variable name with a for loop.
+For example:
+
+```python
+def example1(lst: List[int]) -> int:
+    s = 0
+    for number in lst:  # Fixed
+        s += number
+    return s
+```
+
+### Possibly undefined variable (E9969) [](#E9969)
+
+This error occurs when we use a variable that might not be defined prior to its use.
+The most common cause is when we define a variable in one branch of an if statement, but not another.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9969_possibly_undefined.py
+```
+
+### Redundant assignment (E9959) [](#E9959)
+
+This error occurs when we have two assignment statements to the same variable, without using that
+variable in between the assignment statement. In this case, the first statement is redundant, since
+it gets overridden by the second.
+
+Example:
+
+```python
+x = 10  # This assignment statement is redundant
+y = 5
+x = 1
+print(x)
+```
+
+### Shadowing in comprehension (E9988) [](#E9988)
+
+This error occurs when a variable in a comprehension shadows (i.e., has the same name as) a variable
+from an outer scope, such as a local variable in the same function.
+In general you should avoid reusing variable names within the same function, and so you can fix this
+error by renaming the variable in the comprehension.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9988_shadowing_in_comprehension.py
+---
+lines: 10-12
+---
+```
+
+### Missing parameter type (E9970) [](#E9970)
+
+This error occurs when we have written a function definition but are missing a type annotation for
+a parameter.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9970_missing_param_type.py
+---
+lines: 2-4
+---
+```
+
+### Missing return type (E9971) [](#E9971)
+
+This error occurs when we have written a function definition but are missing a type annotation for 
+the return value. Use `None` as the type annotation if the function does not return anything.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9971_missing_return_type.py
+---
+lines: 2-4
+---
+```
+
+### Missing attribute type (E9972) [](#E9972)
+
+This error occurs when we have written a class but are missing a type annotation for an 
+instance attribute assigned in the class initializer.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9972_missing_attribute_type.py
+---
+lines: 4-9
+---
+```
+
+These type annotations should be written at the top of the class body.
+For example:
+
+```python
+class ExampleClass:
+    """Class docstring."""
+    inst_attr: str
+    inst_attr2: bool
+    
+    def __init__(self):  # Missing return type annotation
+        """Initialize a new instance of this class."""
+        self.inst_attr = 'hi'
+        self.inst_attr2 = True
+```
+
+### Pycodestyle errors (E9989) [](#9989)
+
+These errors are based on the Python code style guidelines ("PEP8") published by the Python team.
+These errors do not affect the functionality of your code, but can affect its readability.
+The error messages display how to fix them (e.g., by adding spaces or adding/removing blank lines).
+
+See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
 
 ## Miscellaneous
 
@@ -2010,3 +2225,5 @@ function and method calls or definitions.
 [The scope of index variables in Python's for loops]: http://eli.thegreenplace.net/2015/the-scope-of-index-variables-in-pythons-for-loops/
 
 [The story of None, True and False]: http://python-history.blogspot.ca/2013/11/story-of-none-true-false.html
+
+[Global Variables Are Bad]: https://wiki.c2.com/?GlobalVariablesAreBad

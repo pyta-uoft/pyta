@@ -14,30 +14,28 @@ class IOFunctionChecker(BaseChecker):
     __implements__ = IAstroidChecker
 
     name = 'IO_Function'
-    msgs = {'E9998': ('Used IO function %s',
-                      'IO-function-not-allowed',
-                      'Used when you use the IO functions "print", "open" or'
-                      '"input". Pylint just try to discourage this usage. '
-                      'That doesn\'t mean you can not use it !'),
+    msgs = {'E9998': ('Used input/output function %s',
+                      'forbidden-IO-function',
+                      'Used when you use the I/O functions "print", "open" or "input". These '
+                      'functions should not be used except where specified by your instructor.'),
            }
     options = (('forbidden-io-functions',
                 {'default': FORBIDDEN_BUILTIN,
                  'type': 'csv', 'metavar': '<builtin function names>',
-                 'help': 'List of builtins function names that should not be '
-                         'used, separated by a comma'}
+                 'help': 'List of built-in function names that should not be used.'}
                 ),
                ('allowed-io',
                 {'default': (),
                  'type': 'csv',
                  'metavar': '<forbidden io>',
-                 'help': 'Allowed modules to be imported.'}
+                 'help': 'Functions where an I/O function may be used.'}
                 )
                )
 
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("IO-function-not-allowed")
+    @check_messages("forbidden-IO-function")
     def visit_call(self, node):
         if isinstance(node.func, astroid.Name):
             name = node.func.name
@@ -48,7 +46,7 @@ class IOFunctionChecker(BaseChecker):
                 # TODO: Only FunctionDefs are checked. Include global scope?
                 if isinstance(scope, astroid.FunctionDef) and scope.name not in self.config.allowed_io:
                     if name in self.config.forbidden_io_functions:
-                        self.add_message('IO-function-not-allowed', node=node,
+                        self.add_message('forbidden-IO-function', node=node,
                                          args=name)
 
 

@@ -68,7 +68,7 @@ def render_context(start, stop, source_lines):
                 for line in range(start, stop))
 
 
-def render_type_annotation_return(msg, source_lines=None):
+def render_missing_return_type(msg, source_lines=None):
     """Render a type annotation return message."""
     node = msg.node
     start_line, start_col = node.fromlineno, node.parent.col_offset
@@ -94,7 +94,7 @@ CUSTOM_MESSAGES = {
     'missing-class-docstring': render_missing_docstring,
     'missing-function-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
-    'type-annotation-return': render_type_annotation_return,
+    'missing-return-type': render_missing_return_type,
     'too-many-arguments': render_too_many_arguments
 }
 

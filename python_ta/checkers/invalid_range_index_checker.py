@@ -30,7 +30,7 @@ class InvalidRangeIndexChecker(BaseChecker):
                 if any([not isinstance(item, astroid.Const) for item in arg]):
                     return
                 eval_parm = list(map(lambda z: literal_eval(z.as_string()), arg))
-                
+
                 # check if there is no args in 'range' call
                 if (len(arg) == 0 or
                     not all([isinstance(c, int) for c in eval_parm]) or
@@ -40,7 +40,7 @@ class InvalidRangeIndexChecker(BaseChecker):
                     args = "{}".format(node.lineno)
                     self.add_message('invalid-range-index', node=node,
                                  args=args)
-                
+
                 if len(arg) == 3:
                     if (abs(eval_parm[2]) >= abs(eval_parm[0] - eval_parm[1]) or
                     eval_parm[2] == 0 or

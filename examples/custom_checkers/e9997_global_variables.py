@@ -1,3 +1,6 @@
+"""Examples for E9997 forbidden-global-variables."""
+
+
 def function() -> None:
     """A test for the global variables checker."""
     # Change "value" to mean the global variable.
@@ -9,18 +12,21 @@ def function() -> None:
 VALUE = 0
 function()
 print(VALUE)
+
 ex = 1
-print(ex)
+
+def add_ex(n: int) -> int:
+    """Add ex to n."""
+    return ex + n
 
 
 # The local variable in a comprehension is okay
-print([x for x in [1, 2, 3]])
 print({x + 1 for x in [1, 2, 3]})
 print({x: x * 3 for x in [1, 2, 3]})
 print(list(x + 1 for x in [1, 2, 3]))
 
 
-def function1() -> None:
+def function1() -> int:
     """A test for the global variables checker."""
 
     def function2() -> None:
@@ -34,13 +40,11 @@ def function1() -> None:
     function2()
 
     # Local variable reflects nonlocal change
-    value + 3  # 103
+    return value + 3  # 103
 
 
 if __name__ == '__main__':
-    # This assignment is okay
-    x = 10
+    var1 = 10  # This assignment is okay: statements inside main block are not checked
 
-    if x > 5:
-        # This assignment is also okay
-        y = 13
+    if var1 > 5:
+        var2 = 13  # This assignment is also okay

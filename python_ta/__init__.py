@@ -219,15 +219,14 @@ def reset_linter(config=None, file_linted=None):
         'python_ta.checkers.forbidden_import_checker',
         'python_ta.checkers.possibly_undefined_checker',
         'python_ta.checkers.global_variables_checker',
-        'python_ta.checkers.IO_Function_checker',
+        'python_ta.checkers.forbidden_io_function_checker',
         'python_ta.checkers.invalid_range_index_checker',
         'python_ta.checkers.one_iteration_checker',
-        'python_ta.checkers.constant_test_checker',
-        'python_ta.checkers.structure_test_checker',
         'python_ta.checkers.type_annotation_checker',
         'python_ta.checkers.unnecessary_indexing_checker',
-        'python_ta.checkers.shadowing_in_comp_checker',
-        'python_ta.checkers.redundant_assignment_checker'
+        'python_ta.checkers.shadowing_in_comprehension_checker',
+        'python_ta.checkers.redundant_assignment_checker',
+        'python_ta.checkers.for_target_subscript_checker'
     ]
 
     # Register new options to a checker here to allow references to

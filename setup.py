@@ -29,7 +29,8 @@ setup(
         'pygments',
         'wrapt>=1.12.0',
         'typeguard>=2.7.1',
-        'requests'
+        'requests',
+        'click>=8.0.1'
     ],
     extras_require={
         'dev': [
@@ -42,6 +43,11 @@ setup(
             'sphinx',
             'sphinx-rtd-theme'
         ]
+    },
+    entry_points={
+        'console_scripts': [
+            'python_ta = python_ta.script:main'
+        ],
     },
     python_requires='~=3.8',
     include_package_data=True,

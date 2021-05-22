@@ -3,7 +3,7 @@ from python_ta import check_all, check_errors
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('-c', '--config', type=click.Path(exists=True, dir_okay=False, resolve_path=True), help="python_ta configuration file")
 @click.option('-E', '--errors-only', is_flag=True, help="Displays errors only", default=False)
 @click.argument('filenames', nargs=-1, type=click.Path(exists=True, dir_okay=True, resolve_path=True))

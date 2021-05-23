@@ -495,6 +495,13 @@ This error occurs when a function argument is never used in the function.
 ```{literalinclude} /../examples/pylint/W0613_unused_argument.py
 ```
 
+### Unused format string key (W1301) [](#W1301)
+
+This error occurs when a value in a formatted string is unused. In other words, it does not get substituted into a placeholder. 
+
+```{literalinclude} /../examples/pylint/W1301_unused_format_string_key.py
+```
+
 ### Pointless statement (W0104) [](#W0104)
 
 This error occurs when a statement does not have any effect. This means that the statement could be

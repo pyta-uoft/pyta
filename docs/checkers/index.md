@@ -659,6 +659,13 @@ str                 sum                 super               tuple               
 vars                zip
 ```
 
+### Redefine in handler (W0623) [](W0623)
+
+This error occurs when the exception handler assigns the exception to an existing name.
+
+```{literalinclude} /../examples/pylint/W0623_redefine_in_handler.py
+```
+
 ## Imports
 
 There are standards governing how we should organize our imports, or even possibly which modules we
@@ -1566,7 +1573,7 @@ class ExampleClass:
         self.inst_attr2 = True
 ```
 
-### Pycodestyle errors (E9989) [](#9989)
+### Pycodestyle errors (E9989) [](#E9989)
 
 These errors are based on the Python code style guidelines ("PEP8") published by the Python team.
 These errors do not affect the functionality of your code, but can affect its readability.

@@ -388,7 +388,7 @@ same path of execution.
 
 ### Redeclare Assigned Name (W0128) [](#W0128)
 
-This error occurs when a variable name is redeclared before use.
+This error occurs when a variable name is reassigned before use.
 
 ```{literalinclude} /../examples/pylint/W0128_redeclare_assigned_name.py
 ```

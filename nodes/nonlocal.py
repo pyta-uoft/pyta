@@ -9,11 +9,11 @@ Nonlocal statement. Also, variables already defined in the current scope trying
 be rebound as nonlocals will raise a SyntaxWarning.
 
 Attributes:
-    - names  (List[str])
+    - names  (list[str])
         - The raw names of variables to be rebound as nonlocal.
 
 Example:
-    - names  -> ['x', 'y']
+    Nonlocal(names=['x', 'y'])
 """
 
 def outer():

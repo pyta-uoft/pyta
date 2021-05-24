@@ -1,4 +1,4 @@
-"""Example for E9988: shadowing-inside-comprehension."""
+"""Example for E9988: shadowing-in-comprehension."""
 from typing import List
 
 

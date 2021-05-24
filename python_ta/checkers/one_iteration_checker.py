@@ -15,7 +15,7 @@ class OneIterationChecker(BaseChecker):
     # use dashes for connecting words in message symbol
     msgs = {'E9996': ('This loop will only ever run for one iteration',
                       'one-iteration',
-                      'Reported when the loop body always breaks out of the loop '
+                      'Reported when the loop body always ends the loop in its first iteration '
                       '(e.g., by returning or using the "break" keyword).'),
            }
 

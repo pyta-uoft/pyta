@@ -408,14 +408,6 @@ example below is considered to have *six* nested blocks, not seven.
 ```{literalinclude} /../examples/pylint/R1702_too_many_nested_blocks.py
 ```
 
-### Too many lines (C0302) [](#C0302)
-
-This error occurs when the file has too many lines. The limit for too many lines is specified
-through the `max-module-lines` configuration option. Default value is `1000`
-
-```{literalinclude} /../examples/pylint/C0302_too_many_lines.py
-```
-
 The code above can be fixed using a helper function:
 
 ```python
@@ -455,6 +447,14 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
         if z is not None
     ]
     return cross_join_list
+```
+
+### Too many lines (C0302) [](#C0302)
+
+This error occurs when the file has too many lines. The limit for too many lines is specified
+through the `max-module-lines` configuration option. Default value is `1000`
+
+```{literalinclude} /../examples/pylint/C0302_too_many_lines.py
 ```
 
 ### Too many arguments (R0913) [](#R0913)

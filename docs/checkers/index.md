@@ -543,11 +543,10 @@ returning `None`.
 
 This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources. 
 
-Problematic code:
 ```{literalinclude} /../examples/pylint/R1732_consider_using_with.py
 ```
 
-Corrected Code:
+Corrected version: 
 ```python
 with open('my_file.txt', 'r') as file:
     ... # No need to manually close the file 

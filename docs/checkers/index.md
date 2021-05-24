@@ -411,7 +411,7 @@ example below is considered to have *six* nested blocks, not seven.
 ### Too many lines (C0302) [](#C0302)
 
 This error occurs when the file has too many lines. The limit for too many lines is specified
-through the `max-module-lines` configuration option.
+through the `max-module-lines` configuration option. Default value is `1000`
 
 ```{literalinclude} /../examples/pylint/C0302_too_many_lines.py
 ```

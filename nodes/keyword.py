@@ -4,14 +4,20 @@ Keyword astroid node
 A keyword argument, kwargs, to a function call or class definition.
 
 Attributes:
-    - arg    (str)
+    - arg       (str)
         - A string of the parameter name.
-    - value  (Node)
-        - A node to pass in to arg.
+    - value     (NodeNG)
+        - A node to pass into the arg.
 
-Example:
-    - arg    -> "object"
-    - value  -> Const(value=2)
+Example 1:
+    Call(
+        func=Name(name='str'),
+        args=[],
+        keywords=[Keyword(
+                arg='object',
+                value=Const(value=2))])
+
+* Note that the Keyword is inside of the keywords list in the Call node.
 """
 
 str(object=2)

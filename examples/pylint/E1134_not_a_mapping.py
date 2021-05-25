@@ -1,14 +1,8 @@
-# mapping = {'hi': 1, 'hello': 2} # maybe this?  # Error on this line: non-mapping value used in a mapping context
-
-def square(n):
-    return n * n
+def func(a: int, b: float) -> None:
+    pass
 
 
-result = map(square, 'test')
-print(result)
-
-if __name__ == '__main__':
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 100
-    })
+def call_func() -> None:
+    a = 1
+    func(**{'a': 10, 'b': 15.2})  # This works
+    func(**a)  # Error on this line: non-mapping value 'a' used in a mapping context

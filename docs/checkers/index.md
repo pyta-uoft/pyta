@@ -802,6 +802,13 @@ docstring.
 ```{literalinclude} /../examples/pylint/C0413_wrong_import_position.py
 ```
 
+### Import outside toplevel (C0415) [](#C0415)
+
+Imports should be placed at the top-level of the module, not inside function or class bodies.
+
+```{literalinclude} /../examples/pylint/C0415_import_outside_toplevel.py
+```
+
 ### Unused import (W0611) [](#W0611)
 
 This error occurs when we import a module which is not used anywhere in our code.

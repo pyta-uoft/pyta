@@ -1,4 +1,4 @@
-from R0401_cyclic_import_2 import Chicken
+from cyclic_import_helper import Chicken
 
 
 class Egg:

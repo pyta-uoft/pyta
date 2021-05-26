@@ -757,11 +757,11 @@ our* `math.py` file, and not the [`math` module] from the standard library.
 A module should not import a file which results in an import of the original module.
 
 Example File 1
-```{literalinclude} /../examples/pylint/R0401_cyclic_import_1.py
+```{literalinclude} /../examples/pylint/R0401_cyclic_import.py
 ```
 
 Example File 2
-```{literalinclude} /../examples/pylint/R0401_cyclic_import_2.py
+```{literalinclude} /../examples/pylint/cyclic_import_helper.py
 ```
 
 ### Multiple imports (C0410) [](#C0410)

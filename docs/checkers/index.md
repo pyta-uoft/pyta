@@ -386,11 +386,11 @@ same path of execution.
 ```{literalinclude} /../examples/pylint/W0125_using_constant_test.py
 ```
 
-### Redeclare Assigned Name (W0128) [](#W0128)
+### Redeclared Assigned Name (W0128) [](#W0128)
 
 This error occurs when a variable name is reassigned before use.
 
-```{literalinclude} /../examples/pylint/W0128_redeclare_assigned_name.py
+```{literalinclude} /../examples/pylint/W0128_redeclared_assigned_name.py
 ```
 
 ### Too many branches (R0912) [](#R0912)

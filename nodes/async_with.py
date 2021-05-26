@@ -7,19 +7,20 @@ to complete, rather the code executes all operations in one go. Only valid in
 body of an AsyncFunctionDef astroid node.
 
 Attributes:
-    - items  (List[Expr])
-        - The expressions or expression-reassigned Name pairs that are to be
-          set up by this "with" and torn down after the completion of body.
-          Expressions are usually Call or Name nodes.
-    - body   (List[Statement])
-        - The code to be performed until the with statement closes.
+    - # Derives directly from "With" node; see "with" node for attributes.
 
 Example:
-    - items  -> [Call(func=Name(name='open'),
-                      args=[Const(value='/foo/bar'), Const(value='r')]),
-                 AssignName(name='f')]]
-    - body   -> [Pass()]
+    AsyncWith(
+        items=[
+            [
+                Call(
+                    func=Name(name='open'),
+                    args=[Const(value='/foo/bar'), Const(value='r')],
+                    keywords=None),
+                AssignName(name='f')]],
+        body=[Pass()])
 """
+
 
 async def fun():
     async with open('/foo/bar', 'r') as f:

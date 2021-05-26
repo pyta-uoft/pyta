@@ -23,21 +23,6 @@ This error occurs when we are using a variable that has not been defined.
 ```{literalinclude} /../examples/pylint/E0602_undefined_variable.py
 ```
 
-### Super with arguments (R1725) [](#R1725)
-
-This error occurs when calling super() with the class and instance as these can be ommited
-from Python 3.
-
-```{literalinclude} /../examples/pylint/R1725_super_with_arguments.py
-```
-
-Correction Version:
-
-```python
-class DummyClass:
-    def __init__(self):
-        super().__init__()  # Error was on this line
-```
 
 ### Undefined loop variable (W0631) [](#W0631)
 
@@ -994,6 +979,22 @@ class Child(Parent):
 - [Super considered super!]
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
+
+### Super with arguments (R1725) [](#R1725)
+
+This error occurs when calling super() with the class and instance as these can be ommited from
+Python 3.
+
+```{literalinclude} /../examples/pylint/R1725_super_with_arguments.py
+```
+
+Correction Version:
+
+```python
+class DummyClass:
+    def __init__(self):
+        super().__init__()  # Error was on this line
+```
 
 ### Attribute defined outside init (W0201) [](#W0201)
 

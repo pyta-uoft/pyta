@@ -1,4 +1,4 @@
-PRIMES = [
+PRIMES = [  # Error on this line, as this is a file-size error.
     2,
     3,
     5,
@@ -998,7 +998,7 @@ PRIMES = [
     7883,
     7901,
     7907,
-    7919]  # Error starts on this line; exceeds default max-module-lines value of 1000
+    7919]  # Too many lines starts here; exceeds default max-module-lines value of 1000
 
 
 def print_primes():

@@ -497,7 +497,7 @@ This error occurs when a function argument is never used in the function.
 
 ### Unused format string key (W1301) [](#W1301)
 
-This error occurs when a value in a formatted string is unused. In other words, it does not get substituted into a placeholder. 
+This error occurs when a format string that uses named conversion specifiers is used with a dictionary that contains keys not required by the format string. 
 
 ```{literalinclude} /../examples/pylint/W1301_unused_format_string_key.py
 ```

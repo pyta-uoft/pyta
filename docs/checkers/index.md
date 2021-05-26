@@ -332,6 +332,20 @@ else:
     number_category = 'non-negative'
 ```
 
+### Condition evals to constant (R1727) [](#R1727)
+
+This error occurs when a boolean test condition always evaluates to a constant.
+
+```{literalinclude} /../examples/pylint/R1727_condition_evals_to_constant.py
+```
+
+The above can be modified to:
+
+```python
+if True:  # Error was on this line
+  pass
+```
+
 ### Singleton comparison (C0121) [](#C0121)
 
 This error occurs when an expression is compared to a singleton value like `True`, `False` or `None`

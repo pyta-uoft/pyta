@@ -510,6 +510,14 @@ removed without changing the behaviour of the program.
 ```{literalinclude} /../examples/pylint/W0104_pointless_statement.py
 ```
 
+### Pointless string statement (W0105) [](#W0105)
+
+This error occurs when a string statement does not have any effect.  Very similar to error `W0104`, but 
+for strings.
+
+```{literalinclude} /../examples/pylint/W0105_pointless_string_statement.py
+```
+
 ### Unnecessary pass (W0107) [](#W0107)
 
 This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has

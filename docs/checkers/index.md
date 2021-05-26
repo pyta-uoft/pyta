@@ -547,6 +547,19 @@ function body.
 In CSC148, you may sometimes choose resolve this error by instead *raising an error* rather than
 returning `None`.
 
+### Consider using with (R1732) [](#R1732)
+
+This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources. 
+
+```{literalinclude} /../examples/pylint/R1732_consider_using_with.py
+```
+
+Corrected version: 
+```python
+with open('my_file.txt', 'r') as file:
+    ... # No need to manually close the file 
+```
+
 ## Documentation and naming
 
 Good documentation and identifiers are essential for writing software. PyTA helps check to make sure

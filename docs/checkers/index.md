@@ -23,7 +23,6 @@ This error occurs when we are using a variable that has not been defined.
 ```{literalinclude} /../examples/pylint/E0602_undefined_variable.py
 ```
 
-
 ### Undefined loop variable (W0631) [](#W0631)
 
 This error occurs when a loop variable is used outside the `for` loop where it was defined.

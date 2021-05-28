@@ -452,10 +452,9 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
 ### Too many lines (C0302) [](#C0302)
 
 This error occurs when the file has too many lines. The limit for too many lines is specified
-through the `max-module-lines` configuration option. Default value is `1000`.
+through the `max-module-lines` configuration option. 
 
-```{literalinclude} /../examples/pylint/C0302_too_many_lines.py
-```
+**Note**: The default value is `1000`.
 
 ### Too many arguments (R0913) [](#R0913)
 

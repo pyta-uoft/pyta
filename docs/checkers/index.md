@@ -335,6 +335,7 @@ else:
 ### Simplifiable condition (R1726) [](#R1726)
 
 This error occurs when a boolean test condition can be simplified.
+Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
 
 ```{literalinclude} /../examples/pylint/R1726_simplifiable_condition.py
 ```

@@ -1587,7 +1587,7 @@ class ExampleClass:
         self.inst_attr2 = True
 ```
 
-### Pycodestyle errors (E9989) [](#9989)
+### Pycodestyle errors (E9989) [](#E9989)
 
 These errors are based on the Python code style guidelines ("PEP8") published by the Python team.
 These errors do not affect the functionality of your code, but can affect its readability.

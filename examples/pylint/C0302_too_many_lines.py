@@ -999,8 +999,3 @@ PRIMES = [  # Error on this line, as this is a file-size error.
     7901,
     7907,
     7919]  # Too many lines starts here; exceeds default max-module-lines value of 1000
-
-
-def print_primes():
-    for prime in PRIMES:
-        print(prime)

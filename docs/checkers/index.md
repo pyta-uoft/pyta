@@ -659,7 +659,7 @@ str                 sum                 super               tuple               
 vars                zip
 ```
 
-### Redefine in handler (W0623) [](W0623)
+### Redefine in handler (W0623) [](#W0623)
 
 This error occurs when the exception handler assigns the exception to an existing name.
 

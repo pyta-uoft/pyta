@@ -335,6 +335,7 @@ else:
 ### Condition evals to constant (R1727) [](#R1727)
 
 This error occurs when a boolean test condition always evaluates to a constant.
+Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
 
 ```{literalinclude} /../examples/pylint/R1727_condition_evals_to_constant.py
 ```

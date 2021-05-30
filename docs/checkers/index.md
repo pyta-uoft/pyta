@@ -332,6 +332,21 @@ else:
     number_category = 'non-negative'
 ```
 
+### Simplifiable condition (R1726) [](#R1726)
+
+This error occurs when a boolean test condition can be simplified.
+Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
+
+```{literalinclude} /../examples/pylint/R1726_simplifiable_condition.py
+```
+
+The above can be modified to:
+
+```python
+if a:  # Error was on this line
+  pass
+```
+
 ### Singleton comparison (C0121) [](#C0121)
 
 This error occurs when an expression is compared to a singleton value like `True`, `False` or `None`

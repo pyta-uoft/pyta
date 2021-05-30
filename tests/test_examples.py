@@ -16,7 +16,8 @@ IGNORED_TESTS = [
     'W0125_using_constant_test.py',
     'W0631_undefined_loop_variable.py',
     'W1503_redundant_unittest_assert.py',
-    'E1140_unhashable_dict_key.py'
+    'E1140_unhashable_dict_key.py',
+    'R0401_cyclic_import.py'
 ]
 
 

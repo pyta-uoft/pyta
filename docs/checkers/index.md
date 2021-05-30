@@ -312,6 +312,15 @@ for number in [1, 2, 3]:
     print(number)
 ```
 
+### Not a mapping (E1134) [](#E1134)
+
+This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a non-dict with `**` in a function call meaning that the parameters are unfilled. 
+
+`**` can only be used on a `dict` to unpack the values. 
+
+```{literalinclude} /../examples/pylint/E1134_not_a_mapping.py
+```
+
 ## Code complexity
 
 ### Unneeded not (C0113) [](#C0113)

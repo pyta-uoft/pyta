@@ -386,6 +386,13 @@ same path of execution.
 ```{literalinclude} /../examples/pylint/W0125_using_constant_test.py
 ```
 
+### Redeclared Assigned Name (W0128) [](#W0128)
+
+This error occurs when a variable is redeclared on the same line it was assigned.
+
+```{literalinclude} /../examples/pylint/W0128_redeclared_assigned_name.py
+```
+
 ### Too many branches (R0912) [](#R0912)
 
 The function or method has too many branches, making it hard to follow. This is a sign that the

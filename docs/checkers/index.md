@@ -471,6 +471,13 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
     return cross_join_list
 ```
 
+### Too many lines (C0302) [](#C0302)
+
+This error occurs when the file has too many lines. The limit for too many lines is specified
+through the `max-module-lines` configuration option. 
+
+**Note**: The default value is `1000`.
+
 ### Too many arguments (R0913) [](#R0913)
 
 The function or method is defined with too many arguments. This is a sign that the function/method

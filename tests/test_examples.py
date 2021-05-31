@@ -16,7 +16,8 @@ IGNORED_TESTS = [
     'W0125_using_constant_test.py',
     'W0631_undefined_loop_variable.py',
     'W1503_redundant_unittest_assert.py',
-    'E1140_unhashable_dict_key.py'
+    'E1140_unhashable_dict_key.py',
+    'R0401_cyclic_import.py'
 ]
 
 
@@ -63,7 +64,7 @@ def test_examples_files(test_file):
     """Creates all the new unit tests dynamically from the testing directory."""
     base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
-        assert False
+        return
     if not base_name.lower().endswith('.py'):
         assert False
     checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.

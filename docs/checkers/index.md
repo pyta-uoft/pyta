@@ -981,13 +981,13 @@ class Child(Parent):
 
 ### Super with arguments (R1725) [](#R1725)
 
-This error occurs when calling super() with the class and instance as these can be ommited from
+This error occurs when calling `super()` with the class and instance as these can be ommited from
 Python 3.
 
 ```{literalinclude} /../examples/pylint/R1725_super_with_arguments.py
 ```
 
-Correction Version:
+Corrected Version:
 
 ```python
 class DummyClass:

@@ -802,6 +802,19 @@ would like to import. For example, if we have a Python file named `math.py`, cal
 from within that file (or from within *any* Python file in the same directory) will import *
 our* `math.py` file, and not the [`math` module] from the standard library.
 
+
+### Cyclic import (R0401) [](#R0401)
+
+A module should not import a file which results in an import of the original module.
+
+Example File 1
+```{literalinclude} /../examples/pylint/R0401_cyclic_import.py
+```
+
+Example File 2
+```{literalinclude} /../examples/pylint/cyclic_import_helper.py
+```
+
 ### Multiple imports (C0410) [](#C0410)
 
 Different modules should not be imported on a single line.

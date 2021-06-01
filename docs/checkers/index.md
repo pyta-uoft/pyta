@@ -1065,6 +1065,22 @@ class Child(Parent):
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
 
+### Super with arguments (R1725) [](#R1725)
+
+This error occurs when calling `super()` with the class and instance as these can be ommited from
+Python 3.
+
+```{literalinclude} /../examples/pylint/R1725_super_with_arguments.py
+```
+
+Corrected Version:
+
+```python
+class DummyClass:
+    def __init__(self):
+        super().__init__()  # Error was on this line
+```
+
 ### Attribute defined outside init (W0201) [](#W0201)
 
 Any attribute we define for a class should be created inside the `__init__` method. Defining it

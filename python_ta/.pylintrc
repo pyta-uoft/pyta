@@ -101,3 +101,24 @@ argument-rgx = (([a-z][a-z0-9_]{0,30})|(_[a-z0-9_]*))$
 class-rgx    = (([A-Z][a-zA-Z0-9]{0,30})|(_[A-Z][a-zA-Z0-9]*))$
 method-rgx   = (([a-z][a-z0-9_]{0,30})|(_[a-z0-9_]*))$
 class-attribute-rgx = ([A-Za-z_][A-Za-z0-9_]{0,30}|(__.*__))$
+
+[PYCODESTYLE]
+# Ignored pycodestyle checks
+pycodestyle-ignored-tests =
+    E111,
+    E114,
+    E117,
+    E401,
+    E402,
+    E501,
+    E701,
+    E702,
+    E703,
+    E711,
+    E712,
+    E722,
+    W291,
+    W292,
+    W293,
+    W391,
+    W503

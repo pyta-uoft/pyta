@@ -10,7 +10,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def setUp(self):
         self.setup_method()
 
-    def test_runtime_error(self):
+    def test_empty_scope(self):
         src = """
         def f(lst: list) -> None:
             i = 0
@@ -21,3 +21,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                     i = 2
         """
         mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)

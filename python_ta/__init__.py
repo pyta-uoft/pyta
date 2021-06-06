@@ -215,7 +215,7 @@ def reset_linter(config=None, file_linted=None):
           'help': 'Server address to submit anonymous data'}),
         ('pycodestyle-ignored-tests',
          {'default': [],
-          'type': 'regexp_csv',
+          'type': 'csv',
           'metavar': '<pycodestyle_ignored_tests>',
           'help': 'List of Pycodestyle errors to ignore'})
     )

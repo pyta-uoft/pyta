@@ -22,15 +22,23 @@ class InvalidForTargetChecker(BaseChecker):
 
     @check_messages('invalid-for-target')
     def visit_for(self, node: astroid.For) -> None:
-        if isinstance(node.target, astroid.Subscript):
+
+        if _target_is_subscript_or_assignattr(node):
             self.add_message('invalid-for-target',
                              node=node.target, args=node.target.as_string())
-        # if there are multiple targets
+        # if there are multiple targets check if any are invalid
         elif isinstance(node.target, astroid.Tuple):
             for target in node.target.elts:
-                if isinstance(target, astroid.Subscript):
+                if _target_is_subscript_or_assignattr(node):
                     self.add_message('invalid-for-target',
                                      node=target, args=target.as_string())
+
+
+def _target_is_subscript_or_assignattr(node: astroid.For) -> bool:
+    loop_var_is_subscript = isinstance(node.target, astroid.Subscript)
+    loop_var_is_attr_assign = isinstance(node.target, astroid.AssignAttr)
+
+    return loop_var_is_subscript or loop_var_is_attr_assign
 
 
 def register(linter):

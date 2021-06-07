@@ -35,10 +35,10 @@ class InvalidForTargetChecker(BaseChecker):
 
 
 def _target_is_subscript_or_assignattr(node: astroid.For) -> bool:
-    loop_var_is_subscript = isinstance(node.target, astroid.Subscript)
-    loop_var_is_attr_assign = isinstance(node.target, astroid.AssignAttr)
+    target_is_subscript = isinstance(node.target, astroid.Subscript)
+    target_is_attr_assign = isinstance(node.target, astroid.AssignAttr)
 
-    return loop_var_is_subscript or loop_var_is_attr_assign
+    return target_is_subscript or target_is_attr_assign
 
 
 def register(linter):

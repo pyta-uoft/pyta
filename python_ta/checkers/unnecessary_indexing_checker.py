@@ -90,7 +90,8 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     """
     iterable = _iterable_if_range(for_node.iter)
     # Name node is not inside Subscript node iterable[index].
-    if not (isinstance(index_node.parent, astroid.Index) and isinstance(index_node.parent.parent, astroid.Subscript)
+    if not (isinstance(index_node.parent, astroid.Index)
+            and isinstance(index_node.parent.parent, astroid.Subscript)
             and isinstance(index_node.parent.parent.value, astroid.Name)
             and index_node.parent.parent.value.name == iterable):
         return False
@@ -99,20 +100,24 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     return subscript_node.ctx == astroid.Load
 
 
-def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node: astroid.For) -> bool:
+def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name],
+                  for_node: astroid.For) -> bool:
     """Return whether or not <index_node> is redundant in <for_node>.
 
     The lookup method is used in case the original loop variable is shadowed
     in the for loop's body.
     """
     if isinstance(index_node, astroid.AssignName):
-        return index_node.lookup(index_node.name)[1][0] != for_node.target or \
-               not isinstance(index_node.parent, astroid.AugAssign)
+        if index_node.lookup(index_node.name)[1] != ():
+            return index_node.lookup(index_node.name)[1][0] != for_node.target or \
+                   not isinstance(index_node.parent, astroid.AugAssign)
     else:
-        return _scope_lookup(index_node) != for_node.target or _is_load_subscript(index_node, for_node)
+        return _scope_lookup(index_node) != for_node.target \
+               or _is_load_subscript(index_node, for_node)
 
 
-def _index_name_nodes(index: str, for_node: astroid.For) -> List[Union[astroid.AssignName, astroid.Name]]:
+def _index_name_nodes(index: str, for_node: astroid.For) -> List[
+    Union[astroid.AssignName, astroid.Name]]:
     """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
     return [name_node for name_node in for_node.nodes_of_class((astroid.AssignName, astroid.Name))
             if name_node.name == index and name_node != for_node.target]

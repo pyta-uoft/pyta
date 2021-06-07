@@ -10,7 +10,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def setUp(self):
         self.setup_method()
 
-    def test_empty_scope(self):
+    def test_empty_scope_no_message(self):
         src = """
         def f(lst: list) -> None:
             i = 0
@@ -40,10 +40,10 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node = mod.body[0].body[1]
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
-                msg_id='unnecessary-indexing',
-                node=for_node
-            )
+                pylint.testutils.Message(
+                    msg_id='unnecessary-indexing',
+                    node=for_node.target
+                )
         ):
             self.checker.visit_for(for_node)
 
@@ -60,10 +60,10 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node = mod.body[0].body[1]
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
-                msg_id='unnecessary-indexing',
-                node=for_node
-            )
+                pylint.testutils.Message(
+                    msg_id='unnecessary-indexing',
+                    node=for_node.target
+                )
         ):
             self.checker.visit_for(for_node)
 
@@ -80,14 +80,14 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node = mod.body[0].body[1]
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
-                msg_id='unnecessary-indexing',
-                node=for_node
-            )
+                pylint.testutils.Message(
+                    msg_id='unnecessary-indexing',
+                    node=for_node.target
+                )
         ):
             self.checker.visit_for(for_node)
 
-    def test_sum_pairs(self):
+    def test_sum_pairs_no_message(self):
         """NO error reported; the loop index is used to index lst2 as well."""
         src = """
         def sum_pairs(lst1: List[int], lst2: List[int]) -> int:
@@ -118,7 +118,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node
+                    node=for_node.target
                 )
         ):
             self.checker.visit_for(for_node)
@@ -131,17 +131,17 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node = mod.body[0].body[0]
 
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node
+                    node=for_node.target
                 )
         ):
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehensions2(self):
+    def test_nested_comprehensions2_no_message(self):
         """NO error reported; j is initialized outside the loop"""
         src = """
         def nested_comprehensions2(items: list) -> None:
@@ -156,7 +156,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehensions3(self):
+    def test_nested_comprehensions3_no_message(self):
         """NO error reported; j is undefined."""
         src = """
         def nested_comprehensions3(items: list) -> None:
@@ -165,12 +165,12 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node = mod.body[0].body[0]
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehensions4(self):
+    def test_nested_comprehensions4_no_message(self):
         """NO error reported; j is undefined."""
         src = """
         def nested_comprehensions3(items: list) -> None:
@@ -179,12 +179,12 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node = mod.body[0].body[0]
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_loop_variable_reassigned(self):
+    def test_loop_variable_reassigned_no_message(self):
         """NO error reported; the loop variable assignment i is unused,
         but is not redundant."""
         src = """
@@ -202,3 +202,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
+
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main(['test_unnecessary_indexing_checker.py'])

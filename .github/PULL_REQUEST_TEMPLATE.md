@@ -4,12 +4,13 @@
 ## Motivation and Context
 
 <!-- Why is this pull request required? What problem does it solve? -->
-<!-- If it fixes an open issue, link the issue by typing in 'resolves #' then the issue number like (resolves #709) -->
+<!--- If it fixes an open issue, please link to the issue here: -->
+<!--- https://docs.github.com/en/github/managing-your-work-on-github/managing-your-work-with-issues-and-pull-requests/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword -->
 
 ## Your Changes
 
-**Description**:
 <!-- Describe your changes here. -->
+**Description**:
 
 **Type of change** (select all that apply):
 <!-- Put an `x` in all the boxes that apply. -->

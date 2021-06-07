@@ -4,7 +4,7 @@
 ## Motivation and Context
 
 <!-- Why is this pull request required? What problem does it solve? -->
-<!-- If it fixes an open issue, link the issue by typing in '#' then the issue number (like #709) -->
+<!-- If it fixes an open issue, link the issue by typing in 'resolves #' then the issue number like (resolves #709) -->
 
 ## Your Changes
 

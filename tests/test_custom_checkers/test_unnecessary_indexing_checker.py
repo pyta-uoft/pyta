@@ -26,3 +26,179 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
+
+    def test_sum_items(self):
+        src = """
+        def sum_items(lst: List[int]) -> int:
+            s = 0
+            for i in range(len(lst)):  #@
+                s += lst[i]
+            return s
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertAddsMessages(
+            pylint.testutils.Message(
+                msg_id='unnecessary-indexing',
+                node=for_node
+            )
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_sum_items2(self):
+        src = """
+        def sum_items2(lst: List[int]) -> int:
+            s = 0
+            for i in range(0, len(lst)):  #@
+                s += lst[i]
+            return s
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertAddsMessages(
+            pylint.testutils.Message(
+                msg_id='unnecessary-indexing',
+                node=for_node
+            )
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_sum_items3(self):
+        src = """
+        def sum_items3(lst: List[int]) -> int:
+            s = 0
+            for i in range(0, len(lst), 1):  #@
+                s += lst[i]
+            return s
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertAddsMessages(
+            pylint.testutils.Message(
+                msg_id='unnecessary-indexing',
+                node=for_node
+            )
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_sum_pairs(self):
+        """NO error reported; the loop index is used to index lst2 as well."""
+        src = """
+        def sum_pairs(lst1: List[int], lst2: List[int]) -> int:
+            s = 0
+            for i in range(len(lst1)):
+                s += lst1[i] * lst2[i]
+            return s
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_nested_sum(self):
+        src = """
+        def nested_sum(items: List[List[int]]) -> int:
+            s = 0
+            for i in range(len(items)):  #@
+                s += sum([2 * x for x in items[i]])
+            return s
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='unnecessary-indexing',
+                    node=for_node
+                )
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_nested_comprehension(self):
+        src = """
+        def nested_comprehension(items: list) -> None:
+            for i in range(len(items)):  #@
+                print([[items[i] for _ in range(10)] for _ in [1, 2, 3]])
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='unnecessary-indexing',
+                    node=for_node
+                )
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_nested_comprehensions2(self):
+        """NO error reported; j is initialized outside the loop"""
+        src = """
+        def nested_comprehensions2(items: list) -> None:
+            j = 0
+            for _ in range(len(items)):
+                print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_nested_comprehensions3(self):
+        """NO error reported; j is undefined."""
+        src = """
+        def nested_comprehensions3(items: list) -> None:
+            for _ in range(len(items)):
+                print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_nested_comprehensions4(self):
+        """NO error reported; j is undefined."""
+        src = """
+        def nested_comprehensions3(items: list) -> None:
+            for _ in range(len(items)):
+                print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_loop_variable_reassigned(self):
+        """NO error reported; the loop variable assignment i is unused,
+        but is not redundant."""
+        src = """
+        def loop_variable_reassigned(items: List[int]) -> int:
+            s = 0
+            for i in range(len(items)):
+                i = 0
+                s += items[i]
+            
+            return s
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        for_node = mod.body[0].body[1]
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)

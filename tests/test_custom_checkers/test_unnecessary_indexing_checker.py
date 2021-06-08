@@ -1,7 +1,6 @@
 import pylint.testutils
 import astroid
 from python_ta.checkers.unnecessary_indexing_checker import UnnecessaryIndexingChecker
-from python_ta.cfg import CFGVisitor
 
 
 class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
@@ -11,6 +10,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         self.setup_method()
 
     def test_empty_scope_no_message(self):
+        """The AssignName node i = 2 returns (builtins, ()) for the scope
+        """
         src = """
         def f(lst: list) -> None:
             i = 0
@@ -21,13 +22,12 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                     i = 2
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_sum_items(self):
+    def test_sum_items_msg(self):
         src = """
         def sum_items(lst: List[int]) -> int:
             s = 0
@@ -36,18 +36,18 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node.target
+                    node=for_node.target,
+                    args=for_node.target.name
                 )
         ):
             self.checker.visit_for(for_node)
 
-    def test_sum_items2(self):
+    def test_sum_items2_msg(self):
         src = """
         def sum_items2(lst: List[int]) -> int:
             s = 0
@@ -56,18 +56,18 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node.target
+                    node=for_node.target,
+                    args=for_node.target.name
                 )
         ):
             self.checker.visit_for(for_node)
 
-    def test_sum_items3(self):
+    def test_sum_items3_msg(self):
         src = """
         def sum_items3(lst: List[int]) -> int:
             s = 0
@@ -76,13 +76,13 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node.target
+                    node=for_node.target,
+                    args=for_node.target.name
                 )
         ):
             self.checker.visit_for(for_node)
@@ -97,13 +97,12 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_nested_sum(self):
+    def test_nested_sum_msg(self):
         src = """
         def nested_sum(items: List[List[int]]) -> int:
             s = 0
@@ -112,31 +111,31 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node.target
+                    node=for_node.target,
+                    args=for_node.target.name
                 )
         ):
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehension(self):
+    def test_nested_comprehension_msg(self):
         src = """
         def nested_comprehension(items: list) -> None:
             for i in range(len(items)):  #@
                 print([[items[i] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[0]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='unnecessary-indexing',
-                    node=for_node.target
+                    node=for_node.target,
+                    args=for_node.target.name
                 )
         ):
             self.checker.visit_for(for_node)
@@ -150,8 +149,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -164,8 +162,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[0]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -178,8 +175,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[0]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -197,8 +193,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = mod.body[0].body[1]
+        for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)

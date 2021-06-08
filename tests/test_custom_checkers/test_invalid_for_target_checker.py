@@ -7,7 +7,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InvalidForTargetChecker
 
     def _assert_no_message(self, src: str) -> None:
-        for_node = _extract_nodes(src, [astroid.For])
+        for_node, *_ = _extract_nodes(src, [astroid.For])
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)

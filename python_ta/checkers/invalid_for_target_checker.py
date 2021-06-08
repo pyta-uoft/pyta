@@ -1,6 +1,6 @@
 """Checker for target of for loop in subscript form.
 """
-from typing import Union
+from typing import Union, List
 
 import astroid
 from pylint.checkers import BaseChecker
@@ -37,7 +37,7 @@ class InvalidForTargetChecker(BaseChecker):
 def _unnest_recursive_seq(node: Union[astroid.List,
                                       astroid.Tuple,
                                       astroid.node_classes.NodeNG]) -> \
-        list[astroid.node_classes.NodeNG]:
+        List[astroid.node_classes.NodeNG]:
     """Return a list of all non-List/Tuple nodes contained in node
 
     Note: passing in an astroid.For node directly will just return the node;

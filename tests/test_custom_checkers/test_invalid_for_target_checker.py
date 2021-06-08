@@ -5,7 +5,7 @@ import astroid
 from python_ta.checkers.invalid_for_target_checker import InvalidForTargetChecker
 
 
-class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
+class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InvalidForTargetChecker
 
     def _assert_no_message(self, src: str) -> None:

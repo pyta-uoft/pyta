@@ -1534,7 +1534,7 @@ loop variable and the list being iterated over.
 
 Examples:
 
-```{literalinclude} /../examples/custom_checkers/e9984_for_target_subscript.py
+```{literalinclude} /../examples/custom_checkers/e9984_invalid_for_target.py
 ---
 lines: 5-10
 ---

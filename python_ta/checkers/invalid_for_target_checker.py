@@ -1,5 +1,7 @@
 """Checker for target of for loop in subscript form.
 """
+from typing import Union
+
 import astroid
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
@@ -20,25 +22,30 @@ class InvalidForTargetChecker(BaseChecker):
     priority = -1
     # pass in message symbol as a parameter of check_messages
 
+    INVALID_TARGETS = (astroid.Subscript, astroid.AssignAttr)
+
     @check_messages('invalid-for-target')
     def visit_for(self, node: astroid.For) -> None:
 
-        if _target_is_subscript_or_assignattr(node):
-            self.add_message('invalid-for-target',
-                             node=node.target, args=node.target.as_string())
-        # if there are multiple targets check if any are invalid
-        elif isinstance(node.target, astroid.Tuple):
-            for target in node.target.elts:
-                if _target_is_subscript_or_assignattr(node):
-                    self.add_message('invalid-for-target',
-                                     node=target, args=target.as_string())
+        for_targets = _unnest_recursive_seq(node.target)
+        for target in for_targets:
+            if isinstance(target, self.INVALID_TARGETS):
+                self.add_message('invalid-for-target',
+                                 node=target, args=target.as_string())
 
 
-def _target_is_subscript_or_assignattr(node: astroid.For) -> bool:
-    target_is_subscript = isinstance(node.target, astroid.Subscript)
-    target_is_attr_assign = isinstance(node.target, astroid.AssignAttr)
+def _unnest_recursive_seq(node: Union[astroid.List,
+                                      astroid.Tuple,
+                                      astroid.node_classes.NodeNG]) -> \
+        list[astroid.node_classes.NodeNG]:
 
-    return target_is_subscript or target_is_attr_assign
+    if isinstance(node, (astroid.List, astroid.Tuple)):
+        nested_targets = []
+        for nested_node in node.elts:
+            nested_targets += _unnest_recursive_seq(nested_node)
+        return nested_targets
+    else:
+        return [node]
 
 
 def register(linter):

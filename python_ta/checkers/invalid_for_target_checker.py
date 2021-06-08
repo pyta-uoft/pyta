@@ -38,6 +38,11 @@ def _unnest_recursive_seq(node: Union[astroid.List,
                                       astroid.Tuple,
                                       astroid.node_classes.NodeNG]) -> \
         list[astroid.node_classes.NodeNG]:
+    """Return a list of all non-List/Tuple nodes contained in node
+
+    Note: passing in an astroid.For node directly will just return the node;
+    pass in the .target get the list of all targets.
+    """
 
     if isinstance(node, (astroid.List, astroid.Tuple)):
         nested_targets = []

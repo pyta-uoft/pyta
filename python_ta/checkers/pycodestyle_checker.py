@@ -10,7 +10,7 @@ class PycodestyleChecker(BaseChecker):
     msgs = {'E9989': ('Found pycodestyle (PEP8) style error at %s', 'pep8-errors', '')}
 
     options = (('pycodestyle-ignore',
-                {'default': [],
+                {'default': (),
                  'type': 'csv',
                  'metavar': '<pycodestyle_ignore>',
                  'help': 'List of Pycodestyle errors to ignore'}

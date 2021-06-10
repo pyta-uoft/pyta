@@ -12,7 +12,7 @@ class PycodestyleChecker(BaseChecker):
     options = (('pycodestyle-ignore',
                 {'default': (),
                  'type': 'csv',
-                 'metavar': '<pycodestyle_ignore>',
+                 'metavar': '<pycodestyle-ignore>',
                  'help': 'List of Pycodestyle errors to ignore'}
                 )
                )

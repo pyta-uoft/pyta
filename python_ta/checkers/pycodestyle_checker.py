@@ -9,7 +9,14 @@ class PycodestyleChecker(BaseChecker):
     name = 'pep8_errors'
     msgs = {'E9989': ('Found pycodestyle (PEP8) style error at %s', 'pep8-errors', '')}
 
-    options = ()
+    options = (('pycodestyle-ignore',
+                {'default': [],
+                 'type': 'csv',
+                 'metavar': '<pycodestyle_ignore>',
+                 'help': 'List of Pycodestyle errors to ignore'}
+                )
+               )
+
     # this is important so that your checker is executed before others
     priority = -1
 

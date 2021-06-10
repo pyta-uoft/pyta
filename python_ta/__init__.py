@@ -212,12 +212,7 @@ def reset_linter(config=None, file_linted=None):
          {'default': 'http://127.0.0.1:5000',
           'type': 'string',
           'metavar': '<server-url>',
-          'help': 'Server address to submit anonymous data'}),
-        ('pycodestyle-ignored-tests',
-         {'default': [],
-          'type': 'csv',
-          'metavar': '<pycodestyle_ignored_tests>',
-          'help': 'List of Pycodestyle errors to ignore'})
+          'help': 'Server address to submit anonymous data'})
     )
 
     custom_checkers = [

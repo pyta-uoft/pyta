@@ -27,30 +27,10 @@ class InvalidForTargetChecker(BaseChecker):
     @check_messages('invalid-for-target')
     def visit_for(self, node: astroid.For) -> None:
 
-        for_targets = _unnest_recursive_seq(node.target)
-        for target in for_targets:
-            if isinstance(target, self.INVALID_TARGETS):
-                self.add_message('invalid-for-target',
-                                 node=target, args=target.as_string())
-
-
-def _unnest_recursive_seq(node: Union[astroid.List,
-                                      astroid.Tuple,
-                                      astroid.node_classes.NodeNG]) -> \
-        List[astroid.node_classes.NodeNG]:
-    """Return a list of all non-List/Tuple nodes contained in node
-
-    Note: passing in an astroid.For node directly will just return the node;
-    pass in the .target get the list of all targets.
-    """
-
-    if isinstance(node, (astroid.List, astroid.Tuple)):
-        nested_targets = []
-        for nested_node in node.elts:
-            nested_targets += _unnest_recursive_seq(nested_node)
-        return nested_targets
-    else:
-        return [node]
+        invalid_for_targets = node.target.nodes_of_class(self.INVALID_TARGETS)
+        for target in invalid_for_targets:
+            self.add_message('invalid-for-target',
+                             node=target, args=target.as_string())
 
 
 def register(linter):

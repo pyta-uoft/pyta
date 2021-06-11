@@ -1,3 +1,5 @@
+from typing import Dict
+
 import os
 import os.path
 import subprocess
@@ -34,7 +36,7 @@ def get_file_paths():
     return test_files
 
 
-def run_pylint_on_examples() -> dict[str, str]:
+def run_pylint_on_examples() -> Dict[str, str]:
     """Return a dict mapping example file path to its pylint output
     """
 
@@ -98,7 +100,7 @@ class TestExamples:
     # Private Attributes:
     #   - _pylint_outputs: mapping of file path to its pylint output
 
-    _pylint_outputs: dict[str, str]
+    _pylint_outputs: Dict[str, str]
 
     @pytest.fixture(scope='session', autouse=True)
     def setup_pylint_output(self) -> None:

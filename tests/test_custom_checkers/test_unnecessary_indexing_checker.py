@@ -9,9 +9,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def setUp(self):
         self.setup_method()
 
-    def test_empty_scope_no_message(self):
-        """The AssignName node i = 2 returns (builtins, ()) for the scope
-        """
+    def test_empty_scope_no_msg(self):
+        """The AssignName node i = 2 returns (builtins, ()) for the scope"""
         src = """
         def f(lst: list) -> None:
             i = 0
@@ -28,6 +27,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_sum_items_msg(self):
+        """Return the sum of a list of numbers."""
         src = """
         def sum_items(lst: List[int]) -> int:
             s = 0
@@ -48,6 +48,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_sum_items2_msg(self):
+        """Return the sum of a list of numbers."""
         src = """
         def sum_items2(lst: List[int]) -> int:
             s = 0
@@ -68,6 +69,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_sum_items3_msg(self):
+        """Return the sum of a list of numbers."""
         src = """
         def sum_items3(lst: List[int]) -> int:
             s = 0
@@ -87,8 +89,10 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_for(for_node)
 
-    def test_sum_pairs_no_message(self):
-        """NO error reported; the loop index is used to index lst2 as well."""
+    def test_sum_pairs_no_msg(self):
+        """Return the sum of corresponding products of two list of numbers.
+
+        NO error reported; the loop index is used to index lst2 as well."""
         src = """
         def sum_pairs(lst1: List[int], lst2: List[int]) -> int:
             s = 0
@@ -103,6 +107,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_nested_sum_msg(self):
+        """Return a repeated sum of the items in the list."""
         src = """
         def nested_sum(items: List[List[int]]) -> int:
             s = 0
@@ -123,6 +128,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_nested_comprehension_msg(self):
+        """Illustrate this checker in a nested comprehension."""
         src = """
         def nested_comprehension(items: list) -> None:
             for i in range(len(items)):  #@
@@ -140,8 +146,11 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehensions2_no_message(self):
-        """NO error reported; j is initialized outside the loop"""
+    def test_nested_comprehensions2_no_msg(self):
+        """Illustrate this checker in a nested comprehension, where the
+        loop variable is unused.
+
+        NO error reported; j is initialized outside the loop"""
         src = """
         def nested_comprehensions2(items: list) -> None:
             j = 0
@@ -154,7 +163,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehensions3_no_message(self):
+    def test_nested_comprehensions3_no_msg(self):
         """NO error reported; j is undefined."""
         src = """
         def nested_comprehensions3(items: list) -> None:
@@ -167,12 +176,15 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_nested_comprehensions4_no_message(self):
-        """NO error reported; j is undefined."""
+    def test_nested_comprehensions4_no_msg(self):
+        """Illustrate this checker in a nested comprehension,
+        where the index into the list is defined in an outer comprehension.
+
+        NO error reported; j is undefined."""
         src = """
-        def nested_comprehensions3(items: list) -> None:
+        def nested_comprehensions4(items: list) -> None:
             for _ in range(len(items)):
-                print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
+                print([[items[j] for _ in range(10)] for j in [1, 2, 3]])
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(astroid.For)
@@ -180,8 +192,11 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
-    def test_loop_variable_reassigned_no_message(self):
-        """NO error reported; the loop variable assignment i is unused,
+    def test_loop_variable_reassigned_no_msg(self):
+        """Illustrate this checker on a loop where the loop variable is reassigned
+        in the loop body.
+
+        NO error reported; the loop variable assignment i is unused,
         but is not redundant."""
         src = """
         def loop_variable_reassigned(items: List[int]) -> int:
@@ -189,8 +204,37 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             for i in range(len(items)):
                 i = 0
                 s += items[i]
-            
             return s
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(astroid.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_sum_items_no_msg(self):
+        """Elements are accessed directly, no unnecessary indexing"""
+        src = """
+        def sum_items(items: List[int]) -> int: 
+            s = 0
+            for x in lst:
+               s += x
+            return s 
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(astroid.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_iter_var_unused_no_msg(self):
+        """Iteration variable i is unused in the code, no unnecessary indexing performed"""
+        src = """
+        def iter_var_unused(items: List[int]) -> int: 
+            s = 0 
+            for i in range(len(lst)):
+                s += 1 
+            return s 
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(astroid.For)

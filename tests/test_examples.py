@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import os
 import os.path
@@ -59,7 +59,7 @@ def _assert_parallel_output(output: str, file_path: str) -> None:
     assert file_name in output
 
 
-def _get_full_pylint_output(file_paths: list[str]) -> str:
+def _get_full_pylint_output(file_paths: List[str]) -> str:
 
     output = subprocess.run(
         ['pylint', '--reports=n',

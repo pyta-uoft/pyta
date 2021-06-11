@@ -3,6 +3,10 @@ import os.path
 import subprocess
 import re
 import pytest
+import sys
+import io
+
+from pylint.lint import Run
 
 
 _EXAMPLES_PATH = 'examples/pylint/'
@@ -34,39 +38,66 @@ def get_file_paths():
     return test_files
 
 
-def create_checker(test_file, checker_name):
-    """Creates a test function from a test file, and a checker name.
-    test_file: The full path (string) to the file.
-    checker_name: The hyphenated checker name that should be detected.
-    An example of a valid checker_name would be: 'no-init-classes'
+def run_pylint_on_examples() -> dict[str, str]:
+    """Return a dict mapping example file path to its pylint output
     """
-    # The following are captured when this function is created.
-    def new_test_func():
+
+    pylint_output = {}
+
+    file_paths = get_file_paths()
+    full_output = _get_full_pylint_output(file_paths)
+    _, *individual_outputs = full_output.split("*************")
+    for output, file_path in zip(individual_outputs, file_paths):
+        _assert_parallel_output(output, file_path)
+        pylint_output[file_path] = output
+
+    return pylint_output
+
+
+def _assert_parallel_output(output: str, file_path: str) -> None:
+    """Assert that the output is for the given file"""
+    file_base_name = os.path.basename(file_path)
+    file_name, _ = os.path.splitext(file_base_name)
+    assert file_name in output
+
+
+def _get_full_pylint_output(file_paths: list[str]) -> str:
+    dummy_out = io.StringIO()
+    sys.stdout = dummy_out
+    Run(file_paths, exit=False)
+    sys.stdout = sys.__stdout__
+
+    return dummy_out.getvalue()
+
+
+class TestExamples:
+    # Private Attributes:
+    #   - _pylint_outputs: mapping of file path to its pylint output
+
+    _pylint_outputs: dict[str, str]
+
+    @pytest.fixture(scope='session', autouse=True)
+    def setup_pylint_output(self) -> None:
+        """Run pylint on all the example files and map by file name"""
+        TestExamples._pylint_outputs = run_pylint_on_examples()
+
+    @pytest.mark.parametrize("test_file", get_file_paths())
+    def test_examples_files(self, test_file):
+        """Creates all the new unit tests dynamically from the testing directory."""
+        base_name = os.path.basename(test_file)
+        if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
+            return
+        if not base_name.lower().endswith('.py'):
+            assert False
+        checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.
+
+        output = TestExamples._pylint_outputs[test_file]
+
         found_pylint_message = False
-        output = subprocess.run(
-            ['pylint', '--reports=n',
-             '--rcfile=python_ta/.pylintrc',
-             test_file],
-            stderr=subprocess.STDOUT,
-            stdout=subprocess.PIPE)
-        for line in output.stdout.decode('utf-8').split('\n'):
+        for line in output.split("\n"):
             if checker_name in line:
                 found_pylint_message = True
-                break
         if not found_pylint_message:
             print('Failed: ' + test_file)  # test doesn't say which file
+
         assert found_pylint_message
-    return new_test_func
-
-
-@pytest.mark.parametrize("test_file", get_file_paths())
-def test_examples_files(test_file):
-    """Creates all the new unit tests dynamically from the testing directory."""
-    base_name = os.path.basename(test_file)
-    if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
-        return
-    if not base_name.lower().endswith('.py'):
-        assert False
-    checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.
-    test_function = create_checker(test_file, checker_name)
-    test_function()

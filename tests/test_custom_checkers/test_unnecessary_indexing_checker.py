@@ -164,7 +164,10 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_nested_comprehensions3_no_msg(self):
-        """NO error reported; j is undefined."""
+        """Illustrate this checker in a nested comprehension,
+        where the index into the list is not defined.
+
+        NO error reported; j is undefined."""
         src = """
         def nested_comprehensions3(items: list) -> None:
             for _ in range(len(items)):

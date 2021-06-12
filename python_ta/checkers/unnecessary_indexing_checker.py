@@ -88,17 +88,6 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     """Return whether or not <index_node> is used to subscript the iterable of <for_node>
     and the subscript item is being loaded from, e.g., s += iterable[index_node].
     """
-    # iterable = _iterable_if_range(for_node.iter)
-    # # Name node is not inside Subscript node iterable[index].
-    # if not (isinstance(index_node.parent, astroid.Index)
-    #         and isinstance(index_node.parent.parent, astroid.Subscript)
-    #         and isinstance(index_node.parent.parent.value, astroid.Name)
-    #         and index_node.parent.parent.value.name == iterable):
-    #     return False
-    # # Use ctx attribute to find out what context the subscript is being used in.
-    # subscript_node = index_node.parent.parent
-    # return subscript_node.ctx == astroid.Load
-
     iterable = _iterable_if_range(for_node.iter)
     # If the Name node is inside a Subscript node and the subscript is being used in a load context
     if isinstance(index_node.parent, astroid.Subscript) \
@@ -108,7 +97,7 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
         subscript_node = index_node.parent
         return subscript_node.ctx == astroid.Load
 
-    # If Name node is not inside a Subscript node iterable[index]
+    # If Name node is not inside a Subscript node iterable[Name]
     return False
 
 
@@ -119,11 +108,7 @@ def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name],
     The lookup method is used in case the original loop variable is shadowed
     in the for loop's body.
     """
-    if isinstance(index_node, astroid.AssignName):
-        if index_node.lookup(index_node.name)[1] != ():
-            return index_node.lookup(index_node.name)[1][0] != for_node.target and \
-                   not isinstance(index_node.parent, astroid.AugAssign)
-    else:
+    if isinstance(index_node, astroid.Name):
         return _scope_lookup(index_node) != for_node.target \
                or _is_load_subscript(index_node, for_node)
 

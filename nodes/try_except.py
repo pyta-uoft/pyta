@@ -5,26 +5,34 @@ This node is used to represent the try-except statements for handling
 exceptions in Python, which may also include an "else" block.
 
 Attributes:
-    - body      (List[Statement])
+    - body      (list[Statement])
         - The code to be executed under the "try" statement to check for
           any raised exceptions.
-    - handlers  (List[ExceptHandler])
+    - handlers  (list[ExceptHandler])
         - The exceptions to be handled (including the code to handle them)
           if raised by code in the "try" block. (One ExceptHandler per "except"
           block.)
-    - orelse    (List[Statement])
+    - orelse    (list[Statement])
         - Optionally, the code to be executed if the "try" code does not
           raise any exceptions.
 
 Example 1:
-    - body      -> [Pass()]
-    - handlers  -> [ExceptHandler(body=[Pass])]
-    - orelse    -> []
+    TryExcept(
+        body=[Pass()],
+        handlers=[ExceptHandler(
+            type=None,
+            name=None,
+            body=[Pass()])],
+        orelse=[])
 
 Example 2:
-    - body      -> [Pass()]
-    - handlers  -> [ExceptHandler(body=[Pass])]
-    - orelse    -> [Pass()]
+    TryExcept(
+        body=[Pass()],
+        handlers=[ExceptHandler(
+            type=None,
+            name=None,
+            body=[Pass()])],
+        orelse=[Pass()])
 """
 
 # Example 1

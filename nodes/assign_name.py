@@ -4,11 +4,11 @@ AssignName astroid node
 An assignment for a name node that appears in a Store (assignment) context.
 
 Attributes:
-    - name  (Name)
-        - The name node to be assigned.
+    - name  (Optional[str])
+        - The name which is assigned to.
 
 Example:
-    - name  -> Name(id='x')
+    AssignName(name='x')
 """
 
 x = 3

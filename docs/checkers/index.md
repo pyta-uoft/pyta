@@ -312,6 +312,15 @@ for number in [1, 2, 3]:
     print(number)
 ```
 
+### Not a mapping (E1134) [](#E1134)
+
+This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a non-dict with `**` in a function call meaning that the parameters are unfilled. 
+
+`**` can only be used on a `dict` to unpack the values. 
+
+```{literalinclude} /../examples/pylint/E1134_not_a_mapping.py
+```
+
 ## Code complexity
 
 ### Unneeded not (C0113) [](#C0113)
@@ -330,6 +339,36 @@ if number < 0:
     number_category = 'negative'
 else:
     number_category = 'non-negative'
+```
+
+### Simplifiable condition (R1726) [](#R1726)
+
+This error occurs when a boolean test condition can be simplified.
+Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
+
+```{literalinclude} /../examples/pylint/R1726_simplifiable_condition.py
+```
+
+The above can be modified to:
+
+```python
+if a:  # Error was on this line
+  pass
+```
+
+### Condition evals to constant (R1727) [](#R1727)
+
+This error occurs when a boolean test condition always evaluates to a constant.
+Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
+
+```{literalinclude} /../examples/pylint/R1727_condition_evals_to_constant.py
+```
+
+The above can be modified to:
+
+```python
+if True:  # Error was on this line
+  pass
 ```
 
 ### Singleton comparison (C0121) [](#C0121)
@@ -384,6 +423,13 @@ its test. In such a case, a conditional statement is not necessary, as it will a
 same path of execution.
 
 ```{literalinclude} /../examples/pylint/W0125_using_constant_test.py
+```
+
+### Redeclared Assigned Name (W0128) [](#W0128)
+
+This error occurs when a variable is redeclared on the same line it was assigned.
+
+```{literalinclude} /../examples/pylint/W0128_redeclared_assigned_name.py
 ```
 
 ### Too many branches (R0912) [](#R0912)
@@ -449,6 +495,13 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
     return cross_join_list
 ```
 
+### Too many lines (C0302) [](#C0302)
+
+This error occurs when the file has too many lines. The limit for too many lines is specified
+through the `max-module-lines` configuration option. 
+
+**Note**: The default value is `1000`.
+
 ### Too many arguments (R0913) [](#R0913)
 
 The function or method is defined with too many arguments. This is a sign that the function/method
@@ -503,6 +556,14 @@ removed without changing the behaviour of the program.
 ```{literalinclude} /../examples/pylint/W0104_pointless_statement.py
 ```
 
+### Pointless string statement (W0105) [](#W0105)
+
+This error occurs when a string statement does not have any effect.  Very similar to error `W0104`, but 
+for strings.
+
+```{literalinclude} /../examples/pylint/W0105_pointless_string_statement.py
+```
+
 ### Unnecessary pass (W0107) [](#W0107)
 
 This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has
@@ -538,6 +599,19 @@ function body.
 
 In CSC148, you may sometimes choose resolve this error by instead *raising an error* rather than
 returning `None`.
+
+### Consider using with (R1732) [](#R1732)
+
+This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources. 
+
+```{literalinclude} /../examples/pylint/R1732_consider_using_with.py
+```
+
+Corrected version: 
+```python
+with open('my_file.txt', 'r') as file:
+    ... # No need to manually close the file 
+```
 
 ## Documentation and naming
 
@@ -743,6 +817,19 @@ would like to import. For example, if we have a Python file named `math.py`, cal
 from within that file (or from within *any* Python file in the same directory) will import *
 our* `math.py` file, and not the [`math` module] from the standard library.
 
+
+### Cyclic import (R0401) [](#R0401)
+
+A module should not import a file which results in an import of the original module.
+
+Example File 1
+```{literalinclude} /../examples/pylint/R0401_cyclic_import.py
+```
+
+Example File 2
+```{literalinclude} /../examples/pylint/cyclic_import_helper.py
+```
+
 ### Multiple imports (C0410) [](#C0410)
 
 Different modules should not be imported on a single line.
@@ -792,6 +879,13 @@ Imports should be placed at the top of the module, above any other code, but bel
 docstring.
 
 ```{literalinclude} /../examples/pylint/C0413_wrong_import_position.py
+```
+
+### Import outside toplevel (C0415) [](#C0415)
+
+Imports should be placed at the top-level of the module, not inside function or class bodies.
+
+```{literalinclude} /../examples/pylint/C0415_import_outside_toplevel.py
 ```
 
 ### Unused import (W0611) [](#W0611)
@@ -970,6 +1064,22 @@ class Child(Parent):
 - [Super considered super!]
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
+
+### Super with arguments (R1725) [](#R1725)
+
+This error occurs when calling `super()` with the class and instance as these can be ommited from
+Python 3.
+
+```{literalinclude} /../examples/pylint/R1725_super_with_arguments.py
+```
+
+Corrected Version:
+
+```python
+class DummyClass:
+    def __init__(self):
+        super().__init__()  # Error was on this line
+```
 
 ### Attribute defined outside init (W0201) [](#W0201)
 
@@ -1566,7 +1676,7 @@ class ExampleClass:
         self.inst_attr2 = True
 ```
 
-### Pycodestyle errors (E9989) [](#9989)
+### Pycodestyle errors (E9989) [](#E9989)
 
 These errors are based on the Python code style guidelines ("PEP8") published by the Python team.
 These errors do not affect the functionality of your code, but can affect its readability.

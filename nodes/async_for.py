@@ -7,22 +7,21 @@ Subclass of For astroid node. This node iterates over async code with a for-loop
  AsyncFunctionDef astroid node.
 
 Attributes:
-    - target  (Name | Tuple | List)
-        - Holds the variable(s) the loop assigns to as a single node.
-    - iter    (Node)
-        - The single node to be looped over.
-    - body    (List[Node])
-        - The node to be executed.
-    - orelse  (List[Node] | None)
-        - Node will execute if the loop finished normally rather than via a
-        break statement.
+    # Derives directly from "For" node; see "For" node for attributes.
 
- Example:
-     - target  -> AssignName(name='a')
-     - iter    -> Name(name='b')
-     - body    -> [If(test=Compare(left=Name(id='a'), ops=[['>', Const(value=5)]]),
-                   body=[Break()], orelse=[])]
-     - orelse  -> [Continue()]
+Example:
+    AsyncFor(
+        target=AssignName(name='a'),
+        iter=Name(name='b'),
+        body=[
+            If(
+                test=Compare(
+                left=Name(name='a'),
+                ops=[['>', Const(value=5)]]),
+                body=[Break()],
+                orelse=[])],
+        orelse=[Continue()])
+
 """
 
 async def fun():

@@ -15,8 +15,11 @@ Example:
     - Note that 'DictUnpack()' node is the 'key' and the nested dictionary is
       'value' in the [key, value] pair of the outermost Dict node.
 
+This is node is NOT created when passing a dictionary into a function using ** (e.g. f(**x))
+
 Type-checking:
     - To be documented
 """
 
+# Example 1
 {1: 1, **{2: 2}}

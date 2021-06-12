@@ -46,7 +46,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'python_ta = python_ta.script:main'
+            'python_ta = python_ta.__main__:main'
         ],
     },
     python_requires='~=3.8',

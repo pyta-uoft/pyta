@@ -20,13 +20,11 @@ class InvalidForTargetChecker(BaseChecker):
             }
     # this is important so that your checker is executed before others
     priority = -1
-    # pass in message symbol as a parameter of check_messages
 
     INVALID_TARGETS = (astroid.Subscript, astroid.AssignAttr)
 
     @check_messages('invalid-for-target')
     def visit_for(self, node: astroid.For) -> None:
-
         invalid_for_targets = node.target.nodes_of_class(self.INVALID_TARGETS)
         for target in invalid_for_targets:
             self.add_message('invalid-for-target',

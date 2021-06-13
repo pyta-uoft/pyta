@@ -71,31 +71,6 @@ def _get_full_pylint_output(file_paths: List[str]) -> str:
     return output.stdout.decode('UTF-8')
 
 
-def create_checker(test_file, checker_name):
-    """Creates a test function from a test file, and a checker name.
-    test_file: The full path (string) to the file.
-    checker_name: The hyphenated checker name that should be detected.
-    An example of a valid checker_name would be: 'no-init-classes'
-    """
-    # The following are captured when this function is created.
-    def new_test_func():
-        found_pylint_message = False
-        output = subprocess.run(
-            ['pylint', '--reports=n',
-             '--rcfile=python_ta/.pylintrc',
-             test_file],
-            stderr=subprocess.STDOUT,
-            stdout=subprocess.PIPE)
-        for line in output.stdout.decode('utf-8').split('\n'):
-            if checker_name in line:
-                found_pylint_message = True
-                break
-        if not found_pylint_message:
-            print('Failed: ' + test_file)  # test doesn't say which file
-        assert found_pylint_message
-    return new_test_func
-
-
 class TestExamples:
     # Private Attributes:
     #   - _pylint_outputs: mapping of file path to its pylint output

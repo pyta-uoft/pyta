@@ -1,0 +1,8 @@
+[run]
+omit =
+    python_ta/checkers/type_inference_checker.py
+    python_ta/transforms/type_inference_visitor.py
+    python_ta/typecheck/*
+    python_ta/util/*
+    python_ta/upload.py
+    python_ta/utils.py

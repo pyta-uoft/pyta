@@ -1,7 +1,6 @@
 from typing import Dict, List, Set
 
 import os
-import os.path
 import subprocess
 import re
 import pytest

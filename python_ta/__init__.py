@@ -226,7 +226,7 @@ def reset_linter(config=None, file_linted=None):
         'python_ta.checkers.unnecessary_indexing_checker',
         'python_ta.checkers.shadowing_in_comprehension_checker',
         'python_ta.checkers.redundant_assignment_checker',
-        'python_ta.checkers.for_target_subscript_checker'
+        'python_ta.checkers.invalid_for_target_checker'
     ]
 
     # Register new options to a checker here to allow references to

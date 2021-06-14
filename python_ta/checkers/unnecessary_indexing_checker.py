@@ -139,7 +139,6 @@ def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node:
         return _scope_lookup(index_node) != for_node.target or _is_load_subscript(index_node, for_node)
 
 
-
 def _index_name_nodes(index: str, for_node: astroid.For) -> List[Union[astroid.AssignName, astroid.Name]]:
     """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
     return [name_node for name_node in for_node.nodes_of_class((astroid.AssignName, astroid.Name))

@@ -220,7 +220,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         src = """
         def sum_items(items: List[int]) -> int: 
             s = 0
-            for x in lst:
+            for x in items:
                s += x
             return s 
         """
@@ -235,7 +235,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         src = """
         def iter_var_unused(items: List[int]) -> int: 
             s = 0 
-            for i in range(len(lst)):
+            for i in range(len(items)):
                 s += 1 
             return s 
         """

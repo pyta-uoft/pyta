@@ -2,6 +2,7 @@
 """
 from typing import List, Optional, Tuple, Union
 
+import sys
 import astroid
 from astroid.node_classes import NodeNG
 from pylint.checkers import BaseChecker
@@ -87,34 +88,61 @@ def _iterable_if_range(node: NodeNG) -> Optional[str]:
 def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     """Return whether or not <index_node> is used to subscript the iterable of <for_node>
     and the subscript item is being loaded from, e.g., s += iterable[index_node].
+
+    NOTE: Index node is deprecated in Python 3.9
+
+    Returns True if the following conditions are met:
+    (3.9)
+        - The <index_node> Name node is inside of a Subscript node
+        - The item that is being indexed is the iterable of the for loop
+        - The Subscript node is being used in a load context
+    (3.8)
+        - The <index_node> Name node is inside of an Index node
+        - The Index node is inside of a Subscript node
+        - The item that is being indexed is the iterable of the for loop
+        - The Subscript node is being used in a load context
     """
     iterable = _iterable_if_range(for_node.iter)
-    # If the Name node is inside a Subscript node and the subscript is being used in a load context
-    if isinstance(index_node.parent, astroid.Subscript) \
-            and isinstance(index_node.parent.value, astroid.Name) \
-            and index_node.parent.value.name == iterable:
-        # Use ctx attribute to find out what context the subscript is being used in
-        subscript_node = index_node.parent
-        return subscript_node.ctx == astroid.Load
+    version = sys.version[:3]
 
-    # If Name node is not inside a Subscript node iterable[Name]
-    return False
+    if version == '3.9':
+        return (
+                isinstance(index_node.parent, astroid.Subscript) and
+                isinstance(index_node.parent.value, astroid.Name) and
+                index_node.parent.value.name == iterable and
+                index_node.parent.ctx == astroid.Load
+        )
+    else:
+        return (
+                isinstance(index_node.parent, astroid.Index) and
+                isinstance(index_node.parent.parent, astroid.Subscript) and
+                isinstance(index_node.parent.parent.value, astroid.Name) and
+                index_node.parent.parent.value.name == iterable and
+                index_node.parent.parent.ctx == astroid.Load
+        )
 
 
-def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name],
-                  for_node: astroid.For) -> bool:
+def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node: astroid.For) -> bool:
     """Return whether or not <index_node> is redundant in <for_node>.
 
     The lookup method is used in case the original loop variable is shadowed
     in the for loop's body.
     """
-    if isinstance(index_node, astroid.Name):
-        return _scope_lookup(index_node) != for_node.target \
-               or _is_load_subscript(index_node, for_node)
+    if isinstance(index_node, astroid.AssignName):
+        if index_node.lookup(index_node.name)[1] != ():
+            return (
+                index_node.lookup(index_node.name)[1][0] != for_node.target and not
+                isinstance(index_node.parent, astroid.AugAssign) and not
+                isinstance(index_node.parent, astroid.Comprehension)
+            )
+    else:
+        return (
+            _scope_lookup(index_node) != for_node.target or
+            _is_load_subscript(index_node, for_node)
+        )
 
 
-def _index_name_nodes(index: str, for_node: astroid.For) -> List[
-    Union[astroid.AssignName, astroid.Name]]:
+def _index_name_nodes(index: str, for_node: astroid.For) -> List[Union[astroid.AssignName, astroid.Name]]:
     """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
     return [name_node for name_node in for_node.nodes_of_class((astroid.AssignName, astroid.Name))
             if name_node.name == index and name_node != for_node.target]

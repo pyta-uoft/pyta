@@ -14,7 +14,7 @@ class PycodestyleChecker(BaseChecker):
                  'type': 'csv',
                  'metavar': '<pycodestyle-ignore>',
                  'help': 'List of Pycodestyle errors to ignore'}
-                )
+                ),
                )
 
     # this is important so that your checker is executed before others
@@ -23,7 +23,7 @@ class PycodestyleChecker(BaseChecker):
     def process_module(self, node):
         style_guide = pycodestyle.StyleGuide(paths=[node.stream().name],
                                              reporter=JSONReport,
-                                             ignore=self.linter.config.pycodestyle_ignored_tests)
+                                             ignore=self.config.pycodestyle_ignore)
         report = style_guide.check_files()
 
         for line_num, msg in report.get_file_results():

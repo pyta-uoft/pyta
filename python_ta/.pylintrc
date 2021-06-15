@@ -5,7 +5,7 @@
 # Default max amount of messages for reporter to display.
 pyta-number-of-messages = 5
 
-# Set whether to use the pycodestyle type-checking checkers.
+# Set whether to use the type-checking checker.
 pyta-type-check = no
 
 # Set the output format. Available pyta formats are: ColorReporter,

@@ -4,8 +4,8 @@
 ## Motivation and Context
 
 <!-- Why is this pull request required? What problem does it solve? -->
-<!--- If it fixes an open issue, please link to the issue here: -->
-<!--- https://docs.github.com/en/github/managing-your-work-on-github/managing-your-work-with-issues-and-pull-requests/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword -->
+<!-- If it fixes an open issue, please link to the issue here: -->
+<!-- https://docs.github.com/en/github/managing-your-work-on-github/managing-your-work-with-issues-and-pull-requests/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword -->
 
 ## Your Changes
 

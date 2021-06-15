@@ -5,10 +5,11 @@ import subprocess
 import re
 import pytest
 import json
+import itertools
 
 
 _EXAMPLES_PATH = 'examples/pylint/'
-_EXAMPLE_PREFIX_REGEX = '[CEFRW]\d{4}'
+_EXAMPLE_PREFIX_REGEX = r'[CEFRW]\d{4}'
 
 
 # The following tests appear to always fail (further investigation needed).
@@ -36,7 +37,10 @@ def get_file_paths():
     return test_files
 
 
-def _get_full_pylint_json_output() -> List[Dict]:
+@pytest.fixture(scope='session', autouse=True)
+def symbols_by_file() -> Dict[str, Set[str]]:
+    """Run pylint on all the example files and return the map of file name to the
+    set of Pylint messages it raises."""
     output = subprocess.run(
         ['pylint', '--reports=n',
          '--rcfile=python_ta/.pylintrc',
@@ -46,50 +50,20 @@ def _get_full_pylint_json_output() -> List[Dict]:
         stdout=subprocess.PIPE)
 
     jsons_output = output.stdout.decode('UTF-8')
-    jsons_output = _strip_trailing_asni(jsons_output)
-    return json.loads(jsons_output)
+    pylint_list_output = json.loads(jsons_output)
 
+    file_to_symbol = {}
+    for path, group in itertools.groupby(pylint_list_output, key=lambda d: d['path']):
+        symbols = {message['symbol'] for message in group}
+        file = os.path.basename(path)
 
-def _strip_trailing_asni(str_to_strip: str) -> str:
-    """Return the string stripped to the final ']'
+        file_to_symbol[file] = symbols
 
-    Running Pytest from a Python Console produces a trailing ANSI '\x1b[0m' code whereas
-    the CLI Pytest does not.
-    """
-    trailing_token = str_to_strip.split(']')[-1]
-    return str_to_strip[:-len(trailing_token)]
-
-
-def _compile_message_symbols_per_file(pylint_output_list: List[Dict]) -> Dict[str, Set[str]]:
-    """Return a dict mapping file name to the set of Pylint message symbols it raises.
-
-    The file name is the basename, not the full or relative path
-    (this is to avoid being unable to access a value because of \\ and / paths)
-    """
-    symbols_by_file = {}
-
-    for pylint_message_data in pylint_output_list:
-        file_name = os.path.basename(pylint_message_data['path'])
-        symbol = pylint_message_data['symbol']
-
-        if file_name not in symbols_by_file:
-            symbols_by_file[file_name] = set()
-
-        symbols_by_file[file_name].add(symbol)
-
-    return symbols_by_file
-
-
-@pytest.fixture(scope='session', autouse=True)
-def symbols_by_file() -> Dict[str, Set[str]]:
-    """Run pylint on all the example files return the map of file name to the
-    set of Pylint messages it raises."""
-    pylint_list_output = _get_full_pylint_json_output()
-    return _compile_message_symbols_per_file(pylint_list_output)
+    return file_to_symbol
 
 
 @pytest.mark.parametrize("test_file", get_file_paths())
-def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]):
+def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) -> None:
     """Creates all the new unit tests dynamically from the testing directory."""
     base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
@@ -104,4 +78,4 @@ def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]):
     found_pylint_message = checker_name in file_symbols
     if not found_pylint_message:
         print('Failed: ' + test_file)  # test doesn't say which file
-    assert found_pylint_message
+    assert found_pylint_message, f'Failed {test_file}. File does not add expected message.'

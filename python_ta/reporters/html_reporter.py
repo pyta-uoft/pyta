@@ -1,7 +1,9 @@
 import os
 import webbrowser
 from collections import defaultdict, namedtuple
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
+import six
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from base64 import b64encode
@@ -13,6 +15,7 @@ from pygments.formatters import HtmlFormatter
 from .color_reporter import ColorReporter
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+
 
 class HTMLReporter(ColorReporter):
     _COLOURING = {'black': '<span class="black">',
@@ -62,8 +65,8 @@ class HTMLReporter(ColorReporter):
 
         MessageSet = namedtuple('MessageSet', 'filename code style')
         append_set = MessageSet(filename=self.filename_to_display(self.current_file_linted),
-                               code=self._messages_shown(self._sorted_error_messages),
-                               style=self._messages_shown(self._sorted_style_messages))
+                                code=self._messages_shown(self._sorted_error_messages),
+                                style=self._messages_shown(self._sorted_style_messages))
         self.messages_by_file.append(append_set)
 
     def output_blob(self):
@@ -84,21 +87,67 @@ class HTMLReporter(ColorReporter):
         # Date/time (24 hour time) format:
         # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
         dt = str(datetime.now().strftime('%a. %b. %d %Y, %I:%M:%S %p'))
+
+        # Render the jinja template
+        rendered_template = template.render(date_time=dt,
+                                            # pyta_logo=pyta_logo_base64_encoded,
+                                            reporter=self)
+        if False:
+            self._write_html_to_file(rendered_template)
+        else:
+            self._open_html_in_browser(rendered_template)
+
+    def _write_html_to_file(self, rendered_template):
         output_path = os.path.join(os.getcwd(), self.linter.config.pyta_output_file)
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(template.render(date_time=dt,
-                                    # pyta_logo=pyta_logo_base64_encoded,
-                                    reporter=self))
-        print('Opening your report in a browser...')
-        output_url = 'file:///{}'.format(output_path)
-        webbrowser.open(output_url, new=2)
+            f.write(rendered_template)
+
+    def _open_html_in_browser(html, using=None, new=0, autoraise=True):
+        """
+        Display html in a web browser without creating a temp file.
+        Instantiates a trivial http server and uses the webbrowser module to
+        open a URL to retrieve html from that server.
+        Parameters
+        ----------
+        html: str
+            HTML string to display
+        using, new, autoraise:
+            See docstrings in webbrowser.get and webbrowser.open
+        """
+        if isinstance(html, six.string_types):
+            html = html.encode("utf8")
+
+        class OneShotRequestHandler(BaseHTTPRequestHandler):
+            """ TESTING TO SEE IF USING A MODIFIED PLOTLY WAY WORKS. """
+
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+
+                bufferSize = 1024 * 1024
+                for i in range(0, len(html), bufferSize):
+                    self.wfile.write(html[i: i + bufferSize])
+
+            def log_message(self, format, *args):
+                # Silence stderr logging
+                pass
+
+        server = HTTPServer(("127.0.0.1", 0), OneShotRequestHandler)
+        chrome_path = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+        webbrowser.register(name='chrome', klass=None, instance=webbrowser.BackgroundBrowser(chrome_path))
+        webbrowser.get('chrome').open(
+            "http://127.0.0.1:%s" % server.server_port, new=new, autoraise=autoraise
+        )
+
+        server.handle_request()
 
     @classmethod
     def _vendor_wrap(self, colour_class, text):
         """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
         if '-line' not in colour_class:
             text = highlight(text, PythonLexer(),
-                            HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-'))
+                             HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-'))
         return text
 
     _display = None

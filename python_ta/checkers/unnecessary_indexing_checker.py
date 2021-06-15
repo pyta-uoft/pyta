@@ -103,9 +103,8 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
         - The Subscript node is being used in a load context
     """
     iterable = _iterable_if_range(for_node.iter)
-    version = sys.version[:3]
 
-    if version == '3.9':
+    if sys.version_info >= (3, 9):
         return (
                 isinstance(index_node.parent, astroid.Subscript) and
                 isinstance(index_node.parent.value, astroid.Name) and

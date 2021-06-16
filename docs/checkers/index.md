@@ -1036,7 +1036,7 @@ class.
 When using inheritance, we should call the `__init__` method of the parent class and not of some
 unrelated class.
 
-```{literalinclude} /../examples/pylint/W0233_non_parent_init.py
+```{literalinclude} /../examples/pylint/W0233_non_parent_init_called.py
 ```
 
 To fix this, call the `__init__` method of the parent class.

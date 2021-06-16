@@ -1,4 +1,4 @@
-from typing import Dict, List, Set
+from typing import Dict, Set
 
 import os
 import subprocess
@@ -20,7 +20,7 @@ IGNORED_TESTS = [
     'W0631_undefined_loop_variable.py',
     'W1503_redundant_unittest_assert.py',
     'E1140_unhashable_dict_key.py',
-    'R0401_cyclic_import.py'
+    'R0401_cyclic_import.py'  # R0401 required an additional unit test but should be kept here.
 ]
 
 
@@ -76,6 +76,34 @@ def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) ->
     file_symbols = symbols_by_file[test_file_name]
 
     found_pylint_message = checker_name in file_symbols
-    if not found_pylint_message:
-        print('Failed: ' + test_file)  # test doesn't say which file
     assert found_pylint_message, f'Failed {test_file}. File does not add expected message.'
+
+
+def test_cyclic_import() -> None:
+    """Test that examples/pylint/R0401_cyclic_import adds R0401 cyclic-import.
+
+    Reason for creating a separate test:
+    This test is separate as pylint adds the R0401 message to the final module within
+    the batch of given modules, not to the R0401_cyclic_import or cyclic_import_helper.
+    It is unintuitive to force R0401_cyclic_import to be the final batched module so that
+    the parametrized test suite passes, so cyclic-import is ignored in the paramterized suite
+    and this additional test is created on the side.
+    """
+
+    cyclic_import_helper = 'examples/pylint/cyclic_import_helper.py'
+    cyclic_import_file = 'examples/pylint/R0401_cyclic_import.py'
+
+    output = subprocess.run(
+        ['pylint', '--reports=n',
+         '--rcfile=python_ta/.pylintrc',
+         '--output-format=json',
+         *[cyclic_import_helper, cyclic_import_file]],
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE)
+
+    jsons_output = output.stdout.decode('UTF-8')
+    pylint_list_output = json.loads(jsons_output)
+
+    found_cyclic_import = any(message['symbol'] == 'cyclic-import'
+                              for message in pylint_list_output)
+    assert found_cyclic_import, f'Failed {cyclic_import_file}. File does not add expected message.'

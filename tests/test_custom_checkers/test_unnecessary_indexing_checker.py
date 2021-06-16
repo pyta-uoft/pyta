@@ -245,6 +245,54 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
+    def test_comp_shadow_no_msg(self):
+        """Iteration variable i is shadowed in the comprehension but not redundant"""
+        src = """
+        def f(lst):
+            s = 0
+            for i in range(len(lst)):
+                lst = [i for i in range(i)]
+                for x in lst:
+                    s += x
+            return s
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(astroid.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_assignname1_no_msg(self):
+        """Iteration variable reassigned and used to increment
+
+        Indexing the iterable is not the only usage
+        """
+        src = """
+        s = 0 
+        for i in range(len(lst)):
+            i = 0 
+            s += i 
+            print(items[i])
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(astroid.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_assignname2_no_msg(self):
+        """Iteration variable incremented each iteration but unused
+        """
+        src = """
+        for i in range(len(lst)): 
+            i += 10
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(astroid.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
 
 if __name__ == "__main__":
     import pytest

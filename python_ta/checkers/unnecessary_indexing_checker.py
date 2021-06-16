@@ -128,12 +128,14 @@ def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node:
     in the for loop's body.
     """
     if isinstance(index_node, astroid.AssignName):
-        if index_node.lookup(index_node.name)[1] != ():
+        previous_context = index_node.lookup(index_node.name)
+        if previous_context[1] != ():
             return (
-                index_node.lookup(index_node.name)[1][0] != for_node.target and not
-                isinstance(index_node.parent, astroid.AugAssign) and not
-                isinstance(index_node.parent, astroid.Comprehension)
+                    previous_context[1][0] != for_node.target
+                    and previous_context[0] is for_node.scope()
             )
+        else:
+            return False
     else:
         return _scope_lookup(index_node) != for_node.target or _is_load_subscript(index_node, for_node)
 

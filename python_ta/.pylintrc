@@ -17,7 +17,8 @@ pyta-reporter = HTMLReporter
 # Set the location of the template for HTMLreporter.
 pyta-template-file = template.html
 
-# Set the output file name for HTMLreporter.
+# Set whether or not to use an output file and the output file name for HTMLreporter.
+pyta-save-html-report = no
 pyta-output-file = pyta_report.html
 
 #Set whether you wish to opt-in to anonymous data collection of errors reported when you run PyTA.

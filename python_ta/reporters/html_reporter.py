@@ -89,20 +89,19 @@ class HTMLReporter(ColorReporter):
         dt = str(datetime.now().strftime('%a. %b. %d %Y, %I:%M:%S %p'))
 
         # Render the jinja template
-        rendered_template = template.render(date_time=dt,
-                                            # pyta_logo=pyta_logo_base64_encoded,
-                                            reporter=self)
-        if False:
+        rendered_template = template.render(date_time=dt, reporter=self)
+
+        if self.linter.config.pyta_save_html_report:
             self._write_html_to_file(rendered_template)
         else:
-            self._open_html_in_browser(rendered_template)
+            self._open_html_in_browser(rendered_template.encode('utf8'))
 
     def _write_html_to_file(self, rendered_template):
         output_path = os.path.join(os.getcwd(), self.linter.config.pyta_output_file)
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(rendered_template)
 
-    def _open_html_in_browser(html, using=None, new=0, autoraise=True):
+    def _open_html_in_browser(self, html, new=0, autoraise=True):
         """
         Display html in a web browser without creating a temp file.
         Instantiates a trivial http server and uses the webbrowser module to
@@ -111,35 +110,21 @@ class HTMLReporter(ColorReporter):
         ----------
         html: str
             HTML string to display
-        using, new, autoraise:
-            See docstrings in webbrowser.get and webbrowser.open
         """
-        if isinstance(html, six.string_types):
-            html = html.encode("utf8")
 
         class OneShotRequestHandler(BaseHTTPRequestHandler):
-            """ TESTING TO SEE IF USING A MODIFIED PLOTLY WAY WORKS. """
-
             def do_GET(self):
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
 
-                bufferSize = 1024 * 1024
-                for i in range(0, len(html), bufferSize):
-                    self.wfile.write(html[i: i + bufferSize])
+                buffer_size = 1024 * 1024
+                for i in range(0, len(html), buffer_size):
+                    self.wfile.write(html[i: i + buffer_size])
 
-            def log_message(self, format, *args):
-                # Silence stderr logging
-                pass
-
-        server = HTTPServer(("127.0.0.1", 0), OneShotRequestHandler)
-        chrome_path = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-        webbrowser.register(name='chrome', klass=None, instance=webbrowser.BackgroundBrowser(chrome_path))
-        webbrowser.get('chrome').open(
-            "http://127.0.0.1:%s" % server.server_port, new=new, autoraise=autoraise
-        )
-
+        # Hard coded on port 2021
+        server = HTTPServer(('127.0.0.1', 2021), OneShotRequestHandler)
+        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=new, autoraise=autoraise)
         server.handle_request()
 
     @classmethod

@@ -4,28 +4,48 @@ Call astroid node
 A function call.
 
 Attributes:
-    - func      (Name | Attribute)
-        - The function.
-    - args      (List[Node])
+    - args      (Optional[list[NodeNG]])
         - List of the arguments passed by position.
-    - keywords  (List[Keyword] | None)
+    - func      (Optional[Name | Attribute])
+        - The function being called.
+    - keywords  (Optional[list[NodeNG]])
         - List of keyword objects representing arguments passed by keyword.
           If None, keywords is an empty list.
+    - kwargs    (list[Keyword])
+        - The keyword arguments that unpack something.
+    - starargs  (list[Starred])
+        - The positional arguments that unpack something.
 
 Example 1:
-    - func      -> Name(name='ord')
-    - args      -> Name(name='c')
-    - keywords  -> []
+    Call(
+        func=Name(name='ord'),
+        args=[Name(name='c')],
+        keywords=None)
 
 Example 2:
-    - func      -> Name(name='func')
-    - args      -> [Name(name='a')]
-    - keywords  -> [keyword(arg='b', value=Name(id='c'))]
+    Call(
+        func=Name(name='func'),
+        args=[
+            Name(name='a'),
+            Starred(
+                ctx=<Context.Load: 1>,
+                value=Name(name='d'))],
+        keywords=[
+            Keyword(
+                arg='b',
+                value=Name(name='c')),
+                Keyword(
+                    arg=None,
+                    value=Name(name='e'))])
+
 
 Example 3:
-    -func       -> Attribute(expr=Name(name='self'), attrname='method')
-    -args       -> Name(name='x')
-    -keywords   -> []
+    Call(
+        func=Attribute(
+            attrname='method',
+            expr=Name(name='self')),
+        args=[Name(name='x')],
+        keywords=None)
 
 Type-checking:
     The type of func must be a function type; the argument types are matched with the parameter types

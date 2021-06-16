@@ -410,6 +410,23 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
             self.checker.visit_name(name_node_x)
+    
+    def test_with_dict_comprehension(self):
+        src = """
+        def func(lst):
+            test = {key:val for key, val in lst}
+            key = 0
+            print(key)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        # expression `key` at line `test = ...`
+        name_node_key = next(func_node.nodes_of_class(astroid.Name))
+
+        self.checker.visit_functiondef(func_node)
+        with self.assertNoMessages():
+            self.checker.visit_name(name_node_key)
 
     def test_assign(self):
         src = """

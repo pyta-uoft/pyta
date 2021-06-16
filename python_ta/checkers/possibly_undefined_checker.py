@@ -127,7 +127,11 @@ class PossiblyUndefinedChecker(BaseChecker):
         elif isinstance(statement, (astroid.ListComp, astroid.SetComp, astroid.DictComp, astroid.GeneratorExp)):
             # Comprehension targets are assigned before expression is evaluated.
             yield from multiple_nodes(statement.generators)  # statement.generators is a list of nodes
-            yield from self.get_nodes(statement.elt)
+            if not hasattr(statement, 'elt'):
+                yield from self.get_nodes(statement.key) # keys evaluated first
+                yield from self.get_nodes(statement.value)
+            else:
+                yield from self.get_nodes(statement.elt)
         else:
             yield from statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name),
                                                 astroid.FunctionDef)

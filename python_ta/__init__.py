@@ -166,7 +166,7 @@ def reset_linter(config=None, file_linted=None):
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
-    # Tuple of custom options. See 'type' in pylint/config.py `VALIDATORS` dict.
+    # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
         ('pyta-reporter',
             {'default': 'ColorReporter',
@@ -226,7 +226,7 @@ def reset_linter(config=None, file_linted=None):
         'python_ta.checkers.unnecessary_indexing_checker',
         'python_ta.checkers.shadowing_in_comprehension_checker',
         'python_ta.checkers.redundant_assignment_checker',
-        'python_ta.checkers.for_target_subscript_checker'
+        'python_ta.checkers.invalid_for_target_checker'
     ]
 
     # Register new options to a checker here to allow references to

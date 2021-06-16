@@ -1,5 +1,5 @@
 """
-Index astroid node
+Index astroid node (removed: replaced by Subscript)
 
 This node represents simple subscripting with a single value.
 
@@ -8,13 +8,13 @@ Attributes:
         - The Expr node can be Const, UnaryOp, BinOp, etc.
 
 Example 1:
-    - value  -> Const(0)
+    Index(value=Const(0))
 
 Example 2:
-    - value -> UnaryOp(-1)
+    Index(value=UnaryOp(-1))
 
 Example 3:
-    - value -> BinOp(1, 2)
+    Index(value=BinOp(1, 2))
 
 Type-checking:
     Index nodes take the same type as their value.

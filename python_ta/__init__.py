@@ -73,7 +73,7 @@ def _check(module_name='', level='all', local_config='', output=None):
       - no argument -- checks the python file containing the function call.
     `level` is used to specify which checks should be made.
     `local_config` is a dict of config options or string (config file name).
-    `output` is an absolute path to capture pyta data output. Default std out.
+    `output` is an absolute or relative path to capture pyta data output. Default std out.
     """
 
     # Add reporters to an internal pylint data structure, for use with setting

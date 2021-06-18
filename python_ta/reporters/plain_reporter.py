@@ -186,7 +186,7 @@ class PlainReporter(BaseReporter):
             try:
                 output_stream = open(self._output_filepath, 'a')
             except FileNotFoundError:
-                raise IOError('path {} does not exist.'.format(output_filepath_arg))
+                raise IOError('path {} does not exist.'.format(self._output_filepath))
         print(self.filename_to_display(self.current_file_linted), file=output_stream)
         print(result, file=output_stream)
         if self._output_filepath:

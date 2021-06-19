@@ -11,6 +11,9 @@ class Employee:
     - self.wage >= 15
     """
 
+    name: str
+    wage: float
+
     def __init__(self, name, wage):
         self.name = name
         self.wage = wage
@@ -30,6 +33,8 @@ class Developer(Employee):
     - self.preferred_language == "Python" or self.preferred_language == "Java"
     """
 
+    preferred_language: str
+
     def __init__(self, name, wage, preferred_language):
         Employee.__init__(self, name, wage)
         self.preferred_language = preferred_language
@@ -42,6 +47,8 @@ class TeamMember:
     Representation Invariants:
     - len(self.team) > 0
     """
+
+    team: str
 
     def __init__(self, team):
         self.team = team

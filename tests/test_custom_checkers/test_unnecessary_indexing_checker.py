@@ -265,8 +265,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_assignname1_no_msg(self):
         """Iteration variable reassigned and used to increment
 
-        Indexing the iterable is not the only usage
-        """
+        Indexing the iterable is not the only usage"""
         src = """
         s = 0 
         for i in range(len(lst)):
@@ -281,11 +280,24 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_assignname2_no_msg(self):
-        """Iteration variable incremented each iteration but unused
-        """
+        """Iteration variable incremented each iteration but unused"""
         src = """
         for i in range(len(lst)): 
             i += 10
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(astroid.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
+    def test_augassign_no_msg(self):
+        """The list is indexed every iteration but the value is being incremented
+
+        Subscript is being used in a store context, so it is not redundant"""
+        src = """
+        for i in range(len(lst)): 
+            lst[i] += 1
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(astroid.For)

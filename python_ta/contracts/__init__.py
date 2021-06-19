@@ -154,8 +154,10 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
             klass_mod = sys.modules.get(type(instance).__module__)
             if klass_mod is not None:
                 _check_invariants(instance, rep_invariants, klass_mod.__dict__)
-            class_of_method = _get_context_class(instance, wrapped)
-            _check_class_type_annotations(class_of_method, instance)
+            is_overriden_method = (wrapped.__qualname__ !=
+                                   getattr(instance, wrapped.__name__).__qualname__)
+            if not is_overriden_method:
+                _check_class_type_annotations(instance)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
@@ -164,24 +166,10 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
     return wrapper(wrapped)
 
 
-def _get_context_class(instance, method) -> Optional[type]:
-    """Return the class of instance's class hierarchy that method was defined in
-
-    Return None if method is a bound method
-    """
-    for cls in instance.__class__.mro():
-        method_name = method.__name__
-        if (method_name in cls.__dict__ and
-                cls.__dict__[method_name].__qualname__ == method.__qualname__):
-            return cls
-    else:
-        return None
-
-
-def _check_class_type_annotations(klass: type, instance: Any) -> None:
+def _check_class_type_annotations(instance: Any) -> None:
     """Check that the type annotations for the class still hold.
     """
-    assert isinstance(instance, klass)
+    klass = instance.__class__
     cls_annotations = typing.get_type_hints(klass)
 
     for attr, annotation in cls_annotations.items():

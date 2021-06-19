@@ -1036,7 +1036,7 @@ class.
 When using inheritance, we should call the `__init__` method of the parent class and not of some
 unrelated class.
 
-```{literalinclude} /../examples/pylint/W0233_non_parent_init.py
+```{literalinclude} /../examples/pylint/W0233_non_parent_init_called.py
 ```
 
 To fix this, call the `__init__` method of the parent class.
@@ -1539,23 +1539,6 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
     """
     for i in range(len(lst1)):
         print(lst1[i] + lst2[i])
-```
-
-
-**Note**:
-If the iteration variable of a for loop is shadowed by the iteration variable inside a list
-comprehension, this checker may not work properly and report a false error.
-
-Example:
-
-```python
-def f(lst):
-    s = 0
-    for i in range(len(lst)):  # Checker will detect an error on this line even though there is none.
-        lst = [i for i in range(i)]
-        for x in lst:
-            s += x
-    return s
 ```
 
 ### For Target Subscript (E9984) [](#E9984)

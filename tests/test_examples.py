@@ -1,12 +1,15 @@
+from typing import Dict, Set
+
 import os
-import os.path
 import subprocess
 import re
 import pytest
+import json
+import itertools
 
 
 _EXAMPLES_PATH = 'examples/pylint/'
-_EXAMPLE_PREFIX_REGEX = '[CEFRW]\d{4}'
+_EXAMPLE_PREFIX_REGEX = r'[CEFRW]\d{4}'
 
 
 # The following tests appear to always fail (further investigation needed).
@@ -17,7 +20,7 @@ IGNORED_TESTS = [
     'W0631_undefined_loop_variable.py',
     'W1503_redundant_unittest_assert.py',
     'E1140_unhashable_dict_key.py',
-    'R0401_cyclic_import.py'
+    'R0401_cyclic_import.py'  # R0401 required an additional unit test but should be kept here.
 ]
 
 
@@ -34,33 +37,33 @@ def get_file_paths():
     return test_files
 
 
-def create_checker(test_file, checker_name):
-    """Creates a test function from a test file, and a checker name.
-    test_file: The full path (string) to the file.
-    checker_name: The hyphenated checker name that should be detected.
-    An example of a valid checker_name would be: 'no-init-classes'
-    """
-    # The following are captured when this function is created.
-    def new_test_func():
-        found_pylint_message = False
-        output = subprocess.run(
-            ['pylint', '--reports=n',
-             '--rcfile=python_ta/.pylintrc',
-             test_file],
-            stderr=subprocess.STDOUT,
-            stdout=subprocess.PIPE)
-        for line in output.stdout.decode('utf-8').split('\n'):
-            if checker_name in line:
-                found_pylint_message = True
-                break
-        if not found_pylint_message:
-            print('Failed: ' + test_file)  # test doesn't say which file
-        assert found_pylint_message
-    return new_test_func
+@pytest.fixture(scope='session', autouse=True)
+def symbols_by_file() -> Dict[str, Set[str]]:
+    """Run pylint on all the example files and return the map of file name to the
+    set of Pylint messages it raises."""
+    output = subprocess.run(
+        ['pylint', '--reports=n',
+         '--rcfile=python_ta/.pylintrc',
+         '--output-format=json',
+         *get_file_paths()],
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE)
+
+    jsons_output = output.stdout.decode('UTF-8')
+    pylint_list_output = json.loads(jsons_output)
+
+    file_to_symbol = {}
+    for path, group in itertools.groupby(pylint_list_output, key=lambda d: d['path']):
+        symbols = {message['symbol'] for message in group}
+        file = os.path.basename(path)
+
+        file_to_symbol[file] = symbols
+
+    return file_to_symbol
 
 
 @pytest.mark.parametrize("test_file", get_file_paths())
-def test_examples_files(test_file):
+def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) -> None:
     """Creates all the new unit tests dynamically from the testing directory."""
     base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
@@ -68,5 +71,39 @@ def test_examples_files(test_file):
     if not base_name.lower().endswith('.py'):
         assert False
     checker_name = base_name[6:-3].replace('_', '-')  # Take off prefix and file extension.
-    test_function = create_checker(test_file, checker_name)
-    test_function()
+
+    test_file_name = os.path.basename(test_file)
+    file_symbols = symbols_by_file[test_file_name]
+
+    found_pylint_message = checker_name in file_symbols
+    assert found_pylint_message, f'Failed {test_file}. File does not add expected message.'
+
+
+def test_cyclic_import() -> None:
+    """Test that examples/pylint/R0401_cyclic_import adds R0401 cyclic-import.
+
+    Reason for creating a separate test:
+    This test is separate as pylint adds the R0401 message to the final module within
+    the batch of given modules, not to the R0401_cyclic_import or cyclic_import_helper.
+    It is unintuitive to force R0401_cyclic_import to be the final batched module so that
+    the parametrized test suite passes, so cyclic-import is ignored in the paramterized suite
+    and this additional test is created on the side.
+    """
+
+    cyclic_import_helper = 'examples/pylint/cyclic_import_helper.py'
+    cyclic_import_file = 'examples/pylint/R0401_cyclic_import.py'
+
+    output = subprocess.run(
+        ['pylint', '--reports=n',
+         '--rcfile=python_ta/.pylintrc',
+         '--output-format=json',
+         *[cyclic_import_helper, cyclic_import_file]],
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE)
+
+    jsons_output = output.stdout.decode('UTF-8')
+    pylint_list_output = json.loads(jsons_output)
+
+    found_cyclic_import = any(message['symbol'] == 'cyclic-import'
+                              for message in pylint_list_output)
+    assert found_cyclic_import, f'Failed {cyclic_import_file}. File does not add expected message.'

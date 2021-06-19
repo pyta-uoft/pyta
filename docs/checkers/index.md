@@ -1541,23 +1541,6 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
         print(lst1[i] + lst2[i])
 ```
 
-
-**Note**:
-If the iteration variable of a for loop is shadowed by the iteration variable inside a list
-comprehension, this checker may not work properly and report a false error.
-
-Example:
-
-```python
-def f(lst):
-    s = 0
-    for i in range(len(lst)):  # Checker will detect an error on this line even though there is none.
-        lst = [i for i in range(i)]
-        for x in lst:
-            s += x
-    return s
-```
-
 ### For Target Subscript (E9984) [](#E9984)
 
 This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the

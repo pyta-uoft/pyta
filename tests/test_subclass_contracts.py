@@ -38,6 +38,38 @@ class Developer(Employee):
         self.preferred_language = preferred_language
 
 
+class Teacher(Employee):
+    """
+    Represents a restaurant teacher
+
+    Representation Invariants:
+    - self.wage == self.wage_per_class * len(self.currently_teaching)
+    """
+    currently_teaching: list[str]
+    wage_per_class: float
+
+    def __init__(self, name, wage_per_class, currently_teaching):
+        Employee.__init__(self, name, wage_per_class * len(currently_teaching))
+        self.wage_per_class = wage_per_class
+        self.currently_teaching = currently_teaching
+
+    def teach_new_classes(self, currently_teaching):
+        """
+        Return when all temporarily violations are remedied.
+        """
+        # temporary violation of Teacher rep invariant (if before/after lengths are different)
+        self.currently_teaching = currently_teaching
+
+        # amending violation
+        self.change_wages(self.wage_per_class * len(currently_teaching))
+
+    def update_wage_per_class(self, wage_per_class):
+        """
+        Return when Teacher's representation invariant is still violate
+        """
+        self.wage_per_class = wage_per_class
+
+
 class TeamMember:
     """
     Represents a person on a team
@@ -76,6 +108,11 @@ def developer():
 @pytest.fixture
 def teamlead():
     return TeamLead("David", 50, "Python", "PyTA")
+
+
+@pytest.fixture
+def pe_bio_teacher():
+    return Teacher("Jewel", 25, ["P.E.", "Biology"])
 
 
 def test_change_developer_wage_lower(developer) -> None:
@@ -132,3 +169,35 @@ def test_change_teamlead_team_invalid(teamlead):
         teamlead.team = ''
     msg = str(excinfo.value)
     assert 'len(self.team) > 0' in msg
+
+
+def test_teacher_rep_violatable(pe_bio_teacher):
+    """
+    Check that the Teacher representation invariant is working properly. Expect an exception.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        pe_bio_teacher.wage_per_class = 100
+    msg = str(excinfo.value)
+    assert 'self.wage == self.wage_per_class * len(self.currently_teaching)' in msg
+
+
+def test_method_violates_class_invariant(pe_bio_teacher):
+    """
+    Call an instance method that violates a rep invariant without fixing it before returning.
+    Expects an exception.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        pe_bio_teacher.update_wage_per_class(100)
+    msg = str(excinfo.value)
+    assert 'self.wage == self.wage_per_class * len(self.currently_teaching)' in msg
+
+
+def test_call_super_when_temp_invalid(pe_bio_teacher):
+    """
+    Call an instance method that temporarily violates a rep invariant when calling a method
+    defined in a super class but later remedies the violation. Expects no exception.
+    """
+    pe_bio_teacher.teach_new_classes(["Computer Science", "Video Production", "Life Science"])
+    assert len(pe_bio_teacher.currently_teaching) == 3
+    assert (pe_bio_teacher.wage ==
+            pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))

@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 from python_ta.contracts import check_all_contracts
 
@@ -45,7 +47,7 @@ class Teacher(Employee):
     Representation Invariants:
     - self.wage == self.wage_per_class * len(self.currently_teaching)
     """
-    currently_teaching: list[str]
+    currently_teaching: List[str]
     wage_per_class: float
 
     def __init__(self, name, wage_per_class, currently_teaching):

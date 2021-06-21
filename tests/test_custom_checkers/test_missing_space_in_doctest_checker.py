@@ -25,8 +25,8 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='missing-space-in-doctest',
-                    node=function_node.body,
-                    args=...
+                    node=function_node,
+                    args=function_node.name
                 )
         ):
             self.checker.visit_functiondef(function_node)
@@ -66,8 +66,8 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='missing-space-in-doctest',
-                    node=function_node.body,
-                    args=...
+                    node=function_node,
+                    args=function_node.name
                 )
         ):
             self.checker.visit_functiondef(function_node)
@@ -90,10 +90,50 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
                 pylint.testutils.Message(
                     msg_id='missing-space-in-doctest',
-                    node=function_node.body,
-                    args=...
+                    node=function_node,
+                    args=function_node.name
                 )
         ):
+            self.checker.visit_functiondef(function_node)
+
+    def test_empty_docstring(self) -> None:
+        """Test the checker on a function with an empty docstring so it does not
+        raise an error"""
+        src = '''
+           def f(x: int) -> int:
+               """
+               """
+           '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(function_node)
+
+    def test_no_docstring(self) -> None:
+        """Test the checker on a function with no docstring so it does not
+        raise an error"""
+        src = '''
+           def f(x: int) -> int:
+                pass
+           '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(function_node)
+
+    def test_no_doctests(self) -> None:
+        """Test the checker on a function with no doctests in the docstring"""
+        src = '''
+           def f(x: int) -> int:
+               """Return one plus x.
+               """
+           '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+
+        with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
 
 

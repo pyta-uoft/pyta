@@ -93,17 +93,18 @@ def add_class_invariants(klass: type) -> None:
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
                 try:
-                    _check_invariants(self, rep_invariants, klass_mod.__dict__)
+                    _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
                     raise AssertionError(str(e)) from None
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):
-            if isinstance(value, (staticmethod, classmethod)):
+            if isinstance(value, (staticmethod, classmethod)) or rep_invariants is None:
                 # Don't check rep invariants for staticmethod and classmethod
+                # or for classes with no invariants
                 setattr(klass, attr, check_contracts(value))
             else:
-                setattr(klass, attr, _instance_method_wrapper(value, rep_invariants))
+                setattr(klass, attr, _instance_method_wrapper(value, klass))
 
     klass.__setattr__ = new_setattr
 
@@ -143,39 +144,22 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def _instance_method_wrapper(wrapped, rep_invariants=None):
-    if rep_invariants is None:
-        return check_contracts
+def _instance_method_wrapper(wrapped, klass: type):
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-            klass_mod = sys.modules.get(type(instance).__module__)
+            klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
-                _check_invariants(instance, rep_invariants, klass_mod.__dict__)
-            class_of_method = _get_context_class(instance, wrapped)
-            _check_class_type_annotations(class_of_method, instance)
+                _check_invariants(instance, klass, klass_mod.__dict__)
+            _check_class_type_annotations(klass, instance)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
             return r
 
     return wrapper(wrapped)
-
-
-def _get_context_class(instance, method) -> Optional[type]:
-    """Return the class of instance's class hierarchy that method was defined in
-
-    Return None if method is a bound method
-    """
-    for cls in instance.__class__.mro():
-        method_name = method.__name__
-        if (method_name in cls.__dict__ and
-                cls.__dict__[method_name].__qualname__ == method.__qualname__):
-            return cls
-    else:
-        return None
 
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:
@@ -194,9 +178,14 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
                 f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"')
 
 
-def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) -> None:
+def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied.
+
+    Precondition:
+        - hasattr(klass, '__representation_invariants__')
     """
+    rep_invariants = klass.__representation_invariants__
+
     for invariant in rep_invariants:
         try:
             _debug(f'Checking representation invariant for {instance.__class__.__qualname__}: {invariant}')

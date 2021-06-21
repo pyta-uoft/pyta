@@ -173,11 +173,6 @@ def reset_linter(config=None, file_linted=None):
              'type': 'string',
              'metavar': '<pyta_reporter>',
              'help': 'Output messages with a specific reporter.'}),
-        ('pyta-pep8',
-            {'default': False,
-             'type': 'yn',
-             'metavar': '<yn>',
-             'help': 'Use the pycodestyle checker.'}),
         ('pyta-type-check',
             {'default': False,
              'type': 'yn',
@@ -227,7 +222,8 @@ def reset_linter(config=None, file_linted=None):
         'python_ta.checkers.shadowing_in_comprehension_checker',
         'python_ta.checkers.redundant_assignment_checker',
         'python_ta.checkers.invalid_for_target_checker',
-        'python_ta.checkers.missing_space_in_doctest_checker'
+        'python_ta.checkers.missing_space_in_doctest_checker',
+        'python_ta.checkers.pycodestyle_checker'
     ]
 
     # Register new options to a checker here to allow references to
@@ -260,8 +256,6 @@ def reset_linter(config=None, file_linted=None):
                 linter.global_set_option(key, config[key])
 
     # Custom checker configuration.
-    if linter.config.pyta_pep8:
-        linter.load_plugin_modules(['python_ta.checkers.pycodestyle_checker'])
     if linter.config.pyta_type_check:
         linter.load_plugin_modules(['python_ta.checkers.type_inference_checker'])
 

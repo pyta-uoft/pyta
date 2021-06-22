@@ -73,7 +73,7 @@ def _check(module_name='', level='all', local_config='', output=None):
       - no argument -- checks the python file containing the function call.
     `level` is used to specify which checks should be made.
     `local_config` is a dict of config options or string (config file name).
-    `output` is an absolute path to capture pyta data output. Default std out.
+    `output` is an absolute or relative path to capture pyta data output. Default std out.
     """
 
     # Add reporters to an internal pylint data structure, for use with setting
@@ -173,11 +173,6 @@ def reset_linter(config=None, file_linted=None):
              'type': 'string',
              'metavar': '<pyta_reporter>',
              'help': 'Output messages with a specific reporter.'}),
-        ('pyta-pep8',
-            {'default': False,
-             'type': 'yn',
-             'metavar': '<yn>',
-             'help': 'Use the pycodestyle checker.'}),
         ('pyta-type-check',
             {'default': False,
              'type': 'yn',
@@ -226,7 +221,8 @@ def reset_linter(config=None, file_linted=None):
         'python_ta.checkers.unnecessary_indexing_checker',
         'python_ta.checkers.shadowing_in_comprehension_checker',
         'python_ta.checkers.redundant_assignment_checker',
-        'python_ta.checkers.invalid_for_target_checker'
+        'python_ta.checkers.invalid_for_target_checker',
+        'python_ta.checkers.pycodestyle_checker'
     ]
 
     # Register new options to a checker here to allow references to
@@ -259,8 +255,6 @@ def reset_linter(config=None, file_linted=None):
                 linter.global_set_option(key, config[key])
 
     # Custom checker configuration.
-    if linter.config.pyta_pep8:
-        linter.load_plugin_modules(['python_ta.checkers.pycodestyle_checker'])
     if linter.config.pyta_type_check:
         linter.load_plugin_modules(['python_ta.checkers.type_inference_checker'])
 

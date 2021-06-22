@@ -173,16 +173,6 @@ def test_change_teamlead_team_invalid(teamlead):
     assert 'len(self.team) > 0' in msg
 
 
-def test_teacher_rep_violatable(pe_bio_teacher):
-    """
-    Check that the Teacher representation invariant is working properly. Expect an exception.
-    """
-    with pytest.raises(AssertionError) as excinfo:
-        pe_bio_teacher.wage_per_class = 100
-    msg = str(excinfo.value)
-    assert 'self.wage == self.wage_per_class * len(self.currently_teaching)' in msg
-
-
 def test_method_violates_class_invariant(pe_bio_teacher):
     """
     Call an instance method that violates a rep invariant without fixing it before returning.

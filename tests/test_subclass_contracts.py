@@ -60,10 +60,10 @@ class Teacher(Employee):
         Return when all temporarily violations are remedied.
         """
         # temporary violation of Teacher rep invariant (if before/after lengths are different)
-        self.currently_teaching = currently_teaching
+        self.change_wages(self.wage_per_class * len(currently_teaching))
 
         # amending violation
-        self.change_wages(self.wage_per_class * len(currently_teaching))
+        self.currently_teaching = currently_teaching
 
     def update_wage_per_class(self, wage_per_class):
         """

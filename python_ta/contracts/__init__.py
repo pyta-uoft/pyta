@@ -132,9 +132,8 @@ def add_class_invariants(klass: type) -> None:
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):
-            if isinstance(value, (staticmethod, classmethod)) or rep_invariants is None:
+            if isinstance(value, (staticmethod, classmethod)):
                 # Don't check rep invariants for staticmethod and classmethod
-                # or for classes with no invariants
                 setattr(klass, attr, check_contracts(value))
             else:
                 setattr(klass, attr, _instance_method_wrapper(value, klass))
@@ -177,7 +176,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def _instance_method_wrapper(wrapped, klass: type):
+def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
@@ -197,8 +196,10 @@ def _instance_method_wrapper(wrapped, klass: type):
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:
     """Check that the type annotations for the class still hold.
+
+    Precondition:
+        - isinstance(instance, klass)
     """
-    assert isinstance(instance, klass)
     cls_annotations = typing.get_type_hints(klass)
 
     for attr, annotation in cls_annotations.items():
@@ -214,10 +215,8 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
 def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied.
 
-    Precondition:
-        - hasattr(klass, '__representation_invariants__')
     """
-    rep_invariants = klass.__representation_invariants__
+    rep_invariants = getattr(klass, '__representation_invariants__', set())
 
     for invariant in rep_invariants:
         try:

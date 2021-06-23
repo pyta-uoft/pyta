@@ -56,9 +56,6 @@ class Teacher(Employee):
         self.currently_teaching = currently_teaching
 
     def teach_new_classes(self, currently_teaching):
-        """
-        Return when all temporarily violations are remedied.
-        """
         # temporary violation of Teacher rep invariant (if before/after lengths are different)
         self.change_wages(self.wage_per_class * len(currently_teaching))
 
@@ -66,10 +63,11 @@ class Teacher(Employee):
         self.currently_teaching = currently_teaching
 
     def update_wage_per_class(self, wage_per_class):
-        """
-        Return when Teacher's representation invariant is still violate
-        """
+        # temporary violation of Teacher rep invariant (if wage rate different from before)
         self.wage_per_class = wage_per_class
+
+        # amending violation
+        self.change_wages(wage_per_class * len(self.currently_teaching))
 
 
 class TeamMember:
@@ -173,18 +171,18 @@ def test_change_teamlead_team_invalid(teamlead):
     assert 'len(self.team) > 0' in msg
 
 
-def test_method_violates_class_invariant(pe_bio_teacher):
-    """
-    Call an instance method that violates a rep invariant without fixing it before returning.
-    Expects an exception.
-    """
-    with pytest.raises(AssertionError) as excinfo:
-        pe_bio_teacher.update_wage_per_class(100)
-    msg = str(excinfo.value)
-    assert 'self.wage == self.wage_per_class * len(self.currently_teaching)' in msg
-
-
 def test_call_super_when_temp_invalid(pe_bio_teacher):
+    """
+    Temporarily violates a rep invariant by setting an instance attribute but later remedies the
+    violation by calling a method defined in the super class. Expects no exception.
+    """
+    pe_bio_teacher.update_wage_per_class(100)
+    assert pe_bio_teacher.wage_per_class == 100
+    assert (pe_bio_teacher.wage ==
+            pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))
+
+
+def test_call_super_creates_temp_invalid(pe_bio_teacher):
     """
     Call an instance method that temporarily violates a rep invariant when calling a method
     defined in a super class but later remedies the violation. Expects no exception.

@@ -180,8 +180,15 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
+
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
+
+            previous_frame = inspect.currentframe().f_back
+            call_site_name = inspect.getframeinfo(previous_frame).function
+            if call_site_name == "__init__":
+                return r
+
             _check_class_type_annotations(klass, instance)
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:

@@ -217,3 +217,7 @@ def test_helper_from_init_violates_if_initialized():
         teamless_member = ComplexMember("PyTA")
     msg = str(excinfo.value)
     assert 'len(self.team) > 0' in msg
+
+
+if __name__ == '__main__':
+    pytest.main(['test_subclass_contracts.py'])

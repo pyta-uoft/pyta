@@ -310,13 +310,25 @@ class ThemedWidget:
     - self.primary_color.isalpha()
     - self.secondary_color.isalpha()
     """
+    size: int
     theme: str
     primary_color: str
     secondary_color: str
 
-    def __init__(self, theme: str, color_palette: Tuple[str, str]):
+    def __init__(self, theme: str, color_palette: Tuple[str, str], options: dict = None):
+        if options:
+            self.setup_options(options)
+        else:
+            self.size = 5
         self.apply_theme(theme)
         self.apply_color_palette(color_palette)
+
+    def setup_options(self, options: dict):
+        if 'size' in options:
+            self.setup_size(options['size'])
+
+    def setup_size(self, size: int):
+        self.size = size
 
     def apply_theme(self, theme: str):
         self.theme = theme
@@ -325,15 +337,24 @@ class ThemedWidget:
         self.primary_color, self.secondary_color = color_palette
 
 
-def test_no_premature_check_from_init() -> None:
+def test_no_premature_check_from_helper_in_init() -> None:
     """Test that representation invariants and type annotations of a class still being
-    initialized are not checked
+    initialized are not checked when a helper called directly from the init returns
     """
     dark_widget = ThemedWidget("dark", ("black", "mahogany"))
     assert dark_widget.theme == "dark"
     assert dark_widget.primary_color == "black"
     assert dark_widget.secondary_color == "mahogany"
 
+
+def test_no_premature_check_from_deep_helper_in_init() -> None:
+    """Test that representation invariants and type annotations of a class still being
+    initialized are not checked when a helper of any depth from the init returns
+    """
+    dark_widget = ThemedWidget("dark", ("black", "mahogany"), options={"size": 10})
+    assert dark_widget.theme == "dark"
+    assert dark_widget.primary_color == "black"
+    assert dark_widget.secondary_color == "mahogany"
 
 if __name__ == '__main__':
     pytest.main(['test_class_contracts.py'])

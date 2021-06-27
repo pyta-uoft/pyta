@@ -26,14 +26,14 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 pylint.testutils.Message(
                     msg_id='missing-space-in-doctest',
                     node=function_node,
-                    args=function_node.name
+                    args=function_node.name,
+                    line=5
                 )
         ):
             self.checker.visit_functiondef(function_node)
 
     def test_no_missing_space(self) -> None:
         """Test the checker on a doctest not missing the space"""
-        """Test the checker on a doctest missing a space"""
         src = '''
         def f(x: int) -> int:
             """Return one plus x.
@@ -67,7 +67,14 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 pylint.testutils.Message(
                     msg_id='missing-space-in-doctest',
                     node=function_node,
-                    args=function_node.name
+                    args=function_node.name,
+                    line=5
+                ),
+                pylint.testutils.Message(
+                    msg_id='missing-space-in-doctest',
+                    node=function_node,
+                    args=function_node.name,
+                    line=7
                 )
         ):
             self.checker.visit_functiondef(function_node)
@@ -91,7 +98,8 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 pylint.testutils.Message(
                     msg_id='missing-space-in-doctest',
                     node=function_node,
-                    args=function_node.name
+                    args=function_node.name,
+                    line=7
                 )
         ):
             self.checker.visit_functiondef(function_node)
@@ -134,6 +142,25 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
         function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
 
         with self.assertNoMessages():
+            self.checker.visit_functiondef(function_node)
+
+    def test_only_doctest_marker(self) -> None:
+        """Test the checker only containing the doctest marker"""
+        src = '''
+              def f(x: int) -> int:
+                  """>>>"""
+              '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+
+        with self.assertAddsMessages(
+                pylint.testutils.Message(
+                    msg_id='missing-space-in-doctest',
+                    node=function_node,
+                    args=function_node.name,
+                    line=3
+                )
+        ):
             self.checker.visit_functiondef(function_node)
 
 

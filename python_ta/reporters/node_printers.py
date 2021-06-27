@@ -89,13 +89,25 @@ def render_too_many_arguments(msg, source_lines=None):
     yield from render_generic(msg, source_lines)
 
 
+def render_missing_space_in_doctest(msg, source_lines=None):
+    """Render a missing space in doctest message"""
+    node = msg.node
+    line = msg.line
+    start = node.lineno
+
+    # Display code snippet from the start of the function to the line containing the error
+    yield from render_context(start, line, source_lines)
+    yield (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
+
+
 CUSTOM_MESSAGES = {
     'missing-module-docstring': render_missing_docstring,
     'missing-class-docstring': render_missing_docstring,
     'missing-function-docstring': render_missing_docstring,
     'trailing-newlines': render_trailing_newlines,
     'missing-return-type': render_missing_return_type,
-    'too-many-arguments': render_too_many_arguments
+    'too-many-arguments': render_too_many_arguments,
+    'missing-space-in-doctest': render_missing_space_in_doctest
 }
 
 

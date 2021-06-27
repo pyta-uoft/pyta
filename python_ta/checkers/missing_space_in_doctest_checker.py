@@ -1,12 +1,11 @@
 """Checker for E9973 missing-space-in-doctest"""
 import astroid
-import re
 
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 
-from typing import List
+DOCTEST = ">>>"
 
 
 class MissingSpaceInDoctestChecker(BaseChecker):
@@ -24,28 +23,37 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     def visit_functiondef(self, node: astroid.FunctionDef) -> None:
         """Visit a function definition"""
         docstring = node.doc
+
         if docstring is not None:
-            doctests = self._find_doctests(docstring)
-            if doctests != []:
-                if any(not self._has_space(docstring, doctest) for doctest in doctests):
-                    self.add_message(
-                        'missing-space-in-doctest', node=node, args=node.name
-                    )
+            start_line = node.lineno
+            lines = docstring.split('\n')
+            line_no = start_line
+
+            for line in lines:
+                line_no += 1
+                if self._has_doctest(line):
+                    if not self._has_space(line):
+                        self.add_message(
+                            'missing-space-in-doctest',
+                            node=node,
+                            args=node.name,
+                            line=line_no
+                        )
 
     # Helper Functions
-    def _find_doctests(self, doc: str) -> List[int]:
-        """Return a list of the indices of the doctests found in the docstring
-
-        Returns [] if no doctests are found in the docstring
+    def _has_doctest(self, doc: str) -> bool:
+        """Return whether the docstring line contains a doctest
         """
-        doctest = ">>>"
-        matches = re.finditer(doctest, doc)
-        return [m.start() for m in matches]
+        return doc.find(DOCTEST) != -1
 
-    def _has_space(self, doc: str, doctest_index: int) -> bool:
-        """Return whether the doctest is followed by a space"""
-        doctest = doc[doctest_index:doctest_index + 4]
-        return doctest[-1] == " "
+    def _has_space(self, doc: str) -> bool:
+        """Return whether the docstring line containing a doctest is followed by a space
+        """
+        start_index = doc.find(DOCTEST)
+        if len(doc) > 3:
+            end_index = start_index + 3
+            return doc[end_index] == " "
+        return False  # Otherwise, the doctest isn't followed by any character
 
 
 def register(linter):

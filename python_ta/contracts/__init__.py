@@ -185,8 +185,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
 
             previous_frame = inspect.currentframe().f_back
-            call_site_name = inspect.getframeinfo(previous_frame).function
-            if call_site_name == "__init__":
+            if _is_exception_callsite(previous_frame, klass):
                 return r
 
             _check_class_type_annotations(klass, instance)
@@ -199,6 +198,44 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             return r
 
     return wrapper(wrapped)
+
+
+def _is_exception_callsite(previous_frame, klass) -> bool:
+    """Return whether callstack_frame (<frame>) is the exception frame for a method of klass
+
+    The check-exception is when klass' init is part of the callstack.
+    """
+    frame = previous_frame
+    while frame:
+        if _frame_is_klass_init(frame, klass):
+            return True
+
+        frame = frame.f_back
+    return False
+
+
+def _frame_is_klass_init(frame, klass) -> bool:
+    """Return whether the frame is the content of klass' init
+
+    Inspect frame's module -> module classes -> class methods -> crosscheck methods with klass init
+    """
+    frame_context_name = inspect.getframeinfo(frame).function
+    if frame_context_name == "<module>" or frame_context_name != "__init__":
+        return False
+
+    frame_context_module = inspect.getmodule(frame)
+
+    all_classes = [val for val in frame_context_module.__dict__.values()
+                   if inspect.isclass(val)]
+    all_methods = [val for cls in all_classes for val in cls.__dict__.values()
+                   if inspect.isfunction(val)]
+
+    for method in all_methods:
+        method_is_frame_context = method.__code__ == frame.f_code
+        if method_is_frame_context and method.__qualname__ == klass.__init__.__qualname__:
+            return True
+    else:
+        return False
 
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:

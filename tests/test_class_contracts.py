@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import pytest
 import math
 from python_ta.contracts import check_all_contracts
-from typing import List, Set
+from typing import List, Set, Tuple
 
 
 def is_valid_name(name):
@@ -13,7 +13,7 @@ class Person:
     """
     Represent a person.
 
-    Representation Invariants: 
+    Representation Invariants:
     - self.age > 0
     - len(self.name) > 0
     - is_valid_name(self.name)
@@ -43,7 +43,7 @@ class Person:
         self.age = -10
         self.age = age
         return age
-    
+
     def add_fav_food(self, food):
         self.fav_foods.append(food)
 
@@ -301,6 +301,38 @@ def test_override_len_simple() -> None:
     """Test that we can instantiate OverrideLen, which has a custom __len__ implementation.
     """
     OverrideLen()
+
+
+class ThemedWidget:
+    """
+    Representation Invariants:
+    - self.theme.lower() in {"dark", "light"}
+    - self.primary_color.isalpha()
+    - self.secondary_color.isalpha()
+    """
+    theme: str
+    primary_color: str
+    secondary_color: str
+
+    def __init__(self, theme: str, color_palette: Tuple[str, str]):
+        self.apply_theme(theme)
+        self.apply_color_palette(color_palette)
+
+    def apply_theme(self, theme: str):
+        self.theme = theme
+
+    def apply_color_palette(self, color_palette: Tuple[str, str]):
+        self.primary_color, self.secondary_color = color_palette
+
+
+def test_no_premature_check_from_init() -> None:
+    """Test that representation invariants and type annotations of a class still being
+    initialized are not checked
+    """
+    dark_widget = ThemedWidget("dark", ("black", "mahogany"))
+    assert dark_widget.theme == "dark"
+    assert dark_widget.primary_color == "black"
+    assert dark_widget.secondary_color == "mahogany"
 
 
 if __name__ == '__main__':

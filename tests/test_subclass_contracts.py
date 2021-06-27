@@ -82,6 +82,20 @@ class TeamMember:
     def __init__(self, team):
         self.team = team
 
+    def change_team(self, team):
+        self.team = team
+
+
+class ComplexMember(TeamMember):
+    """
+    Represents a person who may have complex logic behind what team they should be placed in.
+    """
+
+    def __init__(self, team):
+        super().__init__(team)
+        self.change_team("")
+        self.team = team
+
 
 class TeamLead(Developer, TeamMember):
     """
@@ -163,7 +177,7 @@ def test_change_teamlead_name(teamlead):
 
 def test_change_teamlead_team_invalid(teamlead):
     """
-    Changes the team of the teamlead to something invalid. Excpects an exception.
+    Changes the team of the teamlead to something invalid. Expects an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
         teamlead.team = ''
@@ -191,3 +205,15 @@ def test_call_super_creates_temp_invalid(pe_bio_teacher):
     assert len(pe_bio_teacher.currently_teaching) == 3
     assert (pe_bio_teacher.wage ==
             pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))
+
+
+def test_helper_from_init_violates_if_initialized():
+    """
+    Call an instance method defined in the super (assumed to be already initialized) which will
+    violate said super's representation invariants but remedies the violation post-method call.
+    Expects an exception.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        teamless_member = ComplexMember("PyTA")
+    msg = str(excinfo.value)
+    assert 'len(self.team) > 0' in msg

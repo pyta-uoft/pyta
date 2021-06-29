@@ -3,7 +3,6 @@ import webbrowser
 from collections import defaultdict, namedtuple
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-import six
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from base64 import b64encode
@@ -91,12 +90,14 @@ class HTMLReporter(ColorReporter):
         # Render the jinja template
         rendered_template = template.render(date_time=dt, reporter=self)
 
-        if self.linter.config.pyta_save_html_report:
+        # If a filepath was specified, write to the file
+        if self._output_filepath:
             self._write_html_to_file(rendered_template)
         else:
             self._open_html_in_browser(rendered_template.encode('utf8'))
 
     def _write_html_to_file(self, rendered_template):
+        """ Write the html file to the specified output path. """
         output_path = os.path.join(os.getcwd(), self.linter.config.pyta_output_file)
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(rendered_template)
@@ -106,10 +107,8 @@ class HTMLReporter(ColorReporter):
         Display html in a web browser without creating a temp file.
         Instantiates a trivial http server and uses the webbrowser module to
         open a URL to retrieve html from that server.
-        Parameters
-        ----------
-        html: str
-            HTML string to display
+
+        Modified from: https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/plotly/io/_base_renderers.py#L655
         """
 
         class OneShotRequestHandler(BaseHTTPRequestHandler):
@@ -122,8 +121,7 @@ class HTMLReporter(ColorReporter):
                 for i in range(0, len(html), buffer_size):
                     self.wfile.write(html[i: i + buffer_size])
 
-        # Hard coded on port 2021
-        server = HTTPServer(('127.0.0.1', 2021), OneShotRequestHandler)
+        server = HTTPServer(('127.0.0.1', 0), OneShotRequestHandler)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=new, autoraise=autoraise)
         server.handle_request()
 

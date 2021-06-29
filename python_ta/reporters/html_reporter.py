@@ -98,7 +98,7 @@ class HTMLReporter(ColorReporter):
 
     def _write_html_to_file(self, rendered_template):
         """ Write the html file to the specified output path. """
-        output_path = os.path.join(os.getcwd(), self.linter.config.pyta_output_file)
+        output_path = os.path.join(os.getcwd(), self._output_filepath)
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(rendered_template)
 
@@ -108,7 +108,7 @@ class HTMLReporter(ColorReporter):
         Instantiates a trivial http server and uses the webbrowser module to
         open a URL to retrieve html from that server.
 
-        Modified from: https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/plotly/io/_base_renderers.py#L655
+        Adapted from: https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/plotly/io/_base_renderers.py#L655
         """
 
         class OneShotRequestHandler(BaseHTTPRequestHandler):

@@ -184,8 +184,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
 
-            previous_frame = inspect.currentframe().f_back
-            if _is_exception_callsite(previous_frame, klass):
+            if not _klass_is_initialized(klass, instance):
                 return r
 
             _check_class_type_annotations(klass, instance)
@@ -200,42 +199,18 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     return wrapper(wrapped)
 
 
-def _is_exception_callsite(previous_frame, klass) -> bool:
-    """Return whether callstack_frame (<frame>) is the exception frame for a method of klass
+def _klass_is_initialized(klass: type, instance: Any):
+    """Check that the given instance has initialized its klass.
 
-    The check-exception is when klass' init is part of the callstack.
+    Precondition:
+        - isinstance(instance, klass)
     """
-    frame = previous_frame
-    while frame:
-        if _frame_is_klass_init(frame, klass):
-            return True
-
-        frame = frame.f_back
-    return False
-
-
-def _frame_is_klass_init(frame, klass) -> bool:
-    """Return whether the frame is the content of klass' init
-
-    Inspect frame's module -> module classes -> class methods -> crosscheck methods with klass init
-    """
-    frame_context_name = inspect.getframeinfo(frame).function
-    if frame_context_name == "<module>" or frame_context_name != "__init__":
-        return False
-
-    frame_context_module = inspect.getmodule(frame)
-
-    all_classes = [val for val in frame_context_module.__dict__.values()
-                   if inspect.isclass(val)]
-    all_methods = [val for cls in all_classes for val in cls.__dict__.values()
-                   if inspect.isfunction(val)]
-
-    for method in all_methods:
-        method_is_frame_context = method.__code__ == frame.f_code
-        if method_is_frame_context and method.__qualname__ == klass.__init__.__qualname__:
-            return True
+    cls_annotations = typing.get_type_hints(klass)
+    for attr, _ in cls_annotations.items():
+        if not hasattr(instance, attr):
+            return False
     else:
-        return False
+        return True
 
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:

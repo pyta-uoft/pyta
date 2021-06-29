@@ -126,7 +126,7 @@ def add_class_invariants(klass: type) -> None:
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
                 try:
-                    _check_invariants(self, rep_invariants, klass_mod.__dict__)
+                    _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
                     raise AssertionError(str(e)) from None
 
@@ -136,7 +136,7 @@ def add_class_invariants(klass: type) -> None:
                 # Don't check rep invariants for staticmethod and classmethod
                 setattr(klass, attr, check_contracts(value))
             else:
-                setattr(klass, attr, _instance_method_wrapper(value, rep_invariants))
+                setattr(klass, attr, _instance_method_wrapper(value, klass))
 
     klass.__setattr__ = new_setattr
 
@@ -176,18 +176,16 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def _instance_method_wrapper(wrapped, rep_invariants=None):
-    if rep_invariants is None:
-        return check_contracts
+def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-            _check_class_type_annotations(instance)
-            klass_mod = sys.modules.get(type(instance).__module__)
+            _check_class_type_annotations(klass, instance)
+            klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
-                _check_invariants(instance, rep_invariants, klass_mod.__dict__)
+                _check_invariants(instance, klass, klass_mod.__dict__)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
@@ -195,10 +193,13 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
 
     return wrapper(wrapped)
 
-def _check_class_type_annotations(instance: Any) -> None:
+
+def _check_class_type_annotations(klass: type, instance: Any) -> None:
     """Check that the type annotations for the class still hold.
+
+    Precondition:
+        - isinstance(instance, klass)
     """
-    klass = instance.__class__
     cls_annotations = typing.get_type_hints(klass)
 
     for attr, annotation in cls_annotations.items():
@@ -211,9 +212,12 @@ def _check_class_type_annotations(instance: Any) -> None:
                 f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"')
 
 
-def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) -> None:
+def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied.
+
     """
+    rep_invariants = getattr(klass, '__representation_invariants__', set())
+
     for invariant in rep_invariants:
         try:
             _debug(f'Checking representation invariant for {instance.__class__.__qualname__}: {invariant}')

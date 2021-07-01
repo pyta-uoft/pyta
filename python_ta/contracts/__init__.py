@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Set
+from typing import Any, Callable, List
 from typeguard import check_type
 import sys
 import typing
@@ -183,10 +183,6 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-
-            if not _klass_is_initialized(klass, instance):
-                return r
-
             _check_class_type_annotations(klass, instance)
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
@@ -199,20 +195,6 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     return wrapper(wrapped)
 
 
-def _klass_is_initialized(klass: type, instance: Any):
-    """Check that the given instance has initialized its klass.
-
-    Precondition:
-        - isinstance(instance, klass)
-    """
-    cls_annotations = typing.get_type_hints(klass)
-    for attr, _ in cls_annotations.items():
-        if not hasattr(instance, attr):
-            return False
-    else:
-        return True
-
-
 def _check_class_type_annotations(klass: type, instance: Any) -> None:
     """Check that the type annotations for the class still hold.
 
@@ -222,6 +204,8 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
     cls_annotations = typing.get_type_hints(klass)
 
     for attr, annotation in cls_annotations.items():
+        if not hasattr(instance, attr):
+            continue
         value = getattr(instance, attr)
         try:
             _debug(f'Checking type of attribute {attr} for {klass.__qualname__} instance')

@@ -82,20 +82,6 @@ class TeamMember:
     def __init__(self, team):
         self.team = team
 
-    def change_team(self, team):
-        self.team = team
-
-
-class ComplexMember(TeamMember):
-    """
-    Represents a person who may have complex logic behind what team they should be placed in.
-    """
-
-    def __init__(self, team):
-        super().__init__(team)
-        self.change_team("")
-        self.team = team
-
 
 class TeamLead(Developer, TeamMember):
     """

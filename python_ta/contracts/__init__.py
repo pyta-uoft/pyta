@@ -180,13 +180,10 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
-
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-
             if _instance_init_in_callstack(instance):
                 return r
-
             _check_class_type_annotations(klass, instance)
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
@@ -206,15 +203,12 @@ def _instance_init_in_callstack(instance) -> bool:
     while frame:
         if _frame_is_klass_init(frame, instance):
             return True
-
         frame = frame.f_back
     return False
 
 
 def _frame_is_klass_init(frame, instance) -> bool:
-    """Return whether the frame is the content of klass' init
-
-    Inspect frame's module -> module classes -> class methods -> crosscheck methods with klass init
+    """Return whether the frame is an __init__ for instance
     """
     frame_info = inspect.getframeinfo(frame)
     frame_context_name = frame_info.function

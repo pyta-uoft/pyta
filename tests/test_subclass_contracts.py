@@ -207,17 +207,5 @@ def test_call_super_creates_temp_invalid(pe_bio_teacher):
             pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))
 
 
-def test_helper_from_init_violates_if_initialized():
-    """
-    Call an instance method defined in the super (assumed to be already initialized) which will
-    violate said super's representation invariants but remedies the violation post-method call.
-    Expects an exception.
-    """
-    with pytest.raises(AssertionError) as excinfo:
-        teamless_member = ComplexMember("PyTA")
-    msg = str(excinfo.value)
-    assert 'len(self.team) > 0' in msg
-
-
 if __name__ == '__main__':
     pytest.main(['test_subclass_contracts.py'])

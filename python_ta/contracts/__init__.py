@@ -1,4 +1,4 @@
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional, Set
 from typeguard import check_type
 import sys
 import typing
@@ -183,6 +183,11 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
+
+            previous_frame = inspect.currentframe().f_back
+            if _is_exception_callsite(previous_frame, klass):
+                return r
+
             _check_class_type_annotations(klass, instance)
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
@@ -195,6 +200,44 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     return wrapper(wrapped)
 
 
+def _is_exception_callsite(previous_frame, klass) -> bool:
+    """Return whether callstack_frame (<frame>) is the exception frame for a method of klass
+
+    The check-exception is when klass' init is part of the callstack.
+    """
+    frame = previous_frame
+    while frame:
+        if _frame_is_klass_init(frame, klass):
+            return True
+
+        frame = frame.f_back
+    return False
+
+
+def _frame_is_klass_init(frame, klass) -> bool:
+    """Return whether the frame is the content of klass' init
+
+    Inspect frame's module -> module classes -> class methods -> crosscheck methods with klass init
+    """
+    frame_context_name = inspect.getframeinfo(frame).function
+    if frame_context_name == "<module>" or frame_context_name != "__init__":
+        return False
+
+    frame_context_module = inspect.getmodule(frame)
+
+    all_classes = [val for val in frame_context_module.__dict__.values()
+                   if inspect.isclass(val)]
+    all_methods = [val for cls in all_classes for val in cls.__dict__.values()
+                   if inspect.isfunction(val)]
+
+    for method in all_methods:
+        method_is_frame_context = method.__code__ == frame.f_code
+        if method_is_frame_context and method.__qualname__ == klass.__init__.__qualname__:
+            return True
+    else:
+        return False
+
+
 def _check_class_type_annotations(klass: type, instance: Any) -> None:
     """Check that the type annotations for the class still hold.
 
@@ -204,8 +247,6 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
     cls_annotations = typing.get_type_hints(klass)
 
     for attr, annotation in cls_annotations.items():
-        if not hasattr(instance, attr):
-            continue
         value = getattr(instance, attr)
         try:
             _debug(f'Checking type of attribute {attr} for {klass.__qualname__} instance')

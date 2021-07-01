@@ -356,5 +356,6 @@ def test_no_premature_check_from_deep_helper_in_init() -> None:
     assert dark_widget.primary_color == "black"
     assert dark_widget.secondary_color == "mahogany"
 
+
 if __name__ == '__main__':
     pytest.main(['test_class_contracts.py'])

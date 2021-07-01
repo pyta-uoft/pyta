@@ -201,19 +201,12 @@ def _instance_init_in_callstack(instance) -> bool:
     """
     frame = inspect.currentframe().f_back
     while frame:
-        if _frame_is_klass_init(frame, instance):
+        frame_context_name = inspect.getframeinfo(frame).function
+        frame_context_self = frame.f_locals.get('self', None)
+        if frame_context_name == '__init__' and frame_context_self == instance:
             return True
         frame = frame.f_back
     return False
-
-
-def _frame_is_klass_init(frame, instance) -> bool:
-    """Return whether the frame is an __init__ for instance
-    """
-    frame_info = inspect.getframeinfo(frame)
-    frame_context_name = frame_info.function
-    frame_context_self = frame.f_locals.get('self', None)
-    return frame_context_name == '__init__' and frame_context_self == instance
 
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:

@@ -184,8 +184,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
 
-            previous_frame = inspect.currentframe().f_back
-            if _is_exception_callsite(previous_frame, klass):
+            if _instance_init_in_callstack(instance):
                 return r
 
             _check_class_type_annotations(klass, instance)
@@ -200,42 +199,27 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     return wrapper(wrapped)
 
 
-def _is_exception_callsite(previous_frame, klass) -> bool:
-    """Return whether callstack_frame (<frame>) is the exception frame for a method of klass
-
-    The check-exception is when klass' init is part of the callstack.
+def _instance_init_in_callstack(instance) -> bool:
+    """Return whether instance's init is part of the current callstack
     """
-    frame = previous_frame
+    frame = inspect.currentframe().f_back
     while frame:
-        if _frame_is_klass_init(frame, klass):
+        if _frame_is_klass_init(frame, instance):
             return True
 
         frame = frame.f_back
     return False
 
 
-def _frame_is_klass_init(frame, klass) -> bool:
+def _frame_is_klass_init(frame, instance) -> bool:
     """Return whether the frame is the content of klass' init
 
     Inspect frame's module -> module classes -> class methods -> crosscheck methods with klass init
     """
-    frame_context_name = inspect.getframeinfo(frame).function
-    if frame_context_name == "<module>" or frame_context_name != "__init__":
-        return False
-
-    frame_context_module = inspect.getmodule(frame)
-
-    all_classes = [val for val in frame_context_module.__dict__.values()
-                   if inspect.isclass(val)]
-    all_methods = [val for cls in all_classes for val in cls.__dict__.values()
-                   if inspect.isfunction(val)]
-
-    for method in all_methods:
-        method_is_frame_context = method.__code__ == frame.f_code
-        if method_is_frame_context and method.__qualname__ == klass.__init__.__qualname__:
-            return True
-    else:
-        return False
+    frame_info = inspect.getframeinfo(frame)
+    frame_context_name = frame_info.function
+    frame_context_self = frame.f_locals.get('self', None)
+    return frame_context_name == '__init__' and frame_context_self == instance
 
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:

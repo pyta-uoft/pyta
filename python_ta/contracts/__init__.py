@@ -196,14 +196,19 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     return wrapper(wrapped)
 
 
-def _instance_init_in_callstack(instance) -> bool:
+def _instance_init_in_callstack(instance: Any) -> bool:
     """Return whether instance's init is part of the current callstack
+
+    Note: due to the nature of the check, externally defined __init__ functions with
+    'self' defined as the first parameter may pass this check.
     """
     frame = inspect.currentframe().f_back
     while frame:
         frame_context_name = inspect.getframeinfo(frame).function
-        frame_context_self = frame.f_locals.get('self', None)
-        if frame_context_name == '__init__' and frame_context_self == instance:
+        frame_context_self = frame.f_locals.get('self')
+        frame_context_vars = frame.f_code.co_varnames
+        if (frame_context_name == '__init__' and frame_context_self is instance
+                and frame_context_vars[0] == 'self'):
             return True
         frame = frame.f_back
     return False

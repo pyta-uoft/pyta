@@ -163,7 +163,7 @@ def test_change_teamlead_name(teamlead):
 
 def test_change_teamlead_team_invalid(teamlead):
     """
-    Changes the team of the teamlead to something invalid. Expects an exception.
+    Changes the team of the teamlead to something invalid. Excpects an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
         teamlead.team = ''
@@ -191,7 +191,3 @@ def test_call_super_creates_temp_invalid(pe_bio_teacher):
     assert len(pe_bio_teacher.currently_teaching) == 3
     assert (pe_bio_teacher.wage ==
             pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))
-
-
-if __name__ == '__main__':
-    pytest.main(['test_subclass_contracts.py'])

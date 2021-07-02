@@ -330,10 +330,10 @@ class ThemedWidget:
     def setup_size(self, size: int) -> None:
         self.size = size
 
-    def apply_theme(self, theme: str):
+    def apply_theme(self, theme: str) -> None:
         self.theme = theme
 
-    def apply_color_palette(self, color_palette: Tuple[str, str]):
+    def apply_color_palette(self, color_palette: Tuple[str, str]) -> None:
         self.primary_color, self.secondary_color = color_palette
 
 

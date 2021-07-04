@@ -163,6 +163,26 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_functiondef(function_node)
 
+    def test_not_valid(self) -> None:
+        """Test the checker so that it does not recognize the doctest symbol
+        if not at the start of the line"""
+        src = '''
+           def f(x: int) -> int:
+               """Return one plus x.
+               
+               abc >>> 123 
+               
+               abc >>>1 + 2 
+               
+               123>>>456 
+               """
+           '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(function_node)
+
 
 if __name__ == "__main__":
     import pytest

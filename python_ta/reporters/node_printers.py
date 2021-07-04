@@ -91,13 +91,12 @@ def render_too_many_arguments(msg, source_lines=None):
 
 def render_missing_space_in_doctest(msg, source_lines=None):
     """Render a missing space in doctest message"""
-    node = msg.node
     line = msg.line
-    start = node.lineno
 
-    # Display code snippet from the start of the function to the line containing the error
-    yield from render_context(start, line, source_lines)
+    # Display 2 lines before and after the erroneous line
+    yield from render_context(line - 2, line, source_lines)
     yield (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
 
 
 CUSTOM_MESSAGES = {

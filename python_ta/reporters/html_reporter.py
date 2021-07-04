@@ -15,7 +15,6 @@ from .color_reporter import ColorReporter
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
-
 class HTMLReporter(ColorReporter):
     _COLOURING = {'black': '<span class="black">',
                   'black-line': '<span class="black line-num">',
@@ -64,8 +63,8 @@ class HTMLReporter(ColorReporter):
 
         MessageSet = namedtuple('MessageSet', 'filename code style')
         append_set = MessageSet(filename=self.filename_to_display(self.current_file_linted),
-                                code=self._messages_shown(self._sorted_error_messages),
-                                style=self._messages_shown(self._sorted_style_messages))
+                               code=self._messages_shown(self._sorted_error_messages),
+                               style=self._messages_shown(self._sorted_style_messages))
         self.messages_by_file.append(append_set)
 
     def output_blob(self):

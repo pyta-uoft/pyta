@@ -5,7 +5,7 @@ from pylint.message import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
-OUTPUT_FILENAME = 'pyta_output'
+OUTPUT_FILENAME = 'pyta_output.html'
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors

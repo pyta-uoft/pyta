@@ -88,20 +88,21 @@ class HTMLReporter(ColorReporter):
 
         # Render the jinja template
         rendered_template = template.render(date_time=dt, reporter=self)
+        rendered_template = rendered_template.encode('utf8')
 
         # If a filepath was specified, write to the file
         if self._output_filepath:
             self._write_html_to_file(rendered_template)
         else:
-            self._open_html_in_browser(rendered_template.encode('utf8'))
+            self._open_html_in_browser(rendered_template)
 
-    def _write_html_to_file(self, rendered_template):
+    def _write_html_to_file(self, html: bytes) -> None:
         """ Write the html file to the specified output path. """
         output_path = os.path.join(os.getcwd(), self._output_filepath)
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(rendered_template)
+        with open(output_path, 'wb') as f:
+            f.write(html)
 
-    def _open_html_in_browser(self, html, new=0, autoraise=True):
+    def _open_html_in_browser(self, html: bytes) -> None:
         """
         Display html in a web browser without creating a temp file.
         Instantiates a trivial http server and uses the webbrowser module to
@@ -121,7 +122,7 @@ class HTMLReporter(ColorReporter):
                     self.wfile.write(html[i: i + buffer_size])
 
         server = HTTPServer(('127.0.0.1', 0), OneShotRequestHandler)
-        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=new, autoraise=autoraise)
+        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2, autoraise=True)
         server.handle_request()
 
     @classmethod
@@ -129,7 +130,7 @@ class HTMLReporter(ColorReporter):
         """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
         if '-line' not in colour_class:
             text = highlight(text, PythonLexer(),
-                             HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-'))
+                            HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-'))
         return text
 
     _display = None

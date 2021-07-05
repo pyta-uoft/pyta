@@ -23,11 +23,11 @@ class ShadowingInComprehensionChecker(BaseChecker):
     def visit_comprehension(self, node: astroid.Comprehension):
         if isinstance(node.target, astroid.Tuple):
             for target in node.target.elts:
-                if target.name in node.parent.frame().locals:
+                if target.name in node.parent.frame().locals and target.name != "_":
                     args = target.name
                     self.add_message('shadowing-in-comprehension', node=target, args=args)
         else:  # isinstance(node.target, astroid.AssignName)
-            if node.target.name in node.parent.frame().locals:
+            if node.target.name in node.parent.frame().locals and node.target.name != "_":
                 args = node.target.name
                 self.add_message('shadowing-in-comprehension', node=node.target, args=args)
 

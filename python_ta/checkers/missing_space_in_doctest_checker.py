@@ -29,30 +29,28 @@ class MissingSpaceInDoctestChecker(BaseChecker):
         docstring = node.doc
 
         if docstring is not None:
-            start_line = node.lineno
+            start_line = node.lineno + 1
             lines = docstring.split('\n')
 
             for line_no, line in enumerate(lines):
-                if self._invalid_doctest(line):
+                if self._has_invalid_doctest(line):
                     self.add_message(
                         'missing-space-in-doctest',
                         node=node,
                         args=node.name,
-                        line=line_no + start_line + 1
+                        line=line_no + start_line
                     )
 
     # Helper Function
-    def _invalid_doctest(self, doc: str) -> Union[bool, Optional[Match[str]]]:
+    def _has_invalid_doctest(self, doc: str) -> Union[bool, Optional[Match[str]]]:
         """Return whether the docstring line contains an invalid doctest
         """
         start_index = doc.find(DOCTEST)
         contains_doctest = start_index != -1
-        if contains_doctest:
-            if len(doc) > 3:
-                match = re.match("\s*>>>\w", doc)
-                return match
-            return True  # Otherwise, the doctest isn't followed by any character
-        return False
+        if contains_doctest and len(doc) == 3:
+            return True  # The doctest isn't followed by any character
+        match = re.match("\s*>>>\w", doc)
+        return match
 
 
 def register(linter):

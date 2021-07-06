@@ -182,6 +182,8 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     def wrapper(wrapped, instance, args, kwargs):
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
+            if _instance_init_in_callstack(instance):
+                return r
             _check_class_type_annotations(klass, instance)
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
@@ -192,6 +194,24 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             return r
 
     return wrapper(wrapped)
+
+
+def _instance_init_in_callstack(instance: Any) -> bool:
+    """Return whether instance's init is part of the current callstack
+
+    Note: due to the nature of the check, externally defined __init__ functions with
+    'self' defined as the first parameter may pass this check.
+    """
+    frame = inspect.currentframe().f_back
+    while frame:
+        frame_context_name = inspect.getframeinfo(frame).function
+        frame_context_self = frame.f_locals.get('self')
+        frame_context_vars = frame.f_code.co_varnames
+        if (frame_context_name == '__init__' and frame_context_self is instance
+                and frame_context_vars[0] == 'self'):
+            return True
+        frame = frame.f_back
+    return False
 
 
 def _check_class_type_annotations(klass: type, instance: Any) -> None:

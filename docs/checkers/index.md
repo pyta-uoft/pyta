@@ -1659,6 +1659,28 @@ class ExampleClass:
         self.inst_attr2 = True
 ```
 
+### Missing space in doctest (E9973) [](#E9973)
+
+This error occurs when a doctest found in the docstring of a function is not followed by a space.
+In this case the doctest will not actually be parsed. 
+
+Example:
+```{literalinclude} /../examples/custom_checkers/e9973_missing_space_in_doctest.py
+---
+lines: 4-9
+---
+```
+
+This can simply be corrected by adding a space before the code be executed:
+```
+def f(x: int) -> int:
+    """Return one plus x.
+
+    >>> f(10)  # Adding a space will allow the doctest to be parsed. 
+    11
+    """
+```
+
 ### Pycodestyle errors (E9989) [](#E9989)
 
 These errors are based on the Python code style guidelines ("PEP8") published by the Python team.

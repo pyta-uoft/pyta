@@ -376,3 +376,59 @@ So in the above example, the order of checks made is:
 6. `len(self.id) == 8`
 
 [typeguard]: https://github.com/agronholm/typeguard
+
+### Partial Initialization
+Post-condition checks on class attribute types and representation invariants are disabled while 
+initializing an instance of a class. Due to the nature of the approach to disabling these checks,
+you may encounter that these checks will not run if you pass an already-created instance of an object
+through an externally defined function named `__init__` whose first parameter is self.
+
+```python
+class DataClass:
+    """
+    Representation Invariants:
+    - self.my_int > 10
+    
+    """
+    my_int: int
+
+    def __init__(self) -> None:
+        self.my_int = 30
+
+    def annotation_violation(self) -> None:
+        """
+        Should throw a type annotation error with an int attribute being given a string
+        """
+        self.my_int = 0
+
+
+class UnrelatedClass:
+    def __init__(self) -> None:
+        DataClass.annotation_violation(self)
+
+
+if __name__ == '__main__':
+    import python_ta.contracts
+    python_ta.contracts.check_all_contracts()
+
+    my_instance = DataClass()
+    try:
+        my_instance.annotation_violation()
+    except AssertionError:
+        print('Properly raised AssertionError')
+    else:
+        print('Did not raise AssertionError')
+
+    my_instance2 = DataClass()
+    try:
+        UnrelatedClass.__init__(my_instance2)
+    except AssertionError:
+        print('Properly raised AssertionError')
+    else:
+        print('Did not raise AssertionError')
+```
+The above example outputs the following
+```
+>>> Properly raised AssertionError
+>>> Did not raise AssertionError
+```

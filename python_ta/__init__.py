@@ -222,6 +222,7 @@ def reset_linter(config=None, file_linted=None):
         'python_ta.checkers.shadowing_in_comprehension_checker',
         'python_ta.checkers.redundant_assignment_checker',
         'python_ta.checkers.invalid_for_target_checker',
+        'python_ta.checkers.missing_space_in_doctest_checker',
         'python_ta.checkers.pycodestyle_checker'
     ]
 

@@ -19,6 +19,9 @@ def render_generic(msg, source_lines=None):
         # Display up to 2 lines before node for context:
         yield from render_context(start_line - 2, start_line, source_lines)
 
+        if isinstance(node, astroid.FunctionDef) or isinstance(node, astroid.ClassDef):
+            end_line = start_line
+
         if start_line == end_line:
             yield (start_line, slice(start_col, end_col), LineType.ERROR, source_lines[start_line-1])
         else:

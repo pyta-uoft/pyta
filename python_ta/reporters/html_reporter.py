@@ -122,8 +122,9 @@ class HTMLReporter(ColorReporter):
                     self.wfile.write(html[i: i + buffer_size])
 
         server = HTTPServer(('127.0.0.1', 0), OneShotRequestHandler)
-        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2, autoraise=True)
+        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
         server.handle_request()
+        server.server_close()
 
     @classmethod
     def _vendor_wrap(self, colour_class, text):

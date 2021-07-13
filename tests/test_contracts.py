@@ -166,3 +166,55 @@ def test_search_invalid() -> None:
 
     msg = str(excinfo.value)
     assert 'all({n + m > 0 for n in numbers for m in numbers})' in msg
+
+
+class Player:
+    user: str
+
+
+class CPU(Player):
+    def __init__(self):
+        self.user = 'CPU'
+
+
+class HumanPlayer(Player):
+    def __init__(self):
+        self.user = 'Human'
+
+
+@check_contracts
+def _is_cpu(player: Player) -> bool:
+    return player.user == 'CPU'
+
+
+def test_type_not_instance_error() -> None:
+    """Test that the additional suggestion is added when the type of a class is passed in as an
+    argument instead of its instance
+
+    This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
+    when changing the suggestion text.
+    """
+
+    # Ternary assignment tricks the PyCharm linter into not recognizing the faulty argument
+    player = HumanPlayer if True else CPU()
+    with pytest.raises(AssertionError) as excinfo:
+        _is_cpu(player)
+
+    msg = str(excinfo.value)
+    assert 'Did you mean to pass in an instance of' in msg
+
+
+def test_no_suggestion_instance_as_instance() -> None:
+    """Test that the additional suggestion is not added when an unrelated type is passed in.
+
+    This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
+    when changing the suggestion text.
+    """
+
+    # Ternary assignment tricks the PyCharm linter into not recognizing the faulty argument
+    player = str if True else CPU()
+    with pytest.raises(AssertionError) as excinfo:
+        _is_cpu(player)
+
+    msg = str(excinfo.value)
+    assert 'Did you mean to pass in an instance of' not in msg

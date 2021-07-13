@@ -107,9 +107,11 @@ def test_check_saves_file() -> None:
 
 def test_check_no_reporter_output() -> None:
     """Test whether not specifiying an output does not save a file"""
-
     # To prevent any any browser/server code running when running Pytest to avoid CI timeouts
-    python_ta.check_all = Mock(return_value=None)
+    import webbrowser
+    from http.server import HTTPServer
+    webbrowser.open = Mock(return_value=None)
+    HTTPServer.handle_request = Mock(return_value=None)
 
     _inputs = [
         ['nodes/name.py'],

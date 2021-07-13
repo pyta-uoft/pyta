@@ -6,4 +6,5 @@
 
 usage/quick_start
 checkers/index
+contracts/index
 ```

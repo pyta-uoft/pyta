@@ -140,8 +140,6 @@ class PlainReporter(BaseReporter):
 
         # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
         correct_path = os.path.expanduser(output_filepath_arg)
-        if not os.path.exists(os.path.dirname(correct_path)):
-            raise IOError('path {} does not exist.'.format(output_filepath_arg))
         if os.path.isdir(correct_path):
             correct_path = os.path.join(correct_path, OUTPUT_FILENAME)
 
@@ -185,7 +183,10 @@ class PlainReporter(BaseReporter):
 
         output_stream = sys.stdout
         if self._output_filepath:
-            output_stream = open(self._output_filepath, 'a')
+            try:
+                output_stream = open(self._output_filepath, 'a')
+            except FileNotFoundError:
+                raise IOError('path {} does not exist.'.format(self._output_filepath))
         print(self.filename_to_display(self.current_file_linted), file=output_stream)
         print(result, file=output_stream)
         if self._output_filepath:

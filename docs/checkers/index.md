@@ -1036,7 +1036,7 @@ class.
 When using inheritance, we should call the `__init__` method of the parent class and not of some
 unrelated class.
 
-```{literalinclude} /../examples/pylint/W0233_non_parent_init.py
+```{literalinclude} /../examples/pylint/W0233_non_parent_init_called.py
 ```
 
 To fix this, call the `__init__` method of the parent class.
@@ -1541,23 +1541,6 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
         print(lst1[i] + lst2[i])
 ```
 
-
-**Note**:
-If the iteration variable of a for loop is shadowed by the iteration variable inside a list
-comprehension, this checker may not work properly and report a false error.
-
-Example:
-
-```python
-def f(lst):
-    s = 0
-    for i in range(len(lst)):  # Checker will detect an error on this line even though there is none.
-        lst = [i for i in range(i)]
-        for x in lst:
-            s += x
-    return s
-```
-
 ### For Target Subscript (E9984) [](#E9984)
 
 This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the
@@ -1565,7 +1548,7 @@ loop variable and the list being iterated over.
 
 Examples:
 
-```{literalinclude} /../examples/custom_checkers/e9984_for_target_subscript.py
+```{literalinclude} /../examples/custom_checkers/e9984_invalid_for_target.py
 ---
 lines: 5-10
 ---
@@ -1674,6 +1657,28 @@ class ExampleClass:
         """Initialize a new instance of this class."""
         self.inst_attr = 'hi'
         self.inst_attr2 = True
+```
+
+### Missing space in doctest (E9973) [](#E9973)
+
+This error occurs when a doctest found in the docstring of a function is not followed by a space.
+In this case the doctest will not actually be parsed. 
+
+Example:
+```{literalinclude} /../examples/custom_checkers/e9973_missing_space_in_doctest.py
+---
+lines: 4-9
+---
+```
+
+This can simply be corrected by adding a space before the code be executed:
+```
+def f(x: int) -> int:
+    """Return one plus x.
+
+    >>> f(10)  # Adding a space will allow the doctest to be parsed. 
+    11
+    """
 ```
 
 ### Pycodestyle errors (E9989) [](#E9989)

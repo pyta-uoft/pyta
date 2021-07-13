@@ -8,7 +8,7 @@ install:
   - sudo apt-get install graphviz
   - pip install -e .[dev]
 script:
-  - python -m pytest --cov python_ta --cov-report term-missing --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests
+  - python -m pytest --cov python_ta --cov-config=.coveragerc --cov-report term-missing --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests
 after_success:
   - coveralls
 notifications:

@@ -16,7 +16,7 @@ setup(
     license='MIT',
     packages=['python_ta', 'python_ta.reporters', 'python_ta.checkers',
               'python_ta.cfg', 'python_ta.contracts',
-              'python_ta.patches', 'python_ta.parser',
+              'python_ta.patches',
               'python_ta.transforms', 'python_ta.typecheck', 'python_ta.util'],
     install_requires=[
         'astroid>=2.5,<2.6',

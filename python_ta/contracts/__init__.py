@@ -6,25 +6,33 @@ import inspect
 import wrapt
 
 
-# Can set to True to enable debug messages.
 DEBUG_CONTRACTS = False
+"""
+Set to True to display debugging messages when checking contracts.
+"""
 
 
 class PyTAContractError(Exception):
     """Error raised when a PyTA contract assertion is violated."""
 
 
-def check_all_contracts(*args, decorate_main=True) -> None:
-    """Automatically check contracts for all functions and classes in the given module.
+def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
+    """Automatically check contracts for all functions and classes in the given modules.
 
-    When called with no arguments, the current module's functions and classes are checked.
+    By default (when called with no arguments), the current module is used.
+
+    Args:
+        *mod_names: The names of modules to check contracts for. These modules must have been
+            previously imported.
+        decorate_main: True if the module being run (where __name__ == '__main__') should
+            have contracts checked.
     """
 
     modules = []
     if decorate_main:
         modules.append(sys.modules["__main__"])
 
-    for module_name in args:
+    for module_name in mod_names:
         modules.append(sys.modules.get(module_name, None))
 
     for module in modules:
@@ -32,15 +40,13 @@ def check_all_contracts(*args, decorate_main=True) -> None:
             # Module name was passed in incorrectly.
             continue
         for name, value in inspect.getmembers(module):
-            if inspect.isfunction(value):
+            if inspect.isfunction(value) or inspect.isclass(value):
                 module.__dict__[name] = check_contracts(value)
-            elif inspect.isclass(value):
-                add_class_invariants(value)
 
 
 @wrapt.decorator
-def check_contracts(wrapped, instance, args, kwargs):
-    """A decorator for automatically checking preconditions and type contracts for a function."""
+def _enable_function_contracts(wrapped, instance, args, kwargs):
+    """A decorator that enables checking contracts for a function."""
     try:
         if instance and inspect.isclass(instance):
             # This is a class method, so there is no instance.
@@ -49,6 +55,33 @@ def check_contracts(wrapped, instance, args, kwargs):
             return _check_function_contracts(wrapped, instance, args, kwargs)
     except PyTAContractError as e:
         raise AssertionError(str(e)) from None
+
+
+def check_contracts(func_or_class: Any) -> Callable:
+    """A decorator to enable contract checking for a function or class.
+
+    When used with a class, all methods defined within the class have contract checking enabled.
+
+    Example:
+
+        >>> from python_ta.contracts import check_contracts
+        >>> @check_contracts
+        ... def divide(x: int, y: int) -> int:
+        ...     \"\"\"Return x // y.
+        ...
+        ...     Preconditions:
+        ...        - y != 0
+        ...     \"\"\"
+        ...     return x // y
+    """
+    if inspect.isroutine(func_or_class):
+        return _enable_function_contracts(func_or_class)
+    elif inspect.isclass(func_or_class):
+        add_class_invariants(func_or_class)
+        return func_or_class
+    else:
+        # Default action
+        return func_or_class
 
 
 def add_class_invariants(klass: type) -> None:
@@ -60,11 +93,11 @@ def add_class_invariants(klass: type) -> None:
     # Update representation invariants from this class' docstring and those of its superclasses.
     rep_invariants = set()
 
-    # Iterate over all inherited classes except object
-    for cls in klass.__mro__[:-1]:
+    # Iterate over all inherited classes except builtins
+    for cls in reversed(klass.__mro__):
         if '__representation_invariants__' in cls.__dict__:
             rep_invariants = rep_invariants.union(cls.__representation_invariants__)
-        else:
+        elif cls.__module__ != 'builtins':
             rep_invariants.update(parse_assertions(cls, parse_token='Representation Invariant'))
 
     setattr(klass, '__representation_invariants__', rep_invariants)
@@ -82,7 +115,7 @@ def add_class_invariants(klass: type) -> None:
                 check_type(name, value, cls_annotations[name])
             except TypeError:
                 raise AssertionError(
-                    f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"')
+                    f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"') from None
 
         super(klass, self).__setattr__(name, value)
         curframe = inspect.currentframe()
@@ -93,7 +126,7 @@ def add_class_invariants(klass: type) -> None:
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
                 try:
-                    _check_invariants(self, rep_invariants, klass_mod.__dict__)
+                    _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
                     raise AssertionError(str(e)) from None
 
@@ -103,7 +136,7 @@ def add_class_invariants(klass: type) -> None:
                 # Don't check rep invariants for staticmethod and classmethod
                 setattr(klass, attr, check_contracts(value))
             else:
-                setattr(klass, attr, _instance_method_wrapper(value, rep_invariants))
+                setattr(klass, attr, _instance_method_wrapper(value, klass))
 
     klass.__setattr__ = new_setattr
 
@@ -143,18 +176,18 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def _instance_method_wrapper(wrapped, rep_invariants=None):
-    if rep_invariants is None:
-        return check_contracts
+def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-            klass_mod = sys.modules.get(type(instance).__module__)
+            if _instance_init_in_callstack(instance):
+                return r
+            _check_class_type_annotations(klass, instance)
+            klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
-                _check_invariants(instance, rep_invariants, klass_mod.__dict__)
-            _check_class_type_annotations(instance)
+                _check_invariants(instance, klass, klass_mod.__dict__)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
@@ -162,10 +195,31 @@ def _instance_method_wrapper(wrapped, rep_invariants=None):
 
     return wrapper(wrapped)
 
-def _check_class_type_annotations(instance: Any) -> None:
-    """Check that the type annotations for the class still hold.
+
+def _instance_init_in_callstack(instance: Any) -> bool:
+    """Return whether instance's init is part of the current callstack
+
+    Note: due to the nature of the check, externally defined __init__ functions with
+    'self' defined as the first parameter may pass this check.
     """
-    klass = instance.__class__
+    frame = inspect.currentframe().f_back
+    while frame:
+        frame_context_name = inspect.getframeinfo(frame).function
+        frame_context_self = frame.f_locals.get('self')
+        frame_context_vars = frame.f_code.co_varnames
+        if (frame_context_name == '__init__' and frame_context_self is instance
+                and frame_context_vars[0] == 'self'):
+            return True
+        frame = frame.f_back
+    return False
+
+
+def _check_class_type_annotations(klass: type, instance: Any) -> None:
+    """Check that the type annotations for the class still hold.
+
+    Precondition:
+        - isinstance(instance, klass)
+    """
     cls_annotations = typing.get_type_hints(klass)
 
     for attr, annotation in cls_annotations.items():
@@ -178,9 +232,12 @@ def _check_class_type_annotations(instance: Any) -> None:
                 f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"')
 
 
-def _check_invariants(instance, rep_invariants: Set[str], global_scope: dict) -> None:
+def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied.
+
     """
+    rep_invariants = getattr(klass, '__representation_invariants__', set())
+
     for invariant in rep_invariants:
         try:
             _debug(f'Checking representation invariant for {instance.__class__.__qualname__}: {invariant}')

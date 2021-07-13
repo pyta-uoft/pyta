@@ -5,7 +5,6 @@ from pylint.message import Message
 from collections import defaultdict, namedtuple
 from .node_printers import LineType, render_message
 
-OUTPUT_FILENAME = 'pyta_output'
 NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
 
 # Checks to enable for basic_check (trying to find errors
@@ -80,6 +79,7 @@ class PlainReporter(BaseReporter):
     style_err_title = '=== Style/convention errors (fix: before submission) ==='
     no_err_message = 'None!' + _BREAK * 2
     no_snippet = 'Nothing here.' + _BREAK * 2
+    OUTPUT_FILENAME = 'pyta_output'
 
     def __init__(self, source_lines=None, module_name=''):
         """Reminder: see pylint BaseReporter for other instance variables init.
@@ -141,7 +141,7 @@ class PlainReporter(BaseReporter):
         # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
         correct_path = os.path.expanduser(output_filepath_arg)
         if os.path.isdir(correct_path):
-            correct_path = os.path.join(correct_path, OUTPUT_FILENAME)
+            correct_path = os.path.join(correct_path, self.OUTPUT_FILENAME)
 
         # Save output location and remove it if exists from previous run.
         self._output_filepath = correct_path

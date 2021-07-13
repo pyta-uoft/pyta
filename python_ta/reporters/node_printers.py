@@ -15,7 +15,7 @@ def render_generic(msg, source_lines=None):
         node = msg.node
         start_line, start_col = node.fromlineno, node.col_offset
 
-        if isinstance(node, astroid.FunctionDef) or isinstance(node, astroid.ClassDef):
+        if isinstance(node, (astroid.FunctionDef, astroid.ClassDef)):
             end_line, end_col = start_line, None
         else:
             end_line, end_col = node.end_lineno, node.end_col_offset

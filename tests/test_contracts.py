@@ -177,11 +177,6 @@ class CPU(Player):
         self.user = 'CPU'
 
 
-class HumanPlayer(Player):
-    def __init__(self):
-        self.user = 'Human'
-
-
 @check_contracts
 def _is_cpu(player: Player) -> bool:
     return player.user == 'CPU'
@@ -226,7 +221,7 @@ def test_no_suggestion_instance_as_instance() -> None:
 
     msg = str(excinfo.value)
 
-    part1, part2, part3 = 'Did you pass in', 'instead of', '(...)'
+    part1, part2, part3 = 'Did you pass in', 'instead of', '(...)?'
     assert part1 not in msg
     assert part2 not in msg
     assert part3 not in msg

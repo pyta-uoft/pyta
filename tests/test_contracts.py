@@ -187,21 +187,32 @@ def _is_cpu(player: Player) -> bool:
     return player.user == 'CPU'
 
 
-def test_type_not_instance_error() -> None:
-    """Test that the additional suggestion is added when the type of a class is passed in as an
+def test_class_not_instance_error() -> None:
+    """Test that the additional suggestion is added when the class type is passed in as the
     argument instead of its instance
 
     This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
     when changing the suggestion text.
     """
-
-    # Ternary assignment tricks the PyCharm linter into not recognizing the faulty argument
-    player = HumanPlayer if True else CPU()
     with pytest.raises(AssertionError) as excinfo:
-        _is_cpu(player)
+        _is_cpu(Player)
 
     msg = str(excinfo.value)
-    assert 'Did you mean to pass in an instance of' in msg
+    assert 'Did you pass in Player instead of Player(...)?' in msg
+
+
+def test_subclass_not_instance_error() -> None:
+    """Test that the additional suggestion is added when a subclass type is passed in as an
+    argument instead of its instance
+
+    This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
+    when changing the suggestion text.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        _is_cpu(CPU)
+
+    msg = str(excinfo.value)
+    assert 'Did you pass in CPU instead of CPU(...)?' in msg
 
 
 def test_no_suggestion_instance_as_instance() -> None:
@@ -210,11 +221,12 @@ def test_no_suggestion_instance_as_instance() -> None:
     This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
     when changing the suggestion text.
     """
-
-    # Ternary assignment tricks the PyCharm linter into not recognizing the faulty argument
-    player = str if True else CPU()
     with pytest.raises(AssertionError) as excinfo:
-        _is_cpu(player)
+        _is_cpu(str)
 
     msg = str(excinfo.value)
-    assert 'Did you mean to pass in an instance of' not in msg
+
+    part1, part2, part3 = 'Did you pass in', 'instead of', '(...)'
+    assert part1 not in msg
+    assert part2 not in msg
+    assert part3 not in msg

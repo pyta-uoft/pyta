@@ -182,11 +182,10 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
 def _get_argument_suggestions(arg: Any, annotation: type) -> str:
     """Returns potential suggestions for the given arg and its annotation"""
-    suggestions = ""
-    if isinstance(arg, type) and annotation in arg.mro():
-        suggestions += f'Did you mean to pass in an instance of {arg}?'
+    if isinstance(arg, type) and issubclass(arg, annotation):
+        return 'Did you pass in {cls} instead of {cls}(...)?'.format(cls=arg.__name__)
 
-    return suggestions
+    return ''
 
 
 def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:

@@ -3,16 +3,15 @@ import astroid
 from enum import Enum
 
 
-def render_message(msg, source_lines):
+def render_message(msg, node, source_lines):
     """Render a message based on type."""
     renderer = CUSTOM_MESSAGES.get(msg.symbol, render_generic)
-    yield from renderer(msg, source_lines)
+    yield from renderer(msg, node, source_lines)
 
 
-def render_generic(msg, source_lines=None):
+def render_generic(msg, node=None, source_lines=None):
     """Default rendering for a message."""
-    if hasattr(msg, 'node') and msg.node is not None:
-        node = msg.node
+    if node is not None:
         start_line, start_col = node.fromlineno, node.col_offset
         end_line, end_col = node.end_lineno, node.end_col_offset
 
@@ -36,14 +35,14 @@ def render_generic(msg, source_lines=None):
         yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_missing_docstring(msg, source_lines=None):
+def render_missing_docstring(_msg, node, source_lines=None):
     """Render a missing docstring message."""
-    if isinstance(msg.node, astroid.Module):
+    if isinstance(node, astroid.Module):
         yield (None, slice(None, None), LineType.DOCSTRING, '"""YOUR DOCSTRING HERE"""')
         yield from render_context(1, 3, source_lines)
-    elif isinstance(msg.node, astroid.ClassDef) or isinstance(msg.node, astroid.FunctionDef):
-        start = msg.node.fromlineno
-        end = msg.node.body[0].fromlineno
+    elif isinstance(node, astroid.ClassDef) or isinstance(node, astroid.FunctionDef):
+        start = node.fromlineno
+        end = node.body[0].fromlineno
         yield from render_context(start, end, source_lines)
         # Calculate indentation
         body = source_lines[end-1]
@@ -53,7 +52,7 @@ def render_missing_docstring(msg, source_lines=None):
         yield from render_context(end, end + 2, source_lines)
 
 
-def render_trailing_newlines(msg, source_lines=None):
+def render_trailing_newlines(msg, _node, source_lines=None):
     """Render a trailing newlines message."""
     start_line = msg.line - 1
     yield from render_context(start_line - 2, start_line, source_lines)
@@ -68,9 +67,8 @@ def render_context(start, stop, source_lines):
                 for line in range(start, stop))
 
 
-def render_missing_return_type(msg, source_lines=None):
+def render_missing_return_type(_msg, node, source_lines=None):
     """Render a type annotation return message."""
-    node = msg.node
     start_line, start_col = node.fromlineno, node.parent.col_offset
     end_line, end_col = node.end_lineno, node.end_col_offset
 
@@ -82,14 +80,13 @@ def render_missing_return_type(msg, source_lines=None):
     yield from render_context(end_line + 1, end_line + 3, source_lines)
 
 
-def render_too_many_arguments(msg, source_lines=None):
+def render_too_many_arguments(msg, node, source_lines=None):
     """Render a too many arguments message."""
-    # msg is an Functiondef node so replace it with its Arguments node
-    msg = msg._replace(node=msg.node.args)
-    yield from render_generic(msg, source_lines)
+    # node is a FunctionDef node so replace it with its Arguments child
+    yield from render_generic(msg, node.args, source_lines)
 
 
-def render_missing_space_in_doctest(msg, source_lines=None):
+def render_missing_space_in_doctest(msg, _node, source_lines=None):
     """Render a missing space in doctest message"""
     line = msg.line
 

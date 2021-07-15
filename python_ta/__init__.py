@@ -27,12 +27,12 @@ import importlib.util
 import os
 import sys
 import tokenize
+from typing import Generator
 import webbrowser
 
 import pylint.lint
 import pylint.utils
 from pylint.utils.pragma_parser import OPTION_PO
-from pylint.config.option import VALIDATORS, _call_validator
 
 from astroid import modutils, MANAGER
 
@@ -75,14 +75,9 @@ def _check(module_name='', level='all', local_config='', output=None):
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute or relative path to capture pyta data output. Default std out.
     """
-
-    # Add reporters to an internal pylint data structure, for use with setting
-    # custom pyta options in a Tuple, before (re)setting reporter.
-    for reporter in REPORTERS:
-        VALIDATORS[reporter.__name__] = reporter
     linter = reset_linter(config=local_config)
-
-    current_reporter = reset_reporter(linter, output)
+    current_reporter = linter.reporter
+    current_reporter.set_output(output)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -91,7 +86,7 @@ def _check(module_name='', level='all', local_config='', output=None):
 
     # Try to check file, issue error message for invalid files.
     try:
-        for locations in _get_valid_files_to_check(current_reporter, module_name):
+        for locations in _get_valid_files_to_check(module_name):
             f_paths = []  # Paths to files for data submission
             errs = []  # Errors caught in files for data submission
             config = {}  # Configuration settings for data submission
@@ -100,22 +95,20 @@ def _check(module_name='', level='all', local_config='', output=None):
                     continue  # Check the other files
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
+                # Reuse the same reporter each time to accumulate the results across different files.
                 linter = reset_linter(config=local_config, file_linted=file_py)
-                # Assume the local config will NOT set a new reporter.
                 linter.set_reporter(current_reporter)
-                current_reporter.register_file(file_py)
                 module_name = os.path.splitext(os.path.basename(file_py))[0]
                 if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
                     del MANAGER.astroid_cache[module_name]
                 linter.check(file_py)  # Lint !
                 current_reporter.print_messages(level)
-                current_reporter.reset_messages()  # Clear lists for any next file.
                 if linter.config.pyta_file_permission:
                     f_paths.append(file_py)  # Appending paths for upload
                 print('[INFO] File: {} was checked using the configuration file: {}'.format(
-                    file_py, linter.config_file))
+                    file_py, linter.config_file), file=sys.stderr)
             if linter.config.pyta_error_permission:
-                errs = [msg for msg in current_reporter.messages_by_file]
+                errs = list(current_reporter.messages.values())
             if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
                 # Checks if default configuration was used without changing options through the local_config argument
                 if linter.config_file[-19:-10] != "python_ta" or local_config != '':
@@ -125,7 +118,7 @@ def _check(module_name='', level='all', local_config='', output=None):
                                  config=config,
                                  url=linter.config.pyta_server_address,
                                  version=__version__)
-        current_reporter.output_blob()
+        linter.generate_reports()
         return current_reporter
     except Exception as e:
         print('[ERROR] Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).')
@@ -168,11 +161,6 @@ def reset_linter(config=None, file_linted=None):
     """
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
-        ('pyta-reporter',
-            {'default': 'ColorReporter',
-             'type': 'string',
-             'metavar': '<pyta_reporter>',
-             'help': 'Output messages with a specific reporter.'}),
         ('pyta-type-check',
             {'default': False,
              'type': 'yn',
@@ -257,19 +245,6 @@ def reset_linter(config=None, file_linted=None):
     return linter
 
 
-def reset_reporter(linter, output_filepath=None):
-    """Initialize a reporter with config options.
-
-    Output is an absolute file path to output into.
-    """
-    # Determine the type of reporter from the config setup.
-    current_reporter = _call_validator(linter.config.pyta_reporter,
-                                       None, None, None)
-    current_reporter.set_output_filepath(output_filepath)
-    linter.set_reporter(current_reporter)
-    return current_reporter
-
-
 def get_file_paths(rel_path):
     """A generator for iterating python files within a directory.
     `rel_path` is a relative path to a file or directory.
@@ -319,9 +294,8 @@ def _verify_pre_check(filepath):
     return True
 
 
-def _get_valid_files_to_check(reporter, module_name):
-    """A generator for all valid files to check. Uses a reporter to output
-    messages when an input cannot be checked.
+def _get_valid_files_to_check(module_name: str) -> Generator[str, None, None]:
+    """A generator for all valid files to check.
     """
     # Allow call to check with empty args
     if module_name == '':
@@ -339,7 +313,6 @@ def _get_valid_files_to_check(reporter, module_name):
     # Filter valid files to check
     for item in module_name:
         if not isinstance(item, str):  # Issue errors for invalid types
-            print(reporter.filename_to_display(item))
             print('No check run on file `{}`, with invalid type. Must be type: str.\n'.format(item))
         elif os.path.isdir(item):
             yield item
@@ -350,10 +323,8 @@ def _get_valid_files_to_check(reporter, module_name):
                 if os.path.exists(filepath):
                     yield filepath
                 else:
-                    print(reporter.filename_to_display(item))
                     print('Could not find the file called, `{}`\n'.format(item))
             except ImportError:
-                print(reporter.filename_to_display(item))
                 print('Could not find the file called, `{}`\n'.format(item))
         else:
             yield item  # Check other valid files.

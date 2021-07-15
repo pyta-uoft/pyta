@@ -1,77 +1,17 @@
-import sys
-import os
-from pylint.reporters import BaseReporter
-from pylint.message import Message
-from collections import defaultdict, namedtuple
-from .node_printers import LineType, render_message
+from typing import Dict, List
 
-NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
-
-# Checks to enable for basic_check (trying to find errors
-# and forbidden constructs only)
-ERROR_CHECKS = [
-    'used-before-assignment',
-    'undefined-variable',
-    'undefined-loop-variable',
-    'not-in-loop',
-    'return-outside-function',
-    'duplicate-key',
-    'unreachable',
-    'pointless-statement',
-    'pointless-string-statement',
-    'no-member',
-    'not-callable',
-    'assignment-from-no-return',
-    'assignment-from-none',
-    'no-value-for-parameter',
-    'too-many-function-args',
-    'invalid-sequence-index',
-    'invalid-slice-index',
-    'invalid-unary-operand-type',
-    'unsupported-binary-operation',
-    'unsupported-membership-test',
-    'unsubscriptable-object',
-    'unbalanced-tuple-unpacking',
-    'unpacking-non-sequence',
-    'function-redefined',
-    'duplicate-argument-name',
-    'import-error',
-    'no-name-in-module',
-    'non-parent-init-called',
-    'access-member-before-definition',
-    'method-hidden',
-    'unexpected-special-method-signature',
-    'inherit-non-class',
-    'duplicate-except',
-    'bad-except-order',
-    'raising-bad-type',
-    'raising-non-exception',
-    'catching-non-exception',
-    'bad-indentation',
-    'E9996',
-    'E9991',
-    'E0001',
-    'E9999',
-    'unexpected-keyword-arg',
-    'not-an-iterable',
-    'nonexistent-operator',
-    'invalid-length-returned',
-    'abstract-method',
-    'self-cls-assignment',
-    'dict-iter-missing-items'
-]
+from pylint.interfaces import IReporter
+from .core import NewMessage, PythonTaReporter
 
 
-# Messages that should be highlighted specially
-special = {'missing-docstring',
-           'trailing-newlines'}
+class PlainReporter(PythonTaReporter):
+    """Plain text reporter."""
+    __implements__ = IReporter
+    name = 'PlainReporter'
 
-# Messages without a source code line to highlight
-no_hl = {'invalid-name'}
-# the "Invalid module name" subsection of "invalid-name" belongs here
+    OUTPUT_FILENAME = 'pyta_report.txt'
 
-
-class PlainReporter(BaseReporter):
+    # Rendering constants
     _SPACE = ' '
     _BREAK = '\n'
     _COLOURING = {}
@@ -79,95 +19,18 @@ class PlainReporter(BaseReporter):
     style_err_title = '=== Style/convention errors (fix: before submission) ==='
     no_err_message = 'None!' + _BREAK * 2
     no_snippet = 'Nothing here.' + _BREAK * 2
-    OUTPUT_FILENAME = 'pyta_output'
 
-    def __init__(self, source_lines=None, module_name=''):
-        """Reminder: see pylint BaseReporter for other instance variables init.
+    def print_messages(self, level: str = 'all') -> None:
+        """Print messages for the current file.
+
+        If level == 'all', both errors and style errors are displayed. Otherwise,
+        only errors are displayed.
         """
-        super().__init__()
-        self._error_messages = []
-        self._style_messages = []
-        self._source_lines = source_lines or []
-        self._module_name = module_name
-        self._sorted_error_messages = defaultdict(list)
-        self._sorted_style_messages = defaultdict(list)
-        self._output_filepath = None
-        self.current_file_linted = None
+        error_msgs, style_msgs = self.group_messages(self.messages[self.current_file])
 
-    def reset_sorted_messages(self):
-        """Reset the reporter's sorted messages, for multiple files."""
-        self._sorted_error_messages.clear()
-        self._sorted_style_messages.clear()
-
-    def reset_messages(self):
-        """Reset the reporter's messages, for multiple files."""
-        self._error_messages = []
-        self._style_messages = []
-        self.reset_sorted_messages()
-
-    def handle_message(self, msg):
-        """Handle a new message triggered on the current file."""
-        if msg.msg_id in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
-            self._error_messages.append(msg)
-        else:
-            self._style_messages.append(msg)
-
-    def handle_node(self, msg, node):
-        """Add node attribute to last message."""
-        if msg.msgid in ERROR_CHECKS or msg.symbol in ERROR_CHECKS:
-            if (self._error_messages and
-                    self._error_messages[-1].msg_id == msg.msgid and
-                    not isinstance(self._error_messages[-1], NewMessage)):
-                self._error_messages[-1] = NewMessage(*self._error_messages[-1], node, '')
-        else:
-            if (self._style_messages and
-                    self._style_messages[-1].msg_id == msg.msgid and
-                    not isinstance(self._style_messages[-1], NewMessage)):
-                self._style_messages[-1] = NewMessage(*self._style_messages[-1], node, '')
-
-    def sort_messages(self):
-        """Sort the messages by their type (message id)."""
-        self.reset_sorted_messages()
-        for msg in self._error_messages:
-            self._sorted_error_messages[msg.msg_id].append(msg)
-        for msg in self._style_messages:
-            self._sorted_style_messages[msg.msg_id].append(msg)
-
-    def set_output_filepath(self, output_filepath_arg):
-        """Save location to output pyta messages, if any."""
-        if output_filepath_arg is None:
-            return
-
-        # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
-        correct_path = os.path.expanduser(output_filepath_arg)
-        if os.path.isdir(correct_path):
-            correct_path = os.path.join(correct_path, self.OUTPUT_FILENAME)
-
-        # Save output location and remove it if exists from previous run.
-        self._output_filepath = correct_path
-        # Remove existing file to prepare for appending messages from recursive
-        # linting of files.
-        if os.path.exists(correct_path):
-            os.remove(correct_path)
-
-    def filename_to_display(self, filename):
-        """Display the file name, currently consistent with pylint format."""
-        return '{}'.format(filename)
-
-    def register_file(self, filename):
-        """Register information of the linted file, for later use by reporter"""
-        self.current_file_linted = filename
-
-        # Augment the reporter with the source code.
-        with open(filename, encoding='utf-8') as f:
-            self._source_lines = [
-                line.rstrip() for line in f.readlines()]
-
-    def print_messages(self, level='all'):
-        self.sort_messages()
-
-        result = self._colourify('code-heading', self.code_err_title + self._BREAK)
-        messages_result = self._colour_messages_by_type(style=False)
+        result = 'PyTA Report for: ' + self._colourify('bold', self.current_file) + self._BREAK
+        result += self._colourify('code-heading', self.code_err_title + self._BREAK)
+        messages_result = self._colour_messages_by_type(error_msgs)
         if messages_result:
             result += messages_result
         else:
@@ -175,43 +38,24 @@ class PlainReporter(BaseReporter):
 
         if level == 'all':
             result += self._colourify('style-heading', self.style_err_title + self._BREAK)
-            messages_result = self._colour_messages_by_type(style=True)
+            messages_result = self._colour_messages_by_type(style_msgs)
             if messages_result:
                 result += messages_result
             else:
                 result += self.no_err_message
 
-        output_stream = sys.stdout
-        if self._output_filepath:
-            try:
-                output_stream = open(self._output_filepath, 'a')
-            except FileNotFoundError:
-                raise IOError('path {} does not exist.'.format(self._output_filepath))
-        print(self.filename_to_display(self.current_file_linted), file=output_stream)
-        print(result, file=output_stream)
-        if self._output_filepath:
-            output_stream.close()
+        self.writeln(result)
 
-    def _colour_messages_by_type(self, style=False):
+    def _colour_messages_by_type(self, messages: Dict[str, List[NewMessage]]) -> str:
         """
         Return string of properly formatted members of the messages dict
         (error or style) indicated by style.
-
-        :param bool style: True iff messages is a dict of style messages
-        :return: str
         """
-        if style:
-            messages = self._sorted_style_messages
-            fore_colour = 'style-name'
-        else:
-            messages = self._sorted_error_messages
-            fore_colour = 'code-name'
-
         max_messages = self.linter.config.pyta_number_of_messages
 
         result = ''
         for msg_id in messages:
-            result += self._colourify(fore_colour, msg_id)
+            result += self._colourify('bold', msg_id)
             result += self._colourify('bold', ' ({})  '.format(messages[msg_id][0].symbol))
             result += 'Number of occurrences: {}.'.format(len(messages[msg_id]))
             if max_messages != float('inf') and max_messages < len(messages[msg_id]):
@@ -228,105 +72,7 @@ class PlainReporter(BaseReporter):
                 result += self._colourify('bold', '[Line {}] {}'
                             .format(msg.line, msg_truncated)) + self._BREAK
 
-                try:
-                    if not (msg.symbol in no_hl or
-                    msg.msg.startswith('Invalid module')):
-                        code_snippet = self._build_snippet(msg)
-                        result += code_snippet
-                        try:
-                            messages[msg_id][i] = msg._replace(snippet=code_snippet)
-                        except ValueError:
-                            pass
-                except AttributeError:
-                    pass
+                result += msg.snippet
                 result += self._BREAK
 
         return result
-
-    def _build_snippet(self, msg):
-        """
-        Generates and returns a code snippet for the given Message object,
-        formatted appropriately according to line type.
-
-        :param Message msg: the message for which a code snippet is built
-        :return: str
-        """
-        code_snippet = ''
-
-        for line, slice_, line_type, text in render_message(msg, self._source_lines):
-            code_snippet += self._add_line(line, line_type, slice_, text)
-
-        return code_snippet
-
-    def _add_line(self, n, linetype, slice_, text=''):
-        """
-        Format given source code line as specified and return as str.
-
-        Called by _colour_messages_by_type, relies on _colourify.
-        Now applicable both to ColorReporter and HTMLReporter.
-
-        :param int n: index of line in self._source_lines to add
-        :param LineType linetype: enum member indicating way to format line
-        :return: str
-        """
-        snippet = self._add_line_number(n, linetype)
-
-        # Set starting and ending columns.
-        start_col = slice_.start or 0
-        end_col = slice_.stop or len(text)
-
-        if linetype == LineType.ERROR:
-            if text[:start_col]:
-                snippet += self._colourify('black', text[:start_col])
-            snippet += self._colourify('highlight', text[slice_])
-            if text[end_col:]:
-                snippet += self._colourify('black', text[end_col:])
-        elif linetype == LineType.CONTEXT:
-            snippet += self._colourify('grey', text)
-        elif linetype == LineType.OTHER:
-            snippet += text
-        elif linetype == LineType.DOCSTRING:
-            space_c = len(text) - len(text.lstrip(' '))
-            snippet += space_c * self._SPACE
-            snippet += self._colourify('highlight', text.lstrip(' '))
-
-        snippet += self._BREAK
-        return snippet
-
-    def _add_line_number(self, n, linetype):
-        """Return a formatted string displaying a line number."""
-        spaces = 2 * self._SPACE
-        if n is not None:
-            number = '{:>3}'.format(n)
-        else:
-            number = 3 * self._SPACE
-
-        if linetype == LineType.ERROR:
-            return spaces + self._colourify('gbold-line', number) + spaces
-        elif linetype == LineType.CONTEXT:
-            return spaces + self._colourify('grey-line', number) + spaces
-        elif linetype == LineType.OTHER:
-            return spaces + self._colourify('grey-line', number) + spaces
-        elif linetype == LineType.DOCSTRING:
-            return spaces + self._colourify('black-line', number) + spaces
-        else:
-            return spaces + number + spaces
-
-    @classmethod
-    def _colourify(cls, colour_class, text):
-        return text
-
-    _display = None
-
-    def output_blob(self):
-        """Override in reporters that output collections of messages once at
-        the end of linting all files, rather than stream to std.out"""
-        if self.current_file_linted is None:
-            # There were no files checked.
-            print('[ERROR]: No files were checked.')
-            return
-
-    @classmethod
-    def _vendor_wrap(self, colour_class, text):
-        """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
-        return text

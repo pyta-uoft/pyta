@@ -8,9 +8,8 @@ pyta-number-of-messages = 5
 # Set whether to use the type-checking checker.
 pyta-type-check = no
 
-# Set the output format. Available pyta formats are: ColorReporter,
-# PlainReporter, HTMLReporter, StatReporter, PositionReporter
-pyta-reporter = HTMLReporter
+# (DEPRECATED: Use output-format option below.) Set the [REPORTS] output-format option instead.
+# pyta-reporter = HTMLReporter
 
 # Set the location of the template for HTMLreporter.
 pyta-template-file = template.html
@@ -24,6 +23,11 @@ pyta-file-permission = no
 # Server address for data submission participation.
 pyta-server-address = http://127.0.0.1:5000
 
+[REPORTS]
+# The type of reporter to use to display results. Available PyTA classes are
+# PlainReporter, ColorReporter, HTMLReporter, JSONReporter.
+# Replaces the pyta-reporter option.
+output-format = python_ta.reporters.HTMLReporter
 
 [ELIF]
 

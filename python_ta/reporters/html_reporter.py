@@ -1,6 +1,6 @@
 import os
+import sys
 import webbrowser
-from collections import defaultdict, namedtuple
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from jinja2 import Environment, FileSystemLoader
@@ -10,70 +10,59 @@ from base64 import b64encode
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
+from pylint.interfaces import IReporter
+from pylint.reporters.ureports.nodes import BaseLayout
 
-from .color_reporter import ColorReporter
+from .core import PythonTaReporter
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
-class HTMLReporter(ColorReporter):
-    _COLOURING = {'black': '<span class="black">',
-                  'black-line': '<span class="black line-num">',
-                  'bold': '<span>',
-                  'code-heading': '<span>',
-                  'style-heading': '<span>',
-                  'code-name': '<span>',
-                  'style-name': '<span>',
-                  'highlight': '<span class="highlight-pyta">',
-                  'grey': '<span class="grey">',
-                  'grey-line': '<span class="grey line-num">',
-                  'gbold': '<span class="gbold">',
-                  'gbold-line': '<span class="gbold line-num">',
-                  'reset': '</span>'}
+
+class HTMLReporter(PythonTaReporter):
+    """Reporter that displays results in HTML form.
+
+    By default, automatically opens the report in a web browser.
+    """
+    __implements__ = IReporter
+    name = 'HTMLReporter'
+
+    _COLOURING = {
+        'black': '<span class="black">',
+        'black-line': '<span class="black line-num">',
+        'bold': '<span>',
+        'code-heading': '<span>',
+        'style-heading': '<span>',
+        'code-name': '<span>',
+        'style-name': '<span>',
+        'highlight': '<span class="highlight-pyta">',
+        'grey': '<span class="grey">',
+        'grey-line': '<span class="grey line-num">',
+        'gbold': '<span class="gbold">',
+        'gbold-line': '<span class="gbold line-num">',
+        'reset': '</span>'
+    }
+
+    no_err_message = 'None!'
+    no_snippet = 'Nothing here.'
     code_err_title = 'Code Errors or Forbidden Usage (fix: high priority)'
     style_err_title = 'Style or Convention Errors (fix: before submission)'
-    OUTPUT_FILENAME = 'pyta_output.html'
+    OUTPUT_FILENAME = 'pyta_report.html'
 
-    def __init__(self, source_lines=None, module_name=''):
-        super().__init__(source_lines, module_name)
-        self.messages_by_file = []
-
-    def _messages_shown(self, sorted_messages):
-        """Trim the amount of messages according to the default number.
-        Add information about the number of occurrences vs number shown."""
-        MessageSet = namedtuple('MessageSet', 'shown occurrences messages')
-        ret_sorted = defaultdict()
-        for message_key in sorted_messages:
-            message_list = []
-            for message_tuple_i in sorted_messages[message_key]:
-                # Limit the number of messages shown
-                if len(message_list) < self.linter.config.pyta_number_of_messages:
-                    message_list.append(message_tuple_i)
-            ret_sorted[message_key] = MessageSet(shown=len(message_list),
-                                                 occurrences=len(sorted_messages[message_key]),
-                                                 messages=message_list)
-        return dict(ret_sorted)
-
-    # Override this method
     def print_messages(self, level='all'):
-        # Sort the messages.
-        self.sort_messages()
-        # Call these two just to fill snippet attribute of Messages
-        # (and also to fix weird bad-whitespace thing):
-        self._colour_messages_by_type(style=False)
-        self._colour_messages_by_type(style=True)
+        """Do nothing to print messages, since all are displayed in a single HTML file."""
 
-        MessageSet = namedtuple('MessageSet', 'filename code style')
-        append_set = MessageSet(filename=self.filename_to_display(self.current_file_linted),
-                               code=self._messages_shown(self._sorted_error_messages),
-                               style=self._messages_shown(self._sorted_style_messages))
-        self.messages_by_file.append(append_set)
+    def display_messages(self, layout: BaseLayout) -> None:
+        """Hook for displaying the messages of the reporter
 
-    def output_blob(self):
-        """Output to the template after all messages."""
-        if self.current_file_linted is None:
-            # There were no files checked.
-            print('[ERROR]: No files were checked.')
-            return
+        This will be called whenever the underlying messages
+        needs to be displayed. For some reporters, it probably
+        doesn't make sense to display messages as soon as they
+        are available, so some mechanism of storing them could be used.
+        This method can be implemented to display them after they've
+        been aggregated.
+        """
+        grouped_messages = \
+            {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
 
         template_f = self.linter.config.pyta_template_file
         template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(template_f)
@@ -88,20 +77,15 @@ class HTMLReporter(ColorReporter):
         dt = str(datetime.now().strftime('%a. %b. %d %Y, %I:%M:%S %p'))
 
         # Render the jinja template
-        rendered_template = template.render(date_time=dt, reporter=self)
-        rendered_template = rendered_template.encode('utf8')
+        rendered_template = template.render(date_time=dt, reporter=self,
+                                            grouped_messages=grouped_messages)
 
         # If a filepath was specified, write to the file
-        if self._output_filepath:
-            self._write_html_to_file(rendered_template)
+        if self.out is not sys.stdout:
+            self.writeln(rendered_template)
         else:
+            rendered_template = rendered_template.encode('utf8')
             self._open_html_in_browser(rendered_template)
-
-    def _write_html_to_file(self, html: bytes) -> None:
-        """ Write the html file to the specified output path. """
-        output_path = os.path.join(os.getcwd(), self._output_filepath)
-        with open(output_path, 'wb') as f:
-            f.write(html)
 
     def _open_html_in_browser(self, html: bytes) -> None:
         """
@@ -128,11 +112,21 @@ class HTMLReporter(ColorReporter):
         server.server_close()
 
     @classmethod
-    def _vendor_wrap(self, colour_class, text):
-        """Override in reporters that wrap snippet lines in vendor styles, e.g. pygments."""
+    def _colourify(cls, colour_class: str, text: str) -> str:
+        """Return a colourized version of text, using colour_class.
+        """
+        colour = cls._COLOURING[colour_class]
+        new_text = text.lstrip(' ')
+        space_count = len(text) - len(new_text)
+        new_text = new_text.replace(' ', cls._SPACE)
         if '-line' not in colour_class:
-            text = highlight(text, PythonLexer(),
-                            HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-'))
-        return text
+            new_text = highlight(
+                new_text, PythonLexer(),
+                HtmlFormatter(nowrap=True, lineseparator='', classprefix='pygments-')
+            )
 
-    _display = None
+        return (
+            (space_count * cls._SPACE) + colour +
+            new_text +
+            cls._COLOURING['reset']
+        )

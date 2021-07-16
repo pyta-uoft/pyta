@@ -5,16 +5,16 @@ import colorama
 from colorama import Fore, Back, Style
 import inflection
 import python_ta.transforms.setendings as setendings
-import os 
+import os
 
 colorama.init(strip=False, autoreset=True)
 
 
 def _wrap_color(code_string):
     """Wrap key parts in styling and resets.
-    Stying for each key part from, 
+    Stying for each key part from,
     (col_offset, fromlineno) to (end_col_offset, end_lineno).
-    Note: use this to set color back to default (on mac, and others?): 
+    Note: use this to set color back to default (on mac, and others?):
           Style.RESET_ALL + Style.DIM
     """
     ret = Style.BRIGHT + Fore.WHITE + Back.BLACK
@@ -61,11 +61,11 @@ def print_node(filename, node_class):
 
             out = [
                 first_line[:node.col_offset] +
-                
+
                 # The key part:
                 _wrap_color(first_line[node.col_offset:]) +
                 middle_lines +
-                _wrap_color(last_line[:node.end_col_offset]) + 
+                _wrap_color(last_line[:node.end_col_offset]) +
                 last_line[node.end_col_offset:]
             ]
         print(Style.DIM + '\n'.join(out))
@@ -73,7 +73,7 @@ def print_node(filename, node_class):
 
 
 if __name__ == '__main__':
-    for node_class in astroid.ALL_NODE_CLASSES:
+    for node_class in astroid.nodes.ALL_NODE_CLASSES:
         print('=== {} ==='.format(node_class.__name__))
         file_location = 'nodes/' + \
             inflection.underscore(node_class.__name__) + '.py'

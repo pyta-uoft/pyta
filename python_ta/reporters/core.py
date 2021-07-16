@@ -5,7 +5,7 @@ import os.path
 import sys
 from typing import Dict, Optional, List, Tuple
 
-from astroid.node_classes import NodeNG
+from astroid import NodeNG
 from pylint.message import Message
 from pylint.message.message_definition import MessageDefinition
 from pylint.reporters import BaseReporter

@@ -118,7 +118,7 @@ class PossiblyUndefinedChecker(BaseChecker):
 
         return assigns.difference(kills)
 
-    def get_nodes(self, statement: astroid.node_classes.NodeNG) -> Generator[astroid.node_classes.NodeNG, None, None]:
+    def get_nodes(self, statement: astroid.NodeNG) -> Generator[astroid.NodeNG, None, None]:
         multiple_nodes = lambda nodes : chain.from_iterable(self.get_nodes(node) for node in nodes)
         if isinstance(statement, astroid.Assign):
             # RHS is evaluated before assigned in an assignment statement

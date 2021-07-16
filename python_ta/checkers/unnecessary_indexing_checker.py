@@ -2,9 +2,7 @@
 """
 from typing import List, Optional, Tuple, Union
 
-import sys
 import astroid
-from astroid.node_classes import NodeNG
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -47,7 +45,7 @@ def _is_unnecessary_indexing(node: astroid.For) -> bool:
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
 
 
-def _iterable_if_range(node: NodeNG) -> Optional[str]:
+def _iterable_if_range(node: astroid.NodeNG) -> Optional[str]:
     """Return the iterable's name if this node is in "range" form, or None otherwise.
 
     Check for three forms:
@@ -104,21 +102,12 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     """
     iterable = _iterable_if_range(for_node.iter)
 
-    if sys.version_info >= (3, 9):
-        return (
-                isinstance(index_node.parent, astroid.Subscript) and
-                isinstance(index_node.parent.value, astroid.Name) and
-                index_node.parent.value.name == iterable and
-                index_node.parent.ctx == astroid.Load
-        )
-    else:
-        return (
-                isinstance(index_node.parent, astroid.Index) and
-                isinstance(index_node.parent.parent, astroid.Subscript) and
-                isinstance(index_node.parent.parent.value, astroid.Name) and
-                index_node.parent.parent.value.name == iterable and
-                index_node.parent.parent.ctx == astroid.Load
-        )
+    return (
+        isinstance(index_node.parent, astroid.Subscript) and
+        isinstance(index_node.parent.value, astroid.Name) and
+        index_node.parent.value.name == iterable and
+        index_node.parent.ctx == astroid.Load
+    )
 
 
 def _is_redundant(index_node: Union[astroid.AssignName, astroid.Name], for_node: astroid.For) -> bool:
@@ -146,7 +135,7 @@ def _index_name_nodes(index: str, for_node: astroid.For) -> List[Union[astroid.A
             if name_node.name == index and name_node != for_node.target]
 
 
-def _scope_lookup(node: astroid.Name) -> Optional[NodeNG]:
+def _scope_lookup(node: astroid.Name) -> Optional[astroid.NodeNG]:
     """Look up the given name node's assigment node.
 
     This is a replacement for astroid's LocalsDictNodeNG._scope_lookup method, which doesn't

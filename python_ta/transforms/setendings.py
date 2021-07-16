@@ -27,10 +27,7 @@ within the _transform method.
 Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
-import sys
-
 import astroid
-from astroid.node_classes import NodeNG
 from astroid.transforms import TransformVisitor
 
 CONSUMABLES = " \n\t\\"
@@ -192,11 +189,15 @@ def init_register_ending_setters(source_code):
     ending_transformer = TransformVisitor()
 
     # Check consistency of astroid-provided fromlineno and col_offset attributes.
-    for node_class in astroid.ALL_NODE_CLASSES:
+    for node_class in astroid.nodes.ALL_NODE_CLASSES:
         ending_transformer.register_transform(
             node_class,
             fix_start_attributes,
-            lambda node: node.fromlineno is None or node.col_offset is None)
+            lambda node: (
+                getattr(node, 'fromlineno', None) is None or
+                getattr(node, 'col_offset', None) is None
+            )
+        )
 
     # Ad hoc transformations
     ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
@@ -211,8 +212,7 @@ def init_register_ending_setters(source_code):
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
 
-    if sys.version_info >= (3, 9):
-        ending_transformer.register_transform(astroid.Subscript, fix_subscript(source_code))
+    ending_transformer.register_transform(astroid.Subscript, fix_subscript(source_code))
 
     # Nodes where the source code must also be provided.
     # source_code and the predicate functions get stored in the TransformVisitor
@@ -359,9 +359,9 @@ def fix_start_attributes(node):
     """
     try:
         first_child = next(node.get_children())
-        if node.fromlineno is None:
+        if getattr(node, 'fromlineno', None) is None:
             node.fromlineno = first_child.fromlineno
-        if node.col_offset is None:
+        if getattr(node, 'col_offset', None) is None:
             node.col_offset = first_child.col_offset
 
     except StopIteration:
@@ -369,15 +369,15 @@ def fix_start_attributes(node):
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
         if statement is not node:
-            if node.fromlineno is None:
+            if getattr(node, 'fromlineno', None) is None:
                 node.fromlineno = statement.fromlineno
-            if node.col_offset is None:
+            if getattr(node, 'col_offset', None) is None:
                 node.col_offset = statement.col_offset
         else:
             # Enclosing statement is same as node, also does not have attributes set
-            if node.fromlineno is None:
+            if getattr(node, 'fromlineno', None) is None:
                 node.fromlineno = 0
-            if node.col_offset is None:
+            if getattr(node, 'col_offset', None) is None:
                 node.col_offset = 0
     return node
 
@@ -638,11 +638,15 @@ def register(linter):
 
 def register_transforms(source_code, obj):
     # Check consistency of astroid-provided fromlineno and col_offset attributes.
-    for node_class in astroid.ALL_NODE_CLASSES:
+    for node_class in astroid.nodes.ALL_NODE_CLASSES:
         obj.register_transform(
             node_class,
             fix_start_attributes,
-            lambda node: node.fromlineno is None or node.col_offset is None)
+            lambda node: (
+                getattr(node, 'fromlineno', None) is None or
+                getattr(node, 'col_offset', None) is None
+            )
+        )
 
     # Ad hoc transformations
     obj.register_transform(astroid.Arguments, fix_arguments(source_code))

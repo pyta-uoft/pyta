@@ -95,7 +95,7 @@ def is_in_main(node):
 
     parent = node.parent
     try:
-        if (isinstance(parent, astroid.node_classes.If) and
+        if (isinstance(parent, astroid.If) and
               parent.test.left.name == '__name__' and
               parent.test.ops[0][1].value == '__main__'):
             return True

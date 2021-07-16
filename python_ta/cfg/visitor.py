@@ -1,5 +1,4 @@
 import astroid
-from astroid.node_classes import NodeNG
 from .graph import ControlFlowGraph, CFGBlock
 from typing import List, Tuple, Dict, Union, Optional
 
@@ -15,7 +14,7 @@ class CFGVisitor:
     cfgs: Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
-    _control_boundaries: List[Tuple[NodeNG, Dict[str, CFGBlock]]]
+    _control_boundaries: List[Tuple[astroid.NodeNG, Dict[str, CFGBlock]]]
 
     def __init__(self) -> None:
         super().__init__()
@@ -30,7 +29,7 @@ class CFGVisitor:
         else:
             raise AttributeError(f"'CFGVisitor' object has not attribute '{attr}'")
 
-    def visit_generic(self, node: NodeNG) -> None:
+    def visit_generic(self, node: astroid.NodeNG) -> None:
         """By default, add the expression to the end of the current block."""
         self._current_block.add_statement(node)
 

@@ -251,13 +251,6 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module('expr.py')
         self.set_and_check(module, astroid.Expr, expected)
 
-    def test_extslice(self):
-        if sys.version_info >= (3, 9):
-            self.skipTest('ExtSlice node is deprecated in Python 3.9')
-        expected = [(1, 1, 1, 8), (2, 2, 2, 14), (3, 3, 1, 8), (4, 4, 2, 15), (5, 6, 1, 8)]
-        module = self.get_file_as_module('ext_slice.py')
-        self.set_and_check(module, astroid.ExtSlice, expected)
-
     def test_for(self):
         expected = [(1, 4, 0, 8)]
         module = self.get_file_as_module('for.py')
@@ -299,15 +292,6 @@ class TestEndingLocations(unittest.TestCase):
         expected = [(1, 1, 0, 46), (2, 2, 0, 65), (3, 3, 0, 31), (4, 4, 0, 32)]
         module = self.get_file_as_module('import_from.py')
         self.set_and_check(module, astroid.ImportFrom, expected)
-
-    def test_index(self):
-        """Should include the enclosing brackets, e.g. "[1]" instead of "1".
-        """
-        if sys.version_info >= (3, 9):
-            self.skipTest('Index node is deprecated in Python 3.9')
-        expected = [(1, 1, 1, 5), (2, 2, 2, 10), (3, 3, 2, 15)]
-        module = self.get_file_as_module('index.py')
-        self.set_and_check(module, astroid.Index, expected)
 
     def test_keyword(self):
         """Include the name of the keyword, contained in 'node.arg' attribute.

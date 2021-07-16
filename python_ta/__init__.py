@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "1.8.0a1"  # Version number
+__version__ = "1.8.0a2"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins

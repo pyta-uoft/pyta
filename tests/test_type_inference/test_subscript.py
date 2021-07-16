@@ -9,7 +9,7 @@ from python_ta.transforms.type_inference_visitor import NoType
 settings.load_profile("pyta")
 
 
-@given(cs.subscript_node(cs.simple_homogeneous_list_node(min_size=1), cs.index_node()))
+@given(cs.subscript_node(cs.simple_homogeneous_list_node(min_size=1)))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_inference_list_subscript(node):
     """Test whether visitor properly set the type constraint of Subscript node representing list-index access."""

@@ -10,7 +10,6 @@ An assignment statement is redundant if it satisfies the following two propertie
 """
 from typing import Union
 import astroid
-from astroid.node_classes import NodeNG
 from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages

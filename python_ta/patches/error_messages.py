@@ -77,8 +77,7 @@ patch_data = {
              'R1716': 'You can simplify this boolean operation into a chained comparison. '
                       'Instead of \'a < b and b < c\', use \'a < b < c\'.',
              'R1721': 'When you want to convert a collection from one type into another, use the appropriate '
-                      'type constructor instead of a comprehension. E.g., use \'list(range(1, 10))\' instead of '
-                      '\'[x for x in range(1, 10)]\'.'
+                      'type constructor instead of a comprehension. Here, use %s instead.'
              },
         'NotChecker':
             {'C0113': 'Change "%s" to "%s". Removing the negation simplifies the expression.'
@@ -126,7 +125,6 @@ patch_data = {
             'W0211': 'The static method %r should not have \'self\' as the first parameter.',
             'W0212': 'Since %s starts with an underscore, it is considered private and so '
                      'should not be accessed outside of the class in which it is defined.',
-            'W0221': 'This method must take the same number of arguments as %s %r method.',
             'W0222': 'This method\'s parameters must have the same name, order, and default '
                      'arguments as %s %r method.',
             'W0223': 'The abstract method %r in class %r must be overridden within a '

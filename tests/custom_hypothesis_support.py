@@ -1,5 +1,4 @@
 import astroid
-from astroid.node_classes import NodeNG
 import hypothesis.strategies as hs
 from hypothesis import assume
 from python_ta.transforms.type_inference_visitor import TypeInferer
@@ -232,7 +231,7 @@ def slice_node(draw):
 
 
 @hs.composite
-def subscript_node(draw, value=None, slice=index_node()):
+def subscript_node(draw, value=None, slice=const_node(hs.integers())):
     value = value or subscriptable_expr
     node = astroid.Subscript()
     node.postinit(
@@ -355,7 +354,7 @@ subscriptable_expr = hs.one_of(
 
 
 # Helper functions for testing
-def _parse_text(source: Union[str, NodeNG], reset: bool = False) -> Tuple[astroid.Module, TypeInferer]:
+def _parse_text(source: Union[str, astroid.NodeNG], reset: bool = False) -> Tuple[astroid.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
     # TODO: apparently no literal syntax for empty set in Python3, also cannot do set()
     # TODO: Deal with special case later.
@@ -378,7 +377,7 @@ def _verify_type_setting(module, ast_class, expected_type):
     assert [expected_type] == result, f'{expected_type}, {result}'
 
 
-def lookup_type(inferer: TypeInferer, node: NodeNG, name: str) -> type:
+def lookup_type(inferer: TypeInferer, node: astroid.NodeNG, name: str) -> type:
     """Given a variable name, return its concrete type in the closest scope relative to given node.
     Should be used only for testing purposes.
     """

@@ -6,7 +6,7 @@ with open('README.md') as fh:
 
 setup(
     name='python-ta',
-    version='1.8.0a1',
+    version='1.8.0a2',
     description='Code checking tool for teaching Python',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,10 +19,10 @@ setup(
               'python_ta.patches',
               'python_ta.transforms', 'python_ta.typecheck', 'python_ta.util'],
     install_requires=[
-        'astroid>=2.5,<2.6',
+        'astroid>=2.6,<2.7',
         'hypothesis',
         'pycodestyle',
-        'pylint>=2.8,<2.9',
+        'pylint>=2.9,<2.10',
         'colorama',
         'six',
         'jinja2',

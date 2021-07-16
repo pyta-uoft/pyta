@@ -34,7 +34,6 @@ setup(
     ],
     extras_require={
         'dev': [
-            'coveralls',
             'graphviz',
             'inflection',
             'myst-parser',

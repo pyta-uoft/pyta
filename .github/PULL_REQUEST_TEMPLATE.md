@@ -39,6 +39,6 @@
 ## Checklist
 
 - [ ] I have performed a self-review of my own code.
-- [ ] I have verified that the TravisCI tests have passed. <!-- (check after opening pull request) -->
+- [ ] I have verified that the CI tests have passed. <!-- (check after opening pull request) -->
 - [ ] I have reviewed the test coverage changes reported on Coveralls. <!-- (check after opening pull request) -->
 - [ ] I have added tests for my changes. <!-- (delete this checklist item if not applicable) -->

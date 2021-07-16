@@ -13,7 +13,11 @@ def render_generic(msg, node=None, source_lines=None):
     """Default rendering for a message."""
     if node is not None:
         start_line, start_col = node.fromlineno, node.col_offset
-        end_line, end_col = node.end_lineno, node.end_col_offset
+
+        if isinstance(node, (astroid.FunctionDef, astroid.ClassDef)):
+            end_line, end_col = start_line, None
+        else:
+            end_line, end_col = node.end_lineno, node.end_col_offset
 
         # Display up to 2 lines before node for context:
         yield from render_context(start_line - 2, start_line, source_lines)

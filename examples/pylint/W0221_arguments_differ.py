@@ -13,8 +13,8 @@ class Animal:
 class Dog(Animal):
     """A man's best friend."""
 
-    def make_sound(self, state: str) -> None:  # Error: Parameter differs
-        if state == 'happy':
+    def make_sound(self, mood: str, state: str) -> None:  # Error: Parameter differs
+        if mood == 'happy':
             print("Woof Woof!")
         elif state == 'angry':
             print("Grrrrrrr!!")

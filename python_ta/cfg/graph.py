@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Generator, Optional, List, Set, Tuple, Union
-from astroid.node_classes import NodeNG, Continue, Break, Return
+from astroid import NodeNG, Continue, Break, Return
 
 
 class ControlFlowGraph:

@@ -67,7 +67,7 @@ def test_function_def_no_return(function_name, arguments, body):
 
 
 @given(cs.valid_identifier(), hs.lists(cs.valid_identifier(), min_size=1))
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow], deadline=None)
 def test_function_def_args_simple_return(function_name, arguments):
     """Test FunctionDef node visitors representing function definitions with paramater(s):
      return one of its arguments."""

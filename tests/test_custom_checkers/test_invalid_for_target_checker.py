@@ -187,7 +187,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
 
-def _extract_nodes(src: str, node_types: List[type]) -> List[astroid.node_classes.NodeNG]:
+def _extract_nodes(src: str, node_types: List[type]) -> List[astroid.NodeNG]:
     mod = astroid.parse(src)
 
     extracted_nodes = []

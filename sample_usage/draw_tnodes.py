@@ -1,6 +1,5 @@
 import sys
 import astroid
-from astroid.node_classes import NodeNG
 from graphviz import Graph
 from typing import *
 from typing import ForwardRef
@@ -69,7 +68,7 @@ def gen_graph_from_nodes(nodes, type_fail=None):
     graph.view('tnode_graph')
 
 
-def gen_graph_from_source(source: Union[str, NodeNG]):
+def gen_graph_from_source(source: Union[str, astroid.NodeNG]):
     module, inferer = _parse_text(source)
     gen_graph_from_nodes(inferer.type_constraints._nodes, _find_type_fail(module))
 

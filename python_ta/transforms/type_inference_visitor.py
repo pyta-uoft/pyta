@@ -125,7 +125,7 @@ class TypeInferer:
         """Instantiate a visitor to perform type inference on an AST.
         """
         type_visitor = TransformVisitor()
-        for klass in astroid.ALL_NODE_CLASSES:
+        for klass in astroid.nodes.ALL_NODE_CLASSES:
             if hasattr(self, f'visit_{klass.__name__.lower()}'):
                 type_visitor.register_transform(klass, getattr(self, f'visit_{klass.__name__.lower()}'))
             else:

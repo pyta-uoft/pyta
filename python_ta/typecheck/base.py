@@ -4,7 +4,7 @@ from typing import Callable, _GenericAlias, ForwardRef, _type_check
 from typing import IO # Needed for type_store
 import typing
 import astroid
-from astroid.node_classes import NodeNG
+from astroid import NodeNG
 from itertools import product
 from ..util.monad import Failable, failable_collect
 from python_ta.typecheck.errors import error_message

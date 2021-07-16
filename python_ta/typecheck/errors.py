@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import *
 from typing import _GenericAlias
 import astroid
-from astroid.node_classes import NodeNG
 from python_ta.utils import _get_name, _gorg
 
 
@@ -175,19 +174,19 @@ def subscript_error_message(node: astroid.Subscript) -> str:
     if subscript_gorg is list:
         slice_type = _get_name(node.slice.inf_type.getValue())
         slice_val = node.slice.value
-        slice_str = slice_val.as_string() if isinstance(slice_val, NodeNG) else str(slice_val)
+        slice_str = slice_val.as_string() if isinstance(slice_val, astroid.NodeNG) else str(slice_val)
         return f'You can only access elements of a list using an int. ' \
                f'You used {_correct_article(slice_type)}, {slice_str}.'
     elif subscript_gorg is tuple:
         slice_type = _get_name(node.slice.inf_type.getValue())
         slice_val = node.slice.value
-        slice_str = slice_val.as_string() if isinstance(slice_val, NodeNG) else str(slice_val)
+        slice_str = slice_val.as_string() if isinstance(slice_val, astroid.NodeNG) else str(slice_val)
         return f'You can only access elements of a tuple using an int. ' \
                f'You used {_correct_article(slice_type)}, {slice_str}.'
     elif subscript_gorg is dict:
         slice_type = _get_name(node.slice.inf_type.getValue())
         slice_val = node.slice.value
-        slice_str = slice_val.as_string() if isinstance(slice_val, NodeNG) else str(slice_val)
+        slice_str = slice_val.as_string() if isinstance(slice_val, astroid.NodeNG) else str(slice_val)
         return f'You tried to access an element of this dictionary using ' \
                f'{_correct_article(slice_type)}, {slice_str}, ' \
                f'but the keys are of type {_get_name(subscript_concrete_type.__args__[0])}.'

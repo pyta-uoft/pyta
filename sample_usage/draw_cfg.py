@@ -1,7 +1,6 @@
 import os.path
 from typing import Dict, Set
 import astroid
-from astroid.node_classes import NodeNG
 from astroid.builder import AstroidBuilder
 import graphviz
 from python_ta.cfg import CFGVisitor, ControlFlowGraph, CFGBlock
@@ -17,7 +16,7 @@ GRAPH_OPTIONS = {
 }
 
 
-def display(cfgs: Dict[NodeNG, ControlFlowGraph],
+def display(cfgs: Dict[astroid.NodeNG, ControlFlowGraph],
             filename: str, view: bool = True) -> None:
     graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
     for node, cfg in cfgs.items():

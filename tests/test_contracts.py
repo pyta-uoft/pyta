@@ -1,4 +1,5 @@
 from typing import List, Dict, Set
+import sys
 import pytest
 from python_ta.contracts import check_contracts
 
@@ -225,3 +226,29 @@ def test_no_suggestion_instance_as_instance() -> None:
     assert part1 not in msg
     assert part2 not in msg
     assert part3 not in msg
+
+
+def test_invalid_typing_generic_argument() -> None:
+    """Test that subclass checking on a type parameter that is typing's _GenericAlias does not
+    throw an error (as issubclass does not take in a _GenericAlias as its second argument).
+    """
+
+    @check_contracts
+    def unary(arg: List[str]) -> None:
+        return
+
+    with pytest.raises(AssertionError):
+        unary(dict)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="built-in generics not yet supported")
+def test_invalid_built_in_generic_argument() -> None:
+    """Test that subclass checking on a type parameter that is a GenericAlias does not
+    throw an error (as issubclass does not take in a GenericAlias as its second argument).
+    """
+    @check_contracts
+    def unary(arg: list[str]) -> None:
+        return
+
+    with pytest.raises(AssertionError):
+        unary(dict)

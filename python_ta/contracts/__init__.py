@@ -182,8 +182,11 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
 def _get_argument_suggestions(arg: Any, annotation: type) -> str:
     """Returns potential suggestions for the given arg and its annotation"""
-    if isinstance(arg, type) and issubclass(arg, annotation):
-        return 'Did you pass in {cls} instead of {cls}(...)?'.format(cls=arg.__name__)
+    try:
+        if isinstance(arg, type) and issubclass(arg, annotation):
+            return 'Did you pass in {cls} instead of {cls}(...)?'.format(cls=arg.__name__)
+    except TypeError:
+        pass
 
     return ''
 

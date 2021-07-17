@@ -153,9 +153,13 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 _debug(f'Checking type of parameter {param} in call to {wrapped.__qualname__}')
                 check_type(param, arg, annotations[param])
             except TypeError:
+                additional_suggestions = _get_argument_suggestions(arg, annotations[param])
+
                 raise PyTAContractError(
                     f'{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter '
-                    f'"{param}: {annotations[param]}"')
+                    f'"{param}: {annotations[param]}"' +
+                    (f'\n{additional_suggestions}' if additional_suggestions else '')
+                )
 
     # Check function preconditions
     preconditions = parse_assertions(wrapped)
@@ -174,6 +178,17 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 f'{wrapped.__name__} return value {r} does not match annotated return type {return_type}')
 
     return r
+
+
+def _get_argument_suggestions(arg: Any, annotation: type) -> str:
+    """Returns potential suggestions for the given arg and its annotation"""
+    try:
+        if isinstance(arg, type) and issubclass(arg, annotation):
+            return 'Did you pass in {cls} instead of {cls}(...)?'.format(cls=arg.__name__)
+    except TypeError:
+        pass
+
+    return ''
 
 
 def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:

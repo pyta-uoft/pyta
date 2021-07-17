@@ -1,4 +1,5 @@
 from typing import List, Dict, Set
+import sys
 import pytest
 from python_ta.contracts import check_contracts
 
@@ -166,3 +167,88 @@ def test_search_invalid() -> None:
 
     msg = str(excinfo.value)
     assert 'all({n + m > 0 for n in numbers for m in numbers})' in msg
+
+
+class Player:
+    user: str
+
+
+class CPU(Player):
+    def __init__(self) -> None:
+        self.user = 'CPU'
+
+
+@check_contracts
+def _is_cpu(player: Player) -> bool:
+    return player.user == 'CPU'
+
+
+def test_class_not_instance_error() -> None:
+    """Test that the additional suggestion is added when the class type is passed in as the
+    argument instead of its instance
+
+    This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
+    when changing the suggestion text.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        _is_cpu(Player)
+
+    msg = str(excinfo.value)
+    assert 'Did you pass in Player instead of Player(...)?' in msg
+
+
+def test_subclass_not_instance_error() -> None:
+    """Test that the additional suggestion is added when a subclass type is passed in as an
+    argument instead of its instance
+
+    This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
+    when changing the suggestion text.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        _is_cpu(CPU)
+
+    msg = str(excinfo.value)
+    assert 'Did you pass in CPU instead of CPU(...)?' in msg
+
+
+def test_no_suggestion_instance_as_instance() -> None:
+    """Test that the additional suggestion is not added when an unrelated type is passed in.
+
+    This test is coupled to the suggestion's arbitrarily chosen text, hence should be updated
+    when changing the suggestion text.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        _is_cpu(str)
+
+    msg = str(excinfo.value)
+
+    part1, part2, part3 = 'Did you pass in', 'instead of', '(...)?'
+    assert part1 not in msg
+    assert part2 not in msg
+    assert part3 not in msg
+
+
+def test_invalid_typing_generic_argument() -> None:
+    """Test that subclass checking on a type parameter that is typing's _GenericAlias does not
+    throw an error (as issubclass does not take in a _GenericAlias as its second argument).
+    """
+
+    @check_contracts
+    def unary(arg: List[str]) -> None:
+        return
+
+    with pytest.raises(AssertionError):
+        unary(dict)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="built-in generics not yet supported")
+def test_invalid_built_in_generic_argument() -> None:
+    """Test that subclass checking on a type parameter that is a GenericAlias does not
+    throw an error (as issubclass does not take in a GenericAlias as its second argument).
+    """
+    @check_contracts
+    def unary(arg: list[str]) -> None:
+        return
+
+    with pytest.raises(AssertionError):
+        unary(dict)

@@ -173,7 +173,7 @@ class Player:
 
 
 class CPU(Player):
-    def __init__(self):
+    def __init__(self) -> None:
         self.user = 'CPU'
 
 

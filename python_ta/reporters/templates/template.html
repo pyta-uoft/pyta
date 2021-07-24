@@ -9,180 +9,180 @@
     </head>
     <body>
         <div class="main-grid">
-        <header style="grid-column: 1 / span 2">
-            <h1 class="title">PyTA Error Report</h1>
-            <time>{{ date_time }}</time>
-        </header>
-        <aside style="position: sticky">
-            <section id="sidebar">
-                <article class="section-heading"><h2>Table of Contents</h2></article>
-                <article>
-                    <ul>
-                        {% for filename, messages in grouped_messages.items() %}
-                        <li>
-                            <a style="color: DimGray">
-                                {{filename.split('\\')[-1]}}
-                            </a>
-                            <ul>
-                                <li>
-                                    <a style="font-weight: bold">
-                                        Code Errors or Forbidden Usage
-                                    </a>
-                                    <ul>
-                                        {% for message_id in messages[0] %}
-                                        <li style="font-weight: normal">
-                                            {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a style="font-weight: bold">
-                                        Style and Convention
-                                    </a>
-                                    <ul style="font-weight: normal">
-                                        {% for message_id in messages[1] %}
-                                        <li>
-                                            {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </article>
-            </section>
-        </aside>
-        <main>
-            {% set limit = reporter.linter.config.pyta_number_of_messages %}
-            {% for filename, messages in grouped_messages.items() %}
-            <section>
-                <article class="file-name">
-                    <h2> {{ filename }} </h2>
-                </article>
-                <article class="error-output code-errors">
-                    <h3 class="category-heading">
-                        <span>{{ reporter.code_err_title }}</span>
-                        <span class="slider">
-                            <button>Expand/Collapse Section</button>
-                        </span>
-                    </h3>
-                    <div class="content collapsible">
-                        {% for message_id in messages[0] %}
-                            {% set occurrences = messages[0][message_id] %}
-                        <div class="error-instance">
-                            <div class="info">
-                                <span class="error-link code-error-id">
-                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
-                                </span>
-                                {% set num_occurrences = occurrences|length %}
-                                <span class="occurrences">
-                                {{ num_occurrences }}
-                                {% if num_occurrences == 1 %}
-                                 occurrence.
-                                {% else %}
-                                 occurrences.
-                                {% endif %}
-                                </span>
-                                <span class="shown">
-                                {% if limit < num_occurrences %}
-                                 (First {{ limit }} shown).
-                                {% endif %}
-                                </span>
-                                <span class="slider">
-                                    <button> Expand/Collapse </button>
-                                </span>
-                            </div>
-                            <div class="message-container collapsible">
-                                {% for indiv in occurrences %}
-                                <div class="message">
-                                    <h4 class="message-name">
-                                        [Line {{ indiv.line }}] {{ indiv.msg }}
-                                        <span class="slider">
-                                            <button style="float: right; background: #458B00;"> Expand/Collapse </button>
-                                        </span>
-                                    </h4>
-                                    {% if indiv.snippet != '' %}
-                                    <div class="collapsible">
-                                      <code>{{ indiv.snippet }}</code>
-                                    </div>
-                                    {% else %}
-                                    <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% else %}
-                        <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
-                        {% endfor %}
-                    </div>
-                </article>
-                <article class="error-output style-errors">
-                    <h3 class="category-heading">
-                        <span>{{ reporter.style_err_title }}</span>
-                        <span class="slider">
-                            <button>Expand/Collapse Section</button>
-                        </span>
-                    </h3>
-                    <div class="content collapsible">
-                        {% for message_id, occurrences in messages[1].items() %}
-                        <div class="error-instance">
-
-                            <div class="info">
-                                <span class="error-link style-error-id">
-                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
-                                </span>
-                                {% set num_occurrences = occurrences|length %}
-                                <span class="occurrences">
-                                {{ num_occurrences }}
+            <header style="grid-column: 1 / span 2">
+                <h1 class="title">PyTA Error Report</h1>
+                <time>{{ date_time }}</time>
+            </header>
+            <aside style="position: sticky">
+                <section id="sidebar">
+                    <article class="section-heading"><h2>Table of Contents</h2></article>
+                    <article>
+                        <ul>
+                            {% for filename, messages in grouped_messages.items() %}
+                            <li>
+                                <a style="color: DimGray">
+                                    {{filename.split('\\')[-1]}}
+                                </a>
+                                <ul>
+                                    <li>
+                                        <a style="font-weight: bold">
+                                            Code Errors or Forbidden Usage
+                                        </a>
+                                        <ul>
+                                            {% for message_id in messages[0] %}
+                                            <li style="font-weight: normal">
+                                                {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a style="font-weight: bold">
+                                            Style and Convention
+                                        </a>
+                                        <ul style="font-weight: normal">
+                                            {% for message_id in messages[1] %}
+                                            <li>
+                                                {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                </section>
+            </aside>
+            <main>
+                {% set limit = reporter.linter.config.pyta_number_of_messages %}
+                {% for filename, messages in grouped_messages.items() %}
+                <section>
+                    <article class="file-name">
+                        <h2> {{ filename }} </h2>
+                    </article>
+                    <article class="error-output code-errors">
+                        <h3 class="category-heading">
+                            <span>{{ reporter.code_err_title }}</span>
+                            <span class="slider">
+                                <button>Expand/Collapse Section</button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible">
+                            {% for message_id in messages[0] %}
+                                {% set occurrences = messages[0][message_id] %}
+                            <div class="error-instance">
+                                <div class="info">
+                                    <span class="error-link code-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
+                                    </span>
+                                    {% set num_occurrences = occurrences|length %}
+                                    <span class="occurrences">
+                                    {{ num_occurrences }}
                                     {% if num_occurrences == 1 %}
-                                        occurrence.
+                                     occurrence.
                                     {% else %}
-                                        occurrences.
+                                     occurrences.
                                     {% endif %}
-                                </span>
-                                <span class="shown">
-                                {% if limit < num_occurrences %}
-                                 (First {{ limit }} shown).
-                                {% endif %}
-                                </span>
-                                <span class="slider">
-                                   <button> Expand/Collapse </button>
-                                </span>
-                            </div>
-
-                            <div class="message-container collapsible">
-                                {% for indiv in occurrences %}
-                                <div class="message">
-                                    <h4 class="message-name">
-                                        [Line {{ indiv.line }}] {{ indiv.msg }}
-                                        <span class="slider">
-                                            <button style="float: right; background: #458B00;"> Expand/Collapse </button>
-                                        </span>
-                                    </h4>
-                                    <div class="collapsible">
-                                      {% if indiv.snippet != '' %}
-                                      <code>{{ indiv.snippet }}</code>
-                                      {% else %}
-                                      <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                      {% endif %}
-                                    </div>
+                                    </span>
+                                    <span class="shown">
+                                    {% if limit < num_occurrences %}
+                                     (First {{ limit }} shown).
+                                    {% endif %}
+                                    </span>
+                                    <span class="slider">
+                                        <button> Expand/Collapse </button>
+                                    </span>
                                 </div>
-                                {% endfor %}
+                                <div class="message-container collapsible">
+                                    {% for indiv in occurrences %}
+                                    <div class="message">
+                                        <h4 class="message-name">
+                                            [Line {{ indiv.line }}] {{ indiv.msg }}
+                                            <span class="slider">
+                                                <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                            </span>
+                                        </h4>
+                                        {% if indiv.snippet != '' %}
+                                        <div class="collapsible">
+                                          <code>{{ indiv.snippet }}</code>
+                                        </div>
+                                        {% else %}
+                                        <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             </div>
-
+                            {% else %}
+                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                            {% endfor %}
                         </div>
-                        {% else %}
-                        <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
-                        {% endfor %}
-                    </div>
-                </article>
-            </section>
-            {% endfor %}
-        </main>
+                    </article>
+                    <article class="error-output style-errors">
+                        <h3 class="category-heading">
+                            <span>{{ reporter.style_err_title }}</span>
+                            <span class="slider">
+                                <button>Expand/Collapse Section</button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible">
+                            {% for message_id, occurrences in messages[1].items() %}
+                            <div class="error-instance">
+
+                                <div class="info">
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
+                                    </span>
+                                    {% set num_occurrences = occurrences|length %}
+                                    <span class="occurrences">
+                                    {{ num_occurrences }}
+                                        {% if num_occurrences == 1 %}
+                                            occurrence.
+                                        {% else %}
+                                            occurrences.
+                                        {% endif %}
+                                    </span>
+                                    <span class="shown">
+                                    {% if limit < num_occurrences %}
+                                     (First {{ limit }} shown).
+                                    {% endif %}
+                                    </span>
+                                    <span class="slider">
+                                       <button> Expand/Collapse </button>
+                                    </span>
+                                </div>
+
+                                <div class="message-container collapsible">
+                                    {% for indiv in occurrences %}
+                                    <div class="message">
+                                        <h4 class="message-name">
+                                            [Line {{ indiv.line }}] {{ indiv.msg }}
+                                            <span class="slider">
+                                                <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                            </span>
+                                        </h4>
+                                        <div class="collapsible">
+                                          {% if indiv.snippet != '' %}
+                                          <code>{{ indiv.snippet }}</code>
+                                          {% else %}
+                                          <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                          {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                            {% endfor %}
+                        </div>
+                    </article>
+                </section>
+                {% endfor %}
+            </main>
         </div>
         <footer>
             <div id="report-bug">

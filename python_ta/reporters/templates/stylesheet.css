@@ -15,6 +15,30 @@ header {
     text-align: center;
 }
 
+.main-grid {
+    display: grid;
+    grid-template-columns: 20em 1fr
+}
+
+aside {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+#sidebar {
+    height: 100vh;
+    width: 300px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    top: 0;
+    position:sticky;
+
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
 code {
     white-space: pre;
     font-size: 120%;
@@ -58,6 +82,25 @@ section {
     background: #141E30;
     background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
+}
+
+.section-heading {
+    display: flex;
+    padding: 0 15px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0px 1px 2px black;
+    background: #141E30;
+    background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
+    background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
+}
+
+aside ul {
+    list-style-type: none;
+    padding-left: 20px
+}
+
+aside ul li {
+    margin: 3px 0;
 }
 
 .error-output {

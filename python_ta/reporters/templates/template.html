@@ -8,10 +8,53 @@
         </style>
     </head>
     <body>
-        <header>
+        <div class="main-grid">
+        <header style="grid-column: 1 / span 2">
             <h1 class="title">PyTA Error Report</h1>
             <time>{{ date_time }}</time>
         </header>
+        <aside style="position: sticky">
+            <section id="sidebar">
+                <article class="section-heading"><h2>Table of Contents</h2></article>
+                <article>
+                    <ul>
+                        {% for filename, messages in grouped_messages.items() %}
+                        <li>
+                            <a style="color: DimGray">
+                                {{filename.split('\\')[-1]}}
+                            </a>
+                            <ul>
+                                <li>
+                                    <a style="font-weight: bold">
+                                        Code Errors or Forbidden Usage
+                                    </a>
+                                    <ul>
+                                        {% for message_id in messages[0] %}
+                                        <li style="font-weight: normal">
+                                            {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a style="font-weight: bold">
+                                        Style and Convention
+                                    </a>
+                                    <ul style="font-weight: normal">
+                                        {% for message_id in messages[1] %}
+                                        <li>
+                                            {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </article>
+            </section>
+        </aside>
         <main>
             {% set limit = reporter.linter.config.pyta_number_of_messages %}
             {% for filename, messages in grouped_messages.items() %}
@@ -140,6 +183,7 @@
             </section>
             {% endfor %}
         </main>
+        </div>
         <footer>
             <div id="report-bug">
                 <a href="mailto:david@cs.toronto.edu">Found a bug? Report it to Prof. Liu!</a>

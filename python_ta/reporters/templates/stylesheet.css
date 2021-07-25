@@ -176,21 +176,13 @@ section {
     margin-left: auto;
 }
 
-.slider button {
-    cursor: pointer;
-    background: #427fed;
-    border: 1px solid transparent;
-    border-radius: 2px;
-    padding: 4px 12px;
-    min-width: 54px;
-    margin-left: 16px;
-    color: #fff;
-    font-weight: bold;
-    -webkit-font-smoothing: antialiased;
-    font-size: 12px;
+.slider svg:hover {
+    background-color: #fff;
 }
-.slider button:hover {
-    text-decoration: underline;
+
+svg .collapsed {
+    transform-origin: center;
+    transform: rotate(180deg);
 }
 
 .collapsible {

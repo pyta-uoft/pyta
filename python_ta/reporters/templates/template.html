@@ -23,7 +23,12 @@
                     <h3 class="category-heading">
                         <span>{{ reporter.code_err_title }}</span>
                         <span class="slider">
-                            <button>Expand/Collapse Section</button>
+                            <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="30" style="cursor: pointer">
+                                <g transform="scale(0.13 0.13)">
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#427fed" stroke-width="15px"
+                                        fill="transparent"/>
+                                </g>
+                            </svg>
                         </span>
                     </h3>
                     <div class="content collapsible">
@@ -58,7 +63,12 @@
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                         <span class="slider">
-                                            <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                            <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="20" style="cursor: pointer">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#458B00" stroke-width="15px"
+                                                        fill="transparent"/>
+                                                </g>
+                                            </svg>
                                         </span>
                                     </h4>
                                     {% if indiv.snippet != '' %}
@@ -81,7 +91,12 @@
                     <h3 class="category-heading">
                         <span>{{ reporter.style_err_title }}</span>
                         <span class="slider">
-                            <button>Expand/Collapse Section</button>
+                            <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="30" style="cursor: pointer">
+                                <g transform="scale(0.13 0.13)">
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#427fed" stroke-width="15px"
+                                        fill="transparent"/>
+                                </g>
+                            </svg>
                         </span>
                     </h3>
                     <div class="content collapsible">

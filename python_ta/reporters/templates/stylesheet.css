@@ -177,12 +177,12 @@ section {
 }
 
 .slider svg:hover {
-    background-color: #fff;
+    filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
 }
 
-svg .collapsed {
+svg.collapsed {
     transform-origin: center;
-    transform: rotate(180deg);
+    transform: rotateX(180deg);
 }
 
 .collapsible {

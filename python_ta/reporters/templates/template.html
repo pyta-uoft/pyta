@@ -23,9 +23,9 @@
                     <h3 class="category-heading">
                         <span>{{ reporter.code_err_title }}</span>
                         <span class="slider">
-                            <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="30" style="cursor: pointer"> <!-- UWU -->
+                            <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="30" style="cursor: pointer"> <!-- Dropdown arrows are from FontAwesome under License: https://fontawesome.com/license -->
                                 <g transform="scale(0.13 0.13)">
-                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#427fed" stroke-width="15px"
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px"
                                         fill="transparent"/>
                                 </g>
                             </svg>
@@ -54,7 +54,12 @@
                                 {% endif %}
                                 </span>
                                 <span class="slider">
-                                    <button> Expand/Collapse </button>
+                                    <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="20" style="cursor: pointer">
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px"
+                                                fill="transparent"/>
+                                        </g>
+                                    </svg>
                                 </span>
                             </div>
                             <div class="message-container collapsible">
@@ -65,7 +70,7 @@
                                         <span class="slider">
                                             <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="20" style="cursor: pointer">
                                                 <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#458B00" stroke-width="15px"
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px"
                                                         fill="transparent"/>
                                                 </g>
                                             </svg>
@@ -93,7 +98,7 @@
                         <span class="slider">
                             <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="30" style="cursor: pointer">
                                 <g transform="scale(0.13 0.13)">
-                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#427fed" stroke-width="15px"
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px"
                                         fill="transparent"/>
                                 </g>
                             </svg>
@@ -122,7 +127,12 @@
                                 {% endif %}
                                 </span>
                                 <span class="slider">
-                                   <button> Expand/Collapse </button>
+                                    <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="20" style="cursor: pointer">
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px"
+                                                fill="transparent"/>
+                                        </g>
+                                    </svg>
                                 </span>
                             </div>
 
@@ -132,7 +142,12 @@
                                     <h4 class="message-name">
                                         [Line {{ indiv.line }}] {{ indiv.msg }}
                                         <span class="slider">
-                                            <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                            <svg class="collapse-trigger" viewBox="0 0 10 10" width="60" height="20" style="cursor: pointer; float: right;">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px"
+                                                        fill="transparent"/>
+                                                </g>
+                                            </svg>
                                         </span>
                                     </h4>
                                     <div class="collapsible">

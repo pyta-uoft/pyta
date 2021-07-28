@@ -74,6 +74,8 @@ section {
 .category-heading {
     display: flex;  /*Narrow width viewports*/
     -webkit-font-smoothing: antialiased;
+    align-items: center;
+    margin-top: 7px;
 }
 
 .error-instance {
@@ -182,7 +184,7 @@ section {
 
 svg.collapsed {
     transform-origin: center;
-    transform: rotateX(180deg);
+    transform: rotateX(180deg) translateY(-6px);
 }
 
 .collapsible {

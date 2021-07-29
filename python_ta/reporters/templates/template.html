@@ -9,52 +9,48 @@
     </head>
     <body>
         <div class="main-grid">
-            <header style="grid-column: 1 / span 2">
+            <header>
                 <h1 class="title">PyTA Error Report</h1>
                 <time>{{ date_time }}</time>
             </header>
-            <aside style="position: sticky">
-                <section id="sidebar">
-                    <article class="section-heading"><h2>Table of Contents</h2></article>
-                    <article>
+            <section class="sidebar">
+                <h2>Table of Contents</h2>
+                <ul>
+                    {% for filename, messages in grouped_messages.items() %}
+                    <li>
+                        <span>
+                            {{os.path.basename(filename)}}
+                        </span>
                         <ul>
-                            {% for filename, messages in grouped_messages.items() %}
                             <li>
-                                <a style="color: DimGray">
-                                    {{filename.split('\\')[-1]}}
-                                </a>
+                                <span>
+                                    <strong>Code Errors or Forbidden Usage</strong>
+                                </span>
                                 <ul>
+                                    {% for message_id in messages[0] %}
                                     <li>
-                                        <a style="font-weight: bold">
-                                            Code Errors or Forbidden Usage
-                                        </a>
-                                        <ul>
-                                            {% for message_id in messages[0] %}
-                                            <li style="font-weight: normal">
-                                                {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
+                                        {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
                                     </li>
-                                    <li>
-                                        <a style="font-weight: bold">
-                                            Style and Convention
-                                        </a>
-                                        <ul style="font-weight: normal">
-                                            {% for message_id in messages[1] %}
-                                            <li>
-                                                {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </li>
+                                    {% endfor %}
                                 </ul>
                             </li>
-                            {% endfor %}
+                            <li>
+                                <span>
+                                    <strong>Style and Convention</strong>
+                                </span>
+                                <ul>
+                                    {% for message_id in messages[1] %}
+                                    <li>
+                                        {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
                         </ul>
-                    </article>
-                </section>
-            </aside>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
             <main>
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filename, messages in grouped_messages.items() %}

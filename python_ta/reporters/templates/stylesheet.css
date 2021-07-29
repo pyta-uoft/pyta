@@ -22,11 +22,6 @@ header {
     grid-template-columns: 20em 1fr;
 }
 
-aside {
-    padding-left: 16px;
-    padding-right: 16px;
-}
-
 .sidebar {
     margin-top: 0;
 
@@ -87,15 +82,6 @@ section {
     background: #141E30;
     background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
-}
-
-aside ul {
-    list-style-type: none;
-    padding-left: 20px
-}
-
-aside ul li {
-    margin: 3px 0;
 }
 
 .error-output {

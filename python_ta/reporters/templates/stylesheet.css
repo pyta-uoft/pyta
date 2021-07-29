@@ -74,16 +74,6 @@ section {
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
 }
 
-.section-heading {
-    display: flex;
-    padding: 0 15px;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0px 1px 2px black;
-    background: #141E30;
-    background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
-    background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
-}
-
 .error-output {
     padding: 0 15px;
 }

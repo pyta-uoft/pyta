@@ -13,6 +13,20 @@ header {
     -webkit-font-smoothing: antialiased;
     color: #fff;
     text-align: center;
+
+    grid-column: 1 / span 2;
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 20em 1fr;
+}
+
+.sidebar {
+    margin-top: 0;
+
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
 }
 
 code {

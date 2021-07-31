@@ -177,14 +177,17 @@ section {
 .slider {
     margin-left: auto;
 }
+.slider button {
+    background: none;
+    border: none;
+}
 
-.slider svg:hover {
+.slider button:hover {
     filter: brightness(120%);
 }
 
-svg.collapsed {
-    transform-origin: center;
-    transform: rotateX(180deg) translateY(-6px);
+button.collapsed {
+    transform: scaleY(-1);
 }
 
 .collapsible {

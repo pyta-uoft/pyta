@@ -4,11 +4,12 @@ body {
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
     background: linear-gradient(90deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
-    padding-left: 20px;
+    padding: 20px;
 }
 
 header {
-    padding: 30px;
+    padding: 15px;
+    padding-top: 0px;
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
     color: #fff;

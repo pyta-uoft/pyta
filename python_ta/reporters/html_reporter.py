@@ -78,7 +78,8 @@ class HTMLReporter(PythonTaReporter):
 
         # Render the jinja template
         rendered_template = template.render(date_time=dt, reporter=self,
-                                            grouped_messages=grouped_messages)
+                                            grouped_messages=grouped_messages,
+                                            os=os)
 
         # If a filepath was specified, write to the file
         if self.out is not sys.stdout:

@@ -8,175 +8,213 @@
         </style>
     </head>
     <body>
-        <header>
-            <h1 class="title">PyTA Error Report</h1>
-            <time>{{ date_time }}</time>
-        </header>
-        <main>
-            {% set limit = reporter.linter.config.pyta_number_of_messages %}
-            {% for filename, messages in grouped_messages.items() %}
-            <section>
-                <article class="file-name">
-                    <h2> {{ filename }} </h2>
-                </article>
-                <article class="error-output code-errors">
-                    <h3 class="category-heading">
-                        <span>{{ reporter.code_err_title }}</span>
-                        <span class="slider">
-                            <button>
-                                <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30"> <!-- Dropdown arrows are from FontAwesome under License: https://fontawesome.com/license -->
-                                    <g transform="scale(0.13 0.13)">
-                                        <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                    </g>
-                                </svg>
-                            </button>
+        <div class="main-grid">
+            <header>
+                <h1 class="title">PyTA Error Report</h1>
+                <time>{{ date_time }}</time>
+            </header>
+            <section class="sidebar">
+                <h2>Table of Contents</h2>
+                <ul>
+                    {% for filename, messages in grouped_messages.items() %}
+                    <li>
+                        <span>
+                            {{os.path.basename(filename)}}
                         </span>
-                    </h3>
-                    <div class="content collapsible">
-                        {% for message_id in messages[0] %}
-                            {% set occurrences = messages[0][message_id] %}
-                        <div class="error-instance">
-                            <div class="info">
-                                <span class="error-link code-error-id">
-                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
+                        <ul>
+                            <li>
+                                <span>
+                                    <strong>Code Errors or Forbidden Usage</strong>
                                 </span>
-                                {% set num_occurrences = occurrences|length %}
-                                <span class="occurrences">
-                                {{ num_occurrences }}
-                                {% if num_occurrences == 1 %}
-                                 occurrence.
-                                {% else %}
-                                 occurrences.
-                                {% endif %}
+                                <ul>
+                                    {% for message_id in messages[0] %}
+                                    <li>
+                                        {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            <li>
+                                <span>
+                                    <strong>Style and Convention</strong>
                                 </span>
-                                <span class="shown">
-                                {% if limit < num_occurrences %}
-                                 (First {{ limit }} shown).
-                                {% endif %}
-                                </span>
-                                <span class="slider">
-                                    <button>
-                                        <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                            <g transform="scale(0.13 0.13)">
-                                                <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                            </g>
-                                        </svg>
-                                    </button>
-                                </span>
-                            </div>
-                            <div class="message-container collapsible">
-                                {% for indiv in occurrences %}
-                                <div class="message">
-                                    <h4 class="message-name">
-                                        [Line {{ indiv.line }}] {{ indiv.msg }}
-                                        <span class="slider">
-                                            <button style="float: right;">
-                                                <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                    <g transform="scale(0.13 0.13)">
-                                                        <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                    </g>
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </h4>
-                                    {% if indiv.snippet != '' %}
-                                    <div class="collapsible">
-                                      <code>{{ indiv.snippet }}</code>
-                                    </div>
-                                    {% else %}
-                                    <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% else %}
-                        <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
-                        {% endfor %}
-                    </div>
-                </article>
-                <article class="error-output style-errors">
-                    <h3 class="category-heading">
-                        <span>{{ reporter.style_err_title }}</span>
-                        <span class="slider">
-                            <button>
-                                <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                    <g transform="scale(0.13 0.13)">
-                                        <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                    </g>
-                                </svg>
-                            </button>
-                        </span>
-                    </h3>
-                    <div class="content collapsible">
-                        {% for message_id, occurrences in messages[1].items() %}
-                        <div class="error-instance">
-
-                            <div class="info">
-                                <span class="error-link style-error-id">
-                                    <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
-                                </span>
-                                {% set num_occurrences = occurrences|length %}
-                                <span class="occurrences">
-                                {{ num_occurrences }}
-                                    {% if num_occurrences == 1 %}
-                                        occurrence.
-                                    {% else %}
-                                        occurrences.
-                                    {% endif %}
-                                </span>
-                                <span class="shown">
-                                {% if limit < num_occurrences %}
-                                 (First {{ limit }} shown).
-                                {% endif %}
-                                </span>
-                                <span class="slider">
-                                    <button>
-                                        <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                            <g transform="scale(0.13 0.13)">
-                                                <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                            </g>
-                                        </svg>
-                                    </button>
-                                </span>
-                            </div>
-
-                            <div class="message-container collapsible">
-                                {% for indiv in occurrences %}
-                                <div class="message">
-                                    <h4 class="message-name">
-                                        [Line {{ indiv.line }}] {{ indiv.msg }}
-                                        <span class="slider">
-                                            <button style="float: right;">
-                                                <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                    <g transform="scale(0.13 0.13)">
-                                                        <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px"
-                                                            fill="transparent"/>
-                                                    </g>
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </h4>
-                                    <div class="collapsible">
-                                      {% if indiv.snippet != '' %}
-                                      <code>{{ indiv.snippet }}</code>
-                                      {% else %}
-                                      <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                      {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-
-                        </div>
-                        {% else %}
-                        <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
-                        {% endfor %}
-                    </div>
-                </article>
+                                <ul>
+                                    {% for message_id in messages[1] %}
+                                    <li>
+                                        {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
             </section>
-            {% endfor %}
-        </main>
+            <main>
+                {% set limit = reporter.linter.config.pyta_number_of_messages %}
+                {% for filename, messages in grouped_messages.items() %}
+                <section>
+                    <article class="file-name">
+                        <h2> {{ filename }} </h2>
+                    </article>
+                    <article class="error-output code-errors">
+                        <h3 class="category-heading">
+                            <span>{{ reporter.code_err_title }}</span>
+                            <span class="slider">
+                                <button>
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30"> <!-- Dropdown arrows are from FontAwesome under License: https://fontawesome.com/license -->
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible">
+                            {% for message_id in messages[0] %}
+                                {% set occurrences = messages[0][message_id] %}
+                            <div class="error-instance">
+                                <div class="info">
+                                    <span class="error-link code-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
+                                    </span>
+                                    {% set num_occurrences = occurrences|length %}
+                                    <span class="occurrences">
+                                    {{ num_occurrences }}
+                                    {% if num_occurrences == 1 %}
+                                     occurrence.
+                                    {% else %}
+                                     occurrences.
+                                    {% endif %}
+                                    </span>
+                                    <span class="shown">
+                                    {% if limit < num_occurrences %}
+                                     (First {{ limit }} shown).
+                                    {% endif %}
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible">
+                                    {% for indiv in occurrences %}
+                                    <div class="message">
+                                        <h4 class="message-name">
+                                            [Line {{ indiv.line }}] {{ indiv.msg }}
+                                            <span class="slider">
+                                                <button style="float: right;">
+                                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                        <g transform="scale(0.13 0.13)">
+                                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                        </g>
+                                                    </svg>
+                                                </button>
+                                            </span>
+                                        </h4>
+                                        {% if indiv.snippet != '' %}
+                                        <div class="collapsible">
+                                          <code>{{ indiv.snippet }}</code>
+                                        </div>
+                                        {% else %}
+                                        <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                            {% endfor %}
+                        </div>
+                    </article>
+                    <article class="error-output style-errors">
+                        <h3 class="category-heading">
+                            <span>{{ reporter.style_err_title }}</span>
+                            <span class="slider">
+                                <button>
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible">
+                            {% for message_id, occurrences in messages[1].items() %}
+                            <div class="error-instance">
+                                <div class="info">
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
+                                    </span>
+                                    {% set num_occurrences = occurrences|length %}
+                                    <span class="occurrences">
+                                    {{ num_occurrences }}
+                                        {% if num_occurrences == 1 %}
+                                            occurrence.
+                                        {% else %}
+                                            occurrences.
+                                        {% endif %}
+                                    </span>
+                                    <span class="shown">
+                                    {% if limit < num_occurrences %}
+                                     (First {{ limit }} shown).
+                                    {% endif %}
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <div class="message-container collapsible">
+                                    {% for indiv in occurrences %}
+                                    <div class="message">
+                                        <h4 class="message-name">
+                                            [Line {{ indiv.line }}] {{ indiv.msg }}
+                                            <span class="slider">
+                                                <button style="float: right;">
+                                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                        <g transform="scale(0.13 0.13)">
+                                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                        </g>
+                                                    </svg>
+                                                </button>
+                                            </span>
+                                        </h4>
+                                        <div class="collapsible">
+                                          {% if indiv.snippet != '' %}
+                                          <code>{{ indiv.snippet }}</code>
+                                          {% else %}
+                                          <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                          {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                            {% endfor %}
+                        </div>
+                    </article>
+                </section>
+                {% endfor %}
+            </main>
+        </div>
         <footer>
             <div id="report-bug">
                 <a href="mailto:david@cs.toronto.edu">Found a bug? Report it to Prof. Liu!</a>

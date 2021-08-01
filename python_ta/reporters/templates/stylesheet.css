@@ -13,7 +13,19 @@ header {
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    grid-column: 1 / span 2;
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 20em 1fr;
+}
+
+.sidebar {
+    margin-top: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
 }
 
 code {
@@ -49,6 +61,7 @@ section {
 	min-width: 50%;
 	background: rgba(234, 233, 233, 0.25);
     box-shadow: -1px 9px 15px -5px rgba(77,77,77,0.6);
+    border-radius: 15px;
 }
 
 .file-name {
@@ -59,6 +72,8 @@ section {
     background: #141E30;
     background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px; 
 }
 
 .error-output {

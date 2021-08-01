@@ -197,6 +197,7 @@ section {
 .slider button {
     background: none;
     border: none;
+    cursor: pointer;
 }
 
 .slider button:hover {

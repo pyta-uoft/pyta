@@ -21,8 +21,7 @@ header {
 .main-grid {
     display: grid;
     grid-template-columns: 20em 1fr;
-    grid-template-rows: 136px Calc(100vh - 180px - 136px - 60px);
-    padding: 30px;
+    grid-template-rows: 136px Calc(100vh - 180px - 136px - 40px);
 }
 
 .sidebar {
@@ -253,6 +252,7 @@ footer {
     background: #2d3441;
     color: white;
     padding: 30px;
+    margin-top: 40px;
 }
 
 

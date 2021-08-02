@@ -4,6 +4,7 @@ body {
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
     background: linear-gradient(90deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
+    overflow: hidden;
 }
 
 header {
@@ -20,6 +21,8 @@ header {
 .main-grid {
     display: grid;
     grid-template-columns: 20em 1fr;
+    grid-template-rows: 136px Calc(100vh - 180px - 136px - 60px);
+    padding: 30px;
 }
 
 .sidebar {
@@ -54,6 +57,12 @@ main {
     overflow: auto;
 }
 
+.reporter-container {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
 section {
 	margin: auto;
     margin-bottom: 20px;
@@ -74,7 +83,7 @@ section {
     background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     border-top-left-radius: 15px;
-    border-top-right-radius: 15px; 
+    border-top-right-radius: 15px;
 }
 
 .error-output {
@@ -244,7 +253,6 @@ footer {
     background: #2d3441;
     color: white;
     padding: 30px;
-    margin-top: 40px;
 }
 
 

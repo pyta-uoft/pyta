@@ -52,6 +52,7 @@
                 </ul>
             </section>
             <main>
+                <div class="reporter-container">
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filename, messages in grouped_messages.items() %}
                 <section>
@@ -178,6 +179,7 @@
                     </article>
                 </section>
                 {% endfor %}
+                </div>
             </main>
         </div>
         <footer>

@@ -63,7 +63,13 @@
                         <h3 class="category-heading">
                             <span>{{ reporter.code_err_title }}</span>
                             <span class="slider">
-                                <button>Expand/Collapse Section</button>
+                                <button>
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30"> <!-- Dropdown arrows are from FontAwesome under License: https://fontawesome.com/license -->
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
                             </span>
                         </h3>
                         <div class="content collapsible">
@@ -89,7 +95,13 @@
                                     {% endif %}
                                     </span>
                                     <span class="slider">
-                                        <button> Expand/Collapse </button>
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
                                     </span>
                                 </div>
                                 <div class="message-container collapsible">
@@ -98,7 +110,13 @@
                                         <h4 class="message-name">
                                             [Line {{ indiv.line }}] {{ indiv.msg }}
                                             <span class="slider">
-                                                <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                                <button style="float: right;">
+                                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                        <g transform="scale(0.13 0.13)">
+                                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                        </g>
+                                                    </svg>
+                                                </button>
                                             </span>
                                         </h4>
                                         {% if indiv.snippet != '' %}
@@ -121,13 +139,18 @@
                         <h3 class="category-heading">
                             <span>{{ reporter.style_err_title }}</span>
                             <span class="slider">
-                                <button>Expand/Collapse Section</button>
+                                <button>
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
                             </span>
                         </h3>
                         <div class="content collapsible">
                             {% for message_id, occurrences in messages[1].items() %}
                             <div class="error-instance">
-
                                 <div class="info">
                                     <span class="error-link style-error-id">
                                         <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
@@ -147,7 +170,13 @@
                                     {% endif %}
                                     </span>
                                     <span class="slider">
-                                       <button> Expand/Collapse </button>
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
                                     </span>
                                 </div>
 
@@ -157,7 +186,13 @@
                                         <h4 class="message-name">
                                             [Line {{ indiv.line }}] {{ indiv.msg }}
                                             <span class="slider">
-                                                <button style="float: right; background: #458B00;"> Expand/Collapse </button>
+                                                <button style="float: right;">
+                                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                        <g transform="scale(0.13 0.13)">
+                                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                        </g>
+                                                    </svg>
+                                                </button>
                                             </span>
                                         </h4>
                                         <div class="collapsible">

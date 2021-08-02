@@ -29,6 +29,21 @@ header {
     overscroll-behavior-y: contain;
 }
 
+.sidebar ul {
+    list-style-type: none;
+}
+
+.sidebar button {
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    padding: 0;
+}
+
+.sidebar svg.collapsed {
+    transform: rotate(-90deg);
+}
+
 code {
     white-space: pre;
     font-size: 120%;

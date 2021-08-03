@@ -33,6 +33,7 @@ header {
     font-size: 14px;
     list-style-type: none;
     padding: 0px 20px;
+    white-space: nowrap;
 }
 
 .sidebar ul #file-name {
@@ -41,12 +42,8 @@ header {
     font-size: 16px;
 }
 
-.sidebar li ul {
-    margin: 3px;
-}
-
-.sidebar li {
-    margin-bottom: 5px;
+.sidebar ul li {
+    margin: 5px 0px;
 }
 
 code {

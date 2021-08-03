@@ -104,7 +104,7 @@ section {
 }
 
 .error-link {
-    line-height: 25px;
+    line-height: 35px;
 }
 
 .error-link a {
@@ -180,7 +180,7 @@ section {
 }
 
 .occurrences, .shown {
-    line-height: 25px;
+    line-height: 35px;
     padding-left: 20px;
     vertical-align: middle;
 }

@@ -4,16 +4,15 @@ body {
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
     background: linear-gradient(90deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
-    padding: 20px;
 }
 
 header {
     padding: 15px;
-    padding-top: 0px;
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
     color: #fff;
-    margin-bottom: 15px;
+    margin-left: 20px;
+    margin-bottom: 10px;
     grid-column: 1 / span 2;
 }
 

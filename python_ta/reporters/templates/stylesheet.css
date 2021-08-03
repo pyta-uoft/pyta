@@ -23,7 +23,8 @@ header {
 }
 
 .sidebar {
-    margin-top: 0;
+    margin: 0 20px auto;
+    width: Calc(100% - 40px);
 
     overflow-y: auto;
     overscroll-behavior-y: contain;
@@ -31,6 +32,7 @@ header {
 
 .sidebar ul {
     list-style-type: none;
+    padding-left: 20px;
 }
 
 .sidebar button {

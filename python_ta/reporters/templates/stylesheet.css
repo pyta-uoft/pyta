@@ -24,9 +24,29 @@ header {
 
 .sidebar {
     margin-top: 0;
-
+    box-shadow: none;
     overflow-y: auto;
     overscroll-behavior-y: contain;
+}
+
+.sidebar ul {
+    font-size: 14px;
+    list-style-type: none;
+    padding: 0px 20px;
+}
+
+.sidebar ul #file-name {
+    font-weight: bold;
+    color: grey;
+    font-size: 16px;
+}
+
+.sidebar li ul {
+    margin: 3px;
+}
+
+.sidebar li {
+    margin-bottom: 5px;
 }
 
 code {
@@ -65,7 +85,7 @@ section {
     border-radius: 15px;
 }
 
-.file-name {
+.box-header {
     display: flex;
     padding: 0 15px;
     color: rgba(255, 255, 255, 0.9);

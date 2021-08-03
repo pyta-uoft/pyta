@@ -14,11 +14,13 @@
                 <time>{{ date_time }}</time>
             </header>
             <section class="sidebar">
-                <h2>Table of Contents</h2>
+                <article class="box-header">
+                    <h2>Table of Contents</h2>
+                </article>
                 <ul>
                     {% for filename, messages in grouped_messages.items() %}
                     <li>
-                        <span>
+                        <span id=file-name>
                             {{os.path.basename(filename)}}
                         </span>
                         <ul>
@@ -55,7 +57,7 @@
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filename, messages in grouped_messages.items() %}
                 <section>
-                    <article class="file-name">
+                    <article class="box-header">
                         <h2> {{ filename }} </h2>
                     </article>
                     <article class="error-output code-errors">

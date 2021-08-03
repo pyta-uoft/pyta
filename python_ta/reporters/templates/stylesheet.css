@@ -4,15 +4,16 @@ body {
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
     background: linear-gradient(90deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
+    padding: 20px;
 }
 
 header {
-    padding: 20px;
-	font-size: 14px;
+    padding: 15px;
+    padding-top: 0px;
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
     color: #fff;
-    text-align: center;
+    margin-bottom: 15px;
 }
 
 .main-grid {
@@ -41,14 +42,14 @@ code {
 }
 
 .title {
-	font-size: 40px;
+	font-size: 48px;
     margin: 0;
 }
 
 time {
-    font-weight: bold;
-    padding: 12px;
     display: block;
+    font-size: 25px;
+    margin-top: 10px;
 }
 
 .wrap {
@@ -100,6 +101,8 @@ section {
 .category-heading {
     display: flex;  /*Narrow width viewports*/
     -webkit-font-smoothing: antialiased;
+    align-items: center;
+    margin-top: 7px;
 }
 
 .error-instance {
@@ -201,22 +204,18 @@ section {
 .slider {
     margin-left: auto;
 }
-
 .slider button {
+    background: none;
+    border: none;
     cursor: pointer;
-    background: #427fed;
-    border: 1px solid transparent;
-    border-radius: 2px;
-    padding: 4px 12px;
-    min-width: 54px;
-    margin-left: 16px;
-    color: #fff;
-    font-weight: bold;
-    -webkit-font-smoothing: antialiased;
-    font-size: 12px;
 }
+
 .slider button:hover {
-    text-decoration: underline;
+    filter: brightness(120%);
+}
+
+button.collapsed {
+    transform: scaleY(-1);
 }
 
 .collapsible {

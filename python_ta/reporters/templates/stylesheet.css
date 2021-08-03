@@ -4,7 +4,6 @@ body {
     background: rgba(71, 118, 230, 0.77);
     background: -webkit-linear-gradient(0deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
     background: linear-gradient(90deg, rgba(49, 48, 178, 0.62), rgba(71, 128, 230, 0.77));
-    overflow: hidden;
 }
 
 header {
@@ -14,18 +13,23 @@ header {
     -webkit-font-smoothing: antialiased;
     color: #fff;
     text-align: center;
-
-    grid-column: 1 / span 2;
 }
 
 .main-grid {
     display: grid;
-    grid-template-columns: 20em 1fr;
-    grid-template-rows: 136px Calc(100vh - 180px - 136px - 40px);
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: min-content 1fr;
 }
 
 .sidebar {
     margin-top: 0;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    max-height: 100vh;
+    
+    white-space: nowrap;
 
     overflow-y: auto;
     overscroll-behavior-y: contain;
@@ -54,12 +58,9 @@ time {
 main {
     display: grid;
     overflow: auto;
-}
-
-.reporter-container {
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
+    
+    grid-column: 2;
+    grid-row: 1 / span 2;
 }
 
 section {
@@ -219,7 +220,8 @@ section {
 }
 
 .collapsible {
-    /*width: 100%;*/
+    width: 100%;
+    overflow-x: auto;
 }
 
 /*display none caused width of parent to shrink when longer text messages are hidden*/

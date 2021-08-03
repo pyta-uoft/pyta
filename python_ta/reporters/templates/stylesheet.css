@@ -90,6 +90,8 @@ section {
 .category-heading {
     display: flex;  /*Narrow width viewports*/
     -webkit-font-smoothing: antialiased;
+    align-items: center;
+    margin-top: 7px;
 }
 
 .error-instance {
@@ -191,22 +193,18 @@ section {
 .slider {
     margin-left: auto;
 }
-
 .slider button {
+    background: none;
+    border: none;
     cursor: pointer;
-    background: #427fed;
-    border: 1px solid transparent;
-    border-radius: 2px;
-    padding: 4px 12px;
-    min-width: 54px;
-    margin-left: 16px;
-    color: #fff;
-    font-weight: bold;
-    -webkit-font-smoothing: antialiased;
-    font-size: 12px;
 }
+
 .slider button:hover {
-    text-decoration: underline;
+    filter: brightness(120%);
+}
+
+button.collapsed {
+    transform: scaleY(-1);
 }
 
 .collapsible {

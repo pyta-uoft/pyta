@@ -14,17 +14,22 @@ header {
     -webkit-font-smoothing: antialiased;
     color: #fff;
     margin-bottom: 15px;
-    grid-column: 1 / span 2;
 }
 
 .main-grid {
     display: grid;
-    grid-template-columns: 20em 1fr;
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: min-content 1fr;
 }
 
 .sidebar {
     margin-top: 0;
     box-shadow: none;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    max-height: 100vh;
+    white-space: nowrap;
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
@@ -36,7 +41,7 @@ header {
     white-space: nowrap;
 }
 
-.sidebar ul #file-name {
+.file-name {
     font-weight: bold;
     color: #404040;
     font-size: 16px;
@@ -69,6 +74,8 @@ time {
 main {
     display: grid;
     overflow: auto;
+    grid-column: 2;
+    grid-row: 1 / span 2;
 }
 
 section {
@@ -122,7 +129,7 @@ section {
 }
 
 .error-link {
-    line-height: 25px;
+    line-height: 35px;
 }
 
 .error-link a {
@@ -198,7 +205,7 @@ section {
 }
 
 .occurrences, .shown {
-    line-height: 25px;
+    line-height: 35px;
     padding-left: 20px;
     vertical-align: middle;
 }
@@ -226,7 +233,8 @@ button.collapsed {
 }
 
 .collapsible {
-    /*width: 100%;*/
+    width: 100%;
+    overflow-x: auto;
 }
 
 /*display none caused width of parent to shrink when longer text messages are hidden*/

@@ -14,16 +14,24 @@ header {
     -webkit-font-smoothing: antialiased;
     color: #fff;
     margin-bottom: 15px;
-    grid-column: 1 / span 2;
 }
 
 .main-grid {
     display: grid;
-    grid-template-columns: 20em 1fr;
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: min-content 1fr;
 }
 
 .sidebar {
     margin-top: 0;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    max-height: 100vh;
+    
+    white-space: nowrap;
+
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
@@ -51,6 +59,9 @@ time {
 main {
     display: grid;
     overflow: auto;
+    
+    grid-column: 2;
+    grid-row: 1 / span 2;
 }
 
 section {
@@ -208,7 +219,8 @@ button.collapsed {
 }
 
 .collapsible {
-    /*width: 100%;*/
+    width: 100%;
+    overflow-x: auto;
 }
 
 /*display none caused width of parent to shrink when longer text messages are hidden*/

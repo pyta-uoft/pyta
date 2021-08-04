@@ -23,6 +23,7 @@ header {
 
 .sidebar {
     margin-top: 0;
+    margin-left: 35px;
     padding: 0 20px;
     position: sticky;
     top: 0;

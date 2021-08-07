@@ -21,6 +21,15 @@ header {
     grid-template-rows: min-content 1fr;
 }
 
+@media screen and (max-width: 38em) {
+    .sidebar {
+        display: none;
+    }
+    header {
+        display: none;
+    }
+}
+
 .sidebar {
     margin-top: 0;
     margin-left: 35px;

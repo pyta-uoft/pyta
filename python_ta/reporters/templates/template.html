@@ -14,14 +14,16 @@
                 <time>{{ date_time }}</time>
             </header>
             <section class="sidebar">
-                <article class="section-header">
+                <div class="section-header">
                     <h2>Table of Contents</h2>
-                </article>
+                </div>
                 <ul>
-                    {% for filename, messages in grouped_messages.items() %}
+                    {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
                     <li>
                         <span class=file-name>
-                            {{os.path.basename(filename)}}
+                            <a href={{'#{}'.format(filenum)}}>
+                                {{os.path.basename(filename)}}
+                            </a>
                         </span>
                         <ul>
                             <li>
@@ -31,7 +33,9 @@
                                 <ul>
                                     {% for message_id in messages[0] %}
                                     <li>
-                                        {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                        <a href={{'#{}-{}'.format(filenum, message_id)}}>
+                                            {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                        </a>
                                     </li>
                                     {% endfor %}
                                 </ul>
@@ -43,7 +47,9 @@
                                 <ul>
                                     {% for message_id in messages[1] %}
                                     <li>
-                                        {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                        <a href={{'#{}-{}'.format(filenum, message_id)}}>
+                                            {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                        </a>
                                     </li>
                                     {% endfor %}
                                 </ul>
@@ -55,17 +61,17 @@
             </section>
             <main>
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
-                {% for filename, messages in grouped_messages.items() %}
-                <section>
-                    <article class="section-header">
+                {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
+                <section id={{filenum}}>
+                    <div class="section-header">
                         <h2> {{ filename }} </h2>
-                    </article>
+                    </div>
                     <article class="error-output code-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.code_err_title }}</span>
                             <span class="slider">
                                 <button>
-                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30"> <!-- Dropdown arrows are from FontAwesome under License: https://fontawesome.com/license -->
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
                                         <g transform="scale(0.13 0.13)">
                                             <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
                                         </g>
@@ -76,7 +82,7 @@
                         <div class="content collapsible">
                             {% for message_id in messages[0] %}
                                 {% set occurrences = messages[0][message_id] %}
-                            <div class="error-instance">
+                            <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
                                     <span class="error-link code-error-id">
                                         <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
@@ -151,7 +157,7 @@
                         </h3>
                         <div class="content collapsible">
                             {% for message_id, occurrences in messages[1].items() %}
-                            <div class="error-instance">
+                            <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
                                     <span class="error-link style-error-id">
                                         <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>

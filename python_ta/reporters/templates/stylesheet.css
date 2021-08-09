@@ -205,6 +205,12 @@ section {
     vertical-align: middle;
 }
 
+.more-info {
+    font-size: 12px;
+    color: #000000;
+    font-weight: normal;
+}
+
 .info {
     font-size: 110%;
     display: flex;  /*Narrow width viewports*/

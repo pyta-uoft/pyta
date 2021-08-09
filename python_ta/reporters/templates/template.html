@@ -16,7 +16,7 @@
             <section class="sidebar">
                 <h2>Table of Contents</h2>
                 <ul>
-                    {% for filename, messages in grouped_messages.items() %}
+                    {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
                     <li class="collapsible">
                         <button>
                             <svg width="10" height="10">
@@ -28,7 +28,9 @@
                             </svg>
                         </button>
                         <span>
-                            {{os.path.basename(filename)}}
+                            <a href={{'#{}'.format(filenum)}}>
+                                {{os.path.basename(filename)}}
+                            </a>
                         </span>
                         <ul>
                             <li class="collapsible">
@@ -47,7 +49,9 @@
                                 <ul>
                                     {% for message_id in messages[0] %}
                                     <li>
-                                        {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                        <a href={{'#{}-{}'.format(filenum, message_id)}}>
+                                            {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                        </a>
                                     </li>
                                     {% endfor %}
                                 </ul>
@@ -68,7 +72,9 @@
                                 <ul>
                                     {% for message_id in messages[1] %}
                                     <li>
-                                        {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                        <a href={{'#{}-{}'.format(filenum, message_id)}}>
+                                            {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                        </a>
                                     </li>
                                     {% endfor %}
                                 </ul>
@@ -80,8 +86,8 @@
             </section>
             <main>
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
-                {% for filename, messages in grouped_messages.items() %}
-                <section>
+                {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
+                <section id={{filenum}}>
                     <article class="file-name">
                         <h2> {{ filename }} </h2>
                     </article>
@@ -101,7 +107,7 @@
                         <div class="content collapsible">
                             {% for message_id in messages[0] %}
                                 {% set occurrences = messages[0][message_id] %}
-                            <div class="error-instance">
+                            <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
                                     <span class="error-link code-error-id">
                                         <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>
@@ -176,7 +182,7 @@
                         </h3>
                         <div class="content collapsible">
                             {% for message_id, occurrences in messages[1].items() %}
-                            <div class="error-instance">
+                            <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
                                     <span class="error-link style-error-id">
                                         <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})</a>

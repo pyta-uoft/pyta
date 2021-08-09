@@ -51,6 +51,15 @@ header {
     transform: rotate(-90deg);
 }
 
+.sidebar a:link, a:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    text-decoration: underline;
+}
+
 code {
     white-space: pre;
     font-size: 120%;

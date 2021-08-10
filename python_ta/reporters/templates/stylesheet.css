@@ -13,6 +13,7 @@ header {
     color: #fff;
     margin-left: 20px;
     margin-bottom: 15px;
+    white-space: nowrap;
 }
 
 .main-grid {
@@ -22,18 +23,31 @@ header {
 }
 
 .sidebar {
-    margin-top: 0;
-    margin-left: 35px;
+    margin: 0 20px auto;
     padding: 0 20px;
     position: sticky;
     top: 0;
     height: fit-content;
     max-height: 100vh;
-    
-    white-space: nowrap;
 
     overflow-y: auto;
     overscroll-behavior-y: contain;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.sidebar button {
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    padding: 0;
+}
+
+.sidebar svg.collapsed {
+    transform: rotate(-90deg);
 }
 
 .sidebar a:link, a:visited {

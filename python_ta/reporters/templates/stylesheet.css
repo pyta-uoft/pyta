@@ -32,8 +32,7 @@ header {
 }
 
 .sidebar {
-    margin-top: 0;
-    margin-left: 35px;
+    margin: 0 35px auto;
     position: sticky;
     top: 0;
     height: fit-content;

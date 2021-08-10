@@ -23,20 +23,30 @@ header {
 }
 
 .sidebar {
-    margin: 0 20px auto;
-    padding: 0 20px;
+    margin-top: 0;
+    margin-left: 35px;
     position: sticky;
     top: 0;
     height: fit-content;
     max-height: 100vh;
-
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
 
 .sidebar ul {
+    font-size: 14px;
     list-style-type: none;
-    padding-left: 20px;
+    padding: 0px 20px;
+    white-space: nowrap;
+}
+
+.file-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.sidebar ul li {
+    margin: 5px 0px;
 }
 
 .sidebar button {
@@ -82,7 +92,6 @@ time {
 main {
     display: grid;
     overflow: auto;
-    
     grid-column: 2;
     grid-row: 1 / span 2;
 }
@@ -98,7 +107,7 @@ section {
     border-radius: 15px;
 }
 
-.file-name {
+.section-header {
     display: flex;
     padding: 0 15px;
     color: rgba(255, 255, 255, 0.9);

@@ -14,7 +14,9 @@
                 <time>{{ date_time }}</time>
             </header>
             <section class="sidebar">
-                <h2>Table of Contents</h2>
+                <div class="section-header">
+                    <h2>Table of Contents</h2>
+                </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
                     <li class="collapsible">
@@ -27,7 +29,7 @@
                                 </g>
                             </svg>
                         </button>
-                        <span>
+                        <span class="file-name">
                             <a href={{'#{}'.format(filenum)}}>
                                 {{os.path.basename(filename)}}
                             </a>
@@ -88,9 +90,9 @@
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
                 <section id={{filenum}}>
-                    <article class="file-name">
+                    <div class="section-header">
                         <h2> {{ filename }} </h2>
-                    </article>
+                    </div>
                     <article class="error-output code-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.code_err_title }}</span>

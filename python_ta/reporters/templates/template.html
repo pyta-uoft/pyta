@@ -19,14 +19,32 @@
                 </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
-                    <li>
-                        <span class=file-name>
+                    <li class="collapsible">
+                        <button>
+                            <svg width="10" height="10">
+                                <g transform="scale(0.10 0.10)">
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                          stroke-width="15px"
+                                          fill="transparent"/>
+                                </g>
+                            </svg>
+                        </button>
+                        <span class="file-name">
                             <a href={{'#{}'.format(filenum)}}>
                                 {{os.path.basename(filename)}}
                             </a>
                         </span>
                         <ul>
-                            <li>
+                            <li class="collapsible">
+                                <button>
+                                    <svg width="10" height="10">
+                                        <g transform="scale(0.10 0.10)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                                  stroke-width="15px"
+                                                  fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
                                 <span>
                                     <strong>Code Errors or Forbidden Usage</strong>
                                 </span>
@@ -40,7 +58,16 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                            <li>
+                            <li class="collapsible">
+                                <button>
+                                    <svg width="10" height="10">
+                                        <g transform="scale(0.10 0.10)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                                  stroke-width="15px"
+                                                  fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
                                 <span>
                                     <strong>Style and Convention</strong>
                                 </span>

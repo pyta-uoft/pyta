@@ -13,6 +13,7 @@ header {
     color: #fff;
     margin-left: 20px;
     margin-bottom: 15px;
+    white-space: nowrap;
 }
 
 .main-grid {
@@ -21,19 +22,50 @@ header {
     grid-template-rows: min-content 1fr;
 }
 
+@media screen and (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    header {
+        display: none;
+    }
+}
+
 .sidebar {
-    margin-top: 0;
-    margin-left: 35px;
-    padding: 0 20px;
+    margin: 0 35px auto;
     position: sticky;
     top: 0;
     height: fit-content;
     max-height: 100vh;
-    
-    white-space: nowrap;
-
     overflow-y: auto;
     overscroll-behavior-y: contain;
+}
+
+.sidebar ul {
+    font-size: 14px;
+    list-style-type: none;
+    padding: 0px 20px;
+    white-space: nowrap;
+}
+
+.file-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.sidebar ul li {
+    margin: 5px 0px;
+}
+
+.sidebar button {
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    padding: 0;
+}
+
+.sidebar svg.collapsed {
+    transform: rotate(-90deg);
 }
 
 .sidebar a:link, a:visited {
@@ -68,7 +100,6 @@ time {
 main {
     display: grid;
     overflow: auto;
-    
     grid-column: 2;
     grid-row: 1 / span 2;
 }
@@ -84,7 +115,7 @@ section {
     border-radius: 15px;
 }
 
-.file-name {
+.section-header {
     display: flex;
     padding: 0 15px;
     color: rgba(255, 255, 255, 0.9);

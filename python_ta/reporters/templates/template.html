@@ -14,17 +14,37 @@
                 <time>{{ date_time }}</time>
             </header>
             <section class="sidebar">
-                <h2>Table of Contents</h2>
+                <div class="section-header">
+                    <h2>Table of Contents</h2>
+                </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
-                    <li>
-                        <span>
+                    <li class="collapsible">
+                        <button>
+                            <svg width="10" height="10">
+                                <g transform="scale(0.10 0.10)">
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                          stroke-width="15px"
+                                          fill="transparent"/>
+                                </g>
+                            </svg>
+                        </button>
+                        <span class="file-name">
                             <a href={{'#{}'.format(filenum)}}>
                                 {{os.path.basename(filename)}}
                             </a>
                         </span>
                         <ul>
-                            <li>
+                            <li class="collapsible">
+                                <button>
+                                    <svg width="10" height="10">
+                                        <g transform="scale(0.10 0.10)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                                  stroke-width="15px"
+                                                  fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
                                 <span>
                                     <strong>Code Errors or Forbidden Usage</strong>
                                 </span>
@@ -38,7 +58,16 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                            <li>
+                            <li class="collapsible">
+                                <button>
+                                    <svg width="10" height="10">
+                                        <g transform="scale(0.10 0.10)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                                  stroke-width="15px"
+                                                  fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
                                 <span>
                                     <strong>Style and Convention</strong>
                                 </span>
@@ -61,9 +90,9 @@
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
                 <section id={{filenum}}>
-                    <article class="file-name">
+                    <div class="section-header">
                         <h2> {{ filename }} </h2>
-                    </article>
+                    </div>
                     <article class="error-output code-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.code_err_title }}</span>

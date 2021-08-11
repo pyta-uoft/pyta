@@ -102,6 +102,7 @@ main {
     overflow: auto;
     grid-column: 2;
     grid-row: 1 / span 2;
+    padding-top: 20px;
 }
 
 section {

@@ -98,10 +98,12 @@ time {
 }
 
 main {
-    display: grid;
     overflow: auto;
     grid-column: 2;
     grid-row: 1 / span 2;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 40px;
 }
 
 section {
@@ -259,6 +261,9 @@ button.collapsed {
     transform: scaleY(-1);
 }
 
+.message collapsible {
+    --dropdown-max-height: 50px;
+}
 .collapsible {
     max-height: var(--dropdown-max-height);
     transition: max-height 0.25s ease-out;
@@ -269,7 +274,7 @@ button.collapsed {
 .collapsible.hide-and-maintain-width {
     overflow-y: hidden;
     max-height: 0;
-    transition: max-height 0.15s ease-out;
+    transition: max-height 0.25s ease-out;
 }
 
 .content {

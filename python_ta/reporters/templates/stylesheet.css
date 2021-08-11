@@ -152,6 +152,7 @@ section {
     padding: 8px 16px;
     margin-bottom: 5px;
     border-radius: 3px;
+    overflow-y: hidden;
 }
 
 .error-link {
@@ -259,23 +260,25 @@ button.collapsed {
 }
 
 .collapsible {
+    max-height: var(--dropdown-max-height);
+    transition: max-height 0.25s ease-out;
     width: 100%;
-    overflow-x: auto;
+    overflow: hidden;
 }
 
-/*display none caused width of parent to shrink when longer text messages are hidden*/
 .collapsible.hide-and-maintain-width {
-    visibility: hidden;
-    height: 0;
-    margin: 0;
-    padding: 0;
+    overflow-y: hidden;
+    max-height: 0;
+    transition: max-height 0.15s ease-out;
 }
 
 .content {
+    --dropdown-max-height: 2200px;
     margin-bottom: 15px;
 }
 
 .message-container{
+    --dropdown-max-height: 800px;
     border-top: 1px solid rgba(0, 0, 0, 0.15);
     margin: 8px 0;
 }

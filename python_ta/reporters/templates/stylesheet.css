@@ -101,9 +101,7 @@ main {
     overflow: auto;
     grid-column: 2;
     grid-row: 1 / span 2;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 40px;
+    padding: 20px;
 }
 
 section {
@@ -126,7 +124,7 @@ section {
     background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     border-top-left-radius: 15px;
-    border-top-right-radius: 15px; 
+    border-top-right-radius: 15px;
 }
 
 .error-output {
@@ -154,7 +152,6 @@ section {
     padding: 8px 16px;
     margin-bottom: 5px;
     border-radius: 3px;
-    overflow-y: hidden;
 }
 
 .error-link {
@@ -239,6 +236,12 @@ section {
     vertical-align: middle;
 }
 
+.more-info {
+    font-size: 12px;
+    color: #000000;
+    font-weight: normal;
+}
+
 .info {
     font-size: 110%;
     display: flex;  /*Narrow width viewports*/
@@ -261,29 +264,36 @@ button.collapsed {
     transform: scaleY(-1);
 }
 
-.message collapsible {
-    --dropdown-max-height: 50px;
-}
 .collapsible {
-    max-height: var(--dropdown-max-height);
-    transition: max-height 0.25s ease-out;
     width: 100%;
     overflow: hidden;
 }
 
-.collapsible.hide-and-maintain-width {
-    overflow-y: hidden;
-    max-height: 0;
-    transition: max-height 0.25s ease-out;
+.hide-and-maintain-width {
+    height: 0;
+    transition: height 0.25s ease-out;
+}
+
+.expanded {
+    height: auto;
+    transition: height 0.25s ease-out;
+}
+
+.content.hide-and-maintain-width,
+.message-container.hide-and-maintain-width {
+    transition: height 0.5s ease-out;
+}
+
+.content.expanded,
+.message-container.expanded {
+    transition: height 0.5s ease-out;
 }
 
 .content {
-    --dropdown-max-height: 2200px;
     margin-bottom: 15px;
 }
 
 .message-container{
-    --dropdown-max-height: 800px;
     border-top: 1px solid rgba(0, 0, 0, 0.15);
     margin: 8px 0;
 }

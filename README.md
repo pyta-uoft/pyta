@@ -73,10 +73,13 @@ included as a library). In the Python interpreter, try running:
 
 ## Contributors
 
+Lorena Buciu,
+Simon Chen,
 Nigel Fong,
 Adam Gleizer,
 Ibrahim Hasan,
 Niayesh Ilkhani,
+Craig Katsube,
 Rebecca Kay,
 Christopher Koehler,
 David Kim,

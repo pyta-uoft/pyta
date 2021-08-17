@@ -19,7 +19,7 @@
                 </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
-                    <li class="collapsible">
+                    <li class="collapsible expanded">
                         <button>
                             <svg width="10" height="10">
                                 <g transform="scale(0.10 0.10)">
@@ -35,7 +35,7 @@
                             </a>
                         </span>
                         <ul>
-                            <li class="collapsible">
+                            <li class="collapsible expanded">
                                 <button>
                                     <svg width="10" height="10">
                                         <g transform="scale(0.10 0.10)">
@@ -58,7 +58,7 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                            <li class="collapsible">
+                            <li class="collapsible expanded">
                                 <button>
                                     <svg width="10" height="10">
                                         <g transform="scale(0.10 0.10)">
@@ -106,7 +106,7 @@
                                 </button>
                             </span>
                         </h3>
-                        <div class="content collapsible">
+                        <div class="content collapsible expanded">
                             {% for message_id in messages[0] %}
                                 {% set occurrences = messages[0][message_id] %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
@@ -138,7 +138,7 @@
                                         </button>
                                     </span>
                                 </div>
-                                <div class="message-container collapsible">
+                                <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
                                     <div class="message">
                                         <h4 class="message-name">
@@ -154,7 +154,7 @@
                                             </span>
                                         </h4>
                                         {% if indiv.snippet != '' %}
-                                        <div class="collapsible">
+                                        <div class="collapsible expanded">
                                           <code>{{ indiv.snippet }}</code>
                                         </div>
                                         {% else %}
@@ -182,7 +182,7 @@
                                 </button>
                             </span>
                         </h3>
-                        <div class="content collapsible">
+                        <div class="content collapsible expanded">
                             {% for message_id, occurrences in messages[1].items() %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
@@ -214,7 +214,7 @@
                                     </span>
                                 </div>
 
-                                <div class="message-container collapsible">
+                                <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
                                     <div class="message">
                                         <h4 class="message-name">
@@ -229,7 +229,7 @@
                                                 </button>
                                             </span>
                                         </h4>
-                                        <div class="collapsible">
+                                        <div class="collapsible expanded">
                                           {% if indiv.snippet != '' %}
                                           <code>{{ indiv.snippet }}</code>
                                           {% else %}

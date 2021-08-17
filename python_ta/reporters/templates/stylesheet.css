@@ -98,7 +98,6 @@ time {
 }
 
 main {
-    display: grid;
     overflow: auto;
     grid-column: 2;
     grid-row: 1 / span 2;
@@ -125,7 +124,7 @@ section {
     background: linear-gradient(to left, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     background: -webkit-linear-gradient(right, rgba(36, 59, 85, 0.67), rgba(20, 30, 48, 0.77));
     border-top-left-radius: 15px;
-    border-top-right-radius: 15px; 
+    border-top-right-radius: 15px;
 }
 
 .error-output {
@@ -267,15 +266,27 @@ button.collapsed {
 
 .collapsible {
     width: 100%;
-    overflow-x: auto;
+    overflow: hidden;
 }
 
-/*display none caused width of parent to shrink when longer text messages are hidden*/
-.collapsible.hide-and-maintain-width {
-    visibility: hidden;
+.hide-and-maintain-width {
     height: 0;
-    margin: 0;
-    padding: 0;
+    transition: height 0.25s ease-out;
+}
+
+.expanded {
+    height: auto;
+    transition: height 0.25s ease-out;
+}
+
+.content.hide-and-maintain-width,
+.message-container.hide-and-maintain-width {
+    transition: height 0.5s ease-out;
+}
+
+.content.expanded,
+.message-container.expanded {
+    transition: height 0.5s ease-out;
 }
 
 .content {

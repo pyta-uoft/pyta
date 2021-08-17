@@ -1,6 +1,8 @@
+from typing import Dict, List, Optional, Tuple, Union
+
 import astroid
-from .graph import ControlFlowGraph, CFGBlock
-from typing import List, Tuple, Dict, Union, Optional
+
+from .graph import CFGBlock, ControlFlowGraph
 
 
 class CFGVisitor:
@@ -11,6 +13,7 @@ class CFGVisitor:
         The top of the stack corresponds to the end of the list.
         (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
+
     cfgs: Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
@@ -24,7 +27,7 @@ class CFGVisitor:
         self._control_boundaries = []
 
     def __getattr__(self, attr: str):
-        if attr.startswith('visit_'):
+        if attr.startswith("visit_"):
             return self.visit_generic
         else:
             raise AttributeError(f"'CFGVisitor' object has not attribute '{attr}'")
@@ -116,8 +119,12 @@ class CFGVisitor:
         after_while_block = self._current_cfg.create_block()
 
         # step into while
-        self._control_boundaries.append((node, {astroid.Break.__name__: after_while_block,
-                                                astroid.Continue.__name__: test_block}))
+        self._control_boundaries.append(
+            (
+                node,
+                {astroid.Break.__name__: after_while_block, astroid.Continue.__name__: test_block},
+            )
+        )
 
         # Handle "body" branch
         body_block = self._current_cfg.create_block(test_block)
@@ -153,8 +160,9 @@ class CFGVisitor:
         after_for_block = self._current_cfg.create_block()
 
         # step into for
-        self._control_boundaries.append((node, {astroid.Break.__name__: after_for_block,
-                                                astroid.Continue.__name__: test_block}))
+        self._control_boundaries.append(
+            (node, {astroid.Break.__name__: after_for_block, astroid.Continue.__name__: test_block})
+        )
 
         # Handle "body" branch
         body_block = self._current_cfg.create_block(test_block)
@@ -180,7 +188,7 @@ class CFGVisitor:
     def visit_break(self, node: astroid.Break) -> None:
         self._visit_jump(node)
 
-    def visit_continue(self, node:astroid.Continue) -> None:
+    def visit_continue(self, node: astroid.Continue) -> None:
         self._visit_jump(node)
 
     def visit_return(self, node: astroid.Return) -> None:
@@ -194,8 +202,10 @@ class CFGVisitor:
                 old_curr.add_statement(node)
                 break
         else:
-            raise SyntaxError(f'\'{type(node).__name__}\' outside'
-                              f' {"function" if isinstance(node, astroid.Return) else "loop"}')
+            raise SyntaxError(
+                f"'{type(node).__name__}' outside"
+                f' {"function" if isinstance(node, astroid.Return) else "loop"}'
+            )
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 
@@ -216,7 +226,7 @@ class CFGVisitor:
             h = self._current_cfg.create_block()
             self._current_block = h
             handler.cfg_block = h
-            if handler.name is not None:   # The name assigned to the caught exception.
+            if handler.name is not None:  # The name assigned to the caught exception.
                 handler.name.accept(self)
             for child in handler.body:
                 child.accept(self)

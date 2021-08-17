@@ -32,7 +32,7 @@ Type-checking:
 """
 
 # Example 1
-{'b': 1}
+{"b": 1}
 
 # Example 2
 {my_key: my_value, 3 + 2: x[0]}

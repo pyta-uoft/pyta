@@ -6,7 +6,7 @@ This page is current under construction!
 
 ## Reporters
 
-PythonTA offers four different types of *reporters* used to display the results of its checks to the user.
+PythonTA offers four different types of _reporters_ used to display the results of its checks to the user.
 
 - `python_ta.reporters.PlainReporter`: outputs report in plain text.
 - `python_ta.reporters.ColorReporter`: outputs a colourized report (can only be used in the terminal/Python shell)

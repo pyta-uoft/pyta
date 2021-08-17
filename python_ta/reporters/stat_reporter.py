@@ -18,7 +18,7 @@ class StatReporter(PlainReporter):
         StatReporter.error_messages = []
         StatReporter.style_messages = []
 
-    def print_messages(self, level='all'):
+    def print_messages(self, level="all"):
         """Override the corresponding function in PlainReporter.
 
         @type level: str

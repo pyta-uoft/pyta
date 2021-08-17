@@ -30,7 +30,7 @@ Type-checking:
 """
 
 # Example 1
-f'My name is {name}'
+f"My name is {name}"
 
 # Example 2
-f'{3.14159:.3}'
+f"{3.14159:.3}"

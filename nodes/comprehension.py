@@ -54,4 +54,3 @@ Type-checking:
 
 # Example 2
 [b for b in range(3) if b < 2]
-

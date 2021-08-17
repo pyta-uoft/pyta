@@ -1,6 +1,7 @@
 """Patch to add transforms for setting type constraints and creating control flow graphs.
 """
 from pylint.lint import PyLinter
+
 # from ..transforms.type_inference_visitor import TypeInferer
 from ..cfg.visitor import CFGVisitor
 

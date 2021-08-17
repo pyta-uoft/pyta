@@ -1,23 +1,25 @@
-import astroid
 from typing import ForwardRef
-from .. import custom_hypothesis_support as cs
+
+import astroid
 
 from python_ta.transforms.type_inference_visitor import TypeFail
+
+from .. import custom_hypothesis_support as cs
 
 
 def test_class_with_init():
     program = """
     class Foo:
-    
+
         def __init__(self):
             self.a = 5
-    
+
     foo = Foo()
     """
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         assert isinstance(call_node.inf_type.getValue(), ForwardRef)
-        assert call_node.inf_type.getValue() == ForwardRef('Foo')
+        assert call_node.inf_type.getValue() == ForwardRef("Foo")
 
 
 def test_class_without_init():
@@ -31,7 +33,7 @@ def test_class_without_init():
     ast_mod, ti = cs._parse_text(program)
     for call_node in ast_mod.nodes_of_class(astroid.Call):
         assert isinstance(call_node.inf_type.getValue(), ForwardRef)
-        assert call_node.inf_type.getValue() == ForwardRef('Foo')
+        assert call_node.inf_type.getValue() == ForwardRef("Foo")
 
 
 def test_wrong_number_init():
@@ -68,9 +70,9 @@ def test_builtin_overloaded_initializers():
     """
     ast_mod, ti = cs._parse_text(program, True)
     for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
-        if assgn_node.name == 'range1':
+        if assgn_node.name == "range1":
             range1 = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(range1).getValue() == range
-        if assgn_node.name == 'range2':
+        if assgn_node.name == "range2":
             range2 = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(range2).getValue() == range

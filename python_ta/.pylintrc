@@ -12,7 +12,7 @@ pyta-type-check = no
 # pyta-reporter = HTMLReporter
 
 # Set the location of the template for HTMLreporter.
-pyta-template-file = template.html
+pyta-template-file = template.html.jinja
 
 #Set whether you wish to opt-in to anonymous data collection of errors reported when you run PyTA.
 pyta-error-permission = no

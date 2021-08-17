@@ -1,9 +1,9 @@
 """This module provides the core functionality for all PythonTA reporters.
 """
-from collections import defaultdict, namedtuple
 import os.path
 import sys
-from typing import Dict, Optional, List, Tuple
+from collections import defaultdict, namedtuple
+from typing import Dict, List, Optional, Tuple
 
 from astroid import NodeNG
 from pylint.message import Message
@@ -14,10 +14,10 @@ from pylint.reporters.ureports.nodes import BaseLayout
 from .node_printers import LineType, render_message
 
 # Extension of Pylint's Message class to incorporate astroid node and source code snippet
-NewMessage = namedtuple('NewMessage', Message._fields + ('node', 'snippet'))
+NewMessage = namedtuple("NewMessage", Message._fields + ("node", "snippet"))
 
 # Messages without a source code line to highlight
-NO_SNIPPET = {'invalid-name'}
+NO_SNIPPET = {"invalid-name"}
 
 
 class PythonTaReporter(BaseReporter):
@@ -27,23 +27,22 @@ class PythonTaReporter(BaseReporter):
     """
 
     # Rendering constants
-    _SPACE = ' '
-    _BREAK = '\n'
+    _SPACE = " "
+    _BREAK = "\n"
     _COLOURING = {}
 
     # The error messages to report, mapping filename to a list of messages.
     messages: Dict[str, List[Message]]
 
     def __init__(self) -> None:
-        """Initialize this reporter.
-        """
+        """Initialize this reporter."""
         super().__init__()
         self.messages = defaultdict(list)
         self.source_lines = []
-        self.module_name = ''
-        self.current_file = ''
+        self.module_name = ""
+        self.current_file = ""
 
-    def print_messages(self, level: str = 'all') -> None:
+    def print_messages(self, level: str = "all") -> None:
         """Print messages for the current file.
 
         If level == 'all', both errors and style errors are displayed. Otherwise,
@@ -58,7 +57,7 @@ class PythonTaReporter(BaseReporter):
         If filepath is the path to a directory, a new file is created in that directory
         (with default filename self.OUTPUT_FILENAME).
         """
-        if filepath is None or filepath == '-':
+        if filepath is None or filepath == "-":
             self.out = sys.stdout
         else:
             # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
@@ -66,7 +65,7 @@ class PythonTaReporter(BaseReporter):
             if os.path.isdir(filepath):
                 filepath = os.path.join(filepath, self.OUTPUT_FILENAME)
 
-            self.out = open(filepath, 'w', encoding='utf-8')
+            self.out = open(filepath, "w", encoding="utf-8")
 
     def handle_message(self, msg: Message) -> None:
         """Handle a new message triggered on the current file."""
@@ -79,21 +78,20 @@ class PythonTaReporter(BaseReporter):
         (see python_ta/patches/messages.py).
         """
         curr_messages = self.messages[self.current_file]
-        if len(curr_messages) >= 1 and \
-                curr_messages[-1].msg_id == msg_definition.msgid:
+        if len(curr_messages) >= 1 and curr_messages[-1].msg_id == msg_definition.msgid:
             msg = curr_messages[-1]
 
-            if msg.symbol in NO_SNIPPET or msg.msg.startswith('Invalid module'):
-                snippet = ''
+            if msg.symbol in NO_SNIPPET or msg.msg.startswith("Invalid module"):
+                snippet = ""
             else:
                 snippet = self._build_snippet(msg, node)
 
             curr_messages[-1] = NewMessage(*msg, node, snippet)
 
-    def group_messages(self, messages: List[Message])\
-            -> Tuple[Dict[str, List[Message]], Dict[str, List[Message]]]:
-        """Group messages for the current file by their (error/style) and type (msg_id).
-        """
+    def group_messages(
+        self, messages: List[Message]
+    ) -> Tuple[Dict[str, List[Message]], Dict[str, List[Message]]]:
+        """Group messages for the current file by their (error/style) and type (msg_id)."""
         error_msgs_by_type = defaultdict(list)
         style_msgs_by_type = defaultdict(list)
         for msg in messages:
@@ -120,14 +118,14 @@ class PythonTaReporter(BaseReporter):
         """Return a code snippet for the given Message object, formatted appropriately according
         to line type.
         """
-        code_snippet = ''
+        code_snippet = ""
 
         for lineno, slice_, line_type, text in render_message(msg, node, self.source_lines):
             code_snippet += self._add_line(lineno, line_type, slice_, text)
 
         return code_snippet
 
-    def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = '') -> str:
+    def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = "") -> str:
         """Format given source code line as specified and return as str.
 
         Called by _build_snippet, relies on _colourify.
@@ -139,18 +137,18 @@ class PythonTaReporter(BaseReporter):
             end_col = slice_.stop or len(text)
 
             if text[:start_col]:
-                snippet += self._colourify('black', text[:start_col])
-            snippet += self._colourify('highlight', text[slice_])
+                snippet += self._colourify("black", text[:start_col])
+            snippet += self._colourify("highlight", text[slice_])
             if text[end_col:]:
-                snippet += self._colourify('black', text[end_col:])
+                snippet += self._colourify("black", text[end_col:])
         elif linetype == LineType.CONTEXT:
-            snippet += self._colourify('grey', text)
+            snippet += self._colourify("grey", text)
         elif linetype == LineType.OTHER:
             snippet += text
         elif linetype == LineType.DOCSTRING:
-            space_c = len(text) - len(text.lstrip(' '))
+            space_c = len(text) - len(text.lstrip(" "))
             snippet += space_c * self._SPACE
-            snippet += self._colourify('highlight', text.lstrip(' '))
+            snippet += self._colourify("highlight", text.lstrip(" "))
 
         snippet += self._BREAK
         return snippet
@@ -159,18 +157,18 @@ class PythonTaReporter(BaseReporter):
         """Return a formatted string displaying a line number."""
         spaces = 2 * self._SPACE
         if lineno is not None:
-            number = '{:>3}'.format(lineno)
+            number = "{:>3}".format(lineno)
         else:
             number = 3 * self._SPACE
 
         if linetype == LineType.ERROR:
-            return spaces + self._colourify('gbold-line', number) + spaces
+            return spaces + self._colourify("gbold-line", number) + spaces
         elif linetype == LineType.CONTEXT:
-            return spaces + self._colourify('grey-line', number) + spaces
+            return spaces + self._colourify("grey-line", number) + spaces
         elif linetype == LineType.OTHER:
-            return spaces + self._colourify('grey-line', number) + spaces
+            return spaces + self._colourify("grey-line", number) + spaces
         elif linetype == LineType.DOCSTRING:
-            return spaces + self._colourify('black-line', number) + spaces
+            return spaces + self._colourify("black-line", number) + spaces
         else:
             return spaces + number + spaces
 
@@ -191,7 +189,7 @@ class PythonTaReporter(BaseReporter):
         self.module_name = module
         self.current_file = filepath
 
-        with open(filepath, encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             self.source_lines = [line.rstrip() for line in f.readlines()]
 
     def on_close(self, stats, previous_stats):
@@ -206,53 +204,53 @@ class PythonTaReporter(BaseReporter):
 # Checks to enable for basic_check (trying to find errors
 # and forbidden constructs only)
 ERROR_CHECKS = {
-    'used-before-assignment',
-    'undefined-variable',
-    'undefined-loop-variable',
-    'not-in-loop',
-    'return-outside-function',
-    'duplicate-key',
-    'unreachable',
-    'pointless-statement',
-    'pointless-string-statement',
-    'no-member',
-    'not-callable',
-    'assignment-from-no-return',
-    'assignment-from-none',
-    'no-value-for-parameter',
-    'too-many-function-args',
-    'invalid-sequence-index',
-    'invalid-slice-index',
-    'invalid-unary-operand-type',
-    'unsupported-binary-operation',
-    'unsupported-membership-test',
-    'unsubscriptable-object',
-    'unbalanced-tuple-unpacking',
-    'unpacking-non-sequence',
-    'function-redefined',
-    'duplicate-argument-name',
-    'import-error',
-    'no-name-in-module',
-    'non-parent-init-called',
-    'access-member-before-definition',
-    'method-hidden',
-    'unexpected-special-method-signature',
-    'inherit-non-class',
-    'duplicate-except',
-    'bad-except-order',
-    'raising-bad-type',
-    'raising-non-exception',
-    'catching-non-exception',
-    'bad-indentation',
-    'E9996',
-    'E9991',
-    'E0001',
-    'E9999',
-    'unexpected-keyword-arg',
-    'not-an-iterable',
-    'nonexistent-operator',
-    'invalid-length-returned',
-    'abstract-method',
-    'self-cls-assignment',
-    'dict-iter-missing-items'
+    "used-before-assignment",
+    "undefined-variable",
+    "undefined-loop-variable",
+    "not-in-loop",
+    "return-outside-function",
+    "duplicate-key",
+    "unreachable",
+    "pointless-statement",
+    "pointless-string-statement",
+    "no-member",
+    "not-callable",
+    "assignment-from-no-return",
+    "assignment-from-none",
+    "no-value-for-parameter",
+    "too-many-function-args",
+    "invalid-sequence-index",
+    "invalid-slice-index",
+    "invalid-unary-operand-type",
+    "unsupported-binary-operation",
+    "unsupported-membership-test",
+    "unsubscriptable-object",
+    "unbalanced-tuple-unpacking",
+    "unpacking-non-sequence",
+    "function-redefined",
+    "duplicate-argument-name",
+    "import-error",
+    "no-name-in-module",
+    "non-parent-init-called",
+    "access-member-before-definition",
+    "method-hidden",
+    "unexpected-special-method-signature",
+    "inherit-non-class",
+    "duplicate-except",
+    "bad-except-order",
+    "raising-bad-type",
+    "raising-non-exception",
+    "catching-non-exception",
+    "bad-indentation",
+    "E9996",
+    "E9991",
+    "E0001",
+    "E9999",
+    "unexpected-keyword-arg",
+    "not-an-iterable",
+    "nonexistent-operator",
+    "invalid-length-returned",
+    "abstract-method",
+    "self-cls-assignment",
+    "dict-iter-missing-items",
 }

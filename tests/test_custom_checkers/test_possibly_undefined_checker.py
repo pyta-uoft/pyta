@@ -1,7 +1,8 @@
-import pylint.testutils
 import astroid
-from python_ta.checkers.possibly_undefined_checker import PossiblyUndefinedChecker
+import pylint.testutils
+
 from python_ta.cfg import CFGVisitor
+from python_ta.checkers.possibly_undefined_checker import PossiblyUndefinedChecker
 
 
 class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
@@ -42,8 +43,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(
-            astroid.Name)
+        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(astroid.Name)
         with self.assertNoMessages():
             self.checker.visit_module(mod)
             self.checker.visit_name(name_node_y)
@@ -53,7 +53,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
     def test_no_messages_with_import_from(self):
         src = """
         from random import j
-        
+
         y = 0
         if y > 10:
             j = 10
@@ -188,7 +188,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         src = """
         class A:
             y = 10
-            
+
         if True:
             x = 10
         else:
@@ -217,10 +217,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(
-                msg_id='possibly-undefined',
-                node=name_node_y,
-            ),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y)
         ):
             self.checker.visit_name(name_node_y)
 
@@ -239,10 +236,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(
-                msg_id='possibly-undefined',
-                node=name_node_y,
-            ),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y)
         ):
             self.checker.visit_name(name_node_y)
 
@@ -263,10 +257,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                ),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y)
         ):
             self.checker.visit_name(name_node_y)
 
@@ -287,10 +278,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                ),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y)
         ):
             self.checker.visit_name(name_node_y)
 
@@ -314,10 +302,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                ),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y)
         ):
             self.checker.visit_name(name_node_y)
 
@@ -335,10 +320,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_x,
-                ),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_x)
         ):
             self.checker.visit_name(name_node_x)
 
@@ -356,14 +338,8 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                ),
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_x,
-                )
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y),
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_x),
         ):
             self.checker.visit_name(name_node_y)
             self.checker.visit_name(name_node_x)
@@ -387,10 +363,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='possibly-undefined',
-                    node=name_node_y,
-                )
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_y)
         ):
             self.checker.visit_name(name_node_y)
 
@@ -410,7 +383,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
             self.checker.visit_name(name_node_x)
-    
+
     def test_with_dict_comprehension(self):
         src = """
         def func(lst):
@@ -443,9 +416,6 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
-            pylint.testutils.Message(
-                msg_id='possibly-undefined',
-                node=name_node_x,
-            )
+            pylint.testutils.Message(msg_id="possibly-undefined", node=name_node_x)
         ):
             self.checker.visit_name(name_node_x)

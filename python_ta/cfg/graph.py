@@ -1,10 +1,13 @@
 from __future__ import annotations
-from typing import Generator, Optional, List, Set, Tuple, Union
-from astroid import NodeNG, Continue, Break, Return
+
+from typing import Generator, List, Optional, Set, Tuple, Union
+
+from astroid import Break, Continue, NodeNG, Return
 
 
 class ControlFlowGraph:
     """A graph representing the control flow of a Python program."""
+
     start: CFGBlock
     end: CFGBlock
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
@@ -85,8 +88,7 @@ class ControlFlowGraph:
         """Generate a sequence of all blocks in this graph."""
         yield from self._get_blocks(self.start, set())
 
-    def _get_blocks(self, block: CFGBlock,
-                    visited: Set[int]) -> Generator[CFGBlock, None, None]:
+    def _get_blocks(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:
         if block.id in visited:
             return
 
@@ -115,8 +117,7 @@ class ControlFlowGraph:
         """Generate a sequence of all edges in this graph."""
         yield from self._get_edges(self.start, set())
 
-    def _get_edges(self, block: CFGBlock,
-                   visited: Set[int]) -> Generator[CFGEdge, None, None]:
+    def _get_edges(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGEdge, None, None]:
         if block.id in visited:
             return
 
@@ -138,6 +139,7 @@ class CFGBlock:
 
     Represents a maximal block of code whose statements are guaranteed to execute in sequence.
     """
+
     # A unique identifier
     id: int
     # The statements in this block.
@@ -178,6 +180,7 @@ class CFGEdge:
 
     Edges are directed, and in the future may be augmented with auxiliary metadata about the control flow.
     """
+
     source: CFGBlock
     target: CFGBlock
 

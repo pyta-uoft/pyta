@@ -1,10 +1,13 @@
-from .. import custom_hypothesis_support as cs
-import astroid
 from typing import *
 from typing import ForwardRef, _GenericAlias
+
+import astroid
 import pytest
-from python_ta.typecheck.base import TypeConstraints, _TNode, TypeFail
+
+from python_ta.typecheck.base import TypeConstraints, TypeFail, _TNode
 from sample_usage.draw_tnodes import gen_graph_from_nodes
+
+from .. import custom_hypothesis_support as cs
 
 
 def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
@@ -17,7 +20,9 @@ def tc_to_disjoint(tc: TypeConstraints) -> List[Set[Union[type, str]]]:
         visited_nodes = []
         while open_nodes:
             cur_open_node = open_nodes[0]
-            if isinstance(cur_open_node.type, TypeVar) or isinstance(cur_open_node.type, _GenericAlias):
+            if isinstance(cur_open_node.type, TypeVar) or isinstance(
+                cur_open_node.type, _GenericAlias
+            ):
                 new_set.add(str(cur_open_node.type))
             else:
                 new_set.add(cur_open_node.type)
@@ -56,7 +61,7 @@ def test_one_var():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_TV0'}]
+    expected_set = [{int, "~_TV0"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -68,7 +73,7 @@ def test_typefail():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_TV0'}, {str, '~_TV1'}]
+    expected_set = [{int, "~_TV0"}, {str, "~_TV1"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -81,7 +86,7 @@ def test_multi_var_int():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_TV0', '~_TV1', '~_TV2', '~_TV3'}]
+    expected_set = [{int, "~_TV0", "~_TV1", "~_TV2", "~_TV3"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -94,7 +99,7 @@ def test_multi_var():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_TV0'}, {'~_TV1', str}, {'~_TV2', bool}, {'~_TV3', float}]
+    expected_set = [{int, "~_TV0"}, {"~_TV1", str}, {"~_TV2", bool}, {"~_TV3", float}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -108,7 +113,7 @@ def test_var_chain():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{int, '~_TV0', '~_TV1', '~_TV2', '~_TV3', '~_TV4'}]
+    expected_set = [{int, "~_TV0", "~_TV1", "~_TV2", "~_TV3", "~_TV4"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -118,7 +123,7 @@ def test_list_int():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_TV0', 'typing.List[int]'}, {int}]
+    expected_set = [{"~_TV0", "typing.List[int]"}, {int}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -128,7 +133,7 @@ def test_any_list():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_TV0', 'typing.List[typing.Any]'}, {int}, {str}]
+    expected_set = [{"~_TV0", "typing.List[typing.Any]"}, {int}, {str}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -138,7 +143,7 @@ def test_tuple_int():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_TV0', 'typing.Tuple[int, int]'}]
+    expected_set = [{"~_TV0", "typing.Tuple[int, int]"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -148,7 +153,7 @@ def test_tuple_int_str():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_TV0', 'typing.Tuple[int, str]'}]
+    expected_set = [{"~_TV0", "typing.Tuple[int, str]"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -159,7 +164,7 @@ def test_elt():
     """
     ast_mod, ti = cs._parse_text(src)
     actual_set = tc_to_disjoint(ti.type_constraints)
-    expected_set = [{'~_TV0', 'typing.List[~_TV2]', 'typing.List[int]'}, {'~_TV1', int, '~_TV2'}]
+    expected_set = [{"~_TV0", "typing.List[~_TV2]", "typing.List[int]"}, {"~_TV1", int, "~_TV2"}]
     compare_list_sets(actual_set, expected_set)
 
 
@@ -169,11 +174,11 @@ tc = TypeConstraints()
 def test_forward_ref(draw=False):
     tc.reset()
     t0 = tc.fresh_tvar()
-    assert isinstance(tc.unify(ForwardRef('A'), ForwardRef('B')), TypeFail)
-    assert tc.unify(ForwardRef('A'), ForwardRef('A')).getValue() == ForwardRef('A')
-    assert tc.unify(t0, ForwardRef('A')).getValue() == ForwardRef('A')
+    assert isinstance(tc.unify(ForwardRef("A"), ForwardRef("B")), TypeFail)
+    assert tc.unify(ForwardRef("A"), ForwardRef("A")).getValue() == ForwardRef("A")
+    assert tc.unify(t0, ForwardRef("A")).getValue() == ForwardRef("A")
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', ForwardRef('A')}, {ForwardRef('B')}]
+    expected_set = [{"~_TV0", ForwardRef("A")}, {ForwardRef("B")}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -188,9 +193,10 @@ def test_polymorphic_callable(draw=False):
     tc.unify(t2, Callable[[t0], t0])
     tc.unify(t1, t2)
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', int},
-                    {'~_TV1', '~_TV2', 'typing.Callable[[int], int]',
-                     'typing.Callable[[~_TV0], ~_TV0]'}]
+    expected_set = [
+        {"~_TV0", int},
+        {"~_TV1", "~_TV2", "typing.Callable[[int], int]", "typing.Callable[[~_TV0], ~_TV0]"},
+    ]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -205,9 +211,10 @@ def test_polymorphic_callable2(draw=False):
     tc.unify(t2, Callable[[int], t0])
     tc.unify(t1, t2)
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', int},
-                    {'~_TV1', '~_TV2', 'typing.Callable[[~_TV0], int]',
-                     'typing.Callable[[int], ~_TV0]'}]
+    expected_set = [
+        {"~_TV0", int},
+        {"~_TV1", "~_TV2", "typing.Callable[[~_TV0], int]", "typing.Callable[[int], ~_TV0]"},
+    ]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -222,9 +229,10 @@ def test_polymorphic_callable3(draw=False):
     tc.unify(t2, t1)
     tc.unify(t2, Callable[[int], int])
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', int},
-                    {'~_TV1', '~_TV2', 'typing.Callable[[int], int]',
-                     'typing.Callable[[~_TV0], ~_TV0]'}]
+    expected_set = [
+        {"~_TV0", int},
+        {"~_TV1", "~_TV2", "typing.Callable[[int], int]", "typing.Callable[[~_TV0], ~_TV0]"},
+    ]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -239,9 +247,12 @@ def test_polymorphic_callable4(draw=False):
     tc.unify(t2, t1)
     assert isinstance(tc.unify(t2, Callable[[int], str]), TypeFail)
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', int},
-                    {'~_TV1', '~_TV2', 'typing.Callable[[~_TV0], ~_TV0]'},
-                    {'typing.Callable[[int], str]'}, {str}]
+    expected_set = [
+        {"~_TV0", int},
+        {"~_TV1", "~_TV2", "typing.Callable[[~_TV0], ~_TV0]"},
+        {"typing.Callable[[int], str]"},
+        {str},
+    ]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -250,13 +261,19 @@ def test_polymorphic_callable4(draw=False):
 def test_polymorphic_callable5(draw=False):
     tc.reset()
     t0 = tc.fresh_tvar()
-    tc.unify(Callable[[Callable[[int, t0], int], int], t0],
-             Callable[[Callable[[int, int], int], int], t0])
+    tc.unify(
+        Callable[[Callable[[int, t0], int], int], t0],
+        Callable[[Callable[[int, int], int], int], t0],
+    )
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0', int},
-                    {'typing.Callable[[int, ~_TV0], int]', 'typing.Callable[[int, int], int]'},
-                    {'typing.Callable[[typing.Callable[[int, ~_TV0], int], int], ~_TV0]',
-                     'typing.Callable[[typing.Callable[[int, int], int], int], ~_TV0]'}]
+    expected_set = [
+        {"~_TV0", int},
+        {"typing.Callable[[int, ~_TV0], int]", "typing.Callable[[int, int], int]"},
+        {
+            "typing.Callable[[typing.Callable[[int, ~_TV0], int], int], ~_TV0]",
+            "typing.Callable[[typing.Callable[[int, int], int], int], ~_TV0]",
+        },
+    ]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
@@ -268,13 +285,14 @@ def test_can_unify_callable(draw=False):
     assert not tc.can_unify(Callable[[t0, t0], int], Callable[[str, int], int])
     # make sure tc is unchanged
     actual_set = tc_to_disjoint(tc)
-    expected_set = [{'~_TV0'}]
+    expected_set = [{"~_TV0"}]
     compare_list_sets(actual_set, expected_set)
     if draw:
         gen_graph_from_nodes(tc._nodes)
 
 
 # Inheritance
+
 
 def test_userdefn_inheritance_simple(draw=False):
     src = """
@@ -293,23 +311,24 @@ def test_userdefn_inheritance_simple(draw=False):
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tc = ti.type_constraints
-    a, b, c = [ti.lookup_typevar(node, node.name) for node
-               in ast_mod.nodes_of_class(astroid.AssignName)]
+    a, b, c = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
 
     assert isinstance(tc.unify(a, b), TypeFail)
-    assert tc.unify(c, a).getValue() == ForwardRef('C')
+    assert tc.unify(c, a).getValue() == ForwardRef("C")
     assert isinstance(tc.unify(a, c), TypeFail)  # note that order matters!
-    assert tc.unify(c, b).getValue() == ForwardRef('C')
+    assert tc.unify(c, b).getValue() == ForwardRef("C")
     assert isinstance(tc.unify(b, c), TypeFail)
 
     actual_set = tc_to_disjoint(tc)
     expected_set = [
-        {'~_TV0', Type[ForwardRef('A')]},
-        {'~_TV1', Type[ForwardRef('B')]},
-        {'~_TV2', Type[ForwardRef('C')]},
-        {'~_TV3', ForwardRef('A')},
-        {'~_TV4', ForwardRef('B')},
-        {'~_TV5', ForwardRef('C')}
+        {"~_TV0", Type[ForwardRef("A")]},
+        {"~_TV1", Type[ForwardRef("B")]},
+        {"~_TV2", Type[ForwardRef("C")]},
+        {"~_TV3", ForwardRef("A")},
+        {"~_TV4", ForwardRef("B")},
+        {"~_TV5", ForwardRef("C")},
     ]
 
     # _TNodes should be unchanged after unification
@@ -336,12 +355,13 @@ def test_userdefn_inheritance_multilevel(draw=False):
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tc = ti.type_constraints
-    a, b, c = [ti.lookup_typevar(node, node.name) for node
-               in ast_mod.nodes_of_class(astroid.AssignName)]
+    a, b, c = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
 
-    assert tc.unify(b, a).getValue() == ForwardRef('B')
-    assert tc.unify(c, b).getValue() == ForwardRef('C')
-    assert tc.unify(c, a).getValue() == ForwardRef('C')
+    assert tc.unify(b, a).getValue() == ForwardRef("B")
+    assert tc.unify(c, b).getValue() == ForwardRef("C")
+    assert tc.unify(c, a).getValue() == ForwardRef("C")
     assert isinstance(ti.type_constraints.unify(b, c), TypeFail)
 
     if draw:
@@ -357,8 +377,8 @@ def test_builtin_abst_inheritance(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     tc = ti.type_constraints
     actual_set = tc_to_disjoint(tc)
-    assert {'~_TV0', int} in actual_set
-    assert {'~_TV1', float} in actual_set
+    assert {"~_TV0", int} in actual_set
+    assert {"~_TV1", float} in actual_set
     if draw:
         gen_graph_from_nodes(tc._nodes)
 
@@ -368,21 +388,23 @@ def test_builtin_abst_inheritance(draw=False):
 
 # Inheritance-based method lookup
 
+
 def test_userdefn_mro_simple(draw=False):
     src = """
     class A:
         def foo(self):
             return 0
-            
+
     class B(A):
         pass
-        
+
     b = B()
     x = b.foo()
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    _, b, x = [ti.lookup_typevar(node, node.name) for node
-               in ast_mod.nodes_of_class(astroid.AssignName)]
+    _, b, x = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(x).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -393,22 +415,23 @@ def test_userdefn_mro_multilevel(draw=False):
     class A:
         def foo(self):
             return 0
-            
+
     class B:
         pass
-        
+
     class C(A):
         pass
-        
+
     class D(B, C):
         pass
-        
+
     d = D()
     x = d.foo()
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    _, d, x = [ti.lookup_typevar(node, node.name) for node
-               in ast_mod.nodes_of_class(astroid.AssignName)]
+    _, d, x = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(x).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -418,38 +441,40 @@ def test_userdefn_mro_diamond(draw=False):
     src = """
     class A:
         pass
-            
+
     class B(A):
         def foo(self):
             return 'a'
-        
+
     class C(A):
         def foo(self):
             return 0
-        
+
     class D(B,C):
         pass
-        
+
     d = D()
     x = d.foo() # this is a call to B.foo()
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    _, _, d, x = [ti.lookup_typevar(node, node.name) for node
-                  in ast_mod.nodes_of_class(astroid.AssignName)]
+    _, _, d, x = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
 
 
-@pytest.mark.skip(reason='Cannot yet handle Generic Protocols (SupportsAbs[T])')
+@pytest.mark.skip(reason="Cannot yet handle Generic Protocols (SupportsAbs[T])")
 def test_builtin_abst_base_mro(draw=False):
     src = """
     x = 3 # x descends from SupportsAbs[int]
     y = abs(x)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x, y = [ti.lookup_typevar(node, node.name) for node
-            in ast_mod.nodes_of_class(astroid.AssignName)]
+    x, y = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(y).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -459,13 +484,14 @@ def test_builtin_call_simple_mro(draw=False):
     src = """
     class A:
         pass
-        
+
     a = A()
     x = repr(a)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    a, x = [ti.lookup_typevar(node, node.name) for node
-            in ast_mod.nodes_of_class(astroid.AssignName)]
+    a, x = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -476,8 +502,9 @@ def test_builtin_binop_inheritance(draw=False):
     x = 1.0 + 3
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == float
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -488,8 +515,9 @@ def test_builtin_comp_inheritance(draw=False):
     x = (3 == 'abc')
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == bool
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -499,13 +527,14 @@ def test_userdefn_inherits_from_builtin(draw=False):
     src = """
     class MyStr(str):
         pass
-        
+
     s = MyStr()
     x = s.lower()
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    s, x = [ti.lookup_typevar(node, node.name) for node
-            in ast_mod.nodes_of_class(astroid.AssignName)]
+    s, x = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -521,8 +550,9 @@ def test_userdefn_overrides_builtin(draw=False):
     x = s.lower()
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    _, s, x = [ti.lookup_typevar(node, node.name) for node
-            in ast_mod.nodes_of_class(astroid.AssignName)]
+    _, s, x = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(x).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -533,8 +563,9 @@ def test_builtin_generic_inheritance_init(draw=False):
     x = set([1,2,3])
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == Set[int]
 
 
@@ -544,8 +575,9 @@ def test_builtin_generic_inheritance_method_lookup(draw=False):
     y = x.symmetric_difference([2,3])
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x, y = [ti.lookup_typevar(node, node.name) for node
-            in ast_mod.nodes_of_class(astroid.AssignName)]
+    x, y = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(y).getValue() == Set[int]
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -557,8 +589,9 @@ def test_builtin_generic_inheritance_overloaded_init(draw=False):
     y = list(x)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x, y = [ti.lookup_typevar(node, node.name) for node
-            in ast_mod.nodes_of_class(astroid.AssignName)]
+    x, y = [
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+    ]
     assert ti.type_constraints.resolve(y).getValue() == List[int]
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)

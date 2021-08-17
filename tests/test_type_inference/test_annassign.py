@@ -1,25 +1,36 @@
+from typing import Any, Dict, List, Set, Tuple, Union, _GenericAlias
+
 import astroid
-from hypothesis import given, settings, HealthCheck
+import hypothesis.strategies as hs
+from hypothesis import HealthCheck, given, settings
+from pytest import skip
+
+from python_ta.typecheck.base import (
+    NoType,
+    TypeFail,
+    TypeFailAnnotationInvalid,
+    TypeFailUnify,
+    _gorg,
+    _node_to_type,
+)
+
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type
-import hypothesis.strategies as hs
-from python_ta.typecheck.base import _node_to_type, TypeFail, TypeFailAnnotationInvalid, TypeFailUnify, NoType, _gorg
-from typing import List, Set, Dict, Any, Tuple, Union, _GenericAlias
-from pytest import skip
 
 settings.load_profile("pyta")
 
 
 def test_annassign_concrete():
-    """Test whether types are being properly set for an AnnAssign node.
-    """
-    program = f'class Student:\n' \
-              f'    name: str\n' \
-              f'    age: int\n' \
-              f'    status: bool\n' \
-              f'    def __init__(self):\n' \
-              f'        pass\n' \
-              f''
+    """Test whether types are being properly set for an AnnAssign node."""
+    program = (
+        f"class Student:\n"
+        f"    name: str\n"
+        f"    age: int\n"
+        f"    status: bool\n"
+        f"    def __init__(self):\n"
+        f"        pass\n"
+        f""
+    )
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AnnAssign):
         variable_type = lookup_type(inferer, node, node.target.name)
@@ -30,13 +41,11 @@ def test_annassign_concrete():
 @given(hs.dictionaries(cs.valid_identifier(), cs.builtin_type, min_size=2))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_annassign(variables_annotations_dict):
-    """Test whether types are being properly set for an AnnAssign node.
-    """
-    program = f'class Student:\n'
+    """Test whether types are being properly set for an AnnAssign node."""
+    program = f"class Student:\n"
     for variable in variables_annotations_dict:
-        program += f'    {variable}: {variables_annotations_dict[variable].__name__}\n'
-    program += f'    def __init__(self):\n' \
-               f'        pass\n'
+        program += f"    {variable}: {variables_annotations_dict[variable].__name__}\n"
+    program += f"    def __init__(self):\n" f"        pass\n"
     module, inferer = cs._parse_text(program)
     for node in module.nodes_of_class(astroid.AnnAssign):
         variable_type = lookup_type(inferer, node, node.target.name)
@@ -61,7 +70,7 @@ def test_annassign_subscript_list():
 def test_annassign_subscript_list_int():
     program = """
     lst: List[int]
-    
+
     lst = [1, 2, 3]
     """
     module, inferer = cs._parse_text(program)
@@ -152,7 +161,7 @@ def test_annassign_subscript_tuple_int():
 def test_annassign_subscript_tuple_multi_param():
     program = """
     t: Tuple
-    
+
     t = (1, 'Hello')
     """
     skip("Requires support for multi-parameter Tuple annotations")
@@ -166,7 +175,7 @@ def test_annassign_subscript_multi_list():
     program = """
     l1: List
     l2: List
-    
+
     l1 = [1, 2, 3]
     l2 = ['Hello', 'Goodbye']
     """
@@ -192,8 +201,10 @@ def test_annassign_and_assign():
     x: List[int] = [1, 2, 3]
     """
     module, inferer = cs._parse_text(src, reset=True)
-    x = [inferer.lookup_typevar(node, node.name) for node
-         in module.nodes_of_class(astroid.AssignName)][0]
+    x = [
+        inferer.lookup_typevar(node, node.name)
+        for node in module.nodes_of_class(astroid.AssignName)
+    ][0]
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert ann_node.inf_type == NoType()
     assert inferer.type_constraints.resolve(x).getValue() == List[int]
@@ -252,5 +263,5 @@ def test_annotation_union_list():
     module, inferer = cs._parse_text(src, reset=True)
     for ann_node in module.nodes_of_class(astroid.AnnAssign):
         assert not isinstance(ann_node.inf_type, TypeFail)
-    x_type = lookup_type(inferer, module, 'x')
+    x_type = lookup_type(inferer, module, "x")
     assert x_type == Union[List[Any], int]

@@ -30,7 +30,7 @@ Type-checking:
 """
 
 # Example 1
-f'hello world'
+f"hello world"
 
 # Example 2
-f'name: {name}, age: {age:.0f}'
+f"name: {name}, age: {age:.0f}"

@@ -1,7 +1,8 @@
 from typing import List
 
-import pylint.testutils
 import astroid
+import pylint.testutils
+
 from python_ta.checkers.invalid_for_target_checker import InvalidForTargetChecker
 
 
@@ -31,11 +32,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=subscript_node,
-                    args='l[0]'
-                )
+            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="l[0]")
         ):
             self.checker.visit_for(for_node)
 
@@ -48,11 +45,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, assign_attr_node = _extract_nodes(src, [astroid.For, astroid.AssignAttr])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=assign_attr_node,
-                    args='x.attr'
-                )
+            pylint.testutils.Message(
+                msg_id="invalid-for-target", node=assign_attr_node, args="x.attr"
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -75,17 +70,12 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=subscript_node,
-                    args='b[0]'
-                )
+            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="b[0]")
         ):
             self.checker.visit_for(for_node)
 
     def test_no_msg_list_simple(self) -> None:
-        """Test that no message is added when the for target list only contains valid targets
-        """
+        """Test that no message is added when the for target list only contains valid targets"""
         src = """
         for [a, b] in l:
             pass
@@ -101,11 +91,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=subscript_node,
-                    args='b[0]'
-                )
+            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="b[0]")
         ):
             self.checker.visit_for(for_node)
 
@@ -126,11 +112,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=subscript_node,
-                    args='d[0]'
-                )
+            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
         ):
             self.checker.visit_for(for_node)
 
@@ -151,11 +133,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=subscript_node,
-                    args='d[0]'
-                )
+            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
         ):
             self.checker.visit_for(for_node)
 
@@ -178,11 +156,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='invalid-for-target',
-                    node=subscript_node,
-                    args='d[0]'
-                )
+            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
         ):
             self.checker.visit_for(for_node)
 

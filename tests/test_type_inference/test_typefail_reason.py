@@ -1,10 +1,16 @@
-import astroid
 import typing
-from .. import custom_hypothesis_support as cs
-from python_ta.typecheck.base import TypeFail, TypeFailUnify, TypeFailAnnotationUnify, TypeFailFunction
 
+import astroid
 from pytest import skip
 
+from python_ta.typecheck.base import (
+    TypeFail,
+    TypeFailAnnotationUnify,
+    TypeFailFunction,
+    TypeFailUnify,
+)
+
+from .. import custom_hypothesis_support as cs
 
 
 def find_type_fail(ast_node):
@@ -46,7 +52,7 @@ def test_var_assign():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, 'A', str, exp_src_type=astroid.Assign, num_reasons=1)
+    verify_typefail_unify(tf, "A", str, exp_src_type=astroid.Assign, num_reasons=1)
 
 
 def test_two_var_assign():
@@ -57,7 +63,7 @@ def test_two_var_assign():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, 'A', 'B', exp_src_type=astroid.Assign, num_reasons=2)
+    verify_typefail_unify(tf, "A", "B", exp_src_type=astroid.Assign, num_reasons=2)
 
 
 def test_var_chain():
@@ -67,12 +73,12 @@ def test_var_chain():
 
     B = A
     C = B
-    
+
     C = Z
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, 'C', 'Z', exp_src_type=astroid.Assign, num_reasons=4)
+    verify_typefail_unify(tf, "C", "Z", exp_src_type=astroid.Assign, num_reasons=4)
 
 
 def test_one_list():
@@ -82,7 +88,7 @@ def test_one_list():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, 'L1', str, exp_src_type=astroid.Assign, num_reasons=1)
+    verify_typefail_unify(tf, "L1", str, exp_src_type=astroid.Assign, num_reasons=1)
 
 
 def test_two_lists():
@@ -93,7 +99,7 @@ def test_two_lists():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, 'L1', 'L2', exp_src_type=astroid.Assign, num_reasons=2)
+    verify_typefail_unify(tf, "L1", "L2", exp_src_type=astroid.Assign, num_reasons=2)
 
 
 def test_tuple():
@@ -104,7 +110,7 @@ def test_tuple():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, 'T1', 'T2', exp_src_type=astroid.Assign, num_reasons=2)
+    verify_typefail_unify(tf, "T1", "T2", exp_src_type=astroid.Assign, num_reasons=2)
 
 
 def test_annotation():
@@ -121,7 +127,7 @@ def test_func_annotation():
     src = """
     def f(x: int):
         return x
-    
+
     f('Hello')
     """
     skip("Requires modifications to unify_call")
@@ -134,24 +140,24 @@ def test_function():
     src = """
     def f(x):
         return x + 1
-    
+
     f('Hello')
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_function(tf, 'f(\'Hello\')')
+    verify_typefail_function(tf, "f('Hello')")
 
 
 def test_function_index():
     src = """
     def f(x, y):
         return x + y + 1
-    
+
     f(1, 'two')
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_function(tf, 'f(1, \'two\')')
+    verify_typefail_function(tf, "f(1, 'two')")
     assert tf.arg_indices == [1]
 
 
@@ -164,7 +170,7 @@ def test_function_multi_index():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_function(tf, 'f(\'one\', \'two\')')
+    verify_typefail_function(tf, "f('one', 'two')")
     assert tf.arg_indices == [0, 1]
 
 
@@ -172,20 +178,20 @@ def test_function_numargs():
     src = """
     def f(x, y):
         return x + y
-    
+
     f(5)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_function(tf, 'f(5)')
+    verify_typefail_function(tf, "f(5)")
 
 
 def test_function_overload():
     src = """
     def f(x, y=0):
         return x + y + 1
-    
+
     f(1, 2, 3)"""
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_function(tf, 'f(1, 2, 3)')
+    verify_typefail_function(tf, "f(1, 2, 3)")

@@ -1,6 +1,7 @@
 from typing import List
 
 import pytest
+
 from python_ta.contracts import check_all_contracts
 
 
@@ -12,6 +13,7 @@ class Employee:
     - len(self.name) > 0
     - self.wage >= 15
     """
+
     name: str
     wage: float
 
@@ -33,6 +35,7 @@ class Developer(Employee):
     Representation Invariants:
     - self.preferred_language == "Python" or self.preferred_language == "Java"
     """
+
     preferred_language: str
 
     def __init__(self, name, wage, preferred_language):
@@ -47,6 +50,7 @@ class Teacher(Employee):
     Representation Invariants:
     - self.wage == self.wage_per_class * len(self.currently_teaching)
     """
+
     currently_teaching: List[str]
     wage_per_class: float
 
@@ -77,6 +81,7 @@ class TeamMember:
     Representation Invariants:
     - len(self.team) > 0
     """
+
     team: str
 
     def __init__(self, team):
@@ -97,7 +102,7 @@ class TeamLead(Developer, TeamMember):
 
 
 # Decorating everything in this file
-check_all_contracts(__name__, decorate_main = False)
+check_all_contracts(__name__, decorate_main=False)
 
 
 @pytest.fixture
@@ -122,7 +127,7 @@ def test_change_developer_wage_lower(developer) -> None:
     with pytest.raises(AssertionError) as excinfo:
         developer.change_wages(25)
     msg = str(excinfo.value)
-    assert 'self.wage < new_wage' in msg
+    assert "self.wage < new_wage" in msg
 
 
 def test_increase_teamlead_wages(teamlead):
@@ -140,7 +145,7 @@ def test_decrease_teamlead_wages(teamlead):
     with pytest.raises(AssertionError) as excinfo:
         teamlead.wage = 20
     msg = str(excinfo.value)
-    assert 'self.wage >= 30' in msg
+    assert "self.wage >= 30" in msg
 
 
 def test_change_teamlead_language(teamlead):
@@ -166,9 +171,9 @@ def test_change_teamlead_team_invalid(teamlead):
     Changes the team of the teamlead to something invalid. Excpects an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
-        teamlead.team = ''
+        teamlead.team = ""
     msg = str(excinfo.value)
-    assert 'len(self.team) > 0' in msg
+    assert "len(self.team) > 0" in msg
 
 
 def test_call_super_when_temp_invalid(pe_bio_teacher):
@@ -178,8 +183,9 @@ def test_call_super_when_temp_invalid(pe_bio_teacher):
     """
     pe_bio_teacher.update_wage_per_class(100)
     assert pe_bio_teacher.wage_per_class == 100
-    assert (pe_bio_teacher.wage ==
-            pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))
+    assert pe_bio_teacher.wage == pe_bio_teacher.wage_per_class * len(
+        pe_bio_teacher.currently_teaching
+    )
 
 
 def test_call_super_creates_temp_invalid(pe_bio_teacher):
@@ -189,5 +195,6 @@ def test_call_super_creates_temp_invalid(pe_bio_teacher):
     """
     pe_bio_teacher.teach_new_classes(["Computer Science", "Video Production", "Life Science"])
     assert len(pe_bio_teacher.currently_teaching) == 3
-    assert (pe_bio_teacher.wage ==
-            pe_bio_teacher.wage_per_class * len(pe_bio_teacher.currently_teaching))
+    assert pe_bio_teacher.wage == pe_bio_teacher.wage_per_class * len(
+        pe_bio_teacher.currently_teaching
+    )

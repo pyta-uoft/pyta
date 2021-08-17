@@ -1,32 +1,26 @@
 import os.path
 from typing import Dict, Set
+
 import astroid
-from astroid.builder import AstroidBuilder
 import graphviz
-from python_ta.cfg import CFGVisitor, ControlFlowGraph, CFGBlock
+from astroid.builder import AstroidBuilder
+
+from python_ta.cfg import CFGBlock, CFGVisitor, ControlFlowGraph
+
+USAGE = "USAGE: python -m sample_usage.draw_cfg <your-file.py>"
+GRAPH_OPTIONS = {"format": "jpg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
 
 
-USAGE = 'USAGE: python -m sample_usage.draw_cfg <your-file.py>'
-GRAPH_OPTIONS = {
-    'format': 'jpg',
-    'node_attr': {
-        'shape': 'box',
-        'fontname': 'Courier New'
-    }
-}
-
-
-def display(cfgs: Dict[astroid.NodeNG, ControlFlowGraph],
-            filename: str, view: bool = True) -> None:
+def display(cfgs: Dict[astroid.NodeNG, ControlFlowGraph], filename: str, view: bool = True) -> None:
     graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
     for node, cfg in cfgs.items():
         if isinstance(node, astroid.Module):
-            subgraph_label = '__main__'
+            subgraph_label = "__main__"
         elif isinstance(node, astroid.FunctionDef):
             subgraph_label = node.name
         else:
             continue
-        with graph.subgraph(name=f'cluster_{id(node)}') as c:
+        with graph.subgraph(name=f"cluster_{id(node)}") as c:
             visited = set()
             _visit(cfg.start, c, visited)
             for block in cfg.unreachable_blocks:
@@ -36,25 +30,24 @@ def display(cfgs: Dict[astroid.NodeNG, ControlFlowGraph],
     graph.render(filename, view=view)
 
 
-def _visit(block: CFGBlock,
-           graph: graphviz.Digraph, visited: Set[int]) -> None:
-    node_id = f'{graph.name}_{block.id}'
+def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int]) -> None:
+    node_id = f"{graph.name}_{block.id}"
     if node_id in visited:
         return
 
-    label = '\n'.join([s.as_string() for s in block.statements]) + '\n'
+    label = "\n".join([s.as_string() for s in block.statements]) + "\n"
     # Need to escape backslashes explicitly.
-    label = label.replace('\\', '\\\\')
+    label = label.replace("\\", "\\\\")
     # \l is used for left alignment.
-    label = label.replace('\n', '\\l')
+    label = label.replace("\n", "\\l")
 
-    fill_color = 'grey93' if not block.reachable else 'white'
+    fill_color = "grey93" if not block.reachable else "white"
 
-    graph.node(node_id, label=label, fillcolor=fill_color, style='filled')
+    graph.node(node_id, label=label, fillcolor=fill_color, style="filled")
     visited.add(node_id)
 
     for edge in block.successors:
-        graph.edge(node_id, f'{graph.name}_{edge.target.id}')
+        graph.edge(node_id, f"{graph.name}_{edge.target.id}")
         _visit(edge.target, graph, visited)
 
 
@@ -67,8 +60,9 @@ def main(filepath: str) -> None:
     display(visitor.cfgs, filename)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print(USAGE)
         exit(1)

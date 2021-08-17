@@ -37,6 +37,7 @@ Example:
 
 """
 
+
 @wrapper
 async def animal(arg):
     """

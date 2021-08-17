@@ -12,7 +12,7 @@ Here is a minimal example of using the `python_ta.contracts` module to check a f
 # demo.py
 def divide(x: int, y: int) -> int:
     """Return x // y.
-    
+
     Preconditions:
         - y != 0
     """
@@ -109,7 +109,7 @@ from python_ta.contracts import check_contracts
 @check_contracts
 def divide(x: int, y: int) -> int:
     """Return x // y.
-    
+
     Preconditions:
         - y != 0
     """
@@ -119,7 +119,7 @@ def divide(x: int, y: int) -> int:
 @check_contracts
 def divide_each(lst1: list[int], lst2: list[int]) -> list[int]:
     """Return the quotient of each number in lst1 divided by the corresponding number in lst2.
-    
+
     Preconditions:
         - len(lst1) == len(lst2)
         - all(n != 0 for n in lst2)
@@ -155,7 +155,7 @@ class A:
 When contract checking is enabled for the class, these attribute types are checked (using [typeguard]) at the following times:
 
 1. After every method call.
-2. Whenever an attribute is reassigned *outside* a method of the class.
+2. Whenever an attribute is reassigned _outside_ a method of the class.
 
 Examples:
 
@@ -184,10 +184,10 @@ class Person:
 if __name__ == '__main__':
     # Create a new Person; name and age types are checked at end of __init__
     p = Person('David', 100)
-    
+
     # Types are checked after this method call; AssertionError is raised
     p.set_age_incorrectly()
-    
+
     # Types are checked when attribute is reassigned; AssertionError is raised
     p.name = 100
 ```
@@ -207,7 +207,7 @@ However, PythonTA currently does *not* support this syntax; all attributes must 
 
 ### Classes: custom representation invariants
 
-Similar to function preconditions, you can define *representation invariants* within a class docstring.
+Similar to function preconditions, you can define _representation invariants_ within a class docstring.
 Each representation invariant is a Python expression involving one or more attributes, and are defined using the following syntax:
 
 ```
@@ -229,7 +229,7 @@ from python_ta.contracts import check_contracts
 @check_contracts
 class Person:
     """A class representing a person.
-    
+
     Representation Invariants:
         - self.name.isalpha()
         - self.age >= 0
@@ -251,17 +251,17 @@ class Person:
 if __name__ == '__main__':
     # Create a new Person; representation invariants are checked at end of __init__
     p = Person('David', 10)
-    
+
     # Representation invariants are checked after this method call; AssertionError is raised
     p.decrease_age()
-    
+
     # Representation invariants are checked when attribute is reassigned; AssertionError is raised
     p.name = '123'
 ```
 
 ## Technical notes
 
-This section describes some more technical features of PythonTA's contract checking. 
+This section describes some more technical features of PythonTA's contract checking.
 
 ### Scope
 
@@ -276,7 +276,7 @@ from python_ta.contracts import check_contracts
 @check_contracts
 def f(x: float, y: float) -> float:
     """Return x + y.
-    
+
     Preconditions:
         - x >= 0
         - sqrt(x) >= 3.5
@@ -365,7 +365,7 @@ if __name__ == '__main__':
 ```
 
 All attribute type annotations are checked before all representation invariants.
-Attribute type annotations and representation invariants are checked based on the *reverse* method resolution order of their classes.
+Attribute type annotations and representation invariants are checked based on the _reverse_ method resolution order of their classes.
 So in the above example, the order of checks made is:
 
 1. `self.age` is an `int`
@@ -378,7 +378,8 @@ So in the above example, the order of checks made is:
 [typeguard]: https://github.com/agronholm/typeguard
 
 ### Partial Initialization
-Post-condition checks on class attribute types and representation invariants are disabled while 
+
+Post-condition checks on class attribute types and representation invariants are disabled while
 initializing an instance of a class. Due to the nature of the approach to disabling these checks,
 you may encounter that these checks will not run if you pass an already-created instance of an object
 through an externally defined function named `__init__` whose first parameter is self.
@@ -388,7 +389,7 @@ class DataClass:
     """
     Representation Invariants:
     - self.my_int > 10
-    
+
     """
     my_int: int
 
@@ -427,7 +428,9 @@ if __name__ == '__main__':
     else:
         print('Did not raise AssertionError')
 ```
+
 The above example outputs the following
+
 ```
 >>> Properly raised AssertionError
 >>> Did not raise AssertionError

@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from statistics import median
 from math import ceil, sqrt
+from statistics import median
 
 
 def _individual_calc(error_msgs, style_msgs):
@@ -14,18 +14,22 @@ def _individual_calc(error_msgs, style_msgs):
     """
     # {msg.symbol + "(" + msg.object + ")": count}
     all_msgs = error_msgs + style_msgs
-    totals = [('Error and Style Messages', len(all_msgs)),
-              ('Error Messages', len(error_msgs)),
-              ('Style Messages', len(style_msgs))]
+    totals = [
+        ("Error and Style Messages", len(all_msgs)),
+        ("Error Messages", len(error_msgs)),
+        ("Style Messages", len(style_msgs)),
+    ]
 
     all_num = list(zip(*_calc_helper(all_msgs)))
     error_num = list(zip(*_calc_helper(error_msgs)))
     style_num = list(zip(*_calc_helper(style_msgs)))
 
-    return [('Totals', totals),
-            ('Most Frequent Messages', all_num),
-            ('Most Frequent Errors', error_num),
-            ('Most Frequent Styles', style_num)]
+    return [
+        ("Totals", totals),
+        ("Most Frequent Messages", all_num),
+        ("Most Frequent Errors", error_num),
+        ("Most Frequent Styles", style_num),
+    ]
 
 
 def summary(all_msgs):
@@ -80,21 +84,25 @@ def summary(all_msgs):
 
     std_dev = sqrt(sum_dev / len(stu_errors))
 
-    sum_stats = [('Most Frequent Code Errors', error_num),
-                 ('Average Code Errors Per Student',
-                  round(len(code_errors) / num_stu, 2)),
-                 ('Most Frequent Style Errors', style_num),
-                 ('Average Style Errors Per Student',
-                  round(len(style_errors) / num_stu, 2)),
-                 ('Most Frequent Errors of Either Type', both_num),
-                 ('Average Errors of Either Type Per Student', avg_errors),
-                 ('Five Number Summary of Errors Per Student',
-                  [('Most Errors', stu_errors[0]),
-                   ('Upper Quartile (Q3)', q3),
-                   ('Median', med),
-                   ('Lower Quartile (Q1)', q1),
-                   ('Least Errors', stu_errors[-1])]),
-                 ('Standard Deviation', round(std_dev, 2))]
+    sum_stats = [
+        ("Most Frequent Code Errors", error_num),
+        ("Average Code Errors Per Student", round(len(code_errors) / num_stu, 2)),
+        ("Most Frequent Style Errors", style_num),
+        ("Average Style Errors Per Student", round(len(style_errors) / num_stu, 2)),
+        ("Most Frequent Errors of Either Type", both_num),
+        ("Average Errors of Either Type Per Student", avg_errors),
+        (
+            "Five Number Summary of Errors Per Student",
+            [
+                ("Most Errors", stu_errors[0]),
+                ("Upper Quartile (Q3)", q3),
+                ("Median", med),
+                ("Lower Quartile (Q1)", q1),
+                ("Least Errors", stu_errors[-1]),
+            ],
+        ),
+        ("Standard Deviation", round(std_dev, 2)),
+    ]
 
     return indiv_stats, sum_stats
 
@@ -112,7 +120,7 @@ def _calc_helper(msgs):
     total_msgs = len(msgs)
     # divide each value by total and round to two places
     for message in msgs_dict:
-        msgs_dict[message] = round((msgs_dict[message]/total_msgs * 100), 2)
+        msgs_dict[message] = round((msgs_dict[message] / total_msgs * 100), 2)
     perc_nums = _frequent_messages(msgs_dict)
     return [freq_nums, perc_nums]
 
@@ -126,7 +134,7 @@ def _message_counter(msgs):
     msgs_dict = {}
 
     for msg in msgs:
-        key = '{} ({})'.format(msg.msg_id, msg.symbol)
+        key = "{} ({})".format(msg.msg_id, msg.symbol)
         if key not in msgs_dict:
             msgs_dict[key] = sum(1 for m in msgs if m.msg_id == msg.msg_id)
     return msgs_dict

@@ -1,32 +1,43 @@
-import astroid
 import inspect
-from pylint.interfaces import IAstroidChecker
+
+import astroid
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
+from pylint.interfaces import IAstroidChecker
 
 
 class ForbiddenImportChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = 'forbidden_import'
-    msgs = {'E9999':
-                ('You may not import any modules - you imported %s on line %s.',
-                 'forbidden-import',
-                 'Used when you use import')}
-    options = (('allowed-import-modules',
-                {'default': (),
-                 'type': 'csv',
-                 'metavar': '<modules>',
-                 'help': 'Allowed modules to be imported.'}
-                ),
-               ('extra-imports',
-                {'default': (),
-                 'type': 'csv',
-                 'metavar': '<extra-modules>',
-                 'help': 'Extra allowed modules to be imported.'}
-                )
-               )
+    name = "forbidden_import"
+    msgs = {
+        "E9999": (
+            "You may not import any modules - you imported %s on line %s.",
+            "forbidden-import",
+            "Used when you use import",
+        )
+    }
+    options = (
+        (
+            "allowed-import-modules",
+            {
+                "default": (),
+                "type": "csv",
+                "metavar": "<modules>",
+                "help": "Allowed modules to be imported.",
+            },
+        ),
+        (
+            "extra-imports",
+            {
+                "default": (),
+                "type": "csv",
+                "metavar": "<extra-modules>",
+                "help": "Extra allowed modules to be imported.",
+            },
+        ),
+    )
 
     # this is important so that your checker is executed before others
     priority = -1
@@ -34,23 +45,28 @@ class ForbiddenImportChecker(BaseChecker):
     @check_messages("forbidden-import")
     def visit_import(self, node):
         """visit an Import node"""
-        temp = [name for name in node.names
-                if name[0] not in self.config.allowed_import_modules and
-                name[0] not in self.config.extra_imports]
+        temp = [
+            name
+            for name in node.names
+            if name[0] not in self.config.allowed_import_modules
+            and name[0] not in self.config.extra_imports
+        ]
 
         if temp != []:
             self.add_message(
-                'forbidden-import', node=node,
-                args=(', '.join(map(lambda x: x[0], temp)), node.lineno))
+                "forbidden-import",
+                node=node,
+                args=(", ".join(map(lambda x: x[0], temp)), node.lineno),
+            )
 
     @check_messages("forbidden-import")
     def visit_importfrom(self, node):
         """visit an ImportFrom node"""
-        if node.modname not in self.config.allowed_import_modules and\
-                node.modname not in self.config.extra_imports:
-            self.add_message(
-                'forbidden-import', node=node,
-                args=(node.modname, node.lineno))
+        if (
+            node.modname not in self.config.allowed_import_modules
+            and node.modname not in self.config.extra_imports
+        ):
+            self.add_message("forbidden-import", node=node, args=(node.modname, node.lineno))
 
     @check_messages("forbidden-import")
     def visit_call(self, node):
@@ -60,12 +76,13 @@ class ForbiddenImportChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 if name == "__import__":
-                    if node.args[0].value not in self.config.allowed_import_modules and\
-                                    node.args[0].value not in self.config.extra_imports:
+                    if (
+                        node.args[0].value not in self.config.allowed_import_modules
+                        and node.args[0].value not in self.config.extra_imports
+                    ):
                         args = (node.args[0].value, node.lineno)
                         # add the message
-                        self.add_message('forbidden-import', node=node,
-                                         args=args)
+                        self.add_message("forbidden-import", node=node, args=args)
 
 
 def register(linter):

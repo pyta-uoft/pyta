@@ -70,5 +70,5 @@ Example:
 """
 
 
-def f(a: 'annotation', b=1, c=2, *d, e, f=3, **g):
+def f(a: "annotation", b=1, c=2, *d, e, f=3, **g):
     pass

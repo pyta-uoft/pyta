@@ -1,7 +1,7 @@
 # PyTA Privacy Policy (DRAFT)
 
 Starting in version 1.6.0, PyTA will give user the option of sending anonymized usage data to PyTA maintainers to use to better understand how PyTA is used and to improve the tool.
-This will be an optional *opt-in* feature that is not required to use PythonTA.
+This will be an optional _opt-in_ feature that is not required to use PythonTA.
 
 ## What data will be sent?
 
@@ -20,7 +20,7 @@ The default configuration in the `python_ta` directory is `no` for both options.
 
 ## How will the data be anonymised?
 
-PyTA will not collect or send identifying information about you or your computer. (*Note*: if you choose to submit source files checked by PyTA, those files may contain identifying information about you.)
+PyTA will not collect or send identifying information about you or your computer. (_Note_: if you choose to submit source files checked by PyTA, those files may contain identifying information about you.)
 PyTA does record a hash of your device's MAC address in order to identify when two runs come from the same device, but this is not used to deanonymize the collected data.
 
 ## Who will the data be sent to?

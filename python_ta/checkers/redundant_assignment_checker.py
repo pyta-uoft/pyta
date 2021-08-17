@@ -8,27 +8,29 @@ An assignment statement is redundant if it satisfies the following two propertie
     2. Removing the statement from the program does not in any way change
     the behavior of the program.
 """
-from typing import Union
+from typing import List, Set, Union
+
 import astroid
-from pylint.interfaces import IAstroidChecker
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
+from pylint.interfaces import IAstroidChecker
+
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
-from typing import Set, List
 
 
 class RedundantAssignmentChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
-    name = 'redundant_assignment'
+    name = "redundant_assignment"
     # use dashes for connecting words in message symbol
-    msgs = {'E9959': ('This assignment statement is redundant;' \
-                      ' You can remove it from the program.',
-                      'redundant-assignment',
-                      'This assignment statement is redundant;' \
-                      ' You can remove it from the program.')
-           }
+    msgs = {
+        "E9959": (
+            "This assignment statement is redundant;" " You can remove it from the program.",
+            "redundant-assignment",
+            "This assignment statement is redundant;" " You can remove it from the program.",
+        )
+    }
 
     # this is important so that your checker is executed before others
     priority = -1
@@ -37,15 +39,15 @@ class RedundantAssignmentChecker(BaseChecker):
         super().__init__(linter=linter)
         self._redundant_assignment: Set[astroid.Assign] = set()
 
-    @check_messages('redundant-assignment')
+    @check_messages("redundant-assignment")
     def visit_assign(self, node: astroid.Assign):
         if node in self._redundant_assignment:
-            self.add_message('redundant-assignment', node=node)
+            self.add_message("redundant-assignment", node=node)
 
-    @check_messages('redundant-assignment')
+    @check_messages("redundant-assignment")
     def visit_augassign(self, node: astroid.AugAssign):
         if node in self._redundant_assignment:
-            self.add_message('redundant-assignment', node=node)
+            self.add_message("redundant-assignment", node=node)
 
     def visit_module(self, node: astroid.Module):
         self._analyze(node)
@@ -92,9 +94,16 @@ class RedundantAssignmentChecker(BaseChecker):
                 # `nodes_of_class` below doesnt block looking for required nodes
                 # in function definitions, hence this case.
                 continue
-            for node in statement.nodes_of_class((astroid.AssignName, astroid.DelName, astroid.Name,
-                                                  astroid.Nonlocal, astroid.Global),
-                                              astroid.FunctionDef):
+            for node in statement.nodes_of_class(
+                (
+                    astroid.AssignName,
+                    astroid.DelName,
+                    astroid.Name,
+                    astroid.Nonlocal,
+                    astroid.Global,
+                ),
+                astroid.FunctionDef,
+            ):
                 if isinstance(node, astroid.AssignName):
                     if node.name in gen.difference(kill):
                         self._redundant_assignment.add(node.parent)

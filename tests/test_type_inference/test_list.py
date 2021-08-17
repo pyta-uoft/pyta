@@ -1,11 +1,13 @@
-import astroid
+from typing import Any, List
 
+import astroid
+from hypothesis import HealthCheck, assume, given, settings
 from pytest import skip
+
 from python_ta.typecheck.base import TypeFail
-from hypothesis import assume, given, settings, HealthCheck
+
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type
-from typing import Any, List
 
 settings.load_profile("pyta")
 
@@ -43,8 +45,9 @@ def test_empty_list_reassign():
     x = [1]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -59,15 +62,16 @@ def test_empty_list_reassign_invalid():
 
 
 def test_empty_list_reassign_twice():
-    skip('This test requires special treatment of Any in generics')
+    skip("This test requires special treatment of Any in generics")
     src = """
     x = [] # List[~T1]
     x = [1] # List[int]
     x = [1, 'abc'] # List[Any] and not List[int]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == List[Any]
 
 
@@ -77,8 +81,9 @@ def test_empty_list_append():
     x.append(1)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -99,8 +104,9 @@ def test_list_append():
     x.append(4)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node
-         in ast_mod.nodes_of_class(astroid.AssignName)][0]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
+        0
+    ]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -114,4 +120,7 @@ def test_list_append_list_typevar():
     ast_mod, ti = cs._parse_text(src, reset=True)
     return_node = next(ast_mod.nodes_of_class(astroid.Return))
     functiondef_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
-    assert lookup_type(ti, return_node, return_node.value.name) == List[lookup_type(ti, functiondef_node, 'x')]
+    assert (
+        lookup_type(ti, return_node, return_node.value.name)
+        == List[lookup_type(ti, functiondef_node, "x")]
+    )

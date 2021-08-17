@@ -1,12 +1,14 @@
-import astroid
+from typing import Any, Callable, Tuple
 
+import astroid
+from hypothesis import HealthCheck, assume, given, settings
 from pytest import skip
 
-from hypothesis import given, settings, assume,  HealthCheck
-from typing import Callable, Any, Tuple
+from python_ta.typecheck.base import NoType
+
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type
-from python_ta.typecheck.base import NoType
+
 settings.load_profile("pyta")
 
 
@@ -14,13 +16,12 @@ settings.load_profile("pyta")
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_for_homogeneous_list(iterable):
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement
-     iterating over a homogeneous list.
+    iterating over a homogeneous list.
     """
-    program = f'for elt in {iterable}:\n' \
-              f'    x = elt\n'
+    program = f"for elt in {iterable}:\n" f"    x = elt\n"
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
-    local_type_var = module.type_environment.lookup_in_env('x')
+    local_type_var = module.type_environment.lookup_in_env("x")
     inferred_type = TypeInferrer.type_constraints.resolve(local_type_var).getValue()
     assert inferred_type == for_node.iter.inf_type.getValue().__args__[0]
 
@@ -29,7 +30,7 @@ def test_for_homogeneous_list(iterable):
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_for_heterogeneous_list(iterable):
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement
-     iterating over a heterogeneous list.
+    iterating over a heterogeneous list.
     """
     assume(type(iterable[0]) != type(iterable[1]))
     val_types = [type(val) for val in iterable]
@@ -37,29 +38,30 @@ def test_for_heterogeneous_list(iterable):
         assume(bool not in val_types)
     if bool in val_types:
         assume(int not in val_types)
-    program = f'for elt in {iterable}:\n' \
-              f'    x = elt\n'
+    program = f"for elt in {iterable}:\n" f"    x = elt\n"
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
-    local_type_var = module.type_environment.lookup_in_env('x')
+    local_type_var = module.type_environment.lookup_in_env("x")
     inferred_type = TypeInferrer.type_constraints.resolve(local_type_var).getValue()
     assert inferred_type == Any
 
 
 def test_inference_func_def_for():
     """Test whether visitors properly set the type constraint of the a For node representing for/else statement
-     iterating over a more complex iterable (ie, tuples, dicts, nested iterables).
+    iterating over a more complex iterable (ie, tuples, dicts, nested iterables).
     """
-    program = f'def add_ten(x):\n' \
-              f'    for num in [1, 2, 3, 4]:\n' \
-              f'        x = x + num\n' \
-              f'    return x\n'
+    program = (
+        f"def add_ten(x):\n"
+        f"    for num in [1, 2, 3, 4]:\n"
+        f"        x = x + num\n"
+        f"    return x\n"
+    )
     module, TypeInferrer = cs._parse_text(program)
     for_node = list(module.nodes_of_class(astroid.For))[0]
     function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
     function_type_var = module.type_environment.lookup_in_env(function_def_node.name)
     function_type = TypeInferrer.type_constraints.resolve(function_type_var).getValue()
-    target_type_var = function_def_node.type_environment.lookup_in_env('num')
+    target_type_var = function_def_node.type_environment.lookup_in_env("num")
     target_type = TypeInferrer.type_constraints.resolve(target_type_var).getValue()
     assert (function_type == Callable[[int], int]) and (target_type == int)
 
@@ -73,7 +75,7 @@ def test_for_list_tuple():
         """
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
-        if assign_node.name == 'x' or assign_node.name == 'elt':
+        if assign_node.name == "x" or assign_node.name == "elt":
             assert lookup_type(ti, assign_node, assign_node.name) == Tuple[str, int]
 
 
@@ -87,9 +89,9 @@ def test_for_list_tuple_multi_arg():
         """
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
-        if assign_node.name == 'x' or assign_node.name == 'a':
+        if assign_node.name == "x" or assign_node.name == "a":
             assert lookup_type(ti, assign_node, assign_node.name) == str
-        elif assign_node.name == 'y' or assign_node.name == 'b':
+        elif assign_node.name == "y" or assign_node.name == "b":
             assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
@@ -104,9 +106,9 @@ def test_for_zip():
         """
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
-        if assign_node.name == 'x' or assign_node.name == 'a':
+        if assign_node.name == "x" or assign_node.name == "a":
             assert lookup_type(ti, assign_node, assign_node.name) == str
-        elif assign_node.name == 'y' or assign_node.name == 'b':
+        elif assign_node.name == "y" or assign_node.name == "b":
             assert lookup_type(ti, assign_node, assign_node.name) == int
 
 
@@ -118,13 +120,15 @@ def test_for_dict():
             x = a
             y = b
         """
-    skip(f'Return type of some_dict.items() is inferred as ItemsView[str, int],'
-                   f'which does not unify with List[Tuple[str, int]]')
+    skip(
+        f"Return type of some_dict.items() is inferred as ItemsView[str, int],"
+        f"which does not unify with List[Tuple[str, int]]"
+    )
     module, ti = cs._parse_text(program)
     for assign_node in module.nodes_of_class(astroid.AssignName):
-        if assign_node.name == 'x' or assign_node.name == 'a':
+        if assign_node.name == "x" or assign_node.name == "a":
             assert lookup_type(ti, assign_node, assign_node.name) == str
-        elif assign_node.name == 'y' or assign_node.name == 'b':
+        elif assign_node.name == "y" or assign_node.name == "b":
             assert lookup_type(ti, assign_node, assign_node.name) == int
 
 

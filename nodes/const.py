@@ -19,4 +19,4 @@ Type-checking:
 """
 
 1
-b'6'
+b"6"

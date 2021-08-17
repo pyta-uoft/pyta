@@ -5,6 +5,7 @@ from astroid.bases import BUILTINS
 from pylint.checkers.base import NameChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
+
 from python_ta.checkers.global_variables_checker import is_in_main
 
 
@@ -26,15 +27,15 @@ def _override_check_protected_attribute_access():
     defined for this class. (This leads to false negatives unless we combine
     this with type inference, but we're okay with that.)
     """
-    old_check_protected_attribute_access =\
-        ClassChecker._check_protected_attribute_access
+    old_check_protected_attribute_access = ClassChecker._check_protected_attribute_access
 
     def _check(self, node):
         attrname = node.attrname
         klass = node_frame_class(node)
         if klass is None or (
-                attrname not in klass.instance_attrs and
-                attrname not in (m.name for m in klass.methods())):
+            attrname not in klass.instance_attrs
+            and attrname not in (m.name for m in klass.methods())
+        ):
             old_check_protected_attribute_access(self, node)
 
     ClassChecker._check_protected_attribute_access = _check
@@ -53,7 +54,7 @@ def _override_check_invalid_name_in_main():
 
     def patched_visit_assignname(self, node):
         if is_in_main(node):
-            self._check_name('variable', node.name, node)
+            self._check_name("variable", node.name, node)
         else:
             old_visit_assignname(self, node)
 
@@ -73,7 +74,7 @@ def _override_attribute_defined_outside_init():
         for attr, nodes in cnode.instance_attrs.items():
             setter = _get_attribute_property_setter(attr, cnode)
             if setter is not None:
-                self.config.defining_attr_methods = self.config.defining_attr_methods + (setter, )
+                self.config.defining_attr_methods = self.config.defining_attr_methods + (setter,)
 
         old_leave_classdef(self, cnode)
 

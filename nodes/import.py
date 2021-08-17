@@ -21,11 +21,12 @@ The representation trees display the pair of module name and its alias as a list
 data type is a tuple.
 """
 
+# Example 3:
 # Example 1:
+import astroid
 import astroid as ast
+
+import sample_usage
 
 # Example 2:
 import sample_usage.pyta_stats
-
-# Example 3:
-import astroid, sample_usage

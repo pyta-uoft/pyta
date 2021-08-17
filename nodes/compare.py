@@ -30,6 +30,6 @@ Type-checking:
 
 1 > 3
 
-b'5' <= b'6'
+b"5" <= b"6"
 
-'bob' == 'bob' != 'george'
+"bob" == "bob" != "george"

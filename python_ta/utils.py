@@ -10,8 +10,9 @@ def _get_name(t: type) -> str:
     elif isinstance(t, type):
         return t.__name__
     elif isinstance(t, _GenericAlias):
-        return '{} of {}'.format(_get_name(t.__origin__),
-                                 ', '.join(_get_name(arg) for arg in t.__args__))
+        return "{} of {}".format(
+            _get_name(t.__origin__), ", ".join(_get_name(arg) for arg in t.__args__)
+        )
     else:
         return str(t)
 

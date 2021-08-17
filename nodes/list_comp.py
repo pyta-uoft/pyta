@@ -57,7 +57,7 @@ Type-checking:
 """
 
 # Example 1
-[l+l for l in "str"]
+[l + l for l in "str"]
 
 # Example 2
-[x*y for x in [1, 2, 3] for y in [4, 5, 6]]
+[x * y for x in [1, 2, 3] for y in [4, 5, 6]]

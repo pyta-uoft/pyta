@@ -2,6 +2,7 @@ import json
 
 from pylint.interfaces import IReporter
 from pylint.reporters.ureports.nodes import BaseLayout
+
 from .core import PythonTaReporter
 
 
@@ -10,10 +11,11 @@ class JSONReporter(PythonTaReporter):
 
     Based on Pylint's JSONReporter.
     """
-    __implements__ = IReporter
-    name = 'JSONReporter'
 
-    OUTPUT_FILENAME = 'pyta_report.json'
+    __implements__ = IReporter
+    name = "JSONReporter"
+
+    OUTPUT_FILENAME = "pyta_report.json"
 
     def display_messages(self, layout: BaseLayout) -> None:
         """Hook for displaying the messages of the reporter
@@ -27,9 +29,8 @@ class JSONReporter(PythonTaReporter):
         """
         output = []
         for k, msgs in self.messages.items():
-            output.append({
-                'filename': k,
-                'msgs': [msg._replace(node=None)._asdict() for msg in msgs]
-            })
+            output.append(
+                {"filename": k, "msgs": [msg._replace(node=None)._asdict() for msg in msgs]}
+            )
 
         self.writeln(json.dumps(output, indent=4))

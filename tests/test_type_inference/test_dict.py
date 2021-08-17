@@ -1,9 +1,10 @@
-import astroid
+from typing import Any, Dict, List
 
-from hypothesis import assume, given, settings, HealthCheck
+import astroid
+from hypothesis import HealthCheck, assume, given, settings
+
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type
-from typing import Any, Dict, List
 
 settings.load_profile("pyta")
 
@@ -18,7 +19,9 @@ def test_homogeneous_dict(dictionary):
         assert dict_node.inf_type.getValue() == Dict[Any, Any]
     else:
         first_key, first_value = next(((k, v) for k, v in dictionary.items))
-        cs._verify_type_setting(module, astroid.Dict, Dict[type(first_key.value), type(first_value.value)])
+        cs._verify_type_setting(
+            module, astroid.Dict, Dict[type(first_key.value), type(first_value.value)]
+        )
 
 
 @given(cs.dict_node(min_size=2))

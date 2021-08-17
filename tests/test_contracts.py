@@ -1,11 +1,14 @@
-from typing import List, Dict, Set
 import sys
+from typing import Dict, List, Set
+
 import pytest
+
 from python_ta.contracts import check_contracts
 
 
 def test_nullary_return_int() -> None:
     """Calling a nullary function with the correct return type (int)."""
+
     @check_contracts
     def nullary() -> int:
         return 1
@@ -15,15 +18,17 @@ def test_nullary_return_int() -> None:
 
 def test_nullary_return_dict() -> None:
     """Calling a nullary function with the correct return type (Dict)."""
+
     @check_contracts
     def nullary() -> Dict[str, int]:
-        return {'one': 1}
+        return {"one": 1}
 
     nullary()
 
 
 def test_nullary_return_none() -> None:
     """Calling a nullary function with the correct return type (None)."""
+
     @check_contracts
     def nullary() -> None:
         3 + 4
@@ -33,6 +38,7 @@ def test_nullary_return_none() -> None:
 
 def test_nullary_return_wrong_type() -> None:
     """Calling a nullary function with the incorrect return type."""
+
     @check_contracts
     def nullary() -> str:
         return 1
@@ -43,6 +49,7 @@ def test_nullary_return_wrong_type() -> None:
 
 def test_nullary_return_dict_wrong() -> None:
     """Calling a nullary function with the incorrect return type (Dict)."""
+
     @check_contracts
     def nullary() -> Dict[str, int]:
         return {1: 1}
@@ -53,9 +60,10 @@ def test_nullary_return_dict_wrong() -> None:
 
 def test_nullary_no_return_type() -> None:
     """Calling a nullary function with no specified return type passes."""
+
     @check_contracts
     def nullary():
-        return 'string'
+        return "string"
 
     nullary()
 
@@ -78,7 +86,7 @@ def test_my_sum_empty_list_argument() -> None:
 def test_my_sum_list_mixed_argument() -> None:
     """Calling _my_sum with a list containing not just ints fails type check."""
     with pytest.raises(AssertionError):
-        _my_sum([1, 2, 'hello'])
+        _my_sum([1, 2, "hello"])
 
 
 @check_contracts
@@ -98,7 +106,7 @@ def test_my_sum_one_pre_valid() -> None:
 def test_my_sum_one_wrong_type() -> None:
     """Calling _my_sum_one_precondition on a value of the wrong type."""
     with pytest.raises(AssertionError):
-        _my_sum_one_precondition('hi')
+        _my_sum_one_precondition("hi")
 
 
 def test_my_sum_one_pre_violation() -> None:
@@ -109,7 +117,8 @@ def test_my_sum_one_pre_violation() -> None:
         _my_sum_one_precondition([1])
 
     msg = str(excinfo.value)
-    assert 'len(numbers) > 2' in msg
+    assert "len(numbers) > 2" in msg
+
 
 # Checking to see if functions we defined are in-scope for preconditions
 
@@ -140,7 +149,7 @@ def test_is_even_sum_violation() -> None:
         _is_even_sum([1, 2])
 
     msg = str(excinfo.value)
-    assert 'is_even(numbers)' in msg
+    assert "is_even(numbers)" in msg
 
 
 @check_contracts
@@ -166,7 +175,7 @@ def test_search_invalid() -> None:
         search({-1, -2})
 
     msg = str(excinfo.value)
-    assert 'all({n + m > 0 for n in numbers for m in numbers})' in msg
+    assert "all({n + m > 0 for n in numbers for m in numbers})" in msg
 
 
 class Player:
@@ -175,12 +184,12 @@ class Player:
 
 class CPU(Player):
     def __init__(self) -> None:
-        self.user = 'CPU'
+        self.user = "CPU"
 
 
 @check_contracts
 def _is_cpu(player: Player) -> bool:
-    return player.user == 'CPU'
+    return player.user == "CPU"
 
 
 def test_class_not_instance_error() -> None:
@@ -194,7 +203,7 @@ def test_class_not_instance_error() -> None:
         _is_cpu(Player)
 
     msg = str(excinfo.value)
-    assert 'Did you pass in Player instead of Player(...)?' in msg
+    assert "Did you pass in Player instead of Player(...)?" in msg
 
 
 def test_subclass_not_instance_error() -> None:
@@ -208,7 +217,7 @@ def test_subclass_not_instance_error() -> None:
         _is_cpu(CPU)
 
     msg = str(excinfo.value)
-    assert 'Did you pass in CPU instead of CPU(...)?' in msg
+    assert "Did you pass in CPU instead of CPU(...)?" in msg
 
 
 def test_no_suggestion_instance_as_instance() -> None:
@@ -222,7 +231,7 @@ def test_no_suggestion_instance_as_instance() -> None:
 
     msg = str(excinfo.value)
 
-    part1, part2, part3 = 'Did you pass in', 'instead of', '(...)?'
+    part1, part2, part3 = "Did you pass in", "instead of", "(...)?"
     assert part1 not in msg
     assert part2 not in msg
     assert part3 not in msg
@@ -246,6 +255,7 @@ def test_invalid_built_in_generic_argument() -> None:
     """Test that subclass checking on a type parameter that is a GenericAlias does not
     throw an error (as issubclass does not take in a GenericAlias as its second argument).
     """
+
     @check_contracts
     def unary(arg: list[str]) -> None:
         return

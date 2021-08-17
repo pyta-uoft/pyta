@@ -1,5 +1,6 @@
-import pylint.testutils
 import astroid
+import pylint.testutils
+
 from python_ta.checkers.unnecessary_indexing_checker import UnnecessaryIndexingChecker
 
 
@@ -39,11 +40,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='unnecessary-indexing',
-                    node=for_node.target,
-                    args=for_node.target.name
-                )
+            pylint.testutils.Message(
+                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -60,11 +59,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='unnecessary-indexing',
-                    node=for_node.target,
-                    args=for_node.target.name
-                )
+            pylint.testutils.Message(
+                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -81,11 +78,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='unnecessary-indexing',
-                    node=for_node.target,
-                    args=for_node.target.name
-                )
+            pylint.testutils.Message(
+                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -119,11 +114,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='unnecessary-indexing',
-                    node=for_node.target,
-                    args=for_node.target.name
-                )
+            pylint.testutils.Message(
+                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -138,11 +131,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(astroid.For)
 
         with self.assertAddsMessages(
-                pylint.testutils.Message(
-                    msg_id='unnecessary-indexing',
-                    node=for_node.target,
-                    args=for_node.target.name
-                )
+            pylint.testutils.Message(
+                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -218,11 +209,11 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_sum_items_no_msg(self):
         """Elements are accessed directly, no unnecessary indexing"""
         src = """
-        def sum_items(items: List[int]) -> int: 
+        def sum_items(items: List[int]) -> int:
             s = 0
             for x in items:
                s += x
-            return s 
+            return s
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(astroid.For)
@@ -233,11 +224,11 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_iter_var_unused_no_msg(self):
         """Iteration variable i is unused in the code, no unnecessary indexing performed"""
         src = """
-        def iter_var_unused(items: List[int]) -> int: 
-            s = 0 
+        def iter_var_unused(items: List[int]) -> int:
+            s = 0
             for i in range(len(items)):
-                s += 1 
-            return s 
+                s += 1
+            return s
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(astroid.For)
@@ -267,10 +258,10 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         Indexing the iterable is not the only usage"""
         src = """
-        s = 0 
+        s = 0
         for i in range(len(lst)):
-            i = 0 
-            s += i 
+            i = 0
+            s += i
             print(items[i])
         """
         mod = astroid.parse(src)
@@ -282,7 +273,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_assignname2_no_msg(self):
         """Iteration variable incremented each iteration but unused"""
         src = """
-        for i in range(len(lst)): 
+        for i in range(len(lst)):
             i += 10
         """
         mod = astroid.parse(src)
@@ -296,7 +287,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         Subscript is being used in a store context, so it is not redundant"""
         src = """
-        for i in range(len(lst)): 
+        for i in range(len(lst)):
             lst[i] += 1
         """
         mod = astroid.parse(src)
@@ -308,4 +299,5 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
 if __name__ == "__main__":
     import pytest
-    pytest.main(['test_unnecessary_indexing_checker.py'])
+
+    pytest.main(["test_unnecessary_indexing_checker.py"])

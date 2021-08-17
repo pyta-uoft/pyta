@@ -1,10 +1,10 @@
-from typing import Any, Callable, List, Optional, Set
-from typeguard import check_type
+import inspect
 import sys
 import typing
-import inspect
-import wrapt
+from typing import Any, Callable, List, Optional, Set
 
+import wrapt
+from typeguard import check_type
 
 DEBUG_CONTRACTS = False
 """
@@ -86,7 +86,7 @@ def check_contracts(func_or_class: Any) -> Callable:
 
 def add_class_invariants(klass: type) -> None:
     """Modify the given class to check representation invariants and method contracts."""
-    if '__representation_invariants__' in klass.__dict__:
+    if "__representation_invariants__" in klass.__dict__:
         # This means the class has already been decorated
         return
 
@@ -95,12 +95,12 @@ def add_class_invariants(klass: type) -> None:
 
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
-        if '__representation_invariants__' in cls.__dict__:
+        if "__representation_invariants__" in cls.__dict__:
             rep_invariants = rep_invariants.union(cls.__representation_invariants__)
-        elif cls.__module__ != 'builtins':
-            rep_invariants.update(parse_assertions(cls, parse_token='Representation Invariant'))
+        elif cls.__module__ != "builtins":
+            rep_invariants.update(parse_assertions(cls, parse_token="Representation Invariant"))
 
-    setattr(klass, '__representation_invariants__', rep_invariants)
+    setattr(klass, "__representation_invariants__", rep_invariants)
 
     def new_setattr(self: klass, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
@@ -111,17 +111,18 @@ def add_class_invariants(klass: type) -> None:
 
         if name in cls_annotations:
             try:
-                _debug(f'Checking type of attribute {attr} for {klass.__qualname__} instance')
+                _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
                 check_type(name, value, cls_annotations[name])
             except TypeError:
                 raise AssertionError(
-                    f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"') from None
+                    f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"'
+                ) from None
 
         super(klass, self).__setattr__(name, value)
         curframe = inspect.currentframe()
         callframe = inspect.getouterframes(curframe, 2)
         frame_locals = callframe[1].frame.f_locals
-        if self is not frame_locals.get('self'):
+        if self is not frame_locals.get("self"):
             # Only validating if the attribute is not being set in a instance/class method
             klass_mod = sys.modules.get(klass.__module__)
             if klass_mod is not None:
@@ -142,7 +143,7 @@ def add_class_invariants(klass: type) -> None:
 
 
 def _check_function_contracts(wrapped, instance, args, kwargs):
-    params = wrapped.__code__.co_varnames[:wrapped.__code__.co_argcount]
+    params = wrapped.__code__.co_varnames[: wrapped.__code__.co_argcount]
     annotations = typing.get_type_hints(wrapped)
     args_with_self = args if instance is None else (instance,) + args
 
@@ -150,15 +151,15 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     for arg, param in zip(args_with_self, params):
         if param in annotations:
             try:
-                _debug(f'Checking type of parameter {param} in call to {wrapped.__qualname__}')
+                _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
                 check_type(param, arg, annotations[param])
             except TypeError:
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
                 raise PyTAContractError(
-                    f'{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter '
-                    f'"{param}: {annotations[param]}"' +
-                    (f'\n{additional_suggestions}' if additional_suggestions else '')
+                    f"{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter "
+                    f'"{param}: {annotations[param]}"'
+                    + (f"\n{additional_suggestions}" if additional_suggestions else "")
                 )
 
     # Check function preconditions
@@ -168,14 +169,15 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check return type
     r = wrapped(*args, **kwargs)
-    if 'return' in annotations:
-        return_type = annotations['return']
+    if "return" in annotations:
+        return_type = annotations["return"]
         try:
-            _debug(f'Checking return type from call to {wrapped.__qualname__}')
-            check_type('return', r, return_type)
+            _debug(f"Checking return type from call to {wrapped.__qualname__}")
+            check_type("return", r, return_type)
         except TypeError:
             raise PyTAContractError(
-                f'{wrapped.__name__} return value {r} does not match annotated return type {return_type}')
+                f"{wrapped.__name__} return value {r} does not match annotated return type {return_type}"
+            )
 
     return r
 
@@ -184,15 +186,14 @@ def _get_argument_suggestions(arg: Any, annotation: type) -> str:
     """Returns potential suggestions for the given arg and its annotation"""
     try:
         if isinstance(arg, type) and issubclass(arg, annotation):
-            return 'Did you pass in {cls} instead of {cls}(...)?'.format(cls=arg.__name__)
+            return "Did you pass in {cls} instead of {cls}(...)?".format(cls=arg.__name__)
     except TypeError:
         pass
 
-    return ''
+    return ""
 
 
 def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
-
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
         try:
@@ -220,10 +221,13 @@ def _instance_init_in_callstack(instance: Any) -> bool:
     frame = inspect.currentframe().f_back
     while frame:
         frame_context_name = inspect.getframeinfo(frame).function
-        frame_context_self = frame.f_locals.get('self')
+        frame_context_self = frame.f_locals.get("self")
         frame_context_vars = frame.f_code.co_varnames
-        if (frame_context_name == '__init__' and frame_context_self is instance
-                and frame_context_vars[0] == 'self'):
+        if (
+            frame_context_name == "__init__"
+            and frame_context_self is instance
+            and frame_context_vars[0] == "self"
+        ):
             return True
         frame = frame.f_back
     return False
@@ -240,46 +244,50 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
     for attr, annotation in cls_annotations.items():
         value = getattr(instance, attr)
         try:
-            _debug(f'Checking type of attribute {attr} for {klass.__qualname__} instance')
+            _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
             check_type(attr, value, annotation)
         except TypeError:
             raise AssertionError(
-                f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"')
+                f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"'
+            )
 
 
 def _check_invariants(instance, klass: type, global_scope: dict) -> None:
-    """Check that the representation invariants for the instance are satisfied.
-
-    """
-    rep_invariants = getattr(klass, '__representation_invariants__', set())
+    """Check that the representation invariants for the instance are satisfied."""
+    rep_invariants = getattr(klass, "__representation_invariants__", set())
 
     for invariant in rep_invariants:
         try:
-            _debug(f'Checking representation invariant for {instance.__class__.__qualname__}: {invariant}')
-            check = eval(invariant, {**global_scope, 'self': instance})
+            _debug(
+                f"Checking representation invariant for {instance.__class__.__qualname__}: {invariant}"
+            )
+            check = eval(invariant, {**global_scope, "self": instance})
         except:
-            _debug(f'Warning: could not evaluate representation invariant: {invariant}')
+            _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
             if not check:
                 raise PyTAContractError(f'Representation invariant "{invariant}" violated.')
 
 
-def _check_assertions(wrapped: Callable[..., Any], function_locals: dict, assertions: List[str]) -> None:
-    """Check that the given assertions are still satisfied.
-    """
+def _check_assertions(
+    wrapped: Callable[..., Any], function_locals: dict, assertions: List[str]
+) -> None:
+    """Check that the given assertions are still satisfied."""
     for assertion in assertions:
         try:
-            _debug(f'Checking precondition for {wrapped.__qualname__}: {assertion}')
+            _debug(f"Checking precondition for {wrapped.__qualname__}: {assertion}")
             check = eval(assertion, {**wrapped.__globals__, **function_locals})
         except:
-            _debug(f'Warning: could not evaluate precondition: {assertion}')
+            _debug(f"Warning: could not evaluate precondition: {assertion}")
         else:
             if not check:
-                raise PyTAContractError(f'{wrapped.__name__} precondition "{assertion}" '
-                                        f'violated for arguments {function_locals}.')
+                raise PyTAContractError(
+                    f'{wrapped.__name__} precondition "{assertion}" '
+                    f"violated for arguments {function_locals}."
+                )
 
 
-def parse_assertions(obj: Any, parse_token: str = 'Precondition') -> List[str]:
+def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
     """Return a list of preconditions/representation invariants parsed from the given entity's docstring.
 
     Uses parse_token to determine what to look for. parse_token defaults to Precondition.
@@ -291,27 +299,27 @@ def parse_assertions(obj: Any, parse_token: str = 'Precondition') -> List[str]:
        line is of the form "- <cond>". Each line is considered a separate condition.
        The lines can be separated by blank lines, but no other text.
     """
-    docstring = getattr(obj, '__doc__') or ''
-    lines = [line.strip() for line in docstring.split('\n')]
-    assertion_lines = [i
-                       for i, line in enumerate(lines)
-                       if line.lower().startswith(parse_token.lower())]
+    docstring = getattr(obj, "__doc__") or ""
+    lines = [line.strip() for line in docstring.split("\n")]
+    assertion_lines = [
+        i for i, line in enumerate(lines) if line.lower().startswith(parse_token.lower())
+    ]
 
     if assertion_lines == []:
         return []
 
     first = assertion_lines[0]
 
-    if lines[first].startswith(parse_token + ':'):
-        return [lines[first][len(parse_token + ':'):].strip()]
-    elif lines[first].startswith(parse_token + 's:'):
+    if lines[first].startswith(parse_token + ":"):
+        return [lines[first][len(parse_token + ":") :].strip()]
+    elif lines[first].startswith(parse_token + "s:"):
         assertions = []
-        for line in lines[first + 1:]:
-            if line.startswith('-'):
+        for line in lines[first + 1 :]:
+            if line.startswith("-"):
                 assertion = line[1:].strip()
-                _debug(f'Adding assertion to {obj.__qualname__}: {assertion}')
+                _debug(f"Adding assertion to {obj.__qualname__}: {assertion}")
                 assertions.append(assertion)
-            elif line != '':
+            elif line != "":
                 break
         return assertions
     else:
@@ -326,4 +334,4 @@ def _debug(msg: str) -> None:
     if not DEBUG_CONTRACTS:
         return
 
-    print('[PyTA]', msg, file=sys.stderr)
+    print("[PyTA]", msg, file=sys.stderr)

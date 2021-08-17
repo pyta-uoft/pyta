@@ -39,4 +39,4 @@ return
 return None
 
 # Example 3
-return [x**2 for x in range(10)]
+return [x ** 2 for x in range(10)]

@@ -1,19 +1,25 @@
 """checker for global variables
 """
-from pylint.interfaces import IAstroidChecker
-from pylint.checkers import BaseChecker
-import astroid
 import re
+
+import astroid
+from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
+from pylint.interfaces import IAstroidChecker
 
 
 class GlobalVariablesChecker(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = 'global_variables'
-    msgs = {'E9997': ('Global variables must be constants in CSC108/CSC148: '
-                      '%s', 'forbidden-global-variables', '')}
+    name = "global_variables"
+    msgs = {
+        "E9997": (
+            "Global variables must be constants in CSC108/CSC148: " "%s",
+            "forbidden-global-variables",
+            "",
+        )
+    }
 
     # this is important so that your checker is executed before others
     priority = -1
@@ -24,7 +30,7 @@ class GlobalVariablesChecker(BaseChecker):
 
     def visit_global(self, node):
         args = "the keyword 'global' is used on line {}".format(node.lineno)
-        self.add_message('forbidden-global-variables', node=node, args=args)
+        self.add_message("forbidden-global-variables", node=node, args=args)
 
     def visit_assignname(self, node):
         """Allow global constant variables (uppercase), but issue messages for
@@ -57,18 +63,20 @@ class GlobalVariablesChecker(BaseChecker):
         """Allows constant, global variables (i.e. uppercase), but issue
         messages for all other global variables.
         """
-        if hasattr(node, 'name') and node.name in self.import_names:
+        if hasattr(node, "name") and node.name in self.import_names:
             return
         if isinstance(node.frame(), astroid.scoped_nodes.Module) and not is_in_main(node):
             node_list = _get_child_disallowed_global_var_nodes(node)
             for node in node_list:
                 if isinstance(node, astroid.AssignName):
-                    args = "a global variable '{}' is assigned to on line {}"\
-                        .format(node.name, node.lineno)
+                    args = "a global variable '{}' is assigned to on line {}".format(
+                        node.name, node.lineno
+                    )
                 else:
-                    args = "a global variable '{}' is used on line {}" \
-                        .format(node.name, node.lineno)
-                self.add_message('forbidden-global-variables', node=node, args=args)
+                    args = "a global variable '{}' is used on line {}".format(
+                        node.name, node.lineno
+                    )
+                self.add_message("forbidden-global-variables", node=node, args=args)
 
 
 def _get_child_disallowed_global_var_nodes(node):
@@ -79,9 +87,14 @@ def _get_child_disallowed_global_var_nodes(node):
     for the CONST_NAME_RGX value.
     """
     node_list = []
-    if ((isinstance(node, (astroid.AssignName, astroid.Name)) and not isinstance(node.parent, astroid.Call)) and
-            not re.match(UpperCaseStyle.CONST_NAME_RGX, node.name) and
-            node.scope() is node.root()):
+    if (
+        (
+            isinstance(node, (astroid.AssignName, astroid.Name))
+            and not isinstance(node.parent, astroid.Call)
+        )
+        and not re.match(UpperCaseStyle.CONST_NAME_RGX, node.name)
+        and node.scope() is node.root()
+    ):
         return [node]
 
     for child_node in node.get_children():
@@ -90,14 +103,16 @@ def _get_child_disallowed_global_var_nodes(node):
 
 
 def is_in_main(node):
-    if not hasattr(node, 'parent'):
+    if not hasattr(node, "parent"):
         return False
 
     parent = node.parent
     try:
-        if (isinstance(parent, astroid.If) and
-              parent.test.left.name == '__name__' and
-              parent.test.ops[0][1].value == '__main__'):
+        if (
+            isinstance(parent, astroid.If)
+            and parent.test.left.name == "__name__"
+            and parent.test.ops[0][1].value == "__main__"
+        ):
             return True
         else:
             return is_in_main(parent)

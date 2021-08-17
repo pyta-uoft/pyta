@@ -242,18 +242,18 @@ section {
 }
 
 #error-docs {
-    text-align: center;
-	font-size: 75%;
-	padding: 5px 0px;
+  text-align: center;
+  font-size: 75%;
+  padding: 5px 0px;
 }
 #error-docs a {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    letter-spacing: 1px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 #error-docs a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 #logo {

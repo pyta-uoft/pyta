@@ -28,8 +28,15 @@ If you're interested in using PyTA, you can install it using `pip` (or `pip3`, o
 > pip install python-ta
 ```
 
-If you're developing PyTA, first clone this repo, and then run `pip install -e .[dev]` from inside your local copy of the repo.
-Note that some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.
+### Development
+
+If you're developing PyTA:
+
+1. First, clone this repository.
+2. Open a terminal in this repo, and run `pip install -e .[dev]` to install the dependencies.
+3. Then run `pre-commit install` to install the pre-commit hooks (for automatically formatting and checking your code on each commit).
+
+While not strictly necessary for debugging, some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.
 
 ### Tests
 
@@ -63,7 +70,6 @@ included as a library). In the Python interpreter, try running:
 [Some output should be shown]
 >>> python_ta.doc('E9999')
 ```
-
 
 ## Contributors
 

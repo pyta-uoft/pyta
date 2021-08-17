@@ -1,9 +1,11 @@
+from typing import TypeVar
+
 import astroid
-from .. import custom_hypothesis_support as cs
 from pytest import skip
 
-from typing import TypeVar
 from python_ta.typecheck.base import TypeFailFunction
+
+from .. import custom_hypothesis_support as cs
 
 
 def test_overload_function():
@@ -128,10 +130,10 @@ def test_flagged_builtin_overload():
     """
     ast_mod, ti = cs._parse_text(program)
     for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
-        if assgn_node.name == 'x':
+        if assgn_node.name == "x":
             x = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(x).getValue() == int
-        if assgn_node.name == 'y':
+        if assgn_node.name == "y":
             y = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(y).getValue() == float
 
@@ -149,27 +151,27 @@ def test_builtin_defaults():
 
 
 def test_unresolved_builtin():
-    skip('Requires proper handling of builtins with multiple signatures')
+    skip("Requires proper handling of builtins with multiple signatures")
     program = """
     def f(x, y):
         return x + y
-        
+
     z = f('abc', 'def')
     """
     ast_mod, ti = cs._parse_text(program)
 
     for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
-        if assgn_node.name == 'z':
+        if assgn_node.name == "z":
             z = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(z).getValue() == str
 
 
 def test_unresolved_builtin2():
-    skip('Requires proper handling of builtins with multiple signatures')
+    skip("Requires proper handling of builtins with multiple signatures")
     program = """
     def f(x, y):
         return x + y
-        
+
     def g(x, y):
         z = f(x, y)
         return z + 'abc'

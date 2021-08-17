@@ -51,7 +51,7 @@ NODES_WITHOUT_CHILDREN = [
     astroid.Name,
     astroid.Nonlocal,
     astroid.Pass,
-    astroid.Yield
+    astroid.Yield,
 ]
 
 # These nodes have a child, and their end_lineno and end_col_offset
@@ -93,7 +93,7 @@ NODES_WITH_CHILDREN = [
     astroid.UnaryOp,
     astroid.While,
     astroid.With,
-    astroid.YieldFrom
+    astroid.YieldFrom,
 ]
 
 
@@ -106,6 +106,7 @@ def _token_search(token):
     @type token: string
     @rtype: function
     """
+
     def _is_token(s, index, node):
         """Fix to include certain tokens such as a paren, bracket, or brace.
         @type s: string
@@ -114,6 +115,7 @@ def _token_search(token):
         @rtype: bool
         """
         return s[index] == token
+
     return _is_token
 
 
@@ -122,6 +124,7 @@ def _keyword_search(keyword):
     @type keyword: string
     @rtype: function
     """
+
     def _is_keyword(s, index, node):
         """Search for a keyword. Right-to-left.
         @type s: string
@@ -129,7 +132,8 @@ def _keyword_search(keyword):
         @type node: Astroid node
         @rtype: bool
         """
-        return s[index : index+len(keyword)] == keyword
+        return s[index : index + len(keyword)] == keyword
+
     return _is_keyword
 
 
@@ -138,14 +142,14 @@ def _is_attr_name(s, index, node):
     target_len = len(node.attrname)
     if index < target_len:
         return False
-    return s[index-target_len+1 : index+1] == node.attrname
+    return s[index - target_len + 1 : index + 1] == node.attrname
 
 
 def _is_arg_name(s, index, node):
     """Search for the name of the argument. Right-to-left."""
     if not node.arg:
         return False
-    return s[index : index+len(node.arg)] == node.arg
+    return s[index : index + len(node.arg)] == node.arg
 
 
 # Nodes the require the source code for proper location setting
@@ -153,29 +157,28 @@ def _is_arg_name(s, index, node):
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
     (astroid.AssignAttr, None, _is_attr_name),
-    (astroid.AsyncFor, _keyword_search('async'), None),
-    (astroid.AsyncFunctionDef, _keyword_search('async'), None),
-    (astroid.AsyncWith, _keyword_search('async'), None),
+    (astroid.AsyncFor, _keyword_search("async"), None),
+    (astroid.AsyncFunctionDef, _keyword_search("async"), None),
+    (astroid.AsyncWith, _keyword_search("async"), None),
     (astroid.Attribute, None, _is_attr_name),
-    (astroid.Call, None, _token_search(')')),
-    (astroid.DelAttr, _keyword_search('del'), _is_attr_name),
-    (astroid.DelName, _keyword_search('del'), None),
-    (astroid.Dict, None, _token_search('}')),
-    (astroid.DictComp, None, _token_search('}')),
-    (astroid.Expr, _token_search('('), _token_search(')')),
-
+    (astroid.Call, None, _token_search(")")),
+    (astroid.DelAttr, _keyword_search("del"), _is_attr_name),
+    (astroid.DelName, _keyword_search("del"), None),
+    (astroid.Dict, None, _token_search("}")),
+    (astroid.DictComp, None, _token_search("}")),
+    (astroid.Expr, _token_search("("), _token_search(")")),
     # TODO: use same behavior as Slice.
-    (astroid.ExtSlice, _token_search('['), _token_search(']')),
-    (astroid.GeneratorExp, _token_search('('), _token_search(')')),
-    (astroid.If, _keyword_search('elif'), None),
-    (astroid.Index, _token_search('['), _token_search(']')),
+    (astroid.ExtSlice, _token_search("["), _token_search("]")),
+    (astroid.GeneratorExp, _token_search("("), _token_search(")")),
+    (astroid.If, _keyword_search("elif"), None),
+    (astroid.Index, _token_search("["), _token_search("]")),
     (astroid.Keyword, _is_arg_name, None),
-    (astroid.List, _token_search('['), _token_search(']')),
-    (astroid.ListComp, _token_search('['), _token_search(']')),
-    (astroid.Set, None, _token_search('}')),
-    (astroid.SetComp, None, _token_search('}')),
-    (astroid.Slice, _token_search('['), None),
-    (astroid.Tuple, None, _token_search(',')),
+    (astroid.List, _token_search("["), _token_search("]")),
+    (astroid.ListComp, _token_search("["), _token_search("]")),
+    (astroid.Set, None, _token_search("}")),
+    (astroid.SetComp, None, _token_search("}")),
+    (astroid.Slice, _token_search("["), None),
+    (astroid.Tuple, None, _token_search(",")),
 ]
 
 
@@ -194,9 +197,9 @@ def init_register_ending_setters(source_code):
             node_class,
             fix_start_attributes,
             lambda node: (
-                getattr(node, 'fromlineno', None) is None or
-                getattr(node, 'col_offset', None) is None
-            )
+                getattr(node, "fromlineno", None) is None
+                or getattr(node, "col_offset", None) is None
+            ),
         )
 
     # Ad hoc transformations
@@ -219,15 +222,18 @@ def init_register_ending_setters(source_code):
     for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
         if start_pred is not None:
             ending_transformer.register_transform(
-                node_class, start_setter_from_source(source_code, start_pred))
+                node_class, start_setter_from_source(source_code, start_pred)
+            )
         if end_pred is not None:
             # This is for searching for a trailing comma after a tuple's final element
             if node_class is astroid.Tuple:
                 ending_transformer.register_transform(
-                    node_class, end_setter_from_source(source_code, end_pred, True))
+                    node_class, end_setter_from_source(source_code, end_pred, True)
+                )
             else:
                 ending_transformer.register_transform(
-                    node_class, end_setter_from_source(source_code, end_pred))
+                    node_class, end_setter_from_source(source_code, end_pred)
+                )
 
     # Nodes where extra parentheses are included
     ending_transformer.register_transform(astroid.BinOp, add_parens(source_code))
@@ -249,6 +255,7 @@ def fix_slice(source_code):
     E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing positions
     are sometimes set improperly to 0.
     """
+
     def _find_square_brackets(node):
         if _get_last_child(node):
             set_from_last_child(node)
@@ -261,8 +268,8 @@ def fix_slice(source_code):
             has_children = False
 
         # Search the remaining source code for the "]" char.
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ']':
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#':
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != "]":
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
                 char_i = 0
                 line_i += 1
             else:
@@ -283,6 +290,7 @@ def fix_subscript(source_code):
     Need to include this because the index/extended slice is a value rather than
     a separate Index/ExtSlice in Python 3.9.
     """
+
     def _fix_end(node: astroid.Subscript) -> astroid.Subscript:
         if isinstance(node.slice, astroid.Slice):
             # In this case, the subscript node already contains the final ].
@@ -297,8 +305,8 @@ def fix_subscript(source_code):
             line_i = node.value.end_lineno - 1  # convert 1 to 0 index.
             char_i = node.value.end_col_offset
 
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != ']':
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#':
+        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != "]":
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
                 char_i = 0
                 line_i += 1
             else:
@@ -312,6 +320,7 @@ def fix_subscript(source_code):
 
 def fix_arguments(source_code):
     """For an Arguments node"""
+
     def _find(node: astroid.Arguments) -> astroid.Arguments:
         children = list(node.get_children())
         if children:
@@ -323,8 +332,11 @@ def fix_arguments(source_code):
             if line_i is None:
                 line_i = child.end_lineno
                 char_i = child.end_col_offset
-            elif (line_i < child.end_lineno or
-                  line_i == child.end_lineno and char_i < child.end_col_offset) :
+            elif (
+                line_i < child.end_lineno
+                or line_i == child.end_lineno
+                and char_i < child.end_col_offset
+            ):
                 line_i = child.end_lineno
                 char_i = child.end_col_offset
 
@@ -332,12 +344,12 @@ def fix_arguments(source_code):
 
         # left bracket if parent is FunctionDef, colon if Lambda
         if isinstance(node.parent, astroid.FunctionDef):
-            end_char = ')'
+            end_char = ")"
         else:
-            end_char = ':'
+            end_char = ":"
 
         while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != end_char:
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == '#':
+            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
                 char_i = 0
                 line_i += 1
             else:
@@ -350,6 +362,7 @@ def fix_arguments(source_code):
             node.fromlineno, node.col_offset = line_i + 1, char_i
 
         return node
+
     return _find
 
 
@@ -359,9 +372,9 @@ def fix_start_attributes(node):
     """
     try:
         first_child = next(node.get_children())
-        if getattr(node, 'fromlineno', None) is None:
+        if getattr(node, "fromlineno", None) is None:
             node.fromlineno = first_child.fromlineno
-        if getattr(node, 'col_offset', None) is None:
+        if getattr(node, "col_offset", None) is None:
             node.col_offset = first_child.col_offset
 
     except StopIteration:
@@ -369,15 +382,15 @@ def fix_start_attributes(node):
         # This assumes that statement nodes will always have these attributes set.
         statement = node.statement()
         if statement is not node:
-            if getattr(node, 'fromlineno', None) is None:
+            if getattr(node, "fromlineno", None) is None:
                 node.fromlineno = statement.fromlineno
-            if getattr(node, 'col_offset', None) is None:
+            if getattr(node, "col_offset", None) is None:
                 node.col_offset = statement.col_offset
         else:
             # Enclosing statement is same as node, also does not have attributes set
-            if getattr(node, 'fromlineno', None) is None:
+            if getattr(node, "fromlineno", None) is None:
                 node.fromlineno = 0
-            if getattr(node, 'col_offset', None) is None:
+            if getattr(node, "col_offset", None) is None:
                 node.col_offset = 0
     return node
 
@@ -405,7 +418,7 @@ def set_from_last_child(node):
     if not last_child:
         set_without_children(node)
         return node
-    elif not hasattr(last_child, 'end_lineno'):  # Newly added for Slice() node.
+    elif not hasattr(last_child, "end_lineno"):  # Newly added for Slice() node.
         set_without_children(last_child)
 
     if last_child.end_lineno is not None:
@@ -425,11 +438,11 @@ def set_without_children(node):
 
     Precondition: `node` must not have a `last_child` (node).
     """
-    if not hasattr(node, 'end_lineno'):
+    if not hasattr(node, "end_lineno"):
         node.end_lineno = node.fromlineno
     # FIXME: using the as_string() is a bad technique because many different
     # whitespace possibilities that may not be reflected in it!
-    if not hasattr(node, 'end_col_offset'):
+    if not hasattr(node, "end_col_offset"):
         node.end_col_offset = node.col_offset + len(node.as_string())
     return node
 
@@ -463,8 +476,9 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
     character that fails pred *on the first line*.
     TODO: really the behaviour should be the same for all lines searched for.
     """
+
     def set_endings_from_source(node):
-        if not hasattr(node, 'end_col_offset'):
+        if not hasattr(node, "end_col_offset"):
             set_from_last_child(node)
 
         # Initialize counters. Note: we need to offset lineno,
@@ -473,7 +487,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
 
         # First, search the remaining part of the current end line.
         for j in range(end_col_offset, len(source_code[lineno])):
-            if source_code[lineno][j] == '#':
+            if source_code[lineno][j] == "#":
                 break  # skip over comment lines
             if pred(source_code[lineno], j, node):
                 node.end_col_offset = j + 1
@@ -485,7 +499,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
         for i in range(lineno + 1, len(source_code)):
             # Search each character
             for j in range(len(source_code[i])):
-                if source_code[i][j] == '#':
+                if source_code[i][j] == "#":
                     break  # skip over comment lines
                 if pred(source_code[i], j, node):
                     node.end_col_offset, node.end_lineno = j + 1, i + 1
@@ -510,6 +524,7 @@ def start_setter_from_source(source_code, pred):
     pred is a function that takes a string and index and returns a bool,
     e.g. _is_open_paren
     """
+
     def set_start_from_source(node):
         # Initialize counters. Note: fromlineno is 1-indexed.
         col_offset, lineno = node.col_offset, node.fromlineno - 1
@@ -545,7 +560,7 @@ def add_parens(source_code):
 def _add_parens(source_code):
     def h(node):
         # Initialize counters. Note: fromlineno is 1-indexed.
-        prev =  node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
+        prev = node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
         while True:
             col_offset, lineno = node.col_offset, node.fromlineno - 1
             end_col_offset, end_lineno = node.end_col_offset, node.end_lineno - 1
@@ -553,7 +568,7 @@ def _add_parens(source_code):
             # First, search the remaining part of the current start line
             prev_char, new_lineno, new_coloffset = None, None, None
             for j in range(col_offset - 1, -1, -1):
-                if source_code[lineno][j] in CONSUMABLES or source_code[lineno][j] == ',':
+                if source_code[lineno][j] in CONSUMABLES or source_code[lineno][j] == ",":
                     continue
                 else:
                     prev_char, new_lineno, new_coloffset = source_code[lineno][j], lineno, j
@@ -564,7 +579,7 @@ def _add_parens(source_code):
                 for i in range(lineno - 1, -1, -1):
                     # Search each character, right-to-left
                     for j in range(len(source_code[i]) - 1, -1, -1):
-                        if source_code[i][j] in CONSUMABLES or source_code[i][j] == ',':
+                        if source_code[i][j] in CONSUMABLES or source_code[i][j] == ",":
                             continue
                         else:
                             prev_char, new_lineno, new_coloffset = source_code[i][j], i, j
@@ -573,19 +588,23 @@ def _add_parens(source_code):
                     if prev_char is not None:
                         break
 
-            if prev_char != '(':
+            if prev_char != "(":
                 # No enclosing parentheses
                 break
 
             # Now search for matching ')'
             next_char, new_end_lineno, new_end_coloffset = None, None, None
             for j in range(end_col_offset, len(source_code[end_lineno])):
-                if source_code[end_lineno][j] == '#':
+                if source_code[end_lineno][j] == "#":
                     break  # skip over comment lines
                 elif source_code[end_lineno][j] in CONSUMABLES:
                     continue
                 else:
-                    next_char, new_end_lineno, new_end_coloffset = source_code[end_lineno][j], end_lineno, j
+                    next_char, new_end_lineno, new_end_coloffset = (
+                        source_code[end_lineno][j],
+                        end_lineno,
+                        j,
+                    )
                     break
 
             if next_char is None:
@@ -593,7 +612,7 @@ def _add_parens(source_code):
                 for i in range(end_lineno + 1, len(source_code)):
                     # Search each character
                     for j in range(len(source_code[i])):
-                        if source_code[i][j] == '#':
+                        if source_code[i][j] == "#":
                             break  # skip over comment lines
                         elif source_code[i][j] in CONSUMABLES:
                             continue
@@ -603,13 +622,17 @@ def _add_parens(source_code):
                     if next_char is not None:
                         break
 
-            if next_char != ')':
+            if next_char != ")":
                 break
 
             # At this point, an enclosing pair of parentheses has been found
             prev = node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
-            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset =\
-                new_lineno + 1, new_coloffset, new_end_lineno + 1, new_end_coloffset + 1
+            node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset = (
+                new_lineno + 1,
+                new_coloffset,
+                new_end_lineno + 1,
+                new_end_coloffset + 1,
+            )
 
         # Go back by 1 set of parentheses if inside a function call.
         if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
@@ -643,9 +666,9 @@ def register_transforms(source_code, obj):
             node_class,
             fix_start_attributes,
             lambda node: (
-                getattr(node, 'fromlineno', None) is None or
-                getattr(node, 'col_offset', None) is None
-            )
+                getattr(node, "fromlineno", None) is None
+                or getattr(node, "col_offset", None) is None
+            ),
         )
 
     # Ad hoc transformations
@@ -659,8 +682,6 @@ def register_transforms(source_code, obj):
     # Nodes where the source code must also be provided.
     for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
         if start_pred is not None:
-            obj.register_transform(
-                node_class, start_setter_from_source(source_code, start_pred))
+            obj.register_transform(node_class, start_setter_from_source(source_code, start_pred))
         if end_pred is not None:
-            obj.register_transform(
-                node_class, end_setter_from_source(source_code, end_pred))
+            obj.register_transform(node_class, end_setter_from_source(source_code, end_pred))

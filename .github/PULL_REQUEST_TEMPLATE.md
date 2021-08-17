@@ -10,11 +10,13 @@
 ## Your Changes
 
 <!-- Describe your changes here. -->
+
 **Description**:
 
 **Type of change** (select all that apply):
+
 <!-- Put an `x` in all the boxes that apply. -->
-<!-- Remove any lines that do not apply. --> 
+<!-- Remove any lines that do not apply. -->
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)

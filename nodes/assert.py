@@ -18,4 +18,4 @@ Example:
         fail=Const(value='error'))
 """
 
-assert x == 0, 'error'
+assert x == 0, "error"

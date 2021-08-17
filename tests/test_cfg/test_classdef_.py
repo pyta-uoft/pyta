@@ -1,5 +1,7 @@
-from typing import List, Tuple, Dict, Union
+from typing import Dict, List, Tuple, Union
+
 import astroid
+
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
@@ -11,10 +13,7 @@ def build_cfgs(src: str) -> Dict[Union[astroid.FunctionDef, astroid.Module], Con
 
 
 def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
-    return [
-        [s.as_string() for s in block.statements]
-        for block in cfg.get_blocks()
-    ]
+    return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
 
 def test_simple_class() -> None:
@@ -29,10 +28,7 @@ def test_simple_class() -> None:
 
     keys = list(cfgs)
 
-    expected_blocks = [
-        ['x = 0', 'pass', 'print(x)'],
-        []
-    ]
+    expected_blocks = [["x = 0", "pass", "print(x)"], []]
     assert expected_blocks == _extract_blocks(cfgs[keys[0]])
 
 
@@ -51,13 +47,7 @@ def test_compound_statement_in_class() -> None:
 
     keys = list(cfgs)
 
-    expected_blocks = [
-        ['x = 0', 'x > 5'],
-        ['print(x)'],
-        ['print(z)'],
-        [],
-        ['print(y)']
-    ]
+    expected_blocks = [["x = 0", "x > 5"], ["print(x)"], ["print(z)"], [], ["print(y)"]]
     assert expected_blocks == _extract_blocks(cfgs[keys[0]])
 
 
@@ -78,17 +68,16 @@ def test_class_with_one_method() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['c: int', 'd: str', '\ndef __init__(self) -> None:\n    '
-                             'self.c = 10\n    self.d = \'string\''],
-        []
+        [
+            "c: int",
+            "d: str",
+            "\ndef __init__(self) -> None:\n    " "self.c = 10\n    self.d = 'string'",
+        ],
+        [],
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
-    expected_blocks_method = [
-        ['self'],
-        ['self.c = 10', 'self.d = \'string\''],
-        []
-    ]
+    expected_blocks_method = [["self"], ["self.c = 10", "self.d = 'string'"], []]
     assert expected_blocks_method == _extract_blocks(cfgs[keys[1]])
 
 
@@ -112,24 +101,18 @@ def test_class_with_multiple_method() -> None:
     keys = list(cfgs)
 
     expected_blocks_module = [
-        ['c: int', 'd: str', '\ndef __init__(self) -> None:\n    '
-                             'self.c = 10\n    self.d = \'string\'',
-         '\ndef runner(self) -> str:\n    '
-         'return \'run\''],
-        []
+        [
+            "c: int",
+            "d: str",
+            "\ndef __init__(self) -> None:\n    " "self.c = 10\n    self.d = 'string'",
+            "\ndef runner(self) -> str:\n    " "return 'run'",
+        ],
+        [],
     ]
     assert expected_blocks_module == _extract_blocks(cfgs[keys[0]])
 
-    expected_blocks_init = [
-        ['self'],
-        ['self.c = 10', 'self.d = \'string\''],
-        []
-    ]
+    expected_blocks_init = [["self"], ["self.c = 10", "self.d = 'string'"], []]
     assert expected_blocks_init == _extract_blocks(cfgs[keys[1]])
 
-    expected_block_method = [
-        ['self'],
-        ['return \'run\''],
-        []
-    ]
+    expected_block_method = [["self"], ["return 'run'"], []]
     assert expected_block_method == _extract_blocks(cfgs[keys[2]])

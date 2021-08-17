@@ -32,5 +32,5 @@ Example 1:
         body=[Pass()])
 """
 
-with open(sys.argv[1]) as f, open('input.txt') as i:
+with open(sys.argv[1]) as f, open("input.txt") as i:
     pass

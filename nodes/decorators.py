@@ -17,6 +17,7 @@ Example:
             Name(name='decor')])
 """
 
+
 @wrapper
 @decor
 def fun():

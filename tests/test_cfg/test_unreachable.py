@@ -1,6 +1,8 @@
-from typing import Set, Generator, Tuple, Optional
+from typing import Generator, Optional, Set, Tuple
+
 import astroid
-from python_ta.cfg import CFGVisitor, ControlFlowGraph, CFGBlock
+
+from python_ta.cfg import CFGBlock, CFGVisitor, ControlFlowGraph
 
 
 def build_cfg(src: str, is_function: Optional[bool] = False) -> ControlFlowGraph:
@@ -18,7 +20,7 @@ def extract_blocks(cfg: ControlFlowGraph) -> Tuple[Set, Set]:
     """Returns (unreachable_set, reachable_set)"""
     reachable = (set(), set())
     for block in get_blocks(cfg.end):
-        string = block.statements[0].as_string() if len(block.statements) > 0 else ''
+        string = block.statements[0].as_string() if len(block.statements) > 0 else ""
         reachable[block.reachable].add(string)
     return reachable
 
@@ -28,8 +30,7 @@ def get_blocks(end_block: CFGBlock) -> Generator[CFGBlock, None, None]:
     yield from _get_blocks(end_block, set())
 
 
-def _get_blocks(block: CFGBlock,
-                visited: Set[int]) -> Generator[CFGBlock, None, None]:
+def _get_blocks(block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:
     if block.id in visited:
         return
 
@@ -40,7 +41,7 @@ def _get_blocks(block: CFGBlock,
         yield from _get_blocks(edge.source, visited)
 
 
-"""Note: The first statement of a block in the cfg of a test example cannot be 
+"""Note: The first statement of a block in the cfg of a test example cannot be
 the same as another block in the same cfg."""
 
 
@@ -53,8 +54,8 @@ def test_while_loop_simple() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'print(unreachable)'} == unreachable
-    assert {'n > 10', 'print(n)', ''} == reachable
+    assert {"print(unreachable)"} == unreachable
+    assert {"n > 10", "print(n)", ""} == reachable
 
 
 def test_while_loop_complex() -> None:
@@ -70,8 +71,8 @@ def test_while_loop_complex() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'n > 20', 'print(n - 1)', 'print(5)'} == unreachable
-    assert {'n > 10', 'print(n)', '', 'print(outloop)'} == reachable
+    assert {"n > 20", "print(n - 1)", "print(5)"} == unreachable
+    assert {"n > 10", "print(n)", "", "print(outloop)"} == reachable
 
 
 def test_nested_while_loop() -> None:
@@ -90,8 +91,8 @@ def test_nested_while_loop() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'x > 10', 'print(x)', 'continue', 'print(x - 1)'} == unreachable
-    assert {'n > 10', 'n > 20', '', 'print(n)', 'break', 'print(outloop)'} == reachable
+    assert {"x > 10", "print(x)", "continue", "print(x - 1)"} == unreachable
+    assert {"n > 10", "n > 20", "", "print(n)", "break", "print(outloop)"} == reachable
 
 
 def test_for_loop_simple() -> None:
@@ -104,8 +105,8 @@ def test_for_loop_simple() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'print(unreachable)'} == unreachable
-    assert {'n', 'print(n)', '', 'range(1, 10)', 'print(outloop)'} == reachable
+    assert {"print(unreachable)"} == unreachable
+    assert {"n", "print(n)", "", "range(1, 10)", "print(outloop)"} == reachable
 
 
 def test_for_loop_complex() -> None:
@@ -120,8 +121,8 @@ def test_for_loop_complex() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'n > 20', 'print(n - 1)', 'print(5)'} == unreachable
-    assert {'n', 'range(1, 10)', '', 'print(n)'} == reachable
+    assert {"n > 20", "print(n - 1)", "print(5)"} == unreachable
+    assert {"n", "range(1, 10)", "", "print(n)"} == reachable
 
 
 def test_nested_for_loop() -> None:
@@ -135,8 +136,8 @@ def test_nested_for_loop() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'j', 'range(10)', 'continue'} == unreachable
-    assert {'n', 'range(1, 10)', '', 'print(n)', 'print(outloop)'} == reachable
+    assert {"j", "range(10)", "continue"} == unreachable
+    assert {"n", "range(1, 10)", "", "print(n)", "print(outloop)"} == reachable
 
 
 def test_function_simple() -> None:
@@ -147,8 +148,8 @@ def test_function_simple() -> None:
     """
     cfg = build_cfg(src, is_function=True)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'print(n)'} == unreachable
-    assert {'n', '', 'return'} == reachable
+    assert {"print(n)"} == unreachable
+    assert {"n", "", "return"} == reachable
 
 
 def test_function_complex() -> None:
@@ -161,8 +162,8 @@ def test_function_complex() -> None:
     """
     cfg = build_cfg(src, is_function=True)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'j', 'range(1, 10)', 'continue', 'print(j)'} == unreachable
-    assert {'n', '', 'return'} == reachable
+    assert {"j", "range(1, 10)", "continue", "print(j)"} == unreachable
+    assert {"n", "", "return"} == reachable
 
 
 def test_while_with_if() -> None:
@@ -178,8 +179,8 @@ def test_while_with_if() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'print(\'bye\')'} == unreachable
-    assert {'n > 10', 'print(n)', '', 'print(\'hi\')', 'break', 'print(\'after\')'} == reachable
+    assert {"print('bye')"} == unreachable
+    assert {"n > 10", "print(n)", "", "print('hi')", "break", "print('after')"} == reachable
 
 
 def test_while_with_if_complex() -> None:
@@ -198,6 +199,14 @@ def test_while_with_if_complex() -> None:
     """
     cfg = build_cfg(src)
     unreachable, reachable = extract_blocks(cfg)
-    assert {'print(\'bye\')', 'print(\'unr\')'} == unreachable
-    assert {'n > 10', 'print(n)', '', 'print(\'hi\')', 'break', 'print(\'after\')',
-            'continue', 'n > 25'} == reachable
+    assert {"print('bye')", "print('unr')"} == unreachable
+    assert {
+        "n > 10",
+        "print(n)",
+        "",
+        "print('hi')",
+        "break",
+        "print('after')",
+        "continue",
+        "n > 25",
+    } == reachable

@@ -42,10 +42,10 @@ Example 4:
 from transforms import TransformVisitor as tfv
 
 # Example 2:
-from sample_usage.pyta_stats import pyta_statistics, _print_stats
-
-# Example 3:
-from .. import level_is_2 as l2
+from sample_usage.pyta_stats import _print_stats, pyta_statistics
 
 # Example 4:
 from ...pack3 import level_is_3 as l3
+
+# Example 3:
+from .. import level_is_2 as l2

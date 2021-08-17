@@ -4,4 +4,4 @@ def f(a, b):
 
 
 def g(x, y):
-    return f(x, y) + 'abc'
+    return f(x, y) + "abc"

@@ -1,5 +1,7 @@
 from typing import List
+
 import astroid
+
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
@@ -12,10 +14,7 @@ def build_cfg(src: str) -> ControlFlowGraph:
 
 
 def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
-    return [
-        [s.as_string() for s in block.statements]
-        for block in cfg.get_blocks()
-    ]
+    return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
 
 def test_simple() -> None:
@@ -25,12 +24,9 @@ def test_simple() -> None:
     except Exception:
         pass
     """
-    expected_blocks = [
-        ['print(True)'],
-        ['pass'],
-        []  # end block
-    ]
+    expected_blocks = [["print(True)"], ["pass"], []]  # end block
     assert _extract_blocks(build_cfg(src)) == expected_blocks
+
 
 def test_named_exception() -> None:
     src = """
@@ -39,13 +35,8 @@ def test_named_exception() -> None:
     except Exception as e:
         pass
     """
-    expected_blocks = [
-        ['print(True)'],
-        ['e', 'pass'],
-        []  # end block
-    ]
+    expected_blocks = [["print(True)"], ["e", "pass"], []]  # end block
     assert _extract_blocks(build_cfg(src)) == expected_blocks
-
 
 
 def test_before_after() -> None:
@@ -57,13 +48,7 @@ def test_before_after() -> None:
             pass
         print('after')
         """
-    expected_blocks = [
-        ['x = 0'],
-        ['print(x)'],
-        ['pass'],
-        ['print(\'after\')'],
-        []  # end block
-    ]
+    expected_blocks = [["x = 0"], ["print(x)"], ["pass"], ["print('after')"], []]  # end block
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
 
@@ -78,13 +63,7 @@ def test_multiple_exceptions() -> None:
     else:
         print('else')
     """
-    expected_blocks = [
-        ['print(True)'],
-        ['pass'],
-        [],  # end block
-        ['k', 'pass'],
-        ['print(\'else\')']
-    ]
+    expected_blocks = [["print(True)"], ["pass"], [], ["k", "pass"], ["print('else')"]]  # end block
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
 
@@ -100,11 +79,11 @@ def test_compound_statement() -> None:
         pass
     """
     expected_blocks = [
-        ['x = 0', 'x > 10'],
-        ['print(x)'],
-        ['pass'],
+        ["x = 0", "x > 10"],
+        ["print(x)"],
+        ["pass"],
         [],  # end block
-        ['print(x - 1)']
+        ["print(x - 1)"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
@@ -120,13 +99,7 @@ def test_nested() -> None:
     except Exception:
         pass
     """
-    expected_blocks = [
-        ['x = 0'],
-        ['x = 10'],
-        ['pass'],
-        ['pass'],
-        [],  # end block
-    ]
+    expected_blocks = [["x = 0"], ["x = 10"], ["pass"], ["pass"], []]  # end block
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
 
@@ -152,16 +125,16 @@ def test_complex() -> None:
     print('after')
     """
     expected_blocks = [
-        ['x = 10'],
-        ['x > 5'],
-        ['x -= 1'],
-        ['pass'],
-        ['x > 10'],
-        ['print(True)'],
-        ['print(\'after\')'],
+        ["x = 10"],
+        ["x > 5"],
+        ["x -= 1"],
+        ["pass"],
+        ["x > 10"],
+        ["print(True)"],
+        ["print('after')"],
         [],  # end block
-        ['print(False)'],
-        ['x = 15'],
-        ['pass'],
+        ["print(False)"],
+        ["x = 15"],
+        ["pass"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks

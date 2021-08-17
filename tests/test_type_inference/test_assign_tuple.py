@@ -1,35 +1,37 @@
+from typing import Tuple
+
 import astroid
+
+from python_ta.transforms.type_inference_visitor import NoType
+from python_ta.typecheck.base import TypeFail, TypeInfo
 
 from .. import custom_hypothesis_support as cs
 from ..custom_hypothesis_support import lookup_type
-from python_ta.transforms.type_inference_visitor import NoType
-from python_ta.typecheck.base import TypeInfo, TypeFail
-from typing import Tuple
 
 
-def generate_tuple(length: int, t: type=None):
-    program = ''
+def generate_tuple(length: int, t: type = None):
+    program = ""
     for i in range(length + 1):
         if t is None:
-            program += f'x{i}, '
+            program += f"x{i}, "
         elif t == int:
-            program += f'{i}, '
+            program += f"{i}, "
         elif t == bool:
-            program += f'{i % 2 == 0}, '
+            program += f"{i % 2 == 0}, "
         elif t == str:
-            program += f'\'{str(chr(i+97))}\', '
+            program += f"'{str(chr(i+97))}', "
     return program
 
 
 def generate_tuple_assign(length: int, t: type, same_length: bool, more_args: bool = None):
-    program = ''
+    program = ""
     for i in range(1, length):
         for j in range(1, length):
             if same_length and i == j:
-                program += generate_tuple(i) + '= ' + generate_tuple(j, t) + '\n'
+                program += generate_tuple(i) + "= " + generate_tuple(j, t) + "\n"
             elif not same_length:
                 if (more_args and i > j) or (not more_args and i < j):
-                    program += generate_tuple(i) + '= ' + generate_tuple(j, t) + '\n'
+                    program += generate_tuple(i) + "= " + generate_tuple(j, t) + "\n"
     return program
 
 
@@ -124,7 +126,7 @@ def test_tuple_attribute_variable():
 
     a = A()
     some_list = [1, 2]
-    
+
     a.first_attr, a.second_attr = some_list
     """
     module, _ = cs._parse_text(program)
@@ -141,6 +143,6 @@ def test_tuple_empty():
     """
     module, ti = cs._parse_text(program)
     functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
-    assert lookup_type(ti, functiondef_node, 'a') == Tuple[()]
-    x_type = lookup_type(ti, functiondef_node, 'x')
-    assert lookup_type(ti, functiondef_node, 'b') == Tuple[x_type]
+    assert lookup_type(ti, functiondef_node, "a") == Tuple[()]
+    x_type = lookup_type(ti, functiondef_node, "x")
+    assert lookup_type(ti, functiondef_node, "b") == Tuple[x_type]

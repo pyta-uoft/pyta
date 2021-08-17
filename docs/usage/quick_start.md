@@ -98,7 +98,7 @@ This will open up your web browser to the corresponding entry in our documentati
 
 ## Checking contracts
 
-PyTA supports checking *preconditions* and *representation invariants* automatically during the
+PyTA supports checking _preconditions_ and _representation invariants_ automatically during the
 execution of a Python program. These are parsed automatically from function/class docstrings, and
 turned into executable assertions. Type annotations for functions and class instance attributes are
 also checked. For examples of both the syntax for specifying contracts and resulting behaviour,

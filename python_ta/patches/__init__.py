@@ -1,9 +1,9 @@
 """Monkeypatch pylint behaviour.
 """
 from .checkers import patch_checkers
-from .transforms import patch_ast_transforms
-from .messages import patch_messages, patch_linter_transform
 from .error_messages import patch_error_messages
+from .messages import patch_linter_transform, patch_messages
+from .transforms import patch_ast_transforms
 
 
 def patch_all():

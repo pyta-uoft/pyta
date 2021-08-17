@@ -1,7 +1,8 @@
 import astroid
+from hypothesis import HealthCheck, assume, given, settings
 
-from hypothesis import assume, given, settings, HealthCheck
 from .. import custom_hypothesis_support as cs
+
 settings.load_profile("pyta")
 
 

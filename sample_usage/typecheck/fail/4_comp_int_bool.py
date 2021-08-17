@@ -5,7 +5,7 @@ y = x
 
 
 def f(a):
-    return a == 'abc'
+    return a == "abc"
 
 
 f(y)

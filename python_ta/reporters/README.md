@@ -35,7 +35,6 @@ MessageCode (MessageSymbol)  Number of occurrences: ___.
 
 ```
 
-
 ### Technical Details
 
 Please note that _not all_ messages are accompanied by a code snippet.
@@ -59,25 +58,25 @@ subject to change in later versions of the ColorReporter.
 
 Messages that always highlight the whole error line<sup>2</sup> (sorted by message symbol):
 
-* `bad-whitespace`
-* `line-too-long`
-* `trailing-newlines`
+- `bad-whitespace`
+- `line-too-long`
+- `trailing-newlines`
 
 Messages that treat code snippets differently than just printing/highlighting:
 
-* `Missing function docstring` subtype of `missing-docstring`
-    * For these messages, the first line of the code snippet (the function
-        definition) is printed and highlighted, followed by a single elided
-        line (`...`) to signify the rest of the function/the missing docstring.
+- `Missing function docstring` subtype of `missing-docstring`
+  - For these messages, the first line of the code snippet (the function
+    definition) is printed and highlighted, followed by a single elided
+    line (`...`) to signify the rest of the function/the missing docstring.
 
 Messages that omit code snippets altogether:
 
-* `missing-docstring` (except the `Missing function docstring` subtype)
-* `always-returning-in-a-loop`
-* `too-many-nested-blocks`
-* `invalid-name` (but only the `Invalid module name` subtypes)
+- `missing-docstring` (except the `Missing function docstring` subtype)
+- `always-returning-in-a-loop`
+- `too-many-nested-blocks`
+- `invalid-name` (but only the `Invalid module name` subtypes)
 
-- - -
+---
 
 ##### Notes
 
@@ -137,7 +136,6 @@ the user will be redirected to http://www.cs.toronto.edu/~david/pyta/#W0612. A
 PyTA logo is located at the bottom of the web page and also redirects the user to
 the PyTA documentation website on click. Slightly above the logo, there is a link
 that allows users to report bugs via email.
-
 
 ### Technical Details
 

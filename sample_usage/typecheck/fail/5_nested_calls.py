@@ -6,7 +6,7 @@ def f(a):
 
 
 def g(b):
-    return b + 'abc'
+    return b + "abc"
 
 
 g(f(x))

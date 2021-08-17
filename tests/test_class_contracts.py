@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-import pytest
 import math
+from dataclasses import dataclass
+from typing import Dict, List, Set, Tuple
+
+import pytest
+
 from python_ta.contracts import check_all_contracts
-from typing import List, Set, Tuple, Dict
 
 
 def is_valid_name(name):
@@ -67,7 +69,7 @@ class Pizza:
 
     @classmethod
     def margherita(cls, radius):
-        return cls(radius, ['mozzarella', 'tomatoes'])
+        return cls(radius, ["mozzarella", "tomatoes"])
 
     def area(self):
         return self.circle_area(self.radius)
@@ -87,6 +89,7 @@ class SetWrapper:
     Representation Invariants:
         - all(x in self.set for x in {1, 2, 3})
     """
+
     set: Set[int]
 
 
@@ -102,7 +105,7 @@ def test_change_age_invalid_over(person) -> None:
     with pytest.raises(AssertionError) as excinfo:
         person.change_age(200)
     msg = str(excinfo.value)
-    assert 'age < 150' in msg
+    assert "age < 150" in msg
 
 
 def test_change_name_valid(person) -> None:
@@ -120,7 +123,7 @@ def test_change_name_invalid_nonalpha(person) -> None:
     with pytest.raises(AssertionError) as excinfo:
         person.name = "$$"
     msg = str(excinfo.value)
-    assert 'is_valid_name(self.name)' in msg
+    assert "is_valid_name(self.name)" in msg
 
 
 def test_change_age_invalid_in_method(person) -> None:
@@ -141,13 +144,15 @@ def test_same_method_names(person) -> None:
     with pytest.raises(AssertionError) as excinfo:
         change_age(person, -10)
     msg = str(excinfo.value)
-    assert 'self.age > 0' in msg
+    assert "self.age > 0" in msg
+
 
 def test_wrong_food_type(person) -> None:
     """Change fav food to an int. Expect an exception."""
 
     with pytest.raises(AssertionError):
         person.fav_foods = 5
+
 
 def test_wrong_food_type_instance_method(person) -> None:
     """Violates type annotation within an instance method. Expect exception."""
@@ -164,9 +169,12 @@ def test_create_margherita_invalid() -> None:
     with pytest.raises(AssertionError) as excinfo:
         Pizza.margherita(0)
     msg = str(excinfo.value)
-    assert '0 \
+    assert (
+        "0 \
         < self.radius \
-            <= 10' in msg
+            <= 10"
+        in msg
+    )
 
 
 def test_circle_area_valid() -> None:
@@ -184,7 +192,7 @@ def test_circle_area_invalid() -> None:
     with pytest.raises(AssertionError) as excinfo:
         Pizza.circle_area(0)
     msg = str(excinfo.value)
-    assert 'r > 0' in msg
+    assert "r > 0" in msg
 
 
 def test_set_wrapper_valid() -> None:
@@ -202,7 +210,7 @@ def test_set_wrapper_invalid() -> None:
     with pytest.raises(AssertionError) as excinfo:
         SetWrapper(set={1, 2, -3})
     msg = str(excinfo.value)
-    assert 'all(x in self.set for x in {1, 2, 3})' in msg
+    assert "all(x in self.set for x in {1, 2, 3})" in msg
 
 
 class NoInit:
@@ -211,6 +219,7 @@ class NoInit:
     Representation Invariants:
         - abs(1) < 0  # This is always False
     """
+
     def method(self) -> int:
         """Method to test that representation invariant is checked on method calls."""
         return 1
@@ -226,7 +235,7 @@ def test_no_init_setattr() -> None:
         n.attr = 1
 
     msg = str(excinfo.value)
-    assert 'abs(1) < 0' in msg
+    assert "abs(1) < 0" in msg
 
 
 def test_no_init_method() -> None:
@@ -239,7 +248,7 @@ def test_no_init_method() -> None:
         n.method()
 
     msg = str(excinfo.value)
-    assert 'abs(1) < 0' in msg
+    assert "abs(1) < 0" in msg
 
 
 class NoInit2:
@@ -286,8 +295,8 @@ def setup_module() -> None:
 
 
 class OverrideLen:
-    """A class that overrides its len method.
-    """
+    """A class that overrides its len method."""
+
     x: int
 
     def __init__(self) -> None:
@@ -298,8 +307,7 @@ class OverrideLen:
 
 
 def test_override_len_simple() -> None:
-    """Test that we can instantiate OverrideLen, which has a custom __len__ implementation.
-    """
+    """Test that we can instantiate OverrideLen, which has a custom __len__ implementation."""
     OverrideLen()
 
 
@@ -310,6 +318,7 @@ class ThemedWidget:
     - self.primary_color.isalpha()
     - self.secondary_color.isalpha()
     """
+
     size: int
     theme: str
     primary_color: str
@@ -324,8 +333,8 @@ class ThemedWidget:
         self.apply_color_palette(color_palette)
 
     def setup_options(self, options: Dict) -> None:
-        if 'size' in options:
-            self.setup_size(options['size'])
+        if "size" in options:
+            self.setup_size(options["size"])
 
     def setup_size(self, size: int) -> None:
         self.size = size
@@ -341,21 +350,21 @@ def test_no_premature_check_from_helper_in_init() -> None:
     """Test that representation invariants and type annotations of a class still being
     initialized are not checked when a helper called directly from the init returns
     """
-    dark_widget = ThemedWidget('dark', ('black', 'mahogany'))
-    assert dark_widget.theme == 'dark'
-    assert dark_widget.primary_color == 'black'
-    assert dark_widget.secondary_color == 'mahogany'
+    dark_widget = ThemedWidget("dark", ("black", "mahogany"))
+    assert dark_widget.theme == "dark"
+    assert dark_widget.primary_color == "black"
+    assert dark_widget.secondary_color == "mahogany"
 
 
 def test_no_premature_check_from_deep_helper_in_init() -> None:
     """Test that representation invariants and type annotations of a class still being
     initialized are not checked when a helper of any depth from the init returns
     """
-    dark_widget = ThemedWidget('dark', ('black', 'mahogany'), options={'size': 10})
-    assert dark_widget.theme == 'dark'
-    assert dark_widget.primary_color == 'black'
-    assert dark_widget.secondary_color == 'mahogany'
+    dark_widget = ThemedWidget("dark", ("black", "mahogany"), options={"size": 10})
+    assert dark_widget.theme == "dark"
+    assert dark_widget.primary_color == "black"
+    assert dark_widget.secondary_color == "mahogany"
 
 
-if __name__ == '__main__':
-    pytest.main(['test_class_contracts.py'])
+if __name__ == "__main__":
+    pytest.main(["test_class_contracts.py"])

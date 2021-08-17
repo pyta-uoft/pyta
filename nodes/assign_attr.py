@@ -16,6 +16,7 @@ Example:
         expr=Name(name='self'))
 """
 
-class ClassName():
+
+class ClassName:
     def __init__(self, name):
         self.name = name

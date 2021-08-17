@@ -1,8 +1,10 @@
-import astroid
-
-from hypothesis import given, settings, HealthCheck
 from typing import Any
+
+import astroid
+from hypothesis import HealthCheck, given, settings
+
 from .. import custom_hypothesis_support as cs
+
 settings.load_profile("pyta")
 
 

@@ -1,8 +1,15 @@
 from typing import *
 from typing import Callable, ForwardRef
-from python_ta.typecheck.base import TypeResult, TypeInfo, TypeFail, TypeConstraints, create_Callable
+
 from pytest import skip
 
+from python_ta.typecheck.base import (
+    TypeConstraints,
+    TypeFail,
+    TypeInfo,
+    TypeResult,
+    create_Callable,
+)
 
 skip_msg = "Skipped"
 tc = TypeConstraints()
@@ -10,9 +17,7 @@ tc = TypeConstraints()
 
 # Helper functions
 def unify_helper(arg1: type, arg2: type, exp_result: Union[type, TypeFail]):
-    unify_result = TypeInfo(arg1) >> (
-        lambda t1: TypeInfo(arg2) >> (
-            lambda t2: tc.unify(t1, t2)))
+    unify_result = TypeInfo(arg1) >> (lambda t1: TypeInfo(arg2) >> (lambda t2: tc.unify(t1, t2)))
     if isinstance(exp_result, TypeFail):
         assert isinstance(unify_result, TypeFail)
     else:
@@ -37,16 +42,11 @@ def test_same_prim():
 
 
 def test_diff_prim():
-    unify_helper(bool, str, TypeFail(
-        f'Incompatible Types {bool} and {str}'))
-    unify_helper(int, str, TypeFail(
-        f'Incompatible Types {int} and {str}'))
-    unify_helper(bool, int, TypeFail(
-        f'Incompatible Types {bool} and {int}'))
-    unify_helper(float, int, TypeFail(
-        f'Incompatible Types {float} and {int}'))
-    unify_helper(float, str, TypeFail(
-        f'Incompatible Types {float} and {str}'))
+    unify_helper(bool, str, TypeFail(f"Incompatible Types {bool} and {str}"))
+    unify_helper(int, str, TypeFail(f"Incompatible Types {int} and {str}"))
+    unify_helper(bool, int, TypeFail(f"Incompatible Types {bool} and {int}"))
+    unify_helper(float, int, TypeFail(f"Incompatible Types {float} and {int}"))
+    unify_helper(float, str, TypeFail(f"Incompatible Types {float} and {str}"))
 
 
 # Unify TypeVars
@@ -78,8 +78,7 @@ def test_diff_typevars():
 
     resolve_helper(tv_str, str)
     resolve_helper(tv_int, int)
-    unify_helper(tv_int, tv_str, TypeFail(
-        f'Incompatible Types {str} and {int}'))
+    unify_helper(tv_int, tv_str, TypeFail(f"Incompatible Types {str} and {int}"))
 
 
 def test_one_typevar():
@@ -89,10 +88,8 @@ def test_one_typevar():
     resolve_helper(tv, str)
     unify_helper(tv, str, str)
     unify_helper(str, tv, str)
-    unify_helper(tv, int, TypeFail(
-        f'Incompatible Types {str} and {int}'))
-    unify_helper(int, tv, TypeFail(
-        f'Incompatible Types {int} and {str}'))
+    unify_helper(tv, int, TypeFail(f"Incompatible Types {str} and {int}"))
+    unify_helper(int, tv, TypeFail(f"Incompatible Types {int} and {str}"))
 
 
 def test_two_typevar():
@@ -104,21 +101,21 @@ def test_two_typevar():
 
 # Unify ForwardRefs
 def test_same_forward_ref():
-    fr1 = ForwardRef('a')
-    fr2 = ForwardRef('a')
+    fr1 = ForwardRef("a")
+    fr2 = ForwardRef("a")
     unify_helper(fr1, fr2, fr1)
     unify_helper(fr1, fr2, fr2)
 
 
 def test_diff_forward_ref():
-    skip('The existing error msg does not apply to this situation')
-    fr1 = ForwardRef('a')
-    fr2 = ForwardRef('b')
+    skip("The existing error msg does not apply to this situation")
+    fr1 = ForwardRef("a")
+    fr2 = ForwardRef("b")
     unify_helper(fr1, fr2, TypeFail("Attempted to unify forwardref  with non-ref"))
 
 
 def test_one_forward_ref():
-    fr = ForwardRef('a')
+    fr = ForwardRef("a")
     unify_helper(fr, str, TypeFail("Attempted to unify forwardref  with non-ref"))
 
 
@@ -129,13 +126,17 @@ def test_same_tuple():
 
 
 def test_diff_tuple():
-    unify_helper(Tuple[int, int], Tuple[str, str], TypeFail(
-        f'Incompatible Types {Tuple[int, int]} and {Tuple[str, str]}'))
+    unify_helper(
+        Tuple[int, int],
+        Tuple[str, str],
+        TypeFail(f"Incompatible Types {Tuple[int, int]} and {Tuple[str, str]}"),
+    )
 
 
 def test_nested_tuples():
-    unify_helper(Tuple[str, Tuple[str, bool]], Tuple[str, Tuple[str, bool]],
-                 Tuple[str, Tuple[str, bool]])
+    unify_helper(
+        Tuple[str, Tuple[str, bool]], Tuple[str, Tuple[str, bool]], Tuple[str, Tuple[str, bool]]
+    )
 
 
 def test_typevars_tuple():
@@ -149,16 +150,19 @@ def test_typevars_tuple():
 def test_typevars_nested_tuples():
     tv1 = tc.fresh_tvar(None)
     tv2 = Tuple[tv1, bool]
-    unify_helper(tv2, Tuple[Tuple[str, bool], bool],
-                 Tuple[Tuple[str, bool], bool])
+    unify_helper(tv2, Tuple[Tuple[str, bool], bool], Tuple[Tuple[str, bool], bool])
     resolve_helper(tv1, Tuple[str, bool])
     resolve_helper(tv2, Tuple[Tuple[str, bool], bool])
 
 
 def test_diff_nested_tuples():
-    unify_helper(Tuple[str, Tuple[str, str]],
-                 Tuple[str, Tuple[bool, str]], TypeFail(
-                     f'Incompatible Types {Tuple[str, Tuple[str, str]]} and {Tuple[str, Tuple[bool, str]]}'))
+    unify_helper(
+        Tuple[str, Tuple[str, str]],
+        Tuple[str, Tuple[bool, str]],
+        TypeFail(
+            f"Incompatible Types {Tuple[str, Tuple[str, str]]} and {Tuple[str, Tuple[bool, str]]}"
+        ),
+    )
 
 
 # Unify list
@@ -168,8 +172,7 @@ def test_same_list():
 
 
 def test_diff_list():
-    unify_helper(List[str], List[int], TypeFail(
-        f'Incompatible Types {List[str]} and {List[int]}'))
+    unify_helper(List[str], List[int], TypeFail(f"Incompatible Types {List[str]} and {List[int]}"))
 
 
 # Unify callables
@@ -188,8 +191,7 @@ def test_diff_callable():
     c1 = Callable[[bool], bool]
     c2 = Callable[[str], str]
 
-    unify_helper(c1, c2, TypeFail(
-        f'Incompatible Types {c1} and {c2}'))
+    unify_helper(c1, c2, TypeFail(f"Incompatible Types {c1} and {c2}"))
 
 
 # Polymorphic types

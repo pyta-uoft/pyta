@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -14,13 +14,13 @@ settings.load_profile("pyta")
 def test_homogeneous_dict(dictionary):
     """Test Dictionary nodes representing a dictionary with all key:value pairs of same types."""
     module, _ = cs._parse_text(dictionary)
-    dict_node = list(module.nodes_of_class(astroid.Dict))[0]
+    dict_node = list(module.nodes_of_class(nodes.Dict))[0]
     if len(dict_node.items) == 0:
         assert dict_node.inf_type.getValue() == Dict[Any, Any]
     else:
         first_key, first_value = next(((k, v) for k, v in dictionary.items))
         cs._verify_type_setting(
-            module, astroid.Dict, Dict[type(first_key.value), type(first_value.value)]
+            module, nodes.Dict, Dict[type(first_key.value), type(first_value.value)]
         )
 
 
@@ -41,7 +41,7 @@ def test_heterogeneous_dict(node):
     if bool in key_types:
         assume(int not in val_types)
     module, _ = cs._parse_text(node)
-    cs._verify_type_setting(module, astroid.Dict, Dict[Any, Any])
+    cs._verify_type_setting(module, nodes.Dict, Dict[Any, Any])
 
 
 def test_sorted_dict():
@@ -50,7 +50,7 @@ def test_sorted_dict():
     sorted_dict = sorted(dictionary)
     """
     module, ti = cs._parse_text(src)
-    assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
+    assign_node = list(module.nodes_of_class(nodes.AssignName))[1]
     t = lookup_type(ti, assign_node, assign_node.name)
     assert ti.type_constraints.resolve(t).getValue() == List[str]
 
@@ -61,6 +61,6 @@ def test_any_dict():
     any_empty = any(dictionary)
     """
     module, ti = cs._parse_text(src)
-    assign_node = list(module.nodes_of_class(astroid.AssignName))[1]
+    assign_node = list(module.nodes_of_class(nodes.AssignName))[1]
     t = lookup_type(ti, assign_node, assign_node.name)
     assert ti.type_constraints.resolve(t).getValue() == bool

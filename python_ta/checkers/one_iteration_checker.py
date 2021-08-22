@@ -2,7 +2,7 @@
 """
 from typing import Union
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -37,7 +37,7 @@ class OneIterationChecker(BaseChecker):
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
-    def _check_one_iteration(self, node: Union[astroid.For, astroid.While]) -> bool:
+    def _check_one_iteration(self, node: Union[nodes.For, nodes.While]) -> bool:
         """Return whether the given loop is guaranteed to stop after one iteration.
 
         More precisely, Returns False if there exists a direct predecessor
@@ -49,7 +49,7 @@ class OneIterationChecker(BaseChecker):
         the test condition (or the first of the blocks that make up test condition).
         For `for` loops, it refers to the block with the assignment target.
         """
-        start = node.target if isinstance(node, astroid.For) else node
+        start = node.target if isinstance(node, nodes.For) else node
         if not hasattr(start, "cfg_block"):
             return False
 
@@ -61,7 +61,7 @@ class OneIterationChecker(BaseChecker):
         for pred in preds:
             stmt = pred.source.statements[0]
             if node.parent_of(stmt) and pred.source.reachable:
-                if isinstance(node, astroid.For) and stmt is node.iter:
+                if isinstance(node, nodes.For) and stmt is node.iter:
                     continue
                 return False
         return True

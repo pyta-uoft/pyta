@@ -1,6 +1,6 @@
 from typing import Set, _GenericAlias
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -15,7 +15,7 @@ def test_set_comprehension_reproduce_homogeneous(iterable):
     a homogeneous iterable."""
     program = "{elt for elt in " + repr(iterable) + "}"
     module, _ = cs._parse_text(program)
-    setcomp_node = list(module.nodes_of_class(astroid.SetComp))[0]
+    setcomp_node = list(module.nodes_of_class(nodes.SetComp))[0]
     assert (
         setcomp_node.inf_type.getValue()
         == Set[setcomp_node.generators[0].iter.inf_type.getValue().__args__[0]]
@@ -29,7 +29,7 @@ def test_set_comprehension_reproduce_heterogeneous(iterable):
     a heterogeneous iterable."""
     program = "{elt for elt in " + repr(iterable) + "}"
     module, _ = cs._parse_text(program)
-    setcomp_node = list(module.nodes_of_class(astroid.SetComp))[0]
+    setcomp_node = list(module.nodes_of_class(nodes.SetComp))[0]
     assert (
         setcomp_node.inf_type.getValue()
         == Set[setcomp_node.generators[0].iter.inf_type.getValue().__args__[0]]
@@ -43,7 +43,7 @@ def test_set_comprehension_reproduce_string(iterable):
     a string."""
     program = "{elt for elt in " + repr(iterable) + "}"
     module, _ = cs._parse_text(program)
-    setcomp_node = list(module.nodes_of_class(astroid.SetComp))[0]
+    setcomp_node = list(module.nodes_of_class(nodes.SetComp))[0]
     assert (
         setcomp_node.inf_type.getValue() == Set[setcomp_node.generators[0].iter.inf_type.getValue()]
     )

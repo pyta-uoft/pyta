@@ -1,6 +1,6 @@
 """checker for variable shadowing in a comprehension.
 """
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -23,13 +23,13 @@ class ShadowingInComprehensionChecker(BaseChecker):
     priority = -1
 
     @check_messages("shadowing-in-comprehension")
-    def visit_comprehension(self, node: astroid.Comprehension):
-        if isinstance(node.target, astroid.Tuple):
+    def visit_comprehension(self, node: nodes.Comprehension):
+        if isinstance(node.target, nodes.Tuple):
             for target in node.target.elts:
                 if target.name in node.parent.frame().locals and target.name != "_":
                     args = target.name
                     self.add_message("shadowing-in-comprehension", node=target, args=args)
-        else:  # isinstance(node.target, astroid.AssignName)
+        else:  # isinstance(node.target, nodes.AssignName)
             if node.target.name in node.parent.frame().locals and node.target.name != "_":
                 args = node.target.name
                 self.add_message("shadowing-in-comprehension", node=node.target, args=args)

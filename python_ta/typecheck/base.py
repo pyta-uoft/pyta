@@ -5,8 +5,7 @@ from typing import *
 from typing import IO  # Needed for type_store
 from typing import Callable, ForwardRef, _GenericAlias, _type_check
 
-import astroid
-from astroid import NodeNG
+from astroid import nodes
 
 from python_ta.typecheck.errors import error_message
 from python_ta.utils import _get_name, _gorg
@@ -19,11 +18,11 @@ class _TNode:
 
     type: type
     parent: Optional["_TNode"]
-    parent_path: Optional[List[NodeNG]]
-    adj_list: List[Tuple["_TNode", NodeNG]]
-    ast_node: Optional[NodeNG]
+    parent_path: Optional[List[nodes.NodeNG]]
+    adj_list: List[Tuple["_TNode", nodes.NodeNG]]
+    ast_node: Optional[nodes.NodeNG]
 
-    def __init__(self, node_type: type, ast_node: Optional[NodeNG] = None) -> None:
+    def __init__(self, node_type: type, ast_node: Optional[nodes.NodeNG] = None) -> None:
         self.type = node_type
         self.parent = None
         self.parent_path = None
@@ -44,7 +43,7 @@ class _TNode:
         else:
             return f"TNode: {self.type}"
 
-    def find_path_to_parent(self) -> List[NodeNG]:
+    def find_path_to_parent(self) -> List[nodes.NodeNG]:
         """Return list of astroid nodes relating _TNode to parent _TNode."""
         final_path = []
         cur_node = self
@@ -53,11 +52,11 @@ class _TNode:
             cur_node = cur_node.parent_path[0]
         return final_path
 
-    def find_annotation(self) -> Optional[astroid.AnnAssign]:
+    def find_annotation(self) -> Optional[nodes.AnnAssign]:
         """Find annotation node in list of astroid nodes relating _TNode to parent _TNode, if one exists."""
         path = self.find_path_to_parent()
         for p in path:
-            if isinstance(p, astroid.AnnAssign):
+            if isinstance(p, nodes.AnnAssign):
                 return p
 
 
@@ -116,7 +115,7 @@ class TypeFailUnify(TypeFail):
     :param src_node: astroid node where failure occurs
     """
 
-    def __init__(self, *tnodes: _TNode, src_node: NodeNG = None) -> None:
+    def __init__(self, *tnodes: _TNode, src_node: nodes.NodeNG = None) -> None:
         self.tnodes = tnodes
         self.src_node = src_node
         super().__init__(str(self))
@@ -149,7 +148,9 @@ class TypeFailLookup(TypeFail):
     :param src_node: astroid node where invalid lookup occurs
     """
 
-    def __init__(self, class_tnode: _TNode, attr_node: NodeNG, src_node: NodeNG) -> None:
+    def __init__(
+        self, class_tnode: _TNode, attr_node: nodes.NodeNG, src_node: nodes.NodeNG
+    ) -> None:
         self.class_tnode = class_tnode
         self.attr_node = attr_node
         self.src_node = src_node
@@ -169,7 +170,9 @@ class TypeFailAnnotationUnify(TypeFail):
     :param ann_node: astroid node where annotation is set
     """
 
-    def __init__(self, tnode: _TNode, src_node: NodeNG = None, ann_node: NodeNG = None) -> None:
+    def __init__(
+        self, tnode: _TNode, src_node: nodes.NodeNG = None, ann_node: nodes.NodeNG = None
+    ) -> None:
         self.tnode = tnode
         self.src_node = src_node
         self.ann_node = ann_node
@@ -193,7 +196,7 @@ class TypeFailAnnotationInvalid(TypeFail):
     :param src_node: astroid node where annotation is set
     """
 
-    def __init__(self, src_node: NodeNG) -> None:
+    def __init__(self, src_node: nodes.NodeNG) -> None:
         self.src_node = src_node
         super().__init__(str(self))
 
@@ -214,8 +217,8 @@ class TypeFailFunction(TypeFail):
     def __init__(
         self,
         func_types: Tuple[Callable],
-        funcdef_node: astroid.FunctionDef,
-        src_node: NodeNG,
+        funcdef_node: nodes.FunctionDef,
+        src_node: nodes.NodeNG,
         arg_indices: List[int] = None,
     ) -> None:
         self.func_types = func_types
@@ -230,12 +233,12 @@ class TypeFailFunction(TypeFail):
 
 class TypeFailReturn(TypeFail):
     """
-    TypeFailReturn occurs when a astroid.Return node is encountered outside of a function definition.
+    TypeFailReturn occurs when a nodes.Return node is encountered outside of a function definition.
 
-    :param src_node: Invalid astroid.Return node
+    :param src_node: Invalid nodes.Return node
     """
 
-    def __init__(self, src_node: astroid.Return) -> None:
+    def __init__(self, src_node: nodes.Return) -> None:
         self.src_node = src_node
         super().__init__(str(self))
 
@@ -247,10 +250,10 @@ class TypeFailStarred(TypeFail):
     """
     TypeFailStarred occurs when there are multiple starred variables in the target of an assignment.
 
-    :param src_node: Invalid astroid.Assign node
+    :param src_node: Invalid nodes.Assign node
     """
 
-    def __init__(self, src_node: astroid.Assign) -> None:
+    def __init__(self, src_node: nodes.Assign) -> None:
         self.src_node = src_node
         super().__init__(str(self))
 
@@ -511,14 +514,14 @@ class TypeConstraints:
     # Creating new nodes ("make set")
     ###########################################################################
     # TODO: Rename to better distinguish between _TNodes and AST Nodes
-    def fresh_tvar(self, node: Optional[NodeNG] = None) -> TypeVar:
+    def fresh_tvar(self, node: Optional[nodes.NodeNG] = None) -> TypeVar:
         """Create and return a fresh type variable, associated with the given node."""
         tvar = TypeVar(f"_TV{self._count}")
         self._count += 1
         self._make_set(tvar, ast_node=node)
         return tvar
 
-    def _make_set(self, t: type, ast_node: Optional[NodeNG] = None) -> _TNode:
+    def _make_set(self, t: type, ast_node: Optional[nodes.NodeNG] = None) -> _TNode:
         """Create new set with a single _TNode."""
         node = _TNode(t, ast_node)
         self._nodes.append(node)
@@ -590,11 +593,11 @@ class TypeConstraints:
 
         return goal_tnode
 
-    def find_function_def(self, tn: _TNode) -> Optional[astroid.FunctionDef]:
+    def find_function_def(self, tn: _TNode) -> Optional[nodes.FunctionDef]:
         """Search, using BFS starting from this _TNode, to find a _TNode with a
         FunctionDef node as its ast_node attribute."""
         func_tnode = self.find_node(
-            tn, (lambda t: isinstance(t.ast_node, astroid.FunctionDef)), False
+            tn, (lambda t: isinstance(t.ast_node, nodes.FunctionDef)), False
         )
         if func_tnode:
             return func_tnode.ast_node
@@ -625,7 +628,7 @@ class TypeConstraints:
 
         return goal_tnode
 
-    def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: NodeNG):
+    def create_edges(self, tn1: _TNode, tn2: _TNode, ast_node: nodes.NodeNG):
         if tn1 != tn2:
             edge_exists = False
             for e in tn1.adj_list:
@@ -639,7 +642,7 @@ class TypeConstraints:
     # Type unification ("union")
     ###########################################################################
     @accept_failable
-    def unify(self, t1: type, t2: type, ast_node: Optional[NodeNG] = None) -> TypeResult:
+    def unify(self, t1: type, t2: type, ast_node: Optional[nodes.NodeNG] = None) -> TypeResult:
         """Attempt to unify two types.
 
         :param t1: The first of the two types to be unified.
@@ -713,7 +716,7 @@ class TypeConstraints:
             return NoType()
 
     def _unify_generic(
-        self, tnode1: _TNode, tnode2: _TNode, ast_node: Optional[NodeNG] = None
+        self, tnode1: _TNode, tnode2: _TNode, ast_node: Optional[nodes.NodeNG] = None
     ) -> TypeResult:
         """Unify two generic types (e.g., List, Tuple, Dict, Callable)."""
 
@@ -764,7 +767,7 @@ class TypeConstraints:
 
     @accept_failable
     def unify_call(
-        self, func_var: type, *arg_types: type, node: Optional[NodeNG] = None
+        self, func_var: type, *arg_types: type, node: Optional[nodes.NodeNG] = None
     ) -> TypeResult:
         """Unify a function call with the given function type and argument types.
 
@@ -853,7 +856,7 @@ class TypeConstraints:
         else:
             return TypeInfo(t)
 
-    def fresh_callable(self, func_type: type, node: Optional[NodeNG]) -> type:
+    def fresh_callable(self, func_type: type, node: Optional[nodes.NodeNG]) -> type:
         """Given a callable, substitute all polymorphic variables with fresh ones"""
         new_tvars = {
             tvar: self.fresh_tvar(node) for tvar in getattr(func_type, "__polymorphic_tvars__", [])
@@ -923,7 +926,7 @@ class Environment:
         type_constraints: TypeConstraints,
         environment: "Environment",
         variable_name: str,
-        node: NodeNG,
+        node: nodes.NodeNG,
     ):
         """Helper to create a fresh Type Var and adding the variable to appropriate environment."""
         if environment == "locals":
@@ -941,15 +944,15 @@ class Environment:
 # Parsing type annotations
 ###############################################################################
 def parse_annotations(
-    node: NodeNG, class_tvars: Optional[List[type]] = None
+    node: nodes.NodeNG, class_tvars: Optional[List[type]] = None
 ) -> List[Tuple[type, str]]:
     """Return types specified by the type annotations for a node.
     Returns more than one type if there are default arguments.
     """
-    if isinstance(node, astroid.FunctionDef):
+    if isinstance(node, nodes.FunctionDef):
         arg_types = []
         no_class_tvars = class_tvars is None
-        is_methodcall = isinstance(node.parent, astroid.ClassDef)
+        is_methodcall = isinstance(node.parent, nodes.ClassDef)
         if no_class_tvars and is_methodcall:
             self_type = _node_to_type(node.parent.name)
         elif no_class_tvars or not is_methodcall:
@@ -980,11 +983,11 @@ def parse_annotations(
         ]
         return callables
 
-    elif isinstance(node, astroid.AssignName) and isinstance(node.parent, astroid.AnnAssign):
+    elif isinstance(node, nodes.AssignName) and isinstance(node.parent, nodes.AnnAssign):
         return [_ann_node_to_type(node.parent.annotation).getValue(), "attribute"]
 
 
-def _ann_node_to_type(node: astroid.Name) -> TypeResult:
+def _ann_node_to_type(node: nodes.Name) -> TypeResult:
     """Return a type represented by the input node, substituting Any for missing arguments in generic types"""
     try:
         ann_node_type = _node_to_type(node)
@@ -996,7 +999,7 @@ def _ann_node_to_type(node: astroid.Name) -> TypeResult:
     return ann_type
 
 
-def _generic_to_annotation(ann_node_type: type, node: NodeNG) -> TypeResult:
+def _generic_to_annotation(ann_node_type: type, node: nodes.NodeNG) -> TypeResult:
     is_generic = isinstance(ann_node_type, _GenericAlias) or (
         sys.version_info >= (3, 9) and hasattr(ann_node_type, "__origin__")
     )
@@ -1025,35 +1028,35 @@ def _generic_to_annotation(ann_node_type: type, node: NodeNG) -> TypeResult:
     return ann_type
 
 
-def _node_to_type(node: NodeNG, locals: Dict[str, type] = None) -> type:
+def _node_to_type(node: nodes.NodeNG, locals: Dict[str, type] = None) -> type:
     """Return a type represented by the input node."""
     locals = locals or _TYPESHED_TVARS
     if node is None:
         return Any
     elif isinstance(node, str):
         return _eval_node(node, globals(), locals)
-    elif isinstance(node, astroid.Name):
+    elif isinstance(node, nodes.Name):
         return _eval_node(node.name, globals(), locals)
-    elif isinstance(node, astroid.Attribute):
+    elif isinstance(node, nodes.Attribute):
         return _eval_node(node.attrname, globals(), locals)
-    elif isinstance(node, astroid.Subscript):
+    elif isinstance(node, nodes.Subscript):
         v = _node_to_type(node.value)
         s = _node_to_type(node.slice)
         if isinstance(v, ForwardRef):
             return literal_substitute(v, {v.__forward_arg__: s})
         else:
             return v[s]
-    elif isinstance(node, astroid.Index):
+    elif isinstance(node, nodes.Index):
         return _node_to_type(node.value)
-    elif isinstance(node, astroid.Tuple):
-        return tuple(_node_to_type(t) for t in node.elts if not isinstance(t, astroid.Ellipsis))
-    elif isinstance(node, astroid.List):
-        return [_node_to_type(t) for t in node.elts if not isinstance(t, astroid.Ellipsis)]
-    elif isinstance(node, astroid.Const) and node.value is None:
+    elif isinstance(node, nodes.Tuple):
+        return tuple(_node_to_type(t) for t in node.elts if not isinstance(t, nodes.Ellipsis))
+    elif isinstance(node, nodes.List):
+        return [_node_to_type(t) for t in node.elts if not isinstance(t, nodes.Ellipsis)]
+    elif isinstance(node, nodes.Const) and node.value is None:
         return None
-    elif isinstance(node, astroid.Const) and isinstance(node.value, str):
+    elif isinstance(node, nodes.Const) and isinstance(node.value, str):
         return _node_to_type(node.value)
-    elif isinstance(node, astroid.Const) and node.value is Ellipsis:
+    elif isinstance(node, nodes.Const) and node.value is Ellipsis:
         return Ellipsis
     else:
         return node

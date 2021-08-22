@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+from astroid import nodes
 
 from python_ta.checkers.missing_space_in_doctest_checker import (
     MissingSpaceInDoctestChecker,
@@ -23,7 +24,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
             """
         '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -46,7 +47,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
             """
         '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
@@ -64,7 +65,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
             """
         '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -95,7 +96,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
             """
         '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -116,7 +117,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                """
            '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
@@ -129,7 +130,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 pass
            """
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
@@ -142,7 +143,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                """
            '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
@@ -154,7 +155,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                   """>>>"""
               '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -181,7 +182,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                """
            '''
         mod = astroid.parse(src)
-        function_node, *_ = mod.nodes_of_class(astroid.FunctionDef)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)

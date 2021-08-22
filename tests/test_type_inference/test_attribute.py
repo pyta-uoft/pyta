@@ -1,6 +1,6 @@
 from typing import *
 
-import astroid
+from astroid import nodes
 from pytest import skip
 
 from python_ta.typecheck.base import TypeFail
@@ -17,7 +17,7 @@ def test_instance_dot_method():
         A().foo(0)
         """
     module, _ = cs._parse_text(program, reset=True)
-    for attribute_node in module.nodes_of_class(astroid.Attribute):
+    for attribute_node in module.nodes_of_class(nodes.Attribute):
         assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
@@ -31,7 +31,7 @@ def test_instance_dot_classmethod():
         A().foo(0)
         """
     module, _ = cs._parse_text(program, reset=True)
-    for attribute_node in module.nodes_of_class(astroid.Attribute):
+    for attribute_node in module.nodes_of_class(nodes.Attribute):
         assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
@@ -45,7 +45,7 @@ def test_instance_dot_staticmethod():
         A().foo(0)
         """
     module, _ = cs._parse_text(program, reset=True)
-    for attribute_node in module.nodes_of_class(astroid.Attribute):
+    for attribute_node in module.nodes_of_class(nodes.Attribute):
         assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
@@ -58,7 +58,7 @@ def test_class_dot_method():
         A.foo(A(), 0)
         """
     module, _ = cs._parse_text(program, reset=True)
-    for attribute_node in module.nodes_of_class(astroid.Attribute):
+    for attribute_node in module.nodes_of_class(nodes.Attribute):
         assert (
             str(attribute_node.inf_type.getValue())
             == "typing.Callable[[ForwardRef('A'), int], int]"
@@ -75,7 +75,7 @@ def test_class_dot_classmethod():
         A.foo(0)
         """
     module, _ = cs._parse_text(program, reset=True)
-    for attribute_node in module.nodes_of_class(astroid.Attribute):
+    for attribute_node in module.nodes_of_class(nodes.Attribute):
         assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
@@ -89,7 +89,7 @@ def test_class_dot_staticmethod():
         A.foo(0)
         """
     module, _ = cs._parse_text(program, reset=True)
-    for attribute_node in module.nodes_of_class(astroid.Attribute):
+    for attribute_node in module.nodes_of_class(nodes.Attribute):
         assert str(attribute_node.inf_type.getValue()) == "typing.Callable[[int], int]"
 
 
@@ -101,9 +101,7 @@ def test_attribute_self_bind():
         f(4)
         """
     module, ti = cs._parse_text(program, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in module.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)][0]
     assert str(ti.type_constraints.resolve(x).getValue()) == "typing.List[int]"
 
 
@@ -118,7 +116,7 @@ def test_subscript_attribute():
         x = a.lst[0]
         """
     module, ti = cs._parse_text(program, reset=True)
-    for assgn_node in module.nodes_of_class(astroid.AssignName):
+    for assgn_node in module.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "x":
             x = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(x).getValue() == int
@@ -134,7 +132,7 @@ def test_obj_list_attribute():
         x = lst[0].name
         """
     module, ti = cs._parse_text(program, reset=True)
-    for assgn_node in module.nodes_of_class(astroid.AssignName):
+    for assgn_node in module.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "x":
             x = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(x).getValue() == str
@@ -148,7 +146,7 @@ def test_unknown_class_attribute():
             z = x.name
         """
     module, ti = cs._parse_text(program, reset=True)
-    for assgn_node in module.nodes_of_class(astroid.AssignName):
+    for assgn_node in module.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "z":
             z = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(z).getValue() == int
@@ -163,9 +161,9 @@ def test_unknown_class_attribute2():
             z = foo(y)
         """
     module, ti = cs._parse_text(program, reset=True)
-    for binop_node in module.nodes_of_class(astroid.BinOp):
+    for binop_node in module.nodes_of_class(nodes.BinOp):
         assert binop_node.inf_type.getValue() == int
-    for assgn_node in module.nodes_of_class(astroid.AssignName):
+    for assgn_node in module.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "z":
             z = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(z).getValue() == int
@@ -181,7 +179,7 @@ def test_unknown_class_subscript_attribute():
             z = foo(y)
         """
     module, ti = cs._parse_text(program, reset=True)
-    for assgn_node in module.nodes_of_class(astroid.AssignName):
+    for assgn_node in module.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "z":
             z = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert isinstance(ti.type_constraints.resolve(z).getValue(), TypeVar)
@@ -197,7 +195,7 @@ def test_unknown_class_subscript_attribute2():
             z = foo(y)
         """
     module, ti = cs._parse_text(program, reset=True)
-    for assgn_node in module.nodes_of_class(astroid.AssignName):
+    for assgn_node in module.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "z":
             z = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(z).getValue() == int
@@ -209,7 +207,7 @@ def test_invalid_builtin_attribute():
         y = x.name
         """
     module, ti = cs._parse_text(program, reset=True)
-    assgn_node = list(module.nodes_of_class(astroid.Assign))[1]
+    assgn_node = list(module.nodes_of_class(nodes.Assign))[1]
     assert isinstance(assgn_node.inf_type, TypeFail)
 
 
@@ -228,6 +226,6 @@ def test_attribute_unification_fail():
         f(A)
         """
     module, ti = cs._parse_text(program, reset=True)
-    call_node1, call_node2 = module.nodes_of_class(astroid.Call)[1:]
+    call_node1, call_node2 = module.nodes_of_class(nodes.Call)[1:]
     assert isinstance(call_node.inf_type1, TypeFail)
     assert isinstance(call_node.inf_type2, TypeFail)

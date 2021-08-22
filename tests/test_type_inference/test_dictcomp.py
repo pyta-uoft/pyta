@@ -1,4 +1,4 @@
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -14,7 +14,7 @@ def test_dict_comprehension_reproduce_homogeneous(node):
     dictionary = node.as_string()
     program = f"{{key: {dictionary}[key] for key in {dictionary}}}"
     module, _ = cs._parse_text(program)
-    dictcomp_node = list(module.nodes_of_class(astroid.DictComp))[0]
+    dictcomp_node = list(module.nodes_of_class(nodes.DictComp))[0]
     # reproducing the dict with dict. comprehension; the type of the expression will be same as original iterable
     assert dictcomp_node.inf_type.getValue() == dictcomp_node.generators[0].iter.inf_type.getValue()
 
@@ -27,5 +27,5 @@ def test_dict_comprehension_reproduce_heterogeneous(node):
     dictionary = node.as_string()
     program = f"{{key: {dictionary}[key] for key in {dictionary}}}"
     module, _ = cs._parse_text(program)
-    dictcomp_node = list(module.nodes_of_class(astroid.DictComp))[0]
+    dictcomp_node = list(module.nodes_of_class(nodes.DictComp))[0]
     assert dictcomp_node.inf_type.getValue() == dictcomp_node.generators[0].iter.inf_type.getValue()

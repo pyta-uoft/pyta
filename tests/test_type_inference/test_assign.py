@@ -1,9 +1,9 @@
 from keyword import iskeyword
 from typing import Any, List, TypeVar
 
-import astroid
 import hypothesis.strategies as hs
 import pytest
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 from pytest import skip
 
@@ -39,7 +39,7 @@ def test_set_name_unassigned(identifier):
     """Test visitor for name nodes representing a single unassigned variable in module."""
     program = identifier
     module, _ = cs._parse_text(program)
-    for name_node in module.nodes_of_class(astroid.Name):
+    for name_node in module.nodes_of_class(nodes.Name):
         assert isinstance(name_node.inf_type, TypeFail)
 
 
@@ -51,7 +51,7 @@ def test_set_name_assigned(variables_dict):
     for variable_name in variables_dict:
         program += variable_name + "\n"
     module, inferer = cs._parse_text(program)
-    for name_node in module.nodes_of_class(astroid.Name):
+    for name_node in module.nodes_of_class(nodes.Name):
         name_type = lookup_type(inferer, name_node, name_node.name)
         assert name_node.inf_type.getValue() == name_type
 
@@ -62,7 +62,7 @@ def test_set_single_assign(variables_dict):
     """Test single-target assignment statements; verify unification of type variables."""
     program = cs._parse_dictionary_to_program(variables_dict)
     module, inferer = cs._parse_text(program)
-    for node in module.nodes_of_class(astroid.AssignName):
+    for node in module.nodes_of_class(nodes.AssignName):
         target_value = node.parent.value
         target_type = lookup_type(inferer, node, node.name)
         # compare it to the type of the assigned value
@@ -82,7 +82,7 @@ def test_multi_target_assign(variables_dict):
     )
     module, inferer = cs._parse_text(program)
     # for each Assign node in program, verify unification of the type variables.
-    for node in module.nodes_of_class(astroid.Assign):
+    for node in module.nodes_of_class(nodes.Assign):
         target_type_tuple = zip(node.targets[0].elts, node.value.elts)
         for target, value in target_type_tuple:
             target_type_var = target.frame().type_environment.lookup_in_env(target.name)
@@ -104,7 +104,7 @@ def test_set_multi_assign(variables_list, value):
     variables_list.append(repr(value))
     program = (" = ").join(variables_list)
     module, inferer = cs._parse_text(program)
-    for target_node in module.nodes_of_class(astroid.AssignName):
+    for target_node in module.nodes_of_class(nodes.AssignName):
         value_type = target_node.parent.value.inf_type.getValue()
         target_type_var = target_node.frame().type_environment.lookup_in_env(target_node.name)
         assert inferer.type_constraints.resolve(target_type_var).getValue() == value_type
@@ -126,7 +126,7 @@ def test_assign_complex_homogeneous(variables_dict):
         + " = x"
     )
     module, typeinferrer = cs._parse_text(program)
-    ass_node = list(module.nodes_of_class(astroid.Assign))[0]
+    ass_node = list(module.nodes_of_class(nodes.Assign))[0]
     for variable_name in variables_dict:
         var_tvar = module.type_environment.lookup_in_env(variable_name)
         assert (
@@ -166,7 +166,7 @@ def test_attribute_reassign():
         f"\n"
     )
     module, inferer = cs._parse_text(program)
-    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    functiondef_node = next(module.nodes_of_class(nodes.FunctionDef))
     actual_type = lookup_type(inferer, functiondef_node, "name")
     expected_type = lookup_type(inferer, functiondef_node, "name1")
     assert inferer.type_constraints.can_unify(actual_type, expected_type)
@@ -180,8 +180,7 @@ def test_assign_autoconvert():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][0]
     assert inferer.type_constraints.resolve(x).getValue() == float
 
@@ -192,8 +191,7 @@ def test_augassign_simple_fallback():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][0]
     assert inferer.type_constraints.resolve(x).getValue() == int
 
@@ -206,8 +204,7 @@ def test_augassign_subscript_target():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x, y = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ]
     assert inferer.type_constraints.resolve(y).getValue() == str
 
@@ -219,8 +216,7 @@ def test_augassign_builtin():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][0]
     assert inferer.type_constraints.resolve(x).getValue() == List[int]
 
@@ -233,8 +229,7 @@ def test_augassign_builtin_autoconvert():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][0]
     assert inferer.type_constraints.resolve(x).getValue() == float
 
@@ -250,8 +245,7 @@ def test_augassign_builtin_attribute_autoconvert():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignAttr)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignAttr)
     ][0]
     assert inferer.type_constraints.resolve(x).getValue() == float
 
@@ -276,8 +270,7 @@ def test_augassign_userdefn():
     """
     module, inferer = cs._parse_text(program, reset=True)
     a, b, _, x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][6:]
     assert inferer.type_constraints.resolve(x).getValue() == int
 
@@ -299,8 +292,7 @@ def test_augassign_userdefn_fallback():
     """
     module, inferer = cs._parse_text(program, reset=True)
     a, b, _, x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][4:]
     assert inferer.type_constraints.resolve(x).getValue() == int
 
@@ -317,5 +309,5 @@ def test_augassign_userdefn_fail():
     x = a.val
     """
     module, inferer = cs._parse_text(program, reset=True)
-    for aug_node in module.nodes_of_class(astroid.AugAssign):
+    for aug_node in module.nodes_of_class(nodes.AugAssign):
         assert isinstance(aug_node.inf_type, TypeFail)

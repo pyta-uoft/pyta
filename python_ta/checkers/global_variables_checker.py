@@ -2,7 +2,7 @@
 """
 import re
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
 from pylint.interfaces import IAstroidChecker
@@ -65,10 +65,10 @@ class GlobalVariablesChecker(BaseChecker):
         """
         if hasattr(node, "name") and node.name in self.import_names:
             return
-        if isinstance(node.frame(), astroid.scoped_nodes.Module) and not is_in_main(node):
+        if isinstance(node.frame(), nodes.Module) and not is_in_main(node):
             node_list = _get_child_disallowed_global_var_nodes(node)
             for node in node_list:
-                if isinstance(node, astroid.AssignName):
+                if isinstance(node, nodes.AssignName):
                     args = "a global variable '{}' is assigned to on line {}".format(
                         node.name, node.lineno
                     )
@@ -89,8 +89,8 @@ def _get_child_disallowed_global_var_nodes(node):
     node_list = []
     if (
         (
-            isinstance(node, (astroid.AssignName, astroid.Name))
-            and not isinstance(node.parent, astroid.Call)
+            isinstance(node, (nodes.AssignName, nodes.Name))
+            and not isinstance(node.parent, nodes.Call)
         )
         and not re.match(UpperCaseStyle.CONST_NAME_RGX, node.name)
         and node.scope() is node.root()
@@ -109,7 +109,7 @@ def is_in_main(node):
     parent = node.parent
     try:
         if (
-            isinstance(parent, astroid.If)
+            isinstance(parent, nodes.If)
             and parent.test.left.name == "__name__"
             and parent.test.ops[0][1].value == "__main__"
         ):

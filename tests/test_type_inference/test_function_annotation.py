@@ -1,7 +1,7 @@
 import sys
 from typing import Any, List, Tuple
 
-import astroid
+from astroid import nodes
 from pytest import skip
 
 from python_ta.typecheck.base import TypeFailAnnotationUnify
@@ -17,7 +17,7 @@ def test_single_annotation_int():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
 
 
@@ -28,7 +28,7 @@ def test_single_annotation_str():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == str
 
 
@@ -39,7 +39,7 @@ def test_multiple_annotations():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
     assert lookup_type(ti, func_node, "y") == int
 
@@ -52,7 +52,7 @@ def test_multiple_annotations_diff_type():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
     assert lookup_type(ti, func_node, "y") == str
 
@@ -66,10 +66,10 @@ def test_call_wrong_type():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
@@ -82,10 +82,10 @@ def test_call_wrong_type_str():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == str
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
@@ -98,10 +98,10 @@ def test_call_multiple_annotation_wrong_type():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
@@ -114,11 +114,11 @@ def test_mixed_annotation():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
     assert lookup_type(ti, func_node, "y") == Any
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert call_node.inf_type.getValue() == Any
 
 
@@ -131,11 +131,11 @@ def test_mixed_annotation_wrong():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "x") == int
     assert lookup_type(ti, func_node, "y") == Any
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert isinstance(call_node.inf_type, TypeFailAnnotationUnify)
 
 
@@ -148,10 +148,10 @@ def test_param_subscript_list():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "lst") == List[Any]
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert call_node.inf_type.getValue() == List[Any]
 
 
@@ -164,10 +164,10 @@ def test_param_subscript_list_int():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "lst") == List[int]
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert call_node.inf_type.getValue() == List[int]
 
 
@@ -181,10 +181,10 @@ def test_param_subscript_tuple():
     skip("Requires support for multi-parameter Tuple annotations")
     ast_mod, ti = cs._parse_text(src)
 
-    func_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    func_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, func_node, "t") == Tuple[int, int]
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert call_node.inf_type.getValue() == Tuple[int, int]
 
 
@@ -197,7 +197,7 @@ def test_return_list():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert call_node.inf_type.getValue() == List[Any]
 
 
@@ -210,5 +210,5 @@ def test_return_list_subscript():
     """
     ast_mod, ti = cs._parse_text(src)
 
-    call_node = next(ast_mod.nodes_of_class(astroid.Call))
+    call_node = next(ast_mod.nodes_of_class(nodes.Call))
     assert call_node.inf_type.getValue() == List[int]

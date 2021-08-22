@@ -1,4 +1,4 @@
-import astroid
+from astroid import nodes
 from hypothesis import settings
 from pytest import skip
 
@@ -24,7 +24,7 @@ def test_classdef_attribute_assign():
         f"\n"
     )
     module, inferer = cs._parse_text(program)
-    classdef_node = next(module.nodes_of_class(astroid.ClassDef))
+    classdef_node = next(module.nodes_of_class(nodes.ClassDef))
     for attribute_lst in classdef_node.instance_attrs.values():
         for instance in attribute_lst:
             attribute_type = inferer.type_constraints.resolve(
@@ -48,7 +48,7 @@ def test_classdef_method_call():
         f"\n"
     )
     module, inferer = cs._parse_text(program, True)
-    attribute_node = list(module.nodes_of_class(astroid.Attribute))[1]
+    attribute_node = list(module.nodes_of_class(nodes.Attribute))[1]
     expected_rtype = attribute_node.parent.inf_type.getValue()
     actual_rtype = inferer.type_constraints.resolve(
         attribute_node.inf_type.getValue().__args__[-1]
@@ -69,7 +69,7 @@ def test_classdef_method_call_annotated_concrete():
         f"\n"
     )
     module, inferer = cs._parse_text(program)
-    for functiondef_node in module.nodes_of_class(astroid.FunctionDef):
+    for functiondef_node in module.nodes_of_class(nodes.FunctionDef):
         self_name = functiondef_node.args.args[0].name
         actual_type = inferer.type_constraints.resolve(
             functiondef_node.type_environment.lookup_in_env(self_name)
@@ -97,7 +97,7 @@ def test_bad_attribute_access():
     """User tries to access a non-existing attribute; or misspells the attribute name."""
     program = f"x = 1\n" f"x.wrong_name\n"
     module, inferer = cs._parse_text(program)
-    expr_node = next(module.nodes_of_class(astroid.Expr))
+    expr_node = next(module.nodes_of_class(nodes.Expr))
     expected_msg = "TypeFail: Invalid attribute lookup x.wrong_name"
     assert expr_node.inf_type.getValue() == expected_msg
 
@@ -106,7 +106,7 @@ def test_builtin_method_call_bad_self():
     """User tries to call a method on an object of the wrong type (self)."""
     program = f"x = 1\n" f"x.append(1.0)\n"
     module, inferer = cs._parse_text(program)
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     expected_msg = f"TypeFail: Invalid attribute lookup x.append(1.0)"
     assert isinstance(call_node.inf_type, TypeFail)
     assert call_node.inf_type.getValue() == expected_msg
@@ -116,5 +116,5 @@ def test_builtin_method_call_bad_argument():
     """User tries to call a method on an argument of the wrong type."""
     program = f"x = [1, 2, 3]\n" f"x.extend(1)\n"
     module, inferer = cs._parse_text(program)
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     assert isinstance(call_node.inf_type, TypeFail)

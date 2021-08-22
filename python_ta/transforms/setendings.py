@@ -27,7 +27,7 @@ within the _transform method.
 Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
-import astroid
+from astroid import nodes
 from astroid.transforms import TransformVisitor
 
 CONSUMABLES = " \n\t\\"
@@ -39,61 +39,61 @@ CONSUMABLES = " \n\t\\"
 # predicate technique that uses more robust approach using searching, rather than
 # simple length of string.
 NODES_WITHOUT_CHILDREN = [
-    astroid.AssignName,
-    astroid.Break,
-    astroid.Const,
-    astroid.Continue,
-    astroid.DelName,
-    astroid.Ellipsis,
-    astroid.Global,
-    astroid.Import,
-    astroid.ImportFrom,
-    astroid.Name,
-    astroid.Nonlocal,
-    astroid.Pass,
-    astroid.Yield,
+    nodes.AssignName,
+    nodes.Break,
+    nodes.Const,
+    nodes.Continue,
+    nodes.DelName,
+    nodes.Ellipsis,
+    nodes.Global,
+    nodes.Import,
+    nodes.ImportFrom,
+    nodes.Name,
+    nodes.Nonlocal,
+    nodes.Pass,
+    nodes.Yield,
 ]
 
 # These nodes have a child, and their end_lineno and end_col_offset
 # attributes are set equal to those of their last child.
 NODES_WITH_CHILDREN = [
-    astroid.Assert,
-    astroid.Assign,
-    astroid.AsyncFor,
-    astroid.AsyncFunctionDef,
-    astroid.AsyncWith,
-    astroid.AugAssign,
-    astroid.Await,
-    astroid.BinOp,
-    astroid.BoolOp,
-    astroid.Call,
-    astroid.ClassDef,
-    astroid.Compare,
-    astroid.Comprehension,
-    astroid.Decorators,
-    astroid.Delete,
-    astroid.ExceptHandler,
-    astroid.For,
-    astroid.FormattedValue,
-    astroid.FunctionDef,
-    astroid.GeneratorExp,
-    astroid.If,
-    astroid.IfExp,
-    astroid.Index,
-    astroid.Keyword,
-    astroid.Lambda,
-    astroid.List,
-    astroid.Module,
-    astroid.Raise,
-    astroid.Return,
-    astroid.Starred,
-    astroid.Subscript,
-    astroid.TryExcept,
-    astroid.TryFinally,
-    astroid.UnaryOp,
-    astroid.While,
-    astroid.With,
-    astroid.YieldFrom,
+    nodes.Assert,
+    nodes.Assign,
+    nodes.AsyncFor,
+    nodes.AsyncFunctionDef,
+    nodes.AsyncWith,
+    nodes.AugAssign,
+    nodes.Await,
+    nodes.BinOp,
+    nodes.BoolOp,
+    nodes.Call,
+    nodes.ClassDef,
+    nodes.Compare,
+    nodes.Comprehension,
+    nodes.Decorators,
+    nodes.Delete,
+    nodes.ExceptHandler,
+    nodes.For,
+    nodes.FormattedValue,
+    nodes.FunctionDef,
+    nodes.GeneratorExp,
+    nodes.If,
+    nodes.IfExp,
+    nodes.Index,
+    nodes.Keyword,
+    nodes.Lambda,
+    nodes.List,
+    nodes.Module,
+    nodes.Raise,
+    nodes.Return,
+    nodes.Starred,
+    nodes.Subscript,
+    nodes.TryExcept,
+    nodes.TryFinally,
+    nodes.UnaryOp,
+    nodes.While,
+    nodes.With,
+    nodes.YieldFrom,
 ]
 
 
@@ -156,29 +156,29 @@ def _is_arg_name(s, index, node):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
-    (astroid.AssignAttr, None, _is_attr_name),
-    (astroid.AsyncFor, _keyword_search("async"), None),
-    (astroid.AsyncFunctionDef, _keyword_search("async"), None),
-    (astroid.AsyncWith, _keyword_search("async"), None),
-    (astroid.Attribute, None, _is_attr_name),
-    (astroid.Call, None, _token_search(")")),
-    (astroid.DelAttr, _keyword_search("del"), _is_attr_name),
-    (astroid.DelName, _keyword_search("del"), None),
-    (astroid.Dict, None, _token_search("}")),
-    (astroid.DictComp, None, _token_search("}")),
-    (astroid.Expr, _token_search("("), _token_search(")")),
+    (nodes.AssignAttr, None, _is_attr_name),
+    (nodes.AsyncFor, _keyword_search("async"), None),
+    (nodes.AsyncFunctionDef, _keyword_search("async"), None),
+    (nodes.AsyncWith, _keyword_search("async"), None),
+    (nodes.Attribute, None, _is_attr_name),
+    (nodes.Call, None, _token_search(")")),
+    (nodes.DelAttr, _keyword_search("del"), _is_attr_name),
+    (nodes.DelName, _keyword_search("del"), None),
+    (nodes.Dict, None, _token_search("}")),
+    (nodes.DictComp, None, _token_search("}")),
+    (nodes.Expr, _token_search("("), _token_search(")")),
     # TODO: use same behavior as Slice.
-    (astroid.ExtSlice, _token_search("["), _token_search("]")),
-    (astroid.GeneratorExp, _token_search("("), _token_search(")")),
-    (astroid.If, _keyword_search("elif"), None),
-    (astroid.Index, _token_search("["), _token_search("]")),
-    (astroid.Keyword, _is_arg_name, None),
-    (astroid.List, _token_search("["), _token_search("]")),
-    (astroid.ListComp, _token_search("["), _token_search("]")),
-    (astroid.Set, None, _token_search("}")),
-    (astroid.SetComp, None, _token_search("}")),
-    (astroid.Slice, _token_search("["), None),
-    (astroid.Tuple, None, _token_search(",")),
+    (nodes.ExtSlice, _token_search("["), _token_search("]")),
+    (nodes.GeneratorExp, _token_search("("), _token_search(")")),
+    (nodes.If, _keyword_search("elif"), None),
+    (nodes.Index, _token_search("["), _token_search("]")),
+    (nodes.Keyword, _is_arg_name, None),
+    (nodes.List, _token_search("["), _token_search("]")),
+    (nodes.ListComp, _token_search("["), _token_search("]")),
+    (nodes.Set, None, _token_search("}")),
+    (nodes.SetComp, None, _token_search("}")),
+    (nodes.Slice, _token_search("["), None),
+    (nodes.Tuple, None, _token_search(",")),
 ]
 
 
@@ -192,7 +192,7 @@ def init_register_ending_setters(source_code):
     ending_transformer = TransformVisitor()
 
     # Check consistency of astroid-provided fromlineno and col_offset attributes.
-    for node_class in astroid.nodes.ALL_NODE_CLASSES:
+    for node_class in nodes.ALL_NODE_CLASSES:
         ending_transformer.register_transform(
             node_class,
             fix_start_attributes,
@@ -203,19 +203,19 @@ def init_register_ending_setters(source_code):
         )
 
     # Ad hoc transformations
-    ending_transformer.register_transform(astroid.BinOp, _set_start_from_first_child)
-    ending_transformer.register_transform(astroid.ClassDef, _set_start_from_first_child)
-    ending_transformer.register_transform(astroid.FunctionDef, _set_start_from_first_child)
-    ending_transformer.register_transform(astroid.Tuple, _set_start_from_first_child)
-    ending_transformer.register_transform(astroid.Arguments, fix_arguments(source_code))
-    ending_transformer.register_transform(astroid.Slice, fix_slice(source_code))
+    ending_transformer.register_transform(nodes.BinOp, _set_start_from_first_child)
+    ending_transformer.register_transform(nodes.ClassDef, _set_start_from_first_child)
+    ending_transformer.register_transform(nodes.FunctionDef, _set_start_from_first_child)
+    ending_transformer.register_transform(nodes.Tuple, _set_start_from_first_child)
+    ending_transformer.register_transform(nodes.Arguments, fix_arguments(source_code))
+    ending_transformer.register_transform(nodes.Slice, fix_slice(source_code))
 
     for node_class in NODES_WITHOUT_CHILDREN:
         ending_transformer.register_transform(node_class, set_without_children)
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
 
-    ending_transformer.register_transform(astroid.Subscript, fix_subscript(source_code))
+    ending_transformer.register_transform(nodes.Subscript, fix_subscript(source_code))
 
     # Nodes where the source code must also be provided.
     # source_code and the predicate functions get stored in the TransformVisitor
@@ -226,7 +226,7 @@ def init_register_ending_setters(source_code):
             )
         if end_pred is not None:
             # This is for searching for a trailing comma after a tuple's final element
-            if node_class is astroid.Tuple:
+            if node_class is nodes.Tuple:
                 ending_transformer.register_transform(
                     node_class, end_setter_from_source(source_code, end_pred, True)
                 )
@@ -236,9 +236,9 @@ def init_register_ending_setters(source_code):
                 )
 
     # Nodes where extra parentheses are included
-    ending_transformer.register_transform(astroid.BinOp, add_parens(source_code))
-    ending_transformer.register_transform(astroid.Const, add_parens(source_code))
-    ending_transformer.register_transform(astroid.Tuple, add_parens(source_code))
+    ending_transformer.register_transform(nodes.BinOp, add_parens(source_code))
+    ending_transformer.register_transform(nodes.Const, add_parens(source_code))
+    ending_transformer.register_transform(nodes.Tuple, add_parens(source_code))
 
     return ending_transformer
 
@@ -291,8 +291,8 @@ def fix_subscript(source_code):
     a separate Index/ExtSlice in Python 3.9.
     """
 
-    def _fix_end(node: astroid.Subscript) -> astroid.Subscript:
-        if isinstance(node.slice, astroid.Slice):
+    def _fix_end(node: nodes.Subscript) -> nodes.Subscript:
+        if isinstance(node.slice, nodes.Slice):
             # In this case, the subscript node already contains the final ].
             return node
 
@@ -321,7 +321,7 @@ def fix_subscript(source_code):
 def fix_arguments(source_code):
     """For an Arguments node"""
 
-    def _find(node: astroid.Arguments) -> astroid.Arguments:
+    def _find(node: nodes.Arguments) -> nodes.Arguments:
         children = list(node.get_children())
         if children:
             fix_start_attributes(node)
@@ -343,7 +343,7 @@ def fix_arguments(source_code):
         line_i -= 1  # Switch to 0-indexing
 
         # left bracket if parent is FunctionDef, colon if Lambda
-        if isinstance(node.parent, astroid.FunctionDef):
+        if isinstance(node.parent, nodes.FunctionDef):
             end_char = ")"
         else:
             end_char = ":"
@@ -449,7 +449,7 @@ def set_without_children(node):
 
 def _get_last_child(node):
     """Returns the last child node, or None.
-    Some nodes' last_child() attribute not set, e.g. astroid.Arguments.
+    Some nodes' last_child() attribute not set, e.g. nodes.Arguments.
     """
     if node.last_child():
         return node.last_child()
@@ -635,7 +635,7 @@ def _add_parens(source_code):
             )
 
         # Go back by 1 set of parentheses if inside a function call.
-        if isinstance(node.parent, astroid.Call) and len(node.parent.args) == 1:
+        if isinstance(node.parent, nodes.Call) and len(node.parent.args) == 1:
             node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset = prev
 
         return node
@@ -661,7 +661,7 @@ def register(linter):
 
 def register_transforms(source_code, obj):
     # Check consistency of astroid-provided fromlineno and col_offset attributes.
-    for node_class in astroid.nodes.ALL_NODE_CLASSES:
+    for node_class in nodes.ALL_NODE_CLASSES:
         obj.register_transform(
             node_class,
             fix_start_attributes,
@@ -672,7 +672,7 @@ def register_transforms(source_code, obj):
         )
 
     # Ad hoc transformations
-    obj.register_transform(astroid.Arguments, fix_arguments(source_code))
+    obj.register_transform(nodes.Arguments, fix_arguments(source_code))
 
     for node_class in NODES_WITH_CHILDREN:
         obj.register_transform(node_class, set_from_last_child)

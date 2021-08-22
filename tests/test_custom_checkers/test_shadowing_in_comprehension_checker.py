@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+from astroid import nodes
 
 from python_ta.checkers.shadowing_in_comprehension_checker import (
     ShadowingInComprehensionChecker,
@@ -20,7 +21,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertNoMessages():
             self.checker.visit_comprehension(comp_node)
@@ -32,7 +33,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
             print([items[j] for _ in range(10)])
         """
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertNoMessages():
             self.checker.visit_comprehension(comp_node)
@@ -44,7 +45,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
         print({_ for _ in range(10)})
         """
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertNoMessages():
             self.checker.visit_comprehension(comp_node)
@@ -56,7 +57,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
             return {y: _ for _, y in _.items()}
         """
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertNoMessages():
             self.checker.visit_comprehension(comp_node)
@@ -69,7 +70,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
             return [n for n in range(n)]
         '''
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -88,7 +89,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
             return {y: x for x, y in x.items()}
         '''
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -113,7 +114,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
             return s
         '''
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -133,7 +134,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
                 print(k)
         '''
         mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(astroid.Comprehension)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(

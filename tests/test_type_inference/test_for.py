@@ -1,6 +1,6 @@
 from typing import Any, Callable, Tuple
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 from pytest import skip
 
@@ -20,7 +20,7 @@ def test_for_homogeneous_list(iterable):
     """
     program = f"for elt in {iterable}:\n" f"    x = elt\n"
     module, TypeInferrer = cs._parse_text(program)
-    for_node = list(module.nodes_of_class(astroid.For))[0]
+    for_node = list(module.nodes_of_class(nodes.For))[0]
     local_type_var = module.type_environment.lookup_in_env("x")
     inferred_type = TypeInferrer.type_constraints.resolve(local_type_var).getValue()
     assert inferred_type == for_node.iter.inf_type.getValue().__args__[0]
@@ -40,7 +40,7 @@ def test_for_heterogeneous_list(iterable):
         assume(int not in val_types)
     program = f"for elt in {iterable}:\n" f"    x = elt\n"
     module, TypeInferrer = cs._parse_text(program)
-    for_node = list(module.nodes_of_class(astroid.For))[0]
+    for_node = list(module.nodes_of_class(nodes.For))[0]
     local_type_var = module.type_environment.lookup_in_env("x")
     inferred_type = TypeInferrer.type_constraints.resolve(local_type_var).getValue()
     assert inferred_type == Any
@@ -57,8 +57,8 @@ def test_inference_func_def_for():
         f"    return x\n"
     )
     module, TypeInferrer = cs._parse_text(program)
-    for_node = list(module.nodes_of_class(astroid.For))[0]
-    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    for_node = list(module.nodes_of_class(nodes.For))[0]
+    function_def_node = list(module.nodes_of_class(nodes.FunctionDef))[0]
     function_type_var = module.type_environment.lookup_in_env(function_def_node.name)
     function_type = TypeInferrer.type_constraints.resolve(function_type_var).getValue()
     target_type_var = function_def_node.type_environment.lookup_in_env("num")
@@ -74,7 +74,7 @@ def test_for_list_tuple():
             x = elt
         """
     module, ti = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.AssignName):
+    for assign_node in module.nodes_of_class(nodes.AssignName):
         if assign_node.name == "x" or assign_node.name == "elt":
             assert lookup_type(ti, assign_node, assign_node.name) == Tuple[str, int]
 
@@ -88,7 +88,7 @@ def test_for_list_tuple_multi_arg():
             y = b
         """
     module, ti = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.AssignName):
+    for assign_node in module.nodes_of_class(nodes.AssignName):
         if assign_node.name == "x" or assign_node.name == "a":
             assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == "y" or assign_node.name == "b":
@@ -105,7 +105,7 @@ def test_for_zip():
             y = b
         """
     module, ti = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.AssignName):
+    for assign_node in module.nodes_of_class(nodes.AssignName):
         if assign_node.name == "x" or assign_node.name == "a":
             assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == "y" or assign_node.name == "b":
@@ -125,7 +125,7 @@ def test_for_dict():
         f"which does not unify with List[Tuple[str, int]]"
     )
     module, ti = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.AssignName):
+    for assign_node in module.nodes_of_class(nodes.AssignName):
         if assign_node.name == "x" or assign_node.name == "a":
             assert lookup_type(ti, assign_node, assign_node.name) == str
         elif assign_node.name == "y" or assign_node.name == "b":
@@ -144,7 +144,7 @@ def test_for_target_attr():
         a.attr
     """
     module, ti = cs._parse_text(program)
-    for_node = next(module.nodes_of_class(astroid.For))
+    for_node = next(module.nodes_of_class(nodes.For))
     assert isinstance(for_node.inf_type, NoType)
 
 
@@ -156,5 +156,5 @@ def test_for_target_subscript():
         lst[0]
     """
     module, ti = cs._parse_text(program)
-    for_node = next(module.nodes_of_class(astroid.For))
+    for_node = next(module.nodes_of_class(nodes.For))
     assert isinstance(for_node.inf_type, NoType)

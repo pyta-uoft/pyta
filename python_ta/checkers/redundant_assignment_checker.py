@@ -10,7 +10,7 @@ An assignment statement is redundant if it satisfies the following two propertie
 """
 from typing import List, Set, Union
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -37,25 +37,25 @@ class RedundantAssignmentChecker(BaseChecker):
 
     def __init__(self, linter=None):
         super().__init__(linter=linter)
-        self._redundant_assignment: Set[astroid.Assign] = set()
+        self._redundant_assignment: Set[nodes.Assign] = set()
 
     @check_messages("redundant-assignment")
-    def visit_assign(self, node: astroid.Assign):
+    def visit_assign(self, node: nodes.Assign):
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
     @check_messages("redundant-assignment")
-    def visit_augassign(self, node: astroid.AugAssign):
+    def visit_augassign(self, node: nodes.AugAssign):
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
-    def visit_module(self, node: astroid.Module):
+    def visit_module(self, node: nodes.Module):
         self._analyze(node)
 
-    def visit_functiondef(self, node: astroid.FunctionDef):
+    def visit_functiondef(self, node: nodes.FunctionDef):
         self._analyze(node)
 
-    def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
+    def _analyze(self, node: Union[nodes.Module, nodes.FunctionDef]) -> None:
         """Runs the backward data flow algorithm on a `Module` or `Function` CFG, which in turn
         appends `Assign` nodes to `self.redundant_assignment` if it is redundant.
 
@@ -90,21 +90,21 @@ class RedundantAssignmentChecker(BaseChecker):
         gen = out_facts.copy()
         kill = set()
         for statement in reversed(block.statements):
-            if isinstance(statement, astroid.FunctionDef):
+            if isinstance(statement, nodes.FunctionDef):
                 # `nodes_of_class` below doesnt block looking for required nodes
                 # in function definitions, hence this case.
                 continue
             for node in statement.nodes_of_class(
                 (
-                    astroid.AssignName,
-                    astroid.DelName,
-                    astroid.Name,
-                    astroid.Nonlocal,
-                    astroid.Global,
+                    nodes.AssignName,
+                    nodes.DelName,
+                    nodes.Name,
+                    nodes.Nonlocal,
+                    nodes.Global,
                 ),
-                astroid.FunctionDef,
+                nodes.FunctionDef,
             ):
-                if isinstance(node, astroid.AssignName):
+                if isinstance(node, nodes.AssignName):
                     if node.name in gen.difference(kill):
                         self._redundant_assignment.add(node.parent)
                     elif node.parent in self._redundant_assignment:
@@ -112,19 +112,19 @@ class RedundantAssignmentChecker(BaseChecker):
 
                     # When node.parent is an AugAssign, the name counts as a use of the variable,
                     # and so is added to kill.
-                    if isinstance(node.parent, astroid.AugAssign):
+                    if isinstance(node.parent, nodes.AugAssign):
                         kill.add(node.name)
                     else:
                         kill.discard(node.name)
                     gen.add(node.name)
-                elif isinstance(node, (astroid.Nonlocal, astroid.Global)):
+                elif isinstance(node, (nodes.Nonlocal, nodes.Global)):
                     kill.difference_update(set(node.names))
                 else:
                     kill.add(node.name)
 
         return gen.difference(kill)
 
-    def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:
+    def _get_assigns(self, node: Union[nodes.FunctionDef, nodes.Module]) -> Set[str]:
         """Returns a set of all local and parameter variables that could be
         defined in the program (either a function or module).
 
@@ -136,8 +136,8 @@ class RedundantAssignmentChecker(BaseChecker):
         """
         assigns = set()
         kills = set()
-        for name, nodes in node.locals.items():
-            if any(isinstance(elem, astroid.AssignName) for elem in nodes):
+        for name, assign_nodes in node.locals.items():
+            if any(isinstance(elem, nodes.AssignName) for elem in assign_nodes):
                 assigns.add(name)
         return assigns.difference(kills)
 

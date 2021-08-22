@@ -2,7 +2,7 @@
 import re
 from typing import Match, Optional, Union
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -25,7 +25,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     priority = -1
 
     @check_messages("missing-space-in-doctest")
-    def visit_functiondef(self, node: astroid.FunctionDef) -> None:
+    def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
         docstring = node.doc
 

@@ -1,8 +1,8 @@
 import os.path
 from typing import Dict, Set
 
-import astroid
 import graphviz
+from astroid import nodes
 from astroid.builder import AstroidBuilder
 
 from python_ta.cfg import CFGBlock, CFGVisitor, ControlFlowGraph
@@ -11,12 +11,12 @@ USAGE = "USAGE: python -m sample_usage.draw_cfg <your-file.py>"
 GRAPH_OPTIONS = {"format": "jpg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
 
 
-def display(cfgs: Dict[astroid.NodeNG, ControlFlowGraph], filename: str, view: bool = True) -> None:
+def display(cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, view: bool = True) -> None:
     graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
     for node, cfg in cfgs.items():
-        if isinstance(node, astroid.Module):
+        if isinstance(node, nodes.Module):
             subgraph_label = "__main__"
-        elif isinstance(node, astroid.FunctionDef):
+        elif isinstance(node, nodes.FunctionDef):
             subgraph_label = node.name
         else:
             continue

@@ -1,6 +1,6 @@
 from typing import ForwardRef
 
-import astroid
+from astroid import nodes
 
 from python_ta.transforms.type_inference_visitor import TypeFail
 
@@ -17,7 +17,7 @@ def test_class_with_init():
     foo = Foo()
     """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type.getValue(), ForwardRef)
         assert call_node.inf_type.getValue() == ForwardRef("Foo")
 
@@ -31,7 +31,7 @@ def test_class_without_init():
     foo = Foo()
     """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type.getValue(), ForwardRef)
         assert call_node.inf_type.getValue() == ForwardRef("Foo")
 
@@ -45,7 +45,7 @@ def test_wrong_number_init():
     foo = Foo()
     """
     ast_mod, ti = cs._parse_text(program, True)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFail)
 
 
@@ -59,7 +59,7 @@ def test_class_defined_later():
         pass
     """
     ast_mod, ti = cs._parse_text(program, True)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert not isinstance(call_node.inf_type, TypeFail)
 
 
@@ -69,7 +69,7 @@ def test_builtin_overloaded_initializers():
     range2 = range(1, 10, 1)
     """
     ast_mod, ti = cs._parse_text(program, True)
-    for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
+    for assgn_node in ast_mod.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "range1":
             range1 = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(range1).getValue() == range

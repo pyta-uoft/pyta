@@ -1,4 +1,4 @@
-import astroid
+from astroid import nodes
 from hypothesis import settings
 from pytest import skip
 
@@ -12,7 +12,7 @@ def test_incompatible_binop_call():
     skip("SKIP FOR NOW.")
     program = f'5 + "string"\n'
     module, _ = cs._parse_text(program)
-    binop_node = next(module.nodes_of_class(astroid.BinOp))
+    binop_node = next(module.nodes_of_class(nodes.BinOp))
     expected_msg = (
         "You cannot add an int, 5, and a str, 'string'. "
         "Perhaps you wanted to cast the integer into a string or vice versa?"
@@ -25,7 +25,7 @@ def test_incompatible_unaryop_call():
     skip("SKIP FOR NOW.")
     program = f'~["D"]'
     module, _ = cs._parse_text(program)
-    unaryop_node = next(module.nodes_of_class(astroid.UnaryOp))
+    unaryop_node = next(module.nodes_of_class(nodes.UnaryOp))
     expected_msg = "You cannot take the bitwise inverse of a list of str, ['D']."
     assert unaryop_node.inf_type.getValue() == expected_msg
 
@@ -35,7 +35,7 @@ def test_incompatible_subscript_list():
     skip("SKIP FOR NOW.")
     program = f'[1,2,3]["one"]'
     module, _ = cs._parse_text(program)
-    subscript_node = next(module.nodes_of_class(astroid.Subscript))
+    subscript_node = next(module.nodes_of_class(nodes.Subscript))
     expected_msg = "You can only access elements of a list using an int. You used a str, 'one'."
     assert subscript_node.inf_type.getValue() == expected_msg
 
@@ -45,7 +45,7 @@ def test_incompatible_subscript_tuple():
     skip("SKIP FOR NOW.")
     program = f'(1,2,3)["one"]'
     module, _ = cs._parse_text(program)
-    subscript_node = next(module.nodes_of_class(astroid.Subscript))
+    subscript_node = next(module.nodes_of_class(nodes.Subscript))
     expected_msg = "You can only access elements of a tuple using an int. You used a str, 'one'."
     assert subscript_node.inf_type.getValue() == expected_msg
 
@@ -55,6 +55,6 @@ def test_incompatible_subscript_dictionary():
     skip("SKIP FOR NOW.")
     program = """{ "1" : 1, "2" : 2, "3" : 3 }[1]"""
     module, _ = cs._parse_text(program)
-    subscript_node = next(module.nodes_of_class(astroid.Subscript))
+    subscript_node = next(module.nodes_of_class(nodes.Subscript))
     expected_msg = "You tried to access an element of this dictionary using an int, 1, but the keys are of type str."
     assert subscript_node.inf_type.getValue() == expected_msg

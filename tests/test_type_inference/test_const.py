@@ -1,4 +1,4 @@
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -16,4 +16,4 @@ def test_const(node):
     """
     assume(not isinstance(node.value, str))
     module, _ = cs._parse_text(node)
-    cs._verify_type_setting(module, astroid.Const, type(node.value))
+    cs._verify_type_setting(module, nodes.Const, type(node.value))

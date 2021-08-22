@@ -1,6 +1,6 @@
 from typing import Tuple
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -13,6 +13,6 @@ settings.load_profile("pyta")
 def test_tuple(t_tuple):
     """Test Tuple nodes representing a tuple of various types."""
     module, _ = cs._parse_text(t_tuple)
-    for t_node in module.nodes_of_class(astroid.Tuple):
+    for t_node in module.nodes_of_class(nodes.Tuple):
         elt_types = tuple(elt.inf_type.getValue() for elt in t_node.elts)
         assert t_node.inf_type.getValue() == Tuple[elt_types]

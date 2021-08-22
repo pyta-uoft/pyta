@@ -5,7 +5,7 @@ from typing import Callable, ForwardRef, Union, _GenericAlias
 
 import astroid
 import astroid.inference
-from astroid.node_classes import *
+from astroid import nodes
 from astroid.transforms import TransformVisitor
 
 from ..typecheck.base import (
@@ -62,31 +62,31 @@ class TypeInferer:
     def environment_transformer(self) -> TransformVisitor:
         """Return a TransformVisitor that sets an environment for every node."""
         visitor = TransformVisitor()
-        visitor.register_transform(astroid.FunctionDef, self._set_function_def_environment)
-        visitor.register_transform(astroid.AsyncFunctionDef, self._set_function_def_environment)
-        visitor.register_transform(astroid.ClassDef, self._set_classdef_environment)
-        visitor.register_transform(astroid.Module, self._set_module_environment)
-        visitor.register_transform(astroid.ListComp, self._set_comprehension_environment)
-        visitor.register_transform(astroid.DictComp, self._set_comprehension_environment)
-        visitor.register_transform(astroid.SetComp, self._set_comprehension_environment)
-        visitor.register_transform(astroid.GeneratorExp, self._set_comprehension_environment)
-        visitor.register_transform(astroid.Lambda, self._set_comprehension_environment)
+        visitor.register_transform(nodes.FunctionDef, self._set_function_def_environment)
+        visitor.register_transform(nodes.AsyncFunctionDef, self._set_function_def_environment)
+        visitor.register_transform(nodes.ClassDef, self._set_classdef_environment)
+        visitor.register_transform(nodes.Module, self._set_module_environment)
+        visitor.register_transform(nodes.ListComp, self._set_comprehension_environment)
+        visitor.register_transform(nodes.DictComp, self._set_comprehension_environment)
+        visitor.register_transform(nodes.SetComp, self._set_comprehension_environment)
+        visitor.register_transform(nodes.GeneratorExp, self._set_comprehension_environment)
+        visitor.register_transform(nodes.Lambda, self._set_comprehension_environment)
         return visitor
 
-    def _set_module_environment(self, node: astroid.Module) -> None:
+    def _set_module_environment(self, node: nodes.Module) -> None:
         """Method to set environment of a Module node."""
         node.type_environment = Environment()
         for name in node.globals:
             if not any(
-                isinstance(elt, (astroid.ImportFrom, astroid.Import)) for elt in node.globals[name]
+                isinstance(elt, (nodes.ImportFrom, nodes.Import)) for elt in node.globals[name]
             ):
                 new_tvar = self.type_constraints.fresh_tvar(node.globals[name][0])
-                if any(isinstance(elt, astroid.ClassDef) for elt in node.globals[name]):
+                if any(isinstance(elt, nodes.ClassDef) for elt in node.globals[name]):
                     self.type_constraints.unify(new_tvar, Type[ForwardRef(name)], node)
                 node.type_environment.globals[name] = new_tvar
         self._populate_local_env(node)
 
-    def _set_classdef_environment(self, node: astroid.ClassDef) -> None:
+    def _set_classdef_environment(self, node: nodes.ClassDef) -> None:
         """Method to set environment of a ClassDef node."""
         node.type_environment = Environment()
         for name in node.instance_attrs:
@@ -110,21 +110,21 @@ class TypeInferer:
         except astroid.exceptions.DuplicateBasesError:
             self.type_store.classes[node.name]["__mro"] = [node.name]
 
-    def _set_function_def_environment(self, node: astroid.FunctionDef) -> None:
+    def _set_function_def_environment(self, node: nodes.FunctionDef) -> None:
         """Method to set environment of a FunctionDef node."""
         node.type_environment = Environment()
         # self is a special case
         if (
             node.args.args
             and node.args.args[0].name == "self"
-            and isinstance(node.parent, astroid.ClassDef)
+            and isinstance(node.parent, nodes.ClassDef)
         ):
             node.type_environment.locals["self"] = ForwardRef(node.parent.name)
         self._populate_local_env(node)
         self._populate_local_env_attrs(node)
         node.type_environment.locals["return"] = self.type_constraints.fresh_tvar(node)
 
-    def _set_comprehension_environment(self, node: astroid.Comprehension) -> None:
+    def _set_comprehension_environment(self, node: nodes.Comprehension) -> None:
         """Set the environment of a comprehension expression.
 
         Covers ListComp, SetComp, DictComp, and GeneratorExp."""
@@ -132,14 +132,14 @@ class TypeInferer:
         for name in node.locals:
             node.type_environment.locals[name] = self.type_constraints.fresh_tvar(node)
 
-    def _populate_local_env(self, node: NodeNG) -> None:
+    def _populate_local_env(self, node: nodes.NodeNG) -> None:
         """Helper to populate locals attributes in type environment of given node."""
         for var_name in node.locals:
             try:
                 var_value = node.type_environment.lookup_in_env(var_name)
             except KeyError:
                 if any(
-                    isinstance(elt, (astroid.ImportFrom, astroid.Import))
+                    isinstance(elt, (nodes.ImportFrom, nodes.Import))
                     for elt in node.locals[var_name]
                 ):
                     var_value = Any
@@ -147,13 +147,13 @@ class TypeInferer:
                     var_value = self.type_constraints.fresh_tvar(node.locals[var_name][0])
             node.type_environment.locals[var_name] = var_value
 
-    def _populate_local_env_attrs(self, node: NodeNG) -> None:
+    def _populate_local_env_attrs(self, node: nodes.NodeNG) -> None:
         """Store in TypeStore the attributes of any unresolved class names"""
         for attr_node in chain(
-            node.nodes_of_class(astroid.Attribute), node.nodes_of_class(astroid.AssignAttr)
+            node.nodes_of_class(nodes.Attribute), node.nodes_of_class(nodes.AssignAttr)
         ):
             if (
-                isinstance(attr_node.expr, astroid.Name)
+                isinstance(attr_node.expr, nodes.Name)
                 and attr_node.expr.name in node.type_environment.locals
             ):
                 class_type = node.type_environment.lookup_in_env(attr_node.expr.name)
@@ -170,7 +170,7 @@ class TypeInferer:
     def type_inference_transformer(self) -> TransformVisitor:
         """Instantiate a visitor to perform type inference on an AST."""
         type_visitor = TransformVisitor()
-        for klass in astroid.nodes.ALL_NODE_CLASSES:
+        for klass in nodes.ALL_NODE_CLASSES:
             if hasattr(self, f"visit_{klass.__name__.lower()}"):
                 type_visitor.register_transform(
                     klass, getattr(self, f"visit_{klass.__name__.lower()}")
@@ -179,17 +179,17 @@ class TypeInferer:
                 type_visitor.register_transform(klass, self.visit_default)
         return type_visitor
 
-    def visit_default(self, node: NodeNG) -> None:
+    def visit_default(self, node: nodes.NodeNG) -> None:
         node.inf_type = NoType()
 
     ##############################################################################
     # Literals
     ##############################################################################
-    def visit_const(self, node: astroid.Const) -> None:
+    def visit_const(self, node: nodes.Const) -> None:
         node.inf_type = TypeInfo(type(node.value))
 
-    def visit_list(self, node: astroid.List) -> None:
-        if node.ctx == astroid.Store:
+    def visit_list(self, node: nodes.List) -> None:
+        if node.ctx == nodes.Store:
             # List is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
         elif not node.elts:
@@ -198,14 +198,14 @@ class TypeInferer:
             elt_inf_type = self._unify_elements(node.elts, node)
             node.inf_type = wrap_container(List, elt_inf_type)
 
-    def visit_set(self, node: astroid.Set) -> None:
+    def visit_set(self, node: nodes.Set) -> None:
         if not node.elts:
             node.inf_type = TypeInfo(Set[self.type_constraints.fresh_tvar(node)])
         else:
             elt_inf_type = self._unify_elements(node.elts, node)
             node.inf_type = wrap_container(Set, elt_inf_type)
 
-    def visit_dict(self, node: astroid.Dict) -> None:
+    def visit_dict(self, node: nodes.Dict) -> None:
         if not node.items:
             node.inf_type = TypeInfo(
                 Dict[self.type_constraints.fresh_tvar(node), self.type_constraints.fresh_tvar(node)]
@@ -216,14 +216,14 @@ class TypeInferer:
             val_inf_type = self._unify_elements(val_list, node)
             node.inf_type = wrap_container(Dict, key_inf_type, val_inf_type)
 
-    def visit_tuple(self, node: astroid.Tuple) -> None:
-        if node.ctx == astroid.Store:
+    def visit_tuple(self, node: nodes.Tuple) -> None:
+        if node.ctx == nodes.Store:
             # Tuple is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
         else:
             node.inf_type = wrap_container(Tuple, *(e.inf_type for e in node.elts))
 
-    def _unify_elements(self, lst: List[NodeNG], node: NodeNG) -> TypeResult:
+    def _unify_elements(self, lst: List[nodes.NodeNG], node: nodes.NodeNG) -> TypeResult:
         lst = list(lst)
         elt_inf_type = lst[0].inf_type
         for cur_elt in lst[1:]:
@@ -236,23 +236,23 @@ class TypeInferer:
     ##############################################################################
     # Expression types
     ##############################################################################
-    def visit_ifexp(self, node: astroid.IfExp) -> None:
+    def visit_ifexp(self, node: nodes.IfExp) -> None:
         node.inf_type = self.type_constraints.unify(node.body.inf_type, node.orelse.inf_type, node)
 
-    def visit_expr(self, node: astroid.Expr) -> None:
+    def visit_expr(self, node: nodes.Expr) -> None:
         """Expr nodes take the type of their child."""
         node.inf_type = node.value.inf_type
 
     ##############################################################################
     # Name lookup and assignment
     ##############################################################################
-    def visit_name(self, node: astroid.Name) -> None:
+    def visit_name(self, node: nodes.Name) -> None:
         node.inf_type = self.lookup_inf_type(node, node.name)
 
-    def visit_assign(self, node: astroid.Assign) -> None:
+    def visit_assign(self, node: nodes.Assign) -> None:
         """Update the enclosing scope's type environment for the assignment's binding(s)."""
         # the type of the expression being assigned
-        if isinstance(node.value, astroid.Name):
+        if isinstance(node.value, nodes.Name):
             expr_inf_type = self.lookup_typevar(node, node.value.name)
         else:
             expr_inf_type = node.value.inf_type
@@ -264,8 +264,8 @@ class TypeInferer:
                 node.inf_type = type_result
                 break
 
-    def visit_annassign(self, node: astroid.AnnAssign) -> None:
-        if isinstance(node.target, astroid.AssignAttr):
+    def visit_annassign(self, node: nodes.AnnAssign) -> None:
+        if isinstance(node.target, nodes.AssignAttr):
             var_inf_type = self.lookup_typevar(node.target, node.target.attrname)
         else:
             var_inf_type = self.lookup_typevar(node.target, node.target.name)
@@ -279,12 +279,12 @@ class TypeInferer:
         else:
             node.inf_type = NoType()
 
-    def visit_augassign(self, node: astroid.AugAssign) -> None:
+    def visit_augassign(self, node: nodes.AugAssign) -> None:
         node.inf_type = NoType()
 
         # lookup method for augmented arithmetic assignment
         method_name = BINOP_TO_METHOD[node.op]
-        if isinstance(node.target, astroid.Subscript):
+        if isinstance(node.target, nodes.Subscript):
             target_type = node.target.value.inf_type
             binop_result = self._handle_call(
                 node.target,
@@ -294,9 +294,9 @@ class TypeInferer:
                 node.value.inf_type,
             )
         else:
-            if isinstance(node.target, astroid.AssignName):
+            if isinstance(node.target, nodes.AssignName):
                 target_type = self.lookup_typevar(node.target, node.target.name)
-            elif isinstance(node.target, astroid.AssignAttr):
+            elif isinstance(node.target, nodes.AssignAttr):
                 target_type = self._lookup_attribute_type(
                     node.target, node.target.expr.inf_type, node.target.attrname
                 )
@@ -318,17 +318,17 @@ class TypeInferer:
             node.inf_type = type_result
 
     @accept_failable
-    def _assign_type(self, target: NodeNG, expr_type: type, node: astroid.Assign) -> TypeResult:
+    def _assign_type(self, target: nodes.NodeNG, expr_type: type, node: nodes.Assign) -> TypeResult:
         """Update the type environment so that the target is bound to the given type."""
-        if isinstance(target, astroid.AssignName):
+        if isinstance(target, nodes.AssignName):
             # A single identifier, e.g. x = ...
             target_type_var = self.lookup_typevar(target, target.name)
             return self.type_constraints.unify(target_type_var, expr_type, node)
-        elif isinstance(target, astroid.AssignAttr):
+        elif isinstance(target, nodes.AssignAttr):
             # Attribute mutation, e.g. x.y = ...
             attr_type = self._lookup_attribute_type(target, target.expr.inf_type, target.attrname)
             return self.type_constraints.unify(attr_type, expr_type, node)
-        elif isinstance(target, astroid.Tuple):
+        elif isinstance(target, nodes.Tuple):
             # Unpacking assignment, e.g. x, y = ...
             if getattr(expr_type, "__origin__", None) is tuple:
                 assign_result = self._assign_tuple(target, expr_type, node)
@@ -338,12 +338,12 @@ class TypeInferer:
                 target_tvars = self._get_tuple_targets(target)
                 starred_target_found = False
                 for tvar, elt in zip(target_tvars, target.elts):
-                    if isinstance(elt, astroid.Starred) and not starred_target_found:
+                    if isinstance(elt, nodes.Starred) and not starred_target_found:
                         starred_target_found = True
                         unif_result = assign_result >> (
                             lambda t: self.type_constraints.unify(tvar, List[t.__args__[0]], node)
                         )
-                    elif isinstance(elt, astroid.Starred) and starred_target_found:
+                    elif isinstance(elt, nodes.Starred) and starred_target_found:
                         unif_result = TypeFailStarred(node)
                     else:
                         unif_result = assign_result >> (
@@ -353,17 +353,17 @@ class TypeInferer:
                     if isinstance(unif_result, TypeFail):
                         return unif_result
             return assign_result
-        elif isinstance(target, astroid.Subscript):
+        elif isinstance(target, nodes.Subscript):
             # TODO: previous case must recursively handle this one
             return self._handle_call(
                 target, "__setitem__", target.value.inf_type, target.slice.inf_type, expr_type
             )
 
-    def _assign_tuple(self, target: astroid.Tuple, value: Any, node: astroid.Assign) -> TypeResult:
+    def _assign_tuple(self, target: nodes.Tuple, value: Any, node: nodes.Assign) -> TypeResult:
         """Unify tuple of type variables and tuple of types, within context of Assign statement."""
         starred_index = None
         for i in range(len(target.elts)):
-            if isinstance(target.elts[i], astroid.Starred):
+            if isinstance(target.elts[i], nodes.Starred):
                 if starred_index is None:
                     starred_index = i
                 else:
@@ -401,23 +401,23 @@ class TypeInferer:
         assign_result = TypeInfo(value)
         return assign_result
 
-    def _get_tuple_targets(self, t: astroid.Tuple) -> List[type]:
+    def _get_tuple_targets(self, t: nodes.Tuple) -> List[type]:
         target_tvars = []
         for subtarget in t.elts:
-            if isinstance(subtarget, astroid.AssignAttr):
+            if isinstance(subtarget, nodes.AssignAttr):
                 target_tvars.append(
                     self._lookup_attribute_type(
                         subtarget, subtarget.expr.inf_type, subtarget.attrname
                     )
                 )
-            elif isinstance(subtarget, astroid.Starred):
-                if isinstance(subtarget.value, astroid.AssignAttr):
+            elif isinstance(subtarget, nodes.Starred):
+                if isinstance(subtarget.value, nodes.AssignAttr):
                     target_tvars.append(
                         self.lookup_typevar(subtarget.value, subtarget.value.attrname)
                     )
                 else:
                     target_tvars.append(self.lookup_typevar(subtarget.value, subtarget.value.name))
-            elif isinstance(subtarget, astroid.Subscript):
+            elif isinstance(subtarget, nodes.Subscript):
                 target_tvars.append(
                     self._handle_call(
                         subtarget, "__getitem__", subtarget.value.inf_type, subtarget.slice.inf_type
@@ -429,7 +429,7 @@ class TypeInferer:
 
     @accept_failable
     def _lookup_attribute_type(
-        self, node: NodeNG, class_type: type, attribute_name: str
+        self, node: nodes.NodeNG, class_type: type, attribute_name: str
     ) -> TypeResult:
         """Given the node, class and attribute name, return the type of the attribute."""
         class_type = self.type_constraints.resolve(class_type)
@@ -449,7 +449,7 @@ class TypeInferer:
             result = TypeFailLookup(self.type_constraints.get_tnode(class_type), node, node.parent)
         return result
 
-    def lookup_typevar(self, node: NodeNG, name: str) -> TypeResult:
+    def lookup_typevar(self, node: nodes.NodeNG, name: str) -> TypeResult:
         """Given a variable name, return the equivalent TypeVar in the closest scope relative to given node."""
         cur_node = node
 
@@ -478,7 +478,7 @@ class TypeInferer:
 
         return result
 
-    def lookup_inf_type(self, node: NodeNG, name: str) -> TypeResult:
+    def lookup_inf_type(self, node: nodes.NodeNG, name: str) -> TypeResult:
         """Given a variable name, return a TypeResult object containing the type in the closest scope relative to given node."""
         tvar = self.lookup_typevar(node, name)
         return self.type_constraints.resolve(tvar)
@@ -487,12 +487,12 @@ class TypeInferer:
     # Operation nodes
     ##############################################################################
     @accept_failable
-    def get_call_signature(self, c: type, node: NodeNG) -> TypeResult:
+    def get_call_signature(self, c: type, node: nodes.NodeNG) -> TypeResult:
         """Check for and return initializer function signature when using class name as Callable.
         Return Callable unmodified otherwise.
 
         :param c: Class, ForwardRef to a class, or Callable
-        :param node: astroid.Call node where function call is occurring
+        :param node: nodes.Call node where function call is occurring
         """
         # Any is interpreted as a function that can take any arguments.
         if c is Any:
@@ -538,14 +538,14 @@ class TypeInferer:
         else:
             return TypeFailFunction((c,), None, node)
 
-    def visit_call(self, node: astroid.Call) -> None:
+    def visit_call(self, node: nodes.Call) -> None:
         f = self.type_constraints.resolve(node.func.inf_type)
         func_inf_type = self.get_call_signature(f, node.func)
         arg_inf_types = [arg.inf_type for arg in node.args]
 
         node.inf_type = self.type_constraints.unify_call(func_inf_type, *arg_inf_types, node=node)
 
-    def visit_binop(self, node: astroid.BinOp) -> None:
+    def visit_binop(self, node: nodes.BinOp) -> None:
         left_inf, right_inf = node.left.inf_type, node.right.inf_type
 
         method_name = BINOP_TO_METHOD[node.op]
@@ -570,7 +570,9 @@ class TypeInferer:
                     node.inf_type = l_type
 
     @accept_failable
-    def _arithm_convert(self, node: NodeNG, method: str, t1: type, t2: type) -> Optional[TypeInfo]:
+    def _arithm_convert(
+        self, node: nodes.NodeNG, method: str, t1: type, t2: type
+    ) -> Optional[TypeInfo]:
         if t1 is complex and t2 is complex:
             common_type = complex
         elif (t1 is complex and issubclass(t2, typing.SupportsFloat)) or (
@@ -591,7 +593,7 @@ class TypeInferer:
         else:
             return None
 
-    def visit_unaryop(self, node: astroid.UnaryOp) -> None:
+    def visit_unaryop(self, node: nodes.UnaryOp) -> None:
         # 'not' is not a function, so this handled as a separate case.
         if node.op == "not":
             node.inf_type = TypeInfo(bool)
@@ -599,13 +601,13 @@ class TypeInferer:
             method_name = UNARY_TO_METHOD[node.op]
             node.inf_type = self._handle_call(node, method_name, node.operand.inf_type)
 
-    def visit_boolop(self, node: astroid.BoolOp) -> None:
+    def visit_boolop(self, node: nodes.BoolOp) -> None:
         node.inf_type = self._unify_elements(node.values, node)
         if isinstance(node.inf_type, TypeFail):
             node.inf_type = TypeInfo(Any)
 
     def _handle_compare(
-        self, node: NodeNG, comparator: str, left: NodeNG, right: NodeNG
+        self, node: nodes.NodeNG, comparator: str, left: nodes.NodeNG, right: nodes.NodeNG
     ) -> TypeResult:
         """Helper function to lookup a comparator, find the equivalent function call,
         and unify call with given arguments.
@@ -621,7 +623,7 @@ class TypeInferer:
                 node, BINOP_TO_METHOD[comparator], left.inf_type, right.inf_type
             )
 
-    def visit_compare(self, node: astroid.Compare) -> None:
+    def visit_compare(self, node: nodes.Compare) -> None:
         left = node.left
         compare_type = self._handle_compare(node, node.ops[0][0], left, node.ops[0][1])
 
@@ -634,10 +636,10 @@ class TypeInferer:
     ##############################################################################
     # Subscripting
     ##############################################################################
-    def visit_index(self, node: astroid.Index) -> None:
+    def visit_index(self, node: nodes.Index) -> None:
         node.inf_type = node.value.inf_type
 
-    def visit_slice(self, node: astroid.Slice) -> None:
+    def visit_slice(self, node: nodes.Slice) -> None:
         lower_type = node.lower.inf_type if node.lower else type(None)
         upper_type = node.upper.inf_type if node.upper else type(None)
         step_type = node.step.inf_type if node.step else type(None)
@@ -648,22 +650,22 @@ class TypeInferer:
             lambda t: TypeInfo(slice) if t == type(None) else TypeInfo(t)
         )
 
-    def visit_extslice(self, node: astroid.ExtSlice):
+    def visit_extslice(self, node: nodes.ExtSlice):
         unif_res = failable_collect(dim.inf_type for dim in node.dims)
         node.inf_type = unif_res >> (lambda lst: wrap_container(Tuple, *lst))
 
-    def visit_subscript(self, node: astroid.Subscript) -> None:
+    def visit_subscript(self, node: nodes.Subscript) -> None:
         if isinstance(node.slice.inf_type, TypeFail):
             node.inf_type = node.slice.inf_type
-        elif node.ctx == astroid.Load:
+        elif node.ctx == nodes.Load:
             try:
                 val_inf_type = self.type_constraints.resolve(node.value.inf_type)
                 value_gorg = val_inf_type >> _gorg
             except AttributeError:
                 value_gorg = None
 
-            if value_gorg is type and isinstance(node.slice, astroid.Index):
-                if isinstance(node.slice.value, astroid.Tuple):
+            if value_gorg is type and isinstance(node.slice, nodes.Index):
+                if isinstance(node.slice.value, nodes.Tuple):
                     node.inf_type = wrap_container(
                         _node_to_type(node.value), *_node_to_type(node.slice.value)
                     )
@@ -675,9 +677,9 @@ class TypeInferer:
                 node.inf_type = self._handle_call(
                     node, "__getitem__", node.value.inf_type, node.slice.inf_type
                 )
-        elif node.ctx == astroid.Store:
+        elif node.ctx == nodes.Store:
             node.inf_type = NoType()
-        elif node.ctx == astroid.Del:
+        elif node.ctx == nodes.Del:
             node.inf_type = self._handle_call(
                 node, "__delitem__", node.value.inf_type, node.slice.inf_type
             )
@@ -685,15 +687,15 @@ class TypeInferer:
     ##############################################################################
     # Loops
     ##############################################################################
-    def visit_for(self, node: Union[astroid.For, astroid.Comprehension]) -> None:
+    def visit_for(self, node: Union[nodes.For, nodes.Comprehension]) -> None:
         iter_type_result = self._handle_call(node, "__iter__", node.iter.inf_type)
-        if isinstance(node.target, astroid.AssignName):
+        if isinstance(node.target, nodes.AssignName):
             target_inf_type = self.lookup_inf_type(node.target, node.target.name)
-        elif isinstance(node.target, astroid.AssignAttr):
+        elif isinstance(node.target, nodes.AssignAttr):
             target_inf_type = self._lookup_attribute_type(
                 node.target, node.target.expr.inf_type, node.target.attrname
             )
-        elif isinstance(node.target, astroid.Subscript):
+        elif isinstance(node.target, nodes.Subscript):
             target_inf_type = iter_type_result >> (
                 lambda t: self._handle_call(
                     node.target,
@@ -703,7 +705,7 @@ class TypeInferer:
                     t.__args__[0],
                 )
             )
-        elif isinstance(node.target, astroid.Tuple):
+        elif isinstance(node.target, nodes.Tuple):
             target_inf_type = wrap_container(
                 Tuple,
                 *[
@@ -719,28 +721,28 @@ class TypeInferer:
     ##############################################################################
     # Comprehensions
     ##############################################################################
-    def visit_comprehension(self, node: astroid.Comprehension) -> None:
+    def visit_comprehension(self, node: nodes.Comprehension) -> None:
         self.visit_for(node)
 
-    def visit_dictcomp(self, node: astroid.DictComp) -> None:
+    def visit_dictcomp(self, node: nodes.DictComp) -> None:
         key_inf_type = self.type_constraints.resolve(node.key.inf_type)
         val_inf_type = self.type_constraints.resolve(node.value.inf_type)
         node.inf_type = wrap_container(Dict, key_inf_type, val_inf_type)
 
-    def visit_generatorexp(self, node: astroid.GeneratorExp) -> None:
+    def visit_generatorexp(self, node: nodes.GeneratorExp) -> None:
         elt_inf_type = self.type_constraints.resolve(node.elt.inf_type)
         node.inf_type = wrap_container(Generator, elt_inf_type, None, None)
 
-    def visit_listcomp(self, node: astroid.ListComp) -> None:
+    def visit_listcomp(self, node: nodes.ListComp) -> None:
         val_inf_type = self.type_constraints.resolve(node.elt.inf_type)
         node.inf_type = wrap_container(List, val_inf_type)
 
-    def visit_setcomp(self, node: astroid.SetComp) -> None:
+    def visit_setcomp(self, node: nodes.SetComp) -> None:
         elt_inf_type = self.type_constraints.resolve(node.elt.inf_type)
         node.inf_type = wrap_container(Set, elt_inf_type)
 
     @accept_failable
-    def _handle_call(self, node: NodeNG, function_name: str, *arg_types: type) -> TypeResult:
+    def _handle_call(self, node: nodes.NodeNG, function_name: str, *arg_types: type) -> TypeResult:
         """Helper to lookup a function and unify it with given arguments.
         Return the return type of unified function call.
         """
@@ -752,13 +754,13 @@ class TypeInferer:
     ##############################################################################
     # Definitions
     ##############################################################################
-    def visit_functiondef(self, node: astroid.FunctionDef) -> None:
+    def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         node.inf_type = NoType()
 
         # Get the inferred type of the function arguments
         inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
 
-        if isinstance(node.parent, astroid.ClassDef) and inferred_args:
+        if isinstance(node.parent, nodes.ClassDef) and inferred_args:
             # first argument is special in these cases
             if node.type == "method":
                 self.type_constraints.unify(inferred_args[0], ForwardRef(node.parent.name), node)
@@ -768,8 +770,8 @@ class TypeInferer:
                 )
 
         # Get inferred return type
-        if any(node.nodes_of_class(astroid.Return)):
-            return_node = list(node.nodes_of_class(astroid.Return))[-1]
+        if any(node.nodes_of_class(nodes.Return)):
+            return_node = list(node.nodes_of_class(nodes.Return))[-1]
             if isinstance(return_node.inf_type, TypeFail):
                 inferred_return = return_node.inf_type
             else:
@@ -807,10 +809,10 @@ class TypeInferer:
         if isinstance(result, TypeFail):
             node.inf_type = result
 
-    def visit_asyncfunctiondef(self, node: astroid.AsyncFunctionDef) -> None:
+    def visit_asyncfunctiondef(self, node: nodes.AsyncFunctionDef) -> None:
         self.visit_functiondef(node)
 
-    def visit_lambda(self, node: astroid.Lambda) -> None:
+    def visit_lambda(self, node: nodes.Lambda) -> None:
         inferred_args = [self.lookup_inf_type(node, arg) for arg in node.argnames()]
         inferred_return = node.body.inf_type
 
@@ -822,7 +824,7 @@ class TypeInferer:
             failable_collect(inferred_args), inferred_return, polymorphic_tvars
         )
 
-    def visit_arguments(self, node: astroid.Arguments) -> None:
+    def visit_arguments(self, node: nodes.Arguments) -> None:
         node.inf_type = NoType()
         if any(annotation is not None for annotation in node.annotations):
             for i in range(len(node.annotations)):
@@ -836,7 +838,7 @@ class TypeInferer:
                 else:
                     self.type_constraints.unify(arg_tvar, Any, node)
 
-    def visit_return(self, node: astroid.Return) -> None:
+    def visit_return(self, node: nodes.Return) -> None:
         return_tvar = self.lookup_typevar(node, "return")
         # TODO: Replace with isinstance() once proper TypeFail subclass is created for unbound indentifiers
         if return_tvar == TypeFail("Unbound identifier"):
@@ -855,7 +857,7 @@ class TypeInferer:
         val_inf_type = self.type_constraints.unify(return_value, return_target, node)
         node.inf_type = val_inf_type if isinstance(val_inf_type, TypeFail) else NoType()
 
-    def visit_classdef(self, node: astroid.ClassDef) -> None:
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
         node.inf_type = NoType()
 
         # Update type_store for this class.
@@ -903,7 +905,7 @@ class TypeInferer:
 
         return class_name, class_type, is_inst_expr
 
-    def visit_attribute(self, node: astroid.Attribute) -> None:
+    def visit_attribute(self, node: nodes.Attribute) -> None:
         expr_inf_type = self.type_constraints.resolve(node.expr.inf_type)
         result = self.get_attribute_class(expr_inf_type)
         if not isinstance(result, TypeFail):
@@ -944,12 +946,12 @@ class TypeInferer:
         else:
             node.inf_type = result
 
-    def visit_module(self, node: astroid.Module) -> None:
+    def visit_module(self, node: nodes.Module) -> None:
         node.inf_type = NoType()
 
 
 # Main function (useful for quick debugging)
-def main(source: str) -> Tuple[astroid.Module, TypeInferer]:
+def main(source: str) -> Tuple[nodes.Module, TypeInferer]:
     """Parse a string representing source text, and perform a typecheck.
 
     Return the astroid Module node (with the type_constraints attribute set

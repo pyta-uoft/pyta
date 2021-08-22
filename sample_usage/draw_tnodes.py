@@ -2,7 +2,7 @@ import sys
 from typing import *
 from typing import ForwardRef
 
-import astroid
+from astroid import nodes
 from graphviz import Graph
 
 from python_ta.transforms.type_inference_visitor import TypeInferer
@@ -88,7 +88,7 @@ def gen_graph_from_nodes(nodes, type_fail=None):
     graph.view("tnode_graph")
 
 
-def gen_graph_from_source(source: Union[str, astroid.NodeNG]):
+def gen_graph_from_source(source: Union[str, nodes.NodeNG]):
     module, inferer = _parse_text(source)
     gen_graph_from_nodes(inferer.type_constraints._nodes, _find_type_fail(module))
 

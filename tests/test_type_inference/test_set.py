@@ -1,6 +1,6 @@
 from typing import Any, Set
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -13,14 +13,14 @@ settings.load_profile("pyta")
 def test_homogeneous_set(node):
     """Test Set nodes representing a set of homogeneous values."""
     module, _ = cs._parse_text(node)
-    set_node = list(module.nodes_of_class(astroid.Set))[0]
+    set_node = list(module.nodes_of_class(nodes.Set))[0]
     if len(set_node.elts) == 0:
         assert set_node.inf_type.getValue() == Set[Any]
     else:
         try:
-            cs._verify_type_setting(module, astroid.Set, Set[type(set_node.elts[0].value)])
+            cs._verify_type_setting(module, nodes.Set, Set[type(set_node.elts[0].value)])
         except AttributeError:
-            cs._verify_type_setting(module, astroid.Set, Set[type(set_node.elts[0].operand.value)])
+            cs._verify_type_setting(module, nodes.Set, Set[type(set_node.elts[0].operand.value)])
 
 
 @given(cs.set_node(min_size=2))
@@ -35,5 +35,5 @@ def test_random_set(node):
     if bool in val_types:
         assume(int not in val_types)
     module, _ = cs._parse_text(node)
-    set_node = list(module.nodes_of_class(astroid.Set))[0]
-    cs._verify_type_setting(module, astroid.Set, Set[Any])
+    set_node = list(module.nodes_of_class(nodes.Set))[0]
+    cs._verify_type_setting(module, nodes.Set, Set[Any])

@@ -2,6 +2,7 @@ from typing import List
 
 import astroid
 import pylint.testutils
+from astroid import nodes
 
 from python_ta.checkers.invalid_for_target_checker import InvalidForTargetChecker
 
@@ -10,7 +11,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InvalidForTargetChecker
 
     def _assert_no_message(self, src: str) -> None:
-        for_node, *_ = _extract_nodes(src, [astroid.For])
+        for_node, *_ = _extract_nodes(src, [nodes.For])
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -29,7 +30,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for l[0] in l:
             pass
         """
-        for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
+        for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="l[0]")
@@ -42,7 +43,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for x.attr in l:
             pass
         """
-        for_node, assign_attr_node = _extract_nodes(src, [astroid.For, astroid.AssignAttr])
+        for_node, assign_attr_node = _extract_nodes(src, [nodes.For, nodes.AssignAttr])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -67,7 +68,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for a, b[0] in l:
             pass
         """
-        for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
+        for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="b[0]")
@@ -88,7 +89,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for [a, b[0]] in l:
             pass
         """
-        for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
+        for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="b[0]")
@@ -109,7 +110,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for a, (b, (c, d[0]), e) in l:
             pass
         """
-        for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
+        for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
@@ -130,7 +131,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for [a, [b, [c, d[0]], e]] in l:
             pass
         """
-        for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
+        for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
@@ -153,7 +154,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for a, [b, (c, d[0]), e] in l:
             pass
         """
-        for_node, subscript_node = _extract_nodes(src, [astroid.For, astroid.Subscript])
+        for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
             pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
@@ -161,7 +162,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
 
-def _extract_nodes(src: str, node_types: List[type]) -> List[astroid.NodeNG]:
+def _extract_nodes(src: str, node_types: List[type]) -> List[nodes.NodeNG]:
     mod = astroid.parse(src)
 
     extracted_nodes = []

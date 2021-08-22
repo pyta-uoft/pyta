@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Set, Tuple, Union, _GenericAlias
 
-import astroid
 import hypothesis.strategies as hs
+from astroid import nodes
 from hypothesis import HealthCheck, given, settings
 from pytest import skip
 
@@ -32,7 +32,7 @@ def test_annassign_concrete():
         f""
     )
     module, inferer = cs._parse_text(program)
-    for node in module.nodes_of_class(astroid.AnnAssign):
+    for node in module.nodes_of_class(nodes.AnnAssign):
         variable_type = lookup_type(inferer, node, node.target.name)
         annotated_type = _node_to_type(node.annotation.name)
         assert variable_type == annotated_type
@@ -47,7 +47,7 @@ def test_annassign(variables_annotations_dict):
         program += f"    {variable}: {variables_annotations_dict[variable].__name__}\n"
     program += f"    def __init__(self):\n" f"        pass\n"
     module, inferer = cs._parse_text(program)
-    for node in module.nodes_of_class(astroid.AnnAssign):
+    for node in module.nodes_of_class(nodes.AnnAssign):
         variable_type = lookup_type(inferer, node, node.target.name)
         annotated_type = variables_annotations_dict[node.target.name]
         if isinstance(variable_type, _GenericAlias):
@@ -61,7 +61,7 @@ def test_annassign_subscript_list():
     lst: List
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     t = inferer.type_constraints.resolve(variable_type)
     assert t.getValue() == List[Any]
@@ -74,11 +74,11 @@ def test_annassign_subscript_list_int():
     lst = [1, 2, 3]
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == List[int]
 
-    assign_node = next(module.nodes_of_class(astroid.Assign))
+    assign_node = next(module.nodes_of_class(nodes.Assign))
     assign_type = lookup_type(inferer, assign_node, assign_node.targets[0].name)
     assert assign_type == List[int]
 
@@ -90,11 +90,11 @@ def test_annassign_subscript_list_int_wrong():
     lst = ['Hello', 'Goodbye']
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == List[int]
 
-    assign_node = next(module.nodes_of_class(astroid.Assign))
+    assign_node = next(module.nodes_of_class(nodes.Assign))
     assert isinstance(assign_node.inf_type, TypeFailUnify)
 
 
@@ -103,7 +103,7 @@ def test_annassign_subscript_set():
     s: Set
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Set[Any]
 
@@ -113,7 +113,7 @@ def test_annassign_subscript_set_int():
     s: Set[int]
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Set[int]
 
@@ -123,7 +123,7 @@ def test_annassign_subscript_dict():
     d: Dict
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Dict[Any, Any]
 
@@ -133,7 +133,7 @@ def test_annassign_subscript_dict_int_str():
     d: Dict[int, str]
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Dict[int, str]
 
@@ -143,7 +143,7 @@ def test_annassign_subscript_tuple():
     t: Tuple
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Tuple[Any]
 
@@ -153,7 +153,7 @@ def test_annassign_subscript_tuple_int():
     t: Tuple[int, int]
     """
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Tuple[int, int]
 
@@ -166,7 +166,7 @@ def test_annassign_subscript_tuple_multi_param():
     """
     skip("Requires support for multi-parameter Tuple annotations")
     module, inferer = cs._parse_text(program)
-    ann_node = next(module.nodes_of_class(astroid.AnnAssign))
+    ann_node = next(module.nodes_of_class(nodes.AnnAssign))
     variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
     assert variable_type == Tuple[int, int]
 
@@ -181,11 +181,11 @@ def test_annassign_subscript_multi_list():
     """
     module, inferer = cs._parse_text(program)
 
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         variable_type = lookup_type(inferer, ann_node, ann_node.target.name)
         assert variable_type == List[Any]
 
-    assign_nodes = list(module.nodes_of_class(astroid.Assign))
+    assign_nodes = list(module.nodes_of_class(nodes.Assign))
 
     assign_node_1 = assign_nodes[0]
     assign_type_1 = lookup_type(inferer, assign_node_1, assign_node_1.targets[0].name)
@@ -202,10 +202,9 @@ def test_annassign_and_assign():
     """
     module, inferer = cs._parse_text(src, reset=True)
     x = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ][0]
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         assert ann_node.inf_type == NoType()
     assert inferer.type_constraints.resolve(x).getValue() == List[int]
 
@@ -215,7 +214,7 @@ def test_invalid_annassign_and_assign():
     x: List[str] = [1, 2, 3]
     """
     module, inferer = cs._parse_text(src, reset=True)
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailUnify)
 
 
@@ -224,7 +223,7 @@ def test_annotation_not_type():
     x: [str, int]
     """
     module, inferer = cs._parse_text(src, reset=True)
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailAnnotationInvalid)
 
 
@@ -233,7 +232,7 @@ def test_annotation_forward_ref():
     x: 'SomeClass'
     """
     module, inferer = cs._parse_text(src, reset=True)
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         assert not isinstance(ann_node.inf_type, TypeFail)
 
 
@@ -243,7 +242,7 @@ def test_param_annotation_not_type():
         return x
     """
     module, inferer = cs._parse_text(src, reset=True)
-    for arg_node in module.nodes_of_class(astroid.Arguments):
+    for arg_node in module.nodes_of_class(nodes.Arguments):
         assert isinstance(arg_node.inf_type, TypeFailAnnotationInvalid)
 
 
@@ -252,7 +251,7 @@ def test_annotation_forward_ref_space():
     x: 'Some Class'
     """
     module, inferer = cs._parse_text(src, reset=True)
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         assert isinstance(ann_node.inf_type, TypeFailAnnotationInvalid)
 
 
@@ -261,7 +260,7 @@ def test_annotation_union_list():
     x: Union[List, int]
     """
     module, inferer = cs._parse_text(src, reset=True)
-    for ann_node in module.nodes_of_class(astroid.AnnAssign):
+    for ann_node in module.nodes_of_class(nodes.AnnAssign):
         assert not isinstance(ann_node.inf_type, TypeFail)
     x_type = lookup_type(inferer, module, "x")
     assert x_type == Union[List[Any], int]

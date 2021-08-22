@@ -3,6 +3,7 @@
 from typing import List, Optional, Tuple, Union
 
 import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -27,14 +28,14 @@ class UnnecessaryIndexingChecker(BaseChecker):
 
     # pass in message symbol as a parameter of check_messages
     @check_messages("unnecessary-indexing")
-    def visit_for(self, node: astroid.For) -> None:
+    def visit_for(self, node: nodes.For) -> None:
         if _is_unnecessary_indexing(node):
             args = node.target.name
             self.add_message("unnecessary-indexing", node=node.target, args=args)
 
 
 # Helper functions
-def _is_unnecessary_indexing(node: astroid.For) -> bool:
+def _is_unnecessary_indexing(node: nodes.For) -> bool:
     """Return whether the iteration variable in the for loop is ONLY used to index the iterable.
 
     True if unnecessary usage, False otherwise or if iteration variable not used at all.
@@ -48,7 +49,7 @@ def _is_unnecessary_indexing(node: astroid.For) -> bool:
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
 
 
-def _iterable_if_range(node: astroid.NodeNG) -> Optional[str]:
+def _iterable_if_range(node: nodes.NodeNG) -> Optional[str]:
     """Return the iterable's name if this node is in "range" form, or None otherwise.
 
     Check for three forms:
@@ -58,8 +59,8 @@ def _iterable_if_range(node: astroid.NodeNG) -> Optional[str]:
     """
     # Check outer function call is range
     if (
-        not isinstance(node, astroid.Call)
-        or not isinstance(node.func, astroid.Name)
+        not isinstance(node, nodes.Call)
+        or not isinstance(node.func, nodes.Name)
         or not node.func.name == "range"
     ):
         return None
@@ -68,10 +69,10 @@ def _iterable_if_range(node: astroid.NodeNG) -> Optional[str]:
     if len(node.args) > 1:
         # Check that args[0] == Const(0)
         arg1 = node.args[0]
-        if not isinstance(arg1, astroid.Const) or arg1.value != 0:
+        if not isinstance(arg1, nodes.Const) or arg1.value != 0:
             return None
         if len(node.args) == 3 and (
-            not isinstance(node.args[2], astroid.Const) or node.args[2].value != 1
+            not isinstance(node.args[2], nodes.Const) or node.args[2].value != 1
         ):
             return None
 
@@ -82,16 +83,16 @@ def _iterable_if_range(node: astroid.NodeNG) -> Optional[str]:
         stop_arg = node.args[1]
 
     if (
-        isinstance(stop_arg, astroid.Call)
-        and isinstance(stop_arg.func, astroid.Name)
+        isinstance(stop_arg, nodes.Call)
+        and isinstance(stop_arg.func, nodes.Name)
         and stop_arg.func.name == "len"
         and len(stop_arg.args) == 1
-        and isinstance(stop_arg.args[0], astroid.Name)
+        and isinstance(stop_arg.args[0], nodes.Name)
     ):
         return stop_arg.args[0].name
 
 
-def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
+def _is_load_subscript(index_node: nodes.Name, for_node: nodes.For) -> bool:
     """Return whether or not <index_node> is used to subscript the iterable of <for_node>
     and the subscript item is being loaded from, e.g., s += iterable[index_node].
 
@@ -111,22 +112,20 @@ def _is_load_subscript(index_node: astroid.Name, for_node: astroid.For) -> bool:
     iterable = _iterable_if_range(for_node.iter)
 
     return (
-        isinstance(index_node.parent, astroid.Subscript)
-        and isinstance(index_node.parent.value, astroid.Name)
+        isinstance(index_node.parent, nodes.Subscript)
+        and isinstance(index_node.parent.value, nodes.Name)
         and index_node.parent.value.name == iterable
         and index_node.parent.ctx == astroid.Load
     )
 
 
-def _is_redundant(
-    index_node: Union[astroid.AssignName, astroid.Name], for_node: astroid.For
-) -> bool:
+def _is_redundant(index_node: Union[nodes.AssignName, nodes.Name], for_node: nodes.For) -> bool:
     """Return whether or not <index_node> is redundant in <for_node>.
 
     The lookup method is used in case the original loop variable is shadowed
     in the for loop's body.
     """
-    if isinstance(index_node, astroid.AssignName):
+    if isinstance(index_node, nodes.AssignName):
         previous_context = index_node.lookup(index_node.name)
         if previous_context[1] != ():
             return (
@@ -141,25 +140,23 @@ def _is_redundant(
         )
 
 
-def _index_name_nodes(
-    index: str, for_node: astroid.For
-) -> List[Union[astroid.AssignName, astroid.Name]]:
+def _index_name_nodes(index: str, for_node: nodes.For) -> List[Union[nodes.AssignName, nodes.Name]]:
     """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
     return [
         name_node
-        for name_node in for_node.nodes_of_class((astroid.AssignName, astroid.Name))
+        for name_node in for_node.nodes_of_class((nodes.AssignName, nodes.Name))
         if name_node.name == index and name_node != for_node.target
     ]
 
 
-def _scope_lookup(node: astroid.Name) -> Optional[astroid.NodeNG]:
+def _scope_lookup(node: nodes.Name) -> Optional[nodes.NodeNG]:
     """Look up the given name node's assigment node.
 
     This is a replacement for astroid's LocalsDictNodeNG._scope_lookup method, which doesn't
     seem to handle nested comprehensions (?).
     """
     scope = node.scope()
-    while node.name not in scope and not isinstance(scope, astroid.Module):
+    while node.name not in scope and not isinstance(scope, nodes.Module):
         scope = scope.parent.scope()
 
     if node.name in scope:

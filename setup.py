@@ -25,10 +25,10 @@ setup(
         "python_ta.util",
     ],
     install_requires=[
-        "astroid>=2.6,<2.7",
+        "astroid>=2.7.1,<2.8",
         "hypothesis",
         "pycodestyle",
-        "pylint>=2.9,<2.10",
+        "pylint>=2.10,<2.11",
         "colorama",
         "six",
         "jinja2",

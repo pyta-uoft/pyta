@@ -2,7 +2,7 @@
 """
 from typing import List, Union
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -24,10 +24,10 @@ class InvalidForTargetChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    INVALID_TARGETS = (astroid.Subscript, astroid.AssignAttr)
+    INVALID_TARGETS = (nodes.Subscript, nodes.AssignAttr)
 
     @check_messages("invalid-for-target")
-    def visit_for(self, node: astroid.For) -> None:
+    def visit_for(self, node: nodes.For) -> None:
         invalid_for_targets = node.target.nodes_of_class(self.INVALID_TARGETS)
         for target in invalid_for_targets:
             self.add_message("invalid-for-target", node=target, args=target.as_string())

@@ -1,6 +1,6 @@
 from typing import TypeVar
 
-import astroid
+from astroid import nodes
 from pytest import skip
 
 from python_ta.typecheck.base import TypeFailFunction
@@ -17,7 +17,7 @@ def test_overload_function():
     foo(5, 6)
     """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert call_node.inf_type.getValue() == int
 
 
@@ -30,7 +30,7 @@ def test_overload_function_2():
     foo(5, 6, 7)
     """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert call_node.inf_type.getValue() == int
 
 
@@ -41,7 +41,7 @@ def test_overload_function_with_gap():
     foo(5, None, 7)
     """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert call_node.inf_type.getValue() == int
 
 
@@ -52,7 +52,7 @@ def test_too_few_args():
        foo(5)
        """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -63,7 +63,7 @@ def test_too_few_args_2():
        foo(5, 6)
        """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -74,7 +74,7 @@ def test_too_many_args():
        foo(5, 6)
        """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -85,7 +85,7 @@ def test_too_many_args_2():
        foo(5, 6, 7)
        """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -96,7 +96,7 @@ def test_too_few_args_with_overload():
        foo(5)
        """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -107,7 +107,7 @@ def test_too_many_args_with_overload():
        foo(5, 6, 7)
        """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -119,7 +119,7 @@ def test_overload_function_with_annotations():
     foo(5, 6)
     """
     ast_mod, ti = cs._parse_text(program)
-    for call_node in ast_mod.nodes_of_class(astroid.Call):
+    for call_node in ast_mod.nodes_of_class(nodes.Call):
         assert call_node.inf_type.getValue() == int
 
 
@@ -129,7 +129,7 @@ def test_flagged_builtin_overload():
     y = round(5.5, 1)
     """
     ast_mod, ti = cs._parse_text(program)
-    for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
+    for assgn_node in ast_mod.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "x":
             x = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(x).getValue() == int
@@ -145,7 +145,7 @@ def test_builtin_defaults():
     z = range(1, 10, 3)
     """
     ast_mod, ti = cs._parse_text(program)
-    for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
+    for assgn_node in ast_mod.nodes_of_class(nodes.AssignName):
         x = ti.lookup_typevar(assgn_node, assgn_node.name)
         assert ti.type_constraints.resolve(x).getValue() == range
 
@@ -160,7 +160,7 @@ def test_unresolved_builtin():
     """
     ast_mod, ti = cs._parse_text(program)
 
-    for assgn_node in ast_mod.nodes_of_class(astroid.AssignName):
+    for assgn_node in ast_mod.nodes_of_class(nodes.AssignName):
         if assgn_node.name == "z":
             z = ti.lookup_typevar(assgn_node, assgn_node.name)
             assert ti.type_constraints.resolve(z).getValue() == str
@@ -178,6 +178,6 @@ def test_unresolved_builtin2():
     """
     ast_mod, ti = cs._parse_text(program)
 
-    f_ret_node, g_ret_node = ast_mod.nodes_of_class(astroid.Return)
+    f_ret_node, g_ret_node = ast_mod.nodes_of_class(nodes.Return)
     assert isinstance(f_ret_node, TypeVar)
     assert g_ret_node.inf_type.getValue() == str

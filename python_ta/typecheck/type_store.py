@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import *
 from typing import Any, ForwardRef
 
-import astroid
+from astroid import nodes
 from astroid.builder import AstroidBuilder
 
 from python_ta.typecheck.base import (
@@ -42,9 +42,9 @@ class TypeStore:
                     class_callable(init) for init, _ in methods["__init__"]
                 ]
 
-    def _parse_classes(self, module: astroid.Module) -> None:
+    def _parse_classes(self, module: nodes.Module) -> None:
         """Parse the class definitions from typeshed."""
-        for class_def in module.nodes_of_class(astroid.ClassDef):
+        for class_def in module.nodes_of_class(nodes.ClassDef):
             tvars = []
             self.classes[class_def.name]["__bases"] = []
             for base in class_def.bases:
@@ -57,15 +57,15 @@ class TypeStore:
             for node in (
                 nodes[0]
                 for nodes in class_def.locals.values()
-                if isinstance(nodes[0], astroid.AssignName)
-                and isinstance(nodes[0].parent, astroid.AnnAssign)
+                if isinstance(nodes[0], nodes.AssignName)
+                and isinstance(nodes[0].parent, nodes.AnnAssign)
             ):
                 self.classes[class_def.name][node.name] = parse_annotations(node, tvars)
 
-    def _parse_functions(self, module: astroid.Module) -> None:
+    def _parse_functions(self, module: nodes.Module) -> None:
         """Parse the function definitions from typeshed."""
-        for function_def in module.nodes_of_class(astroid.FunctionDef):
-            in_class = isinstance(function_def.parent, astroid.ClassDef)
+        for function_def in module.nodes_of_class(nodes.FunctionDef):
+            in_class = isinstance(function_def.parent, nodes.ClassDef)
             if in_class:
                 tvars = self.classes[function_def.parent.name]["__pyta_tvars"]
             else:

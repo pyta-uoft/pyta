@@ -1,8 +1,8 @@
 from typing import *
 from typing import ForwardRef, _GenericAlias
 
-import astroid
 import pytest
+from astroid import nodes
 
 from python_ta.typecheck.base import TypeConstraints, TypeFail, _TNode
 from sample_usage.draw_tnodes import gen_graph_from_nodes
@@ -312,7 +312,7 @@ def test_userdefn_inheritance_simple(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     tc = ti.type_constraints
     a, b, c = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ]
 
     assert isinstance(tc.unify(a, b), TypeFail)
@@ -356,7 +356,7 @@ def test_userdefn_inheritance_multilevel(draw=False):
     ast_mod, ti = cs._parse_text(src, reset=True)
     tc = ti.type_constraints
     a, b, c = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ]
 
     assert tc.unify(b, a).getValue() == ForwardRef("B")
@@ -403,7 +403,7 @@ def test_userdefn_mro_simple(draw=False):
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     _, b, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ]
     assert ti.type_constraints.resolve(x).getValue() == int
     if draw:
@@ -430,7 +430,7 @@ def test_userdefn_mro_multilevel(draw=False):
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     _, d, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ]
     assert ti.type_constraints.resolve(x).getValue() == int
     if draw:
@@ -458,7 +458,7 @@ def test_userdefn_mro_diamond(draw=False):
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     _, _, d, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ]
     assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
@@ -472,9 +472,7 @@ def test_builtin_abst_base_mro(draw=False):
     y = abs(x)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x, y = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
-    ]
+    x, y = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)]
     assert ti.type_constraints.resolve(y).getValue() == int
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -489,9 +487,7 @@ def test_builtin_call_simple_mro(draw=False):
     x = repr(a)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    a, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
-    ]
+    a, x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)]
     assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -502,9 +498,7 @@ def test_builtin_binop_inheritance(draw=False):
     x = 1.0 + 3
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == float
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -515,9 +509,7 @@ def test_builtin_comp_inheritance(draw=False):
     x = (3 == 'abc')
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == bool
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -532,9 +524,7 @@ def test_userdefn_inherits_from_builtin(draw=False):
     x = s.lower()
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    s, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
-    ]
+    s, x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)]
     assert ti.type_constraints.resolve(x).getValue() == str
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -551,7 +541,7 @@ def test_userdefn_overrides_builtin(draw=False):
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     _, s, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ]
     assert ti.type_constraints.resolve(x).getValue() == int
     if draw:
@@ -563,9 +553,7 @@ def test_builtin_generic_inheritance_init(draw=False):
     x = set([1,2,3])
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == Set[int]
 
 
@@ -575,9 +563,7 @@ def test_builtin_generic_inheritance_method_lookup(draw=False):
     y = x.symmetric_difference([2,3])
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x, y = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
-    ]
+    x, y = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)]
     assert ti.type_constraints.resolve(y).getValue() == Set[int]
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)
@@ -589,9 +575,7 @@ def test_builtin_generic_inheritance_overloaded_init(draw=False):
     y = list(x)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x, y = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
-    ]
+    x, y = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)]
     assert ti.type_constraints.resolve(y).getValue() == List[int]
     if draw:
         gen_graph_from_nodes(ti.type_constraints._nodes)

@@ -1,7 +1,7 @@
 """checker for type annotation.
 """
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -40,7 +40,7 @@ class TypeAnnotationChecker(BaseChecker):
                 # Check if function is a non-static instance method
                 if (
                     i != 0
-                    or not isinstance(node.parent, astroid.ClassDef)
+                    or not isinstance(node.parent, nodes.ClassDef)
                     or node.type == "staticmethod"
                 ):
                     self.add_message("missing-param-type", node=node.args.args[i])
@@ -52,18 +52,18 @@ class TypeAnnotationChecker(BaseChecker):
     def visit_classdef(self, node):
         for attr_key in node.instance_attrs:
             attr_node = node.instance_attrs[attr_key][0]
-            if isinstance(attr_node, astroid.AssignAttr):
+            if isinstance(attr_node, nodes.AssignAttr):
                 if attr_key not in node.locals and all(
                     attr_key not in base.locals for base in node.ancestors()
                 ):
                     self.add_message("missing-attribute-type", node=attr_node)
-                elif isinstance(attr_node.parent, astroid.AnnAssign):
+                elif isinstance(attr_node.parent, nodes.AnnAssign):
                     self.add_message("missing-attribute-type", node=attr_node)
 
         for attr_key in node.locals:
             attr_node = node.locals[attr_key][0]
-            if isinstance(attr_node, astroid.AssignName) and not isinstance(
-                attr_node.parent, astroid.AnnAssign
+            if isinstance(attr_node, nodes.AssignName) and not isinstance(
+                attr_node.parent, nodes.AnnAssign
             ):
                 self.add_message("missing-attribute-type", node=attr_node)
 

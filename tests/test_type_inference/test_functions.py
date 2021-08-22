@@ -1,8 +1,8 @@
 from keyword import iskeyword
 from typing import Callable
 
-import astroid
 import hypothesis.strategies as hs
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 from pytest import skip
 
@@ -36,7 +36,7 @@ def test_function_def_no_args(function_name, return_value):
     program = _parse_to_function(function_name, [], repr(return_value))
     module, inferer = cs._parse_text(program)
     function_type_var = module.type_environment.lookup_in_env(function_name)
-    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    function_def_node = list(module.nodes_of_class(nodes.FunctionDef))[0]
     return_tvar = function_def_node.type_environment.lookup_in_env("return")
     return_type = inferer.type_constraints.resolve(return_tvar).getValue()
     assert (
@@ -53,10 +53,10 @@ def test_function_def_call_no_args(function_name, return_value):
     )
     module, inferer = cs._parse_text(program)
     # there should be a single Expr node in this program
-    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    function_def_node = list(module.nodes_of_class(nodes.FunctionDef))[0]
     return_tvar = function_def_node.type_environment.lookup_in_env("return")
     return_type = inferer.type_constraints.resolve(return_tvar).getValue()
-    expr_node = next(module.nodes_of_class(astroid.Expr))
+    expr_node = next(module.nodes_of_class(nodes.Expr))
     assert expr_node.inf_type.getValue() == return_type
 
 
@@ -67,7 +67,7 @@ def test_function_def_no_return(function_name, arguments, body):
     for return_value in ["return None", repr(body), "pass"]:
         program = _parse_to_function_no_return(function_name, arguments, repr(return_value))
         module, inferer = cs._parse_text(program)
-        function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
+        function_def_node = next(module.nodes_of_class(nodes.FunctionDef))
         expected_arg_type_vars = [
             function_def_node.type_environment.lookup_in_env(argument) for argument in arguments
         ]
@@ -91,7 +91,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         program = _parse_to_function(function_name, arguments, argument)
         module, inferer = cs._parse_text(program)
         # get the functionDef node - there is only one in this test case.
-        function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
+        function_def_node = next(module.nodes_of_class(nodes.FunctionDef))
         expected_arg_type_vars = [
             function_def_node.type_environment.lookup_in_env(argument) for argument in arguments
         ]
@@ -125,7 +125,7 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         )
         module, inferer = cs._parse_text(program)
         # get the Call node - there is only one in this test case.
-        call_node = next(module.nodes_of_class(astroid.Call))
+        call_node = next(module.nodes_of_class(nodes.Call))
         function_call_type = call_node.inf_type.getValue()
         assert (
             inferer.type_constraints.resolve(function_call_type).getValue()
@@ -164,7 +164,7 @@ def test_function_def_no_args(function_name, return_value):
     program = _parse_to_function(function_name, [], repr(return_value))
     module, inferer = cs._parse_text(program)
     function_type_var = module.type_environment.lookup_in_env(function_name)
-    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    function_def_node = list(module.nodes_of_class(nodes.FunctionDef))[0]
     return_tvar = function_def_node.type_environment.lookup_in_env("return")
     return_type = inferer.type_constraints.resolve(return_tvar).getValue()
     assert (
@@ -181,10 +181,10 @@ def test_function_def_call_no_args(function_name, return_value):
     )
     module, inferer = cs._parse_text(program)
     # there should be a single Expr node in this program
-    function_def_node = list(module.nodes_of_class(astroid.FunctionDef))[0]
+    function_def_node = list(module.nodes_of_class(nodes.FunctionDef))[0]
     return_tvar = function_def_node.type_environment.lookup_in_env("return")
     return_type = inferer.type_constraints.resolve(return_tvar).getValue()
-    expr_node = next(module.nodes_of_class(astroid.Expr))
+    expr_node = next(module.nodes_of_class(nodes.Expr))
     assert expr_node.inf_type.getValue() == return_type
 
 
@@ -195,7 +195,7 @@ def test_function_def_no_return(function_name, arguments, body):
     for return_value in ["return None", repr(body), "pass"]:
         program = _parse_to_function_no_return(function_name, arguments, repr(return_value))
         module, inferer = cs._parse_text(program)
-        function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
+        function_def_node = next(module.nodes_of_class(nodes.FunctionDef))
         expected_arg_type_vars = [
             function_def_node.type_environment.lookup_in_env(argument) for argument in arguments
         ]
@@ -219,7 +219,7 @@ def test_function_def_args_simple_return(function_name, arguments):
         program = _parse_to_function(function_name, arguments, argument)
         module, inferer = cs._parse_text(program)
         # get the functionDef node - there is only one in this test case.
-        function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
+        function_def_node = next(module.nodes_of_class(nodes.FunctionDef))
         expected_arg_type_vars = [
             function_def_node.type_environment.lookup_in_env(argument) for argument in arguments
         ]
@@ -253,7 +253,7 @@ def test_function_def_args_simple_function_call(function_name, variables_dict):
         )
         module, inferer = cs._parse_text(program)
         # get the Call node - there is only one in this test case.
-        call_node = next(module.nodes_of_class(astroid.Call))
+        call_node = next(module.nodes_of_class(nodes.Call))
         function_call_type = call_node.inf_type.getValue()
         assert (
             inferer.type_constraints.resolve(function_call_type).getValue()
@@ -270,7 +270,7 @@ def test_non_annotated_function_call_bad_arguments():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     # TODO: This error is flawed because the unification error occurs for both arguments due to our current implementation,
     # which "chooses" the first valid function type from TypeStore.
     # Should we fix this implementation first or save it for later and hard-code the correct error message for now?
@@ -297,7 +297,7 @@ def test_user_defined_annotated_call_wrong_arguments_type():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    call_node = list(module.nodes_of_class(nodes.Call))[0]
     expected_msg = (
         f'In the Call node in line 4, there was an error in calling the annotated function "add_3":\n'
         f"in parameter (2), the annotated type is int but was given an object of type str.\n"
@@ -318,7 +318,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    call_node = list(module.nodes_of_class(nodes.Call))[0]
     expected_msg = (
         f'In the Call node in line 4, there was an error in calling the function "add_3":\n'
         f"the function was expecting 3 arguments, but was given 0."
@@ -343,7 +343,7 @@ def test_conflicting_inferred_type_variable():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = list(module.nodes_of_class(astroid.Call))[1]
+    call_node = list(module.nodes_of_class(nodes.Call))[1]
     expected_msg = (
         f'In the Call node in line 8, there was an error in calling the annotated function "return_str":\n'
         f"in parameter (1), the annotated type is str but was given an object of inferred type int."
@@ -362,7 +362,7 @@ def test_non_annotated_function_call_bad_arguments():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     # TODO: This error is flawed because the unification error occurs for both arguments due to our current implementation,
     # which "chooses" the first valid function type from TypeStore.
     # Should we fix this implementation first or save it for later and hard-code the correct error message for now?
@@ -390,7 +390,7 @@ def test_user_defined_annotated_call_wrong_arguments_type():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    call_node = list(module.nodes_of_class(nodes.Call))[0]
     expected_msg = (
         f'In the Call node in line 4, there was an error in calling the annotated function "add_3":\n'
         f"in parameter (2), the annotated type is int but was given an object of type str.\n"
@@ -411,7 +411,7 @@ def test_user_defined_annotated_call_wrong_arguments_number():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = list(module.nodes_of_class(astroid.Call))[0]
+    call_node = list(module.nodes_of_class(nodes.Call))[0]
     expected_msg = "Wrong number of arguments"
     assert isinstance(call_node.inf_type, TypeFail)
 
@@ -434,7 +434,7 @@ def test_conflicting_inferred_type_variable():
         module, inferer = cs._parse_text(program)
     except:
         skip()
-    call_node = list(module.nodes_of_class(astroid.Call))[1]
+    call_node = list(module.nodes_of_class(nodes.Call))[1]
     expected_msg = (
         f'In the Call node in line 8, there was an error in calling the annotated function "return_str":\n'
         f"in parameter (1), the annotated type is str but was given an object of inferred type int."
@@ -449,7 +449,7 @@ def test_non_callable():
     x()
     """
     module, inferer = cs._parse_text(program)
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     assert isinstance(call_node.inf_type, TypeFailFunction)
 
 
@@ -467,7 +467,7 @@ def test_magic_call():
     a.__call__()
     """
     module, inferer = cs._parse_text(program, reset=True)
-    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+    for call_node in list(module.nodes_of_class(nodes.Call))[1:]:
         assert call_node.inf_type.getValue() == int
 
 
@@ -482,7 +482,7 @@ def test_no_magic_call():
     a.__call__()
     """
     module, inferer = cs._parse_text(program, reset=True)
-    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+    for call_node in list(module.nodes_of_class(nodes.Call))[1:]:
         assert isinstance(call_node.inf_type, TypeFailLookup)
 
 
@@ -500,5 +500,5 @@ def test_magic_call_wrong_args():
     a.__call__()
     """
     module, inferer = cs._parse_text(program, reset=True)
-    for call_node in list(module.nodes_of_class(astroid.Call))[1:]:
+    for call_node in list(module.nodes_of_class(nodes.Call))[1:]:
         assert isinstance(call_node.inf_type, TypeFailFunction)

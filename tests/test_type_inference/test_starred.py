@@ -1,6 +1,6 @@
 from typing import *
 
-import astroid
+from astroid import nodes
 from pytest import skip
 
 from python_ta.typecheck.base import TypeFail, TypeFailStarred
@@ -15,7 +15,7 @@ def test_list():
     b
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == List[int]
@@ -30,7 +30,7 @@ def test_range():
     b
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             t = name_node.inf_type.getValue()
@@ -46,7 +46,7 @@ def test_tuple():
     b
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == List[int]
@@ -62,7 +62,7 @@ def test_order():
     c
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == int
@@ -79,7 +79,7 @@ def test_order_2():
     b
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == int
@@ -94,7 +94,7 @@ def test_mixed_tuple():
     b
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == List[Any]
@@ -109,7 +109,7 @@ def test_mixed_tuple_order():
     b
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == int
@@ -125,7 +125,7 @@ def test_mixed_tuple_three_var():
     c
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == int
@@ -144,7 +144,7 @@ def test_mixed_tuple_four_var():
     d
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    for name_node in ast_mod.nodes_of_class(astroid.Name):
+    for name_node in ast_mod.nodes_of_class(nodes.Name):
         assert not isinstance(name_node.inf_type, TypeFail)
         if name_node.name == "a":
             assert name_node.inf_type.getValue() == int
@@ -161,7 +161,7 @@ def test_multi_starred():
     *a, b, *c = [1, 2, 3, 4, 5]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    assign_node = next(ast_mod.nodes_of_class(astroid.Assign))
+    assign_node = next(ast_mod.nodes_of_class(nodes.Assign))
     assert isinstance(assign_node.inf_type, TypeFailStarred)
 
 
@@ -171,5 +171,5 @@ def test_multi_variable():
     *a, b, *c = lst
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    assign_node = list(ast_mod.nodes_of_class(astroid.Assign))[1]
+    assign_node = list(ast_mod.nodes_of_class(nodes.Assign))[1]
     assert isinstance(assign_node.inf_type, TypeFailStarred)

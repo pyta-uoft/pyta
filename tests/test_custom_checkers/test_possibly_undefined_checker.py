@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+from astroid import nodes
 
 from python_ta.cfg import CFGVisitor
 from python_ta.checkers.possibly_undefined_checker import PossiblyUndefinedChecker
@@ -22,7 +23,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        name_node_a, name_node_b = mod.nodes_of_class(astroid.Name)
+        name_node_a, name_node_b = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_module(mod)
@@ -43,7 +44,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(astroid.Name)
+        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(nodes.Name)
         with self.assertNoMessages():
             self.checker.visit_module(mod)
             self.checker.visit_name(name_node_y)
@@ -63,7 +64,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(astroid.Name)
+        name_node_y, name_node_print, name_node_j = mod.nodes_of_class(nodes.Name)
         with self.assertNoMessages():
             self.checker.visit_module(mod)
             self.checker.visit_name(name_node_y)
@@ -80,7 +81,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_x = mod.nodes_of_class(astroid.Name)
+        _, name_node_x = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
@@ -98,7 +99,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
@@ -116,7 +117,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
@@ -139,7 +140,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
@@ -157,7 +158,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        __, name_node_y = mod.nodes_of_class(astroid.Name)
+        __, name_node_y = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
@@ -176,7 +177,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
@@ -197,7 +198,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_module(mod)
         with self.assertNoMessages():
@@ -213,7 +214,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        *_, name_node_y = mod.nodes_of_class(astroid.Name)
+        *_, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
@@ -232,7 +233,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        _, name_node_x, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_x, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
@@ -253,7 +254,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
@@ -274,7 +275,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
@@ -298,7 +299,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
@@ -316,7 +317,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_x = mod.nodes_of_class(astroid.Name)
+        _, name_node_x = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
@@ -334,7 +335,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        _, _, name_node_x, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, _, name_node_x, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
@@ -359,7 +360,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        _, name_node_y = mod.nodes_of_class(astroid.Name)
+        _, name_node_y = mod.nodes_of_class(nodes.Name)
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
@@ -378,7 +379,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
         # expression `x` at line `test = ...`
-        name_node_x = next(func_node.nodes_of_class(astroid.Name))
+        name_node_x = next(func_node.nodes_of_class(nodes.Name))
 
         self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
@@ -395,7 +396,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
         # expression `key` at line `test = ...`
-        name_node_key = next(func_node.nodes_of_class(astroid.Name))
+        name_node_key = next(func_node.nodes_of_class(nodes.Name))
 
         self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
@@ -411,8 +412,8 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = mod.body[0]
-        name_node_x = next(func_node.nodes_of_class(astroid.Name))
-        print(list(func_node.nodes_of_class(astroid.Name)))
+        name_node_x = next(func_node.nodes_of_class(nodes.Name))
+        print(list(func_node.nodes_of_class(nodes.Name)))
 
         self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(

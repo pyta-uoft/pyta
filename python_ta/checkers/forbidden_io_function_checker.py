@@ -1,7 +1,7 @@
 """checker for use of I/O functions.
 """
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -48,7 +48,7 @@ class IOFunctionChecker(BaseChecker):
 
     @check_messages("forbidden-IO-function")
     def visit_call(self, node):
-        if isinstance(node.func, astroid.Name):
+        if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
             # locals nor globals scope)
@@ -56,7 +56,7 @@ class IOFunctionChecker(BaseChecker):
                 scope = node.scope()
                 # TODO: Only FunctionDefs are checked. Include global scope?
                 if (
-                    isinstance(scope, astroid.FunctionDef)
+                    isinstance(scope, nodes.FunctionDef)
                     and scope.name not in self.config.allowed_io
                 ):
                     if name in self.config.forbidden_io_functions:

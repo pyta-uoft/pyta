@@ -3,6 +3,7 @@ from typing import Callable, List, Tuple, Union
 
 import astroid
 import hypothesis.strategies as hs
+from astroid import nodes
 from hypothesis import assume, settings
 
 from python_ta.transforms.type_inference_visitor import TypeInferer
@@ -135,7 +136,7 @@ def _parse_dictionary_to_program(variables_dict):
 def binop_node(draw, left=None, op=non_boolean_operator, right=None):
     left = left or const_node()
     right = right or const_node()
-    node = astroid.BinOp(draw(op))
+    node = nodes.BinOp(draw(op))
     node.postinit(draw(left), draw(right))
     return node
 
@@ -143,7 +144,7 @@ def binop_node(draw, left=None, op=non_boolean_operator, right=None):
 @hs.composite
 def boolop_node(draw, value=None, op=binary_bool_operator, **kwargs):
     value = value or const_node()
-    node = astroid.BoolOp(draw(op))
+    node = nodes.BoolOp(draw(op))
     if kwargs.get("min_size", 0) < 2:
         kwargs["min_size"] = 2
     node.postinit(draw(hs.lists(value, **kwargs)))
@@ -154,7 +155,7 @@ def boolop_node(draw, value=None, op=binary_bool_operator, **kwargs):
 def comprehension_node(draw, target=None, iter=None, ifs=hs.just([])):
     target = target or const_node(valid_identifier())
     iter = iter or list_node()
-    node = astroid.Comprehension()
+    node = nodes.Comprehension()
     node.postinit(draw(target), draw(iter), draw(ifs))
     return node
 
@@ -162,13 +163,13 @@ def comprehension_node(draw, target=None, iter=None, ifs=hs.just([])):
 @hs.composite
 def const_node(draw, value=primitive_values):
     """Return a Const node with value drawn from <value>."""
-    return astroid.Const(draw(value))
+    return nodes.Const(draw(value))
 
 
 @hs.composite
 def dict_node(draw, key=const_node(), value=const_node(), **kwargs):
     items = draw(hs.dictionaries(key, value, **kwargs)).items()
-    node = astroid.Dict()
+    node = nodes.Dict()
     node.postinit(items)
     return node
 
@@ -176,7 +177,7 @@ def dict_node(draw, key=const_node(), value=const_node(), **kwargs):
 @hs.composite
 def expr_node(draw, value=None):
     value = value or expr
-    node = astroid.Expr()
+    node = nodes.Expr()
     node.postinit(draw(value))
     return node
 
@@ -186,14 +187,14 @@ def ifexp_node(draw, test=const_node(hs.booleans()), expr=const_node(), orelse=c
     # TODO: Add an option for whether expr and orelse strategies produce the same type.
     test = draw(test)
     expr = draw(expr)
-    node = astroid.IfExp()
+    node = nodes.IfExp()
     node.postinit(test, expr, expr)
     return node
 
 
 @hs.composite
 def index_node(draw, value=const_node(hs.integers())):
-    node = astroid.Index()
+    node = nodes.Index()
     node.postinit(draw(value))
     return node
 
@@ -201,14 +202,14 @@ def index_node(draw, value=const_node(hs.integers())):
 @hs.composite
 def set_node(draw, elt=const_node(), **kwargs):
     """Return a Set node with elements drawn from elt."""
-    node = astroid.Set()
+    node = nodes.Set()
     node.postinit(draw(hs.sets(elt, **kwargs)))
     return node
 
 
 @hs.composite
 def setcomp_node(draw, elt=const_node(), generators=hs.lists(comprehension_node(), min_size=1)):
-    node = astroid.SetComp()
+    node = nodes.SetComp()
     node.postinit(draw(elt), draw(generators))
     return node
 
@@ -216,14 +217,14 @@ def setcomp_node(draw, elt=const_node(), generators=hs.lists(comprehension_node(
 @hs.composite
 def list_node(draw, elt=const_node(), **kwargs):
     """Return a List node with elements drawn from elt."""
-    node = astroid.List()
+    node = nodes.List()
     node.postinit(draw(hs.lists(elt, **kwargs)))
     return node
 
 
 @hs.composite
 def listcomp_node(draw, elt=const_node(), generators=hs.lists(comprehension_node(), min_size=1)):
-    node = astroid.ListComp()
+    node = nodes.ListComp()
     node.postinit(draw(elt), draw(generators))
     return node
 
@@ -233,7 +234,7 @@ def slice_node(draw):
     lower = draw(hs.one_of(const_node(hs.integers()), hs.none()))
     upper = draw(hs.one_of(const_node(hs.integers()), hs.none()))
     step = draw(hs.one_of(const_node(hs.integers()), hs.none()))
-    node = astroid.Slice()
+    node = nodes.Slice()
     node.postinit(lower, upper, step)
     return node
 
@@ -241,7 +242,7 @@ def slice_node(draw):
 @hs.composite
 def subscript_node(draw, value=None, slice=const_node(hs.integers())):
     value = value or subscriptable_expr
-    node = astroid.Subscript()
+    node = nodes.Subscript()
     node.postinit(draw(value), draw(slice))
     return node
 
@@ -250,7 +251,7 @@ def subscript_node(draw, value=None, slice=const_node(hs.integers())):
 def tuple_node(draw, elt=const_node, **kwargs):
     """Return a Tuple node with elements drawn from elt."""
     elts = draw(hs.lists(elt(), **kwargs, min_size=1))
-    node = astroid.Tuple()
+    node = nodes.Tuple()
     node.postinit(elts)
     return node
 
@@ -259,7 +260,7 @@ def tuple_node(draw, elt=const_node, **kwargs):
 def unaryop_node(draw, op=hs.one_of(non_bool_unary_op, unary_bool_operator), operand=const_node()):
     op = draw(op)
     operand = draw(operand)
-    node = astroid.UnaryOp(op)
+    node = nodes.UnaryOp(op)
     node.postinit(operand)
     return node
 
@@ -288,9 +289,9 @@ def simple_homogeneous_set_node(draw, **kwargs):
 @hs.composite
 def name_node(draw, name=None):
     if not name:
-        node = astroid.Name(draw(valid_identifier()))
+        node = nodes.Name(draw(valid_identifier()))
     else:
-        node = astroid.Name(draw(name))
+        node = nodes.Name(draw(name))
     return node
 
 
@@ -302,7 +303,7 @@ def arguments_node(draw, annotated=False):
         annotations = draw(hs.lists(name_node(annotation), min_size=n, max_size=n))
     else:
         annotations = None
-    node = astroid.Arguments()
+    node = nodes.Arguments()
     node.postinit(args, None, None, None, annotations)
     return node
 
@@ -312,15 +313,15 @@ def functiondef_node(draw, name=None, annotated=False, returns=False):
     name = name or draw(valid_identifier())
     args = draw(arguments_node(annotated))
     body = []
-    returns_node = astroid.Return()
+    returns_node = nodes.Return()
     arg_node, arg_type_node = draw(hs.sampled_from(list(zip(args.args, args.annotations))))
     if returns:
         returns_node.postinit(arg_node)
     else:
         returns_node.postinit(const_node(None))
     body.append(returns_node)
-    node = astroid.FunctionDef(name=name)
-    node.parent = astroid.Module("Default", None)
+    node = nodes.FunctionDef(name=name)
+    node.parent = nodes.Module("Default", None)
     node.postinit(args, body, None, arg_type_node)
     return node
 
@@ -334,12 +335,12 @@ subscriptable_expr = hs.one_of(
 
 # Helper functions for testing
 def _parse_text(
-    source: Union[str, astroid.NodeNG], reset: bool = False
-) -> Tuple[astroid.Module, TypeInferer]:
+    source: Union[str, nodes.NodeNG], reset: bool = False
+) -> Tuple[nodes.Module, TypeInferer]:
     """Parse source code text and output an AST with type inference performed."""
     # TODO: apparently no literal syntax for empty set in Python3, also cannot do set()
     # TODO: Deal with special case later.
-    # if isinstance(source, astroid.Set) and len(list(source.elts)) == 0:
+    # if isinstance(source, nodes.Set) and len(list(source.elts)) == 0:
     #     source = f'{set({})}'
     if not isinstance(source, str):  # It's an astroid node
         source = source.as_string()
@@ -358,7 +359,7 @@ def _verify_type_setting(module, ast_class, expected_type):
     assert [expected_type] == result, f"{expected_type}, {result}"
 
 
-def lookup_type(inferer: TypeInferer, node: astroid.NodeNG, name: str) -> type:
+def lookup_type(inferer: TypeInferer, node: nodes.NodeNG, name: str) -> type:
     """Given a variable name, return its concrete type in the closest scope relative to given node.
     Should be used only for testing purposes.
     """

@@ -3,7 +3,7 @@
 from itertools import chain
 from typing import Generator, Set, Union
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -30,7 +30,7 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     def __init__(self, linter=None):
         super().__init__(linter=linter)
-        self._possibly_undefined: Set[astroid.Name] = set()
+        self._possibly_undefined: Set[nodes.Name] = set()
 
     @check_messages("possibly-undefined")
     def visit_name(self, node):
@@ -45,7 +45,7 @@ class PossiblyUndefinedChecker(BaseChecker):
     def visit_functiondef(self, node):
         self._analyze(node)
 
-    def _analyze(self, node: Union[astroid.Module, astroid.FunctionDef]) -> None:
+    def _analyze(self, node: Union[nodes.Module, nodes.FunctionDef]) -> None:
         """Runs the data flow algorithm on a `Module` or `Function` CFG, which in turn
         appends `Name` nodes to `self.possibly_undefined` if it might not be defined.
 
@@ -79,18 +79,18 @@ class PossiblyUndefinedChecker(BaseChecker):
         gen = in_facts.copy()
         kill = set()
         for statement in block.statements:
-            if isinstance(statement, astroid.FunctionDef):
+            if isinstance(statement, nodes.FunctionDef):
                 continue
             for node in self.get_nodes(statement):
-                if isinstance(node, astroid.AssignName):
+                if isinstance(node, nodes.AssignName):
                     gen.add(node.name)
-                elif isinstance(node, astroid.DelName):
+                elif isinstance(node, nodes.DelName):
                     kill.add(node.name)
                 else:
                     name = node.name
                     # comment out 'self.config....' check when running tests
                     if (
-                        not (name in astroid.Module.scope_attrs or utils.is_builtin(name))
+                        not (name in nodes.Module.scope_attrs or utils.is_builtin(name))
                         and name in local_vars
                         and name not in gen.difference(kill)
                     ):
@@ -99,7 +99,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                         self._possibly_undefined.remove(node)
         return gen.difference(kill)
 
-    def _get_assigns(self, node: Union[astroid.FunctionDef, astroid.Module]) -> Set[str]:
+    def _get_assigns(self, node: Union[nodes.FunctionDef, nodes.Module]) -> Set[str]:
         """Returns a set of all local and parameter variables that could be
         defined in the program (either a function or module).
 
@@ -111,12 +111,12 @@ class PossiblyUndefinedChecker(BaseChecker):
         """
         assigns = set()
         kills = set()
-        for name, nodes in node.scope().locals.items():
-            if any(isinstance(elem, astroid.AssignName) for elem in nodes):
+        for name, assign_nodes in node.scope().locals.items():
+            if any(isinstance(elem, nodes.AssignName) for elem in assign_nodes):
                 assigns.add(name)
         for statement in node.nodes_of_class(
-            (astroid.Nonlocal, astroid.Global, astroid.ImportFrom, astroid.Import),
-            astroid.FunctionDef,
+            (nodes.Nonlocal, nodes.Global, nodes.ImportFrom, nodes.Import),
+            nodes.FunctionDef,
         ):
             for name in statement.names:
                 if type(name) is tuple:
@@ -127,14 +127,14 @@ class PossiblyUndefinedChecker(BaseChecker):
 
         return assigns.difference(kills)
 
-    def get_nodes(self, statement: astroid.NodeNG) -> Generator[astroid.NodeNG, None, None]:
-        multiple_nodes = lambda nodes: chain.from_iterable(self.get_nodes(node) for node in nodes)
-        if isinstance(statement, astroid.Assign):
+    def get_nodes(self, statement: nodes.NodeNG) -> Generator[nodes.NodeNG, None, None]:
+        multiple_nodes = lambda nodes_: chain.from_iterable(self.get_nodes(node) for node in nodes_)
+        if isinstance(statement, nodes.Assign):
             # RHS is evaluated before assigned in an assignment statement
             yield from self.get_nodes(statement.value)
             yield from multiple_nodes(statement.targets)  # statement.targets is a list of nodes
         elif isinstance(
-            statement, (astroid.ListComp, astroid.SetComp, astroid.DictComp, astroid.GeneratorExp)
+            statement, (nodes.ListComp, nodes.SetComp, nodes.DictComp, nodes.GeneratorExp)
         ):
             # Comprehension targets are assigned before expression is evaluated.
             yield from multiple_nodes(
@@ -147,7 +147,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                 yield from self.get_nodes(statement.elt)
         else:
             yield from statement.nodes_of_class(
-                (astroid.AssignName, astroid.DelName, astroid.Name), astroid.FunctionDef
+                (nodes.AssignName, nodes.DelName, nodes.Name), nodes.FunctionDef
             )
 
 

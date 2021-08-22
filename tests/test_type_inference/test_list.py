@@ -1,6 +1,6 @@
 from typing import Any, List
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 from pytest import skip
 
@@ -17,11 +17,11 @@ settings.load_profile("pyta")
 def test_homogeneous_lists(lst):
     """Test List nodes representing a list of values of the same primitive type."""
     module, _ = cs._parse_text(lst)
-    list_node = list(module.nodes_of_class(astroid.List))[0]
+    list_node = list(module.nodes_of_class(nodes.List))[0]
     if len(list_node.elts) == 0:
         assert list_node.inf_type.getValue() == List[Any]
     else:
-        cs._verify_type_setting(module, astroid.List, List[type(lst.elts[0].value)])
+        cs._verify_type_setting(module, nodes.List, List[type(lst.elts[0].value)])
 
 
 @given(cs.list_node(min_size=2))
@@ -36,7 +36,7 @@ def test_random_lists(lst):
     if bool in val_types:
         assume(int not in val_types)
     module, _ = cs._parse_text(lst)
-    cs._verify_type_setting(module, astroid.List, List[Any])
+    cs._verify_type_setting(module, nodes.List, List[Any])
 
 
 def test_empty_list_reassign():
@@ -45,9 +45,7 @@ def test_empty_list_reassign():
     x = [1]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -57,7 +55,7 @@ def test_empty_list_reassign_invalid():
     x = ['abc']
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    assgn_node = list(ast_mod.nodes_of_class(astroid.Assign))[1]
+    assgn_node = list(ast_mod.nodes_of_class(nodes.Assign))[1]
     assert isinstance(assgn_node.inf_type, TypeFail)
 
 
@@ -69,9 +67,7 @@ def test_empty_list_reassign_twice():
     x = [1, 'abc'] # List[Any] and not List[int]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[Any]
 
 
@@ -81,9 +77,7 @@ def test_empty_list_append():
     x.append(1)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -94,7 +88,7 @@ def test_empty_list_append_invalid():
     x.append('abc')
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    call_node = list(ast_mod.nodes_of_class(astroid.Call))[1]
+    call_node = list(ast_mod.nodes_of_class(nodes.Call))[1]
     assert isinstance(call_node.inf_type, TypeFail)
 
 
@@ -104,9 +98,7 @@ def test_list_append():
     x.append(4)
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -118,8 +110,8 @@ def test_list_append_list_typevar():
         return lst
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    return_node = next(ast_mod.nodes_of_class(astroid.Return))
-    functiondef_node = next(ast_mod.nodes_of_class(astroid.FunctionDef))
+    return_node = next(ast_mod.nodes_of_class(nodes.Return))
+    functiondef_node = next(ast_mod.nodes_of_class(nodes.FunctionDef))
     assert (
         lookup_type(ti, return_node, return_node.value.name)
         == List[lookup_type(ti, functiondef_node, "x")]

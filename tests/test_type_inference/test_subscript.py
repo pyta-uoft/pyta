@@ -1,6 +1,6 @@
 from typing import List
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, given, settings
 from pytest import skip
 
@@ -17,7 +17,7 @@ settings.load_profile("pyta")
 def test_inference_list_subscript(node):
     """Test whether visitor properly set the type constraint of Subscript node representing list-index access."""
     module, _ = cs._parse_text(node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         list_node = subscript_node.value
         assert subscript_node.inf_type.getValue() == list_node.elts[0].inf_type.getValue()
 
@@ -27,7 +27,7 @@ def test_inference_list_subscript(node):
 def test_subscript_homogeneous_list_slice(node):
     """Test visitor of Subscript node representing slicing of homogeneous list."""
     module, _ = cs._parse_text(node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         list_node = subscript_node.value
         assert subscript_node.inf_type.getValue() == List[list_node.elts[0].inf_type.getValue()]
 
@@ -36,10 +36,10 @@ def test_subscript_homogeneous_list_slice(node):
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_subscript_load_ctx(node):
     """Test visitor of Subscript node when loaded in an (if) expression."""
-    load_node = astroid.If()
-    load_node.postinit(astroid.Const(True), [node], [])
+    load_node = nodes.If()
+    load_node.postinit(nodes.Const(True), [node], [])
     module, _ = cs._parse_text(load_node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         list_node = subscript_node.value
         assert subscript_node.inf_type.getValue() == List[list_node.elts[0].inf_type.getValue()]
 
@@ -50,9 +50,9 @@ def test_homogenous_list_store_ctx():
         [1,2,3][0] = 2
         """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert assign_node.inf_type == NoType()
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         assert subscript_node.inf_type == NoType()
 
 
@@ -62,9 +62,9 @@ def test_homogenous_list_invalid_store_ctx():
         [1,2,3][0] = 'a'
         """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         assert subscript_node.inf_type == NoType()
 
 
@@ -72,10 +72,10 @@ def test_homogenous_list_invalid_store_ctx():
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_subscript_del_ctx(node):
     """Test visitor of Subscript node within a del statement."""
-    del_node = astroid.Delete()
+    del_node = nodes.Delete()
     del_node.postinit([node])
     module, _ = cs._parse_text(del_node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         assert subscript_node.inf_type.getValue() == type(None)
 
 
@@ -85,10 +85,10 @@ def test_inference_dict_subscript(node):
     must be the same type as the dictionary's keys in order to type check.
     """
     for key, _ in node.items:
-        new_node = astroid.Subscript()
+        new_node = nodes.Subscript()
         new_node.postinit(node, key)
         module, _ = cs._parse_text(new_node)
-        for subscript_node in module.nodes_of_class(astroid.Subscript):
+        for subscript_node in module.nodes_of_class(nodes.Subscript):
             dict_node = subscript_node.value
             assert (
                 subscript_node.inf_type.getValue()
@@ -98,12 +98,12 @@ def test_inference_dict_subscript(node):
 
 @given(cs.simple_homogeneous_list_node(min_size=1))
 def test_inference_invalid_slice(node):
-    sub_node = astroid.Subscript()
-    slice = astroid.Slice()
-    slice.postinit(astroid.Const(0), astroid.Const("a"))
+    sub_node = nodes.Subscript()
+    slice = nodes.Slice()
+    slice.postinit(nodes.Const(0), nodes.Const("a"))
     sub_node.postinit(node, slice)
     module, _ = cs._parse_text(sub_node)
-    for subscript_node in module.nodes_of_class(astroid.Subscript):
+    for subscript_node in module.nodes_of_class(nodes.Subscript):
         assert isinstance(subscript_node.inf_type, TypeFail)
 
 
@@ -118,7 +118,7 @@ def test_inference_ext_slice():
         foo[1, 'a']
         """
     module, _ = cs._parse_text(program)
-    subscript_node = list(module.nodes_of_class(astroid.Subscript))[1]
+    subscript_node = list(module.nodes_of_class(nodes.Subscript))[1]
     assert subscript_node.inf_type.getValue() == int
 
 
@@ -127,7 +127,7 @@ def test_subscript_slice():
         x = List[:]
         """
     module, _ = cs._parse_text(program)
-    assign_node = next(module.nodes_of_class(astroid.Assign))
+    assign_node = next(module.nodes_of_class(nodes.Assign))
     assert isinstance(assign_node.inf_type, TypeFail)
 
 
@@ -139,5 +139,5 @@ def test_subscript_slice():
 #     input_slice = ':'.join([str(index) if index else '' for index in slice])
 #     program = f'{input_list}[{input_slice}]'
 #     module, _ = cs._parse_text(program)
-#     subscript_node = list(module.nodes_of_class(astroid.Subscript))[0]
+#     subscript_node = list(module.nodes_of_class(nodes.Subscript))[0]
 #     assert subscript_node.inf_type.getValue() == List[Any]

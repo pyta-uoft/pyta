@@ -1,6 +1,6 @@
 from typing import Tuple
 
-import astroid
+from astroid import nodes
 
 from python_ta.transforms.type_inference_visitor import NoType
 from python_ta.typecheck.base import TypeFail, TypeInfo
@@ -38,21 +38,21 @@ def generate_tuple_assign(length: int, t: type, same_length: bool, more_args: bo
 def test_tuple_same_length_int():
     program = generate_tuple_assign(10, int, True)
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert assign_node.inf_type == NoType()
 
 
 def test_tuple_same_length_bool():
     program = generate_tuple_assign(10, bool, True)
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert assign_node.inf_type == NoType()
 
 
 def test_tuple_same_length_str():
     program = generate_tuple_assign(10, str, True)
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert assign_node.inf_type == NoType()
 
 
@@ -63,7 +63,7 @@ def test_tuple_single_var():
     c = 1, 2, 3, 4
     """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert assign_node.inf_type == NoType()
 
 
@@ -74,21 +74,21 @@ def test_tuple_single_val():
     a, b, c, d = 1
     """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
 
 
 def test_tuple_extra_vars():
     program = generate_tuple_assign(10, int, False, True)
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
 
 
 def test_tuple_extra_value():
     program = generate_tuple_assign(10, int, False, False)
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert isinstance(assign_node.inf_type, TypeFail)
 
 
@@ -98,7 +98,7 @@ def test_tuple_subscript():
     lst[0], lst[1] = 'Bonjour', 'Au revoir'
     """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert not isinstance(assign_node.inf_type, TypeFail)
 
 
@@ -113,7 +113,7 @@ def test_tuple_attribute():
     a.first_attr, a.second_attr = 10, 11
     """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert not isinstance(assign_node.inf_type, TypeFail)
 
 
@@ -130,7 +130,7 @@ def test_tuple_attribute_variable():
     a.first_attr, a.second_attr = some_list
     """
     module, _ = cs._parse_text(program)
-    for assign_node in module.nodes_of_class(astroid.Assign):
+    for assign_node in module.nodes_of_class(nodes.Assign):
         assert not isinstance(assign_node.inf_type, TypeFail)
 
 
@@ -142,7 +142,7 @@ def test_tuple_empty():
         a = b
     """
     module, ti = cs._parse_text(program)
-    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    functiondef_node = next(module.nodes_of_class(nodes.FunctionDef))
     assert lookup_type(ti, functiondef_node, "a") == Tuple[()]
     x_type = lookup_type(ti, functiondef_node, "x")
     assert lookup_type(ti, functiondef_node, "b") == Tuple[x_type]

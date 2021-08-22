@@ -1,7 +1,7 @@
 """Specify how errors should be rendered."""
 from enum import Enum
 
-import astroid
+from astroid import nodes
 
 
 def render_message(msg, node, source_lines):
@@ -15,7 +15,7 @@ def render_generic(msg, node=None, source_lines=None):
     if node is not None:
         start_line, start_col = node.fromlineno, node.col_offset
 
-        if isinstance(node, (astroid.FunctionDef, astroid.ClassDef)):
+        if isinstance(node, (nodes.FunctionDef, nodes.ClassDef)):
             end_line, end_col = start_line, None
         else:
             end_line, end_col = node.end_lineno, node.end_col_offset
@@ -50,10 +50,10 @@ def render_generic(msg, node=None, source_lines=None):
 
 def render_missing_docstring(_msg, node, source_lines=None):
     """Render a missing docstring message."""
-    if isinstance(node, astroid.Module):
+    if isinstance(node, nodes.Module):
         yield (None, slice(None, None), LineType.DOCSTRING, '"""YOUR DOCSTRING HERE"""')
         yield from render_context(1, 3, source_lines)
-    elif isinstance(node, astroid.ClassDef) or isinstance(node, astroid.FunctionDef):
+    elif isinstance(node, nodes.ClassDef) or isinstance(node, nodes.FunctionDef):
         start = node.fromlineno
         end = node.body[0].fromlineno
         yield from render_context(start, end, source_lines)

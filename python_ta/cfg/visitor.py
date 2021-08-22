@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Tuple, Union
 
-import astroid
+from astroid import nodes
 
 from .graph import CFGBlock, ControlFlowGraph
 
@@ -14,10 +14,10 @@ class CFGVisitor:
         (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
 
-    cfgs: Dict[Union[astroid.FunctionDef, astroid.Module], ControlFlowGraph]
+    cfgs: Dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
-    _control_boundaries: List[Tuple[astroid.NodeNG, Dict[str, CFGBlock]]]
+    _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
 
     def __init__(self) -> None:
         super().__init__()
@@ -32,11 +32,11 @@ class CFGVisitor:
         else:
             raise AttributeError(f"'CFGVisitor' object has not attribute '{attr}'")
 
-    def visit_generic(self, node: astroid.NodeNG) -> None:
+    def visit_generic(self, node: nodes.NodeNG) -> None:
         """By default, add the expression to the end of the current block."""
         self._current_block.add_statement(node)
 
-    def visit_module(self, module: astroid.Module) -> None:
+    def visit_module(self, module: nodes.Module) -> None:
         self.cfgs[module] = ControlFlowGraph()
         self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
@@ -48,11 +48,11 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_cfg.update_block_reachability()
 
-    def visit_classdef(self, node: astroid.ClassDef) -> None:
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
         for child in node.body:
             child.accept(self)
 
-    def visit_functiondef(self, func: astroid.FunctionDef) -> None:
+    def visit_functiondef(self, func: nodes.FunctionDef) -> None:
         self._current_block.add_statement(func)
 
         previous_cfg = self._current_cfg
@@ -61,7 +61,7 @@ class CFGVisitor:
         self.cfgs[func] = ControlFlowGraph()
         self._current_cfg = self.cfgs[func]
 
-        self._control_boundaries.append((func, {astroid.Return.__name__: self._current_cfg.end}))
+        self._control_boundaries.append((func, {nodes.Return.__name__: self._current_cfg.end}))
 
         self._current_cfg.start.add_statement(func.args)
         func.cfg_block = self._current_cfg.start
@@ -79,7 +79,7 @@ class CFGVisitor:
         self._current_block = previous_block
         self._current_cfg = previous_cfg
 
-    def visit_if(self, node: astroid.If) -> None:
+    def visit_if(self, node: nodes.If) -> None:
         self._current_block.add_statement(node.test)
         node.cfg_block = self._current_block
         old_curr = self._current_block
@@ -107,7 +107,7 @@ class CFGVisitor:
 
         self._current_block = after_if_block
 
-    def visit_while(self, node: astroid.While) -> None:
+    def visit_while(self, node: nodes.While) -> None:
         old_curr = self._current_block
 
         # Handle "test" block
@@ -122,7 +122,7 @@ class CFGVisitor:
         self._control_boundaries.append(
             (
                 node,
-                {astroid.Break.__name__: after_while_block, astroid.Continue.__name__: test_block},
+                {nodes.Break.__name__: after_while_block, nodes.Continue.__name__: test_block},
             )
         )
 
@@ -147,7 +147,7 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(end_else, after_while_block)
         self._current_block = after_while_block
 
-    def visit_for(self, node: astroid.For) -> None:
+    def visit_for(self, node: nodes.For) -> None:
         old_curr = self._current_block
         old_curr.add_statement(node.iter)
         node.cfg_block = old_curr
@@ -161,7 +161,7 @@ class CFGVisitor:
 
         # step into for
         self._control_boundaries.append(
-            (node, {astroid.Break.__name__: after_for_block, astroid.Continue.__name__: test_block})
+            (node, {nodes.Break.__name__: after_for_block, nodes.Continue.__name__: test_block})
         )
 
         # Handle "body" branch
@@ -185,16 +185,16 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(end_else, after_for_block)
         self._current_block = after_for_block
 
-    def visit_break(self, node: astroid.Break) -> None:
+    def visit_break(self, node: nodes.Break) -> None:
         self._visit_jump(node)
 
-    def visit_continue(self, node: astroid.Continue) -> None:
+    def visit_continue(self, node: nodes.Continue) -> None:
         self._visit_jump(node)
 
-    def visit_return(self, node: astroid.Return) -> None:
+    def visit_return(self, node: nodes.Return) -> None:
         self._visit_jump(node)
 
-    def _visit_jump(self, node: Union[astroid.Break, astroid.Continue, astroid.Return]) -> None:
+    def _visit_jump(self, node: Union[nodes.Break, nodes.Continue, nodes.Return]) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
             if type(node).__name__ in exits:
@@ -204,12 +204,12 @@ class CFGVisitor:
         else:
             raise SyntaxError(
                 f"'{type(node).__name__}' outside"
-                f' {"function" if isinstance(node, astroid.Return) else "loop"}'
+                f' {"function" if isinstance(node, nodes.Return) else "loop"}'
             )
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 
-    def visit_tryexcept(self, node: astroid.TryExcept) -> None:
+    def visit_tryexcept(self, node: nodes.TryExcept) -> None:
         if self._current_block.statements != []:
             self._current_block = self._current_cfg.create_block(self._current_block)
 
@@ -246,7 +246,7 @@ class CFGVisitor:
         self._current_cfg.multiple_link_or_merge(end_body, after_body)
         self._current_block = end_block
 
-    def visit_with(self, node: astroid.With) -> None:
+    def visit_with(self, node: nodes.With) -> None:
         for context_node, name in node.items:
             self._current_block.add_statement(context_node)
             if name is not None:

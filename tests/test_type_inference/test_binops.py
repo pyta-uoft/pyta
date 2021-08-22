@@ -1,6 +1,6 @@
 from typing import List
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 
 from python_ta.typecheck.base import TypeFail, TypeFailFunction
@@ -16,7 +16,7 @@ settings.load_profile("pyta")
 def test_binop_non_bool_concrete(node):
     """Test type setting of BinOp node(s) with non-boolean operands."""
     module, inferer = cs._parse_text(node)
-    binop_node = list(module.nodes_of_class(astroid.BinOp))[0]
+    binop_node = list(module.nodes_of_class(nodes.BinOp))[0]
     left_type, right_type = (
         binop_node.left.inf_type.getValue(),
         binop_node.right.inf_type.getValue(),
@@ -37,9 +37,7 @@ def test_binop_reverse():
     x = 3 * [1,2,3]
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
-    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)][
-        0
-    ]
+    x = [ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)][0]
     assert ti.type_constraints.resolve(x).getValue() == List[int]
 
 
@@ -51,8 +49,7 @@ def test_binop_autoconvert():
     """
     module, inferer = cs._parse_text(program, reset=True)
     x, y, z = [
-        inferer.lookup_typevar(node, node.name)
-        for node in module.nodes_of_class(astroid.AssignName)
+        inferer.lookup_typevar(node, node.name) for node in module.nodes_of_class(nodes.AssignName)
     ]
     assert inferer.type_constraints.resolve(x).getValue() == float
     assert inferer.type_constraints.resolve(y).getValue() == complex
@@ -67,7 +64,7 @@ def test_binop_autoconvert_fail():
     w = 1j << 2
     """
     module, inferer = cs._parse_text(program, reset=True)
-    for binop_node in module.nodes_of_class(astroid.BinOp):
+    for binop_node in module.nodes_of_class(nodes.BinOp):
         assert isinstance(binop_node.inf_type, TypeFail)
 
 
@@ -93,7 +90,7 @@ def test_binop_userdefn():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     a, b, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ][8:]
     assert ti.type_constraints.resolve(x).getValue() == int
 
@@ -117,7 +114,7 @@ def test_binop_reverse_userdefn():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     a, b, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ][6:]
     assert ti.type_constraints.resolve(x).getValue() == bool
 
@@ -144,6 +141,6 @@ def test_binop_reverse_right_subclasses_left():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     a, b, x = [
-        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(astroid.AssignName)
+        ti.lookup_typevar(node, node.name) for node in ast_mod.nodes_of_class(nodes.AssignName)
     ][8:]
     assert ti.type_constraints.resolve(x).getValue() == List[int]

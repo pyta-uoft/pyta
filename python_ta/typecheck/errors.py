@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *
 from typing import _GenericAlias
 
-import astroid
+from astroid import nodes
 
 from python_ta.utils import _get_name, _gorg
 
@@ -105,11 +105,11 @@ INPLACE_TO_BINOP = {
 ###############################################################################
 def error_message(tf: TypeFail) -> None:
     """Return an appropriate error message given an instance of TypeFailFunction."""
-    if isinstance(tf.src_node, astroid.UnaryOp):
+    if isinstance(tf.src_node, nodes.UnaryOp):
         return unaryop_error_message(tf.src_node)
-    elif isinstance(tf.src_node, astroid.BinOp):
+    elif isinstance(tf.src_node, nodes.BinOp):
         return binop_error_message(tf.src_node)
-    elif isinstance(tf.src_node, astroid.Subscript):
+    elif isinstance(tf.src_node, nodes.Subscript):
         return subscript_error_message(tf.src_node)
     else:
         return f"TypeFail: Invalid function call at {tf.src_node.as_string()}"
@@ -126,7 +126,7 @@ def binary_op_hints(op, args):
             return "Perhaps you wanted to cast the integer into a string or vice versa?"
 
 
-def binop_error_message(node: astroid.BinOp) -> str:
+def binop_error_message(node: nodes.BinOp) -> str:
     op_name = BINOP_TO_ENGLISH[node.op]
     left_type = _get_name(node.left.inf_type.getValue())
     right_type = _get_name(node.right.inf_type.getValue())
@@ -142,7 +142,7 @@ def binop_error_message(node: astroid.BinOp) -> str:
 ###############################################################################
 # UnaryOp message
 ###############################################################################
-def unaryop_error_message(node: astroid.UnaryOp) -> str:
+def unaryop_error_message(node: nodes.UnaryOp) -> str:
     op_name = UNARY_TO_ENGLISH[node.op]
     operand = _get_name(node.operand.inf_type.getValue())
 
@@ -152,7 +152,7 @@ def unaryop_error_message(node: astroid.UnaryOp) -> str:
 ###############################################################################
 # Subscript message
 ###############################################################################
-def subscript_error_message(node: astroid.Subscript) -> str:
+def subscript_error_message(node: nodes.Subscript) -> str:
     # Accessing an element of a List with an incompatible index type (non-integers)
     subscript_concrete_type = (node.value.inf_type).getValue()
     if subscript_concrete_type is type(None):
@@ -166,9 +166,7 @@ def subscript_error_message(node: astroid.Subscript) -> str:
     if subscript_gorg is list:
         slice_type = _get_name(node.slice.inf_type.getValue())
         slice_val = node.slice.value
-        slice_str = (
-            slice_val.as_string() if isinstance(slice_val, astroid.NodeNG) else str(slice_val)
-        )
+        slice_str = slice_val.as_string() if isinstance(slice_val, nodes.NodeNG) else str(slice_val)
         return (
             f"You can only access elements of a list using an int. "
             f"You used {_correct_article(slice_type)}, {slice_str}."
@@ -176,9 +174,7 @@ def subscript_error_message(node: astroid.Subscript) -> str:
     elif subscript_gorg is tuple:
         slice_type = _get_name(node.slice.inf_type.getValue())
         slice_val = node.slice.value
-        slice_str = (
-            slice_val.as_string() if isinstance(slice_val, astroid.NodeNG) else str(slice_val)
-        )
+        slice_str = slice_val.as_string() if isinstance(slice_val, nodes.NodeNG) else str(slice_val)
         return (
             f"You can only access elements of a tuple using an int. "
             f"You used {_correct_article(slice_type)}, {slice_str}."
@@ -186,9 +182,7 @@ def subscript_error_message(node: astroid.Subscript) -> str:
     elif subscript_gorg is dict:
         slice_type = _get_name(node.slice.inf_type.getValue())
         slice_val = node.slice.value
-        slice_str = (
-            slice_val.as_string() if isinstance(slice_val, astroid.NodeNG) else str(slice_val)
-        )
+        slice_str = slice_val.as_string() if isinstance(slice_val, nodes.NodeNG) else str(slice_val)
         return (
             f"You tried to access an element of this dictionary using "
             f"{_correct_article(slice_type)}, {slice_str}, "

@@ -1,5 +1,5 @@
-import astroid
 import hypothesis.strategies as hs
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 
 from python_ta.typecheck.base import TypeFail
@@ -19,7 +19,7 @@ def test_compare_equality(left_value, operator_value_tuples):
     for operator, value in operator_value_tuples:
         program += " " + " ".join([operator, repr(value)])
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
@@ -35,7 +35,7 @@ def test_compare_inequality(operators, values):
     # pre_input_program = [str(elt) for tuple in zip(operator, values) for elt in tuple]
     program = f"{str(values[0])} " + " ".join(pre)
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
@@ -43,7 +43,7 @@ def test_compare_in():
     """Test type setting of Compare node representing 'in' operator"""
     program = "0 in [1,2,3]"
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
@@ -51,7 +51,7 @@ def test_compare_in_error():
     """Test type setting of Compare node representing invaliud use of 'in' operator"""
     program = "0 in 5"
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert isinstance(compare_node.inf_type, TypeFail)
 
 
@@ -61,7 +61,7 @@ def test_compare_is():
     A is 1
     """
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
@@ -71,7 +71,7 @@ def test_compare_is_not():
     A is not 1
     """
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
@@ -82,7 +82,7 @@ def test_compare_not_in():
 
     """
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert compare_node.inf_type.getValue() == bool
 
 
@@ -93,5 +93,5 @@ def test_compare_not_in_fail():
 
     """
     module, _ = cs._parse_text(program)
-    compare_node = list(module.nodes_of_class(astroid.Compare))[0]
+    compare_node = list(module.nodes_of_class(nodes.Compare))[0]
     assert isinstance(compare_node.inf_type, TypeFail)

@@ -1,6 +1,6 @@
 import typing
 
-import astroid
+from astroid import nodes
 from pytest import skip
 
 from python_ta.typecheck.base import (
@@ -41,7 +41,7 @@ def verify_typefail_unify(tf: TypeFailUnify, *exp_tnodes, exp_src_type, num_reas
 
 def verify_typefail_function(tf: TypeFailFunction, act_func_call: str):
     assert isinstance(tf, TypeFailFunction)
-    assert isinstance(tf.src_node, astroid.Call)
+    assert isinstance(tf.src_node, nodes.Call)
     assert tf.src_node.as_string() == act_func_call
 
 
@@ -52,7 +52,7 @@ def test_var_assign():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, "A", str, exp_src_type=astroid.Assign, num_reasons=1)
+    verify_typefail_unify(tf, "A", str, exp_src_type=nodes.Assign, num_reasons=1)
 
 
 def test_two_var_assign():
@@ -63,7 +63,7 @@ def test_two_var_assign():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, "A", "B", exp_src_type=astroid.Assign, num_reasons=2)
+    verify_typefail_unify(tf, "A", "B", exp_src_type=nodes.Assign, num_reasons=2)
 
 
 def test_var_chain():
@@ -78,7 +78,7 @@ def test_var_chain():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, "C", "Z", exp_src_type=astroid.Assign, num_reasons=4)
+    verify_typefail_unify(tf, "C", "Z", exp_src_type=nodes.Assign, num_reasons=4)
 
 
 def test_one_list():
@@ -88,7 +88,7 @@ def test_one_list():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, "L1", str, exp_src_type=astroid.Assign, num_reasons=1)
+    verify_typefail_unify(tf, "L1", str, exp_src_type=nodes.Assign, num_reasons=1)
 
 
 def test_two_lists():
@@ -99,7 +99,7 @@ def test_two_lists():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, "L1", "L2", exp_src_type=astroid.Assign, num_reasons=2)
+    verify_typefail_unify(tf, "L1", "L2", exp_src_type=nodes.Assign, num_reasons=2)
 
 
 def test_tuple():
@@ -110,7 +110,7 @@ def test_tuple():
     """
     ast_mod, ti = cs._parse_text(src, reset=True)
     tf = find_type_fail(ast_mod).inf_type
-    verify_typefail_unify(tf, "T1", "T2", exp_src_type=astroid.Assign, num_reasons=2)
+    verify_typefail_unify(tf, "T1", "T2", exp_src_type=nodes.Assign, num_reasons=2)
 
 
 def test_annotation():

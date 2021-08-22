@@ -1,9 +1,9 @@
 import sys
 from typing import Callable, ForwardRef, Generic, Type, _GenericAlias
 
-import astroid
 import hypothesis.strategies as hs
 import pytest
+from astroid import nodes
 from hypothesis import HealthCheck, assume, given, settings
 
 from python_ta.transforms.type_inference_visitor import TypeFail
@@ -37,7 +37,7 @@ def test_inference_args_simple_return(function_name, arguments):
         )
         module, inferer = cs._parse_text(program)
         # get the functionDef node - there is only one in this test case.
-        function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
+        function_def_node = next(module.nodes_of_class(nodes.FunctionDef))
         expected_arg_type_vars = [
             function_def_node.type_environment.lookup_in_env(argument) for argument in arguments
         ]
@@ -61,7 +61,7 @@ def test_function_def_args_simple_return(function_name, arguments):
             function_name, arguments, ("return " + argument + " + " + repr("bob"))
         )
         module, inferer = cs._parse_text(program)
-        function_def_node = next(module.nodes_of_class(astroid.FunctionDef))
+        function_def_node = next(module.nodes_of_class(nodes.FunctionDef))
         expected_arg_type_vars = [
             function_def_node.type_environment.lookup_in_env(argument) for argument in arguments
         ]
@@ -90,7 +90,7 @@ def test_functiondef_annotated_simple_return(functiondef_node):
     for arg in functiondef_node.args.args:
         assume(arg_names.count(arg.name) == 1)
     module, inferer = cs._parse_text(functiondef_node)
-    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    functiondef_node = next(module.nodes_of_class(nodes.FunctionDef))
     # arguments and annotations are not changing, so test this once.
     for i in range(len(functiondef_node.args.annotations)):
         arg_name = functiondef_node.args.args[i].name
@@ -125,7 +125,7 @@ def test_functiondef_method():
                 return x + 1
         """
     module, inferer = cs._parse_text(program)
-    for func_def in module.nodes_of_class(astroid.FunctionDef):
+    for func_def in module.nodes_of_class(nodes.FunctionDef):
         assert lookup_type(inferer, func_def, func_def.argnames()[0]) == ForwardRef("A")
 
 
@@ -138,7 +138,7 @@ def test_functiondef_classmethod():
                 return x + 1
         """
     module, inferer = cs._parse_text(program)
-    for func_def in module.nodes_of_class(astroid.FunctionDef):
+    for func_def in module.nodes_of_class(nodes.FunctionDef):
         assert lookup_type(inferer, func_def, func_def.argnames()[0]) == Type[ForwardRef("A")]
 
 
@@ -151,7 +151,7 @@ def test_functiondef_staticmethod():
                 return x + 1
         """
     module, inferer = cs._parse_text(program)
-    for func_def in module.nodes_of_class(astroid.FunctionDef):
+    for func_def in module.nodes_of_class(nodes.FunctionDef):
         assert lookup_type(inferer, func_def, func_def.argnames()[0]) == int
 
 
@@ -160,7 +160,7 @@ def test_nested_annotated_function_conflicting_body():
     program = f"def random_func(int1: int) -> None:\n" f'    int1 + "bob"\n'
 
     module, inferer = cs._parse_text(program)
-    binop_node = next(module.nodes_of_class(astroid.BinOp))
+    binop_node = next(module.nodes_of_class(nodes.BinOp))
     assert isinstance(binop_node.inf_type, TypeFail)
 
 
@@ -175,7 +175,7 @@ def test_annotated_functiondef_conflicting_return_type():
         f"\n"
     )
     module, inferer = cs._parse_text(program)
-    functiondef_node = next(module.nodes_of_class(astroid.FunctionDef))
+    functiondef_node = next(module.nodes_of_class(nodes.FunctionDef))
     assert isinstance(functiondef_node.inf_type, TypeFail)
 
 
@@ -187,7 +187,7 @@ def test_function_return():
     foo(1)
     """
     module, inferer = cs._parse_text(program)
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     func_type = call_node.func.inf_type.getValue()
     t1, t2 = func_type.__args__
     assert t1 == t2
@@ -201,7 +201,7 @@ def test_function_return_2():
     foo(1,2)
     """
     module, inferer = cs._parse_text(program)
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     func_type = call_node.func.inf_type.getValue()
     t1, t2, t3 = func_type.__args__
     assert t1 == t3
@@ -215,7 +215,7 @@ def test_function_return_3():
     foo(1,2)
     """
     module, inferer = cs._parse_text(program)
-    call_node = next(module.nodes_of_class(astroid.Call))
+    call_node = next(module.nodes_of_class(nodes.Call))
     func_type = call_node.func.inf_type.getValue()
     t1, t2, t3 = func_type.__args__
     assert t2 == t3

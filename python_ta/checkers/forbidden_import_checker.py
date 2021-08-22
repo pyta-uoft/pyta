@@ -1,6 +1,6 @@
 import inspect
 
-import astroid
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
@@ -70,7 +70,7 @@ class ForbiddenImportChecker(BaseChecker):
 
     @check_messages("forbidden-import")
     def visit_call(self, node):
-        if isinstance(node.func, astroid.Name):
+        if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
             # locals nor globals scope)

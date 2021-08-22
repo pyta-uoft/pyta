@@ -1,6 +1,6 @@
 from typing import List
 
-import astroid
+from astroid import nodes
 from hypothesis import HealthCheck, given, settings
 
 from .. import custom_hypothesis_support as cs
@@ -15,7 +15,7 @@ def test_list_comprehension_single_target_name_homogeneous_iterable(iterable):
     name expression over a homogeneous list."""
     program = f"[num for num in {repr(iterable)}]"
     module, typeinferrer = cs._parse_text(program)
-    listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
+    listcomp_node = list(module.nodes_of_class(nodes.ListComp))[0]
     expected_type = List[listcomp_node.generators[0].iter.inf_type.getValue().__args__[0]]
     assert listcomp_node.inf_type.getValue() == expected_type
 
@@ -27,7 +27,7 @@ def test_list_comprehension_single_target_name_heterogeneous_iterable(iterable):
     name expression over a heterogeneous list."""
     program = f"[num for num in {repr(iterable)}]"
     module, typeinferrer = cs._parse_text(program)
-    listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
+    listcomp_node = list(module.nodes_of_class(nodes.ListComp))[0]
     expected_type = List[listcomp_node.generators[0].iter.inf_type.getValue().__args__[0]]
     assert listcomp_node.inf_type.getValue() == expected_type
 
@@ -39,6 +39,6 @@ def test_list_comprehension_single_target_name_string(iterable):
     name expression over a string."""
     program = f"[num for num in {repr(iterable)}]"
     module, typeinferrer = cs._parse_text(program)
-    listcomp_node = list(module.nodes_of_class(astroid.ListComp))[0]
+    listcomp_node = list(module.nodes_of_class(nodes.ListComp))[0]
     expected_type = List[listcomp_node.generators[0].iter.inf_type.getValue()]
     assert listcomp_node.inf_type.getValue() == expected_type

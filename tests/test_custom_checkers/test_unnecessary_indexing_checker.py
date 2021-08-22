@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+from astroid import nodes
 
 from python_ta.checkers.unnecessary_indexing_checker import UnnecessaryIndexingChecker
 
@@ -22,7 +23,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                     i = 2
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -37,7 +38,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -56,7 +57,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -75,7 +76,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -96,7 +97,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -111,7 +112,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -128,7 +129,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[i] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
@@ -149,7 +150,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -165,7 +166,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for _ in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -181,7 +182,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 print([[items[j] for _ in range(10)] for j in [1, 2, 3]])
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -201,7 +202,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -216,7 +217,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -231,7 +232,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -248,7 +249,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             return s
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -265,7 +266,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             print(items[i])
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -277,7 +278,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             i += 10
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
@@ -291,7 +292,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             lst[i] += 1
         """
         mod = astroid.parse(src)
-        for_node, *_ = mod.nodes_of_class(astroid.For)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)

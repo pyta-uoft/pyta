@@ -30,6 +30,7 @@ class PythonTaReporter(BaseReporter):
     _SPACE = " "
     _BREAK = "\n"
     _COLOURING = {}
+    _PRE_LINE_NUM_SPACES = 2
 
     # The error messages to report, mapping filename to a list of messages.
     messages: Dict[str, List[Message]]
@@ -155,6 +156,7 @@ class PythonTaReporter(BaseReporter):
 
     def _add_line_number(self, lineno: int, linetype: LineType) -> str:
         """Return a formatted string displaying a line number."""
+        pre_spaces = self._PRE_LINE_NUM_SPACES * self._SPACE
         spaces = 2 * self._SPACE
         if lineno is not None:
             number = "{:>3}".format(lineno)
@@ -162,15 +164,15 @@ class PythonTaReporter(BaseReporter):
             number = 3 * self._SPACE
 
         if linetype == LineType.ERROR:
-            return spaces + self._colourify("gbold-line", number) + spaces
+            return pre_spaces + self._colourify("gbold-line", number) + spaces
         elif linetype == LineType.CONTEXT:
-            return spaces + self._colourify("grey-line", number) + spaces
+            return pre_spaces + self._colourify("grey-line", number) + spaces
         elif linetype == LineType.OTHER:
-            return spaces + self._colourify("grey-line", number) + spaces
+            return pre_spaces + self._colourify("grey-line", number) + spaces
         elif linetype == LineType.DOCSTRING:
-            return spaces + self._colourify("black-line", number) + spaces
+            return pre_spaces + self._colourify("black-line", number) + spaces
         else:
-            return spaces + number + spaces
+            return pre_spaces + number + spaces
 
     def _display(self, layout: BaseLayout) -> None:
         """display the layout"""

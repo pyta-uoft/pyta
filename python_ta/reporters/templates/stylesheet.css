@@ -13,13 +13,16 @@ body {
     rgba(49, 48, 178, 0.62),
     rgba(71, 128, 230, 0.77)
   );
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 header {
-  padding: 15px;
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
   color: #fff;
+  margin-top: 15px;
   margin-left: 20px;
   margin-bottom: 15px;
   white-space: nowrap;
@@ -27,6 +30,7 @@ header {
 
 .main-grid {
   display: grid;
+  flex: 1;
   grid-template-columns: min-content 1fr;
   grid-template-rows: min-content 1fr;
 }
@@ -41,9 +45,9 @@ header {
 }
 
 .sidebar {
-  margin: 0 35px auto;
+  margin: 0 20px auto;
   position: sticky;
-  top: 0;
+  top: 15px;
   height: fit-content;
   max-height: 100vh;
   overflow-y: auto;
@@ -59,7 +63,7 @@ header {
 
 .file-name {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 1.1em;
 }
 
 .sidebar ul li {
@@ -87,19 +91,14 @@ a:visited {
   text-decoration: underline;
 }
 
-code {
-  white-space: pre;
-  font-size: 120%;
-}
-
 .title {
-  font-size: 48px;
+  font-size: 2.4em;
   margin: 0;
 }
 
 time {
   display: block;
-  font-size: 25px;
+  font-size: 1.2em;
   margin-top: 10px;
 }
 
@@ -116,9 +115,7 @@ main {
 
 section {
   margin: auto;
-  margin-bottom: 20px;
   display: inline-block;
-  font-size: 12px;
   min-width: 50%;
   background: rgba(234, 233, 233, 0.25);
   box-shadow: -1px 9px 15px -5px rgba(77, 77, 77, 0.6);
@@ -204,8 +201,8 @@ section {
 }
 
 .line-num {
-  font-size: 80%;
-  opacity: 0.6;
+  color: #2d3441;
+  font-size: 90%;
 }
 
 .grey {
@@ -226,43 +223,6 @@ section {
   color: rgb(0, 0, 0);
 }
 
-#report-bug {
-  text-align: center;
-  font-size: 75%;
-  padding: 20px;
-}
-#report-bug a {
-  text-decoration: none;
-  color: white;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-#report-bug a:hover {
-  text-decoration: underline;
-}
-
-#error-docs {
-  text-align: center;
-  font-size: 75%;
-  padding: 5px 0px;
-}
-#error-docs a {
-  text-decoration: none;
-  color: white;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-#error-docs a:hover {
-  text-decoration: underline;
-}
-
-#logo {
-  position: relative;
-  width: 100%;
-  text-align: center;
-  padding-top: 10px;
-}
-
 .occurrences,
 .shown {
   line-height: 35px;
@@ -271,7 +231,6 @@ section {
 }
 
 .more-info {
-  font-size: 12px;
   color: #000000;
   font-weight: normal;
 }
@@ -300,40 +259,52 @@ button.collapsed {
 
 .collapsible {
   width: 100%;
-  overflow: hidden;
+  overflow-y: hidden;
 }
 
 .hide-and-maintain-width {
   height: 0;
-  transition: height 0.25s ease-out;
+  transition: height 0.15s ease-out;
 }
 
 .expanded {
   height: auto;
-  transition: height 0.25s ease-out;
+  transition: height 0.15s ease-out;
 }
 
 .content.hide-and-maintain-width,
 .message-container.hide-and-maintain-width {
-  transition: height 0.5s ease-out;
+  margin-bottom: 0;
+  transition: height 0.3s ease-out;
 }
 
 .content.expanded,
 .message-container.expanded {
-  transition: height 0.5s ease-out;
+  transition: height 0.3s ease-out;
 }
 
 .content {
   margin-bottom: 15px;
 }
 
-.message-container {
+.message-container.expanded {
   border-top: 1px solid rgba(0, 0, 0, 0.15);
   margin: 8px 0;
 }
 
-.message-name {
-  margin-bottom: 6px;
+.message-snippet-container {
+  background-color: #f4f8f8;
+}
+
+.message-snippet {
+  font-size: 1.2em;
+  line-height: 1.4em;
+  margin: 0;
+  padding: 0.25em 0;
+}
+
+.message-snippet.hide-and-maintain-width {
+  padding: 0;
 }
 
 .empty-placeholder {
@@ -341,11 +312,39 @@ button.collapsed {
   padding-left: 20px;
 }
 
+/* Footer styling */
+
 footer {
   background: #2d3441;
-  color: white;
-  padding: 30px;
-  margin-top: 40px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  padding: 15px;
+}
+
+footer a {
+  color: #ffffff;
+}
+
+footer a:hover {
+  color: #86d1ef;
+}
+
+footer p {
+  margin-top: 0;
+}
+
+.footer-text {
+  flex: 1;
+}
+
+.logos {
+  width: 110px;
+}
+
+.logo {
+  padding: 0 5px;
+  text-decoration: none;
 }
 
 /*  Pygments css. Edited and reformatted from original output.

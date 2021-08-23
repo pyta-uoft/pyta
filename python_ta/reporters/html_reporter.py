@@ -41,6 +41,7 @@ class HTMLReporter(PythonTaReporter):
         "gbold-line": '<span class="gbold line-num">',
         "reset": "</span>",
     }
+    _PRE_LINE_NUM_SPACES = 0
 
     no_err_message = "None!"
     no_snippet = "Nothing here."

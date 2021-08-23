@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>PyTA Error Report</title>
+        <title>PythonTA Report</title>
         <style rel="stylesheet">
             {% include "stylesheet.css" %}
         </style>
@@ -10,7 +10,7 @@
     <body>
         <div class="main-grid">
             <header>
-                <h1 class="title">PyTA Error Report</h1>
+                <h1 class="title">PythonTA Report</h1>
                 <time>{{ date_time }}</time>
             </header>
             <section class="sidebar">
@@ -52,7 +52,7 @@
                                     {% for message_id in messages[0] %}
                                     <li>
                                         <a href={{'#{}-{}'.format(filenum, message_id)}}>
-                                            {{'{} - {}'.format(message_id, messages[0][message_id][0].symbol)}}
+                                            {{'{} ({})'.format(message_id, messages[0][message_id][0].symbol)}}
                                         </a>
                                     </li>
                                     {% endfor %}
@@ -75,7 +75,7 @@
                                     {% for message_id in messages[1] %}
                                     <li>
                                         <a href={{'#{}-{}'.format(filenum, message_id)}}>
-                                            {{'{} - {}'.format(message_id, messages[1][message_id][0].symbol)}}
+                                            {{'{} ({})'.format(message_id, messages[1][message_id][0].symbol)}}
                                         </a>
                                     </li>
                                     {% endfor %}
@@ -141,7 +141,7 @@
                                 <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
                                     <div class="message">
-                                        <h4 class="message-name">
+                                        <p class="message-name">
                                             [Line {{ indiv.line }}] {{ indiv.msg }}
                                             <span class="slider">
                                                 <button style="float: right;">
@@ -152,10 +152,10 @@
                                                     </svg>
                                                 </button>
                                             </span>
-                                        </h4>
+                                        </p>
                                         {% if indiv.snippet != '' %}
-                                        <div class="collapsible expanded">
-                                          <code>{{ indiv.snippet }}</code>
+                                        <div class="collapsible expanded message-snippet-container">
+                                          <pre class="message-snippet">{{ indiv.snippet }}</pre>
                                         </div>
                                         {% else %}
                                         <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
@@ -217,7 +217,7 @@
                                 <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
                                     <div class="message">
-                                        <h4 class="message-name">
+                                        <p class="message-name">
                                             [Line {{ indiv.line }}] {{ indiv.msg }}
                                             <span class="slider">
                                                 <button style="float: right;">
@@ -228,10 +228,10 @@
                                                     </svg>
                                                 </button>
                                             </span>
-                                        </h4>
-                                        <div class="collapsible expanded">
+                                        </p>
+                                        <div class="collapsible expanded message-snippet-container">
                                           {% if indiv.snippet != '' %}
-                                          <code>{{ indiv.snippet }}</code>
+                                          <pre class="message-snippet">{{ indiv.snippet }}</pre>
                                           {% else %}
                                           <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                           {% endif %}
@@ -251,21 +251,24 @@
             </main>
         </div>
         <footer>
-            <div id="report-bug">
-                <a href="mailto:david@cs.toronto.edu">Found a bug? Report it to Prof. Liu!</a>
-            </div>
-            <div id="error-docs">
+            <div class="footer-text">
+            <p>
+                PythonTA is maintained by Professor David Liu and students at the University of Toronto.
+            </p>
+            <p>
+                Found a bug? Report it to <a href="mailto:david@cs.toronto.edu">Prof. Liu</a>!
+            </p>
+            <p>
                 <a href="https://www.cs.toronto.edu/~david/pyta/">PyTA Help Documentation</a>
+            </p>
             </div>
-            <div id="logo">
-                <a href="http://www.cs.toronto.edu/~david/pyta/" target="_blank">
-                <img src="http://www.cs.toronto.edu/~david/pyta/images/pyta_logo.svg" alt="PyTA logo" height="50"/>
+            <div class="logos">
+                <a class="logo" href="https://www.cs.toronto.edu/~david/pyta/" target="_blank">
+                <img src="https://www.cs.toronto.edu/~david/pyta/images/pyta_logo.svg" alt="PyTA logo" height="40"/>
                 </a>
-            </div>
-             <div id="github-repo">
-                <a href="https://github.com/pyta-uoft/pyta" target="_blank">
+                <a class="logo" href="https://github.com/pyta-uoft/pyta" target="_blank">
                     <!-- From https://icons.getbootstrap.com/icons/github/ -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
                     </svg>
                 </a>

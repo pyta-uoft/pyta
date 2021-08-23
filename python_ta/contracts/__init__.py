@@ -11,6 +11,8 @@ DEBUG_CONTRACTS = False
 Set to True to display debugging messages when checking contracts.
 """
 
+_DEFAULT_MAX_VALUE_LENGTH = 30
+
 
 class PyTAContractError(Exception):
     """Error raised when a PyTA contract assertion is violated."""
@@ -115,7 +117,8 @@ def add_class_invariants(klass: type) -> None:
                 check_type(name, value, cls_annotations[name])
             except TypeError:
                 raise AssertionError(
-                    f'{repr(value)} did not match type annotation for attribute "{name}: {cls_annotations[name]}"'
+                    f"Value {_display_value(value)} did not match type annotation for attribute "
+                    f"{name}: {_display_annotation(cls_annotations[name])}"
                 ) from None
 
         super(klass, self).__setattr__(name, value)
@@ -157,8 +160,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
                 raise PyTAContractError(
-                    f"{wrapped.__name__} argument {repr(arg)} did not match type annotation for parameter "
-                    f'"{param}: {annotations[param]}"'
+                    f"{wrapped.__name__} argument {_display_value(arg)} did not match type "
+                    f"annotation for parameter {param}: {_display_annotation(annotations[param])}"
                     + (f"\n{additional_suggestions}" if additional_suggestions else "")
                 )
 
@@ -176,7 +179,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             check_type("return", r, return_type)
         except TypeError:
             raise PyTAContractError(
-                f"{wrapped.__name__} return value {r} does not match annotated return type {return_type}"
+                f"{wrapped.__name__}'s return value {_display_value(r)} did not match "
+                f"return type annotation {_display_annotation(return_type)}"
             )
 
     return r
@@ -186,7 +190,7 @@ def _get_argument_suggestions(arg: Any, annotation: type) -> str:
     """Returns potential suggestions for the given arg and its annotation"""
     try:
         if isinstance(arg, type) and issubclass(arg, annotation):
-            return "Did you pass in {cls} instead of {cls}(...)?".format(cls=arg.__name__)
+            return "Did you mean {cls}(...) instead of {cls}?".format(cls=arg.__name__)
     except TypeError:
         pass
 
@@ -248,7 +252,8 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
             check_type(attr, value, annotation)
         except TypeError:
             raise AssertionError(
-                f'{repr(value)} did not match type annotation for attribute "{attr}: {annotation}"'
+                f"{_display_value(value)} did not match type annotation for attribute {attr}: "
+                f"{_display_annotation(annotation)}"
             )
 
 
@@ -259,14 +264,15 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     for invariant in rep_invariants:
         try:
             _debug(
-                f"Checking representation invariant for {instance.__class__.__qualname__}: {invariant}"
+                "Checking representation invariant for "
+                f"{instance.__class__.__qualname__}: {invariant}"
             )
             check = eval(invariant, {**global_scope, "self": instance})
         except:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
             if not check:
-                raise PyTAContractError(f'Representation invariant "{invariant}" violated.')
+                raise PyTAContractError(f'Representation invariant "{invariant}" was violated')
 
 
 def _check_assertions(
@@ -281,9 +287,13 @@ def _check_assertions(
             _debug(f"Warning: could not evaluate precondition: {assertion}")
         else:
             if not check:
+                arg_string = ", ".join(
+                    f"{k}: {_display_value(v)}" for k, v in function_locals.items()
+                )
+                arg_string = "{" + arg_string + "}"
                 raise PyTAContractError(
-                    f'{wrapped.__name__} precondition "{assertion}" '
-                    f"violated for arguments {function_locals}."
+                    f'{wrapped.__name__} precondition "{assertion}" was '
+                    f"violated for arguments {arg_string}"
                 )
 
 
@@ -324,6 +334,43 @@ def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
         return assertions
     else:
         return []
+
+
+def _display_value(value: Any, max_length: int = _DEFAULT_MAX_VALUE_LENGTH) -> str:
+    """Return a human-friendly representation of the given value.
+
+    If DEBUG_CONTRACTS is False, truncate long strings to max_length characters.
+
+    Preconditions:
+        - max_length >= 5
+    """
+    s = repr(value)
+    if not DEBUG_CONTRACTS and len(s) > max_length:
+        i = (max_length - 3) // 2
+        return s[:i] + "..." + s[-i:]
+    else:
+        return s
+
+
+def _display_annotation(annotation: Any) -> str:
+    """Return a human-friendly representation of the given type annotation.
+
+    >>> _display_annotation(int)
+    'int'
+    >>> _display_annotation(list[int])
+    'list[int]'
+    >>> from typing import List
+    >>> _display_annotation(List[int])
+    'typing.List[int]'
+    """
+    if annotation is type(None):  # Use 'None' instead of 'NoneType'
+        return "None"
+    if hasattr(annotation, "__origin__"):  # Generic type annotations
+        return repr(annotation)
+    elif hasattr(annotation, "__name__"):
+        return annotation.__name__
+    else:
+        return repr(annotation)
 
 
 def _debug(msg: str) -> None:

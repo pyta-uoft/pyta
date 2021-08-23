@@ -203,7 +203,7 @@ def test_class_not_instance_error() -> None:
         _is_cpu(Player)
 
     msg = str(excinfo.value)
-    assert "Did you pass in Player instead of Player(...)?" in msg
+    assert "Did you mean Player(...) instead of Player?" in msg
 
 
 def test_subclass_not_instance_error() -> None:
@@ -217,7 +217,7 @@ def test_subclass_not_instance_error() -> None:
         _is_cpu(CPU)
 
     msg = str(excinfo.value)
-    assert "Did you pass in CPU instead of CPU(...)?" in msg
+    assert "Did you mean CPU(...) instead of CPU?" in msg
 
 
 def test_no_suggestion_instance_as_instance() -> None:

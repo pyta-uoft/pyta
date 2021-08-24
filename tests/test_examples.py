@@ -115,5 +115,4 @@ def test_cyclic_import() -> None:
     found_cyclic_import = any(
         message["symbol"] == "cyclic-import" for message in pylint_list_output
     )
-
     assert found_cyclic_import, f"Failed {cyclic_import_file}. File does not add expected message."

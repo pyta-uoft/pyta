@@ -50,6 +50,10 @@ class PythonTaReporter(BaseReporter):
         only errors are displayed.
         """
 
+    def has_messages(self) -> bool:
+        """Return whether there are any messages registered."""
+        return any(messages for messages in self.messages.values())
+
     def set_output(self, filepath: Optional[str] = None) -> None:
         """Set output stream based on filepath.
 

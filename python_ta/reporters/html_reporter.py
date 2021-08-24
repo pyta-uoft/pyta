@@ -111,10 +111,23 @@ class HTMLReporter(PythonTaReporter):
                 for i in range(0, len(html), buffer_size):
                     self.wfile.write(html[i : i + buffer_size])
 
+            def log_message(self, format, *args):
+                """Overridden so that no server logging is printed."""
+                pass
+
         server = HTTPServer(("127.0.0.1", 0), OneShotRequestHandler)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
         server.handle_request()
         server.server_close()
+        print(
+            "[INFO] Your PythonTA report is being opened in your web browser.\n"
+            "       If it doesn't open, please add an output argument to python_ta.check_all\n"
+            "       as follows:\n\n"
+            "         check_all(..., output='pyta_report.html')\n\n"
+            "       This will cause PythonTA to save the report to a file, pyta_report.html,\n"
+            "       that you can open manually in a web browser.",
+            file=sys.stderr,
+        )
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

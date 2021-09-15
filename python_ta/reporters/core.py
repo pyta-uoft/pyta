@@ -14,7 +14,9 @@ from pylint.reporters.ureports.nodes import BaseLayout
 from .node_printers import LineType, render_message
 
 # Extension of Pylint's Message class to incorporate astroid node and source code snippet
-NewMessage = namedtuple("NewMessage", Message._fields + ("node", "snippet", "line_end", "column_end"))
+NewMessage = namedtuple(
+    "NewMessage", Message._fields + ("node", "snippet", "line_end", "column_end")
+)
 
 # Messages without a source code line to highlight
 NO_SNIPPET = {"invalid-name"}

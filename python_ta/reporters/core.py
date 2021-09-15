@@ -14,7 +14,7 @@ from pylint.reporters.ureports.nodes import BaseLayout
 from .node_printers import LineType, render_message
 
 # Extension of Pylint's Message class to incorporate astroid node and source code snippet
-NewMessage = namedtuple("NewMessage", Message._fields + ("node", "snippet"))
+NewMessage = namedtuple("NewMessage", Message._fields + ("node", "snippet", "line_end", "column_end"))
 
 # Messages without a source code line to highlight
 NO_SNIPPET = {"invalid-name"}
@@ -88,10 +88,12 @@ class PythonTaReporter(BaseReporter):
 
             if msg.symbol in NO_SNIPPET or msg.msg.startswith("Invalid module"):
                 snippet = ""
+                line_end, column_end = None, None
             else:
                 snippet = self._build_snippet(msg, node)
+                line_end, column_end = self._snippet_endings(msg, node)
 
-            curr_messages[-1] = NewMessage(*msg, node, snippet)
+            curr_messages[-1] = NewMessage(*msg, node, snippet, line_end, column_end)
 
     def group_messages(
         self, messages: List[Message]
@@ -130,6 +132,17 @@ class PythonTaReporter(BaseReporter):
 
         return code_snippet
 
+    def _snippet_endings(self, msg: Message, node: NodeNG) -> Tuple[int, int]:
+        """Return the index of the last line and the index of the last column of the error reported
+        by the message in msg.
+        """
+        line_end, column_end = None, None
+        for lineno, slice_, line_type, text in render_message(msg, node, self.source_lines):
+            if line_type == LineType.ERROR:
+                line_end = lineno
+                column_end = slice_.stop or len(text)
+        return line_end, column_end
+
     def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = "") -> str:
         """Format given source code line as specified and return as str.
 
@@ -137,6 +150,7 @@ class PythonTaReporter(BaseReporter):
         """
         snippet = self._add_line_number(lineno, linetype)
 
+        print(lineno, linetype, slice_, text)
         if linetype == LineType.ERROR:
             start_col = slice_.start or 0
             end_col = slice_.stop or len(text)

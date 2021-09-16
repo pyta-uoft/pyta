@@ -4,7 +4,7 @@ from typing import Dict, List
 from pylint.interfaces import IReporter
 from pylint.reporters.ureports.nodes import BaseLayout
 
-from .core import PythonTaReporter, NewMessage
+from .core import NewMessage, PythonTaReporter
 
 
 class JSONReporter(PythonTaReporter):
@@ -33,8 +33,13 @@ class JSONReporter(PythonTaReporter):
         output = []
         for k, msgs in self.messages.items():
             output.append(
-                {"filename": k,
-                 "msgs": [{**msg._replace(node=None)._asdict(), **self._snippet_endings(msg)} for msg in msgs]}
+                {
+                    "filename": k,
+                    "msgs": [
+                        {**msg._replace(node=None)._asdict(), **self._snippet_endings(msg)}
+                        for msg in msgs
+                    ],
+                }
             )
 
         self.writeln(json.dumps(output, indent=4))
@@ -47,4 +52,4 @@ class JSONReporter(PythonTaReporter):
             line_end, column_end = msg.line, len(self.source_lines[msg.line - 1])
         else:
             line_end, column_end = msg.node.end_lineno, msg.node.end_col_offset
-        return {'line_end': line_end, 'column_end': column_end}
+        return {"line_end": line_end, "column_end": column_end}

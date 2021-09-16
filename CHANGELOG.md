@@ -7,6 +7,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.1.0] - 2021-09-16
+
+### Enhancements
+
+- Added `line_end` and `column_end` to `JSONReporter` output.
+
 ## [2.0.0] - 2021-08-24
 
 PythonTA's adopting semantic versioning as of this release, so we've bumped the version to 2.0.

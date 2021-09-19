@@ -605,6 +605,24 @@ for strings.
 
 ```
 
+### Unnecessary dict index lookup (R1733) [](#R1733)
+
+This error occurs when values for a dictionary are accessed using an index lookup (that is, through
+`dictionary_name[key]`) instead of directly while iterating over key-value pairs of the dictionary.
+
+```{literalinclude} /../examples/pylint/R1733_unnecessary_dict_index_lookup.py
+
+```
+
+The code above can be fixed by accessing the dictionary values directly:
+
+```python
+sample_dict = {"key_one": "value_one", "key_two": "value_two"}
+
+for key, value in sample_dict.items():
+    print(key, value)  # Direct access instead of an index lookup
+```
+
 ### Unnecessary pass (W0107) [](#W0107)
 
 This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has

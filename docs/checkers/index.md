@@ -658,6 +658,22 @@ with open('my_file.txt', 'r') as file:
     ... # No need to manually close the file
 ```
 
+### Use dict literal (R1735) [](#R1735)
+
+This error occurs when dict() is used instead of {]} to create an empty dictionary.
+
+```{literalinclude} /../examples/pylint/R1735_use_dict_literal.py
+
+```
+
+Corrected version:
+
+```python
+student_dict = {} # Erro on this line.
+
+student_dict["123456789"] = "John Doe"
+```
+
 ## Documentation and naming
 
 Good documentation and identifiers are essential for writing software. PyTA helps check to make sure

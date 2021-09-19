@@ -1829,6 +1829,22 @@ s = "{} and {}".format("first", "second")
 
 **See also**: [E1120](#E1120)
 
+### Format string without interpolation (W1310) [](#W1310)
+
+This error occurs when a format string does not have **any** interpolation variables. This can be an issue as it can
+mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code
+and there should be interpolation variables in the string.
+
+```{literalinclude} /../examples/pylint/W1310_format_string_without_interpolation.py
+
+```
+
+The error above can be resolved as follows:
+
+```python
+greeting = 'Hello There, {name}'.format(name='person')
+```
+
 ### Missing format argument key (W1303) [](#W1303)
 
 This error occurs when a format string that uses named fields does not receive the required

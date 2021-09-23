@@ -43,8 +43,8 @@ class HTMLReporter(PythonTaReporter):
     }
     _PRE_LINE_NUM_SPACES = 0
 
-    no_err_message = "None!"
-    no_snippet = "Nothing here."
+    no_err_message = "No problems detected, good job!"
+    no_snippet = "No code to display for this message."
     code_err_title = "Code Errors or Forbidden Usage (fix: high priority)"
     style_err_title = "Style or Convention Errors (fix: before submission)"
     OUTPUT_FILENAME = "pyta_report.html"

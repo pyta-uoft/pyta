@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Bug fixes
+
+- Fix HTML report to display file even when no errors are found.
+
 ## [2.1.0] - 2021-09-16
 
 ### Enhancements

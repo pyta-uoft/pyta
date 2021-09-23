@@ -31,6 +31,7 @@ import tokenize
 import webbrowser
 from typing import Generator
 
+import pylint.config
 import pylint.lint
 import pylint.utils
 from astroid import MANAGER, modutils
@@ -72,6 +73,15 @@ def _check(module_name="", level="all", local_config="", output=None):
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute or relative path to capture pyta data output. Default std out.
     """
+    # Manually create pylint cache directory if it doesn't exist.
+    # This is a backport of https://github.com/PyCQA/pylint/pull/4988,
+    # and should be removed once we update to pylint 2.11.
+    if not os.path.exists(pylint.config.PYLINT_HOME):
+        try:
+            os.makedirs(pylint.config.PYLINT_HOME)
+        except OSError:
+            pass
+
     linter = reset_linter(config=local_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)

@@ -891,6 +891,20 @@ Example File 2
 
 ```
 
+### Consider using from import (R0402) [](#R0402)
+
+Instead of aliasing a multi-level import's final level as itself, consider using a from import.
+
+```{literalinclude} /../examples/pylint/R0402_consider_using_from_import.py
+
+```
+
+Corrected version:
+
+```python
+from python_ta import contracts
+```
+
 ### Multiple imports (C0410) [](#C0410)
 
 Different modules should not be imported on a single line.

@@ -19,8 +19,8 @@ class PlainReporter(PythonTaReporter):
     _COLOURING = {}
     code_err_title = "=== Code errors/forbidden usage (fix: high priority) ==="
     style_err_title = "=== Style/convention errors (fix: before submission) ==="
-    no_err_message = "None!" + _BREAK * 2
-    no_snippet = "Nothing here." + _BREAK * 2
+    no_err_message = "No problems detected, good job!" + _BREAK * 2
+    no_snippet = "No code to display for this message." + _BREAK * 2
 
     def print_messages(self, level: str = "all") -> None:
         """Print messages for the current file.

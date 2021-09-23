@@ -6,6 +6,9 @@ import re
 import pytest
 import json
 import itertools
+from pylint import lint
+from io import StringIO
+import sys
 
 
 _EXAMPLES_PATH = "examples/pylint/"
@@ -41,19 +44,19 @@ def get_file_paths():
 def symbols_by_file() -> Dict[str, Set[str]]:
     """Run pylint on all the example files and return the map of file name to the
     set of Pylint messages it raises."""
-    output = subprocess.run(
+
+    sys.stdout = StringIO()
+    lint.Run(
         [
-            "pylint",
             "--reports=n",
             "--rcfile=python_ta/.pylintrc",
             "--output-format=json",
-            *get_file_paths(),
-        ],
-        stderr=subprocess.STDOUT,
-        stdout=subprocess.PIPE,
+            *get_file_paths()
+        ], exit=False
     )
+    jsons_output = sys.stdout.getvalue()
+    sys.stdout = sys.__stdout__
 
-    jsons_output = output.stdout.decode("UTF-8")
     pylint_list_output = json.loads(jsons_output)
 
     file_to_symbol = {}
@@ -97,19 +100,18 @@ def test_cyclic_import() -> None:
     cyclic_import_helper = "examples/pylint/cyclic_import_helper.py"
     cyclic_import_file = "examples/pylint/R0401_cyclic_import.py"
 
-    output = subprocess.run(
+    sys.stdout = StringIO()
+    lint.Run(
         [
-            "pylint",
             "--reports=n",
             "--rcfile=python_ta/.pylintrc",
             "--output-format=json",
-            *[cyclic_import_helper, cyclic_import_file],
-        ],
-        stderr=subprocess.STDOUT,
-        stdout=subprocess.PIPE,
+            cyclic_import_helper, cyclic_import_file
+        ], exit=False
     )
+    jsons_output = sys.stdout.getvalue()
+    sys.stdout = sys.__stdout__
 
-    jsons_output = output.stdout.decode("UTF-8")
     pylint_list_output = json.loads(jsons_output)
 
     found_cyclic_import = any(

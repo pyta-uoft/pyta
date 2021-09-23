@@ -1995,6 +1995,15 @@ print(make_list(5))
 - [Common Gotchas - Mutable Default Arguments]
 - [Default Parameter Values in Python]
 
+### Forgotten debug statement (W1515) [](#W1515)
+
+This warning occurs when debugging breakpoints (such as `breakpoint()`, `sys.breakpointhook`,
+and `pdb.set_trace()`) are found. These breakpoints should be removed in production code.
+
+```{literalinclude} /../examples/pylint/W1515_forgotten_debug_statement.py
+
+```
+
 ### Consider iterating dictionary (C0201) [](#C0201)
 
 It is more _pythonic_ to iterate through a dictionary directly, without calling the `.keys` method.

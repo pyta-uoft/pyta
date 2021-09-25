@@ -45,6 +45,7 @@ def symbols_by_file() -> Dict[str, Set[str]]:
         [
             "pylint",
             "--reports=n",
+            "--rcfile=python_ta/.pylintrc",
             "--output-format=json",
             *get_file_paths(),
         ],
@@ -100,6 +101,7 @@ def test_cyclic_import() -> None:
         [
             "pylint",
             "--reports=n",
+            "--rcfile=python_ta/.pylintrc",
             "--output-format=json",
             *[cyclic_import_helper, cyclic_import_file],
         ],

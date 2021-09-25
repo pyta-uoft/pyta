@@ -893,7 +893,9 @@ Example File 2
 
 ### Consider using from import (R0402) [](#R0402)
 
-Instead of aliasing a multi-level import's final level as itself, consider using a from import.
+Some imports are long and go through multiple layers of packages or modules. It's common to want to
+rename these imports as the last imported module or package using the `as` keyword.
+Consider using the `from` import syntax instead.
 
 ```{literalinclude} /../examples/pylint/R0402_consider_using_from_import.py
 

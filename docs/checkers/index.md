@@ -1886,6 +1886,48 @@ s = "{} and {}".format("first", "second")
 
 **See also**: [E1120](#E1120)
 
+### F-string without interpolation (W1309) [](#W1309)
+
+This error occurs when there are no interpolation variables present in an f-string. This might indicate that there is
+either a bug in the code (that is, there should be an interpolation variable in the f-string) or the f-string can be a
+normal string.
+
+```{literalinclude} /../examples/pylint/W1309_f_string_without_interpolation.py
+
+```
+
+The issue above can be resolved in 2 ways - either the f-string can be converted into a normal string, or the missing
+interpolation variable can be added to the f-string. The snippet below shows both these solutions.
+
+```python
+# Using a normal string instead of an f-string
+print('Hello World!')
+
+# Adding an interpolation to the f-string
+entity = "World"
+print(f'Hello {entity}!')
+```
+
+**See also**: [W1310](#W1310)
+
+### Format string without interpolation (W1310) [](#W1310)
+
+This error occurs when a format string does not have **any** interpolation variables. This can be an issue as it can
+mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code
+and there should be interpolation variables in the string.
+
+```{literalinclude} /../examples/pylint/W1310_format_string_without_interpolation.py
+
+```
+
+The error above can be resolved as follows:
+
+```python
+greeting = 'Hello There, {name}'.format(name='person')
+```
+
+**See also**: [W1309](#W1309)
+
 ### Missing format argument key (W1303) [](#W1303)
 
 This error occurs when a format string that uses named fields does not receive the required

@@ -677,6 +677,26 @@ with open('my_file.txt', 'r') as file:
     ... # No need to manually close the file
 ```
 
+### Use dict literal (R1735) [](#R1735)
+
+This error occurs when `dict()` is used instead of `{}` to create an empty dictionary.
+
+```{literalinclude} /../examples/pylint/R1735_use_dict_literal.py
+
+```
+
+Corrected version:
+
+```python
+students_info = [[1002123, "Alex H", "CS"], [1001115, "Jack K", "PSY"]]
+
+cs_student_dict = {}  # This is a fixed version.
+
+for student in students_info:
+    if student[2] == "CS":
+        cs_student_dict[student[0]] = student[1]
+```
+
 ## Documentation and naming
 
 Good documentation and identifiers are essential for writing software. PyTA helps check to make sure

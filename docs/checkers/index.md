@@ -400,6 +400,25 @@ if True:  # Error was on this line
   pass
 ```
 
+### Use list literal (R1734) [](#R1734)
+
+This error occurs when `list()` is used instead of `[]` to create an empty list.
+
+```{literalinclude} /../examples/pylint/R1734_use_list_literal.py
+
+```
+
+The above can be modified to:
+
+```python
+lst = [1, 2, 3, 4]
+even_lst = []  # This is a fixed version.
+
+for x in lst:
+    if x % 2 == 0:
+        even_lst.append(x)
+```
+
 ### Singleton comparison (C0121) [](#C0121)
 
 This error occurs when an expression is compared to a singleton value like `True`, `False` or `None`

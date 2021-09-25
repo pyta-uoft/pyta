@@ -2251,6 +2251,15 @@ class Company:
         return len(self._employees)
 ```
 
+### Forgotten debug statement (W1515) [](#W1515)
+
+This warning occurs when debugging breakpoints (such as `breakpoint()`, `sys.breakpointhook()`,
+and `pdb.set_trace()`) are found. These breakpoints should be removed in production code.
+
+```{literalinclude} /../examples/pylint/W1515_forgotten_debug_statement.py
+
+```
+
 ## Style errors [](#style)
 
 ### Multiple statements (C0321) [](#C0321)

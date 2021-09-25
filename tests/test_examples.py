@@ -14,13 +14,13 @@ _EXAMPLE_PREFIX_REGEX = r"[CEFRW]\d{4}"
 
 # The following tests appear to always fail (further investigation needed).
 IGNORED_TESTS = [
-    "E1131_unsupported_binary_operation.py",
-    "E0118_used_prior_global_declaration.py",
-    "W0125_using_constant_test.py",
-    "W0631_undefined_loop_variable.py",
-    "W1503_redundant_unittest_assert.py",
-    "E1140_unhashable_dict_key.py",
-    "R0401_cyclic_import.py",  # R0401 required an additional unit test but should be kept here.
+    "e1131_unsupported_binary_operation.py",
+    "e0118_used_prior_global_declaration.py",
+    "w0125_using_constant_test.py",
+    "w0631_undefined_loop_variable.py",
+    "w1503_redundant_unittest_assert.py",
+    "e1140_unhashable_dict_key.py",
+    "r0401_cyclic_import.py",  # R0401 required an additional unit test but should be kept here.
 ]
 
 
@@ -45,7 +45,6 @@ def symbols_by_file() -> Dict[str, Set[str]]:
         [
             "pylint",
             "--reports=n",
-            "--rcfile=python_ta/.pylintrc",
             "--output-format=json",
             *get_file_paths(),
         ],
@@ -95,13 +94,12 @@ def test_cyclic_import() -> None:
     """
 
     cyclic_import_helper = "examples/pylint/cyclic_import_helper.py"
-    cyclic_import_file = "examples/pylint/R0401_cyclic_import.py"
+    cyclic_import_file = "examples/pylint/r0401_cyclic_import.py"
 
     output = subprocess.run(
         [
             "pylint",
             "--reports=n",
-            "--rcfile=python_ta/.pylintrc",
             "--output-format=json",
             *[cyclic_import_helper, cyclic_import_file],
         ],

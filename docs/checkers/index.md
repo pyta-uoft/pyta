@@ -400,6 +400,25 @@ if True:  # Error was on this line
   pass
 ```
 
+### Use list literal (R1734) [](#R1734)
+
+This error occurs when `list()` is used instead of `[]` to create an empty list.
+
+```{literalinclude} /../examples/pylint/R1734_use_list_literal.py
+
+```
+
+The above can be modified to:
+
+```python
+lst = [1, 2, 3, 4]
+even_lst = []  # This is a fixed version.
+
+for x in lst:
+    if x % 2 == 0:
+        even_lst.append(x)
+```
+
 ### Singleton comparison (C0121) [](#C0121)
 
 This error occurs when an expression is compared to a singleton value like `True`, `False` or `None`
@@ -605,6 +624,24 @@ for strings.
 
 ```
 
+### Unnecessary dict index lookup (R1733) [](#R1733)
+
+This error occurs when values for a dictionary are accessed using an index lookup (that is, through
+`dictionary_name[key]`) instead of directly while iterating over key-value pairs of the dictionary.
+
+```{literalinclude} /../examples/pylint/R1733_unnecessary_dict_index_lookup.py
+
+```
+
+The code above can be fixed by accessing the dictionary values directly:
+
+```python
+sample_dict = {"key_one": "value_one", "key_two": "value_two"}
+
+for key, value in sample_dict.items():
+    print(key, value)  # Direct access instead of an index lookup
+```
+
 ### Unnecessary pass (W0107) [](#W0107)
 
 This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has
@@ -656,6 +693,26 @@ Corrected version:
 ```python
 with open('my_file.txt', 'r') as file:
     ... # No need to manually close the file
+```
+
+### Use dict literal (R1735) [](#R1735)
+
+This error occurs when `dict()` is used instead of `{}` to create an empty dictionary.
+
+```{literalinclude} /../examples/pylint/R1735_use_dict_literal.py
+
+```
+
+Corrected version:
+
+```python
+students_info = [[1002123, "Alex H", "CS"], [1001115, "Jack K", "PSY"]]
+
+cs_student_dict = {}  # This is a fixed version.
+
+for student in students_info:
+    if student[2] == "CS":
+        cs_student_dict[student[0]] = student[1]
 ```
 
 ## Documentation and naming
@@ -1828,6 +1885,48 @@ s = "{} and {}".format("first", "second")
 ```
 
 **See also**: [E1120](#E1120)
+
+### F-string without interpolation (W1309) [](#W1309)
+
+This error occurs when there are no interpolation variables present in an f-string. This might indicate that there is
+either a bug in the code (that is, there should be an interpolation variable in the f-string) or the f-string can be a
+normal string.
+
+```{literalinclude} /../examples/pylint/W1309_f_string_without_interpolation.py
+
+```
+
+The issue above can be resolved in 2 ways - either the f-string can be converted into a normal string, or the missing
+interpolation variable can be added to the f-string. The snippet below shows both these solutions.
+
+```python
+# Using a normal string instead of an f-string
+print('Hello World!')
+
+# Adding an interpolation to the f-string
+entity = "World"
+print(f'Hello {entity}!')
+```
+
+**See also**: [W1310](#W1310)
+
+### Format string without interpolation (W1310) [](#W1310)
+
+This error occurs when a format string does not have **any** interpolation variables. This can be an issue as it can
+mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code
+and there should be interpolation variables in the string.
+
+```{literalinclude} /../examples/pylint/W1310_format_string_without_interpolation.py
+
+```
+
+The error above can be resolved as follows:
+
+```python
+greeting = 'Hello There, {name}'.format(name='person')
+```
+
+**See also**: [W1309](#W1309)
 
 ### Missing format argument key (W1303) [](#W1303)
 

@@ -660,7 +660,7 @@ with open('my_file.txt', 'r') as file:
 
 ### Use dict literal (R1735) [](#R1735)
 
-This error occurs when dict() is used instead of {} to create an empty dictionary.
+This error occurs when `dict()` is used instead of `{}` to create an empty dictionary.
 
 ```{literalinclude} /../examples/pylint/R1735_use_dict_literal.py
 
@@ -669,9 +669,13 @@ This error occurs when dict() is used instead of {} to create an empty dictionar
 Corrected version:
 
 ```python
-student_dict = {} # Error on this line.
+students_info = [[1002123, "Alex H", "CS"], [1001115, "Jack K", "PSY"]]
 
-student_dict["123456789"] = "John Doe"
+cs_student_dict = {}  # This is a fixed version.
+
+for student in students_info:
+    if student[2] == "CS":
+        cs_student_dict[student[0]] = student[1]
 ```
 
 ## Documentation and naming

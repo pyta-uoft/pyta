@@ -12,6 +12,7 @@ Set to True to display debugging messages when checking contracts.
 """
 
 _DEFAULT_MAX_VALUE_LENGTH = 30
+FUNCTION_RETURN_VALUE = "$return_value"
 
 
 class PyTAContractError(Exception):
@@ -183,6 +184,15 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 f"return type annotation {_display_annotation(return_type)}"
             )
 
+    # Check function postconditions
+    postconditions = parse_assertions(wrapped, parse_token="Postcondition")
+    _check_assertions(
+        wrapped,
+        {**function_locals, FUNCTION_RETURN_VALUE: r},
+        postconditions,
+        condition_type="postcondition",
+    )
+
     return r
 
 
@@ -275,16 +285,35 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 raise PyTAContractError(f'Representation invariant "{invariant}" was violated')
 
 
+def _replace_return_value_if_present(assertion: str, function_locals: dict) -> str:
+    """
+    Replaces the FUNCTION_RETURN_VALUE variable with the actual return value of the function to ensure that the
+    return value postcondition can be evaluated.
+    This returns a new assertion string if the replacement took place so that the original string with the
+    FUNCTION_RETURN_VALUE variable can still be used to display error messages to the user, or simply returns the
+    original assertion string if no replacement is required
+
+    Precondition: FUNCTION_RETURN_VALUE in function_locals if FUNCTION_RETURN_VALUE in assertion else True
+    """
+    if FUNCTION_RETURN_VALUE in assertion:
+        return assertion.replace(FUNCTION_RETURN_VALUE, str(function_locals[FUNCTION_RETURN_VALUE]))
+    return assertion
+
+
 def _check_assertions(
-    wrapped: Callable[..., Any], function_locals: dict, assertions: List[str]
+    wrapped: Callable[..., Any],
+    function_locals: dict,
+    assertions: List[str],
+    condition_type: str = "precondition",
 ) -> None:
     """Check that the given assertions are still satisfied."""
     for assertion in assertions:
         try:
-            _debug(f"Checking precondition for {wrapped.__qualname__}: {assertion}")
-            check = eval(assertion, {**wrapped.__globals__, **function_locals})
+            _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion}")
+            replaced_assertion = _replace_return_value_if_present(assertion, function_locals)
+            check = eval(replaced_assertion, {**wrapped.__globals__, **function_locals})
         except:
-            _debug(f"Warning: could not evaluate precondition: {assertion}")
+            _debug(f"Warning: could not evaluate {condition_type}: {assertion}")
         else:
             if not check:
                 arg_string = ", ".join(
@@ -292,7 +321,7 @@ def _check_assertions(
                 )
                 arg_string = "{" + arg_string + "}"
                 raise PyTAContractError(
-                    f'{wrapped.__name__} precondition "{assertion}" was '
+                    f'{wrapped.__name__} {condition_type} "{assertion}" was '
                     f"violated for arguments {arg_string}"
                 )
 

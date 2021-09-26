@@ -250,6 +250,123 @@ def test_invalid_typing_generic_argument() -> None:
         unary(dict)
 
 
+# Checking to see that postcondition checks regarding function return values pass and fail as expected
+@check_contracts
+def _get_double_valid(num: int) -> int:
+    """
+    Correctly Returns twice the number passed as the argument
+
+    Postcondition: $return_value == num * 2
+    """
+    return num * 2
+
+
+@check_contracts
+def _get_double_invalid(num: int) -> int:
+    """
+    Incorrectly returns a number that is not twice the number passed as the argument
+
+    Postcondition: $return_value == num * 2
+    """
+    return (num * 2) + 1
+
+
+def test_get_double_valid() -> None:
+    """Calling the valid implementation of _get_double to get double the number"""
+    assert _get_double_valid(5) == 10
+
+
+def test_get_double_invalid() -> None:
+    """Calling the invalid implementation of _get_double to ensure an AssertionError is raised for failing
+    postcondition check"""
+    with pytest.raises(AssertionError) as excinfo:
+        _get_double_invalid(5)
+
+    msg = str(excinfo.value)
+    assert "$return_value == num * 2" in msg
+
+
+# Checking to see that postcondition checks involving function parameters pass and fail as expected
+@check_contracts
+def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:
+    """
+    Correctly adds a number to the provided set if the number does not already exist in the set.
+
+    Postconditions:
+        - new_num in num_set
+    """
+    if new_num not in num_set:
+        num_set.add(new_num)
+
+
+@check_contracts
+def _add_to_set_invalid(num_set: Set[int], new_num: int) -> None:
+    """
+    Incorrectly checks the existence of new_num in set, causing new_num not to not be added to the set.
+
+    Postconditions:
+        - new_num in num_set
+    """
+    if new_num in num_set:
+        num_set.add(new_num)
+
+
+def test_add_to_set_valid() -> None:
+    """Checks to make sure no exceptions are thrown when correctly adding a number to a set"""
+    sample_set = {5, 4}
+    _add_to_set_valid(sample_set, 1)
+    assert 1 in sample_set
+
+
+def test_add_to_set_invalid() -> None:
+    """Test invalid addition of number to a set - using _add_to_set_invalid and ensuring an AssertionError is
+    raised for failing postcondition check"""
+    sample_set = {1, 2}
+
+    with pytest.raises(AssertionError) as excinfo:
+        _add_to_set_invalid(sample_set, 5)
+
+    msg = str(excinfo.value)
+    assert "new_num in num_set" in msg
+
+
+# Checking to see that postcondition checks that use custom functions in scope pass and fail as expected
+@check_contracts
+def _get_even_nums_valid(lst: List[int]) -> List[int]:
+    """
+    Correctly returns a list of all even numbers in the list
+
+    Postcondition: is_even($return_value)
+    """
+    return [num for num in lst if num % 2 == 0]
+
+
+@check_contracts
+def _get_even_nums_invalid(lst: List[int]) -> List[int]:
+    """
+    Returns a list of all odd numbers in the list, which should cause the postcondition check to fail.
+
+    Postcondition: is_even($return_value)
+    """
+    return [num for num in lst if num % 2 != 0]
+
+
+def test_get_even_nums_valid() -> None:
+    """Test correct retrieval of all even numbers in a list"""
+    assert is_even(_get_even_nums_valid([4, 3, 2, 5, 6, 8, 1]))
+
+
+def test_get_even_nums_invalid() -> None:
+    """Test that the incorrect implementation of _get_even_nums raises an AssertionError because of
+    the failure of the postcondition check"""
+
+    with pytest.raises(AssertionError) as excinfo:
+        _get_even_nums_invalid([5, 4, 3, 2, 1, 0, 5])
+
+    msg = str(excinfo.value)
+    assert "is_even($return_value)" in msg
+
+
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="built-in generics not yet supported")
 def test_invalid_built_in_generic_argument() -> None:
     """Test that subclass checking on a type parameter that is a GenericAlias does not

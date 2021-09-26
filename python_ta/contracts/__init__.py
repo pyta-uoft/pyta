@@ -327,7 +327,7 @@ def _check_assertions(
 
 
 def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
-    """Return a list of preconditions/representation invariants parsed from the given entity's docstring.
+    """Return a list of preconditions/postconditions/representation invariants parsed from the given entity's docstring.
 
     Uses parse_token to determine what to look for. parse_token defaults to Precondition.
 

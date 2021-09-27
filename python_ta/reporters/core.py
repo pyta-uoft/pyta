@@ -195,6 +195,9 @@ class PythonTaReporter(BaseReporter):
         self.module_name = module
         self.current_file = filepath
 
+        if self.current_file not in self.messages:
+            self.messages[self.current_file] = []
+
         with open(filepath, encoding="utf-8") as f:
             self.source_lines = [line.rstrip() for line in f.readlines()]
 

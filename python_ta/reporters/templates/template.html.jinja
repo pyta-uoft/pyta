@@ -111,6 +111,7 @@
                                 {% set occurrences = messages[0][message_id] %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
+                                    {% set mid = message_id.lower() %}
                                     <span class="error-link code-error-id">
                                         <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
                                     </span>

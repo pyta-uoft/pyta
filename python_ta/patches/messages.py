@@ -16,7 +16,9 @@ def patch_messages():
     ):
         old_add_message(self, msg_id, line, node, args, confidence, col_offset)
         msg_info = self.msgs_store.get_message_definitions(msg_id)[0]
-        self.reporter.handle_node(msg_info, node)
+        # guard to allow for backward compatability with Pylint's reporters
+        if hasattr(self.reporter, "handle_node"):
+            self.reporter.handle_node(msg_info, node)
 
     MessagesHandlerMixIn.add_message = new_add_message
 

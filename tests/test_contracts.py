@@ -250,11 +250,11 @@ def test_invalid_typing_generic_argument() -> None:
         unary(dict)
 
 
-# Testing that postcondition checks regarding function return values pass and fail as expected
+# Test that postcondition checks regarding function return values pass and fail as expected
 @check_contracts
 def _get_double_valid(num: int) -> int:
     """
-    Correctly returns twice the number passed as the argument
+    Return twice the number passed as the argument.
 
     Postcondition: $return_value == num * 2
     """
@@ -264,7 +264,7 @@ def _get_double_valid(num: int) -> int:
 @check_contracts
 def _get_double_invalid(num: int) -> int:
     """
-    Incorrectly returns a number that is not twice the number passed as the argument
+    Return a number that is not twice the number passed as the argument.
 
     Postcondition: $return_value == num * 2
     """
@@ -272,13 +272,14 @@ def _get_double_invalid(num: int) -> int:
 
 
 def test_get_double_valid() -> None:
-    """Calling the valid implementation of _get_double to get double the number"""
+    """Test that calling the valid implementation of _get_double succeeds."""
     assert _get_double_valid(5) == 10
 
 
 def test_get_double_invalid() -> None:
-    """Calling the invalid implementation of _get_double to ensure an AssertionError is raised for failing
-    postcondition check"""
+    """Test that calling the invalid implementation of _get_double raises an AssertionError for failing postcondition
+    check.
+    """
     with pytest.raises(AssertionError) as excinfo:
         _get_double_invalid(5)
 
@@ -286,11 +287,11 @@ def test_get_double_invalid() -> None:
     assert "$return_value == num * 2" in msg
 
 
-# Testing that postcondition checks involving function parameters pass and fail as expected
+# Test that postcondition checks involving function parameters pass and fail as expected
 @check_contracts
 def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:
     """
-    Correctly adds a number to the provided set if the number does not already exist in the set.
+    Add a number to the provided set if the number does not already exist in the set.
 
     Postconditions:
         - new_num in num_set
@@ -302,7 +303,7 @@ def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:
 @check_contracts
 def _add_to_set_invalid(num_set: Set[int], new_num: int) -> None:
     """
-    Incorrectly checks for the existence of new_num in set, causing new_num not to not be added to the set.
+    Add new_num to the num_set. This is implemented incorrectly to make the postcondition check fail.
 
     Postconditions:
         - new_num in num_set
@@ -312,15 +313,14 @@ def _add_to_set_invalid(num_set: Set[int], new_num: int) -> None:
 
 
 def test_add_to_set_valid() -> None:
-    """Checks to make sure no errors are raised when correctly adding a number to a set"""
+    """Test that there are no errors when correctly adding a number to a set."""
     sample_set = {5, 4}
     _add_to_set_valid(sample_set, 1)
     assert 1 in sample_set
 
 
 def test_add_to_set_invalid() -> None:
-    """Test invalid addition of number to a set - using _add_to_set_invalid and ensuring an AssertionError is
-    raised for failing postcondition check"""
+    """Test that the attempt to add a number to a set using _add_to_set_invalid raises an AssertionError."""
     sample_set = {1, 2}
 
     with pytest.raises(AssertionError) as excinfo:
@@ -330,11 +330,11 @@ def test_add_to_set_invalid() -> None:
     assert "new_num in num_set" in msg
 
 
-# Testing that postcondition checks that use custom functions in scope pass and fail as expected
+# Test that postcondition checks that use custom functions in scope pass and fail as expected
 @check_contracts
 def _get_even_nums_valid(lst: List[int]) -> List[int]:
     """
-    Correctly returns a list of all even numbers in the input list
+    Return a list of all even numbers in the input list.
 
     Postcondition: is_even($return_value)
     """
@@ -344,7 +344,7 @@ def _get_even_nums_valid(lst: List[int]) -> List[int]:
 @check_contracts
 def _get_even_nums_invalid(lst: List[int]) -> List[int]:
     """
-    Returns a list of all odd numbers in the input list, which should cause the postcondition check to fail.
+    Return a list of all odd numbers in the input list, which should cause the postcondition check to fail.
 
     Postcondition: is_even($return_value)
     """
@@ -352,13 +352,14 @@ def _get_even_nums_invalid(lst: List[int]) -> List[int]:
 
 
 def test_get_even_nums_valid() -> None:
-    """Test correct retrieval of all even numbers in a list"""
+    """Test that _get_even_nums_valid correctly retrieves all even numbers in a list."""
     assert is_even(_get_even_nums_valid([4, 3, 2, 5, 6, 8, 1]))
 
 
 def test_get_even_nums_invalid() -> None:
-    """Test that the incorrect implementation of _get_even_nums raises an AssertionError because of
-    the failure of the postcondition check"""
+    """Test that the incorrect implementation of _get_even_nums raises an AssertionError because of the failure of
+    the postcondition check.
+    """
 
     with pytest.raises(AssertionError) as excinfo:
         _get_even_nums_invalid([5, 4, 3, 2, 1, 0, 5])
@@ -367,7 +368,7 @@ def test_get_even_nums_invalid() -> None:
     assert "is_even($return_value)" in msg
 
 
-# Testing that a function returning a custom object successfully checks for postconditions
+# Test that a function returning a custom object successfully checks for postconditions
 class Rectangle:
     def __init__(self, width: int, height: int):
         self.width = width
@@ -377,7 +378,7 @@ class Rectangle:
 @check_contracts
 def _zero_rectangle_invalid() -> Rectangle:
     """
-    Is supposed to return a rectangle with 0 width and height, but does not.
+    Return a rectangle with non-zero width and height.
 
     Postconditions:
         - $return_value.width == 0
@@ -389,7 +390,7 @@ def _zero_rectangle_invalid() -> Rectangle:
 @check_contracts
 def _zero_rectangle_valid() -> Rectangle:
     """
-    Valid implementation providing a rectangle with 0 width and height
+    Return a rectangle with 0 width and height.
 
     Postconditions:
         - $return_value.width == 0
@@ -399,7 +400,7 @@ def _zero_rectangle_valid() -> Rectangle:
 
 
 def test_zero_rectangle_invalid() -> None:
-    """Checks whether an error is raised when calling the incorrect implementation of _zero_rectangle"""
+    """Test that an error is raised when calling the incorrect implementation of _zero_rectangle."""
 
     with pytest.raises(AssertionError) as excinfo:
         _zero_rectangle_invalid()
@@ -409,17 +410,17 @@ def test_zero_rectangle_invalid() -> None:
 
 
 def test_zero_rectangle_valid() -> None:
-    """Ensures that postcondition checks pass for the valid implementation of _zero_rectangle"""
+    """Test that postcondition checks pass for the valid implementation of _zero_rectangle."""
     rect = _zero_rectangle_valid()
     assert rect.width == 0 and rect.height == 0
 
 
-# Using the legal variable name used to refer to the return value of the function by PyTA as a variable inside
+# Use the legal variable name used to refer to the return value of the function by PyTA as a variable inside
 # the function to ensure a new name is generated which does not cause collision.
 @check_contracts
 def _get_quotient(number: int) -> int:
     """
-    Returns the quotient obtained on dividing the number by 10
+    Return the quotient obtained on dividing the number by 10.
 
     Postcondition: $return_value % 10 == 0
     """
@@ -433,12 +434,12 @@ def _get_quotient(number: int) -> int:
 
 
 def test_get_quotient_valid() -> None:
-    """Ensuring that postcondition check passes when _get_quotient returns a multiple of 10"""
+    """Test that postcondition check passes when _get_quotient returns a multiple of 10."""
     assert _get_quotient(200) % 10 == 0
 
 
 def test_get_quotient_invalid() -> None:
-    """Ensuring that an error is raised when _get_quotient returns a value that is not a multiple of 10"""
+    """Test that an error is raised when _get_quotient returns a value that is not a multiple of 10."""
     with pytest.raises(AssertionError) as excinfo:
         _get_quotient(120)
 
@@ -446,16 +447,16 @@ def test_get_quotient_invalid() -> None:
     assert "$return_value % 10 == 0" in msg
 
 
-# Testing both pre and post conditions in a function
+# Test both pre and post conditions in a function
 @check_contracts
 def _get_quotient_with_pre_and_post(number: int) -> int:
     """
-    Performs the same task as _get_quotient but this time ensures the input is a multiple of 100
+    Perform the same task as _get_quotient but this time ensure the input is a multiple of 100.
 
     Precondition: number % 100 == 0
     Postcondition: $return_value % 10 == 0
     """
-    # Deliberately creating a case in which precondition passes but postcondition does not
+    # Deliberately create a case in which precondition check passes but postcondition check does not
     if number == 400:
         return 4
 
@@ -463,13 +464,14 @@ def _get_quotient_with_pre_and_post(number: int) -> int:
 
 
 def test_get_quotient_with_pre_and_post_valid() -> None:
-    """Ensures the quotient on division by 10 is successfully returned for a multiple of 100"""
+    """Test the quotient on division by 10 is successfully returned for a multiple of 100."""
     assert _get_quotient_with_pre_and_post(500) % 10 == 0
 
 
 def test_get_quotient_with_pre_and_post_invalid_input() -> None:
-    """Ensures an AssertionError is raised when a number that is not a multiple of 100 is provided as the input
-    to _get_quotient_with_pre_and_post"""
+    """Test that an AssertionError is raised when a number that is not a multiple of 100 is provided as the input
+    to _get_quotient_with_pre_and_post.
+    """
     with pytest.raises(AssertionError) as excinfo:
         _get_quotient_with_pre_and_post(150)
 
@@ -478,9 +480,10 @@ def test_get_quotient_with_pre_and_post_invalid_input() -> None:
 
 
 def test_get_quotient_with_pre_and_post_invalid_output() -> None:
-    """Ensures that an AssertionError is raised when a number that is not a multiple of 10 is returned from
+    """Test that an AssertionError is raised when a number that is not a multiple of 10 is returned from
     _get_quotient_with_pre_and_post. In this case, the precondition check should pass but postcondition check should
-    fail."""
+    fail.
+    """
     with pytest.raises(AssertionError) as excinfo:
         _get_quotient_with_pre_and_post(400)
 

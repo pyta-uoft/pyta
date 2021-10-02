@@ -143,7 +143,7 @@ Postconditions:
     - <expr>
 ```
 
-One interesting thing to note about postcondition expressions is that they can include the identifier `$return_value` - which is used to refer to the return value of the function.
+One interesting thing to note about postcondition expressions is that they can include the identifier `$return_value`, which is used to refer to the return value of the function.
 Thus, each `<expr>` in the snippet above can refer to the return value of the function through `$return_value`, in addition to any
 other variables and identifiers that are in scope for the function.
 
@@ -157,7 +157,7 @@ from python_ta.contracts import check_contracts
 
 @check_contracts
 def non_negative_sum(x: int, y: int) -> int:
-    """Return x + y. If x + y < 0, then returns 0 instead.
+    """Return x + y. If x + y < 0, then return 0 instead.
 
     Postconditions:
         - $return_value >= 0
@@ -167,7 +167,7 @@ def non_negative_sum(x: int, y: int) -> int:
 
 @check_contracts
 def non_negative_sum_each(lst1: list[int], lst2: list[int]) -> list[int]:
-    """Returns a non-negative sum when a number is lst1 is added to the corresponding number in lst2.
+    """Return a list of non-negative sums when a number in lst1 is added to the corresponding number in lst2.
     If the sum is negative for a pair, then it is taken to be 0 for that pair.
 
     Preconditions:
@@ -179,9 +179,8 @@ def non_negative_sum_each(lst1: list[int], lst2: list[int]) -> list[int]:
 ```
 
 ```{note}
-Postcondition expressions are evaluated after the type check on the return type is complete. Thus, you can be sure that
-the return value of the function has the correct type if you are writing postcondition expressions that refer to the function's
-return value.
+Postcondition expressions are evaluated after the type check on the return type is complete. Thus, you can assume that
+the return value of the function has the correct type when postcondition expressions are evaluated.
 ```
 
 ### Classes: methods
@@ -317,7 +316,7 @@ This section describes some more technical features of PythonTA's contract check
 
 ### Scope
 
-All custom preconditions, postconditions and representations are evaluated in the scope where their enclosing function/class is defined.
+All custom preconditions, postconditions, and representations are evaluated in the scope where their enclosing function/class is defined.
 Here is an example where a function's preconditions refer to both a helper function defined in the same module, and one that's been imported from a separate module.
 
 ```python

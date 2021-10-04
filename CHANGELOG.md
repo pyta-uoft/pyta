@@ -14,6 +14,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fix HTML report to display file even when no errors are found.
 - Fix pylint cache directory creation (backport of change from pylint 2.11)
 
+### Enhancements
+
+- Added support for postconditions in function docstring.
+
 ## [2.1.0] - 2021-09-16
 
 ### Enhancements

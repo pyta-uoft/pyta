@@ -13,7 +13,7 @@ code.
 
 This error occurs when we are using a variable before it has been assigned a value.
 
-```{literalinclude} /../examples/pylint/E0601_used_before_assignment.py
+```{literalinclude} /../examples/pylint/e0601_used_before_assignment.py
 
 ```
 
@@ -21,7 +21,7 @@ This error occurs when we are using a variable before it has been assigned a val
 
 This error occurs when we are using a variable that has not been defined.
 
-```{literalinclude} /../examples/pylint/E0602_undefined_variable.py
+```{literalinclude} /../examples/pylint/e0602_undefined_variable.py
 
 ```
 
@@ -29,7 +29,7 @@ This error occurs when we are using a variable that has not been defined.
 
 This error occurs when a loop variable is used outside the `for` loop where it was defined.
 
-```{literalinclude} /../examples/pylint/W0631_undefined_loop_variable.py
+```{literalinclude} /../examples/pylint/w0631_undefined_loop_variable.py
 
 ```
 
@@ -47,7 +47,7 @@ This error occurs when the `break` or `continue` keyword is used outside of a lo
 keyword `break` is used to exit a loop early and the keyword `continue` is used to skip an iteration
 in a loop. Hence, both keywords only belong inside loops.
 
-```{literalinclude} /../examples/pylint/E0103_not_in_loop.py
+```{literalinclude} /../examples/pylint/e0103_not_in_loop.py
 
 ```
 
@@ -58,7 +58,7 @@ indented to be considered part of the loop body).
 
 This error occurs when a `return` statement is found outside a function or method.
 
-```{literalinclude} /../examples/pylint/E0104_return_outside_function.py
+```{literalinclude} /../examples/pylint/e0104_return_outside_function.py
 
 ```
 
@@ -70,7 +70,7 @@ be considered part of the loop body).
 This error occurs when there is some code after a `return` or `raise` statement. This code will
 never be run, so either it should be removed, or the function is returning too early.
 
-```{literalinclude} /../examples/pylint/W0101_unreachable.py
+```{literalinclude} /../examples/pylint/w0101_unreachable.py
 
 ```
 
@@ -78,7 +78,7 @@ never be run, so either it should be removed, or the function is returning too e
 
 This error occurs when a dictionary literal sets the same key multiple times.
 
-```{literalinclude} /../examples/pylint/W0109_duplicate_key.py
+```{literalinclude} /../examples/pylint/w0109_duplicate_key.py
 
 ```
 
@@ -91,7 +91,7 @@ dictionary.
 This error occurs when a function call passes a keyword argument which does not match the signature
 of the function being called.
 
-```{literalinclude} /../examples/pylint/E1123_unexpected_keyword_arg.py
+```{literalinclude} /../examples/pylint/e1123_unexpected_keyword_arg.py
 
 ```
 
@@ -113,7 +113,7 @@ which does not exist for the given object. This can happen both for built-in typ
 for classes that we define ourselves. This error often results in
 an [`AttributeError`][attributeerror] when we run the code.
 
-```{literalinclude} /../examples/pylint/E1101_no_member.py
+```{literalinclude} /../examples/pylint/e1101_no_member.py
 
 ```
 
@@ -123,7 +123,7 @@ This error occurs when we try to call a value which is not a function, method, o
 In the following example, we should not call `x()` because `x` refers to an integer, and calling an
 integer has no meaning.
 
-```{literalinclude} /../examples/pylint/E1102_not_callable.py
+```{literalinclude} /../examples/pylint/e1102_not_callable.py
 
 ```
 
@@ -133,7 +133,7 @@ This error occurs when we assign a variable to the return value of a function ca
 never returns anything. In the following example, `add_fruit` mutates `fruit_basket` instead of
 returning a new list. As a result, `new_fruit_basket` always gets the value `None`.
 
-```{literalinclude} /../examples/pylint/E1111_assignment_from_no_return.py
+```{literalinclude} /../examples/pylint/e1111_assignment_from_no_return.py
 
 ```
 
@@ -146,7 +146,7 @@ This error occurs when we assign a variable the return value of a function call,
 always returns `None`. In the following example, `add_fruit` always returns `None`. As a
 result, `new_fruit_basket` will always get the value `None`.
 
-```{literalinclude} /../examples/pylint/E1128_assignment_from_none.py
+```{literalinclude} /../examples/pylint/e1128_assignment_from_none.py
 
 ```
 
@@ -156,7 +156,7 @@ A function must be called with one argument value per parameter in its header. T
 that we called a function with too few arguments. In the following example, there should be _three_
 values passed to the function instead of two.
 
-```{literalinclude} /../examples/pylint/E1120_no_value_for_parameter.py
+```{literalinclude} /../examples/pylint/e1120_no_value_for_parameter.py
 
 ```
 
@@ -172,7 +172,7 @@ A function must be called with one argument value per parameter in its header. T
 that we called a function with too many arguments. In the following example, there should be _two_
 values passed to the function instead of three.
 
-```{literalinclude} /../examples/pylint/E1121_too_many_function_args.py
+```{literalinclude} /../examples/pylint/e1121_too_many_function_args.py
 
 ```
 
@@ -189,7 +189,7 @@ but the value of the index is not an integer.
 
 Remember that the index indicates the _position_ of the item in the list/tuple.
 
-```{literalinclude} /../examples/pylint/E1126_invalid_sequence_index.py
+```{literalinclude} /../examples/pylint/e1126_invalid_sequence_index.py
 
 ```
 
@@ -209,7 +209,7 @@ integers.
 Remember that the slice numbers indicate the _start_ and _stop_ positions for the slice in the
 list/tuple.
 
-```{literalinclude} /../examples/pylint/E1127_invalid_slice_index.py
+```{literalinclude} /../examples/pylint/e1127_invalid_slice_index.py
 
 ```
 
@@ -226,7 +226,7 @@ This error occurs when we use a [unary operator][unary arithmetic and bitwise op
 , `~`) on an object which does not support this operator. For example, a list does not support
 negation.
 
-```{literalinclude} /../examples/pylint/E1130_invalid_unary_operand_type.py
+```{literalinclude} /../examples/pylint/e1130_invalid_unary_operand_type.py
 
 ```
 
@@ -236,7 +236,7 @@ This error occurs when we use a [binary arithmetic operator][binary arithmetic o
 or `*`, but the left and right sides are not compatible types. For example, a dictionary cannot be
 added to a list.
 
-```{literalinclude} /../examples/pylint/E1131_unsupported_binary_operation.py
+```{literalinclude} /../examples/pylint/e1131_unsupported_binary_operation.py
 
 ```
 
@@ -248,7 +248,7 @@ membership tests.
 The standard Python types which support membership tests are strings, lists, tuples, and
 dictionaries.
 
-```{literalinclude} /../examples/pylint/E1135_unsupported_membership_test.py
+```{literalinclude} /../examples/pylint/e1135_unsupported_membership_test.py
 
 ```
 
@@ -259,7 +259,7 @@ does not support indexing (or "subscripting").
 
 The standard Python types which support indexing are strings, lists, tuples, and dictionaries.
 
-```{literalinclude} /../examples/pylint/E1136_unsubscriptable_object.py
+```{literalinclude} /../examples/pylint/e1136_unsubscriptable_object.py
 
 ```
 
@@ -268,7 +268,7 @@ The standard Python types which support indexing are strings, lists, tuples, and
 This error occurs when we assign something to an object which does not support assignment (i.e. an
 object which does not define the `__setitem__` method).
 
-```{literalinclude} /../examples/pylint/E1137_unsupported_assignment_operation.py
+```{literalinclude} /../examples/pylint/e1137_unsupported_assignment_operation.py
 
 ```
 
@@ -277,7 +277,7 @@ object which does not define the `__setitem__` method).
 This error occurs when the `del` keyword is used to delete an item from an object which does not
 support item deletion (i.e. an object that does not define the `__delitem__` special method).
 
-```{literalinclude} /../examples/pylint/E1138_unsupported_delete_operation.py
+```{literalinclude} /../examples/pylint/e1138_unsupported_delete_operation.py
 
 ```
 
@@ -305,7 +305,7 @@ print('c' in named_list)  # Prints False
 This error occurs when we are trying to assign to multiple variables at once, but the right side has
 too few or too many values in the sequence.
 
-```{literalinclude} /../examples/pylint/E0632_unbalanced_tuple_unpacking.py
+```{literalinclude} /../examples/pylint/e0632_unbalanced_tuple_unpacking.py
 
 ```
 
@@ -314,7 +314,7 @@ too few or too many values in the sequence.
 This error occurs when we are trying to assign to multiple variables at once, but the right side is
 not a sequence, and so can't be unpacked.
 
-```{literalinclude} /../examples/pylint/E0633_unpacking_non_sequence.py
+```{literalinclude} /../examples/pylint/e0633_unpacking_non_sequence.py
 
 ```
 
@@ -326,7 +326,7 @@ time. Examples of iterables include sequence types such as `list`, `str`, and `t
 non-sequence types such as `dict`, and instances of other classes which define the `__iter__`
 or `__getitem__` special methods.
 
-```{literalinclude} /../examples/pylint/E1133_not_an_iterable.py
+```{literalinclude} /../examples/pylint/e1133_not_an_iterable.py
 
 ```
 
@@ -343,7 +343,7 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 `**` can only be used on a `dict` to unpack the values.
 
-```{literalinclude} /../examples/pylint/E1134_not_a_mapping.py
+```{literalinclude} /../examples/pylint/e1134_not_a_mapping.py
 
 ```
 
@@ -354,7 +354,7 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 This error occurs when a boolean expression contains an unneeded negation. If we are getting this
 error, the expression can be simplified to not use a negation.
 
-```{literalinclude} /../examples/pylint/C0113_unneeded_not.py
+```{literalinclude} /../examples/pylint/c0113_unneeded_not.py
 
 ```
 
@@ -373,7 +373,7 @@ else:
 This error occurs when a boolean test condition can be simplified.
 Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
 
-```{literalinclude} /../examples/pylint/R1726_simplifiable_condition.py
+```{literalinclude} /../examples/pylint/r1726_simplifiable_condition.py
 
 ```
 
@@ -389,7 +389,7 @@ if a:  # Error was on this line
 This error occurs when a boolean test condition always evaluates to a constant.
 Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
 
-```{literalinclude} /../examples/pylint/R1727_condition_evals_to_constant.py
+```{literalinclude} /../examples/pylint/r1727_condition_evals_to_constant.py
 
 ```
 
@@ -404,7 +404,7 @@ if True:  # Error was on this line
 
 This error occurs when `list()` is used instead of `[]` to create an empty list.
 
-```{literalinclude} /../examples/pylint/R1734_use_list_literal.py
+```{literalinclude} /../examples/pylint/r1734_use_list_literal.py
 
 ```
 
@@ -426,7 +426,7 @@ This error occurs when an expression is compared to a singleton value like `True
 
 Here is an example involving a comparison to `None`:
 
-```{literalinclude} /../examples/pylint/C0121_singleton_comparison.py
+```{literalinclude} /../examples/pylint/c0121_singleton_comparison.py
 
 ```
 
@@ -471,7 +471,7 @@ This error occurs when a conditional statement (like an `if` statement) uses a c
 its test. In such a case, a conditional statement is not necessary, as it will always result in the
 same path of execution.
 
-```{literalinclude} /../examples/pylint/W0125_using_constant_test.py
+```{literalinclude} /../examples/pylint/w0125_using_constant_test.py
 
 ```
 
@@ -479,7 +479,7 @@ same path of execution.
 
 This error occurs when a variable is redeclared on the same line it was assigned.
 
-```{literalinclude} /../examples/pylint/W0128_redeclared_assigned_name.py
+```{literalinclude} /../examples/pylint/w0128_redeclared_assigned_name.py
 
 ```
 
@@ -490,7 +490,7 @@ function/method is too complex, and should be split up.
 
 **Note**: The checker limit is 12 branches.
 
-```{literalinclude} /../examples/pylint/R0912_too_many_branches.py
+```{literalinclude} /../examples/pylint/r0912_too_many_branches.py
 
 ```
 
@@ -503,7 +503,7 @@ or rewritten as a [list comprehension][list comprehensions tutorial].
 **Note**: This checker does not count function, method, or class definitions as blocks, so the
 example below is considered to have _six_ nested blocks, not seven.
 
-```{literalinclude} /../examples/pylint/R1702_too_many_nested_blocks.py
+```{literalinclude} /../examples/pylint/r1702_too_many_nested_blocks.py
 
 ```
 
@@ -563,7 +563,7 @@ combined and passed as a single object.
 
 **Note**: The checker limit is 5 arguments.
 
-```{literalinclude} /../examples/pylint/R0913_too_many_arguments.py
+```{literalinclude} /../examples/pylint/r0913_too_many_arguments.py
 
 ```
 
@@ -573,7 +573,7 @@ The function or method has too many local variables.
 
 **Note**: The checker limit is 15 local variables.
 
-```{literalinclude} /../examples/pylint/R0914_too_many_locals.py
+```{literalinclude} /../examples/pylint/r0914_too_many_locals.py
 
 ```
 
@@ -586,7 +586,7 @@ The function or method has too many statements. We should split it into smaller 
 - The checker limit is 50 statements.
 - Comments do not count as statements.
 
-```{literalinclude} /../examples/pylint/R0915_too_many_statements.py
+```{literalinclude} /../examples/pylint/r0915_too_many_statements.py
 
 ```
 
@@ -594,7 +594,7 @@ The function or method has too many statements. We should split it into smaller 
 
 This error occurs when we have a defined variable that is never used.
 
-```{literalinclude} /../examples/pylint/W0612_unused_variable.py
+```{literalinclude} /../examples/pylint/w0612_unused_variable.py
 
 ```
 
@@ -602,7 +602,7 @@ This error occurs when we have a defined variable that is never used.
 
 This error occurs when a function argument is never used in the function.
 
-```{literalinclude} /../examples/pylint/W0613_unused_argument.py
+```{literalinclude} /../examples/pylint/w0613_unused_argument.py
 
 ```
 
@@ -611,7 +611,7 @@ This error occurs when a function argument is never used in the function.
 This error occurs when a statement does not have any effect. This means that the statement could be
 removed without changing the behaviour of the program.
 
-```{literalinclude} /../examples/pylint/W0104_pointless_statement.py
+```{literalinclude} /../examples/pylint/w0104_pointless_statement.py
 
 ```
 
@@ -620,7 +620,7 @@ removed without changing the behaviour of the program.
 This error occurs when a string statement does not have any effect. Very similar to error `W0104`, but
 for strings.
 
-```{literalinclude} /../examples/pylint/W0105_pointless_string_statement.py
+```{literalinclude} /../examples/pylint/w0105_pointless_string_statement.py
 
 ```
 
@@ -629,7 +629,7 @@ for strings.
 This error occurs when values for a dictionary are accessed using an index lookup (that is, through
 `dictionary_name[key]`) instead of directly while iterating over key-value pairs of the dictionary.
 
-```{literalinclude} /../examples/pylint/R1733_unnecessary_dict_index_lookup.py
+```{literalinclude} /../examples/pylint/r1733_unnecessary_dict_index_lookup.py
 
 ```
 
@@ -648,7 +648,7 @@ This error occurs when a [`pass` statement][`pass` statements] is used that can 
 no effect). `pass` statements should only be used to fill what would otherwise be an empty code
 block, since code blocks cannot be empty in Python.
 
-```{literalinclude} /../examples/pylint/W0107_unnecessary_pass.py
+```{literalinclude} /../examples/pylint/w0107_unnecessary_pass.py
 
 ```
 
@@ -665,7 +665,7 @@ This error occurs when you have a function that sometimes returns a non-`None` v
 implicitly_ returns `None`. This is an issue because in Python, we prefer making code explicit
 rather than implicit.
 
-```{literalinclude} /../examples/pylint/R1710_inconsistent_return_statements.py
+```{literalinclude} /../examples/pylint/r1710_inconsistent_return_statements.py
 
 ```
 
@@ -684,7 +684,7 @@ returning `None`.
 
 This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources.
 
-```{literalinclude} /../examples/pylint/R1732_consider_using_with.py
+```{literalinclude} /../examples/pylint/r1732_consider_using_with.py
 
 ```
 
@@ -699,7 +699,7 @@ with open('my_file.txt', 'r') as file:
 
 This error occurs when `dict()` is used instead of `{}` to create an empty dictionary.
 
-```{literalinclude} /../examples/pylint/R1735_use_dict_literal.py
+```{literalinclude} /../examples/pylint/r1735_use_dict_literal.py
 
 ```
 
@@ -725,7 +725,7 @@ identifiers.
 
 This error occurs when a module, function, class or method has an empty docstring.
 
-```{literalinclude} /../examples/pylint/C0112_empty_docstring.py
+```{literalinclude} /../examples/pylint/c0112_empty_docstring.py
 
 ```
 
@@ -743,7 +743,7 @@ variable, etc.).
 A special character accepted in all types of names is `_`. Numbers are allowed in all names, but
 names must not begin with a number.
 
-```{literalinclude} /../examples/pylint/C0103_invalid_name.py
+```{literalinclude} /../examples/pylint/c0103_invalid_name.py
 
 ```
 
@@ -759,7 +759,7 @@ meaningful one. Here are some of the disallowed names to avoid:
 - `tutu`
 - `tata`
 
-```{literalinclude} /../examples/pylint/C0104_disallowed_name.py
+```{literalinclude} /../examples/pylint/c0104_disallowed_name.py
 
 ```
 
@@ -768,7 +768,7 @@ meaningful one. Here are some of the disallowed names to avoid:
 This error occurs when a function, class or method is redefined. If we are getting this error, we
 should make sure all the functions, methods and classes that we define have different names.
 
-```{literalinclude} /../examples/pylint/E0102_function_redefined.py
+```{literalinclude} /../examples/pylint/e0102_function_redefined.py
 
 ```
 
@@ -777,7 +777,7 @@ should make sure all the functions, methods and classes that we define have diff
 This error occurs if there are duplicate parameter names in function definitions. All parameters
 must have distinct names, so that we can refer to each one separately in the function body.
 
-```{literalinclude} /../examples/pylint/E0108_duplicate_argument_name.py
+```{literalinclude} /../examples/pylint/e0108_duplicate_argument_name.py
 
 ```
 
@@ -785,7 +785,7 @@ must have distinct names, so that we can refer to each one separately in the fun
 
 This error occurs when a local name is redefining the name of a parameter.
 
-```{literalinclude} /../examples/pylint/R1704_redefined_argument_from_local.py
+```{literalinclude} /../examples/pylint/r1704_redefined_argument_from_local.py
 
 ```
 
@@ -811,7 +811,7 @@ name takes precedence, but it hides the global name, making it no longer accessi
 global name is not accessible _anywhere_ in the function where it is redefined, even before the
 redefinition.
 
-```{literalinclude} /../examples/pylint/W0621_redefined_outer_name.py
+```{literalinclude} /../examples/pylint/w0621_redefined_outer_name.py
 
 ```
 
@@ -819,7 +819,7 @@ redefinition.
 
 This error occurs when we are redefining a built-in function, constant, class, or exception.
 
-```{literalinclude} /../examples/pylint/W0622_redefined_builtin.py
+```{literalinclude} /../examples/pylint/w0622_redefined_builtin.py
 
 ```
 
@@ -864,7 +864,7 @@ lines: 1-3
 The module is unable to be imported. Check the spelling of the module name, or whether the module is
 in the correct directory.
 
-```{literalinclude} /../examples/pylint/E0401_import_error.py
+```{literalinclude} /../examples/pylint/e0401_import_error.py
 
 ```
 
@@ -879,7 +879,7 @@ import missing_module as foo  # This module does not exist
 This error occurs when we are trying to access a variable from an imported module, but that variable
 name could not be found in that referenced module.
 
-```{literalinclude} /../examples/pylint/E0611_no_name_in_module.py
+```{literalinclude} /../examples/pylint/e0611_no_name_in_module.py
 
 ```
 
@@ -890,7 +890,7 @@ they add all objects from the imported module into the global namespace. This ma
 tell in which module a particular class, function or constant is defined, and may cause problems,
 for example, when multiple modules have objects with identical names.
 
-```{literalinclude} /../examples/pylint/W0401_wildcard_import.py
+```{literalinclude} /../examples/pylint/w0401_wildcard_import.py
 
 ```
 
@@ -914,7 +914,7 @@ c = module_name.SomeClass()
 
 A module should not be imported more than once.
 
-```{literalinclude} /../examples/pylint/W0404_reimported.py
+```{literalinclude} /../examples/pylint/w0404_reimported.py
 
 ```
 
@@ -923,7 +923,7 @@ A module should not be imported more than once.
 A module should not import itself. For example, if we have a module named `W0406_import_self`, it
 should not import a module with the same name.
 
-```{literalinclude} /../examples/pylint/W0406_import_self.py
+```{literalinclude} /../examples/pylint/w0406_import_self.py
 
 ```
 
@@ -938,7 +938,7 @@ A module should not import a file which results in an import of the original mod
 
 Example File 1
 
-```{literalinclude} /../examples/pylint/R0401_cyclic_import.py
+```{literalinclude} /../examples/pylint/r0401_cyclic_import.py
 
 ```
 
@@ -968,7 +968,7 @@ from python_ta import contracts
 
 Different modules should not be imported on a single line.
 
-```{literalinclude} /../examples/pylint/C0410_multiple_imports.py
+```{literalinclude} /../examples/pylint/c0410_multiple_imports.py
 
 ```
 
@@ -991,7 +991,7 @@ from shutil import copy, SameFileError
 This error occurs when the [PEP8 import order][pep8 imports] is not respected. We should do standard
 library imports first, then third-party libraries, then local imports.
 
-```{literalinclude} /../examples/pylint/C0411_wrong_import_order.py
+```{literalinclude} /../examples/pylint/c0411_wrong_import_order.py
 
 ```
 
@@ -999,7 +999,7 @@ library imports first, then third-party libraries, then local imports.
 
 Imports should be grouped by package.
 
-```{literalinclude} /../examples/pylint/C0412_ungrouped_imports.py
+```{literalinclude} /../examples/pylint/c0412_ungrouped_imports.py
 
 ```
 
@@ -1015,7 +1015,7 @@ from math import floor
 Imports should be placed at the top of the module, above any other code, but below the module
 docstring.
 
-```{literalinclude} /../examples/pylint/C0413_wrong_import_position.py
+```{literalinclude} /../examples/pylint/c0413_wrong_import_position.py
 
 ```
 
@@ -1023,7 +1023,7 @@ docstring.
 
 Imports should be placed at the top-level of the module, not inside function or class bodies.
 
-```{literalinclude} /../examples/pylint/C0415_import_outside_toplevel.py
+```{literalinclude} /../examples/pylint/c0415_import_outside_toplevel.py
 
 ```
 
@@ -1031,7 +1031,7 @@ Imports should be placed at the top-level of the module, not inside function or 
 
 This error occurs when we import a module which is not used anywhere in our code.
 
-```{literalinclude} /../examples/pylint/W0611_unused_import.py
+```{literalinclude} /../examples/pylint/w0611_unused_import.py
 
 ```
 
@@ -1044,7 +1044,7 @@ do too many things.
 
 **Note**: The checker limit is 7 instance attributes.
 
-```{literalinclude} /../examples/pylint/R0902_too_many_instance_attributes.py
+```{literalinclude} /../examples/pylint/r0902_too_many_instance_attributes.py
 
 ```
 
@@ -1094,7 +1094,7 @@ class Composition(object):
 This error occurs when an abstract method (i.e. a method with a `raise NotImplementedError`
 statement) is not overridden inside a subclass of the abstract class.
 
-```{literalinclude} /../examples/pylint/W0223_abstract_method.py
+```{literalinclude} /../examples/pylint/w0223_abstract_method.py
 
 ```
 
@@ -1113,7 +1113,7 @@ class Cat(Animal):
 This error occurs when a method takes a different number of arguments than the interface that it
 implements or the method that it overrides.
 
-```{literalinclude} /../examples/pylint/W0221_arguments_differ.py
+```{literalinclude} /../examples/pylint/w0221_arguments_differ.py
 
 ```
 
@@ -1137,7 +1137,7 @@ signature as the method which it is overriding. In other words, the names and th
 parameters should be the same in the two methods. Furthermore, if a parameter in the parent method
 has a default argument, it must also have a default argument in the child method.
 
-```{literalinclude} /../examples/pylint/W0222_signature_differs.py
+```{literalinclude} /../examples/pylint/w0222_signature_differs.py
 
 ```
 
@@ -1159,7 +1159,7 @@ The purpose of the `__init__` method is to initialize the attributes of an objec
 called by the special method [`__new__`] when a new object is being instantiated, and `__new__` will
 raise a `TypeError` if `__init__` returns anything other than `None`.
 
-```{literalinclude} /../examples/pylint/E0101_return_in_init.py
+```{literalinclude} /../examples/pylint/e0101_return_in_init.py
 
 ```
 
@@ -1168,7 +1168,7 @@ raise a `TypeError` if `__init__` returns anything other than `None`.
 Attributes and methods whose name starts with an underscore should be considered "private" and
 should not be accessed outside of the class in which they are defined.
 
-```{literalinclude} /../examples/pylint/W0212_protected_access.py
+```{literalinclude} /../examples/pylint/w0212_protected_access.py
 
 ```
 
@@ -1182,7 +1182,7 @@ class.
 When using inheritance, we should call the `__init__` method of the parent class and not of some
 unrelated class.
 
-```{literalinclude} /../examples/pylint/W0233_non_parent_init_called.py
+```{literalinclude} /../examples/pylint/w0233_non_parent_init_called.py
 
 ```
 
@@ -1217,7 +1217,7 @@ class Child(Parent):
 This error occurs when calling `super()` with the class and instance as these can be ommited from
 Python 3.
 
-```{literalinclude} /../examples/pylint/R1725_super_with_arguments.py
+```{literalinclude} /../examples/pylint/r1725_super_with_arguments.py
 
 ```
 
@@ -1235,7 +1235,7 @@ Any attribute we define for a class should be created inside the `__init__` meth
 outside this method is considered bad practice, as it makes it harder to keep track of what
 attributes the class actually has.
 
-```{literalinclude} /../examples/pylint/W0201_attribute_defined_outside_init.py
+```{literalinclude} /../examples/pylint/w0201_attribute_defined_outside_init.py
 
 ```
 
@@ -1259,7 +1259,7 @@ If we accidentally hide a method with an attribute, it can cause other code to a
 what it believes to be a method, which will fail since it has become an attribute instead. This will
 cause the program to raise an error.
 
-```{literalinclude} /../examples/pylint/E0202_method_hidden.py
+```{literalinclude} /../examples/pylint/e0202_method_hidden.py
 
 ```
 
@@ -1268,7 +1268,7 @@ cause the program to raise an error.
 Before trying to use a member of a class, it should have been defined at some point. If we try to
 use it before assigning to it, an error will occur.
 
-```{literalinclude} /../examples/pylint/E0203_access_member_before_definition.py
+```{literalinclude} /../examples/pylint/e0203_access_member_before_definition.py
 
 ```
 
@@ -1280,7 +1280,7 @@ dunders" on both sides) does not have the expected number of parameters. Special
 expected signature, and if we create a method with the same name and a different number of
 parameters, it can break existing code and lead to errors.
 
-```{literalinclude} /../examples/pylint/E0302_unexpected_special_method_signature.py
+```{literalinclude} /../examples/pylint/e0302_unexpected_special_method_signature.py
 
 ```
 
@@ -1304,7 +1304,7 @@ A new class can only inherit from a different class (i.e. a Python object which 
 of an object). It cannot inherit from an instance of a class or from a Python literal such as a
 string, list, or dictionary literal.
 
-```{literalinclude} /../examples/pylint/E0239_inherit_non_class.py
+```{literalinclude} /../examples/pylint/e0239_inherit_non_class.py
 
 ```
 
@@ -1320,7 +1320,7 @@ class FancyFloat(float):
 
 A class should not inherit from a different class multiple times.
 
-```{literalinclude} /../examples/pylint/E0241_duplicate_bases.py
+```{literalinclude} /../examples/pylint/e0241_duplicate_bases.py
 
 ```
 
@@ -1331,7 +1331,7 @@ When we create an instance of a class and call an instance method, Python automa
 class instance as the first argument to the method. If a method does not expect any arguments, this
 will result in an error.
 
-```{literalinclude} /../examples/pylint/E0211_no_method_argument.py
+```{literalinclude} /../examples/pylint/e0211_no_method_argument.py
 
 ```
 
@@ -1355,7 +1355,7 @@ first parameter something else, using the word `self` is a convention that is st
 the Python community and makes it clear that we did not simply forget to add `self` or accidentally
 intended a function as a method.
 
-```{literalinclude} /../examples/pylint/E0213_no_self_argument.py
+```{literalinclude} /../examples/pylint/e0213_no_self_argument.py
 
 ```
 
@@ -1382,7 +1382,7 @@ the method as a function (by removing the first parameter `self`) and move it ou
 In the following example, `add_small_coins` does not make use of the first parameter `self` and so
 can be moved outside the class as a function.
 
-```{literalinclude} /../examples/pylint/R0201_no_self_use.py
+```{literalinclude} /../examples/pylint/r0201_no_self_use.py
 
 ```
 
@@ -1416,7 +1416,7 @@ to signal that the method is a static method which does not take a class instanc
 argument. If such a static method contains `self` as the first parameter, it suggests that we are
 erroneously expecting a class instance as the first argument to the method.
 
-```{literalinclude} /../examples/pylint/W0211_bad_staticmethod_argument.py
+```{literalinclude} /../examples/pylint/w0211_bad_staticmethod_argument.py
 
 ```
 
@@ -1450,7 +1450,7 @@ This is not good practice, since we may catch exceptions that we do not want to 
 we typically do not want to catch the [`KeyboardInterrupt`][python documentation: keyboardinterrupt]
 exception, which is thrown when a user attempts to exist the program by typing `Ctrl-C`.
 
-```{literalinclude} /../examples/pylint/W0702_bare_except.py
+```{literalinclude} /../examples/pylint/w0702_bare_except.py
 
 ```
 
@@ -1462,7 +1462,7 @@ from the `Exception` class, using `except Exception:` provides no information re
 exception actually occurred. Exceptions which we do not expect can go unnoticed, and this may lead
 to bugs.
 
-```{literalinclude} /../examples/pylint/W0703_broad_except.py
+```{literalinclude} /../examples/pylint/w0703_broad_except.py
 
 ```
 
@@ -1471,7 +1471,7 @@ to bugs.
 This error occurs when we try to catch the same exception multiple times. Only the first `except`
 block for a particular exception will be reached.
 
-```{literalinclude} /../examples/pylint/W0705_duplicate_except.py
+```{literalinclude} /../examples/pylint/w0705_duplicate_except.py
 
 ```
 
@@ -1482,7 +1482,7 @@ criteria for catching the exception will be used. This means that if we have a g
 type before a specific exception type, the code for the specific exception type will never be
 reached.
 
-```{literalinclude} /../examples/pylint/E0701_bad_except_order.py
+```{literalinclude} /../examples/pylint/e0701_bad_except_order.py
 
 ```
 
@@ -1493,7 +1493,7 @@ tuple. It is possible (but incorrect!) to pass `except` an expression containing
 classes separated by a binary operator such as `and` or `or`. In such a case, only one of the
 exceptions will be caught!
 
-```{literalinclude} /../examples/pylint/W0711_binary_op_exception.py
+```{literalinclude} /../examples/pylint/w0711_binary_op_exception.py
 
 ```
 
@@ -1515,7 +1515,7 @@ this case, it will re-raise the exception that was caught by the `except` block.
 if, for example, we wish to do some cleanup (e.g. close file handles), or print an error message,
 before passing the exception up the call stack.
 
-```{literalinclude} /../examples/pylint/E0704_misplaced_bare_raise.py
+```{literalinclude} /../examples/pylint/e0704_misplaced_bare_raise.py
 
 ```
 
@@ -1537,7 +1537,7 @@ The Python `raise` statement expects an object that is derived from
 the [`BaseException`][python documentation: baseexception] class. We cannot call `raise` on integers
 or strings.
 
-```{literalinclude} /../examples/pylint/E0702_raising_bad_type.py
+```{literalinclude} /../examples/pylint/e0702_raising_bad_type.py
 
 ```
 
@@ -1551,7 +1551,7 @@ inherit from the [`Exception`][python documentation: exception] class (which wil
 descendents of the `BaseException` class). Attempting to raise any other object will lead to an
 error.
 
-```{literalinclude} /../examples/pylint/E0710_raising_non_exception.py
+```{literalinclude} /../examples/pylint/e0710_raising_non_exception.py
 
 ```
 
@@ -1563,7 +1563,7 @@ is not implemented with respect to the other type. It is _not interchangeable_
 with [`NotImplementedError`][python documentation: notimplementederror], which should be used to
 indicate that the abstract method must be implemented by the derived class.
 
-```{literalinclude} /../examples/pylint/E0711_notimplemented_raised.py
+```{literalinclude} /../examples/pylint/e0711_notimplemented_raised.py
 
 ```
 
@@ -1575,7 +1575,7 @@ the Python `except` statement also expects objects that are derived from
 the [`BaseException`][python documentation: baseexception] class. Attempting to call `except` on any
 other object will lead to an error.
 
-```{literalinclude} /../examples/pylint/E0712_catching_non_exception.py
+```{literalinclude} /../examples/pylint/e0712_catching_non_exception.py
 
 ```
 
@@ -1869,7 +1869,7 @@ See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps
 This error occurs when we use the `format` method on a string, but call it with more arguments than
 the number of `{}` in the string.
 
-```{literalinclude} /../examples/pylint/E1305_too_many_format_args.py
+```{literalinclude} /../examples/pylint/e1305_too_many_format_args.py
 
 ```
 
@@ -1890,7 +1890,7 @@ s = "{} who is {} lives in {}".format(name, age, country)
 This error occurs when we use the `format` method on a string, but call it with fewer arguments than
 the number of `{}` in the string.
 
-```{literalinclude} /../examples/pylint/E1306_too_few_format_args.py
+```{literalinclude} /../examples/pylint/e1306_too_few_format_args.py
 
 ```
 
@@ -1908,7 +1908,7 @@ This error occurs when there are no interpolation variables present in an f-stri
 either a bug in the code (that is, there should be an interpolation variable in the f-string) or the f-string can be a
 normal string.
 
-```{literalinclude} /../examples/pylint/W1309_f_string_without_interpolation.py
+```{literalinclude} /../examples/pylint/w1309_f_string_without_interpolation.py
 
 ```
 
@@ -1932,7 +1932,7 @@ This error occurs when a format string does not have **any** interpolation varia
 mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code
 and there should be interpolation variables in the string.
 
-```{literalinclude} /../examples/pylint/W1310_format_string_without_interpolation.py
+```{literalinclude} /../examples/pylint/w1310_format_string_without_interpolation.py
 
 ```
 
@@ -1950,7 +1950,7 @@ This error occurs when a format string that uses named fields does not receive t
 keywords. In the following example, we should assign three values for `last_name`, `first_name`,
 and `age`.
 
-```{literalinclude} /../examples/pylint/W1303_missing_format_argument_key.py
+```{literalinclude} /../examples/pylint/w1303_missing_format_argument_key.py
 
 ```
 
@@ -1969,7 +1969,7 @@ or [`rstrip`][str.rstrip], but pass an argument string which contains duplicate 
 argument string should contain the _distinct_ characters that we want to remove from the end(s) of a
 string.
 
-```{literalinclude} /../examples/pylint/E1310_bad_str_strip_call.py
+```{literalinclude} /../examples/pylint/e1310_bad_str_strip_call.py
 
 ```
 
@@ -1985,7 +1985,7 @@ manual field specification (e.g. `{0}`).
 
 For example, we should not use `{}` and `{index}` at the same time.
 
-```{literalinclude} /../examples/pylint/W1305_format_combined_specification.py
+```{literalinclude} /../examples/pylint/w1305_format_combined_specification.py
 
 ```
 
@@ -2005,7 +2005,7 @@ s = "{0} and {1}".format("a", "b")
 
 This error occurs when a string literal contains a backslash that is not part of an escape sequence.
 
-```{literalinclude} /../examples/pylint/W1401_anomalous_backslash_in_string.py
+```{literalinclude} /../examples/pylint/w1401_anomalous_backslash_in_string.py
 
 ```
 
@@ -2036,7 +2036,7 @@ fails. The conditions should depend on the code that we are testing, and should 
 literal like `True` or `4`. Otherwise, the test will always have the same result, regardless of
 whether our code is correct.
 
-```{literalinclude} /../examples/pylint/W1503_redundant_unittest_assert.py
+```{literalinclude} /../examples/pylint/w1503_redundant_unittest_assert.py
 
 ```
 
@@ -2045,7 +2045,7 @@ whether our code is correct.
 This error occurs when `type` is used instead of `isinstance` to perform a type check.
 Use `isinstance(x, Y)` instead of `type(x) == Y`.
 
-```{literalinclude} /../examples/pylint/C0123_unidiomatic_typecheck.py
+```{literalinclude} /../examples/pylint/c0123_unidiomatic_typecheck.py
 
 ```
 
@@ -2068,7 +2068,7 @@ argument is mutated when the function is called, it will remain modified for all
 calls. This leads to a common "gotcha" in Python, where an "empty" list or dictionary, specified as
 the default argument, starts containing values on calls other than the first call.
 
-```{literalinclude} /../examples/pylint/W0102_dangerous_default_value.py
+```{literalinclude} /../examples/pylint/w0102_dangerous_default_value.py
 
 ```
 
@@ -2114,7 +2114,7 @@ print(make_list(5))
 
 It is more _pythonic_ to iterate through a dictionary directly, without calling the `.keys` method.
 
-```{literalinclude} /../examples/pylint/C0201_consider_iterating_dictionary.py
+```{literalinclude} /../examples/pylint/c0201_consider_iterating_dictionary.py
 
 ```
 
@@ -2130,7 +2130,7 @@ for item in menu:
 This error occurs when a keyword, such as `if` or `for`, is followed by a single item enclosed in
 parentheses. In such a case, parentheses are not necessary.
 
-```{literalinclude} /../examples/pylint/C0325_superfluous_parens.py
+```{literalinclude} /../examples/pylint/c0325_superfluous_parens.py
 
 ```
 
@@ -2149,7 +2149,7 @@ misplacing a comma, which can lead to obscure bugs. In order to make our intenti
 always use parentheses when creating a tuple, and we should never leave a trailing comma in our
 code.
 
-```{literalinclude} /../examples/pylint/R1707_trailing_comma_tuple.py
+```{literalinclude} /../examples/pylint/r1707_trailing_comma_tuple.py
 
 ```
 
@@ -2166,7 +2166,7 @@ This error occurs when an `assert` statement is called with a tuple as the first
 acting on a tuple passes if and only if the tuple is non-empty. This is likely _not_ what the
 programmer had intended.
 
-```{literalinclude} /../examples/pylint/W0199_assert_on_tuple.py
+```{literalinclude} /../examples/pylint/w0199_assert_on_tuple.py
 
 ```
 
@@ -2201,7 +2201,7 @@ following assertions pass if the lines are evaluated together from a Python file
 but `assert num is 257` and `assert chars is 'this string fails'` fail if the lines are entered into
 a Python interpreter one-by-one.
 
-```{literalinclude} /../examples/pylint/R0123_literal_comparison.py
+```{literalinclude} /../examples/pylint/r0123_literal_comparison.py
 
 ```
 
@@ -2233,7 +2233,7 @@ assert chars == 'this string fails'
 This error occurs when an expression that is not a function call is not assigned to a variable.
 Typically, this indicates that we were intending to do something else.
 
-```{literalinclude} /../examples/pylint/W0106_expression_not_assigned.py
+```{literalinclude} /../examples/pylint/w0106_expression_not_assigned.py
 
 ```
 
@@ -2250,7 +2250,7 @@ print("Appended 4 to my list!")
 This error occurs when the `__len__` special method returns something other than a non-negative
 integer.
 
-```{literalinclude} /../examples/pylint/E0303_invalid_length_returned.py
+```{literalinclude} /../examples/pylint/e0303_invalid_length_returned.py
 
 ```
 
@@ -2272,7 +2272,7 @@ class Company:
 This warning occurs when debugging breakpoints (such as `breakpoint()`, `sys.breakpointhook()`,
 and `pdb.set_trace()`) are found. These breakpoints should be removed in production code.
 
-```{literalinclude} /../examples/pylint/W1515_forgotten_debug_statement.py
+```{literalinclude} /../examples/pylint/w1515_forgotten_debug_statement.py
 
 ```
 
@@ -2283,7 +2283,7 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 This error occurs when we write more than one statement on a single line. According to PEP8, [_
 multiple statements on the same line are discouraged_][pep8: other recommendations].
 
-```{literalinclude} /../examples/pylint/C0321_multiple_statements.py
+```{literalinclude} /../examples/pylint/c0321_multiple_statements.py
 
 ```
 
@@ -2303,7 +2303,7 @@ def is_positive(number: int) -> str:
 This error occurs when we end a Python statement with a semicolon. There is no good reason to ever
 use a semicolon in Python.
 
-```{literalinclude} /../examples/pylint/W0301_unnecessary_semicolon.py
+```{literalinclude} /../examples/pylint/w0301_unnecessary_semicolon.py
 
 ```
 
@@ -2318,7 +2318,7 @@ print("Hello World!")
 This error occurs when a file is missing a trailing newline character. For example, if we represent
 a (typically invisible) newline character as `¬`, the following file would raise this error:
 
-```{literalinclude} /../examples/pylint/C0304_missing_final_newline.py
+```{literalinclude} /../examples/pylint/c0304_missing_final_newline.py
 
 ```
 
@@ -2333,7 +2333,7 @@ print("Hello World!")  # Trailing newline is present:  ¬
 This error occurs when a file ends with more than one newline character (i.e. when a file contains
 trailing blank lines). For example:
 
-```{literalinclude} /../examples/pylint/C0305_trailing_newlines.py
+```{literalinclude} /../examples/pylint/c0305_trailing_newlines.py
 
 ```
 
@@ -2348,7 +2348,7 @@ print("Hello World!")  # This file ends with a single newline character! :)
 This error occurs when a line is longer than a predefined number of characters. Our default limit
 for all lines is 80 characters.
 
-```{literalinclude} /../examples/pylint/C0301_line_too_long.py
+```{literalinclude} /../examples/pylint/c0301_line_too_long.py
 
 ```
 
@@ -2454,7 +2454,7 @@ for all lines is 80 characters.
 This error occurs when we attempt to use C-style "pre-increment" or "pre-decrement" operators `++`
 and `--`, which do not exist in Python.
 
-```{literalinclude} /../examples/pylint/E0107_nonexistent_operator.py
+```{literalinclude} /../examples/pylint/e0107_nonexistent_operator.py
 
 ```
 

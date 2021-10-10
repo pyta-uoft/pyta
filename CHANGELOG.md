@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Enhancements
+
+- Added support for postconditions in function docstring.
+
 ## [2.1.1] - 2021-09-23
 
 ### Bug fixes

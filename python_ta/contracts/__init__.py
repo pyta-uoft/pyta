@@ -12,6 +12,7 @@ Set to True to display debugging messages when checking contracts.
 """
 
 _DEFAULT_MAX_VALUE_LENGTH = 30
+FUNCTION_RETURN_VALUE = "$return_value"
 
 
 class PyTAContractError(Exception):
@@ -183,6 +184,16 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 f"return type annotation {_display_annotation(return_type)}"
             )
 
+    # Check function postconditions
+    postconditions = parse_assertions(wrapped, parse_token="Postcondition")
+    _check_assertions(
+        wrapped,
+        function_locals,
+        postconditions,
+        condition_type="postcondition",
+        function_return_val=r,
+    )
+
     return r
 
 
@@ -275,30 +286,78 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 raise PyTAContractError(f'Representation invariant "{invariant}" was violated')
 
 
+def _get_legal_return_val_var_name(var_dict: dict) -> str:
+    """
+    Add '_' to the end of __function_return_value__ until a variable name that has not been used for any other
+    variable in the function's scope is created. This is used to refer to the function's return value when evaluating
+    postconditions.
+    """
+    legal_var_name = "__function_return_value__"
+
+    while legal_var_name in var_dict:
+        legal_var_name += "_"
+
+    return legal_var_name
+
+
+def _replace_return_val_assertion(assertion: str, return_val_var_name: Optional[str]) -> str:
+    """
+    Replace FUNCTION_RETURN_VALUE in the assertion with the legal python variable name generated and return the new
+    assertion. If FUNCTION_RETURN_VALUE does not appear in assertion, then simply return the original assertion.
+
+    Precondition: If FUNCTION_RETURN_VALUE is in assertion, then return_val_var_name is not None
+    """
+
+    if FUNCTION_RETURN_VALUE in assertion:
+        return assertion.replace(FUNCTION_RETURN_VALUE, return_val_var_name)
+    return assertion
+
+
 def _check_assertions(
-    wrapped: Callable[..., Any], function_locals: dict, assertions: List[str]
+    wrapped: Callable[..., Any],
+    function_locals: dict,
+    assertions: List[str],
+    condition_type: str = "precondition",
+    function_return_val: Any = None,
 ) -> None:
     """Check that the given assertions are still satisfied."""
+    return_val_dict, return_val_var_name = {}, None
+
+    if condition_type == "postcondition":
+        return_val_var_name = _get_legal_return_val_var_name(
+            {**wrapped.__globals__, **function_locals}
+        )
+        return_val_dict[return_val_var_name] = function_return_val
+
     for assertion in assertions:
         try:
-            _debug(f"Checking precondition for {wrapped.__qualname__}: {assertion}")
-            check = eval(assertion, {**wrapped.__globals__, **function_locals})
+            _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion}")
+            replaced_assertion = _replace_return_val_assertion(assertion, return_val_var_name)
+            check = eval(
+                replaced_assertion, {**wrapped.__globals__, **function_locals, **return_val_dict}
+            )
         except:
-            _debug(f"Warning: could not evaluate precondition: {assertion}")
+            _debug(f"Warning: could not evaluate {condition_type}: {assertion}")
         else:
             if not check:
                 arg_string = ", ".join(
                     f"{k}: {_display_value(v)}" for k, v in function_locals.items()
                 )
                 arg_string = "{" + arg_string + "}"
+
+                return_val_string = ""
+
+                if condition_type == "postcondition":
+                    return_val_string = f"and return value {function_return_val}"
+
                 raise PyTAContractError(
-                    f'{wrapped.__name__} precondition "{assertion}" was '
-                    f"violated for arguments {arg_string}"
+                    f'{wrapped.__name__} {condition_type} "{assertion}" was '
+                    f"violated for arguments {arg_string} {return_val_string}"
                 )
 
 
 def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
-    """Return a list of preconditions/representation invariants parsed from the given entity's docstring.
+    """Return a list of preconditions/postconditions/representation invariants parsed from the given entity's docstring.
 
     Uses parse_token to determine what to look for. parse_token defaults to Precondition.
 

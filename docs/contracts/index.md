@@ -1,6 +1,6 @@
 # Runtime Contract Checking
 
-PythonTA supports runtime checking of type annotations, function preconditions, and class representation invariants.
+PythonTA supports runtime checking of type annotations, function preconditions, function postconditions, and class representation invariants.
 In contrast to the [checkers from Pylint and our own custom checkers](../checkers/index), the checks described in this section execute when your code is run.
 This makes it easy to incorporate these checks when executing, debugging, and testing your code.
 
@@ -130,6 +130,57 @@ def divide_each(lst1: list[int], lst2: list[int]) -> list[int]:
 ```{note}
 Type annotations are evaluated before these precondition expressions, and so when you are
 writing custom preconditions you can assume that the parameters have the correct type.
+```
+
+### Functions: custom postconditions
+
+Postconditions for a function can be specified much like preconditions in the function docstring:
+
+```
+Postconditions:
+    - <expr>
+    - <expr>
+    - <expr>
+```
+
+One interesting thing to note about postcondition expressions is that they can include the identifier `$return_value`, which is used to refer to the return value of the function.
+Thus, each `<expr>` in the snippet above can refer to the return value of the function through `$return_value`, in addition to any
+other variables and identifiers that are in scope for the function.
+
+Aside from the usage and availability of the `$return_value` identifier, function postconditions are handled the same way as [function preconditions](#functions-custom-preconditions).
+
+Examples:
+
+```python
+from python_ta.contracts import check_contracts
+
+
+@check_contracts
+def non_negative_sum(x: int, y: int) -> int:
+    """Return x + y. If x + y < 0, then return 0 instead.
+
+    Postconditions:
+        - $return_value >= 0
+    """
+    return max(0, x + y)
+
+
+@check_contracts
+def non_negative_sum_each(lst1: list[int], lst2: list[int]) -> list[int]:
+    """Return a list of non-negative sums when a number in lst1 is added to the corresponding number in lst2.
+    If the sum is negative for a pair, then it is taken to be 0 for that pair.
+
+    Preconditions:
+        - len(lst1) == len(lst2)
+    Postconditions:
+        - all(num >= 0 for num in $return_value)
+    """
+    return [non_negative_sum(x, y) for x, y in zip(lst1, lst2)]
+```
+
+```{note}
+Postcondition expressions are evaluated after the type check on the return type is complete. Thus, you can assume that
+the return value of the function has the correct type when postcondition expressions are evaluated.
 ```
 
 ### Classes: methods
@@ -265,7 +316,7 @@ This section describes some more technical features of PythonTA's contract check
 
 ### Scope
 
-All custom preconditions and representations are evaluated in the scope where their enclosing function/class is defined.
+All custom preconditions, postconditions, and representations are evaluated in the scope where their enclosing function/class is defined.
 Here is an example where a function's preconditions refer to both a helper function defined in the same module, and one that's been imported from a separate module.
 
 ```python

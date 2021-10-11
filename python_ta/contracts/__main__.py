@@ -19,7 +19,7 @@ def run_contracts(main: TextIO, extra_mod_names: Tuple):
 
     modified_main_contents = module_node.as_string()
 
-    exec(modified_main_contents)
+    exec(modified_main_contents, globals())
 
 
 def _build_import() -> astroid.NodeNG:

@@ -20,10 +20,11 @@ def run_contracts(main: TextIO, extra_mod_names: Tuple, no_main: bool):
     module_node = astroid.parse(contents)
 
     if_main = _extract_if_main(module_node)
-    import_statement = _build_import()
-    if_main.body.insert(0, import_statement)
-    contracts_call = _build_contracts_call(extra_mod_names, decorate_main=no_main)
-    if_main.body.insert(1, contracts_call)
+    if if_main:
+        import_statement = _build_import()
+        if_main.body.insert(0, import_statement)
+        contracts_call = _build_contracts_call(extra_mod_names, decorate_main=no_main)
+        if_main.body.insert(1, contracts_call)
 
     modified_main_contents = module_node.as_string()
 
@@ -42,7 +43,9 @@ def _build_contracts_call(mod_names: Tuple, decorate_main: bool) -> astroid.Node
 
 def _extract_if_main(module_node: astroid.Module) -> astroid.If:
     if_nodes = module_node.nodes_of_class(astroid.If)
-    return next(node for node in if_nodes if node.test.as_string() == "__name__ == '__main__'")
+    return next(
+        (node for node in if_nodes if node.test.as_string() == "__name__ == '__main__'"), None
+    )
 
 
 if __name__ == "__main__":

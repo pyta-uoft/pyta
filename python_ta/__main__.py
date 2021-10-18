@@ -52,7 +52,6 @@ def main(
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]
     reporter = checker(module_name=paths, config={"output-format": output_format})
-    reporter
     if not exit_zero and reporter.has_messages():
         sys.exit(1)
     else:

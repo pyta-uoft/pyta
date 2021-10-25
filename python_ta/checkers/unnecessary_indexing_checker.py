@@ -16,7 +16,8 @@ class UnnecessaryIndexingChecker(BaseChecker):
     # use dashes for connecting words in message symbol
     msgs = {
         "E9994": (
-            'For loop variable "%s" can be simplified',
+            "For loop variable `%s` can be simplified by looping over the elements directly, "
+            "for example, `for my_variable in %s`.",
             "unnecessary-indexing",
             "Used when you have an loop variable in a for loop "
             "where its only usage is to index the iterable",
@@ -29,8 +30,10 @@ class UnnecessaryIndexingChecker(BaseChecker):
     # pass in message symbol as a parameter of check_messages
     @check_messages("unnecessary-indexing")
     def visit_for(self, node: nodes.For) -> None:
-        if _is_unnecessary_indexing(node):
-            args = node.target.name
+        # Check if the iterable of the for loop is of the form "range(len(<variable-name>))".
+        iterable = _iterable_if_range(node.iter)
+        if iterable is not None and _is_unnecessary_indexing(node):
+            args = node.target.name, iterable
             self.add_message("unnecessary-indexing", node=node.target, args=args)
 
 
@@ -40,11 +43,6 @@ def _is_unnecessary_indexing(node: nodes.For) -> bool:
 
     True if unnecessary usage, False otherwise or if iteration variable not used at all.
     """
-    # Check if the iterable of the for loop is of the form "range(len(<variable-name>))".
-    iterable = _iterable_if_range(node.iter)
-    if iterable is None:
-        return False
-
     index_nodes = _index_name_nodes(node.target.name, node)
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
 
@@ -125,44 +123,29 @@ def _is_redundant(index_node: Union[nodes.AssignName, nodes.Name], for_node: nod
     The lookup method is used in case the original loop variable is shadowed
     in the for loop's body.
     """
-    if isinstance(index_node, nodes.AssignName):
-        previous_context = index_node.lookup(index_node.name)
-        if previous_context[1] != ():
-            return (
-                previous_context[1][0] != for_node.target
-                and previous_context[0] is for_node.scope()
-            )
-        else:
-            return False
-    else:
-        return _scope_lookup(index_node) != for_node.target or _is_load_subscript(
-            index_node, for_node
-        )
+    _, assignments = index_node.lookup(index_node.name)
+    if not assignments:
+        return False
+    elif isinstance(index_node, nodes.AssignName):
+        return assignments[0] != for_node.target
+    else:  # isinstance(index_node, nodes.Name)
+        return assignments[0] != for_node.target or _is_load_subscript(index_node, for_node)
 
 
 def _index_name_nodes(index: str, for_node: nodes.For) -> List[Union[nodes.AssignName, nodes.Name]]:
-    """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>."""
+    """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>.
+
+    Remove uses of variables that shadow <index>.
+    """
+    scope = for_node.scope()
+
     return [
         name_node
         for name_node in for_node.nodes_of_class((nodes.AssignName, nodes.Name))
-        if name_node.name == index and name_node != for_node.target
+        if name_node.name == index
+        and name_node != for_node.target
+        and name_node.lookup(name_node.name)[0] == scope
     ]
-
-
-def _scope_lookup(node: nodes.Name) -> Optional[nodes.NodeNG]:
-    """Look up the given name node's assigment node.
-
-    This is a replacement for astroid's LocalsDictNodeNG._scope_lookup method, which doesn't
-    seem to handle nested comprehensions (?).
-    """
-    scope = node.scope()
-    while node.name not in scope and not isinstance(scope, nodes.Module):
-        scope = scope.parent.scope()
-
-    if node.name in scope:
-        return scope[node.name]
-    else:
-        return None
 
 
 def register(linter):

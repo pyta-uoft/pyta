@@ -41,7 +41,7 @@ from .patches import patch_all
 from .reporters import REPORTERS
 from .upload import upload_to_server
 
-HELP_URL = "http://www.cs.toronto.edu/~david/pyta/"
+HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
 # check the python version
 if sys.version_info < (3, 7, 0):
@@ -378,6 +378,6 @@ def _get_valid_files_to_check(module_name: str) -> Generator[str, None, None]:
 
 def doc(msg_id):
     """Open a webpage explaining the error for the given message."""
-    msg_url = HELP_URL + "#" + msg_id
+    msg_url = HELP_URL + "#" + msg_id.lower()
     print("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)

@@ -1,4 +1,3 @@
-import configparser
 import sys
 from typing import List, Optional
 

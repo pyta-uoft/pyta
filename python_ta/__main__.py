@@ -28,7 +28,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Prints out default PythonTA configuration",
     default=False,
 )
-@click.option("--output-format", help="Specify the format of output report", default="")
+@click.option(
+    "--output-format",
+    help="Specify the format of output report",
+    default="python_ta.reporters.HTMLReporter",
+)
 def main(
     config: Optional[str],
     errors_only: bool,

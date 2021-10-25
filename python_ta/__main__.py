@@ -28,7 +28,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Prints out default PythonTA configuration",
     default=False,
 )
-@click.option("--output-format", help="Specify the format of output report", type=str, default=None)
+@click.option("--output-format", help="Specify the format of output report", default="")
 def main(
     config: Optional[str],
     errors_only: bool,
@@ -44,15 +44,15 @@ def main(
     """
     # `config` is None if `-c` flag is not set
     if generate_config:
-        config = configparser.ConfigParser()
-        config.read(".pylintrc")
-        print({section: dict(config[section]) for section in config.sections()})
+        f = open(".pylintrc", "r")
+        file_contents = f.read()
+        print(file_contents)
+        f.close()
         sys.exit(1)
 
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]
     reporter = checker(module_name=paths, config={"output-format": output_format})
-    reporter
     if not exit_zero and reporter.has_messages():
         sys.exit(1)
     else:

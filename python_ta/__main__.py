@@ -45,8 +45,8 @@ def main(
     # `config` is None if `-c` flag is not set
     if generate_config:
         f = open(".pylintrc", "r")
-        file_contents = f.read()
-        print(file_contents)
+        contents = f.read()
+        print(contents)
         f.close()
         sys.exit(1)
 

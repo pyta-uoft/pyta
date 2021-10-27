@@ -65,25 +65,14 @@ def check_contracts(main: TextIO, extra_mod_names: Tuple, no_main: bool):
 class DuckModule(types.ModuleType):
     """A pseudo module used for syncing execution and module contexts"""
 
-    def __init__(self, name: str, __dict__: Dict[str, Any], content: str) -> None:
+    def __init__(self, name: str, default_globals: Dict[str, Any], content: str) -> None:
         super().__init__(name)
-        self._dict = __dict__
         self.content = content
+        for key, value in default_globals.items():
+            setattr(self, key, value)
 
     def run(self) -> None:
-        exec(self.content, self._dict)
-
-    def __getattribute__(self, item):
-        if item == "__dict__":
-            return self._dict
-        else:
-            return super().__getattribute__(item)
-
-    def __getattr__(self, item):
-        if item in self._dict:
-            return self._dict[item]
-        else:
-            return super().__getattribute__(item)
+        exec(self.content, self.__dict__)
 
 
 def _extract_if_main(module_node: astroid.Module) -> astroid.If:

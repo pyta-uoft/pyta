@@ -26,6 +26,11 @@ if __name__ == '__main__':
     divide(10, 0)  # Preconditions on y violated
 ```
 
+```{note}
+Similarly, we can remove the lines which import and use `python_ta.contracts` and instead run this
+script via terminal with the command `python -m python_ta.contracts demo.py`
+```
+
 If we run this file, an `AssertionError` is raised when we call `divide(10, 0)`:
 
 ```console
@@ -66,6 +71,20 @@ Finally, you can set the `DEBUG_CONTRACTS` constant to `True` to enable debuggin
 ```{eval-rst}
 .. autodata:: python_ta.contracts.DEBUG_CONTRACTS
 ```
+
+## CLI
+
+The `python_ta.contracts` CLI can execute a file as `__main__` with contracts enabled. This option
+requires there to be an `if __name__ == "__main__":` so PythonTA knows when and where to
+start tracking contracts from.
+
+The syntax for this command is: `python -m python_ta.contracts [OPTIONS] FILE [EXTRA_MOD_NAMES]`
+
+where `FILE` is the main script, `EXTRA_MOD_NAMES` are the names of imported modules to also be checked,
+and `--no-decorate-main`, the only available flag, is whether to decorate the main script.
+
+The utmost basic usage of this command is with `python -m python_ta.contracts FILE`.
+See the [quick demo](#quick-demo) above for an example.
 
 ## Specifying contracts
 
@@ -486,3 +505,10 @@ The above example outputs the following
 >>> Properly raised AssertionError
 >>> Did not raise AssertionError
 ```
+
+### Contracts CLI Limitations
+
+The `python_ta.contracts` CLI command will search the main script for where to begin checking contracts from.
+This search will only find if blocks that are one line and are written like `if __name__ == '__main__':`,
+while also accepting varying quotations and arbitrary whitespaces. Any scripts with an unsupported
+variation of this if condition will not be recognized nor run.

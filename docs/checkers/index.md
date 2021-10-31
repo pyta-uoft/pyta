@@ -46,7 +46,8 @@ to obscure and hard-to-detect bugs.
 **See also**:
 
 - [The scope of index variables in Python's for loops]
-  (E0103)=
+
+(E0103)=
 
 ### Not in loop (E0103) [](#E0103)
 
@@ -60,6 +61,7 @@ in a loop. Hence, both keywords only belong inside loops.
 
 A common source of this error is when the `break` or `continue` is not indented properly (it must be
 indented to be considered part of the loop body).
+
 (E0104)=
 
 ### Return outside function (E0104) [](#E0104)
@@ -72,6 +74,7 @@ This error occurs when a `return` statement is found outside a function or metho
 
 A common source of this error is when the `return` is not indented properly (it must be indented to
 be considered part of the loop body).
+
 (W0101)=
 
 ### Unreachable (W0101) [](#W0101)
@@ -96,6 +99,7 @@ This error occurs when a dictionary literal sets the same key multiple times.
 Dictionaries map unique keys to values. When different values are assigned to the same key, the last
 assignment takes precedence. This is rarely what the user wants when they are constructing a
 dictionary.
+
 (E1123)=
 
 ### Unexpected keyword arg (E1123) [](#E1123)
@@ -117,6 +121,7 @@ print_greeting(name="Arthur")
 
 These errors are some of the most common errors we encounter in Python. They generally have to do
 with using a value of one type where another type is required.
+
 (E1101)=
 
 ### No member (E1101) [](#E1101)
@@ -156,6 +161,7 @@ returning a new list. As a result, `new_fruit_basket` always gets the value `Non
 
 We should either modify `add_fruit` to return a new list, or call `add_fruit` without assigning the
 return value to a variable.
+
 (E1128)=
 
 ### Assignment from None (E1128) [](#E1128)
@@ -499,7 +505,8 @@ def square_if_even(number: int) -> int:
 **See also**:
 
 - [The story of None, True and False (and an explanation of literals, keywords and builtins thrown in)][the story of none, true and false]
-  (W0125)=
+
+(W0125)=
 
 ### Using constant test (W0125) [](#W0125)
 
@@ -598,6 +605,7 @@ This error occurs when the file has too many lines. The limit for too many lines
 through the `max-module-lines` configuration option.
 
 **Note**: The default value is `1000`.
+
 (R0913)=
 
 ### Too many arguments (R0913) [](#R0913)
@@ -719,7 +727,8 @@ if `pass` is removed.
 **See also:**
 
 - [StackOverflow: How To Use The Pass Statement In Python]
-  (R1710)=
+
+(R1710)=
 
 ### Inconsistent return statements (R1710) [](#R1710)
 
@@ -741,6 +750,7 @@ function body.
 
 In CSC148, you may sometimes choose resolve this error by instead _raising an error_ rather than
 returning `None`.
+
 (R1732)=
 
 ### Consider using with (R1732) [](#R1732)
@@ -806,6 +816,7 @@ for student in students_info:
 Good documentation and identifiers are essential for writing software. PyTA helps check to make sure
 we haven't forgotten to document anything, as well as a basic check on the formatting of our
 identifiers.
+
 (C0112)=
 
 ### Empty Docstring (C0112) [](#C0112)
@@ -897,6 +908,7 @@ def greet_person(name, friends) -> None:
 ```
 
 **See also**: [W0621](#W0621)
+
 (W0621)=
 
 ### Redefined outer name (W0621) [](#W0621)
@@ -947,6 +959,7 @@ vars                zip
 
 There are standards governing how we should organize our imports, or even possibly which modules we
 may import at all.
+
 (E9999)=
 
 ### Forbidden imports (E9999) [](#E9999)
@@ -1042,6 +1055,7 @@ This error can occur when the name of our Python file conflicts with the name of
 would like to import. For example, if we have a Python file named `math.py`, calling `import math`
 from within that file (or from within _any_ Python file in the same directory) will import _
 our_ `math.py` file, and not the [`math` module] from the standard library.
+
 (R0401)=
 
 ### Cyclic import (R0401) [](#R0401)
@@ -1216,6 +1230,7 @@ class Composition(object):
 ```
 
 **See also**: [R0914](#R0914)
+
 (W0223)=
 
 ### Abstract method (W0223) [](#W0223)
@@ -1313,6 +1328,7 @@ Private attributes and methods can be modified, added, or removed by the maintai
 any time, which makes external code which uses those attributes or methods fragile. Furthermore,
 modifying a private attribute or calling a private method may lead to undefined behavior from the
 class.
+
 (W0233)=
 
 ### Bad parent init (W0233) [](#W0233)
@@ -1349,7 +1365,8 @@ class Child(Parent):
 - [Super considered super!]
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
-  (R1725)=
+
+(R1725)=
 
 ### Super with arguments (R1725) [](#R1725)
 
@@ -1562,7 +1579,8 @@ def add_small_coins(nickels: int = 0, dimes: int = 0, quarters: int = 0) -> floa
 **See also**:
 
 - [W0211](#W0211)
-  (W0211)=
+
+(W0211)=
 
 ### Bad static method argument (W0211) [](#W0211)
 
@@ -1714,6 +1732,7 @@ or strings.
 ```
 
 **See also**: [E0710](#E0710)
+
 (E0710)=
 
 ### Raising non-exception (E0710) [](#E0710)
@@ -1791,6 +1810,7 @@ when we run our code. PythonTA allows global constants, and so would not report 
 `forbidden-global-variables` error on our second example.
 
 **See also**: [Global Variables Are Bad]
+
 (E9998)=
 
 ### Forbidden IO function (E9998) [](#E9998)
@@ -1840,6 +1860,7 @@ def all_even(nums: list[int]) -> bool:
 
 By moving the `return True` to outside the loop, we ensure that the only way `True` is returned is
 when there are only even numbers in the list.
+
 (E9993)=
 
 ### Invalid Range Index (E9993) [](#E9993)
@@ -1855,6 +1876,7 @@ Examples:
 
 When such `range`s are used with a loop, the loop will iterate either zero or one time, which is
 almost certainly not what we intended! This usually indicates an error with how `range` is called.
+
 (E9994)=
 
 ### Unnecessary Indexing (E9994) [](#E9994)
@@ -2088,6 +2110,7 @@ s = "{} who is {} lives in {}".format(name, age, country)
 ```
 
 **See also**: [E1121](#E1121)
+
 (E1306)=
 
 ### Too few format args (E1306) [](#E1306)
@@ -2106,6 +2129,7 @@ s = "{} and {}".format("first", "second")
 ```
 
 **See also**: [E1120](#E1120)
+
 (W1309)=
 
 ### F-string without interpolation (W1309) [](#W1309)
@@ -2131,6 +2155,7 @@ print(f'Hello {entity}!')
 ```
 
 **See also**: [W1310](#W1310)
+
 (W1310)=
 
 ### Format string without interpolation (W1310) [](#W1310)
@@ -2150,6 +2175,7 @@ greeting = 'Hello There, {name}'.format(name='person')
 ```
 
 **See also**: [W1309](#W1309)
+
 (W1303)=
 
 ### Missing format argument key (W1303) [](#W1303)
@@ -2169,6 +2195,7 @@ s = '{last_name}, {fist_name} - {age}'.format(last_name='bond', first_name='jame
 ```
 
 **See also**: [E1120](#E1120), [E1306](#E1120)
+
 (E1310)=
 
 ### Bad str strip call (E1310) [](#E1310)
@@ -2186,6 +2213,7 @@ It is a common mistake to think that `mystring.strip(chars)` removes the substri
 beginning and end of `mystring`. It actually removes all characters in `chars` from the beginning
 and end of `mystring`, _irrespective of their order_! If we pass an argument string with duplicate
 characters to `mystring.strip`, we are likely misinterpreting what this method is doing.
+
 (W1305)=
 
 ### Format combined specification (W1305) [](#W1305)
@@ -2274,6 +2302,7 @@ def is_int(obj: Union[int, float, str]) -> bool:
 ```
 
 **See also**: [C0121](#C0121)
+
 (W0102)=
 
 ### Dangerous default value (W0102) [](#W0102)
@@ -2326,7 +2355,8 @@ print(make_list(5))
 
 - [Common Gotchas - Mutable Default Arguments]
 - [Default Parameter Values in Python]
-  (C0201)=
+
+(C0201)=
 
 ### Consider iterating dictionary (C0201) [](#C0201)
 
@@ -2453,7 +2483,8 @@ assert chars == 'this string fails'
 - [Literally Literals and Other Number Oddities In Python]
 - [StackOverflow: About the changing id of an immutable string]
 - [StackOverflow: When does Python allocate new memory for identical strings?]
-  (W0106)=
+
+(W0106)=
 
 ### Expression not assigned (W0106) [](#W0106)
 
@@ -2692,7 +2723,7 @@ for all lines is 80 characters.
 
    ```
 
-   (E0107)=
+(E0107)=
 
 ### Nonexistent operator (E0107) [](#E0107)
 
@@ -2714,6 +2745,7 @@ spam -= 1
 ## Older errors
 
 The following errors are no longer checked by the latest version of PythonTA.
+
 (C0326)=
 
 ### Bad whitespace (C0326) [](#C0326)
@@ -2722,6 +2754,7 @@ This error occurs when we include a wrong number of spaces around an operator, b
 opener. We should aim to follow
 the [PEP8 convention on whitespace in expressions and statements][pep8: whitespace in expressions and statements]
 .
+
 (W0311)=
 
 ### Bad indentation (W0311) [](#W0311)
@@ -2729,12 +2762,14 @@ the [PEP8 convention on whitespace in expressions and statements][pep8: whitespa
 This error occurs when an unexpected number of tabs or spaces is used to indent the code. It is
 recommended that we use [_four spaces per indentation level_][pep8: indentation] throughout our
 code.
+
 (W0312)=
 
 ### Mixed indentation (W0312) [](#W0312)
 
 This error occurs when the code is indented with a mix of tabs and spaces. Please note that [_spaces
 are the preferred indentation method_][pep8: tabs or spaces?].
+
 (C0330)=
 
 ### Bad continuation (C0330) [](#C0330)

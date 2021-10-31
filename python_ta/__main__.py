@@ -1,6 +1,7 @@
+import os
 import sys
 from typing import List, Optional
-import os
+
 import click
 
 from python_ta import check_all, check_errors

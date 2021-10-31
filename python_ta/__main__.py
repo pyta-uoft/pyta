@@ -1,4 +1,5 @@
 import configparser
+import os
 import sys
 from typing import List, Optional
 
@@ -25,7 +26,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     "-g",
     "--generate-config",
     is_flag=True,
-    help="Prints out default PythonTA configuration",
+    help="Print out default PythonTA configuration file",
     default=False,
 )
 @click.option(
@@ -39,7 +40,7 @@ def main(
     filenames: List[str],
     exit_zero: bool,
     generate_config: bool,
-    output_format,
+    output_format: str,
 ) -> None:
     """A code checking tool for teaching Python.
 
@@ -48,11 +49,11 @@ def main(
     """
     # `config` is None if `-c` flag is not set
     if generate_config:
-        f = open(".pylintrc", "r")
-        contents = f.read()
-        print(contents)
-        f.close()
-        sys.exit(1)
+        pylintrc_location = os.path.join(os.path.dirname(__file__), ".pylintrc")
+        with open(pylintrc_location, "r") as f:
+            contents = f.read()
+            print(contents)
+            sys.exit(0)
 
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]

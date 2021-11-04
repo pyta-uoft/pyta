@@ -73,7 +73,7 @@ The `python_ta.contracts` CLI can execute a file as `__main__` with contracts en
 
 The utmost basic usage of this command is with `python -m python_ta.contracts FILE` where `FILE`
 is the executed Python script such as `demo.py`. See `python -m python_ta.contracts --help` for the full list of
-arguments and options.
+arguments and options. (Note that you may have to write `python3 -m` depending on your installation)
 
 ```{note}
 The `python_ta.contracts` CLI command will search the main script for where to begin checking contracts from.

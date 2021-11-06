@@ -42,7 +42,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
-                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.name, "lst"),
             )
         ):
             self.checker.visit_for(for_node)
@@ -61,7 +63,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
-                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.name, "lst"),
             )
         ):
             self.checker.visit_for(for_node)
@@ -80,7 +84,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
-                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.name, "lst"),
             )
         ):
             self.checker.visit_for(for_node)
@@ -116,7 +122,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
-                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.name, "items"),
             )
         ):
             self.checker.visit_for(for_node)
@@ -133,7 +141,9 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.Message(
-                msg_id="unnecessary-indexing", node=for_node.target, args=for_node.target.name
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.name, "items"),
             )
         ):
             self.checker.visit_for(for_node)
@@ -253,6 +263,47 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
+
+    def test_comp_shadow_msg(self):
+        """Iteration variable i is shadowed in the comprehension and is redundant"""
+        src = """
+        def f(lst):
+            s = 0
+            for i in range(len(lst)):
+                s += lst[i]
+                for x in [i for i in range(10)]:
+                    s += x
+            return s
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertAddsMessages(
+            pylint.testutils.Message(
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.name, "lst"),
+            )
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_loops_sequenced_no_msg(self):
+        """Iteration variable i is used in two loops in sequence, and neither use is redundant"""
+        src = """
+        def f(lst):
+            for i in range(len(lst)):
+                lst[i] += 1
+            for i in range(len(lst)):
+                lst[i] += 1
+        """
+        mod = astroid.parse(src)
+        for_node1, for_node2, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node1)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node2)
 
     def test_assignname1_no_msg(self):
         """Iteration variable reassigned and used to increment

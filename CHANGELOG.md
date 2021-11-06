@@ -10,8 +10,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Added support for postconditions in function docstring.
+- Improve error message of `unncessary-indexing` checker.
 - Added CLI for `python_ta.contracts` module for executing a file with contract checking
   (`$ python -m python_ta.contracts FILE`)
+
+### Bug fixes
+
+- Fix bugs in `unnecessary-indexing` checker:
+  1. False positive when the same loop variable is used in two loops in sequence.
+  2. False negative when the loop variable can be simplified, but is also shadowed in the
+     the loop body.
 
 ## [2.1.1] - 2021-09-23
 

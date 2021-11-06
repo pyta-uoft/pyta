@@ -10,6 +10,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Added support for postconditions in function docstring.
+- Added CLI for `python_ta.contracts` module for executing a file with contract checking
+  (`$ python -m python_ta.contracts FILE`)
 
 ## [2.1.1] - 2021-09-23
 

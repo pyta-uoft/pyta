@@ -11,6 +11,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added support for postconditions in function docstring.
 - Improve error message of `unncessary-indexing` checker.
+- Added CLI for `python_ta.contracts` module for executing a file with contract checking
+  (`$ python -m python_ta.contracts FILE`)
 
 ### Bug fixes
 

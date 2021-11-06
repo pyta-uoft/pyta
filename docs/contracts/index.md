@@ -67,6 +67,21 @@ Finally, you can set the `DEBUG_CONTRACTS` constant to `True` to enable debuggin
 .. autodata:: python_ta.contracts.DEBUG_CONTRACTS
 ```
 
+## Command Line Interface
+
+The `python_ta.contracts` CLI can execute a file as `__main__` with contracts enabled.
+
+The utmost basic usage of this command is with `python -m python_ta.contracts FILE` where `FILE`
+is the executed Python script such as `demo.py`. See `python -m python_ta.contracts --help` for the full list of
+arguments and options. (Note that you may have to write `python3 -m` depending on your installation)
+
+```{note}
+The `python_ta.contracts` CLI command will search the main script for where to begin checking contracts from.
+This search will only find if blocks that are one line and written like `if __name__ == '__main__':`,
+while also accepting varying quotations and whitespaces. Any scripts with an unsupported
+variation of this if condition will not be recognized nor run.
+```
+
 ## Specifying contracts
 
 This sections describes the different kinds of contract specifications that PythonTA currently supports.

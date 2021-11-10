@@ -30,7 +30,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 )
 @click.option(
     "--output-format",
-    help="Specify the format of output report",
+    help="Specify the format of output report. This option is ignored if a --config argument is specified.",
     default="python_ta.reporters.HTMLReporter",
 )
 def main(
@@ -56,7 +56,12 @@ def main(
 
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]
-    reporter = checker(module_name=paths, config={"output-format": output_format})
+
+    if config is None:
+        reporter = checker(module_name=paths, config={"output-format": output_format})
+    else:
+        reporter = checker(module_name=paths, config=config)
+
     if not exit_zero and reporter.has_messages():
         sys.exit(1)
     else:

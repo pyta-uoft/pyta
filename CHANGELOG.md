@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improve error message of `unncessary-indexing` checker.
 - Added CLI for `python_ta.contracts` module for executing a file with contract checking
   (`$ python -m python_ta.contracts FILE`)
+- Added two new command line interfaces. User can print out the default PythonTA configuration file in the command line using `python -m python_ta -g` and can specify the output format of the reporter using `python -m python_ta --output-format FILE`.
 
 ### Bug fixes
 

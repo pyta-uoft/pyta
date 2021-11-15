@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import List, Optional
 
@@ -20,16 +21,45 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     "filenames", nargs=-1, type=click.Path(exists=True, dir_okay=True, resolve_path=True)
 )
 @click.option("--exit-zero", is_flag=True, help="Always return with status code 0", default=False)
-def main(config: Optional[str], errors_only: bool, filenames: List[str], exit_zero: bool) -> None:
+@click.option(
+    "-g",
+    "--generate-config",
+    is_flag=True,
+    help="Print out default PythonTA configuration file",
+    default=False,
+)
+@click.option(
+    "--output-format",
+    help="Specify the format of output report. This option is ignored if a --config argument is specified.",
+    default="python_ta.reporters.HTMLReporter",
+)
+def main(
+    config: Optional[str],
+    errors_only: bool,
+    filenames: List[str],
+    exit_zero: bool,
+    generate_config: bool,
+    output_format: str,
+) -> None:
     """A code checking tool for teaching Python.
-
     FILENAMES can be a string of a directory, or file to check (`.py` extension optional) or
     a list of strings of directories or files.
     """
     # `config` is None if `-c` flag is not set
+    if generate_config:
+        pylintrc_location = os.path.join(os.path.dirname(__file__), ".pylintrc")
+        with open(pylintrc_location, "r") as f:
+            contents = f.read()
+            print(contents)
+            sys.exit(0)
+
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]
-    reporter = checker(module_name=paths, config=config)
+
+    if config is None:
+        reporter = checker(module_name=paths, config={"output-format": output_format})
+    else:
+        reporter = checker(module_name=paths, config=config)
 
     if not exit_zero and reporter.has_messages():
         sys.exit(1)

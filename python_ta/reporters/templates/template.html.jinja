@@ -111,8 +111,9 @@
                                 {% set occurrences = messages[0][message_id] %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
+                                    {% set mid = message_id.lower() %}
                                     <span class="error-link code-error-id">
-                                        <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;{{mid}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
                                     </span>
                                     {% set num_occurrences = occurrences|length %}
                                     <span class="occurrences">
@@ -186,8 +187,9 @@
                             {% for message_id, occurrences in messages[1].items() %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
+                                    {% set mid = message_id.lower() %}
                                     <span class="error-link style-error-id">
-                                        <a href="http://www.cs.toronto.edu/~david/pyta/&#35;{{message_id}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;{{mid}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
                                     </span>
                                     {% set num_occurrences = occurrences|length %}
                                     <span class="occurrences">

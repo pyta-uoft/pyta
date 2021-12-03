@@ -77,16 +77,16 @@ patch_data = {
             "R1721": "When you want to convert a collection from one type into another, use the appropriate "
             "type constructor instead of a comprehension. Here, use %s instead.",
         },
+        "ImplicitBooleanessChecker": {
+            "C1802": "When checking if a collection is empty, either check equality with an empty instance "
+            "of the collection type (e.g., == []) or explicitly check that the len is equal to 0.",
+        },
         "NotChecker": {
             "C0113": 'Change "%s" to "%s". Removing the negation simplifies the expression.'
         },
         "RecommendationChecker": {
             "C0201": "Rather than using '.keys()' to iterate over the keys of a dictionary, "
             "you can simply iterate over the dictionary itself."
-        },
-        "LenChecker": {
-            "C1801": "When checking if a collection is empty, either check equality with an empty instance "
-            "of the collection type (e.g., == []) or explicitly check that the len is equal to 0."
         },
     },
     "pylint.checkers.design_analysis": {

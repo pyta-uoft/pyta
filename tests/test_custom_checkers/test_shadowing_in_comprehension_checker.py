@@ -73,7 +73,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
         comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target,
                 args=comp_node.target.name,
@@ -92,7 +92,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
         comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target.elts[0],
                 args=comp_node.target.elts[0].name,
@@ -117,7 +117,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
         comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target,
                 args=comp_node.target.name,
@@ -137,7 +137,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
         comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target,
                 args=comp_node.target.name,

@@ -81,6 +81,7 @@ disable=
     R0901, R0903, R0904, R0911,
     R1703, R1705, R1706, R1708, R1709, R1711, R1717, R1718, R1719, R1720, R1722, R1723, R1724,
     R1728, R1730, R1731,
+    C1803,
     F0202,
     W0402, W0407,
     W0603,
@@ -89,7 +90,9 @@ disable=
     I1101,
     python3,
     similarities,
-    spelling
+    spelling,
+    threading,
+    unsupported_version
 
 
 # Enable single-letter identifiers

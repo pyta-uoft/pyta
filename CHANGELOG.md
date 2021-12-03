@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added CLI for `python_ta.contracts` module for executing a file with contract checking
   (`$ python -m python_ta.contracts FILE`)
 - Added two new command line interfaces. User can print out the default PythonTA configuration file in the command line using `python -m python_ta -g` and can specify the output format of the reporter using `python -m python_ta --output-format FILE`.
+- Updated to Pylint v2.12. See "New checks" below for the new checkers enabled by default.
 
 ### Bug fixes
 
@@ -21,6 +22,20 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   1. False positive when the same loop variable is used in two loops in sequence.
   2. False negative when the loop variable can be simplified, but is also shadowed in the
      the loop body.
+
+### New checkers
+
+Pylint checkers v2.12:
+
+- `use-implicit-booleaness-not-len` (renamed from `len-as-condition`)
+
+Pylint checkers v2.11:
+
+- `consider-using-f-string`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.1.1] - 2021-09-23
 

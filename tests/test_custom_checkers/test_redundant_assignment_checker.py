@@ -38,7 +38,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="redundant-assignment", node=assign_1)
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1)
         ):
             self.checker.visit_assign(assign_1)
 
@@ -59,7 +59,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="redundant-assignment", node=assign_x)
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_x)
         ):
             self.checker.visit_assign(assign_x)
 
@@ -78,8 +78,8 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="redundant-assignment", node=assign_y),
-            pylint.testutils.Message(msg_id="redundant-assignment", node=assign_x1),
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_y),
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_x1),
         ):
             self.checker.visit_assign(assign_y)
             self.checker.visit_assign(assign_x1)
@@ -102,7 +102,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="redundant-assignment", node=assign_x)
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_x)
         ):
             self.checker.visit_assign(assign_x)
 
@@ -236,6 +236,6 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="redundant-assignment", node=augassign_node)
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=augassign_node)
         ):
             self.checker.visit_augassign(augassign_node)

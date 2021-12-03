@@ -41,7 +41,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
@@ -62,7 +62,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
@@ -83,7 +83,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
@@ -121,7 +121,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "items"),
@@ -140,7 +140,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "items"),
@@ -279,7 +279,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),

@@ -156,7 +156,6 @@ def _is_arg_name(s, index, node):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
-    (nodes.AssignAttr, None, _is_attr_name),
     (nodes.AsyncFor, _keyword_search("async"), None),
     (nodes.AsyncFunctionDef, _keyword_search("async"), None),
     (nodes.AsyncWith, _keyword_search("async"), None),
@@ -478,7 +477,10 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
     """
 
     def set_endings_from_source(node):
-        if not hasattr(node, "end_col_offset"):
+        # Tuple nodes have an end_col_offset that includes the end paren,
+        # but their col_offset does not include the start paren.
+        # To address this, we override the Tuple node's end_col_offset.
+        if not hasattr(node, "end_col_offset") or isinstance(node, nodes.Tuple):
             set_from_last_child(node)
 
         # Initialize counters. Note: we need to offset lineno,

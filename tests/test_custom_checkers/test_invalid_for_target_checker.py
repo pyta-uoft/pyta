@@ -33,7 +33,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="l[0]")
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="l[0]"
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -46,7 +48,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, assign_attr_node = _extract_nodes(src, [nodes.For, nodes.AssignAttr])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(
+            pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=assign_attr_node, args="x.attr"
             )
         ):
@@ -71,7 +73,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="b[0]")
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="b[0]"
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -92,7 +96,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="b[0]")
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="b[0]"
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -113,7 +119,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="d[0]"
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -134,7 +142,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="d[0]"
+            )
         ):
             self.checker.visit_for(for_node)
 
@@ -157,7 +167,9 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         for_node, subscript_node = _extract_nodes(src, [nodes.For, nodes.Subscript])
 
         with self.assertAddsMessages(
-            pylint.testutils.Message(msg_id="invalid-for-target", node=subscript_node, args="d[0]")
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="d[0]"
+            )
         ):
             self.checker.visit_for(for_node)
 

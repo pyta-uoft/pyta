@@ -19,3 +19,6 @@ repos:
     hooks:
       - id: prettier
 exclude: examples
+
+ci:
+  autoupdate_schedule: quarterly

@@ -1,9 +1,6 @@
 """Patch pylint message-handling behaviour."""
-from astroid.transforms import TransformVisitor
 from pylint.interfaces import UNDEFINED
 from pylint.lint import PyLinter
-
-from python_ta.transforms.setendings import register_transforms
 
 
 def patch_messages():
@@ -30,20 +27,3 @@ def patch_messages():
             self.reporter.handle_node(msg_info, node)
 
     PyLinter.add_message = new_add_message
-
-
-def patch_linter_transform():
-    """Patch PyLinter class to apply message transform with source code."""
-    old_get_ast = PyLinter.get_ast
-
-    def new_get_ast(self, filepath, modname):
-        ast = old_get_ast(self, filepath, modname)
-        if ast is not None:
-            with open(filepath, encoding="utf-8") as f:
-                source_code = f.readlines()
-            ending_transformer = TransformVisitor()
-            register_transforms(source_code, ending_transformer)
-            ending_transformer.visit(ast)
-        return ast
-
-    PyLinter.get_ast = new_get_ast

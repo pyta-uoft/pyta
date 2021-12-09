@@ -15,6 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`$ python -m python_ta.contracts FILE`)
 - Added two new command line interfaces. User can print out the default PythonTA configuration file in the command line using `python -m python_ta -g` and can specify the output format of the reporter using `python -m python_ta --output-format FILE`.
 - Updated to Pylint v2.12. See "New checks" below for the new checkers enabled by default.
+- Register ending location setter as pylint plugin.
 
 ### Bug fixes
 

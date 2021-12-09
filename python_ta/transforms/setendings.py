@@ -647,43 +647,16 @@ def _add_parens(source_code):
 
 # Make this module a pylint plugin
 def register(linter):
+    """Patch linter to apply message transform with source code."""
     old_get_ast = linter.get_ast
 
     def new_get_ast(filepath, modname):
         ast = old_get_ast(filepath, modname)
-        with open(filepath) as f:
-            source_code = f.readlines()
-        ending_transformer = TransformVisitor()
-        register_transforms(source_code, ending_transformer)
-        ending_transformer.visit(ast)
+        if ast is not None:
+            with open(filepath, encoding="utf-8") as f:
+                source_code = f.readlines()
+            ending_transformer = init_register_ending_setters(source_code)
+            ending_transformer.visit(ast)
         return ast
 
     linter.get_ast = new_get_ast
-
-
-def register_transforms(source_code, obj):
-    # Check consistency of astroid-provided fromlineno and col_offset attributes.
-    for node_class in nodes.ALL_NODE_CLASSES:
-        obj.register_transform(
-            node_class,
-            fix_start_attributes,
-            lambda node: (
-                getattr(node, "fromlineno", None) is None
-                or getattr(node, "col_offset", None) is None
-            ),
-        )
-
-    # Ad hoc transformations
-    obj.register_transform(nodes.Arguments, fix_arguments(source_code))
-
-    for node_class in NODES_WITH_CHILDREN:
-        obj.register_transform(node_class, set_from_last_child)
-    for node_class in NODES_WITHOUT_CHILDREN:
-        obj.register_transform(node_class, set_without_children)
-
-    # Nodes where the source code must also be provided.
-    for node_class, start_pred, end_pred in NODES_REQUIRING_SOURCE:
-        if start_pred is not None:
-            obj.register_transform(node_class, start_setter_from_source(source_code, start_pred))
-        if end_pred is not None:
-            obj.register_transform(node_class, end_setter_from_source(source_code, end_pred))

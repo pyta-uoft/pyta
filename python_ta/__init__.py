@@ -242,6 +242,7 @@ def reset_linter(config=None, file_linted=None):
     linter = pylint.lint.PyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
+    linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
     if isinstance(config, str) and config != "":
         # Use config file at the specified path instead of the default.

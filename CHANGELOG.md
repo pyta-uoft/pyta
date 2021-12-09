@@ -24,6 +24,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   2. False negative when the loop variable can be simplified, but is also shadowed in the
      the loop body.
 - Fix HTML report to link correctly to specific errors on the PythonTA documentation website.
+- Fix bug when setting ending locations for `ClassDef`s that have no decorators.
 
 ### New checkers
 

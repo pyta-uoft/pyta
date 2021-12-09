@@ -144,7 +144,7 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, nodes.Call, expected)
 
     def test_classdef(self):
-        expected = [(1, 3, 0, 8)]
+        expected = [(1, 3, 0, 8), (6, 8, 0, 12)]
         module = self.get_file_as_module("class_def.py")
         self.set_and_check(module, nodes.ClassDef, expected)
 
@@ -257,8 +257,8 @@ class TestEndingLocations(unittest.TestCase):
         self.set_and_check(module, nodes.For, expected)
 
     def test_functiondef(self):
-        """Note: this node includes the decorator."""
-        expected = [(1, 7, 0, 28)]
+        """Note: this node includes the decorator, if applicable."""
+        expected = [(1, 7, 0, 28), (10, 15, 0, 28)]
         module = self.get_file_as_module("function_def.py")
         self.set_and_check(module, nodes.FunctionDef, expected)
 

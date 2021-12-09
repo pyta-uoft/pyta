@@ -203,8 +203,8 @@ def init_register_ending_setters(source_code):
 
     # Ad hoc transformations
     ending_transformer.register_transform(nodes.BinOp, _set_start_from_first_child)
-    ending_transformer.register_transform(nodes.ClassDef, _set_start_from_first_child)
-    ending_transformer.register_transform(nodes.FunctionDef, _set_start_from_first_child)
+    ending_transformer.register_transform(nodes.ClassDef, _set_start_from_first_decorator)
+    ending_transformer.register_transform(nodes.FunctionDef, _set_start_from_first_decorator)
     ending_transformer.register_transform(nodes.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(nodes.Arguments, fix_arguments(source_code))
     ending_transformer.register_transform(nodes.Slice, fix_slice(source_code))
@@ -401,6 +401,15 @@ def _set_start_from_first_child(node):
     except StopIteration:
         pass
     else:
+        node.fromlineno = first_child.fromlineno
+        node.col_offset = first_child.col_offset
+    return node
+
+
+def _set_start_from_first_decorator(node):
+    """Set the start attributes of this node from its first child, if that child is a decorator."""
+    if getattr(node, "decorators"):
+        first_child = node.decorators
         node.fromlineno = first_child.fromlineno
         node.col_offset = first_child.col_offset
     return node

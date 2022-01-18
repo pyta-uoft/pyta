@@ -422,6 +422,26 @@ else:
     number_category = 'non-negative'
 ```
 
+(C0209)=
+
+### Consider using f string (C0209) [](#C0209)
+
+This error occurs when a string is formatted with `%` or `format()`.
+
+```python
+name = "Bob"
+print("Hi! My name is %s!" % name)  # Error on this line
+print("{0} is my name!".format(name))  # Error on this line
+```
+
+The above can be changed to:
+
+```python
+name = "Bob"
+print(f"Hi! My name is {name}!")
+print(f"{name} is my name!")
+```
+
 (R1726)=
 
 ### Simplifiable condition (R1726) [](#R1726)

@@ -422,6 +422,25 @@ else:
     number_category = 'non-negative'
 ```
 
+(C0209)=
+
+### Consider using f-string (C0209) [](#C0209)
+
+This error occurs when a string is formatted with `%` or `format()`.
+The preferred way to include Python values in strings is with f-strings.
+
+```{literalinclude} /../examples/pylint/c0209_consider_using_f_string.py
+
+```
+
+The above can be changed to:
+
+```python
+name = "Bob"
+print(f"Hi! My name is {name}!")
+print(f"{name} is my name!")
+```
+
 (R1726)=
 
 ### Simplifiable condition (R1726) [](#R1726)

@@ -424,14 +424,13 @@ else:
 
 (C0209)=
 
-### Consider using f string (C0209) [](#C0209)
+### Consider using f-string (C0209) [](#C0209)
 
 This error occurs when a string is formatted with `%` or `format()`.
+The preferred way to include Python values in strings is with f-strings.
 
-```python
-name = "Bob"
-print("Hi! My name is %s!" % name)  # Error on this line
-print("{0} is my name!".format(name))  # Error on this line
+```{literalinclude} /../examples/pylint/c0209_consider_using_f_string.py
+
 ```
 
 The above can be changed to:

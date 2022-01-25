@@ -11,7 +11,7 @@ code.
 
 (E0601)=
 
-### Used before assignment (E0601) 
+### Used before assignment (E0601)
 
 This error occurs when we are using a variable before it has been assigned a value.
 
@@ -21,7 +21,7 @@ This error occurs when we are using a variable before it has been assigned a val
 
 (E0602)=
 
-### Undefined variable (E0602) 
+### Undefined variable (E0602)
 
 This error occurs when we are using a variable that has not been defined.
 
@@ -31,7 +31,7 @@ This error occurs when we are using a variable that has not been defined.
 
 (W0631)=
 
-### Undefined loop variable (W0631) 
+### Undefined loop variable (W0631)
 
 This error occurs when a loop variable is used outside the `for` loop where it was defined.
 
@@ -49,7 +49,7 @@ to obscure and hard-to-detect bugs.
 
 (E0103)=
 
-### Not in loop (E0103) 
+### Not in loop (E0103)
 
 This error occurs when the `break` or `continue` keyword is used outside of a loop. The
 keyword `break` is used to exit a loop early and the keyword `continue` is used to skip an iteration
@@ -64,7 +64,7 @@ indented to be considered part of the loop body).
 
 (E0104)=
 
-### Return outside function (E0104) 
+### Return outside function (E0104)
 
 This error occurs when a `return` statement is found outside a function or method.
 
@@ -77,7 +77,7 @@ be considered part of the loop body).
 
 (W0101)=
 
-### Unreachable (W0101) 
+### Unreachable (W0101)
 
 This error occurs when there is some code after a `return` or `raise` statement. This code will
 never be run, so either it should be removed, or the function is returning too early.
@@ -88,7 +88,7 @@ never be run, so either it should be removed, or the function is returning too e
 
 (W0109)=
 
-### Duplicate key (W0109) 
+### Duplicate key (W0109)
 
 This error occurs when a dictionary literal sets the same key multiple times.
 
@@ -102,7 +102,7 @@ dictionary.
 
 (E1123)=
 
-### Unexpected keyword arg (E1123) 
+### Unexpected keyword arg (E1123)
 
 This error occurs when a function call passes a keyword argument which does not match the signature
 of the function being called.
@@ -124,7 +124,7 @@ with using a value of one type where another type is required.
 
 (E1101)=
 
-### No member (E1101) 
+### No member (E1101)
 
 This error occurs when we use dot notation (`my_var.x`) to access an attribute or to call a method
 which does not exist for the given object. This can happen both for built-in types like `str` and
@@ -137,7 +137,7 @@ an [`AttributeError`][attributeerror] when we run the code.
 
 (E1102)=
 
-### Not callable (E1102) 
+### Not callable (E1102)
 
 This error occurs when we try to call a value which is not a function, method, or callable object.
 In the following example, we should not call `x()` because `x` refers to an integer, and calling an
@@ -149,7 +149,7 @@ integer has no meaning.
 
 (E1111)=
 
-### Assignment from no return (E1111) 
+### Assignment from no return (E1111)
 
 This error occurs when we assign a variable to the return value of a function call, but the function
 never returns anything. In the following example, `add_fruit` mutates `fruit_basket` instead of
@@ -164,7 +164,7 @@ return value to a variable.
 
 (E1128)=
 
-### Assignment from None (E1128) 
+### Assignment from None (E1128)
 
 This error occurs when we assign a variable the return value of a function call, but the function
 always returns `None`. In the following example, `add_fruit` always returns `None`. As a
@@ -176,7 +176,7 @@ result, `new_fruit_basket` will always get the value `None`.
 
 (E1120)=
 
-### No value for parameter (E1120) 
+### No value for parameter (E1120)
 
 A function must be called with one argument value per parameter in its header. This error indicates
 that we called a function with too few arguments. In the following example, there should be _three_
@@ -194,7 +194,7 @@ get_sum(1, 2, 3)
 
 (E1121)=
 
-### Too many function args (E1121) 
+### Too many function args (E1121)
 
 A function must be called with one argument value per parameter in its header. This error indicates
 that we called a function with too many arguments. In the following example, there should be _two_
@@ -212,7 +212,7 @@ get_sum(1, 2)
 
 (E1126)=
 
-### Invalid sequence index (E1126) 
+### Invalid sequence index (E1126)
 
 This error occurs when a list or tuple is indexed using the square bracket notation `my_list[...]`,
 but the value of the index is not an integer.
@@ -232,7 +232,7 @@ print(a[0])
 
 (E1127)=
 
-### Invalid slice index (E1127) 
+### Invalid slice index (E1127)
 
 This error occurs when a list or tuple is sliced using the square bracket
 notation `my_list[... : ...]`, but the two values on the left and right of the colon are not
@@ -254,7 +254,7 @@ print(a[0:3])
 
 (E1130)=
 
-### Invalid unary operand type (E1130) 
+### Invalid unary operand type (E1130)
 
 This error occurs when we use a [unary operator][unary arithmetic and bitwise operations] (`+`, `-`
 , `~`) on an object which does not support this operator. For example, a list does not support
@@ -266,7 +266,7 @@ negation.
 
 (E1131)=
 
-### Unsupported binary operation (E1131) 
+### Unsupported binary operation (E1131)
 
 This error occurs when we use a [binary arithmetic operator][binary arithmetic operations] like `+`
 or `*`, but the left and right sides are not compatible types. For example, a dictionary cannot be
@@ -278,7 +278,7 @@ added to a list.
 
 (E1135)=
 
-### Unsupported membership test (E1135) 
+### Unsupported membership test (E1135)
 
 This error occurs when we use the membership test `a in b`, but the type of `b` does not support
 membership tests.
@@ -292,7 +292,7 @@ dictionaries.
 
 (E1136)=
 
-### Unsubscriptable object (E1136) 
+### Unsubscriptable object (E1136)
 
 This error occurs when we try to index a value using square brackets (`a[...]`), but the type of `a`
 does not support indexing (or "subscripting").
@@ -305,7 +305,7 @@ The standard Python types which support indexing are strings, lists, tuples, and
 
 (E1137)=
 
-### Unsupported assignment operation (E1137) 
+### Unsupported assignment operation (E1137)
 
 This error occurs when we assign something to an object which does not support assignment (i.e. an
 object which does not define the `__setitem__` method).
@@ -316,7 +316,7 @@ object which does not define the `__setitem__` method).
 
 (E1138)=
 
-### Unsupported delete operation (E1138) 
+### Unsupported delete operation (E1138)
 
 This error occurs when the `del` keyword is used to delete an item from an object which does not
 support item deletion (i.e. an object that does not define the `__delitem__` special method).
@@ -346,7 +346,7 @@ print('c' in named_list)  # Prints False
 
 (E0632)=
 
-### Unbalanced tuple unpacking (E0632) 
+### Unbalanced tuple unpacking (E0632)
 
 This error occurs when we are trying to assign to multiple variables at once, but the right side has
 too few or too many values in the sequence.
@@ -357,7 +357,7 @@ too few or too many values in the sequence.
 
 (E0633)=
 
-### Unpacking non-sequence (E0633) 
+### Unpacking non-sequence (E0633)
 
 This error occurs when we are trying to assign to multiple variables at once, but the right side is
 not a sequence, and so can't be unpacked.
@@ -368,7 +368,7 @@ not a sequence, and so can't be unpacked.
 
 (E1133)=
 
-### Not an iterable (E1133) 
+### Not an iterable (E1133)
 
 This error occurs when a non-iterable value is used in a place where an iterable is expected.
 An [iterable][python documentation: iterable] is an object capable of returning its members one at a
@@ -389,7 +389,7 @@ for number in [1, 2, 3]:
 
 (E1134)=
 
-### Not a mapping (E1134) 
+### Not a mapping (E1134)
 
 This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a non-dict with `**` in a function call meaning that the parameters are unfilled.
 
@@ -403,7 +403,7 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 (C0113)=
 
-### Unneeded not (C0113) 
+### Unneeded not (C0113)
 
 This error occurs when a boolean expression contains an unneeded negation. If we are getting this
 error, the expression can be simplified to not use a negation.
@@ -424,7 +424,7 @@ else:
 
 (C0209)=
 
-### Consider using f-string (C0209) 
+### Consider using f-string (C0209)
 
 This error occurs when a string is formatted with `%` or `format()`.
 The preferred way to include Python values in strings is with f-strings.
@@ -443,7 +443,7 @@ print(f"{name} is my name!")
 
 (R1726)=
 
-### Simplifiable condition (R1726) 
+### Simplifiable condition (R1726)
 
 This error occurs when a boolean test condition can be simplified.
 Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
@@ -461,7 +461,7 @@ if a:  # Error was on this line
 
 (R1727)=
 
-### Condition evals to constant (R1727) 
+### Condition evals to constant (R1727)
 
 This error occurs when a boolean test condition always evaluates to a constant.
 Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
@@ -479,7 +479,7 @@ if True:  # Error was on this line
 
 (C0121)=
 
-### Singleton comparison (C0121) 
+### Singleton comparison (C0121)
 
 This error occurs when an expression is compared to a singleton value like `True`, `False` or `None`
 .
@@ -527,7 +527,7 @@ def square_if_even(number: int) -> int:
 
 (W0125)=
 
-### Using constant test (W0125) 
+### Using constant test (W0125)
 
 This error occurs when a conditional statement (like an `if` statement) uses a constant value for
 its test. In such a case, a conditional statement is not necessary, as it will always result in the
@@ -539,7 +539,7 @@ same path of execution.
 
 (W0128)=
 
-### Redeclared Assigned Name (W0128) 
+### Redeclared Assigned Name (W0128)
 
 This error occurs when a variable is redeclared on the same line it was assigned.
 
@@ -549,7 +549,7 @@ This error occurs when a variable is redeclared on the same line it was assigned
 
 (R0912)=
 
-### Too many branches (R0912) 
+### Too many branches (R0912)
 
 The function or method has too many branches, making it hard to follow. This is a sign that the
 function/method is too complex, and should be split up.
@@ -562,7 +562,7 @@ function/method is too complex, and should be split up.
 
 (R1702)=
 
-### Too many nested blocks (R1702) 
+### Too many nested blocks (R1702)
 
 This error occurs when we have more than three levels of nested blocks in our code. Deep nesting is
 a sign that our function or method is too complex, and should be broken down using helper functions
@@ -618,7 +618,7 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
 
 (C0302)=
 
-### Too many lines (C0302) 
+### Too many lines (C0302)
 
 This error occurs when the file has too many lines. The limit for too many lines is specified
 through the `max-module-lines` configuration option.
@@ -627,7 +627,7 @@ through the `max-module-lines` configuration option.
 
 (R0913)=
 
-### Too many arguments (R0913) 
+### Too many arguments (R0913)
 
 The function or method is defined with too many arguments. This is a sign that the function/method
 is too complex, and should be split up, or that some of the arguments are related, and should be
@@ -641,7 +641,7 @@ combined and passed as a single object.
 
 (R0914)=
 
-### Too many locals (R0914) 
+### Too many locals (R0914)
 
 The function or method has too many local variables.
 
@@ -653,7 +653,7 @@ The function or method has too many local variables.
 
 (R0915)=
 
-### Too many statements (R0915) 
+### Too many statements (R0915)
 
 The function or method has too many statements. We should split it into smaller functions/methods.
 
@@ -668,7 +668,7 @@ The function or method has too many statements. We should split it into smaller 
 
 (W0612)=
 
-### Unused variable (W0612) 
+### Unused variable (W0612)
 
 This error occurs when we have a defined variable that is never used.
 
@@ -678,7 +678,7 @@ This error occurs when we have a defined variable that is never used.
 
 (W0613)=
 
-### Unused argument (W0613) 
+### Unused argument (W0613)
 
 This error occurs when a function argument is never used in the function.
 
@@ -688,7 +688,7 @@ This error occurs when a function argument is never used in the function.
 
 (W0104)=
 
-### Pointless statement (W0104) 
+### Pointless statement (W0104)
 
 This error occurs when a statement does not have any effect. This means that the statement could be
 removed without changing the behaviour of the program.
@@ -699,7 +699,7 @@ removed without changing the behaviour of the program.
 
 (W0105)=
 
-### Pointless string statement (W0105) 
+### Pointless string statement (W0105)
 
 This error occurs when a string statement does not have any effect. Very similar to error `W0104`, but
 for strings.
@@ -710,7 +710,7 @@ for strings.
 
 (R1733)=
 
-### Unnecessary dict index lookup (R1733) 
+### Unnecessary dict index lookup (R1733)
 
 This error occurs when values for a dictionary are accessed using an index lookup (that is, through
 `dictionary_name[key]`) instead of directly while iterating over key-value pairs of the dictionary.
@@ -730,7 +730,7 @@ for key, value in sample_dict.items():
 
 (W0107)=
 
-### Unnecessary pass (W0107) 
+### Unnecessary pass (W0107)
 
 This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has
 no effect). `pass` statements should only be used to fill what would otherwise be an empty code
@@ -749,7 +749,7 @@ if `pass` is removed.
 
 (R1710)=
 
-### Inconsistent return statements (R1710) 
+### Inconsistent return statements (R1710)
 
 This error occurs when you have a function that sometimes returns a non-`None` value and sometimes _
 implicitly_ returns `None`. This is an issue because in Python, we prefer making code explicit
@@ -772,7 +772,7 @@ returning `None`.
 
 (R1732)=
 
-### Consider using with (R1732) 
+### Consider using with (R1732)
 
 This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources.
 
@@ -789,7 +789,7 @@ with open('my_file.txt', 'r') as file:
 
 (R1734)=
 
-### Use list literal (R1734) 
+### Use list literal (R1734)
 
 This error occurs when `list()` is used instead of `[]` to create an empty list.
 
@@ -810,7 +810,7 @@ for x in lst:
 
 (R1735)=
 
-### Use dict literal (R1735) 
+### Use dict literal (R1735)
 
 This error occurs when `dict()` is used instead of `{}` to create an empty dictionary.
 
@@ -838,7 +838,7 @@ identifiers.
 
 (C0112)=
 
-### Empty Docstring (C0112) 
+### Empty Docstring (C0112)
 
 This error occurs when a module, function, class or method has an empty docstring.
 
@@ -848,7 +848,7 @@ This error occurs when a module, function, class or method has an empty docstrin
 
 (C0103)=
 
-### Invalid name (C0103) 
+### Invalid name (C0103)
 
 This error occurs when a name does not follow
 the [Python Naming Convention][pep8: naming conventions] associated with its role (constant,
@@ -868,7 +868,7 @@ names must not begin with a number.
 
 (C0104)=
 
-### Disallowed name (C0104) 
+### Disallowed name (C0104)
 
 This error occurs when a variable name is chosen to be a typical generic name, rather than a
 meaningful one. Here are some of the disallowed names to avoid:
@@ -886,7 +886,7 @@ meaningful one. Here are some of the disallowed names to avoid:
 
 (E0102)=
 
-### Function redefined (E0102) 
+### Function redefined (E0102)
 
 This error occurs when a function, class or method is redefined. If we are getting this error, we
 should make sure all the functions, methods and classes that we define have different names.
@@ -897,7 +897,7 @@ should make sure all the functions, methods and classes that we define have diff
 
 (E0108)=
 
-### Duplicate argument name (E0108) 
+### Duplicate argument name (E0108)
 
 This error occurs if there are duplicate parameter names in function definitions. All parameters
 must have distinct names, so that we can refer to each one separately in the function body.
@@ -908,7 +908,7 @@ must have distinct names, so that we can refer to each one separately in the fun
 
 (R1704)=
 
-### Redefined argument from local (R1704) 
+### Redefined argument from local (R1704)
 
 This error occurs when a local name is redefining the name of a parameter.
 
@@ -930,7 +930,7 @@ def greet_person(name, friends) -> None:
 
 (W0621)=
 
-### Redefined outer name (W0621) 
+### Redefined outer name (W0621)
 
 This error occurs when we are redefining a variable name that has already been defined in the outer
 scope.
@@ -946,7 +946,7 @@ redefinition.
 
 (W0622)=
 
-### Redefined builtin (W0622) 
+### Redefined builtin (W0622)
 
 This error occurs when we are redefining a built-in function, constant, class, or exception.
 
@@ -981,7 +981,7 @@ may import at all.
 
 (E9999)=
 
-### Forbidden imports (E9999) 
+### Forbidden imports (E9999)
 
 This error occurs when your code imports a module which is not allowed (usually for the purpose of
 an assignment/exercise).
@@ -994,7 +994,7 @@ lines: 1-3
 
 (E0401)=
 
-### Import error (E0401) 
+### Import error (E0401)
 
 The module is unable to be imported. Check the spelling of the module name, or whether the module is
 in the correct directory.
@@ -1011,7 +1011,7 @@ import missing_module as foo  # This module does not exist
 
 (E0611)=
 
-### No name in module (E0611) 
+### No name in module (E0611)
 
 This error occurs when we are trying to access a variable from an imported module, but that variable
 name could not be found in that referenced module.
@@ -1022,7 +1022,7 @@ name could not be found in that referenced module.
 
 (W0401)=
 
-### Wildcard import (W0401) 
+### Wildcard import (W0401)
 
 We should only import what we need. Wildcard imports (shown below) are generally discouraged, as
 they add all objects from the imported module into the global namespace. This makes it difficult to
@@ -1051,7 +1051,7 @@ c = module_name.SomeClass()
 
 (W0404)=
 
-### Reimported (W0404) 
+### Reimported (W0404)
 
 A module should not be imported more than once.
 
@@ -1061,7 +1061,7 @@ A module should not be imported more than once.
 
 (W0406)=
 
-### Import self (W0406) 
+### Import self (W0406)
 
 A module should not import itself. For example, if we have a module named `W0406_import_self`, it
 should not import a module with the same name.
@@ -1077,7 +1077,7 @@ our_ `math.py` file, and not the [`math` module] from the standard library.
 
 (R0401)=
 
-### Cyclic import (R0401) 
+### Cyclic import (R0401)
 
 A module should not import a file which results in an import of the original module.
 
@@ -1095,7 +1095,7 @@ Example File 2
 
 (R0402)=
 
-### Consider using from import (R0402) 
+### Consider using from import (R0402)
 
 Some imports are long and go through multiple layers of packages or modules. It's common to want to
 rename these imports as the last imported module or package using the `as` keyword.
@@ -1113,7 +1113,7 @@ from python_ta import contracts
 
 (C0410)=
 
-### Multiple imports (C0410) 
+### Multiple imports (C0410)
 
 Different modules should not be imported on a single line.
 
@@ -1137,7 +1137,7 @@ from shutil import copy, SameFileError
 
 (C0411)=
 
-### Wrong import order (C0411) 
+### Wrong import order (C0411)
 
 This error occurs when the [PEP8 import order][pep8 imports] is not respected. We should do standard
 library imports first, then third-party libraries, then local imports.
@@ -1148,7 +1148,7 @@ library imports first, then third-party libraries, then local imports.
 
 (C0412)=
 
-### Ungrouped imports (C0412) 
+### Ungrouped imports (C0412)
 
 Imports should be grouped by package.
 
@@ -1165,7 +1165,7 @@ from math import floor
 
 (C0413)=
 
-### Wrong import position (C0413) 
+### Wrong import position (C0413)
 
 Imports should be placed at the top of the module, above any other code, but below the module
 docstring.
@@ -1176,7 +1176,7 @@ docstring.
 
 (C0415)=
 
-### Import outside toplevel (C0415) 
+### Import outside toplevel (C0415)
 
 Imports should be placed at the top-level of the module, not inside function or class bodies.
 
@@ -1186,7 +1186,7 @@ Imports should be placed at the top-level of the module, not inside function or 
 
 (W0611)=
 
-### Unused import (W0611) 
+### Unused import (W0611)
 
 This error occurs when we import a module which is not used anywhere in our code.
 
@@ -1198,7 +1198,7 @@ This error occurs when we import a module which is not used anywhere in our code
 
 (R0902)=
 
-### Too many instance attributes (R0902) 
+### Too many instance attributes (R0902)
 
 The class has too many instance attributes, which suggests that it is too complicated and tries to
 do too many things.
@@ -1252,7 +1252,7 @@ class Composition(object):
 
 (W0223)=
 
-### Abstract method (W0223) 
+### Abstract method (W0223)
 
 This error occurs when an abstract method (i.e. a method with a `raise NotImplementedError`
 statement) is not overridden inside a subclass of the abstract class.
@@ -1273,7 +1273,7 @@ class Cat(Animal):
 
 (W0221)=
 
-### Arguments differ (W0221) 
+### Arguments differ (W0221)
 
 This error occurs when a method takes a different number of arguments than the interface that it
 implements or the method that it overrides.
@@ -1297,7 +1297,7 @@ class Dog(Animal):
 
 (W0222)=
 
-### Different method signature (W0222) 
+### Different method signature (W0222)
 
 When a child class overrides a method of the parent class, the new method should have the same
 signature as the method which it is overriding. In other words, the names and the order of the
@@ -1320,7 +1320,7 @@ class PremiumBankAccount(StandardBankAccount):
 
 (E0101)=
 
-### Return in `__init__` (E0101) 
+### Return in `__init__` (E0101)
 
 This error occurs when the [`__init__`] method contains a return statement.
 
@@ -1334,7 +1334,7 @@ raise a `TypeError` if `__init__` returns anything other than `None`.
 
 (W0212)=
 
-### Protected member access (W0212) 
+### Protected member access (W0212)
 
 Attributes and methods whose name starts with an underscore should be considered "private" and
 should not be accessed outside of the class in which they are defined.
@@ -1350,7 +1350,7 @@ class.
 
 (W0233)=
 
-### Bad parent init (W0233) 
+### Bad parent init (W0233)
 
 When using inheritance, we should call the `__init__` method of the parent class and not of some
 unrelated class.
@@ -1387,7 +1387,7 @@ class Child(Parent):
 
 (R1725)=
 
-### Super with arguments (R1725) 
+### Super with arguments (R1725)
 
 This error occurs when calling `super()` with the class and instance as these can be ommited from
 Python 3.
@@ -1406,7 +1406,7 @@ class DummyClass:
 
 (W0201)=
 
-### Attribute defined outside init (W0201) 
+### Attribute defined outside init (W0201)
 
 Any attribute we define for a class should be created inside the `__init__` method. Defining it
 outside this method is considered bad practice, as it makes it harder to keep track of what
@@ -1432,7 +1432,7 @@ class SomeNumbers:
 
 (E0202)=
 
-### Method hidden (E0202) 
+### Method hidden (E0202)
 
 If we accidentally hide a method with an attribute, it can cause other code to attempt to invoke
 what it believes to be a method, which will fail since it has become an attribute instead. This will
@@ -1444,7 +1444,7 @@ cause the program to raise an error.
 
 (E0203)=
 
-### Access to member before definition (E0203) 
+### Access to member before definition (E0203)
 
 Before trying to use a member of a class, it should have been defined at some point. If we try to
 use it before assigning to it, an error will occur.
@@ -1455,7 +1455,7 @@ use it before assigning to it, an error will occur.
 
 (E0302)=
 
-### Unexpected special method signature (E0302) 
+### Unexpected special method signature (E0302)
 
 This error occurs when a special method (also known as
 a ["dunder method"][python double-under, double-wonder], because it has double underscores or "
@@ -1483,7 +1483,7 @@ class Animal:
 
 (E0239)=
 
-### Inheriting from a non-class (E0239) 
+### Inheriting from a non-class (E0239)
 
 A new class can only inherit from a different class (i.e. a Python object which defines the _type_
 of an object). It cannot inherit from an instance of a class or from a Python literal such as a
@@ -1503,7 +1503,7 @@ class FancyFloat(float):
 
 (E0241)=
 
-### Duplicate bases (E0241) 
+### Duplicate bases (E0241)
 
 A class should not inherit from a different class multiple times.
 
@@ -1513,7 +1513,7 @@ A class should not inherit from a different class multiple times.
 
 (E0211)=
 
-### No method argument (E0211) 
+### No method argument (E0211)
 
 Each method in a class needs to have at least one parameter, which by convention we name `self`.
 When we create an instance of a class and call an instance method, Python automatically passes the
@@ -1539,7 +1539,7 @@ class Saxophone:
 
 (E0213)=
 
-### `self` as the first argument (E0213) 
+### `self` as the first argument (E0213)
 
 The first parameter of a method should always be called `self`. While it is possible to name the
 first parameter something else, using the word `self` is a convention that is strongly adhered to by
@@ -1566,7 +1566,7 @@ class SecretKeeper:
 
 (R0201)=
 
-### No self use (R0201) 
+### No self use (R0201)
 
 If a method does not make use of the first argument `self`, it means that the task that the method
 is performing is not linked to the class of which it is a member. In such a case, we should rewrite
@@ -1601,7 +1601,7 @@ def add_small_coins(nickels: int = 0, dimes: int = 0, quarters: int = 0) -> floa
 
 (W0211)=
 
-### Bad static method argument (W0211) 
+### Bad static method argument (W0211)
 
 This error occurs when a static method has `self` as the first parameter. Static methods are methods
 that do not operate on instances. If we feel that the logic of a particular function belongs inside
@@ -1640,7 +1640,7 @@ class CashRegister:
 
 (W0702)=
 
-### Bare exception (W0702) 
+### Bare exception (W0702)
 
 If the `except` keyword is used without being passed an exception, _all exceptions will be caught_.
 This is not good practice, since we may catch exceptions that we do not want to catch. For example,
@@ -1653,7 +1653,7 @@ exception, which is thrown when a user attempts to exist the program by typing `
 
 (W0703)=
 
-### Exception is too generic (W0703) 
+### Exception is too generic (W0703)
 
 Using `except Exception:` is only slightly more specific than `except:` and should also be avoided (
 see [W0702](#W0702)). Since most builtin exceptions, and all user-defined exceptions, are derived
@@ -1667,7 +1667,7 @@ to bugs.
 
 (W0705)=
 
-### Duplicate except blocks (W0705) 
+### Duplicate except blocks (W0705)
 
 This error occurs when we try to catch the same exception multiple times. Only the first `except`
 block for a particular exception will be reached.
@@ -1678,7 +1678,7 @@ block for a particular exception will be reached.
 
 (E0701)=
 
-### Bad exception order (E0701) 
+### Bad exception order (E0701)
 
 Except blocks are analyzed sequentially (from top to bottom) and the first block that meets the
 criteria for catching the exception will be used. This means that if we have a generic exception
@@ -1691,7 +1691,7 @@ reached.
 
 (W0711)=
 
-### Binary op exception (W0711) 
+### Binary op exception (W0711)
 
 The Python `except` statement can catch multiple exceptions, if those exceptions are passed as a
 tuple. It is possible (but incorrect!) to pass `except` an expression containing the exception
@@ -1715,7 +1715,7 @@ def divide_and_square(numerator: float, denominator: float) -> float:
 
 (E0704)=
 
-### Misplaced bare raise (E0704) 
+### Misplaced bare raise (E0704)
 
 The Python `raise` statement can be used without an expression only inside an `except` block. In
 this case, it will re-raise the exception that was caught by the `except` block. This may be useful
@@ -1740,7 +1740,7 @@ def divide(numerator: float, denominator: float) -> float:
 
 (E0702)=
 
-### Raising bad type (E0702) 
+### Raising bad type (E0702)
 
 The Python `raise` statement expects an object that is derived from
 the [`BaseException`][python documentation: baseexception] class. We cannot call `raise` on integers
@@ -1754,7 +1754,7 @@ or strings.
 
 (E0710)=
 
-### Raising non-exception (E0710) 
+### Raising non-exception (E0710)
 
 The Python `raise` statement expects an object that is derived from
 the [`BaseException`][python documentation: baseexception] class. All user-defined exceptions should
@@ -1768,7 +1768,7 @@ error.
 
 (E0711)=
 
-### NotImplemented raised (E0711) 
+### NotImplemented raised (E0711)
 
 [`NotImplemented`][python documentation: notimplemented] should only be used as a return value for
 binary special methods, such as `__eq__`, `__lt__`, `__add__`, etc., to indicate that the operation
@@ -1782,7 +1782,7 @@ indicate that the abstract method must be implemented by the derived class.
 
 (E0712)=
 
-### Catching non-exception (E0712) 
+### Catching non-exception (E0712)
 
 The Python `raise` statement expects an object that is derived from
 the [`BaseException`][python documentation: baseexception] class (see [E0710](#E0710)). Accordingly,
@@ -1798,7 +1798,7 @@ other object will lead to an error.
 
 (E9997)=
 
-### Global variables (E9997) 
+### Global variables (E9997)
 
 When writing Python programs, your variables should always be defined within functions.
 (A _global variable_ is a variable that isn't defined within a function.)
@@ -1832,7 +1832,7 @@ when we run our code. PythonTA allows global constants, and so would not report 
 
 (E9998)=
 
-### Forbidden IO function (E9998) 
+### Forbidden IO function (E9998)
 
 Input / output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
 required. If `print` calls are used to debug the code, they should be removed prior to submission.
@@ -1845,7 +1845,7 @@ Example:
 
 (E9996)=
 
-### Loop iterates only once (E9996) 
+### Loop iterates only once (E9996)
 
 This error occurs when a loop will only ever iterate once. This occurs when every possible
 execution path through the loop body ends in a `return` statement (or another type of statement
@@ -1882,7 +1882,7 @@ when there are only even numbers in the list.
 
 (E9993)=
 
-### Invalid Range Index (E9993) 
+### Invalid Range Index (E9993)
 
 This error occurs when we call the `range` function but with argument(s) that would cause the range
 to be empty or only have one element.
@@ -1898,7 +1898,7 @@ almost certainly not what we intended! This usually indicates an error with how 
 
 (E9994)=
 
-### Unnecessary Indexing (E9994) 
+### Unnecessary Indexing (E9994)
 
 This error occurs when we use a for loop that goes over a range of indexes for a list, but only use
 those indexes to access elements from the list.
@@ -1938,7 +1938,7 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
 
 (E9984)=
 
-### For Target Subscript (E9984) 
+### For Target Subscript (E9984)
 
 This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the
 loop variable and the list being iterated over.
@@ -1964,7 +1964,7 @@ def example1(lst: List[int]) -> int:
 
 (E9969)=
 
-### Possibly undefined variable (E9969) 
+### Possibly undefined variable (E9969)
 
 This error occurs when we use a variable that might not be defined prior to its use.
 The most common cause is when we define a variable in one branch of an if statement, but not another.
@@ -1977,7 +1977,7 @@ Example:
 
 (E9959)=
 
-### Redundant assignment (E9959) 
+### Redundant assignment (E9959)
 
 This error occurs when we have two assignment statements to the same variable, without using that
 variable in between the assignment statement. In this case, the first statement is redundant, since
@@ -1994,7 +1994,7 @@ print(x)
 
 (E9988)=
 
-### Shadowing in comprehension (E9988) 
+### Shadowing in comprehension (E9988)
 
 This error occurs when a variable in a comprehension shadows (i.e., has the same name as) a variable
 from an outer scope, such as a local variable in the same function.
@@ -2011,7 +2011,7 @@ lines: 10-12
 
 (E9970)=
 
-### Missing parameter type (E9970) 
+### Missing parameter type (E9970)
 
 This error occurs when we have written a function definition but are missing a type annotation for
 a parameter.
@@ -2026,7 +2026,7 @@ lines: 2-4
 
 (E9971)=
 
-### Missing return type (E9971) 
+### Missing return type (E9971)
 
 This error occurs when we have written a function definition but are missing a type annotation for
 the return value. Use `None` as the type annotation if the function does not return anything.
@@ -2041,7 +2041,7 @@ lines: 2-4
 
 (E9972)=
 
-### Missing attribute type (E9972) 
+### Missing attribute type (E9972)
 
 This error occurs when we have written a class but are missing a type annotation for an
 instance attribute assigned in the class initializer.
@@ -2071,7 +2071,7 @@ class ExampleClass:
 
 (E9973)=
 
-### Missing space in doctest (E9973) 
+### Missing space in doctest (E9973)
 
 This error occurs when a doctest found in the docstring of a function is not followed by a space.
 In this case the doctest will not actually be parsed.
@@ -2097,7 +2097,7 @@ def f(x: int) -> int:
 
 (E9989)=
 
-### Pycodestyle errors (E9989) 
+### Pycodestyle errors (E9989)
 
 These errors are based on the Python code style guidelines ("PEP8") published by the Python team.
 These errors do not affect the functionality of your code, but can affect its readability.
@@ -2109,7 +2109,7 @@ See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps
 
 (E1305)=
 
-### Too many format args (E1305) 
+### Too many format args (E1305)
 
 This error occurs when we use the `format` method on a string, but call it with more arguments than
 the number of `{}` in the string.
@@ -2132,7 +2132,7 @@ s = "{} who is {} lives in {}".format(name, age, country)
 
 (E1306)=
 
-### Too few format args (E1306) 
+### Too few format args (E1306)
 
 This error occurs when we use the `format` method on a string, but call it with fewer arguments than
 the number of `{}` in the string.
@@ -2151,7 +2151,7 @@ s = "{} and {}".format("first", "second")
 
 (W1309)=
 
-### F-string without interpolation (W1309) 
+### F-string without interpolation (W1309)
 
 This error occurs when there are no interpolation variables present in an f-string. This might indicate that there is
 either a bug in the code (that is, there should be an interpolation variable in the f-string) or the f-string can be a
@@ -2177,7 +2177,7 @@ print(f'Hello {entity}!')
 
 (W1310)=
 
-### Format string without interpolation (W1310) 
+### Format string without interpolation (W1310)
 
 This error occurs when a format string does not have **any** interpolation variables. This can be an issue as it can
 mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code
@@ -2197,7 +2197,7 @@ greeting = 'Hello There, {name}'.format(name='person')
 
 (W1303)=
 
-### Missing format argument key (W1303) 
+### Missing format argument key (W1303)
 
 This error occurs when a format string that uses named fields does not receive the required
 keywords. In the following example, we should assign three values for `last_name`, `first_name`,
@@ -2217,7 +2217,7 @@ s = '{last_name}, {fist_name} - {age}'.format(last_name='bond', first_name='jame
 
 (E1310)=
 
-### Bad str strip call (E1310) 
+### Bad str strip call (E1310)
 
 This error occurs when we call [`strip`][str.strip], [`lstrip`][str.lstrip],
 or [`rstrip`][str.rstrip], but pass an argument string which contains duplicate characters. The
@@ -2235,7 +2235,7 @@ characters to `mystring.strip`, we are likely misinterpreting what this method i
 
 (W1305)=
 
-### Format combined specification (W1305) 
+### Format combined specification (W1305)
 
 This error occurs when a format string contains both automatic field numbering (e.g. `{}`) and
 manual field specification (e.g. `{0}`).
@@ -2260,7 +2260,7 @@ s = "{0} and {1}".format("a", "b")
 
 (W1401)=
 
-### Anomalous backslash in string (W1401) 
+### Anomalous backslash in string (W1401)
 
 This error occurs when a string literal contains a backslash that is not part of an escape sequence.
 
@@ -2289,7 +2289,7 @@ print('This is not an escape sequence: \\d')
 
 (W1503)=
 
-### Redundant unittest assert (W1503) 
+### Redundant unittest assert (W1503)
 
 The first argument of `assertTrue` and `assertFalse` is a "condition", which should evaluate
 to `True` or `False`. These methods evaluate the condition to check whether the test passes or
@@ -2303,7 +2303,7 @@ whether our code is correct.
 
 (C0123)=
 
-### Unidiomatic type check (C0123) 
+### Unidiomatic type check (C0123)
 
 This error occurs when `type` is used instead of `isinstance` to perform a type check.
 Use `isinstance(x, Y)` instead of `type(x) == Y`.
@@ -2324,7 +2324,7 @@ def is_int(obj: Union[int, float, str]) -> bool:
 
 (W0102)=
 
-### Dangerous default value (W0102) 
+### Dangerous default value (W0102)
 
 This warning occurs when a mutable object, such as a list or dictionary, is provided as a default
 argument in a function definition. Default arguments are instantiated only once, at the time when
@@ -2377,7 +2377,7 @@ print(make_list(5))
 
 (C0201)=
 
-### Consider iterating dictionary (C0201) 
+### Consider iterating dictionary (C0201)
 
 It is more _pythonic_ to iterate through a dictionary directly, without calling the `.keys` method.
 
@@ -2394,7 +2394,7 @@ for item in menu:
 
 (C0325)=
 
-### Superfluous parens (C0325) 
+### Superfluous parens (C0325)
 
 This error occurs when a keyword, such as `if` or `for`, is followed by a single item enclosed in
 parentheses. In such a case, parentheses are not necessary.
@@ -2412,7 +2412,7 @@ if 'anchovies' in pizza_toppings:
 
 (R1707)=
 
-### Trailing comma tuple (R1707) 
+### Trailing comma tuple (R1707)
 
 This error occurs when a Python expression is terminated by a comma. In Python, a tuple is created
 by the comma symbol, not by parentheses. This makes it easy to create a tuple accidentally, by
@@ -2433,7 +2433,7 @@ print(my_lucky_number)  # Prints 7
 
 (W0199)=
 
-### Assert on tuple (W0199) 
+### Assert on tuple (W0199)
 
 This error occurs when an `assert` statement is called with a tuple as the first argument. `assert`
 acting on a tuple passes if and only if the tuple is non-empty. This is likely _not_ what the
@@ -2466,7 +2466,7 @@ def check(condition, message):
 
 (R0123)=
 
-### Literal comparison (R0123) 
+### Literal comparison (R0123)
 
 This error occurs when we use the identity operator `is` to compare non-boolean Python literals.
 Whether or not two literals representing the same value (e.g. two identical strings) have the same
@@ -2505,7 +2505,7 @@ assert chars == 'this string fails'
 
 (W0106)=
 
-### Expression not assigned (W0106) 
+### Expression not assigned (W0106)
 
 This error occurs when an expression that is not a function call is not assigned to a variable.
 Typically, this indicates that we were intending to do something else.
@@ -2524,7 +2524,7 @@ print("Appended 4 to my list!")
 
 (E0303)=
 
-### Invalid length returned (E0303) 
+### Invalid length returned (E0303)
 
 This error occurs when the `__len__` special method returns something other than a non-negative
 integer.
@@ -2548,7 +2548,7 @@ class Company:
 
 (W1515)=
 
-### Forgotten debug statement (W1515) 
+### Forgotten debug statement (W1515)
 
 This warning occurs when debugging breakpoints (such as `breakpoint()`, `sys.breakpointhook()`,
 and `pdb.set_trace()`) are found. These breakpoints should be removed in production code.
@@ -2561,7 +2561,7 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 (C0321)=
 
-### Multiple statements (C0321) 
+### Multiple statements (C0321)
 
 This error occurs when we write more than one statement on a single line. According to PEP8, [_
 multiple statements on the same line are discouraged_][pep8: other recommendations].
@@ -2583,7 +2583,7 @@ def is_positive(number: int) -> str:
 
 (W0301)=
 
-### Unnecessary semicolon (W0301) 
+### Unnecessary semicolon (W0301)
 
 This error occurs when we end a Python statement with a semicolon. There is no good reason to ever
 use a semicolon in Python.
@@ -2600,7 +2600,7 @@ print("Hello World!")
 
 (C0304)=
 
-### Missing final newline (C0304) 
+### Missing final newline (C0304)
 
 This error occurs when a file is missing a trailing newline character. For example, if we represent
 a (typically invisible) newline character as `¬`, the following file would raise this error:
@@ -2617,7 +2617,7 @@ print("Hello World!")  # Trailing newline is present:  ¬
 
 (C0305)=
 
-### Trailing newlines (C0305) 
+### Trailing newlines (C0305)
 
 This error occurs when a file ends with more than one newline character (i.e. when a file contains
 trailing blank lines). For example:
@@ -2634,7 +2634,7 @@ print("Hello World!")  # This file ends with a single newline character! :)
 
 (C0301)=
 
-### Line too long (C0301) 
+### Line too long (C0301)
 
 This error occurs when a line is longer than a predefined number of characters. Our default limit
 for all lines is 80 characters.
@@ -2647,7 +2647,7 @@ for all lines is 80 characters.
 
 (E0001)=
 
-### Syntax Error (E0001) 
+### Syntax Error (E0001)
 
 1. _SyntaxError: Missing parentheses in call to 'print'_
 
@@ -2744,7 +2744,7 @@ for all lines is 80 characters.
 
 (E0107)=
 
-### Nonexistent operator (E0107) 
+### Nonexistent operator (E0107)
 
 This error occurs when we attempt to use C-style "pre-increment" or "pre-decrement" operators `++`
 and `--`, which do not exist in Python.
@@ -2767,7 +2767,7 @@ The following errors are no longer checked by the latest version of PythonTA.
 
 (C0326)=
 
-### Bad whitespace (C0326) 
+### Bad whitespace (C0326)
 
 This error occurs when we include a wrong number of spaces around an operator, bracket, or block
 opener. We should aim to follow
@@ -2776,7 +2776,7 @@ the [PEP8 convention on whitespace in expressions and statements][pep8: whitespa
 
 (W0311)=
 
-### Bad indentation (W0311) 
+### Bad indentation (W0311)
 
 This error occurs when an unexpected number of tabs or spaces is used to indent the code. It is
 recommended that we use [_four spaces per indentation level_][pep8: indentation] throughout our
@@ -2784,14 +2784,14 @@ code.
 
 (W0312)=
 
-### Mixed indentation (W0312) 
+### Mixed indentation (W0312)
 
 This error occurs when the code is indented with a mix of tabs and spaces. Please note that [_spaces
 are the preferred indentation method_][pep8: tabs or spaces?].
 
 (C0330)=
 
-### Bad continuation (C0330) 
+### Bad continuation (C0330)
 
 This error occurs when we use an inconsistent number of spaces to indent arguments or parameters in
 function and method calls or definitions.

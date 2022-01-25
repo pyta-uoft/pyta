@@ -59,8 +59,7 @@ def main(
 
     # `config` is None if `-c` flag is not set
     if generate_config:
-        pylintrc_location = os.path.join(
-            os.path.dirname(__file__), ".pylintrc")
+        pylintrc_location = os.path.join(os.path.dirname(__file__), ".pylintrc")
         with open(pylintrc_location, "r") as f:
             contents = f.read()
             print(contents)
@@ -70,8 +69,7 @@ def main(
     paths = [click.format_filename(fn) for fn in filenames]
 
     if config is None:
-        reporter = checker(module_name=paths, config={
-                           "output-format": output_format})
+        reporter = checker(module_name=paths, config={"output-format": output_format})
     else:
         reporter = checker(module_name=paths, config=config)
 

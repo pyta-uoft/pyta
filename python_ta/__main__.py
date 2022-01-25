@@ -4,18 +4,14 @@ from typing import List, Optional
 
 import click
 
-from python_ta import check_all, check_errors, __version__
+from python_ta import __version__, check_all, check_errors
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "-v",
-    "--version",
-    is_flag=True,
-    help="Print current version of PythonTA.",
-    default=False
+    "-v", "--version", is_flag=True, help="Print current version of PythonTA.", default=False
 )
 @click.option(
     "-c",

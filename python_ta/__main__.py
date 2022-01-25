@@ -4,12 +4,19 @@ from typing import List, Optional
 
 import click
 
-from python_ta import check_all, check_errors
+from python_ta import check_all, check_errors, __version__
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
+@click.option(
+    "-v",
+    "--version",
+    is_flag=True,
+    help="Print current version of PythonTA.",
+    default=False
+)
 @click.option(
     "-c",
     "--config",
@@ -34,6 +41,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default="python_ta.reporters.HTMLReporter",
 )
 def main(
+    version: bool,
     config: Optional[str],
     errors_only: bool,
     filenames: List[str],
@@ -45,6 +53,10 @@ def main(
     FILENAMES can be a string of a directory, or file to check (`.py` extension optional) or
     a list of strings of directories or files.
     """
+    if version:
+        print(__version__)
+        return
+
     # `config` is None if `-c` flag is not set
     if generate_config:
         pylintrc_location = os.path.join(os.path.dirname(__file__), ".pylintrc")

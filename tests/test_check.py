@@ -258,3 +258,18 @@ def test_check_exit_zero() -> None:
     )
 
     assert output.returncode == 0
+
+def test_check_version() -> None:
+    """Test that python_ta --version outputs python_ta.__version__ to stdout.
+    """
+    stdout = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--version",
+        ], 
+        capture_output=True, 
+        text=True,
+    ).stdout
+    assert(stdout.rstrip("\n") == python_ta.__version__)

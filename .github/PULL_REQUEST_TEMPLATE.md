@@ -44,4 +44,4 @@
 - [ ] I have verified that the CI tests have passed. <!-- (check after opening pull request) -->
 - [ ] I have reviewed the test coverage changes reported on Coveralls. <!-- (check after opening pull request) -->
 - [ ] I have added tests for my changes. <!-- (delete this checklist item if not applicable) -->
-- [ ] - [ ] I have updated the CHANGELOG.md file. <!-- (delete this checklist item if not applicable) -->
+- [ ] I have updated the CHANGELOG.md file. <!-- (delete this checklist item if not applicable) -->

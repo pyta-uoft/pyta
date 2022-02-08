@@ -170,18 +170,15 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function preconditions
     if not hasattr(wrapped, "_preconditions"):
-        # [(assertion, code object, eval_argument)]
+        # [(assertion, code object, return_val_dict)]
         wrapped._preconditions = []
         preconditions = parse_assertions(wrapped)
-        # TODO: Need to update this!
-        eval_argument = {**wrapped.__globals__, **function_locals, **{}}
         for precondition in preconditions:
             try:
                 compiled = compile(precondition, "<string>", "eval")
             except:
-                print(f'compile() failed at ${precondition}') # TODO: remove this after finished
                 continue
-            wrapped._preconditions.append((precondition, compiled, eval_argument))
+            wrapped._preconditions.append((precondition, compiled, {}))
 
     _check_assertions(wrapped, function_locals)
 
@@ -200,23 +197,27 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function postconditions
     if not hasattr(wrapped, "_postconditions"):
-        # [(assertion, code object, eval_argument)]
+        # [(assertion, code object, return_val_dict)]
         wrapped._postconditions = []
         return_val_dict = {}
+        print(3)
+        print(2, _get_legal_return_val_var_name(
+            {**wrapped.__globals__, **function_locals}
+        ))
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
         return_val_dict[return_val_var_name] = r
-        eval_argument = {**wrapped.__globals__, **function_locals, **return_val_dict}
         postconditions = parse_assertions(wrapped, parse_token="Postcondition")
         for postcondition in postconditions:
             assertion = _replace_return_val_assertion(postcondition, return_val_var_name)
+            print(postcondition, return_val_var_name, assertion)
             try:
                 compiled = compile(assertion, "<string>", "eval")
             except:
                 print(f'compile() failed at ${postcondition}') # TODO: remove this after finished
                 continue
-            wrapped._postconditions.append((assertion, compiled, eval_argument))
+            wrapped._postconditions.append((postcondition, compiled, return_val_dict))
 
     _check_assertions(
         wrapped,
@@ -328,6 +329,7 @@ def _get_legal_return_val_var_name(var_dict: dict) -> str:
     while legal_var_name in var_dict:
         legal_var_name += "_"
 
+    print(1, legal_var_name)
     return legal_var_name
 
 
@@ -357,11 +359,11 @@ def _check_assertions(
     if condition_type == "postcondition":
         assertions = wrapped._postconditions
     for assertion in assertions:
-        assertion_str, compiled, eval_args = assertion
+        assertion_str, compiled, return_val_dict = assertion
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
             check = eval(
-                compiled, eval_args
+                compiled, {**wrapped.__globals__, **function_locals, **return_val_dict}
             )
             print(assertion_str)
             print(check)
@@ -378,6 +380,8 @@ def _check_assertions(
 
                 if condition_type == "postcondition":
                     return_val_string = f"and return value {function_return_val}"
+                print(f'{wrapped.__name__} {condition_type} "{assertion_str}" was '
+                    f"violated for arguments {arg_string} {return_val_string}")
                 raise PyTAContractError(
                     f'{wrapped.__name__} {condition_type} "{assertion_str}" was '
                     f"violated for arguments {arg_string} {return_val_string}"

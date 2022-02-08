@@ -1,32 +1,22 @@
-# demo.py
-def test(x: int, y: int) -> int:
+from typing import Dict, List, Set
+from python_ta.contracts import check_contracts
+import pytest
+
+def is_even(lst: List[int]) -> bool:
+    return all([(not x & 1) for x in lst])
+
+@check_contracts
+def _is_even_sum(numbers: List[int]) -> int:
+    """Return the sum of a list of numbers.
+
+    Precondition: is_even(numbers)
     """
-    Preconditions:
-        - y < 10
-        - y < 100
-        - y < 1000
-        - y < 10
-        - y < 100
-        - y < 1000
-        - y < 10
-        - y < 100
-        - y < 1000
-        - y < 10
-        - y < 100
-        - y < 1000
-        - y < 10
-        - y < 100
-        - y < 1000
-    """
-    return x + y
+    return sum(numbers)
 
-def run_test():
-    from python_ta.contracts import check_all_contracts
-    check_all_contracts()
-    for i in range(0, 1000):
-        test(10, i)
+def test():
+    try:
+        _is_even_sum([1, 2])
+    except AssertionError:
+        print(1)
 
-
-if __name__ == '__main__':
-    import timeit
-    run_test()
+test()

@@ -173,6 +173,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         # [(assertion, code object, eval_argument)]
         wrapped._preconditions = []
         preconditions = parse_assertions(wrapped)
+        # TODO: Need to update this!
         eval_argument = {**wrapped.__globals__, **function_locals, **{}}
         for precondition in preconditions:
             try:
@@ -181,6 +182,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 print(f'compile() failed at ${precondition}') # TODO: remove this after finished
                 continue
             wrapped._preconditions.append((precondition, compiled, eval_argument))
+
     _check_assertions(wrapped, function_locals)
 
     # Check return type
@@ -361,6 +363,8 @@ def _check_assertions(
             check = eval(
                 compiled, eval_args
             )
+            print(assertion_str)
+            print(check)
         except:
             _debug(f"Warning: could not evaluate {condition_type}: {assertion_str}")
         else:
@@ -374,7 +378,6 @@ def _check_assertions(
 
                 if condition_type == "postcondition":
                     return_val_string = f"and return value {function_return_val}"
-
                 raise PyTAContractError(
                     f'{wrapped.__name__} {condition_type} "{assertion_str}" was '
                     f"violated for arguments {arg_string} {return_val_string}"

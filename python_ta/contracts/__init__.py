@@ -179,7 +179,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             try:
                 compiled = compile(precondition, "<string>", "eval")
             except:
-                print(f'compile() failed at ${precondition}') # TODO: remove this after finished
+                print(f"compile() failed at ${precondition}")  # TODO: remove this after finished
                 continue
             wrapped._preconditions.append((precondition, compiled, eval_argument))
 
@@ -214,14 +214,14 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             try:
                 compiled = compile(assertion, "<string>", "eval")
             except:
-                print(f'compile() failed at ${postcondition}') # TODO: remove this after finished
+                print(f"compile() failed at ${postcondition}")  # TODO: remove this after finished
                 continue
             wrapped._postconditions.append((assertion, compiled, eval_argument))
 
     _check_assertions(
         wrapped,
         function_locals,
-        function_return_val = r,
+        function_return_val=r,
         condition_type="postcondition",
     )
 
@@ -360,9 +360,7 @@ def _check_assertions(
         assertion_str, compiled, eval_args = assertion
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
-            check = eval(
-                compiled, eval_args
-            )
+            check = eval(compiled, eval_args)
             print(assertion_str)
             print(check)
         except:

@@ -166,18 +166,21 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                     + (f"\n{additional_suggestions}" if additional_suggestions else "")
                 )
 
+    function_locals = dict(zip(params, args_with_self))
+
     # Check function preconditions
-    if not wrapped._preconditions:
-        # [(assertion, compile object)]
+    if not hasattr(wrapped, "_preconditions"):
+        # [(assertion, code object, eval_argument)]
         wrapped._preconditions = []
         preconditions = parse_assertions(wrapped)
+        eval_argument = {**wrapped.__globals__, **function_locals, **{}}
         for precondition in preconditions:
             try:
-                compiled = compile(precondition)
+                compiled = compile(precondition, "<string>", "eval")
             except:
+                print(f'compile() failed at ${precondition}') # TODO: remove this after finished
                 continue
-            wrapped._preconditions.append((precondition, compiled))
-    function_locals = dict(zip(params, args_with_self))
+            wrapped._preconditions.append((precondition, compiled, eval_argument))
     _check_assertions(wrapped, function_locals)
 
     # Check return type
@@ -194,13 +197,30 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             )
 
     # Check function postconditions
-    postconditions = parse_assertions(wrapped, parse_token="Postcondition")
+    if not hasattr(wrapped, "_postconditions"):
+        # [(assertion, code object, eval_argument)]
+        wrapped._postconditions = []
+        return_val_dict = {}
+        return_val_var_name = _get_legal_return_val_var_name(
+            {**wrapped.__globals__, **function_locals}
+        )
+        return_val_dict[return_val_var_name] = r
+        eval_argument = {**wrapped.__globals__, **function_locals, **return_val_dict}
+        postconditions = parse_assertions(wrapped, parse_token="Postcondition")
+        for postcondition in postconditions:
+            assertion = _replace_return_val_assertion(postcondition, return_val_var_name)
+            try:
+                compiled = compile(assertion, "<string>", "eval")
+            except:
+                print(f'compile() failed at ${postcondition}') # TODO: remove this after finished
+                continue
+            wrapped._postconditions.append((assertion, compiled, eval_argument))
+
     _check_assertions(
         wrapped,
         function_locals,
-        postconditions,
+        function_return_val = r,
         condition_type="postcondition",
-        function_return_val=r,
     )
 
     return r
@@ -325,28 +345,24 @@ def _replace_return_val_assertion(assertion: str, return_val_var_name: Optional[
 def _check_assertions(
     wrapped: Callable[..., Any],
     function_locals: dict,
-    assertions: List[str],
     condition_type: str = "precondition",
     function_return_val: Any = None,
 ) -> None:
     """Check that the given assertions are still satisfied."""
-    return_val_dict, return_val_var_name = {}, None
-
+    assertions = []
+    if condition_type == "precondition":
+        assertions = wrapped._preconditions
     if condition_type == "postcondition":
-        return_val_var_name = _get_legal_return_val_var_name(
-            {**wrapped.__globals__, **function_locals}
-        )
-        return_val_dict[return_val_var_name] = function_return_val
-
+        assertions = wrapped._postconditions
     for assertion in assertions:
+        assertion_str, compiled, eval_args = assertion
         try:
-            _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion}")
-            replaced_assertion = _replace_return_val_assertion(assertion, return_val_var_name)
+            _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
             check = eval(
-                replaced_assertion, {**wrapped.__globals__, **function_locals, **return_val_dict}
+                compiled, eval_args
             )
         except:
-            _debug(f"Warning: could not evaluate {condition_type}: {assertion}")
+            _debug(f"Warning: could not evaluate {condition_type}: {assertion_str}")
         else:
             if not check:
                 arg_string = ", ".join(
@@ -360,7 +376,7 @@ def _check_assertions(
                     return_val_string = f"and return value {function_return_val}"
 
                 raise PyTAContractError(
-                    f'{wrapped.__name__} {condition_type} "{assertion}" was '
+                    f'{wrapped.__name__} {condition_type} "{assertion_str}" was '
                     f"violated for arguments {arg_string} {return_val_string}"
                 )
 

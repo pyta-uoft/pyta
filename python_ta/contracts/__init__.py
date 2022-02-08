@@ -167,9 +167,18 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 )
 
     # Check function preconditions
-    preconditions = parse_assertions(wrapped)
+    if not wrapped._preconditions:
+        # [(assertion, compile object)]
+        wrapped._preconditions = []
+        preconditions = parse_assertions(wrapped)
+        for precondition in preconditions:
+            try:
+                compiled = compile(precondition)
+            except:
+                continue
+            wrapped._preconditions.append((precondition, compiled))
     function_locals = dict(zip(params, args_with_self))
-    _check_assertions(wrapped, function_locals, preconditions)
+    _check_assertions(wrapped, function_locals)
 
     # Check return type
     r = wrapped(*args, **kwargs)

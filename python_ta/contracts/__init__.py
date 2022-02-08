@@ -215,14 +215,14 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             try:
                 compiled = compile(assertion, "<string>", "eval")
             except:
-                print(f'compile() failed at ${postcondition}') # TODO: remove this after finished
+                print(f"compile() failed at ${postcondition}")  # TODO: remove this after finished
                 continue
             wrapped._postconditions.append((postcondition, compiled, return_val_dict))
 
     _check_assertions(
         wrapped,
         function_locals,
-        function_return_val = r,
+        function_return_val=r,
         condition_type="postcondition",
     )
 

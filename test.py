@@ -1,9 +1,13 @@
 from typing import Dict, List, Set
-from python_ta.contracts import check_contracts
+
 import pytest
+
+from python_ta.contracts import check_contracts
+
 
 def is_even(lst: List[int]) -> bool:
     return all([(not x & 1) for x in lst])
+
 
 @check_contracts
 def _is_even_sum(numbers: List[int]) -> int:
@@ -13,10 +17,12 @@ def _is_even_sum(numbers: List[int]) -> int:
     """
     return sum(numbers)
 
+
 def test():
     try:
         _is_even_sum([1, 2])
     except AssertionError:
         print(1)
+
 
 test()

@@ -96,6 +96,7 @@ def add_class_invariants(klass: type) -> None:
         return
 
     # Update representation invariants from this class' docstring and those of its superclasses.
+    # {(assertion, compiled)}
     rep_invariants = set()
 
     # Iterate over all inherited classes except builtins
@@ -103,7 +104,14 @@ def add_class_invariants(klass: type) -> None:
         if "__representation_invariants__" in cls.__dict__:
             rep_invariants = rep_invariants.union(cls.__representation_invariants__)
         elif cls.__module__ != "builtins":
-            rep_invariants.update(parse_assertions(cls, parse_token="Representation Invariant"))
+            assertions = parse_assertions(cls, parse_token="Representation Invariant")
+            # Try compiling assertions
+            for assertion in assertions:
+                try:
+                    compiled = compile(assertion, "<string>", "eval")
+                except:
+                    continue
+                rep_invariants.add((assertion, compiled))
 
     setattr(klass, "__representation_invariants__", rep_invariants)
 
@@ -310,13 +318,13 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied."""
     rep_invariants = getattr(klass, "__representation_invariants__", set())
 
-    for invariant in rep_invariants:
+    for invariant, compiled in rep_invariants:
         try:
             _debug(
                 "Checking representation invariant for "
                 f"{instance.__class__.__qualname__}: {invariant}"
             )
-            check = eval(invariant, {**global_scope, "self": instance})
+            check = eval(compiled, {**global_scope, "self": instance})
         except:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:

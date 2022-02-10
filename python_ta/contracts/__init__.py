@@ -380,12 +380,10 @@ def _check_assertions(
     for assertion_str, compiled, return_val_var_name in assertions:
         return_val_dict = {}
         if condition_type == "postcondition":
-            return_val_dict = {return_val_var_name : function_return_val}
+            return_val_dict = {return_val_var_name: function_return_val}
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
-            check = eval(
-                compiled, {**wrapped.__globals__, **function_locals, **return_val_dict}
-            )
+            check = eval(compiled, {**wrapped.__globals__, **function_locals, **return_val_dict})
         except:
             _debug(f"Warning: could not evaluate {condition_type}: {assertion_str}")
         else:

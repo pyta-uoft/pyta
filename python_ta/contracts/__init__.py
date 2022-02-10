@@ -18,6 +18,8 @@ FUNCTION_RETURN_VALUE = "$return_value"
 class PyTAContractError(Exception):
     """Error raised when a PyTA contract assertion is violated."""
 
+class DummyClass:
+    """Dummy class used to store pre and post conditions for bounded methods."""
 
 def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
     """Automatically check contracts for all functions and classes in the given modules.
@@ -168,17 +170,29 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     function_locals = dict(zip(params, args_with_self))
 
+    # Check bounded function
+    if hasattr(wrapped, "__self__"):
+        owner = wrapped.__self__
+        if not hasattr(owner, "__bounded_pre_and_post_conditions__"):
+            # {__name__ : [...]}
+            owner.__bounded_pre_and_post_conditions__ = {}
+        if wrapped.__name__ not in owner.__bounded_pre_and_post_conditions__:
+            owner.__bounded_pre_and_post_conditions__[wrapped.__name__] = DummyClass()
+        target = owner.__bounded_pre_and_post_conditions__[wrapped.__name__]
+    else:
+        target = wrapped
+
     # Check function preconditions
-    if not hasattr(wrapped, "_preconditions"):
+    if not hasattr(target, "_preconditions"):
         # [(assertion, code object, None)]
-        wrapped._preconditions = []
+        target._preconditions = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
             try:
                 compiled = compile(precondition, "<string>", "eval")
             except:
                 continue
-            wrapped._preconditions.append((precondition, compiled, None))
+            target._preconditions.append((precondition, compiled, None))
 
     _check_assertions(wrapped, function_locals)
 
@@ -196,9 +210,9 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             )
 
     # Check function postconditions
-    if not hasattr(wrapped, "_postconditions"):
+    if not hasattr(target, "_postconditions"):
         # [(assertion, code object, return_val_var_name)]
-        wrapped._postconditions = []
+        target._postconditions = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
@@ -209,7 +223,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 compiled = compile(assertion, "<string>", "eval")
             except:
                 continue
-            wrapped._postconditions.append((postcondition, compiled, return_val_var_name))
+            target._postconditions.append((postcondition, compiled, return_val_var_name))
 
     _check_assertions(
         wrapped,
@@ -344,13 +358,18 @@ def _check_assertions(
     function_return_val: Any = None,
 ) -> None:
     """Check that the given assertions are still satisfied."""
+    # Check bounded function
+    if hasattr(wrapped, "__self__"):
+        owner = wrapped.__self__
+        target = owner.__bounded_pre_and_post_conditions__[wrapped.__name__]
+    else:
+        target = wrapped
     assertions = []
     if condition_type == "precondition":
-        assertions = wrapped._preconditions
+        assertions = target._preconditions
     if condition_type == "postcondition":
-        assertions = wrapped._postconditions
-    for assertion in assertions:
-        assertion_str, compiled, return_val_var_name = assertion
+        assertions = target._postconditions
+    for assertion_str, compiled, return_val_var_name in assertions:
         return_val_dict = {}
         if condition_type == "postcondition":
             return_val_dict = {return_val_var_name : function_return_val}

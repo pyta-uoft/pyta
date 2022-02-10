@@ -191,16 +191,16 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         target = wrapped
 
     # Check function preconditions
-    if not hasattr(target, "_preconditions"):
+    if not hasattr(target, "__preconditions__"):
         # [(assertion, code object, None)]
-        target._preconditions = []
+        target.__preconditions__ = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
             try:
                 compiled = compile(precondition, "<string>", "eval")
             except:
                 continue
-            target._preconditions.append((precondition, compiled, None))
+            target.__preconditions__.append((precondition, compiled, None))
 
     _check_assertions(wrapped, function_locals)
 
@@ -218,9 +218,9 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             )
 
     # Check function postconditions
-    if not hasattr(target, "_postconditions"):
+    if not hasattr(target, "__postconditions__"):
         # [(assertion, code object, return_val_var_name)]
-        target._postconditions = []
+        target.__postconditions__ = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
@@ -231,7 +231,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 compiled = compile(assertion, "<string>", "eval")
             except:
                 continue
-            target._postconditions.append((postcondition, compiled, return_val_var_name))
+            target.__postconditions__.append((postcondition, compiled, return_val_var_name))
 
     _check_assertions(
         wrapped,
@@ -374,9 +374,9 @@ def _check_assertions(
         target = wrapped
     assertions = []
     if condition_type == "precondition":
-        assertions = target._preconditions
+        assertions = target.__preconditions__
     if condition_type == "postcondition":
-        assertions = target._postconditions
+        assertions = target.__postconditions__
     for assertion_str, compiled, return_val_var_name in assertions:
         return_val_dict = {}
         if condition_type == "postcondition":

@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
+- Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
 
 ## [2.2.0] - 2021-12-09
 

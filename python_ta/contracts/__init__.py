@@ -182,13 +182,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check bounded function
     if hasattr(wrapped, "__self__"):
-        owner = wrapped.__self__
-        if not hasattr(owner, "__bounded_pre_and_post_conditions__"):
-            # {__name__ : [...]}
-            owner.__bounded_pre_and_post_conditions__ = {}
-        if wrapped.__name__ not in owner.__bounded_pre_and_post_conditions__:
-            owner.__bounded_pre_and_post_conditions__[wrapped.__name__] = DummyClass()
-        target = owner.__bounded_pre_and_post_conditions__[wrapped.__name__]
+        target = wrapped.__func__
     else:
         target = wrapped
 
@@ -370,8 +364,7 @@ def _check_assertions(
     """Check that the given assertions are still satisfied."""
     # Check bounded function
     if hasattr(wrapped, "__self__"):
-        owner = wrapped.__self__
-        target = owner.__bounded_pre_and_post_conditions__[wrapped.__name__]
+        target = wrapped.__func__
     else:
         target = wrapped
     assertions = []

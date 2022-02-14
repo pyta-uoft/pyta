@@ -19,10 +19,6 @@ class PyTAContractError(Exception):
     """Error raised when a PyTA contract assertion is violated."""
 
 
-class DummyClass:
-    """Dummy class used to store pre and post conditions for bounded methods."""
-
-
 def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
     """Automatically check contracts for all functions and classes in the given modules.
 

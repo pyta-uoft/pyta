@@ -1,3 +1,16 @@
+"""This module provides the functionality for PythonTA contracts.
+
+Representation invariants, preconditions, and postconditions are parsed, compiled, and stored.
+Below are some notes on how they are stored.
+    - Representation invariants are stored in the instance attribute __representation_invariants__
+    of the class instance as a list [(assertion, compiled)].
+    - Preconditions are stored in an attribute __preconditions__ of the function as a list
+    [(assertion, compiled)].
+    - Postconditions are stored in an attribute __postconditions__ of the function as a list
+    [(assertion, compiled, return_val_var_name)].
+    - For bounded methods, preconditions and postconditions are stored as an attribute of the method's
+    __func__ object.
+"""
 import inspect
 import sys
 import typing
@@ -94,7 +107,6 @@ def add_class_invariants(klass: type) -> None:
         return
 
     # Update representation invariants from this class' docstring and those of its superclasses.
-    # {(assertion, compiled)}
     rep_invariants: List[Tuple[str, object]] = []
 
     # Iterate over all inherited classes except builtins
@@ -187,7 +199,6 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function preconditions
     if not hasattr(target, "__preconditions__"):
-        # [(assertion, compiled)]
         target.__preconditions__: List[Tuple[str, object]] = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
@@ -217,7 +228,6 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function postconditions
     if not hasattr(target, "__postconditions__"):
-        # [(assertion, compiled, return_val_var_name)]
         target.__postconditions__: List[Tuple[str, object, str]] = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}

@@ -187,8 +187,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function preconditions
     if not hasattr(target, "__preconditions__"):
-        # [(assertion, code object, None)]
-        target.__preconditions__ = []
+        # [(assertion, compiled)]
+        target.__preconditions__: List[Tuple[str, object]] = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
             try:
@@ -198,7 +198,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                     f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
                 )
                 continue
-            target.__preconditions__.append((precondition, compiled, None))
+            target.__preconditions__.append((precondition, compiled))
 
     _check_assertions(wrapped, function_locals)
 
@@ -217,8 +217,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function postconditions
     if not hasattr(target, "__postconditions__"):
-        # [(assertion, code object, return_val_var_name)]
-        target.__postconditions__ = []
+        # [(assertion, compiled, return_val_var_name)]
+        target.__postconditions__: List[Tuple[str, object, str]] = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
@@ -375,12 +375,12 @@ def _check_assertions(
     assertions = []
     if condition_type == "precondition":
         assertions = target.__preconditions__
-    if condition_type == "postcondition":
+    elif condition_type == "postcondition":
         assertions = target.__postconditions__
-    for assertion_str, compiled, return_val_var_name in assertions:
+    for assertion_str, compiled, *return_val_var_name in assertions:
         return_val_dict = {}
         if condition_type == "postcondition":
-            return_val_dict = {return_val_var_name: function_return_val}
+            return_val_dict = {return_val_var_name[0]: function_return_val}
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
             check = eval(compiled, {**wrapped.__globals__, **function_locals, **return_val_dict})

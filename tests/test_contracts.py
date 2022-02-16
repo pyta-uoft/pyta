@@ -433,9 +433,9 @@ def _get_quotient(number: int) -> int:
     return __function_return_value__
 
 
-# def test_get_quotient_valid() -> None:
-#     """Test that postcondition check passes when _get_quotient returns a multiple of 10."""
-#     assert _get_quotient(200) % 10 == 0
+def test_get_quotient_valid() -> None:
+    """Test that postcondition check passes when _get_quotient returns a multiple of 10."""
+    assert _get_quotient(200) % 10 == 0
 
 
 def test_get_quotient_invalid() -> None:

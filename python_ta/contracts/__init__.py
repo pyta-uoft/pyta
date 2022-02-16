@@ -108,6 +108,9 @@ def add_class_invariants(klass: type) -> None:
                 try:
                     compiled = compile(assertion, "<string>", "eval")
                 except:
+                    _debug(
+                        f"Warning: representation invariant {assertion} could not be parsed as a valid Python expression"
+                    )
                     continue
                 rep_invariants.append((assertion, compiled))
 
@@ -191,6 +194,9 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             try:
                 compiled = compile(precondition, "<string>", "eval")
             except:
+                _debug(
+                    f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
+                )
                 continue
             target.__preconditions__.append((precondition, compiled, None))
 
@@ -222,6 +228,9 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             try:
                 compiled = compile(assertion, "<string>", "eval")
             except:
+                _debug(
+                    f"Warning: postcondition {postcondition} could not be parsed as a valid Python expression"
+                )
                 continue
             target.__postconditions__.append((postcondition, compiled, return_val_var_name))
 

@@ -1,7 +1,7 @@
 import inspect
 import sys
 import typing
-from typing import Any, Callable, List, Optional, Set
+from typing import Any, Callable, List, Optional, Set, Tuple
 
 import wrapt
 from typeguard import check_type
@@ -95,12 +95,12 @@ def add_class_invariants(klass: type) -> None:
 
     # Update representation invariants from this class' docstring and those of its superclasses.
     # {(assertion, compiled)}
-    rep_invariants = set()
+    rep_invariants: List[Tuple[str, object]] = []
 
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
         if "__representation_invariants__" in cls.__dict__:
-            rep_invariants = rep_invariants.union(cls.__representation_invariants__)
+            rep_invariants.extend(cls.__representation_invariants__)
         elif cls.__module__ != "builtins":
             assertions = parse_assertions(cls, parse_token="Representation Invariant")
             # Try compiling assertions
@@ -109,7 +109,7 @@ def add_class_invariants(klass: type) -> None:
                     compiled = compile(assertion, "<string>", "eval")
                 except:
                     continue
-                rep_invariants.add((assertion, compiled))
+                rep_invariants.append((assertion, compiled))
 
     setattr(klass, "__representation_invariants__", rep_invariants)
 

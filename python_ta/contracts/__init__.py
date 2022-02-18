@@ -6,8 +6,8 @@ Below are some notes on how they are stored.
     as a list [(assertion, compiled)].
     - Preconditions are stored in an attribute __preconditions__ of the function as a list
     [(assertion, compiled)].
-    - For bounded methods, preconditions and postconditions are stored as an attribute of the method's
-    __func__ object.
+    - Postconditions are stored in an attribute __postconditions__ of the function as a list
+    [(assertion, compiled, return_val_var_name)].
 """
 import inspect
 import sys

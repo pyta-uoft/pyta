@@ -1,7 +1,19 @@
+"""This module provides the functionality for PythonTA contracts.
+
+Representation invariants, preconditions, and postconditions are parsed, compiled, and stored.
+Below are some notes on how they are stored.
+    - Representation invariants are stored in a class attribute __representation_invariants__
+    as a list [(assertion, compiled)].
+    - Preconditions are stored in an attribute __preconditions__ of the function as a list
+    [(assertion, compiled)].
+    - Postconditions are stored in an attribute __postconditions__ of the function as a list
+    [(assertion, compiled, return_val_var_name)].
+"""
 import inspect
 import sys
 import typing
-from typing import Any, Callable, List, Optional, Set
+from types import CodeType
+from typing import Any, Callable, List, Optional, Set, Tuple
 
 import wrapt
 from typeguard import check_type
@@ -94,14 +106,24 @@ def add_class_invariants(klass: type) -> None:
         return
 
     # Update representation invariants from this class' docstring and those of its superclasses.
-    rep_invariants = set()
+    rep_invariants: List[Tuple[str, CodeType]] = []
 
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
         if "__representation_invariants__" in cls.__dict__:
-            rep_invariants = rep_invariants.union(cls.__representation_invariants__)
+            rep_invariants.extend(cls.__representation_invariants__)
         elif cls.__module__ != "builtins":
-            rep_invariants.update(parse_assertions(cls, parse_token="Representation Invariant"))
+            assertions = parse_assertions(cls, parse_token="Representation Invariant")
+            # Try compiling assertions
+            for assertion in assertions:
+                try:
+                    compiled = compile(assertion, "<string>", "eval")
+                except:
+                    _debug(
+                        f"Warning: representation invariant {assertion} could not be parsed as a valid Python expression"
+                    )
+                    continue
+                rep_invariants.append((assertion, compiled))
 
     setattr(klass, "__representation_invariants__", rep_invariants)
 
@@ -166,10 +188,29 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                     + (f"\n{additional_suggestions}" if additional_suggestions else "")
                 )
 
-    # Check function preconditions
-    preconditions = parse_assertions(wrapped)
     function_locals = dict(zip(params, args_with_self))
-    _check_assertions(wrapped, function_locals, preconditions)
+
+    # Check bounded function
+    if hasattr(wrapped, "__self__"):
+        target = wrapped.__func__
+    else:
+        target = wrapped
+
+    # Check function preconditions
+    if not hasattr(target, "__preconditions__"):
+        target.__preconditions__: List[Tuple[str, CodeType]] = []
+        preconditions = parse_assertions(wrapped)
+        for precondition in preconditions:
+            try:
+                compiled = compile(precondition, "<string>", "eval")
+            except:
+                _debug(
+                    f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
+                )
+                continue
+            target.__preconditions__.append((precondition, compiled))
+
+    _check_assertions(wrapped, function_locals)
 
     # Check return type
     r = wrapped(*args, **kwargs)
@@ -185,13 +226,28 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             )
 
     # Check function postconditions
-    postconditions = parse_assertions(wrapped, parse_token="Postcondition")
+    if not hasattr(target, "__postconditions__"):
+        target.__postconditions__: List[Tuple[str, CodeType, str]] = []
+        return_val_var_name = _get_legal_return_val_var_name(
+            {**wrapped.__globals__, **function_locals}
+        )
+        postconditions = parse_assertions(wrapped, parse_token="Postcondition")
+        for postcondition in postconditions:
+            assertion = _replace_return_val_assertion(postcondition, return_val_var_name)
+            try:
+                compiled = compile(assertion, "<string>", "eval")
+            except:
+                _debug(
+                    f"Warning: postcondition {postcondition} could not be parsed as a valid Python expression"
+                )
+                continue
+            target.__postconditions__.append((postcondition, compiled, return_val_var_name))
+
     _check_assertions(
         wrapped,
         function_locals,
-        postconditions,
-        condition_type="postcondition",
         function_return_val=r,
+        condition_type="postcondition",
     )
 
     return r
@@ -272,13 +328,13 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied."""
     rep_invariants = getattr(klass, "__representation_invariants__", set())
 
-    for invariant in rep_invariants:
+    for invariant, compiled in rep_invariants:
         try:
             _debug(
                 "Checking representation invariant for "
                 f"{instance.__class__.__qualname__}: {invariant}"
             )
-            check = eval(invariant, {**global_scope, "self": instance})
+            check = eval(compiled, {**global_scope, "self": instance})
         except:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
@@ -316,28 +372,29 @@ def _replace_return_val_assertion(assertion: str, return_val_var_name: Optional[
 def _check_assertions(
     wrapped: Callable[..., Any],
     function_locals: dict,
-    assertions: List[str],
     condition_type: str = "precondition",
     function_return_val: Any = None,
 ) -> None:
     """Check that the given assertions are still satisfied."""
-    return_val_dict, return_val_var_name = {}, None
-
-    if condition_type == "postcondition":
-        return_val_var_name = _get_legal_return_val_var_name(
-            {**wrapped.__globals__, **function_locals}
-        )
-        return_val_dict[return_val_var_name] = function_return_val
-
-    for assertion in assertions:
+    # Check bounded function
+    if hasattr(wrapped, "__self__"):
+        target = wrapped.__func__
+    else:
+        target = wrapped
+    assertions = []
+    if condition_type == "precondition":
+        assertions = target.__preconditions__
+    elif condition_type == "postcondition":
+        assertions = target.__postconditions__
+    for assertion_str, compiled, *return_val_var_name in assertions:
+        return_val_dict = {}
+        if condition_type == "postcondition":
+            return_val_dict = {return_val_var_name[0]: function_return_val}
         try:
-            _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion}")
-            replaced_assertion = _replace_return_val_assertion(assertion, return_val_var_name)
-            check = eval(
-                replaced_assertion, {**wrapped.__globals__, **function_locals, **return_val_dict}
-            )
+            _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
+            check = eval(compiled, {**wrapped.__globals__, **function_locals, **return_val_dict})
         except:
-            _debug(f"Warning: could not evaluate {condition_type}: {assertion}")
+            _debug(f"Warning: could not evaluate {condition_type}: {assertion_str}")
         else:
             if not check:
                 arg_string = ", ".join(
@@ -349,9 +406,8 @@ def _check_assertions(
 
                 if condition_type == "postcondition":
                     return_val_string = f"and return value {function_return_val}"
-
                 raise PyTAContractError(
-                    f'{wrapped.__name__} {condition_type} "{assertion}" was '
+                    f'{wrapped.__name__} {condition_type} "{assertion_str}" was '
                     f"violated for arguments {arg_string} {return_val_string}"
                 )
 

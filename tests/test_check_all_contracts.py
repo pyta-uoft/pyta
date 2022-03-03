@@ -11,6 +11,6 @@ def divide(x: blah, y: blah) -> int:
 def run():
     from python_ta.contracts import check_all_contracts
 
-    check_all_contracts(__name__)
+    check_all_contracts(__name__, decorate_main=False)
 
     divide(10, "x")

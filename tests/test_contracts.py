@@ -68,8 +68,12 @@ def test_nullary_no_return_type() -> None:
     nullary()
 
 
+# In reference to issue #799
+blah = int
+
+
 @check_contracts
-def _my_sum(numbers: List[int]) -> int:
+def _my_sum(numbers: List[blah]) -> int:
     return sum(numbers)
 
 
@@ -503,3 +507,13 @@ def test_invalid_built_in_generic_argument() -> None:
 
     with pytest.raises(AssertionError):
         unary(dict)
+
+
+def test_check_all_contracts_module_names_argument() -> None:
+    """Test that checks for classes and functions not declared as parameters to check_all_contracts
+    are skipped.
+    """
+    from tests.test_check_all_contracts import run
+
+    with pytest.raises(AssertionError):
+        run()

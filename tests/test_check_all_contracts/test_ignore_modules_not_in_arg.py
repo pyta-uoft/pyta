@@ -1,4 +1,6 @@
-# In reference to issue #799
+"""In reference to issue 799, test that check_all_contracts skips checks for modules not specified as an argument.
+"""
+
 blah = int
 
 

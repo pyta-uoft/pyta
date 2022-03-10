@@ -45,12 +45,10 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
 
     modules = []
     if decorate_main:
-        modules.append(sys.modules["__main__"])
+        mod_names.append("__main__")
 
     for module_name in mod_names:
         modules.append(sys.modules.get(module_name, None))
-
-    module_names = set(m.__name__ for m in modules)
 
     for module in modules:
         if not module:
@@ -58,7 +56,7 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
             continue
         for name, value in inspect.getmembers(module):
             if inspect.isfunction(value) or inspect.isclass(value):
-                module.__dict__[name] = check_contracts(value, module_names=module_names)
+                module.__dict__[name] = check_contracts(value, module_names=mod_names)
 
 
 @wrapt.decorator

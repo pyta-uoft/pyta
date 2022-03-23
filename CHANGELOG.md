@@ -12,6 +12,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
 - Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
 
+### Bug fixes
+
+- Function `check_all_contracts` skips contract checks for functions and classes which are not defined in a module whose name is passed as an argument. If `decorate_main` argument is `True`, functions and classes defined in `__main__` module will be checked without needing to pass in additional arguments.
+
 ## [2.2.0] - 2021-12-09
 
 ### Enhancements

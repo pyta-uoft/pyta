@@ -45,7 +45,7 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
 
     modules = []
     if decorate_main:
-        modules.append(sys.modules["__main__"])
+        mod_names.append("__main__")
 
     for module_name in mod_names:
         modules.append(sys.modules.get(module_name, None))
@@ -56,7 +56,7 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
             continue
         for name, value in inspect.getmembers(module):
             if inspect.isfunction(value) or inspect.isclass(value):
-                module.__dict__[name] = check_contracts(value)
+                module.__dict__[name] = check_contracts(value, module_names=mod_names)
 
 
 @wrapt.decorator
@@ -72,10 +72,11 @@ def _enable_function_contracts(wrapped, instance, args, kwargs):
         raise AssertionError(str(e)) from None
 
 
-def check_contracts(func_or_class: Any) -> Callable:
+def check_contracts(func_or_class: Any, module_names: Optional[Set[str]] = None) -> Callable:
     """A decorator to enable contract checking for a function or class.
 
     When used with a class, all methods defined within the class have contract checking enabled.
+    If module_names is not None, only functions or classes defined in a module whose name is in module_names are checked.
 
     Example:
 
@@ -89,7 +90,12 @@ def check_contracts(func_or_class: Any) -> Callable:
         ...     \"\"\"
         ...     return x // y
     """
-    if inspect.isroutine(func_or_class):
+    if module_names is not None and func_or_class.__module__ not in module_names:
+        _debug(
+            f"Warning: skipping contract check for {func_or_class.__name__} defined in {func_or_class.__module__} because module is not included as an argument."
+        )
+        return func_or_class
+    elif inspect.isroutine(func_or_class):
         return _enable_function_contracts(func_or_class)
     elif inspect.isclass(func_or_class):
         add_class_invariants(func_or_class)

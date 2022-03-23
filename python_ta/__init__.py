@@ -34,6 +34,7 @@ from typing import Generator
 import pylint.config
 import pylint.lint
 import pylint.utils
+import toml
 from astroid import MANAGER, modutils
 from pylint.utils.pragma_parser import OPTION_PO
 
@@ -51,18 +52,32 @@ if sys.version_info < (3, 7, 0):
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
 
+patch_data = {}
 
-def check_errors(module_name="", config="", output=None):
+
+def check_errors(module_name="", config="", patch_config="", output=None):
     """Check a module for errors, printing a report."""
-    return _check(module_name=module_name, level="error", local_config=config, output=output)
+    return _check(
+        module_name=module_name,
+        level="error",
+        local_config=config,
+        patch_config=patch_config,
+        output=output,
+    )
 
 
-def check_all(module_name="", config="", output=None):
+def check_all(module_name="", config="", patch_config="", output=None):
     """Check a module for errors and style warnings, printing a report."""
-    return _check(module_name=module_name, level="all", local_config=config, output=output)
+    return _check(
+        module_name=module_name,
+        level="all",
+        local_config=config,
+        patch_config=patch_config,
+        output=output,
+    )
 
 
-def _check(module_name="", level="all", local_config="", output=None):
+def _check(module_name="", level="all", local_config="", patch_config="", output=None):
     """Check a module for problems, printing a report.
 
     The `module_name` can take several inputs:
@@ -73,13 +88,13 @@ def _check(module_name="", level="all", local_config="", output=None):
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute or relative path to capture pyta data output. Default std out.
     """
-    linter = reset_linter(config=local_config)
+    linter = reset_linter(config=local_config, patch_config=patch_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all()  # Monkeypatch pylint (override certain methods)
+        patch_all(patch_data)  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
@@ -94,7 +109,9 @@ def _check(module_name="", level="all", local_config="", output=None):
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 # Reuse the same reporter each time to accumulate the results across different files.
-                linter = reset_linter(config=local_config, file_linted=file_py)
+                linter = reset_linter(
+                    config=local_config, patch_config=patch_config, file_linted=file_py
+                )
                 linter.set_reporter(current_reporter)
                 module_name = os.path.splitext(os.path.basename(file_py))[0]
                 if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
@@ -149,6 +166,19 @@ def _find_local_config(curr_dir):
         return os.path.join(curr_dir, "pylintrc")
 
 
+def _find_patch_config(curr_dir):
+    """Search for a `patch_config.toml` configuration file provided in same (user)
+    location as the source file to check.
+    Return absolute path to the file, or None.
+    `curr_dir` is an absolute path to a directory, containing a file to check.
+    """
+    if curr_dir.endswith(".py"):
+        curr_dir = os.path.dirname(curr_dir)
+    if os.path.exists(os.path.join(curr_dir, "patch_config.toml")):
+        return os.path.join(curr_dir, "patch_config.toml")
+    return None
+
+
 def _load_config(linter, config_location):
     """Load configuration into the linter."""
     linter.read_config_file(config_location)
@@ -156,7 +186,12 @@ def _load_config(linter, config_location):
     linter.load_config_file()
 
 
-def reset_linter(config=None, file_linted=None):
+def _load_patch_config(patch_config_location):
+    global patch_data
+    patch_data = toml.load(patch_config_location)
+
+
+def reset_linter(config=None, patch_config=None, file_linted=None):
     """Construct a new linter. Register config and checker plugins.
 
     To determine which configuration to use:
@@ -269,6 +304,22 @@ def reset_linter(config=None, file_linted=None):
     # Custom checker configuration.
     if linter.config.pyta_type_check:
         linter.load_plugin_modules(["python_ta.checkers.type_inference_checker"])
+
+    # Load patch configs
+    if isinstance(patch_config, str) and patch_config != "":
+        # Use config file at the specified path instead of the default.
+        _load_patch_config(patch_config)
+    else:
+        # If available, use config file at directory of the file being linted.
+        patch_config_location = None
+        if file_linted:
+            patch_config_location = _find_patch_config(file_linted)
+
+        # Otherwise, use default config file shipped with python_ta package.
+        if not patch_config_location:
+            patch_config_location = _find_patch_config(os.path.dirname(__file__))
+
+        _load_patch_config(patch_config_location)
 
     return linter
 

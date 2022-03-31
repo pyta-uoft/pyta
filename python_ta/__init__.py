@@ -34,6 +34,7 @@ from typing import Generator
 import pylint.config
 import pylint.lint
 import pylint.utils
+import toml
 from astroid import MANAGER, modutils
 from pylint.utils.pragma_parser import OPTION_PO
 
@@ -76,10 +77,13 @@ def _check(module_name="", level="all", local_config="", output=None):
     linter = reset_linter(config=local_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)
+    patch_config_path = linter.option_value("patch-config-path")
+
+    patch_config = toml.load(patch_config_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all()  # Monkeypatch pylint (override certain methods)
+        patch_all(patch_config)  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
@@ -106,6 +110,12 @@ def _check(module_name="", level="all", local_config="", output=None):
                 print(
                     "[INFO] File: {} was checked using the configuration file: {}".format(
                         file_py, linter.config_file
+                    ),
+                    file=sys.stderr,
+                )
+                print(
+                    "[INFO] File: {} was checked using the patch-config file: {}".format(
+                        file_py, patch_config_path
                     ),
                     file=sys.stderr,
                 )
@@ -143,10 +153,10 @@ def _find_local_config(curr_dir):
     """
     if curr_dir.endswith(".py"):
         curr_dir = os.path.dirname(curr_dir)
-    if os.path.exists(os.path.join(curr_dir, ".pylintrc")):
-        return os.path.join(curr_dir, ".pylintrc")
-    elif os.path.exists(os.path.join(curr_dir, "pylintrc")):
-        return os.path.join(curr_dir, "pylintrc")
+    if os.path.exists(os.path.join(curr_dir, "config", ".pylintrc")):
+        return os.path.join(curr_dir, "config", ".pylintrc")
+    elif os.path.exists(os.path.join(curr_dir, "config", "pylintrc")):
+        return os.path.join(curr_dir, "config", "pylintrc")
 
 
 def _load_config(linter, config_location):
@@ -216,6 +226,15 @@ def reset_linter(config=None, file_linted=None):
                 "type": "string",
                 "metavar": "<server-url>",
                 "help": "Server address to submit anonymous data",
+            },
+        ),
+        (
+            "patch-config-path",
+            {
+                "default": os.path.join(os.path.dirname(__file__), "config", "patch_config.toml"),
+                "type": "string",
+                "metavar": "<patch_config>",
+                "help": "Path to patch config toml file.",
             },
         ),
     )

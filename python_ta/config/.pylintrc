@@ -23,6 +23,9 @@ pyta-file-permission = no
 # Server address for data submission participation.
 pyta-server-address = http://127.0.0.1:5000
 
+# Path to patch_config toml file
+patch-config-path = python_ta/config/patch_config.toml
+
 [REPORTS]
 # The type of reporter to use to display results. Available PyTA classes are
 # PlainReporter, ColorReporter, HTMLReporter, JSONReporter.

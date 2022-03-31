@@ -6,9 +6,9 @@ from .messages import patch_messages
 from .transforms import patch_ast_transforms
 
 
-def patch_all():
+def patch_all(patch_config: dict):
     """Execute all patches defined in this module."""
     patch_checkers()
     patch_ast_transforms()
     patch_messages()
-    patch_error_messages()
+    patch_error_messages(patch_config)

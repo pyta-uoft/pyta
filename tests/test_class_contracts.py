@@ -87,7 +87,7 @@ class Pizza:
         """
         Precondition: r > 0
         """
-        return r ** 2 * math.pi
+        return r**2 * math.pi
 
 
 @dataclass
@@ -204,7 +204,7 @@ def test_circle_area_valid() -> None:
     Calculate circle area with valid r.
     """
     a = Pizza.circle_area(10)
-    assert a == (10 ** 2 * math.pi)
+    assert a == (10**2 * math.pi)
 
 
 def test_circle_area_invalid() -> None:

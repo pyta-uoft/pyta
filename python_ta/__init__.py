@@ -77,13 +77,13 @@ def _check(module_name="", level="all", local_config="", output=None):
     linter = reset_linter(config=local_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)
-    patch_config_path = linter.option_value("patch-config-path")
+    messages_config_path = linter.option_value("messages-config-path")
 
-    patch_config = toml.load(patch_config_path)
+    messages_config = toml.load(messages_config_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(patch_config)  # Monkeypatch pylint (override certain methods)
+        patch_all(messages_config)  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
@@ -114,8 +114,8 @@ def _check(module_name="", level="all", local_config="", output=None):
                     file=sys.stderr,
                 )
                 print(
-                    "[INFO] File: {} was checked using the patch-config file: {}".format(
-                        file_py, patch_config_path
+                    "[INFO] File: {} was checked using the messages-config file: {}".format(
+                        file_py, messages_config_path
                     ),
                     file=sys.stderr,
                 )
@@ -229,11 +229,13 @@ def reset_linter(config=None, file_linted=None):
             },
         ),
         (
-            "patch-config-path",
+            "messages-config-path",
             {
-                "default": os.path.join(os.path.dirname(__file__), "config", "patch_config.toml"),
+                "default": os.path.join(
+                    os.path.dirname(__file__), "config", "messages_config.toml"
+                ),
                 "type": "string",
-                "metavar": "<patch_config>",
+                "metavar": "<messages_config>",
                 "help": "Path to patch config toml file.",
             },
         ),

@@ -49,7 +49,7 @@ def symbols_by_file() -> Dict[str, Set[str]]:
     lint.Run(
         [
             "--reports=n",
-            "--rcfile=python_ta/.pylintrc",
+            "--rcfile=python_ta/config/.pylintrc",
             "--output-format=json",
             *get_file_paths()
         ], exit=False
@@ -104,7 +104,7 @@ def test_cyclic_import() -> None:
     lint.Run(
         [
             "--reports=n",
-            "--rcfile=python_ta/.pylintrc",
+            "--rcfile=python_ta/config/.pylintrc",
             "--output-format=json",
             cyclic_import_helper, cyclic_import_file
         ], exit=False

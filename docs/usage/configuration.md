@@ -4,6 +4,12 @@
 This page is current under construction!
 ```
 
+## Custom Error Messages
+
+PythonTA allows for pylint error messages to be overridden with more user friendly messages.
+These messages are specified in `config/messages_config.toml` in the source code.
+The user can provide their own messages configuration file by specifying `messages-config-path` in their `.pylintrc` file.
+
 ## Reporters
 
 PythonTA offers four different types of _reporters_ used to display the results of its checks to the user.

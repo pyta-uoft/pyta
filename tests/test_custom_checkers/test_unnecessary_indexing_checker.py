@@ -45,7 +45,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -66,7 +67,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -87,7 +89,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -125,7 +128,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "items"),
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -144,7 +148,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "items"),
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -283,7 +288,8 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
                 args=(for_node.target.name, "lst"),
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 

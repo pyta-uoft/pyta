@@ -77,7 +77,8 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target,
                 args=comp_node.target.name,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_comprehension(comp_node)
 
@@ -96,7 +97,8 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target.elts[0],
                 args=comp_node.target.elts[0].name,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_comprehension(comp_node)
 
@@ -121,7 +123,8 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target,
                 args=comp_node.target.name,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_comprehension(comp_node)
 
@@ -141,7 +144,8 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
                 msg_id="shadowing-in-comprehension",
                 node=comp_node.target,
                 args=comp_node.target.name,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_comprehension(comp_node)
 

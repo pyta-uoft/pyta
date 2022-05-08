@@ -72,12 +72,12 @@ disable=
     E1507,
     E1700, E1701,
     W0111, W0120, W0150, W0177,
-    W0232, W0235, W0236, W0238,
+    W0232, W0235, W0236, W0238, W0244,
     W0601, W0602, W0614, W0640,
     W1113, W1115,
     W1300, W1301, W1302, W1306, W1307,
-    W1502, W1503, W1505, W1506, W1507, W1508, W1509, W1510, W1511, W1512, W1513, W1514,
-    C0122,
+    W1502, W1503, W1505, W1506, W1507, W1508, W1509, W1510, W1511, W1512, W1513, W1514, W1518,
+    C0105, C0122, C0131,
     C0200, C0202, C0203, C0204, C0205, C0206, C0207, C0208,
     C0327, C0328,
     R0202, R0203, R0206,
@@ -95,7 +95,8 @@ disable=
     similarities,
     spelling,
     threading,
-    unsupported_version
+    unsupported_version,
+    E2502, E2510, E2511, E2512, E2513, E2514, E2515
 
 
 # Enable single-letter identifiers

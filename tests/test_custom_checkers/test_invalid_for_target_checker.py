@@ -35,7 +35,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=subscript_node, args="l[0]"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -50,7 +51,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=assign_attr_node, args="x.attr"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -75,7 +77,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=subscript_node, args="b[0]"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -98,7 +101,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=subscript_node, args="b[0]"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -121,7 +125,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=subscript_node, args="d[0]"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -144,7 +149,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=subscript_node, args="d[0]"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 
@@ -169,7 +175,8 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="invalid-for-target", node=subscript_node, args="d[0]"
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_for(for_node)
 

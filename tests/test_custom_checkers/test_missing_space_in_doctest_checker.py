@@ -32,7 +32,8 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 node=function_node,
                 args=function_node.name,
                 line=5,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_functiondef(function_node)
 
@@ -80,6 +81,7 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 args=function_node.name,
                 line=7,
             ),
+            ignore_position=True,
         ):
             self.checker.visit_functiondef(function_node)
 
@@ -104,7 +106,8 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 node=function_node,
                 args=function_node.name,
                 line=7,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_functiondef(function_node)
 
@@ -163,7 +166,8 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
                 node=function_node,
                 args=function_node.name,
                 line=3,
-            )
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_functiondef(function_node)
 

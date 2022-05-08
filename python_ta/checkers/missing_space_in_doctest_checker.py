@@ -27,9 +27,9 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     @check_messages("missing-space-in-doctest")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
-        docstring = node.doc
 
-        if docstring is not None:
+        if node.doc_node is not None:
+            docstring = node.doc_node.value
             start_line = node.lineno + 1
             lines = docstring.split("\n")
 

@@ -503,3 +503,13 @@ def test_invalid_built_in_generic_argument() -> None:
 
     with pytest.raises(AssertionError):
         unary(dict)
+
+
+def test_check_all_contracts_module_names_argument() -> None:
+    """Test that checks for classes and functions not declared as parameters to check_all_contracts
+    are skipped.
+    """
+    from tests.fixtures.contracts.modules_not_in_arg import run
+
+    with pytest.raises(AssertionError):
+        run()

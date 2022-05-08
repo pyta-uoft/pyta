@@ -49,6 +49,14 @@ class Person:
     def add_fav_food(self, food):
         self.fav_foods.append(food)
 
+    def return_mouthful_greeting(self, greeting: str) -> str:
+        """
+        Return a mouthful (over 20 characters) greeting.
+
+        Postcondition: len($return_value) > 20
+        """
+        return f"{greeting} {self.name}!"
+
 
 def change_age(person, new_age):
     person.age = new_age
@@ -79,7 +87,7 @@ class Pizza:
         """
         Precondition: r > 0
         """
-        return r ** 2 * math.pi
+        return r**2 * math.pi
 
 
 @dataclass
@@ -161,6 +169,20 @@ def test_wrong_food_type_instance_method(person) -> None:
         person.add_fav_food(5)
 
 
+def test_return_mouthful_greeting_valid(person) -> None:
+    """Get a mouthful (over 20 chars) greeting"""
+
+    mouthful_greeting = person.return_mouthful_greeting("Top of the morning to you")
+    assert len(mouthful_greeting) > 20
+
+
+def test_return_mouthful_greeting_invalid(person) -> None:
+    """Violated postcondition of return_mouthful_greeting"""
+
+    with pytest.raises(AssertionError):
+        person.return_mouthful_greeting("Hello")
+
+
 def test_create_margherita_invalid() -> None:
     """
     Create circle area with invalid r. Also tests multiline conditions.
@@ -182,7 +204,7 @@ def test_circle_area_valid() -> None:
     Calculate circle area with valid r.
     """
     a = Pizza.circle_area(10)
-    assert a == (10 ** 2 * math.pi)
+    assert a == (10**2 * math.pi)
 
 
 def test_circle_area_invalid() -> None:

@@ -78,8 +78,8 @@ def _check(module_name="", level="all", local_config="", output=None):
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.option_value("messages-config-path")
-
-    messages_config = toml.load(messages_config_path)
+    messages_config_def_path = linter.get_option_def("messages-config-path")["default"]
+    messages_config = _load_messages_config(messages_config_path, messages_config_def_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -164,6 +164,24 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
+
+
+def _load_messages_config(path: str, def_path: str) -> dict:
+    """Given path (potentially) specified by user and default def_path
+    of messages config file, merge the config files."""
+    if def_path == path:
+        return toml.load(path)
+    merge_into = toml.load(def_path)
+    merge_from = toml.load(path)
+    for i in merge_from:
+        for j in merge_from[i]:
+            for k in merge_from[i][j]:
+                try:
+                    merge_into[i][j][k] = merge_from[i][j][k]
+                except KeyError:
+                    pass
+    merge_into = {**merge_into, **merge_from}
+    return merge_into
 
 
 def reset_linter(config=None, file_linted=None):

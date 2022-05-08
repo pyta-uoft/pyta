@@ -10,6 +10,26 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
+- Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
+- Can configure custom error messages for pylint in a toml file.
+
+### Bug fixes
+
+- Function `check_all_contracts` skips contract checks for functions and classes which are not defined in a module whose name is passed as an argument. If `decorate_main` argument is `True`, functions and classes defined in `__main__` module will be checked without needing to pass in additional arguments.
+
+### New checkers
+
+Pylint checkers v2.13:
+
+- `modified-iterating-list`
+- `modified-iterating-dict`
+- `modified-iterating-set`
+- `unnecessary-ellipsis`
+- `bad-file-encoding`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.2.0] - 2021-12-09
 

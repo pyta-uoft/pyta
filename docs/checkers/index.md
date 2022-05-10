@@ -2557,6 +2557,16 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
+(W4701)=
+
+## Modified iterating list
+
+This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
+
+```{literalinclude} /../examples/pylint/w4701_modified_iterating_list.py
+
+```
+
 ## Style errors [](#style)
 
 (C0321)=

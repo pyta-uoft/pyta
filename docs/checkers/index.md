@@ -2652,6 +2652,22 @@ def my_func() -> None:
         ...
 ```
 
+(C2503)=
+
+### Bad file encoding (C2503)
+
+This error occurs when there is an encoding declaration or if any identifier is non-ASCII
+
+```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
+
+```
+
+Corrected version:
+
+```python
+my_int = 3
+```
+
 (C0301)=
 
 ### Line too long (C0301)

@@ -2639,7 +2639,7 @@ print("Hello World!")  # This file ends with a single newline character! :)
 This error occurs when a docstring is the preceding line of an ellipsis or if there is a statement 
 in the same scope as an ellipsis
 
-```{literalinclude} /../examples/pylint/c0305_trailing_newlines.py
+```{literalinclude} /../examples/pylint/w2301_unnecessary_ellipsis.py
 
 ```
 

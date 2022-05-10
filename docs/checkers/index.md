@@ -2561,7 +2561,7 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 (E4702)=
 
-### Modified Iterating Dict
+### Modified iterating dict
 
 This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
 

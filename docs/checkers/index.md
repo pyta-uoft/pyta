@@ -2559,9 +2559,11 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ## Modified Iteration
 
-### Not a modifiable dictionary
+(E4702)=
 
-This error occurs when a dictionary is modified while it is in a for loop. This modification includes adding or removing items from the `dict`.The resulting message is, Iterated dict '%s' is being modified inside for loop body, iterate through a copy of it instead.
+### Modified Iterating Dict
+
+This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
 
 ```{literalinclude} /../examples/pylint/e4702_modified_iterating_dict.py
 

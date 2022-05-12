@@ -2640,8 +2640,8 @@ This error occurs when a docstring is the preceding line of an ellipsis or if th
 in the same scope as an ellipsis. An ellipsis should only be used as a "placeholder" to fill in a block
 of code that requires at least one statement.
 
-
 ```{literalinclude} /../examples/pylint/w2301_unnecessary_ellipsis.py
+
 ```
 
 Corrected version:

@@ -2632,6 +2632,27 @@ Corrected version:
 print("Hello World!")  # This file ends with a single newline character! :)
 ```
 
+(W2301)=
+
+### Unnecessary ellipsis (W2301)
+
+This error occurs when a docstring is the preceding line of an ellipsis or if there is a statement
+in the same scope as an ellipsis. An ellipsis should only be used as a "placeholder" to fill in a block
+of code that requires at least one statement.
+
+
+```{literalinclude} /../examples/pylint/w2301_unnecessary_ellipsis.py
+```
+
+Corrected version:
+
+```python
+def my_func() -> None:
+    """Test Doctest"""
+    if True:
+        ...
+```
+
 (C0301)=
 
 ### Line too long (C0301)

@@ -2559,11 +2559,11 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 (E4703)=
 
-## Modified iterating set
+## Modified iterating set (E4703)
 
 This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
 
-```{literalinclude} /../examples/pylint/e4702_modified_iterating_set.py
+```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
 
 ```
 

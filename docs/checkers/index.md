@@ -2569,6 +2569,16 @@ This error occurs when a dictionary is modified inside a for loop by adding or r
 
 ```
 
+(E4703)=
+
+## Modified iterating set (E4703)
+
+This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
+
+```
+
 ## Style errors [](#style)
 
 (C0321)=

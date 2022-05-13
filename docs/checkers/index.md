@@ -2557,6 +2557,28 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
+## Modified Iteration
+
+(E4702)=
+
+### Modified iterating dict (E4702)
+
+This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4702_modified_iterating_dict.py
+
+```
+
+(E4703)=
+
+## Modified iterating set (E4703)
+
+This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
+
+```
+
 ## Style errors [](#style)
 
 (C0321)=
@@ -2651,6 +2673,23 @@ def my_func() -> None:
     """Test Doctest"""
     if True:
         ...
+```
+
+(C2503)=
+
+### Bad file encoding (C2503)
+
+This error occurs when there is an encoding declaration at the top of the Python file or if any
+identifier uses non-ASCII characters.
+
+```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
+
+```
+
+Corrected version:
+
+```python
+my_int = 3
 ```
 
 (C0301)=

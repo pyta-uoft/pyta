@@ -2557,6 +2557,8 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
+## Modified Iteration
+
 (W4701)=
 
 ## Modified iterating list (W4701)
@@ -2564,6 +2566,26 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
 
 ```{literalinclude} /../examples/pylint/w4701_modified_iterating_list.py
+
+```
+
+(E4702)=
+
+### Modified iterating dict (E4702)
+
+This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4702_modified_iterating_dict.py
+
+```
+
+(E4703)=
+
+## Modified iterating set (E4703)
+
+This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
 
 ```
 

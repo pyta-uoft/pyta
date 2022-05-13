@@ -2654,6 +2654,23 @@ Corrected version:
 print("Hello World!")  # This file ends with a single newline character! :)
 ```
 
+(C2503)=
+
+### Bad file encoding (C2503)
+
+This error occurs when there is an encoding declaration at the top of the Python file or if any
+identifier uses non-ASCII characters.
+
+```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
+
+```
+
+Corrected version:
+
+```python
+my_int = 3
+```
+
 (C0301)=
 
 ### Line too long (C0301)

@@ -2632,9 +2632,6 @@ Corrected version:
 print("Hello World!")  # This file ends with a single newline character! :)
 ```
 
-(W2301)=
-
-
 (C0301)=
 
 ### Line too long (C0301)

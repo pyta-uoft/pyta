@@ -747,6 +747,27 @@ if `pass` is removed.
 
 - [StackOverflow: How To Use The Pass Statement In Python]
 
+(W2301)=
+
+### Unnecessary ellipsis (W2301)
+
+This error occurs when a docstring is the preceding line of an ellipsis or if there is a statement
+in the same scope as an ellipsis. An ellipsis should only be used as a "placeholder" to fill in a block
+of code that requires at least one statement.
+
+```{literalinclude} /../examples/pylint/w2301_unnecessary_ellipsis.py
+
+```
+
+Corrected version:
+
+```python
+def my_func() -> None:
+    """Test Doctest"""
+    if True:
+        ...
+```
+
 (R1710)=
 
 ### Inconsistent return statements (R1710)

@@ -78,8 +78,8 @@ def _check(module_name="", level="all", local_config="", output=None):
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.option_value("messages-config-path")
-    messages_config_def_path = linter.get_option_def("messages-config-path")["default"]
-    messages_config = _load_messages_config(messages_config_path, messages_config_def_path)
+    messages_config_default_path = linter.get_option_def("messages-config-path")["default"]
+    messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -166,21 +166,23 @@ def _load_config(linter, config_location):
     linter.load_config_file()
 
 
-def _load_messages_config(path: str, def_path: str) -> dict:
-    """Given path (potentially) specified by user and default def_path
+def _load_messages_config(path: str, default_path: str) -> dict:
+    """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files."""
-    if def_path == path:
+    if default_path == path:
         return toml.load(path)
-    merge_into = toml.load(def_path)
+    merge_into = toml.load(default_path)
     merge_from = toml.load(path)
-    for i in merge_from:
-        for j in merge_from[i]:
-            for k in merge_from[i][j]:
-                try:
-                    merge_into[i][j][k] = merge_from[i][j][k]
-                except KeyError:
-                    pass
-    merge_into = {**merge_into, **merge_from}
+    for category in merge_from:
+        if category not in merge_into:
+            merge_into[category] = {}
+        for checker in merge_from[category]:
+            if checker not in merge_into[category]:
+                merge_into[category][checker] = {}
+            for error_code in merge_from[category][checker]:
+                merge_into[category][checker][error_code] = merge_from[category][checker][
+                    error_code
+                ]
     return merge_into
 
 

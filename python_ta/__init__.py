@@ -169,8 +169,6 @@ def _load_config(linter, config_location):
 def _load_messages_config(path: str, default_path: str) -> dict:
     """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files."""
-    if default_path == path:
-        return toml.load(path)
     merge_into = toml.load(default_path)
     merge_from = toml.load(path)
     for category in merge_from:

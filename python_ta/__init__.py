@@ -29,6 +29,8 @@ import os
 import sys
 import tokenize
 import webbrowser
+from builtins import FileNotFoundError
+from pathlib import Path
 from typing import Generator
 
 import pylint.config
@@ -78,8 +80,8 @@ def _check(module_name="", level="all", local_config="", output=None):
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.option_value("messages-config-path")
-
-    messages_config = toml.load(messages_config_path)
+    messages_config_default_path = linter.get_option_def("messages-config-path")["default"]
+    messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -164,6 +166,35 @@ def _load_config(linter, config_location):
     linter.read_config_file(config_location)
     linter.config_file = config_location
     linter.load_config_file()
+
+
+def _load_messages_config(path: str, default_path: str) -> dict:
+    """Given path (potentially) specified by user and default default_path
+    of messages config file, merge the config files."""
+    merge_into = toml.load(default_path)
+
+    if Path(default_path).resolve() == Path(path).resolve():
+        return merge_into
+
+    try:
+        merge_from = toml.load(path)
+    except FileNotFoundError:
+        print(
+            f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}."
+        )
+        return merge_into
+
+    for category in merge_from:
+        if category not in merge_into:
+            merge_into[category] = {}
+        for checker in merge_from[category]:
+            if checker not in merge_into[category]:
+                merge_into[category][checker] = {}
+            for error_code in merge_from[category][checker]:
+                merge_into[category][checker][error_code] = merge_from[category][checker][
+                    error_code
+                ]
+    return merge_into
 
 
 def reset_linter(config=None, file_linted=None):

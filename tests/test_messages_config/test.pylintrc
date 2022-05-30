@@ -24,13 +24,13 @@ pyta-file-permission = no
 pyta-server-address = http://127.0.0.1:5000
 
 # Path to messages_config toml file
-# messages-config-path = messages.toml
+messages-config-path = tests/test_messages_config/test.messages_config.toml
 
 [REPORTS]
 # The type of reporter to use to display results. Available PyTA classes are
 # PlainReporter, ColorReporter, HTMLReporter, JSONReporter.
 # Replaces the pyta-reporter option.
-output-format = python_ta.reporters.HTMLReporter
+output-format = python_ta.reporters.PlainReporter
 
 [ELIF]
 
@@ -72,19 +72,18 @@ disable=
     E1507,
     E1700, E1701,
     W0111, W0120, W0150, W0177,
-    W0232, W0235, W0236, W0238, W0244,
+    W0232, W0235, W0236, W0238,
     W0601, W0602, W0614, W0640,
     W1113, W1115,
     W1300, W1301, W1302, W1306, W1307,
-    W1502, W1503, W1505, W1506, W1507, W1508, W1509, W1510, W1511, W1512, W1513, W1514, W1518,
-    C0105, C0122, C0131,
+    W1502, W1503, W1505, W1506, W1507, W1508, W1509, W1510, W1511, W1512, W1513, W1514,
+    C0122,
     C0200, C0202, C0203, C0204, C0205, C0206, C0207, C0208,
     C0327, C0328,
     R0202, R0203, R0206,
     R0901, R0903, R0904, R0911,
     R1703, R1705, R1706, R1708, R1709, R1711, R1717, R1718, R1719, R1720, R1722, R1723, R1724,
     R1728, R1730, R1731,
-    C1803,
     F0202,
     W0402, W0407,
     W0603,
@@ -93,10 +92,7 @@ disable=
     I1101,
     python3,
     similarities,
-    spelling,
-    threading,
-    unsupported_version,
-    E2502, E2510, E2511, E2512, E2513, E2514, E2515
+    spelling
 
 
 # Enable single-letter identifiers

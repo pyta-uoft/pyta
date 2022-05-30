@@ -20,19 +20,19 @@ class TestTypeAnnotationChecker(pylint.testutils.CheckerTestCase):
         arg_node_y = function_def.args.find_argname("y")[1]
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="missing-param-type",
+                msg_id="type-is-assigned",
                 node=arg_node_x,
             ),
             pylint.testutils.MessageTest(
-                msg_id="missing-param-type",
+                msg_id="type-is-assigned",
                 node=arg_node_y,
             ),
             pylint.testutils.MessageTest(
-                msg_id="type-is-assigned",
+                msg_id="missing-param-type",
                 node=arg_node_x,
             ),
             pylint.testutils.MessageTest(
-                msg_id="type-is-assigned",
+                msg_id="missing-param-type",
                 node=arg_node_y,
             ),
             ignore_position=True,

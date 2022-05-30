@@ -180,7 +180,7 @@ def _load_messages_config(path: str, default_path: str) -> dict:
         merge_from = toml.load(path)
     except FileNotFoundError:
         print(
-            f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}"
+            f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}."
         )
         return merge_into
 

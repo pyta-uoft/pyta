@@ -47,7 +47,7 @@ class TypeAnnotationChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("missing-param-type", "missing-return-type")
+    @check_messages("missing-param-type", "type-is-assigned", "missing-return-type")
     def visit_functiondef(self, node):
         arguments = node.args.arguments
         names = [arg.name for arg in arguments if isinstance(arg, nodes.AssignName)]

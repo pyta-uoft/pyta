@@ -32,6 +32,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
             docstring = node.doc
             start_line = node.lineno + 1
             lines = docstring.split("\n")
+
             for line_no, line in enumerate(lines):
                 if self._has_invalid_doctest(line):
                     self.add_message(
@@ -49,6 +50,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
             docstring = node.doc
             start_line = node.lineno + 1
             lines = docstring.split("\n")
+
             for line_no, line in enumerate(lines):
                 if self._has_invalid_doctest(line):
                     self.add_message(
@@ -66,6 +68,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
             docstring = node.doc
             start_line = node.lineno + 1
             lines = docstring.split("\n")
+            
             for line_no, line in enumerate(lines):
                 if self._has_invalid_doctest(line):
                     self.add_message(

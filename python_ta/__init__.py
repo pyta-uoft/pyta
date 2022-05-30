@@ -29,6 +29,8 @@ import os
 import sys
 import tokenize
 import webbrowser
+from builtins import FileNotFoundError
+from pathlib import Path
 from typing import Generator
 
 import pylint.config
@@ -170,7 +172,18 @@ def _load_messages_config(path: str, default_path: str) -> dict:
     """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files."""
     merge_into = toml.load(default_path)
-    merge_from = toml.load(path)
+
+    if Path(default_path).resolve() == Path(path).resolve():
+        return merge_into
+
+    try:
+        merge_from = toml.load(path)
+    except FileNotFoundError:
+        print(
+            f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}"
+        )
+        return merge_into
+
     for category in merge_from:
         if category not in merge_into:
             merge_into[category] = {}

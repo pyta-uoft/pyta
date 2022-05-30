@@ -1,10 +1,19 @@
 """checker for type annotation.
 """
 
+import builtins
+
 from astroid import nodes
+from astroid.exceptions import NoDefault
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import check_messages
 from pylint.interfaces import IAstroidChecker
+
+builtin_types = []
+for name in dir(builtins):
+    candidate = getattr(builtins, name)
+    if isinstance(candidate, type):
+        builtin_types.append(name)
 
 
 class TypeAnnotationChecker(BaseChecker):
@@ -28,6 +37,11 @@ class TypeAnnotationChecker(BaseChecker):
             "missing-attribute-type",
             "Presented when a type annotation is missing.",
         ),
+        "E9995": (
+            "Type is assigned instead of annotated.",
+            "type-is-assigned",
+            "Presented when a type is assigned instead of annotated.",
+        ),
     }
 
     # this is important so that your checker is executed before others
@@ -35,8 +49,20 @@ class TypeAnnotationChecker(BaseChecker):
 
     @check_messages("missing-param-type", "missing-return-type")
     def visit_functiondef(self, node):
-        for i in range(len(node.args.annotations)):
-            if node.args.annotations[i] is None:
+        arguments = node.args.arguments
+        names = [arg.name for arg in arguments if isinstance(arg, nodes.AssignName)]
+        for name in names:
+            # Check if assign builtin
+            try:
+                default_value = node.args.default_value(name)
+            except NoDefault:
+                continue
+            if isinstance(default_value, nodes.Name) and default_value.name in builtin_types:
+                self.add_message("type-is-assigned", node=node.args.find_argname(name)[1])
+
+        annotations = node.args.annotations
+        for i in range(len(annotations)):
+            if annotations[i] is None:
                 # Check if function is a non-static instance method
                 if (
                     i != 0
@@ -62,10 +88,13 @@ class TypeAnnotationChecker(BaseChecker):
 
         for attr_key in node.locals:
             attr_node = node.locals[attr_key][0]
-            if isinstance(attr_node, nodes.AssignName) and not isinstance(
-                attr_node.parent, nodes.AnnAssign
-            ):
+            parent = attr_node.parent
+            if isinstance(attr_node, nodes.AssignName) and not isinstance(parent, nodes.AnnAssign):
                 self.add_message("missing-attribute-type", node=attr_node)
+                # Check if assign builtin
+                if isinstance(parent, nodes.Assign) and isinstance(parent.value, nodes.Name):
+                    if parent.value.name in builtin_types:
+                        self.add_message("type-is-assigned", node=attr_node)
 
 
 def register(linter):

@@ -24,7 +24,7 @@ pyta-file-permission = no
 pyta-server-address = http://127.0.0.1:5000
 
 # Path to messages_config toml file
-messages-config-path = python_ta/config/messages_config.toml
+# messages-config-path = messages.toml
 
 [REPORTS]
 # The type of reporter to use to display results. Available PyTA classes are

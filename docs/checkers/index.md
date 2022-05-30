@@ -747,6 +747,27 @@ if `pass` is removed.
 
 - [StackOverflow: How To Use The Pass Statement In Python]
 
+(W2301)=
+
+### Unnecessary ellipsis (W2301)
+
+This error occurs when a docstring is the preceding line of an ellipsis or if there is a statement
+in the same scope as an ellipsis. An ellipsis should only be used as a "placeholder" to fill in a block
+of code that requires at least one statement.
+
+```{literalinclude} /../examples/pylint/w2301_unnecessary_ellipsis.py
+
+```
+
+Corrected version:
+
+```python
+def my_func() -> None:
+    """Test Doctest"""
+    if True:
+        ...
+```
+
 (R1710)=
 
 ### Inconsistent return statements (R1710)
@@ -2557,6 +2578,38 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
+## Modified Iteration
+
+(W4701)=
+
+## Modified iterating list (W4701)
+
+This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
+
+```{literalinclude} /../examples/pylint/w4701_modified_iterating_list.py
+
+```
+
+(E4702)=
+
+### Modified iterating dict (E4702)
+
+This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4702_modified_iterating_dict.py
+
+```
+
+(E4703)=
+
+## Modified iterating set (E4703)
+
+This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
+
+```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
+
+```
+
 ## Style errors [](#style)
 
 (C0321)=
@@ -2630,6 +2683,23 @@ Corrected version:
 
 ```python
 print("Hello World!")  # This file ends with a single newline character! :)
+```
+
+(C2503)=
+
+### Bad file encoding (C2503)
+
+This error occurs when there is an encoding declaration at the top of the Python file or if any
+identifier uses non-ASCII characters.
+
+```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
+
+```
+
+Corrected version:
+
+```python
+my_int = 3
 ```
 
 (C0301)=

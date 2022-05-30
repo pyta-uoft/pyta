@@ -16,7 +16,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     name = "missing_space_in_doctest"
     msgs = {
         "E9973": (
-            'Space missing after >>> in the docstring of function "%s."',
+            'Space missing after >>> in the docstring of "%s."',
             "missing-space-in-doctest",
             "Used when a doctest is missing a space before the code to be executed",
         )
@@ -28,11 +28,44 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
 
-        if node.doc_node is not None:
-            docstring = node.doc_node.value
+        if node.doc is not None:
+            docstring = node.doc
             start_line = node.lineno + 1
             lines = docstring.split("\n")
+            for line_no, line in enumerate(lines):
+                if self._has_invalid_doctest(line):
+                    self.add_message(
+                        "missing-space-in-doctest",
+                        node=node,
+                        args=node.name,
+                        line=line_no + start_line,
+                    )
 
+    @check_messages("missing-space-in-doctest")
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
+        """Visit a Class definition"""
+
+        if node.doc is not None:
+            docstring = node.doc
+            start_line = node.lineno + 1
+            lines = docstring.split("\n")
+            for line_no, line in enumerate(lines):
+                if self._has_invalid_doctest(line):
+                    self.add_message(
+                        "missing-space-in-doctest",
+                        node=node,
+                        args=node.name,
+                        line=line_no + start_line,
+                    )
+
+    @check_messages("missing-space-in-doctest")
+    def visit_module(self, node: nodes.Module) -> None:
+        """Visit a Module definition"""
+
+        if node.doc is not None:
+            docstring = node.doc
+            start_line = node.lineno + 1
+            lines = docstring.split("\n")
             for line_no, line in enumerate(lines):
                 if self._has_invalid_doctest(line):
                     self.add_message(

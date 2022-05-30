@@ -191,6 +191,127 @@ class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
 
+    def test_missing_space_class(self) -> None:
+        """Test the checker on a doctest missing a space"""
+        src = '''
+        class ClassA:
+            """
+            >>>var = 2 #@
+            """
+            var1: int
+        '''
+        mod = astroid.parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-space-in-doctest",
+                node=class_node,
+                args=class_node.name,
+                line=4,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_no_missing_space_class(self) -> None:
+        """Test the checker on a doctest not missing the space"""
+        src = '''
+        class ClassA:
+            """
+            >>> var = 2
+            9
+            """
+            var1: int
+        '''
+        mod = astroid.parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_classdef(class_node)
+
+    def test_missing_space_mixed_class(self) -> None:
+        """Test the checker on multiple doctests"""
+        src = '''
+        class ClassA:
+            """
+            >>> var = 2
+            >>>var + 7
+            9
+            """
+            var1: int
+        '''
+        mod = astroid.parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-space-in-doctest",
+                node=class_node,
+                args=class_node.name,
+                line=5,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_missing_space_module(self) -> None:
+        """Test the checker on a doctest missing a space"""
+        src = '''
+        """This is the module header
+        >>>var = 2
+        """
+        '''
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-space-in-doctest",
+                node=module_node,
+                args=module_node.name,
+                line=2,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(module_node)
+
+    def test_no_missing_space_module(self) -> None:
+        """Test the checker on a doctest not missing the space"""
+        src = '''
+        """This is the module header
+        >>> var = 2
+        """
+        '''
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+
+        with self.assertNoMessages():
+            self.checker.visit_module(module_node)
+
+    def test_missing_space_mixed_module(self) -> None:
+        """Test the checker on multiple doctests"""
+        src = '''
+        """This is the module header
+        >>>var = 2
+        >>> print(var + 7)
+        9
+        """
+        '''
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-space-in-doctest",
+                node=module_node,
+                args=module_node.name,
+                line=2,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(module_node)
+
 
 if __name__ == "__main__":
     import pytest

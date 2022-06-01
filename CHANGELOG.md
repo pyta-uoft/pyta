@@ -12,6 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
 - Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
 - Can configure custom error messages for pylint in a toml file.
+- `missing_space_in_doctest_checker` is now able to check doctests in python modules and classes.
 
 ### Bug fixes
 

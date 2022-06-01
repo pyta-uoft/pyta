@@ -27,48 +27,26 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     @check_messages("missing-space-in-doctest")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
-
-        if node.doc is not None:
-            docstring = node.doc
-            start_line = node.lineno + 1
-            lines = docstring.split("\n")
-
-            for line_no, line in enumerate(lines):
-                if self._has_invalid_doctest(line):
-                    self.add_message(
-                        "missing-space-in-doctest",
-                        node=node,
-                        args=node.name,
-                        line=line_no + start_line,
-                    )
+        self._check_docstring(node)
 
     @check_messages("missing-space-in-doctest")
     def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a Class definition"""
-
-        if node.doc is not None:
-            docstring = node.doc
-            start_line = node.lineno + 1
-            lines = docstring.split("\n")
-
-            for line_no, line in enumerate(lines):
-                if self._has_invalid_doctest(line):
-                    self.add_message(
-                        "missing-space-in-doctest",
-                        node=node,
-                        args=node.name,
-                        line=line_no + start_line,
-                    )
+        self._check_docstring(node)
 
     @check_messages("missing-space-in-doctest")
     def visit_module(self, node: nodes.Module) -> None:
         """Visit a Module definition"""
+        self._check_docstring(node)
 
+    # Helper Functions
+    def _check_docstring(self, node) -> None:
+        """Go through the docstring of the respective node type"""
         if node.doc is not None:
             docstring = node.doc
             start_line = node.lineno + 1
             lines = docstring.split("\n")
-            
+
             for line_no, line in enumerate(lines):
                 if self._has_invalid_doctest(line):
                     self.add_message(
@@ -78,7 +56,6 @@ class MissingSpaceInDoctestChecker(BaseChecker):
                         line=line_no + start_line,
                     )
 
-    # Helper Function
     def _has_invalid_doctest(self, doc: str) -> Union[bool, Optional[Match[str]]]:
         """Return whether the docstring line contains an invalid doctest"""
         start_index = doc.find(DOCTEST)

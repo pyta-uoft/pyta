@@ -16,7 +16,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     name = "missing_space_in_doctest"
     msgs = {
         "E9973": (
-            'Space missing after >>> in the docstring of function "%s."',
+            'Space missing after >>> in the docstring of "%s."',
             "missing-space-in-doctest",
             "Used when a doctest is missing a space before the code to be executed",
         )
@@ -27,9 +27,23 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     @check_messages("missing-space-in-doctest")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
+        self._check_docstring(node)
 
-        if node.doc_node is not None:
-            docstring = node.doc_node.value
+    @check_messages("missing-space-in-doctest")
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
+        """Visit a Class definition"""
+        self._check_docstring(node)
+
+    @check_messages("missing-space-in-doctest")
+    def visit_module(self, node: nodes.Module) -> None:
+        """Visit a Module definition"""
+        self._check_docstring(node)
+
+    # Helper Functions
+    def _check_docstring(self, node) -> None:
+        """Go through the docstring of the respective node type"""
+        if node.doc is not None:
+            docstring = node.doc
             start_line = node.lineno + 1
             lines = docstring.split("\n")
 
@@ -42,7 +56,6 @@ class MissingSpaceInDoctestChecker(BaseChecker):
                         line=line_no + start_line,
                     )
 
-    # Helper Function
     def _has_invalid_doctest(self, doc: str) -> Union[bool, Optional[Match[str]]]:
         """Return whether the docstring line contains an invalid doctest"""
         start_index = doc.find(DOCTEST)

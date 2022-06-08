@@ -54,7 +54,6 @@ class IOFunctionChecker(BaseChecker):
 
             if not (name in node.frame() or name in node.root()):
                 scope = node.scope()
-                # TODO: Only FunctionDefs are checked. Include global scope?
                 if (
                     isinstance(scope, nodes.FunctionDef)
                     and expression not in self.config.allowed_io

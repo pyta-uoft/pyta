@@ -10,7 +10,6 @@ FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
 
 class IOFunctionChecker(BaseChecker):
-
     __implements__ = IAstroidChecker
 
     name = "IO_Function"
@@ -48,19 +47,6 @@ class IOFunctionChecker(BaseChecker):
 
     @check_messages("forbidden-IO-function")
     def visit_call(self, node):
-        if isinstance(node.func, nodes.Attribute):
-            name = node.func.attrname
-            expression = node.func.as_string()
-
-            if not (name in node.frame() or name in node.root()):
-                scope = node.scope()
-                if (
-                    isinstance(scope, nodes.FunctionDef)
-                    and expression not in self.config.allowed_io
-                ):
-                    if expression in self.config.forbidden_io_functions:
-                        self.add_message("forbidden-IO-function", node=node, args=name)
-
         if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
@@ -68,12 +54,20 @@ class IOFunctionChecker(BaseChecker):
             if not (name in node.frame() or name in node.root()):
                 scope = node.scope()
                 # TODO: Only FunctionDefs are checked. Include global scope?
-                if (
-                    isinstance(scope, nodes.FunctionDef)
-                    and scope.name not in self.config.allowed_io
-                ):
-                    if name in self.config.forbidden_io_functions:
-                        self.add_message("forbidden-IO-function", node=node, args=name)
+                for element in node.root().body:
+                    if (
+                            isinstance(element, nodes.ClassDef)
+                            and scope.name not in self.config.allowed_io
+                    ):
+                        if name in self.config.forbidden_io_functions:
+                            self.add_message("forbidden-IO-function", node=node, args=name)
+
+                    elif (
+                            isinstance(element, nodes.FunctionDef)
+                            and scope.name not in self.config.allowed_io
+                    ):
+                        if name in self.config.forbidden_io_functions:
+                            self.add_message("forbidden-IO-function", node=node, args=name)
 
 
 def register(linter):

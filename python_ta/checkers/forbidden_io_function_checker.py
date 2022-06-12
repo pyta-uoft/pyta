@@ -56,15 +56,15 @@ class IOFunctionChecker(BaseChecker):
                 # TODO: Only FunctionDefs are checked. Include global scope?
                 for element in node.root().body:
                     if (
-                            isinstance(element, nodes.ClassDef)
-                            and scope.name not in self.config.allowed_io
+                        isinstance(element, nodes.ClassDef)
+                        and scope.name not in self.config.allowed_io
                     ):
                         if name in self.config.forbidden_io_functions:
                             self.add_message("forbidden-IO-function", node=node, args=name)
 
                     elif (
-                            isinstance(element, nodes.FunctionDef)
-                            and scope.name not in self.config.allowed_io
+                        isinstance(element, nodes.FunctionDef)
+                        and scope.name not in self.config.allowed_io
                     ):
                         if name in self.config.forbidden_io_functions:
                             self.add_message("forbidden-IO-function", node=node, args=name)

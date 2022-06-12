@@ -57,11 +57,10 @@ class IOFunctionChecker(BaseChecker):
                 for element in node.root().body:
                     if (
                             isinstance(element, nodes.ClassDef)
-                            and scope.name not in self.config.allowed_io
+                            and (element.name + '.' + scope.name) not in self.config.allowed_io
                     ):
                         if name in self.config.forbidden_io_functions:
                             self.add_message("forbidden-IO-function", node=node, args=name)
-
                     elif (
                             isinstance(element, nodes.FunctionDef)
                             and scope.name not in self.config.allowed_io

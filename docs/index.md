@@ -8,4 +8,5 @@ usage/quick_start
 checkers/index
 usage/configuration
 contracts/index
+debug/index
 ```

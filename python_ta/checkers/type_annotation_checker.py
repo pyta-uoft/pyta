@@ -40,7 +40,7 @@ class TypeAnnotationChecker(BaseChecker):
     priority = -1
 
     def is_bultin_type(self, node):
-        """Check if Name nodes such as <Name.int ...> represent builtin types."""
+        """Check if nodes such as <Name.int ...> represent builtin types."""
         inferred = node.inferred()
         if len(inferred) > 0 and inferred[0] is not Uninferable:
             if inferred[0].pytype() == "builtins.type":

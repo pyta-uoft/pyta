@@ -49,17 +49,6 @@ class TypeAnnotationChecker(BaseChecker):
 
     @check_messages("missing-param-type", "missing-return-type", "type-is-assigned")
     def visit_functiondef(self, node):
-        # arguments = node.args.arguments
-        # names = [arg.name for arg in arguments if isinstance(arg, nodes.AssignName)]
-        # for name in names:
-        #     # Check if assign builtin
-        #     try:
-        #         default_value = node.args.default_value(name)
-        #     except NoDefault:
-        #         continue
-        #     if isinstance(default_value, nodes.Name) and default_value.name in builtin_types:
-        #         self.add_message("type-is-assigned", node=node.args.find_argname(name)[1])
-
         arguments = node.args.args
         names = [argument.name for argument in arguments]
         annotations = node.args.annotations

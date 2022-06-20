@@ -2047,6 +2047,20 @@ lines: 2-4
 
 (E9971)=
 
+### Type is assigned (E9995)
+
+This error occurs when a type is not annotated but assigned in a function or class definition.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9995_type_is_assigned.py
+---
+lines: 3-14
+---
+```
+
+(E9971)=
+
 ### Missing return type (E9971)
 
 This error occurs when we have written a function definition but are missing a type annotation for

@@ -53,6 +53,7 @@ class TestTypeAnnotationChecker(pylint.testutils.CheckerTestCase):
             # type is assigned instead of annotated here
             x = bool
             y = Dict[str, str]
+            # checker should not pick this up
             z: complex = complex
         """
         class_def = astroid.extract_node(src)

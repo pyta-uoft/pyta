@@ -26,6 +26,7 @@ Pylint checkers v2.13:
 - `modified-iterating-set`
 - `unnecessary-ellipsis`
 - `bad-file-encoding`
+- `type-is-assigned`
 
 For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above

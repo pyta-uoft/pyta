@@ -1,4 +1,4 @@
-from python_ta.debug import AccumulationTable
+from python_ta.debug.AccumulationTable import AccumulationTable
 
 
 def my_func(numbers: list) -> None:
@@ -6,9 +6,7 @@ def my_func(numbers: list) -> None:
     sum_so_far = 0
     list_so_far = []
     avg_so_far = "N/A"
-    with AccumulationTable.AccumulationTable(
-        ["sum_so_far", "list_so_far", "avg_so_far"], [sum_so_far, list_so_far, avg_so_far], "number"
-    ) as table:
+    with AccumulationTable(["sum_so_far", "list_so_far", "avg_so_far"]) as table:
         for number in numbers:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]

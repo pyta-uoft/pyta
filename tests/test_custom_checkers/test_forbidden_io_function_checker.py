@@ -1,6 +1,7 @@
 import astroid
 import pylint.testutils
 from astroid import nodes
+
 from python_ta.checkers.forbidden_io_function_checker import IOFunctionChecker
 
 
@@ -22,9 +23,10 @@ class TestForbiddenIOFunctionNoAllowedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         call, *_ = mod.nodes_of_class(nodes.Call)
         with self.assertAddsMessages(
-                pylint.testutils.MessageTest(msg_id="forbidden-IO-function", node=call,
-                                             args=call.func.name),
-                ignore_position=True,
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-IO-function", node=call, args=call.func.name
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_call(call)
 
@@ -39,9 +41,10 @@ class TestForbiddenIOFunctionNoAllowedChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         call, *_ = mod.nodes_of_class(nodes.Call)
         with self.assertAddsMessages(
-                pylint.testutils.MessageTest(msg_id="forbidden-IO-function", node=call,
-                                             args=call.func.name),
-                ignore_position=True,
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-IO-function", node=call, args=call.func.name
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_call(call)
 
@@ -66,7 +69,7 @@ class TestForbiddenIOFunctionAllowedFunctionChecker(pylint.testutils.CheckerTest
 
     def test_message_class_allowed_function(self):
         """Only top-level function is allowed, function associated with a class will raise a
-        message """
+        message"""
         src = """
         class Example:
             def my_function(self):
@@ -77,9 +80,10 @@ class TestForbiddenIOFunctionAllowedFunctionChecker(pylint.testutils.CheckerTest
         call, *_ = mod.nodes_of_class(nodes.Call)
 
         with self.assertAddsMessages(
-                pylint.testutils.MessageTest(msg_id="forbidden-IO-function", node=call,
-                                             args=call.func.name),
-                ignore_position=True,
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-IO-function", node=call, args=call.func.name
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_call(call)
 
@@ -90,7 +94,7 @@ class TestForbiddenIOFunctionAllowedClassChecker(pylint.testutils.CheckerTestCas
 
     def test_message_function_allowed_class(self):
         """Only my_function associated with a class is allowed, top-level function will raise a
-        message """
+        message"""
         src = """
             def my_function(string: str):
                 string = "hello"
@@ -101,9 +105,10 @@ class TestForbiddenIOFunctionAllowedClassChecker(pylint.testutils.CheckerTestCas
         call, *_ = mod.nodes_of_class(nodes.Call)
 
         with self.assertAddsMessages(
-                pylint.testutils.MessageTest(msg_id="forbidden-IO-function", node=call,
-                                             args=call.func.name),
-                ignore_position=True,
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-IO-function", node=call, args=call.func.name
+            ),
+            ignore_position=True,
         ):
             self.checker.visit_call(call)
 

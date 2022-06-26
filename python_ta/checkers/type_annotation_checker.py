@@ -39,11 +39,11 @@ class TypeAnnotationChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def is_bultin_type(self, node):
+    def is_type(self, node):
         """Check if nodes such as <Name.int ...> represent builtin types."""
         inferred = node.inferred()
         if len(inferred) > 0 and inferred[0] is not Uninferable:
-            if inferred[0].pytype() == "builtins.type":
+            if isinstance(inferred[0], nodes.ClassDef):
                 return True
         return False
 
@@ -66,7 +66,7 @@ class TypeAnnotationChecker(BaseChecker):
                     except NoDefault:
                         default_value = None
                     if default_value is not None:
-                        if self.is_bultin_type(default_value):
+                        if self.is_type(default_value):
                             self.add_message("type-is-assigned", node=arguments[i])
         if node.returns is None:
             self.add_message("missing-return-type", node=node.args)
@@ -88,7 +88,7 @@ class TypeAnnotationChecker(BaseChecker):
             parent = attr_node.parent
             if isinstance(attr_node, nodes.AssignName) and not isinstance(parent, nodes.AnnAssign):
                 self.add_message("missing-attribute-type", node=attr_node)
-                if self.is_bultin_type(attr_node):
+                if self.is_type(attr_node):
                     self.add_message("type-is-assigned", node=attr_node)
 
 

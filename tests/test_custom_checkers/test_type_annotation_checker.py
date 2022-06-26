@@ -14,9 +14,12 @@ class TestTypeAnnotationChecker(pylint.testutils.CheckerTestCase):
         src = """
         from typing import List
 
-        def add_two_numbers(x=int, y=List[float], z: type = complex) -> int:
-            # type is assigned instead of annotated here,
-            # should be def add_two_numbers(x: int, y: int) -> int
+
+        def add_two_numbers(
+            x=int, # Error on this line
+            y=List[float], # Error on this line
+            z: type = complex # No error on this line
+        ) -> int:
             return (x + y) * z
         """
         function_def = astroid.extract_node(src)
@@ -47,14 +50,17 @@ class TestTypeAnnotationChecker(pylint.testutils.CheckerTestCase):
         """Ensure that checker catches when type is assigned instead of annotated
         in class attributes."""
         src = """
-        from typing import Dict
+        import datetime
+
+
+        class Person:
+            name = "Bob"
+
 
         class MyDataType:
-            # type is assigned instead of annotated here
-            x = bool
-            y = Dict[str, str]
-            # checker should not pick this up
-            z: complex = complex
+            x = datetime.time # Error on this line
+            y = Person # Error on this line
+            z: complex = complex # No error on this line
         """
         class_def = astroid.extract_node(src)
         attr_node_x = class_def.locals["x"][0]

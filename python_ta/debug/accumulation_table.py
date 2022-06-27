@@ -85,7 +85,7 @@ class AccumulationTable:
 
         return loop_str
 
-    def _add_keys(self, func_node: astroid.NodeNG, func_frame: inspect.FrameType) -> None:
+    def _add_keys(self, func_node: types.NodeNG, func_frame: types.FrameType) -> None:
         """Add the names and values of the all the accumulators for the zeroth iteration"""
         self._loop_var_name = func_node.target.name
         self._loop_accumulation_values = {}

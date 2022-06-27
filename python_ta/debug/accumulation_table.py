@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 from typing import Union
 
@@ -83,7 +85,7 @@ class AccumulationTable:
 
         return loop_str
 
-    def _add_keys(self, func_node: astroid.NodeNG, func_frame: inspect) -> None:
+    def _add_keys(self, func_node: astroid.NodeNG, func_frame: inspect.FrameType) -> None:
         """Add the names and values of the all the accumulators for the zeroth iteration"""
         self._loop_var_name = func_node.target.name
         self._loop_accumulation_values = {}
@@ -93,7 +95,7 @@ class AccumulationTable:
             else:
                 raise NameError
 
-    def __enter__(self):
+    def __enter__(self) -> AccumulationTable:
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_string = inspect.cleandoc(inspect.getsource(func_frame))
         lst_from_with_stmt = func_string.splitlines()[

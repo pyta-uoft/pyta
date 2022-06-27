@@ -10,6 +10,7 @@ FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
 
 class IOFunctionChecker(BaseChecker):
+
     __implements__ = IAstroidChecker
 
     name = "IO_Function"

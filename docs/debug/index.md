@@ -11,7 +11,7 @@ nicely in table format.
 
 For example:
 
-```
+```python
 def my_func(numbers: list) -> tuple:
     """Return the sum and average at each iteration
     of the numbers in numbers.

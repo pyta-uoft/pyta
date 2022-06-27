@@ -1,4 +1,4 @@
-from python_ta.debug.AccumulationTable import AccumulationTable
+from python_ta.debug.accumulation_table import AccumulationTable
 
 
 def my_func(numbers: list) -> None:

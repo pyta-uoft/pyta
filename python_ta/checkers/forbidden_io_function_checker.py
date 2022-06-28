@@ -54,9 +54,19 @@ class IOFunctionChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 scope = node.scope()
+                scope_parent = scope.parent
                 # TODO: Only FunctionDefs are checked. Include global scope?
+
                 if (
-                    isinstance(scope, nodes.FunctionDef)
+                    isinstance(scope_parent, nodes.ClassDef)
+                    and isinstance(scope, nodes.FunctionDef)
+                    and (scope_parent.name + "." + scope.name) not in self.config.allowed_io
+                ):
+                    if name in self.config.forbidden_io_functions:
+                        self.add_message("forbidden-IO-function", node=node, args=name)
+                elif (
+                    isinstance(scope_parent, nodes.Module)
+                    and isinstance(scope, nodes.FunctionDef)
                     and scope.name not in self.config.allowed_io
                 ):
                     if name in self.config.forbidden_io_functions:

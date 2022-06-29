@@ -75,7 +75,9 @@ class AccumulationTable:
         to the end of the for loop"""
         endpoint = len(full_string)
         for i in range(len(full_string)):
-            if full_string[i] != "" and full_string[i][no_whitespaces] != " ":
+            if full_string[i] != "" and not (
+                full_string[i][no_whitespaces] == " " or full_string[i][no_whitespaces] == "\t"
+            ):
                 endpoint = i
                 break
 

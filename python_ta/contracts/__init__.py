@@ -45,7 +45,7 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
 
     modules = []
     if decorate_main:
-        mod_names = mod_names + tuple("__main__")
+        mod_names = mod_names + ("__main__",)
 
     for module_name in mod_names:
         modules.append(sys.modules.get(module_name, None))

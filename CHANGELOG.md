@@ -20,6 +20,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### New checkers
 
+Custom checkers:
+
+- `type-is-assigned`: Flag when a type is not annotated but rather assigned in a function or class definition.
+
 Pylint checkers v2.13:
 
 - `modified-iterating-list`

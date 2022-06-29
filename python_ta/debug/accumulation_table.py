@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import inspect
-from typing import Union
 
 import astroid
 import tabulate
@@ -25,12 +24,14 @@ class AccumulationTable:
     _accumulation_names: list[str]
     _loop_accumulation_values: dict[str, list]
     _loop_var_name: str
-    _loop_var_val: list[Union[int, str]]
+    _loop_var_val: list
 
     def __init__(self, accumulation_names: list) -> None:
-        self._accumulation_names = accumulation_names
         self._num_iterations = 0
-        self._loop_var_val = ["N/A"]
+        self._accumulation_names = accumulation_names
+        self._loop_accumulation_values = {}
+        self._loop_var_name = ""
+        self._loop_var_val = []
 
     def add_iteration(self, val: list, var) -> None:
         """Add the values of the accumulator and loop variables of an iteration"""
@@ -58,7 +59,7 @@ class AccumulationTable:
             )
         )
 
-    def _no_of_indents(self, with_line: str) -> int:
+    def _no_of_whitespaces(self, with_line: str) -> int:
         """Return the number of indents that are in the line of code containing the with statement"""
         blank_chars = 0
         for char in with_line:
@@ -67,28 +68,22 @@ class AccumulationTable:
             else:
                 break
 
-        return blank_chars // 4
+        return blank_chars
 
-    def _loop_string(self, full_string: list[str], no_indents: int) -> str:
+    def _loop_string(self, full_string: list[str], no_whitespaces: int) -> str:
         """Convert the list of lines that are strings from the beginning of the for loop
         to the end of the for loop"""
         endpoint = len(full_string)
         for i in range(len(full_string)):
-            if full_string[i] != "" and (no_indents + 1) * "    " not in full_string[i]:
+            if full_string[i] != "" and full_string[i][no_whitespaces] != " ":
                 endpoint = i
                 break
 
-        end_loop = full_string[:endpoint]
-        loop_str = ""
-        for elem in end_loop:
-            loop_str += elem + "\n"
-
-        return loop_str
+        return "\n".join(full_string[:endpoint])
 
     def _add_keys(self, func_node: types.NodeNG, func_frame: types.FrameType) -> None:
         """Add the names and values of the all the accumulators for the zeroth iteration"""
         self._loop_var_name = func_node.target.name
-        self._loop_accumulation_values = {}
         for name in self._accumulation_names:
             if name in func_frame.f_locals:
                 self._loop_accumulation_values[name] = [func_frame.f_locals[name]]
@@ -96,17 +91,16 @@ class AccumulationTable:
                 raise NameError
 
     def __enter__(self) -> AccumulationTable:
+        self._loop_var_val.append("N/A")
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_string = inspect.cleandoc(inspect.getsource(func_frame))
-        lst_from_with_stmt = func_string.splitlines()[
-            inspect.getlineno(func_frame) - func_frame.f_code.co_firstlineno + 1 :
-        ]
-        num_indents = self._no_of_indents(
-            func_string.splitlines()[
-                inspect.getlineno(func_frame) - func_frame.f_code.co_firstlineno
-            ]
-        )
-        loop_str = self._loop_string(lst_from_with_stmt, num_indents)
+        lst_str_lines = func_string.splitlines()
+        with_stmt_index = inspect.getlineno(func_frame) - func_frame.f_code.co_firstlineno
+
+        lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
+        no_whitespaces = self._no_of_whitespaces(lst_str_lines[with_stmt_index])
+        loop_str = self._loop_string(lst_from_with_stmt, no_whitespaces)
+
         func_node = astroid.parse(loop_str).body[0]
         self._add_keys(func_node, func_frame)
         return self

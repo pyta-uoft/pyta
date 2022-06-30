@@ -4,13 +4,10 @@
 from astroid import Uninferable, nodes
 from astroid.exceptions import NoDefault
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 
 class TypeAnnotationChecker(BaseChecker):
-
-    __implements__ = IAstroidChecker
 
     name = "TypeAnnotationChecker"
     msgs = {
@@ -47,7 +44,7 @@ class TypeAnnotationChecker(BaseChecker):
                 return True
         return False
 
-    @check_messages("missing-param-type", "missing-return-type", "type-is-assigned")
+    @only_required_for_messages("missing-param-type", "missing-return-type", "type-is-assigned")
     def visit_functiondef(self, node):
         arguments = node.args.args
         names = [argument.name for argument in arguments]
@@ -71,7 +68,7 @@ class TypeAnnotationChecker(BaseChecker):
         if node.returns is None:
             self.add_message("missing-return-type", node=node.args)
 
-    @check_messages("missing-attribute-type", "type-is-assigned")
+    @only_required_for_messages("missing-attribute-type", "type-is-assigned")
     def visit_classdef(self, node):
         for attr_key in node.instance_attrs:
             attr_node = node.instance_attrs[attr_key][0]

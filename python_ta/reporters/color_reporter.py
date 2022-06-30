@@ -9,7 +9,6 @@ from .plain_reporter import PlainReporter
 class ColorReporter(PlainReporter):
     """Colorized text reporter. Should only be used to print to stdout."""
 
-    __implements__ = IReporter
     name = "ColorReporter"
 
     _COLOURING = {

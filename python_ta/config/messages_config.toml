@@ -63,7 +63,6 @@ E0203 = "You can't use instance attribute %r prior to its assignment on line %s.
 E0211 = "Every instance method requires at least one parameter 'self', referring to the object on which this method is called. "
 E0213 = "The first parameter of a method should always be called 'self'. "
 E0241 = "This class %r should not inherit from the same class multiple times."
-R0201 = "This method does not make use of 'self', so you should remove the self parameter and move this method outside of the class (turning it into a top-level function)."
 R0205 = "All classes inherit from object by default, so you do not need to specify this in the header for %r."
 W0211 = "The static method %r should not have 'self' as the first parameter."
 W0212 = "Since %s starts with an underscore, it is considered private and so should not be accessed outside of the class in which it is defined."

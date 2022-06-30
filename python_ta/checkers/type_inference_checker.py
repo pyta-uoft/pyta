@@ -2,15 +2,12 @@
 """
 
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 from python_ta.typecheck.base import TypeFail
 
 
 class TypeInferenceChecker(BaseChecker):
-
-    __implements__ = IAstroidChecker
 
     name = "TypeInferenceChecker"
     msgs = {
@@ -24,7 +21,7 @@ class TypeInferenceChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("type-error")
+    @only_required_for_messages("type-error")
     def visit_default(self, node):
         if hasattr(node, "inf_type"):
             x = node.inf_type

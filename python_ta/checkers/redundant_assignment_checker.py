@@ -11,16 +11,14 @@ An assignment statement is redundant if it satisfies the following two propertie
 from typing import List, Set, Union
 
 from astroid import nodes
-from pylint.checkers import BaseChecker, utils
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers import BaseChecker
+from pylint.checkers.utils import only_required_for_messages
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
 
 class RedundantAssignmentChecker(BaseChecker):
 
-    __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
     name = "redundant_assignment"
     # use dashes for connecting words in message symbol
@@ -39,12 +37,12 @@ class RedundantAssignmentChecker(BaseChecker):
         super().__init__(linter=linter)
         self._redundant_assignment: Set[nodes.Assign] = set()
 
-    @check_messages("redundant-assignment")
+    @only_required_for_messages("redundant-assignment")
     def visit_assign(self, node: nodes.Assign):
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
-    @check_messages("redundant-assignment")
+    @only_required_for_messages("redundant-assignment")
     def visit_augassign(self, node: nodes.AugAssign):
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)

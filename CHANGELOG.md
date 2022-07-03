@@ -12,12 +12,17 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
 - Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
 - Can configure custom error messages for pylint in a toml file.
+- `missing_space_in_doctest_checker` is now able to check doctests in python modules and classes.
 
 ### Bug fixes
 
 - Function `check_all_contracts` skips contract checks for functions and classes which are not defined in a module whose name is passed as an argument. If `decorate_main` argument is `True`, functions and classes defined in `__main__` module will be checked without needing to pass in additional arguments.
 
 ### New checkers
+
+Custom checkers:
+
+- `type-is-assigned`: Flag when a type is not annotated but rather assigned in a function or class definition.
 
 Pylint checkers v2.13:
 

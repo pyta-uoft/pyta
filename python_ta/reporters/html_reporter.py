@@ -23,7 +23,6 @@ class HTMLReporter(PythonTaReporter):
     By default, automatically opens the report in a web browser.
     """
 
-    __implements__ = IReporter
     name = "HTMLReporter"
 
     _COLOURING = {

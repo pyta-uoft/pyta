@@ -3,15 +3,12 @@
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
 
 class IOFunctionChecker(BaseChecker):
-
-    __implements__ = IAstroidChecker
 
     name = "IO_Function"
     msgs = {
@@ -46,7 +43,7 @@ class IOFunctionChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("forbidden-IO-function")
+    @only_required_for_messages("forbidden-IO-function")
     def visit_call(self, node):
         if isinstance(node.func, nodes.Name):
             name = node.func.name
@@ -60,16 +57,16 @@ class IOFunctionChecker(BaseChecker):
                 if (
                     isinstance(scope_parent, nodes.ClassDef)
                     and isinstance(scope, nodes.FunctionDef)
-                    and (scope_parent.name + "." + scope.name) not in self.config.allowed_io
+                    and (scope_parent.name + "." + scope.name) not in self.linter.config.allowed_io
                 ):
-                    if name in self.config.forbidden_io_functions:
+                    if name in self.linter.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)
                 elif (
                     isinstance(scope_parent, nodes.Module)
                     and isinstance(scope, nodes.FunctionDef)
-                    and scope.name not in self.config.allowed_io
+                    and scope.name not in self.linter.config.allowed_io
                 ):
-                    if name in self.config.forbidden_io_functions:
+                    if name in self.linter.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)
 
 

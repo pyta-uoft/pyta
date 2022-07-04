@@ -2,7 +2,7 @@
 """
 import os.path
 import sys
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
 from astroid import NodeNG
@@ -13,8 +13,18 @@ from pylint.reporters.ureports.nodes import BaseLayout
 
 from .node_printers import LineType, render_message
 
-# Extension of Pylint's Message class to incorporate astroid node and source code snippet
-NewMessage = namedtuple("NewMessage", Message._fields + ("node", "snippet"))
+
+class NewMessage:
+    """Extension of Pylint's Message class to incorporate astroid node and source code snippet."""
+
+    def __init__(self, message: Message, node: NodeNG, snippet: Optional[str]) -> None:
+        self.message = message
+        self.node = node
+        self.snippet = snippet
+
+    def __getattr__(self, item):
+        return getattr(self.message, item)
+
 
 # Messages without a source code line to highlight
 NO_SNIPPET = {"invalid-name"}
@@ -91,7 +101,7 @@ class PythonTaReporter(BaseReporter):
             else:
                 snippet = self._build_snippet(msg, node)
 
-            curr_messages[-1] = NewMessage(*msg, node, snippet)
+            curr_messages[-1] = NewMessage(msg, node, snippet)
 
     def group_messages(
         self, messages: List[Message]
@@ -190,8 +200,12 @@ class PythonTaReporter(BaseReporter):
         return text
 
     # Event callbacks
-    def on_set_current_module(self, module: str, filepath: str) -> None:
+    def on_set_current_module(self, module: str, filepath: Optional[str]) -> None:
         """Hook called when a module starts to be analysed."""
+        # Skip if filepath is None
+        if filepath is None:
+            return
+
         self.module_name = module
         self.current_file = filepath
 

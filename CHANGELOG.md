@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
 - Can configure custom error messages for pylint in a toml file.
 - `missing_space_in_doctest_checker` is now able to check doctests in python modules and classes.
+- Updated to Pylint v2.14. See "New checks" below for the new checkers enabled by default.
 
 ### Bug fixes
 
@@ -31,6 +32,14 @@ Pylint checkers v2.13:
 - `modified-iterating-set`
 - `unnecessary-ellipsis`
 - `bad-file-encoding`
+
+Pylint checkers v2.14:
+
+- `comparison-of-constants`
+- `potential-index-error`
+- `unnecessary-list-index-lookup`
+- `duplicate-value`
+- `super-without-brackets`
 
 For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above

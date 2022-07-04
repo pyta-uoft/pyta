@@ -4,13 +4,11 @@ from typing import Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 
 class OneIterationChecker(BaseChecker):
 
-    __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
     name = "one_iteration"
     # use dashes for connecting words in message symbol
@@ -26,13 +24,13 @@ class OneIterationChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    # pass in message symbol as a parameter of check_messages
-    @check_messages("one-iteration")
+    # pass in message symbol as a parameter of only_required_for_messages
+    @only_required_for_messages("one-iteration")
     def visit_for(self, node):
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
-    @check_messages("one-iteration")
+    @only_required_for_messages("one-iteration")
     def visit_while(self, node):
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)

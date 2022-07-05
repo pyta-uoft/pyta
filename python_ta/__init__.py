@@ -32,6 +32,7 @@ import webbrowser
 from builtins import FileNotFoundError
 from pathlib import Path
 from typing import Generator
+from os import listdir
 
 import pylint.config
 import pylint.lint
@@ -272,21 +273,25 @@ def reset_linter(config=None, file_linted=None):
         ),
     )
 
-    custom_checkers = [
-        "python_ta.checkers.forbidden_import_checker",
-        "python_ta.checkers.possibly_undefined_checker",
-        "python_ta.checkers.global_variables_checker",
-        "python_ta.checkers.forbidden_io_function_checker",
-        "python_ta.checkers.invalid_range_index_checker",
-        "python_ta.checkers.one_iteration_checker",
-        "python_ta.checkers.type_annotation_checker",
-        "python_ta.checkers.unnecessary_indexing_checker",
-        "python_ta.checkers.shadowing_in_comprehension_checker",
-        "python_ta.checkers.redundant_assignment_checker",
-        "python_ta.checkers.invalid_for_target_checker",
-        "python_ta.checkers.missing_space_in_doctest_checker",
-        "python_ta.checkers.pycodestyle_checker",
-    ]
+    absolute_checkers_path = Path("checkers").absolute()
+    path_as_string = absolute_checkers_path.__str__()
+    custom_checkers = [("python_ta.checkers." + f[:-3]) for f in listdir(path_as_string) if
+                       f != '__init__.py' and f != '__pycache__']
+    #     [
+    #     "python_ta.checkers.forbidden_import_checker",
+    #     "python_ta.checkers.possibly_undefined_checker",
+    #     "python_ta.checkers.global_variables_checker",
+    #     "python_ta.checkers.forbidden_io_function_checker",
+    #     "python_ta.checkers.invalid_range_index_checker",
+    #     "python_ta.checkers.one_iteration_checker",
+    #     "python_ta.checkers.type_annotation_checker",
+    #     "python_ta.checkers.unnecessary_indexing_checker",
+    #     "python_ta.checkers.shadowing_in_comprehension_checker",
+    #     "python_ta.checkers.redundant_assignment_checker",
+    #     "python_ta.checkers.invalid_for_target_checker",
+    #     "python_ta.checkers.missing_space_in_doctest_checker",
+    #     "python_ta.checkers.pycodestyle_checker",
+    # ]
 
     # Register new options to a checker here to allow references to
     # options in `.pylintrc` config file.
@@ -319,8 +324,8 @@ def reset_linter(config=None, file_linted=None):
                 linter.global_set_option(key, config[key])
 
     # Custom checker configuration.
-    if linter.config.pyta_type_check:
-        linter.load_plugin_modules(["python_ta.checkers.type_inference_checker"])
+    # if linter.config.pyta_type_check:
+    #     linter.load_plugin_modules(["python_ta.checkers.type_inference_checker"])
 
     return linter
 

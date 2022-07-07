@@ -2,13 +2,10 @@ from ast import literal_eval
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 
 class InvalidRangeIndexChecker(BaseChecker):
-
-    __implements__ = IAstroidChecker
 
     name = "invalid_range_index"
     msgs = {
@@ -21,7 +18,7 @@ class InvalidRangeIndexChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("invalid-range-index")
+    @only_required_for_messages("invalid-range-index")
     def visit_call(self, node):
         if isinstance(node.func, nodes.Name):
             name = node.func.name

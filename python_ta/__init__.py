@@ -39,6 +39,7 @@ import pylint.lint
 import pylint.utils
 import toml
 from astroid import MANAGER, modutils
+from pylint.config.config_initialization import _config_initialization
 from pylint.utils.pragma_parser import OPTION_PO
 
 from .patches import patch_all
@@ -80,8 +81,8 @@ def _check(module_name="", level="all", local_config="", output=None):
     linter = reset_linter(config=local_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)
-    messages_config_path = linter.option_value("messages-config-path")
-    messages_config_default_path = linter.get_option_def("messages-config-path")["default"]
+    messages_config_path = linter.config.messages_config_path
+    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
     messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
 
     global PYLINT_PATCHED
@@ -106,7 +107,7 @@ def _check(module_name="", level="all", local_config="", output=None):
                 module_name = os.path.splitext(os.path.basename(file_py))[0]
                 if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
                     del MANAGER.astroid_cache[module_name]
-                linter.check(file_py)  # Lint !
+                linter.check([file_py])  # Lint !
                 current_reporter.print_messages(level)
                 if linter.config.pyta_file_permission:
                     f_paths.append(file_py)  # Appending paths for upload
@@ -164,9 +165,8 @@ def _find_local_config(curr_dir):
 
 def _load_config(linter, config_location):
     """Load configuration into the linter."""
-    linter.read_config_file(config_location)
+    _config_initialization(linter, args_list=[], config_file=config_location)
     linter.config_file = config_location
-    linter.load_config_file()
 
 
 def _load_messages_config(path: str, default_path: str) -> dict:
@@ -321,7 +321,7 @@ def reset_linter(config=None, file_linted=None):
         # location.
         if isinstance(config, dict):
             for key in config:
-                linter.global_set_option(key, config[key])
+                linter.set_option(key, config[key])
 
     # Custom checker configuration.
     # if linter.config.pyta_type_check:

@@ -13,7 +13,6 @@ class JSONReporter(PythonTaReporter):
     Based on Pylint's JSONReporter.
     """
 
-    __implements__ = IReporter
     name = "JSONReporter"
 
     OUTPUT_FILENAME = "pyta_report.json"

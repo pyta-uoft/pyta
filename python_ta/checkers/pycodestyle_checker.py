@@ -1,10 +1,8 @@
 import pycodestyle
-from pylint.checkers import BaseChecker
-from pylint.interfaces import IRawChecker
+from pylint.checkers import BaseRawFileChecker
 
 
-class PycodestyleChecker(BaseChecker):
-    __implements__ = IRawChecker
+class PycodestyleChecker(BaseRawFileChecker):
 
     name = "pep8_errors"
     msgs = {"E9989": ("Found pycodestyle (PEP8) style error at %s", "pep8-errors", "")}
@@ -26,7 +24,9 @@ class PycodestyleChecker(BaseChecker):
 
     def process_module(self, node):
         style_guide = pycodestyle.StyleGuide(
-            paths=[node.stream().name], reporter=JSONReport, ignore=self.config.pycodestyle_ignore
+            paths=[node.stream().name],
+            reporter=JSONReport,
+            ignore=self.linter.config.pycodestyle_ignore,
         )
         report = style_guide.check_files()
 

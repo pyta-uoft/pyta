@@ -4,12 +4,10 @@ from typing import List, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 
 class InvalidForTargetChecker(BaseChecker):
-    __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
     name = "invalid_for_target"
     # use dashes for connecting words in message symbol
@@ -26,7 +24,7 @@ class InvalidForTargetChecker(BaseChecker):
 
     INVALID_TARGETS = (nodes.Subscript, nodes.AssignAttr)
 
-    @check_messages("invalid-for-target")
+    @only_required_for_messages("invalid-for-target")
     def visit_for(self, node: nodes.For) -> None:
         invalid_for_targets = node.target.nodes_of_class(self.INVALID_TARGETS)
         for target in invalid_for_targets:

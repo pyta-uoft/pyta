@@ -5,12 +5,9 @@ import re
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
-from pylint.interfaces import IAstroidChecker
 
 
 class GlobalVariablesChecker(BaseChecker):
-
-    __implements__ = IAstroidChecker
 
     name = "global_variables"
     msgs = {

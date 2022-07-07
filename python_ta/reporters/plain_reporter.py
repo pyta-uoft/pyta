@@ -8,7 +8,6 @@ from .core import NewMessage, PythonTaReporter
 class PlainReporter(PythonTaReporter):
     """Plain text reporter."""
 
-    __implements__ = IReporter
     name = "PlainReporter"
 
     OUTPUT_FILENAME = "pyta_report.txt"

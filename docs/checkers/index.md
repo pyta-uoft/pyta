@@ -2045,6 +2045,56 @@ lines: 2-4
 ---
 ```
 
+(E9995)=
+
+### Type is assigned (E9995)
+
+This error occurs when a type is not annotated but rather assigned in a function or class definition.
+In Python, default values for function arguments and class instance variables are assigned using `=` during their respective definitions.
+Type annotations, on the other hand, are declared using `:`.
+Below is a correct usage of assigning default values and annotating types.
+
+```python
+def print_str_argument(str_argument: str = "Some default value."):
+    print(str_argument)
+
+
+class BirthdayCake:
+    number_of_candles: int = 1 # 1 is the default value
+```
+
+An incorrect usage of assigning default values and annotating types is shown below.
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9995_type_is_assigned.py
+
+```
+
+To fix these errors, one may make the following changes.
+
+```python
+from typing import List
+import datetime
+
+
+class Person:
+    name = "Bob"
+
+
+def add_two_numbers(
+    x: int,
+    y: List[float],
+    z: type = complex
+) -> int:
+    return (x + y) * z
+
+
+class MyDataType:
+    x: datetime.time
+    y: Person
+    z: complex = complex
+```
+
 (E9971)=
 
 ### Missing return type (E9971)

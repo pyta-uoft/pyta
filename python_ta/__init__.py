@@ -30,9 +30,9 @@ import sys
 import tokenize
 import webbrowser
 from builtins import FileNotFoundError
+from os import listdir
 from pathlib import Path
 from typing import Generator
-from os import listdir
 
 import pylint.config
 import pylint.lint
@@ -275,8 +275,11 @@ def reset_linter(config=None, file_linted=None):
 
     absolute_checkers_path = Path("python_ta//checkers").absolute()
     path_as_string = absolute_checkers_path.__str__()
-    custom_checkers = [("python_ta.checkers." + f[:-3]) for f in listdir(path_as_string) if
-                       f != '__init__.py' and f != '__pycache__']
+    custom_checkers = [
+        ("python_ta.checkers." + f[:-3])
+        for f in listdir(path_as_string)
+        if f != "__init__.py" and f != "__pycache__"
+    ]
     #     [
     #     "python_ta.checkers.forbidden_import_checker",
     #     "python_ta.checkers.possibly_undefined_checker",

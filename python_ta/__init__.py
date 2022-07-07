@@ -273,7 +273,7 @@ def reset_linter(config=None, file_linted=None):
         ),
     )
 
-    absolute_checkers_path = Path("checkers").absolute()
+    absolute_checkers_path = Path("python_ta//checkers").absolute()
     path_as_string = absolute_checkers_path.__str__()
     custom_checkers = [("python_ta.checkers." + f[:-3]) for f in listdir(path_as_string) if
                        f != '__init__.py' and f != '__pycache__']

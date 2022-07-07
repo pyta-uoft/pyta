@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import sys
 
 import astroid
 import tabulate
@@ -92,20 +93,31 @@ class AccumulationTable:
             else:
                 raise NameError
 
+    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any):
+        loop_frame = frame.f_back
+        frame_vars = loop_frame.f_locals
+        accumulation_vals = []
+        for var in self._accumulation_names:
+            if var in frame_vars:
+                accumulation_vals.append(frame_vars[var])
+        if self._loop_var_name in frame_vars:
+            self.add_iteration(accumulation_vals, frame_vars[self._loop_var_name])
+
     def __enter__(self) -> AccumulationTable:
         self._loop_var_val.append("N/A")
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_string = inspect.cleandoc(inspect.getsource(func_frame))
         lst_str_lines = func_string.splitlines()
         with_stmt_index = inspect.getlineno(func_frame) - func_frame.f_code.co_firstlineno
-
         lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
         no_whitespaces = self._no_of_whitespaces(lst_str_lines[with_stmt_index])
         loop_str = self._loop_string(lst_from_with_stmt, no_whitespaces)
 
         func_node = astroid.parse(loop_str).body[0]
+        sys.settrace(self._trace_loop)
         self._add_keys(func_node, func_frame)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        sys.settrace(None)
         self._tabulate_data()

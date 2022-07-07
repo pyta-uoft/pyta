@@ -60,14 +60,14 @@ class IOFunctionChecker(BaseChecker):
                 if (
                     isinstance(scope_parent, nodes.ClassDef)
                     and isinstance(scope, nodes.FunctionDef)
-                    and (scope_parent.name + "." + scope.name) not in self.config.allowed_io
+                    and (scope_parent.name + "." + scope.name) not in self.linter.config.allowed_io
                 ):
                     if name in self.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)
                 elif (
                     isinstance(scope_parent, nodes.Module)
                     and isinstance(scope, nodes.FunctionDef)
-                    and scope.name not in self.config.allowed_io
+                    and scope.name not in self.linter.config.allowed_io
                 ):
                     if name in self.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)

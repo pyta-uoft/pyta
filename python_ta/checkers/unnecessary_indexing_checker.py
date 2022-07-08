@@ -5,12 +5,10 @@ from typing import List, Optional, Tuple, Union
 import astroid
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 
 class UnnecessaryIndexingChecker(BaseChecker):
-    __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
     name = "unnecessary_indexing"
     # use dashes for connecting words in message symbol
@@ -27,8 +25,8 @@ class UnnecessaryIndexingChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    # pass in message symbol as a parameter of check_messages
-    @check_messages("unnecessary-indexing")
+    # pass in message symbol as a parameter of only_required_for_messages
+    @only_required_for_messages("unnecessary-indexing")
     def visit_for(self, node: nodes.For) -> None:
         # Check if the iterable of the for loop is of the form "range(len(<variable-name>))".
         iterable = _iterable_if_range(node.iter)

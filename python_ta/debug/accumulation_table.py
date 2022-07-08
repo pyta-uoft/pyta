@@ -18,6 +18,8 @@ class AccumulationTable:
         _loop_accumulation_values: a mapping between the accumulation variables and their value during each iteration
         _loop_var_name: the name of the loop variable
         _loop_var_val: the value of the loop variable during each iteration
+        _curr_lineno: the current line number of the loop
+        _curr_values: the current accumulation values for this specific iteration
 
     """
 
@@ -26,6 +28,8 @@ class AccumulationTable:
     _loop_accumulation_values: dict[str, list]
     _loop_var_name: str
     _loop_var_val: list
+    _curr_lineno: int
+    _curr_values: list
 
     def __init__(self, accumulation_names: list) -> None:
         self._num_iterations = 0
@@ -33,8 +37,10 @@ class AccumulationTable:
         self._loop_accumulation_values = {}
         self._loop_var_name = ""
         self._loop_var_val = []
+        self._curr_lineno = 0
+        self._curr_values = []
 
-    def add_iteration(self, val: list, var) -> None:
+    def _add_iteration(self, val: list, var) -> None:
         """Add the values of the accumulator and loop variables of an iteration"""
         self._loop_var_val.append(var)
         for i in range(len(self._accumulation_names)):
@@ -93,15 +99,22 @@ class AccumulationTable:
             else:
                 raise NameError
 
-    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any):
-        loop_frame = frame.f_back
-        frame_vars = loop_frame.f_locals
-        accumulation_vals = []
-        for var in self._accumulation_names:
-            if var in frame_vars:
-                accumulation_vals.append(frame_vars[var])
-        if self._loop_var_name in frame_vars:
-            self.add_iteration(accumulation_vals, frame_vars[self._loop_var_name])
+    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> self._trace_loop:
+        if self._curr_lineno > frame.f_lineno:
+            local_vars = frame.f_locals
+            curr_vals = []
+            for accumulator in self._accumulation_names:
+                if accumulator in local_vars:
+                    curr_vals.append(local_vars[accumulator])
+
+            if self._loop_var_name in local_vars and not (
+                self._curr_values == [curr_vals, local_vars[self._loop_var_name]]
+            ):
+                self._curr_values = [curr_vals, local_vars[self._loop_var_name]]
+                self._add_iteration(curr_vals, local_vars[self._loop_var_name])
+
+        self._curr_lineno = frame.f_lineno
+        return self._trace_loop
 
     def __enter__(self) -> AccumulationTable:
         self._loop_var_val.append("N/A")
@@ -114,8 +127,10 @@ class AccumulationTable:
         loop_str = self._loop_string(lst_from_with_stmt, no_whitespaces)
 
         func_node = astroid.parse(loop_str).body[0]
-        sys.settrace(self._trace_loop)
         self._add_keys(func_node, func_frame)
+
+        func_frame.f_trace = self._trace_loop
+        sys.settrace(func_frame.f_trace)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

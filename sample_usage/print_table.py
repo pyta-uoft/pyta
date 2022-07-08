@@ -13,7 +13,6 @@ def my_func(numbers: list) -> None:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
             avg_so_far = sum(list_so_far) / len(list_so_far)
-            # table.add_iteration([sum_so_far, list_so_far, avg_so_far], number)
 
 
 if __name__ == "__main__":

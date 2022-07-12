@@ -52,7 +52,7 @@ class AccumulationTable:
         and loop variable to its respective value during each iteration
         """
         table_dict = {
-            "iterations": list(range(self._num_iterations + 1)),
+            "iteration": list(range(self._num_iterations + 1)),
             "loop variable (" + self._loop_var_name + ")": self._loop_var_val,
             **self._loop_accumulation_values,
         }
@@ -99,22 +99,16 @@ class AccumulationTable:
             else:
                 raise NameError
 
-    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> self._trace_loop:
-        if self._curr_lineno > frame.f_lineno:
+    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> None:
+        if event == "line" and frame.f_lineno == self._curr_lineno:
             local_vars = frame.f_locals
             curr_vals = []
             for accumulator in self._accumulation_names:
                 if accumulator in local_vars:
                     curr_vals.append(local_vars[accumulator])
-
-            if self._loop_var_name in local_vars and not (
-                self._curr_values == [curr_vals, local_vars[self._loop_var_name]]
-            ):
+            if self._loop_var_name in local_vars:
                 self._curr_values = [curr_vals, local_vars[self._loop_var_name]]
                 self._add_iteration(curr_vals, local_vars[self._loop_var_name])
-
-        self._curr_lineno = frame.f_lineno
-        return self._trace_loop
 
     def __enter__(self) -> AccumulationTable:
         self._loop_var_val.append("N/A")
@@ -122,6 +116,7 @@ class AccumulationTable:
         func_string = inspect.cleandoc(inspect.getsource(func_frame))
         lst_str_lines = func_string.splitlines()
         with_stmt_index = inspect.getlineno(func_frame) - func_frame.f_code.co_firstlineno
+        self._curr_lineno = inspect.getlineno(func_frame) + 1
         lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
         no_whitespaces = self._no_of_whitespaces(lst_str_lines[with_stmt_index])
         loop_str = self._loop_string(lst_from_with_stmt, no_whitespaces)

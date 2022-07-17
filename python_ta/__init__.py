@@ -275,11 +275,11 @@ def reset_linter(config=None, file_linted=None):
 
     parent_dir_path = os.path.dirname(__file__)
     python_ta_dir = os.listdir(parent_dir_path)
-    checkers_index = python_ta_dir.index('checkers')
+    checkers_index = python_ta_dir.index("checkers")
     custom_checkers = [
         ("python_ta.checkers." + os.path.splitext(f)[0])
         for f in os.listdir(parent_dir_path + "/" + python_ta_dir[checkers_index])
-        if f != "__init__.py" and os.path.splitext(f)[1] != ''
+        if f != "__init__.py" and os.path.splitext(f)[1] != ""
     ]
 
     # Register new options to a checker here to allow references to
@@ -361,7 +361,7 @@ def _verify_pre_check(filepath):
         print(
             "[ERROR] python_ta could not check your code due to an "
             + "invalid character. Please check the following lines "
-              "in your file and all characters that are marked with a �."
+            "in your file and all characters that are marked with a �."
         )
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):

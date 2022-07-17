@@ -5,9 +5,6 @@
 # Default max amount of messages for reporter to display.
 pyta-number-of-messages = 5
 
-# Set whether to use the type-checking checker.
-pyta-type-check = no
-
 # (DEPRECATED: Use output-format option below.) Set the [REPORTS] output-format option instead.
 # pyta-reporter = HTMLReporter
 

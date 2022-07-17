@@ -273,28 +273,14 @@ def reset_linter(config=None, file_linted=None):
         ),
     )
 
-    absolute_checkers_path = Path("python_ta//checkers").absolute()
-    path_as_string = absolute_checkers_path.__str__()
+    parent_dir_path = os.path.dirname(__file__)
+    python_ta_dir = os.listdir(parent_dir_path)
+    checkers_index = python_ta_dir.index('checkers')
     custom_checkers = [
-        ("python_ta.checkers." + f[:-3])
-        for f in listdir(path_as_string)
-        if f != "__init__.py" and f != "__pycache__"
+        ("python_ta.checkers." + os.path.splitext(f)[0])
+        for f in os.listdir(parent_dir_path + "/" + python_ta_dir[checkers_index])
+        if f != "__init__.py" and os.path.splitext(f)[1] != ''
     ]
-    #     [
-    #     "python_ta.checkers.forbidden_import_checker",
-    #     "python_ta.checkers.possibly_undefined_checker",
-    #     "python_ta.checkers.global_variables_checker",
-    #     "python_ta.checkers.forbidden_io_function_checker",
-    #     "python_ta.checkers.invalid_range_index_checker",
-    #     "python_ta.checkers.one_iteration_checker",
-    #     "python_ta.checkers.type_annotation_checker",
-    #     "python_ta.checkers.unnecessary_indexing_checker",
-    #     "python_ta.checkers.shadowing_in_comprehension_checker",
-    #     "python_ta.checkers.redundant_assignment_checker",
-    #     "python_ta.checkers.invalid_for_target_checker",
-    #     "python_ta.checkers.missing_space_in_doctest_checker",
-    #     "python_ta.checkers.pycodestyle_checker",
-    # ]
 
     # Register new options to a checker here to allow references to
     # options in `.pylintrc` config file.
@@ -325,10 +311,6 @@ def reset_linter(config=None, file_linted=None):
         if isinstance(config, dict):
             for key in config:
                 linter.set_option(key, config[key])
-
-    # Custom checker configuration.
-    # if linter.config.pyta_type_check:
-    #     linter.load_plugin_modules(["python_ta.checkers.type_inference_checker"])
 
     return linter
 
@@ -379,7 +361,7 @@ def _verify_pre_check(filepath):
         print(
             "[ERROR] python_ta could not check your code due to an "
             + "invalid character. Please check the following lines "
-            "in your file and all characters that are marked with a �."
+              "in your file and all characters that are marked with a �."
         )
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):

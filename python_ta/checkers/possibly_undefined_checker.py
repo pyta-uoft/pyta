@@ -5,15 +5,13 @@ from typing import Generator, Set, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
 
 class PossiblyUndefinedChecker(BaseChecker):
 
-    __implements__ = IAstroidChecker
     # name is the same as file name but without _checker part
     name = "possibly_undefined"
     # use dashes for connecting words in message symbol
@@ -32,7 +30,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         super().__init__(linter=linter)
         self._possibly_undefined: Set[nodes.Name] = set()
 
-    @check_messages("possibly-undefined")
+    @only_required_for_messages("possibly-undefined")
     def visit_name(self, node):
         """Adds message if there exists a path from the start block to node where
         a variable used by node might not be defined."""
@@ -88,7 +86,6 @@ class PossiblyUndefinedChecker(BaseChecker):
                     kill.add(node.name)
                 else:
                     name = node.name
-                    # comment out 'self.config....' check when running tests
                     if (
                         not (name in nodes.Module.scope_attrs or utils.is_builtin(name))
                         and name in local_vars

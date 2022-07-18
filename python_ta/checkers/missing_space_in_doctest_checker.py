@@ -4,14 +4,12 @@ from typing import Match, Optional, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 DOCTEST = ">>>"
 
 
 class MissingSpaceInDoctestChecker(BaseChecker):
-    __implements__ = IAstroidChecker
 
     name = "missing_space_in_doctest"
     msgs = {
@@ -24,17 +22,17 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     # This is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("missing-space-in-doctest")
+    @only_required_for_messages("missing-space-in-doctest")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
         self._check_docstring(node)
 
-    @check_messages("missing-space-in-doctest")
+    @only_required_for_messages("missing-space-in-doctest")
     def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a Class definition"""
         self._check_docstring(node)
 
-    @check_messages("missing-space-in-doctest")
+    @only_required_for_messages("missing-space-in-doctest")
     def visit_module(self, node: nodes.Module) -> None:
         """Visit a Module definition"""
         self._check_docstring(node)
@@ -42,8 +40,8 @@ class MissingSpaceInDoctestChecker(BaseChecker):
     # Helper Functions
     def _check_docstring(self, node) -> None:
         """Go through the docstring of the respective node type"""
-        if node.doc is not None:
-            docstring = node.doc
+        if node.doc_node is not None:
+            docstring = node.doc_node.value or ""
             start_line = node.lineno + 1
             lines = docstring.split("\n")
 
@@ -62,7 +60,7 @@ class MissingSpaceInDoctestChecker(BaseChecker):
         contains_doctest = start_index != -1
         if contains_doctest and len(doc) == 3:
             return True  # The doctest isn't followed by any character
-        match = re.match("\s*>>>\w", doc)
+        match = re.match(r"\s*>>>\w", doc)
         return match
 
 

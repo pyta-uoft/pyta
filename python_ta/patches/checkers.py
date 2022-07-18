@@ -74,7 +74,9 @@ def _override_attribute_defined_outside_init():
         for attr, nodes in cnode.instance_attrs.items():
             setter = _get_attribute_property_setter(attr, cnode)
             if setter is not None:
-                self.config.defining_attr_methods = self.config.defining_attr_methods + (setter,)
+                self.linter.config.defining_attr_methods = (
+                    self.linter.config.defining_attr_methods + (setter,)
+                )
 
         old_leave_classdef(self, cnode)
 

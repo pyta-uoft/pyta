@@ -2,13 +2,10 @@
 """
 from astroid import nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import check_messages
-from pylint.interfaces import IAstroidChecker
+from pylint.checkers.utils import only_required_for_messages
 
 
 class ShadowingInComprehensionChecker(BaseChecker):
-
-    __implements__ = IAstroidChecker
 
     name = "shadowing_in_comprehension"
     msgs = {
@@ -22,7 +19,7 @@ class ShadowingInComprehensionChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    @check_messages("shadowing-in-comprehension")
+    @only_required_for_messages("shadowing-in-comprehension")
     def visit_comprehension(self, node: nodes.Comprehension):
         if isinstance(node.target, nodes.Tuple):
             for target in node.target.elts:

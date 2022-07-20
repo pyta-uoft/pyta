@@ -274,12 +274,10 @@ def reset_linter(config=None, file_linted=None):
     )
 
     parent_dir_path = os.path.dirname(__file__)
-    python_ta_dir = os.listdir(parent_dir_path)
-    checkers_index = python_ta_dir.index('checkers')
     custom_checkers = [
         ("python_ta.checkers." + os.path.splitext(f)[0])
-        for f in os.listdir(parent_dir_path + "/" + python_ta_dir[checkers_index])
-        if f != "__init__.py" and os.path.splitext(f)[1] != ''
+        for f in listdir(parent_dir_path + "/checkers")
+        if f != "__init__.py" and os.path.splitext(f)[1] == '.py'
     ]
 
     # Register new options to a checker here to allow references to

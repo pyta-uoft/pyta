@@ -41,3 +41,29 @@ iterations    loop variable (number)    sum_so_far    list_so_far               
 5             50                        150           [10, 20, 30, 40, 50]      30.0
 6             60                        210           [10, 20, 30, 40, 50, 60]  35.0
 ```
+
+### Usage Guide
+
+Over any accumulator loop, such as:
+
+```python
+my_list = [10, 20, 30]
+sum_so_far = 0
+for number in my_list:
+    sum_so_far = sum_so_far + number
+```
+
+Add the call `with AccumulationTable():` above the accumulator loop
+with everything in the scope of the loop nested in the call. Within
+the initialization of `AccumulationTable()` use a list of strings
+containing all the accumulator variables that need to be tracked. For example:
+
+```python
+from python_ta.debug.accumulation_table import AccumulationTable
+
+my_list = [10, 20, 30]
+sum_so_far = 0
+with AccumulationTable(['sum_so_far']):
+    for number in my_list:
+        sum_so_far = sum_so_far + number
+```

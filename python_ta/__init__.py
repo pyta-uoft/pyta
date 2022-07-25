@@ -30,6 +30,7 @@ import sys
 import tokenize
 import webbrowser
 from builtins import FileNotFoundError
+from os import listdir
 from pathlib import Path
 from typing import Generator
 
@@ -272,20 +273,11 @@ def reset_linter(config=None, file_linted=None):
         ),
     )
 
+    parent_dir_path = os.path.dirname(__file__)
     custom_checkers = [
-        "python_ta.checkers.forbidden_import_checker",
-        "python_ta.checkers.possibly_undefined_checker",
-        "python_ta.checkers.global_variables_checker",
-        "python_ta.checkers.forbidden_io_function_checker",
-        "python_ta.checkers.invalid_range_index_checker",
-        "python_ta.checkers.one_iteration_checker",
-        "python_ta.checkers.type_annotation_checker",
-        "python_ta.checkers.unnecessary_indexing_checker",
-        "python_ta.checkers.shadowing_in_comprehension_checker",
-        "python_ta.checkers.redundant_assignment_checker",
-        "python_ta.checkers.invalid_for_target_checker",
-        "python_ta.checkers.missing_space_in_doctest_checker",
-        "python_ta.checkers.pycodestyle_checker",
+        ("python_ta.checkers." + os.path.splitext(f)[0])
+        for f in listdir(parent_dir_path + "/checkers")
+        if f != "__init__.py" and os.path.splitext(f)[1] == ".py"
     ]
 
     # Register new options to a checker here to allow references to
@@ -317,10 +309,6 @@ def reset_linter(config=None, file_linted=None):
         if isinstance(config, dict):
             for key in config:
                 linter.set_option(key, config[key])
-
-    # Custom checker configuration.
-    if linter.config.pyta_type_check:
-        linter.load_plugin_modules(["python_ta.checkers.type_inference_checker"])
 
     return linter
 

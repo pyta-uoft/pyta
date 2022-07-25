@@ -5,16 +5,17 @@ types of accumulator loops
 
 from python_ta.debug.accumulation_table import AccumulationTable
 
-# def test_one_var() -> None:
-#     test_list = [10, 20, 30]
-#     sum_so_far = 0
-#     with AccumulationTable(["sum_so_far"]) as table:
-#         for number in test_list:
-#             sum_so_far = sum_so_far + number
-#
-#         assert table.loop_var_val == ["N/A", 10, 20, 30]
-#         assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
-#         assert table.loop_var_name == "number"
+
+def test_one_var() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with AccumulationTable(["sum_so_far"]) as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+
+        # assert table.loop_var_val == ["N/A", 10, 20, 30]
+        assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+        assert table.loop_var_name == "number"
 
 
 def test_two_var() -> None:

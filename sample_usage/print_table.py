@@ -14,24 +14,11 @@ def my_func(numbers: list) -> None:
     sum_so_far = 0
     list_so_far = []
     avg_so_far = "N/A"
-    with AccumulationTable(["sum_so_far", "list_so_far", "avg_so_far"]) as table:
+    with AccumulationTable(["sum_so_far", "list_so_far", "avg_so_far"]):
         for number in numbers:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
             avg_so_far = sum(list_so_far) / len(list_so_far)
-
-    # There is an issue with the accumulator loop below.
-    # When calling keeping the loop variable the same name, despite
-    # being in a different scope, adds a row/iteration to the table
-    # In this scenario, if I reuse the variable name 'number', there
-    # is an extra row which contains the initialization of the previous
-    # loop variable's final value.
-
-    # test_list = [10, 20, 30]
-    # var_so_far = 0
-    # with AccumulationTable(['var_so_far']) as other:
-    #     for number in test_list:
-    #         var_so_far = var_so_far + number
 
 
 class Restaurant:

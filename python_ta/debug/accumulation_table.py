@@ -69,9 +69,9 @@ class AccumulationTable:
 
     Private instance attributes:
         loop_accumulators: a mapping between the accumulation variables
-            and their value during each iteration
+            and their values during each iteration
         loop_var_name: the name of the loop variable
-        loop_var_val: the value of the loop variable during each iteration
+        loop_var_val: the values of the loop variable during each iteration
         _loop_lineno: the line number of the for loop
         _zero_iteration: a variable to keep track of and skip
             the zeroth iteration of the accumulator loop

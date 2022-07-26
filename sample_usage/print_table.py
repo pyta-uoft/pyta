@@ -53,30 +53,11 @@ class Restaurant:
                 curr_total += curr_item_price
 
 
-# class MyClass:
-#     curr_total: int
-#
-#     def __init__(self):
-#         self.curr_total = 0
-#
-#     def get_items(self, items: list) -> None:
-#         with AccumulationTable(['self.curr_total']) as table:
-#             for item in items:
-#                 self.curr_total = self.curr_total + item
-
-
 if __name__ == "__main__":
     print("my_func function example:")
     my_func([10, 20, 30, 40, 50, 60])
+
     print("\nRestaurant class example:")
     restaurant = Restaurant()
     restaurant.add_order(["fries", "burger", "soda", "nuggets"])
     restaurant.print_total()
-
-    # The example of MyClass has the issue that if the accumulator variable is not
-    # defined in the local scope, i.e. in the scope of the function with the accumulator
-    # loop it will run into a Error with the names. In other words, when dealing with
-    # accumulation strictly from class attributes, AccumulationTable fails.
-
-    # my_class = MyClass()
-    # my_class.get_items([10, 20, 30])

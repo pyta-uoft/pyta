@@ -55,8 +55,9 @@ for number in my_list:
 
 Add the call `with AccumulationTable():` above the accumulator loop
 with everything in the scope of the loop nested in the call. Within
-the initialization of `AccumulationTable()` use a list of strings
-containing all the accumulator variables that need to be tracked. For example:
+the parameter for the initialization of `AccumulationTable()` use a
+list of strings containing all the accumulator variables as an argument
+that need to be tracked. For example:
 
 ```python
 from python_ta.debug.accumulation_table import AccumulationTable

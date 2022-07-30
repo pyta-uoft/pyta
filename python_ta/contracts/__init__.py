@@ -430,7 +430,10 @@ def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
        line is of the form "- <cond>". Each line is considered a separate condition.
        The lines can be separated by blank lines, but no other text.
     """
-    docstring = getattr(obj, "__doc__") or ""
+    if isinstance(obj, str):
+        docstring = obj
+    else:
+        docstring = getattr(obj, "__doc__") or ""
     lines = [line.strip() for line in docstring.split("\n")]
     assertion_lines = [
         i for i, line in enumerate(lines) if line.lower().startswith(parse_token.lower())
@@ -448,7 +451,8 @@ def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
         for line in lines[first + 1 :]:
             if line.startswith("-"):
                 assertion = line[1:].strip()
-                _debug(f"Adding assertion to {obj.__qualname__}: {assertion}")
+                if hasattr(obj, "__qualname__"):
+                    _debug(f"Adding assertion to {obj.__qualname__}: {assertion}")
                 assertions.append(assertion)
             elif line != "":
                 break

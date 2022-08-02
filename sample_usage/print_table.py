@@ -1,6 +1,5 @@
 """
-Examples of how to use the AccumulationTable Class with its
-respective outputs
+Examples of how to use the AccumulationTable Class
 """
 
 import inspect

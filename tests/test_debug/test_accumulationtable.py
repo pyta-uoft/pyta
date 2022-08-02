@@ -36,7 +36,7 @@ def test_two_var() -> None:
 
 
 class MyClass:
-    items = list
+    items: list
 
     def __init__(self, items: list):
         self.items = items

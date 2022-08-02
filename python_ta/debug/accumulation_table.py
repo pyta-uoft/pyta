@@ -11,13 +11,11 @@ import astroid
 import tabulate
 
 
-def no_of_whitespaces(with_line: str) -> int:
-    """Return the number of whitespaces that are in the line of code
-    containing the with statement
-    """
+def num_whitespaces(start_of_loop: str) -> int:
+    """Number of spaces at the beginning of the accumulation loop"""
     blank_chars = 0
-    for char in with_line:
-        if char == " ":
+    for char in start_of_loop:
+        if char.isspace():
             blank_chars += 1
         else:
             break
@@ -25,41 +23,29 @@ def no_of_whitespaces(with_line: str) -> int:
     return blank_chars
 
 
-def loop_string(full_string: list[str], no_whitespaces: int) -> str:
-    """Convert the list of lines that are strings from the beginning of the for loop
-    to the end of the for loop
+def get_loop_lines(lines: list[str], num_whitespace: int) -> str:
+    """Function that returns the lines from the start to the end
+    of the accumulator loop
     """
-    endpoint = len(full_string)
-    for i in range(len(full_string)):
-        if full_string[i].strip() != "" and not full_string[i][no_whitespaces].isspace():
+    endpoint = len(lines)
+    for i in range(len(lines)):
+        if lines[i].strip() != "" and not lines[i][num_whitespace].isspace():
             endpoint = i
             break
 
-    return "\n".join(full_string[:endpoint])
+    return "\n".join(lines[:endpoint])
 
 
-def setup_table(table: AccumulationTable) -> None:
-    """
-    Get the frame of the code containing the with statement, cut down the source code
-    such that it only contains the with statement and the accumulator loop and set up
-    the trace function to track the values of the accumulator variables during each iteration
-    """
-    class_frame = inspect.getouterframes(inspect.currentframe())[1].frame
-    func_frame = inspect.getouterframes(class_frame)[1].frame
-    func_string = inspect.cleandoc(inspect.getsource(func_frame))
-
+def get_for_node(frame: types.FrameType) -> types.NodeNG:
+    """Return the For node from the frame containing the accumulator loop"""
+    func_string = inspect.cleandoc(inspect.getsource(frame))
+    with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
     lst_str_lines = func_string.splitlines()
-    with_stmt_index = inspect.getlineno(func_frame) - func_frame.f_code.co_firstlineno
-    table.get_lineno(inspect.getlineno(func_frame) + 1)
     lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
-    no_whitespaces = no_of_whitespaces(lst_str_lines[with_stmt_index])
-    loop_str = loop_string(lst_from_with_stmt, no_whitespaces)
+    num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
+    loop_lines = get_loop_lines(lst_from_with_stmt, num_whitespace)
 
-    func_node = astroid.parse(loop_str).body[0]
-    table.add_zero_iter(func_node, func_frame)
-
-    func_frame.f_trace = table.trace_loop
-    sys.settrace(lambda *_args: None)
+    return astroid.parse(loop_lines).body[0]
 
 
 class AccumulationTable:
@@ -73,8 +59,6 @@ class AccumulationTable:
         loop_var_name: the name of the loop variable
         loop_var_val: the values of the loop variable during each iteration
         _loop_lineno: the line number of the for loop
-        _zero_iteration: a variable to keep track of and skip
-            the zeroth iteration of the accumulator loop
 
     """
 
@@ -82,7 +66,6 @@ class AccumulationTable:
     loop_var_name: str
     loop_var_val: list
     _loop_lineno: int
-    _zero_iteration: bool
 
     def __init__(self, accumulation_names: list) -> None:
         self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
@@ -91,22 +74,29 @@ class AccumulationTable:
         self._loop_lineno = 0
         self._zero_iteration = True
 
-    def get_lineno(self, line_no: int) -> None:
-        """Get the line number of the for loop nested in the with statement"""
-        self._loop_lineno = line_no
-
-    def _add_iteration(self, val: list, var: Any) -> None:
-        """Add the values of the accumulator and loop variables of an iteration"""
-        self.loop_var_val.append(var)
-        for index, key in enumerate(self.loop_accumulators):
-            self.loop_accumulators[key].append(val[index])
+    def _record_iteration(
+        self, accumulator_values: list, loop_variable_value: Any, frame: types.FrameType
+    ) -> None:
+        """Record the values of the accumulator variables and loop variable of an iteration"""
+        if len(self.loop_var_val) > 0:
+            self.loop_var_val.append(loop_variable_value)
+            for index, accumulator in enumerate(self.loop_accumulators):
+                self.loop_accumulators[accumulator].append(accumulator_values[index])
+        else:
+            # zeroth iteration
+            self.loop_var_val.append("N/A")
+            for name in self.loop_accumulators:
+                if name in frame.f_locals:
+                    self.loop_accumulators[name] = [frame.f_locals[name]]
+                else:
+                    raise NameError
 
     def _create_iteration_dict(self) -> dict:
-        """Use the values of each iteration and return a dictionary that maps each accumulator
+        """Return a dictionary that maps each accumulator
         and loop variable to its respective value during each iteration
         """
         return {
-            "iteration": list(range(len(self.loop_accumulators[list(self.loop_accumulators)[0]]))),
+            "iteration": list(range(len(self.loop_var_val))),
             "loop variable (" + self.loop_var_name + ")": self.loop_var_val,
             **self.loop_accumulators,
         }
@@ -120,18 +110,9 @@ class AccumulationTable:
             )
         )
 
-    def add_zero_iter(self, func_node: types.NodeNG, func_frame: types.FrameType) -> None:
-        """Add the names and values of the all the accumulators for the zeroth iteration"""
-        self.loop_var_name = func_node.target.name
-        for name in self.loop_accumulators:
-            if name in func_frame.f_locals:
-                self.loop_accumulators[name] = [func_frame.f_locals[name]]
-            else:
-                raise NameError
-
     def trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> None:
         """Trace through the for loop and store the values of the
-        accumulators during each iteration
+        accumulators and loop variable during each iteration
         """
         if event == "line" and frame.f_lineno == self._loop_lineno:
             local_vars = frame.f_locals
@@ -142,17 +123,34 @@ class AccumulationTable:
                 else:
                     raise NameError
 
-            if self.loop_var_name in local_vars and not self._zero_iteration:
-                self._add_iteration(curr_vals, local_vars[self.loop_var_name])
+            if self.loop_var_name in local_vars and len(self.loop_var_val) > 0:
+                self._record_iteration(curr_vals, local_vars[self.loop_var_name], None)
 
-            self._zero_iteration = False
+    def setup_table(self) -> None:
+        """
+        Get the frame of the code containing the with statement, cut down the source code
+        such that it only contains the with statement and the accumulator loop and set up
+        the trace function to track the values of the accumulator variables during each iteration
+        """
+        func_frame = inspect.getouterframes(
+            inspect.getouterframes(inspect.currentframe())[1].frame
+        )[1].frame
+        self._loop_lineno = inspect.getlineno(func_frame) + 1
+
+        for_node = get_for_node(func_frame)
+        self.loop_var_name = for_node.target.name
+        self._record_iteration([], None, func_frame)
+
+        func_frame.f_trace = self.trace_loop
+        sys.settrace(lambda *_args: None)
 
     def __enter__(self) -> AccumulationTable:
-        self.loop_var_val.append("N/A")
-        setup_table(self)
+        """Set up and return the accumulation table"""
+        self.setup_table()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Exit the accumulator loop, set the frame to none and print the table"""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None
         self._tabulate_data()

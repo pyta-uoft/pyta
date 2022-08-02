@@ -33,7 +33,7 @@ jobs:
           pip install -e .[dev]
       - name: Run tests
         run: |
-          pytest --cov python_ta --cov-config=.coveragerc --cov-report term-missing --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests
+          pytest --cov python_ta --cov-config=.coveragerc --cov-report term-missing --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug
       - name: Upload test coverage to coveralls.io
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

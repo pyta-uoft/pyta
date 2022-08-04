@@ -67,12 +67,11 @@ class AccumulationTable:
     loop_var_val: list
     _loop_lineno: int
 
-    def __init__(self, accumulation_names: list) -> None:
+    def __init__(self, accumulation_names: list[str]) -> None:
         self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
         self.loop_var_name = ""
         self.loop_var_val = []
         self._loop_lineno = 0
-        self._zero_iteration = True
 
     def _record_iteration(
         self, accumulator_values: list, loop_variable_value: Any, frame: types.FrameType
@@ -110,7 +109,7 @@ class AccumulationTable:
             )
         )
 
-    def trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> None:
+    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> None:
         """Trace through the for loop and store the values of the
         accumulators and loop variable during each iteration
         """
@@ -126,7 +125,7 @@ class AccumulationTable:
             if self.loop_var_name in local_vars and len(self.loop_var_val) > 0:
                 self._record_iteration(curr_vals, local_vars[self.loop_var_name], None)
 
-    def setup_table(self) -> None:
+    def _setup_table(self) -> None:
         """
         Get the frame of the code containing the with statement, cut down the source code
         such that it only contains the with statement and the accumulator loop and set up
@@ -141,12 +140,12 @@ class AccumulationTable:
         self.loop_var_name = for_node.target.name
         self._record_iteration([], None, func_frame)
 
-        func_frame.f_trace = self.trace_loop
+        func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)
 
     def __enter__(self) -> AccumulationTable:
-        """Set up and return the accumulation table"""
-        self.setup_table()
+        """Set up and return the accumulation table for the accumulator loop"""
+        self._setup_table()
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:

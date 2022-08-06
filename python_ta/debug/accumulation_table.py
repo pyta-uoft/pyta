@@ -6,13 +6,14 @@ from __future__ import annotations
 
 import inspect
 import sys
+import types
 
 import astroid
 import tabulate
 
 
 def num_whitespaces(start_of_loop: str) -> int:
-    """Number of spaces at the beginning of the accumulation loop"""
+    """Return the number of spaces at the beginning of the accumulation loop"""
     blank_chars = 0
     for char in start_of_loop:
         if char.isspace():
@@ -24,7 +25,7 @@ def num_whitespaces(start_of_loop: str) -> int:
 
 
 def get_loop_lines(lines: list[str], num_whitespace: int) -> str:
-    """Function that returns the lines from the start to the end
+    """Return the lines from the start to the end
     of the accumulator loop
     """
     endpoint = len(lines)
@@ -36,7 +37,7 @@ def get_loop_lines(lines: list[str], num_whitespace: int) -> str:
     return "\n".join(lines[:endpoint])
 
 
-def get_for_node(frame: types.FrameType) -> types.NodeNG:
+def get_for_node(frame: types.FrameType) -> astroid.For:
     """Return the For node from the frame containing the accumulator loop"""
     func_string = inspect.cleandoc(inspect.getsource(frame))
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
@@ -53,7 +54,7 @@ class AccumulationTable:
     Class used as a form of print debugging to analyze different loop and
     accumulation variables during each iteration in a for loop
 
-    Private instance attributes:
+    Instance attributes:
         loop_accumulators: a mapping between the accumulation variables
             and their values during each iteration
         loop_var_name: the name of the loop variable
@@ -73,20 +74,22 @@ class AccumulationTable:
         self.loop_var_val = []
         self._loop_lineno = 0
 
-    def _record_iteration(
-        self, accumulator_values: list, loop_variable_value: Any, frame: types.FrameType
-    ) -> None:
+    def _record_iteration(self, frame: types.FrameType) -> None:
         """Record the values of the accumulator variables and loop variable of an iteration"""
         if len(self.loop_var_val) > 0:
-            self.loop_var_val.append(loop_variable_value)
-            for index, accumulator in enumerate(self.loop_accumulators):
-                self.loop_accumulators[accumulator].append(accumulator_values[index])
+            self.loop_var_val.append(frame.f_locals[self.loop_var_name])
+            for accumulator in self.loop_accumulators:
+                if accumulator in frame.f_locals:
+                    self.loop_accumulators[accumulator].append(frame.f_locals[accumulator])
+                else:
+                    raise NameError
+
         else:
             # zeroth iteration
             self.loop_var_val.append("N/A")
-            for name in self.loop_accumulators:
-                if name in frame.f_locals:
-                    self.loop_accumulators[name] = [frame.f_locals[name]]
+            for accumulator in self.loop_accumulators:
+                if accumulator in frame.f_locals:
+                    self.loop_accumulators[accumulator] = [frame.f_locals[accumulator]]
                 else:
                     raise NameError
 
@@ -114,16 +117,7 @@ class AccumulationTable:
         accumulators and loop variable during each iteration
         """
         if event == "line" and frame.f_lineno == self._loop_lineno:
-            local_vars = frame.f_locals
-            curr_vals = []
-            for accumulator in self.loop_accumulators:
-                if accumulator in local_vars:
-                    curr_vals.append(local_vars[accumulator])
-                else:
-                    raise NameError
-
-            if self.loop_var_name in local_vars and len(self.loop_var_val) > 0:
-                self._record_iteration(curr_vals, local_vars[self.loop_var_name], None)
+            self._record_iteration(frame)
 
     def _setup_table(self) -> None:
         """
@@ -138,7 +132,6 @@ class AccumulationTable:
 
         for_node = get_for_node(func_frame)
         self.loop_var_name = for_node.target.name
-        self._record_iteration([], None, func_frame)
 
         func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)

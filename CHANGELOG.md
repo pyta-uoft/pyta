@@ -15,6 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `missing_space_in_doctest_checker` is now able to check doctests in python modules and classes.
 - Updated to Pylint v2.14. See "New checks" below for the new checkers enabled by default.
 - Added new `python_ta.debug` module with an `AccumulationTable` context manager for loop print debugging.
+- Improve message for R1710 (inconsistent-return-statements)
 
 ### Bug fixes
 

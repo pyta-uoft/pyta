@@ -3,7 +3,7 @@ Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
 
-from python_ta.debug.accumulation_table import AccumulationTable
+from python_ta.debug import AccumulationTable
 
 
 def test_one_var() -> None:

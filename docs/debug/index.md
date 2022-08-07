@@ -60,7 +60,7 @@ list of strings containing all the accumulator variables as an argument
 that need to be tracked. For example:
 
 ```python
-from python_ta.debug.accumulation_table import AccumulationTable
+from python_ta.debug import AccumulationTable
 
 my_list = [10, 20, 30]
 sum_so_far = 0

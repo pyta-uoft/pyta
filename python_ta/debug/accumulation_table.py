@@ -78,20 +78,14 @@ class AccumulationTable:
         """Record the values of the accumulator variables and loop variable of an iteration"""
         if len(self.loop_var_val) > 0:
             self.loop_var_val.append(frame.f_locals[self.loop_var_name])
-            for accumulator in self.loop_accumulators:
-                if accumulator in frame.f_locals:
-                    self.loop_accumulators[accumulator].append(frame.f_locals[accumulator])
-                else:
-                    raise NameError
-
         else:
-            # zeroth iteration
             self.loop_var_val.append("N/A")
-            for accumulator in self.loop_accumulators:
-                if accumulator in frame.f_locals:
-                    self.loop_accumulators[accumulator] = [frame.f_locals[accumulator]]
-                else:
-                    raise NameError
+
+        for accumulator in self.loop_accumulators:
+            if accumulator in frame.f_locals:
+                self.loop_accumulators[accumulator].append(frame.f_locals[accumulator])
+            else:
+                raise NameError
 
     def _create_iteration_dict(self) -> dict:
         """Return a dictionary that maps each accumulator

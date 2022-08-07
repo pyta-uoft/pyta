@@ -8,34 +8,38 @@ from astroid import nodes
 class ExprWrapper:
     node: astroid.NodeNG
     types = {}
-    variable_counter = 0
 
     def __init__(self, expr: nodes.Expr, types={}):
         self.node = expr.value
         self.types = types
         self.transformed = self.reduce(self.node)
 
-    def reduce(self, node: astroid.NodeNG) -> Optional[astroid.NodeNG]:
-        if isinstance(node, nodes.BoolOp):
-            node = self.parse_bool_op(node)
-        elif isinstance(node, nodes.UnaryOp):
-            node = self.parse_unary_op(node)
-        elif isinstance(node, nodes.Compare):
-            node = self.parse_compare(node)
-        elif isinstance(node, nodes.BinOp):
-            node = self.parse_bin_op(node)
-        elif isinstance(node, nodes.Const):
-            node = node.value
-        elif isinstance(node, nodes.Name):
-            node = self.apply_name(node.name, self.types[node.name])
-        else:
-            # Throw some error
-            pass
+    def reduce(self, node: astroid.NodeNG) -> Optional[z3.ExprRef]:
+        """Convert astroid node to z3 expression and return it.
+        If an error is encountered or a case is not considered, return None."""
+        try:
+            if isinstance(node, nodes.BoolOp):
+                node = self.parse_bool_op(node)
+            elif isinstance(node, nodes.UnaryOp):
+                node = self.parse_unary_op(node)
+            elif isinstance(node, nodes.Compare):
+                node = self.parse_compare(node)
+            elif isinstance(node, nodes.BinOp):
+                node = self.parse_bin_op(node)
+            elif isinstance(node, nodes.Const):
+                node = node.value
+            elif isinstance(node, nodes.Name):
+                node = self.apply_name(node.name, self.types[node.name])
+            else:
+                node = None
 
-        return node
+            return node
+        except Exception:
+            return None
 
-    def apply_name(self, name: str, typ: str):
-        """Set up the appropriate variable representation in Z3 based on name and type (typ)."""
+    def apply_name(self, name: str, typ: str) -> Optional[z3.ExprRef]:
+        """Set up the appropriate variable representation in Z3 based on name and type.
+        If an error is encountered or a case is unconsidered, return None."""
         # TODO: determine full list of supported types
         if typ == "int":
             return z3.Int(name)
@@ -44,8 +48,11 @@ class ExprWrapper:
         if typ == "bool":
             return z3.Bool(name)
 
-    def parse_compare(self, node: astroid.Compare):
+        return None
+
+    def parse_compare(self, node: astroid.Compare) -> Optional[z3.ExprRef]:
         left, ops = node.left, node.ops
+        # ERROR: left, right can be None at any point in the execution
         left = self.reduce(left)
         for item in ops:
             op, right = item
@@ -53,42 +60,74 @@ class ExprWrapper:
             left = self.apply_bin_op(left, op, right)
         return left
 
-    def apply_unary_op(self, left, op):
-        if op == "not":
-            return z3.Not(left)
+    def apply_unary_op(self, left, op) -> Optional[z3.ExprRef]:
+        # ERROR: left can be None
+        # ERROR: see apply_bool_op ERROR comments
+        if left is None:
+            return None
+        try:
+            if op == "not":
+                return z3.Not(left)
+            else:
+                return None
+        except z3.z3types.Z3Exception:
+            return None
 
-    def apply_bin_op(self, left, op, right):
+    def apply_bin_op(self, left, op, right) -> Optional[z3.ExprRef]:
         """Given left, right, op, apply the binary operation."""
-        # Todo: find out which binary operations are supported
-        if op == "+":
-            return left + right
-        elif op == "**":
-            return left**right
-        elif op == "==":
-            return left == right
-        elif op == "<=":
-            return left <= right
-        elif op == ">=":
-            return left >= right
-        elif op == "<":
-            return left < right
-        elif op == ">":
-            return left > right
+        # ERROR: left or right can be None
+        if left is None or right is None:
+            return None
+        # TODO: find out which binary operations are supported
+        # ERROR: unsupported operation ie. bool + bool (raises TypeError)
+        try:
+            if op == "+":
+                return left + right
+            elif op == "-":
+                return left - right
+            elif op == "*":
+                return left * right
+            elif op == "/":
+                return left / right
+            elif op == "**":
+                return left**right
+            elif op == "==":
+                return left == right
+            elif op == "<=":
+                return left <= right
+            elif op == ">=":
+                return left >= right
+            elif op == "<":
+                return left < right
+            elif op == ">":
+                return left > right
+            else:
+                return None
+        except TypeError:
+            return None
 
-    def apply_bool_op(self, op, values):
-        if op == "and":
-            return z3.And(values)
-        elif op == "or":
-            return z3.Or(values)
+    def apply_bool_op(self, op, values) -> Optional[z3.ExprRef]:
+        # ERROR: z3.Not does not take array values (raises Z3Exception)
+        # ERROR: something like z3.And(1) (raises Z3Exception)
+        try:
+            if op == "and":
+                return z3.And(values)
+            elif op == "or":
+                return z3.Or(values)
+            elif op == "not":
+                return z3.Not(values)
+            else:
+                return None
+        except z3.z3types.Z3Exception:
+            return None
 
-    def parse_unary_op(self, node: astroid.UnaryOp):
+    def parse_unary_op(self, node: astroid.UnaryOp) -> Optional[z3.ExprRef]:
         left, op = node.operand, node.op
         left = self.reduce(left)
         return self.apply_unary_op(left, op)
 
-    def parse_bin_op(self, node: astroid.BinOp):
+    def parse_bin_op(self, node: astroid.BinOp) -> Optional[z3.ExprRef]:
         """Recurse on node.left, node.op, node.right."""
-        # TODO: determine full list of what node.left or node.right can be
         left, op, right = node.left, node.op, node.right
         left = self.reduce(left)
         right = self.reduce(right)

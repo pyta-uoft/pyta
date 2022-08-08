@@ -10,6 +10,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug fixes
 
 - Add missing `toml` package to library dependencies.
+- Improve formatting of `None` and `float`s in `AccumulationTable` display.
+  Also make minor improvements to the documentation.
 
 ## [2.3.0] - 2022-08-08
 

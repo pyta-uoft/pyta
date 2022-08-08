@@ -112,7 +112,11 @@ class AccumulationTable:
         iteration_dict = self._create_iteration_dict()
         print(
             tabulate.tabulate(
-                iteration_dict, headers="keys", colalign=(*["left"] * len(iteration_dict),)
+                iteration_dict,
+                headers="keys",
+                colalign=(*["left"] * len(iteration_dict),),
+                disable_numparse=True,
+                missingval="None",
             )
         )
 

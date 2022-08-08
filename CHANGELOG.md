@@ -7,6 +7,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.3.1] - 2022-08-08
+
+### Bug fixes
+
+- Add missing `toml` package to library dependencies.
+- Improve formatting of `None` and `float`s in `AccumulationTable` display.
+  Also make minor improvements to the documentation.
+
+## [2.3.0] - 2022-08-08
+
 ### Enhancements
 
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
@@ -14,6 +24,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Can configure custom error messages for pylint in a toml file.
 - `missing_space_in_doctest_checker` is now able to check doctests in python modules and classes.
 - Updated to Pylint v2.14. See "New checks" below for the new checkers enabled by default.
+- Added new `python_ta.debug` module with an `AccumulationTable` context manager for loop print debugging.
+- Improve message for R1710 (inconsistent-return-statements)
 
 ### Bug fixes
 

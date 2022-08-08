@@ -59,17 +59,13 @@ class AccumulationTable:
     Instance attributes:
         loop_accumulators: a mapping between the accumulation variables
             and their values during each iteration
-        loop_var_name: the name of the loop variable
-        loop_var_val: the values of the loop variable during each iteration
+        loop_variables: a mapping between the loop variables and their
+            values during each iteration
         _loop_lineno: the line number of the for loop
     """
 
     loop_accumulators: dict[str, list]
-    """A dictionary mapping loop accumulator variable name to its values across all loop iterations."""
-    loop_var_name: str
-    """The name of the for loop target variable."""
-    loop_var_val: list
-    """The values of the for loop target variable across all loop iterations."""
+    loop_variables: dict[str, list]
     _loop_lineno: int
 
     def __init__(self, accumulation_names: list[str]) -> None:
@@ -80,16 +76,17 @@ class AccumulationTable:
 
         """
         self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
-        self.loop_var_name = ""
-        self.loop_var_val = []
+        self.loop_variables = {}
         self._loop_lineno = 0
 
     def _record_iteration(self, frame: types.FrameType) -> None:
-        """Record the values of the accumulator variables and loop variable of an iteration"""
-        if len(self.loop_var_val) > 0:
-            self.loop_var_val.append(copy.copy(frame.f_locals[self.loop_var_name]))
+        """Record the values of the accumulator variables and loop variables of an iteration"""
+        if len(list(self.loop_variables.values())[0]) > 0:
+            for loop_var in self.loop_variables:
+                self.loop_variables[loop_var].append(frame.f_locals[loop_var])
         else:
-            self.loop_var_val.append("N/A")
+            for loop_var in self.loop_variables:
+                self.loop_variables[loop_var].append("N/A")
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
@@ -102,9 +99,17 @@ class AccumulationTable:
         and loop variable to its respective value during each iteration
         """
         return {
-            "iteration": list(range(len(self.loop_var_val))),
-            "loop variable (" + self.loop_var_name + ")": self.loop_var_val,
-            **self.loop_accumulators,
+            "iteration": list(range(len(list(self.loop_variables.values())[0]))),
+            **{
+                loop_var.replace(loop_var, "loop variable (" + loop_var + ")"): loop_vals
+                for loop_var, loop_vals in self.loop_variables.items()
+            },
+            **{
+                accumulator.replace(
+                    accumulator, "accumulator (" + accumulator + ")"
+                ): accumulator_vals
+                for accumulator, accumulator_vals in self.loop_accumulators.items()
+            },
         }
 
     def _tabulate_data(self) -> None:
@@ -139,7 +144,11 @@ class AccumulationTable:
         self._loop_lineno = inspect.getlineno(func_frame) + 1
 
         for_node = get_for_node(func_frame)
-        self.loop_var_name = for_node.target.name
+        if type(for_node.target) == astroid.Tuple:
+            for loop_var in for_node.target.elts:
+                self.loop_variables[loop_var.name] = []
+        else:
+            self.loop_variables[for_node.target.name] = []
 
         func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)

@@ -4,9 +4,11 @@ for an accumulator loop
 """
 from __future__ import annotations
 
+import copy
 import inspect
 import sys
 import types
+from typing import Any
 
 import astroid
 import tabulate
@@ -60,15 +62,23 @@ class AccumulationTable:
         loop_var_name: the name of the loop variable
         loop_var_val: the values of the loop variable during each iteration
         _loop_lineno: the line number of the for loop
-
     """
 
     loop_accumulators: dict[str, list]
+    """A dictionary mapping loop accumulator variable name to its values across all loop iterations."""
     loop_var_name: str
+    """The name of the for loop target variable."""
     loop_var_val: list
+    """The values of the for loop target variable across all loop iterations."""
     _loop_lineno: int
 
     def __init__(self, accumulation_names: list[str]) -> None:
+        """Initialize an Accumulation Table context manager for print-based loop debugging.
+
+        Args:
+            accumulation_names: a list of the loop accumulator variable names to display.
+
+        """
         self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
         self.loop_var_name = ""
         self.loop_var_val = []
@@ -77,13 +87,13 @@ class AccumulationTable:
     def _record_iteration(self, frame: types.FrameType) -> None:
         """Record the values of the accumulator variables and loop variable of an iteration"""
         if len(self.loop_var_val) > 0:
-            self.loop_var_val.append(frame.f_locals[self.loop_var_name])
+            self.loop_var_val.append(copy.copy(frame.f_locals[self.loop_var_name]))
         else:
             self.loop_var_val.append("N/A")
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
-                self.loop_accumulators[accumulator].append(frame.f_locals[accumulator])
+                self.loop_accumulators[accumulator].append(copy.copy(frame.f_locals[accumulator]))
             else:
                 raise NameError
 
@@ -106,7 +116,7 @@ class AccumulationTable:
             )
         )
 
-    def _trace_loop(self, frame: types.FrameType, event: str, arg: Any) -> None:
+    def _trace_loop(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Trace through the for loop and store the values of the
         accumulators and loop variable during each iteration
         """

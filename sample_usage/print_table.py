@@ -1,23 +1,24 @@
+"""Examples for the python_ta.debug.AccumulationTable class.
 """
-Examples of how to use the AccumulationTable Class
-"""
+from __future__ import annotations
 
-import inspect
 from typing import Union
 
-from python_ta.debug.accumulation_table import AccumulationTable
+from python_ta.debug import AccumulationTable
 
 
-def my_func(numbers: list) -> None:
-    """Print the Accumulation Table to show the tracking of the respective variables."""
+def calculate_sum_and_averages(numbers: list) -> list:
+    """Return the running sums and averages of the given numbers."""
     sum_so_far = 0
     list_so_far = []
-    avg_so_far = "N/A"
-    with AccumulationTable(["sum_so_far", "list_so_far", "avg_so_far"]):
+    avg_so_far = None
+    with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"]):
         for number in numbers:
             sum_so_far = sum_so_far + number
-            list_so_far = list_so_far + [number]
-            avg_so_far = sum(list_so_far) / len(list_so_far)
+            avg_so_far = sum_so_far / (len(list_so_far) + 1)
+            list_so_far.append((sum_so_far, avg_so_far))
+
+    return list_so_far
 
 
 class Restaurant:
@@ -53,8 +54,9 @@ class Restaurant:
 
 
 if __name__ == "__main__":
-    print("my_func function example:")
-    my_func([10, 20, 30, 40, 50, 60])
+    print("calculate_sum_and_averages([10, 20, 30, 40, 50, 60])")
+    calculate_sum_and_averages([10, 20, 30, 40, 50, 60])
+    print("")
 
     print("\nRestaurant class example:")
     restaurant = Restaurant()

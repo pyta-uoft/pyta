@@ -34,7 +34,12 @@ R1701 = "These multiple calls to isinstance can be merged into isinstance(%s, (%
 R1702 = "Your code has too many nested blocks (%s, exceeding limit %s). You should try to break it down into helper functions."
 R1704 = "This local variable %r should have a name different from all function parameters."
 R1707 = "If you mean to create a tuple here, surround the tuple expression with parentheses."
-R1710 = "Since this function can return a non-None value, you should explicitly write \"return None\" whenever None is returned by this function. (Possibly including at the end of the function body.)"
+R1710 = """This function has at least one case where the function body will execute without ending in an explicit return statement. \
+    You should check your code to make sure every possible execution path through the function body ends in a return statement.\n\n\
+    Note: one common source of this error is if you're using if statements without an explicit else branch. \
+    In this case, you should consider revising your code to either add an else branch, or, if you are confident \
+    that the if and elif conditions cover all possible cases, you can convert the final "elif" into an "else".\
+    """
 R1712 = "Use parallel assignment to swap the values of variables. For example: to swap variables 'a' and 'b', simply do 'a, b = b, a'."
 R1713 = "If you want to concatenate a sequence of strings, use the str.join method."
 R1714 = "To check whether this variable is equal to one of many values, merge the comparisons into a single check: %r."

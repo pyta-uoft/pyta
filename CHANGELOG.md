@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.3.1] - 2022-08-08
+
 ### Bug fixes
 
 - Add missing `toml` package to library dependencies.

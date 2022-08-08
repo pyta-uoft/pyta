@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.3.0] - 2022-08-08
+
 ### Enhancements
 
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.

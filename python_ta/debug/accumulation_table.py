@@ -102,16 +102,8 @@ class AccumulationTable:
         """
         return {
             "iteration": list(range(len(list(self.loop_variables.values())[0]))),
-            **{
-                loop_var.replace(loop_var, "loop variable (" + loop_var + ")"): loop_vals
-                for loop_var, loop_vals in self.loop_variables.items()
-            },
-            **{
-                accumulator.replace(
-                    accumulator, "accumulator (" + accumulator + ")"
-                ): accumulator_vals
-                for accumulator, accumulator_vals in self.loop_accumulators.items()
-            },
+            **self.loop_variables,
+            **self.loop_accumulators,
         }
 
     def _tabulate_data(self) -> None:
@@ -146,9 +138,8 @@ class AccumulationTable:
         self._loop_lineno = inspect.getlineno(func_frame) + 1
 
         for_node = get_for_node(func_frame)
-        if type(for_node.target) == astroid.Tuple:
-            for loop_var in for_node.target.elts:
-                self.loop_variables[loop_var.name] = []
+        if isinstance(for_node.target, astroid.Tuple):
+            self.loop_variables = {loop_var.name: [] for loop_var in for_node.target.elts}
         else:
             self.loop_variables[for_node.target.name] = []
 

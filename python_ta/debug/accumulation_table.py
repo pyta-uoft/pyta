@@ -65,7 +65,9 @@ class AccumulationTable:
     """
 
     loop_accumulators: dict[str, list]
+    """A dictionary mapping loop accumulator variable name to its values across all loop iterations."""
     loop_variables: dict[str, list]
+    """A dictionary mapping loop variable variable name to its values across all loop iterations."""
     _loop_lineno: int
 
     def __init__(self, accumulation_names: list[str]) -> None:
@@ -83,7 +85,7 @@ class AccumulationTable:
         """Record the values of the accumulator variables and loop variables of an iteration"""
         if len(list(self.loop_variables.values())[0]) > 0:
             for loop_var in self.loop_variables:
-                self.loop_variables[loop_var].append(frame.f_locals[loop_var])
+                self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
         else:
             for loop_var in self.loop_variables:
                 self.loop_variables[loop_var].append("N/A")

@@ -56,9 +56,7 @@ iteration    loop variable (number)    sum_so_far    avg_so_far    list_so_far
 The `AccumulationTable` class has the following instance attributes you can access after the `with` statement.
 
 ```{eval-rst}
-.. autoattribute:: python_ta.debug.AccumulationTable.loop_var_name
-
-.. autoattribute:: python_ta.debug.AccumulationTable.loop_var_val
+.. autoattribute:: python_ta.debug.AccumulationTable.loop_variables
 
 .. autoattribute:: python_ta.debug.AccumulationTable.loop_accumulators
 ```
@@ -92,10 +90,7 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 
 1. `AccumulationTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
 
-2. Only supports for loops with one target.
-
-   - For loops like `for i, item in enumerate(my_list)` are not supported.
-   - While loops are not supported.
+2. Does not have support for while loops
 
 3. Only supports loop accumulation variables, but not accumulators as part of an object.
    For example, instance attribute accumulators are not supported:
@@ -113,8 +108,8 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 5. All tracked loop variables other than the for loop target must be initialized before the loop,
    even when the variables are guaranteed to be initialized before use inside the loop body.
 
-6. The `AccumulatorTable` context manager can only log the execution of one for loop.
-   To log the state of multiple for loops, each must be wrapped in a separate `with` statement and fresh `AccumulatorTable` instance.
+6. The `AccumulationTable` context manager can only log the execution of one for loop.
+   To log the state of multiple for loops, each must be wrapped in a separate `with` statement and fresh `AccumulationTable` instance.
 
 [tabulate]: https://github.com/astanin/python-tabulate
 [`sys.settrace`]: https://docs.python.org/3/library/sys.html#sys.settrace

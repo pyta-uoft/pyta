@@ -90,7 +90,7 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 
 1. `AccumulationTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
 
-2. Does not have support for while loops
+2. Does not have support for while loops.
 
 3. Only supports loop accumulation variables, but not accumulators as part of an object.
    For example, instance attribute accumulators are not supported:

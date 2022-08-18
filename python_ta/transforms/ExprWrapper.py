@@ -19,14 +19,16 @@ class ExprWrapper:
 
     def __init__(self, expr: nodes.Expr, types=None):
         self.node = expr.value
-        self.types = types or {}
+        if self.types is None:
+            self.types = {}
 
     def reduce(self, node: astroid.NodeNG = None) -> Optional[z3.ExprRef]:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
         """
-        node = node or self.node
+        if node is None:
+            node = self.node
 
         try:
             if isinstance(node, nodes.BoolOp):

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import astroid
 import z3
@@ -6,17 +6,28 @@ from astroid import nodes
 
 
 class ExprWrapper:
+    """
+    Wrapper class to convert an astroid expression node into a z3 expression.
+
+    Instance attributes:
+        - node: astroid node obtained given by the value attribute of astroid expression.
+        - types: dictionary mapping variable names in astroid expression to their type name.
+    """
+
     node: astroid.NodeNG
-    types = {}
+    types: Dict[str, str]
 
-    def __init__(self, expr: nodes.Expr, types={}):
+    def __init__(self, expr: nodes.Expr, types=None):
         self.node = expr.value
-        self.types = types
-        self.transformed = self.reduce(self.node)
+        self.types = types or {}
 
-    def reduce(self, node: astroid.NodeNG) -> Optional[z3.ExprRef]:
-        """Convert astroid node to z3 expression and return it.
-        If an error is encountered or a case is not considered, return None."""
+    def reduce(self, node: astroid.NodeNG = None) -> Optional[z3.ExprRef]:
+        """
+        Convert astroid node to z3 expression and return it.
+        If an error is encountered or a case is not considered, return None.
+        """
+        node = node or self.node
+
         try:
             if isinstance(node, nodes.BoolOp):
                 node = self.parse_bool_op(node)

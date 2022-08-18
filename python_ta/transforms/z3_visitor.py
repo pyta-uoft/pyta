@@ -28,14 +28,14 @@ class Z3Visitor:
                 if isinstance(inferred[0], nodes.ClassDef):
                     types[arg.name] = inferred[0].name
         # Parse preconditions
-        docstring = node.doc
+        docstring = node.doc_node.value
         preconditions = parse_assertions(docstring, parse_token="Precondition")
         # Get z3 constraints
         z3_constraints = []
         for pre in preconditions:
             pre = astroid.parse(pre).body[0]
             ew = ExprWrapper(pre, types)
-            transformed = ew.transformed
+            transformed = ew.reduce()
             if transformed is not None:
                 z3_constraints.append(transformed)
         # Set z3 constraints

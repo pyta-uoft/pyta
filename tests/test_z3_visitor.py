@@ -22,7 +22,7 @@ def test_arithmetic_constraints():
     y = z3.Int("y")
     z = z3.Real("z")
     # Construct expected
-    expected = z3.And([x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0])])
+    expected = z3.And([x**2 + y**2 == z**2, x > 0, y > 0, z == 0])
     actual = z3.And(function_def.z3_constraints)
     solver = z3.Solver()
     solver.add(actual == expected)

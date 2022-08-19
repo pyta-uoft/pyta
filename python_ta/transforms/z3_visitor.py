@@ -1,9 +1,10 @@
 import astroid
 from astroid import Uninferable, nodes
 from astroid.transforms import TransformVisitor
+from z3.z3types import Z3Exception
 
 from ..contracts import parse_assertions
-from .ExprWrapper import ExprWrapper
+from .ExprWrapper import ExprWrapper, Z3ParseException
 
 
 class Z3Visitor:
@@ -35,7 +36,10 @@ class Z3Visitor:
         for pre in preconditions:
             pre = astroid.parse(pre).body[0]
             ew = ExprWrapper(pre, types)
-            transformed = ew.reduce()
+            try:
+                transformed = ew.reduce()
+            except (Z3Exception, Z3ParseException):
+                transformed = None
             if transformed is not None:
                 z3_constraints.append(transformed)
         # Set z3 constraints

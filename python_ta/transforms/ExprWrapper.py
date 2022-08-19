@@ -122,7 +122,7 @@ class ExprWrapper:
             else:
                 raise Z3ParseException(f"Unhandled binary operation {op}.")
         except TypeError:
-            raise Z3ParseException(f"Operation {op} incompatible with types.")
+            raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
 
     def apply_bool_op(self, op: str, values: Union[z3.ExprRef, List[z3.ExprRef]]) -> z3.ExprRef:
         """Apply boolean operation given by op to values."""

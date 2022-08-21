@@ -8,6 +8,12 @@ from .ExprWrapper import ExprWrapper, Z3ParseException
 
 
 class Z3Visitor:
+    """
+    The class responsible for visiting astroid nodes (currently only FunctionDef nodes),
+    parsing preconditions, and converting them to z3 expressions to be appended in the
+    z3_constraints attribute of the node.
+    """
+
     def __init__(self):
         """Return a TransformVisitor that sets an environment for every node."""
         visitor = TransformVisitor()

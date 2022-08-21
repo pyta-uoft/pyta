@@ -51,17 +51,18 @@ class ExprWrapper:
         elif isinstance(node, nodes.Const):
             node = node.value
         elif isinstance(node, nodes.Name):
-            node = self.apply_name(node.name, self.types[node.name])
+            node = self.apply_name(node.name)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
         return node
 
-    def apply_name(self, name: str, typ: str) -> z3.ExprRef:
+    def apply_name(self, name: str) -> z3.ExprRef:
         """
         Set up the appropriate variable representation in Z3 based on name and type.
         If an error is encountered or a case is unconsidered, return None.
         """
+        typ = self.types[name]
         type_to_z3 = {
             "int": z3.Int,
             "float": z3.Real,

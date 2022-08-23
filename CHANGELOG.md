@@ -7,6 +7,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Experimental
+
+- Added preliminary support for translation of constraints into Z3 solver.
+  (This is currently not enabled by default in PythonTA.)
+
 ## [2.3.1] - 2022-08-08
 
 ### Bug fixes

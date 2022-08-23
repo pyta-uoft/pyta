@@ -35,8 +35,7 @@ class Z3Visitor:
                 if isinstance(inferred[0], nodes.ClassDef):
                     types[arg.name] = inferred[0].name
         # Parse preconditions
-        docstring = node.doc_node.value
-        preconditions = parse_assertions(docstring, parse_token="Precondition")
+        preconditions = parse_assertions(node, parse_token="Precondition")
         # Get z3 constraints
         z3_constraints = []
         for pre in preconditions:

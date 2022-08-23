@@ -430,8 +430,9 @@ def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
        line is of the form "- <cond>". Each line is considered a separate condition.
        The lines can be separated by blank lines, but no other text.
     """
-    if isinstance(obj, str):
-        docstring = obj
+    if hasattr(obj, "doc_node"):
+        # Check if obj is an astroid node
+        docstring = obj.doc_node.value
     else:
         docstring = getattr(obj, "__doc__") or ""
     lines = [line.strip() for line in docstring.split("\n")]

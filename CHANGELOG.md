@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+- Updated jsonreporter to get data from the new pylint Message class (#840)
+
 ### Experimental
 
 - Added preliminary support for translation of constraints into Z3 solver.

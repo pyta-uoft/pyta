@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.3.2] - 2022-08-30
+
+### Bug fixes
+
 - Updated jsonreporter to get data from the new pylint Message class (#840)
 
 ### Experimental

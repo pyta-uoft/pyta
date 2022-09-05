@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Bug fixes
+
+- Restored 'line_end', 'column_end', and 'snippet' fields in JSON reporter output.
+
 ## [2.3.2] - 2022-08-30
 
 ### Bug fixes

@@ -33,7 +33,7 @@ class JSONReporter(PythonTaReporter):
             output.append(
                 {
                     "filename": k,
-                    "msgs": [vars(msg.message) for msg in msgs],
+                    "msgs": [msg.to_dict() for msg in msgs],
                 }
             )
 

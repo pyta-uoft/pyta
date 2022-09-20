@@ -1657,6 +1657,32 @@ class CashRegister:
 - [R0201](#R0201)
 - [StackOverflow: What is the difference between `@staticmethod` and `@classmethod` in Python?]
 
+(W0211)=
+
+### Super without brackets (W0245)
+
+When making a call to a parent class using super(), we must always include the brackets since it is a type of function call. Without the brackets, python may interpret it as an undefined variable named "super" rather than actually calling its superclass.
+
+```{literalinclude} /../examples/pylint/w0245_super_without_brackets.py
+
+```
+
+Corrected version:
+
+```python
+class Animal:
+    """A class that represents an animal"""
+    def __init__(self) -> None:
+        print('This is an animal')
+
+
+class Cat(Animal):
+    """A class that represents a cat, a type of animal"""
+    def __init__(self) -> None:
+        super().__init__()
+        print('This is a cat')
+```
+
 ## Exceptions
 
 (W0702)=

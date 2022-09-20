@@ -96,4 +96,5 @@ Amr Sharaf,
 Kavin Singh,
 Alexey Strokach,
 Jasmine Wu,
-Philippe Yu
+Philippe Yu,
+Yibing (Amy) Lu

@@ -1657,7 +1657,7 @@ class CashRegister:
 - [R0201](#R0201)
 - [StackOverflow: What is the difference between `@staticmethod` and `@classmethod` in Python?]
 
-(W0211)=
+(W0245)=
 
 ### Super without brackets (W0245)
 

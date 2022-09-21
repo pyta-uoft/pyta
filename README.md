@@ -94,6 +94,7 @@ Justin Park,
 Harshkumar Patel,
 Amr Sharaf,
 Kavin Singh,
+Sophy Sun,
 Alexey Strokach,
 Jasmine Wu,
 Philippe Yu

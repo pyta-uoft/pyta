@@ -117,6 +117,24 @@ Corrected version:
 print_greeting(name="Arthur")
 ```
 
+(W0130)=
+
+### Duplicate Value (W0130)
+
+This error occurs when a set contains the same value two or more times.
+
+```{literalinclude} /../examples/pylint/w0130_duplicate_value.py
+
+```
+
+Corrected version:
+
+```python
+correct_set = {'value 1', 2, 3}
+```
+
+Sets are unordered collections that should not contain duplicate elements.
+
 ## Type errors
 
 These errors are some of the most common errors we encounter in Python. They generally have to do

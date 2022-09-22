@@ -26,6 +26,3 @@ tests/test_type_inference/png*
 
 # Sphinx documentation build files
 docs/_build
-
-# Environments
-venv/

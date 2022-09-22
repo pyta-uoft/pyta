@@ -133,7 +133,7 @@ Corrected version:
 correct_set = {'value 1', 2, 3}
 ```
 
-Sets are unordered collections that should not contain duplicate elements.
+Sets are unordered and duplicate elements are not allowed.
 
 ## Type errors
 

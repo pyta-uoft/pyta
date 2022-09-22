@@ -54,6 +54,7 @@ C1802 = "When checking if a collection is empty, either check equality with an e
 C0113 = "Change \"%s\" to \"%s\". Removing the negation simplifies the expression."
 
 ["pylint.checkers.refactoring".RecommendationChecker]
+C0200 = "Consider using bult-in `enumerate` instead of iterating with `range` and `len`."
 C0201 = "Rather than using '.keys()' to iterate over the keys of a dictionary, you can simply iterate over the dictionary itself."
 
 ["pylint.checkers.design_analysis".MisdesignChecker]

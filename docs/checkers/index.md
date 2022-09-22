@@ -2446,6 +2446,16 @@ print(make_list(5))
 - [Common Gotchas - Mutable Default Arguments]
 - [Default Parameter Values in Python]
 
+(C0200)=
+
+### Consider using enumerate (C0200)
+
+Consider using built-in `enumerate` instead of iterating with `range` and `len`.
+
+```{literalinclude} /../examples/pylint/c0200_consider_using_enumerate.py
+
+```
+
 (C0201)=
 
 ### Consider iterating dictionary (C0201)

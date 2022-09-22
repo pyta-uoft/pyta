@@ -13,6 +13,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Restored 'line_end', 'column_end', and 'snippet' fields in JSON reporter output.
 
+### Enhancements
+
+- Pylint check C0200 is no longer disabled by default.
+
 ## [2.3.2] - 2022-08-30
 
 ### Bug fixes

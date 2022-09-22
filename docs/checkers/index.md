@@ -1661,7 +1661,7 @@ class CashRegister:
 
 ### Super without brackets (W0245)
 
-When making a call to a parent class using super(), we must always include the brackets since it is a type of function call. Without the brackets, python may interpret it as an undefined variable named "super" rather than actually calling its superclass.
+When making a call to a parent class using super(), we must always include the brackets since it is a type of function call. Without the brackets, python may interpret it as an undefined object named "super" rather than actually calling its superclass.
 
 ```{literalinclude} /../examples/pylint/w0245_super_without_brackets.py
 
@@ -1677,7 +1677,7 @@ class Animal:
 
 
 class Cat(Animal):
-    """A class that represents a cat, a type of animal"""
+    """A class that represents a cat"""
     def __init__(self) -> None:
         super().__init__()
         print('This is a cat')

@@ -744,6 +744,7 @@ Corrected version:
 colours = ['red', 'blue', 'yellow', 'green']
 
 for index, colour in enumerate(colours):
+    print(index)
     print(colour)
 ```
 

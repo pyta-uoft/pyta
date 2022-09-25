@@ -75,6 +75,23 @@ This error occurs when a `return` statement is found outside a function or metho
 A common source of this error is when the `return` is not indented properly (it must be indented to
 be considered part of the loop body).
 
+(E0643)=
+
+### Potential index error (E0643)
+
+This error occurs when trying to access the index of an iterable (such as `list`, `str`, or `tuple`) that's beyond its length.
+
+```{literalinclude} /../examples/pylint/e0643_potential_index_error.py
+
+```
+
+Corrected Version:
+
+```python
+coffees = ['americano', 'latte', 'macchiato', 'mocha']
+print(coffees[3])
+```
+
 (W0101)=
 
 ### Unreachable (W0101)

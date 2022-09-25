@@ -728,6 +728,26 @@ for key, value in sample_dict.items():
     print(key, value)  # Direct access instead of an index lookup
 ```
 
+(R1736)=
+
+### Unnecessary list index lookup (R1736)
+
+This error occurs when iterating through a list while keeping track of both index and value using `enumerate()` but still using the index to access the value (which can be accessed directly).
+
+```{literalinclude} /../examples/pylint/r1736_unnecessary_list_index_lookup.py
+
+```
+
+Corrected version:
+
+```python
+colours = ['red', 'blue', 'yellow', 'green']
+
+for index, colour in enumerate(colours):
+    print(index)
+    print(colour)
+```
+
 (W0107)=
 
 ### Unnecessary pass (W0107)

@@ -1406,6 +1406,32 @@ class Child(Parent):
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
 
+(W0245)=
+
+### Super without brackets (W0245)
+
+When making a call to a parent class using `super()`, we must always include the brackets since it is a type of function call. Without the brackets, Python may interpret it as the `super` function itself rather than calling the function to access the superclass.
+
+```{literalinclude} /../examples/pylint/w0245_super_without_brackets.py
+
+```
+
+Corrected version:
+
+```python
+class Animal:
+    """A class that represents an animal"""
+    def __init__(self) -> None:
+        print('This is an animal')
+
+
+class Cat(Animal):
+    """A class that represents a cat"""
+    def __init__(self) -> None:
+        super().__init__()
+        print('This is a cat')
+```
+
 (R1725)=
 
 ### Super with arguments (R1725)

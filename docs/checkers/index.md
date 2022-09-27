@@ -100,6 +100,24 @@ Dictionaries map unique keys to values. When different values are assigned to th
 assignment takes precedence. This is rarely what the user wants when they are constructing a
 dictionary.
 
+(W0130)=
+
+### Duplicate Value (W0130)
+
+This error occurs when a set literal contains the same value two or more times.
+
+```{literalinclude} /../examples/pylint/w0130_duplicate_value.py
+
+```
+
+Corrected version:
+
+```python
+correct_set = {'value 1', 2, 3}
+```
+
+Sets are unordered and duplicate elements are not allowed.
+
 (E1123)=
 
 ### Unexpected keyword arg (E1123)
@@ -116,24 +134,6 @@ Corrected version:
 ```python
 print_greeting(name="Arthur")
 ```
-
-(W0130)=
-
-### Duplicate Value (W0130)
-
-This error occurs when a set contains the same value two or more times.
-
-```{literalinclude} /../examples/pylint/w0130_duplicate_value.py
-
-```
-
-Corrected version:
-
-```python
-correct_set = {'value 1', 2, 3}
-```
-
-Sets are unordered and duplicate elements are not allowed.
 
 ## Type errors
 

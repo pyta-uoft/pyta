@@ -2257,6 +2257,24 @@ The error messages display how to fix them (e.g., by adding spaces or adding/rem
 
 See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
 
+(R0133)=
+
+### Comparison of constants (R0133)
+
+This error occurs when two constants are compared with each other. The result of the comparison is always the same.
+It is better to use the constant directly.
+
+```{literalinclude} /../examples/pylint/r0133_comparison_of_constants.py
+
+```
+
+Corrected version:
+
+```python
+def is_equal_to_one(a: int) -> bool:
+    return a == 1
+```
+
 ## Miscellaneous
 
 (E1305)=

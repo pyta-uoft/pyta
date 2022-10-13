@@ -5,7 +5,7 @@ from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
 
-from python_ta.checkers.global_variables_checker import is_in_main
+from python_ta.utils import _is_in_main
 
 FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
@@ -69,11 +69,7 @@ class IOFunctionChecker(BaseChecker):
                 ):
                     if name in self.linter.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)
-                elif (
-                    isinstance(scope_parent, type(None))
-                    and isinstance(scope, nodes.Module)
-                    and not is_in_main(node)
-                ):
+                elif isinstance(scope, nodes.Module) and not _is_in_main(node):
                     if name in self.linter.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)
 

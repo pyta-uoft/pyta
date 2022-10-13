@@ -6,6 +6,8 @@ from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
 
+from python_ta.utils import _is_in_main
+
 
 class GlobalVariablesChecker(BaseChecker):
 
@@ -62,7 +64,7 @@ class GlobalVariablesChecker(BaseChecker):
         """
         if hasattr(node, "name") and node.name in self.import_names:
             return
-        if isinstance(node.frame(), nodes.Module) and not is_in_main(node):
+        if isinstance(node.frame(), nodes.Module) and not _is_in_main(node):
             node_list = _get_child_disallowed_global_var_nodes(node)
             for node in node_list:
                 if isinstance(node, nodes.AssignName):
@@ -97,24 +99,6 @@ def _get_child_disallowed_global_var_nodes(node):
     for child_node in node.get_children():
         node_list += _get_child_disallowed_global_var_nodes(child_node)
     return node_list
-
-
-def is_in_main(node):
-    if not hasattr(node, "parent"):
-        return False
-
-    parent = node.parent
-    try:
-        if (
-            isinstance(parent, nodes.If)
-            and parent.test.left.name == "__name__"
-            and parent.test.ops[0][1].value == "__main__"
-        ):
-            return True
-        else:
-            return is_in_main(parent)
-    except (AttributeError, IndexError) as e:
-        return is_in_main(parent)
 
 
 def register(linter):

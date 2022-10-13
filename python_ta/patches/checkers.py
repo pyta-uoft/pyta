@@ -6,7 +6,7 @@ from pylint.checkers.base import NameChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
 
-from python_ta.checkers.global_variables_checker import is_in_main
+from python_ta.utils import _is_in_main
 
 
 def patch_checkers():
@@ -53,7 +53,7 @@ def _override_check_invalid_name_in_main():
     old_visit_assignname = NameChecker.visit_assignname
 
     def patched_visit_assignname(self, node):
-        if is_in_main(node):
+        if _is_in_main(node):
             self._check_name("variable", node.name, node)
         else:
             old_visit_assignname(self, node)

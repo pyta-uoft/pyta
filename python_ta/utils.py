@@ -42,6 +42,6 @@ def _is_in_main(node):
         ):
             return True
         else:
-            return is_in_main(parent)
+            return _is_in_main(parent)
     except (AttributeError, IndexError) as e:
-        return is_in_main(parent)
+        return _is_in_main(parent)

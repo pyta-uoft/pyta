@@ -1945,6 +1945,13 @@ Example:
 
 ```
 
+The exception is calling IO functions inside the main block, which is allowed.
+
+```python
+if __name__ == "__main__":
+    name = input()
+```
+
 (E9996)=
 
 ### Loop iterates only once (E9996)

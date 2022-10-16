@@ -354,6 +354,132 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
 
+    def test_comp_no_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [x for x in lst]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp2_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(0, len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_list_comp3_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(0, len(lst), 1)]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_binop_msg(self):
+        """Return a list of all the items in lst multiplied by 2"""
+        src = """
+        def f(lst: list) -> list:
+            return [2*lst[i] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_pairs_no_msg(self):
+        """Return a list of the sums of lst and lst1.
+
+        NO error reported; the loop index is used to index lst1 as well."""
+        src = """
+        def f(lst: list, lst1: list) -> list:
+            return [lst[i] + lst1[i] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_var_unused_no_msg(self):
+        """Iteration variable i is unused in the code, no unnecessary indexing performed"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[0] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_incrememt_index_no_msg(self):
+        """Iteration variable is modified to index list, no unnecessary indexing"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i+1] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
 
 if __name__ == "__main__":
     import pytest

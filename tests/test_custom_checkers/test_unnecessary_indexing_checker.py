@@ -468,7 +468,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_comprehension(comp_node)
 
-    def test_comp_incrememt_index_no_msg(self):
+    def test_comp_increment_index_no_msg(self):
         """Iteration variable is modified to index list, no unnecessary indexing"""
         src = """
         def f(lst: list) -> list:
@@ -478,6 +478,44 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_if_cond_comp_msg(self):
+        """Check comprehension with redundant indexing in if-condition"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(len(lst)) if lst[i] % 2 == 0]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_mult_var_comp_msg(self):
+        """Check for redundancy in a comprehension with multiple lists and variables"""
+        src = """
+        def f(lst: list, lst1: list) -> list:
+            return [lst[i] + lst1[j] for i in range(len(lst)) for j in range(len(lst1))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
             self.checker.visit_comprehension(comp_node)
 
 

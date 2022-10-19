@@ -1,13 +1,11 @@
 # PythonTA Checks
 
-This page describes in greater detail the errors that PythonTA checks for.
-If anything is unclear, incorrect, or missing, please don't hesitate to send an
-email to \[david at cs dot toronto dot edu\].
+This page describes in greater detail the errors that PythonTA checks for. If anything is unclear, incorrect, or
+missing, please don't hesitate to send an email to \[david at cs dot toronto dot edu\].
 
 ## Improper Python usage
 
-These errors generally indicate a misuse of variables, control flow, or other Python features in our
-code.
+These errors generally indicate a misuse of variables, control flow, or other Python features in our code.
 
 (E0601)=
 
@@ -39,9 +37,8 @@ This error occurs when a loop variable is used outside the `for` loop where it w
 
 ```
 
-Python, unlike many other languages (e.g. C, C++, Java), allows loop variables to be accessed
-outside the loop in which they were defined. However, this practice is discouraged, as it can lead
-to obscure and hard-to-detect bugs.
+Python, unlike many other languages (e.g. C, C++, Java), allows loop variables to be accessed outside the loop in which
+they were defined. However, this practice is discouraged, as it can lead to obscure and hard-to-detect bugs.
 
 **See also**:
 
@@ -51,16 +48,16 @@ to obscure and hard-to-detect bugs.
 
 ### Not in loop (E0103)
 
-This error occurs when the `break` or `continue` keyword is used outside of a loop. The
-keyword `break` is used to exit a loop early and the keyword `continue` is used to skip an iteration
-in a loop. Hence, both keywords only belong inside loops.
+This error occurs when the `break` or `continue` keyword is used outside of a loop. The keyword `break` is used to exit
+a loop early and the keyword `continue` is used to skip an iteration in a loop. Hence, both keywords only belong inside
+loops.
 
 ```{literalinclude} /../examples/pylint/e0103_not_in_loop.py
 
 ```
 
-A common source of this error is when the `break` or `continue` is not indented properly (it must be
-indented to be considered part of the loop body).
+A common source of this error is when the `break` or `continue` is not indented properly (it must be indented to be
+considered part of the loop body).
 
 (E0104)=
 
@@ -72,15 +69,15 @@ This error occurs when a `return` statement is found outside a function or metho
 
 ```
 
-A common source of this error is when the `return` is not indented properly (it must be indented to
-be considered part of the loop body).
+A common source of this error is when the `return` is not indented properly (it must be indented to be considered part
+of the loop body).
 
 (W0101)=
 
 ### Unreachable (W0101)
 
-This error occurs when there is some code after a `return` or `raise` statement. This code will
-never be run, so either it should be removed, or the function is returning too early.
+This error occurs when there is some code after a `return` or `raise` statement. This code will never be run, so either
+it should be removed, or the function is returning too early.
 
 ```{literalinclude} /../examples/pylint/w0101_unreachable.py
 
@@ -96,16 +93,15 @@ This error occurs when a dictionary literal sets the same key multiple times.
 
 ```
 
-Dictionaries map unique keys to values. When different values are assigned to the same key, the last
-assignment takes precedence. This is rarely what the user wants when they are constructing a
-dictionary.
+Dictionaries map unique keys to values. When different values are assigned to the same key, the last assignment takes
+precedence. This is rarely what the user wants when they are constructing a dictionary.
 
 (E1123)=
 
 ### Unexpected keyword arg (E1123)
 
-This error occurs when a function call passes a keyword argument which does not match the signature
-of the function being called.
+This error occurs when a function call passes a keyword argument which does not match the signature of the function
+being called.
 
 ```{literalinclude} /../examples/pylint/e1123_unexpected_keyword_arg.py
 
@@ -119,17 +115,16 @@ print_greeting(name="Arthur")
 
 ## Type errors
 
-These errors are some of the most common errors we encounter in Python. They generally have to do
-with using a value of one type where another type is required.
+These errors are some of the most common errors we encounter in Python. They generally have to do with using a value of
+one type where another type is required.
 
 (E1101)=
 
 ### No member (E1101)
 
-This error occurs when we use dot notation (`my_var.x`) to access an attribute or to call a method
-which does not exist for the given object. This can happen both for built-in types like `str` and
-for classes that we define ourselves. This error often results in
-an [`AttributeError`][attributeerror] when we run the code.
+This error occurs when we use dot notation (`my_var.x`) to access an attribute or to call a method which does not exist
+for the given object. This can happen both for built-in types like `str` and for classes that we define ourselves. This
+error often results in an [`AttributeError`][attributeerror] when we run the code.
 
 ```{literalinclude} /../examples/pylint/e1101_no_member.py
 
@@ -139,9 +134,8 @@ an [`AttributeError`][attributeerror] when we run the code.
 
 ### Not callable (E1102)
 
-This error occurs when we try to call a value which is not a function, method, or callable object.
-In the following example, we should not call `x()` because `x` refers to an integer, and calling an
-integer has no meaning.
+This error occurs when we try to call a value which is not a function, method, or callable object. In the following
+example, we should not call `x()` because `x` refers to an integer, and calling an integer has no meaning.
 
 ```{literalinclude} /../examples/pylint/e1102_not_callable.py
 
@@ -151,24 +145,24 @@ integer has no meaning.
 
 ### Assignment from no return (E1111)
 
-This error occurs when we assign a variable to the return value of a function call, but the function
-never returns anything. In the following example, `add_fruit` mutates `fruit_basket` instead of
-returning a new list. As a result, `new_fruit_basket` always gets the value `None`.
+This error occurs when we assign a variable to the return value of a function call, but the function never returns
+anything. In the following example, `add_fruit` mutates `fruit_basket` instead of returning a new list. As a
+result, `new_fruit_basket` always gets the value `None`.
 
 ```{literalinclude} /../examples/pylint/e1111_assignment_from_no_return.py
 
 ```
 
-We should either modify `add_fruit` to return a new list, or call `add_fruit` without assigning the
-return value to a variable.
+We should either modify `add_fruit` to return a new list, or call `add_fruit` without assigning the return value to a
+variable.
 
 (E1128)=
 
 ### Assignment from None (E1128)
 
-This error occurs when we assign a variable the return value of a function call, but the function
-always returns `None`. In the following example, `add_fruit` always returns `None`. As a
-result, `new_fruit_basket` will always get the value `None`.
+This error occurs when we assign a variable the return value of a function call, but the function always returns `None`.
+In the following example, `add_fruit` always returns `None`. As a result, `new_fruit_basket` will always get the
+value `None`.
 
 ```{literalinclude} /../examples/pylint/e1128_assignment_from_none.py
 
@@ -178,8 +172,8 @@ result, `new_fruit_basket` will always get the value `None`.
 
 ### No value for parameter (E1120)
 
-A function must be called with one argument value per parameter in its header. This error indicates
-that we called a function with too few arguments. In the following example, there should be _three_
+A function must be called with one argument value per parameter in its header. This error indicates that we called a
+function with too few arguments. In the following example, there should be _three_
 values passed to the function instead of two.
 
 ```{literalinclude} /../examples/pylint/e1120_no_value_for_parameter.py
@@ -196,8 +190,8 @@ get_sum(1, 2, 3)
 
 ### Too many function args (E1121)
 
-A function must be called with one argument value per parameter in its header. This error indicates
-that we called a function with too many arguments. In the following example, there should be _two_
+A function must be called with one argument value per parameter in its header. This error indicates that we called a
+function with too many arguments. In the following example, there should be _two_
 values passed to the function instead of three.
 
 ```{literalinclude} /../examples/pylint/e1121_too_many_function_args.py
@@ -214,8 +208,8 @@ get_sum(1, 2)
 
 ### Invalid sequence index (E1126)
 
-This error occurs when a list or tuple is indexed using the square bracket notation `my_list[...]`,
-but the value of the index is not an integer.
+This error occurs when a list or tuple is indexed using the square bracket notation `my_list[...]`, but the value of the
+index is not an integer.
 
 Remember that the index indicates the _position_ of the item in the list/tuple.
 
@@ -234,12 +228,10 @@ print(a[0])
 
 ### Invalid slice index (E1127)
 
-This error occurs when a list or tuple is sliced using the square bracket
-notation `my_list[... : ...]`, but the two values on the left and right of the colon are not
-integers.
+This error occurs when a list or tuple is sliced using the square bracket notation `my_list[... : ...]`, but the two
+values on the left and right of the colon are not integers.
 
-Remember that the slice numbers indicate the _start_ and _stop_ positions for the slice in the
-list/tuple.
+Remember that the slice numbers indicate the _start_ and _stop_ positions for the slice in the list/tuple.
 
 ```{literalinclude} /../examples/pylint/e1127_invalid_slice_index.py
 
@@ -257,8 +249,7 @@ print(a[0:3])
 ### Invalid unary operand type (E1130)
 
 This error occurs when we use a [unary operator][unary arithmetic and bitwise operations] (`+`, `-`
-, `~`) on an object which does not support this operator. For example, a list does not support
-negation.
+, `~`) on an object which does not support this operator. For example, a list does not support negation.
 
 ```{literalinclude} /../examples/pylint/e1130_invalid_unary_operand_type.py
 
@@ -269,8 +260,7 @@ negation.
 ### Unsupported binary operation (E1131)
 
 This error occurs when we use a [binary arithmetic operator][binary arithmetic operations] like `+`
-or `*`, but the left and right sides are not compatible types. For example, a dictionary cannot be
-added to a list.
+or `*`, but the left and right sides are not compatible types. For example, a dictionary cannot be added to a list.
 
 ```{literalinclude} /../examples/pylint/e1131_unsupported_binary_operation.py
 
@@ -280,11 +270,9 @@ added to a list.
 
 ### Unsupported membership test (E1135)
 
-This error occurs when we use the membership test `a in b`, but the type of `b` does not support
-membership tests.
+This error occurs when we use the membership test `a in b`, but the type of `b` does not support membership tests.
 
-The standard Python types which support membership tests are strings, lists, tuples, and
-dictionaries.
+The standard Python types which support membership tests are strings, lists, tuples, and dictionaries.
 
 ```{literalinclude} /../examples/pylint/e1135_unsupported_membership_test.py
 
@@ -307,8 +295,8 @@ The standard Python types which support indexing are strings, lists, tuples, and
 
 ### Unsupported assignment operation (E1137)
 
-This error occurs when we assign something to an object which does not support assignment (i.e. an
-object which does not define the `__setitem__` method).
+This error occurs when we assign something to an object which does not support assignment (i.e. an object which does not
+define the `__setitem__` method).
 
 ```{literalinclude} /../examples/pylint/e1137_unsupported_assignment_operation.py
 
@@ -318,8 +306,8 @@ object which does not define the `__setitem__` method).
 
 ### Unsupported delete operation (E1138)
 
-This error occurs when the `del` keyword is used to delete an item from an object which does not
-support item deletion (i.e. an object that does not define the `__delitem__` special method).
+This error occurs when the `del` keyword is used to delete an item from an object which does not support item deletion (
+i.e. an object that does not define the `__delitem__` special method).
 
 ```{literalinclude} /../examples/pylint/e1138_unsupported_delete_operation.py
 
@@ -329,7 +317,6 @@ Corrected version:
 
 ```python
 class NamedList:
-
     ...  # Same as in the code above
 
     def __delitem__(self, name: str) -> None:
@@ -348,8 +335,8 @@ print('c' in named_list)  # Prints False
 
 ### Unbalanced tuple unpacking (E0632)
 
-This error occurs when we are trying to assign to multiple variables at once, but the right side has
-too few or too many values in the sequence.
+This error occurs when we are trying to assign to multiple variables at once, but the right side has too few or too many
+values in the sequence.
 
 ```{literalinclude} /../examples/pylint/e0632_unbalanced_tuple_unpacking.py
 
@@ -359,8 +346,8 @@ too few or too many values in the sequence.
 
 ### Unpacking non-sequence (E0633)
 
-This error occurs when we are trying to assign to multiple variables at once, but the right side is
-not a sequence, and so can't be unpacked.
+This error occurs when we are trying to assign to multiple variables at once, but the right side is not a sequence, and
+so can't be unpacked.
 
 ```{literalinclude} /../examples/pylint/e0633_unpacking_non_sequence.py
 
@@ -371,9 +358,9 @@ not a sequence, and so can't be unpacked.
 ### Not an iterable (E1133)
 
 This error occurs when a non-iterable value is used in a place where an iterable is expected.
-An [iterable][python documentation: iterable] is an object capable of returning its members one at a
-time. Examples of iterables include sequence types such as `list`, `str`, and `tuple`, some
-non-sequence types such as `dict`, and instances of other classes which define the `__iter__`
+An [iterable][python documentation: iterable] is an object capable of returning its members one at a time. Examples of
+iterables include sequence types such as `list`, `str`, and `tuple`, some non-sequence types such as `dict`, and
+instances of other classes which define the `__iter__`
 or `__getitem__` special methods.
 
 ```{literalinclude} /../examples/pylint/e1133_not_an_iterable.py
@@ -391,7 +378,8 @@ for number in [1, 2, 3]:
 
 ### Not a mapping (E1134)
 
-This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a non-dict with `**` in a function call meaning that the parameters are unfilled.
+This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a
+non-dict with `**` in a function call meaning that the parameters are unfilled.
 
 `**` can only be used on a `dict` to unpack the values.
 
@@ -405,8 +393,8 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 ### Unneeded not (C0113)
 
-This error occurs when a boolean expression contains an unneeded negation. If we are getting this
-error, the expression can be simplified to not use a negation.
+This error occurs when a boolean expression contains an unneeded negation. If we are getting this error, the expression
+can be simplified to not use a negation.
 
 ```{literalinclude} /../examples/pylint/c0113_unneeded_not.py
 
@@ -426,8 +414,8 @@ else:
 
 ### Consider using f-string (C0209)
 
-This error occurs when a string is formatted with `%` or `format()`.
-The preferred way to include Python values in strings is with f-strings.
+This error occurs when a string is formatted with `%` or `format()`. The preferred way to include Python values in
+strings is with f-strings.
 
 ```{literalinclude} /../examples/pylint/c0209_consider_using_f_string.py
 
@@ -445,8 +433,8 @@ print(f"{name} is my name!")
 
 ### Simplifiable condition (R1726)
 
-This error occurs when a boolean test condition can be simplified.
-Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
+This error occurs when a boolean test condition can be simplified. Test conditions are expressions evaluated inside of
+statements such as `if`, `while`, or `assert`.
 
 ```{literalinclude} /../examples/pylint/r1726_simplifiable_condition.py
 
@@ -456,15 +444,15 @@ The above can be modified to:
 
 ```python
 if a:  # Error was on this line
-  pass
+    pass
 ```
 
 (R1727)=
 
 ### Condition evals to constant (R1727)
 
-This error occurs when a boolean test condition always evaluates to a constant.
-Test conditions are expressions evaluated inside of statements such as `if`, `while`, or `assert`.
+This error occurs when a boolean test condition always evaluates to a constant. Test conditions are expressions
+evaluated inside of statements such as `if`, `while`, or `assert`.
 
 ```{literalinclude} /../examples/pylint/r1727_condition_evals_to_constant.py
 
@@ -474,7 +462,7 @@ The above can be modified to:
 
 ```python
 if True:  # Error was on this line
-  pass
+    pass
 ```
 
 (C0121)=
@@ -501,8 +489,8 @@ def square(number: Optional[float]) -> Optional[float]:
         return number ** 2
 ```
 
-On the other hand, if you are comparing a boolean value to `True` or `False`, you can actually omit
-the comparison entirely:
+On the other hand, if you are comparing a boolean value to `True` or `False`, you can actually omit the comparison
+entirely:
 
 ```python
 # Bad
@@ -529,9 +517,8 @@ def square_if_even(number: int) -> int:
 
 ### Using constant test (W0125)
 
-This error occurs when a conditional statement (like an `if` statement) uses a constant value for
-its test. In such a case, a conditional statement is not necessary, as it will always result in the
-same path of execution.
+This error occurs when a conditional statement (like an `if` statement) uses a constant value for its test. In such a
+case, a conditional statement is not necessary, as it will always result in the same path of execution.
 
 ```{literalinclude} /../examples/pylint/w0125_using_constant_test.py
 
@@ -551,8 +538,8 @@ This error occurs when a variable is redeclared on the same line it was assigned
 
 ### Too many branches (R0912)
 
-The function or method has too many branches, making it hard to follow. This is a sign that the
-function/method is too complex, and should be split up.
+The function or method has too many branches, making it hard to follow. This is a sign that the function/method is too
+complex, and should be split up.
 
 **Note**: The checker limit is 12 branches.
 
@@ -564,12 +551,12 @@ function/method is too complex, and should be split up.
 
 ### Too many nested blocks (R1702)
 
-This error occurs when we have more than three levels of nested blocks in our code. Deep nesting is
-a sign that our function or method is too complex, and should be broken down using helper functions
-or rewritten as a [list comprehension][list comprehensions tutorial].
+This error occurs when we have more than three levels of nested blocks in our code. Deep nesting is a sign that our
+function or method is too complex, and should be broken down using helper functions or rewritten as
+a [list comprehension][list comprehensions tutorial].
 
-**Note**: This checker does not count function, method, or class definitions as blocks, so the
-example below is considered to have _six_ nested blocks, not seven.
+**Note**: This checker does not count function, method, or class definitions as blocks, so the example below is
+considered to have _six_ nested blocks, not seven.
 
 ```{literalinclude} /../examples/pylint/r1702_too_many_nested_blocks.py
 
@@ -620,8 +607,8 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
 
 ### Too many lines (C0302)
 
-This error occurs when the file has too many lines. The limit for too many lines is specified
-through the `max-module-lines` configuration option.
+This error occurs when the file has too many lines. The limit for too many lines is specified through
+the `max-module-lines` configuration option.
 
 **Note**: The default value is `1000`.
 
@@ -629,9 +616,8 @@ through the `max-module-lines` configuration option.
 
 ### Too many arguments (R0913)
 
-The function or method is defined with too many arguments. This is a sign that the function/method
-is too complex, and should be split up, or that some of the arguments are related, and should be
-combined and passed as a single object.
+The function or method is defined with too many arguments. This is a sign that the function/method is too complex, and
+should be split up, or that some of the arguments are related, and should be combined and passed as a single object.
 
 **Note**: The checker limit is 5 arguments.
 
@@ -690,8 +676,8 @@ This error occurs when a function argument is never used in the function.
 
 ### Pointless statement (W0104)
 
-This error occurs when a statement does not have any effect. This means that the statement could be
-removed without changing the behaviour of the program.
+This error occurs when a statement does not have any effect. This means that the statement could be removed without
+changing the behaviour of the program.
 
 ```{literalinclude} /../examples/pylint/w0104_pointless_statement.py
 
@@ -701,8 +687,7 @@ removed without changing the behaviour of the program.
 
 ### Pointless string statement (W0105)
 
-This error occurs when a string statement does not have any effect. Very similar to error `W0104`, but
-for strings.
+This error occurs when a string statement does not have any effect. Very similar to error `W0104`, but for strings.
 
 ```{literalinclude} /../examples/pylint/w0105_pointless_string_statement.py
 
@@ -732,16 +717,15 @@ for key, value in sample_dict.items():
 
 ### Unnecessary pass (W0107)
 
-This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has
-no effect). `pass` statements should only be used to fill what would otherwise be an empty code
-block, since code blocks cannot be empty in Python.
+This error occurs when a [`pass` statement][`pass` statements] is used that can be avoided (or has no effect). `pass`
+statements should only be used to fill what would otherwise be an empty code block, since code blocks cannot be empty in
+Python.
 
 ```{literalinclude} /../examples/pylint/w0107_unnecessary_pass.py
 
 ```
 
-In the above example, the `pass` statement is "unnecessary" as the program's effect is not changed
-if `pass` is removed.
+In the above example, the `pass` statement is "unnecessary" as the program's effect is not changed if `pass` is removed.
 
 **See also:**
 
@@ -751,9 +735,9 @@ if `pass` is removed.
 
 ### Unnecessary ellipsis (W2301)
 
-This error occurs when a docstring is the preceding line of an ellipsis or if there is a statement
-in the same scope as an ellipsis. An ellipsis should only be used as a "placeholder" to fill in a block
-of code that requires at least one statement.
+This error occurs when a docstring is the preceding line of an ellipsis or if there is a statement in the same scope as
+an ellipsis. An ellipsis should only be used as a "placeholder" to fill in a block of code that requires at least one
+statement.
 
 ```{literalinclude} /../examples/pylint/w2301_unnecessary_ellipsis.py
 
@@ -773,29 +757,27 @@ def my_func() -> None:
 ### Inconsistent return statements (R1710)
 
 This error occurs when you have a function that sometimes returns a non-`None` value and sometimes _
-implicitly_ returns `None`. This is an issue because in Python, we prefer making code explicit
-rather than implicit.
+implicitly_ returns `None`. This is an issue because in Python, we prefer making code explicit rather than implicit.
 
 ```{literalinclude} /../examples/pylint/r1710_inconsistent_return_statements.py
 
 ```
 
-In `add_sqrts`, we should change `return` into `return None` to make better contrast the return
-value with the other branch. In the other two functions, it's possible that none of the `return`
-statements will execute, and so the end of the function body will be reached, causing a `None` to be
-returned implicitly.
+In `add_sqrts`, we should change `return` into `return None` to make better contrast the return value with the other
+branch. In the other two functions, it's possible that none of the `return`
+statements will execute, and so the end of the function body will be reached, causing a `None` to be returned
+implicitly.
 (Forgetting about this behaviour actually is a common source of bugs in student code!)
-In both cases, you can fix the problem by adding an explicit `return None` to the end of the
-function body.
+In both cases, you can fix the problem by adding an explicit `return None` to the end of the function body.
 
-In CSC148, you may sometimes choose resolve this error by instead _raising an error_ rather than
-returning `None`.
+In CSC148, you may sometimes choose resolve this error by instead _raising an error_ rather than returning `None`.
 
 (R1732)=
 
 ### Consider using with (R1732)
 
-This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources.
+This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By
+using `with`, the file is closed automatically which saves resources.
 
 ```{literalinclude} /../examples/pylint/r1732_consider_using_with.py
 
@@ -805,7 +787,7 @@ Corrected version:
 
 ```python
 with open('my_file.txt', 'r') as file:
-    ... # No need to manually close the file
+    ...  # No need to manually close the file
 ```
 
 (R1734)=
@@ -853,9 +835,8 @@ for student in students_info:
 
 ## Documentation and naming
 
-Good documentation and identifiers are essential for writing software. PyTA helps check to make sure
-we haven't forgotten to document anything, as well as a basic check on the formatting of our
-identifiers.
+Good documentation and identifiers are essential for writing software. PyTA helps check to make sure we haven't
+forgotten to document anything, as well as a basic check on the formatting of our identifiers.
 
 (C0112)=
 
@@ -871,17 +852,15 @@ This error occurs when a module, function, class or method has an empty docstrin
 
 ### Invalid name (C0103)
 
-This error occurs when a name does not follow
-the [Python Naming Convention][pep8: naming conventions] associated with its role (constant,
-variable, etc.).
+This error occurs when a name does not follow the [Python Naming Convention][pep8: naming conventions] associated with
+its role (constant, variable, etc.).
 
-- Names of variables, attributes, methods, and arguments should be
-  in **`lowercase_with_underscores`**.
+- Names of variables, attributes, methods, and arguments should be in **`lowercase_with_underscores`**.
 - Names of constants should be in **`ALL_CAPS_WITH_UNDERSCORES`**.
 - Names of classes should be in **`CamelCase`**.
 
-A special character accepted in all types of names is `_`. Numbers are allowed in all names, but
-names must not begin with a number.
+A special character accepted in all types of names is `_`. Numbers are allowed in all names, but names must not begin
+with a number.
 
 ```{literalinclude} /../examples/pylint/c0103_invalid_name.py
 
@@ -891,8 +870,8 @@ names must not begin with a number.
 
 ### Disallowed name (C0104)
 
-This error occurs when a variable name is chosen to be a typical generic name, rather than a
-meaningful one. Here are some of the disallowed names to avoid:
+This error occurs when a variable name is chosen to be a typical generic name, rather than a meaningful one. Here are
+some of the disallowed names to avoid:
 
 - `foo`
 - `bar`
@@ -909,8 +888,8 @@ meaningful one. Here are some of the disallowed names to avoid:
 
 ### Function redefined (E0102)
 
-This error occurs when a function, class or method is redefined. If we are getting this error, we
-should make sure all the functions, methods and classes that we define have different names.
+This error occurs when a function, class or method is redefined. If we are getting this error, we should make sure all
+the functions, methods and classes that we define have different names.
 
 ```{literalinclude} /../examples/pylint/e0102_function_redefined.py
 
@@ -920,8 +899,8 @@ should make sure all the functions, methods and classes that we define have diff
 
 ### Duplicate argument name (E0108)
 
-This error occurs if there are duplicate parameter names in function definitions. All parameters
-must have distinct names, so that we can refer to each one separately in the function body.
+This error occurs if there are duplicate parameter names in function definitions. All parameters must have distinct
+names, so that we can refer to each one separately in the function body.
 
 ```{literalinclude} /../examples/pylint/e0108_duplicate_argument_name.py
 
@@ -953,13 +932,11 @@ def greet_person(name, friends) -> None:
 
 ### Redefined outer name (W0621)
 
-This error occurs when we are redefining a variable name that has already been defined in the outer
-scope.
+This error occurs when we are redefining a variable name that has already been defined in the outer scope.
 
-For example, this error will occur when we have a local name identical to a global name. The local
-name takes precedence, but it hides the global name, making it no longer accessible. Note that the
-global name is not accessible _anywhere_ in the function where it is redefined, even before the
-redefinition.
+For example, this error will occur when we have a local name identical to a global name. The local name takes
+precedence, but it hides the global name, making it no longer accessible. Note that the global name is not accessible _
+anywhere_ in the function where it is redefined, even before the redefinition.
 
 ```{literalinclude} /../examples/pylint/w0621_redefined_outer_name.py
 
@@ -997,15 +974,14 @@ vars                zip
 
 ## Imports
 
-There are standards governing how we should organize our imports, or even possibly which modules we
-may import at all.
+There are standards governing how we should organize our imports, or even possibly which modules we may import at all.
 
 (E9999)=
 
 ### Forbidden imports (E9999)
 
-This error occurs when your code imports a module which is not allowed (usually for the purpose of
-an assignment/exercise).
+This error occurs when your code imports a module which is not allowed (usually for the purpose of an
+assignment/exercise).
 
 ```{literalinclude} /../examples/custom_checkers/e9999_forbidden_import.py
 ---
@@ -1017,8 +993,8 @@ lines: 1-3
 
 ### Import error (E0401)
 
-The module is unable to be imported. Check the spelling of the module name, or whether the module is
-in the correct directory.
+The module is unable to be imported. Check the spelling of the module name, or whether the module is in the correct
+directory.
 
 ```{literalinclude} /../examples/pylint/e0401_import_error.py
 
@@ -1034,8 +1010,8 @@ import missing_module as foo  # This module does not exist
 
 ### No name in module (E0611)
 
-This error occurs when we are trying to access a variable from an imported module, but that variable
-name could not be found in that referenced module.
+This error occurs when we are trying to access a variable from an imported module, but that variable name could not be
+found in that referenced module.
 
 ```{literalinclude} /../examples/pylint/e0611_no_name_in_module.py
 
@@ -1045,24 +1021,24 @@ name could not be found in that referenced module.
 
 ### Wildcard import (W0401)
 
-We should only import what we need. Wildcard imports (shown below) are generally discouraged, as
-they add all objects from the imported module into the global namespace. This makes it difficult to
-tell in which module a particular class, function or constant is defined, and may cause problems,
-for example, when multiple modules have objects with identical names.
+We should only import what we need. Wildcard imports (shown below) are generally discouraged, as they add all objects
+from the imported module into the global namespace. This makes it difficult to tell in which module a particular class,
+function or constant is defined, and may cause problems, for example, when multiple modules have objects with identical
+names.
 
 ```{literalinclude} /../examples/pylint/w0401_wildcard_import.py
 
 ```
 
-Rather than importing everything with wildcard `*`, we should specify the names of the objects which
-we would like to import:
+Rather than importing everything with wildcard `*`, we should specify the names of the objects which we would like to
+import:
 
 ```python
 from module_name import SOME_CONSTANT, SomeClass, some_function
 ```
 
-Or, if we need to import many objects from a particular module, we can import the module itself, and
-use it as a namespace for the required objects:
+Or, if we need to import many objects from a particular module, we can import the module itself, and use it as a
+namespace for the required objects:
 
 ```python
 import module_name
@@ -1084,15 +1060,15 @@ A module should not be imported more than once.
 
 ### Import self (W0406)
 
-A module should not import itself. For example, if we have a module named `W0406_import_self`, it
-should not import a module with the same name.
+A module should not import itself. For example, if we have a module named `W0406_import_self`, it should not import a
+module with the same name.
 
 ```{literalinclude} /../examples/pylint/w0406_import_self.py
 
 ```
 
-This error can occur when the name of our Python file conflicts with the name of a module which we
-would like to import. For example, if we have a Python file named `math.py`, calling `import math`
+This error can occur when the name of our Python file conflicts with the name of a module which we would like to import.
+For example, if we have a Python file named `math.py`, calling `import math`
 from within that file (or from within _any_ Python file in the same directory) will import _
 our_ `math.py` file, and not the [`math` module] from the standard library.
 
@@ -1118,9 +1094,8 @@ Example File 2
 
 ### Consider using from import (R0402)
 
-Some imports are long and go through multiple layers of packages or modules. It's common to want to
-rename these imports as the last imported module or package using the `as` keyword.
-Consider using the `from` import syntax instead.
+Some imports are long and go through multiple layers of packages or modules. It's common to want to rename these imports
+as the last imported module or package using the `as` keyword. Consider using the `from` import syntax instead.
 
 ```{literalinclude} /../examples/pylint/R0402_consider_using_from_import.py
 
@@ -1149,8 +1124,8 @@ import sys
 import math
 ```
 
-Note, however, that we can import multiple functions, classes, or constants on one line, as long as
-they are from the same module.
+Note, however, that we can import multiple functions, classes, or constants on one line, as long as they are from the
+same module.
 
 ```python
 from shutil import copy, SameFileError
@@ -1160,8 +1135,8 @@ from shutil import copy, SameFileError
 
 ### Wrong import order (C0411)
 
-This error occurs when the [PEP8 import order][pep8 imports] is not respected. We should do standard
-library imports first, then third-party libraries, then local imports.
+This error occurs when the [PEP8 import order][pep8 imports] is not respected. We should do standard library imports
+first, then third-party libraries, then local imports.
 
 ```{literalinclude} /../examples/pylint/c0411_wrong_import_order.py
 
@@ -1188,8 +1163,7 @@ from math import floor
 
 ### Wrong import position (C0413)
 
-Imports should be placed at the top of the module, above any other code, but below the module
-docstring.
+Imports should be placed at the top of the module, above any other code, but below the module docstring.
 
 ```{literalinclude} /../examples/pylint/c0413_wrong_import_position.py
 
@@ -1221,8 +1195,7 @@ This error occurs when we import a module which is not used anywhere in our code
 
 ### Too many instance attributes (R0902)
 
-The class has too many instance attributes, which suggests that it is too complicated and tries to
-do too many things.
+The class has too many instance attributes, which suggests that it is too complicated and tries to do too many things.
 
 **Note**: The checker limit is 7 instance attributes.
 
@@ -1230,8 +1203,8 @@ do too many things.
 
 ```
 
-One solution is to logically decompose the class into multiple classes, each with fewer instance
-attributes. We can then use composition to access those attributes in a different class.
+One solution is to logically decompose the class into multiple classes, each with fewer instance attributes. We can then
+use composition to access those attributes in a different class.
 
 ```python
 class Edible(object):
@@ -1296,8 +1269,8 @@ class Cat(Animal):
 
 ### Arguments differ (W0221)
 
-This error occurs when a method takes a different number of arguments than the interface that it
-implements or the method that it overrides.
+This error occurs when a method takes a different number of arguments than the interface that it implements or the
+method that it overrides.
 
 ```{literalinclude} /../examples/pylint/w0221_arguments_differ.py
 
@@ -1320,10 +1293,10 @@ class Dog(Animal):
 
 ### Different method signature (W0222)
 
-When a child class overrides a method of the parent class, the new method should have the same
-signature as the method which it is overriding. In other words, the names and the order of the
-parameters should be the same in the two methods. Furthermore, if a parameter in the parent method
-has a default argument, it must also have a default argument in the child method.
+When a child class overrides a method of the parent class, the new method should have the same signature as the method
+which it is overriding. In other words, the names and the order of the parameters should be the same in the two methods.
+Furthermore, if a parameter in the parent method has a default argument, it must also have a default argument in the
+child method.
 
 ```{literalinclude} /../examples/pylint/w0222_signature_differs.py
 
@@ -1345,9 +1318,9 @@ class PremiumBankAccount(StandardBankAccount):
 
 This error occurs when the [`__init__`] method contains a return statement.
 
-The purpose of the `__init__` method is to initialize the attributes of an object. `__init__` is
-called by the special method [`__new__`] when a new object is being instantiated, and `__new__` will
-raise a `TypeError` if `__init__` returns anything other than `None`.
+The purpose of the `__init__` method is to initialize the attributes of an object. `__init__` is called by the special
+method [`__new__`] when a new object is being instantiated, and `__new__` will raise a `TypeError` if `__init__` returns
+anything other than `None`.
 
 ```{literalinclude} /../examples/pylint/e0101_return_in_init.py
 
@@ -1357,24 +1330,22 @@ raise a `TypeError` if `__init__` returns anything other than `None`.
 
 ### Protected member access (W0212)
 
-Attributes and methods whose name starts with an underscore should be considered "private" and
-should not be accessed outside of the class in which they are defined.
+Attributes and methods whose name starts with an underscore should be considered "private" and should not be accessed
+outside of the class in which they are defined.
 
 ```{literalinclude} /../examples/pylint/w0212_protected_access.py
 
 ```
 
-Private attributes and methods can be modified, added, or removed by the maintainer of the class at
-any time, which makes external code which uses those attributes or methods fragile. Furthermore,
-modifying a private attribute or calling a private method may lead to undefined behavior from the
-class.
+Private attributes and methods can be modified, added, or removed by the maintainer of the class at any time, which
+makes external code which uses those attributes or methods fragile. Furthermore, modifying a private attribute or
+calling a private method may lead to undefined behavior from the class.
 
 (W0233)=
 
 ### Bad parent init (W0233)
 
-When using inheritance, we should call the `__init__` method of the parent class and not of some
-unrelated class.
+When using inheritance, we should call the `__init__` method of the parent class and not of some unrelated class.
 
 ```{literalinclude} /../examples/pylint/w0233_non_parent_init_called.py
 
@@ -1410,8 +1381,7 @@ class Child(Parent):
 
 ### Super with arguments (R1725)
 
-This error occurs when calling `super()` with the class and instance as these can be ommited from
-Python 3.
+This error occurs when calling `super()` with the class and instance as these can be ommited from Python 3.
 
 ```{literalinclude} /../examples/pylint/r1725_super_with_arguments.py
 
@@ -1429,9 +1399,8 @@ class DummyClass:
 
 ### Attribute defined outside init (W0201)
 
-Any attribute we define for a class should be created inside the `__init__` method. Defining it
-outside this method is considered bad practice, as it makes it harder to keep track of what
-attributes the class actually has.
+Any attribute we define for a class should be created inside the `__init__` method. Defining it outside this method is
+considered bad practice, as it makes it harder to keep track of what attributes the class actually has.
 
 ```{literalinclude} /../examples/pylint/w0201_attribute_defined_outside_init.py
 
@@ -1455,9 +1424,8 @@ class SomeNumbers:
 
 ### Method hidden (E0202)
 
-If we accidentally hide a method with an attribute, it can cause other code to attempt to invoke
-what it believes to be a method, which will fail since it has become an attribute instead. This will
-cause the program to raise an error.
+If we accidentally hide a method with an attribute, it can cause other code to attempt to invoke what it believes to be
+a method, which will fail since it has become an attribute instead. This will cause the program to raise an error.
 
 ```{literalinclude} /../examples/pylint/e0202_method_hidden.py
 
@@ -1467,8 +1435,8 @@ cause the program to raise an error.
 
 ### Access to member before definition (E0203)
 
-Before trying to use a member of a class, it should have been defined at some point. If we try to
-use it before assigning to it, an error will occur.
+Before trying to use a member of a class, it should have been defined at some point. If we try to use it before
+assigning to it, an error will occur.
 
 ```{literalinclude} /../examples/pylint/e0203_access_member_before_definition.py
 
@@ -1478,11 +1446,11 @@ use it before assigning to it, an error will occur.
 
 ### Unexpected special method signature (E0302)
 
-This error occurs when a special method (also known as
-a ["dunder method"][python double-under, double-wonder], because it has double underscores or "
-dunders" on both sides) does not have the expected number of parameters. Special methods have an
-expected signature, and if we create a method with the same name and a different number of
-parameters, it can break existing code and lead to errors.
+This error occurs when a special method (also known as a ["dunder method"][python double-under, double-wonder], because
+it has double underscores or "
+dunders" on both sides) does not have the expected number of parameters. Special methods have an expected signature, and
+if we create a method with the same name and a different number of parameters, it can break existing code and lead to
+errors.
 
 ```{literalinclude} /../examples/pylint/e0302_unexpected_special_method_signature.py
 
@@ -1507,8 +1475,8 @@ class Animal:
 ### Inheriting from a non-class (E0239)
 
 A new class can only inherit from a different class (i.e. a Python object which defines the _type_
-of an object). It cannot inherit from an instance of a class or from a Python literal such as a
-string, list, or dictionary literal.
+of an object). It cannot inherit from an instance of a class or from a Python literal such as a string, list, or
+dictionary literal.
 
 ```{literalinclude} /../examples/pylint/e0239_inherit_non_class.py
 
@@ -1536,10 +1504,9 @@ A class should not inherit from a different class multiple times.
 
 ### No method argument (E0211)
 
-Each method in a class needs to have at least one parameter, which by convention we name `self`.
-When we create an instance of a class and call an instance method, Python automatically passes the
-class instance as the first argument to the method. If a method does not expect any arguments, this
-will result in an error.
+Each method in a class needs to have at least one parameter, which by convention we name `self`. When we create an
+instance of a class and call an instance method, Python automatically passes the class instance as the first argument to
+the method. If a method does not expect any arguments, this will result in an error.
 
 ```{literalinclude} /../examples/pylint/e0211_no_method_argument.py
 
@@ -1562,10 +1529,9 @@ class Saxophone:
 
 ### `self` as the first argument (E0213)
 
-The first parameter of a method should always be called `self`. While it is possible to name the
-first parameter something else, using the word `self` is a convention that is strongly adhered to by
-the Python community and makes it clear that we did not simply forget to add `self` or accidentally
-intended a function as a method.
+The first parameter of a method should always be called `self`. While it is possible to name the first parameter
+something else, using the word `self` is a convention that is strongly adhered to by the Python community and makes it
+clear that we did not simply forget to add `self` or accidentally intended a function as a method.
 
 ```{literalinclude} /../examples/pylint/e0213_no_self_argument.py
 
@@ -1589,12 +1555,12 @@ class SecretKeeper:
 
 ### No self use (R0201)
 
-If a method does not make use of the first argument `self`, it means that the task that the method
-is performing is not linked to the class of which it is a member. In such a case, we should rewrite
-the method as a function (by removing the first parameter `self`) and move it outside the class.
+If a method does not make use of the first argument `self`, it means that the task that the method is performing is not
+linked to the class of which it is a member. In such a case, we should rewrite the method as a function (by removing the
+first parameter `self`) and move it outside the class.
 
-In the following example, `add_small_coins` does not make use of the first parameter `self` and so
-can be moved outside the class as a function.
+In the following example, `add_small_coins` does not make use of the first parameter `self` and so can be moved outside
+the class as a function.
 
 ```{literalinclude} /../examples/pylint/r0201_no_self_use.py
 
@@ -1624,13 +1590,12 @@ def add_small_coins(nickels: int = 0, dimes: int = 0, quarters: int = 0) -> floa
 
 ### Bad static method argument (W0211)
 
-This error occurs when a static method has `self` as the first parameter. Static methods are methods
-that do not operate on instances. If we feel that the logic of a particular function belongs inside
-a class, we can move that function into the class and add
-a [`@staticmethod`][python documentation: staticmethod] [decorator][python documentation: decorator]
-to signal that the method is a static method which does not take a class instance as the first
-argument. If such a static method contains `self` as the first parameter, it suggests that we are
-erroneously expecting a class instance as the first argument to the method.
+This error occurs when a static method has `self` as the first parameter. Static methods are methods that do not operate
+on instances. If we feel that the logic of a particular function belongs inside a class, we can move that function into
+the class and add a [`@staticmethod`][python documentation: staticmethod] [decorator][python documentation: decorator]
+to signal that the method is a static method which does not take a class instance as the first argument. If such a
+static method contains `self` as the first parameter, it suggests that we are erroneously expecting a class instance as
+the first argument to the method.
 
 ```{literalinclude} /../examples/pylint/w0211_bad_staticmethod_argument.py
 
@@ -1663,9 +1628,9 @@ class CashRegister:
 
 ### Bare exception (W0702)
 
-If the `except` keyword is used without being passed an exception, _all exceptions will be caught_.
-This is not good practice, since we may catch exceptions that we do not want to catch. For example,
-we typically do not want to catch the [`KeyboardInterrupt`][python documentation: keyboardinterrupt]
+If the `except` keyword is used without being passed an exception, _all exceptions will be caught_. This is not good
+practice, since we may catch exceptions that we do not want to catch. For example, we typically do not want to catch
+the [`KeyboardInterrupt`][python documentation: keyboardinterrupt]
 exception, which is thrown when a user attempts to exist the program by typing `Ctrl-C`.
 
 ```{literalinclude} /../examples/pylint/w0702_bare_except.py
@@ -1677,10 +1642,9 @@ exception, which is thrown when a user attempts to exist the program by typing `
 ### Exception is too generic (W0703)
 
 Using `except Exception:` is only slightly more specific than `except:` and should also be avoided (
-see [W0702](#W0702)). Since most builtin exceptions, and all user-defined exceptions, are derived
-from the `Exception` class, using `except Exception:` provides no information regarding which
-exception actually occurred. Exceptions which we do not expect can go unnoticed, and this may lead
-to bugs.
+see [W0702](#W0702)). Since most builtin exceptions, and all user-defined exceptions, are derived from the `Exception`
+class, using `except Exception:` provides no information regarding which exception actually occurred. Exceptions which
+we do not expect can go unnoticed, and this may lead to bugs.
 
 ```{literalinclude} /../examples/pylint/w0703_broad_except.py
 
@@ -1701,10 +1665,9 @@ block for a particular exception will be reached.
 
 ### Bad exception order (E0701)
 
-Except blocks are analyzed sequentially (from top to bottom) and the first block that meets the
-criteria for catching the exception will be used. This means that if we have a generic exception
-type before a specific exception type, the code for the specific exception type will never be
-reached.
+Except blocks are analyzed sequentially (from top to bottom) and the first block that meets the criteria for catching
+the exception will be used. This means that if we have a generic exception type before a specific exception type, the
+code for the specific exception type will never be reached.
 
 ```{literalinclude} /../examples/pylint/e0701_bad_except_order.py
 
@@ -1714,10 +1677,9 @@ reached.
 
 ### Binary op exception (W0711)
 
-The Python `except` statement can catch multiple exceptions, if those exceptions are passed as a
-tuple. It is possible (but incorrect!) to pass `except` an expression containing the exception
-classes separated by a binary operator such as `and` or `or`. In such a case, only one of the
-exceptions will be caught!
+The Python `except` statement can catch multiple exceptions, if those exceptions are passed as a tuple. It is possible (
+but incorrect!) to pass `except` an expression containing the exception classes separated by a binary operator such
+as `and` or `or`. In such a case, only one of the exceptions will be caught!
 
 ```{literalinclude} /../examples/pylint/w0711_binary_op_exception.py
 
@@ -1738,10 +1700,9 @@ def divide_and_square(numerator: float, denominator: float) -> float:
 
 ### Misplaced bare raise (E0704)
 
-The Python `raise` statement can be used without an expression only inside an `except` block. In
-this case, it will re-raise the exception that was caught by the `except` block. This may be useful
-if, for example, we wish to do some cleanup (e.g. close file handles), or print an error message,
-before passing the exception up the call stack.
+The Python `raise` statement can be used without an expression only inside an `except` block. In this case, it will
+re-raise the exception that was caught by the `except` block. This may be useful if, for example, we wish to do some
+cleanup (e.g. close file handles), or print an error message, before passing the exception up the call stack.
 
 ```{literalinclude} /../examples/pylint/e0704_misplaced_bare_raise.py
 
@@ -1764,8 +1725,7 @@ def divide(numerator: float, denominator: float) -> float:
 ### Raising bad type (E0702)
 
 The Python `raise` statement expects an object that is derived from
-the [`BaseException`][python documentation: baseexception] class. We cannot call `raise` on integers
-or strings.
+the [`BaseException`][python documentation: baseexception] class. We cannot call `raise` on integers or strings.
 
 ```{literalinclude} /../examples/pylint/e0702_raising_bad_type.py
 
@@ -1778,10 +1738,9 @@ or strings.
 ### Raising non-exception (E0710)
 
 The Python `raise` statement expects an object that is derived from
-the [`BaseException`][python documentation: baseexception] class. All user-defined exceptions should
-inherit from the [`Exception`][python documentation: exception] class (which will make them indirect
-descendents of the `BaseException` class). Attempting to raise any other object will lead to an
-error.
+the [`BaseException`][python documentation: baseexception] class. All user-defined exceptions should inherit from
+the [`Exception`][python documentation: exception] class (which will make them indirect descendents of
+the `BaseException` class). Attempting to raise any other object will lead to an error.
 
 ```{literalinclude} /../examples/pylint/e0710_raising_non_exception.py
 
@@ -1791,11 +1750,11 @@ error.
 
 ### NotImplemented raised (E0711)
 
-[`NotImplemented`][python documentation: notimplemented] should only be used as a return value for
-binary special methods, such as `__eq__`, `__lt__`, `__add__`, etc., to indicate that the operation
-is not implemented with respect to the other type. It is _not interchangeable_
-with [`NotImplementedError`][python documentation: notimplementederror], which should be used to
-indicate that the abstract method must be implemented by the derived class.
+[`NotImplemented`][python documentation: notimplemented] should only be used as a return value for binary special
+methods, such as `__eq__`, `__lt__`, `__add__`, etc., to indicate that the operation is not implemented with respect to
+the other type. It is _not interchangeable_
+with [`NotImplementedError`][python documentation: notimplementederror], which should be used to indicate that the
+abstract method must be implemented by the derived class.
 
 ```{literalinclude} /../examples/pylint/e0711_notimplemented_raised.py
 
@@ -1806,10 +1765,9 @@ indicate that the abstract method must be implemented by the derived class.
 ### Catching non-exception (E0712)
 
 The Python `raise` statement expects an object that is derived from
-the [`BaseException`][python documentation: baseexception] class (see [E0710](#E0710)). Accordingly,
-the Python `except` statement also expects objects that are derived from
-the [`BaseException`][python documentation: baseexception] class. Attempting to call `except` on any
-other object will lead to an error.
+the [`BaseException`][python documentation: baseexception] class (see [E0710](#E0710)). Accordingly, the Python `except`
+statement also expects objects that are derived from the [`BaseException`][python documentation: baseexception] class.
+Attempting to call `except` on any other object will lead to an error.
 
 ```{literalinclude} /../examples/pylint/e0712_catching_non_exception.py
 
@@ -1832,21 +1790,21 @@ lines: 16-20
 ---
 ```
 
-Global variables should be avoided because they can be changed by other functions, which causes
-unpredictable behaviour in your program. You can indicate that a global variable shouldn't be
-changed by naming it using the `ALL_CAPS` naming style:
+Global variables should be avoided because they can be changed by other functions, which causes unpredictable behaviour
+in your program. You can indicate that a global variable shouldn't be changed by naming it using the `ALL_CAPS` naming
+style:
 
 ```python
 EX = 1
 
 
 def add_ex(n: int) -> int:
-  """Add EX to n."""
-  return EX + n
+    """Add EX to n."""
+    return EX + n
 ```
 
-We call variables that are named using this style **constants**, and expect that they don't change
-when we run our code. PythonTA allows global constants, and so would not report the
+We call variables that are named using this style **constants**, and expect that they don't change when we run our code.
+PythonTA allows global constants, and so would not report the
 `forbidden-global-variables` error on our second example.
 
 **See also**: [Global Variables Are Bad]
@@ -1855,8 +1813,8 @@ when we run our code. PythonTA allows global constants, and so would not report 
 
 ### Forbidden IO function (E9998)
 
-Input / output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
-required. If `print` calls are used to debug the code, they should be removed prior to submission.
+Input / output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly required. If `print`
+calls are used to debug the code, they should be removed prior to submission.
 
 Example:
 
@@ -1868,45 +1826,44 @@ Example:
 
 ### Loop iterates only once (E9996)
 
-This error occurs when a loop will only ever iterate once. This occurs when every possible
-execution path through the loop body ends in a `return` statement (or another type of statement
-that ends the loop, like `break`).
+This error occurs when a loop will only ever iterate once. This occurs when every possible execution path through the
+loop body ends in a `return` statement (or another type of statement that ends the loop, like `break`).
 
 Example:
 
 ```python
 def all_even(nums: list[int]) -> bool:
     """Return whether nums contains only even numbers."""
-    for num in nums:      # This loop will only ever run for one iteration before returning.
+    for num in nums:  # This loop will only ever run for one iteration before returning.
         if num % 2 == 0:
             return True
         else:
             return False
 ```
 
-In this example, the return value of `all_even` is based only on the first number in `nums`, and none
-of the other list elements are checked. This version would incorrectly return `True` on the list `[2, 3]`.
-Here is a corrected version of this function:
+In this example, the return value of `all_even` is based only on the first number in `nums`, and none of the other list
+elements are checked. This version would incorrectly return `True` on the list `[2, 3]`. Here is a corrected version of
+this function:
 
 ```python
 def all_even(nums: list[int]) -> bool:
     """Return whether nums contains only even numbers."""
-    for num in nums:      # This loop will only ever run for one iteration before returning.
+    for num in nums:  # This loop will only ever run for one iteration before returning.
         if num % 2 != 0:
             return False
 
     return True
 ```
 
-By moving the `return True` to outside the loop, we ensure that the only way `True` is returned is
-when there are only even numbers in the list.
+By moving the `return True` to outside the loop, we ensure that the only way `True` is returned is when there are only
+even numbers in the list.
 
 (E9993)=
 
 ### Invalid Range Index (E9993)
 
-This error occurs when we call the `range` function but with argument(s) that would cause the range
-to be empty or only have one element.
+This error occurs when we call the `range` function but with argument(s) that would cause the range to be empty or only
+have one element.
 
 Examples:
 
@@ -1914,17 +1871,17 @@ Examples:
 
 ```
 
-When such `range`s are used with a loop, the loop will iterate either zero or one time, which is
-almost certainly not what we intended! This usually indicates an error with how `range` is called.
+When such `range`s are used with a loop, the loop will iterate either zero or one time, which is almost certainly not
+what we intended! This usually indicates an error with how `range` is called.
 
 (E9994)=
 
 ### Unnecessary Indexing (E9994)
 
-This error occurs when we use a for loop that goes over a range of indexes for a list, but only use
+This error occurs when we use a for loop or comprehension that goes over a range of indexes for a list, but only use
 those indexes to access elements from the list.
 
-Example:
+Example (For loop):
 
 ```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
 ---
@@ -1944,9 +1901,26 @@ def sum_items(lst: List[int]) -> int:
     return s
 ```
 
-In general, we should only loop over indexes (`for i in range(len(lst))`) if we are using the index
-for some purpose other than indexing into the list.
-One common example is if we want to loop over two lists in parallel:
+Example (Comprehension):
+
+```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
+---
+lines: 98-100
+---
+```
+
+We can simplify the above code by changing the comprehension to go over the elements of the list directly:
+
+```python
+def list_comp(lst: list) -> list:
+    """Return all the items in lst in a new list."""
+    return [x for x in lst]
+```
+
+In general, we should only loop over indexes (`for i in range(len(lst))`) if we are using the index for some purpose
+other than indexing into the list. One common example is if we want to iterate over two lists in parallel:
+
+For-Loop:
 
 ```python
 def print_sum(lst1: List[int], lst2: List[int]) -> None:
@@ -1957,12 +1931,21 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
         print(lst1[i] + lst2[i])
 ```
 
+Comprehension:
+
+```python
+def parallel_lst(lst1: List[int], lst2: List[int]) -> list:
+    """Return a list of the concatenation of the values of lst1 and lst2 at index i.
+    Precondition: lst1 and lst2 have the same length."""
+    return [lst1[i] + lst2[i] for i in range(len(lst1))]
+```
+
 (E9984)=
 
 ### For Target Subscript (E9984)
 
-This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the
-loop variable and the list being iterated over.
+This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the loop variable and
+the list being iterated over.
 
 Examples:
 
@@ -1972,8 +1955,7 @@ lines: 5-10
 ---
 ```
 
-To fix this, always use a brand-new variable name with a for loop.
-For example:
+To fix this, always use a brand-new variable name with a for loop. For example:
 
 ```python
 def example1(lst: List[int]) -> int:
@@ -1987,8 +1969,8 @@ def example1(lst: List[int]) -> int:
 
 ### Possibly undefined variable (E9969)
 
-This error occurs when we use a variable that might not be defined prior to its use.
-The most common cause is when we define a variable in one branch of an if statement, but not another.
+This error occurs when we use a variable that might not be defined prior to its use. The most common cause is when we
+define a variable in one branch of an if statement, but not another.
 
 Example:
 
@@ -2000,9 +1982,8 @@ Example:
 
 ### Redundant assignment (E9959)
 
-This error occurs when we have two assignment statements to the same variable, without using that
-variable in between the assignment statement. In this case, the first statement is redundant, since
-it gets overridden by the second.
+This error occurs when we have two assignment statements to the same variable, without using that variable in between
+the assignment statement. In this case, the first statement is redundant, since it gets overridden by the second.
 
 Example:
 
@@ -2017,10 +1998,9 @@ print(x)
 
 ### Shadowing in comprehension (E9988)
 
-This error occurs when a variable in a comprehension shadows (i.e., has the same name as) a variable
-from an outer scope, such as a local variable in the same function.
-In general you should avoid reusing variable names within the same function, and so you can fix this
-error by renaming the variable in the comprehension.
+This error occurs when a variable in a comprehension shadows (i.e., has the same name as) a variable from an outer
+scope, such as a local variable in the same function. In general you should avoid reusing variable names within the same
+function, and so you can fix this error by renaming the variable in the comprehension.
 
 Example:
 
@@ -2034,8 +2014,7 @@ lines: 10-12
 
 ### Missing parameter type (E9970)
 
-This error occurs when we have written a function definition but are missing a type annotation for
-a parameter.
+This error occurs when we have written a function definition but are missing a type annotation for a parameter.
 
 Example:
 
@@ -2049,10 +2028,10 @@ lines: 2-4
 
 ### Type is assigned (E9995)
 
-This error occurs when a type is not annotated but rather assigned in a function or class definition.
-In Python, default values for function arguments and class instance variables are assigned using `=` during their respective definitions.
-Type annotations, on the other hand, are declared using `:`.
-Below is a correct usage of assigning default values and annotating types.
+This error occurs when a type is not annotated but rather assigned in a function or class definition. In Python, default
+values for function arguments and class instance variables are assigned using `=` during their respective definitions.
+Type annotations, on the other hand, are declared using `:`. Below is a correct usage of assigning default values and
+annotating types.
 
 ```python
 def print_str_argument(str_argument: str = "Some default value."):
@@ -2060,11 +2039,10 @@ def print_str_argument(str_argument: str = "Some default value."):
 
 
 class BirthdayCake:
-    number_of_candles: int = 1 # 1 is the default value
+    number_of_candles: int = 1  # 1 is the default value
 ```
 
-An incorrect usage of assigning default values and annotating types is shown below.
-Example:
+An incorrect usage of assigning default values and annotating types is shown below. Example:
 
 ```{literalinclude} /../examples/custom_checkers/e9995_type_is_assigned.py
 
@@ -2082,9 +2060,9 @@ class Person:
 
 
 def add_two_numbers(
-    x: int,
-    y: List[float],
-    z: type = complex
+        x: int,
+        y: List[float],
+        z: type = complex
 ) -> int:
     return (x + y) * z
 
@@ -2099,8 +2077,8 @@ class MyDataType:
 
 ### Missing return type (E9971)
 
-This error occurs when we have written a function definition but are missing a type annotation for
-the return value. Use `None` as the type annotation if the function does not return anything.
+This error occurs when we have written a function definition but are missing a type annotation for the return value.
+Use `None` as the type annotation if the function does not return anything.
 
 Example:
 
@@ -2114,8 +2092,8 @@ lines: 2-4
 
 ### Missing attribute type (E9972)
 
-This error occurs when we have written a class but are missing a type annotation for an
-instance attribute assigned in the class initializer.
+This error occurs when we have written a class but are missing a type annotation for an instance attribute assigned in
+the class initializer.
 
 Example:
 
@@ -2125,8 +2103,7 @@ lines: 4-9
 ---
 ```
 
-These type annotations should be written at the top of the class body.
-For example:
+These type annotations should be written at the top of the class body. For example:
 
 ```python
 class ExampleClass:
@@ -2144,8 +2121,8 @@ class ExampleClass:
 
 ### Missing space in doctest (E9973)
 
-This error occurs when a doctest found in the docstring of a function is not followed by a space.
-In this case the doctest will not actually be parsed.
+This error occurs when a doctest found in the docstring of a function is not followed by a space. In this case the
+doctest will not actually be parsed.
 
 Example:
 
@@ -2170,9 +2147,9 @@ def f(x: int) -> int:
 
 ### Pycodestyle errors (E9989)
 
-These errors are based on the Python code style guidelines ("PEP8") published by the Python team.
-These errors do not affect the functionality of your code, but can affect its readability.
-The error messages display how to fix them (e.g., by adding spaces or adding/removing blank lines).
+These errors are based on the Python code style guidelines ("PEP8") published by the Python team. These errors do not
+affect the functionality of your code, but can affect its readability. The error messages display how to fix them (e.g.,
+by adding spaces or adding/removing blank lines).
 
 See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
 
@@ -2182,8 +2159,8 @@ See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps
 
 ### Too many format args (E1305)
 
-This error occurs when we use the `format` method on a string, but call it with more arguments than
-the number of `{}` in the string.
+This error occurs when we use the `format` method on a string, but call it with more arguments than the number of `{}`
+in the string.
 
 ```{literalinclude} /../examples/pylint/e1305_too_many_format_args.py
 
@@ -2205,8 +2182,8 @@ s = "{} who is {} lives in {}".format(name, age, country)
 
 ### Too few format args (E1306)
 
-This error occurs when we use the `format` method on a string, but call it with fewer arguments than
-the number of `{}` in the string.
+This error occurs when we use the `format` method on a string, but call it with fewer arguments than the number of `{}`
+in the string.
 
 ```{literalinclude} /../examples/pylint/e1306_too_few_format_args.py
 
@@ -2251,8 +2228,8 @@ print(f'Hello {entity}!')
 ### Format string without interpolation (W1310)
 
 This error occurs when a format string does not have **any** interpolation variables. This can be an issue as it can
-mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code
-and there should be interpolation variables in the string.
+mean that either the string can be a normal string which does not need any formatting, or there is a bug in the code and
+there should be interpolation variables in the string.
 
 ```{literalinclude} /../examples/pylint/w1310_format_string_without_interpolation.py
 
@@ -2270,9 +2247,8 @@ greeting = 'Hello There, {name}'.format(name='person')
 
 ### Missing format argument key (W1303)
 
-This error occurs when a format string that uses named fields does not receive the required
-keywords. In the following example, we should assign three values for `last_name`, `first_name`,
-and `age`.
+This error occurs when a format string that uses named fields does not receive the required keywords. In the following
+example, we should assign three values for `last_name`, `first_name`, and `age`.
 
 ```{literalinclude} /../examples/pylint/w1303_missing_format_argument_key.py
 
@@ -2290,26 +2266,25 @@ s = '{last_name}, {fist_name} - {age}'.format(last_name='bond', first_name='jame
 
 ### Bad str strip call (E1310)
 
-This error occurs when we call [`strip`][str.strip], [`lstrip`][str.lstrip],
-or [`rstrip`][str.rstrip], but pass an argument string which contains duplicate characters. The
-argument string should contain the _distinct_ characters that we want to remove from the end(s) of a
-string.
+This error occurs when we call [`strip`][str.strip], [`lstrip`][str.lstrip], or [`rstrip`][str.rstrip], but pass an
+argument string which contains duplicate characters. The argument string should contain the _distinct_ characters that
+we want to remove from the end(s) of a string.
 
 ```{literalinclude} /../examples/pylint/e1310_bad_str_strip_call.py
 
 ```
 
-It is a common mistake to think that `mystring.strip(chars)` removes the substring `chars` from the
-beginning and end of `mystring`. It actually removes all characters in `chars` from the beginning
-and end of `mystring`, _irrespective of their order_! If we pass an argument string with duplicate
-characters to `mystring.strip`, we are likely misinterpreting what this method is doing.
+It is a common mistake to think that `mystring.strip(chars)` removes the substring `chars` from the beginning and end
+of `mystring`. It actually removes all characters in `chars` from the beginning and end of `mystring`, _irrespective of
+their order_! If we pass an argument string with duplicate characters to `mystring.strip`, we are likely misinterpreting
+what this method is doing.
 
 (W1305)=
 
 ### Format combined specification (W1305)
 
-This error occurs when a format string contains both automatic field numbering (e.g. `{}`) and
-manual field specification (e.g. `{0}`).
+This error occurs when a format string contains both automatic field numbering (e.g. `{}`) and manual field
+specification (e.g. `{0}`).
 
 For example, we should not use `{}` and `{index}` at the same time.
 
@@ -2339,8 +2314,7 @@ This error occurs when a string literal contains a backslash that is not part of
 
 ```
 
-The following is a [list of recognized escape sequences][string and bytes literals] in Python string
-literals.
+The following is a [list of recognized escape sequences][string and bytes literals] in Python string literals.
 
 ```
 \newline    \a          \r          \xhh
@@ -2349,8 +2323,8 @@ literals.
 \"          \n          \ooo        \Uxxxxxxxx
 ```
 
-If a backslash character is not used to start one of the escape sequences listed above, we should
-make this explicit by escaping the backslash with another backslash.
+If a backslash character is not used to start one of the escape sequences listed above, we should make this explicit by
+escaping the backslash with another backslash.
 
 ```python
 print('This is a tab: \t')
@@ -2362,11 +2336,10 @@ print('This is not an escape sequence: \\d')
 
 ### Redundant unittest assert (W1503)
 
-The first argument of `assertTrue` and `assertFalse` is a "condition", which should evaluate
-to `True` or `False`. These methods evaluate the condition to check whether the test passes or
-fails. The conditions should depend on the code that we are testing, and should not be a constant
-literal like `True` or `4`. Otherwise, the test will always have the same result, regardless of
-whether our code is correct.
+The first argument of `assertTrue` and `assertFalse` is a "condition", which should evaluate to `True` or `False`. These
+methods evaluate the condition to check whether the test passes or fails. The conditions should depend on the code that
+we are testing, and should not be a constant literal like `True` or `4`. Otherwise, the test will always have the same
+result, regardless of whether our code is correct.
 
 ```{literalinclude} /../examples/pylint/w1503_redundant_unittest_assert.py
 
@@ -2376,8 +2349,8 @@ whether our code is correct.
 
 ### Unidiomatic type check (C0123)
 
-This error occurs when `type` is used instead of `isinstance` to perform a type check.
-Use `isinstance(x, Y)` instead of `type(x) == Y`.
+This error occurs when `type` is used instead of `isinstance` to perform a type check. Use `isinstance(x, Y)` instead
+of `type(x) == Y`.
 
 ```{literalinclude} /../examples/pylint/c0123_unidiomatic_typecheck.py
 
@@ -2397,12 +2370,11 @@ def is_int(obj: Union[int, float, str]) -> bool:
 
 ### Dangerous default value (W0102)
 
-This warning occurs when a mutable object, such as a list or dictionary, is provided as a default
-argument in a function definition. Default arguments are instantiated only once, at the time when
-the function is defined (i.e. when the interpreter encounters the `def ...` block). If the default
-argument is mutated when the function is called, it will remain modified for all subsequent function
-calls. This leads to a common "gotcha" in Python, where an "empty" list or dictionary, specified as
-the default argument, starts containing values on calls other than the first call.
+This warning occurs when a mutable object, such as a list or dictionary, is provided as a default argument in a function
+definition. Default arguments are instantiated only once, at the time when the function is defined (i.e. when the
+interpreter encounters the `def ...` block). If the default argument is mutated when the function is called, it will
+remain modified for all subsequent function calls. This leads to a common "gotcha" in Python, where an "empty" list or
+dictionary, specified as the default argument, starts containing values on calls other than the first call.
 
 ```{literalinclude} /../examples/pylint/w0102_dangerous_default_value.py
 
@@ -2422,14 +2394,14 @@ However, the actual output is:
 [0, 1, 2, 3, 4, 0, 1, 2, 3, 4]
 ```
 
-If we want to prevent this surprising behavior, we should use `None` as the default argument, and
-then check for `None` inside the function body. For example, the following code prints the expected
-output:
+If we want to prevent this surprising behavior, we should use `None` as the default argument, and then check for `None`
+inside the function body. For example, the following code prints the expected output:
 
 ```python
 from typing import List, Optional
 
-def make_list(n: int, lst: Optional[List[int]]=None) -> List[int]:
+
+def make_list(n: int, lst: Optional[List[int]] = None) -> List[int]:
     if lst is None:
         lst = []
     for i in range(n):
@@ -2467,8 +2439,8 @@ for item in menu:
 
 ### Superfluous parens (C0325)
 
-This error occurs when a keyword, such as `if` or `for`, is followed by a single item enclosed in
-parentheses. In such a case, parentheses are not necessary.
+This error occurs when a keyword, such as `if` or `for`, is followed by a single item enclosed in parentheses. In such a
+case, parentheses are not necessary.
 
 ```{literalinclude} /../examples/pylint/c0325_superfluous_parens.py
 
@@ -2485,11 +2457,10 @@ if 'anchovies' in pizza_toppings:
 
 ### Trailing comma tuple (R1707)
 
-This error occurs when a Python expression is terminated by a comma. In Python, a tuple is created
-by the comma symbol, not by parentheses. This makes it easy to create a tuple accidentally, by
-misplacing a comma, which can lead to obscure bugs. In order to make our intention clear, we should
-always use parentheses when creating a tuple, and we should never leave a trailing comma in our
-code.
+This error occurs when a Python expression is terminated by a comma. In Python, a tuple is created by the comma symbol,
+not by parentheses. This makes it easy to create a tuple accidentally, by misplacing a comma, which can lead to obscure
+bugs. In order to make our intention clear, we should always use parentheses when creating a tuple, and we should never
+leave a trailing comma in our code.
 
 ```{literalinclude} /../examples/pylint/r1707_trailing_comma_tuple.py
 
@@ -2507,8 +2478,7 @@ print(my_lucky_number)  # Prints 7
 ### Assert on tuple (W0199)
 
 This error occurs when an `assert` statement is called with a tuple as the first argument. `assert`
-acting on a tuple passes if and only if the tuple is non-empty. This is likely _not_ what the
-programmer had intended.
+acting on a tuple passes if and only if the tuple is non-empty. This is likely _not_ what the programmer had intended.
 
 ```{literalinclude} /../examples/pylint/w0199_assert_on_tuple.py
 
@@ -2527,8 +2497,8 @@ def check(condition1: bool, condition2: bool, condition3: bool) -> None:
     assert condition3
 ```
 
-If we would like `assert` to show a special error message when the assertion fails, we should
-provide that message as the second argument.
+If we would like `assert` to show a special error message when the assertion fails, we should provide that message as
+the second argument.
 
 ```python
 def check(condition, message):
@@ -2539,20 +2509,18 @@ def check(condition, message):
 
 ### Literal comparison (R0123)
 
-This error occurs when we use the identity operator `is` to compare non-boolean Python literals.
-Whether or not two literals representing the same value (e.g. two identical strings) have the same
-identity can vary, depending on the way the code is being executed, the code that has ran
-previously, and the version and implementation of the Python interpreter. For example, each of the
-following assertions pass if the lines are evaluated together from a Python file,
-but `assert num is 257` and `assert chars is 'this string fails'` fail if the lines are entered into
-a Python interpreter one-by-one.
+This error occurs when we use the identity operator `is` to compare non-boolean Python literals. Whether or not two
+literals representing the same value (e.g. two identical strings) have the same identity can vary, depending on the way
+the code is being executed, the code that has ran previously, and the version and implementation of the Python
+interpreter. For example, each of the following assertions pass if the lines are evaluated together from a Python file,
+but `assert num is 257` and `assert chars is 'this string fails'` fail if the lines are entered into a Python
+interpreter one-by-one.
 
 ```{literalinclude} /../examples/pylint/r0123_literal_comparison.py
 
 ```
 
-To prevent the confusion, it is advisable to use the equality operator `==` when comparing objects
-with Python literals.
+To prevent the confusion, it is advisable to use the equality operator `==` when comparing objects with Python literals.
 
 ```python
 num = 256
@@ -2578,8 +2546,8 @@ assert chars == 'this string fails'
 
 ### Expression not assigned (W0106)
 
-This error occurs when an expression that is not a function call is not assigned to a variable.
-Typically, this indicates that we were intending to do something else.
+This error occurs when an expression that is not a function call is not assigned to a variable. Typically, this
+indicates that we were intending to do something else.
 
 ```{literalinclude} /../examples/pylint/w0106_expression_not_assigned.py
 
@@ -2597,8 +2565,7 @@ print("Appended 4 to my list!")
 
 ### Invalid length returned (E0303)
 
-This error occurs when the `__len__` special method returns something other than a non-negative
-integer.
+This error occurs when the `__len__` special method returns something other than a non-negative integer.
 
 ```{literalinclude} /../examples/pylint/e0303_invalid_length_returned.py
 
@@ -2621,8 +2588,8 @@ class Company:
 
 ### Forgotten debug statement (W1515)
 
-This warning occurs when debugging breakpoints (such as `breakpoint()`, `sys.breakpointhook()`,
-and `pdb.set_trace()`) are found. These breakpoints should be removed in production code.
+This warning occurs when debugging breakpoints (such as `breakpoint()`, `sys.breakpointhook()`, and `pdb.set_trace()`)
+are found. These breakpoints should be removed in production code.
 
 ```{literalinclude} /../examples/pylint/w1515_forgotten_debug_statement.py
 
@@ -2634,7 +2601,8 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ## Modified iterating list (W4701)
 
-This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
+This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of
+modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
 
 ```{literalinclude} /../examples/pylint/w4701_modified_iterating_list.py
 
@@ -2644,7 +2612,9 @@ This error occurs when a list is modified inside a for loop by adding or removin
 
 ### Modified iterating dict (E4702)
 
-This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
+This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other
+types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A
+copy of the `dict` can be used instead.
 
 ```{literalinclude} /../examples/pylint/e4702_modified_iterating_dict.py
 
@@ -2654,7 +2624,8 @@ This error occurs when a dictionary is modified inside a for loop by adding or r
 
 ## Modified iterating set (E4703)
 
-This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
+This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of
+modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
 
 ```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
 
@@ -2688,8 +2659,8 @@ def is_positive(number: int) -> str:
 
 ### Unnecessary semicolon (W0301)
 
-This error occurs when we end a Python statement with a semicolon. There is no good reason to ever
-use a semicolon in Python.
+This error occurs when we end a Python statement with a semicolon. There is no good reason to ever use a semicolon in
+Python.
 
 ```{literalinclude} /../examples/pylint/w0301_unnecessary_semicolon.py
 
@@ -2705,8 +2676,8 @@ print("Hello World!")
 
 ### Missing final newline (C0304)
 
-This error occurs when a file is missing a trailing newline character. For example, if we represent
-a (typically invisible) newline character as `¬`, the following file would raise this error:
+This error occurs when a file is missing a trailing newline character. For example, if we represent a (typically
+invisible) newline character as `¬`, the following file would raise this error:
 
 ```{literalinclude} /../examples/pylint/c0304_missing_final_newline.py
 
@@ -2722,8 +2693,8 @@ print("Hello World!")  # Trailing newline is present:  ¬
 
 ### Trailing newlines (C0305)
 
-This error occurs when a file ends with more than one newline character (i.e. when a file contains
-trailing blank lines). For example:
+This error occurs when a file ends with more than one newline character (i.e. when a file contains trailing blank lines)
+. For example:
 
 ```{literalinclude} /../examples/pylint/c0305_trailing_newlines.py
 
@@ -2739,8 +2710,8 @@ print("Hello World!")  # This file ends with a single newline character! :)
 
 ### Bad file encoding (C2503)
 
-This error occurs when there is an encoding declaration at the top of the Python file or if any
-identifier uses non-ASCII characters.
+This error occurs when there is an encoding declaration at the top of the Python file or if any identifier uses
+non-ASCII characters.
 
 ```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
 
@@ -2756,8 +2727,8 @@ my_int = 3
 
 ### Line too long (C0301)
 
-This error occurs when a line is longer than a predefined number of characters. Our default limit
-for all lines is 80 characters.
+This error occurs when a line is longer than a predefined number of characters. Our default limit for all lines is 80
+characters.
 
 ```{literalinclude} /../examples/pylint/c0301_line_too_long.py
 
@@ -2771,8 +2742,8 @@ for all lines is 80 characters.
 
 1. _SyntaxError: Missing parentheses in call to 'print'_
 
-   In Python 3, `print` is a builtin _function_, and should be called like any other function, with
-   arguments inside parentheses. In previous versions of Python, `print` had been a keyword.
+   In Python 3, `print` is a builtin _function_, and should be called like any other function, with arguments inside
+   parentheses. In previous versions of Python, `print` had been a keyword.
 
    ```{literalinclude} /../examples/syntax_errors/missing_parentheses_in_call_to_print.py
 
@@ -2781,9 +2752,8 @@ for all lines is 80 characters.
 2. _SyntaxError: can't assign to literal_
 
    There must always be a variable on the left-hand side of the equals sign (where the term "
-   variable" can refer to a single identifier `a = 10`, multiple identifiers `a, b = 10, 20`, a
-   dictionary element `foo['a'] = 10`, a class attribute `foo.bar = 10`, etc.). We cannot assign to
-   a string or numeric literal.
+   variable" can refer to a single identifier `a = 10`, multiple identifiers `a, b = 10, 20`, a dictionary
+   element `foo['a'] = 10`, a class attribute `foo.bar = 10`, etc.). We cannot assign to a string or numeric literal.
 
    ```{literalinclude} /../examples/syntax_errors/assignment_to_literal.py
 
@@ -2800,8 +2770,7 @@ for all lines is 80 characters.
 
       ```
 
-   2. Assignment operator `=` used inside a condition expression (likely in place of the equality
-      operator `==`).
+   2. Assignment operator `=` used inside a condition expression (likely in place of the equality operator `==`).
 
       ```{literalinclude} /../examples/syntax_errors/assignment_inside_condition.py
 
@@ -2819,8 +2788,7 @@ for all lines is 80 characters.
 
       ```
 
-      The following is a [list of Python keywords][keywords] which cannot be used as variable
-      names:
+      The following is a [list of Python keywords][keywords] which cannot be used as variable names:
 
       ```
       False      class      finally    is         return
@@ -2832,8 +2800,8 @@ for all lines is 80 characters.
       break      except     in         raise
       ```
 
-   5. Use of an undefined operator. For example, there are no "increment by one" `++` or "decrement
-      by one" `--` operators in Python.
+   5. Use of an undefined operator. For example, there are no "increment by one" `++` or "decrement by one" `--`
+      operators in Python.
 
    ```{literalinclude} /../examples/syntax_errors/undefined_operator.py
 
@@ -2841,9 +2809,8 @@ for all lines is 80 characters.
 
 4. _IndentationError: unindent does not match any outer indentation level_
 
-   We must use a constant number of whitespace characters for each level of indentation. If we start
-   a code block using four spaces for indentation, we must use four spaces throughout that code
-   block.
+   We must use a constant number of whitespace characters for each level of indentation. If we start a code block using
+   four spaces for indentation, we must use four spaces throughout that code block.
 
    ```{literalinclude} /../examples/syntax_errors/unindent_does_not_match_indentation.py
 
@@ -2854,9 +2821,8 @@ for all lines is 80 characters.
 
 5. _IndentationError: unexpected indent_
 
-   In Python, the only time we would increase the indentation level of our code is to define a new
-   code block after a [compound statement][compound statements] such as `for`, `if`, `def`,
-   or `class`.
+   In Python, the only time we would increase the indentation level of our code is to define a new code block after
+   a [compound statement][compound statements] such as `for`, `if`, `def`, or `class`.
 
    ```{literalinclude} /../examples/syntax_errors/unexpected_indent.py
 
@@ -2889,8 +2855,8 @@ The following errors are no longer checked by the latest version of PythonTA.
 
 ### Bad whitespace (C0326)
 
-This error occurs when we include a wrong number of spaces around an operator, bracket, or block
-opener. We should aim to follow
+This error occurs when we include a wrong number of spaces around an operator, bracket, or block opener. We should aim
+to follow
 the [PEP8 convention on whitespace in expressions and statements][pep8: whitespace in expressions and statements]
 .
 
@@ -2898,23 +2864,22 @@ the [PEP8 convention on whitespace in expressions and statements][pep8: whitespa
 
 ### Bad indentation (W0311)
 
-This error occurs when an unexpected number of tabs or spaces is used to indent the code. It is
-recommended that we use [_four spaces per indentation level_][pep8: indentation] throughout our
-code.
+This error occurs when an unexpected number of tabs or spaces is used to indent the code. It is recommended that we
+use [_four spaces per indentation level_][pep8: indentation] throughout our code.
 
 (W0312)=
 
 ### Mixed indentation (W0312)
 
-This error occurs when the code is indented with a mix of tabs and spaces. Please note that [_spaces
-are the preferred indentation method_][pep8: tabs or spaces?].
+This error occurs when the code is indented with a mix of tabs and spaces. Please note that [_spaces are the preferred
+indentation method_][pep8: tabs or spaces?].
 
 (C0330)=
 
 ### Bad continuation (C0330)
 
-This error occurs when we use an inconsistent number of spaces to indent arguments or parameters in
-function and method calls or definitions.
+This error occurs when we use an inconsistent number of spaces to indent arguments or parameters in function and method
+calls or definitions.
 
 <!-- Python objects -->
 

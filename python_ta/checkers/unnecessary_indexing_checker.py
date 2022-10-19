@@ -14,10 +14,11 @@ class UnnecessaryIndexingChecker(BaseChecker):
     # use dashes for connecting words in message symbol
     msgs = {
         "E9994": (
-            "For loop variable `%s` can be simplified by looping over the elements directly, "
+            "Iteration variable `%s` can be simplified by accessing the elements directly in the for loop or "
+            "comprehension, "
             "for example, `for my_variable in %s`.",
             "unnecessary-indexing",
-            "Used when you have an loop variable in a for loop "
+            "Used when you have an iteration variable in a for loop/comprehension "
             "where its only usage is to index the iterable",
         )
     }
@@ -44,7 +45,7 @@ class UnnecessaryIndexingChecker(BaseChecker):
 
 # Helper functions
 def _is_unnecessary_indexing(node: Union[nodes.For, nodes.Comprehension]) -> bool:
-    """Return whether the iteration variable in the for loop is ONLY used to index the iterable.
+    """Return whether the iteration variable in the for loop/comprehension is ONLY used to index the iterable.
 
     True if unnecessary usage, False otherwise or if iteration variable not used at all.
     """
@@ -106,12 +107,12 @@ def _is_load_subscript(
     Returns True if the following conditions are met:
     (3.9)
         - The <index_node> Name node is inside of a Subscript node
-        - The item that is being indexed is the iterable of the loop
+        - The item that is being indexed is the iterable of the for loop/comprehension
         - The Subscript node is being used in a load context
     (3.8)
         - The <index_node> Name node is inside of an Index node
         - The Index node is inside of a Subscript node
-        - The item that is being indexed is the iterable of the loop
+        - The item that is being indexed is the iterable of the for loop/comprehension
         - The Subscript node is being used in a load context
     """
     iterable = _iterable_if_range(loop_node.iter)
@@ -130,8 +131,8 @@ def _is_redundant(
 ) -> bool:
     """Return whether or not <index_node> is redundant in <loop_node>.
 
-    The lookup method is used in case the original loop variable is shadowed
-    in the for loop's body.
+    The lookup method is used in case the original iteration variable is shadowed
+    in the for loop/comprehension's body.
     """
     _, assignments = index_node.lookup(index_node.name)
     if not assignments:

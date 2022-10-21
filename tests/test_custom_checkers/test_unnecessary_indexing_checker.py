@@ -238,7 +238,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_iter_var_unused_no_msg(self):
-        """Iteration variable i is unused in the code, no unnecessary indexing performed"""
+        """Index variable i is unused in the code, no unnecessary indexing performed"""
         src = """
         def iter_var_unused(items: List[int]) -> int:
             s = 0
@@ -253,7 +253,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_comp_shadow_no_msg(self):
-        """Iteration variable i is shadowed in the comprehension but not redundant"""
+        """Index variable i is shadowed in the comprehension but not redundant"""
         src = """
         def f(lst):
             s = 0
@@ -270,7 +270,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_comp_shadow_msg(self):
-        """Iteration variable i is shadowed in the comprehension and is redundant"""
+        """Index variable i is shadowed in the comprehension and is redundant"""
         src = """
         def f(lst):
             s = 0
@@ -294,7 +294,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_loops_sequenced_no_msg(self):
-        """Iteration variable i is used in two loops in sequence, and neither use is redundant"""
+        """Index variable i is used in two loops in sequence, and neither use is redundant"""
         src = """
         def f(lst):
             for i in range(len(lst)):
@@ -312,7 +312,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node2)
 
     def test_assignname1_no_msg(self):
-        """Iteration variable reassigned and used to increment
+        """Index variable reassigned and used to increment
 
         Indexing the iterable is not the only usage"""
         src = """
@@ -329,7 +329,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_assignname2_no_msg(self):
-        """Iteration variable incremented each iteration but unused"""
+        """Index variable incremented each iteration but unused"""
         src = """
         for i in range(len(lst)):
             i += 10
@@ -457,7 +457,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_comprehension(comp_node)
 
     def test_comp_var_unused_no_msg(self):
-        """Iteration variable i is unused in the code, no unnecessary indexing performed"""
+        """Index variable i is unused in the code, no unnecessary indexing performed"""
         src = """
         def f(lst: list) -> list:
             return [lst[0] for i in range(len(lst))]
@@ -469,7 +469,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_comprehension(comp_node)
 
     def test_comp_increment_index_no_msg(self):
-        """Iteration variable is modified to index list, no unnecessary indexing"""
+        """Index variable is modified to index list, no unnecessary indexing"""
         src = """
         def f(lst: list) -> list:
             return [lst[i+1] for i in range(len(lst))]

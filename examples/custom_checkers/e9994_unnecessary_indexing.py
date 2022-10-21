@@ -102,11 +102,11 @@ def list_comp(lst: list) -> list:
 
 def comp_binop(lst: list) -> list:
     """Return a list of all the items in lst multiplied by 2"""
-    return [2*lst[i] for i in range(len(lst))]  # Error on this line
+    return [2 * lst[i] for i in range(len(lst))]  # Error on this line
 
 
 def comp_var_unused(lst: list) -> list:
-    """Iteration variable i is unused in the code, no unnecessary indexing performed"""
+    """Index variable i is unused in the code, no unnecessary indexing performed"""
 
-    # No error reported; iteration variable unused.
+    # No error reported; index variable unused.
     return [lst[0] for i in range(len(lst))]

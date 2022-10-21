@@ -14,11 +14,11 @@ class UnnecessaryIndexingChecker(BaseChecker):
     # use dashes for connecting words in message symbol
     msgs = {
         "E9994": (
-            "Iteration variable `%s` can be simplified by accessing the elements directly in the for loop or "
+            "Index variable `%s` can be simplified by accessing the elements directly in the for loop or "
             "comprehension, "
             "for example, `for my_variable in %s`.",
             "unnecessary-indexing",
-            "Used when you have an iteration variable in a for loop/comprehension "
+            "Used when you have an index variable in a for loop/comprehension "
             "where its only usage is to index the iterable",
         )
     }
@@ -45,9 +45,9 @@ class UnnecessaryIndexingChecker(BaseChecker):
 
 # Helper functions
 def _is_unnecessary_indexing(node: Union[nodes.For, nodes.Comprehension]) -> bool:
-    """Return whether the iteration variable in the for loop/comprehension is ONLY used to index the iterable.
+    """Return whether the index variable in the for loop/comprehension is ONLY used to index the iterable.
 
-    True if unnecessary usage, False otherwise or if iteration variable not used at all.
+    True if unnecessary usage, False otherwise or if index variable not used at all.
     """
     index_nodes = _index_name_nodes(node.target.name, node)
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
@@ -131,7 +131,7 @@ def _is_redundant(
 ) -> bool:
     """Return whether or not <index_node> is redundant in <loop_node>.
 
-    The lookup method is used in case the original iteration variable is shadowed
+    The lookup method is used in case the original index variable is shadowed
     in the for loop/comprehension's body.
     """
     _, assignments = index_node.lookup(index_node.name)

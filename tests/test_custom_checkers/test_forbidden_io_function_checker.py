@@ -48,6 +48,21 @@ class TestForbiddenIOFunctionNoAllowedChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_call(call)
 
+    def test_message_global(self):
+        """Global scope not allowed, IO function input raises a message"""
+        src = """
+        name = input()
+        """
+        mod = astroid.parse(src)
+        call, *_ = mod.nodes_of_class(nodes.Call)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-IO-function", node=call, args=call.func.name
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_call(call)
+
 
 class TestForbiddenIOFunctionAllowedFunctionChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = IOFunctionChecker
@@ -119,6 +134,18 @@ class TestForbiddenIOFunctionAllowedClassChecker(pylint.testutils.CheckerTestCas
             def my_function(self):
                 name = input()
                 return name
+        """
+        mod = astroid.parse(src)
+        call, *_ = mod.nodes_of_class(nodes.Call)
+
+        with self.assertNoMessages():
+            self.checker.visit_call(call)
+
+    def test_message_global_allowed_main_block(self):
+        """Main block is allowed, IO function input does not raises a message"""
+        src = """
+        if __name__ == "__main__":
+            name = input()
         """
         mod = astroid.parse(src)
         call, *_ = mod.nodes_of_class(nodes.Call)

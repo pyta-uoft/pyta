@@ -18,7 +18,7 @@ material going into further detail for the emitted errors.
 
 For greater details on the errors PyTA checks for: [Help Documentation](https://www.cs.toronto.edu/~david/pyta/).
 
-For help getting started using PyTA: [Quick Start](https://www.cs.toronto.edu/~david/pyta/quick_start.html).
+For help getting started using PyTA: [Quick Start](https://www.cs.toronto.edu/~david/pyta/usage/quick_start.html).
 
 ## Installation
 
@@ -33,7 +33,7 @@ If you're interested in using PyTA, you can install it using `pip` (or `pip3`, o
 If you're developing PyTA:
 
 1. First, clone this repository.
-2. Open a terminal in this repo, and run `pip install -e .[dev]` to install the dependencies.
+2. Open a terminal in this repo, and run `pip install -e ".[dev]"` to install the dependencies.
 3. Then run `pre-commit install` to install the pre-commit hooks (for automatically formatting and checking your code on each commit).
 
 While not strictly necessary for debugging, some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.
@@ -88,6 +88,7 @@ Simeon Krastnikov,
 Ryan Lee,
 Hayley Lin,
 Wendy Liu,
+Yibing (Amy) Lu,
 Shweta Mogalapalli,
 Ignas Panero Armoska,
 Justin Park,
@@ -95,5 +96,6 @@ Harshkumar Patel,
 Amr Sharaf,
 Kavin Singh,
 Alexey Strokach,
+Sophy Sun,
 Jasmine Wu,
-Philippe Yu
+Philippe Yu,

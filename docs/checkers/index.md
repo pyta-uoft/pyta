@@ -75,6 +75,23 @@ This error occurs when a `return` statement is found outside a function or metho
 A common source of this error is when the `return` is not indented properly (it must be indented to
 be considered part of the loop body).
 
+(E0643)=
+
+### Potential index error (E0643)
+
+This error occurs when trying to access the index of an iterable (such as `list`, `str`, or `tuple`) that's beyond its length.
+
+```{literalinclude} /../examples/pylint/e0643_potential_index_error.py
+
+```
+
+Corrected Version:
+
+```python
+coffees = ['americano', 'latte', 'macchiato', 'mocha']
+print(coffees[3])
+```
+
 (W0101)=
 
 ### Unreachable (W0101)
@@ -99,6 +116,24 @@ This error occurs when a dictionary literal sets the same key multiple times.
 Dictionaries map unique keys to values. When different values are assigned to the same key, the last
 assignment takes precedence. This is rarely what the user wants when they are constructing a
 dictionary.
+
+(W0130)=
+
+### Duplicate Value (W0130)
+
+This error occurs when a set literal contains the same value two or more times.
+
+```{literalinclude} /../examples/pylint/w0130_duplicate_value.py
+
+```
+
+Corrected version:
+
+```python
+correct_set = {'value 1', 2, 3}
+```
+
+Sets are unordered and duplicate elements are not allowed.
 
 (E1123)=
 
@@ -726,6 +761,26 @@ sample_dict = {"key_one": "value_one", "key_two": "value_two"}
 
 for key, value in sample_dict.items():
     print(key, value)  # Direct access instead of an index lookup
+```
+
+(R1736)=
+
+### Unnecessary list index lookup (R1736)
+
+This error occurs when iterating through a list while keeping track of both index and value using `enumerate()` but still using the index to access the value (which can be accessed directly).
+
+```{literalinclude} /../examples/pylint/r1736_unnecessary_list_index_lookup.py
+
+```
+
+Corrected version:
+
+```python
+colours = ['red', 'blue', 'yellow', 'green']
+
+for index, colour in enumerate(colours):
+    print(index)
+    print(colour)
 ```
 
 (W0107)=
@@ -1406,6 +1461,32 @@ class Child(Parent):
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
 
+(W0245)=
+
+### Super without brackets (W0245)
+
+When making a call to a parent class using `super()`, we must always include the brackets since it is a type of function call. Without the brackets, Python may interpret it as the `super` function itself rather than calling the function to access the superclass.
+
+```{literalinclude} /../examples/pylint/w0245_super_without_brackets.py
+
+```
+
+Corrected version:
+
+```python
+class Animal:
+    """A class that represents an animal"""
+    def __init__(self) -> None:
+        print('This is an animal')
+
+
+class Cat(Animal):
+    """A class that represents a cat"""
+    def __init__(self) -> None:
+        super().__init__()
+        print('This is a cat')
+```
+
 (R1725)=
 
 ### Super with arguments (R1725)
@@ -1864,6 +1945,13 @@ Example:
 
 ```
 
+The exception is calling IO functions inside the main block, which is allowed.
+
+```python
+if __name__ == "__main__":
+    name = input()
+```
+
 (E9996)=
 
 ### Loop iterates only once (E9996)
@@ -2202,6 +2290,24 @@ These errors do not affect the functionality of your code, but can affect its re
 The error messages display how to fix them (e.g., by adding spaces or adding/removing blank lines).
 
 See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
+
+(R0133)=
+
+### Comparison of constants (R0133)
+
+This error occurs when two constants are compared with each other. The result of the comparison is always the same.
+It is better to use the constant directly.
+
+```{literalinclude} /../examples/pylint/r0133_comparison_of_constants.py
+
+```
+
+Corrected version:
+
+```python
+def is_equal_to_one(a: int) -> bool:
+    return a == 1
+```
 
 ## Miscellaneous
 

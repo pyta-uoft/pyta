@@ -25,6 +25,19 @@ class NewMessage:
     def __getattr__(self, item):
         return getattr(self.message, item)
 
+    def to_dict(self) -> Dict:
+        """Return a dictionary containing the fields of this message.
+
+        Useful for JSON output.
+        """
+        return {
+            **vars(self.message),
+            "snippet": self.snippet,
+            # The following are DEPRECATED and will be removed in a future release.
+            "line_end": self.message.end_line,
+            "column_end": self.message.end_column,
+        }
+
 
 # Messages without a source code line to highlight
 NO_SNIPPET = {"invalid-name"}

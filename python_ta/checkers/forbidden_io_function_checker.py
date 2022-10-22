@@ -5,6 +5,8 @@ from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
 
+from python_ta.utils import _is_in_main
+
 FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
 
@@ -52,7 +54,6 @@ class IOFunctionChecker(BaseChecker):
             if not (name in node.frame() or name in node.root()):
                 scope = node.scope()
                 scope_parent = scope.parent
-                # TODO: Only FunctionDefs are checked. Include global scope?
 
                 if (
                     isinstance(scope_parent, nodes.ClassDef)
@@ -66,6 +67,9 @@ class IOFunctionChecker(BaseChecker):
                     and isinstance(scope, nodes.FunctionDef)
                     and scope.name not in self.linter.config.allowed_io
                 ):
+                    if name in self.linter.config.forbidden_io_functions:
+                        self.add_message("forbidden-IO-function", node=node, args=name)
+                elif isinstance(scope, nodes.Module) and not _is_in_main(node):
                     if name in self.linter.config.forbidden_io_functions:
                         self.add_message("forbidden-IO-function", node=node, args=name)
 

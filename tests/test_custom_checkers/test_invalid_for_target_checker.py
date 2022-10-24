@@ -180,6 +180,190 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_for(for_node)
 
+    def test_no_msg_comp_simple(self) -> None:
+        """Test that no message is added when the comprehension contains a valid target."""
+        src = """
+        [x for x in lst]
+        """
+        comp_node, *_ = _extract_nodes(src, [nodes.Comprehension])
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_subscript(self) -> None:
+        """Test that a message is added when the comprehension contains an invalid target."""
+        src = """
+        [x for x[0] in x]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="x[0]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_assign_attr(self) -> None:
+        """Test that a message is added when a comprehension target assigns to an attribute"""
+        src = """
+        [x for x.attr in l]
+        """
+        comp_node, assign_attr_node = _extract_nodes(src, [nodes.Comprehension, nodes.AssignAttr])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=assign_attr_node, args="x.attr"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_no_msg_comp_tuple_simple(self) -> None:
+        """Test that no message is added when the comprehension target tuple only contains valid targets
+        Note: a target with commas but no parentheses becomes a Tuple node.
+        """
+        src = """
+        [a for a ,b in l]
+        """
+        comp_node, *_ = _extract_nodes(src, [nodes.Comprehension])
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_tuple_simple(self) -> None:
+        """Test that a message is added when a comprehension target tuple contains invalid targets"""
+        src = """
+        [a for a, b[0] in l]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="b[0]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_no_msg_comp_list(self) -> None:
+        """Test that no message is added when the comprehension target list only contains valid targets"""
+        src = """
+        [a for [a, b] in l]
+        """
+        comp_node, *_ = _extract_nodes(src, [nodes.Comprehension])
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_list(self) -> None:
+        """Test that a message is added when a comprehension target list contains invalid targets"""
+        src = """
+        [a for [a, b[0]] in l]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="b[0]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_no_msg_comp_tuple_nested(self) -> None:
+        """Test that no message is added when comprehension target nested tuples only contain valid targets"""
+        src = """
+        [a for a, (b, (c, d), e) in l]
+        """
+        comp_node, *_ = _extract_nodes(src, [nodes.Comprehension])
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_tuple_nested(self) -> None:
+        """Test that a message is added when comprehension target nested tuples contains invalid targets"""
+        src = """
+        [a for a, (b, (c, d[0]), e) in l]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="d[0]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_no_msg_comp_list_nested(self) -> None:
+        """Test that no message is added when comprehension target nested lists only contain valid targets"""
+        src = """
+        [a for [a, [b, [c, d], e]] in l]
+        """
+        comp_node, *_ = _extract_nodes(src, [nodes.Comprehension])
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_list_nested(self) -> None:
+        """Test that a message is added when comprehension target nested lists contains invalid targets"""
+        src = """
+        [a for [a, [b, [c, d[0]], e]] in l]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="d[0]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_no_msg_comp_tuple_and_list_nested(self) -> None:
+        """Test that no message is added when comprehension target nested tuples and lists
+        only contain valid targets"""
+        src = """
+        [a for a, [b, (c, d), e] in l]
+        """
+        comp_node, *_ = _extract_nodes(src, [nodes.Comprehension])
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_tuple_and_list_nested(self) -> None:
+        """Test that a message is added when comprehension target nested tuples and lists
+        contains invalid targets"""
+        src = """
+        [a for a, [b, (c, d[0]), e] in l]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="d[0]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_msg_comp_slicing(self) -> None:
+        """Test that a message is added when the comprehension target is a list slice"""
+        src = """
+        [a for a[1:] in l]
+        """
+        comp_node, subscript_node = _extract_nodes(src, [nodes.Comprehension, nodes.Subscript])
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-for-target", node=subscript_node, args="a[1:]"
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
 
 def _extract_nodes(src: str, node_types: List[type]) -> List[nodes.NodeNG]:
     mod = astroid.parse(src)

@@ -2049,10 +2049,10 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
 
 ### For Target Subscript (E9984)
 
-This error occurs when a for loop variable uses indexing notation, which can occur if you mix up the
-loop variable and the list being iterated over.
+This error occurs when an index variable in a for loop or comprehension uses indexing notation, which can occur if you mix up the
+index variable and the list being iterated over.
 
-Examples:
+Example (For loop):
 
 ```{literalinclude} /../examples/custom_checkers/e9984_invalid_for_target.py
 ---
@@ -2060,8 +2060,18 @@ lines: 5-10
 ---
 ```
 
-To fix this, always use a brand-new variable name with a for loop.
+Example (Comprehension):
+
+```{literalinclude} /../examples/custom_checkers/e9984_invalid_for_target.py
+---
+lines: 54-56
+---
+```
+
+To fix this, always use a brand-new variable name for your index variable.
 For example:
+
+For loop:
 
 ```python
 def example1(lst: List[int]) -> int:
@@ -2069,6 +2079,13 @@ def example1(lst: List[int]) -> int:
     for number in lst:  # Fixed
         s += number
     return s
+```
+
+Comprehension:
+
+```python
+def example7(lst: List[int]) -> List[int]:
+    return [lst[i] for i in lst]  # Fixed
 ```
 
 (E9969)=

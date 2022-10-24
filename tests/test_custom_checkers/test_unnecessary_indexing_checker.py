@@ -238,7 +238,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_iter_var_unused_no_msg(self):
-        """Iteration variable i is unused in the code, no unnecessary indexing performed"""
+        """Index variable i is unused in the code, no unnecessary indexing performed"""
         src = """
         def iter_var_unused(items: List[int]) -> int:
             s = 0
@@ -253,7 +253,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_comp_shadow_no_msg(self):
-        """Iteration variable i is shadowed in the comprehension but not redundant"""
+        """Index variable i is shadowed in the comprehension but not redundant"""
         src = """
         def f(lst):
             s = 0
@@ -270,7 +270,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_comp_shadow_msg(self):
-        """Iteration variable i is shadowed in the comprehension and is redundant"""
+        """Index variable i is shadowed in the comprehension and is redundant"""
         src = """
         def f(lst):
             s = 0
@@ -294,7 +294,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_loops_sequenced_no_msg(self):
-        """Iteration variable i is used in two loops in sequence, and neither use is redundant"""
+        """Index variable i is used in two loops in sequence, and neither use is redundant"""
         src = """
         def f(lst):
             for i in range(len(lst)):
@@ -312,7 +312,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node2)
 
     def test_assignname1_no_msg(self):
-        """Iteration variable reassigned and used to increment
+        """Index variable reassigned and used to increment
 
         Indexing the iterable is not the only usage"""
         src = """
@@ -329,7 +329,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_for(for_node)
 
     def test_assignname2_no_msg(self):
-        """Iteration variable incremented each iteration but unused"""
+        """Index variable incremented each iteration but unused"""
         src = """
         for i in range(len(lst)):
             i += 10
@@ -353,6 +353,170 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_for(for_node)
+
+    def test_comp_no_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [x for x in lst]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp2_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(0, len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_list_comp3_msg(self):
+        """Return a list of all the items in lst"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(0, len(lst), 1)]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_binop_msg(self):
+        """Return a list of all the items in lst multiplied by 2"""
+        src = """
+        def f(lst: list) -> list:
+            return [2*lst[i] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_pairs_no_msg(self):
+        """Return a list of the sums of lst and lst1.
+
+        NO error reported; the loop index is used to index lst1 as well."""
+        src = """
+        def f(lst: list, lst1: list) -> list:
+            return [lst[i] + lst1[i] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_var_unused_no_msg(self):
+        """Index variable i is unused in the code, no unnecessary indexing performed"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[0] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_comp_increment_index_no_msg(self):
+        """Index variable is modified to index list, no unnecessary indexing"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i+1] for i in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_if_cond_comp_msg(self):
+        """Check comprehension with redundant indexing in if-condition"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(len(lst)) if lst[i] % 2 == 0]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
+    def test_mult_var_comp_msg(self):
+        """Check for redundancy in a comprehension with multiple lists and variables"""
+        src = """
+        def f(lst: list, lst1: list) -> list:
+            return [lst[i] + lst1[j] for i in range(len(lst)) for j in range(len(lst1))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
 
 
 if __name__ == "__main__":

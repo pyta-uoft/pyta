@@ -18,6 +18,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Restored 'line_end', 'column_end', and 'snippet' fields in JSON reporter output.
 
+### Enhancements
+
+- `forbidden_io_function_checker` is now able to check for calls to IO functions written at the top-level of a module, but ouside of the main block.
+
 ## [2.3.2] - 2022-08-30
 
 ### Bug fixes

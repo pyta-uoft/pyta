@@ -9,7 +9,14 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Enhancements
 
+- `unnecessary_indexing_checker` has now been extended to check comprehensions in addition to for loops.
 - `invalid_for_target_checker` has now been extended to check comprehensions in addition to for loops.
+
+## [2.3.3] - 2022-09-05
+
+### Bug fixes
+
+- Restored 'line_end', 'column_end', and 'snippet' fields in JSON reporter output.
 
 ## [2.3.2] - 2022-08-30
 

@@ -14,10 +14,11 @@ class UnnecessaryIndexingChecker(BaseChecker):
     # use dashes for connecting words in message symbol
     msgs = {
         "E9994": (
-            "For loop variable `%s` can be simplified by looping over the elements directly, "
+            "Index variable `%s` can be simplified by accessing the elements directly in the for loop or "
+            "comprehension, "
             "for example, `for my_variable in %s`.",
             "unnecessary-indexing",
-            "Used when you have an loop variable in a for loop "
+            "Used when you have an index variable in a for loop/comprehension "
             "where its only usage is to index the iterable",
         )
     }
@@ -34,12 +35,19 @@ class UnnecessaryIndexingChecker(BaseChecker):
             args = node.target.name, iterable
             self.add_message("unnecessary-indexing", node=node.target, args=args)
 
+    @only_required_for_messages("unnecessary-indexing")
+    def visit_comprehension(self, node: nodes.Comprehension) -> None:
+        iterable = _iterable_if_range(node.iter)
+        if iterable is not None and _is_unnecessary_indexing(node):
+            args = node.target.name, iterable
+            self.add_message("unnecessary-indexing", node=node.target, args=args)
+
 
 # Helper functions
-def _is_unnecessary_indexing(node: nodes.For) -> bool:
-    """Return whether the iteration variable in the for loop is ONLY used to index the iterable.
+def _is_unnecessary_indexing(node: Union[nodes.For, nodes.Comprehension]) -> bool:
+    """Return whether the index variable in the for loop/comprehension is ONLY used to index the iterable.
 
-    True if unnecessary usage, False otherwise or if iteration variable not used at all.
+    True if unnecessary usage, False otherwise or if index variable not used at all.
     """
     index_nodes = _index_name_nodes(node.target.name, node)
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
@@ -88,8 +96,10 @@ def _iterable_if_range(node: nodes.NodeNG) -> Optional[str]:
         return stop_arg.args[0].name
 
 
-def _is_load_subscript(index_node: nodes.Name, for_node: nodes.For) -> bool:
-    """Return whether or not <index_node> is used to subscript the iterable of <for_node>
+def _is_load_subscript(
+    index_node: nodes.Name, loop_node: Union[nodes.For, nodes.Comprehension]
+) -> bool:
+    """Return whether or not <index_node> is used to subscript the iterable of <loop_node>
     and the subscript item is being loaded from, e.g., s += iterable[index_node].
 
     NOTE: Index node is deprecated in Python 3.9
@@ -97,15 +107,15 @@ def _is_load_subscript(index_node: nodes.Name, for_node: nodes.For) -> bool:
     Returns True if the following conditions are met:
     (3.9)
         - The <index_node> Name node is inside of a Subscript node
-        - The item that is being indexed is the iterable of the for loop
+        - The item that is being indexed is the iterable of the for loop/comprehension
         - The Subscript node is being used in a load context
     (3.8)
         - The <index_node> Name node is inside of an Index node
         - The Index node is inside of a Subscript node
-        - The item that is being indexed is the iterable of the for loop
+        - The item that is being indexed is the iterable of the for loop/comprehension
         - The Subscript node is being used in a load context
     """
-    iterable = _iterable_if_range(for_node.iter)
+    iterable = _iterable_if_range(loop_node.iter)
 
     return (
         isinstance(index_node.parent, nodes.Subscript)
@@ -115,33 +125,43 @@ def _is_load_subscript(index_node: nodes.Name, for_node: nodes.For) -> bool:
     )
 
 
-def _is_redundant(index_node: Union[nodes.AssignName, nodes.Name], for_node: nodes.For) -> bool:
-    """Return whether or not <index_node> is redundant in <for_node>.
+def _is_redundant(
+    index_node: Union[nodes.AssignName, nodes.Name],
+    loop_node: Union[nodes.For, nodes.Comprehension],
+) -> bool:
+    """Return whether or not <index_node> is redundant in <loop_node>.
 
-    The lookup method is used in case the original loop variable is shadowed
-    in the for loop's body.
+    The lookup method is used in case the original index variable is shadowed
+    in the for loop/comprehension's body.
     """
     _, assignments = index_node.lookup(index_node.name)
     if not assignments:
         return False
     elif isinstance(index_node, nodes.AssignName):
-        return assignments[0] != for_node.target
+        return assignments[0] != loop_node.target
     else:  # isinstance(index_node, nodes.Name)
-        return assignments[0] != for_node.target or _is_load_subscript(index_node, for_node)
+        return assignments[0] != loop_node.target or _is_load_subscript(index_node, loop_node)
 
 
-def _index_name_nodes(index: str, for_node: nodes.For) -> List[Union[nodes.AssignName, nodes.Name]]:
-    """Return a list of <index> AssignName and Name nodes contained in the body of <for_node>.
+def _index_name_nodes(
+    index: str, loop_node: Union[nodes.For, nodes.Comprehension]
+) -> List[Union[nodes.AssignName, nodes.Name]]:
+    """Return a list of <index> AssignName and Name nodes contained in the body of <loop_node>.
 
     Remove uses of variables that shadow <index>.
     """
-    scope = for_node.scope()
+    scope = loop_node.scope()
+
+    if isinstance(loop_node, nodes.For):
+        body = loop_node
+    else:
+        body = loop_node.parent
 
     return [
         name_node
-        for name_node in for_node.nodes_of_class((nodes.AssignName, nodes.Name))
+        for name_node in body.nodes_of_class((nodes.AssignName, nodes.Name))
         if name_node.name == index
-        and name_node != for_node.target
+        and name_node != loop_node.target
         and name_node.lookup(name_node.name)[0] == scope
     ]
 

@@ -2009,10 +2009,10 @@ almost certainly not what we intended! This usually indicates an error with how 
 
 ### Unnecessary Indexing (E9994)
 
-This error occurs when we use a for loop that goes over a range of indexes for a list, but only use
+This error occurs when we use a for loop or comprehension that goes over a range of indexes for a list, but only use
 those indexes to access elements from the list.
 
-Example:
+Example (For loop):
 
 ```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
 ---
@@ -2032,9 +2032,27 @@ def sum_items(lst: List[int]) -> int:
     return s
 ```
 
+Example (Comprehension):
+
+```{literalinclude} /../examples/custom_checkers/e9994_unnecessary_indexing.py
+---
+lines: 98-100
+---
+```
+
+We can simplify the above code by changing the comprehension to go over the elements of the list directly:
+
+```python
+def list_comp(lst: list) -> list:
+    """Return all the items in lst in a new list."""
+    return [x for x in lst]
+```
+
 In general, we should only loop over indexes (`for i in range(len(lst))`) if we are using the index
 for some purpose other than indexing into the list.
-One common example is if we want to loop over two lists in parallel:
+One common example is if we want to iterate over two lists in parallel:
+
+For loop:
 
 ```python
 def print_sum(lst1: List[int], lst2: List[int]) -> None:
@@ -2043,6 +2061,15 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
     """
     for i in range(len(lst1)):
         print(lst1[i] + lst2[i])
+```
+
+Comprehension:
+
+```python
+def parallel_lst(lst1: List[int], lst2: List[int]) -> list:
+    """Return a list of the concatenation of the values of lst1 and lst2 at index i.
+    Precondition: lst1 and lst2 have the same length."""
+    return [lst1[i] + lst2[i] for i in range(len(lst1))]
 ```
 
 (E9984)=

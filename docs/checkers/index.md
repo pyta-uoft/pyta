@@ -2112,7 +2112,7 @@ Comprehension:
 
 ```python
 def example7(lst: List[int]) -> List[int]:
-    return [lst[i] for i in lst]  # Fixed
+    return [number for number in lst]  # Fixed
 ```
 
 (E9969)=

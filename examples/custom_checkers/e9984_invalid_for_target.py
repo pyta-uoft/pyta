@@ -49,3 +49,19 @@ def example6(lst: List[Tuple[int, Tuple[int, int]]]) -> int:
     for i, [j, lst[0]] in lst:  # Error on this line. lst[0] is highlighted.
         s += i * j * lst[0]
     return s
+
+
+def example7(lst: List[int]) -> List[int]:
+    """Comprehension target is an element of a list."""
+    return [lst[0] for lst[0] in lst]  # Error on this line. lst[0] is highlighted.
+
+
+def example8(lst: List[int]) -> List[int]:
+    """Comprehension target is a slice of a list."""
+    return [lst[0] for lst[0:1] in lst]  # Error on this line. lst[0:1] is highlighted.
+
+
+def example9(lst: List[int]) -> list:
+    """Comprehension target is an object's attribute"""
+    x = type("EmptyClass", (), {})
+    return [x.attr for x.attr in lst]  # Error on this line. x.attr is highlighted

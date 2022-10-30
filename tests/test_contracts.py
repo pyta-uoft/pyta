@@ -16,6 +16,16 @@ def test_nullary_return_int() -> None:
     nullary()
 
 
+def test_nullary_return_float() -> None:
+    """Calling a nullary function with the correct return type (float)."""
+
+    @check_contracts
+    def nullary() -> float:
+        return 1.0
+
+    nullary()
+
+
 def test_nullary_return_dict() -> None:
     """Calling a nullary function with the correct return type (Dict)."""
 
@@ -58,6 +68,28 @@ def test_nullary_return_dict_wrong() -> None:
         nullary()
 
 
+def test_nullary_return_int_float_error() -> None:
+    """Calling a nullary function with return type int, got float"""
+
+    @check_contracts
+    def nullary() -> int:
+        return 1.5
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
+def test_nullary_return_float_int_error() -> None:
+    """Calling a nullary function with return type float, got int"""
+
+    @check_contracts
+    def nullary() -> float:
+        return 1
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
 def test_nullary_no_return_type() -> None:
     """Calling a nullary function with no specified return type passes."""
 
@@ -69,24 +101,46 @@ def test_nullary_no_return_type() -> None:
 
 
 @check_contracts
-def _my_sum(numbers: List[int]) -> int:
+def _my_sum_int(numbers: List[int]) -> int:
     return sum(numbers)
 
 
-def test_my_sum_list_int_argument() -> None:
-    """Calling _my_sum with a list of integers passes type check."""
-    _my_sum([1, 2, 3])
+@check_contracts
+def _my_sum_float(numbers: List[float]) -> float:
+    return sum(numbers)
 
 
-def test_my_sum_empty_list_argument() -> None:
-    """Calling _my_sum with an empty list passes type check."""
-    _my_sum([])
-
-
-def test_my_sum_list_mixed_argument() -> None:
-    """Calling _my_sum with a list containing not just ints fails type check."""
+def test_my_sum_float_int_argument() -> None:
+    """Calling _my_sum_float with a list of integers fails type check."""
     with pytest.raises(AssertionError):
-        _my_sum([1, 2, "hello"])
+        _my_sum_float([1, 2, 3])
+
+
+def test_my_sum_float_float_argument() -> None:
+    """Calling _my_sum_float with a list of floats passes type check."""
+    _my_sum_float([1.0, 2.0, 3.0])
+
+
+def test_my_sum_int_list_int_argument() -> None:
+    """Calling _my_sum_int with a list of integers passes type check."""
+    _my_sum_int([1, 2, 3])
+
+
+def test_my_sum_int_float_argument() -> None:
+    """Calling _my_sum_int with a list of floats fails type check."""
+    with pytest.raises(AssertionError):
+        _my_sum_int([1.5, 2.0])
+
+
+def test_my_sum_int_empty_list_argument() -> None:
+    """Calling _my_sum_int with an empty list passes type check."""
+    _my_sum_int([])
+
+
+def test_my_sum_int_list_mixed_argument() -> None:
+    """Calling _my_sum_int with a list containing not just ints fails type check."""
+    with pytest.raises(AssertionError):
+        _my_sum_int([1, 2, "hello"])
 
 
 @check_contracts

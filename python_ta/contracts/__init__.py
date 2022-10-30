@@ -224,6 +224,11 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         return_type = annotations["return"]
         try:
             _debug(f"Checking return type from call to {wrapped.__qualname__}")
+            if type(r) is int and return_type is float:
+                raise PyTAContractError(
+                    f"{wrapped.__name__}'s return value {_display_value(r)} did not match "
+                    f"return type annotation {_display_annotation(return_type)}"
+                )
             check_type("return", r, return_type)
         except TypeError:
             raise PyTAContractError(

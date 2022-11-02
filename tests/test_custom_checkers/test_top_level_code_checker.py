@@ -18,9 +18,7 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod, args=mod.body
-            ),
+            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=mod, args=2),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)
@@ -28,15 +26,13 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
     def test_message_complex(self):
         """Top level code not allowed, raises a message."""
         src = """
-        print("testing code")
         if __name__ == "__main__":
             print("I'm in main")
+        print("testing code")
         """
         mod = astroid.parse(src)
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod, args=mod.body
-            ),
+            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=mod, args=4),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)
@@ -96,9 +92,7 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod, args=mod.body
-            ),
+            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=mod, args=2),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)

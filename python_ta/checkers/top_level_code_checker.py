@@ -9,7 +9,7 @@ class TopLevelCodeChecker(BaseChecker):
     name = "Top_Level_Code"
     msgs = {
         "E9992": (
-            "You may not write top level code %s",
+            "Forbidden top level code found on line %s",
             "forbidden-top-level-code",
             "Used when you write top-level code that is not allowed. "
             "The allowed top-level code includes imports, definitions, and assignments.",
@@ -28,8 +28,7 @@ class TopLevelCodeChecker(BaseChecker):
                 and not _is_constant_assignment(statement)
                 and not _is_main(statement)
             ):
-                body = node.body
-                self.add_message("forbidden-top-level-code", node=node, args=body)
+                self.add_message("forbidden-top-level-code", node=node, args=statement.lineno)
 
 
 # Helper functions

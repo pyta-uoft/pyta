@@ -184,6 +184,11 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         if param in annotations:
             try:
                 _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
+                if type(arg) is int and annotations[param] is float:
+                    raise PyTAContractError(
+                        f"{wrapped.__name__}'s return value {_display_value(arg)} did not match "
+                        f"return type annotation {_display_annotation(annotations[param])}"
+                    )
                 check_type(param, arg, annotations[param])
             except TypeError:
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])

@@ -137,10 +137,10 @@ def test_parameter_int() -> None:
 
 def test_parameter_float() -> None:
     @check_contracts
-    def parameter_int(num: float) -> None:
+    def parameter_float(num: float) -> None:
         return None
 
-    parameter_int(1.0)
+    parameter_float(1.0)
 
 
 def test_parameter_int_float_error() -> None:
@@ -154,11 +154,11 @@ def test_parameter_int_float_error() -> None:
 
 def test_parameter_float_int_error() -> None:
     @check_contracts
-    def parameter_int(num: float) -> None:
+    def parameter_float(num: float) -> None:
         return None
 
     with pytest.raises(AssertionError):
-        parameter_int(1)
+        parameter_float(1)
 
 
 @check_contracts

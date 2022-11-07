@@ -106,23 +106,23 @@ def _my_sum(numbers: List[int]) -> int:
 
 
 def test_my_sum_list_int_argument() -> None:
-    """Calling _my_sum_int with a list of integers passes type check."""
+    """Calling _my_sum with a list of integers passes type check."""
     _my_sum([1, 2, 3])
 
 
 def test_my_sum_float_argument() -> None:
-    """Calling _my_sum_int with a list of floats fails type check."""
+    """Calling _my_sum with a list of floats fails type check."""
     with pytest.raises(AssertionError):
         _my_sum([1.5, 2.0])
 
 
 def test_my_sum_empty_list_argument() -> None:
-    """Calling _my_sum_int with an empty list passes type check."""
+    """Calling _my_sum with an empty list passes type check."""
     _my_sum([])
 
 
 def test_my_sum_list_mixed_argument() -> None:
-    """Calling _my_sum_int with a list containing not just ints fails type check."""
+    """Calling _my_sum with a list containing not just ints fails type check."""
     with pytest.raises(AssertionError):
         _my_sum([1, 2, "hello"])
 

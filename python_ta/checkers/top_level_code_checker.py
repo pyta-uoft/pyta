@@ -26,7 +26,7 @@ class TopLevelCodeChecker(BaseChecker):
                 _is_import(statement)
                 or _is_definition(statement)
                 or _is_constant_assignment(statement)
-                or _is_main(statement)
+                or _is_main_block(statement)
             ):
                 self.add_message("forbidden-top-level-code", node=node, args=statement.lineno)
 
@@ -46,7 +46,7 @@ def _is_constant_assignment(statement):
     )
 
 
-def _is_main(statement):
+def _is_main_block(statement):
     return (
         isinstance(statement, nodes.If)
         and statement.test.left.name == "__name__"

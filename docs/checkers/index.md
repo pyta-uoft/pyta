@@ -1932,6 +1932,32 @@ when we run our code. PythonTA allows global constants, and so would not report 
 
 **See also**: [Global Variables Are Bad]
 
+(E9992)=
+
+### Top Level Code (E9992)
+
+This error occurs when code statements are placed in the top level.
+The type of statements allowed in the top level are imports, function/class definitions,
+assignment to constants, and the main block.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9992_top_level_code.py
+
+```
+
+To fix this, you could place the testing code inside the main block. For example:
+
+```python
+def example_function(name: str) -> str:
+    return print(f'Hello {name}!')
+
+
+if __name__ == "__main__":
+    print(example_function("Fred"))  # error on this line
+
+```
+
 (E9998)=
 
 ### Forbidden IO function (E9998)

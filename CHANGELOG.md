@@ -21,7 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Custom checkers:
 
-- `top-level-code`: Flag code written at the top level when it is not of the four acceptable types.
+- `top-level-code`: Flag code written at the top level when it is not one of the four acceptable types.
 
 ## [2.3.2] - 2022-08-30
 

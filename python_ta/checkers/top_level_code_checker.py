@@ -33,33 +33,25 @@ class TopLevelCodeChecker(BaseChecker):
 
 # Helper functions
 def _is_import(statement):
-    if isinstance(statement, nodes.Import) or isinstance(statement, nodes.ImportFrom):
-        return True
-    return False
+    return isinstance(statement, nodes.Import) or isinstance(statement, nodes.ImportFrom)
 
 
 def _is_definition(statement):
-    if isinstance(statement, nodes.FunctionDef) or isinstance(statement, nodes.ClassDef):
-        return True
-    return False
+    return isinstance(statement, nodes.FunctionDef) or isinstance(statement, nodes.ClassDef)
 
 
 def _is_constant_assignment(statement):
-    if isinstance(statement, nodes.Assign) and re.search(
+    return isinstance(statement, nodes.Assign) and re.search(
         "^[A-Z]+(?:_[A-Z]+)*$", statement.targets[0].name
-    ):
-        return True
-    return False
+    )
 
 
 def _is_main(statement):
-    if (
+    return (
         isinstance(statement, nodes.If)
         and statement.test.left.name == "__name__"
         and statement.test.ops[0][1].value == "__main__"
-    ):
-        return True
-    return False
+    )
 
 
 def register(linter):

@@ -22,11 +22,11 @@ class TopLevelCodeChecker(BaseChecker):
     @only_required_for_messages("forbidden-top-level-code")
     def visit_module(self, node):
         for statement in node.body:
-            if (
-                not _is_import(statement)
-                and not _is_definition(statement)
-                and not _is_constant_assignment(statement)
-                and not _is_main(statement)
+            if not (
+                _is_import(statement)
+                or _is_definition(statement)
+                or _is_constant_assignment(statement)
+                or _is_main(statement)
             ):
                 self.add_message("forbidden-top-level-code", node=node, args=statement.lineno)
 

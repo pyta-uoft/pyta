@@ -184,12 +184,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         if param in annotations:
             try:
                 _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
-                if type(arg) is int and annotations[param] is float:
-                    raise PyTAContractError(
-                        f"{wrapped.__name__}'s return value {_display_value(arg)} did not match "
-                        f"return type annotation {_display_annotation(annotations[param])}"
-                    )
-                check_type(param, arg, annotations[param])
+                check_type_strict(param, arg, annotations[param], wrapped)
             except TypeError:
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
@@ -229,12 +224,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         return_type = annotations["return"]
         try:
             _debug(f"Checking return type from call to {wrapped.__qualname__}")
-            if type(r) is int and return_type is float:
-                raise PyTAContractError(
-                    f"{wrapped.__name__}'s return value {_display_value(r)} did not match "
-                    f"return type annotation {_display_annotation(return_type)}"
-                )
-            check_type("return", r, return_type)
+            check_type_strict("return", r, return_type, wrapped)
         except TypeError:
             raise PyTAContractError(
                 f"{wrapped.__name__}'s return value {_display_value(r)} did not match "
@@ -267,6 +257,16 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     )
 
     return r
+
+
+def check_type_strict(argname: str, value, expected_type, wrapped) -> None:
+    """Ensure that ``value`` matches ``expected_type``. Differentiates between types float and int."""
+    if type(value) is int and expected_type is float:
+        raise PyTAContractError(
+            f"{wrapped.__name__}'s return value {_display_value(value)} did not match "
+            f"return type annotation {_display_annotation(expected_type)}"
+        )
+    check_type(argname, value, expected_type)
 
 
 def _get_argument_suggestions(arg: Any, annotation: type) -> str:

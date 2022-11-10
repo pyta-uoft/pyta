@@ -16,7 +16,7 @@ from types import CodeType
 from typing import Any, Callable, List, Optional, Set, Tuple
 
 import wrapt
-from typeguard import check_type, qualified_name
+from typeguard import check_type
 
 DEBUG_CONTRACTS = False
 """

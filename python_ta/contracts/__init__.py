@@ -259,7 +259,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
     return r
 
 
-def check_type_strict(argname: str, value, expected_type) -> None:
+def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
     """Ensure that ``value`` matches ``expected_type``. Differentiates between types float and int."""
     if type(value) is int and expected_type is float:
         raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")

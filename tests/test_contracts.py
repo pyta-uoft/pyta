@@ -16,6 +16,16 @@ def test_nullary_return_int() -> None:
     nullary()
 
 
+def test_nullary_return_float() -> None:
+    """Calling a nullary function with the correct return type (float)."""
+
+    @check_contracts
+    def nullary() -> float:
+        return 1.0
+
+    nullary()
+
+
 def test_nullary_return_dict() -> None:
     """Calling a nullary function with the correct return type (Dict)."""
 
@@ -58,6 +68,28 @@ def test_nullary_return_dict_wrong() -> None:
         nullary()
 
 
+def test_nullary_return_int_float_error() -> None:
+    """Calling a nullary function with return type int, got float"""
+
+    @check_contracts
+    def nullary() -> int:
+        return 1.5
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
+def test_nullary_return_float_int_error() -> None:
+    """Calling a nullary function with return type float, got int"""
+
+    @check_contracts
+    def nullary() -> float:
+        return 1
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
 def test_nullary_no_return_type() -> None:
     """Calling a nullary function with no specified return type passes."""
 
@@ -78,6 +110,12 @@ def test_my_sum_list_int_argument() -> None:
     _my_sum([1, 2, 3])
 
 
+def test_my_sum_float_argument() -> None:
+    """Calling _my_sum with a list of floats fails type check."""
+    with pytest.raises(AssertionError):
+        _my_sum([1.5, 2.0])
+
+
 def test_my_sum_empty_list_argument() -> None:
     """Calling _my_sum with an empty list passes type check."""
     _my_sum([])
@@ -87,6 +125,40 @@ def test_my_sum_list_mixed_argument() -> None:
     """Calling _my_sum with a list containing not just ints fails type check."""
     with pytest.raises(AssertionError):
         _my_sum([1, 2, "hello"])
+
+
+def test_parameter_int() -> None:
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    parameter_int(1)
+
+
+def test_parameter_float() -> None:
+    @check_contracts
+    def parameter_float(num: float) -> None:
+        return None
+
+    parameter_float(1.0)
+
+
+def test_parameter_int_float_error() -> None:
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_int(1.0)
+
+
+def test_parameter_float_int_error() -> None:
+    @check_contracts
+    def parameter_float(num: float) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_float(1)
 
 
 @check_contracts

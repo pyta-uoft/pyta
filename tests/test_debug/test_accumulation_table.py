@@ -17,6 +17,24 @@ def test_one_accumulator() -> None:
     assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
 
 
+def test_two_accumulator_while_loop() -> None:
+    number = 10
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    list_so_far = []
+    with AccumulationTable(["sum_so_far", "list_so_far"]) as table:
+        while number in test_list:
+            sum_so_far = sum_so_far + number
+            list_so_far = list_so_far + [number]
+            number += 10
+
+    assert table.loop_variables == {"number": [10, 20, 30, 40]}
+    assert table.loop_accumulators == {
+        "sum_so_far": [0, 10, 30, 60],
+        "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
+    }
+
+
 def test_two_accumulators() -> None:
     test_list = [10, 20, 30]
     sum_so_far = 0
@@ -40,7 +58,6 @@ class MyClass:
         self.items = items
 
     def get_total(self) -> None:
-
         sum_so_far = 0
         with AccumulationTable(["sum_so_far"]) as table:
             for item in self.items:

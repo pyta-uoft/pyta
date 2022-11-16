@@ -39,13 +39,15 @@ def get_loop_lines(lines: list[str], num_whitespace: int) -> str:
     return "\n".join(lines[:endpoint])
 
 
-def get_for_node(frame: types.FrameType) -> astroid.For:
+def get_loop_node(frame: types.FrameType) -> astroid.For:
     """Return the For node from the frame containing the accumulator loop"""
     func_string = inspect.cleandoc(inspect.getsource(frame))
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
     lst_str_lines = func_string.splitlines()
     lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
-    num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
+    num_whitespace = num_whitespaces(
+        lst_str_lines[with_stmt_index]
+    )  # with statement indentation level
     loop_lines = get_loop_lines(lst_from_with_stmt, num_whitespace)
 
     return astroid.parse(loop_lines).body[0]
@@ -88,7 +90,10 @@ class AccumulationTable:
                 self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
         else:
             for loop_var in self.loop_variables:
-                self.loop_variables[loop_var].append("N/A")
+                if loop_var in frame.f_locals:  # handle while loop
+                    self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
+                else:
+                    self.loop_variables[loop_var].append("N/A")
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
@@ -123,7 +128,9 @@ class AccumulationTable:
         """Trace through the for loop and store the values of the
         accumulators and loop variable during each iteration
         """
-        if event == "line" and frame.f_lineno == self._loop_lineno:
+        if (
+            event == "line" and frame.f_lineno == self._loop_lineno
+        ):  # everytime we hit the for loop again, we record the loop variables and accumulators
             self._record_iteration(frame)
 
     def _setup_table(self) -> None:
@@ -137,11 +144,13 @@ class AccumulationTable:
         )[1].frame
         self._loop_lineno = inspect.getlineno(func_frame) + 1
 
-        for_node = get_for_node(func_frame)
-        if isinstance(for_node.target, astroid.Tuple):
-            self.loop_variables = {loop_var.name: [] for loop_var in for_node.target.elts}
-        else:
-            self.loop_variables[for_node.target.name] = []
+        node = get_loop_node(func_frame)
+        if isinstance(node, astroid.For) and isinstance(node.target, astroid.Tuple):
+            self.loop_variables = {loop_var.name: [] for loop_var in node.target.elts}
+        elif isinstance(node, astroid.For):
+            self.loop_variables[node.target.name] = []
+        elif isinstance(node, astroid.While):
+            self.loop_variables[node.test.left.name] = []
 
         func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)

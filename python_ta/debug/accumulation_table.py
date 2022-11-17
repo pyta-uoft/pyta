@@ -8,7 +8,7 @@ import copy
 import inspect
 import sys
 import types
-from typing import Any
+from typing import Any, Union
 
 import astroid
 import tabulate
@@ -39,15 +39,13 @@ def get_loop_lines(lines: list[str], num_whitespace: int) -> str:
     return "\n".join(lines[:endpoint])
 
 
-def get_loop_node(frame: types.FrameType) -> astroid.For:
-    """Return the For node from the frame containing the accumulator loop"""
+def get_loop_node(frame: types.FrameType) -> Union[astroid.For, astroid.While]:
+    """Return the For or While node from the frame containing the accumulator loop"""
     func_string = inspect.cleandoc(inspect.getsource(frame))
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
     lst_str_lines = func_string.splitlines()
     lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
-    num_whitespace = num_whitespaces(
-        lst_str_lines[with_stmt_index]
-    )  # with statement indentation level
+    num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
     loop_lines = get_loop_lines(lst_from_with_stmt, num_whitespace)
 
     return astroid.parse(loop_lines).body[0]
@@ -56,14 +54,14 @@ def get_loop_node(frame: types.FrameType) -> astroid.For:
 class AccumulationTable:
     """
     Class used as a form of print debugging to analyze different loop and
-    accumulation variables during each iteration in a for loop
+    accumulation variables during each iteration in a for or while loop
 
     Instance attributes:
         loop_accumulators: a mapping between the accumulation variables
             and their values during each iteration
         loop_variables: a mapping between the loop variables and their
             values during each iteration
-        _loop_lineno: the line number of the for loop
+        _loop_lineno: the line number of the loop
     """
 
     loop_accumulators: dict[str, list]
@@ -85,15 +83,15 @@ class AccumulationTable:
 
     def _record_iteration(self, frame: types.FrameType) -> None:
         """Record the values of the accumulator variables and loop variables of an iteration"""
-        if len(list(self.loop_variables.values())[0]) > 0:
+        if (
+            len(list(self.loop_variables.keys())) > 0
+            and len(list(self.loop_variables.values())[0]) > 0
+        ):
             for loop_var in self.loop_variables:
                 self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
         else:
             for loop_var in self.loop_variables:
-                if loop_var in frame.f_locals:  # handle while loop
-                    self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
-                else:
-                    self.loop_variables[loop_var].append("N/A")
+                self.loop_variables[loop_var].append("N/A")
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
@@ -106,7 +104,7 @@ class AccumulationTable:
         and loop variable to its respective value during each iteration
         """
         return {
-            "iteration": list(range(len(list(self.loop_variables.values())[0]))),
+            "iteration": list(range(len(list(self.loop_accumulators.values())[0]))),
             **self.loop_variables,
             **self.loop_accumulators,
         }
@@ -114,6 +112,7 @@ class AccumulationTable:
     def _tabulate_data(self) -> None:
         """Print the values of the accumulator and loop variables into a table"""
         iteration_dict = self._create_iteration_dict()
+        print("\n")
         print(
             tabulate.tabulate(
                 iteration_dict,
@@ -125,12 +124,10 @@ class AccumulationTable:
         )
 
     def _trace_loop(self, frame: types.FrameType, event: str, _arg: Any) -> None:
-        """Trace through the for loop and store the values of the
+        """Trace through the loop and store the values of the
         accumulators and loop variable during each iteration
         """
-        if (
-            event == "line" and frame.f_lineno == self._loop_lineno
-        ):  # everytime we hit the for loop again, we record the loop variables and accumulators
+        if event == "line" and frame.f_lineno == self._loop_lineno:
             self._record_iteration(frame)
 
     def _setup_table(self) -> None:
@@ -149,8 +146,6 @@ class AccumulationTable:
             self.loop_variables = {loop_var.name: [] for loop_var in node.target.elts}
         elif isinstance(node, astroid.For):
             self.loop_variables[node.target.name] = []
-        elif isinstance(node, astroid.While):
-            self.loop_variables[node.test.left.name] = []
 
         func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)

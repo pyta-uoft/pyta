@@ -6,10 +6,10 @@ from pylint.checkers.utils import only_required_for_messages
 
 
 class TopLevelCodeChecker(BaseChecker):
-    name = "Top_Level_Code"
+    name = "top_level_code"
     msgs = {
         "E9992": (
-            "Forbidden top level code found on line %s",
+            "Forbidden top-level code found on line %s",
             "forbidden-top-level-code",
             "Used when you write top-level code that is not allowed. "
             "The allowed top-level code includes imports, definitions, and assignments.",

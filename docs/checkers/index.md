@@ -1950,11 +1950,11 @@ To fix this, you could place the testing code inside the main block. For example
 
 ```python
 def example_function(name: str) -> str:
-    return print(f'Hello {name}!')
+    return f'Hello {name}!'
 
 
-if __name__ == "__main__":
-    print(example_function("Fred"))  # error on this line
+if __name__ == '__main__':
+    print(example_function('Fred'))
 
 ```
 

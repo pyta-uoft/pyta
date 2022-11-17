@@ -2,6 +2,7 @@ import re
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
+from pylint.checkers.base import UpperCaseStyle
 from pylint.checkers.utils import only_required_for_messages
 
 
@@ -32,21 +33,33 @@ class TopLevelCodeChecker(BaseChecker):
 
 
 # Helper functions
-def _is_import(statement):
-    return isinstance(statement, nodes.Import) or isinstance(statement, nodes.ImportFrom)
+def _is_import(statement) -> bool:
+    """
+    Return whether or not <statement> is an Import or an ImportFrom.
+    """
+    return isinstance(statement, (nodes.Import, nodes.ImportFrom))
 
 
-def _is_definition(statement):
-    return isinstance(statement, nodes.FunctionDef) or isinstance(statement, nodes.ClassDef)
+def _is_definition(statement) -> bool:
+    """
+    Return whether or not <statement> is a function definition or a class definition.
+    """
+    return isinstance(statement, (nodes.FunctionDef, nodes.ClassDef))
 
 
-def _is_constant_assignment(statement):
-    return isinstance(statement, nodes.Assign) and re.search(
-        "^[A-Z]+(?:_[A-Z]+)*$", statement.targets[0].name
+def _is_constant_assignment(statement) -> bool:
+    """
+    Return whether or not <statement> is a constant assignment.
+    """
+    return isinstance(statement, nodes.Assign) and re.match(
+        UpperCaseStyle.CONST_NAME_RGX, statement.targets[0].name
     )
 
 
-def _is_main_block(statement):
+def _is_main_block(statement) -> bool:
+    """
+    Return whether or not <statement> is the main block.
+    """
     return (
         isinstance(statement, nodes.If)
         and statement.test.left.name == "__name__"

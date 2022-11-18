@@ -11,6 +11,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `unnecessary_indexing_checker` has now been extended to check comprehensions in addition to for loops.
 - `invalid_for_target_checker` has now been extended to check comprehensions in addition to for loops.
+- Violated representation invariant error message now includes the current values of the instance attributes.
+
+### Bug Fixes
+
+- Fixed Issue #831: Contract Checker Bug. Now raises `AssertionError` when the expected type is `float` but got `int` instead.
 
 ## [2.3.3] - 2022-09-05
 

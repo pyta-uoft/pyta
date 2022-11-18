@@ -345,7 +345,12 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
             if not check:
-                raise PyTAContractError(f'Representation invariant "{invariant}" was violated')
+                arg_string = instance.__dict__
+
+                raise PyTAContractError(
+                    f'Representation invariant "{invariant}" was violated for'
+                    f" arguments {arg_string}"
+                )
 
 
 def _get_legal_return_val_var_name(var_dict: dict) -> str:

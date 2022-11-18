@@ -108,7 +108,7 @@ def person():
 
 def test_change_age_invalid_over(person) -> None:
     """
-    Change the age to larger than 100. Expect an exception.
+    Change the age to larger than 150. Expect an exception.
     """
     with pytest.raises(AssertionError) as excinfo:
         person.change_age(200)
@@ -217,6 +217,27 @@ def test_circle_area_invalid() -> None:
     assert "r > 0" in msg
 
 
+def test_pizza_valid() -> None:
+    """
+    Test the Pizza representation invariant on a valid instance.
+    """
+    pizza = Pizza(radius=5, ingredients=["cheese", "pepperoni"])
+    assert pizza.radius == 5 and pizza.ingredients == ["cheese", "pepperoni"]
+
+
+def test_pizza_invalid() -> None:
+    """
+    Test the Pizza representation invariant on an invalid instance.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        Pizza(radius=10, ingredients=[])
+    msg = str(excinfo.value)
+    assert (
+        "\"len(self.ingredients) > 0\" was violated for arguments {'radius': 10, 'ingredients': []}"
+        in msg
+    )
+
+
 def test_set_wrapper_valid() -> None:
     """
     Test the SetWrapper representation invariant on a valid instance.
@@ -227,12 +248,15 @@ def test_set_wrapper_valid() -> None:
 
 def test_set_wrapper_invalid() -> None:
     """
-    Test the SetWrapper representation invariant on a valid instance.
+    Test the SetWrapper representation invariant on an invalid instance.
     """
     with pytest.raises(AssertionError) as excinfo:
         SetWrapper(set={1, 2, -3})
     msg = str(excinfo.value)
-    assert "all(x in self.set for x in {1, 2, 3})" in msg
+    assert (
+        "\"all(x in self.set for x in {1, 2, 3})\" was violated for arguments {'set': {1, 2, -3}}"
+        in msg
+    )
 
 
 class NoInit:

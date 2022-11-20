@@ -352,11 +352,15 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
             if not check:
-                arg_string = instance.__dict__
+                curr_attributes = ", ".join(
+                    f"{k}: {_display_value(v)}" for k, v in vars(instance).items()
+                )
+
+                curr_attributes = "{" + curr_attributes + "}"
 
                 raise PyTAContractError(
                     f'Representation invariant "{invariant}" was violated for'
-                    f" arguments {arg_string}"
+                    f" instance attributes {curr_attributes}"
                 )
 
 

@@ -71,7 +71,7 @@ class AccumulationTable:
     _loop_lineno: int
 
     def __init__(self, accumulation_names: list[str]) -> None:
-        """Initialize an Accumulation Table context manager for print-based loop debugging.
+        """Initialize an AccumulationTable context manager for print-based loop debugging.
 
         Args:
             accumulation_names: a list of the loop accumulator variable names to display.
@@ -112,7 +112,6 @@ class AccumulationTable:
     def _tabulate_data(self) -> None:
         """Print the values of the accumulator and loop variables into a table"""
         iteration_dict = self._create_iteration_dict()
-        print("\n")
         print(
             tabulate.tabulate(
                 iteration_dict,

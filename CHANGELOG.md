@@ -21,7 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - `forbidden_io_function_checker` is now able to check for calls to IO functions written at the top-level of a module, but outside the main block.
-- `python_ta.debug.AccumulationTable` is extended to support printing loop iterations for While Loops
+- `python_ta.debug.AccumulationTable` is extended to support printing loop iterations for while loops.
 
 ## [2.3.2] - 2022-08-30
 

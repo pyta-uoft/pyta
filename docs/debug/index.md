@@ -48,9 +48,9 @@ iteration    number    sum_so_far    avg_so_far    list_so_far
 6            60        210           35.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0), (210, 35.0)]
 ```
 
-### While Loop Example
+### While loop Example
 
-To use Accumulation Table with While Loops, you need to pass in the name of the loop variable when initializing the Table.
+To use AccumulationTable with while loops, you need to pass in the name of the loop variable when initializing the Table.
 
 ```python
 # demo.py

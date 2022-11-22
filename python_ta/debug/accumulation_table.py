@@ -83,10 +83,7 @@ class AccumulationTable:
 
     def _record_iteration(self, frame: types.FrameType) -> None:
         """Record the values of the accumulator variables and loop variables of an iteration"""
-        if (
-            len(list(self.loop_variables.keys())) > 0
-            and len(list(self.loop_variables.values())[0]) > 0
-        ):
+        if self.loop_variables != {} and len(list(self.loop_variables.values())[0]) > 0:
             for loop_var in self.loop_variables:
                 self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
         else:

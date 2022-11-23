@@ -100,9 +100,12 @@ class AccumulationTable:
         """Return a dictionary that maps each accumulator
         and loop variable to its respective value during each iteration
         """
-        iteration = list(range(len(list(self.loop_accumulators.values())[0])))
+
         if self.loop_variables != {}:
             iteration = list(range(len(list(self.loop_variables.values())[0])))
+        elif self.loop_accumulators != {}:
+            iteration = list(range(len(list(self.loop_accumulators.values())[0])))
+
         return {
             "iteration": iteration,
             **self.loop_variables,
@@ -146,6 +149,9 @@ class AccumulationTable:
         elif isinstance(node, astroid.For):
             self.loop_variables[node.target.name] = []
 
+        assert self.loop_accumulators != {} or self.loop_variables != {}, (
+            "The loop accumulator and loop variables " "cannot be both empty "
+        )
         func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)
 

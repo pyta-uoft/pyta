@@ -36,6 +36,16 @@ def test_nullary_return_dict() -> None:
     nullary()
 
 
+def test_nullary_return_bool() -> None:
+    """Calling a nullary function with the correct return type (Bool)."""
+
+    @check_contracts
+    def nullary() -> bool:
+        return True
+
+    nullary()
+
+
 def test_nullary_return_none() -> None:
     """Calling a nullary function with the correct return type (None)."""
 
@@ -84,6 +94,28 @@ def test_nullary_return_float_int_error() -> None:
 
     @check_contracts
     def nullary() -> float:
+        return 1
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
+def test_nullary_return_int_bool_error() -> None:
+    """Calling a nullary function with return type int, got bool"""
+
+    @check_contracts
+    def nullary() -> int:
+        return True
+
+    with pytest.raises(AssertionError):
+        nullary()
+
+
+def test_nullary_return_bool_int_error() -> None:
+    """Calling a nullary function with return type bool, got int"""
+
+    @check_contracts
+    def nullary() -> bool:
         return 1
 
     with pytest.raises(AssertionError):
@@ -143,6 +175,14 @@ def test_parameter_float() -> None:
     parameter_float(1.0)
 
 
+def test_parameter_bool() -> None:
+    @check_contracts
+    def parameter_bool(result: bool) -> None:
+        return None
+
+    parameter_bool(True)
+
+
 def test_parameter_int_float_error() -> None:
     @check_contracts
     def parameter_int(num: int) -> None:
@@ -159,6 +199,24 @@ def test_parameter_float_int_error() -> None:
 
     with pytest.raises(AssertionError):
         parameter_float(1)
+
+
+def test_parameter_int_bool_error() -> None:
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_int(True)
+
+
+def test_parameter_bool_int_error() -> None:
+    @check_contracts
+    def parameter_bool(result: bool) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_bool(1)
 
 
 @check_contracts

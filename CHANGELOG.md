@@ -15,7 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug Fixes
 
 - Fixed Issue #831: Contract Checker Bug. Now raises `AssertionError` when the expected type is `float` but got `int` instead.
-- Now raises `AssertionError` when the expected type is `int` but got `bool` instead.
+- PyTA contracts' type checking now raises `AssertionError` when the expected type is `int` but got `bool` instead.
 
 ## [2.3.3] - 2022-09-05
 

@@ -175,6 +175,14 @@ def test_parameter_float() -> None:
     parameter_float(1.0)
 
 
+def test_parameter_bool() -> None:
+    @check_contracts
+    def parameter_bool(result: bool) -> None:
+        return None
+
+    parameter_bool(True)
+
+
 def test_parameter_int_float_error() -> None:
     @check_contracts
     def parameter_int(num: int) -> None:
@@ -191,6 +199,24 @@ def test_parameter_float_int_error() -> None:
 
     with pytest.raises(AssertionError):
         parameter_float(1)
+
+
+def test_parameter_int_bool_error() -> None:
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_int(True)
+
+
+def test_parameter_bool_int_error() -> None:
+    @check_contracts
+    def parameter_bool(result: bool) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_bool(1)
 
 
 @check_contracts

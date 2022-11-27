@@ -233,7 +233,8 @@ def test_pizza_invalid() -> None:
         Pizza(radius=10, ingredients=[])
     msg = str(excinfo.value)
     assert (
-        'Representation invariant "len(self.ingredients) > 0" was violated for instance attributes {radius: 10, '
+        '"Pizza" representation invariant "len(self.ingredients) > 0" was violated for instance attributes {'
+        "radius: 10, "
         "ingredients: []}" == msg
     )
 
@@ -254,7 +255,8 @@ def test_set_wrapper_invalid() -> None:
         SetWrapper(set={1, 2, -3})
     msg = str(excinfo.value)
     assert (
-        'Representation invariant "all(x in self.set for x in {1, 2, 3})" was violated for instance attributes {'
+        '"SetWrapper" representation invariant "all(x in self.set for x in {1, 2, 3})" was violated for instance '
+        "attributes {"
         "set: {1, 2, -3}}" == msg
     )
 

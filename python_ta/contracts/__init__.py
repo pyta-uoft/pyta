@@ -359,7 +359,7 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 curr_attributes = "{" + curr_attributes + "}"
 
                 raise PyTAContractError(
-                    f'Representation invariant "{invariant}" was violated for'
+                    f'"{instance.__class__.__name__}" representation invariant "{invariant}" was violated for'
                     f" instance attributes {curr_attributes}"
                 )
 

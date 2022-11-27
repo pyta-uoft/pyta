@@ -27,6 +27,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `forbidden_io_function_checker` is now able to check for calls to IO functions written at the top-level of a module, but ouside of the main block.
 
+### New checkers
+
+Custom checkers:
+
+- `forbidden-top-level-code`: Flag code written at the top level when it is not one of the four acceptable types.
+
 ## [2.3.2] - 2022-08-30
 
 ### Bug fixes

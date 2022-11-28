@@ -82,6 +82,7 @@ class MyClass:
         self.items = items
 
     def get_total(self) -> None:
+
         sum_so_far = 0
         with AccumulationTable(["sum_so_far"]) as table:
             for item in self.items:

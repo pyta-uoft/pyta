@@ -57,6 +57,7 @@ def test_two_accumulators() -> None:
         for number in test_list:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
+
     assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
     assert table.loop_accumulators == {
         "sum_so_far": [0, 10, 30, 60],

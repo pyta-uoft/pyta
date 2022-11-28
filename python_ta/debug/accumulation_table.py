@@ -149,9 +149,10 @@ class AccumulationTable:
         elif isinstance(node, astroid.For):
             self.loop_variables[node.target.name] = []
 
-        assert self.loop_accumulators != {} or self.loop_variables != {}, (
-            "The loop accumulator and loop variables " "cannot be both empty "
-        )
+        assert (
+            self.loop_accumulators != {} or self.loop_variables != {}
+        ), "The loop accumulator and loop variables cannot be both empty"
+
         func_frame.f_trace = self._trace_loop
         sys.settrace(lambda *_args: None)
 

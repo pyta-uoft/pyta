@@ -7,7 +7,7 @@ This feature makes it easier to trace the execution of a loop by printing the st
 
 This feature uses the `python_ta.debug.AccumulationTable` as a context manager wrapping a loop.
 
-### For Loop Example
+### For loop example
 
 ```python
 # demo.py
@@ -48,9 +48,9 @@ iteration    number    sum_so_far    avg_so_far    list_so_far
 6            60        210           35.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0), (210, 35.0)]
 ```
 
-### While loop Example
+### While loop example
 
-To use AccumulationTable with while loops, you need to pass in the name of the loop variable when initializing the Table.
+To use `AccumulationTable` with while loops, you need to pass in the name of the loop variable when initializing the table.
 
 ```python
 # demo.py

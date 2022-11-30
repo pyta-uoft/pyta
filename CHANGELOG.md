@@ -13,6 +13,18 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `invalid_for_target_checker` has now been extended to check comprehensions in addition to for loops.
 - `forbidden_io_function_checker` is now able to check for calls to IO functions written at the top-level of a module, but outside the main block.
 - `python_ta.debug.AccumulationTable` is extended to support printing loop iterations for while loops.
+- Violated representation invariant error message now includes the class name and current values of the instance attributes.
+
+### Bug Fixes
+
+- Fixed Issue #831: Contract Checker Bug. Now raises `AssertionError` when the expected type is `float` but got `int` instead.
+- PyTA contracts' type checking now raises `AssertionError` when the expected type is `int` but got `bool` instead.
+
+### New checkers
+
+Custom checkers:
+
+- `forbidden-top-level-code`: Flag code written at the top level when it is not one of the four acceptable types.
 
 ## [2.3.3] - 2022-09-05
 

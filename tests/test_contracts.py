@@ -3,6 +3,7 @@ from typing import Dict, List, Set
 
 import pytest
 
+import python_ta.contracts
 from python_ta.contracts import check_contracts
 
 
@@ -248,6 +249,14 @@ def test_my_sum_one_pre_violation() -> None:
 
     msg = str(excinfo.value)
     assert "len(numbers) > 2" in msg
+
+
+def test_my_sum_one_disable_contract_checking() -> None:
+    """Calling _my_sum_one_precondition with a value that violates the precondition but with ENABLE_CONTRACT_CHECKING
+    = False so no error is raised"""
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
+    _my_sum_one_precondition([1])
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 # Checking to see if functions we defined are in-scope for preconditions

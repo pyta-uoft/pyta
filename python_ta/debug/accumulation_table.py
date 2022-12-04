@@ -26,7 +26,7 @@ def num_whitespaces(start_of_loop: str) -> int:
     return blank_chars
 
 
-def get_loop_lines(lines: list[str], num_whitespace: int) -> str:
+def get_with_lines(lines: list[str], num_whitespace: int) -> str:
     """Return the lines from the start to the end
     of the accumulator loop
     """
@@ -46,9 +46,11 @@ def get_loop_node(frame: types.FrameType) -> Union[astroid.For, astroid.While]:
     lst_str_lines = func_string.splitlines()
     lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
     num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
-    loop_lines = get_loop_lines(lst_from_with_stmt, num_whitespace)
+    with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
 
-    return astroid.parse(loop_lines).body[0]
+    for node in astroid.parse(with_lines).body:
+        if isinstance(node, (astroid.For, astroid.While)):
+            return node
 
 
 class AccumulationTable:
@@ -141,9 +143,11 @@ class AccumulationTable:
         func_frame = inspect.getouterframes(
             inspect.getouterframes(inspect.currentframe())[1].frame
         )[1].frame
-        self._loop_lineno = inspect.getlineno(func_frame) + 1
 
         node = get_loop_node(func_frame)
+
+        self._loop_lineno = inspect.getlineno(func_frame) + node.lineno
+
         if isinstance(node, astroid.For) and isinstance(node.target, astroid.Tuple):
             self.loop_variables = {loop_var.name: [] for loop_var in node.target.elts}
         elif isinstance(node, astroid.For):

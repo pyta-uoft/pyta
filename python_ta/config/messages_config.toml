@@ -133,8 +133,8 @@ E1127 = "The index in a slice must be an int, 'None', or an object with an '__in
 E1129 = "The object after the 'with' keyword must be an instance of a type that implements the '__enter__' and '__exit__', methods, which type %s does not."
 E1131 = "%s. The binary operation can't be performed on the two operands provided."
 E1136 = "%s does not support indexing."
-E1140 = "Dictionary keys must be immutable."
 E1141 = "If you want to iterate through the (key, value) pairs of a dictionary, you need to write 'for key, value in my_dict.items()'."
+E1143 = "Set elements and dictionary keys must be hashable. In particular, they cannot be lists, sets, or dictionaries."
 W1114 = "The arguments in this function call aren't in the same order as the parameters in the function definition."
 
 ["pylint.checkers.typecheck".IterableChecker]

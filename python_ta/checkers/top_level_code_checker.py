@@ -29,7 +29,7 @@ class TopLevelCodeChecker(BaseChecker):
                 or _is_constant_assignment(statement)
                 or _is_main_block(statement)
             ):
-                self.add_message("forbidden-top-level-code", node=node, args=statement.lineno)
+                self.add_message("forbidden-top-level-code", node=statement, args=statement.lineno)
 
 
 # Helper functions
@@ -51,9 +51,14 @@ def _is_constant_assignment(statement) -> bool:
     """
     Return whether or not <statement> is a constant assignment.
     """
-    return isinstance(statement, nodes.Assign) and re.match(
-        UpperCaseStyle.CONST_NAME_RGX, statement.targets[0].name
-    )
+    if not isinstance(statement, nodes.Assign):
+        return False
+
+    names = []
+    for target in statement.targets:
+        names.extend(node.name for node in target.nodes_of_class(nodes.AssignName, nodes.Name))
+
+    return all(re.match(UpperCaseStyle.CONST_NAME_RGX, name) for name in names)
 
 
 def _is_main_block(statement) -> bool:
@@ -62,7 +67,13 @@ def _is_main_block(statement) -> bool:
     """
     return (
         isinstance(statement, nodes.If)
+        and isinstance(statement.test, nodes.Compare)
+        and isinstance(statement.test.left, nodes.Name)
+        and isinstance(statement.test.left, nodes.Name)
         and statement.test.left.name == "__name__"
+        and len(statement.test.ops) == 1
+        and statement.test.ops[0][0] == "=="
+        and isinstance(statement.test.ops[0][1], nodes.Const)
         and statement.test.ops[0][1].value == "__main__"
     )
 

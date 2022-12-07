@@ -291,7 +291,7 @@ def fix_subscript(source_code):
     """
 
     def _fix_end(node: nodes.Subscript) -> nodes.Subscript:
-        if isinstance(node.slice, nodes.Slice):
+        if isinstance(node.slice, (nodes.Slice, nodes.Tuple)):
             # In this case, the subscript node already contains the final ].
             return node
 

@@ -659,8 +659,8 @@ def register(linter):
     """Patch linter to apply message transform with source code."""
     old_get_ast = linter.get_ast
 
-    def new_get_ast(filepath, modname):
-        ast = old_get_ast(filepath, modname)
+    def new_get_ast(filepath, modname, data):
+        ast = old_get_ast(filepath, modname, data)
         if ast is not None:
             with open(filepath, encoding="utf-8") as f:
                 source_code = f.readlines()

@@ -19,6 +19,9 @@ import wrapt
 from typeguard import check_type
 
 ENABLE_CONTRACT_CHECKING = True
+"""
+Set to True to enable contract checking.
+"""
 DEBUG_CONTRACTS = False
 """
 Set to True to display debugging messages when checking contracts.
@@ -268,11 +271,12 @@ def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
         - float vs. int
         - bool vs. int
     """
-    if (type(value) is int and expected_type is float) or (
-        type(value) is bool and expected_type is int
-    ):
-        raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
-    check_type(argname, value, expected_type)
+    if ENABLE_CONTRACT_CHECKING:
+        if (type(value) is int and expected_type is float) or (
+            type(value) is bool and expected_type is int
+        ):
+            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+        check_type(argname, value, expected_type)
 
 
 def _get_argument_suggestions(arg: Any, annotation: type) -> str:

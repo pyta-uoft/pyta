@@ -9,8 +9,8 @@ from ..cfg.visitor import CFGVisitor
 def patch_ast_transforms():
     old_get_ast = PyLinter.get_ast
 
-    def new_get_ast(self, filepath, modname):
-        ast = old_get_ast(self, filepath, modname)
+    def new_get_ast(self, filepath, modname, data):
+        ast = old_get_ast(self, filepath, modname, data)
         if ast is not None:
             # type_inferer = TypeInferer()
             # env_transformer = type_inferer.environment_transformer()

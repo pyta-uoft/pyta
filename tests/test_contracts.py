@@ -123,6 +123,19 @@ def test_nullary_return_bool_int_error() -> None:
         nullary()
 
 
+def test_nullary_int_bool_disable_contract_checking() -> None:
+    """Calling a nullary function with incorrect return type and with ENABLE_CONTRACT_CHECKING disabled so no error
+    is raised."""
+
+    @check_contracts
+    def nullary() -> int:
+        return True
+
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
+    nullary()
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
+
+
 def test_nullary_no_return_type() -> None:
     """Calling a nullary function with no specified return type passes."""
 
@@ -218,6 +231,16 @@ def test_parameter_bool_int_error() -> None:
 
     with pytest.raises(AssertionError):
         parameter_bool(1)
+
+
+def test_parameter_int_bool_disable_contract_checking() -> None:
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
+    parameter_int(True)
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 @check_contracts

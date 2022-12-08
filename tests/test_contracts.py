@@ -449,6 +449,15 @@ def test_get_double_invalid() -> None:
     assert "$return_value == num * 2" in msg
 
 
+def test_get_double_disabled_contract_checking() -> None:
+    """Test that calling the invalid implementation of _get_double does NOT raise an AssertionError when
+    ENABLE_CONTRACT_CHECKING is False.
+    """
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
+    assert _get_double_invalid(5) == 11
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
+
+
 # Test that postcondition checks involving function parameters pass and fail as expected
 @check_contracts
 def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:

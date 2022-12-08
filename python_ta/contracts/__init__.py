@@ -254,12 +254,13 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 continue
             target.__postconditions__.append((postcondition, compiled, return_val_var_name))
 
-    _check_assertions(
-        wrapped,
-        function_locals,
-        function_return_val=r,
-        condition_type="postcondition",
-    )
+    if ENABLE_CONTRACT_CHECKING:
+        _check_assertions(
+            wrapped,
+            function_locals,
+            function_return_val=r,
+            condition_type="postcondition",
+        )
 
     return r
 

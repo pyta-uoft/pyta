@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `forbidden_io_function_checker` is now able to check for calls to IO functions written at the top-level of a module, but outside the main block.
 - `python_ta.debug.AccumulationTable` is extended to support printing loop iterations for while loops.
 - Violated representation invariant error message now includes the class name and current values of the instance attributes.
+- Added constant `python_ta.contracts.ENABLE_CONTRACT_CHECKING` to only check contracts when its value is set to `True`.
 - `python_ta.debug.AccumulationTable` has extended loop detection which allows the loop to appear anywhere inside the with statement.
 
 ### Bug Fixes

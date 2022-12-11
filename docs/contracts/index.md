@@ -61,6 +61,12 @@ functions/classes have contract checking enabled.
 .. autofunction:: python_ta.contracts.check_contracts(func_or_class)
 ```
 
+You can set the `ENABLE_CONTRACT_CHECKING` constant to `True` to enable all contract checking.
+
+```{eval-rst}
+.. autodata:: python_ta.contracts.ENABLE_CONTRACT_CHECKING
+```
+
 Finally, you can set the `DEBUG_CONTRACTS` constant to `True` to enable debugging information to be printed when checking contracts.
 
 ```{eval-rst}

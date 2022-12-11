@@ -18,6 +18,10 @@ from typing import Any, Callable, List, Optional, Set, Tuple
 import wrapt
 from typeguard import check_type
 
+ENABLE_CONTRACT_CHECKING = True
+"""
+Set to True to enable contract checking.
+"""
 DEBUG_CONTRACTS = False
 """
 Set to True to display debugging messages when checking contracts.
@@ -157,7 +161,7 @@ def add_class_invariants(klass: type) -> None:
         if self is not frame_locals.get("self"):
             # Only validating if the attribute is not being set in a instance/class method
             klass_mod = sys.modules.get(klass.__module__)
-            if klass_mod is not None:
+            if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
                 try:
                     _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
@@ -216,7 +220,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 continue
             target.__preconditions__.append((precondition, compiled))
 
-    _check_assertions(wrapped, function_locals)
+    if ENABLE_CONTRACT_CHECKING:
+        _check_assertions(wrapped, function_locals)
 
     # Check return type
     r = wrapped(*args, **kwargs)
@@ -249,12 +254,13 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 continue
             target.__postconditions__.append((postcondition, compiled, return_val_var_name))
 
-    _check_assertions(
-        wrapped,
-        function_locals,
-        function_return_val=r,
-        condition_type="postcondition",
-    )
+    if ENABLE_CONTRACT_CHECKING:
+        _check_assertions(
+            wrapped,
+            function_locals,
+            function_return_val=r,
+            condition_type="postcondition",
+        )
 
     return r
 
@@ -266,11 +272,12 @@ def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
         - float vs. int
         - bool vs. int
     """
-    if (type(value) is int and expected_type is float) or (
-        type(value) is bool and expected_type is int
-    ):
-        raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
-    check_type(argname, value, expected_type)
+    if ENABLE_CONTRACT_CHECKING:
+        if (type(value) is int and expected_type is float) or (
+            type(value) is bool and expected_type is int
+        ):
+            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+        check_type(argname, value, expected_type)
 
 
 def _get_argument_suggestions(arg: Any, annotation: type) -> str:
@@ -293,7 +300,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
                 return r
             _check_class_type_annotations(klass, instance)
             klass_mod = sys.modules.get(klass.__module__)
-            if klass_mod is not None:
+            if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
                 _check_invariants(instance, klass, klass_mod.__dict__)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None

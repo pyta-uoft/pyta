@@ -27,9 +27,7 @@ def num_whitespaces(start_of_loop: str) -> int:
 
 
 def get_with_lines(lines: list[str], num_whitespace: int) -> str:
-    """Return the lines from the start to the end
-    of the accumulator loop
-    """
+    """Return the lines in the with block"""
     endpoint = len(lines)
     for i in range(len(lines)):
         if lines[i].strip() != "" and not lines[i][num_whitespace].isspace():
@@ -48,9 +46,10 @@ def get_loop_node(frame: types.FrameType) -> Union[astroid.For, astroid.While]:
     num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
     with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
 
-    for node in astroid.parse(with_lines).body:
-        if isinstance(node, (astroid.For, astroid.While)):
-            return node
+    with_module = astroid.parse(with_lines)
+    for statement in with_module.nodes_of_class((astroid.For, astroid.While)):
+        if isinstance(statement, (astroid.For, astroid.While)):
+            return statement
 
 
 class AccumulationTable:

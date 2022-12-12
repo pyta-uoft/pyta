@@ -8,9 +8,6 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = TopLevelCodeChecker
     CONFIG = {}
 
-    def setup(self):
-        self.setup_method()
-
     def test_message_simple(self):
         """Top level code not allowed, raises a message."""
         src = """
@@ -18,7 +15,9 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=mod, args=2),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
+            ),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)
@@ -32,7 +31,9 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=mod, args=4),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[1], args=4
+            ),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)
@@ -92,7 +93,37 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         """
         mod = astroid.parse(src)
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=mod, args=2),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(mod)
+
+    def test_message_regular_assignment_unpacking(self):
+        """Top level regular unpacking assignment not allowed, raises a message."""
+        src = """
+        name, CONST = "George", 3
+        """
+        mod = astroid.parse(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(mod)
+
+    def test_message_regular_assignment_starred(self):
+        """Top level regular assignment with a starred target not allowed, raises a message."""
+        src = """
+        NAME, *nums = ["George", 3, 4]
+        """
+        mod = astroid.parse(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
+            ),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)

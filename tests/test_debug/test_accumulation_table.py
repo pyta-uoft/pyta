@@ -76,6 +76,78 @@ def test_empty_accumulators_and_variables() -> None:
                 number += 10
 
 
+def test_three_different_loop_lineno() -> None:
+    test_list = [10, 20, 30]
+    list_so_far = []
+    with AccumulationTable(["sum_so_far", "list_so_far"]) as table:
+        sum_so_far = 0
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+            list_so_far = list_so_far + [number]
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {
+        "sum_so_far": [0, 10, 30, 60],
+        "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
+    }
+
+
+def test_four_different_loop_lineno() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    list_so_far = []
+    with AccumulationTable(["sum_so_far", "list_so_far"]) as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+            list_so_far = list_so_far + [number]
+        b = ""
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {
+        "sum_so_far": [0, 10, 30, 60],
+        "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
+    }
+
+
+def test_five_nested_for_loop() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    list_so_far = []
+    with AccumulationTable(["sum_so_far", "list_so_far"]) as table:
+        i = 0
+        if True:
+            for number in test_list:
+                sum_so_far = sum_so_far + number
+                list_so_far = list_so_far + [number]
+        while i < 5:
+            i += 1
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {
+        "sum_so_far": [0, 10, 30, 60],
+        "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
+    }
+
+
+def test_five_nested_while_loop() -> None:
+    number = 10
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    list_so_far = []
+    with AccumulationTable(["number", "sum_so_far", "list_so_far"]) as table:
+        if True:
+            while number in test_list:
+                sum_so_far = sum_so_far + number
+                list_so_far = list_so_far + [number]
+                number += 10
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+            list_so_far = list_so_far + [number]
+
+    assert table.loop_accumulators == {
+        "number": [10, 20, 30, 40],
+        "sum_so_far": [0, 10, 30, 60],
+        "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
+    }
+
+
 class MyClass:
     items: list
 

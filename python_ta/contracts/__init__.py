@@ -12,20 +12,32 @@ Below are some notes on how they are stored.
 import inspect
 import sys
 import typing
-from types import CodeType
+from types import CodeType, FunctionType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple
 
 import wrapt
 from typeguard import check_type
 
+# Configuration options
+
 ENABLE_CONTRACT_CHECKING = True
 """
 Set to True to enable contract checking.
 """
+
 DEBUG_CONTRACTS = False
 """
 Set to True to display debugging messages when checking contracts.
 """
+
+RENAME_MAIN_TO_PYDEV_UMD = True
+"""
+Set to False to disable workaround for PyCharm's "Run File in Python Console" action.
+In most cases you should not need to change this!
+"""
+
+_PYDEV_UMD_NAME = "pydev_umd"
+
 
 _DEFAULT_MAX_VALUE_LENGTH = 30
 FUNCTION_RETURN_VALUE = "$return_value"
@@ -50,6 +62,11 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
     modules = []
     if decorate_main:
         mod_names = mod_names + ("__main__",)
+
+        # Also add _PYDEV_UMD_NAME, handling when the file is being run in PyCharm
+        # with the "Run in Python Console" action.
+        if RENAME_MAIN_TO_PYDEV_UMD:
+            mod_names = mod_names + (_PYDEV_UMD_NAME,)
 
     for module_name in mod_names:
         modules.append(sys.modules.get(module_name, None))
@@ -142,7 +159,8 @@ def add_class_invariants(klass: type) -> None:
 
         Check representation invariants for this class when not within an instance method of the class.
         """
-        cls_annotations = typing.get_type_hints(klass)
+        klass_mod = _get_module(klass)
+        cls_annotations = typing.get_type_hints(klass, globalns=klass_mod.__dict__)
 
         if name in cls_annotations:
             try:
@@ -160,7 +178,7 @@ def add_class_invariants(klass: type) -> None:
         frame_locals = callframe[1].frame.f_locals
         if self is not frame_locals.get("self"):
             # Only validating if the attribute is not being set in a instance/class method
-            klass_mod = sys.modules.get(klass.__module__)
+            klass_mod = _get_module(klass)
             if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
                 try:
                     _check_invariants(self, klass, klass_mod.__dict__)
@@ -299,7 +317,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             if _instance_init_in_callstack(instance):
                 return r
             _check_class_type_annotations(klass, instance)
-            klass_mod = sys.modules.get(klass.__module__)
+            klass_mod = _get_module(klass)
             if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
                 _check_invariants(instance, klass, klass_mod.__dict__)
         except PyTAContractError as e:
@@ -337,7 +355,8 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
     Precondition:
         - isinstance(instance, klass)
     """
-    cls_annotations = typing.get_type_hints(klass)
+    klass_mod = _get_module(klass)
+    cls_annotations = typing.get_type_hints(klass, globalns=klass_mod.__dict__)
 
     for attr, annotation in cls_annotations.items():
         value = getattr(instance, attr)
@@ -527,6 +546,38 @@ def _display_annotation(annotation: Any) -> str:
         return annotation.__name__
     else:
         return repr(annotation)
+
+
+def _get_module(obj: Any) -> ModuleType:
+    """Return the module where obj was defined (normally obj.__module__).
+
+    NOTE: this function defines a special case when using PyCharm and the file
+    defining the object is "Run in Python Console". In this case, the pydevd runner
+    renames the '__main__' module to 'pydev_umd', and so we need to access that
+    module instead. This behaviour can be disabled by setting RENAME_MAIN_TO_PYDEV_UMD
+    to False.
+    """
+    module_name = obj.__module__
+    module = sys.modules[module_name]
+
+    if (
+        module_name != "__main__"
+        or not RENAME_MAIN_TO_PYDEV_UMD
+        or _PYDEV_UMD_NAME not in sys.modules
+    ):
+        return module
+
+    # Get a function/class name to check whether it is defined in the module
+    if isinstance(obj, (FunctionType, type)):
+        name = obj.__name__
+    else:
+        # For any other type of object, be conservative and just return the module
+        return module
+
+    if name in vars(module):
+        return module
+    else:
+        return sys.modules[_PYDEV_UMD_NAME]
 
 
 def _debug(msg: str) -> None:

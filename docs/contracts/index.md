@@ -67,10 +67,16 @@ You can set the `ENABLE_CONTRACT_CHECKING` constant to `True` to enable all cont
 .. autodata:: python_ta.contracts.ENABLE_CONTRACT_CHECKING
 ```
 
-Finally, you can set the `DEBUG_CONTRACTS` constant to `True` to enable debugging information to be printed when checking contracts.
+You can set the `DEBUG_CONTRACTS` constant to `True` to enable debugging information to be printed when checking contracts.
 
 ```{eval-rst}
 .. autodata:: python_ta.contracts.DEBUG_CONTRACTS
+```
+
+The following constant is used to make contract checking compatible with PyCharm's "Run File in Python Console" action.
+
+```{eval-rst}
+.. autodata:: python_ta.contracts.RENAME_MAIN_TO_PYDEV_UMD
 ```
 
 ## Command Line Interface

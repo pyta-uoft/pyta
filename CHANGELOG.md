@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.4.0] - 2022-12-21
+
 ### Enhancements
 
 - `unnecessary_indexing_checker` has now been extended to check comprehensions in addition to for loops.

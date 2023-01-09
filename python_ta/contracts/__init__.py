@@ -84,7 +84,7 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
 def _enable_function_contracts(wrapped, instance, args, kwargs):
     """A decorator that enables checking contracts for a function."""
     try:
-        if instance and inspect.isclass(instance):
+        if instance is not None and inspect.isclass(instance):
             # This is a class method, so there is no instance.
             return _check_function_contracts(wrapped, None, args, kwargs)
         else:
@@ -198,7 +198,11 @@ def add_class_invariants(klass: type) -> None:
 
 def _check_function_contracts(wrapped, instance, args, kwargs):
     params = wrapped.__code__.co_varnames[: wrapped.__code__.co_argcount]
-    annotations = typing.get_type_hints(wrapped)
+    if instance is not None:
+        klass_mod = _get_module(type(instance))
+        annotations = typing.get_type_hints(wrapped, globalns=klass_mod.__dict__)
+    else:
+        annotations = typing.get_type_hints(wrapped)
     args_with_self = args if instance is None else (instance,) + args
 
     # Check function parameter types

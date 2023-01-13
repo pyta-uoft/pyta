@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.4.1] - 2023-1-13
+
 ### Bug fixes
 
 - Fixed PyTA contract checking for method calls when running modules in PyCharm using the "Run File in Python Console" action.

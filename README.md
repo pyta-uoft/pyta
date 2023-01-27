@@ -33,7 +33,7 @@ If you're interested in using PyTA, you can install it using `pip` (or `pip3`, o
 If you're developing PyTA:
 
 1. First, clone this repository.
-2. Open a terminal in this repo, and run `pip install -e ".[dev]"` to install the dependencies.
+2. Open a terminal in this repo, and run `pip install -e ".[dev, z3]"` to install the dependencies.
 3. Then run `pre-commit install` to install the pre-commit hooks (for automatically formatting and checking your code on each commit).
 
 While not strictly necessary for debugging, some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.

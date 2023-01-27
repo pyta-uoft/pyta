@@ -20,7 +20,8 @@ __version__ = "2.4.2.dev"  # Version number
 import builtins
 
 from pylint.lint import PyLinter
-from pylint.reporters import BaseReporter
+
+from .reporters.core import PythonTaReporter
 
 try:
     del builtins._
@@ -64,7 +65,7 @@ def check_errors(
     module_name: Union[List[str], str] = "",
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
-) -> BaseReporter:
+) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(module_name=module_name, level="error", local_config=config, output=output)
 
@@ -73,7 +74,7 @@ def check_all(
     module_name: Union[List[str], str] = "",
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
-) -> BaseReporter:
+) -> PythonTaReporter:
     """Check a module for errors and style warnings, printing a report."""
     return _check(module_name=module_name, level="all", local_config=config, output=output)
 
@@ -83,7 +84,7 @@ def _check(
     level: str = "all",
     local_config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
-) -> BaseReporter:
+) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
     The `module_name` can take several inputs:

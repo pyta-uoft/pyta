@@ -12,7 +12,6 @@ W0126 = "This if condition references a function but is missing the parentheses 
 W0199 = "Calling assert on a tuple will only evaluate to False if it is empty. It's likely you intended 'assert x, y' rather than 'assert (x,y)'."
 
 ["pylint.checkers.base".ComparisonChecker]
-R0123 = "When performing a comparison with a literal, use '==' instead of 'is'. Exceptions: use 'is' when comparing to None."
 C0123 = "You should use 'isinstance(x, my_type)' instead of 'type(x) == my_type' to check the type of a value."
 
 ["pylint.checkers.base".NameChecker]
@@ -42,7 +41,7 @@ R1710 = """This function has at least one case where the function body will exec
     """
 R1712 = "Use parallel assignment to swap the values of variables. For example: to swap variables 'a' and 'b', simply do 'a, b = b, a'."
 R1713 = "If you want to concatenate a sequence of strings, use the str.join method."
-R1714 = "To check whether this variable is equal to one of many values, merge the comparisons into a single check: %r."
+R1714 = "To check whether this variable is equal to one of many values, use the in operator with a set or list, for example: '%s %sin {%s}'."
 R1715 = "To lookup a value from a dictionary if a key is present and use a default value if the key is not, use the built-in dict.get method."
 R1716 = "You can simplify this boolean operation into a chained comparison. Instead of 'a < b and b < c', use 'a < b < c'."
 R1721 = "When you want to convert a collection from one type into another, use the appropriate type constructor instead of a comprehension. Here, use %s instead."
@@ -65,8 +64,8 @@ R0916 = "This if condition contains too many boolean expressions (%s, exceeding 
 
 ["pylint.checkers.classes".ClassChecker]
 E0203 = "You can't use instance attribute %r prior to its assignment on line %s."
-E0211 = "Every instance method requires at least one parameter 'self', referring to the object on which this method is called. "
-E0213 = "The first parameter of a method should always be called 'self'. "
+E0211 = "Every instance method (including %r) requires at least one parameter 'self', referring to the object on which this method is called. "
+E0213 = "The first parameter of every instance method (including %r) should always be called 'self'. "
 E0241 = "This class %r should not inherit from the same class multiple times."
 R0205 = "All classes inherit from object by default, so you do not need to specify this in the header for %r."
 W0211 = "The static method %r should not have 'self' as the first parameter."

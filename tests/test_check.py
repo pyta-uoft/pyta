@@ -6,23 +6,23 @@ import sys
 from os import path, remove
 from unittest.mock import Mock
 
-from pytest import skip
-
 import python_ta
 
 
 def test_check_on_dir():
     """The function, check_all() should handle a top-level dir as input."""
-    _inputs = [["nodes"], ["examples"]]
-    for item in _inputs:
-        python_ta.check_all(
-            item,
-            config={
-                "output-format": "python_ta.reporters.PlainReporter",
-                "pyta-error-permission": "no",
-                "pyta-file-permission": "no",
-            },
-        )
+    reporter = python_ta.check_all(
+        "examples",
+        config={
+            "output-format": "python_ta.reporters.JSONReporter",
+            "pyta-error-permission": "no",
+            "pyta-file-permission": "no",
+        },
+    )
+    for filename, messages in reporter.messages.items():
+        assert "astroid-error" not in {
+            msg.message.symbol for msg in messages
+        }, f"astroid-error encountered for {filename}"
 
 
 def test_check_on_file():

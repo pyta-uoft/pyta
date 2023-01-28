@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Bug fixes
+
+- Fixed custom message formats based on Pylint 2.15 updates.
+
 ## [2.4.1] - 2023-1-13
 
 ### Bug fixes

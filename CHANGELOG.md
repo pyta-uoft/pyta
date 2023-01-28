@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug fixes
 
 - Fixed custom message formats based on Pylint 2.15 updates.
+- Fixed bug in shadowing-in-comprehension checker when target is a subscript node.
 
 ## [2.4.1] - 2023-1-13
 

@@ -58,6 +58,8 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
         decorate_main: True if the module being run (where __name__ == '__main__') should
             have contracts checked.
     """
+    if not ENABLE_CONTRACT_CHECKING:
+        return
 
     modules = []
     if decorate_main:
@@ -111,6 +113,9 @@ def check_contracts(func_or_class: Any, module_names: Optional[Set[str]] = None)
         ...     \"\"\"
         ...     return x // y
     """
+    if not ENABLE_CONTRACT_CHECKING:
+        return func_or_class
+
     if module_names is not None and func_or_class.__module__ not in module_names:
         _debug(
             f"Warning: skipping contract check for {func_or_class.__name__} defined in {func_or_class.__module__} because module is not included as an argument."
@@ -128,7 +133,7 @@ def check_contracts(func_or_class: Any, module_names: Optional[Set[str]] = None)
 
 def add_class_invariants(klass: type) -> None:
     """Modify the given class to check representation invariants and method contracts."""
-    if "__representation_invariants__" in klass.__dict__:
+    if not ENABLE_CONTRACT_CHECKING or "__representation_invariants__" in klass.__dict__:
         # This means the class has already been decorated
         return
 

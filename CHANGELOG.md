@@ -11,6 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed custom message formats based on Pylint 2.15 updates.
 - Fixed bug in shadowing-in-comprehension checker when target is a subscript node.
+- Ensured `check_contracts` and `check_all_contracts` do nothing when `ENABLE_CONTRACT_CHECKING` is `False`.
 
 ## [2.4.1] - 2023-1-13
 

@@ -684,3 +684,24 @@ def test_check_all_contracts_module_names_argument() -> None:
 
     with pytest.raises(AssertionError):
         run()
+
+
+@pytest.fixture()
+def disable_contract_checking():
+    """Fixture for setting python_ta.contracts.ENABLE_CONTRACT_CHECKING = False."""
+    import python_ta.contracts
+
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
+    yield
+    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True
+
+
+def test_enable_contract_checking_false(disable_contract_checking) -> None:
+    """Test that check_contracts does nothing when ENABLE_CONTRACT_CHECKING is False."""
+
+    @check_contracts
+    def unary2(arg: int) -> int:
+        return arg
+
+    # No error should be raised even though the argument is the wrong type
+    assert unary2("wrong type!") == "wrong type!"

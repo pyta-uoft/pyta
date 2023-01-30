@@ -19,6 +19,10 @@ __version__ = "2.4.2.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 
+from pylint.lint import PyLinter
+
+from .reporters.core import PythonTaReporter
+
 try:
     del builtins._
 except AttributeError:
@@ -32,7 +36,7 @@ import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
 from pathlib import Path
-from typing import Generator
+from typing import AnyStr, Generator, List, Optional, TextIO, Union
 
 import pylint.config
 import pylint.lint
@@ -57,17 +61,30 @@ if sys.version_info < (3, 7, 0):
 PYLINT_PATCHED = False
 
 
-def check_errors(module_name="", config="", output=None):
+def check_errors(
+    module_name: Union[List[str], str] = "",
+    config: Union[dict, str] = "",
+    output: Optional[TextIO] = None,
+) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(module_name=module_name, level="error", local_config=config, output=output)
 
 
-def check_all(module_name="", config="", output=None):
+def check_all(
+    module_name: Union[List[str], str] = "",
+    config: Union[dict, str] = "",
+    output: Optional[TextIO] = None,
+) -> PythonTaReporter:
     """Check a module for errors and style warnings, printing a report."""
     return _check(module_name=module_name, level="all", local_config=config, output=output)
 
 
-def _check(module_name="", level="all", local_config="", output=None):
+def _check(
+    module_name: Union[List[str], str] = "",
+    level: str = "all",
+    local_config: Union[dict, str] = "",
+    output: Optional[TextIO] = None,
+) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
     The `module_name` can take several inputs:
@@ -148,7 +165,7 @@ def _check(module_name="", level="all", local_config="", output=None):
         raise e
 
 
-def _find_local_config(curr_dir):
+def _find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
     """Search for a `.pylintrc` configuration file provided in same (user)
     location as the source file to check.
     Return absolute path to the file, or None.
@@ -163,7 +180,7 @@ def _find_local_config(curr_dir):
         return os.path.join(curr_dir, "config", "pylintrc")
 
 
-def _load_config(linter, config_location):
+def _load_config(linter: PyLinter, config_location: AnyStr) -> None:
     """Load configuration into the linter."""
     _config_initialization(linter, args_list=[], config_file=config_location)
     linter.config_file = config_location
@@ -198,7 +215,9 @@ def _load_messages_config(path: str, default_path: str) -> dict:
     return merge_into
 
 
-def reset_linter(config=None, file_linted=None):
+def reset_linter(
+    config: Optional[Union[dict, str]] = None, file_linted: Optional[AnyStr] = None
+) -> PyLinter:
     """Construct a new linter. Register config and checker plugins.
 
     To determine which configuration to use:
@@ -313,7 +332,7 @@ def reset_linter(config=None, file_linted=None):
     return linter
 
 
-def get_file_paths(rel_path):
+def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
     """A generator for iterating python files within a directory.
     `rel_path` is a relative path to a file or directory.
     Returns paths to all files in a directory.
@@ -326,7 +345,7 @@ def get_file_paths(rel_path):
                 yield os.path.join(root, filename)  # Format path, from root.
 
 
-def _verify_pre_check(filepath):
+def _verify_pre_check(filepath: AnyStr) -> bool:
     """Check student code for certain issues."""
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
@@ -369,7 +388,7 @@ def _verify_pre_check(filepath):
     return True
 
 
-def _get_valid_files_to_check(module_name: str) -> Generator[str, None, None]:
+def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[AnyStr, None, None]:
     """A generator for all valid files to check."""
     # Allow call to check with empty args
     if module_name == "":
@@ -408,7 +427,7 @@ def _get_valid_files_to_check(module_name: str) -> Generator[str, None, None]:
             yield item  # Check other valid files.
 
 
-def doc(msg_id):
+def doc(msg_id: str) -> None:
     """Open a webpage explaining the error for the given message."""
     msg_url = HELP_URL + "#" + msg_id.lower()
     print("Opening {} in a browser.".format(msg_url))

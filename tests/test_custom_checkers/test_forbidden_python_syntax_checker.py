@@ -8,7 +8,7 @@ from python_ta.checkers.forbidden_python_syntax_checker import (
 )
 
 
-class TestForbiddenPythonSyntaxCheckerDisallowedElements(pylint.testutils.CheckerTestCase):
+class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenPythonSyntaxChecker
     CONFIG = {}
 
@@ -104,9 +104,9 @@ class TestForbiddenPythonSyntaxCheckerDisallowedElements(pylint.testutils.Checke
             self.checker.visit_while(while_node)
 
 
-class TestForbiddenPythonSyntaxCheckerAllowedElements(pylint.testutils.CheckerTestCase):
+class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenPythonSyntaxChecker
-    CONFIG = {"allowed_python_elements": ["break", "continue", "comprehension", "for", "while"]}
+    CONFIG = {"allowed_python_syntax": ["break", "continue", "comprehension", "for", "while"]}
 
     def set_up(self) -> None:
         """Perform the set up before each test case executes."""

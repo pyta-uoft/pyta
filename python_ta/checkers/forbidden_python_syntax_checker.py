@@ -9,50 +9,32 @@ from pylint.lint import PyLinter
 class ForbiddenPythonSyntaxChecker(BaseChecker):
     """A checker class to report on the disallowed use of various Python syntax.
 
-    Includes checking the use of:
+    Includes optional checking for the following syntax:
       - break
       - continue
       - comprehension
       - for
       - while
+
+    By default, all Python syntax is allowed. Use options to disallow.
     """
 
     name = "forbidden_python_syntax"
     msgs = {
         "E9950": (
-            "You may not use break statement(s).",
-            "forbidden-break-usage",
-            "Used when a break statement is found in your code.",
-        ),
-        "E9951": (
-            "You may not use continue statement(s).",
-            "forbidden-continue-usage",
-            "Used when a continue statement is found in your code.",
-        ),
-        "E9952": (
-            "You may not use any comprehensions.",
-            "forbidden-comprehension-usage",
-            "Used when a comprehension is found in your code.",
-        ),
-        "E9953": (
-            "You may not use any for loops.",
-            "forbidden-for-loop-usage",
-            "Used when a for loop is found in your code.",
-        ),
-        "E9954": (
-            "You may not use any while loops.",
-            "forbidden-while-loop-usage",
-            "Used when a while loop is found in your code.",
+            "You may not use %s syntax in your code.",
+            "forbidden-python-syntax",
+            "Used when %s syntax is found in your code.",
         ),
     }
     options = (
         (
-            "allowed-python-syntax",
+            "disallowed-python-syntax",
             {
                 "default": (),
                 "type": "csv",
-                "metavar": "<allowed-syntax>",
-                "help": "List of Python syntax that are allowed to be used.",
+                "metavar": "<disallowed-syntax>",
+                "help": "List of Python syntax that are not allowed to be used.",
             },
         ),
     )
@@ -60,35 +42,31 @@ class ForbiddenPythonSyntaxChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    @only_required_for_messages("forbidden-break-usage")
-    def visit_break(self, node: nodes.Break) -> None:
-        """Visit a Break node."""
-        if "break" not in self.linter.config.allowed_python_syntax:
-            self.add_message("forbidden-break-usage", node=node)
+    @only_required_for_messages("forbidden-python-syntax")
+    def visit_default(self, node: nodes.NodeNG) -> None:
+        """Visit a node in the AST."""
+        name = _pascal_case_to_lower(node.__class__.__name__)
 
-    @only_required_for_messages("forbidden-continue-usage")
-    def visit_continue(self, node: nodes.Continue) -> None:
-        """Visit a Continue node."""
-        if "continue" not in self.linter.config.allowed_python_syntax:
-            self.add_message("forbidden-continue-usage", node=node)
+        if name in self.linter.config.disallowed_python_syntax:
+            self.add_message("forbidden-python-syntax", node=node, args=name)
 
-    @only_required_for_messages("forbidden-comprehension-usage")
-    def visit_comprehension(self, node: nodes.Comprehension) -> None:
-        """Visit a Comprehension node."""
-        if "comprehension" not in self.linter.config.allowed_python_syntax:
-            self.add_message("forbidden-comprehension-usage", node=node)
+        return
 
-    @only_required_for_messages("forbidden-for-loop-usage")
-    def visit_for(self, node: nodes.For) -> None:
-        """Visit a For node."""
-        if "for" not in self.linter.config.allowed_python_syntax:
-            self.add_message("forbidden-for-loop-usage", node=node)
 
-    @only_required_for_messages("forbidden-while-loop-usage")
-    def visit_while(self, node: nodes.While) -> None:
-        """Visit a While node."""
-        if "for" not in self.linter.config.allowed_python_syntax:
-            self.add_message("forbidden-while-loop-usage", node=node)
+def _pascal_case_to_lower(s: str) -> str:
+    """Return the given string in lower case and separating each capitalized word with a space.
+
+    Precondition:
+      - s is a string in PascalCase and is the class name of an AST node.
+    """
+    out = ""
+
+    for char in s:
+        if char.isupper():
+            out += " "
+        out += char
+
+    return out.lower().strip()
 
 
 def register(linter: PyLinter) -> None:

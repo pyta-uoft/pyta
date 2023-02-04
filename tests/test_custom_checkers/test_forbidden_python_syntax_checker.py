@@ -5,12 +5,13 @@ from astroid import nodes
 
 from python_ta.checkers.forbidden_python_syntax_checker import (
     ForbiddenPythonSyntaxChecker,
+    _pascal_case_to_lower,
 )
 
 
 class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenPythonSyntaxChecker
-    CONFIG = {}
+    CONFIG = {"disallowed_python_syntax": ["break", "continue", "comprehension", "for", "while"]}
 
     def set_up(self) -> None:
         """Perform the set up before each test case executes."""
@@ -26,12 +27,15 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         break_node, *_ = mod.nodes_of_class(nodes.Break)
+        name = _pascal_case_to_lower(break_node.__class__.__name__)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-break-usage", node=break_node),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-python-syntax", node=break_node, args=name
+            ),
             ignore_position=True,
         ):
-            self.checker.visit_break(break_node)
+            self.checker.visit_default(break_node)
 
     def test_disallow_continue_in_code(self) -> None:
         """Test that the checker correctly reports a continue statement in the code when its usage
@@ -43,12 +47,15 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         continue_node, *_ = mod.nodes_of_class(nodes.Continue)
+        name = _pascal_case_to_lower(continue_node.__class__.__name__)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-continue-usage", node=continue_node),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-python-syntax", node=continue_node, args=name
+            ),
             ignore_position=True,
         ):
-            self.checker.visit_continue(continue_node)
+            self.checker.visit_default(continue_node)
 
     def test_disallow_comprehension_in_code(self) -> None:
         """Test that the checker correctly reports a comprehension in the code when its usage is
@@ -59,14 +66,15 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         comprehension_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+        name = _pascal_case_to_lower(comprehension_node.__class__.__name__)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="forbidden-comprehension-usage", node=comprehension_node
+                msg_id="forbidden-python-syntax", node=comprehension_node, args=name
             ),
             ignore_position=True,
         ):
-            self.checker.visit_comprehension(comprehension_node)
+            self.checker.visit_default(comprehension_node)
 
     def test_disallow_for_loop_in_code(self) -> None:
         """Test that the checker correctly reports a for loop in the code when its usage is
@@ -78,12 +86,15 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(nodes.For)
+        name = _pascal_case_to_lower(for_node.__class__.__name__)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-for-loop-usage", node=for_node),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-python-syntax", node=for_node, args=name
+            ),
             ignore_position=True,
         ):
-            self.checker.visit_for(for_node)
+            self.checker.visit_default(for_node)
 
     def test_disallow_while_loop_in_code(self) -> None:
         """Test that the checker correctly reports a while loop in the code when its usage is
@@ -96,17 +107,20 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         while_node, *_ = mod.nodes_of_class(nodes.While)
+        name = _pascal_case_to_lower(while_node.__class__.__name__)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="forbidden-while-loop-usage", node=while_node),
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-python-syntax", node=while_node, args=name
+            ),
             ignore_position=True,
         ):
-            self.checker.visit_while(while_node)
+            self.checker.visit_default(while_node)
 
 
 class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenPythonSyntaxChecker
-    CONFIG = {"allowed_python_syntax": ["break", "continue", "comprehension", "for", "while"]}
+    CONFIG = {}
 
     def set_up(self) -> None:
         """Perform the set up before each test case executes."""
@@ -124,7 +138,7 @@ class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTest
         break_node, *_ = mod.nodes_of_class(nodes.Break)
 
         with self.assertNoMessages():
-            self.checker.visit_break(break_node)
+            self.checker.visit_default(break_node)
 
     def test_allow_continue_in_code(self) -> None:
         """Test that the checker correctly doesn't report a continue statement when its usage is
@@ -138,7 +152,7 @@ class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTest
         continue_node, *_ = mod.nodes_of_class(nodes.Continue)
 
         with self.assertNoMessages():
-            self.checker.visit_continue(continue_node)
+            self.checker.visit_default(continue_node)
 
     def test_allow_comprehension_in_code(self) -> None:
         """Test that the checker correctly doesn't report a comprehension when its usage is allowed."""
@@ -149,7 +163,7 @@ class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTest
         comprehension_node, *_ = mod.nodes_of_class(nodes.Comprehension)
 
         with self.assertNoMessages():
-            self.checker.visit_comprehension(comprehension_node)
+            self.checker.visit_default(comprehension_node)
 
     def test_allow_for_in_code(self) -> None:
         """Test that the checker correctly doesn't report a for loop when its usage is allowed."""
@@ -161,7 +175,7 @@ class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTest
         for_node, *_ = mod.nodes_of_class(nodes.For)
 
         with self.assertNoMessages():
-            self.checker.visit_for(for_node)
+            self.checker.visit_default(for_node)
 
     def test_allow_while_in_code(self) -> None:
         """Test that the checker correctly doesn't report a while loop when its usage is allowed."""
@@ -174,7 +188,7 @@ class TestForbiddenPythonSyntaxCheckerAllowedsyntax(pylint.testutils.CheckerTest
         while_node, *_ = mod.nodes_of_class(nodes.While)
 
         with self.assertNoMessages():
-            self.checker.visit_while(while_node)
+            self.checker.visit_default(while_node)
 
 
 if __name__ == "__main__":

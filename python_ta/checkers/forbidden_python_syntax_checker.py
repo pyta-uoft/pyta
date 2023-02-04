@@ -50,8 +50,6 @@ class ForbiddenPythonSyntaxChecker(BaseChecker):
         if name in self.linter.config.disallowed_python_syntax:
             self.add_message("forbidden-python-syntax", node=node, args=name)
 
-        return
-
 
 def _pascal_case_to_lower(s: str) -> str:
     """Return the given string in lower case and separating each capitalized word with a space.

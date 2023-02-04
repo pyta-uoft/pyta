@@ -9,4 +9,4 @@ for i in range(1, 10):  # forbidden python syntax
     if i == 5:
         break  # forbidden python syntax
 
-squares = [i ** 2 for i in range(1, 10)]
+squares = [i ** 2 for i in range(1, 10)]  # forbidden python syntax

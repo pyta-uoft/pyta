@@ -109,7 +109,9 @@ def _check(
 
     # Try to check file, issue error message for invalid files.
     try:
-        for locations in _get_valid_files_to_check(module_name):
+        files_to_check = list(_get_valid_files_to_check(module_name))
+
+        for locations in files_to_check:
             f_paths = []  # Paths to files for data submission
             errs = []  # Errors caught in files for data submission
             config = {}  # Configuration settings for data submission
@@ -155,7 +157,9 @@ def _check(
                     url=linter.config.pyta_server_address,
                     version=__version__,
                 )
-        linter.generate_reports()
+        # Only generate reports (display the webpage) if there were valid files to check
+        if len(files_to_check) != 0:
+            linter.generate_reports()
         return current_reporter
     except Exception as e:
         print(

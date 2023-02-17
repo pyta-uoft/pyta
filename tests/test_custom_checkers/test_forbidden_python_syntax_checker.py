@@ -5,13 +5,12 @@ from astroid import nodes
 
 from python_ta.checkers.forbidden_python_syntax_checker import (
     ForbiddenPythonSyntaxChecker,
-    _pascal_case_to_lower,
 )
 
 
 class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenPythonSyntaxChecker
-    CONFIG = {"disallowed_python_syntax": ["break", "continue", "comprehension", "for", "while"]}
+    CONFIG = {"disallowed_python_syntax": ["Break", "Continue", "Comprehension", "For", "While"]}
 
     def set_up(self) -> None:
         """Perform the set up before each test case executes."""
@@ -27,7 +26,7 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         break_node, *_ = mod.nodes_of_class(nodes.Break)
-        name = _pascal_case_to_lower(break_node.__class__.__name__)
+        name = break_node.__class__.__name__
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
@@ -47,7 +46,7 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         continue_node, *_ = mod.nodes_of_class(nodes.Continue)
-        name = _pascal_case_to_lower(continue_node.__class__.__name__)
+        name = continue_node.__class__.__name__
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
@@ -66,7 +65,7 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         comprehension_node, *_ = mod.nodes_of_class(nodes.Comprehension)
-        name = _pascal_case_to_lower(comprehension_node.__class__.__name__)
+        name = comprehension_node.__class__.__name__
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
@@ -86,7 +85,7 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         for_node, *_ = mod.nodes_of_class(nodes.For)
-        name = _pascal_case_to_lower(for_node.__class__.__name__)
+        name = for_node.__class__.__name__
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
@@ -107,7 +106,7 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         """
         mod = astroid.parse(src)
         while_node, *_ = mod.nodes_of_class(nodes.While)
-        name = _pascal_case_to_lower(while_node.__class__.__name__)
+        name = while_node.__class__.__name__
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(

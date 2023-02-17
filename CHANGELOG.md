@@ -7,15 +7,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-## [2.4.3] - 2023-02-03
-
 ### New checkers
 
 Custom checkers:
 
 - `forbidden-python-syntax`: Flag code that is not permitted to be used on an assessment.
 
-## [2.4.2] - 2023-01-31
+## [2.4.2] - 2023-1-31
 
 ### Bug fixes
 
@@ -23,7 +21,7 @@ Custom checkers:
 - Fixed bug in shadowing-in-comprehension checker when target is a subscript node.
 - Ensured `check_contracts` and `check_all_contracts` do nothing when `ENABLE_CONTRACT_CHECKING` is `False`.
 
-## [2.4.1] - 2023-01-13
+## [2.4.1] - 2023-1-13
 
 ### Bug fixes
 

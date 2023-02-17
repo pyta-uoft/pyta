@@ -9,14 +9,8 @@ from pylint.lint import PyLinter
 class ForbiddenPythonSyntaxChecker(BaseChecker):
     """A checker class to report on the disallowed use of various Python syntax.
 
-    Includes optional checking for the following syntax:
-      - break
-      - continue
-      - comprehension
-      - for
-      - while
-
-    By default, all Python syntax is allowed. Use options to disallow.
+    Use options to disallow specific types of Python syntax corresponding to astroid nodes,
+    e.g. Break or For.
     """
 
     name = "forbidden_python_syntax"
@@ -45,26 +39,10 @@ class ForbiddenPythonSyntaxChecker(BaseChecker):
     @only_required_for_messages("forbidden-python-syntax")
     def visit_default(self, node: nodes.NodeNG) -> None:
         """Visit a node in the AST."""
-        name = _pascal_case_to_lower(node.__class__.__name__)
+        name = node.__class__.__name__
 
         if name in self.linter.config.disallowed_python_syntax:
             self.add_message("forbidden-python-syntax", node=node, args=name)
-
-
-def _pascal_case_to_lower(s: str) -> str:
-    """Return the given string in lower case and separating each capitalized word with a space.
-
-    Precondition:
-      - s is a string in PascalCase and is the class name of an AST node.
-    """
-    out = ""
-
-    for char in s:
-        if char.isupper():
-            out += " "
-        out += char
-
-    return out.lower().strip()
 
 
 def register(linter: PyLinter) -> None:

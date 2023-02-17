@@ -2366,15 +2366,16 @@ Example:
 
 ```
 
-Any disallowed syntax must be listed in the options for this checker. For example, run the following
-commands in Python in the `pyta` directory to see the errors:
+By default, all Python syntax is allowed. To forbid a specific type of syntax, use the disallowed-python-syntax
+option. This takes a list of names of [AST nodes from astroid](https://pylint.pycqa.org/projects/astroid/en/latest/api/astroid.nodes.html)
+to forbid. For example, use the following configuration to forbid break and continue statements, comprehensions,
+and for and while loops:
 
-```
->>> import python_ta
->>> python_ta.check_all(
-  module_name="examples/custom_checkers/e9950_forbidden_python_syntax.py",
-  config={"disallowed-python-syntax": ["break", "continue", "comprehension", "for", "while"]}
-)
+```python
+import python_ta
+python_ta.check_all(config={
+    "disallowed-python-syntax": ["Break", "Continue", "Comprehension", "For", "While"]
+})
 ```
 
 ## Miscellaneous

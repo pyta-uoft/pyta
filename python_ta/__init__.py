@@ -109,15 +109,18 @@ def _check(
 
     # Try to check file, issue error message for invalid files.
     try:
-        files_to_check = list(_get_valid_files_to_check(module_name))
+        # Flag indicating whether at least one file has been checked
+        is_any_file_checked = False
 
-        for locations in files_to_check:
+        for locations in _get_valid_files_to_check(module_name):
             f_paths = []  # Paths to files for data submission
             errs = []  # Errors caught in files for data submission
             config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
+                # The current file can actually be checked so update the flag
+                is_any_file_checked = True
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 # Reuse the same reporter each time to accumulate the results across different files.
@@ -158,7 +161,7 @@ def _check(
                     version=__version__,
                 )
         # Only generate reports (display the webpage) if there were valid files to check
-        if len(files_to_check) != 0:
+        if is_any_file_checked:
             linter.generate_reports()
         return current_reporter
     except Exception as e:

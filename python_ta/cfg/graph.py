@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generator, List, Optional, Set, Tuple, Union
+from typing import Any, Generator, List, Optional, Set, Tuple, Union
 
 from astroid import Break, Continue, NodeNG, Return
 
@@ -133,6 +133,17 @@ class ControlFlowGraph:
             if block in self.unreachable_blocks:
                 self.unreachable_blocks.remove(block)
 
+    def label_edge(self, source: CFGBlock, target: CFGBlock, label: Any) -> None:
+        """Update the label for the out-edge from source to target.
+
+        Preconditions:
+            - an out-edge exists from source to target
+        """
+        for edge in source.successors:
+            if edge.target == target:
+                edge.label = label
+                return
+
 
 class CFGBlock:
     """A node in a control flow graph.
@@ -183,9 +194,11 @@ class CFGEdge:
 
     source: CFGBlock
     target: CFGBlock
+    label: Optional[Any]
 
     def __init__(self, source: CFGBlock, target: CFGBlock) -> None:
         self.source = source
         self.target = target
+        self.label = None
         self.source.successors.append(self)
         self.target.predecessors.append(self)

@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Bug fixes
+
+- Fixed bug in possibly-undefined checker where a comprehension variable is falsely flagged as possibly undefined.
+
 ## [2.4.2] - 2023-1-31
 
 ### Bug fixes

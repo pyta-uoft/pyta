@@ -10,6 +10,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug fixes
 
 - Fixed bug in possibly-undefined checker where a comprehension variable is falsely flagged as possibly undefined.
+- Fixed bug where `check_errors` and `check_all` opens a webpage when a nonexistent or unreadable path is passed as an argument.
+
+### New checkers
+
+Custom checkers:
+
+- `forbidden-python-syntax`: Flag code that is not permitted to be used on an assessment.
 
 ## [2.4.2] - 2023-1-31
 

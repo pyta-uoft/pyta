@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from astroid import nodes
 
@@ -8,6 +8,11 @@ from .graph import CFGBlock, ControlFlowGraph
 class CFGVisitor:
     """An astroid visitor that creates a control flow graph for a given Python module.
 
+    Initialize with an options dict to configure the visitor.
+
+    Supported Options:
+      - "separate-condition-blocks": bool
+
     Private Attributes:
     _control_boundaries: A stack of the boundaries the visitor is currently in.
         The top of the stack corresponds to the end of the list.
@@ -15,13 +20,18 @@ class CFGVisitor:
     """
 
     cfgs: Dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]
+    options: Dict[str, Any]
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
 
-    def __init__(self) -> None:
+    def __init__(self, options: Optional[Dict[str, Any]] = None) -> None:
         super().__init__()
         self.cfgs = {}
+        if options is not None:
+            self.options = options
+        else:
+            self.options = {"separate-condition-blocks": False}
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
@@ -80,7 +90,16 @@ class CFGVisitor:
         self._current_cfg = previous_cfg
 
     def visit_if(self, node: nodes.If) -> None:
-        self._current_block.add_statement(node.test)
+        separate_conditions = self.options.get("separate-condition-blocks", False)
+        if separate_conditions:
+            # Create a block for the test condition
+            test_block = self._current_cfg.create_block(self._current_block)
+            test_block.add_statement(node.test)
+            self._current_block = test_block
+        else:
+            # If the options doesn't specify to separate the test condition blocks, just add it to
+            # the current block.
+            self._current_block.add_statement(node.test)
         node.cfg_block = self._current_block
         old_curr = self._current_block
 

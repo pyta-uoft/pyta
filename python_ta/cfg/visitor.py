@@ -12,6 +12,8 @@ class CFGVisitor:
 
     Supported Options:
       - "separate-condition-blocks": bool
+            This option specifies whether the test condition of an if statement gets merged with any
+            preceding statements or placed in a new block. By default, it will merge them.
 
     Private Attributes:
     _control_boundaries: A stack of the boundaries the visitor is currently in.
@@ -28,10 +30,9 @@ class CFGVisitor:
     def __init__(self, options: Optional[Dict[str, Any]] = None) -> None:
         super().__init__()
         self.cfgs = {}
+        self.options = {"separate-condition-blocks": False}
         if options is not None:
-            self.options = options
-        else:
-            self.options = {"separate-condition-blocks": False}
+            self.options.update(options)
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []

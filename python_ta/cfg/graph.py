@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Generator, List, Optional, Set, Tuple, Union
 
-from astroid import Break, Continue, NodeNG, Return
+from astroid import Break, Continue, NodeNG, Raise, Return
 
 
 class ControlFlowGraph:
@@ -180,7 +180,7 @@ class CFGBlock:
     def is_jump(self) -> bool:
         """Returns True if the block has a statement that branches
         the control flow (ex: `break`)"""
-        return isinstance(self.jump, (Break, Continue, Return))
+        return isinstance(self.jump, (Break, Continue, Return, Raise))
 
 
 class CFGEdge:

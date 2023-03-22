@@ -448,3 +448,24 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
+
+    def test_prev_incorrect_raise_handling(self) -> None:
+        """Test that this checker no longer falsely flags a variable as being possibly undefined
+        when it conditionally raises an exception."""
+        src = """
+        def g(a: int) -> int:
+            if a % 3 == 0:
+                result = 3
+            elif a % 2 == 0:
+                result = 2
+            else:
+                raise NotImplementedError
+
+            return result
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)

@@ -141,17 +141,6 @@ class ControlFlowGraph:
             if block in self.unreachable_blocks:
                 self.unreachable_blocks.remove(block)
 
-    def label_edge(self, source: CFGBlock, target: CFGBlock, label: Any) -> None:
-        """Update the label for the out-edge from source to target.
-
-        Preconditions:
-            - an out-edge exists from source to target
-        """
-        for edge in source.successors:
-            if edge.target == target:
-                edge.label = label
-                return
-
 
 class CFGBlock:
     """A node in a control flow graph.

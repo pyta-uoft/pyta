@@ -2352,6 +2352,32 @@ def is_equal_to_one(a: int) -> bool:
     return a == 1
 ```
 
+(E9950)=
+
+### Forbidden Python syntax (E9950)
+
+This error occurs when disallowed Python syntax is used in code. Disallowed syntax refers to any
+Python syntax that shouldn't be used because it defeats the purpose of an assessment. Used for
+teaching purposes.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9950_forbidden_python_syntax.py
+
+```
+
+By default, all Python syntax is allowed. To forbid a specific type of syntax, use the disallowed-python-syntax
+option. This takes a list of names of [AST nodes from astroid](https://pylint.pycqa.org/projects/astroid/en/latest/api/astroid.nodes.html)
+to forbid. For example, use the following configuration to forbid break and continue statements, comprehensions,
+and for and while loops:
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "disallowed-python-syntax": ["Break", "Continue", "Comprehension", "For", "While"]
+})
+```
+
 ## Miscellaneous
 
 (E1305)=

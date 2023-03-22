@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generator, List, Optional, Set, Tuple, Union
+from typing import Any, Generator, List, Optional, Set, Tuple, Union
 
 from astroid import Break, Continue, NodeNG, Return
 
@@ -21,17 +21,21 @@ class ControlFlowGraph:
         self.start = self.create_block()
         self.end = self.create_block()
 
-    def create_block(self, pred: Optional[CFGBlock] = None) -> CFGBlock:
+    def create_block(
+        self, pred: Optional[CFGBlock] = None, edge_label: Optional[Any] = None
+    ) -> CFGBlock:
         """Create a new CFGBlock for this graph.
 
         If pred is specified, set that block as a predecessor of the new block.
+
+        If edge_label is specified, set the corresponding edge in the CFG with that label.
         """
         new_block = CFGBlock(self.block_count)
         self.unreachable_blocks.add(new_block)
 
         self.block_count += 1
         if pred:
-            self.link_or_merge(pred, new_block)
+            self.link_or_merge(pred, new_block, edge_label)
         return new_block
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
@@ -39,13 +43,17 @@ class ControlFlowGraph:
         if not source.is_jump():
             CFGEdge(source, target)
 
-    def link_or_merge(self, source: CFGBlock, target: CFGBlock) -> None:
+    def link_or_merge(
+        self, source: CFGBlock, target: CFGBlock, edge_label: Optional[Any] = None
+    ) -> None:
         """Link source to target, or merge source into target if source is empty.
 
         An "empty" node for this purpose is when source has no statements.
 
         source with a jump statement cannot be further linked or merged to
         another target.
+
+        If edge_label is specified, set the corresponding edge in the CFG with that label.
         """
         if source.is_jump():
             return
@@ -60,7 +68,7 @@ class ControlFlowGraph:
             # represent any part of the program so it is redundant.
             self.unreachable_blocks.remove(source)
         else:
-            CFGEdge(source, target)
+            CFGEdge(source, target, edge_label)
 
     def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
         """Link source to multiple target, or merge source into targets if source is empty.
@@ -183,9 +191,13 @@ class CFGEdge:
 
     source: CFGBlock
     target: CFGBlock
+    label: Optional[Any]
 
-    def __init__(self, source: CFGBlock, target: CFGBlock) -> None:
+    def __init__(
+        self, source: CFGBlock, target: CFGBlock, edge_label: Optional[Any] = None
+    ) -> None:
         self.source = source
         self.target = target
+        self.label = edge_label
         self.source.successors.append(self)
         self.target.predecessors.append(self)

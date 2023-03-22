@@ -103,8 +103,8 @@ class CFGVisitor:
         node.cfg_block = self._current_block
         old_curr = self._current_block
 
-        # Handle "then" branch.
-        then_block = self._current_cfg.create_block(old_curr)
+        # Handle "then" branch and label it.
+        then_block = self._current_cfg.create_block(old_curr, edge_label="True")
         self._current_block = then_block
         for child in node.body:
             child.accept(self)
@@ -114,7 +114,8 @@ class CFGVisitor:
         if node.orelse == []:
             end_else = old_curr
         else:
-            else_block = self._current_cfg.create_block(old_curr)
+            # Label the edge to the else block.
+            else_block = self._current_cfg.create_block(old_curr, edge_label="False")
             self._current_block = else_block
             for child in node.orelse:
                 child.accept(self)
@@ -122,7 +123,11 @@ class CFGVisitor:
 
         after_if_block = self._current_cfg.create_block()
         self._current_cfg.link_or_merge(end_if, after_if_block)
-        self._current_cfg.link_or_merge(end_else, after_if_block)
+        # Label the edge if there was no "else" branch
+        if node.orelse == []:
+            self._current_cfg.link_or_merge(end_else, after_if_block, edge_label="False")
+        else:
+            self._current_cfg.link_or_merge(end_else, after_if_block)
 
         self._current_block = after_if_block
 

@@ -142,10 +142,10 @@ class PossiblyUndefinedChecker(BaseChecker):
                 yield from self.get_nodes(statement.value)
             else:
                 yield from self.get_nodes(statement.elt)
-        else:
-            yield from statement.nodes_of_class(
-                (nodes.AssignName, nodes.DelName, nodes.Name), nodes.FunctionDef
-            )
+        elif isinstance(statement, (nodes.AssignName, nodes.DelName, nodes.Name)):
+            yield statement
+        elif not isinstance(statement, nodes.FunctionDef):
+            yield from multiple_nodes(statement.get_children())
 
 
 def register(linter):

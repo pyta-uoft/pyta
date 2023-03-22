@@ -429,3 +429,22 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_name(name_node_x)
+
+    def test_prev_generator_flag(self) -> None:
+        """Test that this checker no longer falsely flags a comprehension variable for being
+        possibly undefined when it shadows a variable in another scope.
+        """
+        src = """
+        def f() -> None:
+            if True:
+                print(x for x in range(20))
+            else:
+                for x in range(10):
+                    pass
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)

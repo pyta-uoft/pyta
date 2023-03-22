@@ -199,7 +199,14 @@ class CFGVisitor:
     def visit_return(self, node: nodes.Return) -> None:
         self._visit_jump(node)
 
-    def _visit_jump(self, node: Union[nodes.Break, nodes.Continue, nodes.Return]) -> None:
+    def visit_raise(self, node: nodes.Raise) -> None:
+        # Raise acts like a return so it jumps to the end
+        self._control_boundaries.append((node, {nodes.Raise.__name__: self._current_cfg.end}))
+        self._visit_jump(node)
+
+    def _visit_jump(
+        self, node: Union[nodes.Break, nodes.Continue, nodes.Return, nodes.Raise]
+    ) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
             if type(node).__name__ in exits:

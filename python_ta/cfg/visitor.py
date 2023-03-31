@@ -61,7 +61,15 @@ class CFGVisitor:
         self.cfgs[func] = ControlFlowGraph()
         self._current_cfg = self.cfgs[func]
 
-        self._control_boundaries.append((func, {nodes.Return.__name__: self._current_cfg.end}))
+        self._control_boundaries.append(
+            (
+                func,
+                {
+                    nodes.Return.__name__: self._current_cfg.end,
+                    nodes.Raise.__name__: self._current_cfg.end,
+                },
+            )
+        )
 
         self._current_cfg.start.add_statement(func.args)
         func.cfg_block = self._current_cfg.start
@@ -200,8 +208,6 @@ class CFGVisitor:
         self._visit_jump(node)
 
     def visit_raise(self, node: nodes.Raise) -> None:
-        # Raise acts like a return so it jumps to the end
-        self._control_boundaries.append((node, {nodes.Raise.__name__: self._current_cfg.end}))
         self._visit_jump(node)
 
     def _visit_jump(

@@ -233,17 +233,24 @@ class CFGVisitor:
 
         node.cfg_block = self._current_block
 
-        for child in node.body:
-            child.accept(self)
-        end_body = self._current_block
-
+        # Construct the exception handlers first
+        # Initialize a temporary block to later merge with end_body
+        self._current_block = self._current_cfg.create_block()
+        temp = self._current_block
         end_block = self._current_cfg.create_block()
 
         after_body = []
+        # Mapping of exceptions to their handler blocks
+        exceptions = {}
         for handler in node.handlers:
             h = self._current_cfg.create_block()
             self._current_block = h
             handler.cfg_block = h
+
+            # Update exceptions to map the names of the exceptions handled to the block itself
+            exception_names = _extract_exceptions(handler)
+            exceptions.update({exc_name: h for exc_name in exception_names})
+
             if handler.name is not None:  # The name assigned to the caught exception.
                 handler.name.accept(self)
             for child in handler.body:
@@ -261,6 +268,27 @@ class CFGVisitor:
                 child.accept(self)
             self._current_cfg.link_or_merge(self._current_block, end_block)
 
+        # Construct the try body so reset current block to this node's block
+        self._current_block = node.cfg_block
+
+        # Have a flag for whether a raise statement was added to the control boundary
+        added_to_cb = False
+        for child in node.body:
+            # Update control boundary if child is or contains a raise statement
+            raise_stmts = list(child.nodes_of_class(nodes.Raise))
+            if len(raise_stmts) != 0 and raise_stmts[0].exc is not None:
+                raise_link = exceptions.get(raise_stmts[0].exc.name, self._current_cfg.end)
+                self._control_boundaries.append((node, {nodes.Raise.__name__: raise_link}))
+                added_to_cb = True
+
+            child.accept(self)
+        end_body = self._current_block
+
+        # Remove from control boundaries if we added to it in the tryexcept
+        if added_to_cb:
+            self._control_boundaries.pop()
+
+        self._current_cfg.link_or_merge(temp, end_body)
         self._current_cfg.multiple_link_or_merge(end_body, after_body)
         self._current_block = end_block
 
@@ -272,3 +300,20 @@ class CFGVisitor:
 
         for child in node.body:
             child.accept(self)
+
+
+def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:
+    """A helper method that returns a list of all the exceptions handled by this except block as a
+    list of strings.
+    """
+    exceptions = node.type
+    exceptions_so_far = []
+    # ExceptHandler.type will either be Tuple, NodeNG, or None.
+    if exceptions is None:
+        return exceptions_so_far
+
+    # Get all the Name nodes for all exceptions this except block is handling
+    for exception in exceptions.nodes_of_class(nodes.Name):
+        exceptions_so_far.append(exception.name)
+
+    return exceptions_so_far

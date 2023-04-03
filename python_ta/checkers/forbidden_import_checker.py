@@ -6,7 +6,6 @@ from pylint.checkers.utils import only_required_for_messages
 
 
 class ForbiddenImportChecker(BaseChecker):
-
     name = "forbidden_import"
     msgs = {
         "E9999": (

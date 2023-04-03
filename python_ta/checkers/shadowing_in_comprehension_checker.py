@@ -6,7 +6,6 @@ from pylint.checkers.utils import only_required_for_messages
 
 
 class ShadowingInComprehensionChecker(BaseChecker):
-
     name = "shadowing_in_comprehension"
     msgs = {
         "E9988": (

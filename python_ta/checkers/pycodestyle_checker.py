@@ -3,7 +3,6 @@ from pylint.checkers import BaseRawFileChecker
 
 
 class PycodestyleChecker(BaseRawFileChecker):
-
     name = "pep8_errors"
     msgs = {"E9989": ("Found pycodestyle (PEP8) style error at %s", "pep8-errors", "")}
 

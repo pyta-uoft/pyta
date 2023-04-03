@@ -10,7 +10,6 @@ DOCTEST = ">>>"
 
 
 class MissingSpaceInDoctestChecker(BaseChecker):
-
     name = "missing_space_in_doctest"
     msgs = {
         "E9973": (

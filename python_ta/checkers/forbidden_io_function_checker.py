@@ -11,7 +11,6 @@ FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
 
 class IOFunctionChecker(BaseChecker):
-
     name = "IO_Function"
     msgs = {
         "E9998": (

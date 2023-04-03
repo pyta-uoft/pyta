@@ -18,7 +18,6 @@ from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
 
 class RedundantAssignmentChecker(BaseChecker):
-
     # name is the same as file name but without _checker part
     name = "redundant_assignment"
     # use dashes for connecting words in message symbol

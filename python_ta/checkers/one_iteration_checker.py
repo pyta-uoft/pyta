@@ -8,7 +8,6 @@ from pylint.checkers.utils import only_required_for_messages
 
 
 class OneIterationChecker(BaseChecker):
-
     # name is the same as file name but without _checker part
     name = "one_iteration"
     # use dashes for connecting words in message symbol

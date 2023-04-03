@@ -77,6 +77,7 @@ Type-checking:
     declaration appears.
 """
 
+
 # Example 1
 @wrapper
 def fun(arg) -> str:

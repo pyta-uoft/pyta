@@ -13,6 +13,15 @@ def build_cfg(src: str) -> ControlFlowGraph:
     return t.cfgs[mod]
 
 
+def build_cfg_separate_conditions(src: str) -> ControlFlowGraph:
+    """Build a CFG but configure the visitor to separate the test condition blocks."""
+    mod = astroid.parse(src)
+    t = CFGVisitor({"separate-condition-blocks": True})
+    mod.accept(t)
+
+    return t.cfgs[mod]
+
+
 def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
@@ -120,3 +129,68 @@ def test_nested_if() -> None:
         ["print('bye')"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
+
+
+def test_if_multiple_statements_in_branches_with_separate_conditions() -> None:
+    """Test an if statement with multiple statements in each branch with the visitor configured to
+    separate the test condition from the preceding statements."""
+    src = """
+    if 3 > 1:
+        print('hi')
+        print('hi')
+    else:
+        print('bye')
+        print('bye')
+        print('bye')
+    """
+    expected_blocks = [
+        ["3 > 1"],
+        ["print('hi')", "print('hi')"],
+        [],
+        ["print('bye')", "print('bye')", "print('bye')"],
+    ]
+    assert _extract_blocks(build_cfg_separate_conditions(src)) == expected_blocks
+
+
+def test_if_surrounding_statements_with_separate_conditions() -> None:
+    """Test an if statement with other statements before and after it with the visitor configured to
+    separate the test condition from the preceding statements."""
+    src = """
+    x = 1
+    if x > 1:
+        print('hi')
+    else:
+        print('bye')
+    print(x)
+    """
+    expected_blocks = [["x = 1"], ["x > 1"], ["print('hi')"], ["print(x)"], [], ["print('bye')"]]
+    assert _extract_blocks(build_cfg_separate_conditions(src)) == expected_blocks
+
+
+def test_nested_if_with_separate_conditions() -> None:
+    src = """
+    x = 1
+    if x > 1:
+        print('hi')
+        if x == 2:
+            print('nested')
+        else:
+            print('not nested')
+        print('done')
+    else:
+        print('bye')
+    print(x)
+    """
+    expected_blocks = [
+        ["x = 1"],
+        ["x > 1"],
+        ["print('hi')"],
+        ["x == 2"],
+        ["print('nested')"],
+        ["print('done')"],
+        ["print(x)"],
+        [],
+        ["print('not nested')"],
+        ["print('bye')"],
+    ]
+    assert _extract_blocks(build_cfg_separate_conditions(src)) == expected_blocks

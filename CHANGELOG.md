@@ -11,6 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed bug in possibly-undefined checker where a comprehension variable is falsely flagged as possibly undefined.
 - Fixed bug where `check_errors` and `check_all` opens a webpage when a nonexistent or unreadable path is passed as an argument.
+- Fixed the CFG implementation of pyta to resolve a bug in the possibly-undefined checker where variables were falsely flagged as possibly undefined when the code conditionally raises an exception and the variable was referenced afterwards.
 
 ### New checkers
 

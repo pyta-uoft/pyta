@@ -63,3 +63,19 @@ def test_link_return_to_block() -> None:
 
     new_block = cfg.create_block(return_block)
     assert new_block.predecessors == []
+
+
+def test_link_raise_to_block() -> None:
+    src = """
+    def func():
+        raise NotImplementedError
+    """
+    cfgs = build_cfgs(src)
+    keys = list(cfgs)
+    cfg = cfgs[keys[1]]
+
+    raise_block = cfg.start.successors[0].target
+    assert raise_block.statements[0].as_string() == "raise NotImplementedError"
+
+    new_block = cfg.create_block(raise_block)
+    assert new_block.predecessors == []

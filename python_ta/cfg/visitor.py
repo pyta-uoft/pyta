@@ -235,7 +235,11 @@ class CFGVisitor:
     ) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
-            if type(node).__name__ in exits:
+            if isinstance(node, nodes.Raise) and f"{nodes.Raise.__name__} {node.exc.name}" in exits:
+                self._current_cfg.link(old_curr, exits[f"{nodes.Raise.__name__} {node.exc.name}"])
+                old_curr.add_statement(node)
+                break
+            elif type(node).__name__ in exits:
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break
@@ -260,16 +264,16 @@ class CFGVisitor:
         end_block = self._current_cfg.create_block()
 
         after_body = []
-        # Mapping of exceptions to their handler blocks
-        exceptions = {}
         for handler in node.handlers:
             h = self._current_cfg.create_block()
             self._current_block = h
             handler.cfg_block = h
 
-            # Update exceptions to map the names of the exceptions handled to the block itself
-            exception_names = _extract_exceptions(handler)
-            exceptions.update({exc_name: h for exc_name in exception_names})
+            # Iterate through all the exceptions this ExceptHandler handles, adding each one to the
+            # control boundary
+            for exception in _extract_exceptions(handler):
+                # Store both the 'Raise' and the exception class name
+                self._control_boundaries.append((node, {f"{nodes.Raise.__name__} {exception}": h}))
 
             if handler.name is not None:  # The name assigned to the caught exception.
                 handler.name.accept(self)
@@ -291,21 +295,12 @@ class CFGVisitor:
         # Construct the try body so reset current block to this node's block
         self._current_block = node.cfg_block
 
-        # Have a flag for whether a raise statement was added to the control boundary
-        added_to_cb = False
         for child in node.body:
-            # Update control boundary if child is or contains a raise statement
-            raise_stmts = list(child.nodes_of_class(nodes.Raise))
-            if len(raise_stmts) != 0 and raise_stmts[0].exc is not None:
-                raise_link = exceptions.get(raise_stmts[0].exc.name, self._current_cfg.end)
-                self._control_boundaries.append((node, {nodes.Raise.__name__: raise_link}))
-                added_to_cb = True
-
             child.accept(self)
         end_body = self._current_block
 
-        # Remove from control boundaries if we added to it in the tryexcept
-        if added_to_cb:
+        # Remove each control boundary that we added in this method
+        for _ in node.handlers:
             self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(temp, end_body)

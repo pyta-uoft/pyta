@@ -235,11 +235,15 @@ class CFGVisitor:
     ) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
+            # Linked specific Raise statements to corresponding except handler
             if isinstance(node, nodes.Raise) and f"{nodes.Raise.__name__} {node.exc.name}" in exits:
                 self._current_cfg.link(old_curr, exits[f"{nodes.Raise.__name__} {node.exc.name}"])
                 old_curr.add_statement(node)
                 break
-            elif type(node).__name__ in exits:
+
+            # Linking Raise to general catch-all except handler and other nodes to corresponding
+            # blocks
+            if type(node).__name__ in exits:
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break
@@ -264,15 +268,20 @@ class CFGVisitor:
         end_block = self._current_cfg.create_block()
 
         after_body = []
-        for handler in node.handlers:
+        # Construct blocks in reverse to give precedence to the first block in overlapping except
+        # branches
+        for handler in reversed(node.handlers):
             h = self._current_cfg.create_block()
             self._current_block = h
             handler.cfg_block = h
 
-            # Iterate through all the exceptions this ExceptHandler handles, adding each one to the
-            # control boundary
-            for exception in _extract_exceptions(handler):
-                # Store both the 'Raise' and the exception class name
+            exceptions = _extract_exceptions(handler)
+            # Edge case: catch-all except clause (i.e. except: ...)
+            if exceptions == []:
+                self._control_boundaries.append((node, {nodes.Raise.__name__: h}))
+
+            # General case: specific except clause
+            for exception in exceptions:
                 self._control_boundaries.append((node, {f"{nodes.Raise.__name__} {exception}": h}))
 
             if handler.name is not None:  # The name assigned to the caught exception.

@@ -17,6 +17,10 @@ def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
 
+def _extract_unreachable_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
+    return [[s.as_string() for s in block.statements] for block in cfg.unreachable_blocks]
+
+
 def test_simple() -> None:
     src = """
     try:
@@ -63,7 +67,7 @@ def test_multiple_exceptions() -> None:
     else:
         print('else')
     """
-    expected_blocks = [["print(True)"], ["pass"], [], ["k", "pass"], ["print('else')"]]  # end block
+    expected_blocks = [["print(True)"], ["k", "pass"], [], ["pass"], ["print('else')"]]  # end block
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
 
@@ -138,3 +142,60 @@ def test_complex() -> None:
         ["pass"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
+
+
+def test_raise_in_tryexcept() -> None:
+    """Test that the try-body is correctly linked to the except block when the same exception is
+    raised in the try-body."""
+    src = """
+    try:
+        raise NotImplementedError
+    except NotImplementedError:
+        pass
+    """
+    expected_unreachable_blocks = []
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
+
+
+def test_overlapping_exceptions() -> None:
+    """Test that the try-body is linked to the correct except block when there are duplicate except
+    clauses."""
+    src = """
+    try:
+        raise RuntimeError
+    except RuntimeError:
+        print("oh no!")
+    except RuntimeError:
+        pass
+    """
+    expected_unreachable_blocks = [["pass"]]
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
+
+
+def test_catch_all_exception() -> None:
+    """Test that the try-body is correctly linked to the catch-all except block."""
+    src = """
+    try:
+        raise IOError
+    except NotImplementedError:
+        pass
+    except:
+        print("heh")
+    """
+    expected_unreachable_blocks = [["pass"]]
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
+
+
+def test_no_link_catch_all() -> None:
+    """Test that the try-body correctly links to its corresponding except block even when there's a
+    general exception clause."""
+    src = """
+        try:
+            raise NotImplementedError
+        except NotImplementedError:
+            pass
+        except:
+            print("heh")
+        """
+    expected_unreachable_blocks = [["print('heh')"]]
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks

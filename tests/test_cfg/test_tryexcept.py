@@ -164,7 +164,7 @@ def test_overlapping_exceptions() -> None:
     try:
         raise RuntimeError
     except RuntimeError:
-        print("oh no!")
+        print('oh no!')
     except RuntimeError:
         pass
     """
@@ -180,7 +180,7 @@ def test_catch_all_exception() -> None:
     except NotImplementedError:
         pass
     except:
-        print("heh")
+        print('heh')
     """
     expected_unreachable_blocks = [["pass"]]
     assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
@@ -195,7 +195,7 @@ def test_no_link_catch_all() -> None:
     except NotImplementedError:
         pass
     except:
-        print("heh")
+        print('heh')
      """
     expected_unreachable_blocks = [["print('heh')"]]
     assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
@@ -221,6 +221,19 @@ def test_nameless_node_with_general_catch() -> None:
     try:
         raise
     except:
+        pass
+    """
+    expected_unreachable_blocks = []
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
+
+
+def test_exception_with_args() -> None:
+    """Test that the try-body correctly links to its corresponding except block when an exception
+    instance is passed."""
+    src = """
+    try:
+        raise NotImplementedError('oh no!')
+    except NotImplementedError:
         pass
     """
     expected_unreachable_blocks = []

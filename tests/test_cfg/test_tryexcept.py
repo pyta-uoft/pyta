@@ -190,12 +190,38 @@ def test_no_link_catch_all() -> None:
     """Test that the try-body correctly links to its corresponding except block even when there's a
     general exception clause."""
     src = """
-        try:
-            raise NotImplementedError
-        except NotImplementedError:
-            pass
-        except:
-            print("heh")
-        """
+    try:
+        raise NotImplementedError
+    except NotImplementedError:
+        pass
+    except:
+        print("heh")
+     """
     expected_unreachable_blocks = [["print('heh')"]]
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
+
+
+def test_nameless_node_raise_exceptions() -> None:
+    """Test that the try-body correctly links to the end block when the raise statement's exception
+    is of type None with no general except handler block."""
+    src = """
+    try:
+        raise
+    except NotImplementedError:
+        pass
+    """
+    expected_unreachable_blocks = [["pass"]]
+    assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks
+
+
+def test_nameless_node_with_general_catch() -> None:
+    """Test that the try-body correctly links to the general catch all block when the raise
+    statement's exception has no .name attribute."""
+    src = """
+    try:
+        raise
+    except:
+        pass
+    """
+    expected_unreachable_blocks = []
     assert _extract_unreachable_blocks(build_cfg(src)) == expected_unreachable_blocks

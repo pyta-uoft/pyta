@@ -6,7 +6,6 @@ from pylint.checkers.utils import only_required_for_messages
 
 
 class InvalidRangeIndexChecker(BaseChecker):
-
     name = "invalid_range_index"
     msgs = {
         "E9993": (
@@ -38,7 +37,6 @@ class InvalidRangeIndexChecker(BaseChecker):
                     or (len(arg) == 1 and eval_parm[0] < 2)
                     or (len(arg) == 2 and eval_parm[1] - eval_parm[0] < 2)
                 ):
-
                     args = "{}".format(node.lineno)
                     self.add_message("invalid-range-index", node=node, args=args)
 
@@ -49,7 +47,6 @@ class InvalidRangeIndexChecker(BaseChecker):
                         or (eval_parm[0] > eval_parm[1] and eval_parm[2] < 0)
                         or (eval_parm[0] < eval_parm[1] and eval_parm[2] > 0)
                     ):
-
                         args = "{}".format(node.lineno)
                         self.add_message("invalid-range-index", node=node, args=args)
 

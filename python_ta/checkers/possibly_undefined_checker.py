@@ -11,7 +11,6 @@ from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
 
 class PossiblyUndefinedChecker(BaseChecker):
-
     # name is the same as file name but without _checker part
     name = "possibly_undefined"
     # use dashes for connecting words in message symbol

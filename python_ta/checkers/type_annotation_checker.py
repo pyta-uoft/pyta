@@ -8,7 +8,6 @@ from pylint.checkers.utils import only_required_for_messages
 
 
 class TypeAnnotationChecker(BaseChecker):
-
     name = "TypeAnnotationChecker"
     msgs = {
         "E9970": (

@@ -8,7 +8,6 @@ from python_ta.typecheck.base import TypeFail
 
 
 class TypeInferenceChecker(BaseChecker):
-
     name = "TypeInferenceChecker"
     msgs = {
         "E9900": (

@@ -10,7 +10,6 @@ from python_ta.utils import _is_in_main
 
 
 class GlobalVariablesChecker(BaseChecker):
-
     name = "global_variables"
     msgs = {
         "E9997": (

@@ -8,7 +8,7 @@ from astroid.builder import AstroidBuilder
 from python_ta.cfg import CFGBlock, CFGVisitor, ControlFlowGraph
 
 USAGE = "USAGE: python -m sample_usage.draw_cfg <your-file.py>"
-GRAPH_OPTIONS = {"format": "jpg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
+GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
 
 
 def display(cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, view: bool = True) -> None:
@@ -22,15 +22,15 @@ def display(cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, view: boo
             continue
         with graph.subgraph(name=f"cluster_{id(node)}") as c:
             visited = set()
-            _visit(cfg.start, c, visited)
+            _visit(cfg.start, c, visited, cfg.end)
             for block in cfg.unreachable_blocks:
-                _visit(block, c, visited)
-            c.attr(label=subgraph_label)
+                _visit(block, c, visited, cfg.end)
+            c.attr(label=subgraph_label, fontname="Courier New")
 
     graph.render(filename, view=view)
 
 
-def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int]) -> None:
+def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int], end: CFGBlock) -> None:
     node_id = f"{graph.name}_{block.id}"
     if node_id in visited:
         return
@@ -42,6 +42,8 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int]) -> None:
     label = label.replace("\n", "\\l")
 
     fill_color = "grey93" if not block.reachable else "white"
+    # Change the fill colour if block is the end of the cfg
+    fill_color = "black" if block == end else fill_color
 
     graph.node(node_id, label=label, fillcolor=fill_color, style="filled")
     visited.add(node_id)
@@ -51,7 +53,7 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int]) -> None:
             graph.edge(node_id, f"{graph.name}_{edge.target.id}", str(edge.label))
         else:
             graph.edge(node_id, f"{graph.name}_{edge.target.id}")
-        _visit(edge.target, graph, visited)
+        _visit(edge.target, graph, visited, end)
 
 
 def main(filepath: str) -> None:

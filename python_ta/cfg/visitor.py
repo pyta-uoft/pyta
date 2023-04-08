@@ -268,6 +268,7 @@ class CFGVisitor:
         end_block = self._current_cfg.create_block()
         # Case where Raise is not handled in tryexcept
         self._control_boundaries.append((node, {nodes.Raise.__name__: end_block}))
+        cbs_added = 1
 
         after_body = []
         # Construct blocks in reverse to give precedence to the first block in overlapping except
@@ -281,10 +282,12 @@ class CFGVisitor:
             # Edge case: catch-all except clause (i.e. except: ...)
             if exceptions == []:
                 self._control_boundaries.append((node, {nodes.Raise.__name__: h}))
+                cbs_added += 1
 
             # General case: specific except clause
             for exception in exceptions:
                 self._control_boundaries.append((node, {f"{nodes.Raise.__name__} {exception}": h}))
+                cbs_added += 1
 
             if handler.name is not None:  # The name assigned to the caught exception.
                 handler.name.accept(self)
@@ -311,7 +314,7 @@ class CFGVisitor:
         end_body = self._current_block
 
         # Remove each control boundary that we added in this method
-        for _ in range(len(node.handlers) + 1):
+        for _ in range(cbs_added):
             self._control_boundaries.pop()
 
         self._current_cfg.link_or_merge(temp, end_body)
@@ -356,6 +359,6 @@ def _get_raise_exc(node: nodes.Raise) -> str:
 
     # Return the formatted name of the exception or the just 'Raise' otherwise
     try:
-        return f"{nodes.Raise.__name__} {exceptions.__next__().name}"
+        return f"{nodes.Raise.__name__} {next(exceptions).name}"
     except StopIteration:
         return nodes.Raise.__name__

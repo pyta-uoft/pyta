@@ -9,6 +9,7 @@ from python_ta.cfg import CFGBlock, CFGVisitor, ControlFlowGraph
 
 USAGE = "USAGE: python -m sample_usage.draw_cfg <your-file.py>"
 GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
+SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def display(cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, view: bool = True) -> None:
@@ -25,7 +26,7 @@ def display(cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, view: boo
             _visit(cfg.start, c, visited, cfg.end)
             for block in cfg.unreachable_blocks:
                 _visit(block, c, visited, cfg.end)
-            c.attr(label=subgraph_label, fontname="Courier New")
+            c.attr(label=subgraph_label, **SUBGRAPH_OPTIONS)
 
     graph.render(filename, view=view)
 

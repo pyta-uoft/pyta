@@ -19,6 +19,10 @@ Custom checkers:
 
 - `forbidden-python-syntax`: Flag code that is not permitted to be used on an assessment.
 
+### Other
+
+- Pin dependency versions
+
 ## [2.4.2] - 2023-1-31
 
 ### Bug fixes

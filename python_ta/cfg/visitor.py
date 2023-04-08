@@ -235,6 +235,14 @@ class CFGVisitor:
     ) -> None:
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
+            if isinstance(node, nodes.Raise):
+                exc_name = _get_raise_exc(node)
+
+                if exc_name in exits:
+                    self._current_cfg.link(old_curr, exits[exc_name])
+                    old_curr.add_statement(node)
+                    break
+
             if type(node).__name__ in exits:
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
@@ -253,17 +261,34 @@ class CFGVisitor:
 
         node.cfg_block = self._current_block
 
-        for child in node.body:
-            child.accept(self)
-        end_body = self._current_block
-
+        # Construct the exception handlers first
+        # Initialize a temporary block to later merge with end_body
+        self._current_block = self._current_cfg.create_block()
+        temp = self._current_block
         end_block = self._current_cfg.create_block()
+        # Case where Raise is not handled in tryexcept
+        self._control_boundaries.append((node, {nodes.Raise.__name__: end_block}))
+        cbs_added = 1
 
         after_body = []
-        for handler in node.handlers:
+        # Construct blocks in reverse to give precedence to the first block in overlapping except
+        # branches
+        for handler in reversed(node.handlers):
             h = self._current_cfg.create_block()
             self._current_block = h
             handler.cfg_block = h
+
+            exceptions = _extract_exceptions(handler)
+            # Edge case: catch-all except clause (i.e. except: ...)
+            if exceptions == []:
+                self._control_boundaries.append((node, {nodes.Raise.__name__: h}))
+                cbs_added += 1
+
+            # General case: specific except clause
+            for exception in exceptions:
+                self._control_boundaries.append((node, {f"{nodes.Raise.__name__} {exception}": h}))
+                cbs_added += 1
+
             if handler.name is not None:  # The name assigned to the caught exception.
                 handler.name.accept(self)
             for child in handler.body:
@@ -281,6 +306,18 @@ class CFGVisitor:
                 child.accept(self)
             self._current_cfg.link_or_merge(self._current_block, end_block)
 
+        # Construct the try body so reset current block to this node's block
+        self._current_block = node.cfg_block
+
+        for child in node.body:
+            child.accept(self)
+        end_body = self._current_block
+
+        # Remove each control boundary that we added in this method
+        for _ in range(cbs_added):
+            self._control_boundaries.pop()
+
+        self._current_cfg.link_or_merge(temp, end_body)
         self._current_cfg.multiple_link_or_merge(end_body, after_body)
         self._current_block = end_block
 
@@ -292,3 +329,36 @@ class CFGVisitor:
 
         for child in node.body:
             child.accept(self)
+
+
+def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:
+    """A helper method that returns a list of all the exceptions handled by this except block as a
+    list of strings.
+    """
+    exceptions = node.type
+    exceptions_so_far = []
+    # ExceptHandler.type will either be Tuple, NodeNG, or None.
+    if exceptions is None:
+        return exceptions_so_far
+
+    # Get all the Name nodes for all exceptions this except block is handling
+    for exception in exceptions.nodes_of_class(nodes.Name):
+        exceptions_so_far.append(exception.name)
+
+    return exceptions_so_far
+
+
+def _get_raise_exc(node: nodes.Raise) -> str:
+    """A helper method that returns a string formatted for the control boundary representing the
+    exception that this Raise node throws.
+
+    Preconditions:
+        - the raise statement is of the form 'raise' or 'raise <exception_class>'
+    """
+    exceptions = node.nodes_of_class(nodes.Name)
+
+    # Return the formatted name of the exception or the just 'Raise' otherwise
+    try:
+        return f"{nodes.Raise.__name__} {next(exceptions).name}"
+    except StopIteration:
+        return nodes.Raise.__name__

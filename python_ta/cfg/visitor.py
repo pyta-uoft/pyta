@@ -160,7 +160,7 @@ class CFGVisitor:
         )
 
         # Handle "body" branch
-        body_block = self._current_cfg.create_block(test_block)
+        body_block = self._current_cfg.create_block(test_block, edge_label="True")
         self._current_block = body_block
         for child in node.body:
             child.accept(self)
@@ -171,7 +171,7 @@ class CFGVisitor:
         self._control_boundaries.pop()
 
         # Handle "else" branch
-        else_block = self._current_cfg.create_block(test_block)
+        else_block = self._current_cfg.create_block(test_block, edge_label="False")
         self._current_block = else_block
         for child in node.orelse:
             child.accept(self)

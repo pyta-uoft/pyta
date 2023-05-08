@@ -1753,9 +1753,9 @@ exception, which is thrown when a user attempts to exist the program by typing `
 
 ```
 
-(W0703)=
+(W0718)=
 
-### Exception is too generic (W0703)
+### Exception is too generic (W0718)
 
 Using `except Exception:` is only slightly more specific than `except:` and should also be avoided (
 see [W0702](#W0702)). Since most builtin exceptions, and all user-defined exceptions, are derived
@@ -1763,7 +1763,7 @@ from the `Exception` class, using `except Exception:` provides no information re
 exception actually occurred. Exceptions which we do not expect can go unnoticed, and this may lead
 to bugs.
 
-```{literalinclude} /../examples/pylint/w0703_broad_except.py
+```{literalinclude} /../examples/pylint/w0718_broad_exception_caught.py
 
 ```
 

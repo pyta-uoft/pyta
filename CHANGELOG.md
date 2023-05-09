@@ -7,6 +7,24 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### New checkers
+
+Pylint checkers v2.16:
+
+- `pointless-exception-statement`
+- `shadowed-import`
+- `unbalanced-dict-unpacking`
+- `nested-min-max`
+- `invalid-slice-step`
+
+Pylint checkers v2.17:
+
+- `bad-chained-comparison`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
+
 ## [2.5.0] - 2023-04-27
 
 ### Bug fixes

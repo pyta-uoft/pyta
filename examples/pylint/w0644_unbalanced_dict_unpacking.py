@@ -6,5 +6,7 @@ SCORES = {
     "billy": (2, 2, 2, 2),
 }
 
-for a, b, c, d in SCORES.values():  # unbalanced-dict-unpacking
+c, d = SCORES   # unbalanced-dict-unpacking
+
+for a, b in SCORES.values():  # unbalanced-dict-unpacking
     print(a)

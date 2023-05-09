@@ -2965,6 +2965,17 @@ for all lines is 80 characters.
 
 ```
 
+(W3601)=
+
+### Bad chained comparison (W3601)
+
+This error occurs when a chained comparison uses semantically incompatible operators. For example,
+"<" has a different meaning than "is".
+
+```{literalinclude} /../examples/pylint/w3601_bad_chained_comparison.py
+
+```
+
 ## Syntax errors
 
 (E0001)=

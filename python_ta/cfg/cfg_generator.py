@@ -1,3 +1,6 @@
+"""
+Provides a method to generate and display the control flow graph of a given module.
+"""
 import importlib.util
 import os.path
 import sys
@@ -7,7 +10,8 @@ import graphviz
 from astroid import nodes
 from astroid.builder import AstroidBuilder
 
-from python_ta.cfg import CFGBlock, CFGVisitor, ControlFlowGraph
+from .graph import CFGBlock, ControlFlowGraph
+from .visitor import CFGVisitor
 
 GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
 SUBGRAPH_OPTIONS = {"fontname": "Courier New"}

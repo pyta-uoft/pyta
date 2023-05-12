@@ -20,6 +20,9 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 def generate_cfg(module_name: str = "") -> None:
     """Generate a control flow graph for the given module.
 
+    Args:
+        module_name (str): The name of the module.
+
     The `module_name` can either be:
       - relative or absolute path of a file (must have `.py` extension).
       - no argument -- generate a CFG for the python file containing the function call.

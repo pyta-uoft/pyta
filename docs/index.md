@@ -9,4 +9,5 @@ checkers/index
 usage/configuration
 contracts/index
 debug/index
+cfg/index
 ```

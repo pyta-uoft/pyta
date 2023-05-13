@@ -17,20 +17,21 @@ GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Cou
 SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
-def generate_cfg(module_name: str = "") -> None:
+def generate_cfg(module_name: str = "", view: bool = True) -> None:
     """Generate a control flow graph for the given module.
 
     Args:
         module_name (str): The name of the module.
+        view (bool): Open the control flow graph for viewing.
 
     The `module_name` can either be:
       - relative or absolute path of a file (must have `.py` extension).
       - no argument -- generate a CFG for the python file containing the function call.
     """
-    _generate(module_name=module_name)
+    _generate(module_name=module_name, view=view)
 
 
-def _generate(module_name: str = "") -> None:
+def _generate(module_name: str = "", view: bool = True) -> None:
     """Generate a control flow graph for the given module.
 
     The `module_name` can either be:
@@ -48,7 +49,7 @@ def _generate(module_name: str = "") -> None:
     visitor = CFGVisitor()
     mod.accept(visitor)
 
-    _display(visitor.cfgs, file_name)
+    _display(visitor.cfgs, file_name, view=view)
 
 
 def _get_valid_file_path(module_name: str = "") -> Optional[str]:

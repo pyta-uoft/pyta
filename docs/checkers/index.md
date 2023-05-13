@@ -410,10 +410,22 @@ SCORES = {
     "billy": (2, 2, 2, 2),
 }
 
-a, b, c = SCORES
+a, b, c = SCORES  # unpacking the dictionary keys
 
-for d, e, f in SCORES.values():
+for d, e, f in SCORES.values():  # unpacking the dictionary values
     print(d)
+```
+
+Note that when using unpacking with a dictionary on the right-hand side of an `=`, the variables on the left-hand side gets assigned the keys of the dictionary. For example,
+
+```python
+test = {
+  "hi": 0,
+  "bye": 1,
+}
+
+# `a` gets assigned "hi", `b` gets assigned "bye"
+a, b = test
 ```
 
 (E0633)=

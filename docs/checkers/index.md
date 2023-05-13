@@ -2969,8 +2969,14 @@ for all lines is 80 characters.
 
 ### Bad chained comparison (W3601)
 
-This error occurs when a chained comparison uses semantically incompatible operators. For example,
-"<" has a different meaning than "is".
+This error occurs when a chained comparison uses incompatible comparison operators, i.e. operators that perform a different kind of test. For example,
+`<` has a different meaning than `is` and `in`.
+
+The different types of comparison operators can be classified in the following categories:
+
+- [Value comparisons][value comparisons] which compares values
+- [Membership tests][membership test operations] which checks whether a value is present in some other object
+- [Identity comparisons][identity comparisons] which checks whether two variables or values represent the same object
 
 ```{literalinclude} /../examples/pylint/w3601_bad_chained_comparison.py
 
@@ -3160,6 +3166,9 @@ function and method calls or definitions.
 [python documentation: staticmethod]: https://docs.python.org/3/library/functions.html#staticmethod
 [string and bytes literals]: https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals
 [unary arithmetic and bitwise operations]: https://docs.python.org/3/reference/expressions.html#unary-arithmetic-and-bitwise-operations
+[value comparisons]: https://docs.python.org/3/reference/expressions.html#value-comparisons
+[membership test operations]: https://docs.python.org/3/reference/expressions.html#membership-test-operations
+[identity comparisons]: https://docs.python.org/3/reference/expressions.html#is-not
 
 <!-- PEP8 -->
 

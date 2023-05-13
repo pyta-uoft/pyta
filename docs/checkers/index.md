@@ -910,7 +910,9 @@ for student in students_info:
 
 ### Nested min-max (W3301)
 
-This error occurs when there are nested calls of min or max instead of using a single min/max call.
+This error occurs when there are nested calls of `min` or `max` instead of using a single `min`/`max` call.
+
+Note that using a single `min`/`max` call is perfectly fine since you can pass in an arbitrary number of arguments.
 
 ```{literalinclude} /../examples/pylint/w3301_nested_min_max.py
 

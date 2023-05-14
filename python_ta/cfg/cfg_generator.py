@@ -26,7 +26,7 @@ def generate_cfg(module_name: str = "", view: bool = True) -> None:
 
     The `module_name` can either be:
       - relative or absolute path of a file (must have `.py` extension).
-      - no argument -- generate a CFG for the python file containing the function call.
+      - no argument -- generate a CFG for the Python file containing the function call.
     """
     _generate(module_name=module_name, view=view)
 
@@ -36,7 +36,7 @@ def _generate(module_name: str = "", view: bool = True) -> None:
 
     The `module_name` can either be:
       - relative or absolute path of a file (must have `.py` extension).
-      - no argument -- generate a CFG for the python file containing the function call.
+      - no argument -- generate a CFG for the Python file containing the function call.
     """
     # Generate a control flow graph for the given file
     abs_path = _get_valid_file_path(module_name)

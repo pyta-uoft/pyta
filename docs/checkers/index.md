@@ -743,6 +743,24 @@ for strings.
 
 ```
 
+(W0133)=
+
+### Pointless exception statement (W0133)
+
+This error occurs when an exception is created but never assigned, raised or returned for use anywhere in the code.
+
+```{literalinclude} /../examples/pylint/w0105_pointless_string_statement.py
+
+```
+
+This error can be resolved by assigning, raising or returning the exception as demonstrated below:
+
+**Note** : NameError is a subclass of Exception (It is a more specific type of exception in Python).
+
+```python
+raise NameError("This is not a pointless exception anymore.")
+```
+
 (R1733)=
 
 ### Unnecessary dict index lookup (R1733)

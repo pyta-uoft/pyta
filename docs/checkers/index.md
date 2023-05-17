@@ -379,6 +379,16 @@ del named_list['c']
 print('c' in named_list)  # Prints False
 ```
 
+(E1144)=
+
+### Invalid Slice Step (E1144)
+
+This error occurs when a slice step is 0.
+
+```{literalinclude} /../examples/pylint/e1144_invalid_slice_step.py
+
+```
+
 (E0632)=
 
 ### Unbalanced tuple unpacking (E0632)

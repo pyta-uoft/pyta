@@ -379,6 +379,16 @@ del named_list['c']
 print('c' in named_list)  # Prints False
 ```
 
+(E1144)=
+
+### Invalid Slice Step (E1144)
+
+This error occurs when a slice step is 0.
+
+```{literalinclude} /../examples/pylint/e1144_invalid_slice_step.py
+
+```
+
 (E0632)=
 
 ### Unbalanced tuple unpacking (E0632)
@@ -942,6 +952,26 @@ cs_student_dict = {}  # This is a fixed version.
 for student in students_info:
     if student[2] == "CS":
         cs_student_dict[student[0]] = student[1]
+```
+
+(W3301)=
+
+### Nested min-max (W3301)
+
+This error occurs when there are nested calls of `min` or `max` instead of using a single `min`/`max` call.
+
+Note that using a single `min`/`max` call is perfectly fine since you can pass in an arbitrary number of arguments.
+
+```{literalinclude} /../examples/pylint/w3301_nested_min_max.py
+
+```
+
+Corrected version:
+
+```python
+smallest = min(12, 1, 2)
+
+largest = max(12, 1, 2)
 ```
 
 ## Documentation and naming

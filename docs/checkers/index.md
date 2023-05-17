@@ -916,6 +916,26 @@ for student in students_info:
         cs_student_dict[student[0]] = student[1]
 ```
 
+(W3301)=
+
+### Nested min-max (W3301)
+
+This error occurs when there are nested calls of `min` or `max` instead of using a single `min`/`max` call.
+
+Note that using a single `min`/`max` call is perfectly fine since you can pass in an arbitrary number of arguments.
+
+```{literalinclude} /../examples/pylint/w3301_nested_min_max.py
+
+```
+
+Corrected version:
+
+```python
+smallest = min(12, 1, 2)
+
+largest = max(12, 1, 2)
+```
+
 ## Documentation and naming
 
 Good documentation and identifiers are essential for writing software. PyTA helps check to make sure

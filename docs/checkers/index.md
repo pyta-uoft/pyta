@@ -1740,6 +1740,27 @@ class CashRegister:
 
 ## Exceptions
 
+(W0133)=
+
+### Pointless exception statement (W0133)
+
+This error occurs when an exception is created but never assigned, raised or returned for use anywhere in the code.
+
+```{literalinclude} /../examples/pylint/w0133_pointless_exception_statement.py
+
+```
+
+This error can be resolved by assigning, raising or returning the exception as demonstrated below:
+
+```python
+def reciprocal(num: float) -> float:
+    """Return 1 / num."""
+    if num == 0:
+        raise ValueError('num cannot be 0!')
+    else:
+        return 1 / num
+```
+
 (W0702)=
 
 ### Bare exception (W0702)
@@ -1765,24 +1786,6 @@ to bugs.
 
 ```{literalinclude} /../examples/pylint/w0718_broad_exception_caught.py
 
-```
-
-(W0133)=
-
-### Pointless exception statement (W0133)
-
-This error occurs when an exception is created but never assigned, raised or returned for use anywhere in the code.
-
-```{literalinclude} /../examples/pylint/w0105_pointless_string_statement.py
-
-```
-
-This error can be resolved by assigning, raising or returning the exception as demonstrated below:
-
-**Note** : NameError is a subclass of Exception (it is a more specific type of exception in Python).
-
-```python
-raise NameError("The variable x is undefined!")
 ```
 
 (W0705)=

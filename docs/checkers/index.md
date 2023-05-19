@@ -1740,26 +1740,6 @@ class CashRegister:
 
 ## Exceptions
 
-(W0719)=
-
-### Broad exception raised (W0719)
-
-This error is emitted when one raises a generic exception. Raising exceptions that are not specific will cause the
-program to catch generic exceptions. This is bad practice because we may catch exceptions that we don't want.
-Catching generic exceptions can also hide bugs and make it harder to debug programs.
-
-```{literalinclude} /../examples/pylint/w0702_bare_except.py
-
-```
-
-This error can be resolved by raising a more specific exception:
-
-**Note** : NameError is a subclass of Exception (it is a more specific type of exception in Python).
-
-```python
-raise NameError("The variable x doesn't exist!")
-```
-
 (W0702)=
 
 ### Bare exception (W0702)
@@ -1785,6 +1765,26 @@ to bugs.
 
 ```{literalinclude} /../examples/pylint/w0718_broad_exception_caught.py
 
+```
+
+(W0719)=
+
+### Broad exception raised (W0719)
+
+This error is emitted when one raises a generic exception. Raising exceptions that are not specific will cause the
+program to catch generic exceptions. This is bad practice because we may catch exceptions that we don't want.
+Catching generic exceptions can also hide bugs and make it harder to debug programs.
+
+```{literalinclude} /../examples/pylint/w0719_broad_exception_raised.py
+
+```
+
+This error can be resolved by raising a more specific exception:
+
+**Note**: `NameError` is a subclass of `Exception` (it is a more specific type of exception in Python).
+
+```python
+raise NameError("The variable x doesn't exist!")
 ```
 
 (W0705)=

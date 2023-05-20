@@ -1156,7 +1156,7 @@ our_ `math.py` file, and not the [`math` module] from the standard library.
 ### Shadowed import (W0416)
 
 This error occurs when a module is imported with an aliased name that has already been used by a
-previous import. This prevents the original module from ever being used later in your code
+previous import. This prevents the original module from ever being used later in your code.
 
 ```{literalinclude} /../examples/pylint/w0416_shadowed_import.py
 

@@ -400,6 +400,44 @@ too few or too many values in the sequence.
 
 ```
 
+(W0644)=
+
+### Unbalanced dict unpacking (W0644)
+
+This error occurs when we are trying to assign dictionary keys or values to multiple variables at
+once, but the right side has too few or too many values.
+
+```{literalinclude} /../examples/pylint/w0644_unbalanced_dict_unpacking.py
+
+```
+
+Corrected version:
+
+```python
+SCORES = {
+    "bob": (1, 1, 3, 2),
+    "joe": (4, 3, 1, 2),
+    "billy": (2, 2, 2, 2),
+}
+
+a, b, c = SCORES  # unpacking the dictionary keys
+
+for d, e, f in SCORES.values():  # unpacking the dictionary values
+    print(d)
+```
+
+Note that when using unpacking with a dictionary on the right-hand side of an `=`, the variables on the left-hand side gets assigned the keys of the dictionary. For example,
+
+```python
+test = {
+  "hi": 0,
+  "bye": 1,
+}
+
+# `a` gets assigned "hi", `b` gets assigned "bye"
+a, b = test
+```
+
 (E0633)=
 
 ### Unpacking non-sequence (E0633)

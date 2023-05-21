@@ -400,6 +400,44 @@ too few or too many values in the sequence.
 
 ```
 
+(W0644)=
+
+### Unbalanced dict unpacking (W0644)
+
+This error occurs when we are trying to assign dictionary keys or values to multiple variables at
+once, but the right side has too few or too many values.
+
+```{literalinclude} /../examples/pylint/w0644_unbalanced_dict_unpacking.py
+
+```
+
+Corrected version:
+
+```python
+SCORES = {
+    "bob": (1, 1, 3, 2),
+    "joe": (4, 3, 1, 2),
+    "billy": (2, 2, 2, 2),
+}
+
+a, b, c = SCORES  # unpacking the dictionary keys
+
+for d, e, f in SCORES.values():  # unpacking the dictionary values
+    print(d)
+```
+
+Note that when using unpacking with a dictionary on the right-hand side of an `=`, the variables on the left-hand side gets assigned the keys of the dictionary. For example,
+
+```python
+test = {
+  "hi": 0,
+  "bye": 1,
+}
+
+# `a` gets assigned "hi", `b` gets assigned "bye"
+a, b = test
+```
+
 (E0633)=
 
 ### Unpacking non-sequence (E0633)
@@ -1781,6 +1819,27 @@ class CashRegister:
 
 ## Exceptions
 
+(W0133)=
+
+### Pointless exception statement (W0133)
+
+This error occurs when an exception is created but never assigned, raised or returned for use anywhere in the code.
+
+```{literalinclude} /../examples/pylint/w0133_pointless_exception_statement.py
+
+```
+
+This error can be resolved by assigning, raising or returning the exception as demonstrated below:
+
+```python
+def reciprocal(num: float) -> float:
+    """Return 1 / num."""
+    if num == 0:
+        raise ValueError('num cannot be 0!')
+    else:
+        return 1 / num
+```
+
 (W0702)=
 
 ### Bare exception (W0702)
@@ -1806,6 +1865,26 @@ to bugs.
 
 ```{literalinclude} /../examples/pylint/w0718_broad_exception_caught.py
 
+```
+
+(W0719)=
+
+### Broad exception raised (W0719)
+
+This error is emitted when one raises a generic exception. Raising exceptions that are not specific will cause the
+program to catch generic exceptions. This is bad practice because we may catch exceptions that we don't want.
+Catching generic exceptions can also hide bugs and make it harder to debug programs.
+
+```{literalinclude} /../examples/pylint/w0719_broad_exception_raised.py
+
+```
+
+This error can be resolved by raising a more specific exception:
+
+**Note**: `NameError` is a subclass of `Exception` (it is a more specific type of exception in Python).
+
+```python
+raise NameError("The variable x doesn't exist!")
 ```
 
 (W0705)=
@@ -3006,6 +3085,23 @@ for all lines is 80 characters.
 
 ```
 
+(W3601)=
+
+### Bad chained comparison (W3601)
+
+This error occurs when a chained comparison uses incompatible comparison operators, i.e. operators that perform a different kind of test. For example,
+`<` has a different meaning than `is` and `in`.
+
+The different types of comparison operators can be classified in the following categories:
+
+- [Value comparisons][value comparisons] which compares values
+- [Membership tests][membership test operations] which checks whether a value is present in some other object
+- [Identity comparisons][identity comparisons] which checks whether two variables or values represent the same object
+
+```{literalinclude} /../examples/pylint/w3601_bad_chained_comparison.py
+
+```
+
 ## Syntax errors
 
 (E0001)=
@@ -3190,6 +3286,9 @@ function and method calls or definitions.
 [python documentation: staticmethod]: https://docs.python.org/3/library/functions.html#staticmethod
 [string and bytes literals]: https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals
 [unary arithmetic and bitwise operations]: https://docs.python.org/3/reference/expressions.html#unary-arithmetic-and-bitwise-operations
+[value comparisons]: https://docs.python.org/3/reference/expressions.html#value-comparisons
+[membership test operations]: https://docs.python.org/3/reference/expressions.html#membership-test-operations
+[identity comparisons]: https://docs.python.org/3/reference/expressions.html#is-not
 
 <!-- PEP8 -->
 

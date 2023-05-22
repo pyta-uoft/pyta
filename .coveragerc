@@ -1,6 +1,7 @@
 [run]
 omit =
     python_ta/checkers/type_inference_checker.py
+    python_ta/debug/*
     python_ta/transforms/type_inference_visitor.py
     python_ta/typecheck/*
     python_ta/util/*

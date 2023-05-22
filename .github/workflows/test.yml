@@ -3,6 +3,9 @@ name: PythonTA Tests
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - master
 
 jobs:
   test:
@@ -32,14 +35,28 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install pytest coveralls~=3.0
           pip install -e .[dev,z3]
       - name: Run tests
         run: |
-          pytest --cov python_ta --cov-config=.coveragerc --cov-report term-missing --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug
+          pytest --cov python_ta --cov-config=.coveragerc --cov-report lcov --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug
           pytest tests/test_debug
       - name: Upload test coverage to coveralls.io
+        uses: coverallsapp/github-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          coveralls --service=github
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          flag-name: run-${{ matrix.python-version }}
+          parallel: true
+
+  finish:
+    needs: test
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        env:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          parallel-finished: true
+          carryforward: "run-3.8,run-3.9,run-3.10,run-3.11"

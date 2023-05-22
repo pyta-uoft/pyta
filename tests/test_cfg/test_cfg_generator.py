@@ -22,7 +22,7 @@ TEST_SCRIPT_WITH_IMPORT = (
     + """
 if __name__ == "__main__":
     import python_ta.cfg
-    python_ta.cfg.generate_cfg(view=False)
+    python_ta.cfg.generate_cfg(auto_open=False)
 """
 )
 
@@ -58,7 +58,7 @@ def test_script_external_call() -> None:
     # Create the temporary file and store the name of it and the file paths of the graphviz files
     script_name, file_path, svg_file_path = create_script(TEST_SCRIPT)
 
-    cfg.generate_cfg(module_name=script_name, view=False)
+    cfg.generate_cfg(mod=script_name, auto_open=False)
 
     # Check if the graphviz files were created
     assert os.path.isfile(file_path) and os.path.isfile(svg_file_path)

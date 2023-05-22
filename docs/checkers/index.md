@@ -1219,6 +1219,17 @@ would like to import. For example, if we have a Python file named `math.py`, cal
 from within that file (or from within _any_ Python file in the same directory) will import _
 our_ `math.py` file, and not the [`math` module] from the standard library.
 
+(W0416)=
+
+### Shadowed import (W0416)
+
+This error occurs when a module is imported with an aliased name that has already been used by a
+previous import. This prevents the original module from ever being used later in your code.
+
+```{literalinclude} /../examples/pylint/w0416_shadowed_import.py
+
+```
+
 (R0401)=
 
 ### Cyclic import (R0401)

@@ -43,11 +43,7 @@ This feature is not limited to just the Python file from which the function is c
 ```python
 import python_ta.cfg
 
-python_ta.cfg.generate_cfg("my_file.py")  # Creates the graph but won't display it
-
-python_ta.cfg.generate_cfg("my_file.py", True)  # Displays the cfg in your browser
-
-python_ta.cfg.generate_cfg("my_file.py", False)  # Creates the graph but won't display it
+python_ta.cfg.generate_cfg("my_file.py")
 ```
 
 **Note:** only one control flow graph can be generated per function call (i.e. you can't pass in a list of files to generate control flow graphs for).

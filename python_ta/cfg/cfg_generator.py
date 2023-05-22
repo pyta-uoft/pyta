@@ -23,7 +23,7 @@ def generate_cfg(mod: str = "", auto_open: bool = False) -> None:
     Args:
         mod (str): The path to the module. `mod` can either be the path of a file (must have `.py`
             extension) or have no argument (generates a CFG for the Python file from which this
-            function is called.)
+            function is called).
         auto_open (bool): Automatically open the graph in your browser.
     """
     _generate(mod=mod, auto_open=auto_open)

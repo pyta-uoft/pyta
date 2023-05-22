@@ -99,5 +99,6 @@ Richard Shi,
 Kavin Singh,
 Alexey Strokach,
 Sophy Sun,
+Sarah Wang
 Jasmine Wu,
 Philippe Yu,

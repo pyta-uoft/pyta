@@ -3,6 +3,7 @@ import re
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
+from pylint.checkers.base.name_checker.checker import DEFAULT_PATTERNS
 from pylint.checkers.utils import only_required_for_messages
 
 
@@ -49,7 +50,7 @@ def _is_definition(statement) -> bool:
 
 def _is_constant_assignment(statement) -> bool:
     """
-    Return whether or not <statement> is a constant assignment.
+    Return whether or not <statement> is a constant assignment or type alias assignment.
     """
     if not isinstance(statement, nodes.Assign):
         return False
@@ -58,7 +59,11 @@ def _is_constant_assignment(statement) -> bool:
     for target in statement.targets:
         names.extend(node.name for node in target.nodes_of_class(nodes.AssignName, nodes.Name))
 
-    return all(re.match(UpperCaseStyle.CONST_NAME_RGX, name) for name in names)
+    return all(
+        re.match(UpperCaseStyle.CONST_NAME_RGX, name)
+        or re.match(DEFAULT_PATTERNS["typealias"], name)
+        for name in names
+    )
 
 
 def _is_main_block(statement) -> bool:

@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Enhancements
+
+- Can now create control flow graphs to visualize the execution of your program.
+
 ### New checkers
 
 Pylint checkers v2.16:

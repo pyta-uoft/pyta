@@ -2,7 +2,6 @@
 Test suite for generating control flow graphs using the PythonTA API.
 """
 import os.path
-import subprocess
 import tempfile
 from typing import Tuple
 
@@ -16,15 +15,6 @@ def foo() -> None:
         if i < 5:
             print("hi")
 """
-
-TEST_SCRIPT_WITH_IMPORT = (
-    TEST_SCRIPT
-    + """
-if __name__ == "__main__":
-    import python_ta.cfg
-    python_ta.cfg.generate_cfg(auto_open=False)
-"""
-)
 
 
 @pytest.fixture(autouse=True)
@@ -67,3 +57,36 @@ def test_script_external_call() -> None:
     os.remove(script_name)
     os.remove(file_path)
     os.remove(svg_file_path)
+
+
+def test_mod_not_valid(capsys) -> None:
+    """Test that generate_cfg prints the correct error message when `mod` is not a valid file.
+
+    No files will be created (so no cleanup is required). Uses the `capsys` fixture to access
+    stdout.
+    """
+    script_name = "not a valid file"
+    expected = "Could not find the file called, `not a valid file`\n\n"
+
+    cfg.generate_cfg(mod=script_name, auto_open=False)
+
+    captured = capsys.readouterr()
+
+    assert captured.out == expected
+
+
+def test_mod_not_str(capsys) -> None:
+    """Test that generate_cfg enforces `mod` to be of type str and prints the correct error message
+    when it isn't.
+
+    No files will be created (so no cleanup is required). Uses the `capsys` fixture to access
+    stdout.
+    """
+    script_name = 1
+    expected = "No CFG generated. Input to check, `1`, has invalid type, must be a string.\n"
+
+    cfg.generate_cfg(mod=script_name, auto_open=False)
+
+    captured = capsys.readouterr()
+
+    assert captured.out == expected

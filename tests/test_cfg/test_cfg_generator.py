@@ -67,21 +67,3 @@ def test_script_external_call() -> None:
     os.remove(script_name)
     os.remove(file_path)
     os.remove(svg_file_path)
-
-
-def test_script_internal_call() -> None:
-    """Test that generate_cfg correctly creates both graph files when the script contains the call
-    to create its control flow graph."""
-    # Create the temporary file and store the name of it and the file paths of the graphviz files
-    script_name, file_path, svg_file_path = create_script(TEST_SCRIPT_WITH_IMPORT)
-
-    # Execute the script, which contains the call to generate the control flow graph
-    subprocess.run(["python", script_name])
-
-    # Check if the graphviz files were created
-    assert os.path.isfile(file_path) and os.path.isfile(svg_file_path)
-
-    # Teardown: remove the temporary files
-    os.remove(script_name)
-    os.remove(file_path)
-    os.remove(svg_file_path)

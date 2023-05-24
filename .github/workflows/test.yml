@@ -36,6 +36,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -e .[dev,z3]
+          pip install pytest-snapshot
       - name: Run tests
         run: |
           pytest --cov python_ta --cov-config=.coveragerc --cov-report lcov --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug

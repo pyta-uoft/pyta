@@ -16,6 +16,8 @@ def foo() -> None:
             print("hi")
 """
 
+HOME_DIRECTORY = os.getcwd()
+
 
 @pytest.fixture(autouse=True)
 def reset_dir(request, monkeypatch):
@@ -54,6 +56,30 @@ def test_script_external_call() -> None:
     assert os.path.isfile(file_path) and os.path.isfile(svg_file_path)
 
     # Teardown: remove the temporary files
+    os.remove(script_name)
+    os.remove(file_path)
+    os.remove(svg_file_path)
+
+
+def test_script_output_with_snapshot(snapshot) -> None:
+    """Test that generate_cfg correctly creates a graphviz file with the expected content."""
+    # Create the temporary file and store the name of it and the file paths of the graphviz files
+    script_name, file_path, svg_file_path = create_script(TEST_SCRIPT)
+
+    # Create the graphviz files
+    cfg.generate_cfg(mod=script_name, auto_open=False)
+
+    # Open the actual graphviz file for reading
+    actual = open(file_path, "r")
+    # Skip the first line since it depends on the file name
+    next(actual)
+
+    # Check that the contents match
+    snapshot.snapshot_dir = HOME_DIRECTORY + "\\tests\\test_cfg\\snapshots"
+    snapshot.assert_match(actual.read(), "sample_cfg_output.txt")
+
+    # Teardown: close any open files and remove the temporary files
+    actual.close()
     os.remove(script_name)
     os.remove(file_path)
     os.remove(svg_file_path)

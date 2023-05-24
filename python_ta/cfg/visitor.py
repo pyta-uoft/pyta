@@ -23,6 +23,8 @@ class CFGVisitor:
 
     cfgs: Dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]
     options: Dict[str, Any]
+    # cfg_count is used as an "auto-increment" to ensure cfg ids are unique.
+    cfg_count: int
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
@@ -33,6 +35,7 @@ class CFGVisitor:
         self.options = {"separate-condition-blocks": False}
         if options is not None:
             self.options.update(options)
+        self.cfg_count = 0
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
@@ -48,7 +51,8 @@ class CFGVisitor:
         self._current_block.add_statement(node)
 
     def visit_module(self, module: nodes.Module) -> None:
-        self.cfgs[module] = ControlFlowGraph()
+        self.cfgs[module] = ControlFlowGraph(self.cfg_count)
+        self.cfg_count += 1
         self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
         module.cfg_block = self._current_cfg.start
@@ -69,7 +73,8 @@ class CFGVisitor:
         previous_cfg = self._current_cfg
         previous_block = self._current_block
 
-        self.cfgs[func] = ControlFlowGraph()
+        self.cfgs[func] = ControlFlowGraph(self.cfg_count)
+        self.cfg_count += 1
         self._current_cfg = self.cfgs[func]
 
         self._control_boundaries.append(

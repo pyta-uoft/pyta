@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Can now create control flow graphs to visualize the execution of your program.
+- The `TopLevelCodeChecker` can now check for the proper naming style usage for type alias assignment statements.
 
 ### New checkers
 

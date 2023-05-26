@@ -27,7 +27,7 @@ class TopLevelCodeChecker(BaseChecker):
             if not (
                 _is_import(statement)
                 or _is_definition(statement)
-                or _is_constant_assignment(statement)
+                or _is_allowed_assignment(statement)
                 or _is_main_block(statement)
             ):
                 self.add_message("forbidden-top-level-code", node=statement, args=statement.lineno)
@@ -48,7 +48,7 @@ def _is_definition(statement) -> bool:
     return isinstance(statement, (nodes.FunctionDef, nodes.ClassDef))
 
 
-def _is_constant_assignment(statement) -> bool:
+def _is_allowed_assignment(statement) -> bool:
     """
     Return whether or not <statement> is a constant assignment or type alias assignment.
     """

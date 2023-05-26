@@ -100,6 +100,29 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_module(mod)
 
+    def test_no_message_type_alias_assignment(self):
+        """Top level type alias assignment allowed, no message."""
+        src = """
+        MyType = list[list[list[int]]]
+        """
+        mod = astroid.parse(src)
+        with self.assertNoMessages():
+            self.checker.visit_module(mod)
+
+    def test_message_type_alias_assignment(self):
+        """Top level type alias assignment not allowed, raises a message."""
+        src = """
+        TypeName = list[int]
+        """
+        mod = astroid.parse(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(mod)
+
     def test_message_regular_assignment_unpacking(self):
         """Top level regular unpacking assignment not allowed, raises a message."""
         src = """

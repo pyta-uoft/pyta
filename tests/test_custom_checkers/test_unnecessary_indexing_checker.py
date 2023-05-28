@@ -518,6 +518,85 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_comprehension(comp_node)
 
+    def test_mult_var_tuple_msg(self):
+        """Illustrates this checker on a loop which has two variables in a tuple."""
+        src = """
+        def f(lst1: list, lst2: list) -> None:
+            for i, j in zip(range(len(lst1)), range(len(lst2))):  #@
+                print(lst1[i], lst2[j])
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.elts, "lst1", "lst2"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_mult_var_undefined_msg(self):
+        """Illustrates this checker on a loop which has two undefined variables."""
+        src = """
+        def f(lst1: list, lst2: list) -> None:
+            for _, _ in zip(range(len(lst1)), range(len(lst2))):  #@
+                print(lst1[_], lst2[_])
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.elts, "lst1", "lst2"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_mult_var_list_msg(self):
+        """Illustrates this checker on a loop which has two variables in a list."""
+        src = """
+        def f(lst1: list, lst2: list) -> None:
+            for [i, j] in zip(range(len(lst1)), range(len(lst2))):  #@
+                print(lst1[i], lst2[j])
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.elts, "lst1", "lst2"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_mult_var_comp_tuple_msg(self):
+        """Illustrates this checker on a list comprehension which has two variables."""
+        src = """
+        def f(lst1: list, lst2: list) -> None:
+            [print(lst1[i], lst2[j]) for i, j in zip(range(len(lst1)), range(len(lst2)))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=comp_node.target,
+                args=(comp_node.target.elts, "lst1", "lst2"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_comprehension(comp_node)
+
 
 if __name__ == "__main__":
     import pytest

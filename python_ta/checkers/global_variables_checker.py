@@ -80,9 +80,6 @@ class GlobalVariablesChecker(BaseChecker):
 def _get_child_disallowed_global_var_nodes(node):
     """Return a list of all top-level Name or AssignName nodes for a given
     global, non-constant variable.
-
-    TODO: use the configured NamingStyle instead of hard-coded SnakeCaseStyle
-    for the CONST_NAME_RGX value.
     """
     node_list = []
     if (

@@ -14,26 +14,10 @@ def reset_dir(request, monkeypatch):
     monkeypatch.chdir(request.fspath.dirname)
 
 
-def test_script_external_call() -> None:
-    """Test that generate_cfg correctly creates both graph files when the script does not contain
-    the call to create its control flow graph."""
-    script_name = "file_fixtures/my_file.py"
-    dot_file_path = os.path.splitext(os.path.basename(script_name))[0]
-    svg_file_path = dot_file_path + ".svg"
-
-    # Create the graphviz files using my_file.py
-    cfg.generate_cfg(mod=script_name, auto_open=False)
-
-    # Check if the graphviz files were created
-    assert os.path.isfile(dot_file_path) and os.path.isfile(svg_file_path)
-
-    # Teardown: remove the graphviz generated files
-    os.remove(dot_file_path)
-    os.remove(svg_file_path)
-
-
-def test_script_output_with_snapshot(snapshot) -> None:
-    """Test that generate_cfg correctly creates a graphviz dot file with the expected content."""
+@pytest.fixture
+def create_cfg():
+    """Create the CFG for each test that uses the code in a file fixture."""
+    # Setup: store the paths of the files being used/created
     script_name = "file_fixtures/my_file.py"
     dot_file_path = os.path.splitext(os.path.basename(script_name))[0]
     svg_file_path = dot_file_path + ".svg"
@@ -42,16 +26,35 @@ def test_script_output_with_snapshot(snapshot) -> None:
     cfg.generate_cfg(mod=script_name, auto_open=False)
 
     # Open the actual graphviz file for reading
-    actual = open(dot_file_path, "r")
+    gv_file_io = open(dot_file_path)
 
-    # Check that the contents match
-    snapshot.snapshot_dir = "snapshots"
-    snapshot.assert_match(actual.read(), "sample_cfg_output.txt")
+    yield dot_file_path, svg_file_path, gv_file_io
 
-    # Teardown: close any open files and remove the graphviz generated files
-    actual.close()
+    # Teardown: close any open file IO and remove the graphviz generated files
+    gv_file_io.close()
     os.remove(dot_file_path)
     os.remove(svg_file_path)
+
+
+def test_script_external_call(create_cfg) -> None:
+    """Test that generate_cfg correctly creates both graph files when the script does not contain
+    the call to create its control flow graph."""
+    # Receive the file paths from the setup_files fixture
+    dot_file_path, svg_file_path, _ = create_cfg
+
+    # Check if the graphviz files were created
+    assert os.path.isfile(dot_file_path)
+    assert os.path.isfile(svg_file_path)
+
+
+def test_script_output_with_snapshot(snapshot, create_cfg) -> None:
+    """Test that generate_cfg correctly creates a graphviz dot file with the expected content."""
+    # Receive the file paths from the setup_files fixture
+    _, _, gv_file_io = create_cfg
+
+    # Check that the contents match with the snapshot
+    snapshot.snapshot_dir = "snapshots"
+    snapshot.assert_match(gv_file_io.read(), "my_file.gv")
 
 
 def test_mod_not_valid(capsys) -> None:

@@ -87,7 +87,7 @@ def _display(
             subgraph_label = node.name
         else:
             continue
-        with graph.subgraph(name=f"cluster_{id(node)}") as c:
+        with graph.subgraph(name=f"cluster_{cfg.cfg_id}") as c:
             visited = set()
             _visit(cfg.start, c, visited, cfg.end)
             for block in cfg.unreachable_blocks:

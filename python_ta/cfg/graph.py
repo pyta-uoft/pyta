@@ -10,13 +10,16 @@ class ControlFlowGraph:
 
     start: CFGBlock
     end: CFGBlock
+    # The unique id of this cfg. Defaults to 0 if not initialized in a CFGVisitor instance.
+    cfg_id: int
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
 
-    def __init__(self) -> None:
+    def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0
+        self.cfg_id = cfg_id
         self.unreachable_blocks = set()
         self.start = self.create_block()
         self.end = self.create_block()

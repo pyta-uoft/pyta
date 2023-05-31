@@ -2,19 +2,10 @@
 Test suite for generating control flow graphs using the PythonTA API.
 """
 import os.path
-import tempfile
-from typing import Tuple
 
 import pytest
 
 import python_ta.cfg as cfg
-
-TEST_SCRIPT = """
-def foo() -> None:
-    for i in range(1, 10):
-        if i < 5:
-            print("hi")
-"""
 
 
 @pytest.fixture(autouse=True)
@@ -23,40 +14,47 @@ def reset_dir(request, monkeypatch):
     monkeypatch.chdir(request.fspath.dirname)
 
 
-def create_script(code: str) -> Tuple[str, str, str]:
-    """Returns a 3-tuple containing the name of the temporary file corresponding to the Python file
-    of script, and the names of the two files that will be produced by graphviz."""
-    script = tempfile.NamedTemporaryFile(suffix=".py", mode="w+t", delete=False)
-    script.writelines(code)
-    script.flush()
-    script.close()
+@pytest.fixture
+def create_cfg():
+    """Create the CFG for each test that uses the code in a file fixture."""
+    # Setup: store the paths of the files being used/created
+    script_name = "file_fixtures/my_file.py"
+    dot_file_path = os.path.splitext(os.path.basename(script_name))[0]
+    svg_file_path = dot_file_path + ".svg"
 
-    # Get the paths of the files of interest (temp file + graphviz files that will be created)
-    dir_name = os.path.dirname(script.name)
-    file_path = os.path.splitext(script.name)[0]
-    svg_file_path = file_path + ".svg"
-
-    # Change directory to the temporary directory so the graphviz files will be created there
-    os.chdir(dir_name)
-
-    return script.name, file_path, svg_file_path
-
-
-def test_script_external_call() -> None:
-    """Test that generate_cfg correctly creates both graph files when the script does not contain
-    the call to create its control flow graph."""
-    # Create the temporary file and store the name of it and the file paths of the graphviz files
-    script_name, file_path, svg_file_path = create_script(TEST_SCRIPT)
-
+    # Create the graphviz files using my_file.py
     cfg.generate_cfg(mod=script_name, auto_open=False)
 
-    # Check if the graphviz files were created
-    assert os.path.isfile(file_path) and os.path.isfile(svg_file_path)
+    # Open the actual graphviz file for reading
+    gv_file_io = open(dot_file_path)
 
-    # Teardown: remove the temporary files
-    os.remove(script_name)
-    os.remove(file_path)
+    yield dot_file_path, svg_file_path, gv_file_io
+
+    # Teardown: close any open file IO and remove the graphviz generated files
+    gv_file_io.close()
+    os.remove(dot_file_path)
     os.remove(svg_file_path)
+
+
+def test_script_external_call(create_cfg) -> None:
+    """Test that generate_cfg correctly creates both graph files when the script does not contain
+    the call to create its control flow graph."""
+    # Receive the file paths from the setup_files fixture
+    dot_file_path, svg_file_path, _ = create_cfg
+
+    # Check if the graphviz files were created
+    assert os.path.isfile(dot_file_path)
+    assert os.path.isfile(svg_file_path)
+
+
+def test_script_output_with_snapshot(snapshot, create_cfg) -> None:
+    """Test that generate_cfg correctly creates a graphviz dot file with the expected content."""
+    # Receive the file paths from the setup_files fixture
+    _, _, gv_file_io = create_cfg
+
+    # Check that the contents match with the snapshot
+    snapshot.snapshot_dir = "snapshots"
+    snapshot.assert_match(gv_file_io.read(), "my_file.gv")
 
 
 def test_mod_not_valid(capsys) -> None:

@@ -5,6 +5,8 @@ import re
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
+from pylint.checkers.base.name_checker.checker import DEFAULT_PATTERNS
+from pylint.checkers.utils import is_builtin
 
 from python_ta.utils import _is_in_main
 
@@ -13,7 +15,7 @@ class GlobalVariablesChecker(BaseChecker):
     name = "global_variables"
     msgs = {
         "E9997": (
-            "Global variables must be constants in CSC108/CSC148: " "%s",
+            "Global variables must be constants or type aliases in CSC108/CSC148: " "%s",
             "forbidden-global-variables",
             "",
         )
@@ -31,13 +33,13 @@ class GlobalVariablesChecker(BaseChecker):
         self.add_message("forbidden-global-variables", node=node, args=args)
 
     def visit_assignname(self, node):
-        """Allow global constant variables (uppercase), but issue messages for
+        """Allow global constant variables (uppercase) and type aliases (type alias pattern), but issue messages for
         all other globals.
         """
         self._inspect_vars(node)
 
     def visit_name(self, node):
-        """Allow global constant variables (uppercase), but issue messages for
+        """Allow global constant variables (uppercase) and type aliases (type alias pattern), but issue messages for
         all other globals.
         """
         self._inspect_vars(node)
@@ -58,7 +60,7 @@ class GlobalVariablesChecker(BaseChecker):
                 self.import_names.append(name_tuple[0])  # no alias
 
     def _inspect_vars(self, node):
-        """Allows constant, global variables (i.e. uppercase), but issue
+        """Allows constant, global variables (i.e. uppercase) and type aliases (i.e. type alias pattern), but issue
         messages for all other global variables.
         """
         if hasattr(node, "name") and node.name in self.import_names:
@@ -79,10 +81,7 @@ class GlobalVariablesChecker(BaseChecker):
 
 def _get_child_disallowed_global_var_nodes(node):
     """Return a list of all top-level Name or AssignName nodes for a given
-    global, non-constant variable.
-
-    TODO: use the configured NamingStyle instead of hard-coded SnakeCaseStyle
-    for the CONST_NAME_RGX value.
+    global, non-constant and non-type alias variable.
     """
     node_list = []
     if (
@@ -90,7 +89,11 @@ def _get_child_disallowed_global_var_nodes(node):
             isinstance(node, (nodes.AssignName, nodes.Name))
             and not isinstance(node.parent, nodes.Call)
         )
-        and not re.match(UpperCaseStyle.CONST_NAME_RGX, node.name)
+        and not (
+            re.match(UpperCaseStyle.CONST_NAME_RGX, node.name)
+            or re.match(DEFAULT_PATTERNS["typealias"], node.name)
+        )
+        and not is_builtin(node.name)
         and node.scope() is node.root()
     ):
         return [node]

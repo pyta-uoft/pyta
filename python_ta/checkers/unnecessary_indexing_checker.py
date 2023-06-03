@@ -49,16 +49,9 @@ def _is_unnecessary_indexing(node: Union[nodes.For, nodes.Comprehension]) -> boo
 
     True if unnecessary usage, False otherwise or if index variable not used at all.
     """
-    if isinstance(node.target, nodes.AssignName):
-        index_nodes = _index_name_nodes(node.target.name, node)
-    elif isinstance(node.target, Union[nodes.Tuple, nodes.List]):
-        index_nodes = []
-        for var in node.target.elts:
-            if isinstance(var, nodes.AssignName):
-                index_nodes.extend(_index_name_nodes(var.name, node))
-    else:  # Is there a case where node.target is something other than AssignName, Tuple, or List?
-        pass
-
+    index_nodes = []
+    for assign_name_node in node.target.nodes_of_class(nodes.AssignName):
+        index_nodes.extend(_index_name_nodes(assign_name_node.name, node))
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
 
 

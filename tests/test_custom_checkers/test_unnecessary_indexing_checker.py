@@ -518,6 +518,38 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_comprehension(comp_node)
 
+    def test_subscript_target_msg(self):
+        """Illustrates this checker on a loop where the target variable is a subscript node."""
+        src = """
+        def f(lst: list) -> None:
+            for lst[0] in range(len(lst)):
+                print(lst[0])
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-indexing",
+                node=for_node.target,
+                args=(for_node.target.value.name, "lst"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_for(for_node)
+
+    def test_subscript_target_comp_msg(self):
+        """Illustrates this checker on a list comprehension where the target variable is a subscript node."""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[0] for lst[0] in range(len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
 
 if __name__ == "__main__":
     import pytest

@@ -14,6 +14,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of code as an error.
 - The `GlobalVariablesChecker` now allows type alias assignment statements at the top level, i.e., doesn't flag such
   lines of code as an error.
+- The HTML Report now displays the error message for C0303 `trailing-whitespace`, and only trailing whitespaces are
+  highlighted rather than the entire line of code.
 
 ### New checkers
 

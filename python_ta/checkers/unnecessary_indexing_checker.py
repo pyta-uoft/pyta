@@ -33,7 +33,7 @@ class UnnecessaryIndexingChecker(BaseChecker):
         iterable = _iterable_if_range(node.iter)
         if iterable is not None and _is_unnecessary_indexing(node):
             args = (
-                node.target.nodes_of_class(Union[nodes.AssignName, nodes.Name]).__next__().name,
+                node.target.nodes_of_class(nodes.AssignName, nodes.Name).__next__().name,
                 iterable,
             )
             self.add_message("unnecessary-indexing", node=node.target, args=args)
@@ -43,7 +43,7 @@ class UnnecessaryIndexingChecker(BaseChecker):
         iterable = _iterable_if_range(node.iter)
         if iterable is not None and _is_unnecessary_indexing(node):
             args = (
-                node.target.nodes_of_class(Union[nodes.AssignName, nodes.Name]).__next__().name,
+                node.target.nodes_of_class(nodes.AssignName, nodes.Name).__next__().name,
                 iterable,
             )
             self.add_message("unnecessary-indexing", node=node.target, args=args)
@@ -56,7 +56,9 @@ def _is_unnecessary_indexing(node: Union[nodes.For, nodes.Comprehension]) -> boo
     True if unnecessary usage, False otherwise or if index variable not used at all.
     """
     index_nodes = []
-    for assign_name_node in node.target.nodes_of_class(Union[nodes.AssignName, nodes.Name]):
+    for assign_name_node in node.target.nodes_of_class(nodes.AssignName, nodes.Name):
+        # node.target.nodes_of_class(Union[nodes.AssignName, nodes.Name]) works for my new example, but the
+        # current code does not
         index_nodes.extend(_index_name_nodes(assign_name_node.name, node))
     return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
 

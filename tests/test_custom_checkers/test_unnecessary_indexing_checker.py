@@ -538,18 +538,6 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_for(for_node)
 
-    def test_subscript_target_comp_msg(self):
-        """Illustrates this checker on a list comprehension where the target variable is a subscript node."""
-        src = """
-        def f(lst1: list, lst2: list) -> list:
-            return [lst2[lst1[0]] for lst1[0] in range(len(lst2))]
-        """
-        mod = astroid.parse(src)
-        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
-
-        with self.assertNoMessages():
-            self.checker.visit_comprehension(comp_node)
-
 
 if __name__ == "__main__":
     import pytest

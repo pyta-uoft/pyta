@@ -124,6 +124,8 @@ pycodestyle-ignore =
     E711,  # pylint C0121
     E712,  # pylint C0121
     E722,  # pylint W0702
+    W291,  # pylint C0303
     W292,  # pylint C0304
+    W293,  # pylint C0303
     W391,  # pylint C0305
     W503   # this one just conflicts with pycodestyle W504

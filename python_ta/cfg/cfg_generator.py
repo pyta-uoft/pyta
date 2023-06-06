@@ -4,7 +4,7 @@ Provides a function to generate and display the control flow graph of a given mo
 import importlib.util
 import os.path
 import sys
-from typing import Dict, Optional, Set
+from typing import Dict, List, Optional, Set
 
 import graphviz
 from astroid import nodes
@@ -18,7 +18,7 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def generate_cfg(
-    mod: str = "", auto_open: bool = False, funcs_to_render: Optional[list[str]] = None
+    mod: str = "", auto_open: bool = False, funcs_to_render: Optional[List[str]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -33,7 +33,7 @@ def generate_cfg(
 
 
 def _generate(
-    mod: str = "", auto_open: bool = False, funcs_to_render: Optional[list[str]] = None
+    mod: str = "", auto_open: bool = False, funcs_to_render: Optional[List[str]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 

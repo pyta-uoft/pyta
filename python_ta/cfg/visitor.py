@@ -30,10 +30,10 @@ class CFGVisitor:
     _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
     # If non-NIL, the visitor only creates cfgs for these functions
-    _functions_to_render: Optional[list[str]]
+    _functions_to_render: Optional[List[str]]
 
     def __init__(
-        self, options: Optional[Dict[str, Any]] = None, funcs: Optional[list[str]] = None
+        self, options: Optional[Dict[str, Any]] = None, funcs: Optional[List[str]] = None
     ) -> None:
         super().__init__()
         self.cfgs = {}

@@ -1,0 +1,22 @@
+digraph funcs_only {
+	node [fontname="Courier New" shape=box]
+	subgraph cluster_0 {
+		cluster_0_0 [label="\l" fillcolor=white style=filled]
+		cluster_0_0 -> cluster_0_2
+		cluster_0_2 [label="a = 5\l" fillcolor=white style=filled]
+		cluster_0_2 -> cluster_0_1
+		cluster_0_1 [label="\l" fillcolor=black style=filled]
+		fontname="Courier New" label=foo
+	}
+	subgraph cluster_1 {
+		cluster_1_0 [label="\l" fillcolor=white style=filled]
+		cluster_1_0 -> cluster_1_2
+		cluster_1_2 [label="a > 0\l" fillcolor=white style=filled]
+		cluster_1_2 -> cluster_1_3 [label=True]
+		cluster_1_3 [label="owl = 'hoo'\l" fillcolor=white style=filled]
+		cluster_1_3 -> cluster_1_1
+		cluster_1_1 [label="\l" fillcolor=black style=filled]
+		cluster_1_2 -> cluster_1_1 [label=False]
+		fontname="Courier New" label=hoo
+	}
+}

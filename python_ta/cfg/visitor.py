@@ -1,3 +1,4 @@
+import itertools
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from astroid import nodes
@@ -28,8 +29,12 @@ class CFGVisitor:
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
+    # If non-NIL, the visitor only creates cfgs for these functions
+    _functions_to_render: Optional[list[str]]
 
-    def __init__(self, options: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, options: Optional[Dict[str, Any]] = None, funcs: Optional[list[str]] = None
+    ) -> None:
         super().__init__()
         self.cfgs = {}
         self.options = {"separate-condition-blocks": False}
@@ -39,6 +44,7 @@ class CFGVisitor:
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
+        self._functions_to_render = funcs
 
     def __getattr__(self, attr: str):
         if attr.startswith("visit_"):
@@ -48,9 +54,16 @@ class CFGVisitor:
 
     def visit_generic(self, node: nodes.NodeNG) -> None:
         """By default, add the expression to the end of the current block."""
-        self._current_block.add_statement(node)
+        if self._current_block is not None:
+            self._current_block.add_statement(node)
 
     def visit_module(self, module: nodes.Module) -> None:
+        # Modules shouldn't be considered if user specifies functions to render
+        if self._functions_to_render is not None:
+            for child in module.body:
+                child.accept(self)
+            return
+
         self.cfgs[module] = ControlFlowGraph(self.cfg_count)
         self.cfg_count += 1
         self._current_cfg = self.cfgs[module]
@@ -68,7 +81,14 @@ class CFGVisitor:
             child.accept(self)
 
     def visit_functiondef(self, func: nodes.FunctionDef) -> None:
-        self._current_block.add_statement(func)
+        # If user specifies to only render functions, check if the current function is listed
+        if self._functions_to_render is not None and func.name not in self._functions_to_render:
+            for child in func.body:
+                child.accept(self)
+            return
+
+        if self._current_block is not None:
+            self._current_block.add_statement(func)
 
         previous_cfg = self._current_cfg
         previous_block = self._current_block
@@ -104,6 +124,12 @@ class CFGVisitor:
         self._current_cfg = previous_cfg
 
     def visit_if(self, node: nodes.If) -> None:
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            # Check the then and else branches
+            _check_child_nodes(self, node.body, node.orelse)
+            return
+
         separate_conditions = self.options.get("separate-condition-blocks", False)
         if separate_conditions:
             # Create a block for the test condition
@@ -146,6 +172,12 @@ class CFGVisitor:
         self._current_block = after_if_block
 
     def visit_while(self, node: nodes.While) -> None:
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            # Check the while loop body and else branch
+            _check_child_nodes(self, node.body, node.orelse)
+            return
+
         old_curr = self._current_block
 
         # Handle "test" block
@@ -186,6 +218,12 @@ class CFGVisitor:
         self._current_block = after_while_block
 
     def visit_for(self, node: nodes.For) -> None:
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            # Check the for loop body and else branch
+            _check_child_nodes(self, node.body, node.orelse)
+            return
+
         old_curr = self._current_block
         old_curr.add_statement(node.iter)
         node.cfg_block = old_curr
@@ -238,6 +276,10 @@ class CFGVisitor:
     def _visit_jump(
         self, node: Union[nodes.Break, nodes.Continue, nodes.Return, nodes.Raise]
     ) -> None:
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            return
+
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
             if isinstance(node, nodes.Raise):
@@ -261,6 +303,14 @@ class CFGVisitor:
         self._current_block = unreachable_block
 
     def visit_tryexcept(self, node: nodes.TryExcept) -> None:
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            # Check the try body, the raise handlers and else branch
+            _check_child_nodes(
+                self, node.body, *(handler.body for handler in reversed(node.handlers)), node.orelse
+            )
+            return
+
         if self._current_block.statements != []:
             self._current_block = self._current_cfg.create_block(self._current_block)
 
@@ -327,6 +377,12 @@ class CFGVisitor:
         self._current_block = end_block
 
     def visit_with(self, node: nodes.With) -> None:
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            # Check the with statement body
+            _check_child_nodes(self, node.body)
+            return
+
         for context_node, name in node.items:
             self._current_block.add_statement(context_node)
             if name is not None:
@@ -367,3 +423,11 @@ def _get_raise_exc(node: nodes.Raise) -> str:
         return f"{nodes.Raise.__name__} {next(exceptions).name}"
     except StopIteration:
         return nodes.Raise.__name__
+
+
+def _check_child_nodes(visitor: CFGVisitor, *nodes_list: List[nodes.NodeNG]) -> None:
+    """Visit all of the nodes in `nodes` using the provided CFGVisitor."""
+    nodes_to_visit = itertools.chain(*nodes_list)
+
+    for child in nodes_to_visit:
+        child.accept(visitor)

@@ -132,9 +132,7 @@ class HTMLReporter(PythonTaReporter):
     def _colourify(cls, colour_class: str, text: str) -> str:
         """Return a colourized version of text, using colour_class."""
         colour = cls._COLOURING[colour_class]
-        new_text = text.lstrip(" ")
-        space_count = len(text) - len(new_text)
-        new_text = new_text.replace(" ", cls._SPACE)
+        new_text = text.replace(" ", cls._SPACE)
         if "-line" not in colour_class:
             new_text = highlight(
                 new_text,
@@ -142,4 +140,4 @@ class HTMLReporter(PythonTaReporter):
                 HtmlFormatter(nowrap=True, lineseparator="", classprefix="pygments-"),
             )
 
-        return (space_count * cls._SPACE) + colour + new_text + cls._COLOURING["reset"]
+        return colour + new_text + cls._COLOURING["reset"]

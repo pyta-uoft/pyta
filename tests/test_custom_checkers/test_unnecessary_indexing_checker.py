@@ -532,7 +532,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="unnecessary-indexing",
                 node=for_node.target,
-                args=(for_node.target.value.name, "lst2"),
+                args=(for_node.target.as_string(), "lst2"),
             ),
             ignore_position=True,
         ):

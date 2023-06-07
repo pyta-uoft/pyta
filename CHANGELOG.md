@@ -16,6 +16,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   lines of code as an error.
 - For the message display of C0303 `trailing-whitespace`, trailing whitespaces are now appearing in the reporters,
   and only those spaces are highlighted rather than the entire line of code.
+- The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
 
 ### New checkers
 

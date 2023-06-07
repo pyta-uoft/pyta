@@ -79,6 +79,15 @@ def render_trailing_newlines(msg, _node, source_lines=None):
     )
 
 
+def render_trailing_whitespace(msg, _node, source_lines=None):
+    """Render a trailing whitespace message."""
+    line = msg.line
+    start_index, end_index = len(source_lines[line - 1].rstrip()), len(source_lines[line - 1])
+    yield from render_context(line - 1, line, source_lines)
+    yield (line, slice(start_index, end_index), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 2, source_lines)
+
+
 def render_context(start, stop, source_lines):
     """Helper for rendering context lines."""
     start, stop = max(start, 1), min(stop, len(source_lines))
@@ -124,6 +133,7 @@ CUSTOM_MESSAGES = {
     "missing-class-docstring": render_missing_docstring,
     "missing-function-docstring": render_missing_docstring,
     "trailing-newlines": render_trailing_newlines,
+    "trailing-whitespace": render_trailing_whitespace,
     "missing-return-type": render_missing_return_type,
     "too-many-arguments": render_too_many_arguments,
     "missing-space-in-doctest": render_missing_space_in_doctest,

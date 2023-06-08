@@ -93,7 +93,11 @@ def _display(
         if isinstance(node, nodes.Module):
             subgraph_label = "__main__"
         elif isinstance(node, nodes.FunctionDef):
+            scope_parent = node.scope().parent
             subgraph_label = node.name
+            # Update the label to the qualified name if it is a method
+            if isinstance(scope_parent, nodes.ClassDef):
+                subgraph_label = scope_parent.name + "." + subgraph_label
         else:
             continue
         with graph.subgraph(name=f"cluster_{cfg.cfg_id}") as c:

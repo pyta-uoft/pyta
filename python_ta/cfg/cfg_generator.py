@@ -18,7 +18,7 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def generate_cfg(
-    mod: str = "", auto_open: bool = False, funcs_to_render: Optional[List[str]] = None
+    mod: str = "", auto_open: bool = False, functions: Optional[List[str]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -27,13 +27,14 @@ def generate_cfg(
             extension) or have no argument (generates a CFG for the Python file from which this
             function is called).
         auto_open (bool): Automatically open the graph in your browser.
-        funcs_to_render (list): Only render cfgs for these functions.
+        functions (list): Only render cfgs for these functions and methods. `functions` is a list of
+            function names and the qualified names of methods that you wish to create cfgs for.
     """
-    _generate(mod=mod, auto_open=auto_open, funcs_to_render=funcs_to_render)
+    _generate(mod=mod, auto_open=auto_open, functions=functions)
 
 
 def _generate(
-    mod: str = "", auto_open: bool = False, funcs_to_render: Optional[List[str]] = None
+    mod: str = "", auto_open: bool = False, functions: Optional[List[str]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -41,7 +42,7 @@ def _generate(
       - the path of a file (must have `.py` extension).
       - no argument -- generate a CFG for the Python file from which this function is called.
 
-    `funcs_to_render` can either be:
+    `functions` can either be:
       - a list of function names to render cfgs for (only generates cfgs for these functions).
       - no arguments -- generate cfgs for the entire module and all its functions.
     """
@@ -53,7 +54,10 @@ def _generate(
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
     module = AstroidBuilder().file_build(abs_path)
-    visitor = CFGVisitor(funcs=funcs_to_render)
+    options = {
+        "functions": [] if functions is None else functions,
+    }
+    visitor = CFGVisitor(options=options)
     module.accept(visitor)
 
     _display(visitor.cfgs, file_name, auto_open=auto_open)

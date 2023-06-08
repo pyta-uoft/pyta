@@ -46,6 +46,22 @@ import python_ta.cfg
 python_ta.cfg.generate_cfg("my_file.py")
 ```
 
+There is also an additional optional argument which specifies the functions and methods to generate control flow graphs for. By default, PythonTA will generate a control flow graph for the entire Python file but when provided a list of function and method names, it will only generate control flow graphs for the specified functions.
+
+Note that the specified functions must be top-level functions or methods. That is, function definitions that are nested inside other types of syntax aside from `class` definitions (e.g. `if` and `for` statements) will not be detected. For specifying methods, use their qualified names. For example, if you have a class named `MyClass` with the method `foo`, use `MyClass.foo`.
+
+```python
+# Assume my_file.py has a class `MyClass` with method `MyClass.foo` and a top-level method `foo`
+
+import python_ta.cfg
+
+python_ta.cfg.generate_cfg(mod="my_file.py", functions=["MyClass.foo"])
+```
+
+which produces the following control flow graph:
+
+![method_only.svg](images/method_only.svg)
+
 **Note:** only one control flow graph can be generated per function call (i.e. you can't pass in a list of files to generate control flow graphs for).
 
 ## API

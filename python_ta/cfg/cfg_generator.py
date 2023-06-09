@@ -4,7 +4,7 @@ Provides a function to generate and display the control flow graph of a given mo
 import importlib.util
 import os.path
 import sys
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, Optional, Set
 
 import graphviz
 from astroid import nodes
@@ -18,33 +18,37 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def generate_cfg(
-    mod: str = "", auto_open: bool = False, functions: Optional[List[str]] = None
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
+
+    Supported Options:
+      - "separate-condition-blocks": bool
+            This option specifies whether the test condition of an if statement gets merged with any
+            preceding statements or placed in a new block. By default, it will merge them.
+      - "functions": list[str]
+            This option specifies whether to restrict the creation of cfgs to just top-level
+            function definitions or methods provided in this list. By default, it will create the
+            cfg for the entire file.
 
     Args:
         mod (str): The path to the module. `mod` can either be the path of a file (must have `.py`
             extension) or have no argument (generates a CFG for the Python file from which this
             function is called).
         auto_open (bool): Automatically open the graph in your browser.
-        functions (list): Only render cfgs for these functions and methods. `functions` is a list of
-            function names and the qualified names of methods that you wish to create cfgs for.
+        visitor_options (dict): An options dict to configure how the cfgs are generated.
     """
-    _generate(mod=mod, auto_open=auto_open, functions=functions)
+    _generate(mod=mod, auto_open=auto_open, visitor_options=visitor_options)
 
 
 def _generate(
-    mod: str = "", auto_open: bool = False, functions: Optional[List[str]] = None
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
     `mod` can either be:
       - the path of a file (must have `.py` extension).
       - no argument -- generate a CFG for the Python file from which this function is called.
-
-    `functions` can either be:
-      - a list of function names to render cfgs for (only generates cfgs for these functions).
-      - no arguments -- generate cfgs for the entire module and all its functions.
     """
     # Generate a control flow graph for the given file
     abs_path = _get_valid_file_path(mod)
@@ -54,10 +58,7 @@ def _generate(
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
     module = AstroidBuilder().file_build(abs_path)
-    options = {
-        "functions": [] if functions is None else functions,
-    }
-    visitor = CFGVisitor(options=options)
+    visitor = CFGVisitor(options=visitor_options)
     module.accept(visitor)
 
     _display(visitor.cfgs, file_name, auto_open=auto_open)

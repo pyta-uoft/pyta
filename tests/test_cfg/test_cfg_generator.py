@@ -48,7 +48,10 @@ def create_cfg_funcs_only():
     svg_file_path = dot_file_path + ".svg"
 
     # Create the graphviz files using my_file.py
-    cfg.generate_cfg(mod=script_name, auto_open=False, functions=["MyClass.foo", "foo", "hoo"])
+    options = {
+        "functions": ["MyClass.foo", "foo", "hoo"],
+    }
+    cfg.generate_cfg(mod=script_name, auto_open=False, visitor_options=options)
 
     # Open the actual graphviz file for reading
     gv_file_io = open(dot_file_path)

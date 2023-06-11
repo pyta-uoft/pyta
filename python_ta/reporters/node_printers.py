@@ -128,6 +128,19 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
+def render_pep8_blank_lines_in_between_functions(msg, _node, source_lines=None):
+    """Render a PEP8 blank lines in between functions message."""
+    line = msg.line - 1
+    while source_lines[line - 1] == "\n":
+        line -= 1
+    yield from render_context(line - 1, line + 1, source_lines)
+    yield from (
+        (curr_line, slice(None, None), LineType.ERROR, " ")
+        for curr_line in range(line + 1, msg.line)
+    )
+    yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
 CUSTOM_MESSAGES = {
     "missing-module-docstring": render_missing_docstring,
     "missing-class-docstring": render_missing_docstring,
@@ -137,6 +150,7 @@ CUSTOM_MESSAGES = {
     "missing-return-type": render_missing_return_type,
     "too-many-arguments": render_too_many_arguments,
     "missing-space-in-doctest": render_missing_space_in_doctest,
+    "pep8-errors": render_pep8_blank_lines_in_between_functions,
 }
 
 

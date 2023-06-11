@@ -4,7 +4,7 @@ Provides a function to generate and display the control flow graph of a given mo
 import importlib.util
 import os.path
 import sys
-from typing import Dict, Optional, Set
+from typing import Any, Dict, Optional, Set
 
 import graphviz
 from astroid import nodes
@@ -17,19 +17,33 @@ GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Cou
 SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
-def generate_cfg(mod: str = "", auto_open: bool = False) -> None:
+def generate_cfg(
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
+) -> None:
     """Generate a control flow graph for the given module.
+
+    Supported Options:
+      - "separate-condition-blocks": bool
+            This option specifies whether the test condition of an if statement gets merged with any
+            preceding statements or placed in a new block. By default, it will merge them.
+      - "functions": list[str]
+            This option specifies whether to restrict the creation of cfgs to just top-level
+            function definitions or methods provided in this list. By default, it will create the
+            cfg for the entire file.
 
     Args:
         mod (str): The path to the module. `mod` can either be the path of a file (must have `.py`
             extension) or have no argument (generates a CFG for the Python file from which this
             function is called).
         auto_open (bool): Automatically open the graph in your browser.
+        visitor_options (dict): An options dict to configure how the cfgs are generated.
     """
-    _generate(mod=mod, auto_open=auto_open)
+    _generate(mod=mod, auto_open=auto_open, visitor_options=visitor_options)
 
 
-def _generate(mod: str = "", auto_open: bool = False) -> None:
+def _generate(
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
+) -> None:
     """Generate a control flow graph for the given module.
 
     `mod` can either be:
@@ -44,7 +58,7 @@ def _generate(mod: str = "", auto_open: bool = False) -> None:
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
     module = AstroidBuilder().file_build(abs_path)
-    visitor = CFGVisitor()
+    visitor = CFGVisitor(options=visitor_options)
     module.accept(visitor)
 
     _display(visitor.cfgs, file_name, auto_open=auto_open)
@@ -84,7 +98,11 @@ def _display(
         if isinstance(node, nodes.Module):
             subgraph_label = "__main__"
         elif isinstance(node, nodes.FunctionDef):
+            scope_parent = node.scope().parent
             subgraph_label = node.name
+            # Update the label to the qualified name if it is a method
+            if isinstance(scope_parent, nodes.ClassDef):
+                subgraph_label = scope_parent.name + "." + subgraph_label
         else:
             continue
         with graph.subgraph(name=f"cluster_{cfg.cfg_id}") as c:

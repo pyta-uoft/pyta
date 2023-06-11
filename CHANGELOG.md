@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Can now create control flow graphs to visualize the execution of your program.
+- Added support to allow the user to configure how control flow graphs are generated.
 - The `TopLevelCodeChecker` now allows type alias assignment statements at the top level, i.e., doesn't flag such lines
   of code as an error.
 - The `GlobalVariablesChecker` now allows type alias assignment statements at the top level, i.e., doesn't flag such

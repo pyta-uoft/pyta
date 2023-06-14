@@ -19,6 +19,8 @@ __version__ = "2.5.1.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 
+from pylint.config.config_file_parser import _ConfigurationFileParser
+from pylint.config.exceptions import _UnrecognizedOptionError
 from pylint.lint import PyLinter
 
 from .reporters.core import PythonTaReporter
@@ -193,6 +195,28 @@ def _load_config(linter: PyLinter, config_location: AnyStr) -> None:
     linter.config_file = config_location
 
 
+def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
+    """Override the default linter configuration options (if possible).
+
+    Snippets taken from pylint.config.config_initialization.
+    """
+    # Read the configuration file.
+    config_file_parser = _ConfigurationFileParser(verbose=True, linter=linter)
+    try:
+        _, config_args = config_file_parser.parse_config_file(file_path=config_location)
+    except OSError as ex:
+        print(ex, file=sys.stderr)
+        sys.exit(32)
+
+    # Override the config options by parsing the provided file.
+    try:
+        linter._parse_configuration_file(config_args)
+    except _UnrecognizedOptionError as exc:
+        print(f"Unrecognized options: {', '.join(exc.options)}", file=sys.stderr)
+
+    linter.config_file = config_location
+
+
 def _load_messages_config(path: str, default_path: str) -> dict:
     """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files."""
@@ -314,27 +338,26 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
-    if isinstance(config, str) and config != "":
-        # Use config file at the specified path instead of the default.
-        _load_config(linter, config)
-    else:
-        # If available, use config file at directory of the file being linted.
-        pylintrc_location = None
-        if file_linted:
-            pylintrc_location = _find_local_config(file_linted)
+    # If available, use config file at directory of the file being linted.
+    pylintrc_location = None
+    if file_linted:
+        pylintrc_location = _find_local_config(file_linted)
 
-        # Otherwise, use default config file shipped with python_ta package.
-        if not pylintrc_location:
-            pylintrc_location = _find_local_config(os.path.dirname(__file__))
+    # Otherwise, use default config file shipped with python_ta package.
+    if not pylintrc_location:
+        pylintrc_location = _find_local_config(os.path.dirname(__file__))
 
-        _load_config(linter, pylintrc_location)
+    _load_config(linter, pylintrc_location)
 
-        # Override part of the default config, with a dict of config options.
-        # Note: these configs are overridden by config file in user's codebase
-        # location.
-        if isinstance(config, dict):
-            for key in config:
-                linter.set_option(key, config[key])
+    # Override part of the default config, with a dict of config options.
+    # Note: these configs are overridden by config file in user's codebase
+    # location.
+    if isinstance(config, dict):
+        for key in config:
+            linter.set_option(key, config[key])
+    # Override part of the default config, using the provided file if config is a non-empty str.
+    elif isinstance(config, str) and config != "":
+        _override_config(linter, config)
 
     return linter
 

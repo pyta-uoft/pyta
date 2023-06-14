@@ -18,6 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the message display of C0303 `trailing-whitespace`, trailing whitespaces are now appearing in the reporters,
   and only those spaces are highlighted rather than the entire line of code.
 - The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
+- The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
 
 ### New checkers
 
@@ -45,6 +46,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed bug where `check_errors` and `check_all` opens a webpage when a nonexistent or unreadable path is passed as an argument.
 - Fixed the CFG implementation to resolve a bug in the possibly-undefined checker where variables were falsely flagged as possibly undefined when the code conditionally raises an exception and the variable was referenced afterwards.
 - Fixed bug where the generated CFGs will highlight the except block as unreachable if the same exception it is handling was raised in the body of the tryexcept.
+- Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
 
 ### New checkers
 

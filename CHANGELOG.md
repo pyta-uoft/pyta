@@ -23,10 +23,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the message display of E9989 `pep8-errors`, all "blank line" messages are now custom-rendered, i.e., blank lines
   are now highlighted instead of function signatures and instruction strings are added for required blank lines that
   are missing.
+- The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
 
 ### Bug Fixes
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
+- Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
 
 ### New checkers
 

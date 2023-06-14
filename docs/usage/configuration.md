@@ -4,6 +4,42 @@
 This page is current under construction!
 ```
 
+## Providing Your Own Configuration Settings
+
+While PythonTA comes with its own default configuration settings, you can provide either a `dict` or the file name of the config file containing the configuration options you want to override.
+
+When providing your own configuration settings (either a `dict` or file), you just need to provide a minimal configuration file that contains only the configuration options you wish to override. PythonTA will use its default options for all other options.
+
+### Sample Usage
+
+```python
+import python_ta
+
+options = {
+    'pyta-number-of-messages': 10,
+    'max-line-length': 100,
+    ...,
+}
+
+# Using config dict
+python_ta.check_all(..., config=options)
+
+# Using config file
+# Assume there is a config file `config/.pylintrc`
+python_ta.check_all(..., config='config/.pylintrc')
+```
+
+```toml
+# config/.pylintrc
+[CUSTOM PYTA OPTIONS]
+pyta-number-of-messages = 10
+
+[FORMAT]
+max-line-length = 100
+
+...
+```
+
 ## Custom Error Messages
 
 PythonTA allows for pylint error messages to be overridden with more user friendly messages.
@@ -45,3 +81,17 @@ python_ta.check_all(..., output='pyta_output.txt')
 
 This options is compatible with all of PythonTA's reporter types, but we do not recommend its use with ColorReporter,
 as this reporter uses terminal-specific characters to colourize text displayed on your screen.
+
+## Forbidden Imports
+
+By default, PythonTA has a list of modules that are allowed to be imported. You can specify any additional modules using the `extra-imports` configuration option, which you can set in a call to `python_ta.check_all` or in a configuration file.
+
+```python
+import python_ta
+python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
+```
+
+```toml
+[FORBIDDEN IMPORT]
+extra-imports = math, tkinter
+```

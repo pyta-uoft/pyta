@@ -17,6 +17,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the message display of C0303 `trailing-whitespace`, trailing whitespaces are now appearing in the reporters,
   and only those spaces are highlighted rather than the entire line of code.
 - The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
+- Modified configuration behaviour so when providing a config file, it only needs to contain the configuration options you want overridden.
 
 ### New checkers
 

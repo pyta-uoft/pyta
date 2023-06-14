@@ -3,7 +3,7 @@
 # Make sure to register custom options tuple first in `python_ta/__init__.py`
 # ===========================================================
 # Default max amount of messages for reporter to display.
-pyta-number-of-messages = 5
+pyta-number-of-messages = 0
 
 # (DEPRECATED: Use output-format option below.) Set the [REPORTS] output-format option instead.
 # pyta-reporter = HTMLReporter

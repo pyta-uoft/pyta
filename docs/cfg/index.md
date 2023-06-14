@@ -46,6 +46,25 @@ import python_ta.cfg
 python_ta.cfg.generate_cfg("my_file.py")
 ```
 
+There is also an additional optional argument that allows you to configure how the control flow graphs are generated. For example, you can separate the `if` condition from the preceding statements, or you can specify function and method names to restrict the creation of control flow graphs to just those functions.
+
+```python
+# Assume my_file.py has a class `MyClass` with method `MyClass.foo` and a top-level method `foo`
+
+import python_ta.cfg
+
+options = {
+        "separate-condition-blocks": True,
+        "functions": ["MyClass.foo"]
+    }
+
+python_ta.cfg.generate_cfg(mod="my_file.py", visitor_options=options)
+```
+
+which produces the following control flow graph:
+
+![method_only.svg](images/method_only.svg)
+
 **Note:** only one control flow graph can be generated per function call (i.e. you can't pass in a list of files to generate control flow graphs for).
 
 ## API
@@ -53,5 +72,7 @@ python_ta.cfg.generate_cfg("my_file.py")
 ```{eval-rst}
 .. autofunction:: python_ta.cfg.generate_cfg
 ```
+
+**Note:** the specified functions must be top-level functions or methods. That is, function definitions that are nested inside other types of syntax aside from `class` definitions (e.g. `if` and `for` statements) will not be detected. For specifying methods, use their qualified names. For example, if you have a class named `MyClass` with the method `foo`, use `MyClass.foo`.
 
 [graphviz]: https://www.graphviz.org/

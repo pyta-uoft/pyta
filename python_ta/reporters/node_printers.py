@@ -130,15 +130,18 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 
 def render_pep8_blank_lines_in_between_functions(msg, _node, source_lines=None):
     """Render a PEP8 blank lines in between functions message."""
-    line = msg.line - 1
-    while source_lines[line - 1] == "\n":
-        line -= 1
-    yield from render_context(line - 1, line + 1, source_lines)
-    yield from (
-        (curr_line, slice(None, None), LineType.ERROR, " ")
-        for curr_line in range(line + 1, msg.line)
-    )
-    yield from render_context(msg.line, msg.line + 2, source_lines)
+    if "blank line" in msg.msg:
+        line = msg.line - 1
+        while source_lines[line - 1] == "\n":
+            line -= 1
+        yield from render_context(line - 1, line + 1, source_lines)
+        yield from (
+            (curr_line, slice(None, None), LineType.ERROR, " " * 20)
+            for curr_line in range(line + 1, msg.line)
+        )
+        yield from render_context(msg.line, msg.line + 2, source_lines)
+    else:
+        render_generic(msg, _node, source_lines)
 
 
 CUSTOM_MESSAGES = {

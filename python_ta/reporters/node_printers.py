@@ -141,7 +141,7 @@ def render_pep8_blank_lines_in_between_functions(msg, _node, source_lines=None):
         )
         yield from render_context(msg.line, msg.line + 2, source_lines)
     else:
-        render_generic(msg, _node, source_lines)
+        yield from render_generic(msg, _node, source_lines)
 
 
 CUSTOM_MESSAGES = {

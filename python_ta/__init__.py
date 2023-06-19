@@ -111,6 +111,8 @@ def _check(
     `level` is used to specify which checks should be made.
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute or relative path to capture pyta data output. Default std out.
+    `load_default_config` is used to specify whether to load the default .pylintrc file that comes
+    with PythonTA. It will load it by default.
     """
     linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter
@@ -273,10 +275,10 @@ def reset_linter(
     """Construct a new linter. Register config and checker plugins.
 
     To determine which configuration to use:
+    - If the option is enabled, load the default PythonTA config file,
     - If the config argument is a string, use the config found at that location,
     - Otherwise,
         - Try to use the config file at directory of the file being linted,
-        - Otherwise try to use default config file shipped with python_ta.
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
@@ -359,11 +361,6 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
-    # Logic for loading configurations:
-    # 1. Load PythonTA default config file (if option is enabled).
-    # 2. Load specified config (if given as a str). Otherwise, load the config file in the current
-    #    directory, if available.
-    # 3. Override config options (if given as a dict).
     default_config_path = _find_local_config(os.path.dirname(__file__))
     set_config = _load_config
 

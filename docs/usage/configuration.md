@@ -6,9 +6,9 @@ This page is current under construction!
 
 ## Providing Your Own Configuration Settings
 
-While PythonTA comes with its own default configuration settings, you can provide either a `dict` or the file name of the config file containing the configuration options you want to override.
+While PythonTA comes with its own default configuration settings, you can provide either a `dict` or the file name of the config file containing the configuration options you want to override. PythonTA will use its default options for all other options.
 
-When providing your own configuration settings (either a `dict` or file), you just need to provide a minimal configuration file that contains only the configuration options you wish to override. PythonTA will use its default options for all other options.
+When providing your own configuration settings as a file, you just need to provide a minimal configuration file that contains only the configuration options you wish to override. The configuration file must be in the [TOML](https://toml.io/en/v1.0.0) file format.
 
 ### Sample Usage
 
@@ -38,6 +38,18 @@ pyta-number-of-messages = 10
 max-line-length = 100
 
 ...
+```
+
+### Autoloading PythonTA default config
+
+The `load_default_config` option of `check_errors` and `check_all` can be used to specify whether to automatically load the PythonTA default config. By default, PythonTA will automatically load the default config.
+
+When disabled, it will still load PythonTA's custom options, but will no longer override pylint's default options. As such, it will use pylint's default options.
+
+```python
+import python_ta
+
+python_ta.check_all(..., load_default_config=False)
 ```
 
 ## Custom Error Messages

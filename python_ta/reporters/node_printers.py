@@ -157,13 +157,12 @@ def render_pep8_blank_lines(msg, _node, source_lines=None):
                 )
                 for _ in range(0, 2)
             )
-            yield from render_context(msg.line, msg.line + 2, source_lines)
         else:
             line -= 1
             yield from render_context(line - 1, line + 1, source_lines)
             yield (line + 1, slice(None, None), LineType.ERROR, " " * 32)
             yield (None, slice(None, None), LineType.ERROR, '"""INSERT NEW BLANK LINE HERE"""')
-            yield from render_context(msg.line, msg.line + 2, source_lines)
+        yield from render_context(msg.line, msg.line + 2, source_lines)
     elif "too many blank lines" in msg.msg:
         line = msg.line - 1
         while source_lines[line - 1] == "\n":

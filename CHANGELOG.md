@@ -21,6 +21,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modified configuration behaviour so when providing a config file, it only needs to contain the configuration options you want overridden.
 - Added the option `load_default_config` to `check_errors` and `check_all` to specify whether to automatically load the PythonTA default config.
 
+### Bug Fixes
+
+- Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
+
 ### New checkers
 
 Pylint checkers v2.16:

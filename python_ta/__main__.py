@@ -55,7 +55,7 @@ def main(
 
     # `config` is None if `-c` flag is not set
     if generate_config:
-        pylintrc_location = os.path.join(os.path.dirname(__file__), ".pylintrc")
+        pylintrc_location = os.path.join(os.path.dirname(__file__), "config/.pylintrc")
         with open(pylintrc_location, "r") as f:
             contents = f.read()
             print(contents)

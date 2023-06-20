@@ -131,7 +131,7 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 
 
 def render_pep8_errors(msg, _node, source_lines=None):
-    """Render a PEP8 blank lines message."""
+    """Render a PEP8 error message."""
     if "expected 1 blank line," in msg.msg:
         yield from render_pep8_errors_e301(msg, _node, source_lines)
     elif "expected 2 blank lines," in msg.msg:
@@ -149,7 +149,7 @@ def render_pep8_errors(msg, _node, source_lines=None):
 
 
 def render_blank_line(line):
-    """Render a blank line."""
+    """Render a blank line for a PEP8 error message."""
     yield (line + 1, slice(None, None), LineType.ERROR, " " * 28)
 
 

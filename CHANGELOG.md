@@ -18,9 +18,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the message display of C0303 `trailing-whitespace`, trailing whitespaces are now appearing in the reporters,
   and only those spaces are highlighted rather than the entire line of code.
 - The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
-- For the message display of E9989 `pep8-errors`, all "blank line" messages are now custom-rendered, i.e., blank lines
-  are now highlighted instead of function signatures and instruction strings are added for required blank lines that
-  are missing.
 
 ### New checkers
 

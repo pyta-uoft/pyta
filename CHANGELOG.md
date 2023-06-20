@@ -20,6 +20,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
 - Modified configuration behaviour so when providing a config file, it only needs to contain the configuration options you want overridden.
 - Added the option `load_default_config` to `check_errors` and `check_all` to specify whether to automatically load the PythonTA default config.
+- For the message display of E9989 `pep8-errors`, all "blank line" messages are now custom-rendered, i.e., blank lines
+  are now highlighted instead of function signatures and instruction strings are added for required blank lines that
+  are missing.
 
 ### New checkers
 

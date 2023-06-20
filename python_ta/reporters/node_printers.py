@@ -3,6 +3,8 @@ from enum import Enum
 
 from astroid import nodes
 
+NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
+
 
 def render_message(msg, node, source_lines):
     """Render a message based on type."""
@@ -128,63 +130,129 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_blank_lines(msg, _node, source_lines=None):
+def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 blank lines message."""
-    if "blank line" not in msg.msg:
-        yield from render_generic(msg, _node, source_lines)
-    elif "expected 1 blank line" in msg.msg:
-        line = msg.line - 1
-        yield from render_context(line - 1, line + 1, source_lines)
-        body = source_lines[line]
-        indentation = len(body) - len(body.lstrip())
-        yield (
-            None,
-            slice(None, None),
-            LineType.ERROR,
-            body[:indentation] + '"""INSERT NEW BLANK LINE HERE"""' + " " * indentation,
-        )
-        yield from render_context(msg.line, msg.line + 2, source_lines)
-    elif "expected 2 blank lines" in msg.msg:
-        line = msg.line - 1
-        if "found 0" in msg.msg:
-            yield from render_context(line - 1, line + 1, source_lines)
-            yield from (
-                (
-                    None,
-                    slice(None, None),
-                    LineType.ERROR,
-                    '"""INSERT NEW BLANK LINE HERE"""',
-                )
-                for _ in range(0, 2)
-            )
-        else:
-            line -= 1
-            yield from render_context(line - 1, line + 1, source_lines)
-            yield (line + 1, slice(None, None), LineType.ERROR, " " * 32)
-            yield (None, slice(None, None), LineType.ERROR, '"""INSERT NEW BLANK LINE HERE"""')
-        yield from render_context(msg.line, msg.line + 2, source_lines)
+    if "expected 1 blank line," in msg.msg:
+        yield from render_pep8_errors_e301(msg, _node, source_lines)
+    elif "expected 2 blank lines," in msg.msg:
+        yield from render_pep8_errors_e302(msg, _node, source_lines)
     elif "too many blank lines" in msg.msg:
-        line = msg.line - 1
-        while source_lines[line - 1] == "\n":
-            line -= 1
-        yield from render_context(line - 1, line + 1, source_lines)
-        body = source_lines[msg.line - 1]
-        indentation = len(body) - len(body.lstrip())
-        yield from (
-            (curr_line, slice(None, None), LineType.ERROR, " " * (indentation + 32))
-            for curr_line in range(line + 1, msg.line)
-        )
-        yield from render_context(msg.line, msg.line + 2, source_lines)
+        yield from render_pep8_errors_e303(msg, _node, source_lines)
+    elif "blank lines found after function decorator" in msg.msg:
+        yield from render_pep8_errors_e304(msg, _node, source_lines)
+    elif "expected 2 blank lines after class or function definition" in msg.msg:
+        yield from render_pep8_errors_e305(msg, _node, source_lines)
+    elif "expected 1 blank line before a nested definition" in msg.msg:
+        yield from render_pep8_errors_e306(msg, _node, source_lines)
     else:
-        line = msg.line - 1
-        while source_lines[line - 1] == "\n":
-            line -= 1
+        yield from render_generic(msg, _node, source_lines)
+
+
+def render_blank_line(line):
+    """Render a blank line."""
+    yield (line + 1, slice(None, None), LineType.ERROR, " " * 28)
+
+
+def render_pep8_errors_e301(msg, _node, source_lines=None):
+    """Render a PEP8 expected 1 blank line message."""
+    line = msg.line - 1
+    yield from render_context(line - 1, line + 1, source_lines)
+    body = source_lines[line]
+    indentation = len(body) - len(body.lstrip())
+    yield (
+        None,
+        slice(None, None),
+        LineType.ERROR,
+        body[:indentation] + NEW_BLANK_LINE_MESSAGE + " " * indentation,
+    )
+    yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
+def render_pep8_errors_e302(msg, _node, source_lines=None):
+    """Render a PEP8 expected 2 blank lines message."""
+    line = msg.line - 1
+    if "found 0" in msg.msg:
         yield from render_context(line - 1, line + 1, source_lines)
         yield from (
-            (curr_line, slice(None, None), LineType.ERROR, " " * 32)
-            for curr_line in range(line + 1, msg.line)
+            (
+                None,
+                slice(None, None),
+                LineType.ERROR,
+                NEW_BLANK_LINE_MESSAGE,
+            )
+            for _ in range(0, 2)
         )
-        yield from render_context(msg.line, msg.line + 2, source_lines)
+    else:
+        line -= 1
+        yield from render_context(line - 1, line + 1, source_lines)
+        yield from render_blank_line(line)
+        yield (None, slice(None, None), LineType.ERROR, NEW_BLANK_LINE_MESSAGE)
+    yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
+def render_pep8_errors_e303(msg, _node, source_lines=None):
+    """Render a PEP8 too many blank lines message."""
+    line = msg.line - 1
+    while source_lines[line - 1] == "\n":
+        line -= 1
+    yield from render_context(line - 1, line + 1, source_lines)
+    body = source_lines[msg.line - 1]
+    indentation = len(body) - len(body.lstrip())
+    yield from (
+        (curr_line, slice(None, None), LineType.ERROR, " " * (indentation + 28))
+        for curr_line in range(line + 1, msg.line)
+    )
+    yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
+def render_pep8_errors_e304(msg, _node, source_lines=None):
+    """Render a PEP8 blank lines found after function decorator message."""
+    line = msg.line - 1
+    while source_lines[line - 1] == "\n":
+        line -= 1
+    yield from render_context(line - 1, line + 1, source_lines)
+    yield from (
+        (curr_line, slice(None, None), LineType.ERROR, " " * 28)
+        for curr_line in range(line + 1, msg.line)
+    )
+    yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
+def render_pep8_errors_e305(msg, _node, source_lines=None):
+    """Render a PEP8 expected 2 blank lines after class or function definition message."""
+    line = msg.line - 1
+    if "found 0" in msg.msg:
+        yield from render_context(line - 1, line + 1, source_lines)
+        yield from (
+            (
+                None,
+                slice(None, None),
+                LineType.ERROR,
+                NEW_BLANK_LINE_MESSAGE,
+            )
+            for _ in range(0, 2)
+        )
+    else:
+        line -= 1
+        yield from render_context(line - 1, line + 1, source_lines)
+        yield from render_blank_line(line)
+        yield (None, slice(None, None), LineType.ERROR, NEW_BLANK_LINE_MESSAGE)
+    yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
+def render_pep8_errors_e306(msg, _node, source_lines=None):
+    """Render a PEP8 expected 1 blank line before a nested definition message."""
+    line = msg.line - 1
+    yield from render_context(line - 1, line + 1, source_lines)
+    body = source_lines[line]
+    indentation = len(body) - len(body.lstrip())
+    yield (
+        None,
+        slice(None, None),
+        LineType.ERROR,
+        body[:indentation] + NEW_BLANK_LINE_MESSAGE + " " * indentation,
+    )
+    yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
 CUSTOM_MESSAGES = {
@@ -196,7 +264,7 @@ CUSTOM_MESSAGES = {
     "missing-return-type": render_missing_return_type,
     "too-many-arguments": render_too_many_arguments,
     "missing-space-in-doctest": render_missing_space_in_doctest,
-    "pep8-errors": render_pep8_blank_lines,
+    "pep8-errors": render_pep8_errors,
 }
 
 

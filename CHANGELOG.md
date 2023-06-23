@@ -24,6 +24,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   are now highlighted instead of function signatures and instruction strings are added for required blank lines that
   are missing.
 
+### Bug Fixes
+
+- Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
+
 ### New checkers
 
 Pylint checkers v2.16:

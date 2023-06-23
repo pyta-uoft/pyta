@@ -193,7 +193,7 @@ def render_pep8_errors_e302(msg, _node, source_lines=None):
 def render_pep8_errors_e303(msg, _node, source_lines=None):
     """Render a PEP8 too many blank lines message."""
     line = msg.line - 1
-    while source_lines[line - 1] == "\n":
+    while source_lines[line - 1].strip() == "":
         line -= 1
     yield from render_context(line - 1, line + 1, source_lines)
     body = source_lines[msg.line - 1]
@@ -208,7 +208,7 @@ def render_pep8_errors_e303(msg, _node, source_lines=None):
 def render_pep8_errors_e304(msg, _node, source_lines=None):
     """Render a PEP8 blank lines found after function decorator message."""
     line = msg.line - 1
-    while source_lines[line - 1] == "\n":
+    while source_lines[line - 1].strip() == "":
         line -= 1
     yield from render_context(line - 1, line + 1, source_lines)
     yield from (

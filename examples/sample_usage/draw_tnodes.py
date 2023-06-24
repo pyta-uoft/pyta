@@ -9,7 +9,7 @@ from python_ta.transforms.type_inference_visitor import TypeInferer
 from python_ta.typecheck.base import TypeFail, _TNode
 from tests.custom_hypothesis_support import _parse_text
 
-USAGE = "Usage: python -m sample_usage.draw_tnodes <your-file.py>"
+USAGE = "Usage: python -m examples.sample_usage.draw_tnodes <your-file.py>"
 
 
 def _type_str(type):

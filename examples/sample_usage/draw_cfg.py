@@ -1,6 +1,6 @@
 import python_ta.cfg
 
-USAGE = "USAGE: python -m sample_usage.draw_cfg <your-file.py>"
+USAGE = "USAGE: python -m examples.sample_usage.draw_cfg <your-file.py>"
 
 
 def main(filepath: str) -> None:

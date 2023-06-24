@@ -19,6 +19,8 @@ __version__ = "2.5.1.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 
+from pylint.config.config_file_parser import _ConfigurationFileParser
+from pylint.config.exceptions import _UnrecognizedOptionError
 from pylint.lint import PyLinter
 
 from .reporters.core import PythonTaReporter
@@ -65,18 +67,32 @@ def check_errors(
     module_name: Union[List[str], str] = "",
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
+    load_default_config: bool = True,
 ) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
-    return _check(module_name=module_name, level="error", local_config=config, output=output)
+    return _check(
+        module_name=module_name,
+        level="error",
+        local_config=config,
+        output=output,
+        load_default_config=load_default_config,
+    )
 
 
 def check_all(
     module_name: Union[List[str], str] = "",
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
+    load_default_config: bool = True,
 ) -> PythonTaReporter:
     """Check a module for errors and style warnings, printing a report."""
-    return _check(module_name=module_name, level="all", local_config=config, output=output)
+    return _check(
+        module_name=module_name,
+        level="all",
+        local_config=config,
+        output=output,
+        load_default_config=load_default_config,
+    )
 
 
 def _check(
@@ -84,6 +100,7 @@ def _check(
     level: str = "all",
     local_config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
+    load_default_config: bool = True,
 ) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
@@ -94,8 +111,10 @@ def _check(
     `level` is used to specify which checks should be made.
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute or relative path to capture pyta data output. Default std out.
+    `load_default_config` is used to specify whether to load the default .pylintrc file that comes
+    with PythonTA. It will load it by default.
     """
-    linter = reset_linter(config=local_config)
+    linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
@@ -124,7 +143,11 @@ def _check(
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 # Reuse the same reporter each time to accumulate the results across different files.
-                linter = reset_linter(config=local_config, file_linted=file_py)
+                linter = reset_linter(
+                    config=local_config,
+                    file_linted=file_py,
+                    load_default_config=load_default_config,
+                )
                 linter.set_reporter(current_reporter)
                 module_name = os.path.splitext(os.path.basename(file_py))[0]
                 if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
@@ -193,6 +216,28 @@ def _load_config(linter: PyLinter, config_location: AnyStr) -> None:
     linter.config_file = config_location
 
 
+def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
+    """Override the default linter configuration options (if possible).
+
+    Snippets taken from pylint.config.config_initialization.
+    """
+    # Read the configuration file.
+    config_file_parser = _ConfigurationFileParser(verbose=True, linter=linter)
+    try:
+        _, config_args = config_file_parser.parse_config_file(file_path=config_location)
+    except OSError as ex:
+        print(ex, file=sys.stderr)
+        sys.exit(32)
+
+    # Override the config options by parsing the provided file.
+    try:
+        linter._parse_configuration_file(config_args)
+    except _UnrecognizedOptionError as exc:
+        print(f"Unrecognized options: {', '.join(exc.options)}", file=sys.stderr)
+
+    linter.config_file = config_location
+
+
 def _load_messages_config(path: str, default_path: str) -> dict:
     """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files."""
@@ -223,15 +268,17 @@ def _load_messages_config(path: str, default_path: str) -> dict:
 
 
 def reset_linter(
-    config: Optional[Union[dict, str]] = None, file_linted: Optional[AnyStr] = None
+    config: Optional[Union[dict, str]] = None,
+    file_linted: Optional[AnyStr] = None,
+    load_default_config: bool = True,
 ) -> PyLinter:
     """Construct a new linter. Register config and checker plugins.
 
     To determine which configuration to use:
+    - If the option is enabled, load the default PythonTA config file,
     - If the config argument is a string, use the config found at that location,
     - Otherwise,
         - Try to use the config file at directory of the file being linted,
-        - Otherwise try to use default config file shipped with python_ta.
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
@@ -314,20 +361,25 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
+    default_config_path = _find_local_config(os.path.dirname(__file__))
+    set_config = _load_config
+
+    if load_default_config:
+        _load_config(linter, default_config_path)
+        # If we do specify to load the default config, we just need to override the options later.
+        set_config = _override_config
+
     if isinstance(config, str) and config != "":
-        # Use config file at the specified path instead of the default.
-        _load_config(linter, config)
+        set_config(linter, config)
     else:
         # If available, use config file at directory of the file being linted.
         pylintrc_location = None
         if file_linted:
             pylintrc_location = _find_local_config(file_linted)
 
-        # Otherwise, use default config file shipped with python_ta package.
-        if not pylintrc_location:
-            pylintrc_location = _find_local_config(os.path.dirname(__file__))
-
-        _load_config(linter, pylintrc_location)
+        # Load or override the options if there is a config file in the current directory.
+        if pylintrc_location:
+            set_config(linter, pylintrc_location)
 
         # Override part of the default config, with a dict of config options.
         # Note: these configs are overridden by config file in user's codebase

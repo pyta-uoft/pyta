@@ -18,7 +18,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the message display of C0303 `trailing-whitespace`, trailing whitespaces are now appearing in the reporters,
   and only those spaces are highlighted rather than the entire line of code.
 - The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
-- The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
+- Modified configuration behaviour so when providing a config file, it only needs to contain the configuration options you want overridden.
+- Added the option `load_default_config` to `check_errors` and `check_all` to specify whether to automatically load the PythonTA default config.
+- For the message display of E9989 `pep8-errors`, all "blank line" messages are now custom-rendered, i.e., blank lines
+  are now highlighted instead of function signatures and instruction strings are added for required blank lines that
+  are missing.
+
+### Bug Fixes
+
+- Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
 
 ### New checkers
 

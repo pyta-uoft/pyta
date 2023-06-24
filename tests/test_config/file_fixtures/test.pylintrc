@@ -1,0 +1,14 @@
+[CUSTOM PYTA OPTIONS]
+
+# Default max amount of messages for reporter to display.
+pyta-number-of-messages = 10
+
+[ELIF]
+
+# Set maximum allowed if nesting.
+max-nested-blocks = 5
+
+[FORMAT]
+
+# Set the maximum line length.
+max-line-length = 120

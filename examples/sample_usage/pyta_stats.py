@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 import python_ta
 from python_ta.reporters.stat_reporter import StatReporter
-from sample_usage.stats_analysis import summary
+from examples.sample_usage.stats_analysis import summary
 
 
 def pyta_statistics(directory, config=""):

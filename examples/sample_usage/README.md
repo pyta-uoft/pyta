@@ -42,7 +42,7 @@ call `pyta_statistics` on the absolute path to the directory, as so:
 
 ```python
 >>> directory = "C:\\Users\\prof\\Documents\\course1\\projects"  # for example
->>> from sample_usage.pyta_stats import pyta_statistics          # while running python in the pyta directory
+>>> from examples.sample_usage.pyta_stats import pyta_statistics          # while running python in the pyta directory
 >>> pyta_statistics(directory)
 ```
 
@@ -54,7 +54,7 @@ aggregate (if it is a course directory).
 There are three Python files that contribute to the aggregation and calculation
 of statistics for Python TA:
 
-- `sample_usage/pyta_stats.py`
+- `examples/sample_usage/pyta_stats.py`
 
   - This module contains the `pyta_statistics` function that users run on the
     directory that they want to analyse. It aggregates statistics that are collected
@@ -62,7 +62,7 @@ of statistics for Python TA:
     the actual statistics calculators contained in the `stats_analysis` module,
     and pretty-prints the results.
 
-- `sample_usage/stats_analysis.py`
+- `examples/sample_usage/stats_analysis.py`
 
   - This module performs all of the actual statistics calculation on data collected
     by `pyta_stats`. The main function, `summary`, takes in the data and calls

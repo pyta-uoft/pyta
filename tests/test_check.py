@@ -27,7 +27,7 @@ def test_check_on_dir():
 
 def test_check_on_file():
     """Test files"""
-    _inputs = [["nodes/name.py"], ["nodes/dict.py", "nodes/const.py"]]
+    _inputs = [["examples/nodes/name.py"], ["examples/nodes/dict.py", "examples/nodes/const.py"]]
     for item in _inputs:
         python_ta.check_all(
             item,
@@ -46,8 +46,8 @@ def test_check_on_bad_input():
     _inputs = [
         [222],
         222,
-        ["nodes/dict.py nodes/const.py"],
-        [222, "examples/inline_config_comment.py", "nodes/dict.py"],
+        ["examples/nodes/dict.py examples/nodes/const.py"],
+        [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
         ["file_does_not_exist"],
     ]
     for item in _inputs:
@@ -63,7 +63,7 @@ def test_check_on_bad_input():
 
 def test_check_with_config():
     """Test inputs along with a config arg."""
-    _inputs = [["nodes/const.py"], ["nodes"]]
+    _inputs = [["examples/nodes/const.py"], ["examples/nodes"]]
     CONFIG = {
         # [ELIF]
         "max-nested-blocks": 4,
@@ -172,7 +172,7 @@ def test_check_with_config():
 
 def test_check_saves_file() -> None:
     """Test whether or not specifiying an output properly saves a file"""
-    _inputs = [["nodes/name.py"]]
+    _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output will be created in the main directory
         python_ta.check_all(item, output="pyta_output.html")
@@ -195,7 +195,7 @@ def test_check_no_reporter_output() -> None:
     webbrowser.open = Mock(return_value=None)
     HTTPServer.handle_request = Mock(return_value=None)
 
-    _inputs = [["nodes/name.py"]]
+    _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory
         python_ta.check_all(item)
@@ -234,7 +234,7 @@ def test_check_errors_nonzero() -> None:
             "python_ta",
             "--config",
             "tests/test.pylintrc",
-            "nodes/name.py",
+            "examples/nodes/name.py",
         ]
     )
 
@@ -253,7 +253,7 @@ def test_check_exit_zero() -> None:
             "--exit-zero",
             "--config",
             "tests/test.pylintrc",
-            "nodes/name.py",
+            "examples/nodes/name.py",
         ]
     )
 

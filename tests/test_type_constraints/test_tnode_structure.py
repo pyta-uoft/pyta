@@ -4,8 +4,8 @@ from typing import ForwardRef, _GenericAlias
 import pytest
 from astroid import nodes
 
+from examples.sample_usage.draw_tnodes import gen_graph_from_nodes
 from python_ta.typecheck.base import TypeConstraints, TypeFail, _TNode
-from sample_usage.draw_tnodes import gen_graph_from_nodes
 
 from .. import custom_hypothesis_support as cs
 

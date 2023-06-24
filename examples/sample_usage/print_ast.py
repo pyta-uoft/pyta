@@ -6,7 +6,7 @@ import sys
 import astroid
 from colorama import Back, Fore
 
-USAGE = "Usage: python -m sample_usage.print_ast <your-file.py>"
+USAGE = "Usage: python -m examples.sample_usage.print_ast <your-file.py>"
 FILL = "  "
 # Unicode Box Drawing Characters.
 CHAR_PIPE = "┃"

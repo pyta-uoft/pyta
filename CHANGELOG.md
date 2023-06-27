@@ -27,6 +27,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug Fixes
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
+- Fixed bug in how PythonTA reports error messages that occur when parsing configuration files.
 
 ### New checkers
 

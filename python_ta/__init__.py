@@ -221,6 +221,8 @@ def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
 
     Snippets taken from pylint.config.config_initialization.
     """
+    linter.set_current_module(config_location)
+
     # Read the configuration file.
     config_file_parser = _ConfigurationFileParser(verbose=True, linter=linter)
     try:
@@ -234,6 +236,9 @@ def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
         linter._parse_configuration_file(config_args)
     except _UnrecognizedOptionError as exc:
         print(f"Unrecognized options: {', '.join(exc.options)}", file=sys.stderr)
+
+    # Everything has been set up already so emit any stashed messages.
+    linter._emit_stashed_messages()
 
     linter.config_file = config_location
 

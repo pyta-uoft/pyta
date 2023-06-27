@@ -121,3 +121,33 @@ def test_default_pylint_checks_in_no_default(configure_linter_no_default) -> Non
     assert all(
         check not in disabled_checks for check in previously_disabled_checks if disabled_checks
     )
+
+
+def test_unknown_option_value() -> None:
+    """Test that the configuration options gets overridden without error when there is an unknown
+    option value."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = python_ta.reset_linter(config=config).reporter
+
+    # Check if there are any messages with the msg_id `W0012` (the code corresponding to the error
+    # `unknown-option-value`.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert "W0012" in message_ids
+
+
+def test_unknown_option_value_no_default() -> None:
+    """Test that the configuration options gets loaded without error when there is an unknown option
+    value.
+
+    The default options are not loaded from the PythonTA default config."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = python_ta.reset_linter(config=config, load_default_config=False).reporter
+
+    # Check if there are any messages with the msg_id `W0012` (the code corresponding to the error
+    # `unknown-option-value`.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert "W0012" in message_ids

@@ -3,6 +3,7 @@
 import os.path
 import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from astroid import NodeNG
@@ -215,6 +216,20 @@ class PythonTaReporter(BaseReporter):
     # Event callbacks
     def on_set_current_module(self, module: str, filepath: Optional[str]) -> None:
         """Hook called when a module starts to be analysed."""
+        # First, check if `module` is the name of a config file and if so, make filepath the
+        # corresponding path to that config file.
+        possible_config_path = Path(os.path.expandvars(module)).expanduser()
+        config_extensions = [".toml", ".ini", ".pylintrc"]
+
+        if possible_config_path.exists():
+            module_basename = os.path.basename(module)
+            if (
+                any(possible_config_path.suffix == extension for extension in config_extensions)
+                or module_basename == ".pylintrc"
+                or module_basename == "pylintrc"
+            ):
+                filepath = possible_config_path
+
         # Skip if filepath is None
         if filepath is None:
             return

@@ -33,7 +33,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-snapshot",
-    "pytest-cov ~= 4.0.0",
+    "pytest-cov >= 4.0,< 4.2",
     "sphinx",
     "sphinx-rtd-theme",
 ]

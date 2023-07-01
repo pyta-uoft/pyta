@@ -1,5 +1,5 @@
 """
-Test suite for checking whether the correct number of error occurrences are being displayed.
+Test suite for checking that the correct number of error occurrences are being displayed.
 """
 
 import contextlib
@@ -29,7 +29,7 @@ def pyta_output(num_msgs: int) -> str:
 
 
 def test_default() -> None:
-    """Tests that all messages are displayed when pyta-number-of-messages = 0"""
+    """Tests that all messages are displayed when pyta-number-of-messages = 0."""
     pyta_report = pyta_output(0)
     expected = 12
     actual = pyta_report.count("msg_id")
@@ -38,7 +38,7 @@ def test_default() -> None:
 
 
 def test_num_msgs2() -> None:
-    """Tests that only two messages per error are displayed when pyta-number-of-messages = 2"""
+    """Tests that only two messages per error are displayed when pyta-number-of-messages = 2."""
     pyta_report = pyta_output(2)
     expected = 7
     actual = pyta_report.count("msg_id")

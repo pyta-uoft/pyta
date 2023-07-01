@@ -1,5 +1,6 @@
-"""Python script to use for testing that the correct number of error occurrences are being displayed."""
+"""Python script used for testing that the correct number of error occurrences are being displayed."""
 
+# The following imports are used solely to trigger error messages.
 import packaging
 import pip
 import pygments

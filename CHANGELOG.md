@@ -23,8 +23,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the message display of E9989 `pep8-errors`, all "blank line" messages are now custom-rendered, i.e., blank lines
   are now highlighted instead of function signatures and instruction strings are added for required blank lines that
   are missing.
+- When running `check_contracts` on a class with type aliases as type annotations for its attributes, the `NameError`
+  that appears (which indicates that the type alias is undefined) is now resolved.
 - The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
-
+  
 ### Bug Fixes
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.

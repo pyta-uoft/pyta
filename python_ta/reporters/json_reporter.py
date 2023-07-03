@@ -42,27 +42,19 @@ class JSONReporter(PythonTaReporter):
     def _output_messages(self, msgs: List[NewMessage]) -> List[Dict]:
         """Returns a list of dictionaries containing formatted error messages."""
         max_messages = self.linter.config.pyta_number_of_messages
+        unique_msg_names = {msg.message.msg_id for msg in msgs}
+        num_occurrences = {}
         output_lst = []
-        all_msg_names = [msg.message.msg_id for msg in msgs]
 
-        unique_msg_names = []
-        [
-            unique_msg_names.append(msg_id)
-            for msg_id in all_msg_names
-            if msg_id not in unique_msg_names
-        ]
+        for msg_name in unique_msg_names:
+            num_occurrences[msg_name] = 0
 
-        for msg_id in unique_msg_names:
-            num_messages = 0
-            for msg in msgs:
-                if max_messages == 0 or (
-                    msg.message.msg_id == msg_id and num_messages < max_messages
-                ):
-                    message_dict = msg.to_dict()
-                    message_dict["number_of_occurrences"] = all_msg_names.count(msg.message.msg_id)
+        for msg in msgs:
+            if max_messages == 0 or num_occurrences[msg.message.msg_id] < max_messages:
+                output_lst.append(msg.to_dict())
+            num_occurrences[msg.message.msg_id] += 1
 
-                    if message_dict not in output_lst:
-                        output_lst.append(message_dict)
-                    num_messages += 1
+        for msg_dict in output_lst:
+            msg_dict["number_of_occurrences"] = num_occurrences[msg_dict["msg_id"]]
 
         return output_lst

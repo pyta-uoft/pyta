@@ -29,6 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
 - Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
+- Fixed bug where the JSON reporter was not limiting the number of error occurrences displayed with respect to `pyta-number-of-messages`.
 
 ### New checkers
 

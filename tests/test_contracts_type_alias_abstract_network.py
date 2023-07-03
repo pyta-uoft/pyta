@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Tuple
-
-# This creates a type alias, to save us typing "int | Tuple[int, int]" everywhere
-NodeAddress = int | Tuple[int, int]
+# This creates a type alias, to save us typing "int | tuple" everywhere
+NodeAddress = int | tuple
 
 
 ###############################################################################

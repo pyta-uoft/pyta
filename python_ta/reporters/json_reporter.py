@@ -42,12 +42,8 @@ class JSONReporter(PythonTaReporter):
     def _output_messages(self, msgs: List[NewMessage]) -> List[Dict]:
         """Returns a list of dictionaries containing formatted error messages."""
         max_messages = self.linter.config.pyta_number_of_messages
-        unique_msg_names = {msg.message.msg_id for msg in msgs}
-        num_occurrences = {}
+        num_occurrences = {msg.message.msg_id: 0 for msg in msgs}
         output_lst = []
-
-        for msg_name in unique_msg_names:
-            num_occurrences[msg_name] = 0
 
         for msg in msgs:
             if max_messages == 0 or num_occurrences[msg.message.msg_id] < max_messages:

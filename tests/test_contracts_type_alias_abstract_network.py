@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Union
 
 # This creates a type alias, to save us typing "int | tuple[int, int]" everywhere
-NodeAddress = Union[int | tuple[int, int]]
+NodeAddress = Union[int, tuple[int, int]]
 
 
 ###############################################################################

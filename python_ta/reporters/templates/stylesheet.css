@@ -1,7 +1,15 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-    Helvetica Neue, Helvetica, Ubuntu, Arial, sans-serif;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Helvetica Neue,
+    Helvetica,
+    Ubuntu,
+    Arial,
+    sans-serif;
   background: rgba(71, 118, 230, 0.77);
   background: -webkit-linear-gradient(
     0deg,
@@ -163,7 +171,9 @@ section {
 .error-instance {
   display: grid;
   background: #fff;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1), 0 4px 7px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.1),
+    0 4px 7px rgba(0, 0, 0, 0.1);
   padding: 8px 16px;
   margin-bottom: 5px;
   border-radius: 3px;

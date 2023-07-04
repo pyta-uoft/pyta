@@ -221,7 +221,7 @@ class PythonTaReporter(BaseReporter):
         possible_config_path = Path(os.path.expandvars(module)).expanduser()
 
         if possible_config_path.exists() and filepath is None:
-            filepath = possible_config_path
+            filepath = str(possible_config_path)
 
         # Skip if filepath is None
         if filepath is None:

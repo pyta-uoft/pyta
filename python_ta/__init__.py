@@ -138,8 +138,6 @@ def _check(
             for file_py in get_file_paths(locations):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
-                # The current file can actually be checked so update the flag
-                is_any_file_checked = True
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 # Reuse the same reporter each time to accumulate the results across different files.
@@ -148,7 +146,24 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
-                linter.set_reporter(current_reporter)
+
+                if not is_any_file_checked:
+                    current_reporter = linter.reporter
+                    current_reporter.set_output(output)
+
+                    # Temporarily update the current file to the most recently parsed config file
+                    # and print any messages.
+                    if linter.config_file != _find_local_config(os.path.dirname(__file__)):
+                        curr_file = linter.current_file
+                        current_reporter.current_file = linter.config_file
+                        current_reporter.print_messages()
+                        linter.current_file = curr_file
+                else:
+                    linter.set_reporter(current_reporter)
+
+                # The current file was checked so update the flag
+                is_any_file_checked = True
+
                 module_name = os.path.splitext(os.path.basename(file_py))[0]
                 if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
                     del MANAGER.astroid_cache[module_name]

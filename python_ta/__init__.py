@@ -148,16 +148,14 @@ def _check(
                 )
 
                 if not is_any_file_checked:
+                    prev_output = current_reporter.out
                     current_reporter = linter.reporter
-                    current_reporter.set_output(output)
+                    current_reporter.out = prev_output
 
-                    # Temporarily update the current file to the most recently parsed config file
-                    # and print any messages.
-                    if linter.config_file != _find_local_config(os.path.dirname(__file__)):
-                        curr_file = linter.current_file
-                        current_reporter.current_file = linter.config_file
+                    # At this point, the only possible errors are those from parsing the config file
+                    # so print them, if there are any.
+                    if current_reporter.messages:
                         current_reporter.print_messages()
-                        linter.current_file = curr_file
                 else:
                     linter.set_reporter(current_reporter)
 

@@ -158,7 +158,7 @@ def test_json_config_parsing_error(capsys) -> None:
     """Test that the JSONReporter correctly includes the config parsing error in its report."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_json_with_errors.pylintrc")
-    python_ta.check_all(config=config)
+    python_ta.check_all(module_name="examples/nodes/name.py", config=config)
     out = capsys.readouterr().out
 
     reports = json.loads(out)
@@ -173,7 +173,7 @@ def test_print_messages_config_parsing_error(capsys) -> None:
     the config parsing error in its printed report."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_plain_with_errors.pylintrc")
-    python_ta.check_all(config=config)
+    python_ta.check_all(module_name="examples/nodes/name.py", config=config)
 
     out = capsys.readouterr().out
 

@@ -291,7 +291,7 @@ def reset_linter(
         (
             "pyta-number-of-messages",
             {
-                "default": 5,
+                "default": 0,  # If the value is 0, all messages are displayed.
                 "type": "int",
                 "metavar": "<number_messages>",
                 "help": "Display a certain number of messages to the user, without overwhelming them.",

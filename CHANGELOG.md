@@ -25,10 +25,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   are missing.
 - When running `check_contracts` on a class with type aliases as type annotations for its attributes, the `NameError`
   that appears (which indicates that the type alias is undefined) is now resolved.
+- The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
 
 ### Bug Fixes
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
+- Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
+- Fixed bug where the JSON reporter was not limiting the number of error occurrences displayed with respect to `pyta-number-of-messages`.
 
 ### New checkers
 

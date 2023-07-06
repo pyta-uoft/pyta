@@ -125,7 +125,7 @@
                                     {% endif %}
                                     </span>
                                     <span class="shown">
-                                    {% if limit < num_occurrences %}
+                                    {% if 0 < limit < num_occurrences %}
                                      (First {{ limit }} shown).
                                     {% endif %}
                                     </span>
@@ -141,27 +141,29 @@
                                 </div>
                                 <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
-                                    <div class="message">
-                                        <p class="message-name">
-                                            [Line {{ indiv.line }}] {{ indiv.msg }}
-                                            <span class="slider">
-                                                <button style="float: right;">
-                                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                        <g transform="scale(0.13 0.13)">
-                                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                        </g>
-                                                    </svg>
-                                                </button>
-                                            </span>
-                                        </p>
-                                        {% if indiv.snippet != '' %}
-                                        <div class="collapsible expanded message-snippet-container">
-                                          <pre class="message-snippet">{{ indiv.snippet }}</pre>
-                                        </div>
-                                        {% else %}
-                                        <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                        {% endif %}
-                                    </div>
+                                        {% if limit == 0 or loop.index0 < limit %}
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line {{ indiv.line }}] {{ indiv.msg }}
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                {% if indiv.snippet != '' %}
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  <pre class="message-snippet">{{ indiv.snippet }}</pre>
+                                                </div>
+                                                {% else %}
+                                                <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                                {% endif %}
+                                            </div>
+                                       {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
@@ -201,7 +203,7 @@
                                         {% endif %}
                                     </span>
                                     <span class="shown">
-                                    {% if limit < num_occurrences %}
+                                    {% if 0 < limit < num_occurrences %}
                                      (First {{ limit }} shown).
                                     {% endif %}
                                     </span>
@@ -215,30 +217,31 @@
                                         </button>
                                     </span>
                                 </div>
-
                                 <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
-                                    <div class="message">
-                                        <p class="message-name">
-                                            [Line {{ indiv.line }}] {{ indiv.msg }}
-                                            <span class="slider">
-                                                <button style="float: right;">
-                                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                        <g transform="scale(0.13 0.13)">
-                                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                        </g>
-                                                    </svg>
-                                                </button>
-                                            </span>
-                                        </p>
-                                        <div class="collapsible expanded message-snippet-container">
-                                          {% if indiv.snippet != '' %}
-                                          <pre class="message-snippet">{{ indiv.snippet }}</pre>
-                                          {% else %}
-                                          <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
-                                          {% endif %}
-                                        </div>
-                                    </div>
+                                        {% if limit == 0 or loop.index0 < limit %}
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line {{ indiv.line }}] {{ indiv.msg }}
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  {% if indiv.snippet != '' %}
+                                                  <pre class="message-snippet">{{ indiv.snippet }}</pre>
+                                                  {% else %}
+                                                  <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                                  {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
 

@@ -1,7 +1,7 @@
 # Configuration
 
 ```{note}
-This page is current under construction!
+This page is currently under construction!
 ```
 
 ## Providing Your Own Configuration Settings

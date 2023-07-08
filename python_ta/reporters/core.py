@@ -41,7 +41,10 @@ class NewMessage:
 
 
 # Messages without a source code line to highlight
-NO_SNIPPET = {"invalid-name"}
+NO_SNIPPET = {
+    "invalid-name",
+    "unknown-option-value",
+}
 
 
 class PythonTaReporter(BaseReporter):

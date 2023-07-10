@@ -3,6 +3,7 @@
 import os.path
 import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from astroid import NodeNG
@@ -40,7 +41,10 @@ class NewMessage:
 
 
 # Messages without a source code line to highlight
-NO_SNIPPET = {"invalid-name"}
+NO_SNIPPET = {
+    "invalid-name",
+    "unknown-option-value",
+}
 
 
 class PythonTaReporter(BaseReporter):
@@ -215,6 +219,13 @@ class PythonTaReporter(BaseReporter):
     # Event callbacks
     def on_set_current_module(self, module: str, filepath: Optional[str]) -> None:
         """Hook called when a module starts to be analysed."""
+        # First, check if `module` is the name of a config file and if so, make filepath the
+        # corresponding path to that config file.
+        possible_config_path = Path(os.path.expandvars(module)).expanduser()
+
+        if possible_config_path.exists() and filepath is None:
+            filepath = str(possible_config_path)
+
         # Skip if filepath is None
         if filepath is None:
             return

@@ -1,0 +1,16 @@
+[REPORTS]
+
+output-format = python_ta.reporters.JSONReporter
+
+[FORMAT]
+
+max-line-length = 100
+
+ignore-long-lines = ^\s*((# )?<?https?://\S+>?)|(>>>.*)$
+
+[FORBIDDEN IMPORT]
+extra-imports = math, tkinter
+
+[MESSAGES CONTROL]
+disable =
+    ooga

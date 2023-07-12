@@ -12,5 +12,6 @@ ignore-long-lines = ^\s*((# )?<?https?://\S+>?)|(>>>.*)$
 extra-imports = math, tkinter
 
 [MESSAGES CONTROL]
+# To trigger W0012, R0022
 disable =
-    ooga
+    ooga, bad-continuation

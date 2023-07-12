@@ -1,6 +1,7 @@
 """
 Test suite for checking whether configuration worked correctly with user-inputted configurations.
 """
+import json
 import os
 
 import pytest
@@ -121,3 +122,59 @@ def test_default_pylint_checks_in_no_default(configure_linter_no_default) -> Non
     assert all(
         check not in disabled_checks for check in previously_disabled_checks if disabled_checks
     )
+
+
+def test_unknown_option_value() -> None:
+    """Test that the configuration options gets overridden without error when there is an unknown
+    option value."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = python_ta.reset_linter(config=config).reporter
+
+    # Check if there are any messages with the msg_id `W0012` (the code corresponding to the error
+    # `unknown-option-value`.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert "W0012" in message_ids
+
+
+def test_unknown_option_value_no_default() -> None:
+    """Test that the configuration options gets loaded without error when there is an unknown option
+    value.
+
+    The default options are not loaded from the PythonTA default config."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = python_ta.reset_linter(config=config, load_default_config=False).reporter
+
+    # Check if there are any messages with the msg_id `W0012` (the code corresponding to the error
+    # `unknown-option-value`.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert "W0012" in message_ids
+
+
+def test_json_config_parsing_error(capsys) -> None:
+    """Test that the JSONReporter correctly includes the config parsing error in its report."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_json_with_errors.pylintrc")
+    python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+    out = capsys.readouterr().out
+
+    reports = json.loads(out)
+
+    assert any(msg["msg_id"] == "W0012" for report in reports for msg in report["msgs"])
+
+
+def test_print_messages_config_parsing_error(capsys) -> None:
+    """Test that print_messages correctly prints the config parsing error in its report.
+
+    This tests the functionality of PlainReporter and ColorReporter to verify it correctly includes
+    the config parsing error in its printed report."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_plain_with_errors.pylintrc")
+    python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+
+    out = capsys.readouterr().out
+
+    assert "W0012" in out

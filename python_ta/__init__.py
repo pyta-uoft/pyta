@@ -138,8 +138,6 @@ def _check(
             for file_py in get_file_paths(locations):
                 if not _verify_pre_check(file_py):
                     continue  # Check the other files
-                # The current file can actually be checked so update the flag
-                is_any_file_checked = True
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
                 # Reuse the same reporter each time to accumulate the results across different files.
@@ -148,7 +146,22 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
-                linter.set_reporter(current_reporter)
+
+                if not is_any_file_checked:
+                    prev_output = current_reporter.out
+                    current_reporter = linter.reporter
+                    current_reporter.out = prev_output
+
+                    # At this point, the only possible errors are those from parsing the config file
+                    # so print them, if there are any.
+                    if current_reporter.messages:
+                        current_reporter.print_messages()
+                else:
+                    linter.set_reporter(current_reporter)
+
+                # The current file was checked so update the flag
+                is_any_file_checked = True
+
                 module_name = os.path.splitext(os.path.basename(file_py))[0]
                 if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
                     del MANAGER.astroid_cache[module_name]
@@ -221,6 +234,8 @@ def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
 
     Snippets taken from pylint.config.config_initialization.
     """
+    linter.set_current_module(config_location)
+
     # Read the configuration file.
     config_file_parser = _ConfigurationFileParser(verbose=True, linter=linter)
     try:
@@ -234,6 +249,9 @@ def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
         linter._parse_configuration_file(config_args)
     except _UnrecognizedOptionError as exc:
         print(f"Unrecognized options: {', '.join(exc.options)}", file=sys.stderr)
+
+    # Everything has been set up already so emit any stashed messages.
+    linter._emit_stashed_messages()
 
     linter.config_file = config_location
 
@@ -291,7 +309,7 @@ def reset_linter(
         (
             "pyta-number-of-messages",
             {
-                "default": 5,
+                "default": 0,  # If the value is 0, all messages are displayed.
                 "type": "int",
                 "metavar": "<number_messages>",
                 "help": "Display a certain number of messages to the user, without overwhelming them.",

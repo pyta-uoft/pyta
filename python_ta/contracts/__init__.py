@@ -165,7 +165,7 @@ def add_class_invariants(klass: type) -> None:
         Check representation invariants for this class when not within an instance method of the class.
         """
         klass_mod = _get_module(klass)
-        cls_annotations = typing.get_type_hints(klass, globalns=klass_mod.__dict__)
+        cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
 
         if name in cls_annotations:
             try:
@@ -365,7 +365,7 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
         - isinstance(instance, klass)
     """
     klass_mod = _get_module(klass)
-    cls_annotations = typing.get_type_hints(klass, globalns=klass_mod.__dict__)
+    cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
 
     for attr, annotation in cls_annotations.items():
         value = getattr(instance, attr)

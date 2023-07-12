@@ -59,12 +59,16 @@ class PlainReporter(PythonTaReporter):
             result += self._colourify("bold", msg_id)
             result += self._colourify("bold", " ({})  ".format(messages[msg_id][0].symbol))
             result += "Number of occurrences: {}.".format(len(messages[msg_id]))
-            if max_messages != float("inf") and max_messages < len(messages[msg_id]):
+            if (
+                max_messages != 0
+                and max_messages != float("inf")
+                and max_messages < len(messages[msg_id])
+            ):
                 result += " (First {} shown).".format(max_messages)
             result += self._BREAK
 
             for i, msg in enumerate(messages[msg_id]):
-                if i == max_messages:
+                if max_messages != 0 and i == max_messages:
                     break
 
                 # Use only explanation, without redundant accessory information

@@ -598,3 +598,32 @@ def _debug(msg: str) -> None:
         return
 
     print("[PyTA]", msg, file=sys.stderr)
+
+
+def check_invariants(obj: object) -> None:
+    """Check that the representation invariants of obj are satisfied."""
+    klass = obj.__class__
+    klass_mod = _get_module(klass)
+
+    # Retrieve the representation invariants of the object
+    rep_invariants: List[Tuple[str, CodeType]] = []
+
+    for cls in reversed(klass.__mro__):
+        if "__representation_invariants__" in cls.__dict__:
+            rep_invariants.extend(cls.__representation_invariants__)
+        elif cls.__module__ != "builtins":
+            assertions = parse_assertions(cls, parse_token="Representation Invariant")
+            for assertion in assertions:
+                try:
+                    compiled = compile(assertion, "<string>", "eval")
+                except:
+                    _debug(
+                        f"Warning: representation invariant {assertion} could not be parsed as a valid Python expression"
+                    )
+                    continue
+                rep_invariants.append((assertion, compiled))
+
+    setattr(klass, "__representation_invariants__", rep_invariants)
+
+    # Check invariants
+    _check_invariants(obj, klass, klass_mod.__dict__)

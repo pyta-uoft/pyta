@@ -11,10 +11,5 @@ ignore-long-lines = ^\s*((# )?<?https?://\S+>?)|(>>>.*)$
 [FORBIDDEN IMPORT]
 extra-imports = math, tkinter
 
-[MESSAGES CONTROL]
-# To trigger W0012, R0022
-disable =
-    ooga, bad-continuation
-
-# To trigger E0015
-no-space-check =
+# To trigger F0011
+bad

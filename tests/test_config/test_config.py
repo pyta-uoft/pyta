@@ -14,9 +14,11 @@ TEST_CONFIG = {
     "max-line-length": 120,
 }
 
+# Non-fatal config errors. Fatal errors will be checked individually.
 CONFIG_ERRORS_TO_CHECK = {
     "W0012",
     "R0022",
+    "E0015",
 }
 
 
@@ -131,7 +133,9 @@ def test_default_pylint_checks_in_no_default(configure_linter_no_default) -> Non
 
 def test_config_parsing_errors() -> None:
     """Test that the configuration options gets overridden without error when there are errors
-    parsing the config files."""
+    parsing the config files.
+
+    This checks the non-fatal errors from parsing the config file."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
     reporter = python_ta.reset_linter(config=config).reporter
@@ -145,6 +149,8 @@ def test_config_parsing_errors() -> None:
 def test_config_parsing_errors_no_default() -> None:
     """Test that the configuration options gets loaded without error when there are errors
     parsing the config files.
+
+    This checks the non-fatal errors from parsing the config file.
 
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
@@ -198,3 +204,25 @@ def test_no_snippet_for_config_parsing_errors() -> None:
     ]
 
     assert all(snippet == "" for snippet in snippets)
+
+
+def test_config_parse_error(capsys) -> None:
+    """Test that F0011 (config-parse-error) correctly gets reported."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")
+    reporter = python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+
+    msg_id = reporter.messages[config][0].msg_id
+
+    assert msg_id == "F0011"
+
+
+def test_config_parse_error_has_no_snippet() -> None:
+    """Test that F0011 (config-parse-error) correctly gets reported with no code snippet."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")
+    reporter = python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+
+    snippet = reporter.messages[config][0].snippet
+
+    assert snippet == ""

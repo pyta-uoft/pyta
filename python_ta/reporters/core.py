@@ -46,6 +46,7 @@ NO_SNIPPET = {
     "unknown-option-value",
     "config-parse-error",
     "useless-option-value",
+    "unrecognized-option",
 }
 
 

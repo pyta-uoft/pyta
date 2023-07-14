@@ -177,7 +177,9 @@ def add_class_invariants(klass: type) -> None:
                         f"Value {_display_value(value)} did not match type annotation for attribute "
                         f"{name}: {_display_annotation(cls_annotations[name])}"
                     ) from None
-            original_attr_value = getattr(klass, name, None)
+            original_attr_value = None
+            if hasattr(super(klass, self), name):
+                original_attr_value = super(klass, self).__getattribute__(name)
             super(klass, self).__setattr__(name, value)
             frame_locals = inspect.currentframe().f_back.f_locals
             if self is not frame_locals.get("self"):
@@ -187,7 +189,7 @@ def add_class_invariants(klass: type) -> None:
                         _check_invariants(self, klass, klass_mod.__dict__)
                     except PyTAContractError as e:
                         if original_attr_value is None:
-                            delattr(klass, name)
+                            super(klass, self).__delattr__(name)
                         else:
                             super(klass, self).__setattr__(name, original_attr_value)
                         raise AssertionError(str(e)) from None

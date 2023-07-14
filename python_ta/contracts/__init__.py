@@ -159,36 +159,35 @@ def add_class_invariants(klass: type) -> None:
 
     setattr(klass, "__representation_invariants__", rep_invariants)
 
+    klass_mod = _get_module(klass)
+    cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
+
     def new_setattr(self: klass, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
 
         Check representation invariants for this class when not within an instance method of the class.
         """
-        klass_mod = _get_module(klass)
-        cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
-
-        if name in cls_annotations:
-            try:
-                _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
-                check_type(name, value, cls_annotations[name])
-            except TypeError:
-                raise AssertionError(
-                    f"Value {_display_value(value)} did not match type annotation for attribute "
-                    f"{name}: {_display_annotation(cls_annotations[name])}"
-                ) from None
-
-        super(klass, self).__setattr__(name, value)
-        curframe = inspect.currentframe()
-        callframe = inspect.getouterframes(curframe, 2)
-        frame_locals = callframe[1].frame.f_locals
-        if self is not frame_locals.get("self"):
-            # Only validating if the attribute is not being set in a instance/class method
-            klass_mod = _get_module(klass)
-            if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
+        if ENABLE_CONTRACT_CHECKING:
+            if name in cls_annotations:
                 try:
-                    _check_invariants(self, klass, klass_mod.__dict__)
-                except PyTAContractError as e:
-                    raise AssertionError(str(e)) from None
+                    _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
+                    check_type(name, value, cls_annotations[name])
+                except TypeError:
+                    raise AssertionError(
+                        f"Value {_display_value(value)} did not match type annotation for attribute "
+                        f"{name}: {_display_annotation(cls_annotations[name])}"
+                    ) from None
+            original_attr_value = getattr(klass, name)
+            super(klass, self).__setattr__(name, value)
+            frame_locals = inspect.currentframe().f_back.f_locals
+            if self is not frame_locals.get("self"):
+                # Only validating if the attribute is not being set in a instance/class method
+                if klass_mod is not None:
+                    try:
+                        _check_invariants(self, klass, klass_mod.__dict__)
+                    except PyTAContractError as e:
+                        super(klass, self).__setattr__(name, original_attr_value)
+                        raise AssertionError(str(e)) from None
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):

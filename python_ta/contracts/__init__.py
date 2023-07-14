@@ -187,7 +187,7 @@ def add_class_invariants(klass: type) -> None:
                         _check_invariants(self, klass, klass_mod.__dict__)
                     except PyTAContractError as e:
                         if original_attr_value is None:
-                            super(klass, self).__delattr__(name)
+                            delattr(klass, name)
                         else:
                             super(klass, self).__setattr__(name, original_attr_value)
                         raise AssertionError(str(e)) from None

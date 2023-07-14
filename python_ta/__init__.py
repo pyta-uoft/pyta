@@ -248,7 +248,8 @@ def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
     try:
         linter._parse_configuration_file(config_args)
     except _UnrecognizedOptionError as exc:
-        print(f"Unrecognized options: {', '.join(exc.options)}", file=sys.stderr)
+        unrecognized_options_message = ", ".join(exc.options)
+        linter.add_message("unrecognized-option", args=unrecognized_options_message, line=0)
 
     # Everything has been set up already so emit any stashed messages.
     linter._emit_stashed_messages()

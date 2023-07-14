@@ -177,7 +177,7 @@ def add_class_invariants(klass: type) -> None:
                         f"Value {_display_value(value)} did not match type annotation for attribute "
                         f"{name}: {_display_annotation(cls_annotations[name])}"
                     ) from None
-            original_attr_value = getattr(klass, name)
+            original_attr_value = getattr(klass, name, None)
             super(klass, self).__setattr__(name, value)
             frame_locals = inspect.currentframe().f_back.f_locals
             if self is not frame_locals.get("self"):

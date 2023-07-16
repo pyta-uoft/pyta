@@ -26,10 +26,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - When running `check_contracts` on a class with type aliases as type annotations for its attributes, the `NameError`
   that appears (which indicates that the type alias is undefined) is now resolved.
 - The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
-- For the contract checking `new_setattr` function, the check for `ENABLE_CONTRACT_CHECKING` is now at the top of the
-  function body, any variables that depend only on `klass` are now defined in the outer function, the use of
-  `inspect.getouterframes` is now changed to improve efficiency, and the attribute value is now
-  restored to the original value if the `_check_invariants` call raises an error.
+- For the contract checking `new_setattr` function, any variables that depend only on `klass` are now defined in the
+  outer function, efficiency of code was improved, and the attribute value is now restored to the original value if the
+  `_check_invariants` call raises an error.
 
 ### Bug Fixes
 

@@ -14,6 +14,13 @@ TEST_CONFIG = {
     "max-line-length": 120,
 }
 
+# Non-fatal config errors. Fatal errors will be checked individually.
+CONFIG_ERRORS_TO_CHECK = {
+    "W0012",
+    "R0022",
+    "E0015",
+}
+
 
 @pytest.fixture
 def configure_linter_load_default():
@@ -124,34 +131,36 @@ def test_default_pylint_checks_in_no_default(configure_linter_no_default) -> Non
     )
 
 
-def test_unknown_option_value() -> None:
-    """Test that the configuration options gets overridden without error when there is an unknown
-    option value."""
+def test_config_parsing_errors() -> None:
+    """Test that the configuration options gets overridden without error when there are errors
+    parsing the config files.
+
+    This checks the non-fatal errors from parsing the config file."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
     reporter = python_ta.reset_linter(config=config).reporter
 
-    # Check if there are any messages with the msg_id `W0012` (the code corresponding to the error
-    # `unknown-option-value`.
+    # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
     message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
 
-    assert "W0012" in message_ids
+    assert all(error in message_ids for error in CONFIG_ERRORS_TO_CHECK)
 
 
-def test_unknown_option_value_no_default() -> None:
-    """Test that the configuration options gets loaded without error when there is an unknown option
-    value.
+def test_config_parsing_errors_no_default() -> None:
+    """Test that the configuration options gets loaded without error when there are errors
+    parsing the config files.
+
+    This checks the non-fatal errors from parsing the config file.
 
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
     reporter = python_ta.reset_linter(config=config, load_default_config=False).reporter
 
-    # Check if there are any messages with the msg_id `W0012` (the code corresponding to the error
-    # `unknown-option-value`.
+    # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
     message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
 
-    assert "W0012" in message_ids
+    assert all(error in message_ids for error in CONFIG_ERRORS_TO_CHECK)
 
 
 def test_json_config_parsing_error(capsys) -> None:
@@ -178,3 +187,42 @@ def test_print_messages_config_parsing_error(capsys) -> None:
     out = capsys.readouterr().out
 
     assert "W0012" in out
+
+
+def test_no_snippet_for_config_parsing_errors() -> None:
+    """Test that there is no snippet being built for errors that come from parsing the config file."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+
+    # Gather all the built code snippets for the `msg_id`s specified in CONFIG_ERRORS_TO_CHECK.
+    snippets = [
+        msg.snippet
+        for message_lis in reporter.messages.values()
+        for msg in message_lis
+        if msg.msg_id in CONFIG_ERRORS_TO_CHECK
+    ]
+
+    assert all(snippet == "" for snippet in snippets)
+
+
+def test_config_parse_error(capsys) -> None:
+    """Test that F0011 (config-parse-error) correctly gets reported."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")
+    reporter = python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+
+    msg_id = reporter.messages[config][0].msg_id
+
+    assert msg_id == "F0011"
+
+
+def test_config_parse_error_has_no_snippet() -> None:
+    """Test that F0011 (config-parse-error) correctly gets reported with no code snippet."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")
+    reporter = python_ta.check_all(module_name="examples/nodes/name.py", config=config)
+
+    snippet = reporter.messages[config][0].snippet
+
+    assert snippet == ""

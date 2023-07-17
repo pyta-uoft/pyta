@@ -137,27 +137,7 @@ def add_class_invariants(klass: type) -> None:
         # This means the class has already been decorated
         return
 
-    # Update representation invariants from this class' docstring and those of its superclasses.
-    rep_invariants: List[Tuple[str, CodeType]] = []
-
-    # Iterate over all inherited classes except builtins
-    for cls in reversed(klass.__mro__):
-        if "__representation_invariants__" in cls.__dict__:
-            rep_invariants.extend(cls.__representation_invariants__)
-        elif cls.__module__ != "builtins":
-            assertions = parse_assertions(cls, parse_token="Representation Invariant")
-            # Try compiling assertions
-            for assertion in assertions:
-                try:
-                    compiled = compile(assertion, "<string>", "eval")
-                except:
-                    _debug(
-                        f"Warning: representation invariant {assertion} could not be parsed as a valid Python expression"
-                    )
-                    continue
-                rep_invariants.append((assertion, compiled))
-
-    setattr(klass, "__representation_invariants__", rep_invariants)
+    _set_invariants(klass)
 
     def new_setattr(self: klass, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
@@ -600,19 +580,18 @@ def _debug(msg: str) -> None:
     print("[PyTA]", msg, file=sys.stderr)
 
 
-def check_invariants(obj: object) -> None:
-    """Check that the representation invariants of obj are satisfied."""
-    klass = obj.__class__
-    klass_mod = _get_module(klass)
-
-    # Retrieve the representation invariants of the object
+def _set_invariants(klass: type) -> None:
+    """Retrieve and set the representation invariants of this class"""
+    # Update representation invariants from this class' docstring and those of its superclasses.
     rep_invariants: List[Tuple[str, CodeType]] = []
 
+    # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
         if "__representation_invariants__" in cls.__dict__:
             rep_invariants.extend(cls.__representation_invariants__)
         elif cls.__module__ != "builtins":
             assertions = parse_assertions(cls, parse_token="Representation Invariant")
+            # Try compiling assertions
             for assertion in assertions:
                 try:
                     compiled = compile(assertion, "<string>", "eval")
@@ -625,5 +604,11 @@ def check_invariants(obj: object) -> None:
 
     setattr(klass, "__representation_invariants__", rep_invariants)
 
-    # Check invariants
+
+def check_invariants(obj: object) -> None:
+    """Check that the representation invariants of obj are satisfied."""
+    klass = obj.__class__
+    klass_mod = _get_module(klass)
+
+    _set_invariants(klass)
     _check_invariants(obj, klass, klass_mod.__dict__)

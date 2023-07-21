@@ -45,6 +45,9 @@ NO_SNIPPET = {
     "invalid-name",
     "unknown-option-value",
     "pep8-name-violation",
+    "config-parse-error",
+    "useless-option-value",
+    "unrecognized-option",
 }
 
 

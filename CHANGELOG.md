@@ -26,6 +26,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - When running `check_contracts` on a class with type aliases as type annotations for its attributes, the `NameError`
   that appears (which indicates that the type alias is undefined) is now resolved.
 - The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
+- For the contract checking `new_setattr` function, any variables that depend only on `klass` are now defined in the
+  outer function, efficiency of code was improved, and the attribute value is now restored to the original value if the
+  `_check_invariants` call raises an error.
 
 ### Bug Fixes
 
@@ -33,6 +36,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed bug in how PythonTA reports error messages that occur when parsing configuration files.
 - Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
 - Fixed bug where the JSON reporter was not limiting the number of error occurrences displayed with respect to `pyta-number-of-messages`.
+- Ensured some config file parsing errors no longer display incorrect lines of code as the source of the error.
 
 ### New checkers
 

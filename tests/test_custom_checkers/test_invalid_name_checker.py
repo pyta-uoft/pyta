@@ -1,4 +1,6 @@
 """Test suite for testing the InvalidNameChecker."""
+import sys
+import unittest
 
 import astroid
 import pylint.testutils
@@ -325,6 +327,7 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assignname(assignname_node)
 
+    @unittest.skipIf(sys.version_info < (3, 10, 0), "TypeAlias was new in version 3.10.")
     def test_typealias_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid typealias name."""
         src = """

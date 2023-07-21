@@ -1,7 +1,7 @@
 """A checker used for identifying names that don't conform to Python naming conventions."""
 
 import re
-from typing import List
+from typing import List, Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
@@ -480,7 +480,7 @@ class InvalidNameChecker(BaseChecker):
             args = (node_type, name, msg)
             self.add_message("pep8-name-violation", node=node, args=args)
 
-    def _recursive_check_names(self, args: list[nodes.AssignName]) -> None:
+    def _recursive_check_names(self, args: List[nodes.AssignName]) -> None:
         """Check names in a possibly recursive list <arg>.
 
         Taken from pylint.checkers.base.name_checker.checker.
@@ -492,7 +492,7 @@ class InvalidNameChecker(BaseChecker):
             self._check_name("argument", arg.name, arg)
 
     @staticmethod
-    def _assigns_typevar(node: nodes.NodeNG | None) -> bool:
+    def _assigns_typevar(node: Optional[nodes.NodeNG]) -> bool:
         """Check if a node is assigning a TypeVar.
 
         Taken from pylint.checkers.base.name_checker.checker."""
@@ -503,7 +503,7 @@ class InvalidNameChecker(BaseChecker):
         return False
 
     @staticmethod
-    def _assigns_typealias(node: nodes.NodeNG | None) -> bool:
+    def _assigns_typealias(node: Optional[nodes.NodeNG]) -> bool:
         """Check if a node is assigning a TypeAlias.
 
         Taken from pylint.checkers.base.name_checker.checker."""

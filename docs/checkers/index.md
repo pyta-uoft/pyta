@@ -1118,6 +1118,29 @@ str                 sum                 super               tuple               
 vars                zip
 ```
 
+(C9103)=
+
+### PEP8 name violation (C9103)
+
+This error is an extension of C0103 (invalid-name) which aims to provide a more detailed and beginner-friendly error message about how a variable name violated the PEP8 naming conventions.
+
+Again, refer to the [Python Naming Conventions][pep8: naming conventions] for further details but as a quick reminder:
+
+- Names of variables, attributes, methods, and arguments should be in **`snake_case`**.
+- Names of constants should be in **`UPPER_CASE_WITH_UNDERSCORES`**.
+- Names of classes should be in **`PascalCase`**.
+- Numbers are allowed in names but names cannot start with a number.
+
+And a quick reminder on the previously mentioned types of naming conventions:
+
+- **`snake_case`**: only lowercase words with each word separated by an underscore "`_`".
+- **`UPPER_CASE_WITH_UNDERSCORES`** only uppercase words with each word separated by an underscore "`_`".
+- **`PascalCase`**: capitalize the first letter of each word with no separation between each word.
+
+```{literalinclude} /../examples/custom_checkers/c9103_invalid_name_checker.py
+
+```
+
 ## Imports
 
 There are standards governing how we should organize our imports, or even possibly which modules we

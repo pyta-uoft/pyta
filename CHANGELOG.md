@@ -36,6 +36,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### New checkers
 
+Custom checkers:
+
+- `invalid-name-checker`: Provide beginner-friendly error messages when reporting variable names that violate PEP8 naming conventions.
+
 Pylint checkers v2.16:
 
 - `pointless-exception-statement`

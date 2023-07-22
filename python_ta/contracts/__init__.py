@@ -167,7 +167,10 @@ def add_class_invariants(klass: type) -> None:
 
         Check representation invariants for this class when not within an instance method of the class.
         """
-        if ENABLE_CONTRACT_CHECKING:
+        if not ENABLE_CONTRACT_CHECKING:
+            super(klass, self).__setattr__(name, value)
+            return
+        else:
             if name in cls_annotations:
                 try:
                     _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")

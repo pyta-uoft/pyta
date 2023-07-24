@@ -29,7 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - For the contract checking `new_setattr` function, any variables that depend only on `klass` are now defined in the
   outer function, efficiency of code was improved, and the attribute value is now restored to the original value if the
   `_check_invariants` call raises an error.
-- Can now check explicitly for whether the representation invariants of an object are satisfied.
+- Added new function `check_invariants` which takes in an object and checks that the representation invariants of the object are satisfied.
 
 ### Bug Fixes
 

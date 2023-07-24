@@ -615,5 +615,7 @@ def check_invariants(obj: object) -> None:
     klass = obj.__class__
     klass_mod = _get_module(klass)
 
-    _set_invariants(klass)
-    _check_invariants(obj, klass, klass_mod.__dict__)
+    try:
+        _check_invariants(obj, klass, klass_mod.__dict__)
+    except PyTAContractError as e:
+        raise AssertionError(str(e)) from None

@@ -1,4 +1,5 @@
 """Test suite for testing the InvalidNameChecker."""
+import os
 import sys
 import unittest
 
@@ -6,15 +7,12 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
+import python_ta
 from python_ta.checkers.invalid_name_checker import InvalidNameChecker
 
 
 class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InvalidNameChecker
-    CONFIG = {
-        # To prevent a Namespace error.
-        "property_classes": "",
-    }
 
     def set_up(self) -> None:
         """Perform the set up before each test case executes."""
@@ -28,16 +26,15 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         module_node, *_ = mod.nodes_of_class(nodes.Module)
         module_node.name = "l"
-        print(module_node.name)
-        args = (
-            "module",
-            module_node.name,
-            f'"{module_node.name}" is a single character name that should be avoided. In some '
-            f"fonts, these characters are indistinguishable from the numbers 1 and 0.",
+        msg = (
+            f'"{module_node.name}" is a name that should be avoided. Change to something less '
+            f"ambiguous and/or more descriptive."
         )
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-name-violation", node=module_node, args=args),
+            pylint.testutils.MessageTest(
+                msg_id="module-name-violation", node=module_node, args=msg, line=1
+            ),
             ignore_position=True,
         ):
             self.checker.visit_module(module_node)
@@ -50,17 +47,15 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
-        args = (
-            "const",
-            name,
-            f'Const name "{name}" is not in UPPER_CASE_WITH_UNDERSCORES. Constants should be '
-            f"all-uppercase words with each word separated by an underscore. A single leading "
-            f"underscore can be used to denote a private constant.",
+        msg = (
+            f'Constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. Constants '
+            f"should be all-uppercase words with each word separated by an underscore. A "
+            f"single leading underscore can be used to denote a private constant."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -75,18 +70,15 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         classdef_node, *_ = mod.nodes_of_class(nodes.ClassDef)
         name = classdef_node.name
-        args = (
-            "class",
-            name,
-            f'Class name "{name}" is not in PascalCase. Class names should have the '
-            f"first letter of each word capitalized with no separation between each "
-            f"word. A single leading underscore can be used to denote a private "
-            f"class.",
+        msg = (
+            f'Class name "{name}" should be in PascalCase format. Class names should have the '
+            f"first letter of each word capitalized with no separation between each word. A "
+            f"single leading underscore can be used to denote a private class."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=classdef_node, args=args
+                msg_id="naming-convention-violation", node=classdef_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -101,17 +93,15 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         name = functiondef_node.name
-        args = (
-            "function",
-            name,
-            f'Function name "{name}" is not in snake_case. Function names should be lowercase, '
-            f"with words separated by underscores. A single leading underscore can be used to "
-            f"denote a private function.",
+        msg = (
+            f'Function name "{name}" should be in snake_case format. Function names should be '
+            f"lowercase, with words separated by underscores. A single leading underscore can "
+            f"be used to denote a private function."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=functiondef_node, args=args
+                msg_id="naming-convention-violation", node=functiondef_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -127,18 +117,16 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         name = functiondef_node.name
-        args = (
-            "method",
-            name,
-            f'Method name "{name}" is not in snake_case. Method names should be lowercase, with '
-            f"words separated by underscores. A single leading underscore can be used to denote a "
-            f"private method while a double leading underscore invokes Python's name-mangling "
-            f"rules.",
+        msg = (
+            f'Method name "{name}" should be in snake_case format. Method names should be '
+            f"lowercase, with words separated by underscores. A single leading underscore can "
+            f"be used to denote a private method while a double leading underscore invokes "
+            f"Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=functiondef_node, args=args
+                msg_id="naming-convention-violation", node=functiondef_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -148,28 +136,25 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         """Test that the checker correctly reports an invalid attr name."""
         src = """
         class BadClass:
-            def __init__(self):
-                self.AlsoNotSnakeCase = "no"
+            AlsoNotSnakeCase: str
         """
         mod = astroid.parse(src)
-        classdef_node, *_ = mod.nodes_of_class(nodes.ClassDef)
-        assignattr_node, *_ = mod.nodes_of_class(nodes.AssignAttr)
-        args = (
-            "attr",
-            "AlsoNotSnakeCase",
-            f'Attr name "AlsoNotSnakeCase" is not in snake_case. Attr names should be lowercase, '
-            f"with words separated by underscores. A single leading underscore can be used to "
-            f"denote a private attr while a double leading underscore invokes Python's "
-            f"name-mangling rules.",
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+        name = assignname_node.name
+        msg = (
+            f'Attribute name "{name}" should be in snake_case format. Attribute names should be '
+            f"lowercase, with words separated by underscores. A single leading underscore can "
+            f"be used to denote a private attribute while a double leading underscore invokes "
+            f"Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignattr_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
-            self.checker.visit_classdef(classdef_node)
+            self.checker.visit_assignname(assignname_node)
 
     def test_argument_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid argument name."""
@@ -178,23 +163,20 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             pass
         """
         mod = astroid.parse(src)
-        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
-        argument_node = functiondef_node.args.args[0]
+        argument_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = argument_node.name
-        args = (
-            "argument",
-            name,
-            f'"{name}" is a single character name that should be avoided. In some fonts, these '
-            f"characters are indistinguishable from the numbers 1 and 0.",
+        msg = (
+            f'"{name}" is a name that should be avoided. Change to something less ambiguous '
+            f"and/or more descriptive."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=argument_node, args=args
+                msg_id="naming-convention-violation", node=argument_node, args=msg
             ),
             ignore_position=True,
         ):
-            self.checker.visit_functiondef(functiondef_node)
+            self.checker.visit_assignname(argument_node)
 
     def test_variable_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid variable name."""
@@ -205,17 +187,15 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
-        args = (
-            "variable",
-            name,
-            f'Variable name "{name}" is not in snake_case. Variable names should be lowercase, '
-            f"with words separated by underscores. A single leading underscore can be used to "
-            f"denote a private variable.",
+        msg = (
+            f'Variable name "{name}" should be in snake_case format. Variable names should be '
+            f"lowercase, with words separated by underscores. A single leading underscore can "
+            f"be used to denote a private variable."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -232,25 +212,23 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
-        args = (
-            "class attribute",
-            name,
-            f'Class attribute name "{name}" is not in snake_case. Class attribute names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can be "
-            f"used to denote a private class attribute while a double leading underscore invokes "
-            f"Python's name-mangling rules.",
+        msg = (
+            f'Class attribute name "{name}" should be in snake_case format. Class attribute names '
+            f"should be lowercase, with words separated by underscores. A single leading "
+            f"underscore can be used to denote a private class attribute while a double "
+            f"leading underscore invokes Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
             self.checker.visit_assignname(assignname_node)
 
     def test_class_const_name_violation(self) -> None:
-        """Test that the checker correctly reports an invalid class const name."""
+        """Test that the checker correctly reports an invalid class constant name."""
         src = """
         from typing import Final
 
@@ -260,41 +238,16 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
-        args = (
-            "class const",
-            name,
-            f'Class const name "{name}" is not in UPPER_CASE_WITH_UNDERSCORES. Constants should be '
-            f"all-uppercase words with each word separated by an underscore. A single leading "
-            f"underscore can be used to denote a private constant.",
+        msg = (
+            f'Class constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. '
+            f"Constants should be all-uppercase words with each word separated by an "
+            f"underscore. A single leading underscore can be used to denote a private "
+            f"constant. A double leading underscore invokes Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_assignname(assignname_node)
-
-    def test_inlinevar_name_violation(self) -> None:
-        """Test that the checker correctly reports an invalid inlinevar name."""
-        src = """
-        [NO_SNAKE for NO_SNAKE in range(1, 3)]
-        """
-        mod = astroid.parse(src)
-        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
-        name = assignname_node.name
-        args = (
-            "inlinevar",
-            name,
-            f'Inline variable name "{name}" is not in snake_case. Inline variable names should be '
-            f"lowercase, with words separated by underscores. A single underscore can be used to "
-            f'denote a "throwaway"/unused variable.',
-        )
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -310,18 +263,15 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
-        args = (
-            "typevar",
-            name,
-            f'Typevar name "{name}" does not abide by the naming convention. Typevar names may '
-            f"start with 0-2 underscores, does not start with a capital T, and is either in all "
-            f"capital letters and no underscores, or in PascalCase, optionally ending in T and not "
-            f'ending with "Type", an optional "_co" or "_contra" ending.',
+        msg = (
+            f'Type variable name "{name}" should be in PascalCase format. Type variable names '
+            f"should have the first letter of each word capitalized with no separation between "
+            f"each word."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
@@ -338,17 +288,27 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
-        args = (
-            "typealias",
-            name,
-            f'Typealias name "{name}" is not in PascalCase. Typealias names should have the first '
-            f"letter of each word capitalized with no separation between each word.",
+        msg = (
+            f'Type alias name "{name}" should be in PascalCase format. Type alias names should '
+            f"have the first letter of each word capitalized with no separation between each "
+            f"word."
         )
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="pep8-name-violation", node=assignname_node, args=args
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
             ),
             ignore_position=True,
         ):
             self.checker.visit_assignname(assignname_node)
+
+
+def test_module_name_no_snippet() -> None:
+    """Test that PythonTA does not build a snippet for the message added by this checker."""
+    curr_dir = os.path.dirname(__file__)
+    file_fixture = os.path.join(curr_dir, "file_fixtures", "badModuleName.py")
+    reporter = python_ta.check_all(module_name=file_fixture)
+
+    snippet = reporter.messages[file_fixture][0].snippet
+
+    assert snippet == ""

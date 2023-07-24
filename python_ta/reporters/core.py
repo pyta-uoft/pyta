@@ -44,7 +44,7 @@ class NewMessage:
 NO_SNIPPET = {
     "invalid-name",
     "unknown-option-value",
-    "pep8-name-violation",
+    "module-name-violation",
     "config-parse-error",
     "useless-option-value",
     "unrecognized-option",

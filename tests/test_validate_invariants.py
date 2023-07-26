@@ -1,5 +1,5 @@
 """
-Test suite for checking the functionality of check_invariants.
+Test suite for checking the functionality of validate_invariants.
 """
 
 from typing import List
@@ -30,17 +30,17 @@ class Person:
 
 
 def test_no_errors() -> None:
-    """Checks that check_invariants does not raise an error when representation invariants are satisfied."""
+    """Checks that validate_invariants does not raise an error when representation invariants are satisfied."""
     person = Person("Jim", 50, ["Pam", "Dwight"])
 
     try:
         validate_invariants(person)
     except AssertionError:
-        pytest.fail("check_invariants has incorrectly raised an AssertionError")
+        pytest.fail("validate_invariants has incorrectly raised an AssertionError")
 
 
 def test_raise_error() -> None:
-    """Checks that check_invariants raises an error when representation invariants are violated."""
+    """Checks that validate_invariants raises an error when representation invariants are violated."""
     person = Person("Jim", 50, ["Pam", "Dwight"])
     person.friends.pop()
 

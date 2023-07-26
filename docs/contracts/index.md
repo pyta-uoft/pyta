@@ -63,7 +63,7 @@ The second, `check_contracts`, is a decorator allowing more fine-grained control
 You can pass an object into the function `validate_invariants` to manually check the representation invariants of the object.
 
 ```{eval-rst}
-.. autofunction:: python_ta.contracts.check_invariants(object)
+.. autofunction:: python_ta.contracts.validate_invariants(object)
 ```
 
 You can set the `ENABLE_CONTRACT_CHECKING` constant to `True` to enable all contract checking.

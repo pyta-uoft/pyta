@@ -48,11 +48,9 @@ AssertionError: divide argument '2' did not match type annotation for parameter 
 
 ## API
 
-The `python_ta.contracts` module offers three functions for enabling contract checking.
+The `python_ta.contracts` module offers two functions for enabling contract checking.
 The first, `check_all_contracts`, enables contract checking for all functions and classes defined within a module or set of modules.
-The second, `check_contracts`, is a decorator allowing more fine-grained control over which
-functions/classes have contract checking enabled. The third, `check_invariants`, takes in an object and checks
-that the representation invariants of the object are satisfied.
+The second, `check_contracts`, is a decorator allowing more fine-grained control over which functions/classes have contract checking enabled.
 
 ```{eval-rst}
 .. autofunction:: python_ta.contracts.check_all_contracts
@@ -61,6 +59,8 @@ that the representation invariants of the object are satisfied.
 ```{eval-rst}
 .. autofunction:: python_ta.contracts.check_contracts(func_or_class)
 ```
+
+You can pass an object into the function `validate_invariants` to manually check the representation invariants of the object.
 
 ```{eval-rst}
 .. autofunction:: python_ta.contracts.check_invariants(object)

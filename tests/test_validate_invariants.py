@@ -6,7 +6,7 @@ from typing import List
 
 import pytest
 
-from python_ta.contracts import check_contracts, check_invariants
+from python_ta.contracts import check_contracts, validate_invariants
 
 
 @check_contracts
@@ -34,9 +34,9 @@ def test_no_errors() -> None:
     person = Person("Jim", 50, ["Pam", "Dwight"])
 
     try:
-        check_invariants(person)
-    except Exception:
-        pytest.fail("check_invariants has incorrectly raised an error")
+        validate_invariants(person)
+    except AssertionError:
+        pytest.fail("check_invariants has incorrectly raised an AssertionError")
 
 
 def test_raise_error() -> None:
@@ -45,4 +45,4 @@ def test_raise_error() -> None:
     person.friends.pop()
 
     with pytest.raises(AssertionError):
-        check_invariants(person)
+        validate_invariants(person)

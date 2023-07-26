@@ -610,7 +610,7 @@ def _set_invariants(klass: type) -> None:
     setattr(klass, "__representation_invariants__", rep_invariants)
 
 
-def check_invariants(obj: object) -> None:
+def validate_invariants(obj: object) -> None:
     """Check that the representation invariants of obj are satisfied."""
     klass = obj.__class__
     klass_mod = _get_module(klass)

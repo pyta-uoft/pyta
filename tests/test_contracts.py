@@ -123,7 +123,7 @@ def test_nullary_return_bool_int_error() -> None:
         nullary()
 
 
-def test_nullary_int_bool_disable_contract_checking() -> None:
+def test_nullary_int_bool_disable_contract_checking(disable_contract_checking) -> None:
     """Calling a nullary function with incorrect return type and with ENABLE_CONTRACT_CHECKING disabled so no error
     is raised."""
 
@@ -131,9 +131,7 @@ def test_nullary_int_bool_disable_contract_checking() -> None:
     def nullary() -> int:
         return True
 
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
     nullary()
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 def test_nullary_no_return_type() -> None:
@@ -233,14 +231,12 @@ def test_parameter_bool_int_error() -> None:
         parameter_bool(1)
 
 
-def test_parameter_int_bool_disable_contract_checking() -> None:
+def test_parameter_int_bool_disable_contract_checking(disable_contract_checking) -> None:
     @check_contracts
     def parameter_int(num: int) -> None:
         return None
 
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
     parameter_int(True)
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 @check_contracts
@@ -274,12 +270,10 @@ def test_my_sum_one_pre_violation() -> None:
     assert "len(numbers) > 2" in msg
 
 
-def test_my_sum_one_disable_contract_checking() -> None:
+def test_my_sum_one_disable_contract_checking(disable_contract_checking) -> None:
     """Calling _my_sum_one_precondition with a value that violates the precondition but with ENABLE_CONTRACT_CHECKING
     = False so no error is raised"""
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
     _my_sum_one_precondition([1])
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 # Checking to see if functions we defined are in-scope for preconditions
@@ -449,13 +443,11 @@ def test_get_double_invalid() -> None:
     assert "$return_value == num * 2" in msg
 
 
-def test_get_double_disabled_contract_checking() -> None:
+def test_get_double_disabled_contract_checking(disable_contract_checking) -> None:
     """Test that calling the invalid implementation of _get_double does NOT raise an AssertionError when
     ENABLE_CONTRACT_CHECKING is False.
     """
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
     assert _get_double_invalid(5) == 11
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 # Test that postcondition checks involving function parameters pass and fail as expected
@@ -686,16 +678,6 @@ def test_check_all_contracts_module_names_argument() -> None:
         run()
 
 
-@pytest.fixture()
-def disable_contract_checking():
-    """Fixture for setting python_ta.contracts.ENABLE_CONTRACT_CHECKING = False."""
-    import python_ta.contracts
-
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
-    yield
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True
-
-
 def test_enable_contract_checking_false(disable_contract_checking) -> None:
     """Test that check_contracts does nothing when ENABLE_CONTRACT_CHECKING is False."""
 
@@ -705,3 +687,18 @@ def test_enable_contract_checking_false(disable_contract_checking) -> None:
 
     # No error should be raised even though the argument is the wrong type
     assert unary2("wrong type!") == "wrong type!"
+
+
+def test_invalid_attr_type_disable_contract_checking(disable_contract_checking) -> None:
+    """
+    Test that a Person object is created with an attribute value that doesn't match the specified type annotation but
+    with ENABLE_CONTRACT_CHECKING = False so no error is raised.
+    """
+
+    @check_contracts
+    class Person:
+        age: int
+
+    my_person = Person()
+    my_person.age = "John"
+    assert my_person.age == "John"

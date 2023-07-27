@@ -240,21 +240,11 @@ def test_pizza_invalid() -> None:
     )
 
 
-@pytest.fixture
-def reset_constant(request):
-    original_constant_value = python_ta.contracts.ENABLE_CONTRACT_CHECKING
-    constant_value_to_set = getattr(request, "param", original_constant_value)
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = constant_value_to_set
-    yield
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = original_constant_value
-
-
-def test_pizza_invalid_disable_contract_checking(reset_constant) -> None:
+def test_pizza_invalid_disable_contract_checking(disable_contract_checking) -> None:
     """
     Test the Pizza representation invariant on an invalid instance but with ENABLE_CONTRACT_CHECKING = False so
     no error is raised.
     """
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
     pizza = Pizza(radius=10, ingredients=[])
     assert pizza.radius == 10 and pizza.ingredients == []
 

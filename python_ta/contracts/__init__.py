@@ -150,34 +150,33 @@ def add_class_invariants(klass: type) -> None:
         if not ENABLE_CONTRACT_CHECKING:
             super(klass, self).__setattr__(name, value)
             return
-        else:
-            if name in cls_annotations:
+        if name in cls_annotations:
+            try:
+                _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
+                check_type(name, value, cls_annotations[name])
+            except TypeError:
+                raise AssertionError(
+                    f"Value {_display_value(value)} did not match type annotation for attribute "
+                    f"{name}: {_display_annotation(cls_annotations[name])}"
+                ) from None
+        original_attr_value_exists = False
+        original_attr_value = None
+        if hasattr(super(klass, self), name):
+            original_attr_value_exists = True
+            original_attr_value = super(klass, self).__getattribute__(name)
+        super(klass, self).__setattr__(name, value)
+        frame_locals = inspect.currentframe().f_back.f_locals
+        if self is not frame_locals.get("self"):
+            # Only validating if the attribute is not being set in a instance/class method
+            if klass_mod is not None:
                 try:
-                    _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
-                    check_type(name, value, cls_annotations[name])
-                except TypeError:
-                    raise AssertionError(
-                        f"Value {_display_value(value)} did not match type annotation for attribute "
-                        f"{name}: {_display_annotation(cls_annotations[name])}"
-                    ) from None
-            original_attr_value_exists = False
-            original_attr_value = None
-            if hasattr(super(klass, self), name):
-                original_attr_value_exists = True
-                original_attr_value = super(klass, self).__getattribute__(name)
-            super(klass, self).__setattr__(name, value)
-            frame_locals = inspect.currentframe().f_back.f_locals
-            if self is not frame_locals.get("self"):
-                # Only validating if the attribute is not being set in a instance/class method
-                if klass_mod is not None:
-                    try:
-                        _check_invariants(self, klass, klass_mod.__dict__)
-                    except PyTAContractError as e:
-                        if original_attr_value_exists:
-                            super(klass, self).__setattr__(name, original_attr_value)
-                        else:
-                            super(klass, self).__delattr__(name)
-                        raise AssertionError(str(e)) from None
+                    _check_invariants(self, klass, klass_mod.__dict__)
+                except PyTAContractError as e:
+                    if original_attr_value_exists:
+                        super(klass, self).__setattr__(name, original_attr_value)
+                    else:
+                        super(klass, self).__delattr__(name)
+                    raise AssertionError(str(e)) from None
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):

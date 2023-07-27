@@ -147,6 +147,9 @@ def add_class_invariants(klass: type) -> None:
 
         Check representation invariants for this class when not within an instance method of the class.
         """
+        if not ENABLE_CONTRACT_CHECKING:
+            super(klass, self).__setattr__(name, value)
+            return
         if name in cls_annotations:
             try:
                 _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
@@ -165,7 +168,7 @@ def add_class_invariants(klass: type) -> None:
         frame_locals = inspect.currentframe().f_back.f_locals
         if self is not frame_locals.get("self"):
             # Only validating if the attribute is not being set in a instance/class method
-            if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
+            if klass_mod is not None:
                 try:
                     _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:

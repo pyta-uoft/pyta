@@ -1118,6 +1118,39 @@ str                 sum                 super               tuple               
 vars                zip
 ```
 
+(C9103)=
+
+### Naming convention violation (C9103)
+
+This error aims to provide a more detailed and beginner-friendly error message about how a variable name violated Python naming conventions.
+
+Again, refer to the [Python Naming Conventions][pep8: naming conventions] for further details but as a quick reminder:
+
+- Avoid using the single character variable names `l`, `O`, or `I` as they are indistinguishable from the numbers zero and one.
+- Names of variables, attributes, methods, and arguments should be in **`snake_case`**.
+- Names of constants should be in **`UPPER_CASE_WITH_UNDERSCORES`**.
+- Names of classes, exceptions, type variables and type aliases should be in **`PascalCase`**.
+- Numbers are allowed in names but names cannot start with a number.
+- Names should not exceed 30 characters, with the exception of type variables and type aliases which have a limit of 20.
+
+And a quick reminder on the previously mentioned types of naming conventions:
+
+- **`snake_case`**: only lowercase words with each word separated by an underscore "`_`".
+- **`UPPER_CASE_WITH_UNDERSCORES`** only uppercase words with each word separated by an underscore "`_`".
+- **`PascalCase`**: capitalize the first letter of each word with no separation between each word.
+
+```{literalinclude} /../examples/custom_checkers/c9103_naming_convention_violation.py
+
+```
+
+**Note:** this checker is intended to replace C0103 (invalid-name).
+
+(C9104)=
+
+### Module name violation (C9104)
+
+This error occurs when the name of a module violates Python naming conventions. The names of modules should be in **`snake_case`** and should not exceed 30 characters.
+
 ## Imports
 
 There are standards governing how we should organize our imports, or even possibly which modules we

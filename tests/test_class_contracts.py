@@ -240,15 +240,13 @@ def test_pizza_invalid() -> None:
     )
 
 
-def test_pizza_invalid_disable_contract_checking() -> None:
+def test_pizza_invalid_disable_contract_checking(disable_contract_checking) -> None:
     """
     Test the Pizza representation invariant on an invalid instance but with ENABLE_CONTRACT_CHECKING = False so
     no error is raised.
     """
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = False
     pizza = Pizza(radius=10, ingredients=[])
     assert pizza.radius == 10 and pizza.ingredients == []
-    python_ta.contracts.ENABLE_CONTRACT_CHECKING = True  # Reset default value to True
 
 
 def test_set_wrapper_valid() -> None:

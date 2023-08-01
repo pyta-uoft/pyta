@@ -32,6 +32,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new function `validate_invariants` which takes in an object and checks that the representation invariants of the object are satisfied.
 - The check for `ENABLE_CONTRACT_CHECKING` is now moved to the top of the body of the `new_setattr` function.
 - Added the file `conftest.py` to store `pytest` fixtures.
+- Updated to [pycodestyle v2.11](https://github.com/PyCQA/pycodestyle/blob/main/CHANGES.txt).
 
 ### Bug Fixes
 

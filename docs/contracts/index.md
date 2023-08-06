@@ -114,6 +114,8 @@ def f(x0: type0, x1: type1 ...) -> return_type:
 Whenever the function is called, parameter types are checked before executing the function body, and the return type is checked immediately before the function returns.
 PythonTA uses the [typeguard] library to check types.
 
+(functions-custom-preconditions)=
+
 ### Functions: custom preconditions
 
 You can write arbitrary preconditions as Python expressions in the function docstring, using the following syntax:

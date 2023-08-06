@@ -41,6 +41,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
 - Fixed bug where the JSON reporter was not limiting the number of error occurrences displayed with respect to `pyta-number-of-messages`.
 - Ensured some config file parsing errors no longer display incorrect lines of code as the source of the error.
+- Remove line double-spacing in PlainReporter and ColorReporter output code snippets.
 
 ### New checkers
 

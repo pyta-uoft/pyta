@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "PythonTA"
-copyright = "2021, David Liu"
+copyright = "2023, David Liu"
 author = "David Liu"
 
 

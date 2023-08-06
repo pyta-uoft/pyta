@@ -7,45 +7,50 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.6.0] - 2023-08-06
+
 ### Enhancements
 
-- Can now create control flow graphs to visualize the execution of your program.
-- Added support to allow the user to configure how control flow graphs are generated.
-- The `TopLevelCodeChecker` now allows type alias assignment statements at the top level, i.e., doesn't flag such lines
-  of code as an error.
-- The `GlobalVariablesChecker` now allows type alias assignment statements at the top level, i.e., doesn't flag such
-  lines of code as an error.
-- For the message display of C0303 `trailing-whitespace`, trailing whitespaces are now appearing in the reporters,
-  and only those spaces are highlighted rather than the entire line of code.
-- The `UnnecessaryIndexingChecker` now checks for a greater variety of loop/comprehension indexes.
-- Modified configuration behaviour so when providing a config file, it only needs to contain the configuration options you want overridden.
-- Added the option `load_default_config` to `check_errors` and `check_all` to specify whether to automatically load the PythonTA default config.
-- For the message display of E9989 `pep8-errors`, all "blank line" messages are now custom-rendered, i.e., blank lines
-  are now highlighted instead of function signatures and instruction strings are added for required blank lines that
-  are missing.
-- When running `check_contracts` on a class with type aliases as type annotations for its attributes, the `NameError`
-  that appears (which indicates that the type alias is undefined) is now resolved.
-- The default value of `pyta-number-of-messages` is now 0. This automatically displays all occurrences of the same error.
-- For the contract checking `new_setattr` function, any variables that depend only on `klass` are now defined in the
-  outer function, efficiency of code was improved, and the attribute value is now restored to the original value if the
-  `_check_invariants` call raises an error.
-- Added new function `validate_invariants` which takes in an object and checks that the representation invariants of the object are satisfied.
-- The check for `ENABLE_CONTRACT_CHECKING` is now moved to the top of the body of the `new_setattr` function.
-- Added the file `conftest.py` to store `pytest` fixtures.
+- Can now create control flow graphs using `python_ta.control_flow_graphs` to visualize the
+  execution paths of Python code.
+- `forbidden-top-level-code` and `forbidden-global-variables` now allow top-level type alias
+  assignment statements.
+- The `trailing-whitespace` error message now highlights the trailing whitespace.
+- The `unnecessary-indexing` error now checks for a greater variety of loop/comprehension indexes.
+- Provided configuration files are now merged with PythonTA defaults, so you now only
+  need to specify options that you want to be overridden. To ignore PythonTA defaults (the
+  old behaviour), pass `load_default_config=False` to `check_errors` and `check_all`.
+- Improved the code snippets for the `pep8-errors` "blank line" messages.
+  Extra blank lines are now highlighted, and suggestions are added when blank lines are missing.
+- The default value of the `pyta-number-of-messages` configuration option is now 0 (changed from 5)
+  This causes all error occurrences to be displayed.
+- Improved efficiency of the contract-checking custom `setattr` for classes.
+- Added new function `python_ta.contracts.validate_invariants` to manually check contracts
+  for an object.
+- Updated to [pycodestyle v2.11](https://github.com/PyCQA/pycodestyle/blob/main/CHANGES.txt).
 
 ### Bug Fixes
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
 - Fixed bug in how PythonTA reports error messages that occur when parsing configuration files.
-- Fixed bug where the HTML reporter would display all error occurrences of the same type despite stating that only a limited number was being shown.
-- Fixed bug where the JSON reporter was not limiting the number of error occurrences displayed with respect to `pyta-number-of-messages`.
-- Ensured some config file parsing errors no longer display incorrect lines of code as the source of the error.
+- Ensured some config file parsing errors no longer display incorrect lines in the error report.
+- Fixed bug where the `HTMLReporter` and `JSONReporter` would ignore the `pyta-number-of-messages`
+  option and always display all error occurrences.
+- Fixed bug in `check_contracts` where imported classes were not correctly resolved when checking
+  types.
+- Fixed bug for class contract-checking when assigning an instance attribute that violates a class
+  type constraint or representation invariant. Previously, the instance attribute changed to the
+  new value after the error was raised, but now is correctly restored to the original value.
+- Remove line double-spacing in PlainReporter and ColorReporter output code snippets.
 
 ### New checkers
 
 Custom checkers:
 
-- `invalid-name-checker`: Provide beginner-friendly error messages when reporting variable names that violate Python naming conventions.
+- `invalid-name-checker`: Provide beginner-friendly error messages when reporting variable names
+  that violate Python naming conventions. This replaces pylint's
+  [C0103](https://pylint.pycqa.org/en/latest/user_guide/messages/convention/invalid-name.html)
+  check.
 
 Pylint checkers v2.16:
 

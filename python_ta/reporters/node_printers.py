@@ -4,7 +4,7 @@ from enum import Enum
 from astroid import nodes
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
-NEW_INDENT_MESSAGE = "# INSERT NEW INDENT HERE"
+NEW_INDENT_MESSAGE = "# INSERT INDENT"
 
 
 def render_message(msg, node, source_lines):
@@ -133,8 +133,15 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
-    if "continuation line missing indentation or outdented" in msg.msg:
+    if "unexpected indentation (comment)" in msg.msg:
+        yield from render_pep8_errors_e116(msg, _node, source_lines)
+    elif "continuation line missing indentation or outdented" in msg.msg:
         yield from render_pep8_errors_e122(msg, _node, source_lines)
+    elif (
+        "continuation line with same indent as next logical line"
+        or "visually indented line with same indent as next logical line" in msg.msg
+    ):
+        yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
     elif "continuation line over-indented for visual indent" in msg.msg:
         yield from render_pep8_errors_e127(msg, _node, source_lines)
     elif "continuation line unaligned for hanging indent" in msg.msg:
@@ -160,6 +167,39 @@ def render_blank_line(line):
     yield (line + 1, slice(None, None), LineType.ERROR, " " * 28)
 
 
+def render_pep8_errors_e116(msg, _node, source_lines=None):
+    """Render a PEP8 unexpected indentation (comment) message"""
+    line = msg.line - 1
+    prev_line_start_index, msg_line_start_index, next_line_start_index, correct_indentation = (
+        0,
+        0,
+        0,
+        0,
+    )
+
+    while source_lines[line][msg_line_start_index] == " ":
+        msg_line_start_index += 1
+
+    if len(source_lines[line + 1]) != 0 or len(source_lines[line - 1]) != 0:
+        if len(source_lines[line - 1]) == 0:
+            while source_lines[line + 1][next_line_start_index] == " ":
+                next_line_start_index += 1
+            correct_indentation = next_line_start_index
+        else:
+            while source_lines[line - 1][prev_line_start_index] == " ":
+                prev_line_start_index += 1
+            correct_indentation = prev_line_start_index
+
+    yield from render_context(msg.line - 2, msg.line, source_lines)
+    yield (
+        msg.line,
+        slice(correct_indentation, msg_line_start_index),
+        LineType.ERROR,
+        source_lines[msg.line - 1],
+    )
+    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
+
+
 def render_pep8_errors_e122(msg, _node, source_lines=None):
     """Render a PEP8 continuation line missing indentation or outdented message."""
     line = msg.line - 1
@@ -169,6 +209,24 @@ def render_pep8_errors_e122(msg, _node, source_lines=None):
         slice(0, len(NEW_INDENT_MESSAGE)),
         LineType.ERROR,
         NEW_INDENT_MESSAGE + source_lines[line],
+    )
+    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
+
+
+def render_pep8_errors_e125_and_e129(msg, _node, source_lines=None):
+    """Render a PEP8 continuation line with same indent as next logical line message
+    AND a PEP8 visually indented line with same indent as next logical line messsage"""
+    msg_line_start_index = 0
+
+    while source_lines[msg.line - 1][msg_line_start_index] == " ":
+        msg_line_start_index += 1
+
+    yield from render_context(msg.line - 2, msg.line, source_lines)
+    yield (
+        msg.line,
+        slice(msg_line_start_index, msg_line_start_index + len(NEW_INDENT_MESSAGE)),
+        LineType.ERROR,
+        " " * msg_line_start_index + NEW_INDENT_MESSAGE + source_lines[msg.line - 1].lstrip(),
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 

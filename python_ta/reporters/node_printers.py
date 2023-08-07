@@ -144,6 +144,11 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e122(msg, _node, source_lines)
     elif "closing bracket does not match visual indentation" in msg.msg:
         yield from render_pep8_errors_e124(msg, _node, source_lines)
+    elif (
+        "continuation line with same indent as next logical line" in msg.msg
+        or "visually indented line with same indent as next logical line" in msg.msg
+    ):
+        yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
     elif "continuation line over-indented for visual indent" in msg.msg:
         yield from render_pep8_errors_e127(msg, _node, source_lines)
     elif "continuation line under-indented for visual indent" in msg.msg:
@@ -231,6 +236,24 @@ def render_pep8_errors_e124(msg, _node, source_lines=None):
         slice(col, col + len(ALIGN_BRACKET_MESSAGE) + 1),
         LineType.ERROR,
         source_lines[line] + ALIGN_BRACKET_MESSAGE,
+    )
+    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
+
+
+def render_pep8_errors_e125_and_e129(msg, _node, source_lines=None):
+    """Render a PEP8 continuation line with same indent as next logical line message
+    AND a PEP8 visually indented line with same indent as next logical line messsage"""
+    msg_line_start_index = 0
+
+    while source_lines[msg.line - 1][msg_line_start_index] == " ":
+        msg_line_start_index += 1
+
+    yield from render_context(msg.line - 2, msg.line, source_lines)
+    yield (
+        msg.line,
+        slice(msg_line_start_index, msg_line_start_index + len(NEW_INDENT_MESSAGE)),
+        LineType.ERROR,
+        " " * msg_line_start_index + NEW_INDENT_MESSAGE + source_lines[msg.line - 1].lstrip(),
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 

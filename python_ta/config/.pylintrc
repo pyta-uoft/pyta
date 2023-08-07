@@ -113,8 +113,8 @@ class-attribute-rgx = ([A-Za-z_][A-Za-z0-9_]{0,30}|(__.*__))$
 # Ignored pycodestyle checks
 pycodestyle-ignore =
     E111,  # pylint W0311
-    E112,  # pylint E0001 runs first
-    E113,  # pylint E0001 runs first
+    E112,  # pylint E0001
+    E113,  # pylint E0001
     E114,  # pylint W0311
     E117,  # pylint W0311
     E401,  # pylint C0410

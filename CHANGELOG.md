@@ -22,7 +22,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   old behaviour), pass `load_default_config=False` to `check_errors` and `check_all`.
 - Improved the code snippets for the `pep8-errors` "blank line" messages.
   Extra blank lines are now highlighted, and suggestions are added when blank lines are missing.
-- The default value of the `pyta-number-of-messages` configuration option is now 0 (changed from 5)
+- The default value of the `pyta-number-of-messages` configuration option is now 0 (changed from 5).
   This causes all error occurrences to be displayed.
 - Improved efficiency of the contract-checking custom `setattr` for classes.
 - Added new function `python_ta.contracts.validate_invariants` to manually check contracts

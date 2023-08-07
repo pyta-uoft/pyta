@@ -176,16 +176,16 @@ def render_pep8_errors_e122(msg, _node, source_lines=None):
 def render_pep8_errors_e127(msg, _node, source_lines=None):
     """Render a PEP8 continuation line over-indented for visual indent message."""
     line = msg.line - 1
-    first_non_space_prev_line_index = 0
-    first_non_space_msg_line_index = 0
-    while source_lines[line - 1][first_non_space_prev_line_index] == " ":
-        first_non_space_prev_line_index += 1
-    while source_lines[line][first_non_space_msg_line_index] == " ":
-        first_non_space_msg_line_index += 1
+    prev_line_start_index = 0
+    curr_line_start_index = 0
+    while source_lines[line - 1][prev_line_start_index] == " ":
+        prev_line_start_index += 1
+    while source_lines[line][curr_line_start_index] == " ":
+        curr_line_start_index += 1
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
         line + 1,
-        slice(first_non_space_prev_line_index + 4, first_non_space_msg_line_index),
+        slice(prev_line_start_index + 4, curr_line_start_index),
         LineType.ERROR,
         source_lines[line],
     )
@@ -195,16 +195,16 @@ def render_pep8_errors_e127(msg, _node, source_lines=None):
 def render_pep8_errors_e131(msg, _node, source_lines=None):
     """Render a PEP8 continuation line unaligned for hanging indent message."""
     line = msg.line - 1
-    first_non_space_prev_line_index = 0
-    first_non_space_msg_line_index = 0
-    while source_lines[line - 1][first_non_space_prev_line_index] == " ":
-        first_non_space_prev_line_index += 1
-    while source_lines[line][first_non_space_msg_line_index] == " ":
-        first_non_space_msg_line_index += 1
+    prev_line_start_index = 0
+    curr_line_start_index = 0
+    while source_lines[line - 1][prev_line_start_index] == " ":
+        prev_line_start_index += 1
+    while source_lines[line][curr_line_start_index] == " ":
+        curr_line_start_index += 1
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
         line + 1,
-        slice(first_non_space_prev_line_index, first_non_space_msg_line_index),
+        slice(prev_line_start_index, curr_line_start_index),
         LineType.ERROR,
         source_lines[line],
     )

@@ -9,6 +9,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Enhancements
 
+- Created many custom renderers to make the code snippets for `pep8-errors` easier to understand.
+
+## [2.6.0] - 2023-08-06
+
+### Enhancements
+
 - Can now create control flow graphs to visualize the execution of your program.
 - Added support to allow the user to configure how control flow graphs are generated.
 - The `TopLevelCodeChecker` now allows type alias assignment statements at the top level, i.e., doesn't flag such lines

@@ -225,10 +225,11 @@ def render_pep8_errors_e116(msg, _node, source_lines=None):
         else:
             reference_line = line + 1
 
+        while source_lines[reference_line][correct_indentation] == " ":
+            correct_indentation += 1
+
     while source_lines[line][msg_line_start_index] == " ":
         msg_line_start_index += 1
-    while source_lines[reference_line][correct_indentation] == " ":
-        correct_indentation += 1
 
     yield from render_context(msg.line - 2, msg.line, source_lines)
     yield (

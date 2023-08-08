@@ -216,29 +216,30 @@ def render_pep8_errors_e115(msg, _node, source_lines=None):
 
 def render_pep8_errors_e116(msg, _node, source_lines=None):
     """Render a PEP8 unexpected indentation (comment) message"""
-    line = msg.line - 1
-    msg_line_start_index, reference_line, correct_indentation = (0, 0, 0)
+    yield from render_generic(msg, _node, source_lines)
+    # line = msg.line - 1
+    # msg_line_start_index, reference_line, correct_indentation = (0, 0, 0)
 
-    if len(source_lines[line + 1]) != 0 or len(source_lines[line - 1]) != 0:
-        if len(source_lines[line + 1]) == 0:
-            reference_line = line - 1
-        else:
-            reference_line = line + 1
+    # if len(source_lines[line + 1]) != 0 or len(source_lines[line - 1]) != 0:
+    #     if len(source_lines[line + 1]) == 0:
+    #         reference_line = line - 1
+    #     else:
+    #         reference_line = line + 1
+    #
+    #     while source_lines[reference_line][correct_indentation] == " ":
+    #         correct_indentation += 1
 
-        while source_lines[reference_line][correct_indentation] == " ":
-            correct_indentation += 1
-
-    while source_lines[line][msg_line_start_index] == " ":
-        msg_line_start_index += 1
-
-    yield from render_context(msg.line - 2, msg.line, source_lines)
-    yield (
-        msg.line,
-        slice(correct_indentation, msg_line_start_index),
-        LineType.ERROR,
-        source_lines[msg.line - 1],
-    )
-    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
+    # while source_lines[line][msg_line_start_index] == " ":
+    #     msg_line_start_index += 1
+    #
+    # yield from render_context(msg.line - 2, msg.line, source_lines)
+    # yield (
+    #     msg.line,
+    #     slice(correct_indentation, msg_line_start_index),
+    #     LineType.ERROR,
+    #     source_lines[msg.line - 1],
+    # )
+    # yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
 def render_pep8_errors_e122(msg, _node, source_lines=None):

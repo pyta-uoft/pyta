@@ -217,16 +217,15 @@ def render_pep8_errors_e115(msg, _node, source_lines=None):
 def render_pep8_errors_e116(msg, _node, source_lines=None):
     """Render a PEP8 unexpected indentation (comment) message"""
     line = msg.line - 1
-    msg_line_start_index, reference_line, correct_indentation = (0, 0, 0)
+    msg_line_start_index, correct_indentation = (0, 0)
 
-    if len(source_lines[line + 1]) != 0 or len(source_lines[line - 1]) != 0:
-        if len(source_lines[line + 1]) == 0:
-            reference_line = line - 1
-        else:
-            reference_line = line + 1
-
-        # while source_lines[reference_line][correct_indentation] == " ":
-        #     correct_indentation += 1
+    if len(source_lines[line + 1]) != 0:
+        while source_lines[line + 1][correct_indentation] == " ":
+            correct_indentation += 1
+    else:
+        if line - 1 >= 0 and len(source_lines[line - 1]) != 0:
+            while source_lines[line - 1][correct_indentation] == " ":
+                correct_indentation += 1
 
     while source_lines[line][msg_line_start_index] == " ":
         msg_line_start_index += 1

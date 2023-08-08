@@ -140,6 +140,8 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e101(msg, _node, source_lines)
     elif "expected an indented block (comment)" in msg.msg:
         yield from render_pep8_errors_e115(msg, _node, source_lines)
+    elif "unexpected indentation (comment)" in msg.msg:
+        yield from render_pep8_errors_e116(msg, _node, source_lines)
     elif "continuation line missing indentation or outdented" in msg.msg:
         yield from render_pep8_errors_e122(msg, _node, source_lines)
     elif "closing bracket does not match visual indentation" in msg.msg:
@@ -210,6 +212,32 @@ def render_pep8_errors_e101(msg, _node, source_lines=None):
 def render_pep8_errors_e115(msg, _node, source_lines=None):
     """Render a PEP8 expected an indented block (comment) message."""
     yield from render_pep8_errors_e122(msg, _node, source_lines)
+
+
+def render_pep8_errors_e116(msg, _node, source_lines=None):
+    """Render a PEP8 unexpected indentation (comment) message"""
+    line = msg.line - 1
+    msg_line_start_index, reference_line, correct_indentation = (0, 0, 0)
+
+    if len(source_lines[line + 1]) != 0 or len(source_lines[line - 1]) != 0:
+        if len(source_lines[line + 1]) == 0:
+            reference_line = line - 1
+        else:
+            reference_line = line + 1
+
+    while source_lines[line][msg_line_start_index] == " ":
+        msg_line_start_index += 1
+    while source_lines[reference_line][correct_indentation] == " ":
+        correct_indentation += 1
+
+    yield from render_context(msg.line - 2, msg.line, source_lines)
+    yield (
+        msg.line,
+        slice(correct_indentation, msg_line_start_index),
+        LineType.ERROR,
+        source_lines[msg.line - 1],
+    )
+    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
 def render_pep8_errors_e122(msg, _node, source_lines=None):

@@ -1070,7 +1070,7 @@ def greet_person(name, friends) -> None:
         print("I am friends with {}".format(friend))
 ```
 
-**See also**: [W0621](#W0621)
+**See also**: [](W0621)
 
 (W0621)=
 
@@ -1289,7 +1289,7 @@ Some imports are long and go through multiple layers of packages or modules. It'
 rename these imports as the last imported module or package using the `as` keyword.
 Consider using the `from` import syntax instead.
 
-```{literalinclude} /../examples/pylint/R0402_consider_using_from_import.py
+```{literalinclude} /../examples/pylint/r0402_consider_using_from_import.py
 
 ```
 
@@ -1888,7 +1888,7 @@ exception, which is thrown when a user attempts to exist the program by typing `
 
 (W0718)=
 
-### Exception is too generic (W0718)
+### Broad exception caught (W0718)
 
 Using `except Exception:` is only slightly more specific than `except:` and should also be avoided (
 see [W0702](#W0702)). Since most builtin exceptions, and all user-defined exceptions, are derived
@@ -2060,7 +2060,7 @@ When writing Python programs, your variables should always be defined within fun
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/E9997_global_variables.py
+```{literalinclude} /../examples/custom_checkers/e9997_global_variables.py
 ---
 lines: 16-20
 ---
@@ -2120,7 +2120,7 @@ required. If `print` calls are used to debug the code, they should be removed pr
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/E9998_forbidden_io_function.py
+```{literalinclude} /../examples/custom_checkers/e9998_forbidden_io_function.py
 
 ```
 
@@ -2983,11 +2983,11 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
-## Modified Iteration
+## Modified iterators in for loops
 
 (W4701)=
 
-## Modified iterating list (W4701)
+### Modified iterating list (W4701)
 
 This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
 
@@ -3007,7 +3007,7 @@ This error occurs when a dictionary is modified inside a for loop by adding or r
 
 (E4703)=
 
-## Modified iterating set (E4703)
+### Modified iterating set (E4703)
 
 This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
 
@@ -3015,7 +3015,9 @@ This error occurs when a set is modified inside a for loop by adding or removing
 
 ```
 
-## Style errors [](#style)
+(#style) =
+
+## Style errors
 
 (C0321)=
 

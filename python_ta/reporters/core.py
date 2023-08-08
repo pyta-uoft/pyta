@@ -241,7 +241,7 @@ class PythonTaReporter(BaseReporter):
             self.messages[self.current_file] = []
 
         with open(filepath, encoding="utf-8") as f:
-            self.source_lines = [line for line in f.readlines()]
+            self.source_lines = [line.rstrip("\r\n") for line in f.readlines()]
 
     def on_close(self, stats, previous_stats):
         """Hook called when a module finished analyzing.

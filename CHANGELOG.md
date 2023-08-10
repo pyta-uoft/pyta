@@ -7,6 +7,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Bug fixes
+
+- Make `graphviz` an optional dependency, and clarify the installation requirements for visualizing
+  control flow graphs.
+
 ## [2.6.0] - 2023-08-06
 
 ### Enhancements

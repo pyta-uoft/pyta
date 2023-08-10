@@ -26,7 +26,6 @@ requires-python = ">=3.8"
 
 [project.optional-dependencies]
 dev = [
-    "graphviz",
     "hypothesis",
     "inflection",
     "myst-parser",
@@ -36,6 +35,9 @@ dev = [
     "pytest-cov >= 4.0,< 4.2",
     "sphinx",
     "sphinx-rtd-theme",
+]
+cfg = [
+    "graphviz",
 ]
 z3 = [
     "z3-solver",

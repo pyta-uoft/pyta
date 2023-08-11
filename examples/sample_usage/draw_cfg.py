@@ -1,10 +1,10 @@
-import python_ta.cfg
+import python_ta.cfg.cfg_generator as cfg_generator
 
 USAGE = "USAGE: python -m examples.sample_usage.draw_cfg <your-file.py>"
 
 
 def main(filepath: str) -> None:
-    python_ta.cfg.generate_cfg(mod=filepath, auto_open=True)
+    cfg_generator.generate_cfg(mod=filepath, auto_open=True)
 
 
 if __name__ == "__main__":

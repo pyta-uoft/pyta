@@ -5,7 +5,7 @@ import os.path
 
 import pytest
 
-import python_ta.cfg as cfg
+import python_ta.cfg.cfg_generator as cfg_generator
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +23,7 @@ def create_cfg():
     svg_file_path = dot_file_path + ".svg"
 
     # Create the graphviz files using my_file.py
-    cfg.generate_cfg(mod=script_name, auto_open=False)
+    cfg_generator.generate_cfg(mod=script_name, auto_open=False)
 
     # Open the actual graphviz file for reading
     gv_file_io = open(dot_file_path)
@@ -51,7 +51,7 @@ def create_cfg_funcs_only():
     options = {
         "functions": ["MyClass.foo", "foo", "hoo"],
     }
-    cfg.generate_cfg(mod=script_name, auto_open=False, visitor_options=options)
+    cfg_generator.generate_cfg(mod=script_name, auto_open=False, visitor_options=options)
 
     # Open the actual graphviz file for reading
     gv_file_io = open(dot_file_path)
@@ -118,7 +118,7 @@ def test_mod_not_valid(capsys) -> None:
     script_name = "not a valid file"
     expected = "Could not find the file called, `not a valid file`\n\n"
 
-    cfg.generate_cfg(mod=script_name, auto_open=False)
+    cfg_generator.generate_cfg(mod=script_name, auto_open=False)
 
     captured = capsys.readouterr()
 
@@ -135,7 +135,7 @@ def test_mod_not_str(capsys) -> None:
     script_name = 1
     expected = "No CFG generated. Input to check, `1`, has invalid type, must be a string.\n"
 
-    cfg.generate_cfg(mod=script_name, auto_open=False)
+    cfg_generator.generate_cfg(mod=script_name, auto_open=False)
 
     captured = capsys.readouterr()
 

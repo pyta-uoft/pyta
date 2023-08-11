@@ -140,7 +140,7 @@ def add_class_invariants(klass: type) -> None:
     _set_invariants(klass)
 
     klass_mod = _get_module(klass)
-    cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
+    cls_annotations = None  # This is a cached value set the first time new_setattr is called
 
     def new_setattr(self: klass, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
@@ -150,6 +150,11 @@ def add_class_invariants(klass: type) -> None:
         if not ENABLE_CONTRACT_CHECKING:
             super(klass, self).__setattr__(name, value)
             return
+
+        nonlocal cls_annotations
+        if cls_annotations is None:
+            cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
+
         if name in cls_annotations:
             try:
                 _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")

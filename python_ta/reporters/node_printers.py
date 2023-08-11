@@ -6,8 +6,6 @@ from astroid import nodes
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
 NEW_INDENT_MESSAGE = "# INSERT NEW INDENT HERE"
-ALIGN_BRACKET_MESSAGE = "  # ALIGN WITH MATCHING OPENING BRACKET"
-INSERT_SPACE_MESSAGE = "(INSERT SPACE HERE)"
 
 
 def render_message(msg, node, source_lines):
@@ -185,8 +183,6 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e306(msg, _node, source_lines)
     elif "test for object identity should be 'is not'" in msg.msg:
         yield from render_pep8_errors_e714(msg, _node, source_lines)
-    elif "invalid escape sequence" in msg.msg:
-        yield from render_pep8_errors_w605(msg, _node, source_lines)
     else:
         yield from render_generic(msg, _node, source_lines)
 
@@ -209,7 +205,16 @@ def render_pep8_errors_e101(msg, _node, source_lines=None):
 
 def render_pep8_errors_e115(msg, _node, source_lines=None):
     """Render a PEP8 expected an indented block (comment) message."""
-    yield from render_pep8_errors_e122(msg, _node, source_lines)
+    line = msg.line - 1
+
+    yield from render_context(line - 1, line + 1, source_lines)
+    yield (
+        line,
+        slice(0, len(source_lines[line])),
+        LineType.ERROR,
+        source_lines[line] + " # INDENT THIS LINE",
+    )
+    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
 def render_pep8_errors_e122(msg, _node, source_lines=None):
@@ -231,12 +236,7 @@ def render_pep8_errors_e124(msg, _node, source_lines=None):
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (
-        line + 1,
-        slice(col, col + len(ALIGN_BRACKET_MESSAGE) + 1),
-        LineType.ERROR,
-        source_lines[line] + ALIGN_BRACKET_MESSAGE,
-    )
+    yield (line + 1, slice(col, col + 1), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -282,9 +282,9 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     line = msg.line - 1
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
-    snippet = source_lines[line] + ALIGN_BRACKET_MESSAGE
+
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line + 1, slice(col, col + len(snippet)), LineType.ERROR, snippet)
+    yield (line + 1, slice(0, col if col != 0 else None), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -356,7 +356,7 @@ def render_pep8_errors_227(msg, _node, source_lines=None):
     col = int(res.group().split()[-1])
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col - 1, col + 2), LineType.ERROR, source_lines[line])
+    yield (line, slice(col, col + 1), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -383,13 +383,12 @@ def render_pep8_errors_251(msg, _node, source_lines=None):
 def render_pep8_errors_e265(msg, _node, source_lines=None):
     """Render a PEP8 block comment should start with '# ' message."""
     line = msg.line - 1
-    block_comment = source_lines[line][0] + INSERT_SPACE_MESSAGE
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
         line,
-        slice(0, len(block_comment)),
+        slice(0, len(source_lines[line])),
         LineType.ERROR,
-        block_comment + source_lines[line][1:],
+        source_lines[line] + " # INSERT SPACE AFTER THE '#'",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -415,12 +414,17 @@ def render_pep8_errors_e275(msg, _node, source_lines=None):
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
 
+    # Get the range for highlighting the corresponding keyword.
+    curr_idx = col
+    while not (source_lines[line][curr_idx].isspace() or curr_idx == 0):
+        curr_idx -= 1
+
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
         line,
-        slice(col, col + len(INSERT_SPACE_MESSAGE)),
+        slice(curr_idx if curr_idx == 0 else curr_idx + 1, col),
         LineType.ERROR,
-        source_lines[line][:col] + INSERT_SPACE_MESSAGE + source_lines[line][col:],
+        source_lines[line] + " # INSERT SPACE AFTER KEYWORD",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -533,24 +537,19 @@ def render_pep8_errors_e714(msg, _node, source_lines=None):
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
 
+    # Get the range for highlighting the expression.
+    curr_idx = col
+    words = source_lines[line][col : len(source_lines[line]) - 1].split()
+    is_keyword_idx = words.index("is") + 1
+    curr_idx += sum(len(word) for word in words[: is_keyword_idx + 1]) + is_keyword_idx
+
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
         line,
-        slice(col, None),
+        slice(col, curr_idx),
         LineType.ERROR,
-        source_lines[line] + "  # `not <var> is <type>` should be `<var> is not <type>`.",
+        source_lines[line] + "  # `not <x> is <y>` should be `<x> is not <y>`.",
     )
-    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
-
-
-def render_pep8_errors_w605(msg, _node, source_lines=None):
-    """Render a PEP8 invalid escape sequence message."""
-    line = msg.line - 1
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-
-    yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col, col + 2), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 

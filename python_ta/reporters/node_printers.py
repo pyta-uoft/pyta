@@ -155,7 +155,7 @@ def render_pep8_errors(msg, _node, source_lines=None):
     elif "continuation line under-indented for visual indent" in msg.msg:
         yield from render_pep8_errors_e128(msg, _node, source_lines)
     elif "whitespace after '('" in msg.msg:
-        yield from render_pep8_errors_201(msg, _node, source_lines)
+        yield from render_pep8_errors_e201(msg, _node, source_lines)
     elif "whitespace before ')'" in msg.msg:
         yield from render_pep8_errors_e202(msg, _node, source_lines)
     elif "whitespace before '('" in msg.msg:
@@ -167,11 +167,11 @@ def render_pep8_errors(msg, _node, source_lines=None):
     elif "tab after operator" in msg.msg or "tab after keyword" in msg.msg:
         yield from render_pep8_errors_e224_and_e273(msg, _node, source_lines)
     elif "missing whitespace around bitwise or shift operator" in msg.msg:
-        yield from render_pep8_errors_227(msg, _node, source_lines)
+        yield from render_pep8_errors_e227(msg, _node, source_lines)
     elif "missing whitespace around modulo operator" in msg.msg:
         yield from render_pep8_errors_e228(msg, _node, source_lines)
     elif "unexpected spaces around keyword / parameter equals" in msg.msg:
-        yield from render_pep8_errors_251(msg, _node, source_lines)
+        yield from render_pep8_errors_e251(msg, _node, source_lines)
     elif "at least two spaces before inline comment" in msg.msg:
         yield from render_pep8_errors_e261(msg, _node, source_lines)
     elif "block comment should start with '# '" in msg.msg:
@@ -196,8 +196,6 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e306(msg, _node, source_lines)
     elif "test for object identity should be 'is not'" in msg.msg:
         yield from render_pep8_errors_e714(msg, _node, source_lines)
-    elif "do not compare types, use ‘isinstance()’" in msg.msg:
-        yield from render_pep8_errors_e721(msg, _node, source_lines)
     else:
         yield from render_generic(msg, _node, source_lines)
 
@@ -214,7 +212,7 @@ def render_pep8_errors_e101(msg, _node, source_lines=None):
     while source_lines[line][curr_idx].isspace():
         curr_idx += 1
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(0, curr_idx), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(0, curr_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -224,10 +222,10 @@ def render_pep8_errors_e115(msg, _node, source_lines=None):
 
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
-        line,
+        msg.line,
         slice(0, len(source_lines[line])),
         LineType.ERROR,
-        source_lines[line] + " # INDENT THIS LINE",
+        source_lines[line] + "  # INDENT THIS LINE",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -262,7 +260,7 @@ def render_pep8_errors_e122_and_e127_and_e131(msg, _node, source_lines=None):
     end_index = curr_line_start_index if curr_line_start_index > 0 else len(source_lines[line])
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
-        line + 1,
+        msg.line,
         slice(0, end_index),
         LineType.ERROR,
         source_lines[line],
@@ -276,7 +274,7 @@ def render_pep8_errors_e124(msg, _node, source_lines=None):
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line + 1, slice(col, col + 1), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(col, col + 1), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -305,11 +303,11 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     col = int(res.group().split()[-1])
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line + 1, slice(0, col if col != 0 else None), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(0, col if col != 0 else None), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
-def render_pep8_errors_201(msg, _node, source_lines=None):
+def render_pep8_errors_e201(msg, _node, source_lines=None):
     """Render a PEP8 whitespace after '(' message."""
     line = msg.line - 1
     res = re.search(r"column (\d+)", msg.msg)
@@ -319,7 +317,7 @@ def render_pep8_errors_201(msg, _node, source_lines=None):
         curr_idx += 1
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col - 1, curr_idx), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(col, curr_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -347,7 +345,7 @@ def render_pep8_errors_e211(msg, _node, source_lines=None):
         curr_idx += 1
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col, curr_idx + 1), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(col, curr_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -375,7 +373,7 @@ def render_pep8_errors_e223(msg, _node, source_lines=None):
         curr_idx += 1
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(col, curr_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -389,18 +387,24 @@ def render_pep8_errors_e224_and_e273(msg, _node, source_lines):
         curr_idx -= 1
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(curr_idx + 1, col + 1), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(curr_idx + 1, col + 1), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
-def render_pep8_errors_227(msg, _node, source_lines=None):
+def render_pep8_errors_e227(msg, _node, source_lines=None):
     """Render a PEP8 missing whitespace around bitwise or shift operator message."""
     line = msg.line - 1
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
+    # Check which operator to get the correct range of the line to highlight.
+    # Default highlight is one character, but may be updated to two.
+    # Note that only binary bitwise operators that are more than one character are included.
+    operators = {">>", "<<"}
+    end_idx = col + 1
+    end_idx = end_idx + 1 if source_lines[line][col : col + 2] in operators else end_idx
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col, col + 1), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(col, end_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -415,12 +419,12 @@ def render_pep8_errors_e228(msg, _node, source_lines=None):
         msg.line,
         slice(col, col + 1),
         LineType.ERROR,
-        source_lines[line] + " # INSERT A SPACE BEFORE & AFTER THE MODULO OPERATOR",
+        source_lines[line] + "  # INSERT A SPACE BEFORE & AFTER THE MODULO OPERATOR",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
-def render_pep8_errors_251(msg, _node, source_lines=None):
+def render_pep8_errors_e251(msg, _node, source_lines=None):
     """Render a PEP8 unexpected spaces around keyword / parameter equals message."""
     line = msg.line - 1
     res = re.search(r"column (\d+)", msg.msg)
@@ -436,7 +440,7 @@ def render_pep8_errors_251(msg, _node, source_lines=None):
         end_idx += 1
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(start_idx, end_idx), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(start_idx, end_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -451,7 +455,7 @@ def render_pep8_errors_e261(msg, _node, source_lines=None):
         msg.line,
         slice(col, len(source_lines[line])),
         LineType.ERROR,
-        source_lines[line] + " # INSERT TWO SPACES BEFORE THE '#'",
+        source_lines[line] + "  # INSERT TWO SPACES BEFORE THE '#'",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -461,10 +465,10 @@ def render_pep8_errors_e265(msg, _node, source_lines=None):
     line = msg.line - 1
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
-        line,
+        msg.line,
         slice(0, len(source_lines[line])),
         LineType.ERROR,
-        source_lines[line] + " # INSERT SPACE AFTER THE '#'",
+        source_lines[line] + "  # INSERT SPACE AFTER THE '#'",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -479,10 +483,10 @@ def render_pep8_errors_e266(msg, _node, source_lines=None):
 
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
-        line,
+        msg.line,
         slice(msg_line_start_index, len(source_lines[line])),
         LineType.ERROR,
-        source_lines[line] + " # THERE SHOULD ONLY BE ONE '#'",
+        source_lines[line] + "  # THERE SHOULD ONLY BE ONE '#'",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -498,21 +502,7 @@ def render_pep8_errors_e272(msg, _node, source_lines=None):
         curr_idx += 1
 
     yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line])
-    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
-
-
-def render_pep8_errors_e273(msg, _node, source_lines):
-    """Render a PEP8 tab after keyword message."""
-    line = msg.line - 1
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    curr_idx = col
-    while source_lines[line][curr_idx] == "\t":
-        curr_idx -= 1
-
-    yield from render_context(line - 1, line + 1, source_lines)
-    yield (line, slice(curr_idx + 1, col + 1), LineType.ERROR, source_lines[line])
+    yield (msg.line, slice(col, curr_idx), LineType.ERROR, source_lines[line])
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
@@ -529,10 +519,10 @@ def render_pep8_errors_e275(msg, _node, source_lines=None):
 
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
-        line,
+        msg.line,
         slice(curr_idx if curr_idx == 0 else curr_idx + 1, col),
         LineType.ERROR,
-        source_lines[line] + " # INSERT SPACE AFTER KEYWORD",
+        source_lines[line] + "  # INSERT SPACE AFTER KEYWORD",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
@@ -653,32 +643,10 @@ def render_pep8_errors_e714(msg, _node, source_lines=None):
 
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
-        line,
+        msg.line,
         slice(col, curr_idx),
         LineType.ERROR,
         source_lines[line] + "  # `not <x> is <y>` should be `<x> is not <y>`.",
-    )
-    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
-
-
-def render_pep8_errors_e721(msg, _node, source_lines=None):
-    """Render a PEP8 do not compare types, use ‘isinstance()’ message."""
-    line = msg.line - 1
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-
-    # Get the range for highlighting the expression.
-    curr_idx = col
-    words = source_lines[line][col : len(source_lines[line])].split()
-    is_keyword_idx = words.index("is") + 1
-    curr_idx += sum(len(word) for word in words[: is_keyword_idx + 1]) + is_keyword_idx
-
-    yield from render_context(line - 1, line + 1, source_lines)
-    yield (
-        line,
-        slice(col, curr_idx),
-        LineType.ERROR,
-        source_lines[line] + "  # `use isinstance(object, type)`.",
     )
     yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 

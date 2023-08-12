@@ -16,6 +16,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Make `graphviz` an optional dependency, and clarify the installation requirements for visualizing
   control flow graphs.
 - Fix `check_contrats` handling of forward references in class type annotations when using `check_contracts` decorator.
+- Fix handling of `|` in type annotations (by updating to `typeguard` v4.1.0).
 
 ## [2.6.0] - 2023-08-06
 

@@ -18,7 +18,7 @@ dependencies = [
     "six",
     "tabulate ~= 0.9.0",
     "toml ~= 0.10.2",
-    "typeguard >= 2.13.3, < 3",
+    "typeguard >= 4.1.0, < 5",
     "wrapt >= 1.15.0, < 2",
 ]
 dynamic = ["version"]

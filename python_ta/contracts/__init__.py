@@ -16,7 +16,7 @@ from types import CodeType, FunctionType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple
 
 import wrapt
-from typeguard import check_type
+from typeguard import CollectionCheckStrategy, TypeCheckError, check_type
 
 # Configuration options
 
@@ -158,8 +158,12 @@ def add_class_invariants(klass: type) -> None:
         if name in cls_annotations:
             try:
                 _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
-                check_type(name, value, cls_annotations[name])
-            except TypeError:
+                check_type(
+                    value,
+                    cls_annotations[name],
+                    collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS,
+                )
+            except TypeCheckError:
                 raise AssertionError(
                     f"Value {_display_value(value)} did not match type annotation for attribute "
                     f"{name}: {_display_annotation(cls_annotations[name])}"
@@ -209,7 +213,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             try:
                 _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
                 check_type_strict(param, arg, annotations[param])
-            except TypeError:
+            except (TypeError, TypeCheckError):
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
                 raise PyTAContractError(
@@ -250,7 +254,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         try:
             _debug(f"Checking return type from call to {wrapped.__qualname__}")
             check_type_strict("return", r, return_type)
-        except TypeError:
+        except (TypeError, TypeCheckError):
             raise PyTAContractError(
                 f"{wrapped.__name__}'s return value {_display_value(r)} did not match "
                 f"return type annotation {_display_annotation(return_type)}"
@@ -297,7 +301,9 @@ def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
             type(value) is bool and expected_type is int
         ):
             raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
-        check_type(argname, value, expected_type)
+        check_type(
+            value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
+        )
 
 
 def _get_argument_suggestions(arg: Any, annotation: type) -> str:
@@ -364,8 +370,10 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
         value = getattr(instance, attr)
         try:
             _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
-            check_type(attr, value, annotation)
-        except TypeError:
+            check_type(
+                value, annotation, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
+            )
+        except TypeCheckError:
             raise AssertionError(
                 f"{_display_value(value)} did not match type annotation for attribute {attr}: "
                 f"{_display_annotation(annotation)}"

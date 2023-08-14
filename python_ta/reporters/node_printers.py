@@ -242,9 +242,7 @@ def render_pep8_errors_e122_and_e127_and_e131(msg, _node, source_lines=None):
     message, and a continuation line unaligned for hanging indent message.
     """
     line = msg.line - 1
-    curr_line_start_index = 0
-    while source_lines[line][curr_line_start_index] == " ":
-        curr_line_start_index += 1
+    curr_line_start_index = len(source_lines[line]) - len(source_lines[line].lstrip())
     end_index = curr_line_start_index if curr_line_start_index > 0 else len(source_lines[line])
     yield from render_context(line - 1, line + 1, source_lines)
     yield (
@@ -253,7 +251,7 @@ def render_pep8_errors_e122_and_e127_and_e131(msg, _node, source_lines=None):
         LineType.ERROR,
         source_lines[line],
     )
-    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
+    yield from render_context(line + 2, line + 4, source_lines)
 
 
 def render_pep8_errors_e124(msg, _node, source_lines=None):

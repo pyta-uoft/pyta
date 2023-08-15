@@ -11,6 +11,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Created many custom renderers to make the code snippets for `pep8-errors` easier to understand.
 
+## [2.6.1] - 2023-08-13
+
 ### Bug fixes
 
 - Make `graphviz` an optional dependency, and clarify the installation requirements for visualizing

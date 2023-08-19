@@ -1,0 +1,22 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: PythonTA
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: David
+    family-names: Liu
+    email: david@cs.toronto.edu
+    affiliation: University of Toronto
+    orcid: "https://orcid.org/0000-0001-5777-5833"
+repository-code: "https://github.com/pyta-uoft/pyta"
+url: "https://www.cs.toronto.edu/~david/pyta/"
+abstract: Code checking tool for teaching Python.
+license: GPL-3.0
+commit: 23cd60ce7bad47a5edffed7c7e2bed7d3e4da46a
+version: 2.6.1
+date-released: "2023-08-13"

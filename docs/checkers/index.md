@@ -2124,6 +2124,30 @@ Example:
 
 ```
 
+By default, there are no Input / output functions ([`input`], [`open`] and [`print`]) allowed.
+However, users may want to specify the permissible functions for utilizing input / output operations.
+To allow a specific function to use input / output functions, use **allowed-io** option.
+For example, suppose the user defined a Python function as follows:
+
+```python
+def hello_world() -> None:
+    """The first steps in learning Python"""
+
+    print('Hello World')    # Error on this line (print is an I/O function)
+```
+
+Use the following configuration to allow the usage of an input / output function ([`print`] in this case):
+
+```python
+import python_ta
+python_ta.check_all(config={
+    'allowed-io': ['hello_world']
+})
+```
+
+An important observation to make in the aforementioned example is that [`hello_world`] precisely matches
+the function's name where input/output operations are permitted.
+
 The exception is calling IO functions inside the main block, which is allowed.
 
 ```python

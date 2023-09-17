@@ -2488,8 +2488,8 @@ The error messages display how to fix them (e.g., by adding spaces or adding/rem
 See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
 
 By default, all styling guidelines checked by "pycodestyle" are reported. To ignore a specific check, use the
-pycodestyle-ignore option. This takes in a list of error codes from [pycodestyle error codes](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
-to ignore. For example, use the following configuration to ignores E302 (expected 2 blank lines, found 0), and
+`pycodestyle-ignore` option. This takes in a list of error codes from [pycodestyle error codes](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
+to ignore. For example, use the following configuration to ignore E302 (expected 2 blank lines, found 0), and
 E305 (expected 2 blank lines after end of function or class):
 
 ```python

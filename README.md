@@ -102,3 +102,4 @@ Sophy Sun,
 Sarah Wang
 Jasmine Wu,
 Philippe Yu,
+Merrick Liu

@@ -99,6 +99,7 @@ Richard Shi,
 Kavin Singh,
 Alexey Strokach,
 Sophy Sun,
-Sarah Wang
+Utku Egemen Umut,
+Sarah Wang,
 Jasmine Wu,
 Philippe Yu,

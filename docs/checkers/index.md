@@ -2115,13 +2115,34 @@ if __name__ == '__main__':
 
 ### Forbidden IO function (E9998)
 
-Input / output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
+Input/output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
 required. If `print` calls are used to debug the code, they should be removed prior to submission.
 
 Example:
 
 ```{literalinclude} /../examples/custom_checkers/e9998_forbidden_io_function.py
 
+```
+
+By default, there are no input/output functions ([`input`], [`open`] and [`print`]) allowed.
+However, users may want to specify the permissible functions for utilizing input/output operations.
+Use the `allowed-io` option to specify **a list of function names** where input/output functions are allowed.
+For example, suppose the user defined a Python function as follows:
+
+```python
+def hello_world() -> None:
+    """The first steps in learning Python"""
+
+    print('Hello World')    # Error on this line (print is an I/O function)
+```
+
+Use the following configuration to allow the usage of an input/output function ([`print`] in this case):
+
+```python
+import python_ta
+python_ta.check_all(config={
+    'allowed-io': ['hello_world']
+})
 ```
 
 The exception is calling IO functions inside the main block, which is allowed.

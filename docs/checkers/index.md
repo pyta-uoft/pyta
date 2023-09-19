@@ -79,8 +79,7 @@ be considered part of the loop body).
 
 ### Potential index error (E0643)
 
-This error occurs when trying to access the index of an iterable (such as `list`, `str`, or `tuple`) that's beyond its
-length.
+This error occurs when trying to access the index of an iterable (such as `list`, `str`, or `tuple`) that's beyond its length.
 
 ```{literalinclude} /../examples/pylint/e0643_potential_index_error.py
 
@@ -365,6 +364,7 @@ Corrected version:
 
 ```python
 class NamedList:
+
     ...  # Same as in the code above
 
     def __delitem__(self, name: str) -> None:
@@ -426,13 +426,12 @@ for d, e, f in SCORES.values():  # unpacking the dictionary values
     print(d)
 ```
 
-Note that when using unpacking with a dictionary on the right-hand side of an `=`, the variables on the left-hand side
-gets assigned the keys of the dictionary. For example,
+Note that when using unpacking with a dictionary on the right-hand side of an `=`, the variables on the left-hand side gets assigned the keys of the dictionary. For example,
 
 ```python
 test = {
-    "hi": 0,
-    "bye": 1,
+  "hi": 0,
+  "bye": 1,
 }
 
 # `a` gets assigned "hi", `b` gets assigned "bye"
@@ -475,8 +474,7 @@ for number in [1, 2, 3]:
 
 ### Not a mapping (E1134)
 
-This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a
-non-dict with `**` in a function call meaning that the parameters are unfilled.
+This error occurs when a non-mapping value is used in a place where mapping is expected. This is a result of unpacking a non-dict with `**` in a function call meaning that the parameters are unfilled.
 
 `**` can only be used on a `dict` to unpack the values.
 
@@ -541,7 +539,7 @@ The above can be modified to:
 
 ```python
 if a:  # Error was on this line
-    pass
+  pass
 ```
 
 (R1727)=
@@ -559,7 +557,7 @@ The above can be modified to:
 
 ```python
 if True:  # Error was on this line
-    pass
+  pass
 ```
 
 (C0121)=
@@ -817,8 +815,7 @@ for key, value in sample_dict.items():
 
 ### Unnecessary list index lookup (R1736)
 
-This error occurs when iterating through a list while keeping track of both index and value using `enumerate()` but
-still using the index to access the value (which can be accessed directly).
+This error occurs when iterating through a list while keeping track of both index and value using `enumerate()` but still using the index to access the value (which can be accessed directly).
 
 ```{literalinclude} /../examples/pylint/r1736_unnecessary_list_index_lookup.py
 
@@ -901,8 +898,7 @@ returning `None`.
 
 ### Consider using with (R1732)
 
-This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By
-using `with`, the file is closed automatically which saves resources.
+This error occurs when a resource allocating operation such as opening a file can be replaced by a `with` block. By using `with`, the file is closed automatically which saves resources.
 
 ```{literalinclude} /../examples/pylint/r1732_consider_using_with.py
 
@@ -912,7 +908,7 @@ Corrected version:
 
 ```python
 with open('my_file.txt', 'r') as file:
-    ...  # No need to manually close the file
+    ... # No need to manually close the file
 ```
 
 (R1734)=
@@ -1074,7 +1070,7 @@ def greet_person(name, friends) -> None:
         print("I am friends with {}".format(friend))
 ```
 
-**See also**: [](W0621)
+**See also**: [W0621](#W0621)
 
 (W0621)=
 
@@ -1126,13 +1122,11 @@ vars                zip
 
 ### Naming convention violation (C9103)
 
-This error aims to provide a more detailed and beginner-friendly error message about how a variable name violated Python
-naming conventions.
+This error aims to provide a more detailed and beginner-friendly error message about how a variable name violated Python naming conventions.
 
 Again, refer to the [Python Naming Conventions][pep8: naming conventions] for further details but as a quick reminder:
 
-- Avoid using the single character variable names `l`, `O`, or `I` as they are indistinguishable from the numbers zero
-  and one.
+- Avoid using the single character variable names `l`, `O`, or `I` as they are indistinguishable from the numbers zero and one.
 - Names of variables, attributes, methods, and arguments should be in **`snake_case`**.
 - Names of constants should be in **`UPPER_CASE_WITH_UNDERSCORES`**.
 - Names of classes, exceptions, type variables and type aliases should be in **`PascalCase`**.
@@ -1155,8 +1149,7 @@ And a quick reminder on the previously mentioned types of naming conventions:
 
 ### Module name violation (C9104)
 
-This error occurs when the name of a module violates Python naming conventions. The names of modules should be
-in \* \*`snake_case`\*\* and should not exceed 30 characters.
+This error occurs when the name of a module violates Python naming conventions. The names of modules should be in **`snake_case`** and should not exceed 30 characters.
 
 ## Imports
 
@@ -1176,25 +1169,28 @@ lines: 1-3
 ---
 ```
 
-PythonTA allows you to specify all the modules that you wish to allow for a particular file using the
-allowed-import-modules configuration option in the check_all function
+PythonTA allows you to specify all the modules that you wish to allow for a particular file
+using the `allowed-import-modules` configuration option:
 
 ```python
 import python_ta
 python_ta.check_all(..., config={'allowed-import-modules': ["random"]})
 ```
 
-You can specify any additional modules you want to allow for import using the extra-imports
-configuration option, which you can set in a call to python_ta.check_all or in a configuration file.
+You can specify any additional modules you want to allow for import using the
+`extra-imports` configuration option:
 
 ```python
 import python_ta
 python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
 ```
 
-```python
+You can also use a configuration file to specify both the `allowed-import-modules` and `extra-imports`.
+
+```toml
 [FORBIDDEN IMPORT]
-extra - imports = math, tkinter
+allowed-import-modules = random
+extra-imports = math, tkinter
 ```
 
 (E0401)=
@@ -1317,7 +1313,7 @@ Some imports are long and go through multiple layers of packages or modules. It'
 rename these imports as the last imported module or package using the `as` keyword.
 Consider using the `from` import syntax instead.
 
-```{literalinclude} /../examples/pylint/r0402_consider_using_from_import.py
+```{literalinclude} /../examples/pylint/R0402_consider_using_from_import.py
 
 ```
 
@@ -1605,9 +1601,7 @@ class Child(Parent):
 
 ### Super without brackets (W0245)
 
-When making a call to a parent class using `super()`, we must always include the brackets since it is a type of function
-call. Without the brackets, Python may interpret it as the `super` function itself rather than calling the function to
-access the superclass.
+When making a call to a parent class using `super()`, we must always include the brackets since it is a type of function call. Without the brackets, Python may interpret it as the `super` function itself rather than calling the function to access the superclass.
 
 ```{literalinclude} /../examples/pylint/w0245_super_without_brackets.py
 
@@ -1618,14 +1612,12 @@ Corrected version:
 ```python
 class Animal:
     """A class that represents an animal"""
-
     def __init__(self) -> None:
         print('This is an animal')
 
 
 class Cat(Animal):
     """A class that represents a cat"""
-
     def __init__(self) -> None:
         super().__init__()
         print('This is a cat')
@@ -1920,7 +1912,7 @@ exception, which is thrown when a user attempts to exist the program by typing `
 
 (W0718)=
 
-### Broad exception caught (W0718)
+### Exception is too generic (W0718)
 
 Using `except Exception:` is only slightly more specific than `except:` and should also be avoided (
 see [W0702](#W0702)). Since most builtin exceptions, and all user-defined exceptions, are derived
@@ -2092,7 +2084,7 @@ When writing Python programs, your variables should always be defined within fun
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/e9997_global_variables.py
+```{literalinclude} /../examples/custom_checkers/E9997_global_variables.py
 ---
 lines: 16-20
 ---
@@ -2107,8 +2099,8 @@ EX = 1
 
 
 def add_ex(n: int) -> int:
-    """Add EX to n."""
-    return EX + n
+  """Add EX to n."""
+  return EX + n
 ```
 
 We call variables that are named using this style **constants**, and expect that they don't change
@@ -2152,7 +2144,7 @@ required. If `print` calls are used to debug the code, they should be removed pr
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/e9998_forbidden_io_function.py
+```{literalinclude} /../examples/custom_checkers/E9998_forbidden_io_function.py
 
 ```
 
@@ -2176,7 +2168,7 @@ Example:
 ```python
 def all_even(nums: list[int]) -> bool:
     """Return whether nums contains only even numbers."""
-    for num in nums:  # This loop will only ever run for one iteration before returning.
+    for num in nums:      # This loop will only ever run for one iteration before returning.
         if num % 2 == 0:
             return True
         else:
@@ -2190,7 +2182,7 @@ Here is a corrected version of this function:
 ```python
 def all_even(nums: list[int]) -> bool:
     """Return whether nums contains only even numbers."""
-    for num in nums:  # This loop will only ever run for one iteration before returning.
+    for num in nums:      # This loop will only ever run for one iteration before returning.
         if num % 2 != 0:
             return False
 
@@ -2287,8 +2279,7 @@ def parallel_lst(lst1: List[int], lst2: List[int]) -> list:
 
 ### For Target Subscript (E9984)
 
-This error occurs when an index variable in a for loop or comprehension uses indexing notation, which can occur if you
-mix up the
+This error occurs when an index variable in a for loop or comprehension uses indexing notation, which can occur if you mix up the
 index variable and the list being iterated over.
 
 Example (For loop):
@@ -2394,8 +2385,7 @@ lines: 2-4
 ### Type is assigned (E9995)
 
 This error occurs when a type is not annotated but rather assigned in a function or class definition.
-In Python, default values for function arguments and class instance variables are assigned using `=` during their
-respective definitions.
+In Python, default values for function arguments and class instance variables are assigned using `=` during their respective definitions.
 Type annotations, on the other hand, are declared using `:`.
 Below is a correct usage of assigning default values and annotating types.
 
@@ -2405,7 +2395,7 @@ def print_str_argument(str_argument: str = "Some default value."):
 
 
 class BirthdayCake:
-    number_of_candles: int = 1  # 1 is the default value
+    number_of_candles: int = 1 # 1 is the default value
 ```
 
 An incorrect usage of assigning default values and annotating types is shown below.
@@ -2427,9 +2417,9 @@ class Person:
 
 
 def add_two_numbers(
-        x: int,
-        y: List[float],
-        z: type = complex
+    x: int,
+    y: List[float],
+    z: type = complex
 ) -> int:
     return (x + y) * z
 
@@ -2554,14 +2544,12 @@ Example:
 ```
 
 By default, all Python syntax is allowed. To forbid a specific type of syntax, use the disallowed-python-syntax
-option. This takes a list of names
-of [AST nodes from astroid](https://pylint.pycqa.org/projects/astroid/en/latest/api/astroid.nodes.html)
+option. This takes a list of names of [AST nodes from astroid](https://pylint.pycqa.org/projects/astroid/en/latest/api/astroid.nodes.html)
 to forbid. For example, use the following configuration to forbid break and continue statements, comprehensions,
 and for and while loops:
 
 ```python
 import python_ta
-
 python_ta.check_all(config={
     "disallowed-python-syntax": ["Break", "Continue", "Comprehension", "For", "While"]
 })
@@ -2820,8 +2808,7 @@ output:
 ```python
 from typing import List, Optional
 
-
-def make_list(n: int, lst: Optional[List[int]] = None) -> List[int]:
+def make_list(n: int, lst: Optional[List[int]]=None) -> List[int]:
     if lst is None:
         lst = []
     for i in range(n):
@@ -3020,14 +3007,13 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
-## Modified iterators in for loops
+## Modified Iteration
 
 (W4701)=
 
-### Modified iterating list (W4701)
+## Modified iterating list (W4701)
 
-This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of
-modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
+This error occurs when a list is modified inside a for loop by adding or removing items from the `list`. Other types of modification are okay, and do not trigger the error. A copy of the `list` can be used instead.
 
 ```{literalinclude} /../examples/pylint/w4701_modified_iterating_list.py
 
@@ -3037,9 +3023,7 @@ modification are okay, and do not trigger the error. A copy of the `list` can be
 
 ### Modified iterating dict (E4702)
 
-This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other
-types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A
-copy of the `dict` can be used instead.
+This error occurs when a dictionary is modified inside a for loop by adding or removing items from the `dict`. Other types of modification (like assigning a new value to an existing key) are actually okay, and do not trigger the error. A copy of the `dict` can be used instead.
 
 ```{literalinclude} /../examples/pylint/e4702_modified_iterating_dict.py
 
@@ -3047,18 +3031,15 @@ copy of the `dict` can be used instead.
 
 (E4703)=
 
-### Modified iterating set (E4703)
+## Modified iterating set (E4703)
 
-This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of
-modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
+This error occurs when a set is modified inside a for loop by adding or removing items from the `set`. Other types of modification are actually okay, and do not trigger the error. A copy of the `set` can be used instead.
 
 ```{literalinclude} /../examples/pylint/e4703_modified_iterating_set.py
 
 ```
 
-(#style) =
-
-## Style errors
+## Style errors [](#style)
 
 (C0321)=
 
@@ -3165,8 +3146,7 @@ for all lines is 80 characters.
 
 ### Bad chained comparison (W3601)
 
-This error occurs when a chained comparison uses incompatible comparison operators, i.e. operators that perform a
-different kind of test. For example,
+This error occurs when a chained comparison uses incompatible comparison operators, i.e. operators that perform a different kind of test. For example,
 `<` has a different meaning than `is` and `in`.
 
 The different types of comparison operators can be classified in the following categories:

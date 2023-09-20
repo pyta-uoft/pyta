@@ -2155,6 +2155,17 @@ if __name__ == "__main__":
     name = input()
 ```
 
+By default, [`input`], [`open`] and [`print`] are not allowed. However, you can choose which I/O functions specifically to disallow using the `forbidden-io-functions`
+option. This takes a list of function names that should not be used. For example,
+use the following configuration to forbid the use of [`print`] but allow [`input`] and [`open`]:
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "forbidden-io-functions": ["print"]
+})
+```
+
 (E9996)=
 
 ### Loop iterates only once (E9996)
@@ -2510,6 +2521,16 @@ These errors do not affect the functionality of your code, but can affect its re
 The error messages display how to fix them (e.g., by adding spaces or adding/removing blank lines).
 
 See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
+
+By default, all styling guidelines checked by `pycodestyle` are reported. To ignore a specific check, use the
+`pycodestyle-ignore` option. This takes in a list of error codes from [pycodestyle error codes](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
+to ignore. For example, use the following configuration to ignore E302 (expected 2 blank lines, found 0), and
+E305 (expected 2 blank lines after end of function or class):
+
+```python
+import python_ta
+python_ta.check_all(config={"pycodestyle-ignore": ["E302", "E305"]})
+```
 
 (R0133)=
 

@@ -1,5 +1,7 @@
 import pycodestyle
+from astroid import nodes
 from pylint.checkers import BaseRawFileChecker
+from pylint.lint import PyLinter
 
 
 class PycodestyleChecker(BaseRawFileChecker):
@@ -21,7 +23,7 @@ class PycodestyleChecker(BaseRawFileChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def process_module(self, node):
+    def process_module(self, node: nodes.NodeNG):
         style_guide = pycodestyle.StyleGuide(
             paths=[node.stream().name],
             reporter=JSONReport,
@@ -42,6 +44,6 @@ class JSONReport(pycodestyle.StandardReport):
         ]
 
 
-def register(linter):
+def register(linter: PyLinter):
     """required method to auto register this checker"""
     linter.register_checker(PycodestyleChecker(linter))

@@ -6,6 +6,7 @@ from typing import Generator, Set, Union
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
@@ -30,16 +31,16 @@ class PossiblyUndefinedChecker(BaseChecker):
         self._possibly_undefined: Set[nodes.Name] = set()
 
     @only_required_for_messages("possibly-undefined")
-    def visit_name(self, node):
+    def visit_name(self, node: nodes.Name):
         """Adds message if there exists a path from the start block to node where
         a variable used by node might not be defined."""
         if node in self._possibly_undefined:
             self.add_message("possibly-undefined", node=node)
 
-    def visit_module(self, node):
+    def visit_module(self, node: nodes.Module):
         self._analyze(node)
 
-    def visit_functiondef(self, node):
+    def visit_functiondef(self, node: nodes.FunctionDef):
         self._analyze(node)
 
     def _analyze(self, node: Union[nodes.Module, nodes.FunctionDef]) -> None:
@@ -147,5 +148,5 @@ class PossiblyUndefinedChecker(BaseChecker):
             yield from multiple_nodes(statement.get_children())
 
 
-def register(linter):
+def register(linter: PyLinter):
     linter.register_checker(PossiblyUndefinedChecker(linter))

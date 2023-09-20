@@ -4,6 +4,7 @@
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 from python_ta.utils import _is_in_main
 
@@ -45,7 +46,7 @@ class IOFunctionChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("forbidden-IO-function")
-    def visit_call(self, node):
+    def visit_call(self, node: nodes.Call):
         if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
@@ -73,5 +74,5 @@ class IOFunctionChecker(BaseChecker):
                         self.add_message("forbidden-IO-function", node=node, args=name)
 
 
-def register(linter):
+def register(linter: PyLinter):
     linter.register_checker(IOFunctionChecker(linter))

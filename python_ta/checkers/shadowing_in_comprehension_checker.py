@@ -3,6 +3,7 @@
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class ShadowingInComprehensionChecker(BaseChecker):
@@ -31,5 +32,5 @@ class ShadowingInComprehensionChecker(BaseChecker):
                 self.add_message("shadowing-in-comprehension", node=node.target, args=args)
 
 
-def register(linter):
+def register(linter: PyLinter):
     linter.register_checker(ShadowingInComprehensionChecker(linter))

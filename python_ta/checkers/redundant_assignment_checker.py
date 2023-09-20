@@ -13,6 +13,7 @@ from typing import List, Set, Union
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
@@ -139,5 +140,5 @@ class RedundantAssignmentChecker(BaseChecker):
         return assigns.difference(kills)
 
 
-def register(linter):
+def register(linter: PyLinter):
     linter.register_checker(RedundantAssignmentChecker(linter))

@@ -5,6 +5,7 @@ from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
 from pylint.checkers.base.name_checker.checker import DEFAULT_PATTERNS
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class TopLevelCodeChecker(BaseChecker):
@@ -22,7 +23,7 @@ class TopLevelCodeChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("forbidden-top-level-code")
-    def visit_module(self, node):
+    def visit_module(self, node: nodes.Module):
         for statement in node.body:
             if not (
                 _is_import(statement)
@@ -34,21 +35,21 @@ class TopLevelCodeChecker(BaseChecker):
 
 
 # Helper functions
-def _is_import(statement) -> bool:
+def _is_import(statement: nodes.NodeNG) -> bool:
     """
     Return whether or not <statement> is an Import or an ImportFrom.
     """
     return isinstance(statement, (nodes.Import, nodes.ImportFrom))
 
 
-def _is_definition(statement) -> bool:
+def _is_definition(statement: nodes.NodeNG) -> bool:
     """
     Return whether or not <statement> is a function definition or a class definition.
     """
     return isinstance(statement, (nodes.FunctionDef, nodes.ClassDef))
 
 
-def _is_allowed_assignment(statement) -> bool:
+def _is_allowed_assignment(statement: nodes.NodeNG) -> bool:
     """
     Return whether or not <statement> is a constant assignment or type alias assignment.
     """
@@ -66,7 +67,7 @@ def _is_allowed_assignment(statement) -> bool:
     )
 
 
-def _is_main_block(statement) -> bool:
+def _is_main_block(statement: nodes.NodeNG) -> bool:
     """
     Return whether or not <statement> is the main block.
     """
@@ -83,5 +84,5 @@ def _is_main_block(statement) -> bool:
     )
 
 
-def register(linter):
+def register(linter: PyLinter):
     linter.register_checker(TopLevelCodeChecker(linter))

@@ -88,7 +88,7 @@ Simeon Krastnikov,
 Ryan Lee,
 Hayley Lin,
 Bruce Liu,
-Merrick Liu
+Merrick Liu,
 Wendy Liu,
 Yibing (Amy) Lu,
 Shweta Mogalapalli,

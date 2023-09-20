@@ -2115,7 +2115,7 @@ if __name__ == '__main__':
 
 ### Forbidden IO function (E9998)
 
-Input / output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
+Input/output functions ([`input`], [`open`] and [`print`]) should not be used unless explicitly
 required. If `print` calls are used to debug the code, they should be removed prior to submission.
 
 Example:
@@ -2124,11 +2124,43 @@ Example:
 
 ```
 
+By default, there are no input/output functions ([`input`], [`open`] and [`print`]) allowed.
+However, users may want to specify the permissible functions for utilizing input/output operations.
+Use the `allowed-io` option to specify **a list of function names** where input/output functions are allowed.
+For example, suppose the user defined a Python function as follows:
+
+```python
+def hello_world() -> None:
+    """The first steps in learning Python"""
+
+    print('Hello World')    # Error on this line (print is an I/O function)
+```
+
+Use the following configuration to allow the usage of an input/output function ([`print`] in this case):
+
+```python
+import python_ta
+python_ta.check_all(config={
+    'allowed-io': ['hello_world']
+})
+```
+
 The exception is calling IO functions inside the main block, which is allowed.
 
 ```python
 if __name__ == "__main__":
     name = input()
+```
+
+By default, [`input`], [`open`] and [`print`] are not allowed. However, you can choose which I/O functions specifically to disallow using the `forbidden-io-functions`
+option. This takes a list of function names that should not be used. For example,
+use the following configuration to forbid the use of [`print`] but allow [`input`] and [`open`]:
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "forbidden-io-functions": ["print"]
+})
 ```
 
 (E9996)=
@@ -2486,6 +2518,16 @@ These errors do not affect the functionality of your code, but can affect its re
 The error messages display how to fix them (e.g., by adding spaces or adding/removing blank lines).
 
 See also: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)
+
+By default, all styling guidelines checked by `pycodestyle` are reported. To ignore a specific check, use the
+`pycodestyle-ignore` option. This takes in a list of error codes from [pycodestyle error codes](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
+to ignore. For example, use the following configuration to ignore E302 (expected 2 blank lines, found 0), and
+E305 (expected 2 blank lines after end of function or class):
+
+```python
+import python_ta
+python_ta.check_all(config={"pycodestyle-ignore": ["E302", "E305"]})
+```
 
 (R0133)=
 

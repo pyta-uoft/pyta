@@ -1169,6 +1169,30 @@ lines: 1-3
 ---
 ```
 
+PythonTA allows you to specify all the modules that you wish to allow for a particular file
+using the `allowed-import-modules` configuration option:
+
+```python
+import python_ta
+python_ta.check_all(..., config={'allowed-import-modules': ["random"]})
+```
+
+You can specify any additional modules you want to allow for import using the
+`extra-imports` configuration option:
+
+```python
+import python_ta
+python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
+```
+
+You can also use a configuration file to specify both the `allowed-import-modules` and `extra-imports`.
+
+```toml
+[FORBIDDEN IMPORT]
+allowed-import-modules = random
+extra-imports = math, tkinter
+```
+
 (E0401)=
 
 ### Import error (E0401)

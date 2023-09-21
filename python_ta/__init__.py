@@ -380,11 +380,11 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
         print(
             "[ERROR] python_ta could not check your code due to an "
             + "invalid character. Please check the following lines "
-            "in your file and all characters that are marked with a  ."
+            "in your file and all characters that are marked with a �."
         )
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):
-                if " " in line:
+                if "�" in line:
                     print(f"  Line {i}: {line}", end="")
         return False
     return True

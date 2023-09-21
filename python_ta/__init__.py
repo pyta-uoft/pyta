@@ -40,6 +40,7 @@ import os
 import sys
 import tokenize
 import webbrowser
+from builtins import FileNotFoundError
 from os import listdir
 from typing import AnyStr, Generator, List, Optional, TextIO, Union
 

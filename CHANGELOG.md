@@ -7,6 +7,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Bug fixes
+
+- Fix `naming-convention-violation` bug where `_` was considered an invalid variable name.
+- Fix `naming-convention-violation` bug where top-level constants were being checked as regular variable names.
+
 ### Enhancements
 
 - Created many custom renderers to make the code snippets for `pep8-errors` easier to understand.

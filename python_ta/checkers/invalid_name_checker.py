@@ -277,10 +277,6 @@ class InvalidNameChecker(BaseChecker):
     """
 
     name = "naming_convention_violation"
-    # Template of displayed message will include the following:
-    #   1. Describe the variable name type (e.g. `module`, `const`, etc.) and the name itself.
-    #   2. Explanation of how the name violates the naming convention and suggest a
-    #   correction(s), if appropriate.
     msgs = {
         "C9103": (
             "%s",
@@ -293,9 +289,6 @@ class InvalidNameChecker(BaseChecker):
             "Used when the name doesn't conform to standard Python naming conventions.",
         ),
     }
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     @only_required_for_messages("module-name-violation")
     def visit_module(self, node: nodes.Module) -> None:
@@ -468,5 +461,5 @@ class InvalidNameChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
-    """Register this checker to the linter."""
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(InvalidNameChecker(linter))

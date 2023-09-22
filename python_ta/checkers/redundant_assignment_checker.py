@@ -18,9 +18,16 @@ from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
 
 class RedundantAssignmentChecker(BaseChecker):
-    # name is the same as file name but without _checker part
+    """A checker class for redundant assignment statements in the program.
+    An assignment statement is redundant if it satisfies the following two properties:
+
+    1. Every path from a definition of a variable `v` to its first usage
+    goes through at least one re-definition of `v`.
+
+    2. Removing the statement from the program does not in any way change
+    the behavior of the program."""
+
     name = "redundant_assignment"
-    # use dashes for connecting words in message symbol
     msgs = {
         "E9959": (
             "This assignment statement is redundant;" " You can remove it from the program.",
@@ -29,27 +36,28 @@ class RedundantAssignmentChecker(BaseChecker):
         )
     }
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
     def __init__(self, linter=None):
         super().__init__(linter=linter)
         self._redundant_assignment: Set[nodes.Assign] = set()
 
     @only_required_for_messages("redundant-assignment")
     def visit_assign(self, node: nodes.Assign):
+        """Visit the assign node"""
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
     @only_required_for_messages("redundant-assignment")
     def visit_augassign(self, node: nodes.AugAssign):
+        """ "Visit the augmented assign node"""
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
     def visit_module(self, node: nodes.Module):
+        """Visit the module"""
         self._analyze(node)
 
     def visit_functiondef(self, node: nodes.FunctionDef):
+        """Visit the function definition"""
         self._analyze(node)
 
     def _analyze(self, node: Union[nodes.Module, nodes.FunctionDef]) -> None:
@@ -140,4 +148,5 @@ class RedundantAssignmentChecker(BaseChecker):
 
 
 def register(linter):
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(RedundantAssignmentChecker(linter))

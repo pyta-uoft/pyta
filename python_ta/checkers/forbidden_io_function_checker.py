@@ -11,6 +11,10 @@ FORBIDDEN_BUILTIN = ["input", "print", "open"]
 
 
 class IOFunctionChecker(BaseChecker):
+    """A checker class to report on the use of disallowed I/O functions.
+
+    Use options to specify the forbidden io functions and the allowed io functions."""
+
     name = "IO_Function"
     msgs = {
         "E9998": (
@@ -40,9 +44,6 @@ class IOFunctionChecker(BaseChecker):
             },
         ),
     )
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     @only_required_for_messages("forbidden-IO-function")
     def visit_call(self, node):
@@ -74,4 +75,5 @@ class IOFunctionChecker(BaseChecker):
 
 
 def register(linter):
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(IOFunctionChecker(linter))

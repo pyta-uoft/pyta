@@ -11,9 +11,10 @@ from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
 
 class PossiblyUndefinedChecker(BaseChecker):
-    # name is the same as file name but without _checker part
+    """A checker class that reports variables that have the possibility of being undefined when a statement
+    is executed"""
+
     name = "possibly_undefined"
-    # use dashes for connecting words in message symbol
     msgs = {
         "E9969": (
             "This variable might not be defined when this statement is executed.",
@@ -21,9 +22,6 @@ class PossiblyUndefinedChecker(BaseChecker):
             "Reported when a statement uses a variable that might not be assigned.",
         )
     }
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     def __init__(self, linter=None):
         super().__init__(linter=linter)
@@ -37,9 +35,11 @@ class PossiblyUndefinedChecker(BaseChecker):
             self.add_message("possibly-undefined", node=node)
 
     def visit_module(self, node):
+        """Visits the module node"""
         self._analyze(node)
 
     def visit_functiondef(self, node):
+        """Visits the function definition"""
         self._analyze(node)
 
     def _analyze(self, node: Union[nodes.Module, nodes.FunctionDef]) -> None:
@@ -148,4 +148,5 @@ class PossiblyUndefinedChecker(BaseChecker):
 
 
 def register(linter):
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(PossiblyUndefinedChecker(linter))

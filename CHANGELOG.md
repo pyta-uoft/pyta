@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.6.2] - 2023-09-22
+
 ### Bug fixes
 
 - Fix `naming-convention-violation` bug where `_` was considered an invalid variable name.

@@ -1,4 +1,5 @@
 import inspect
+import os
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -41,14 +42,17 @@ class ForbiddenImportChecker(BaseChecker):
     @only_required_for_messages("forbidden-import")
     def visit_import(self, node):
         """visit an Import node"""
+        local_files = self.get_local_files()
+
         temp = [
             name
             for name in node.names
             if name[0] not in self.linter.config.allowed_import_modules
             and name[0] not in self.linter.config.extra_imports
+            and name[0] not in local_files
         ]
 
-        if temp != []:
+        if temp:
             self.add_message(
                 "forbidden-import",
                 node=node,
@@ -61,6 +65,7 @@ class ForbiddenImportChecker(BaseChecker):
         if (
             node.modname not in self.linter.config.allowed_import_modules
             and node.modname not in self.linter.config.extra_imports
+            and node.modname not in self.get_local_files()
         ):
             self.add_message("forbidden-import", node=node, args=(node.modname, node.lineno))
 
@@ -75,10 +80,18 @@ class ForbiddenImportChecker(BaseChecker):
                     if (
                         node.args[0].value not in self.linter.config.allowed_import_modules
                         and node.args[0].value not in self.linter.config.extra_imports
+                        and node.args[0].value not in self.get_local_files()
                     ):
                         args = (node.args[0].value, node.lineno)
                         # add the message
                         self.add_message("forbidden-import", node=node, args=args)
+
+    def get_local_files(self):
+        return [
+            f[:-3]
+            for f in os.listdir(os.path.dirname(self.linter.current_file))
+            if f.endswith(".py")
+        ]
 
 
 def register(linter):

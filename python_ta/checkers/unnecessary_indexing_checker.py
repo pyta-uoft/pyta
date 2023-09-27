@@ -1,6 +1,6 @@
 """checker for unnecessary indexing in a loop.
 """
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import astroid
 from astroid import nodes

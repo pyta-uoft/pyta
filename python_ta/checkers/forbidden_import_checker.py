@@ -86,7 +86,14 @@ class ForbiddenImportChecker(BaseChecker):
                         # add the message
                         self.add_message("forbidden-import", node=node, args=args)
 
-    def get_local_files(self):
+    def get_local_files(self) -> list:
+        """
+        Returns the list of the local files given by self.linter.current_file
+        Returns empty list if current_file is not defined
+        """
+        if self.linter.current_file is None:
+            return []
+
         return [
             f[:-3]
             for f in os.listdir(os.path.dirname(self.linter.current_file))

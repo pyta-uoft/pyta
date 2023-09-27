@@ -1,7 +1,6 @@
 import os
 import sys
 import webbrowser
-from base64 import b64encode
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -9,7 +8,6 @@ from jinja2 import Environment, FileSystemLoader
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
-from pylint.interfaces import IReporter
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter

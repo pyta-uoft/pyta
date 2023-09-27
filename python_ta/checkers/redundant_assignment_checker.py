@@ -8,7 +8,7 @@ An assignment statement is redundant if it satisfies the following two propertie
     2. Removing the statement from the program does not in any way change
     the behavior of the program.
 """
-from typing import List, Set, Union
+from typing import Set, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker

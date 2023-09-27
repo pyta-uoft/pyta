@@ -94,6 +94,19 @@ python_ta.check_all(..., output='pyta_output.txt')
 This options is compatible with all of PythonTA's reporter types, but we do not recommend its use with ColorReporter,
 as this reporter uses terminal-specific characters to colourize text displayed on your screen.
 
+## Overwrite Error Messages
+
+By default, PythonTA overwrites Pylint's error messages with its own to make them more reader-friendly. You can specify whether
+you want Pylint's default error messages instead using the `overwrite-error-messages` option. For example, use the following configuration to
+see Pylint's error messages:
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "overwrite-error-messages": False
+})
+```
+
 ## Forbidden Imports
 
 By default, PythonTA has a list of modules that are allowed to be imported. You can specify any additional modules using the `extra-imports` configuration option, which you can set in a call to `python_ta.check_all` or in a configuration file.

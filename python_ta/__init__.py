@@ -120,10 +120,12 @@ def _check(
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
     messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
-
+    overwrite_error_messages = linter.config.overwrite_error_messages
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(messages_config)  # Monkeypatch pylint (override certain methods)
+        patch_all(
+            messages_config, overwrite_error_messages
+        )  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
@@ -361,6 +363,15 @@ def reset_linter(
                 "type": "string",
                 "metavar": "<messages_config>",
                 "help": "Path to patch config toml file.",
+            },
+        ),
+        (
+            "overwrite-error-messages",
+            {
+                "default": True,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "Overwrite the default pylint error messages",
             },
         ),
     )

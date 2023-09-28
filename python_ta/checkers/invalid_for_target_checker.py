@@ -1,7 +1,5 @@
 """Checker for target of for loop or comprehension in subscript form.
 """
-from typing import List, Union
-
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages

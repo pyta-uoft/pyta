@@ -1,7 +1,5 @@
 from typing import Dict, List
 
-from pylint.interfaces import IReporter
-
 from .core import NewMessage, PythonTaReporter
 
 

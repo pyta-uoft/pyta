@@ -1,9 +1,7 @@
-""" Python Teaching Assistant - Configuration
-
+"""
 Within the config submodule, this .py file encompasses functions responsible
  for managing all configuration-related tasks.
 """
-__version__ = "2.6.2.dev"  # Version number
 
 import os
 import sys
@@ -16,14 +14,8 @@ from pylint.config.config_initialization import _config_initialization
 from pylint.config.exceptions import _UnrecognizedOptionError
 from pylint.lint import PyLinter
 
-HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
-# check the python version
-if sys.version_info < (3, 7, 0):
-    print("[WARNING] You need Python 3.7 or later to run PythonTA.")
-
-
-def _find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
+def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
     """Search for a `.pylintrc` configuration file provided in same (user)
     location as the source file to check.
     Return absolute path to the file, or None.
@@ -38,13 +30,13 @@ def _find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
         return os.path.join(curr_dir, "config", "pylintrc")
 
 
-def _load_config(linter: PyLinter, config_location: AnyStr) -> None:
+def load_config(linter: PyLinter, config_location: AnyStr) -> None:
     """Load configuration into the linter."""
     _config_initialization(linter, args_list=[], config_file=config_location)
     linter.config_file = config_location
 
 
-def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
+def override_config(linter: PyLinter, config_location: AnyStr) -> None:
     """Override the default linter configuration options (if possible).
 
     Snippets taken from pylint.config.config_initialization.
@@ -72,7 +64,7 @@ def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
     linter.config_file = config_location
 
 
-def _load_messages_config(path: str, default_path: str) -> dict:
+def load_messages_config(path: str, default_path: str) -> dict:
     """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files."""
     merge_into = toml.load(default_path)

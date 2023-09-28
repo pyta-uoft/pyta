@@ -1,6 +1,7 @@
 """checker for global variables
 """
 import re
+from typing import List
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -25,42 +26,42 @@ class GlobalVariablesChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def __init__(self, linter=None):
+    def __init__(self, linter=None) -> None:
         super().__init__(linter)
         self.import_names = []
 
-    def visit_global(self, node: nodes.Global):
+    def visit_global(self, node: nodes.Global) -> None:
         args = "the keyword 'global' is used on line {}".format(node.lineno)
         self.add_message("forbidden-global-variables", node=node, args=args)
 
-    def visit_assignname(self, node: nodes.AssignName):
+    def visit_assignname(self, node: nodes.AssignName) -> None:
         """Allow global constant variables (uppercase) and type aliases (type alias pattern), but issue messages for
         all other globals.
         """
         self._inspect_vars(node)
 
-    def visit_name(self, node: nodes.Name):
+    def visit_name(self, node: nodes.Name) -> None:
         """Allow global constant variables (uppercase) and type aliases (type alias pattern), but issue messages for
         all other globals.
         """
         self._inspect_vars(node)
 
-    def visit_import(self, node: nodes.Import):
+    def visit_import(self, node: nodes.Import) -> None:
         """Save the names of imports, to prevent mistaking for global vars."""
         self._store_name_or_alias(node)
 
-    def visit_importfrom(self, node: nodes.ImportFrom):
+    def visit_importfrom(self, node: nodes.ImportFrom) -> None:
         """Save the names of imports, to prevent mistaking for global vars."""
         self._store_name_or_alias(node)
 
-    def _store_name_or_alias(self, node: nodes.NodeNG):
+    def _store_name_or_alias(self, node: nodes.NodeNG) -> None:
         for name_tuple in node.names:
             if name_tuple[1] is not None:
                 self.import_names.append(name_tuple[1])  # aliased names
             else:
                 self.import_names.append(name_tuple[0])  # no alias
 
-    def _inspect_vars(self, node: nodes.NodeNG):
+    def _inspect_vars(self, node: nodes.NodeNG) -> None:
         """Allows constant, global variables (i.e. uppercase) and type aliases (i.e. type alias pattern), but issue
         messages for all other global variables.
         """
@@ -80,7 +81,7 @@ class GlobalVariablesChecker(BaseChecker):
                 self.add_message("forbidden-global-variables", node=node, args=args)
 
 
-def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG):
+def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG) -> List[nodes.NodeNG]:
     """Return a list of all top-level Name or AssignName nodes for a given
     global, non-constant and non-type alias variable.
     """
@@ -104,6 +105,6 @@ def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG):
     return node_list
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     """required method to auto register this checker"""
     linter.register_checker(GlobalVariablesChecker(linter))

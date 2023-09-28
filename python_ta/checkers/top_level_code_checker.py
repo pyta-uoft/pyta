@@ -23,7 +23,7 @@ class TopLevelCodeChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("forbidden-top-level-code")
-    def visit_module(self, node: nodes.Module):
+    def visit_module(self, node: nodes.Module) -> None:
         for statement in node.body:
             if not (
                 _is_import(statement)
@@ -84,5 +84,5 @@ def _is_main_block(statement: nodes.NodeNG) -> bool:
     )
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(TopLevelCodeChecker(linter))

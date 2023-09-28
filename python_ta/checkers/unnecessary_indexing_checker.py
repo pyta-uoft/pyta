@@ -169,5 +169,5 @@ def _index_name_nodes(
     ]
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(UnnecessaryIndexingChecker(linter))

@@ -23,7 +23,7 @@ class TypeInferenceChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("type-error")
-    def visit_default(self, node: nodes.NodeNG):
+    def visit_default(self, node: nodes.NodeNG) -> None:
         if hasattr(node, "inf_type"):
             x = node.inf_type
             if isinstance(x, TypeFail):
@@ -37,5 +37,5 @@ class TypeInferenceChecker(BaseChecker):
                 self.add_message("type-error", args=x.msg, node=node)
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(TypeInferenceChecker(linter))

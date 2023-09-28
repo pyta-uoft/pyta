@@ -26,12 +26,12 @@ class OneIterationChecker(BaseChecker):
 
     # pass in message symbol as a parameter of only_required_for_messages
     @only_required_for_messages("one-iteration")
-    def visit_for(self, node: nodes.For):
+    def visit_for(self, node: nodes.For) -> None:
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
     @only_required_for_messages("one-iteration")
-    def visit_while(self, node: nodes.While):
+    def visit_while(self, node: nodes.While) -> None:
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
@@ -65,5 +65,5 @@ class OneIterationChecker(BaseChecker):
         return True
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(OneIterationChecker(linter))

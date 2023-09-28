@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import pycodestyle
 from astroid import nodes
 from pylint.checkers import BaseRawFileChecker
@@ -23,7 +25,7 @@ class PycodestyleChecker(BaseRawFileChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def process_module(self, node: nodes.NodeNG):
+    def process_module(self, node: nodes.NodeNG) -> None:
         style_guide = pycodestyle.StyleGuide(
             paths=[node.stream().name],
             reporter=JSONReport,
@@ -36,7 +38,7 @@ class PycodestyleChecker(BaseRawFileChecker):
 
 
 class JSONReport(pycodestyle.StandardReport):
-    def get_file_results(self):
+    def get_file_results(self) -> List[Tuple]:
         self._deferred_print.sort()
         return [
             (line_number, f"line {line_number}, column {offset}: {text}")
@@ -44,6 +46,6 @@ class JSONReport(pycodestyle.StandardReport):
         ]
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     """required method to auto register this checker"""
     linter.register_checker(PycodestyleChecker(linter))

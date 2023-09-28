@@ -38,5 +38,5 @@ class InvalidForTargetChecker(BaseChecker):
             self.add_message("invalid-for-target", node=target, args=target.as_string())
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(InvalidForTargetChecker(linter))

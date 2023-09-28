@@ -46,7 +46,7 @@ class IOFunctionChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("forbidden-IO-function")
-    def visit_call(self, node: nodes.Call):
+    def visit_call(self, node: nodes.Call) -> None:
         if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
@@ -74,5 +74,5 @@ class IOFunctionChecker(BaseChecker):
                         self.add_message("forbidden-IO-function", node=node, args=name)
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(IOFunctionChecker(linter))

@@ -64,6 +64,6 @@ class MissingSpaceInDoctestChecker(BaseChecker):
         return match
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     """Required method to auto register this checker"""
     linter.register_checker(MissingSpaceInDoctestChecker(linter))

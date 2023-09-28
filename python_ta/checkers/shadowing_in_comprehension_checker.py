@@ -20,7 +20,7 @@ class ShadowingInComprehensionChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("shadowing-in-comprehension")
-    def visit_comprehension(self, node: nodes.Comprehension):
+    def visit_comprehension(self, node: nodes.Comprehension) -> None:
         if isinstance(node.target, nodes.Tuple):
             for target in node.target.elts:
                 if target.name in node.parent.frame().locals and target.name != "_":
@@ -32,5 +32,5 @@ class ShadowingInComprehensionChecker(BaseChecker):
                 self.add_message("shadowing-in-comprehension", node=node.target, args=args)
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(ShadowingInComprehensionChecker(linter))

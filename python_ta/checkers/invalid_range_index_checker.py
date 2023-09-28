@@ -19,7 +19,7 @@ class InvalidRangeIndexChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("invalid-range-index")
-    def visit_call(self, node: nodes.Call):
+    def visit_call(self, node: nodes.Call) -> None:
         if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
@@ -52,6 +52,6 @@ class InvalidRangeIndexChecker(BaseChecker):
                         self.add_message("invalid-range-index", node=node, args=args)
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     """required method to auto register this checker"""
     linter.register_checker(InvalidRangeIndexChecker(linter))

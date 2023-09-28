@@ -121,7 +121,7 @@ def _check(
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-    messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
+    messages_config = load_messages_config(messages_config_path, messages_config_default_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -304,13 +304,13 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
-    default_config_path = _find_local_config(os.path.dirname(__file__))
-    set_config = _load_config
+    default_config_path = find_local_config(os.path.dirname(__file__))
+    set_config = load_config
 
     if load_default_config:
-        _load_config(linter, default_config_path)
+        load_config(linter, default_config_path)
         # If we do specify to load the default config, we just need to override the options later.
-        set_config = _override_config
+        set_config = override_config
 
     if isinstance(config, str) and config != "":
         set_config(linter, config)
@@ -318,7 +318,7 @@ def reset_linter(
         # If available, use config file at directory of the file being linted.
         pylintrc_location = None
         if file_linted:
-            pylintrc_location = _find_local_config(file_linted)
+            pylintrc_location = find_local_config(file_linted)
 
         # Load or override the options if there is a config file in the current directory.
         if pylintrc_location:

@@ -1,4 +1,4 @@
-"""A checker used for identifying names that don't conform to Python naming conventions."""
+"""Checker used for identifying names that don't conform to Python naming conventions."""
 
 import re
 from typing import List, Optional

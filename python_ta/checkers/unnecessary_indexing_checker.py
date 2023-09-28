@@ -1,4 +1,4 @@
-"""checker for unnecessary indexing in a loop.
+"""Checker for unnecessary indexing in a loop.
 """
 from typing import List, Optional, Tuple, Union
 

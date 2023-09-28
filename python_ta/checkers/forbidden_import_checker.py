@@ -1,4 +1,4 @@
-"""checker for use of forbidden imports.
+"""Checker or use of forbidden imports.
 """
 
 import inspect

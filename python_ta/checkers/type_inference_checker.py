@@ -1,4 +1,4 @@
-"""checker for type inference errors.
+"""Checker for type inference errors.
 """
 
 from pylint.checkers import BaseChecker

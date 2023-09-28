@@ -1,4 +1,4 @@
-"""checker for use of I/O functions.
+"""Checker for use of I/O functions.
 """
 
 from astroid import nodes

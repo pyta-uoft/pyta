@@ -1,4 +1,4 @@
-"""checker for type annotation.
+"""Checker for type annotation.
 """
 
 from astroid import Uninferable, nodes

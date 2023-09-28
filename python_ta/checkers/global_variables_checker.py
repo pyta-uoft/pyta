@@ -1,4 +1,4 @@
-"""checker for global variables
+"""Checker for global variables
 """
 import re
 

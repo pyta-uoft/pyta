@@ -1,4 +1,4 @@
-"""checker for variable shadowing in a comprehension.
+"""Checker for variable shadowing in a comprehension.
 """
 from astroid import nodes
 from pylint.checkers import BaseChecker

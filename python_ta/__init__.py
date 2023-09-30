@@ -21,13 +21,12 @@ import builtins
 
 from pylint.lint import PyLinter
 
-from python_ta.config import (
+from .config import (
     find_local_config,
     load_config,
     load_messages_config,
     override_config,
 )
-
 from .reporters.core import PythonTaReporter
 
 try:

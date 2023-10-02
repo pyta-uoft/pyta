@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fix `naming-convention-violation` bug where `_` was considered an invalid variable name.
 - Fix `naming-convention-violation` bug where top-level constants were being checked as regular variable names.
+- Don't throw `forbidden-import` error when importing local files
 
 ### Enhancements
 

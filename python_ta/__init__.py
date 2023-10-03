@@ -121,7 +121,7 @@ def _check(
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
 
-    messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
+    messages_config = load_messages_config(messages_config_path, messages_config_default_path)
     overwrite_error_messages = linter.config.overwrite_error_messages
 
     global PYLINT_PATCHED

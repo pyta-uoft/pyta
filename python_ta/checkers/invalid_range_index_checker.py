@@ -26,7 +26,12 @@ class InvalidRangeIndexChecker(BaseChecker):
             if not (name in node.frame() or name in node.root()) and name == "range":
                 arg = node.args  # the arguments of 'range' call
                 # guard nodes (e.g. Name) not properly handled by literal_eval.
-                if any([not isinstance(item, nodes.Const) for item in arg]):
+                if any(
+                    [
+                        not isinstance(item, nodes.Const) and not isinstance(item, nodes.UnaryOp)
+                        for item in arg
+                    ]
+                ):
                     return
                 eval_parm = list(map(lambda z: literal_eval(z.as_string()), arg))
 
@@ -44,8 +49,8 @@ class InvalidRangeIndexChecker(BaseChecker):
                     if (
                         abs(eval_parm[2]) >= abs(eval_parm[0] - eval_parm[1])
                         or eval_parm[2] == 0
-                        or (eval_parm[0] > eval_parm[1] and eval_parm[2] < 0)
-                        or (eval_parm[0] < eval_parm[1] and eval_parm[2] > 0)
+                        or (eval_parm[0] > eval_parm[1] and eval_parm[2] > 0)
+                        or (eval_parm[0] < eval_parm[1] and eval_parm[2] < 0)
                     ):
                         args = "{}".format(node.lineno)
                         self.add_message("invalid-range-index", node=node, args=args)

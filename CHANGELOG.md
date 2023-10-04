@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fix `naming-convention-violation` bug where `_` was considered an invalid variable name.
 - Fix `naming-convention-violation` bug where top-level constants were being checked as regular variable names.
+- Fix `invalid-range-index` bug where `range(1, 5, 3)` would not pass the check
 
 ### Enhancements
 

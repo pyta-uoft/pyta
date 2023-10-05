@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+- Fix `invalid-range-index` bug where valid range calls were flagged as invalid
+
 ## [2.6.2] - 2023-09-22
 
 ### Bug fixes

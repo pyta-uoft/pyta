@@ -95,7 +95,6 @@ class PlainReporter(PythonTaReporter):
         if linetype == LineType.ERROR:
             start_col = slice_.start or 0
             end_col = slice_.stop or len(text)
-
             if text[:start_col]:
                 # by default, self._colourify returns the text itself
                 snippet += self._colourify("black", text[:start_col])
@@ -106,7 +105,6 @@ class PlainReporter(PythonTaReporter):
             snippet = self._overline_helper(snippet=snippet, text=text[slice_], prespace=prespace)
         elif linetype == LineType.CONTEXT:
             snippet += self._colourify("grey", text)
-            # snippet += "‾"
         elif linetype == LineType.OTHER:
             snippet += text
         elif linetype == LineType.DOCSTRING:

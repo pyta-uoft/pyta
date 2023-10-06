@@ -44,16 +44,16 @@ class ColorReporter(PlainReporter):
         Called by _build_snippet, relies on _colourify.
         """
         snippet = self._add_line_number(lineno, linetype)
+
         if linetype == LineType.ERROR:
             start_col = slice_.start or 0
             end_col = slice_.stop or len(text)
+
             if text[:start_col]:
                 snippet += self._colourify("black", text[:start_col])
-            prespace = snippet
             snippet += self._colourify("highlight", text[slice_])
             if text[end_col:]:
                 snippet += self._colourify("black", text[end_col:])
-            snippet = self._overline_helper(snippet=snippet, text=text[slice_], prespace=prespace)
         elif linetype == LineType.CONTEXT:
             snippet += self._colourify("grey", text)
         elif linetype == LineType.OTHER:
@@ -61,12 +61,7 @@ class ColorReporter(PlainReporter):
         elif linetype == LineType.DOCSTRING:
             space_c = len(text) - len(text.lstrip(" "))
             snippet += space_c * self._SPACE
-            prespace = snippet  # at this point, we just have spaces
             snippet += self._colourify("highlight", text.lstrip(" "))
-            snippet = self._overline_helper(
-                snippet=snippet, text=text.lstrip(" "), prespace=prespace
-            )
-            snippet += space_c * self._SPACE
 
         snippet += self._BREAK
         return snippet
@@ -82,5 +77,6 @@ class ColorReporter(PlainReporter):
         """
         colour = cls._COLOURING[colour_class]
         new_text = text.lstrip(" ")
+        space_count = len(text) - len(new_text)
         new_text = new_text.replace(" ", cls._SPACE)
-        return colour + new_text + cls._COLOURING["reset"]
+        return (space_count * cls._SPACE) + colour + new_text + cls._COLOURING["reset"]

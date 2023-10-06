@@ -91,7 +91,6 @@ class PlainReporter(PythonTaReporter):
         Called by _build_snippet, relies on _colourify.
         """
         snippet = self._add_line_number(lineno, linetype)
-
         if linetype == LineType.ERROR:
             start_col = slice_.start or 0
             end_col = slice_.stop or len(text)

@@ -43,28 +43,7 @@ class ColorReporter(PlainReporter):
 
         Called by _build_snippet, relies on _colourify.
         """
-        snippet = self._add_line_number(lineno, linetype)
-
-        if linetype == LineType.ERROR:
-            start_col = slice_.start or 0
-            end_col = slice_.stop or len(text)
-
-            if text[:start_col]:
-                snippet += self._colourify("black", text[:start_col])
-            snippet += self._colourify("highlight", text[slice_])
-            if text[end_col:]:
-                snippet += self._colourify("black", text[end_col:])
-        elif linetype == LineType.CONTEXT:
-            snippet += self._colourify("grey", text)
-        elif linetype == LineType.OTHER:
-            snippet += text
-        elif linetype == LineType.DOCSTRING:
-            space_c = len(text) - len(text.lstrip(" "))
-            snippet += space_c * self._SPACE
-            snippet += self._colourify("highlight", text.lstrip(" "))
-
-        snippet += self._BREAK
-        return snippet
+        return super(PlainReporter, self)._add_line(lineno, linetype, slice_, text)
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

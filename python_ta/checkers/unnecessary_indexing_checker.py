@@ -6,6 +6,7 @@ import astroid
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class UnnecessaryIndexingChecker(BaseChecker):
@@ -168,5 +169,5 @@ def _index_name_nodes(
     ]
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(UnnecessaryIndexingChecker(linter))

@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug fixes
 
 - Ensure pycodestyle W503, line break before binary operator, is disabled (regression from 2.6.2).
+- Don't throw `forbidden-import` error when importing local files
 
 ## [2.6.2] - 2023-09-22
 
@@ -17,7 +18,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fix `naming-convention-violation` bug where `_` was considered an invalid variable name.
 - Fix `naming-convention-violation` bug where top-level constants were being checked as regular variable names.
-- Don't throw `forbidden-import` error when importing local files
 
 ### Enhancements
 

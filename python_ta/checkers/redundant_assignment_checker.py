@@ -8,11 +8,12 @@ An assignment statement is redundant if it satisfies the following two propertie
     2. Removing the statement from the program does not in any way change
     the behavior of the program.
 """
-from typing import List, Set, Union
+from typing import Set, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
 
@@ -32,24 +33,24 @@ class RedundantAssignmentChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def __init__(self, linter=None):
+    def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
         self._redundant_assignment: Set[nodes.Assign] = set()
 
     @only_required_for_messages("redundant-assignment")
-    def visit_assign(self, node: nodes.Assign):
+    def visit_assign(self, node: nodes.Assign) -> None:
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
     @only_required_for_messages("redundant-assignment")
-    def visit_augassign(self, node: nodes.AugAssign):
+    def visit_augassign(self, node: nodes.AugAssign) -> None:
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
-    def visit_module(self, node: nodes.Module):
+    def visit_module(self, node: nodes.Module) -> None:
         self._analyze(node)
 
-    def visit_functiondef(self, node: nodes.FunctionDef):
+    def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         self._analyze(node)
 
     def _analyze(self, node: Union[nodes.Module, nodes.FunctionDef]) -> None:
@@ -139,5 +140,5 @@ class RedundantAssignmentChecker(BaseChecker):
         return assigns.difference(kills)
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(RedundantAssignmentChecker(linter))

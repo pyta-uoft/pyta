@@ -86,6 +86,7 @@ Christopher Koehler,
 David Kim,
 Simeon Krastnikov,
 Ryan Lee,
+Christopher Li,
 Hayley Lin,
 Bruce Liu,
 Merrick Liu

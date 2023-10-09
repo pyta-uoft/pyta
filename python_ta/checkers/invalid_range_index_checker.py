@@ -3,6 +3,7 @@ from ast import literal_eval
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class InvalidRangeIndexChecker(BaseChecker):
@@ -18,7 +19,7 @@ class InvalidRangeIndexChecker(BaseChecker):
     priority = -1
 
     @only_required_for_messages("invalid-range-index")
-    def visit_call(self, node):
+    def visit_call(self, node: nodes.Call) -> None:
         if isinstance(node.func, nodes.Name):
             name = node.func.name
             # ignore the name if it's not a builtin (i.e. not defined in the
@@ -56,6 +57,6 @@ def is_valid_range(start: int, stop: int, step: int) -> bool:
     return (stop - start) / step > 1
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     """required method to auto register this checker"""
     linter.register_checker(InvalidRangeIndexChecker(linter))

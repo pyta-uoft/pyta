@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.6.3] - 2023-10-09
+
 ### Bug fixes
 
 - Ensure pycodestyle W503, line break before binary operator, is disabled (regression from 2.6.2).

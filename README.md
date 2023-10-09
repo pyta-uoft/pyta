@@ -76,6 +76,7 @@ included as a library). In the Python interpreter, try running:
 Lorena Buciu,
 Simon Chen,
 Freeman Cheng,
+Ivan Chepelev,
 Nigel Fong,
 Adam Gleizer,
 Ibrahim Hasan,

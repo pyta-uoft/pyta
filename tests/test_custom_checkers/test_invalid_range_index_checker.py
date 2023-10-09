@@ -99,6 +99,21 @@ class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_call(range_node)
 
+    def test_invalid_range_zero_step(self):
+        src = """
+        range(1, 10, 0)
+        """
+        range_node = astroid.extract_node(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-range-index",
+                node=range_node,
+                args="2",
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_call(range_node)
+
 
 if __name__ == "__main__":
     import pytest

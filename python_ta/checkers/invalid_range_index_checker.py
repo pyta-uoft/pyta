@@ -41,18 +41,20 @@ class InvalidRangeIndexChecker(BaseChecker):
                     return
 
                 # set positional and default arguments of range
-                arg0 = eval_params[0] if len(args) > 1 else 0
-                arg2 = eval_params[2] if len(args) == 3 else 1
-                arg1 = eval_params[0] if len(args) == 1 else eval_params[1]
+                start = eval_params[0] if len(args) > 1 else 0
+                stop = eval_params[0] if len(args) == 1 else eval_params[1]
+                step = eval_params[2] if len(args) == 3 else 1
 
-                if not is_valid_range(arg0, arg1, arg2):
+                if not is_valid_range(start, stop, step):
                     self.add_message("invalid-range-index", node=node, args=str(node.lineno))
 
 
-def is_valid_range(arg0: int, arg1: int, arg2: int) -> bool:
+def is_valid_range(start: int, stop: int, step: int) -> bool:
     """Returns True if a range call with three arguments is valid.
     We consider a range to be valid if it has more than one element."""
-    return (arg1 - arg0) / arg2 > 1
+    if step == 0:
+        return False
+    return (stop - start) / step > 1
 
 
 def register(linter: PyLinter) -> None:

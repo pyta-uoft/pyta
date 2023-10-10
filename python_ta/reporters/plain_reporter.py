@@ -90,34 +90,17 @@ class PlainReporter(PythonTaReporter):
 
         Called by _build_snippet, relies on _colourify.
         """
-        snippet = self._add_line_number(lineno, linetype)
+        snippet_so_far = super()._add_line(lineno, linetype, slice_, text)
         if linetype == LineType.ERROR:
-            start_col = slice_.start or 0
-            end_col = slice_.stop or len(text)
-            if text[:start_col]:
-                # by default, self._colourify returns the text itself
-                snippet += self._colourify("black", text[:start_col])
-            prespace = len(snippet) * self._SPACE
-            snippet += self._colourify("highlight", text[slice_])
-            if text[end_col:]:
-                snippet += self._colourify("black", text[end_col:])
-            snippet = self._overline_helper(snippet=snippet, text=text[slice_], prespace=prespace)
-        elif linetype == LineType.CONTEXT:
-            snippet += self._colourify("grey", text)
-        elif linetype == LineType.OTHER:
-            snippet += text
-        elif linetype == LineType.DOCSTRING:
-            space_c = len(text) - len(text.lstrip(" "))
-            snippet += space_c * self._SPACE
-            prespace = snippet  # at this point, we just have spaces
-            snippet += self._colourify("highlight", text.lstrip(" "))
-            snippet = self._overline_helper(
-                snippet=snippet, text=text.lstrip(" "), prespace=prespace
-            )
-            snippet += space_c * self._SPACE
+            start = slice_.start or 0
+            prespace = (7 + start) * self._SPACE
+            snippet_so_far = self._overline_helper(snippet_so_far, text[slice_], prespace)
 
-        snippet += self._BREAK
-        return snippet
+        elif linetype == LineType.DOCSTRING:
+            prespace = (7 + len(text) - len(text.lstrip(" "))) * self._SPACE
+            snippet_so_far = self._overline_helper(snippet_so_far, text.lstrip(" "), prespace)
+
+        return snippet_so_far
 
     def _overline_helper(self, snippet: str, text: str, prespace: str) -> str:
         """
@@ -125,7 +108,7 @@ class PlainReporter(PythonTaReporter):
         part that is highlighted as ERROR. Returns the corresponding snippet as a result.
         """
         overline = "‾" * len(text)
-        snippet += self._BREAK  # So that we add overline under the line (row) that error occurs
         snippet += prespace + overline
+        snippet += self._BREAK  # So that we add overline under the line (row) that error occurs
 
         return snippet

@@ -38,13 +38,6 @@ class ColorReporter(PlainReporter):
         with colorama_text(wrap=(sys.platform == "win32"), strip=False):
             super().print_messages(level)
 
-    def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = "") -> str:
-        """Format given source code line as specified and return as str.
-
-        Called by _build_snippet, relies on _colourify.
-        """
-        return super(PlainReporter, self)._add_line(lineno, linetype, slice_, text)
-
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:
         """

@@ -3,7 +3,6 @@ import sys
 from colorama import Back, Fore, Style, colorama_text
 from pylint.interfaces import IReporter
 
-from .node_printers import LineType
 from .plain_reporter import PlainReporter
 
 

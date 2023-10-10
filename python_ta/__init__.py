@@ -14,19 +14,15 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "2.6.4.dev"  # Version number
+__version__ = "2.6.3.dev"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
 
+from pylint.config.config_file_parser import _ConfigurationFileParser
+from pylint.config.exceptions import _UnrecognizedOptionError
 from pylint.lint import PyLinter
 
-from .config import (
-    find_local_config,
-    load_config,
-    load_messages_config,
-    override_config,
-)
 from .reporters.core import PythonTaReporter
 
 try:
@@ -35,18 +31,22 @@ except AttributeError:
     pass
 
 import importlib.util
+import logging
 import os
 import sys
 import tokenize
 import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
+from pathlib import Path
 from typing import AnyStr, Generator, List, Optional, TextIO, Union
 
 import pylint.config
 import pylint.lint
 import pylint.utils
+import toml
 from astroid import MANAGER, modutils
+from pylint.config.config_initialization import _config_initialization
 from pylint.utils.pragma_parser import OPTION_PO
 
 from .patches import patch_all
@@ -55,9 +55,13 @@ from .upload import upload_to_server
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
+# configuring logger level so that it displays all messages
+logging.basicConfig(level=logging.NOTSET)
+
 # check the python version
 if sys.version_info < (3, 7, 0):
-    print("[WARNING] You need Python 3.7 or later to run PythonTA.")
+    # TODO Test Logger
+    logging.warning("[WARNING] You need Python 3.7 or later to run PythonTA.")
 
 
 # Flag to determine if we've previously patched pylint
@@ -120,7 +124,7 @@ def _check(
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-    messages_config = load_messages_config(messages_config_path, messages_config_default_path)
+    messages_config = _load_messages_config(messages_config_path, messages_config_default_path)
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -170,17 +174,17 @@ def _check(
                 current_reporter.print_messages(level)
                 if linter.config.pyta_file_permission:
                     f_paths.append(file_py)  # Appending paths for upload
-                print(
+                # TODO Test Logger
+                logging.info(
                     "[INFO] File: {} was checked using the configuration file: {}".format(
                         file_py, linter.config_file
-                    ),
-                    file=sys.stderr,
+                    )
                 )
-                print(
+                # TODO Test Logger
+                logging.info(
                     "[INFO] File: {} was checked using the messages-config file: {}".format(
                         file_py, messages_config_path
-                    ),
-                    file=sys.stderr,
+                    )
                 )
             if linter.config.pyta_error_permission:
                 errs = list(current_reporter.messages.values())
@@ -202,11 +206,93 @@ def _check(
             linter.generate_reports()
         return current_reporter
     except Exception as e:
-        print(
+        # TODO Test Logger
+        logging.error(
             "[ERROR] Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."
         )
-        print('[ERROR] Error message: "{}"'.format(e))
+        # TODO Test Logger
+        logging.error('[ERROR] Error message: "{}"'.format(e))
         raise e
+
+
+def _find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
+    """Search for a `.pylintrc` configuration file provided in same (user)
+    location as the source file to check.
+    Return absolute path to the file, or None.
+    `curr_dir` is an absolute path to a directory, containing a file to check.
+    For more info see, pylint.config.find_pylintrc
+    """
+    if curr_dir.endswith(".py"):
+        curr_dir = os.path.dirname(curr_dir)
+    if os.path.exists(os.path.join(curr_dir, "config", ".pylintrc")):
+        return os.path.join(curr_dir, "config", ".pylintrc")
+    elif os.path.exists(os.path.join(curr_dir, "config", "pylintrc")):
+        return os.path.join(curr_dir, "config", "pylintrc")
+
+
+def _load_config(linter: PyLinter, config_location: AnyStr) -> None:
+    """Load configuration into the linter."""
+    _config_initialization(linter, args_list=[], config_file=config_location)
+    linter.config_file = config_location
+
+
+def _override_config(linter: PyLinter, config_location: AnyStr) -> None:
+    """Override the default linter configuration options (if possible).
+
+    Snippets taken from pylint.config.config_initialization.
+    """
+    linter.set_current_module(config_location)
+
+    # Read the configuration file.
+    config_file_parser = _ConfigurationFileParser(verbose=True, linter=linter)
+    try:
+        _, config_args = config_file_parser.parse_config_file(file_path=config_location)
+    except OSError as ex:
+        # TODO Test Logger
+        logging.error(ex)
+        sys.exit(32)
+
+    # Override the config options by parsing the provided file.
+    try:
+        linter._parse_configuration_file(config_args)
+    except _UnrecognizedOptionError as exc:
+        unrecognized_options_message = ", ".join(exc.options)
+        linter.add_message("unrecognized-option", args=unrecognized_options_message, line=0)
+
+    # Everything has been set up already so emit any stashed messages.
+    linter._emit_stashed_messages()
+
+    linter.config_file = config_location
+
+
+def _load_messages_config(path: str, default_path: str) -> dict:
+    """Given path (potentially) specified by user and default default_path
+    of messages config file, merge the config files."""
+    merge_into = toml.load(default_path)
+
+    if Path(default_path).resolve() == Path(path).resolve():
+        return merge_into
+
+    try:
+        merge_from = toml.load(path)
+    except FileNotFoundError:
+        # TODO Test Logger
+        logging.warning(
+            f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}."
+        )
+        return merge_into
+
+    for category in merge_from:
+        if category not in merge_into:
+            merge_into[category] = {}
+        for checker in merge_from[category]:
+            if checker not in merge_into[category]:
+                merge_into[category][checker] = {}
+            for error_code in merge_from[category][checker]:
+                merge_into[category][checker][error_code] = merge_from[category][checker][
+                    error_code
+                ]
+    return merge_into
 
 
 def reset_linter(
@@ -303,13 +389,13 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
-    default_config_path = find_local_config(os.path.dirname(__file__))
-    set_config = load_config
+    default_config_path = _find_local_config(os.path.dirname(__file__))
+    set_config = _load_config
 
     if load_default_config:
-        load_config(linter, default_config_path)
+        _load_config(linter, default_config_path)
         # If we do specify to load the default config, we just need to override the options later.
-        set_config = override_config
+        set_config = _override_config
 
     if isinstance(config, str) and config != "":
         set_config(linter, config)
@@ -317,7 +403,7 @@ def reset_linter(
         # If available, use config file at directory of the file being linted.
         pylintrc_location = None
         if file_linted:
-            pylintrc_location = find_local_config(file_linted)
+            pylintrc_location = _find_local_config(file_linted)
 
         # Load or override the options if there is a config file in the current directory.
         if pylintrc_location:
@@ -359,24 +445,28 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
                     continue
                 match = OPTION_PO.search(content)
                 if match is not None:
-                    print(
+                    # TODO Test Logger
+                    logging.error(
                         '[ERROR] String "pylint:" found in comment. '
                         + "No check run on file `{}.`\n".format(filepath)
                     )
                     return False
     except IndentationError as e:
-        print(
+        # TODO Test Logger
+        logging.error(
             "[ERROR] python_ta could not check your code due to an "
             + "indentation error at line {}.".format(e.lineno)
         )
         return False
     except tokenize.TokenError as e:
-        print(
+        # TODO Test Logger
+        logging.error(
             "[ERROR] python_ta could not check your code due to a " + "syntax error in your file."
         )
         return False
     except UnicodeDecodeError:
-        print(
+        # TODO Test Logger
+        logging.error(
             "[ERROR] python_ta could not check your code due to an "
             + "invalid character. Please check the following lines "
             "in your file and all characters that are marked with a �."
@@ -401,7 +491,8 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
         module_name = [module_name]
     # Otherwise, enforce API to expect `module_name` type as list
     elif not isinstance(module_name, list):
-        print(
+        # TODO Test Logger
+        logging.error(
             "No checks run. Input to check, `{}`, has invalid type, must be a list of strings.".format(
                 module_name
             )
@@ -411,7 +502,10 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
     # Filter valid files to check
     for item in module_name:
         if not isinstance(item, str):  # Issue errors for invalid types
-            print("No check run on file `{}`, with invalid type. Must be type: str.\n".format(item))
+            # TODO Test Logger
+            logging.error(
+                "No check run on file `{}`, with invalid type. Must be type: str.\n".format(item)
+            )
         elif os.path.isdir(item):
             yield item
         elif not os.path.exists(os.path.expanduser(item)):
@@ -421,9 +515,11 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
                 if os.path.exists(filepath):
                     yield filepath
                 else:
-                    print("Could not find the file called, `{}`\n".format(item))
+                    # TODO Test Logger
+                    logging.error("Could not find the file called, `{}`\n".format(item))
             except ImportError:
-                print("Could not find the file called, `{}`\n".format(item))
+                # TODO Test Logger
+                logging.error("Could not find the file called, `{}`\n".format(item))
         else:
             yield item  # Check other valid files.
 
@@ -431,5 +527,6 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
 def doc(msg_id: str) -> None:
     """Open a webpage explaining the error for the given message."""
     msg_url = HELP_URL + "#" + msg_id.lower()
-    print("Opening {} in a browser.".format(msg_url))
+    # TODO Test Logger
+    logging.info("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)

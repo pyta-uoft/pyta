@@ -61,7 +61,7 @@ logging.basicConfig(level=logging.NOTSET, format="[%(levelname)s] %(message)s")
 # check the python version
 if sys.version_info < (3, 7, 0):
     # TODO Test Logger
-    logging.warning("[WARNING] You need Python 3.7 or later to run PythonTA.")
+    logging.warning("You need Python 3.7 or later to run PythonTA.")
 
 
 # Flag to determine if we've previously patched pylint
@@ -176,13 +176,13 @@ def _check(
                     f_paths.append(file_py)  # Appending paths for upload
                 # TODO Test Logger
                 logging.info(
-                    "[INFO] File: {} was checked using the configuration file: {}".format(
+                    "File: {} was checked using the configuration file: {}".format(
                         file_py, linter.config_file
                     )
                 )
                 # TODO Test Logger
                 logging.info(
-                    "[INFO] File: {} was checked using the messages-config file: {}".format(
+                    "File: {} was checked using the messages-config file: {}".format(
                         file_py, messages_config_path
                     )
                 )
@@ -208,10 +208,10 @@ def _check(
     except Exception as e:
         # TODO Test Logger
         logging.error(
-            "[ERROR] Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."
+            "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."
         )
         # TODO Test Logger
-        logging.error('[ERROR] Error message: "{}"'.format(e))
+        logging.error('Error message: "{}"'.format(e))
         raise e
 
 
@@ -278,7 +278,7 @@ def _load_messages_config(path: str, default_path: str) -> dict:
     except FileNotFoundError:
         # TODO Test Logger
         logging.warning(
-            f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}."
+            f"Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}."
         )
         return merge_into
 
@@ -447,27 +447,27 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
                 if match is not None:
                     # TODO Test Logger
                     logging.error(
-                        '[ERROR] String "pylint:" found in comment. '
+                        'String "pylint:" found in comment. '
                         + "No check run on file `{}.`\n".format(filepath)
                     )
                     return False
     except IndentationError as e:
         # TODO Test Logger
         logging.error(
-            "[ERROR] python_ta could not check your code due to an "
+            "python_ta could not check your code due to an "
             + "indentation error at line {}.".format(e.lineno)
         )
         return False
     except tokenize.TokenError as e:
         # TODO Test Logger
         logging.error(
-            "[ERROR] python_ta could not check your code due to a " + "syntax error in your file."
+            "python_ta could not check your code due to a " + "syntax error in your file."
         )
         return False
     except UnicodeDecodeError:
         # TODO Test Logger
         logging.error(
-            "[ERROR] python_ta could not check your code due to an "
+            "python_ta could not check your code due to an "
             + "invalid character. Please check the following lines "
             "in your file and all characters that are marked with a �."
         )

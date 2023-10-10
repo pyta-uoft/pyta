@@ -614,7 +614,6 @@ def _debug(msg: str) -> None:
     """
     if not DEBUG_CONTRACTS:
         return
-    # Test Logging
     logging.debug(msg)
 
 

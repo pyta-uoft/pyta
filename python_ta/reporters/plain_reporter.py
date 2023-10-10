@@ -93,7 +93,9 @@ class PlainReporter(PythonTaReporter):
         snippet_so_far = super()._add_line(lineno, linetype, slice_, text)
         if linetype == LineType.ERROR:
             start = slice_.start or 0
-            prespace = (7 + start) * self._SPACE
+            prespace = (
+                7 + start
+            ) * self._SPACE  # number 7 for prespaces included for adding line number
             snippet_so_far = self._overline_helper(snippet_so_far, text[slice_], prespace)
 
         elif linetype == LineType.DOCSTRING:

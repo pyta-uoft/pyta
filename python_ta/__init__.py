@@ -56,7 +56,7 @@ from .upload import upload_to_server
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
 # configuring logger level so that it displays all messages
-logging.basicConfig(level=logging.NOTSET)
+logging.basicConfig(level=logging.NOTSET, format="[%(levelname)s] %(message)s")
 
 # check the python version
 if sys.version_info < (3, 7, 0):

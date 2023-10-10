@@ -4,7 +4,7 @@ contracts.DEBUG_CONTRACTS = True
 from python_ta.contracts import check_contracts
 
 
-def test_contracts_debug(caplog):
+def test_contracts_debug(caplog) -> None:
     """Test to see if _debug method is logging messages correctly"""
 
     @check_contracts

@@ -54,6 +54,9 @@ from .patches import patch_all
 from .reporters import REPORTERS
 from .upload import upload_to_server
 
+# Configuring logger
+logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
+
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
 # check the python version
@@ -384,7 +387,8 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):
                 if "�" in line:
-                    print(f"  Line {i}: {line}", end="")
+                    # print(f"  Line {i}: {line}", end="")
+                    logging.error(f"  Line {i}: {line}")  # TODO make sure it prints out fine
         return False
     return True
 

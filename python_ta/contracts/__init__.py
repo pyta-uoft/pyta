@@ -13,7 +13,7 @@ import inspect
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Tuple
+from typing import Any, Callable, List, Optional, Set, Tuple, TypeVar, Union, overload
 
 import wrapt
 from typeguard import CollectionCheckStrategy, TypeCheckError, check_type
@@ -95,7 +95,23 @@ def _enable_function_contracts(wrapped, instance, args, kwargs):
         raise AssertionError(str(e)) from None
 
 
-def check_contracts(func_or_class: Any, module_names: Optional[Set[str]] = None) -> Callable:
+# Wildcard Type Variable
+Class = TypeVar("Class", bound=type)
+
+
+@overload
+def check_contracts(func: FunctionType, module_names: Optional[Set[str]] = None) -> FunctionType:
+    ...
+
+
+@overload
+def check_contracts(func: Class, module_names: Optional[Set[str]] = None) -> Class:
+    ...
+
+
+def check_contracts(
+    func_or_class: Union[Class, FunctionType], module_names: Optional[Set[str]] = None
+) -> Union[Class, FunctionType]:
     """A decorator to enable contract checking for a function or class.
 
     When used with a class, all methods defined within the class have contract checking enabled.

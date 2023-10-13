@@ -5,6 +5,7 @@ from astroid import Uninferable, nodes
 from astroid.exceptions import NoDefault
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class TypeAnnotationChecker(BaseChecker):
@@ -35,7 +36,7 @@ class TypeAnnotationChecker(BaseChecker):
     # this is important so that your checker is executed before others
     priority = -1
 
-    def is_type(self, node):
+    def is_type(self, node: nodes.NodeNG) -> bool:
         """Check if nodes such as <Name.int ...> represent builtin types."""
         inferred = node.inferred()
         if len(inferred) > 0 and inferred[0] is not Uninferable:
@@ -44,7 +45,7 @@ class TypeAnnotationChecker(BaseChecker):
         return False
 
     @only_required_for_messages("missing-param-type", "missing-return-type", "type-is-assigned")
-    def visit_functiondef(self, node):
+    def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         arguments = node.args.args
         names = [argument.name for argument in arguments]
         annotations = node.args.annotations
@@ -68,7 +69,7 @@ class TypeAnnotationChecker(BaseChecker):
             self.add_message("missing-return-type", node=node.args)
 
     @only_required_for_messages("missing-attribute-type", "type-is-assigned")
-    def visit_classdef(self, node):
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
         for attr_key in node.instance_attrs:
             attr_node = node.instance_attrs[attr_key][0]
             if isinstance(attr_node, nodes.AssignAttr):
@@ -88,5 +89,5 @@ class TypeAnnotationChecker(BaseChecker):
                     self.add_message("type-is-assigned", node=attr_node)
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(TypeAnnotationChecker(linter))

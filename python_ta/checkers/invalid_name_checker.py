@@ -305,7 +305,7 @@ class InvalidNameChecker(BaseChecker):
         self._check_name("module", node.name.split(".")[-1], node)
 
     @only_required_for_messages("naming-convention-violation")
-    def visit_classdef(self, node: nodes.ClassDef):
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a Class node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""
@@ -325,7 +325,7 @@ class InvalidNameChecker(BaseChecker):
     visit_asyncfunctiondef = visit_functiondef
 
     @only_required_for_messages("naming-convention-violation")
-    def visit_assignname(self, node: nodes.AssignName):
+    def visit_assignname(self, node: nodes.AssignName) -> None:
         """Visit an AssignName node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""

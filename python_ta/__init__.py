@@ -286,13 +286,15 @@ def reset_linter(
                 "help": "Path to patch config toml file.",
             },
         ),
-        "allow-pylint-comments",
-        {
-            "default": False,
-            "type": "yn",
-            "metavar": "<yn>",
-            "help": "allows or disallows pylint: comments",
-        },
+        (
+            "allow-pylint-comments",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "allows or disallows pylint: comments",
+            },
+        ),
     )
 
     parent_dir_path = os.path.dirname(__file__)

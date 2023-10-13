@@ -1,10 +1,9 @@
 """Checker for target of for loop or comprehension in subscript form.
 """
-from typing import List, Union
-
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class InvalidForTargetChecker(BaseChecker):
@@ -37,5 +36,5 @@ class InvalidForTargetChecker(BaseChecker):
             self.add_message("invalid-for-target", node=target, args=target.as_string())
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     linter.register_checker(InvalidForTargetChecker(linter))

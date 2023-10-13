@@ -136,7 +136,7 @@ def _check(
             errs = []  # Errors caught in files for data submission
             config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
-                if not _verify_pre_check(file_py):
+                if not _verify_pre_check(file_py, linter):
                     continue  # Check the other files
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
@@ -430,24 +430,25 @@ def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
                 yield os.path.join(root, filename)  # Format path, from root.
 
 
-def _verify_pre_check(filepath: AnyStr) -> bool:
+def _verify_pre_check(filepath: AnyStr, linter: PyLinter) -> bool:
     """Check student code for certain issues."""
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:
-        # Check for inline "pylint:" comment, which may indicate a student
-        # trying to disable a check.
-        with tokenize.open(os.path.expanduser(filepath)) as f:
-            for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
-                if tok_type != tokenize.COMMENT:
-                    continue
-                match = OPTION_PO.search(content)
-                if match is not None:
-                    print(
-                        '[ERROR] String "pylint:" found in comment. '
-                        + "No check run on file `{}.`\n".format(filepath)
-                    )
-                    return False
+        if not linter.config.allow_pylint_comments:
+            # Check for inline "pylint:" comment, which may indicate a student
+            # trying to disable a check.
+            with tokenize.open(os.path.expanduser(filepath)) as f:
+                for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
+                    if tok_type != tokenize.COMMENT:
+                        continue
+                    match = OPTION_PO.search(content)
+                    if match is not None:
+                        print(
+                            '[ERROR] String "pylint:" found in comment. '
+                            + "No check run on file `{}.`\n".format(filepath)
+                        )
+                        return False
     except IndentationError as e:
         print(
             "[ERROR] python_ta could not check your code due to an "

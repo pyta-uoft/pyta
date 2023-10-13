@@ -25,31 +25,36 @@ class InvalidRangeIndexChecker(BaseChecker):
             # ignore the name if it's not a builtin (i.e. not defined in the
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()) and name == "range":
-                arg = node.args  # the arguments of 'range' call
+                args = node.args  # the arguments of 'range' call
                 # guard nodes (e.g. Name) not properly handled by literal_eval.
-                if any([not isinstance(item, nodes.Const) for item in arg]):
+                if any([not isinstance(arg, (nodes.Const, nodes.UnaryOp)) for arg in args]):
                     return
-                eval_parm = list(map(lambda z: literal_eval(z.as_string()), arg))
 
-                # check if there is no args in 'range' call
+                eval_params = list(map(lambda z: literal_eval(z.as_string()), args))
+
                 if (
-                    len(arg) == 0
-                    or not all([isinstance(c, int) for c in eval_parm])
-                    or (len(arg) == 1 and eval_parm[0] < 2)
-                    or (len(arg) == 2 and eval_parm[1] - eval_parm[0] < 2)
+                    len(args) == 0
+                    or len(args) > 3
+                    or not all([isinstance(c, int) for c in eval_params])
                 ):
-                    args = "{}".format(node.lineno)
-                    self.add_message("invalid-range-index", node=node, args=args)
+                    self.add_message("invalid-range-index", node=node, args=str(node.lineno))
+                    return
 
-                if len(arg) == 3:
-                    if (
-                        abs(eval_parm[2]) >= abs(eval_parm[0] - eval_parm[1])
-                        or eval_parm[2] == 0
-                        or (eval_parm[0] > eval_parm[1] and eval_parm[2] < 0)
-                        or (eval_parm[0] < eval_parm[1] and eval_parm[2] > 0)
-                    ):
-                        args = "{}".format(node.lineno)
-                        self.add_message("invalid-range-index", node=node, args=args)
+                # set positional and default arguments of range
+                start = eval_params[0] if len(args) > 1 else 0
+                stop = eval_params[0] if len(args) == 1 else eval_params[1]
+                step = eval_params[2] if len(args) == 3 else 1
+
+                if not is_valid_range(start, stop, step):
+                    self.add_message("invalid-range-index", node=node, args=str(node.lineno))
+
+
+def is_valid_range(start: int, stop: int, step: int) -> bool:
+    """Returns True if a range call with three arguments is valid.
+    We consider a range to be valid if it has more than one element."""
+    if step == 0:
+        return False
+    return (stop - start) / step > 1
 
 
 def register(linter: PyLinter) -> None:

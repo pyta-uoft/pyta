@@ -1,2 +1,2 @@
 ["pylint.checkers.base".BasicChecker]
-E0111 = "This custom error message is modified."
+W0101 = "This custom error message is modified."

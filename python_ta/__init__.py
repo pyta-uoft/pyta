@@ -120,15 +120,14 @@ def _check(
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-
-    messages_config = load_messages_config(messages_config_path, messages_config_default_path)
-    overwrite_error_messages = linter.config.overwrite_error_messages
+    use_pyta_error_messages = linter.config.use_pyta_error_messages
+    messages_config = load_messages_config(
+        messages_config_path, messages_config_default_path, use_pyta_error_messages
+    )
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(
-            messages_config, overwrite_error_messages
-        )  # Monkeypatch pylint (override certain methods)
+        patch_all(messages_config)  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
@@ -291,12 +290,12 @@ def reset_linter(
             },
         ),
         (
-            "overwrite-error-messages",
+            "use-pyta-error-messages",
             {
                 "default": True,
                 "type": "yn",
                 "metavar": "<yn>",
-                "help": "Overwrite the default pylint error messages",
+                "help": "Overwrite the default pylint error messages with PythonTA's messages",
             },
         ),
     )

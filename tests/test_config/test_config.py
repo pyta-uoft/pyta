@@ -12,7 +12,6 @@ TEST_CONFIG = {
     "pyta-number-of-messages": 10,
     "max-nested-blocks": 5,
     "max-line-length": 120,
-    "overwrite-error-messages": True,
 }
 
 # Non-fatal config errors. Fatal errors will be checked individually.

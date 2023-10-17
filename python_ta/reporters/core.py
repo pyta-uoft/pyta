@@ -62,6 +62,8 @@ class PythonTaReporter(BaseReporter):
     _BREAK = "\n"
     _COLOURING = {}
     _PRE_LINE_NUM_SPACES = 2
+    _NUM_LENGTH_SPACES = 3
+    _AFTER_NUM_SPACES = 2
 
     # The error messages to report, mapping filename to a list of messages.
     messages: Dict[str, List[Message]]
@@ -192,11 +194,11 @@ class PythonTaReporter(BaseReporter):
     def _add_line_number(self, lineno: int, linetype: LineType) -> str:
         """Return a formatted string displaying a line number."""
         pre_spaces = self._PRE_LINE_NUM_SPACES * self._SPACE
-        spaces = 2 * self._SPACE
+        spaces = self._AFTER_NUM_SPACES * self._SPACE
         if lineno is not None:
             number = "{:>3}".format(lineno)
         else:
-            number = 3 * self._SPACE
+            number = self._NUM_LENGTH_SPACES * self._SPACE
 
         if linetype == LineType.ERROR:
             return pre_spaces + self._colourify("gbold-line", number) + spaces

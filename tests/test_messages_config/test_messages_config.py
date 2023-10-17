@@ -10,17 +10,15 @@ def test_valid_message_config_and_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test1.pylintrc",
+            "tests/test_messages_config/test_user_config_pyta_overwrite.pylintrc",
             "tests/test_messages_config/testing_code.py",
         ],
         capture_output=True,
         text=True,
     )
 
-    assert (
-        "This custom error message is modified." in output.stdout
-        and "The first reversed() argument is not a sequence" not in output.stdout
-    )
+    assert "This custom error message is modified." in output.stdout
+    assert "The first reversed() argument is not a sequence" not in output.stdout
 
 
 def test_no_message_config_and_pyta_overwrite():
@@ -31,17 +29,15 @@ def test_no_message_config_and_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test2.pylintrc",
+            "tests/test_messages_config/test_no_user_config_pyta_overwrite.pylintrc",
             "tests/test_messages_config/testing_code.py",
         ],
         capture_output=True,
         text=True,
     )
 
-    assert (
-        "This custom error message is modified." not in output.stdout
-        and "The first reversed() argument is not a sequence" not in output.stdout
-    )
+    assert "This custom error message is modified." not in output.stdout
+    assert "The first reversed() argument is not a sequence" not in output.stdout
 
 
 def test_valid_message_config_and_no_pyta_overwrite():
@@ -52,17 +48,15 @@ def test_valid_message_config_and_no_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test3.pylintrc",
+            "tests/test_messages_config/test_user_config_no_pyta_overwrite.pylintrc",
             "tests/test_messages_config/testing_code.py",
         ],
         capture_output=True,
         text=True,
     )
 
-    assert (
-        "This custom error message is modified." in output.stdout
-        and "The first reversed() argument is not a sequence" in output.stdout
-    )
+    assert "This custom error message is modified." in output.stdout
+    assert "The first reversed() argument is not a sequence" in output.stdout
 
 
 def test_no_message_config_and_no_pyta_overwrite():
@@ -73,14 +67,12 @@ def test_no_message_config_and_no_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test4.pylintrc",
+            "tests/test_messages_config/test_no_user_config_no_pyta_overwrite.pylintrc",
             "tests/test_messages_config/testing_code.py",
         ],
         capture_output=True,
         text=True,
     )
 
-    assert (
-        "This custom error message is modified." not in output.stdout
-        and "The first reversed() argument is not a sequence" in output.stdout
-    )
+    assert "This custom error message is modified." not in output.stdout
+    assert "The first reversed() argument is not a sequence" in output.stdout

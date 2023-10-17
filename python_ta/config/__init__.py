@@ -67,9 +67,8 @@ def override_config(linter: PyLinter, config_location: AnyStr) -> None:
 def load_messages_config(path: str, default_path: str, use_pyta_error_messages: bool) -> dict:
     """Given path (potentially) specified by user and default default_path
     of messages config file, merge the config files. We will only add the
-    PythonTA error messages if use_pyta_error_messages is True"""
-    merge_into = toml.load(default_path)
-
+    PythonTA error messages if use_pyta_error_messages is True.
+    """
     # assume the user is not going to provide a path which is the same as the default
     if Path(default_path).resolve() == Path(path).resolve():
         merge_from = {}
@@ -80,17 +79,18 @@ def load_messages_config(path: str, default_path: str, use_pyta_error_messages: 
             print(f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}.")
             merge_from = {}
 
-    if use_pyta_error_messages:
-        for category in merge_from:
-            if category not in merge_into:
-                merge_into[category] = {}
-            for checker in merge_from[category]:
-                if checker not in merge_into[category]:
-                    merge_into[category][checker] = {}
-                for error_code in merge_from[category][checker]:
-                    merge_into[category][checker][error_code] = merge_from[category][checker][
-                        error_code
-                    ]
-        return merge_into
-    else:
+    if not use_pyta_error_messages:
         return merge_from
+
+    merge_into = toml.load(default_path)
+    for category in merge_from:
+        if category not in merge_into:
+            merge_into[category] = {}
+        for checker in merge_from[category]:
+            if checker not in merge_into[category]:
+                merge_into[category][checker] = {}
+            for error_code in merge_from[category][checker]:
+                merge_into[category][checker][error_code] = merge_from[category][checker][
+                    error_code
+                ]
+    return merge_into

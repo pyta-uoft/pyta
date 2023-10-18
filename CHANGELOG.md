@@ -8,10 +8,19 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Unreleased
 
 ### Bug fixes
+- Don't throw `forbidden-import` error when importing local files
+
+### Enhancements
+
+- Both PlainReporter and ColorReporter emphasize specific code chunks by using overline characters under any part that is highlighted as ERROR.
+
+## [2.6.3] - 2023-10-09
+
+### Bug fixes
 
 - Ensure pycodestyle W503, line break before binary operator, is disabled (regression from 2.6.2).
 - Fix `check_contracts` typings so PyCharm static checking will work
-- Don't throw `forbidden-import` error when importing local files
+- Fix `invalid-range-index` bug where valid range calls were flagged as invalid
 
 ## [2.6.2] - 2023-09-22
 

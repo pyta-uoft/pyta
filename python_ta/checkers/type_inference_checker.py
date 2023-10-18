@@ -1,8 +1,10 @@
 """Checker for type inference errors.
 """
 
+from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 from python_ta.typecheck.base import TypeFail
 
@@ -20,7 +22,7 @@ class TypeInferenceChecker(BaseChecker):
     }
 
     @only_required_for_messages("type-error")
-    def visit_default(self, node):
+    def visit_default(self, node: nodes.NodeNG) -> None:
         if hasattr(node, "inf_type"):
             x = node.inf_type
             if isinstance(x, TypeFail):
@@ -34,6 +36,6 @@ class TypeInferenceChecker(BaseChecker):
                 self.add_message("type-error", args=x.msg, node=node)
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     """Required method to auto-register this checker to the linter"""
     linter.register_checker(TypeInferenceChecker(linter))

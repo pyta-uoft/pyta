@@ -5,6 +5,7 @@ from typing import Match, Optional, Union
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 DOCTEST = ">>>"
 
@@ -36,7 +37,8 @@ class MissingSpaceInDoctestChecker(BaseChecker):
         """Visit a Module definition"""
         self._check_docstring(node)
 
-    def _check_docstring(self, node) -> None:
+    # Helper Functions
+    def _check_docstring(self, node: nodes.NodeNG) -> None:
         """Go through the docstring of the respective node type"""
         if node.doc_node is not None:
             docstring = node.doc_node.value or ""
@@ -62,6 +64,6 @@ class MissingSpaceInDoctestChecker(BaseChecker):
         return match
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     """Required method to auto register this checker on the linter"""
     linter.register_checker(MissingSpaceInDoctestChecker(linter))

@@ -1,8 +1,7 @@
 from typing import Dict, List
 
-from pylint.interfaces import IReporter
-
 from .core import NewMessage, PythonTaReporter
+from .node_printers import LineType
 
 
 class PlainReporter(PythonTaReporter):
@@ -83,3 +82,31 @@ class PlainReporter(PythonTaReporter):
                 result += self._BREAK
 
         return result
+
+    def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = "") -> str:
+        """Format given source code line as specified and return as str.
+
+        Called by _build_snippet, relies on _colourify.
+        """
+        lineno_spaces = self._PRE_LINE_NUM_SPACES + self._NUM_LENGTH_SPACES + self._AFTER_NUM_SPACES
+        snippet_so_far = super()._add_line(lineno, linetype, slice_, text)
+        if linetype == LineType.ERROR:
+            start = slice_.start or 0
+            prespace = (
+                lineno_spaces + start
+            ) * self._SPACE  # number 7 for prespaces included for adding line number
+            snippet_so_far += self._overline_helper(text[slice_], prespace)
+
+        elif linetype == LineType.DOCSTRING:
+            prespace = (lineno_spaces + len(text) - len(text.lstrip(" "))) * self._SPACE
+            snippet_so_far += self._overline_helper(text.lstrip(" "), prespace)
+
+        return snippet_so_far
+
+    def _overline_helper(self, text: str, prespace: str) -> str:
+        """
+        Helper method _add_line. Adds the Unicode U+203E (the overline character "‾") under any
+        part that is highlighted as ERROR. Returns the corresponding snippet as a result.
+        """
+        overline = "‾" * len(text)
+        return prespace + overline + self._BREAK

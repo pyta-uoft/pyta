@@ -3,6 +3,7 @@
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class ShadowingInComprehensionChecker(BaseChecker):
@@ -18,7 +19,7 @@ class ShadowingInComprehensionChecker(BaseChecker):
     }
 
     @only_required_for_messages("shadowing-in-comprehension")
-    def visit_comprehension(self, node: nodes.Comprehension):
+    def visit_comprehension(self, node: nodes.Comprehension) -> None:
         """Visit the comprehension node"""
         if isinstance(node.target, nodes.Tuple):
             for target in node.target.elts:
@@ -31,6 +32,6 @@ class ShadowingInComprehensionChecker(BaseChecker):
                 self.add_message("shadowing-in-comprehension", node=node.target, args=args)
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     """Required method to auto-register this checker to the linter"""
     linter.register_checker(ShadowingInComprehensionChecker(linter))

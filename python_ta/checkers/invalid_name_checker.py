@@ -170,7 +170,7 @@ def _check_function_and_variable_name(node_type: str, name: str) -> List[str]:
     Returns an empty list if `name` is a valid function or variable name."""
     error_msgs = []
 
-    if not _is_in_snake_case(name):
+    if name != "_" and not _is_in_snake_case(name):
         error_msgs.append(
             f'{node_type.capitalize()} name "{name}" should be in snake_case format. '
             f"{node_type.capitalize()} names should be lowercase, with words "
@@ -298,7 +298,7 @@ class InvalidNameChecker(BaseChecker):
         self._check_name("module", node.name.split(".")[-1], node)
 
     @only_required_for_messages("naming-convention-violation")
-    def visit_classdef(self, node: nodes.ClassDef):
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a Class node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""
@@ -318,7 +318,7 @@ class InvalidNameChecker(BaseChecker):
     visit_asyncfunctiondef = visit_functiondef
 
     @only_required_for_messages("naming-convention-violation")
-    def visit_assignname(self, node: nodes.AssignName):
+    def visit_assignname(self, node: nodes.AssignName) -> None:
         """Visit an AssignName node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""
@@ -375,7 +375,7 @@ class InvalidNameChecker(BaseChecker):
                     self._check_name("class", node.name, node)
 
                 # Don't emit if the name redefines an import in an ImportError except handler.
-                elif not _redefines_import(node) and isinstance(inferred_assign_type, nodes.Const):
+                elif not _redefines_import(node):
                     self._check_name("constant", node.name, node)
                 else:
                     self._check_name("variable", node.name, node)

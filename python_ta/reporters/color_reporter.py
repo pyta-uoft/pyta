@@ -1,7 +1,6 @@
 import sys
 
 from colorama import Back, Fore, Style, colorama_text
-from pylint.interfaces import IReporter
 
 from .plain_reporter import PlainReporter
 

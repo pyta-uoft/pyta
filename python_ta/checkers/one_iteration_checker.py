@@ -5,6 +5,7 @@ from typing import Union
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
+from pylint.lint import PyLinter
 
 
 class OneIterationChecker(BaseChecker):
@@ -19,13 +20,13 @@ class OneIterationChecker(BaseChecker):
     }
 
     @only_required_for_messages("one-iteration")
-    def visit_for(self, node):
+    def visit_for(self, node: nodes.For) -> None:
         """Visits for node"""
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
     @only_required_for_messages("one-iteration")
-    def visit_while(self, node):
+    def visit_while(self, node: nodes.While) -> None:
         """Visits while node"""
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
@@ -60,6 +61,6 @@ class OneIterationChecker(BaseChecker):
         return True
 
 
-def register(linter):
+def register(linter: PyLinter) -> None:
     """Required method to auto-register this checker to the linter"""
     linter.register_checker(OneIterationChecker(linter))

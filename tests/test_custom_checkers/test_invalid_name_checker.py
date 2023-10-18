@@ -39,6 +39,20 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_module(module_node)
 
+    def test_module_name_underscore(self) -> None:
+        """Test that the checker does not report an error when the module name starts with an
+        underscore.
+        """
+        src = """
+        i = "hi"
+        """
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+        module_node.name = "_my_module"
+
+        with self.assertNoMessages():
+            self.checker.visit_module(module_node)
+
     def test_const_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid const name."""
         src = """
@@ -59,6 +73,28 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_assignname(assignname_node)
+
+    def test_const_name_underscore(self) -> None:
+        """Test that the checker does not report a const name that starts with an underscore."""
+        src = """
+        _MY_PRIVATE_CONST = "it is not"
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
+    def test_const_name_list(self) -> None:
+        """Test that the checker does not report a const name that is assigned to a list."""
+        src = """
+        MY_CONSTANT_LIST = [1, 2, 3]
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
     def test_class_name_violation(self) -> None:
@@ -84,6 +120,18 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_classdef(classdef_node)
 
+    def test_class_name_underscore(self) -> None:
+        """Test that the checker does not report a class name that starts with an underscore."""
+        src = """
+        class _MyClass:
+            pass
+        """
+        mod = astroid.parse(src)
+        classdef_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_classdef(classdef_node)
+
     def test_function_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid function name."""
         src = """
@@ -105,6 +153,18 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_functiondef(functiondef_node)
+
+    def test_function_name_underscore(self) -> None:
+        """Test that the checker does not report a function name that starts with an underscore."""
+        src = """
+        def _my_function():
+            pass
+        """
+        mod = astroid.parse(src)
+        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
             self.checker.visit_functiondef(functiondef_node)
 
     def test_method_name_violation(self) -> None:
@@ -132,6 +192,19 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_functiondef(functiondef_node)
 
+    def test_method_name_underscore(self) -> None:
+        """Test that the checker does not report a method name that starts with an underscore."""
+        src = """
+        class BadClass:
+            def _my_function(self):
+                pass
+        """
+        mod = astroid.parse(src)
+        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(functiondef_node)
+
     def test_attr_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid attr name."""
         src = """
@@ -156,6 +229,18 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assignname(assignname_node)
 
+    def test_attr_name_underscore(self) -> None:
+        """Test that the checker does not report an attribute name that starts with an underscore."""
+        src = """
+        class GoodClass:
+            _attr: str
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
     def test_argument_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid argument name."""
         src = """
@@ -176,6 +261,18 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_assignname(argument_node)
+
+    def test_argument_name_underscore(self) -> None:
+        """Test that the checker does not report an argument name that starts with an underscore."""
+        src = """
+        def good(_name: str) -> None:
+            print(_name)
+        """
+        mod = astroid.parse(src)
+        argument_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
             self.checker.visit_assignname(argument_node)
 
     def test_variable_name_violation(self) -> None:
@@ -199,6 +296,31 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_assignname(assignname_node)
+
+    def test_variable_name_leading_underscore(self) -> None:
+        """Test that the checker does not report a variable name that starts with an underscore."""
+        src = """
+        def f():
+            _my_var = 10
+            print(_my_var)
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
+    def test_variable_name_underscore(self) -> None:
+        """Test that the checker does not report a variable name that is just an underscore."""
+        src = """
+        for _ in range(10):
+            print('hi')
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
     def test_class_attribute_name_violation(self) -> None:
@@ -227,6 +349,21 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assignname(assignname_node)
 
+    def test_class_attribute_name_underscore(self) -> None:
+        """Test that the checker does not report a class attribute name that starts with an
+        underscore."""
+        src = """
+        from typing import ClassVar
+
+        class BadClass:
+            _snake_case: ClassVar = "CONSTANT"
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
     def test_class_const_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid class constant name."""
         src = """
@@ -253,6 +390,21 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assignname(assignname_node)
 
+    def test_class_const_name_underscore(self) -> None:
+        """Test that the checker does not report a class constant name that starts with an
+        underscore."""
+        src = """
+        from typing import Final
+
+        class BadClass:
+            _MY_CONSTANT: Final = "CONSTANT"
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
     def test_typevar_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid typevar name."""
         src = """
@@ -275,6 +427,19 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_assignname(assignname_node)
+
+    def test_typevar_name_underscore(self) -> None:
+        """Test that the checker does not report a typevar name that starts with an underscore."""
+        src = """
+        from typing import TypeVar
+
+        _MyTypeVar = TypeVar('type_var', str, float)
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
     @unittest.skipIf(sys.version_info < (3, 10, 0), "TypeAlias was new in version 3.10.")
@@ -300,6 +465,20 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_assignname(assignname_node)
+
+    @unittest.skipIf(sys.version_info < (3, 10, 0), "TypeAlias was new in version 3.10.")
+    def test_typealias_name_underscore(self) -> None:
+        """Test that the checker does not report a type alias name that starts with an underscore."""
+        src = """
+        from typing import TypeAlias
+
+        _MyTypeAlias: TypeAlias = dict, str
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
 

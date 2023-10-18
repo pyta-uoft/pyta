@@ -1,5 +1,5 @@
 def some_function():
-    x = 5  # pylint:
+    x = 5  # pylint: disable something
     y = 0
     result = x / y
     return result
@@ -11,4 +11,4 @@ if __name__ == "__main__":
     import python_ta
 
     options = {"allow-pylint-comments": False}
-    python_ta.check_all()
+    python_ta.check_all(config=options)

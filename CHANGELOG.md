@@ -8,6 +8,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Unreleased
 
 ### Bug fixes
+
 - Don't throw `forbidden-import` error when importing local files
 
 ### Enhancements

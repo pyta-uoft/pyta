@@ -54,8 +54,9 @@ python_ta.check_all(..., load_default_config=False)
 
 ## Allowing 'pylint:' Comments
 
-PythonTA allows you to choose whether you want to locally disable checks using 'pylint:' or not, i.e. it
-lets you choose whether or not you want to allow comments that begin with 'pylint:'.
+PythonTA allows you to choose whether you want to locally disable checks by using 'pylint:' in a comment, i.e. it
+lets you choose whether or not you want to allow comments that begin with 'pylint:'. The default value for this option
+is False, i.e. PythonTA by default would not allow you to use 'pylint:' in a comment.
 
 ```python
 import python_ta
@@ -65,9 +66,20 @@ python_ta.check_all(..., config = {"allow-pylint-comments" : True})
 
 ## Custom Error Messages
 
-PythonTA allows for pylint error messages to be overridden with more user friendly messages.
-These messages are specified in `config/messages_config.toml` in the source code.
+By default, PythonTA overwrites some of pylint's error messages with its own to make them more beginner-friendly.
+These messages are specified in `config/messages_config.toml` in the source code. You can prevent this by setting the
+`use-pyta-error-messages` option to `False`.
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "use-pyta-error-messages": False
+})
+```
+
+PythonTA also allows for pylint error messages to be overridden with custom user messages.
 The user can provide their own messages configuration file by specifying `messages-config-path` in their `.pylintrc` file.
+These messages have priority over both pylint's and PythonTA's messages and aren't affected by `use-pyta-error-messages`.
 
 ## Reporters
 

@@ -26,6 +26,9 @@ pyta-server-address = http://127.0.0.1:5000
 # Allowing pylint: comments
 allow-pylint-comments = no
 
+# Set whether the default error messages by pylint should be overwritten by PythonTA's custom messages
+use-pyta-error-messages = yes
+
 [REPORTS]
 # The type of reporter to use to display results. Available PyTA classes are
 # PlainReporter, ColorReporter, HTMLReporter, JSONReporter.

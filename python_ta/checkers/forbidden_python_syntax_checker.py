@@ -1,4 +1,4 @@
-"""A checker for reporting on the disallowed use of various Python syntax.
+"""Checker for reporting on the disallowed use of various Python syntax.
 """
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -33,9 +33,6 @@ class ForbiddenPythonSyntaxChecker(BaseChecker):
         ),
     )
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
     @only_required_for_messages("forbidden-python-syntax")
     def visit_default(self, node: nodes.NodeNG) -> None:
         """Visit a node in the AST."""
@@ -46,5 +43,5 @@ class ForbiddenPythonSyntaxChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
-    """Register this checker to the linter."""
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(ForbiddenPythonSyntaxChecker(linter))

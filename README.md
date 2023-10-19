@@ -93,6 +93,7 @@ Bruce Liu,
 Merrick Liu
 Wendy Liu,
 Yibing (Amy) Lu,
+Aina Fatema Asim Merchant,
 Shweta Mogalapalli,
 Ignas Panero Armoska,
 Justin Park,

@@ -1,8 +1,6 @@
 """Checker or use of forbidden imports.
 """
 
-import inspect
-
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages

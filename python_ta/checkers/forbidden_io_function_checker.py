@@ -14,7 +14,7 @@ FORBIDDEN_BUILTIN = ["input", "print", "open"]
 class IOFunctionChecker(BaseChecker):
     """A checker class to report on the use of disallowed I/O functions.
 
-    Use options to specify the forbidden io functions and the allowed io functions."""
+    Use options to specify the forbidden I/O functions and the allowed I/O functions."""
 
     name = "IO_Function"
     msgs = {

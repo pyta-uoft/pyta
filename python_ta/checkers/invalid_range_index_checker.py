@@ -1,4 +1,4 @@
-"""Checker for idex ranges"""
+"""Checker for index ranges"""
 from ast import literal_eval
 
 from astroid import nodes

@@ -2,11 +2,15 @@
 Test suite for checking whether configuration worked correctly with user-inputted configurations.
 """
 import json
+import logging
 import os
+import unittest
+from unittest.mock import patch
 
 import pytest
 
 import python_ta
+from python_ta.config import load_messages_config, override_config
 
 TEST_CONFIG = {
     "pyta-number-of-messages": 10,
@@ -211,9 +215,7 @@ def test_config_parse_error(capsys) -> None:
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")
     reporter = python_ta.check_all(module_name="examples/nodes/name.py", config=config)
-
     msg_id = reporter.messages[config][0].msg_id
-
     assert msg_id == "F0011"
 
 
@@ -226,3 +228,24 @@ def test_config_parse_error_has_no_snippet() -> None:
     snippet = reporter.messages[config][0].snippet
 
     assert snippet == ""
+
+
+@patch("python_ta.config.override_config")
+def test_override_config_logging(caplog, capsys) -> None:
+    """Testing that the OSError in override_config is logged correctly"""
+    path = "C:\\foo\\tests\\file_fixtures\\test_f0011.pylintrc"
+
+    with pytest.raises(SystemExit) as _:
+        python_ta.check_all(module_name="examples/nodes/name.py", config=path)
+    assert caplog.records[0].levelname == "ERROR"
+    assert f"The config file {path} doesn't exist!" in caplog.text
+
+
+# @patch("toml.load", side_effect=FileNotFoundError)
+def test_load_messages_config_with_file_not_found_exception(caplog):
+    with patch("python_ta.config.toml.load", side_effect=FileNotFoundError):
+        load_messages_config("non_existent_file.toml", "default_file.toml")
+
+    assert "Could not find messages config file at" in caplog.text
+    assert "Using default messages config file at" in caplog.text
+    assert "ERROR" in [record.levelname for record in caplog.records]

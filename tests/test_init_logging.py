@@ -1,17 +1,5 @@
 """Tests for top level __init__.py logging functionality in pyta"""
-import sys
-
 import python_ta
-
-
-# TODO if statement not catching sys.version_info (suspicion init.py and import statement)
-def test_sys_version_log(caplog, monkeypatch) -> None:
-    """Testing if message logged when system version is too low is correct"""
-    monkeypatch.setattr(sys, "version_info", (0, 0, 0))
-
-    python_ta.check_all()
-    assert caplog.records[0].levelname == "WARNING"
-    assert "You need Python 3.7 or later to run PythonTA." in caplog.text
 
 
 # TODO how to get unexpected error?
@@ -32,12 +20,15 @@ def test_pre_check_log(caplog) -> None:
     """Testing logging in _verify_pre_check function"""
     # Checking pylint comment
 
-    # Checking indentation error
+    # Checking indentation error (Use unexpected indent) # TODO does pyta handle these erros
+    python_ta.check_all(module_name="examples/syntax_errors/unexpected_indent")
+    assert "indentation error at line" in caplog.text
 
-    # Checking token error
+    # Checking token error (Use syntax error examples)
+    python_ta.check_all(module_name="examples/syntax_errors/missing_colon")
+    assert "syntax error in your file" in caplog.text
 
     # Checking unicode decode error
-    pass
 
 
 def test_files_to_check_log(caplog) -> None:

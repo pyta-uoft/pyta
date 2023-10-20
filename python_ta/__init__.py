@@ -61,7 +61,6 @@ HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
 # check the python version
 if sys.version_info < (3, 7, 0):
-    # TODO Test
     logging.warning("You need Python 3.7 or later to run PythonTA.")
 
 
@@ -388,7 +387,7 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
             for i, line in enumerate(f):
                 if "�" in line:
                     # print(f"  Line {i}: {line}", end="")
-                    logging.error(f"  Line {i}: {line}")  # TODO make sure it prints out fine
+                    logging.error(f"  Line {i}: {line}")
         return False
     return True
 

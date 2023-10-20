@@ -48,7 +48,6 @@ def override_config(linter: PyLinter, config_location: AnyStr) -> None:
     try:
         _, config_args = config_file_parser.parse_config_file(file_path=config_location)
     except OSError as ex:
-        # TODO Test Logging
         logging.error(ex)
         sys.exit(32)
 
@@ -76,7 +75,6 @@ def load_messages_config(path: str, default_path: str) -> dict:
     try:
         merge_from = toml.load(path)
     except FileNotFoundError:
-        # TODO Test Logging
         logging.warning(
             f"Could not find messages config file at {str(Path(path).resolve())}. Using default messages config file at {str(Path(default_path).resolve())}."
         )

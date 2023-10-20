@@ -124,7 +124,10 @@ def _check(
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-    messages_config = load_messages_config(messages_config_path, messages_config_default_path)
+    use_pyta_error_messages = linter.config.use_pyta_error_messages
+    messages_config = load_messages_config(
+        messages_config_path, messages_config_default_path, use_pyta_error_messages
+    )
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -288,6 +291,15 @@ def reset_linter(
                 "help": "Path to patch config toml file.",
             },
         ),
+        (
+            "use-pyta-error-messages",
+            {
+                "default": True,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "Overwrite the default pylint error messages with PythonTA's messages",
+            },
+        ),
     )
 
     parent_dir_path = os.path.dirname(__file__)
@@ -386,7 +398,6 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):
                 if "�" in line:
-                    # print(f"  Line {i}: {line}", end="")
                     logging.error(f"  Line {i}: {line}")
         return False
     return True

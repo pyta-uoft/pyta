@@ -1,0 +1,15 @@
+[CUSTOM PYTA OPTIONS]
+
+# Make sure to register custom options tuple first in `python_ta/__init__.py`
+# ===========================================================
+# Path to messages_config toml file
+messages-config-path = tests/test_messages_config/test.messages_config.toml
+
+# Set whether the default error messages by pylint should be overwritten by python TA's custom messages
+use-pyta-error-messages = yes
+
+[REPORTS]
+# The type of reporter to use to display results. Available PyTA classes are
+# PlainReporter, ColorReporter, HTMLReporter, JSONReporter.
+# Replaces the pyta-reporter option.
+output-format = python_ta.reporters.PlainReporter

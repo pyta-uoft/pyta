@@ -11,6 +11,8 @@ DOCTEST = ">>>"
 
 
 class MissingSpaceInDoctestChecker(BaseChecker):
+    """A checker class that reports the missing spaces after doctests in docstrings."""
+
     name = "missing_space_in_doctest"
     msgs = {
         "E9973": (
@@ -19,8 +21,6 @@ class MissingSpaceInDoctestChecker(BaseChecker):
             "Used when a doctest is missing a space before the code to be executed",
         )
     }
-    # This is important so that your checker is executed before others
-    priority = -1
 
     @only_required_for_messages("missing-space-in-doctest")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
@@ -65,5 +65,5 @@ class MissingSpaceInDoctestChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
-    """Required method to auto register this checker"""
+    """Required method to auto register this checker on the linter"""
     linter.register_checker(MissingSpaceInDoctestChecker(linter))

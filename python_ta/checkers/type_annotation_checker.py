@@ -1,4 +1,4 @@
-"""checker for type annotation.
+"""Checker for type annotation.
 """
 
 from astroid import Uninferable, nodes
@@ -9,6 +9,9 @@ from pylint.lint import PyLinter
 
 
 class TypeAnnotationChecker(BaseChecker):
+    """A checker class that reports missing parameter, attribute and return type annotation.
+    Also reports if type is assigned instead of annotated."""
+
     name = "TypeAnnotationChecker"
     msgs = {
         "E9970": (
@@ -33,9 +36,6 @@ class TypeAnnotationChecker(BaseChecker):
         ),
     }
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
     def is_type(self, node: nodes.NodeNG) -> bool:
         """Check if nodes such as <Name.int ...> represent builtin types."""
         inferred = node.inferred()
@@ -46,6 +46,7 @@ class TypeAnnotationChecker(BaseChecker):
 
     @only_required_for_messages("missing-param-type", "missing-return-type", "type-is-assigned")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
+        """Visit function definition"""
         arguments = node.args.args
         names = [argument.name for argument in arguments]
         annotations = node.args.annotations
@@ -70,6 +71,7 @@ class TypeAnnotationChecker(BaseChecker):
 
     @only_required_for_messages("missing-attribute-type", "type-is-assigned")
     def visit_classdef(self, node: nodes.ClassDef) -> None:
+        """Visit class definition"""
         for attr_key in node.instance_attrs:
             attr_node = node.instance_attrs[attr_key][0]
             if isinstance(attr_node, nodes.AssignAttr):
@@ -90,4 +92,5 @@ class TypeAnnotationChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(TypeAnnotationChecker(linter))

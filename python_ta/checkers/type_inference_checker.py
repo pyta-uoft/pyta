@@ -1,4 +1,4 @@
-"""checker for type inference errors.
+"""Checker for type inference errors.
 """
 
 from astroid import nodes
@@ -10,6 +10,8 @@ from python_ta.typecheck.base import TypeFail
 
 
 class TypeInferenceChecker(BaseChecker):
+    """A checker class that reports type errors"""
+
     name = "TypeInferenceChecker"
     msgs = {
         "E9900": (
@@ -18,9 +20,6 @@ class TypeInferenceChecker(BaseChecker):
             "Presented when there is some kind of error with types.",
         )
     }
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     @only_required_for_messages("type-error")
     def visit_default(self, node: nodes.NodeNG) -> None:
@@ -38,4 +37,5 @@ class TypeInferenceChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(TypeInferenceChecker(linter))

@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Enhancements
 
+- Added new configuration option `use-pyta-error-messages` to let users choose whether PythonTA should overwrite pylint's error messages.
 - Both PlainReporter and ColorReporter emphasize specific code chunks by using overline characters under any part that is highlighted as ERROR.
 
 ## [2.6.3] - 2023-10-09

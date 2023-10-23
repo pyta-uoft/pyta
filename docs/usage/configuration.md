@@ -54,9 +54,20 @@ python_ta.check_all(..., load_default_config=False)
 
 ## Custom Error Messages
 
-PythonTA allows for pylint error messages to be overridden with more user friendly messages.
-These messages are specified in `config/messages_config.toml` in the source code.
+By default, PythonTA overwrites some of pylint's error messages with its own to make them more beginner-friendly.
+These messages are specified in `config/messages_config.toml` in the source code. You can prevent this by setting the
+`use-pyta-error-messages` option to `False`.
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "use-pyta-error-messages": False
+})
+```
+
+PythonTA also allows for pylint error messages to be overridden with custom user messages.
 The user can provide their own messages configuration file by specifying `messages-config-path` in their `.pylintrc` file.
+These messages have priority over both pylint's and PythonTA's messages and aren't affected by `use-pyta-error-messages`.
 
 ## Reporters
 

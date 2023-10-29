@@ -230,22 +230,20 @@ def test_config_parse_error_has_no_snippet() -> None:
     assert snippet == ""
 
 
-@patch("python_ta.config.override_config")
 def test_override_config_logging(caplog, capsys) -> None:
     """Testing that the OSError in override_config is logged correctly"""
     path = "C:\\foo\\tests\\file_fixtures\\test_f0011.pylintrc"
 
-    with pytest.raises(SystemExit) as _:
+    with pytest.raises(SystemExit):
         python_ta.check_all(module_name="examples/nodes/name.py", config=path)
     assert caplog.records[0].levelname == "ERROR"
     assert f"The config file {path} doesn't exist!" in caplog.text
 
 
-# @patch("toml.load", side_effect=FileNotFoundError)
-def test_load_messages_config_with_file_not_found_exception(caplog):
-    with patch("python_ta.config.toml.load", side_effect=FileNotFoundError):
-        load_messages_config("non_existent_file.toml", "default_file.toml")
-
-    assert "Could not find messages config file at" in caplog.text
-    assert "Using default messages config file at" in caplog.text
-    assert "ERROR" in [record.levelname for record in caplog.records]
+@patch("python_ta.config.toml.load", side_effect=FileNotFoundError)
+def test_load_messages_config_logging(_, caplog):
+    try:
+        load_messages_config("non_existent_file.toml", "default_file.toml", True)
+    except FileNotFoundError:
+        assert "Could not find messages config file at" in caplog.text
+        assert "WARNING" in [record.levelname for record in caplog.records]

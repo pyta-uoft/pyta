@@ -1,4 +1,4 @@
-"""checker for variable shadowing in a comprehension.
+"""Checker for variable shadowing in a comprehension.
 """
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -7,6 +7,8 @@ from pylint.lint import PyLinter
 
 
 class ShadowingInComprehensionChecker(BaseChecker):
+    """A checker class that reports a comprehension variable shadowing a variable in outer scope"""
+
     name = "shadowing_in_comprehension"
     msgs = {
         "E9988": (
@@ -16,11 +18,9 @@ class ShadowingInComprehensionChecker(BaseChecker):
         )
     }
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
     @only_required_for_messages("shadowing-in-comprehension")
     def visit_comprehension(self, node: nodes.Comprehension) -> None:
+        """Visit the comprehension node"""
         if isinstance(node.target, nodes.Tuple):
             for target in node.target.elts:
                 if target.name in node.parent.frame().locals and target.name != "_":
@@ -33,4 +33,5 @@ class ShadowingInComprehensionChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(ShadowingInComprehensionChecker(linter))

@@ -3,6 +3,9 @@
 # Default max amount of messages for reporter to display.
 pyta-number-of-messages = 10
 
+# Set whether the default error messages by pylint should be overwritten by python TA's custom messages
+overwrite-error-messages = yes
+
 [ELIF]
 
 # Set maximum allowed if nesting.

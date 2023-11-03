@@ -1,3 +1,4 @@
+"""Checker for top-level code"""
 import re
 
 from astroid import nodes
@@ -9,6 +10,8 @@ from pylint.lint import PyLinter
 
 
 class TopLevelCodeChecker(BaseChecker):
+    """A checker class that reports forbidden top-level code"""
+
     name = "top_level_code"
     msgs = {
         "E9992": (
@@ -19,11 +22,9 @@ class TopLevelCodeChecker(BaseChecker):
         )
     }
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
     @only_required_for_messages("forbidden-top-level-code")
     def visit_module(self, node: nodes.Module) -> None:
+        """Visit module"""
         for statement in node.body:
             if not (
                 _is_import(statement)
@@ -34,7 +35,6 @@ class TopLevelCodeChecker(BaseChecker):
                 self.add_message("forbidden-top-level-code", node=statement, args=statement.lineno)
 
 
-# Helper functions
 def _is_import(statement: nodes.NodeNG) -> bool:
     """
     Return whether or not <statement> is an Import or an ImportFrom.
@@ -85,4 +85,5 @@ def _is_main_block(statement: nodes.NodeNG) -> bool:
 
 
 def register(linter: PyLinter) -> None:
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(TopLevelCodeChecker(linter))

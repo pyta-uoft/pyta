@@ -1,4 +1,4 @@
-"""checker for a loop that can only ever run for one iteration.
+"""Checker for a loop that can only ever run for one iteration.
 """
 from typing import Union
 
@@ -9,9 +9,7 @@ from pylint.lint import PyLinter
 
 
 class OneIterationChecker(BaseChecker):
-    # name is the same as file name but without _checker part
     name = "one_iteration"
-    # use dashes for connecting words in message symbol
     msgs = {
         "E9996": (
             "This loop will only ever run for one iteration",
@@ -21,17 +19,15 @@ class OneIterationChecker(BaseChecker):
         )
     }
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
-    # pass in message symbol as a parameter of only_required_for_messages
     @only_required_for_messages("one-iteration")
     def visit_for(self, node: nodes.For) -> None:
+        """Visits for node"""
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
     @only_required_for_messages("one-iteration")
     def visit_while(self, node: nodes.While) -> None:
+        """Visits while node"""
         if self._check_one_iteration(node):
             self.add_message("one-iteration", node=node)
 
@@ -66,4 +62,5 @@ class OneIterationChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(OneIterationChecker(linter))

@@ -1,4 +1,4 @@
-"""checker for global variables
+"""Checker for global variables
 """
 import re
 from typing import List
@@ -14,6 +14,8 @@ from python_ta.utils import _is_in_main
 
 
 class GlobalVariablesChecker(BaseChecker):
+    """A checker class that reports the forbidden global variables in the file"""
+
     name = "global_variables"
     msgs = {
         "E9997": (
@@ -22,9 +24,6 @@ class GlobalVariablesChecker(BaseChecker):
             "",
         )
     }
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter)
@@ -106,5 +105,5 @@ def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG) -> List[nodes.Nod
 
 
 def register(linter: PyLinter) -> None:
-    """required method to auto register this checker"""
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(GlobalVariablesChecker(linter))

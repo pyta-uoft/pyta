@@ -1,3 +1,4 @@
+"""Checker for index ranges"""
 from ast import literal_eval
 
 from astroid import nodes
@@ -7,6 +8,8 @@ from pylint.lint import PyLinter
 
 
 class InvalidRangeIndexChecker(BaseChecker):
+    """A checker class that reports the usage of an invalid index range."""
+
     name = "invalid_range_index"
     msgs = {
         "E9993": (
@@ -15,8 +18,6 @@ class InvalidRangeIndexChecker(BaseChecker):
             "Used when you use invalid index range",
         )
     }
-    # this is important so that your checker is executed before others
-    priority = -1
 
     @only_required_for_messages("invalid-range-index")
     def visit_call(self, node: nodes.Call) -> None:
@@ -58,5 +59,5 @@ def is_valid_range(start: int, stop: int, step: int) -> bool:
 
 
 def register(linter: PyLinter) -> None:
-    """required method to auto register this checker"""
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(InvalidRangeIndexChecker(linter))

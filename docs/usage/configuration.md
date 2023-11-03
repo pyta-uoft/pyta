@@ -60,7 +60,7 @@ lets you choose whether or not you want to allow comments that begin with 'pylin
 ```python
 import python_ta
 
-python_ta.check_all(..., config = {"allow-pylint-comments" : True})
+python_ta.check_all(..., config={"allow-pylint-comments": True})
 ```
 
 ## Custom Error Messages

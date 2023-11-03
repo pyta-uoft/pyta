@@ -405,6 +405,7 @@ def _verify_pre_check(filepath: AnyStr) -> bool:
 
 def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[AnyStr, None, None]:
     """A generator for all valid files to check."""
+    logging.info("RAN")
     # Allow call to check with empty args
     if module_name == "":
         m = sys.modules["__main__"]

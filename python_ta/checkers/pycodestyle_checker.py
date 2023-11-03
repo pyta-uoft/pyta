@@ -1,3 +1,4 @@
+"""Checker for the style of the file"""
 from typing import List, Tuple
 
 import pycodestyle
@@ -7,6 +8,10 @@ from pylint.lint import PyLinter
 
 
 class PycodestyleChecker(BaseRawFileChecker):
+    """A checker class to report PEP8 style errors in the file.
+
+    Use options to specify the list of PEP8 errors to ignore"""
+
     name = "pep8_errors"
     msgs = {"E9989": ("Found pycodestyle (PEP8) style error at %s", "pep8-errors", "")}
 
@@ -21,9 +26,6 @@ class PycodestyleChecker(BaseRawFileChecker):
             },
         ),
     )
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     def process_module(self, node: nodes.NodeNG) -> None:
         style_guide = pycodestyle.StyleGuide(
@@ -47,5 +49,5 @@ class JSONReport(pycodestyle.StandardReport):
 
 
 def register(linter: PyLinter) -> None:
-    """required method to auto register this checker"""
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(PycodestyleChecker(linter))

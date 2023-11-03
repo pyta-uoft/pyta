@@ -1,3 +1,6 @@
+"""Checker or use of forbidden imports.
+"""
+
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
@@ -5,6 +8,9 @@ from pylint.lint import PyLinter
 
 
 class ForbiddenImportChecker(BaseChecker):
+    """A checker class to report on the disallowed imports in the file.
+    Use options to specify the import modules that are allowed and the extra import modules."""
+
     name = "forbidden_import"
     msgs = {
         "E9999": (
@@ -33,9 +39,6 @@ class ForbiddenImportChecker(BaseChecker):
             },
         ),
     )
-
-    # this is important so that your checker is executed before others
-    priority = -1
 
     @only_required_for_messages("forbidden-import")
     def visit_import(self, node: nodes.Import) -> None:
@@ -76,10 +79,9 @@ class ForbiddenImportChecker(BaseChecker):
                         and node.args[0].value not in self.linter.config.extra_imports
                     ):
                         args = (node.args[0].value, node.lineno)
-                        # add the message
                         self.add_message("forbidden-import", node=node, args=args)
 
 
 def register(linter: PyLinter) -> None:
-    """required method to auto register this checker"""
+    """Required method to auto register this checker"""
     linter.register_checker(ForbiddenImportChecker(linter))

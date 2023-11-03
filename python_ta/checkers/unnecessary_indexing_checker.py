@@ -1,4 +1,4 @@
-"""checker for unnecessary indexing in a loop.
+"""Checker for unnecessary indexing in a loop.
 """
 from typing import List, Optional, Union
 
@@ -10,9 +10,10 @@ from pylint.lint import PyLinter
 
 
 class UnnecessaryIndexingChecker(BaseChecker):
-    # name is the same as file name but without _checker part
+    """A checker class that reports unnecessary indexing in loops and comprehensions.
+    Indexing is unnecessary when the elements can be accessed directly"""
+
     name = "unnecessary_indexing"
-    # use dashes for connecting words in message symbol
     msgs = {
         "E9994": (
             "Loop/comprehension index `%s` can be simplified by accessing the elements directly in the for loop or "
@@ -24,12 +25,9 @@ class UnnecessaryIndexingChecker(BaseChecker):
         )
     }
 
-    # this is important so that your checker is executed before others
-    priority = -1
-
-    # pass in message symbol as a parameter of only_required_for_messages
     @only_required_for_messages("unnecessary-indexing")
     def visit_for(self, node: nodes.For) -> None:
+        """Visits for node"""
         # Check if the iterable of the for loop is of the form "range(len(<variable-name>))".
         iterable = _iterable_if_range(node.iter)
         if iterable is not None and _is_unnecessary_indexing(node):
@@ -38,6 +36,7 @@ class UnnecessaryIndexingChecker(BaseChecker):
 
     @only_required_for_messages("unnecessary-indexing")
     def visit_comprehension(self, node: nodes.Comprehension) -> None:
+        """Visits comprehension node"""
         iterable = _iterable_if_range(node.iter)
         if iterable is not None and _is_unnecessary_indexing(node):
             args = node.target.as_string(), iterable
@@ -170,4 +169,5 @@ def _index_name_nodes(
 
 
 def register(linter: PyLinter) -> None:
+    """Required method to auto-register this checker to the linter"""
     linter.register_checker(UnnecessaryIndexingChecker(linter))

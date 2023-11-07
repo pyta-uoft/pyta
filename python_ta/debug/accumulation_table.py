@@ -52,6 +52,24 @@ def get_loop_node(frame: types.FrameType) -> Union[astroid.For, astroid.While]:
             return statement
 
 
+def get_variables_initialized_in_loop(frame: types.FrameType) -> set[str]:
+    """Returns a set of all the variables initialized in the loop"""
+    func_string = inspect.cleandoc(inspect.getsource(frame))
+    with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
+    lst_str_lines = func_string.splitlines()
+    lst_from_with_stmt = lst_str_lines[with_stmt_index + 1:]
+    num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
+    with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
+
+    with_module = astroid.parse(with_lines)
+
+    variables = set()
+    for assignment in with_module.nodes_of_class(astroid.Assign):
+        for target in assignment.targets:
+            variables.add(target.as_string())
+    return variables
+
+
 class AccumulationTable:
     """
     Class used as a form of print debugging to analyze different loop and
@@ -81,6 +99,7 @@ class AccumulationTable:
         self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
         self.loop_variables = {}
         self._loop_lineno = 0
+        self._loop_variables_initialized_in_loop = set()
 
     def _record_iteration(self, frame: types.FrameType) -> None:
         """Record the values of the accumulator variables and loop variables of an iteration"""
@@ -94,7 +113,7 @@ class AccumulationTable:
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
                 self.loop_accumulators[accumulator].append(copy.copy(frame.f_locals[accumulator]))
-            elif len(list(self.loop_variables.values())[0]) == 1:  # Checks if it's the first iteration
+            elif accumulator in self._loop_variables_initialized_in_loop:  # Checks if it's the first iteration
                 self.loop_accumulators[accumulator].append("N/A")
             else:
                 raise NameError
@@ -146,6 +165,7 @@ class AccumulationTable:
         )[1].frame
 
         node = get_loop_node(func_frame)
+        self._loop_variables_initialized_in_loop = get_variables_initialized_in_loop(func_frame)
 
         self._loop_lineno = inspect.getlineno(func_frame) + node.lineno
 

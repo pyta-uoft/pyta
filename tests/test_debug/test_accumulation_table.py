@@ -208,6 +208,16 @@ def test_loop_variable_initialized_in_loop() -> None:
     assert table.loop_accumulators == {'i': ['N/A', 10, 20, 30, 40, 50, 60]}
 
 
+def test_loop_variable_conditionally_initialized_in_loop() -> None:
+    with AccumulationTable(["i"]) as table:
+        for number in [10, 20, 30, 40, 50, 60]:
+            if number == 30:
+                i = number
+
+    assert table.loop_variables == {'number': ['N/A', 10, 20, 30, 40, 50, 60]}
+    assert table.loop_accumulators == {'i': ['N/A', 'N/A', 'N/A', 30, 30, 30, 30]}
+
+
 def test_uninitialized_loop_accumulators() -> None:
     with pytest.raises(NameError):
         with AccumulationTable(["i"]) as table:

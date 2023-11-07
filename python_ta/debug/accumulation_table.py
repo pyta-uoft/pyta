@@ -113,7 +113,7 @@ class AccumulationTable:
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
                 self.loop_accumulators[accumulator].append(copy.copy(frame.f_locals[accumulator]))
-            elif accumulator in self._loop_variables_initialized_in_loop:  # Checks if it's the first iteration
+            elif accumulator in self._loop_variables_initialized_in_loop:
                 self.loop_accumulators[accumulator].append("N/A")
             else:
                 raise NameError

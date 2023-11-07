@@ -214,8 +214,8 @@ def test_loop_variable_conditionally_initialized_in_loop() -> None:
             if number == 30:
                 i = number
 
-    assert table.loop_variables == {'number': ['N/A', 10, 20, 30, 40, 50, 60]}
-    assert table.loop_accumulators == {'i': ['N/A', 'N/A', 'N/A', 30, 30, 30, 30]}
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loop_accumulators == {"i": ["N/A", "N/A", "N/A", 30, 30, 30, 30]}
 
 
 def test_uninitialized_loop_accumulators() -> None:

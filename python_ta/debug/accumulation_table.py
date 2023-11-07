@@ -57,7 +57,7 @@ def get_variables_initialized_in_loop(frame: types.FrameType) -> set[str]:
     func_string = inspect.cleandoc(inspect.getsource(frame))
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
     lst_str_lines = func_string.splitlines()
-    lst_from_with_stmt = lst_str_lines[with_stmt_index + 1:]
+    lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]
     num_whitespace = num_whitespaces(lst_str_lines[with_stmt_index])
     with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
 

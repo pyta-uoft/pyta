@@ -197,3 +197,19 @@ def test_two_loop_vars_two_accumulators() -> None:
         "keys_so_far": [0, 1, 3, 6],
         "values_so_far": ["", "I lo", "I love CS", "I love CSC110"],
     }
+
+
+def test_loop_variable_initialized_in_loop() -> None:
+    with AccumulationTable(["i"]) as table:
+        for number in [10, 20, 30, 40, 50, 60]:
+            i = number
+
+    assert table.loop_variables == {'number': ['N/A', 10, 20, 30, 40, 50, 60]}
+    assert table.loop_accumulators == {'i': ['N/A', 10, 20, 30, 40, 50, 60]}
+
+
+def test_uninitialized_loop_accumulators() -> None:
+    with pytest.raises(NameError):
+        with AccumulationTable(["i"]) as table:
+            for number in [10, 20, 30, 40, 50, 60]:
+                _ = number

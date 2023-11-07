@@ -204,8 +204,8 @@ def test_loop_variable_initialized_in_loop() -> None:
         for number in [10, 20, 30, 40, 50, 60]:
             i = number
 
-    assert table.loop_variables == {'number': ['N/A', 10, 20, 30, 40, 50, 60]}
-    assert table.loop_accumulators == {'i': ['N/A', 10, 20, 30, 40, 50, 60]}
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loop_accumulators == {"i": ["N/A", 10, 20, 30, 40, 50, 60]}
 
 
 def test_uninitialized_loop_accumulators() -> None:

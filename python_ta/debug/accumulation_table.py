@@ -95,11 +95,8 @@ class AccumulationTable:
             if accumulator in frame.f_locals:
                 value = copy.copy(frame.f_locals[accumulator])
             else:
-                try:
-                    value = eval(accumulator, frame.f_locals)
-                except NameError:
-                    # name error wil be raised if accumulator cannot be found in the context of frame.f_globals
-                    value = eval(accumulator, frame.f_globals)
+                # name error wil be raised if accumulator cannot be found
+                value = eval(accumulator, frame.f_globals, frame.f_locals)
 
             self.loop_accumulators[accumulator].append(value)
 

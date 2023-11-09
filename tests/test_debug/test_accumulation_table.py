@@ -148,6 +148,7 @@ def test_five_nested_while_loop() -> None:
     }
 
 
+# make extra test cases because eval can take any expression
 class MyClass:
     items: list
     sum_so_far: int
@@ -196,6 +197,17 @@ def test_instance_var_accumulator() -> None:
 def test_class_var_accumulator() -> None:
     my_class = MyClass([10, 20, 30])
     my_class.accumulate_class_var()
+
+
+def test_expression_accumulator() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with AccumulationTable(["sum_so_far * 2"]) as table:
+        for item in test_list:
+            sum_so_far = sum_so_far + item
+
+    assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far * 2": [0, 20, 60, 120]}
 
 
 def test_invalid_accumulator() -> None:

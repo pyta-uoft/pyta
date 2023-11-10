@@ -114,6 +114,46 @@ class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_call(range_node)
 
+    def test_wrong_type(self):
+        src = """
+        range("hello", "bye")
+        """
+        range_node = astroid.extract_node(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-range-index",
+                node=range_node,
+                args="2",
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_call(range_node)
+
+    def test_variables_undefined(self):
+        src = """
+        range(start, stop)  # These variables are undefined
+        """
+        range_node = astroid.extract_node(src)
+        with self.assertNoMessages():
+            self.checker.visit_call(range_node)
+
+    def test_variables_defined(self):
+        src = """
+        start = 1
+        stop = 10
+        range(start, -stop)  # These variables can be inferred
+        """
+        range_node = astroid.extract_node(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-range-index",
+                node=range_node,
+                args="4",
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_call(range_node)
+
 
 if __name__ == "__main__":
     import pytest

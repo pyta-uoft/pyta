@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [2.6.4] - 2024-11-10
+
 ### Bug fixes
 
 - Fixed bug with `invalid-range-index` when variables are used in `range` expressions.

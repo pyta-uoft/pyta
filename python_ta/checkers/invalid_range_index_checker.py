@@ -1,7 +1,6 @@
-from ast import literal_eval
-
+"""Checker for index ranges"""
 from astroid import nodes
-from pylint.checkers import BaseChecker
+from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import only_required_for_messages
 
 
@@ -25,11 +24,14 @@ class InvalidRangeIndexChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()) and name == "range":
                 args = node.args  # the arguments of 'range' call
-                # guard nodes (e.g. Name) not properly handled by literal_eval.
-                if any([not isinstance(arg, (nodes.Const, nodes.UnaryOp)) for arg in args]):
+
+                inferred_params = [utils.safe_infer(arg) for arg in args]
+
+                # Check whether every inference was successful
+                if not all(isinstance(node, nodes.Const) for node in inferred_params):
                     return
 
-                eval_params = list(map(lambda z: literal_eval(z.as_string()), args))
+                eval_params = [const.value for const in inferred_params]
 
                 if (
                     len(args) == 0

@@ -96,9 +96,7 @@ class AccumulationTable:
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
                 self.loop_accumulators[accumulator].append(copy.copy(frame.f_locals[accumulator]))
-            elif (accumulator in frame.f_code.co_varnames) or (
-                accumulator in frame.f_code.co_names
-            ):
+            elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
                 self.loop_accumulators[accumulator].append(NO_VALUE)
             else:
                 raise NameError

@@ -15,6 +15,7 @@ import tabulate
 
 NO_VALUE = 'N/A'
 
+
 def num_whitespaces(start_of_loop: str) -> int:
     """Return the number of spaces at the beginning of the accumulation loop"""
     blank_chars = 0

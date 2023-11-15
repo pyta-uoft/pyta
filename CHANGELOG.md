@@ -13,6 +13,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Both PlainReporter and ColorReporter emphasize specific code chunks by using overline characters under any part that is highlighted as ERROR.
 - `AccumulationTable` can now track variables initialized within the `for` loop. Prior, only variables initialized before the `for` loop could be tracked.
 
+## [2.6.4] - 2024-11-10
+
+### Bug fixes
+
+- Fixed bug with `invalid-range-index` when variables are used in `range` expressions.
+
 ## [2.6.3] - 2023-10-09
 
 ### Bug fixes

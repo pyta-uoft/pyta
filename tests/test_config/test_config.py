@@ -3,6 +3,7 @@ Test suite for checking whether configuration worked correctly with user-inputte
 """
 import json
 import os
+from unittest.mock import mock_open, patch
 
 import pytest
 
@@ -226,3 +227,23 @@ def test_config_parse_error_has_no_snippet() -> None:
     snippet = reporter.messages[config][0].snippet
 
     assert snippet == ""
+
+
+def test_allow_pylint_comments() -> None:
+    """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
+    set to True"""
+
+    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
+        result = python_ta._verify_pre_check("", allow_pylint_comments=True)
+
+    assert result is True
+
+
+def test_disallows_pylint_comments() -> None:
+    """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
+    is set to False"""
+
+    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
+        result = python_ta._verify_pre_check("", allow_pylint_comments=False)
+
+    assert result is False

@@ -148,7 +148,6 @@ def test_five_nested_while_loop() -> None:
     }
 
 
-# make extra test cases because eval can take any expression
 class MyClass:
     items: list
     sum_so_far: int

@@ -148,6 +148,16 @@ def test_five_nested_while_loop() -> None:
     }
 
 
+def test_accumulation_table_with_deepcopy():
+    data = [[1], [2], [3]]
+    with AccumulationTable(["data"]) as table:
+        for sublist in data:
+            sublist[0] *= 2
+    recorded_values = table.loop_accumulators["data"][0]
+    expected_values = [[1], [2], [3]]
+    assert recorded_values == expected_values
+
+
 class MyClass:
     items: list
 

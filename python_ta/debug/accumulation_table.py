@@ -13,6 +13,8 @@ from typing import Any, Union
 import astroid
 import tabulate
 
+NO_VALUE = "N/A"
+
 
 def num_whitespaces(start_of_loop: str) -> int:
     """Return the number of spaces at the beginning of the accumulation loop"""
@@ -89,11 +91,13 @@ class AccumulationTable:
                 self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
         else:
             for loop_var in self.loop_variables:
-                self.loop_variables[loop_var].append("N/A")
+                self.loop_variables[loop_var].append(NO_VALUE)
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
                 self.loop_accumulators[accumulator].append(copy.copy(frame.f_locals[accumulator]))
+            elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
+                self.loop_accumulators[accumulator].append(NO_VALUE)
             else:
                 raise NameError
 

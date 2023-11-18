@@ -98,7 +98,6 @@ class AccumulationTable:
                 self.loop_accumulators[accumulator].append(
                     copy.deepcopy(frame.f_locals[accumulator])
                 )
-                self.loop_accumulators[accumulator].append(copy.copy(frame.f_locals[accumulator]))
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
                 self.loop_accumulators[accumulator].append(NO_VALUE)
             else:

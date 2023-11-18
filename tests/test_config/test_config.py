@@ -231,7 +231,8 @@ def test_config_parse_error_has_no_snippet() -> None:
 
 def test_allow_pylint_comments() -> None:
     """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
-    set to True"""
+    set to True
+    """
 
     with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
         result = python_ta._verify_pre_check("", allow_pylint_comments=True)
@@ -241,7 +242,8 @@ def test_allow_pylint_comments() -> None:
 
 def test_disallows_pylint_comments() -> None:
     """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
-    is set to False"""
+    is set to False
+    """
 
     with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
         result = python_ta._verify_pre_check("", allow_pylint_comments=False)

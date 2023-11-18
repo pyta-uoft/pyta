@@ -371,7 +371,8 @@ def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
 def _verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
     """Check student code for certain issues.
     The additional allow_pylint_comments parameter indicates whether we want the user to be able to add comments
-    beginning with pylint which can be used to locally disable checks."""
+    beginning with pylint which can be used to locally disable checks.
+    """
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:

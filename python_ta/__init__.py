@@ -140,7 +140,8 @@ def _check(
             errs = []  # Errors caught in files for data submission
             config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
-                if not _verify_pre_check(file_py):
+                allowed_pylint = linter.config.allow_pylint_comments
+                if not _verify_pre_check(file_py, allowed_pylint):
                     continue  # Check the other files
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
@@ -290,6 +291,15 @@ def reset_linter(
             },
         ),
         (
+            "allow-pylint-comments",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "allows or disallows pylint: comments",
+            },
+        ),
+        (
             "use-pyta-error-messages",
             {
                 "default": True,
@@ -358,13 +368,18 @@ def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
                 yield os.path.join(root, filename)  # Format path, from root.
 
 
-def _verify_pre_check(filepath: AnyStr) -> bool:
-    """Check student code for certain issues."""
+def _verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
+    """Check student code for certain issues.
+    The additional allow_pylint_comments parameter indicates whether we want the user to be able to add comments
+    beginning with pylint which can be used to locally disable checks.
+    """
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:
         # Check for inline "pylint:" comment, which may indicate a student
         # trying to disable a check.
+        if allow_pylint_comments:
+            return True
         with tokenize.open(os.path.expanduser(filepath)) as f:
             for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:

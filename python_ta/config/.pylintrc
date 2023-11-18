@@ -23,6 +23,9 @@ pyta-server-address = http://127.0.0.1:5000
 # Path to messages_config toml file
 # messages-config-path = messages.toml
 
+# Allowing pylint: comments
+allow-pylint-comments = no
+
 # Set whether the default error messages by pylint should be overwritten by PythonTA's custom messages
 use-pyta-error-messages = yes
 

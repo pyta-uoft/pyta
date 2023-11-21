@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Both PlainReporter and ColorReporter emphasize specific code chunks by using overline characters under any part that is highlighted as ERROR.
 - Added new configuration option `allow-pylint-comments` to let users choose whether PythonTA should allow comments beginning with pylint: or not.
 - `AccumulationTable` can now track variables initialized within the `for` loop. Prior, only variables initialized before the `for` loop could be tracked.
+- `AccumulationTable` can now take in any accumulator expressions, for eg. `x * 2`, instead of just variables
 
 ## [2.6.4] - 2024-11-10
 

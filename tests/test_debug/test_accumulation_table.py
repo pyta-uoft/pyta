@@ -6,6 +6,7 @@ types of accumulator loops
 import pytest
 
 from python_ta.debug import AccumulationTable
+from python_ta.debug.snapshot import snapshot
 
 
 def test_one_accumulator() -> None:
@@ -197,3 +198,70 @@ def test_two_loop_vars_two_accumulators() -> None:
         "keys_so_far": [0, 1, 3, 6],
         "values_so_far": ["", "I lo", "I love CS", "I love CSC110"],
     }
+
+
+# The functions below are for snapshot() testing purposes ONLY
+
+
+def func1():
+    """
+    Function for snapshot() testing.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot()
+
+
+def func2():
+    """
+    Function for snapshot() testing.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
+    return func1()
+
+
+def func3():
+    """
+    Function for snapshot() testing.
+    """
+    test_var1c = []
+    for i in range(5):
+        test_var1c.append(i)
+
+    return func2()
+
+
+def test_snapshot_one_procedure() -> None:
+    test_var1 = 1
+    test_var2 = "SDS"
+    returned_array = snapshot()
+
+    assert {"test_snapshot_one_procedure": {"test_var1": 1, "test_var2": "SDS"}} == returned_array[
+        0
+    ]
+
+
+def test_snapshot_two_procedures() -> None:
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } in func3()
+    assert {
+        "func2": {
+            "test_var1b": {"SDS_coolest_project": "PyTA"},
+            "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
+        }
+    } in func2()
+
+
+def test_snapshot_three_procures() -> None:
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } in func3()
+    assert {
+        "func2": {
+            "test_var1b": {"SDS_coolest_project": "PyTA"},
+            "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
+        }
+    } in func3()
+    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} in func3()

@@ -2,12 +2,12 @@
 Test suite for checking whether configuration worked correctly with user-inputted configurations.
 """
 import json
-import logging
 import os
 from unittest.mock import mock_open, patch
-import unittest
 
+import pylint.lint
 import pytest
+from pylint import lint
 
 import python_ta
 from python_ta.config import load_messages_config, override_config
@@ -232,12 +232,13 @@ def test_config_parse_error_has_no_snippet() -> None:
     assert snippet == ""
 
 
-def test_override_config_logging(caplog, capsys) -> None:
+def test_override_config_logging(caplog) -> None:
     """Testing that the OSError in override_config is logged correctly"""
     path = "C:\\foo\\tests\\file_fixtures\\test_f0011.pylintrc"
+    linter = lint.PyLinter()
 
     with pytest.raises(SystemExit):
-        python_ta.check_all(module_name="examples/nodes/name.py", config=path)
+        override_config(linter, path)
     assert caplog.records[0].levelname == "ERROR"
     assert f"The config file {path} doesn't exist!" in caplog.text
 

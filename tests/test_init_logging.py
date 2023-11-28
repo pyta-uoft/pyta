@@ -48,13 +48,12 @@ def test_get_valid_files_to_check(caplog) -> None:
         "No check run on file `0`, with invalid type. Must be type: str.",
         "Could not find the file called, `foo`",
     ]
-    # TODO this is some how passing and still returning a generator
-    # _get_valid_files_to_check({"examples/nodes/assign"})
-    # _get_valid_files_to_check([0])
-    # _get_valid_files_to_check("foo")
-    python_ta.check_all(module_name={"examples/nodes/assign"})
-    python_ta.check_all(module_name=[0])
-    python_ta.check_all(module_name="foo")
+
+    # Iterating through generators to produce errors
+    [_ for _ in _get_valid_files_to_check(module_name={"examples/nodes/assign"})]
+    [_ for _ in _get_valid_files_to_check(module_name=[0])]
+    [_ for _ in _get_valid_files_to_check(module_name="foo")]
+
     for i in range(3):
         assert caplog.records[i].levelname == "ERROR"
         assert expected_logs[i] in caplog.records[i].msg

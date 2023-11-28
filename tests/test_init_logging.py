@@ -1,4 +1,5 @@
 """Tests for top level __init__.py logging functionality in pyta"""
+import tokenize
 from unittest.mock import patch
 
 import python_ta
@@ -34,9 +35,35 @@ def test_check_exception_log(_, caplog) -> None:
             assert expected_logs[i] in caplog.records[i].msg
 
 
-@patch("pylint.utils.pragma_parser.OPTION_PO.search", side_effect=IndentationError)
-def test_pre_check_log(_, caplog) -> None:
-    """Testing logging in _verify_pre_check function"""
+def test_pre_check_log_pylint_comment(caplog) -> None:
+    """Testing logging in _verify_pre_check function when checking for pyling comment"""
+    _verify_pre_check("../examples/pylint/pylint_comment.py", False)
+    assert "String \"pylint:\" found in comment. No check run on file `../examples/pylint/pylint_comment.py." in caplog.text
+    assert "ERROR" == caplog.records[0].levelname
+
+
+@patch("python_ta.tokenize.open", side_effect=IndentationError)
+def test_pre_check_log_indentation_error(_, caplog) -> None:
+    """Testing logging in _verify_pre_check function IndentationError catch block"""
+    _verify_pre_check("../examples/syntax_errors/unexpected_indent.py", False)
+    assert "python_ta could not check your code due to an indentation error at line" in caplog.text
+    assert "ERROR" == caplog.records[0].levelname
+
+
+@patch("python_ta.tokenize.open", side_effect=tokenize.TokenError)
+def test_pre_check_log_token_error(_, caplog) -> None:
+    """Testing logging in _verify_pre_check function TokenError catch block"""
+    _verify_pre_check("../examples/syntax_errors/missing_colon.py", False)
+    assert "python_ta could not check your code due to a syntax error in your file." in caplog.text
+    assert "ERROR" == caplog.records[0].levelname
+
+
+@patch("python_ta.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
+def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
+    """Testing logging in _verify_pre_check function UnicodeDecodeError catch block"""
+    _verify_pre_check("../examples/syntax_errors/missing_colon.py", False)
+    assert "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �." in caplog.text
+    assert "ERROR" == caplog.records[0].levelname
 
 
 def test_get_valid_files_to_check(caplog) -> None:

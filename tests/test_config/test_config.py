@@ -4,8 +4,8 @@ Test suite for checking whether configuration worked correctly with user-inputte
 import json
 import logging
 import os
-from unittest.mock import mock_open, patch
 import unittest
+from unittest.mock import mock_open, patch
 
 import pytest
 

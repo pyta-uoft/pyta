@@ -134,23 +134,10 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 
 1. `AccumulationTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
 
-2. Only supports loop accumulation variables, but not accumulators as part of an object.
-   For example, instance attribute accumulators are not supported:
-
-   ```python
-   class MyClass:
-       def update_my_sum(self, numbers):
-           for number in numbers:
-               self.sum_so_far = self.sum_so_far + number
-   ```
-
-3. Loop variable state is stored by creating shallow copies of the objects.
+2. Loop variable state is stored by creating shallow copies of the objects.
    Loops that mutate a nested part of an object will not have their state displayed properly.
 
-4. All tracked loop variables other than the for loop target must be initialized before the loop,
-   even when the variables are guaranteed to be initialized before use inside the loop body.
-
-5. The `AccumulationTable` context manager can only log the execution of one for loop.
+3. The `AccumulationTable` context manager can only log the execution of one for loop.
    To log the state of multiple for loops, each must be wrapped in a separate `with` statement and fresh `AccumulationTable` instance.
 
 [tabulate]: https://github.com/astanin/python-tabulate

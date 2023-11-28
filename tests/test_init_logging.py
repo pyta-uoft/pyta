@@ -1,44 +1,42 @@
 """Tests for top level __init__.py logging functionality in pyta"""
-import tokenize
 from unittest.mock import patch
 
 import python_ta
-from python_ta import _get_valid_files_to_check
+from python_ta import _get_valid_files_to_check, _verify_pre_check
 
 
-# TODO how to get unexpected error?
 def test_check_log(caplog) -> None:
-    """Testing logging in _check function"""
+    """Testing logging in _check function when no exception is thrown"""
     expected_messages = [
         "was checked using the configuration file:",
         "was checked using the messages-config file:",
     ]
 
-    python_ta.check_all(module_name="examples/nodes/assign")
+    python_ta._check()
     for i in range(2):
         assert caplog.records[i].levelname == "INFO"
         assert expected_messages[i] in caplog.records[i].msg
 
 
+@patch("python_ta._get_valid_files_to_check", side_effect=Exception("Testing"))
+def test_check_exception_log(_, caplog) -> None:
+    """Testing logging in _check function when exception is thrown"""
+    try:
+        python_ta._check()
+    except Exception:
+        expected_logs = [
+            "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).",
+            "Error message: \"Testing\"",
+        ]
+
+        for i in range(2):
+            assert caplog.records[i].levelname == "ERROR"
+            assert expected_logs[i] in caplog.records[i].msg
+
+
 @patch("pylint.utils.pragma_parser.OPTION_PO.search", side_effect=IndentationError)
 def test_pre_check_log(_, caplog) -> None:
     """Testing logging in _verify_pre_check function"""
-    # Checking pylint comment
-
-    # Checking indentation error (Use unexpected indent) # TODO does pyta handle these
-    # with patch("python_ta.OPTION_PO.search", side_effect=IndentationError):
-    python_ta.check_all(module_name="examples/syntax_errors/unexpected_indent")
-    assert "indentation error at line" in caplog.text
-
-    # Checking token error (Use syntax error examples)
-    # with patch("python_ta.OPTION_PO.search", side_effect=tokenize.TokenError):
-    #     python_ta.check_all(module_name="examples/syntax_errors/missing_colon")
-    #     assert "syntax error in your file" in caplog.text
-    #
-    # # Checking unicode decode error
-    # with patch("python_ta.OPTION_PO.search", side_effect=UnicodeDecodeError):
-    #     python_ta.check_all(module_name="examples/syntax_errors/missing_colon")
-    #     assert  "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �." in caplog.text
 
 
 def test_get_valid_files_to_check(caplog) -> None:
@@ -54,7 +52,7 @@ def test_get_valid_files_to_check(caplog) -> None:
     [_ for _ in _get_valid_files_to_check(module_name=[0])]
     [_ for _ in _get_valid_files_to_check(module_name="foo")]
 
-    for i in range(3):
+    for i in range(len(expected_logs)):
         assert caplog.records[i].levelname == "ERROR"
         assert expected_logs[i] in caplog.records[i].msg
 

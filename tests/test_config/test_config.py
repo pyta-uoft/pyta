@@ -2,6 +2,7 @@
 Test suite for checking whether configuration worked correctly with user-inputted configurations.
 """
 import json
+import logging
 import os
 from unittest.mock import mock_open, patch
 

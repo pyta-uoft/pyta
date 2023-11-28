@@ -27,7 +27,7 @@ def test_check_exception_log(_, caplog) -> None:
     except Exception:
         expected_logs = [
             "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).",
-            "Error message: \"Testing\"",
+            'Error message: "Testing"',
         ]
 
         for i in range(2):
@@ -38,7 +38,10 @@ def test_check_exception_log(_, caplog) -> None:
 def test_pre_check_log_pylint_comment(caplog) -> None:
     """Testing logging in _verify_pre_check function when checking for pyling comment"""
     _verify_pre_check("../examples/pylint/pylint_comment.py", False)
-    assert "String \"pylint:\" found in comment. No check run on file `../examples/pylint/pylint_comment.py." in caplog.text
+    assert (
+        'String "pylint:" found in comment. No check run on file `../examples/pylint/pylint_comment.py.'
+        in caplog.text
+    )
     assert "ERROR" == caplog.records[0].levelname
 
 
@@ -62,7 +65,10 @@ def test_pre_check_log_token_error(_, caplog) -> None:
 def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function UnicodeDecodeError catch block"""
     _verify_pre_check("../examples/syntax_errors/missing_colon.py", False)
-    assert "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �." in caplog.text
+    assert (
+        "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �."
+        in caplog.text
+    )
     assert "ERROR" == caplog.records[0].levelname
 
 

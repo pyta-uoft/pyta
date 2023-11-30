@@ -160,9 +160,12 @@ def test_accumulation_table_with_deepcopy():
 
 class MyClass:
     items: list
+    sum_so_far: int
+    difference_so_far = 0
 
     def __init__(self, items: list):
         self.items = items
+        self.sum_so_far = 0
 
     def get_total(self) -> None:
         sum_so_far = 0
@@ -173,10 +176,56 @@ class MyClass:
         assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
         assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
 
+    def accumulate_instance_var(self) -> None:
+        with AccumulationTable(["self.sum_so_far"]) as table:
+            for item in self.items:
+                self.sum_so_far = self.sum_so_far + item
+
+        assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+        assert table.loop_accumulators == {"self.sum_so_far": [0, 10, 30, 60]}
+
+    def accumulate_class_var(self) -> None:
+        with AccumulationTable(["MyClass.difference_so_far"]) as table:
+            for item in self.items:
+                MyClass.difference_so_far = MyClass.difference_so_far - item
+
+        assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+        assert table.loop_accumulators == {"MyClass.difference_so_far": [0, -10, -30, -60]}
+
 
 def test_class_var() -> None:
     my_class = MyClass([10, 20, 30])
     my_class.get_total()
+
+
+def test_instance_var_accumulator() -> None:
+    my_class = MyClass([10, 20, 30])
+    my_class.accumulate_instance_var()
+
+
+def test_class_var_accumulator() -> None:
+    my_class = MyClass([10, 20, 30])
+    my_class.accumulate_class_var()
+
+
+def test_expression_accumulator() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with AccumulationTable(["sum_so_far * 2"]) as table:
+        for item in test_list:
+            sum_so_far = sum_so_far + item
+
+    assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far * 2": [0, 20, 60, 120]}
+
+
+def test_invalid_accumulator() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with pytest.raises(NameError):
+        with AccumulationTable(["invalid"]) as table:
+            for number in test_list:
+                sum_so_far = sum_so_far + number
 
 
 def test_two_loop_vars_one_accumulator() -> None:

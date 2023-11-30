@@ -98,10 +98,14 @@ class AccumulationTable:
                 self.loop_accumulators[accumulator].append(
                     copy.deepcopy(frame.f_locals[accumulator])
                 )
+                value = copy.copy(frame.f_locals[accumulator])
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
-                self.loop_accumulators[accumulator].append(NO_VALUE)
+                value = NO_VALUE
             else:
-                raise NameError
+                # name error wil be raised if accumulator cannot be found
+                value = eval(accumulator, frame.f_globals, frame.f_locals)
+
+            self.loop_accumulators[accumulator].append(value)
 
     def _create_iteration_dict(self) -> dict:
         """Return a dictionary that maps each accumulator

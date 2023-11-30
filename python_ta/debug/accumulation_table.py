@@ -95,15 +95,13 @@ class AccumulationTable:
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
-                self.loop_accumulators[accumulator].append(
-                    copy.deepcopy(frame.f_locals[accumulator])
-                )
-                value = copy.copy(frame.f_locals[accumulator])
+                value = copy.deepcopy(frame.f_locals[accumulator])
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
                 value = NO_VALUE
             else:
                 # name error wil be raised if accumulator cannot be found
                 value = eval(accumulator, frame.f_globals, frame.f_locals)
+                value = copy.deepcopy(value)
 
             self.loop_accumulators[accumulator].append(value)
 

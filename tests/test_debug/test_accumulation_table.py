@@ -266,7 +266,6 @@ def test_snapshot_three_levels() -> None:
     Evaluates the precision of the snapshot() function in capturing
     local variables during a three-level nested function call.
     """
-
     local_vars = func3()
 
     assert {

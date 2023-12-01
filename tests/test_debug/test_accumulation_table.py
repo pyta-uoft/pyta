@@ -201,9 +201,7 @@ def test_two_loop_vars_two_accumulators() -> None:
 
 
 # The functions below are for snapshot() testing purposes ONLY
-
-
-def func1():
+def func1() -> list:
     """
     Function for snapshot() testing.
     """
@@ -212,7 +210,7 @@ def func1():
     return snapshot()
 
 
-def func2():
+def func2() -> list:
     """
     Function for snapshot() testing.
     """
@@ -221,7 +219,7 @@ def func2():
     return func1()
 
 
-def func3():
+def func3() -> list:
     """
     Function for snapshot() testing.
     """
@@ -232,36 +230,52 @@ def func3():
     return func2()
 
 
-def test_snapshot_one_procedure() -> None:
-    test_var1 = 1
-    test_var2 = "SDS"
-    returned_array = snapshot()
+def test_snapshot_one_level() -> None:
+    """
+    Examines whether the snapshot() function accurately captures
+    the local variables of a singular function call,
+    devoid of any nested levels.
+    """
+    local_vars = func1()
 
-    assert {"test_snapshot_one_procedure": {"test_var1": 1, "test_var2": "SDS"}} == returned_array[
-        0
-    ]
-
-
-def test_snapshot_two_procedures() -> None:
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
-    } in func3()
+    } == local_vars[0]
+
+
+def test_snapshot_two_levels() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables during a two-level nested function call.
+    """
+    local_vars = func2()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
     assert {
         "func2": {
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
-    } in func2()
+    } == local_vars[1]
 
 
-def test_snapshot_three_procures() -> None:
+def test_snapshot_three_levels() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables during a three-level nested function call.
+    """
+
+    local_vars = func3()
+
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
-    } in func3()
+    } == local_vars[0]
     assert {
         "func2": {
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
-    } in func3()
-    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} in func3()
+    } == local_vars[1]
+    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]

@@ -151,9 +151,12 @@ def test_five_nested_while_loop() -> None:
 
 class MyClass:
     items: list
+    sum_so_far: int
+    difference_so_far = 0
 
     def __init__(self, items: list):
         self.items = items
+        self.sum_so_far = 0
 
     def get_total(self) -> None:
         sum_so_far = 0
@@ -164,10 +167,56 @@ class MyClass:
         assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
         assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
 
+    def accumulate_instance_var(self) -> None:
+        with AccumulationTable(["self.sum_so_far"]) as table:
+            for item in self.items:
+                self.sum_so_far = self.sum_so_far + item
+
+        assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+        assert table.loop_accumulators == {"self.sum_so_far": [0, 10, 30, 60]}
+
+    def accumulate_class_var(self) -> None:
+        with AccumulationTable(["MyClass.difference_so_far"]) as table:
+            for item in self.items:
+                MyClass.difference_so_far = MyClass.difference_so_far - item
+
+        assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+        assert table.loop_accumulators == {"MyClass.difference_so_far": [0, -10, -30, -60]}
+
 
 def test_class_var() -> None:
     my_class = MyClass([10, 20, 30])
     my_class.get_total()
+
+
+def test_instance_var_accumulator() -> None:
+    my_class = MyClass([10, 20, 30])
+    my_class.accumulate_instance_var()
+
+
+def test_class_var_accumulator() -> None:
+    my_class = MyClass([10, 20, 30])
+    my_class.accumulate_class_var()
+
+
+def test_expression_accumulator() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with AccumulationTable(["sum_so_far * 2"]) as table:
+        for item in test_list:
+            sum_so_far = sum_so_far + item
+
+    assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far * 2": [0, 20, 60, 120]}
+
+
+def test_invalid_accumulator() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with pytest.raises(NameError):
+        with AccumulationTable(["invalid"]) as table:
+            for number in test_list:
+                sum_so_far = sum_so_far + number
 
 
 def test_two_loop_vars_one_accumulator() -> None:
@@ -198,8 +247,32 @@ def test_two_loop_vars_two_accumulators() -> None:
         "keys_so_far": [0, 1, 3, 6],
         "values_so_far": ["", "I lo", "I love CS", "I love CSC110"],
     }
+    
+def test_loop_variable_initialized_in_loop() -> None:
+    with AccumulationTable(["i"]) as table:
+        for number in [10, 20, 30, 40, 50, 60]:
+            i = number
+
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loop_accumulators == {"i": ["N/A", 10, 20, 30, 40, 50, 60]}
 
 
+def test_loop_variable_conditionally_initialized_in_loop() -> None:
+    with AccumulationTable(["i"]) as table:
+        for number in [10, 20, 30, 40, 50, 60]:
+            if number == 30:
+                i = number
+
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loop_accumulators == {"i": ["N/A", "N/A", "N/A", 30, 30, 30, 30]}
+
+
+def test_uninitialized_loop_accumulators() -> None:
+    with pytest.raises(NameError):
+        with AccumulationTable(["i"]) as table:
+            for number in [10, 20, 30, 40, 50, 60]:
+                _ = number
+                
 # The functions below are for snapshot() testing purposes ONLY
 def func1() -> list:
     """

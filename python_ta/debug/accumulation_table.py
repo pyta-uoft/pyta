@@ -88,19 +88,20 @@ class AccumulationTable:
         """Record the values of the accumulator variables and loop variables of an iteration"""
         if self.loop_variables != {} and len(list(self.loop_variables.values())[0]) > 0:
             for loop_var in self.loop_variables:
-                self.loop_variables[loop_var].append(copy.copy(frame.f_locals[loop_var]))
+                self.loop_variables[loop_var].append(copy.deepcopy(frame.f_locals[loop_var]))
         else:
             for loop_var in self.loop_variables:
                 self.loop_variables[loop_var].append(NO_VALUE)
 
         for accumulator in self.loop_accumulators:
             if accumulator in frame.f_locals:
-                value = copy.copy(frame.f_locals[accumulator])
+                value = copy.deepcopy(frame.f_locals[accumulator])
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
                 value = NO_VALUE
             else:
                 # name error wil be raised if accumulator cannot be found
                 value = eval(accumulator, frame.f_globals, frame.f_locals)
+                value = copy.deepcopy(value)
 
             self.loop_accumulators[accumulator].append(value)
 

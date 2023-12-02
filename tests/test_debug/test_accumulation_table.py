@@ -7,6 +7,7 @@ import copy
 import pytest
 
 from python_ta.debug import AccumulationTable
+from python_ta.debug.snapshot import snapshot
 
 
 def test_one_accumulator() -> None:
@@ -396,3 +397,83 @@ def test_uninitialized_loop_accumulators() -> None:
         with AccumulationTable(["i"]) as table:
             for number in [10, 20, 30, 40, 50, 60]:
                 _ = number
+
+
+# The functions below are for snapshot() testing purposes ONLY
+def func1() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot()
+
+
+def func2() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
+    return func1()
+
+
+def func3() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1c = []
+    for i in range(5):
+        test_var1c.append(i)
+
+    return func2()
+
+
+def test_snapshot_one_level() -> None:
+    """
+    Examines whether the snapshot() function accurately captures
+    the local variables of a singular function call,
+    devoid of any nested levels.
+    """
+    local_vars = func1()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
+
+
+def test_snapshot_two_levels() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables during a two-level nested function call.
+    """
+    local_vars = func2()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
+    assert {
+        "func2": {
+            "test_var1b": {"SDS_coolest_project": "PyTA"},
+            "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
+        }
+    } == local_vars[1]
+
+
+def test_snapshot_three_levels() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables during a three-level nested function call.
+    """
+    local_vars = func3()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
+    assert {
+        "func2": {
+            "test_var1b": {"SDS_coolest_project": "PyTA"},
+            "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
+        }
+    } == local_vars[1]
+    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]

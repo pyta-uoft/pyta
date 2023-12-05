@@ -38,7 +38,7 @@ def test_check_exception_log(_, caplog) -> None:
 
 def test_pre_check_log_pylint_comment(caplog) -> None:
     """Testing logging in _verify_pre_check function when checking for pyling comment"""
-    path = os.path.join(os.getcwd(), "../examples/pylint/pylint_comment.py")
+    path = os.path.join(os.path.dirname(__file__), "fixtures", "pylint_comment.py")
     _verify_pre_check(path, False)
     assert (
         f'String "pylint:" found in comment. No check run on file `{path}'
@@ -68,13 +68,19 @@ def test_pre_check_log_token_error(_, caplog) -> None:
 @patch("python_ta.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
 def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function UnicodeDecodeError catch block"""
-    path = os.path.join(os.getcwd(), "../examples/syntax_errors/missing_colon.py")
+    expected_logs = [
+        'python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �.',
+        '  Line 1: "�"\n',
+        '  Line 2: "�"\n',
+        '  Line 5: "�"'
+    ]
+
+    path = os.path.join(os.path.dirname(__file__), "fixtures", "unicode_decode_error.py")
     _verify_pre_check(path, False)
-    assert (
-        "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �."
-        in caplog.text
-    )
-    assert "ERROR" == caplog.records[0].levelname
+
+    for i in range(len(expected_logs)):
+        assert expected_logs[i] == caplog.records[i].msg
+        assert "ERROR" == caplog.records[i].levelname
 
 
 def test_get_valid_files_to_check(caplog) -> None:

@@ -66,10 +66,10 @@ def test_pre_check_log_token_error(_, caplog) -> None:
 def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function UnicodeDecodeError catch block"""
     expected_logs = [
-        'python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �.',
+        "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �.",
         '  Line 1: "�"\n',
         '  Line 2: "�"\n',
-        '  Line 5: "�"'
+        '  Line 5: "�"',
     ]
 
     path = os.path.join(os.path.dirname(__file__), "fixtures", "unicode_decode_error.py")

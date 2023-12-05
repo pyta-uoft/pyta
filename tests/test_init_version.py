@@ -1,6 +1,7 @@
 """Test for __init__.py system version check"""
-import sys
 import importlib
+import sys
+
 import python_ta
 
 

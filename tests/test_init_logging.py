@@ -40,10 +40,7 @@ def test_pre_check_log_pylint_comment(caplog) -> None:
     """Testing logging in _verify_pre_check function when checking for pyling comment"""
     path = os.path.join(os.path.dirname(__file__), "fixtures", "pylint_comment.py")
     _verify_pre_check(path, False)
-    assert (
-        f'String "pylint:" found in comment. No check run on file `{path}'
-        in caplog.text
-    )
+    assert f'String "pylint:" found in comment. No check run on file `{path}' in caplog.text
     assert "ERROR" == caplog.records[0].levelname
 
 

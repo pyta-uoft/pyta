@@ -413,7 +413,7 @@ def _verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):
                 if "�" in line:
-                    logging.error(f"  Line {i}: {line}")
+                    logging.error(f"  Line {i + 1}: {line}")
         return False
     return True
 

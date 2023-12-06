@@ -3,7 +3,7 @@
 # Make sure to register custom options tuple first in `python_ta/__init__.py`
 # ===========================================================
 # Path to messages_config toml file
-messages-config-path = tests/test_messages_config/test.messages_config.toml
+messages-config-path = test.messages_config.toml
 
 # Set whether the default error messages by pylint should be overwritten by python TA's custom messages
 use-pyta-error-messages = yes

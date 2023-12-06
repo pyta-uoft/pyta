@@ -1,6 +1,6 @@
 import subprocess
 import sys
-
+import os
 
 def test_valid_message_config_and_pyta_overwrite():
     """Test the error messages given a valid messages-config-path with use-pyta-error-messages as True"""
@@ -10,8 +10,8 @@ def test_valid_message_config_and_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test_user_config_pyta_overwrite.pylintrc",
-            "tests/test_messages_config/testing_code.py",
+            "test_user_config_pyta_overwrite.pylintrc",
+            "testing_code.py",
         ],
         capture_output=True,
         text=True,
@@ -29,8 +29,8 @@ def test_no_message_config_and_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test_no_user_config_pyta_overwrite.pylintrc",
-            "tests/test_messages_config/testing_code.py",
+            "test_no_user_config_pyta_overwrite.pylintrc",
+            "testing_code.py",
         ],
         capture_output=True,
         text=True,
@@ -48,8 +48,8 @@ def test_valid_message_config_and_no_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test_user_config_no_pyta_overwrite.pylintrc",
-            "tests/test_messages_config/testing_code.py",
+            "test_user_config_no_pyta_overwrite.pylintrc",
+            "testing_code.py",
         ],
         capture_output=True,
         text=True,
@@ -67,8 +67,8 @@ def test_no_message_config_and_no_pyta_overwrite():
             "-m",
             "python_ta",
             "--config",
-            "tests/test_messages_config/test_no_user_config_no_pyta_overwrite.pylintrc",
-            "tests/test_messages_config/testing_code.py",
+            "test_no_user_config_no_pyta_overwrite.pylintrc",
+            "testing_code.py",
         ],
         capture_output=True,
         text=True,

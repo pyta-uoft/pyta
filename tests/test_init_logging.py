@@ -14,7 +14,7 @@ def test_check_log(caplog) -> None:
         "was checked using the messages-config file:",
     ]
 
-    python_ta._check()
+    python_ta._check(module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py"))
     for i in range(2):
         assert caplog.records[i].levelname == "INFO"
         assert expected_messages[i] in caplog.records[i].msg
@@ -69,7 +69,7 @@ def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
         "python_ta could not check your code due to an invalid character. Please check the following lines in your file and all characters that are marked with a �.",
         '  Line 1: "�"\n',
         '  Line 2: "�"\n',
-        '  Line 5: "�"',
+        '  Line 5: "�"\n',
     ]
 
     path = os.path.join(os.path.dirname(__file__), "fixtures", "unicode_decode_error.py")

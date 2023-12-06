@@ -40,7 +40,7 @@ cfg = [
     "graphviz",
 ]
 z3 = [
-    "z3-solver",
+    "z3-solver==4.12.1.0",
 ]
 
 [project.scripts]

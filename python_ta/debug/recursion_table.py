@@ -1,26 +1,27 @@
 """
 Table data structure that prints a nicely formatted table
-for a recursive function
+for a recursive function.
 """
 from __future__ import annotations
 
 import inspect
 import sys
 import types
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import tabulate
 
 from python_ta.util.tree import Tree
 
+DEFAULT_FUNCTION_STRING = "N/A"
+
 
 def clean_frame_variables(frame: types.FrameType) -> dict[str, Any]:
-    """remove the local variables from the frame's locals and keep only the
-    parameters
+    """Remove the local variables from the frame's locals and keep only the
+    parameters.
     """
     raw_variables = frame.f_locals
     parameters = inspect.getargvalues(frame).args
-    # not mutating the local variables to avoid unintended effects
     cleaned_variables = {param: raw_variables[param] for param in parameters}
     return cleaned_variables
 
@@ -28,104 +29,104 @@ def clean_frame_variables(frame: types.FrameType) -> dict[str, Any]:
 class RecursionTable:
     """
     Class used as a form of print debugging to analyze the inputs
-    and return values for a recursive function
+    and return values for a recursive function.
 
     Instance attributes:
-        frames_mapping: a mapping between the frame for a
-            recursive function and their return values and inputs
-        frames_ordered: a list to conserve the order in which the
-            frames were created
-        function_name: name of the function being traced
+        frames_data: a mapping between the frame for a
+            recursive function and its traced values
+        function_name: name of the function to be traced
         _trees: mapping of the frames to the corresponding tree
             representing the function call
     """
 
-    frames_mapping: dict[types.FrameType, list]
-    frames_ordered: list[types.FrameType]
+    frames_data: dict[types.FrameType, dict[str, Any]]
     function_name: str
     _trees: dict[types.FrameType, Tree]
 
-    def __init__(self) -> None:
-        """Initialize a RecursionTable context manager for print-based recursive debugging."""
-        self.frames_mapping = {}
-        self.frames_ordered = []
+    def __init__(self, function_name: str) -> None:
+        """Initialize a RecursionTable context manager for print-based recursive debugging
+        of <function_name>.
+        """
+        self.function_name = function_name
+        self.frames_data = {}
         self._trees = {}
-        self.function_name = ""
 
-    def get_root(self) -> Tree:
-        """To be used when we want to access the root node of the tree"""
-        return self._trees[self.frames_ordered[0]]
+    def _get_root(self) -> Optional[Tree]:
+        """Return the root node of the tree."""
+        if self.frames_data:
+            return self._trees[next(iter(self.frames_data))]
 
     def _create_func_call_string(self, frame_variables: dict[str, Any]) -> str:
         """Create a string representation of the function call given the inputs
-        for eg. fib(2, 3)
+        for eg. 'fib(2, 3)'.
         """
         # note that in python dicts the order is maintained based on insertion
         # we don't need to worry about the order of inputs changing
-        caller_val = f"{self.function_name}("
-        count = 0
-        for var in frame_variables:
-            caller_val += f"{frame_variables[var]}"
-            if count < len(frame_variables) - 1:
-                caller_val += ", "
-            count += 1
-        caller_val += ")"
-        return caller_val
+        function_inputs = ", ".join(str(frame_variables[var]) for var in frame_variables)
+        return f"{self.function_name}({function_inputs})"
 
-    def _record_call(self, frame: types.FrameType) -> None:
-        """Update the state of the table representation after a function call is detected"""
-        self.frames_mapping[frame] = []
-        self.frames_ordered.append(frame)
-        caller_frame = frame.f_back
-        caller_frame_variables = clean_frame_variables(caller_frame)
-
-        # this handles the very first function call
-        if not self.function_name:
-            self.function_name = frame.f_code.co_name
-            caller_func_string = "NA"
-        else:
-            caller_func_string = self._create_func_call_string(caller_frame_variables)
-        self.frames_mapping[frame].append(caller_func_string)
-
-        # tree insertion
-        current_frame_variables = clean_frame_variables(frame)
-        current_func_string = self._create_func_call_string(current_frame_variables)
+    def _insert_to_tree(
+        self, current_func_string: str, frame: types.FrameType, caller_frame: types.FrameType
+    ) -> None:
+        """Create a new node for self._trees and add it as a child for its parent frame, if applicable."""
         current_node = Tree([current_func_string])
         self._trees[frame] = current_node
-
+        # this will always be true unless frame is the initial function call frame
         if caller_frame in self._trees:
             caller_node = self._trees[caller_frame]
             caller_node.add_child(current_node)
 
+    def _record_call(self, frame: types.FrameType) -> None:
+        """Update the state of the table representation after a function call is detected."""
+        current_frame_data = {}
+        caller_frame = frame.f_back
+        current_frame_variables = clean_frame_variables(frame)
+
+        # add the inputs to the dict
+        for variable in current_frame_variables:
+            current_frame_data[variable] = current_frame_variables[variable]
+
+        # add the parent function call string
+        if caller_frame not in self.frames_data:
+            current_frame_data["called by"] = DEFAULT_FUNCTION_STRING
+        else:
+            current_frame_data["called by"] = self.frames_data[caller_frame]["call string"]
+
+        # add the function call string for the current frame
+        current_func_string = self._create_func_call_string(current_frame_variables)
+        current_frame_data["call string"] = current_func_string
+
+        self.frames_data[frame] = current_frame_data
+        self._insert_to_tree(current_func_string, frame, caller_frame)
+
     def _record_return(self, frame: types.FrameType, return_value: Any) -> None:
-        """Update the state of the table representation after a function return is detected
-        Note: the frame must already have been seen as returns are done 'on the way out'
+        """Update the state of the table representation after a function return is detected.
+        Note: the frame must already have been seen as returns are done 'on the way out'.
         """
-        self.frames_mapping[frame].append(return_value)
+        self.frames_data[frame]["return value"] = return_value
         current_node = self._trees[frame]
         current_node.value.append(return_value)
 
     def get_recursive_dict(self) -> dict[str, list]:
         """Use the instance variables that define the table to create a final dictionary
-        which directly represents the table
+        which directly represents the table.
         """
-        # intialize table columns
-        parameters = inspect.getargvalues(self.frames_ordered[0]).args
-        recursive_dict = {key: [] for key in parameters + ["called_by", "return_value"]}
-        for frame in self.frames_ordered:
-            current_frame_variables = clean_frame_variables(frame)
-            for variable in current_frame_variables:
-                recursive_dict[variable].append(current_frame_variables[variable])
+        if not self.frames_data:
+            return {}
+        # intialize table columns using the first frame
+        parameters = inspect.getargvalues(next(iter(self.frames_data))).args
+        recursive_dict = {key: [] for key in parameters + ["called by", "return value"]}
 
-            caller_expression, return_val = self.frames_mapping[frame]
-
-            recursive_dict["called_by"].append(caller_expression)
-
-            recursive_dict["return_value"].append(return_val)
+        for frame in self.frames_data:
+            current_frame_data = self.frames_data[frame]
+            for key in current_frame_data:
+                # this should always be true unless key == "call string"
+                if key in recursive_dict:
+                    recursive_dict[key].append(current_frame_data[key])
         return recursive_dict
 
     def _tabulate_data(self) -> None:
-        """Print the recursive table"""
+        """Print the recursive table."""
         recursive_dict = self.get_recursive_dict()
         print(
             tabulate.tabulate(
@@ -139,23 +140,24 @@ class RecursionTable:
 
     def _trace_recursion(self, frame: types.FrameType, event: str, _arg: Any) -> Callable:
         """Trace through the recursive exexution and call the corresponding
-        method depending on whether a call or return is detected
+        method depending on whether a call or return is detected.
         """
-        # ignore the execution of the __exit__ method
-        if event == "call" and frame.f_code.co_name != "__exit__":
-            self._record_call(frame)
-        if event == "return":
-            self._record_return(frame, _arg)
+        # only trace frames that match the correct function name
+        if frame.f_code.co_name == self.function_name:
+            if event == "call":
+                self._record_call(frame)
+            elif event == "return":
+                self._record_return(frame, _arg)
 
         # return the function to continue tracing
         return self._trace_recursion
 
     def __enter__(self) -> RecursionTable:
-        """Set up and return the recursion table for the recursive function"""
+        """Set up and return the recursion table for the recursive function."""
         sys.settrace(self._trace_recursion)
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Exit the recursive execution, stop tracing function execution and print the table"""
+        """Exit the recursive execution, stop tracing function execution and print the table."""
         sys.settrace(None)
         self._tabulate_data()

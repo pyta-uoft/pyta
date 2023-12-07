@@ -14,7 +14,9 @@ def test_check_log(caplog) -> None:
         "was checked using the messages-config file:",
     ]
 
-    python_ta._check(module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py"))
+    python_ta._check(
+        module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py")
+    )
     for i in range(2):
         assert caplog.records[i].levelname == "INFO"
         assert expected_messages[i] in caplog.records[i].msg

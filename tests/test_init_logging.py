@@ -1,10 +1,22 @@
 """Tests for top level __init__.py logging functionality in pyta"""
 import os
+import sys
 import tokenize
 from unittest.mock import patch
 
 import python_ta
 from python_ta import _get_valid_files_to_check, _verify_pre_check
+
+
+def test_sys_version_log(caplog, monkeypatch) -> None:
+    """Testing if _check function logged message when system version is too low is correct"""
+    monkeypatch.setattr(sys, "version_info", (3, 6, 0))
+    python_ta._check(
+        module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py")
+    )
+
+    assert caplog.records[0].levelname == "WARNING"
+    assert "You need Python 3.7 or later to run PythonTA." in caplog.text
 
 
 def test_check_log(caplog) -> None:
@@ -91,9 +103,9 @@ def test_get_valid_files_to_check(caplog) -> None:
     ]
 
     # Iterating through generators to produce errors
-    [_ for _ in _get_valid_files_to_check(module_name={"examples/nodes/assign"})]
-    [_ for _ in _get_valid_files_to_check(module_name=[0])]
-    [_ for _ in _get_valid_files_to_check(module_name="foo")]
+    tuple(_get_valid_files_to_check(module_name={"examples/nodes/assign"}))
+    tuple(_get_valid_files_to_check(module_name=[0]))
+    tuple(_get_valid_files_to_check(module_name="foo"))
 
     for i in range(len(expected_logs)):
         assert caplog.records[i].levelname == "ERROR"

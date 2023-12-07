@@ -76,7 +76,7 @@ def load_messages_config(path: str, default_path: str, use_pyta_error_messages: 
         try:
             merge_from = toml.load(path)
         except FileNotFoundError:
-            logging.warning(f"Could not find messages config file at {str(Path(path).resolve())}. ")
+            logging.warning(f"Could not find messages config file at {str(Path(path).resolve())}.")
             merge_from = {}
 
     if not use_pyta_error_messages:

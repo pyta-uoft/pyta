@@ -2,10 +2,12 @@
 Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
+import copy
 
 import pytest
 
 from python_ta.debug import AccumulationTable
+from python_ta.debug.snapshot import snapshot
 
 
 def test_one_accumulator() -> None:
@@ -148,6 +150,56 @@ def test_five_nested_while_loop() -> None:
     }
 
 
+def test_accumulation_table_list_deepcopy():
+    data = [[1], [2], [3]]
+    with AccumulationTable(["data"]) as table:
+        for sublist in data:
+            sublist[0] *= 2
+    recorded_value_0 = table.loop_accumulators["data"][0]
+    expected_value_0 = [[1], [2], [3]]
+    recorded_value_1 = table.loop_accumulators["data"][1]
+    expected_value_1 = [[2], [2], [3]]
+    recorded_value_2 = table.loop_accumulators["data"][2]
+    expected_value_2 = [[2], [4], [3]]
+    recorded_value_3 = table.loop_accumulators["data"][3]
+    expected_value_3 = [[2], [4], [6]]
+    assert recorded_value_0 == expected_value_0
+    assert recorded_value_1 == expected_value_1
+    assert recorded_value_2 == expected_value_2
+    assert recorded_value_3 == expected_value_3
+
+
+def test_loop_variables_with_deepcopy():
+    data = [[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]
+
+    with AccumulationTable(["data"]) as table:
+        for nested_list in data:
+            nested_list[0][0] += 100
+
+    recorded_values = table.loop_variables["nested_list"]
+    expected_values = ["N/A", [[101, 2], [3, 4]], [[105, 6], [7, 8]], [[109, 10], [11, 12]]]
+
+    assert recorded_values == expected_values
+
+
+def test_accumulation_table_dict_deepcopy():
+    data = {"variable": [{"nested": 1}, {"nested": 2}]}
+
+    with AccumulationTable(["data"]) as table:
+        for item in data["variable"]:
+            item["nested"] *= 2
+
+    recorded_value_0 = table.loop_accumulators["data"][0]
+    expected_value_0 = {"variable": [{"nested": 1}, {"nested": 2}]}
+    recorded_value_1 = table.loop_accumulators["data"][1]
+    expected_value_1 = {"variable": [{"nested": 2}, {"nested": 2}]}
+    recorded_value_2 = table.loop_accumulators["data"][2]
+    expected_value_2 = {"variable": [{"nested": 2}, {"nested": 4}]}
+    assert recorded_value_0 == expected_value_0
+    assert recorded_value_1 == expected_value_1
+    assert recorded_value_2 == expected_value_2
+
+
 class MyClass:
     items: list
     sum_so_far: int
@@ -182,6 +234,69 @@ class MyClass:
         assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
         assert table.loop_accumulators == {"MyClass.difference_so_far": [0, -10, -30, -60]}
 
+    def check_accumulation_table_accumulator_deepcopy(self):
+        if any(
+            isinstance(sub, list)
+            for sublist in self.items
+            if isinstance(sublist, list)
+            for sub in sublist
+        ):
+            return (
+                "Checking only for lists with max depth 2, because if that works, other depths will work too."
+                "Please provide list with max depth 2."
+            )
+
+        original_items = copy.deepcopy(self.items)
+        with AccumulationTable(["self.items"]) as table:
+            for sublist in self.items:
+                if isinstance(sublist, list):
+                    sublist[0] *= 2
+        for i in range(0, len(table.loop_accumulators["self.items"])):
+            recorded_value = table.loop_accumulators["self.items"][i]
+            expected_value = []
+            if i != 0:
+                if isinstance(self.items[i - 1], list):
+                    expected_value.extend(original_items[0 : i - 1])
+                    expected_value.append(
+                        [original_items[i - 1][0] * 2] + original_items[i - 1][1:]
+                    )
+                    expected_value.extend(original_items[i:])
+                    original_items = expected_value
+                else:
+                    expected_value.extend(original_items)
+            else:
+                expected_value.extend(original_items)
+            assert recorded_value == expected_value
+
+    def check_accumulation_table_loop_variable_deepcopy(self):
+        if any(
+            isinstance(sub, list)
+            for sublist in self.items
+            if isinstance(sublist, list)
+            for sub in sublist
+        ):
+            return (
+                "Checking only for lists with max depth 2, because if that works, other depths will work too."
+                "Please provide list with max depth 2."
+            )
+
+        original_items = copy.deepcopy(self.items)
+        with AccumulationTable(["self.items"]) as table:
+            for nested_list in self.items:
+                if isinstance(nested_list, list):
+                    nested_list[0] += 10
+        recorded_values = table.loop_variables["nested_list"]
+        expected_values = []
+        for i in range(0, len(original_items) + 1):
+            if i == 0:
+                expected_values.append("N/A")
+                continue
+            if not isinstance(original_items[i - 1], list):
+                expected_values.append(original_items[i - 1])
+            else:
+                expected_values.append([original_items[i - 1][0] + 10] + original_items[i - 1][1:])
+        assert recorded_values == expected_values
+
 
 def test_class_var() -> None:
     my_class = MyClass([10, 20, 30])
@@ -196,6 +311,16 @@ def test_instance_var_accumulator() -> None:
 def test_class_var_accumulator() -> None:
     my_class = MyClass([10, 20, 30])
     my_class.accumulate_class_var()
+
+
+def test_deepcopy_accumulator_in_class() -> None:
+    checker = MyClass([1, 2, [3, 4], [5], 7, 8])
+    checker.check_accumulation_table_accumulator_deepcopy()
+
+
+def test_deepcopy_loop_variables_in_class() -> None:
+    checker = MyClass([1, 2, [3, 4], [5], 7, 8])
+    checker.check_accumulation_table_loop_variable_deepcopy()
 
 
 def test_expression_accumulator() -> None:
@@ -272,3 +397,83 @@ def test_uninitialized_loop_accumulators() -> None:
         with AccumulationTable(["i"]) as table:
             for number in [10, 20, 30, 40, 50, 60]:
                 _ = number
+
+
+# The functions below are for snapshot() testing purposes ONLY
+def func1() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot()
+
+
+def func2() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
+    return func1()
+
+
+def func3() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1c = []
+    for i in range(5):
+        test_var1c.append(i)
+
+    return func2()
+
+
+def test_snapshot_one_level() -> None:
+    """
+    Examines whether the snapshot() function accurately captures
+    the local variables of a singular function call,
+    devoid of any nested levels.
+    """
+    local_vars = func1()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
+
+
+def test_snapshot_two_levels() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables during a two-level nested function call.
+    """
+    local_vars = func2()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
+    assert {
+        "func2": {
+            "test_var1b": {"SDS_coolest_project": "PyTA"},
+            "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
+        }
+    } == local_vars[1]
+
+
+def test_snapshot_three_levels() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables during a three-level nested function call.
+    """
+    local_vars = func3()
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[0]
+    assert {
+        "func2": {
+            "test_var1b": {"SDS_coolest_project": "PyTA"},
+            "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
+        }
+    } == local_vars[1]
+    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]

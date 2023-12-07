@@ -41,6 +41,7 @@ cfg = [
 ]
 z3 = [
     "z3-solver",
+    "importlib_resources ; python_version<'3.9'"
 ]
 
 [project.scripts]

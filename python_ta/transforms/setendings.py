@@ -137,14 +137,6 @@ def _keyword_search(keyword):
     return _is_keyword
 
 
-def _is_attr_name(s, index, node):
-    """Search for the name of the attribute. Left-to-right."""
-    target_len = len(node.attrname)
-    if index < target_len:
-        return False
-    return s[index - target_len + 1 : index + 1] == node.attrname
-
-
 def _is_arg_name(s, index, node):
     """Search for the name of the argument. Right-to-left."""
     if not node.arg:
@@ -159,9 +151,8 @@ NODES_REQUIRING_SOURCE = [
     (nodes.AsyncFor, _keyword_search("async"), None),
     (nodes.AsyncFunctionDef, _keyword_search("async"), None),
     (nodes.AsyncWith, _keyword_search("async"), None),
-    (nodes.Attribute, None, _is_attr_name),
     (nodes.Call, None, _token_search(")")),
-    (nodes.DelAttr, _keyword_search("del"), _is_attr_name),
+    (nodes.DelAttr, _keyword_search("del"), None),
     (nodes.DelName, _keyword_search("del"), None),
     (nodes.Dict, None, _token_search("}")),
     (nodes.DictComp, None, _token_search("}")),
@@ -267,7 +258,11 @@ def fix_slice(source_code):
             has_children = False
 
         # Search the remaining source code for the "]" char.
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != "]":
+        while (
+            line_i < len(source_code)
+            and char_i < len(source_code[line_i])
+            and source_code[line_i][char_i] != "]"
+        ):
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
                 char_i = 0
                 line_i += 1

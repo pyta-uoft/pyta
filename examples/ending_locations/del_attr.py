@@ -3,3 +3,4 @@ class Foo():
         self.attr = 1
         del self.attr
         del self . attr
+        del self.attr; del self.attr

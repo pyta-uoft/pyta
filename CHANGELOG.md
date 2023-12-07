@@ -18,6 +18,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `AccumulationTable` now stores deep copies of objects rather than shallow copies, thus fixing issues that come up in case of mutation during loop.
 - Created a `RecursionTable` context manager for recursive tracing using a tabular output.
 
+### Bug fixes
+
+- Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
+  was accessed twice on the same line.
+
 ## [2.6.4] - 2024-11-10
 
 ### Bug fixes

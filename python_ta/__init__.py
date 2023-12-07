@@ -59,10 +59,6 @@ logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
-# check the python version
-if sys.version_info < (3, 7, 0):
-    logging.warning("You need Python 3.7 or later to run PythonTA.")
-
 
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
@@ -119,6 +115,10 @@ def _check(
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
     """
+    # check the python version
+    if sys.version_info < (3, 7, 0):
+        logging.warning("You need Python 3.7 or later to run PythonTA.")
+
     linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)

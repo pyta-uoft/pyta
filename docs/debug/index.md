@@ -141,9 +141,6 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 2. The `AccumulationTable` context manager can only log the execution of one for loop.
    To log the state of multiple for loops, each must be wrapped in a separate `with` statement and fresh `AccumulationTable` instance.
 
-[tabulate]: https://github.com/astanin/python-tabulate
-[`sys.settrace`]: https://docs.python.org/3/library/sys.html#sys.settrace
-
 ## Recursion
 
 This section will discuss the debugging of recursive functions.

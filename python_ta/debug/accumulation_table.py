@@ -65,6 +65,7 @@ class AccumulationTable:
         loop_variables: a mapping between the loop variables and their
             values during each iteration
         _loop_lineno: the line number of the loop
+        output_filepath: the filepath  where the table will be written if it is passed in, defaults to None
     """
 
     loop_accumulators: dict[str, list]

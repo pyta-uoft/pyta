@@ -101,7 +101,7 @@ class TestEndingLocations(unittest.TestCase):
         """Note: Setting the attribute node by its last child doesn't include
         the attribute in determining the end_col_offset.
         """
-        expected = [(1, 1, 0, 12), (2, 2, 0, 14)]
+        expected = [(1, 1, 0, 12), (2, 2, 0, 14), (3, 3, 0, 12), (3, 3, 16, 28)]
         module = self.get_file_as_module("attribute.py")
         self.set_and_check(module, nodes.Attribute, expected)
 
@@ -194,7 +194,7 @@ class TestEndingLocations(unittest.TestCase):
         """Include the 'del' keyword in the col_offset property.
         Include the attribute name in the end_col_offset property.
         """
-        expected = [(4, 4, 8, 21), (5, 5, 8, 23)]
+        expected = [(4, 4, 8, 21), (5, 5, 8, 23), (6, 6, 8, 21), (6, 6, 23, 36)]
         module = self.get_file_as_module("del_attr.py")
         self.set_and_check(module, nodes.DelAttr, expected)
 

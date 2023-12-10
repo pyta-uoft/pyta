@@ -3,8 +3,10 @@ Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
 import copy
+import shutil
 
 import pytest
+import tabulate
 
 from python_ta.debug import AccumulationTable
 from python_ta.debug.snapshot import snapshot
@@ -477,3 +479,60 @@ def test_snapshot_three_levels() -> None:
         }
     } == local_vars[1]
     assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]
+
+
+def test_output_to_existing_file(tmp_path) -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    output_file = tmp_path / "output.txt"
+    with open(output_file, "a") as file:
+        file.write("Existing Content")
+        file.write("\n")
+    with AccumulationTable(["sum_so_far"], output=str(output_file)) as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+        iteration_dict = table._create_iteration_dict()
+
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+
+    with open(output_file, "r") as file:
+        content = file.read()
+        expected_values = tabulate.tabulate(
+            iteration_dict,
+            headers="keys",
+            colalign=(*["left"] * len(iteration_dict),),
+            disable_numparse=True,
+            missingval="None",
+        )
+    assert "Existing Content" in content
+    assert expected_values in content
+
+    shutil.rmtree(tmp_path)
+
+
+def test_output_to_new_file(tmp_path) -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with AccumulationTable(["sum_so_far"], output=str(tmp_path / "output.txt")) as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+        iteration_dict = table._create_iteration_dict()
+
+    output_file = tmp_path / "output.txt"
+    assert output_file.exists()
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+
+    with open(output_file, "r") as file:
+        content = file.read()
+        expected_values = tabulate.tabulate(
+            iteration_dict,
+            headers="keys",
+            colalign=(*["left"] * len(iteration_dict),),
+            disable_numparse=True,
+            missingval="None",
+        )
+    assert expected_values in content
+
+    shutil.rmtree(tmp_path)

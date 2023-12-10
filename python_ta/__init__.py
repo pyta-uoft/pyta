@@ -54,9 +54,6 @@ from .patches import patch_all
 from .reporters import REPORTERS
 from .upload import upload_to_server
 
-# Configuring logger
-logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
-
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
 
@@ -115,6 +112,9 @@ def _check(
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
     """
+    # Configuring logger
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
+
     # check the python version
     if sys.version_info < (3, 7, 0):
         logging.warning("You need Python 3.7 or later to run PythonTA.")

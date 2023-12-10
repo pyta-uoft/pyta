@@ -128,6 +128,29 @@ def calculate_sum_and_averages(numbers: list) -> list:
 
 ```
 
+You also have the option to pass in a file path as an attribute to the AccumulationTable object. In this case, the table will be appended to the file instead of being written the console.
+For example:
+
+```python
+from python_ta.debug import AccumulationTable
+
+
+def calculate_sum_and_averages(numbers: list) -> list:
+    """Return the running sums and averages of the given numbers.
+    """
+    sum_so_far = 0
+    list_so_far = []
+    avg_so_far = None
+    output_file = 'output.txt'
+    with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], output_file) as table:
+        for number in numbers:
+            sum_so_far = sum_so_far + number
+            avg_so_far = sum_so_far / (len(list_so_far) + 1)
+            list_so_far.append((sum_so_far, avg_so_far))
+
+    return list_so_far
+```
+
 ## Current limitations
 
 The `AccumulationTable` is a new PythonTA feature and currently has the following known limitations:

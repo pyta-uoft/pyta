@@ -109,22 +109,81 @@ def test_multiple_parameters_multiple_calls() -> None:
     assert recursive_dict["return value"] == [30, 9, 3, 6, 21, 9, 12]
 
 
-def test_with_static_method():
-    class Testing:
-        @staticmethod
-        def fact(n):
-            if n == 0:
-                return 1
-            return n * Testing.fact(n - 1)
+class Testing:
+    n: int
 
-    with RecursionTable("fact") as table:
-        Testing.fact(3)
+    def __init__(self, n):
+        self.n = n
+
+    def fact_instance(self):
+        if self.n == 0:
+            return 1
+        self.n -= 1
+        return (self.n + 1) * self.fact_instance()
+
+    @staticmethod
+    def fact_static(n):
+        if n == 0:
+            return 1
+        return n * Testing.fact_static(n - 1)
+
+    def __str__(self):
+        return str(self.n)
+
+
+def test_with_static_method():
+    with RecursionTable("fact_static") as table:
+        Testing.fact_static(3)
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 3
     assert recursive_dict["n"] == [3, 2, 1, 0]
-    assert recursive_dict["called by"] == ["N/A", "fact(3)", "fact(2)", "fact(1)"]
+    assert recursive_dict["called by"] == [
+        "N/A",
+        "fact_static(3)",
+        "fact_static(2)",
+        "fact_static(1)",
+    ]
     assert recursive_dict["return value"] == [6, 2, 1, 1]
+
+
+def test_with_instance_method():
+    with RecursionTable("fact_instance") as table:
+        testing = Testing(3)
+        testing.fact_instance()
+
+    recursive_dict = table.get_recursive_dict()
+    assert len(list(recursive_dict.keys())) == 3
+    assert [str(obj) for obj in recursive_dict["self"]] == ["3", "2", "1", "0"]
+    assert recursive_dict["called by"] == [
+        "N/A",
+        "fact_instance(3)",
+        "fact_instance(2)",
+        "fact_instance(1)",
+    ]
+    assert recursive_dict["return value"] == [6, 2, 1, 1]
+
+
+def test_mutable_parameter():
+    with RecursionTable("mutate_list") as table:
+
+        def mutate_list(lst):
+            if lst[0] == 0:
+                return 0
+            lst[0] -= 1
+            return mutate_list(lst)
+
+        mutate_list([2, -1, 3])
+
+    recursive_dict = table.get_recursive_dict()
+    assert len(list(recursive_dict.keys())) == 3
+    assert recursive_dict["lst"] == [[2, -1, 3], [1, -1, 3], [0, -1, 3]]
+    assert recursive_dict["called by"] == [
+        "N/A",
+        "mutate_list([2, -1, 3])",
+        "mutate_list([1, -1, 3])",
+    ]
+    assert recursive_dict["return value"] == [0, 0, 0]
 
 
 def test_invalid_function_name() -> None:

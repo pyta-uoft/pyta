@@ -4,6 +4,7 @@ for a recursive function.
 """
 from __future__ import annotations
 
+import copy
 import inspect
 import sys
 import types
@@ -22,7 +23,7 @@ def clean_frame_variables(frame: types.FrameType) -> dict[str, Any]:
     """
     raw_variables = frame.f_locals
     parameters = inspect.getargvalues(frame).args
-    cleaned_variables = {param: raw_variables[param] for param in parameters}
+    cleaned_variables = {param: copy.deepcopy(raw_variables[param]) for param in parameters}
     return cleaned_variables
 
 
@@ -115,7 +116,7 @@ class RecursionTable:
             return {}
         # intialize table columns using the first frame
         parameters = inspect.getargvalues(next(iter(self.frames_data))).args
-        recursive_dict = {key: [] for key in parameters + ["called by", "return value"]}
+        recursive_dict = {key: [] for key in parameters + ["return value", "called by"]}
 
         for frame in self.frames_data:
             current_frame_data = self.frames_data[frame]

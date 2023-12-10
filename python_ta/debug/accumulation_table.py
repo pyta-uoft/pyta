@@ -8,7 +8,7 @@ import copy
 import inspect
 import sys
 import types
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import astroid
 import tabulate
@@ -65,6 +65,7 @@ class AccumulationTable:
         loop_variables: a mapping between the loop variables and their
             values during each iteration
         _loop_lineno: the line number of the loop
+        output_filepath: the filepath  where the table will be written if it is passed in, defaults to None
     """
 
     loop_accumulators: dict[str, list]
@@ -72,8 +73,9 @@ class AccumulationTable:
     loop_variables: dict[str, list]
     """A dictionary mapping loop variable variable name to its values across all loop iterations."""
     _loop_lineno: int
+    output_filepath: Optional[str]
 
-    def __init__(self, accumulation_names: list[str]) -> None:
+    def __init__(self, accumulation_names: list[str], output: Union[None, str] = None) -> None:
         """Initialize an AccumulationTable context manager for print-based loop debugging.
 
         Args:
@@ -83,6 +85,7 @@ class AccumulationTable:
         self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
         self.loop_variables = {}
         self._loop_lineno = 0
+        self.output_filepath = output
 
     def _record_iteration(self, frame: types.FrameType) -> None:
         """Record the values of the accumulator variables and loop variables of an iteration"""
@@ -124,15 +127,22 @@ class AccumulationTable:
     def _tabulate_data(self) -> None:
         """Print the values of the accumulator and loop variables into a table"""
         iteration_dict = self._create_iteration_dict()
-        print(
-            tabulate.tabulate(
-                iteration_dict,
-                headers="keys",
-                colalign=(*["left"] * len(iteration_dict),),
-                disable_numparse=True,
-                missingval="None",
-            )
+        table = tabulate.tabulate(
+            iteration_dict,
+            headers="keys",
+            colalign=(*["left"] * len(iteration_dict),),
+            disable_numparse=True,
+            missingval="None",
         )
+        if self.output_filepath is None:
+            print(table)
+        else:
+            try:
+                with open(self.output_filepath, "a") as file:
+                    file.write(table)
+                    file.write("\n")
+            except OSError as e:
+                print(f"Error writing to file: {e}")
 
     def _trace_loop(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Trace through the loop and store the values of the

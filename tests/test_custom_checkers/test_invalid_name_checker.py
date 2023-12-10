@@ -481,6 +481,18 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
+    def test_name_in_main_block(self) -> None:
+        """Test that the checker does not report a top-level variable that is assigned within
+        a main block."""
+        src = """
+        if __name__ == '__main__':
+            const_not_upper = "it is not"
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
 
 def test_module_name_no_snippet() -> None:
     """Test that PythonTA does not build a snippet for the message added by this checker."""

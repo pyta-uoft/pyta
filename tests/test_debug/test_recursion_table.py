@@ -186,6 +186,30 @@ def test_mutable_parameter():
     assert recursive_dict["return value"] == [0, 0, 0]
 
 
+def test_mutable_return():
+    with RecursionTable("mutate_return") as table:
+
+        def mutate_return(lst):
+            if lst[0] == 0:
+                return lst
+            lst[0] -= 1
+            mutate_return(lst)
+            lst[-1] += 1
+            return lst
+
+        mutate_return([2, -1, 3])
+
+    recursive_dict = table.get_recursive_dict()
+    assert len(list(recursive_dict.keys())) == 3
+    assert recursive_dict["lst"] == [[2, -1, 3], [1, -1, 3], [0, -1, 3]]
+    assert recursive_dict["called by"] == [
+        "N/A",
+        "mutate_return([2, -1, 3])",
+        "mutate_return([1, -1, 3])",
+    ]
+    assert recursive_dict["return value"] == [[0, -1, 5], [0, -1, 4], [0, -1, 3]]
+
+
 def test_invalid_function_name() -> None:
     with RecursionTable("invalid") as table:
 

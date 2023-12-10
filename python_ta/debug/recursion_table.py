@@ -104,7 +104,7 @@ class RecursionTable:
         """Update the state of the table representation after a function return is detected.
         Note: the frame must already have been seen as returns are done 'on the way out'.
         """
-        self.frames_data[frame]["return value"] = return_value
+        self.frames_data[frame]["return value"] = copy.deepcopy(return_value)
         current_node = self._trees[frame]
         current_node.value.append(return_value)
 

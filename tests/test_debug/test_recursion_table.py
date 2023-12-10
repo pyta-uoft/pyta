@@ -131,7 +131,7 @@ class Testing:
         return str(self.n)
 
 
-def test_with_static_method():
+def test_static_method():
     with RecursionTable("fact_static") as table:
         Testing.fact_static(3)
 
@@ -147,7 +147,7 @@ def test_with_static_method():
     assert recursive_dict["return value"] == [6, 2, 1, 1]
 
 
-def test_with_instance_method():
+def test_instance_method():
     with RecursionTable("fact_instance") as table:
         testing = Testing(3)
         testing.fact_instance()

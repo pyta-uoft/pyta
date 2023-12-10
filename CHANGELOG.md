@@ -23,6 +23,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
   was accessed twice on the same line.
+- Fix bug where the `naming-convention-violation` checker was checking variables defined in a module's main block. This was inconsistent with the `forbidden-global-variables` checker.
 
 ## [2.6.4] - 2024-11-10
 

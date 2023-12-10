@@ -17,6 +17,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `AccumulationTable` now stores deep copies of objects rather than shallow copies, thus fixing issues that come up in case of mutation during loop.
 - `AccumulationTable` can now take in any accumulator expressions, for eg. `x * 2`, instead of just variables.
 - `AccumulationTable` now has an optional initialization argument `output` which allows the users to choose whether they want to write the Accumulation Table to a file.
+- Created a `RecursionTable` context manager for recursive tracing using a tabular output.
 
 ### Bug fixes
 

@@ -9,6 +9,8 @@ from pylint.checkers.base.name_checker.checker import _redefines_import
 from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
+from python_ta.utils import _is_in_main
+
 # Bad variable names.
 BAD_NAMES = {"l", "I", "O"}
 
@@ -334,7 +336,7 @@ class InvalidNameChecker(BaseChecker):
             self._check_name("argument", node.name, node)
 
         # Check names defined in module scope
-        elif isinstance(frame, nodes.Module):
+        elif isinstance(frame, nodes.Module) and not _is_in_main(node):
             # Check names defined in Assign nodes
             if isinstance(assign_type, nodes.Assign):
                 inferred_assign_type = utils.safe_infer(assign_type.value)

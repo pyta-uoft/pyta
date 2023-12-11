@@ -6,8 +6,10 @@ import os
 from unittest.mock import mock_open, patch
 
 import pytest
+from pylint import lint
 
 import python_ta
+from python_ta.config import load_messages_config, override_config
 
 TEST_CONFIG = {
     "pyta-number-of-messages": 10,
@@ -227,6 +229,26 @@ def test_config_parse_error_has_no_snippet() -> None:
     snippet = reporter.messages[config][0].snippet
 
     assert snippet == ""
+
+
+def test_override_config_logging(caplog) -> None:
+    """Testing that the OSError in override_config is logged correctly"""
+    path = "C:\\foo\\tests\\file_fixtures\\test_f0011.pylintrc"
+    linter = lint.PyLinter()
+
+    with pytest.raises(SystemExit):
+        override_config(linter, path)
+    assert caplog.records[0].levelname == "ERROR"
+    assert f"The config file {path} doesn't exist!" in caplog.text
+
+
+@patch("python_ta.config.toml.load", side_effect=FileNotFoundError)
+def test_load_messages_config_logging(_, caplog):
+    try:
+        load_messages_config("non_existent_file.toml", "default_file.toml", True)
+    except FileNotFoundError:
+        assert "Could not find messages config file at" in caplog.text
+        assert "WARNING" in [record.levelname for record in caplog.records]
 
 
 def test_allow_pylint_comments() -> None:

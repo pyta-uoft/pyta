@@ -1,3 +1,5 @@
+import logging
+
 from python_ta import contracts
 
 contracts.DEBUG_CONTRACTS = True
@@ -6,6 +8,7 @@ from python_ta.contracts import check_contracts
 
 def test_contracts_debug(caplog) -> None:
     """Test to see if _debug function is logging messages correctly"""
+    caplog.set_level(logging.DEBUG)
 
     @check_contracts
     def divide(x: int, y: int) -> int:

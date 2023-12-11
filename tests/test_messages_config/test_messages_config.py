@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from os import environ
 
 
 def test_valid_message_config_and_pyta_overwrite():
@@ -15,6 +16,7 @@ def test_valid_message_config_and_pyta_overwrite():
         ],
         capture_output=True,
         text=True,
+        env={**environ, "PYTHONIOENCODING": "utf-8"},
     )
 
     assert "This custom error message is modified." in output.stdout
@@ -34,6 +36,7 @@ def test_no_message_config_and_pyta_overwrite():
         ],
         capture_output=True,
         text=True,
+        env={**environ, "PYTHONIOENCODING": "utf-8"},
     )
 
     assert "This custom error message is modified." not in output.stdout
@@ -53,6 +56,7 @@ def test_valid_message_config_and_no_pyta_overwrite():
         ],
         capture_output=True,
         text=True,
+        env={**environ, "PYTHONIOENCODING": "utf-8"},
     )
 
     assert "This custom error message is modified." in output.stdout
@@ -72,6 +76,7 @@ def test_no_message_config_and_no_pyta_overwrite():
         ],
         capture_output=True,
         text=True,
+        env={**environ, "PYTHONIOENCODING": "utf-8"},
     )
 
     assert "This custom error message is modified." not in output.stdout

@@ -462,5 +462,5 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
 def doc(msg_id: str) -> None:
     """Open a webpage explaining the error for the given message."""
     msg_url = HELP_URL + "#" + msg_id.lower()
-    logging.info("Opening {} in a browser.".format(msg_url))
+    print("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)

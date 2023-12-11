@@ -1,4 +1,5 @@
 """Tests for top level __init__.py logging functionality in pyta"""
+import logging
 import os
 import sys
 import tokenize
@@ -12,7 +13,8 @@ def test_sys_version_log(caplog, monkeypatch) -> None:
     """Testing if _check function logged message when system version is too low is correct"""
     monkeypatch.setattr(sys, "version_info", (3, 6, 0))
     python_ta._check(
-        module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py")
+        module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py"),
+        local_config={"output-format": "python_ta.reporters.PlainReporter"},
     )
 
     assert caplog.records[0].levelname == "WARNING"
@@ -26,8 +28,10 @@ def test_check_log(caplog) -> None:
         "was checked using the messages-config file:",
     ]
 
+    caplog.set_level(logging.INFO)
     python_ta._check(
-        module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py")
+        module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py"),
+        local_config={"output-format": "python_ta.reporters.PlainReporter"},
     )
     for i in range(2):
         assert caplog.records[i].levelname == "INFO"
@@ -38,7 +42,7 @@ def test_check_log(caplog) -> None:
 def test_check_exception_log(_, caplog) -> None:
     """Testing logging in _check function when exception is thrown"""
     try:
-        python_ta._check()
+        python_ta._check(local_config={"output-format": "python_ta.reporters.PlainReporter"})
     except Exception:
         expected_logs = [
             "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).",
@@ -112,11 +116,12 @@ def test_get_valid_files_to_check(caplog) -> None:
         assert expected_logs[i] in caplog.records[i].msg
 
 
-def test_doc_log(caplog) -> None:
+@patch("webbrowser.open", lambda _: None)
+def test_doc_log(capsys) -> None:
     """Testing logging in doc function"""
     python_ta.doc("E0602")
-    assert caplog.records[0].levelname == "INFO"
+    captured = capsys.readouterr()
     assert (
         "Opening http://www.cs.toronto.edu/~david/pyta/checkers/index.html#e0602 in a browser."
-        in caplog.text
+        in captured.out
     )

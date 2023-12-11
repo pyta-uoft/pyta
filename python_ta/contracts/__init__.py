@@ -614,6 +614,7 @@ def _debug(msg: str) -> None:
     """
     if not DEBUG_CONTRACTS:
         return
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.DEBUG)
     logging.debug(msg)
 
 

@@ -318,14 +318,6 @@ tup1 = TypeVar("tup1")
 tup2 = TypeVar("tup2")
 
 
-class TuplePlus(TypeVar, _root=True):
-    def eval_type(self, type_constraints: "TypeConstraints") -> TypeResult:
-        t1, t2 = self.__constraints__
-        t1 = type_constraints.resolve(t1).__params__
-        t2 = type_constraints.resolve(t2).__params__
-        return wrap_container(Tuple, t1, t2)
-
-
 _TYPESHED_TVARS = {
     "_T": TypeVar("_T"),
     "_T_co": TypeVar("_T_co", covariant=True),
@@ -409,7 +401,6 @@ TYPE_SIGNATURES = {
         "__mul__": create_Callable([List[a], int], List[a], {a}),
         "__getitem__": create_Callable([List[a], int], a, {a}),
     },
-    Tuple: {"__add__": create_Callable([tup1, tup2], TuplePlus("tup+", tup1, tup2), {tup1, tup2})},
 }
 
 
@@ -846,8 +837,6 @@ class TypeConstraints:
 
     def _type_eval(self, t: type) -> TypeResult:
         """Evaluate a type. Used for tuples."""
-        if isinstance(t, TuplePlus):
-            return t.eval_type(self)
         if isinstance(t, TypeVar):
             return self.resolve(t)
         if isinstance(t, _GenericAlias) and t.__args__ is not None:
@@ -872,9 +861,6 @@ def literal_substitute(t: type, type_map: Dict[str, type]) -> type:
         return TypeVar(t.__name__)
     elif isinstance(t, ForwardRef):
         return ForwardRef(literal_substitute(t.__forward_arg__, type_map))
-    elif isinstance(t, TuplePlus):
-        subbed_args = [literal_substitute(t1, type_map) for t1 in t.__constraints__]
-        return TuplePlus("tup+", *subbed_args)
     elif is_callable(t):
         args = list(literal_substitute(t1, type_map) for t1 in t.__args__[:-1])
         res = literal_substitute(t.__args__[-1], type_map)

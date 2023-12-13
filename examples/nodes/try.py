@@ -1,5 +1,5 @@
 """
-TryExcept astroid node
+Try astroid node
 
 This node is used to represent the try-except statements for handling
 exceptions in Python, which may also include an "else" block.
@@ -15,9 +15,12 @@ Attributes:
     - orelse    (list[Statement])
         - Optionally, the code to be executed if the "try" code does not
           raise any exceptions.
+    - finalbody (list[Statement])
+        - The code to be executed after the "try" block, regardless of
+          whether any exceptions were raised.
 
 Example 1:
-    TryExcept(
+    Try(
         body=[Pass()],
         handlers=[ExceptHandler(
             type=None,
@@ -26,13 +29,23 @@ Example 1:
         orelse=[])
 
 Example 2:
-    TryExcept(
+    Try(
         body=[Pass()],
         handlers=[ExceptHandler(
             type=None,
             name=None,
             body=[Pass()])],
         orelse=[Pass()])
+
+Example 3:
+    Try(
+        body=[Pass()],
+        handlers=[ExceptHandler(
+            type=None,
+            name=None,
+            body=[Pass()])],
+        orelse=[],
+        finalbody=[Pass()])
 """
 
 # Example 1
@@ -47,4 +60,12 @@ try:
 except:
     pass
 else:
+    pass
+
+# Example 3
+try:
+    pass
+except:
+    pass
+finally:
     pass

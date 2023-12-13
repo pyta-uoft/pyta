@@ -6,6 +6,7 @@ from typing import Callable, ForwardRef, Union, _GenericAlias
 import astroid
 import astroid.inference
 from astroid import nodes
+from astroid.const import Context
 from astroid.transforms import TransformVisitor
 
 from ..typecheck.base import (
@@ -189,7 +190,7 @@ class TypeInferer:
         node.inf_type = TypeInfo(type(node.value))
 
     def visit_list(self, node: nodes.List) -> None:
-        if node.ctx == nodes.Store:
+        if node.ctx == Context.Store:
             # List is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
         elif not node.elts:
@@ -217,7 +218,7 @@ class TypeInferer:
             node.inf_type = wrap_container(Dict, key_inf_type, val_inf_type)
 
     def visit_tuple(self, node: nodes.Tuple) -> None:
-        if node.ctx == nodes.Store:
+        if node.ctx == Context.Store:
             # Tuple is the target of an assignment; do not give it a type.
             node.inf_type = NoType()
         else:
@@ -636,9 +637,6 @@ class TypeInferer:
     ##############################################################################
     # Subscripting
     ##############################################################################
-    def visit_index(self, node: nodes.Index) -> None:
-        node.inf_type = node.value.inf_type
-
     def visit_slice(self, node: nodes.Slice) -> None:
         lower_type = node.lower.inf_type if node.lower else type(None)
         upper_type = node.upper.inf_type if node.upper else type(None)
@@ -650,14 +648,10 @@ class TypeInferer:
             lambda t: TypeInfo(slice) if t == type(None) else TypeInfo(t)
         )
 
-    def visit_extslice(self, node: nodes.ExtSlice):
-        unif_res = failable_collect(dim.inf_type for dim in node.dims)
-        node.inf_type = unif_res >> (lambda lst: wrap_container(Tuple, *lst))
-
     def visit_subscript(self, node: nodes.Subscript) -> None:
         if isinstance(node.slice.inf_type, TypeFail):
             node.inf_type = node.slice.inf_type
-        elif node.ctx == nodes.Load:
+        elif node.ctx == Context.Load:
             try:
                 val_inf_type = self.type_constraints.resolve(node.value.inf_type)
                 value_gorg = val_inf_type >> _gorg
@@ -677,9 +671,9 @@ class TypeInferer:
                 node.inf_type = self._handle_call(
                     node, "__getitem__", node.value.inf_type, node.slice.inf_type
                 )
-        elif node.ctx == nodes.Store:
+        elif node.ctx == Context.Store:
             node.inf_type = NoType()
-        elif node.ctx == nodes.Del:
+        elif node.ctx == Context.Del:
             node.inf_type = self._handle_call(
                 node, "__delitem__", node.value.inf_type, node.slice.inf_type
             )

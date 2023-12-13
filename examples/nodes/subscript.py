@@ -6,7 +6,7 @@ This node represents iterable subscripting using '[' and ']' in Python.
 Attributes:
     - value  (Expr)
         - The iterable whose elements are to be accessed by the subscript.
-    - slice  (Node[Index | Slice | ExtSlice])
+    - slice  (Expr)
         - The index or slice of the iterable being subscripted.
     - ctx    (class[expr_context])
         - The context in which this subscripted iterable is used, one of

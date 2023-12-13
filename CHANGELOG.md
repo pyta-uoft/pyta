@@ -18,12 +18,26 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `AccumulationTable` can now take in any accumulator expressions, for eg. `x * 2`, instead of just variables.
 - `AccumulationTable` now has an optional initialization argument `output` which allows the users to choose whether they want to write the Accumulation Table to a file.
 - Created a `RecursionTable` context manager for recursive tracing using a tabular output.
+- Support Python 3.12 (requiring upgrade to pylint and astroid 3.0)
 
 ### Bug fixes
 
 - Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
   was accessed twice on the same line.
 - Fix bug where the `naming-convention-violation` checker was checking variables defined in a module's main block. This was inconsistent with the `forbidden-global-variables` checker.
+
+### New checkers
+
+Pylint checkers v3.0:
+
+- `invalid-field-call`
+- `return-in-finally`
+- `kwarg-superseded-by-positional-arg`
+- `unnecessary-negation` (renamed from `unneeded-not`)
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.6.4] - 2024-11-10
 

@@ -193,13 +193,6 @@ def ifexp_node(draw, test=const_node(hs.booleans()), expr=const_node(), orelse=c
 
 
 @hs.composite
-def index_node(draw, value=const_node(hs.integers())):
-    node = nodes.Index()
-    node.postinit(draw(value))
-    return node
-
-
-@hs.composite
 def set_node(draw, elt=const_node(), **kwargs):
     """Return a Set node with elements drawn from elt."""
     node = nodes.Set()

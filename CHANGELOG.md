@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
   was accessed twice on the same line.
 - Fix bug where the `naming-convention-violation` checker was checking variables defined in a module's main block. This was inconsistent with the `forbidden-global-variables` checker.
+- Fixed bug with `invalid-range-index`: do not attempt any inference of variables in `range` expressions. All range arguments involving variables will be ignored by this checker.
 
 ### New checkers
 

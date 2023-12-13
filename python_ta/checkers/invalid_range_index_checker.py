@@ -26,8 +26,11 @@ class InvalidRangeIndexChecker(BaseChecker):
             if not (name in node.frame() or name in node.root()) and name == "range":
                 args = node.args  # the arguments of 'range' call
 
-                inferred_params = [utils.safe_infer(arg) for arg in args]
+                # ignore calls involving variables; these cannot be inferred properly
+                if any(any(arg.nodes_of_class(nodes.Name)) for arg in args):
+                    return
 
+                inferred_params = [utils.safe_infer(arg) for arg in args]
                 # Check whether every inference was successful
                 if not all(isinstance(node, nodes.Const) for node in inferred_params):
                     return

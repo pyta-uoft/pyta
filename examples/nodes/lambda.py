@@ -52,11 +52,6 @@ Example 2:
             op='+',
             left=Name(name='x'),
             right=Name(name='y')))
-
-
-Type-checking:
-    The inferred type is a Callable with arguments inferred from the body of the
-    lambda expressions and whose return type is the inferred type of the body.
 """
 
 # Example 1

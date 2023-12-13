@@ -39,14 +39,6 @@ Example 4:
                         ctx=<Context.Store: 2>,
                         value=AssignName(name='b'))])],
         value=Name(name='d'))
-
-Type-checking:
-    - Single identifiers are associated with the type of the expression on the RHS of the =.
-    - For (unpacking) tuple/list assignment, the RHS must be an iterable of the same length as
-      the number of identifiers on the LHS.
-    - An exception is when the * operator is used preceding a variable,
-      in this case, the remaining values in the iterable will assigned to
-      that variable as a list.
 """
 
 # Example 1

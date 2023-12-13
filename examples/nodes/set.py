@@ -16,10 +16,6 @@ Example 2:
         Const(value=1),
         Const(value=2),
         Const(value='hi')]
-
-Type-checking:
-    Type is set[T], where T is the most specific class that every element
-    of the list is an instance of.
 """
 
 # Example 1

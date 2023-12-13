@@ -30,11 +30,6 @@ Example 2:
         left=Name(name='x'),
         right=Name(name='y')),
     orelse=Name(name='something'))
-
-
-Type-checking:
-    The type of the expression is the same as the type of the body and orelse expressions
-    (they must have the same type).
 """
 
 # Example 1

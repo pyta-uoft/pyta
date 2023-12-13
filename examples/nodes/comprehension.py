@@ -44,9 +44,6 @@ Example 2:
                 Compare(
                     left=Name(name='b'),
                     ops=[['<', Const(value=2)]])])
-
-Type-checking:
-    Unify the target against the "contained" type in the iterable.
 """
 
 # Example 1

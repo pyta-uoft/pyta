@@ -43,9 +43,6 @@ Example 3: (Nested in Subscript)
                 op='-',
                 operand=Const(value=1)),
             step=Const(value=3)))
-
-Type-checking:
-    Delegate to the __init__ constructor for slice, setting type to 'slice' on success.
 """
 
 # Example 1

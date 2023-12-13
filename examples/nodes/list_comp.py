@@ -51,9 +51,6 @@ Example 2:
                         Const(value=5),
                         Const(value=6)]),
                 ifs=[])])
-
-Type-checking:
-    The type of the ListComp is list[T], where T is the type of elt.
 """
 
 # Example 1

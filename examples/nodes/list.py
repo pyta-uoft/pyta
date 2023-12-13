@@ -32,11 +32,6 @@ Example 3:
             elts=[Const(value=7), Const(value=8)]))
 
 Example 3 demonstrates a Store context instead of Load
-
-
-Type-checking:
-    Type is list[T], where T is the most specific class that every element
-    of the list is an instance of.
 """
 
 # Example 1

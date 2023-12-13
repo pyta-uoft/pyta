@@ -40,6 +40,10 @@ For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
 list only contains the Pylint checkers enabled by default in PythonTA.
 
+### Internal
+
+- Remove experimental type inference code.
+
 ## [2.6.4] - 2024-11-10
 
 ### Bug fixes

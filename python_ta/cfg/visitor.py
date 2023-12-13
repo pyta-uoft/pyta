@@ -310,7 +310,7 @@ class CFGVisitor:
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 
-    def visit_tryexcept(self, node: nodes.TryExcept) -> None:
+    def visit_try(self, node: nodes.Try) -> None:
         # When only creating cfgs for functions, _current_cfg will only be None outside of functions
         if self._current_cfg is None:
             return
@@ -325,7 +325,7 @@ class CFGVisitor:
         self._current_block = self._current_cfg.create_block()
         temp = self._current_block
         end_block = self._current_cfg.create_block()
-        # Case where Raise is not handled in tryexcept
+        # Case where Raise is not handled in try
         self._control_boundaries.append((node, {nodes.Raise.__name__: end_block}))
         cbs_added = 1
 

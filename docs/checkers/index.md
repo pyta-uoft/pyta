@@ -484,14 +484,14 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 ## Code complexity
 
-(C0113)=
+(C0117)=
 
-### Unneeded not (C0113)
+### Unnecessary negation (C0117)
 
-This error occurs when a boolean expression contains an unneeded negation. If we are getting this
+This error occurs when a boolean expression contains an nnecessary negation. If we are getting this
 error, the expression can be simplified to not use a negation.
 
-```{literalinclude} /../examples/pylint/c0113_unneeded_not.py
+```{literalinclude} /../examples/pylint/c0117_unnecessary_negation.py
 
 ```
 

@@ -12,7 +12,7 @@ Attributes:
         - A list of nodes in the body of the exception.
 
 Example 1:
-    TryExcept(
+    Try(
         body=[Pass()],
         handlers=[ExceptHandler(
             type=None,
@@ -20,10 +20,10 @@ Example 1:
             body=[Pass()])],
         orelse=[])
 
-* ExceptHandler is in the handlers list of the TryExcept node
+* ExceptHandler is in the handlers list of the Try node
 
 Example 3:
-    TryExcept(
+    Try(
         body=[Pass()],
         handlers=[ExceptHandler(
             type=Name(name='AssertionError'),
@@ -32,7 +32,7 @@ Example 3:
         orelse=[])
 
 Example 2:
-    TryExcept(
+    Try(
         body=[Pass()],
         handlers=[ExceptHandler(
                 type=Name(name='ValueError'),
@@ -41,7 +41,7 @@ Example 2:
         orelse=[])
 
 Example 4:
-    TryExcept(
+    Try(
        body=[Pass()],
        handlers=[ExceptHandler(
              type=Tuple(

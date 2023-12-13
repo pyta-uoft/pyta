@@ -427,15 +427,10 @@ class TestEndingLocations(unittest.TestCase):
         module = self.get_file_as_module("subscript.py")
         self.set_and_check(module, nodes.Subscript, expected)
 
-    def test_tryexcept(self):
-        expected = [(1, 4, 0, 8)]
-        module = self.get_file_as_module("try_except.py")
-        self.set_and_check(module, nodes.TryExcept, expected)
-
-    def test_tryfinally(self):
+    def test_try(self):
         expected = [(1, 6, 0, 8)]
-        module = self.get_file_as_module("try_finally.py")
-        self.set_and_check(module, nodes.TryFinally, expected)
+        module = self.get_file_as_module("try.py")
+        self.set_and_check(module, nodes.Try, expected)
 
     def test_tuple(self):
         expected = [

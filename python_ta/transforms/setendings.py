@@ -44,7 +44,6 @@ NODES_WITHOUT_CHILDREN = [
     nodes.Const,
     nodes.Continue,
     nodes.DelName,
-    nodes.Ellipsis,
     nodes.Global,
     nodes.Import,
     nodes.ImportFrom,
@@ -79,7 +78,6 @@ NODES_WITH_CHILDREN = [
     nodes.GeneratorExp,
     nodes.If,
     nodes.IfExp,
-    nodes.Index,
     nodes.Keyword,
     nodes.Lambda,
     nodes.List,
@@ -88,8 +86,7 @@ NODES_WITH_CHILDREN = [
     nodes.Return,
     nodes.Starred,
     nodes.Subscript,
-    nodes.TryExcept,
-    nodes.TryFinally,
+    nodes.Try,
     nodes.UnaryOp,
     nodes.While,
     nodes.With,
@@ -137,14 +134,6 @@ def _keyword_search(keyword):
     return _is_keyword
 
 
-def _is_attr_name(s, index, node):
-    """Search for the name of the attribute. Left-to-right."""
-    target_len = len(node.attrname)
-    if index < target_len:
-        return False
-    return s[index - target_len + 1 : index + 1] == node.attrname
-
-
 def _is_arg_name(s, index, node):
     """Search for the name of the argument. Right-to-left."""
     if not node.arg:
@@ -159,18 +148,14 @@ NODES_REQUIRING_SOURCE = [
     (nodes.AsyncFor, _keyword_search("async"), None),
     (nodes.AsyncFunctionDef, _keyword_search("async"), None),
     (nodes.AsyncWith, _keyword_search("async"), None),
-    (nodes.Attribute, None, _is_attr_name),
     (nodes.Call, None, _token_search(")")),
-    (nodes.DelAttr, _keyword_search("del"), _is_attr_name),
+    (nodes.DelAttr, _keyword_search("del"), None),
     (nodes.DelName, _keyword_search("del"), None),
     (nodes.Dict, None, _token_search("}")),
     (nodes.DictComp, None, _token_search("}")),
     (nodes.Expr, _token_search("("), _token_search(")")),
-    # TODO: use same behavior as Slice.
-    (nodes.ExtSlice, _token_search("["), _token_search("]")),
     (nodes.GeneratorExp, _token_search("("), _token_search(")")),
     (nodes.If, _keyword_search("elif"), None),
-    (nodes.Index, _token_search("["), _token_search("]")),
     (nodes.Keyword, _is_arg_name, None),
     (nodes.List, _token_search("["), _token_search("]")),
     (nodes.ListComp, _token_search("["), _token_search("]")),
@@ -267,7 +252,11 @@ def fix_slice(source_code):
             has_children = False
 
         # Search the remaining source code for the "]" char.
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != "]":
+        while (
+            line_i < len(source_code)
+            and char_i < len(source_code[line_i])
+            and source_code[line_i][char_i] != "]"
+        ):
             if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
                 char_i = 0
                 line_i += 1
@@ -367,7 +356,7 @@ def fix_arguments(source_code):
 
 def fix_start_attributes(node):
     """Some nodes don't always have the `col_offset` property set by Astroid:
-    Comprehension, ExtSlice, Index, Keyword, Module, Slice.
+    Comprehension, Keyword, Module, Slice.
     """
     try:
         first_child = next(node.get_children())

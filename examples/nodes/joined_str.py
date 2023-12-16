@@ -24,9 +24,6 @@ Example 2:
 
 * Note that there is another JoinedStr in the format_spec of the FormattedValue.
 This JoinedStr contains a str Const representing how to format a FormattedValue value
-
-Type-checking:
-    - To be documented
 """
 
 # Example 1

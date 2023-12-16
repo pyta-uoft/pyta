@@ -24,11 +24,6 @@ Example 2:
 
 Representation tree of Dict nodes show each KVP as a list;
 however, the actual .items attribute stores each KVP as a tuple.
-
-Type-checking:
-    Type is dict[K, V], where K is the most specific class that every key
-    of the dictionary is an instance of, and V is the most specific class that
-    every value of the dictionary is an instance of.
 """
 
 # Example 1

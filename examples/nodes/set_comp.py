@@ -55,9 +55,6 @@ Example 2:
                 ifs=[Compare(
                     left=Name(name='x'),
                     ops=[['<', Name(name='y')]])])])
-
-Type-checking:
-    The type of the SetComp is set[T], where T is the type of elt.
 """
 
 # Example 1

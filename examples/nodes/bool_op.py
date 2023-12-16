@@ -27,10 +27,6 @@ Example 3:
             BoolOp(
                 op='and',
                 values=[Const(value=1), Const(value=2)])])
-
-Type-checking:
-    If all of the values have the type type, that type is used as the type of the of BoolOp itself.
-    Otherwise, the type of the BoolOp is Any.
 """
 
 # Example 1

@@ -36,10 +36,6 @@ Example:
             Name(name='base2')],
         keywords=[],
         body=[Pass()])
-
-Type-checking:
-    The class name is added to the parent's type environment.
-    The class' instance variables and methods are used to update the global TypeStore.
 """
 
 

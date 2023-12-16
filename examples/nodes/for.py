@@ -43,10 +43,6 @@ Example 3:
         iter=Name(name='some_iterable'),
         body=[Break()],
         orelse=[])
-
-
-Type-checking:
-    Unify the target against the "contained" type in the iterable.
 """
 
 # Example 1

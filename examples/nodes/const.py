@@ -13,9 +13,6 @@ Example 1:
 
 Example 2:
     Const(value=b'6')
-
-Type-checking:
-    The type of a Const node is the type of its value attribute.
 """
 
 1

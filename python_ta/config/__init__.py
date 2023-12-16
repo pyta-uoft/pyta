@@ -2,7 +2,7 @@
 Within the config submodule, this .py file encompasses functions responsible
  for managing all configuration-related tasks.
 """
-
+import logging
 import os
 import sys
 from pathlib import Path
@@ -48,7 +48,7 @@ def override_config(linter: PyLinter, config_location: AnyStr) -> None:
     try:
         _, config_args = config_file_parser.parse_config_file(file_path=config_location)
     except OSError as ex:
-        print(ex, file=sys.stderr)
+        logging.error(ex)
         sys.exit(32)
 
     # Override the config options by parsing the provided file.
@@ -76,7 +76,7 @@ def load_messages_config(path: str, default_path: str, use_pyta_error_messages: 
         try:
             merge_from = toml.load(path)
         except FileNotFoundError:
-            print(f"[WARNING] Could not find messages config file at {str(Path(path).resolve())}.")
+            logging.warning(f"Could not find messages config file at {str(Path(path).resolve())}.")
             merge_from = {}
 
     if not use_pyta_error_messages:

@@ -2,8 +2,8 @@
 """
 from typing import List, Optional, Union
 
-import astroid
 from astroid import nodes
+from astroid.const import Context
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
@@ -123,7 +123,7 @@ def _is_load_subscript(
         isinstance(index_node.parent, nodes.Subscript)
         and isinstance(index_node.parent.value, nodes.Name)
         and index_node.parent.value.name == iterable
-        and index_node.parent.ctx == astroid.Load
+        and index_node.parent.ctx == Context.Load
     )
 
 

@@ -68,13 +68,6 @@ FunctionDef(
         type_comment_posonlyargs=[]),
     returns=None,
     body=[Pass()])
-
-Type-checking:
-    We infer types for the arguments and return type based on the function body;
-    the return type is inferred as None if there are no Return nodes in the body.
-    This inferred type is unified with any type annotations that appear in the function
-    header, and finally this type is used to update the environment in which this function
-    declaration appears.
 """
 
 

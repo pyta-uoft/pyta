@@ -14,7 +14,7 @@ Attributes:
           originating exception, using a Call, Name or Const exception node.
 
 Example 1: (Nested in ExceptHandler)
-    TryExcept(
+    Try(
         body=[Expr(value=Call(
             func=Name(name='print'),
             args=[BinOp(
@@ -34,7 +34,7 @@ Example 1: (Nested in ExceptHandler)
         orelse=[])
 
 Example 2: (Nested in ExceptHandler)
-    TryExcept(
+    Try(
         body=[Expr(value=Call(
             func=Name(name='print'),
             args=[BinOp(
@@ -54,7 +54,7 @@ Example 2: (Nested in ExceptHandler)
         orelse=[])
 
 Example 3: (Nested in ExceptHandler)
-    TryExcept(
+    Try(
         body=[Expr(value=Call(
             func=Name(name='print'),
             args=[BinOp(

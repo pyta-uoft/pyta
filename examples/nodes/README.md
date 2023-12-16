@@ -61,8 +61,7 @@ usually compose the body of a parent node.
 - Pass
 - Raise
 - Return
-- TryExcept
-- TryFinally
+- Try
 - While
 - With
 
@@ -79,7 +78,6 @@ usually compose the body of a parent node.
 - DelName (see [below](#expression-context))
 - Dict
 - DictComp
-- Ellipsis
 - GeneratorExp
 - IfExp
 - Lambda

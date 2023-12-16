@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "2.6.4.dev"  # Version number
+__version__ = "2.7.1.dev"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
@@ -35,6 +35,7 @@ except AttributeError:
     pass
 
 import importlib.util
+import logging
 import os
 import sys
 import tokenize
@@ -54,10 +55,6 @@ from .reporters import REPORTERS
 from .upload import upload_to_server
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
-
-# check the python version
-if sys.version_info < (3, 7, 0):
-    print("[WARNING] You need Python 3.7 or later to run PythonTA.")
 
 
 # Flag to determine if we've previously patched pylint
@@ -115,6 +112,13 @@ def _check(
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
     """
+    # Configuring logger
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
+
+    # check the python version
+    if sys.version_info < (3, 7, 0):
+        logging.warning("You need Python 3.7 or later to run PythonTA.")
+
     linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)
@@ -140,7 +144,8 @@ def _check(
             errs = []  # Errors caught in files for data submission
             config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
-                if not _verify_pre_check(file_py):
+                allowed_pylint = linter.config.allow_pylint_comments
+                if not _verify_pre_check(file_py, allowed_pylint):
                     continue  # Check the other files
                 # Load config file in user location. Construct new linter each
                 # time, so config options don't bleed to unintended files.
@@ -173,17 +178,15 @@ def _check(
                 current_reporter.print_messages(level)
                 if linter.config.pyta_file_permission:
                     f_paths.append(file_py)  # Appending paths for upload
-                print(
-                    "[INFO] File: {} was checked using the configuration file: {}".format(
+                logging.info(
+                    "File: {} was checked using the configuration file: {}".format(
                         file_py, linter.config_file
-                    ),
-                    file=sys.stderr,
+                    )
                 )
-                print(
-                    "[INFO] File: {} was checked using the messages-config file: {}".format(
+                logging.info(
+                    "File: {} was checked using the messages-config file: {}".format(
                         file_py, messages_config_path
-                    ),
-                    file=sys.stderr,
+                    )
                 )
             if linter.config.pyta_error_permission:
                 errs = list(current_reporter.messages.values())
@@ -205,10 +208,10 @@ def _check(
             linter.generate_reports()
         return current_reporter
     except Exception as e:
-        print(
-            "[ERROR] Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."
+        logging.error(
+            "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."
         )
-        print('[ERROR] Error message: "{}"'.format(e))
+        logging.error('Error message: "{}"'.format(e))
         raise e
 
 
@@ -229,10 +232,6 @@ def reset_linter(
     """
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
-        (
-            "pyta-type-check",
-            {"default": False, "type": "yn", "metavar": "<yn>", "help": "Enable the type-checker."},
-        ),
         (
             "pyta-number-of-messages",
             {
@@ -287,6 +286,15 @@ def reset_linter(
                 "type": "string",
                 "metavar": "<messages_config>",
                 "help": "Path to patch config toml file.",
+            },
+        ),
+        (
+            "allow-pylint-comments",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "allows or disallows pylint: comments",
             },
         ),
         (
@@ -358,45 +366,50 @@ def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
                 yield os.path.join(root, filename)  # Format path, from root.
 
 
-def _verify_pre_check(filepath: AnyStr) -> bool:
-    """Check student code for certain issues."""
+def _verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
+    """Check student code for certain issues.
+    The additional allow_pylint_comments parameter indicates whether we want the user to be able to add comments
+    beginning with pylint which can be used to locally disable checks.
+    """
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
     try:
         # Check for inline "pylint:" comment, which may indicate a student
         # trying to disable a check.
+        if allow_pylint_comments:
+            return True
         with tokenize.open(os.path.expanduser(filepath)) as f:
             for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
                     continue
                 match = OPTION_PO.search(content)
                 if match is not None:
-                    print(
-                        '[ERROR] String "pylint:" found in comment. '
+                    logging.error(
+                        'String "pylint:" found in comment. '
                         + "No check run on file `{}.`\n".format(filepath)
                     )
                     return False
     except IndentationError as e:
-        print(
-            "[ERROR] python_ta could not check your code due to an "
+        logging.error(
+            "python_ta could not check your code due to an "
             + "indentation error at line {}.".format(e.lineno)
         )
         return False
     except tokenize.TokenError as e:
-        print(
-            "[ERROR] python_ta could not check your code due to a " + "syntax error in your file."
+        logging.error(
+            "python_ta could not check your code due to a " + "syntax error in your file."
         )
         return False
     except UnicodeDecodeError:
-        print(
-            "[ERROR] python_ta could not check your code due to an "
+        logging.error(
+            "python_ta could not check your code due to an "
             + "invalid character. Please check the following lines "
             "in your file and all characters that are marked with a �."
         )
         with open(os.path.expanduser(filepath), encoding="utf-8", errors="replace") as f:
             for i, line in enumerate(f):
                 if "�" in line:
-                    print(f"  Line {i}: {line}", end="")
+                    logging.error(f"  Line {i + 1}: {line}")
         return False
     return True
 
@@ -413,7 +426,7 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
         module_name = [module_name]
     # Otherwise, enforce API to expect `module_name` type as list
     elif not isinstance(module_name, list):
-        print(
+        logging.error(
             "No checks run. Input to check, `{}`, has invalid type, must be a list of strings.".format(
                 module_name
             )
@@ -423,7 +436,9 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
     # Filter valid files to check
     for item in module_name:
         if not isinstance(item, str):  # Issue errors for invalid types
-            print("No check run on file `{}`, with invalid type. Must be type: str.\n".format(item))
+            logging.error(
+                "No check run on file `{}`, with invalid type. Must be type: str.\n".format(item)
+            )
         elif os.path.isdir(item):
             yield item
         elif not os.path.exists(os.path.expanduser(item)):
@@ -433,9 +448,9 @@ def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[A
                 if os.path.exists(filepath):
                     yield filepath
                 else:
-                    print("Could not find the file called, `{}`\n".format(item))
+                    logging.error("Could not find the file called, `{}`\n".format(item))
             except ImportError:
-                print("Could not find the file called, `{}`\n".format(item))
+                logging.error("Could not find the file called, `{}`\n".format(item))
         else:
             yield item  # Check other valid files.
 

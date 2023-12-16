@@ -31,9 +31,6 @@ Example 4:
     UnaryOp(
         op='~',
         operand=Const(value=72))
-
-Type-checking:
-    Translate the operator into the corresponding method, and type-check the method call.
 """
 
 # Example 1:

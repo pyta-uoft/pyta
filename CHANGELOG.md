@@ -7,14 +7,50 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-### Bug fixes
-
-- Don't throw `forbidden-import` error when importing local files
+## [2.7.0] - 2024-12-14
 
 ### Enhancements
 
 - Added new configuration option `use-pyta-error-messages` to let users choose whether PythonTA should overwrite pylint's error messages.
 - Both PlainReporter and ColorReporter emphasize specific code chunks by using overline characters under any part that is highlighted as ERROR.
+- Added snapshot function for deriving a list of dictionaries containing local variables from relevant functions and/or stack frames.
+- Added new configuration option `allow-pylint-comments` to let users choose whether PythonTA should allow comments beginning with pylint: or not.
+- `AccumulationTable` can now track variables initialized within the `for` loop. Prior, only variables initialized before the `for` loop could be tracked.
+- `AccumulationTable` now stores deep copies of objects rather than shallow copies, thus fixing issues that come up in case of mutation during loop.
+- `AccumulationTable` can now take in any accumulator expressions, for eg. `x * 2`, instead of just variables.
+- `AccumulationTable` now has an optional initialization argument `output` which allows the users to choose whether they want to write the Accumulation Table to a file.
+- Created a `RecursionTable` context manager for recursive tracing using a tabular output.
+- Support Python 3.12 (requiring upgrade to pylint and astroid 3.0)
+
+### Bug fixes
+
+- Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
+  was accessed twice on the same line.
+- Fix bug where the `naming-convention-violation` checker was checking variables defined in a module's main block. This was inconsistent with the `forbidden-global-variables` checker.
+- Fixed bug with `invalid-range-index`: do not attempt any inference of variables in `range` expressions. All range arguments involving variables will be ignored by this checker.
+
+### New checkers
+
+Pylint checkers v3.0:
+
+- `invalid-field-call`
+- `return-in-finally`
+- `kwarg-superseded-by-positional-arg`
+- `unnecessary-negation` (renamed from `unneeded-not`)
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
+
+### Internal
+
+- Remove experimental type inference code.
+
+## [2.6.4] - 2024-11-10
+
+### Bug fixes
+
+- Fixed bug with `invalid-range-index` when variables are used in `range` expressions.
 
 ## [2.6.3] - 2023-10-09
 

@@ -3,10 +3,13 @@ Test suite for checking whether configuration worked correctly with user-inputte
 """
 import json
 import os
+from unittest.mock import mock_open, patch
 
 import pytest
+from pylint import lint
 
 import python_ta
+from python_ta.config import load_messages_config, override_config
 
 TEST_CONFIG = {
     "pyta-number-of-messages": 10,
@@ -97,7 +100,6 @@ def test_checker_options_in_no_default(configure_linter_no_default) -> None:
     The default options are not loaded from the PythonTA default config."""
     options_dict = configure_linter_no_default.config.__dict__
     pyta_checker_options = (
-        "pyta_type_check",
         "pyta_number_of_messages",
         "pyta_template_file",
         "pyta_error_permission",
@@ -226,3 +228,45 @@ def test_config_parse_error_has_no_snippet() -> None:
     snippet = reporter.messages[config][0].snippet
 
     assert snippet == ""
+
+
+def test_override_config_logging(caplog) -> None:
+    """Testing that the OSError in override_config is logged correctly"""
+    path = "C:\\foo\\tests\\file_fixtures\\test_f0011.pylintrc"
+    linter = lint.PyLinter()
+
+    with pytest.raises(SystemExit):
+        override_config(linter, path)
+    assert caplog.records[0].levelname == "ERROR"
+    assert f"The config file {path} doesn't exist!" in caplog.text
+
+
+@patch("python_ta.config.toml.load", side_effect=FileNotFoundError)
+def test_load_messages_config_logging(_, caplog):
+    try:
+        load_messages_config("non_existent_file.toml", "default_file.toml", True)
+    except FileNotFoundError:
+        assert "Could not find messages config file at" in caplog.text
+        assert "WARNING" in [record.levelname for record in caplog.records]
+
+
+def test_allow_pylint_comments() -> None:
+    """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
+    set to True
+    """
+
+    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
+        result = python_ta._verify_pre_check("", allow_pylint_comments=True)
+
+    assert result is True
+
+
+def test_disallows_pylint_comments() -> None:
+    """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
+    is set to False
+    """
+
+    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
+        result = python_ta._verify_pre_check("", allow_pylint_comments=False)
+
+    assert result is False

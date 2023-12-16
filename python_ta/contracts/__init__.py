@@ -10,6 +10,7 @@ Below are some notes on how they are stored.
     [(assertion, compiled, return_val_var_name)].
 """
 import inspect
+import logging
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
@@ -613,8 +614,8 @@ def _debug(msg: str) -> None:
     """
     if not DEBUG_CONTRACTS:
         return
-
-    print("[PyTA]", msg, file=sys.stderr)
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.DEBUG)
+    logging.debug(msg)
 
 
 def _set_invariants(klass: type) -> None:

@@ -52,6 +52,17 @@ import python_ta
 python_ta.check_all(..., load_default_config=False)
 ```
 
+## Allowing 'pylint:' Comments
+
+PythonTA allows you to choose whether you want to locally disable checks by using 'pylint:' in a comment, i.e. it
+lets you choose whether or not you want to allow comments that begin with 'pylint:'. The default value for this option is False, i.e. PythonTA by default would not allow you to use 'pylint:' in a comment.
+
+```python
+import python_ta
+
+python_ta.check_all(..., config={"allow-pylint-comments": True})
+```
+
 ## Custom Error Messages
 
 By default, PythonTA overwrites some of pylint's error messages with its own to make them more beginner-friendly.

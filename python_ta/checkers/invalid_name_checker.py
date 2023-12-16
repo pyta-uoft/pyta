@@ -9,6 +9,8 @@ from pylint.checkers.base.name_checker.checker import _redefines_import
 from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
+from python_ta.utils import _is_in_main
+
 # Bad variable names.
 BAD_NAMES = {"l", "I", "O"}
 
@@ -334,7 +336,7 @@ class InvalidNameChecker(BaseChecker):
             self._check_name("argument", node.name, node)
 
         # Check names defined in module scope
-        elif isinstance(frame, nodes.Module):
+        elif isinstance(frame, nodes.Module) and not _is_in_main(node):
             # Check names defined in Assign nodes
             if isinstance(assign_type, nodes.Assign):
                 inferred_assign_type = utils.safe_infer(assign_type.value)
@@ -449,12 +451,17 @@ class InvalidNameChecker(BaseChecker):
         Taken from pylint.checkers.base.name_checker.checker."""
         inferred = utils.safe_infer(node)
         if isinstance(inferred, nodes.ClassDef):
-            if inferred.qname() == ".Union":
+            qname = inferred.qname()
+            if qname == "typing.TypeAlias":
+                return True
+            if qname == ".Union":
                 # Union is a special case because it can be used as a type alias
                 # or as a type annotation. We only want to check the former.
                 assert node is not None
                 return not isinstance(node.parent, nodes.AnnAssign)
         elif isinstance(inferred, nodes.FunctionDef):
+            # TODO: when py3.12 is minimum, remove this condition
+            # TypeAlias became a class in python 3.12
             if inferred.qname() == "typing.TypeAlias":
                 return True
         return False

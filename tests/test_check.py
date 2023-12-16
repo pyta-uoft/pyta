@@ -3,7 +3,7 @@ installed `python_ta` package.
 """
 import subprocess
 import sys
-from os import path, remove
+from os import environ, path, remove
 from unittest.mock import Mock
 
 import python_ta
@@ -254,7 +254,8 @@ def test_check_exit_zero() -> None:
             "--config",
             "tests/test.pylintrc",
             "examples/nodes/name.py",
-        ]
+        ],
+        env={**environ, "PYTHONIOENCODING": "utf-8"},
     )
 
     assert output.returncode == 0

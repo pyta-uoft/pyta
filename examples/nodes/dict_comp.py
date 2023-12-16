@@ -51,9 +51,6 @@ Example 3:
              target=AssignName(name='y'),
              iter=Name(name='b'),
              ifs=[])])
-
-Type-checking:
-    The type of the DictComp is dict[K, V], where K is the type of key and V is the type of value.
 """
 
 # Example 1

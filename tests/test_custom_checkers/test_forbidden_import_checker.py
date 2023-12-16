@@ -87,6 +87,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_call(node)
 
+    @pylint.testutils.set_config(allow_local_modules=True)
     def test_allowed_local_import(self) -> None:
         src = """
         import imported_module
@@ -98,4 +99,22 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
         node, *_ = mod.nodes_of_class(astroid.nodes.Import)
 
         with self.assertNoMessages():
+            self.checker.visit_import(node)
+
+    def test_disallowed_local_import(self) -> None:
+        src = """
+        import imported_module
+        """
+
+        self.linter.current_file = os.path.abspath(__file__ + "/../test_e9999_local_import/main.py")
+
+        mod = astroid.parse(src)
+        node, *_ = mod.nodes_of_class(astroid.nodes.Import)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-import", node=node, line=1, args=("imported_module", 2)
+            ),
+            ignore_position=True,
+        ):
             self.checker.visit_import(node)

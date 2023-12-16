@@ -40,7 +40,7 @@ class ForbiddenImportChecker(BaseChecker):
             },
         ),
         (
-            "allow-local-modules",
+            "allow-local-imports",
             {
                 "default": False,
                 "type": "yn",
@@ -106,7 +106,7 @@ class ForbiddenImportChecker(BaseChecker):
         if self.linter.current_file is None:
             return []
 
-        if not self.linter.config.allow_local_modules:
+        if not self.linter.config.allow_local_imports:
             return []
 
         return [

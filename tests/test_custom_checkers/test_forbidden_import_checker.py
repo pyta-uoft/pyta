@@ -87,7 +87,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_call(node)
 
-    @pylint.testutils.set_config(allow_local_modules=True)
+    @pylint.testutils.set_config(allow_local_imports=True)
     def test_allowed_local_import(self) -> None:
         src = """
         import imported_module

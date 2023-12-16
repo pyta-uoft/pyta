@@ -45,7 +45,7 @@ ignore-long-lines = ^\s*((# )?<?https?://\S+>?)|(>>>.*)$
 allowed-import-modules = dataclasses, doctest, unittest, hypothesis, pytest, python_ta, python_ta.contracts,
                          timeit, typing, __future__
 extra-imports =
-allow-local-modules = no
+allow-local-imports = no
 
 [FORBIDDEN IO]
 

@@ -1193,6 +1193,13 @@ allowed-import-modules = random
 extra-imports = math, tkinter
 ```
 
+In addition, you can specify if you want to allow for local imports through `allow-local-imports` option:
+
+```python
+import python_ta
+python_ta.check_all(..., config={'allow-local-imports': True})
+```
+
 (E0401)=
 
 ### Import error (E0401)

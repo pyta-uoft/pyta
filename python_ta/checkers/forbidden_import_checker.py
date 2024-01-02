@@ -1,5 +1,6 @@
 """Checker or use of forbidden imports.
 """
+import os
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -38,19 +39,31 @@ class ForbiddenImportChecker(BaseChecker):
                 "help": "Extra allowed modules to be imported.",
             },
         ),
+        (
+            "allow-local-imports",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "Allow local modules to be imported.",
+            },
+        ),
     )
 
     @only_required_for_messages("forbidden-import")
     def visit_import(self, node: nodes.Import) -> None:
         """visit an Import node"""
+        local_files = self.get_allowed_local_files()
+
         temp = [
             name
             for name in node.names
             if name[0] not in self.linter.config.allowed_import_modules
             and name[0] not in self.linter.config.extra_imports
+            and name[0] not in local_files
         ]
 
-        if temp != []:
+        if temp:
             self.add_message(
                 "forbidden-import",
                 node=node,
@@ -63,6 +76,7 @@ class ForbiddenImportChecker(BaseChecker):
         if (
             node.modname not in self.linter.config.allowed_import_modules
             and node.modname not in self.linter.config.extra_imports
+            and node.modname not in self.get_allowed_local_files()
         ):
             self.add_message("forbidden-import", node=node, args=(node.modname, node.lineno))
 
@@ -77,9 +91,29 @@ class ForbiddenImportChecker(BaseChecker):
                     if (
                         node.args[0].value not in self.linter.config.allowed_import_modules
                         and node.args[0].value not in self.linter.config.extra_imports
+                        and node.args[0].value not in self.get_allowed_local_files()
                     ):
                         args = (node.args[0].value, node.lineno)
                         self.add_message("forbidden-import", node=node, args=args)
+
+    def get_allowed_local_files(self) -> list:
+        """
+        Returns the list of the local files given by self.linter.current_file
+
+        Returns empty list if current_file is not defined
+        Returns empty list if local imports are not allowed
+        """
+        if self.linter.current_file is None:
+            return []
+
+        if not self.linter.config.allow_local_imports:
+            return []
+
+        return [
+            f[:-3]
+            for f in os.listdir(os.path.dirname(self.linter.current_file))
+            if f.endswith(".py")
+        ]
 
 
 def register(linter: PyLinter) -> None:

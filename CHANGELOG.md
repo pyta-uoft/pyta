@@ -7,6 +7,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+- Add new boolean configuration `allow-local-imports` to allow for local imports
+
 ## [2.7.0] - 2024-12-14
 
 ### Enhancements

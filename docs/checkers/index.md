@@ -1187,7 +1187,7 @@ python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
 
 You can also use a configuration file to specify both the `allowed-import-modules` and `extra-imports`.
 
-```toml
+```ini
 [FORBIDDEN IMPORT]
 allowed-import-modules = random
 extra-imports = math, tkinter

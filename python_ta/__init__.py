@@ -14,7 +14,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all()
 """
-__version__ = "2.6.5.dev"  # Version number
+__version__ = "2.7.1.dev"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 import builtins
@@ -232,10 +232,6 @@ def reset_linter(
     """
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
-        (
-            "pyta-type-check",
-            {"default": False, "type": "yn", "metavar": "<yn>", "help": "Enable the type-checker."},
-        ),
         (
             "pyta-number-of-messages",
             {

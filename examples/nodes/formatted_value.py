@@ -24,9 +24,6 @@ Example 2:
 
     * NOTE : The example above is of a FormattedValue Node "{3.14159:.3}'" within
                  a JoinedStr Node "f'{3.14159:.3}'".
-
-Type-checking:
-    - To be documented
 """
 
 # Example 1

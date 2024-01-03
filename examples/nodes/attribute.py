@@ -14,10 +14,6 @@ Example:
     Attribute(
         attrname='colour',
         expr=Name(name='snake'))
-
-Type-checking:
-    The type of `expr` is resolved, and attrname is looked up for that type.
-    (Currently in TypeStore only, for built-in types.)
 """
 
 snake.colour

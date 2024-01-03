@@ -129,3 +129,15 @@ python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
 [FORBIDDEN IMPORT]
 extra-imports = math, tkinter
 ```
+
+In addition, you can specify `allow-local-imports` to allow local imports.
+
+```python
+import python_ta
+python_ta.check_all(..., config={'allow-local-imports': True})
+```
+
+```toml
+[FORBIDDEN IMPORT]
+allow-local-imports = yes
+```

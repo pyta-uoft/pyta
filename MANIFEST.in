@@ -2,4 +2,3 @@ include README.md
 include python_ta/config/.pylintrc
 include python_ta/config/messages_config.toml
 include python_ta/reporters/templates/*
-include python_ta/typecheck/typeshed/*

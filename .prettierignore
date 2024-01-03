@@ -1,0 +1,6 @@
+# Ignore artifacts
+build
+dist
+
+# Ignore minified Javascript assets
+*.min.js

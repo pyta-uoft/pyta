@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+- Add new boolean configuration `allow-local-imports` to allow for local imports
+
+## [2.7.0] - 2024-12-14
+
 ### Enhancements
 
 - Added new configuration option `use-pyta-error-messages` to let users choose whether PythonTA should overwrite pylint's error messages.
@@ -25,6 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
   was accessed twice on the same line.
 - Fix bug where the `naming-convention-violation` checker was checking variables defined in a module's main block. This was inconsistent with the `forbidden-global-variables` checker.
+- Fixed bug with `invalid-range-index`: do not attempt any inference of variables in `range` expressions. All range arguments involving variables will be ignored by this checker.
 
 ### New checkers
 
@@ -38,6 +43,10 @@ Pylint checkers v3.0:
 For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
 list only contains the Pylint checkers enabled by default in PythonTA.
+
+### Internal
+
+- Remove experimental type inference code.
 
 ## [2.6.4] - 2024-11-10
 

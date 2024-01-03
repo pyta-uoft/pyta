@@ -100,7 +100,6 @@ def test_checker_options_in_no_default(configure_linter_no_default) -> None:
     The default options are not loaded from the PythonTA default config."""
     options_dict = configure_linter_no_default.config.__dict__
     pyta_checker_options = (
-        "pyta_type_check",
         "pyta_number_of_messages",
         "pyta_template_file",
         "pyta_error_permission",

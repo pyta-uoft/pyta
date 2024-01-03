@@ -17,9 +17,6 @@ Example:
         ctx=<Context.Load: 1>,
         value=Name(name='x'),
         slice=Const(value=0))
-
-Type-checking:
-    Delegates to the methods __getitem__, __setitem__, or __delitem__, depending on context.
 """
 
 x[0]

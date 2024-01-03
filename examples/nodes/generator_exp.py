@@ -31,9 +31,6 @@ Example:
                 args=[Name(name='i')],
                 keywords=None),
             ifs=[])])
-
-Type-checking:
-    The type of the GeneratorExp is Generator[T, None, None], where T is the type of elt.
 """
 
 # Example

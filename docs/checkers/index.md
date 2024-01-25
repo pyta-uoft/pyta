@@ -482,6 +482,16 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 ```
 
+(W1117)=
+
+### Keyword argument superseded by positional argument (W1117)
+
+This error occurs when a function is called with keyword arguments with the same name as positional-only parameters and the function contains a keyword variadic parameter dict.
+
+```{literalinclude} /../examples/pylint/w1117_kwarg_superseded_by_positional_arg.py
+
+```
+
 ## Code complexity
 
 (C0117)=

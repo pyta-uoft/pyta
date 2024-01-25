@@ -401,7 +401,12 @@ def test_uninitialized_loop_accumulators() -> None:
                 _ = number
 
 
-# The functions below are for snapshot() testing purposes ONLY
+# The functions (and top level vars) below are for snapshot() testing purposes ONLY
+team_lead = "David Liu"
+SDS_projects = ["PyTA", "MarkUs", "Memory Models"]
+team_num = 9
+
+
 def func1() -> list:
     """
     Function for snapshot() testing.
@@ -440,8 +445,16 @@ def test_snapshot_one_level() -> None:
     local_vars = func1()
 
     assert {
-        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+        "__main__": {
+            "team_lead": "David Liu",
+            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
+            "team_num": 9,
+        }
     } == local_vars[0]
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[1]
 
 
 def test_snapshot_two_levels() -> None:
@@ -452,14 +465,23 @@ def test_snapshot_two_levels() -> None:
     local_vars = func2()
 
     assert {
-        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+        "__main__": {
+            "team_lead": "David Liu",
+            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
+            "team_num": 9,
+        }
     } == local_vars[0]
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[1]
+
     assert {
         "func2": {
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
-    } == local_vars[1]
+    } == local_vars[2]
 
 
 def test_snapshot_three_levels() -> None:
@@ -470,15 +492,23 @@ def test_snapshot_three_levels() -> None:
     local_vars = func3()
 
     assert {
-        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+        "__main__": {
+            "team_lead": "David Liu",
+            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
+            "team_num": 9,
+        }
     } == local_vars[0]
+
+    assert {
+        "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
+    } == local_vars[1]
     assert {
         "func2": {
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
-    } == local_vars[1]
-    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]
+    } == local_vars[2]
+    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[3]
 
 
 def test_output_to_existing_file(tmp_path) -> None:

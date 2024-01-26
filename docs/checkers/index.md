@@ -1813,9 +1813,9 @@ class SecretKeeper:
 
 ### Invalid Field Call (E3701)
 
-The `dataclasses.field` function is used to specify the behaviour of instance attributes when defining a dataclass. 
-This function returns a `Field` object that contains the arguments that were set in the function. This function should 
-only be used as the value of an assignment in a dataclass definition or in the `make_dataclass()` function. Any other 
+The `dataclasses.field` function is used to specify the behaviour of instance attributes when defining a dataclass.
+This function returns a `Field` object that contains the arguments that were set in the function. This function should
+only be used as the value of an assignment in a dataclass definition or in the `make_dataclass()` function. Any other
 use will be considered invalid.
 
 ```{literalinclude} /../examples/pylint/e3701_invalid_field_call.py

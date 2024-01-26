@@ -22,16 +22,14 @@ This error occurs when a `return` statement is used inside a `finally` block.
 Corrected Version:
 
 ```python
-def error_code():
-
-    error_codes = [0, 1, 2]
+def error_code(error_codes):
 
     try:
-        return error_codes[2]
+        print(error_codes[0])
     except IndexError:
-        ...
+        return error_codes[1]
 
-    return error_codes[0]
+    return error_codes[2]
 ```
 
 (E0601)=

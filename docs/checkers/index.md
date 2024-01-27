@@ -9,31 +9,6 @@ email to \[david at cs dot toronto dot edu\].
 These errors generally indicate a misuse of variables, control flow, or other Python features in our
 code.
 
-(W0134)=
-
-### Return in finally
-
-This error occurs when a `return` statement is used inside a `finally` block.
-
-```{literalinclude} /../examples/pylint/w0134_return_in_finally.py
-
-```
-
-Corrected Version:
-
-```python
-def error_code():
-
-    error_codes = [0, 1, 2]
-
-    try:
-        return error_codes[2]
-    except IndexError:
-        ...
-
-    return error_codes[0]
-```
-
 (E0601)=
 
 ### Used before assignment (E0601)

@@ -93,7 +93,7 @@ Bruce Liu,
 Merrick Liu,
 Wendy Liu,
 Yibing (Amy) Lu,
-Maria Shurui Ma
+Maria Shurui Ma,
 Aina Fatema Asim Merchant,
 Shweta Mogalapalli,
 Ignas Panero Armoska,

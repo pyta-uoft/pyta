@@ -13,7 +13,12 @@ code.
 
 ### Return in finally
 
-This error occurs when a `return` statement is used inside a `finally` block.
+This error occurs when a `return` statement is used inside a `finally` block. Doing so overwrites any previous return
+values therefore should be avoided.
+
+For example, in the code example below, if an `IndexError` occurs we want
+`error_codes[1]` to be returned, however since there is a return statement in the `finally` block `error_codes[2]` will be
+returned instead. Moving that return statement outside the `finally` block would resolve the issue.
 
 ```{literalinclude} /../examples/pylint/w0134_return_in_finally.py
 
@@ -511,7 +516,7 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 ### Unnecessary negation (C0117)
 
-This error occurs when a boolean expression contains an unnecessary negation. If we are getting this
+This error occurs when a boolean expression contains an nnecessary negation. If we are getting this
 error, the expression can be simplified to not use a negation.
 
 ```{literalinclude} /../examples/pylint/c0117_unnecessary_negation.py

@@ -488,7 +488,7 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 ### Unnecessary negation (C0117)
 
-This error occurs when a boolean expression contains an nnecessary negation. If we are getting this
+This error occurs when a boolean expression contains an unnecessary negation. If we are getting this
 error, the expression can be simplified to not use a negation.
 
 ```{literalinclude} /../examples/pylint/c0117_unnecessary_negation.py

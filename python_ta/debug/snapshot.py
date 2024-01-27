@@ -33,13 +33,10 @@ def snapshot():
     local_vars = []
     frame = inspect.currentframe().f_back
 
-    # Handling possible errors
-    if frame is None:
-        raise RuntimeError("Cannot capture snapshot from top-level script.")
-
-    local_vars.append(get_filtered_global_variables(frame=frame))
-
     while frame:
+        if len(local_vars) == 0:  # to ensure we do not add main stack frame multiple times
+            local_vars.append(get_filtered_global_variables(frame))
+
         if frame.f_code.co_name != "<module>":
             local_vars.append({frame.f_code.co_name: frame.f_locals})
         frame = frame.f_back

@@ -1950,6 +1950,34 @@ def reciprocal(num: float) -> float:
         return 1 / num
 ```
 
+(W0134)=
+
+### Return in finally (W0134)
+
+This error occurs when a `return` statement is used inside a `finally` block. Doing so overwrites any previous return
+values therefore should be avoided.
+
+For example, in the code example below, if an `IndexError` occurs we want
+`error_codes[1]` to be returned, however since there is a return statement in the `finally` block `error_codes[2]` will be
+returned instead. Moving that return statement outside the `finally` block would resolve the issue.
+
+```{literalinclude} /../examples/pylint/w0134_return_in_finally.py
+
+```
+
+Corrected Version:
+
+```python
+def error_code(error_codes):
+
+    try:
+        print(error_codes[0])
+    except IndexError:
+        return error_codes[1]
+
+    return error_codes[2]
+```
+
 (W0702)=
 
 ### Bare exception (W0702)

@@ -1905,10 +1905,6 @@ class Wallet:
     money: int = field(default=5)
 ```
 
-**See also**:
-
-- [Dataclass field Function Tutorial]
-
 ## Exceptions
 
 (W0133)=
@@ -3457,4 +3453,3 @@ function and method calls or definitions.
 [the scope of index variables in python's for loops]: http://eli.thegreenplace.net/2015/the-scope-of-index-variables-in-pythons-for-loops/
 [the story of none, true and false]: http://python-history.blogspot.ca/2013/11/story-of-none-true-false.html
 [global variables are bad]: https://wiki.c2.com/?GlobalVariablesAreBad
-[dataclass field function tutorial]: https://www.studytonight.com/post/python-dataclass-field-function-part-3

@@ -245,6 +245,28 @@ Corrected version:
 get_sum(1, 2)
 ```
 
+(W1117)=
+
+### Keyword argument superseded by positional argument (W1117)
+
+This error occurs when a function is called with keyword arguments with the same name as positional-only parameters and the function contains a keyword variadic parameter dict.
+
+In the example below, `greeting` is a positional-only parameter of the function `print_greeting`.
+However, when the function is called, `"Hi"` is passed as a keyword argument. As a result, it will be collected in a dictionary by the keyword variadic parameter `kwds`,
+and the function will print out the default value `"Hello"`, which is an unintended behavior of the function call.
+
+```{literalinclude} /../examples/pylint/w1117_kwarg_superseded_by_positional_arg.py
+
+```
+
+Corrected version:
+
+```python
+print_greeting("Hi")
+```
+
+This will print out `"Hi"` as intended.
+
 (E1126)=
 
 ### Invalid sequence index (E1126)
@@ -479,16 +501,6 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 `**` can only be used on a `dict` to unpack the values.
 
 ```{literalinclude} /../examples/pylint/e1134_not_a_mapping.py
-
-```
-
-(W1117)=
-
-### Keyword argument superseded by positional argument (W1117)
-
-This error occurs when a function is called with keyword arguments with the same name as positional-only parameters and the function contains a keyword variadic parameter dict.
-
-```{literalinclude} /../examples/pylint/w1117_kwarg_superseded_by_positional_arg.py
 
 ```
 

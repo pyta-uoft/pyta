@@ -1903,6 +1903,30 @@ class CashRegister:
 - [R0201](#R0201)
 - [StackOverflow: What is the difference between `@staticmethod` and `@classmethod` in Python?]
 
+(E3701)=
+
+### Invalid field call (E3701)
+
+The [`dataclasses.field`][dataclass fields] function is used to specify the behaviour of instance attributes when defining a dataclass.
+This function returns a `Field` object that contains the arguments that were set in the function. This function should
+only be used as the value of an assignment in a dataclass definition or in the `make_dataclass()` function. Any other
+use will be considered invalid.
+
+```{literalinclude} /../examples/pylint/e3701_invalid_field_call.py
+
+```
+
+Corrected version:
+
+```python
+from dataclasses import dataclass, field
+
+@dataclass
+class Wallet:
+    """A custom class for storing information about a wallet."""
+    money: int = field(default=5)
+```
+
 ## Exceptions
 
 (W0133)=
@@ -3419,6 +3443,7 @@ function and method calls or definitions.
 [value comparisons]: https://docs.python.org/3/reference/expressions.html#value-comparisons
 [membership test operations]: https://docs.python.org/3/reference/expressions.html#membership-test-operations
 [identity comparisons]: https://docs.python.org/3/reference/expressions.html#is-not
+[dataclass fields]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
 
 <!-- PEP8 -->
 

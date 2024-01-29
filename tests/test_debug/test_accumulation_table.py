@@ -450,11 +450,11 @@ def test_snapshot_one_level() -> None:
             "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
             "team_num": 9,
         }
-    } == local_vars[0]
+    } == local_vars[1]
 
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
-    } == local_vars[1]
+    } == local_vars[0]
 
 
 def test_snapshot_two_levels() -> None:

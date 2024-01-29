@@ -34,11 +34,43 @@ def snapshot():
     frame = inspect.currentframe().f_back
 
     while frame:
-        if len(local_vars) == 0:  # to ensure we do not add main stack frame multiple times
-            local_vars.append(get_filtered_global_variables(frame))
-
-        if frame.f_code.co_name != "<module>":
+        # whether the current stack frame corresponds to the global module context or not
+        if frame.f_code.co_name != "<module>":  # skips the global module context
             local_vars.append({frame.f_code.co_name: frame.f_locals})
+
+        global_vars = get_filtered_global_variables(frame)
+        if global_vars not in local_vars:  # to avoid duplicates in nested function calls
+            local_vars.append(global_vars)
+
         frame = frame.f_back
 
     return local_vars
+
+
+# The functions (and top-level variables) below are for snapshot() testing purposes ONLY
+team_lead = "David Liu"
+SDS_projects = ["PyTA", "MarkUs", "Memory Models"]
+team_num = 9
+
+
+def func1() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot()
+
+
+def func2() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
+    return func1()
+
+
+if __name__ == "__main__":
+    local_vars = func1()
+    print(local_vars)

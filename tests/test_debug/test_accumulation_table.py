@@ -463,6 +463,7 @@ def test_snapshot_two_levels() -> None:
     local variables during a two-level nested function call.
     """
     local_vars = func2()
+    print(local_vars)
 
     assert {
         "__main__": {
@@ -470,11 +471,11 @@ def test_snapshot_two_levels() -> None:
             "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
             "team_num": 9,
         }
-    } == local_vars[0]
+    } == local_vars[1]
 
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
-    } == local_vars[1]
+    } == local_vars[0]
 
     assert {
         "func2": {
@@ -497,11 +498,11 @@ def test_snapshot_three_levels() -> None:
             "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
             "team_num": 9,
         }
-    } == local_vars[0]
+    } == local_vars[1]
 
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
-    } == local_vars[1]
+    } == local_vars[0]
 
     assert {
         "func2": {

@@ -29,7 +29,7 @@ python_ta.check_all(..., config=options)
 python_ta.check_all(..., config='config/.pylintrc')
 ```
 
-```toml
+```ini
 # config/.pylintrc
 [CUSTOM PYTA OPTIONS]
 pyta-number-of-messages = 10
@@ -97,7 +97,7 @@ import python_ta
 python_ta.check_all(..., config={'output-format': 'python_ta.reporters.PlainReporter'})
 ```
 
-```toml
+```ini
 [REPORTS]
 output-format = python_ta.reporters.PlainReporter
 ```
@@ -125,7 +125,19 @@ import python_ta
 python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
 ```
 
-```toml
+```ini
 [FORBIDDEN IMPORT]
 extra-imports = math, tkinter
+```
+
+In addition, you can specify `allow-local-imports` to allow local imports.
+
+```python
+import python_ta
+python_ta.check_all(..., config={'allow-local-imports': True})
+```
+
+```ini
+[FORBIDDEN IMPORT]
+allow-local-imports = yes
 ```

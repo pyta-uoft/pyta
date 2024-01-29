@@ -26,3 +26,6 @@ docs/_build
 
 # Environments
 venv/
+
+# For prettier
+node_modules/

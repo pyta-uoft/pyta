@@ -45,32 +45,3 @@ def snapshot():
         frame = frame.f_back
 
     return local_vars
-
-
-# The functions (and top-level variables) below are for snapshot() testing purposes ONLY
-team_lead = "David Liu"
-SDS_projects = ["PyTA", "MarkUs", "Memory Models"]
-team_num = 9
-
-
-def func1() -> list:
-    """
-    Function for snapshot() testing.
-    """
-    test_var1a = "David is cool!"
-    test_var2a = "Students Developing Software"
-    return snapshot()
-
-
-def func2() -> list:
-    """
-    Function for snapshot() testing.
-    """
-    test_var1b = {"SDS_coolest_project": "PyTA"}
-    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
-    return func1()
-
-
-if __name__ == "__main__":
-    local_vars = func1()
-    print(local_vars)

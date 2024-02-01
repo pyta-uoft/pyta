@@ -245,6 +245,28 @@ Corrected version:
 get_sum(1, 2)
 ```
 
+(W1117)=
+
+### Keyword argument superseded by positional argument (W1117)
+
+This error occurs when a function is called with keyword arguments with the same name as positional-only parameters and the function contains a keyword variadic parameter dict.
+
+In the example below, `greeting` is a positional-only parameter of the function `print_greeting`.
+However, when the function is called, `"Hi"` is passed as a keyword argument. As a result, it will be collected in a dictionary by the keyword variadic parameter `kwds`,
+and the function will print out the default value `"Hello"`, which is an unintended behavior of the function call.
+
+```{literalinclude} /../examples/pylint/w1117_kwarg_superseded_by_positional_arg.py
+
+```
+
+Corrected version:
+
+```python
+print_greeting("Hi")
+```
+
+This will print out `"Hi"` as intended.
+
 (E1126)=
 
 ### Invalid sequence index (E1126)
@@ -488,7 +510,7 @@ This error occurs when a non-mapping value is used in a place where mapping is e
 
 ### Unnecessary negation (C0117)
 
-This error occurs when a boolean expression contains an nnecessary negation. If we are getting this
+This error occurs when a boolean expression contains an unnecessary negation. If we are getting this
 error, the expression can be simplified to not use a negation.
 
 ```{literalinclude} /../examples/pylint/c0117_unnecessary_negation.py
@@ -1905,6 +1927,30 @@ class CashRegister:
 - [R0201](#R0201)
 - [StackOverflow: What is the difference between `@staticmethod` and `@classmethod` in Python?]
 
+(E3701)=
+
+### Invalid field call (E3701)
+
+The [`dataclasses.field`][dataclass fields] function is used to specify the behaviour of instance attributes when defining a dataclass.
+This function returns a `Field` object that contains the arguments that were set in the function. This function should
+only be used as the value of an assignment in a dataclass definition or in the `make_dataclass()` function. Any other
+use will be considered invalid.
+
+```{literalinclude} /../examples/pylint/e3701_invalid_field_call.py
+
+```
+
+Corrected version:
+
+```python
+from dataclasses import dataclass, field
+
+@dataclass
+class Wallet:
+    """A custom class for storing information about a wallet."""
+    money: int = field(default=5)
+```
+
 ## Exceptions
 
 (W0133)=
@@ -1926,6 +1972,34 @@ def reciprocal(num: float) -> float:
         raise ValueError('num cannot be 0!')
     else:
         return 1 / num
+```
+
+(W0134)=
+
+### Return in finally (W0134)
+
+This error occurs when a `return` statement is used inside a `finally` block. Doing so overwrites any previous return
+values therefore should be avoided.
+
+For example, in the code example below, if an `IndexError` occurs we want
+`error_codes[1]` to be returned, however since there is a return statement in the `finally` block `error_codes[2]` will be
+returned instead. Moving that return statement outside the `finally` block would resolve the issue.
+
+```{literalinclude} /../examples/pylint/w0134_return_in_finally.py
+
+```
+
+Corrected Version:
+
+```python
+def error_code(error_codes):
+
+    try:
+        print(error_codes[0])
+    except IndexError:
+        return error_codes[1]
+
+    return error_codes[2]
 ```
 
 (W0702)=
@@ -3421,6 +3495,7 @@ function and method calls or definitions.
 [value comparisons]: https://docs.python.org/3/reference/expressions.html#value-comparisons
 [membership test operations]: https://docs.python.org/3/reference/expressions.html#membership-test-operations
 [identity comparisons]: https://docs.python.org/3/reference/expressions.html#is-not
+[dataclass fields]: https://docs.python.org/3/library/dataclasses.html#dataclasses.field
 
 <!-- PEP8 -->
 

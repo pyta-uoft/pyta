@@ -8,7 +8,11 @@ from python_ta.checkers.forbidden_import_checker import ForbiddenImportChecker
 
 class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenImportChecker
-    CONFIG = {"allowed_import_modules": ["python_ta"], "extra_imports": ["datetime"]}
+    CONFIG = {
+        "allowed_import_modules": ["python_ta"],
+        "extra_imports": ["datetime"],
+        "allowed_function_imports": ["math.floor"],
+    }
 
     def test_forbidden_import_statement(self) -> None:
         """Tests for `import XX` statements"""
@@ -118,3 +122,32 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_import(node)
+
+    def test_allowed_function_import(self) -> None:
+        src = """
+        from math import floor
+        """
+
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.ImportFrom)
+
+        with self.assertNoMessages():
+            self.checker.visit_importfrom(node)
+
+    def test_disallowed_function_import(self) -> None:
+        src = """
+        from math import sqrt
+        """
+
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.ImportFrom)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-import", node=node, line=1, args=("math", 2)
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_importfrom(node)

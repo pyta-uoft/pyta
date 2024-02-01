@@ -134,7 +134,7 @@ def register(linter: PyLinter) -> None:
     linter.register_checker(ForbiddenImportChecker(linter))
 
 
-def _get_full_import_names(modname: str, names: list[tuple]) -> list[str]:
+def _get_full_import_names(modname: str, names: list) -> list:
     """Given a module name and a list of functions imported from the module, return a list of strings
     in the form {module name}.{function name}.
 

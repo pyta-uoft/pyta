@@ -48,6 +48,15 @@ class ForbiddenImportChecker(BaseChecker):
                 "help": "Allow local modules to be imported.",
             },
         ),
+        (
+            "allowed-function-imports",
+            {
+                "default": (),
+                "type": "csv",
+                "metavar": "<functions>",
+                "help": "Specific allowed functions from modules to be imported.",
+            },
+        ),
     )
 
     @only_required_for_messages("forbidden-import")
@@ -77,6 +86,10 @@ class ForbiddenImportChecker(BaseChecker):
             node.modname not in self.linter.config.allowed_import_modules
             and node.modname not in self.linter.config.extra_imports
             and node.modname not in self.get_allowed_local_files()
+            and not all(
+                name in self.linter.config.allowed_function_imports
+                for name in _get_full_import_names(node.modname, node.names)
+            )
         ):
             self.add_message("forbidden-import", node=node, args=(node.modname, node.lineno))
 
@@ -119,3 +132,13 @@ class ForbiddenImportChecker(BaseChecker):
 def register(linter: PyLinter) -> None:
     """Required method to auto register this checker"""
     linter.register_checker(ForbiddenImportChecker(linter))
+
+
+def _get_full_import_names(modname: str, names: list) -> list:
+    """Given a module name and a list of functions imported from the module, return a list of strings
+    in the form {module name}.{function name}.
+
+    modname and names are in the format as provided from the corresponding attributes in the pylint.ImportFrom node
+    """
+
+    return [modname + "." + name[0] for name in names]

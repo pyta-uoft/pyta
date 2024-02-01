@@ -43,8 +43,8 @@ class JSONReport(pycodestyle.StandardReport):
     def get_file_results(self) -> List[Tuple]:
         self._deferred_print.sort()
         return [
-            (line_number, f"line {line_number}, column {offset}: {text}")
-            for line_number, offset, _, text, _ in self._deferred_print
+            (line_number, f"line {line_number}, column {offset}: {text} (pycodestyle [{code}])")
+            for line_number, offset, code, text, _ in self._deferred_print
         ]
 
 

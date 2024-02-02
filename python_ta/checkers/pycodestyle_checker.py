@@ -13,7 +13,7 @@ class PycodestyleChecker(BaseRawFileChecker):
     Use options to specify the list of PEP8 errors to ignore"""
 
     name = "pep8_errors"
-    msgs = {"E9989": ("Found pycodestyle (PEP8) style error at %s", "pep8-errors", "")}
+    msgs = {"E9989": ("Found pycodestyle (PEP8) style error %s at %s", "pep8-errors", "")}
 
     options = (
         (
@@ -35,15 +35,15 @@ class PycodestyleChecker(BaseRawFileChecker):
         )
         report = style_guide.check_files()
 
-        for line_num, msg in report.get_file_results():
-            self.add_message("pep8-errors", line=line_num, args=msg)
+        for line_num, msg, code in report.get_file_results():
+            self.add_message("pep8-errors", line=line_num, args=(code, msg))
 
 
 class JSONReport(pycodestyle.StandardReport):
     def get_file_results(self) -> List[Tuple]:
         self._deferred_print.sort()
         return [
-            (line_number, f"line {line_number}, column {offset}: {text} (pycodestyle [{code}])")
+            (line_number, f"line {line_number}, column {offset}: {text}", f"{code}")
             for line_number, offset, code, text, _ in self._deferred_print
         ]
 

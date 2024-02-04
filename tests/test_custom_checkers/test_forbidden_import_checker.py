@@ -10,8 +10,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ForbiddenImportChecker
     CONFIG = {
         "allowed_import_modules": ["python_ta"],
-        "extra_imports": ["datetime"],
-        "allowed_function_imports": ["math.floor"],
+        "extra_imports": ["datetime", "math.floor"],
     }
 
     def test_forbidden_import_statement(self) -> None:
@@ -26,7 +25,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="forbidden-import", node=node, line=1, args=("copy", 2)
+                msg_id="forbidden-import", node=node, line=1, args=("module copy",)
             ),
             ignore_position=True,
         ):
@@ -44,7 +43,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="forbidden-import", node=node, line=1, args=("sys", 2)
+                msg_id="forbidden-import", node=node, line=1, args=("path from module sys",)
             ),
             ignore_position=True,
         ):
@@ -85,7 +84,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="forbidden-import", node=node, line=1, args=("math", 2)
+                msg_id="forbidden-import", node=node, line=1, args=("module math",)
             ),
             ignore_position=True,
         ):
@@ -117,7 +116,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="forbidden-import", node=node, line=1, args=("imported_module", 2)
+                msg_id="forbidden-import", node=node, line=1, args=("module imported_module",)
             ),
             ignore_position=True,
         ):
@@ -135,9 +134,9 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_importfrom(node)
 
-    def test_disallowed_function_import(self) -> None:
+    def test_multiple_disallowed_function_import(self) -> None:
         src = """
-        from math import sqrt
+        from math import sqrt, ceil
         """
 
         mod = astroid.parse(src)
@@ -146,7 +145,7 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="forbidden-import", node=node, line=1, args=("math", 2)
+                msg_id="forbidden-import", node=node, line=1, args=("sqrt, ceil from module math",)
             ),
             ignore_position=True,
         ):

@@ -15,7 +15,7 @@ class ForbiddenImportChecker(BaseChecker):
     name = "forbidden_import"
     msgs = {
         "E9999": (
-            "You may not import any modules - you imported %s on line %s.",
+            "You may not import %s.",
             "forbidden-import",
             "Used when you use import",
         )
@@ -27,7 +27,7 @@ class ForbiddenImportChecker(BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<modules>",
-                "help": "Allowed modules to be imported.",
+                "help": "Allowed names to be imported.",
             },
         ),
         (
@@ -36,7 +36,7 @@ class ForbiddenImportChecker(BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<extra-modules>",
-                "help": "Extra allowed modules to be imported.",
+                "help": "Extra names to be imported.",
             },
         ),
         (
@@ -46,15 +46,6 @@ class ForbiddenImportChecker(BaseChecker):
                 "type": "yn",
                 "metavar": "<yn>",
                 "help": "Allow local modules to be imported.",
-            },
-        ),
-        (
-            "allowed-function-imports",
-            {
-                "default": (),
-                "type": "csv",
-                "metavar": "<functions>",
-                "help": "Specific allowed functions from modules to be imported.",
             },
         ),
     )
@@ -76,7 +67,7 @@ class ForbiddenImportChecker(BaseChecker):
             self.add_message(
                 "forbidden-import",
                 node=node,
-                args=(", ".join(map(lambda x: x[0], temp)), node.lineno),
+                args=("module " + ", ".join(map(lambda x: x[0], temp)),),
             )
 
     @only_required_for_messages("forbidden-import")
@@ -86,12 +77,18 @@ class ForbiddenImportChecker(BaseChecker):
             node.modname not in self.linter.config.allowed_import_modules
             and node.modname not in self.linter.config.extra_imports
             and node.modname not in self.get_allowed_local_files()
-            and not all(
-                name in self.linter.config.allowed_function_imports
-                for name in _get_full_import_names(node.modname, node.names)
-            )
         ):
-            self.add_message("forbidden-import", node=node, args=(node.modname, node.lineno))
+            # since name will be the combined form, e.g. math.sqrt, in the message we want just the imported name itself
+            forbidden_imports = [
+                name.split(".")[-1]
+                for name in _get_full_import_names(node.modname, node.names)
+                if name not in self.linter.config.allowed_import_modules
+                and name not in self.linter.config.extra_imports
+            ]
+            if forbidden_imports:
+                message = ", ".join(forbidden_imports) + " from module " + node.modname
+
+                self.add_message("forbidden-import", node=node, args=(message,))
 
     @only_required_for_messages("forbidden-import")
     def visit_call(self, node: nodes.Call) -> None:
@@ -106,7 +103,7 @@ class ForbiddenImportChecker(BaseChecker):
                         and node.args[0].value not in self.linter.config.extra_imports
                         and node.args[0].value not in self.get_allowed_local_files()
                     ):
-                        args = (node.args[0].value, node.lineno)
+                        args = ("module " + node.args[0].value,)
                         self.add_message("forbidden-import", node=node, args=args)
 
     def get_allowed_local_files(self) -> list:
@@ -135,7 +132,7 @@ def register(linter: PyLinter) -> None:
 
 
 def _get_full_import_names(modname: str, names: list) -> list:
-    """Given a module name and a list of functions imported from the module, return a list of strings
+    """Given a module name and a list of names imported from the module, return a list of strings
     in the form {module name}.{function name}.
 
     modname and names are in the format as provided from the corresponding attributes in the pylint.ImportFrom node

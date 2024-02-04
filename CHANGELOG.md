@@ -10,7 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhancements
 
 - Add new boolean configuration `allow-local-imports` to allow for local imports
-- Allowed specifying specific allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
+- Allowed specifying allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
 
 ## [2.7.0] - 2024-12-14
 

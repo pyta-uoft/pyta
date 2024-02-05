@@ -36,7 +36,7 @@ class ForbiddenImportChecker(BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<extra-modules>",
-                "help": "Extra names to be imported.",
+                "help": "Extra allowed names to be imported.",
             },
         ),
         (
@@ -135,7 +135,6 @@ def _get_full_import_names(modname: str, names: list) -> list:
     """Given a module name and a list of names imported from the module, return a list of strings
     in the form {module name}.{function name}.
 
-    modname and names are in the format as provided from the corresponding attributes in the pylint.ImportFrom node
+    modname and names are in the format as provided from the corresponding attributes in the astroid.ImportFrom node
     """
-
     return [modname + "." + name[0] for name in names]

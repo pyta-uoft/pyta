@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Dict, List
 
 from .core import NewMessage, PythonTaReporter

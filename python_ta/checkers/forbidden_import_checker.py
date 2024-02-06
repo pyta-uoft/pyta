@@ -1,5 +1,7 @@
 """Checker or use of forbidden imports.
 """
+from __future__ import annotations
+
 import os
 
 from astroid import nodes
@@ -15,7 +17,7 @@ class ForbiddenImportChecker(BaseChecker):
     name = "forbidden_import"
     msgs = {
         "E9999": (
-            "You may not import any modules - you imported %s on line %s.",
+            "You may not import %s.",
             "forbidden-import",
             "Used when you use import",
         )
@@ -27,7 +29,7 @@ class ForbiddenImportChecker(BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<modules>",
-                "help": "Allowed modules to be imported.",
+                "help": "Allowed names to be imported.",
             },
         ),
         (
@@ -36,7 +38,7 @@ class ForbiddenImportChecker(BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<extra-modules>",
-                "help": "Extra allowed modules to be imported.",
+                "help": "Extra allowed names to be imported.",
             },
         ),
         (
@@ -67,7 +69,7 @@ class ForbiddenImportChecker(BaseChecker):
             self.add_message(
                 "forbidden-import",
                 node=node,
-                args=(", ".join(map(lambda x: x[0], temp)), node.lineno),
+                args=("module " + ", ".join(map(lambda x: x[0], temp)),),
             )
 
     @only_required_for_messages("forbidden-import")
@@ -78,7 +80,17 @@ class ForbiddenImportChecker(BaseChecker):
             and node.modname not in self.linter.config.extra_imports
             and node.modname not in self.get_allowed_local_files()
         ):
-            self.add_message("forbidden-import", node=node, args=(node.modname, node.lineno))
+            # since name will be the combined form, e.g. math.sqrt, in the message we want just the imported name itself
+            forbidden_imports = [
+                name.split(".")[-1]
+                for name in _get_full_import_names(node.modname, node.names)
+                if name not in self.linter.config.allowed_import_modules
+                and name not in self.linter.config.extra_imports
+            ]
+            if forbidden_imports:
+                message = ", ".join(forbidden_imports) + " from module " + node.modname
+
+                self.add_message("forbidden-import", node=node, args=(message,))
 
     @only_required_for_messages("forbidden-import")
     def visit_call(self, node: nodes.Call) -> None:
@@ -93,7 +105,7 @@ class ForbiddenImportChecker(BaseChecker):
                         and node.args[0].value not in self.linter.config.extra_imports
                         and node.args[0].value not in self.get_allowed_local_files()
                     ):
-                        args = (node.args[0].value, node.lineno)
+                        args = ("module " + node.args[0].value,)
                         self.add_message("forbidden-import", node=node, args=args)
 
     def get_allowed_local_files(self) -> list:
@@ -119,3 +131,12 @@ class ForbiddenImportChecker(BaseChecker):
 def register(linter: PyLinter) -> None:
     """Required method to auto register this checker"""
     linter.register_checker(ForbiddenImportChecker(linter))
+
+
+def _get_full_import_names(modname: str, names: list[tuple[str, str]]) -> list:
+    """Given a module name and a list of names imported from the module, return a list of strings
+    in the form {module name}.{function name}.
+
+    modname and names are in the format as provided from the corresponding attributes in the astroid.ImportFrom node
+    """
+    return [modname + "." + name[0] for name in names]

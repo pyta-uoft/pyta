@@ -69,13 +69,9 @@ class HTMLReporter(PythonTaReporter):
         #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
         #     pyta_logo_base64_encoded = b64encode(image_file.read()).decode()
 
-        # Date/time (24 hour time) format:
-        # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
-        dt = str(datetime.now().strftime("%a. %b. %d %Y, %I:%M:%S %p"))
-
         # Render the jinja template
         rendered_template = template.render(
-            date_time=dt,
+            date_time=self._generate_report_date_time(),
             reporter=self,
             grouped_messages=grouped_messages,
             os=os,

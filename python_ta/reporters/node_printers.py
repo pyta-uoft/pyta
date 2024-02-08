@@ -159,6 +159,8 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e223(msg, _node, source_lines)
     elif "E224" in msg.msg or "E273" in msg.msg:
         yield from render_pep8_errors_e224_and_e273(msg, _node, source_lines)
+    elif "E226" in msg.msg:
+        yield from render_pep8_errors_e226(msg, _node, source_lines)
     elif "E227" in msg.msg:
         yield from render_pep8_errors_e227(msg, _node, source_lines)
     elif "E228" in msg.msg:
@@ -361,6 +363,18 @@ def render_pep8_errors_e224_and_e273(msg, _node, source_lines):
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
+def render_pep8_errors_e226(msg, _node, source_lines):
+    """Render a PEP8 missing whitespace around arithmetic operator message"""
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+    end_idx = col + 1
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, end_idx), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 3, source_lines)
 
 

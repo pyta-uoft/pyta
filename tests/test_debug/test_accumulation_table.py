@@ -3,6 +3,7 @@ Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
 import copy
+import os
 import shutil
 import subprocess
 
@@ -491,8 +492,10 @@ def test_snapshot_main_stackframe() -> None:
     as a pytest module rather than the test file itself, causing global variables to be
     absent in the <module> stack frame. This behavior is inherent to pytest and cannot be modified.
     """
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_main_frame_path = os.path.join(current_directory, "snapshot_main_frame.py")
     main_frame = subprocess.run(
-        ["python", "./snapshot_main_frame.py"], capture_output=True, text=True
+        ["python", snapshot_main_frame_path], capture_output=True, text=True
     )
     global_vars = main_frame.stdout
     assert (

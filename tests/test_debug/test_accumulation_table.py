@@ -455,7 +455,6 @@ def test_snapshot_two_levels() -> None:
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
     } == local_vars[0]
-
     assert {
         "func2": {
             "test_var1b": {"SDS_coolest_project": "PyTA"},
@@ -474,14 +473,12 @@ def test_snapshot_three_levels() -> None:
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
     } == local_vars[0]
-
     assert {
         "func2": {
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
     } == local_vars[1]
-
     assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]
 
 

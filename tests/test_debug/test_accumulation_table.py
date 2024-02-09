@@ -492,7 +492,7 @@ def test_snapshot_main_stackframe() -> None:
     absent in the <module> stack frame. This behavior is inherent to pytest and cannot be modified.
     """
     main_frame = subprocess.run(
-        ["python", "snapshot_main_frame.py"], capture_output=True, text=True
+        ["python", "./snapshot_main_frame.py"], capture_output=True, text=True
     )
     global_vars = main_frame.stdout
     assert (

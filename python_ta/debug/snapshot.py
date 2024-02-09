@@ -37,9 +37,8 @@ def snapshot():
         # whether the current stack frame corresponds to the global module context or not
         if frame.f_code.co_name != "<module>":  # skips the global module context
             local_vars.append({frame.f_code.co_name: frame.f_locals})
-
-        global_vars = get_filtered_global_variables(frame)
-        if global_vars not in local_vars:  # to avoid duplicates in nested function calls
+        else:
+            global_vars = get_filtered_global_variables(frame)
             local_vars.append(global_vars)
 
         frame = frame.f_back

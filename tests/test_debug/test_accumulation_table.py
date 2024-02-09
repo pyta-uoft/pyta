@@ -4,6 +4,7 @@ types of accumulator loops
 """
 import copy
 import shutil
+import subprocess
 
 import pytest
 import tabulate
@@ -401,12 +402,7 @@ def test_uninitialized_loop_accumulators() -> None:
                 _ = number
 
 
-# The functions (and top-level variables) below are for snapshot() testing purposes ONLY
-team_lead = "David Liu"
-SDS_projects = ["PyTA", "MarkUs", "Memory Models"]
-team_num = 9
-
-
+# The functions below are for snapshot() testing purposes ONLY
 def func1() -> list:
     """
     Function for snapshot() testing.
@@ -445,14 +441,6 @@ def test_snapshot_one_level() -> None:
     local_vars = func1()
 
     assert {
-        "__main__": {
-            "team_lead": "David Liu",
-            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
-            "team_num": 9,
-        }
-    } == local_vars[1]
-
-    assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
     } == local_vars[0]
 
@@ -463,15 +451,6 @@ def test_snapshot_two_levels() -> None:
     local variables during a two-level nested function call.
     """
     local_vars = func2()
-    print(local_vars)
-
-    assert {
-        "__main__": {
-            "team_lead": "David Liu",
-            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
-            "team_num": 9,
-        }
-    } == local_vars[1]
 
     assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
@@ -482,7 +461,7 @@ def test_snapshot_two_levels() -> None:
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
-    } == local_vars[2]
+    } == local_vars[1]
 
 
 def test_snapshot_three_levels() -> None:
@@ -493,14 +472,6 @@ def test_snapshot_three_levels() -> None:
     local_vars = func3()
 
     assert {
-        "__main__": {
-            "team_lead": "David Liu",
-            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
-            "team_num": 9,
-        }
-    } == local_vars[1]
-
-    assert {
         "func1": {"test_var2a": "Students Developing Software", "test_var1a": "David is cool!"}
     } == local_vars[0]
 
@@ -509,9 +480,29 @@ def test_snapshot_three_levels() -> None:
             "test_var1b": {"SDS_coolest_project": "PyTA"},
             "test_var2b": ("Aina", "Merrick", "Varun", "Utku"),
         }
-    } == local_vars[2]
+    } == local_vars[1]
 
-    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[3]
+    assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]
+
+
+def test_snapshot_main_stackframe() -> None:
+    """
+    Assesses the accuracy of the snapshot() function in capturing global variables.
+    Specifically, it verifies whether global variables (formatted as JSON) from another
+    file within the same module ("snapshot_main_frame.py") are accurately captured.
+    Subprocesses are utilized due to pytest's module configuration, where main is treated
+    as a pytest module rather than the test file itself, causing global variables to be
+    absent in the <module> stack frame. This behavior is inherent to pytest and cannot be modified.
+    """
+    main_frame = subprocess.run(
+        ["python", "snapshot_main_frame.py"], capture_output=True, text=True
+    )
+    global_vars = main_frame.stdout
+    assert (
+        "{'__main__': {'team_lead': 'David Liu',"
+        " 'SDS_projects': ['PyTA', 'MarkUs', 'Memory Models'],"
+        " 'team_num': 9}}" in global_vars
+    )
 
 
 def test_output_to_existing_file(tmp_path) -> None:

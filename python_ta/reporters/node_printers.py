@@ -194,6 +194,10 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e305(msg, _node, source_lines)
     elif "expected 1 blank line before a nested definition" in msg.msg:
         yield from render_pep8_errors_e306(msg, _node, source_lines)
+    elif "multiple imports on one line" in msg.msg:
+        yield from render_pep8_errors_e401(msg, _node, source_lines)
+    elif "module level import not at top of file" in msg.msg:
+        yield from render_pep8_errors_e402(msg, _node, source_lines)
     else:
         yield from render_generic(msg, _node, source_lines)
 
@@ -598,6 +602,24 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
         body[:indentation] + NEW_BLANK_LINE_MESSAGE + " " * indentation,
     )
     yield from render_context(msg.line, msg.line + 2, source_lines)
+
+
+def render_pep8_errors_e401(msg, _node, source_lines=None):
+    """Render a PEP8 multiple imports on one line message."""
+    line = msg.line
+    curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip()) + 7
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(curr_idx, None), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
+def render_pep8_errors_e402(msg, _node, source_lines=None):
+    """Render a PEP8 module level import not at top of file message."""
+    line = msg.line
+    curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(curr_idx, None), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
 
 
 CUSTOM_MESSAGES = {

@@ -162,6 +162,8 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e211(msg, _node, source_lines)
     elif "multiple spaces before operator" in msg.msg:
         yield from render_pep8_errors_e221(msg, _node, source_lines)
+    elif "multiple spaces after operator" in msg.msg:
+        yield from render_pep8_errors_e222(msg, _node, source_lines)
     elif "tab before operator" in msg.msg:
         yield from render_pep8_errors_e223(msg, _node, source_lines)
     elif "tab after operator" in msg.msg or "tab after keyword" in msg.msg:
@@ -174,6 +176,8 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e251(msg, _node, source_lines)
     elif "at least two spaces before inline comment" in msg.msg:
         yield from render_pep8_errors_e261(msg, _node, source_lines)
+    elif "inline comment should start with '# '" in msg.msg:
+        yield from render_pep8_errors_e262(msg, _node, source_lines)
     elif "block comment should start with '# '" in msg.msg:
         yield from render_pep8_errors_e265(msg, _node, source_lines)
     elif "too many leading '#' for block comment" in msg.msg:
@@ -343,6 +347,19 @@ def render_pep8_errors_e221(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
+def render_pep8_errors_e222(msg, _node, source_lines=None):
+    """Render a PEP8 multiple spaces after operator message"""
+
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+
+    curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
 def render_pep8_errors_e223(msg, _node, source_lines=None):
     """Render a PEP8 tab before operator message."""
     line = msg.line
@@ -431,6 +448,21 @@ def render_pep8_errors_e261(msg, _node, source_lines=None):
         LineType.ERROR,
         source_lines[line - 1] + "  # INSERT TWO SPACES BEFORE THE '#'",
     )
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
+def render_pep8_errors_e262(msg, _node, source_lines=None):
+    """Render a PEP8 inline comment should start with '# ' message"""
+
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+
+    keyword = source_lines[line - 1][col:].split()[1]
+    keyword_idx = source_lines[line - 1].index(keyword)
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, keyword_idx), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 3, source_lines)
 
 

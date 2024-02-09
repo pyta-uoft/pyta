@@ -7,8 +7,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Enhancements
+
 - Add new boolean configuration `allow-local-imports` to allow for local imports
-- Extended the `snasphot` function to derive the relevant variables define at the top level (global variables).
+  <<<<<<< HEAD
+- # Extended the `snasphot` function to derive the relevant variables define at the top level (global variables).
+- Include the pycodestyle error code to the error message for PEP8 style errors
+- Added date and time display to `PlainReporter` and `ColorReporter`
+- Allowed specifying allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
+  > > > > > > > 098553c4a4e363bd8ea04b7c73da2628069dad48
 
 ## [2.7.0] - 2024-12-14
 

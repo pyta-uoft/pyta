@@ -3,6 +3,7 @@
 import os.path
 import sys
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -213,6 +214,15 @@ class PythonTaReporter(BaseReporter):
 
     def _display(self, layout: BaseLayout) -> None:
         """display the layout"""
+
+    def _generate_report_date_time(self) -> str:
+        """Return date and time the report was generated."""
+
+        # Date/time (24 hour time) format:
+        # Generated: ShortDay. ShortMonth. PaddedDay LongYear, Hour:Min:Sec
+        dt = str(datetime.now().strftime("%a. %b. %d %Y, %I:%M:%S %p"))
+
+        return dt
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

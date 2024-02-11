@@ -13,6 +13,4 @@ team_lead = "David Liu"
 SDS_projects = ["PyTA", "MarkUs", "Memory Models"]
 team_num = 9
 
-global_vars = snapshot()[0]
-json.dumps(global_vars)
-print(global_vars)
+print(json.dumps(snapshot()[0]))

@@ -3,9 +3,11 @@ Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
 import copy
+import json
 import os
 import shutil
 import subprocess
+import sys
 
 import pytest
 import tabulate
@@ -495,14 +497,18 @@ def test_snapshot_main_stackframe() -> None:
     current_directory = os.path.dirname(os.path.abspath(__file__))
     snapshot_main_frame_path = os.path.join(current_directory, "snapshot_main_frame.py")
     main_frame = subprocess.run(
-        ["python", snapshot_main_frame_path], capture_output=True, text=True
+        [sys.executable, snapshot_main_frame_path], capture_output=True, text=True
     )
     global_vars = main_frame.stdout
-    assert (
-        "{'__main__': {'team_lead': 'David Liu',"
-        " 'SDS_projects': ['PyTA', 'MarkUs', 'Memory Models'],"
-        " 'team_num': 9}}" in global_vars
-    )
+    parsed_global_vars = json.loads(global_vars)
+
+    assert parsed_global_vars == {
+        "__main__": {
+            "team_lead": "David Liu",
+            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
+            "team_num": 9,
+        }
+    }
 
 
 def test_output_to_existing_file(tmp_path) -> None:

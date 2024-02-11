@@ -3,9 +3,10 @@ Use the 'inspect' module to extract local variables from
  multiple stack frames. Useful for dynamic debugging.
 """
 import inspect
+from types import FrameType
 
 
-def get_filtered_global_variables(frame) -> dict:
+def get_filtered_global_variables(frame: FrameType) -> dict:
     """
     Helper function for retriving global variables
     (i.e. top level variables in "__main__" frame's scope)
@@ -30,17 +31,16 @@ def snapshot():
     each mapping function names to their respective local variables.
     Excludes the global module context.
     """
-    local_vars = []
+    variables = []
     frame = inspect.currentframe().f_back
 
     while frame:
-        # whether the current stack frame corresponds to the global module context or not
-        if frame.f_code.co_name != "<module>":  # skips the global module context
-            local_vars.append({frame.f_code.co_name: frame.f_locals})
+        if frame.f_code.co_name != "<module>":
+            variables.append({frame.f_code.co_name: frame.f_locals})
         else:
             global_vars = get_filtered_global_variables(frame)
-            local_vars.append(global_vars)
+            variables.append(global_vars)
 
         frame = frame.f_back
 
-    return local_vars
+    return variables

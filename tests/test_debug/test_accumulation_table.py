@@ -3,7 +3,11 @@ Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
 import copy
+import json
+import os
 import shutil
+import subprocess
+import sys
 
 import pytest
 import tabulate
@@ -479,6 +483,32 @@ def test_snapshot_three_levels() -> None:
         }
     } == local_vars[1]
     assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]
+
+
+def test_snapshot_main_stackframe() -> None:
+    """
+    Assesses the accuracy of the snapshot() function in capturing global variables.
+    Specifically, it verifies whether global variables (formatted as JSON) from another
+    file within the same module ("snapshot_main_frame.py") are accurately captured.
+    Subprocesses are utilized due to pytest's module configuration, where main is treated
+    as a pytest module rather than the test file itself, causing global variables to be
+    absent in the <module> stack frame. This behavior is inherent to pytest and cannot be modified.
+    """
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_main_frame_path = os.path.join(current_directory, "snapshot_main_frame.py")
+    main_frame = subprocess.run(
+        [sys.executable, snapshot_main_frame_path], capture_output=True, text=True
+    )
+    global_vars = main_frame.stdout
+    parsed_global_vars = json.loads(global_vars)
+
+    assert parsed_global_vars == {
+        "__main__": {
+            "team_lead": "David Liu",
+            "SDS_projects": ["PyTA", "MarkUs", "Memory Models"],
+            "team_num": 9,
+        }
+    }
 
 
 def test_output_to_existing_file(tmp_path) -> None:

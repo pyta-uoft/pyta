@@ -47,7 +47,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
                 msg_id="pep8-errors",
                 line=1,
                 node=None,
-                args=("E262", "line 1, column 8: inline comment should start with '# '"),
+                args=("E262", "line 1, column 7: inline comment should start with '# '"),
             ),
             ignore_position=True,
         ):
@@ -64,4 +64,5 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
 if __name__ == "__main__":
     import pytest
 
+    print(CURRENT_DIR_PATH)
     pytest.main(["test_pycodestyle_checker.py"])

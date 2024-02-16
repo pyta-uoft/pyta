@@ -7,7 +7,10 @@ from astroid.manager import AstroidManager
 
 from python_ta.checkers.pycodestyle_checker import PycodestyleChecker
 
-CURRENT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+DIR_PATH = (
+    os.path.abspath(os.path.join(__file__, "../../.."))
+    + "/examples/custom_checkers/e9989_pycodestyle/"
+)
 
 MANAGER = AstroidManager()
 register_all_brains(MANAGER)
@@ -17,9 +20,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = PycodestyleChecker
 
     def test_error_e222(self) -> None:
-        mod = MANAGER.ast_from_file(
-            CURRENT_DIR_PATH + "test_e9989_pycodestyle/error_e222_example.py"
-        )
+        mod = MANAGER.ast_from_file(DIR_PATH + "e222_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
@@ -32,16 +33,12 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
             self.checker.process_module(mod)
 
     def test_no_error_e222(self) -> None:
-        mod = MANAGER.ast_from_file(
-            CURRENT_DIR_PATH + "test_e9989_pycodestyle/no_error_e222_example.py"
-        )
+        mod = MANAGER.ast_from_file(DIR_PATH + "e222_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
     def test_error_e262(self) -> None:
-        mod = MANAGER.ast_from_file(
-            CURRENT_DIR_PATH + "test_e9989_pycodestyle/error_e262_example.py"
-        )
+        mod = MANAGER.ast_from_file(DIR_PATH + "e262_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
@@ -54,9 +51,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
             self.checker.process_module(mod)
 
     def test_no_error_e262(self) -> None:
-        mod = MANAGER.ast_from_file(
-            CURRENT_DIR_PATH + "test_e9989_pycodestyle/no_error_e262_example.py"
-        )
+        mod = MANAGER.ast_from_file(DIR_PATH + "e262_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 

@@ -133,8 +133,11 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
-    if "indentation contains mixed spaces and tabs" in msg.msg:
-        yield from render_pep8_errors_e101(msg, _node, source_lines)
+    if (
+        "indentation contains mixed spaces and tabs" in msg.msg
+        or "closing bracket does not match indentation of opening bracket's line" in msg.msg
+    ):
+        yield from render_pep8_errors_e101_and_e123(msg, _node, source_lines)
     elif "expected an indented block (comment)" in msg.msg:
         yield from render_pep8_errors_e115(msg, _node, source_lines)
     elif "unexpected indentation (comment)" in msg.msg:
@@ -154,10 +157,8 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
     elif "continuation line under-indented for visual indent" in msg.msg:
         yield from render_pep8_errors_e128(msg, _node, source_lines)
-    elif "whitespace after '('" in msg.msg:
-        yield from render_pep8_errors_e201(msg, _node, source_lines)
-    elif "whitespace before ')'" in msg.msg:
-        yield from render_pep8_errors_e202(msg, _node, source_lines)
+    elif "whitespace after '('" in msg.msg or "whitespace before ')'" in msg.msg:
+        yield from render_pep8_errors_e201_and_e202(msg, _node, source_lines)
     elif "whitespace before '('" in msg.msg:
         yield from render_pep8_errors_e211(msg, _node, source_lines)
     elif "multiple spaces before operator" in msg.msg:
@@ -194,10 +195,6 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e305(msg, _node, source_lines)
     elif "expected 1 blank line before a nested definition" in msg.msg:
         yield from render_pep8_errors_e306(msg, _node, source_lines)
-    elif "multiple imports on one line" in msg.msg:
-        yield from render_pep8_errors_e401(msg, _node, source_lines)
-    elif "module level import not at top of file" in msg.msg:
-        yield from render_pep8_errors_e402(msg, _node, source_lines)
     else:
         yield from render_generic(msg, _node, source_lines)
 
@@ -207,7 +204,7 @@ def render_blank_line(line):
     yield (line + 1, slice(None, None), LineType.ERROR, " " * 28)
 
 
-def render_pep8_errors_e101(msg, _node, source_lines=None):
+def render_pep8_errors_e101_and_e123(msg, _node, source_lines=None):
     """Render a PEP8 indentation contains mixed spaces and tabs message."""
     line = msg.line
     curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
@@ -299,20 +296,8 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e201(msg, _node, source_lines=None):
+def render_pep8_errors_e201_and_e202(msg, _node, source_lines=None):
     """Render a PEP8 whitespace after '(' message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
-
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
-
-
-def render_pep8_errors_e202(msg, _node, source_lines=None):
-    """Render a PEP8 whitespace before ')' message."""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
@@ -512,7 +497,7 @@ def render_pep8_errors_e301(msg, _node, source_lines=None):
         None,
         slice(None, None),
         LineType.ERROR,
-        body[:indentation] + NEW_BLANK_LINE_MESSAGE + " " * indentation,
+        body[:indentation] + NEW_BLANK_LINE_MESSAGE,
     )
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
@@ -599,27 +584,9 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
         None,
         slice(None, None),
         LineType.ERROR,
-        body[:indentation] + NEW_BLANK_LINE_MESSAGE + " " * indentation,
+        body[:indentation] + NEW_BLANK_LINE_MESSAGE,
     )
     yield from render_context(msg.line, msg.line + 2, source_lines)
-
-
-def render_pep8_errors_e401(msg, _node, source_lines=None):
-    """Render a PEP8 multiple imports on one line message."""
-    line = msg.line
-    curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip()) + 7
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(curr_idx, None), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
-
-
-def render_pep8_errors_e402(msg, _node, source_lines=None):
-    """Render a PEP8 module level import not at top of file message."""
-    line = msg.line
-    curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(curr_idx, None), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
 CUSTOM_MESSAGES = {

@@ -147,12 +147,8 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
     elif "E128" in msg.msg:
         yield from render_pep8_errors_e128(msg, _node, source_lines)
-    elif "E201" in msg.msg:
-        yield from render_pep8_errors_e201(msg, _node, source_lines)
-    elif "E202" in msg.msg:
-        yield from render_pep8_errors_e202(msg, _node, source_lines)
-    elif "E203" in msg.msg:
-        yield from render_pep8_errors_e203(msg, _node, source_lines)
+    elif "E201" in msg.msg or "E202" in msg.msg or "E203" in msg.msg:
+        yield from render_pep8_errors_e201_e202_e203(msg, _node, source_lines)
     elif "E211" in msg.msg:
         yield from render_pep8_errors_e211(msg, _node, source_lines)
     elif "E221" in msg.msg:
@@ -292,32 +288,10 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e201(msg, _node, source_lines=None):
-    """Render a PEP8 whitespace after '(' message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
-
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
-
-
-def render_pep8_errors_e202(msg, _node, source_lines=None):
-    """Render a PEP8 whitespace before ')' message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
-
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
-
-
-def render_pep8_errors_e203(msg, _node, source_lines):
-    """Render a PEP8 whitespace before ‘,’, ‘;’, or ‘:’ message."""
+def render_pep8_errors_e201_e202_e203(msg, _node, source_lines=None):
+    """Render a PEP8 whitespace after '(' message,
+    a PEP8 whitespace before ')' message,
+    AND a PEP8 whitespace before ‘,’, ‘;’, or ‘:’ message."""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])

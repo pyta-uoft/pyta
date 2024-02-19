@@ -348,8 +348,6 @@ def render_pep8_errors_e221(msg, _node, source_lines=None):
 
 
 def render_pep8_errors_e222(msg, _node, source_lines=None):
-    """Render a PEP8 multiple spaces after operator message"""
-
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
@@ -452,8 +450,6 @@ def render_pep8_errors_e261(msg, _node, source_lines=None):
 
 
 def render_pep8_errors_e262(msg, _node, source_lines=None):
-    """Render a PEP8 inline comment should start with '# ' message"""
-
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])

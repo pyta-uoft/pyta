@@ -2,18 +2,12 @@ import os
 
 import astroid
 import pylint.testutils
+from astroid import MANAGER
 from astroid.brain.helpers import register_all_brains
-from astroid.manager import AstroidManager
 
 from python_ta.checkers.pycodestyle_checker import PycodestyleChecker
 
-DIR_PATH = (
-    os.path.abspath(os.path.join(__file__, "../../.."))
-    + "/examples/custom_checkers/e9989_pycodestyle/"
-)
-
-MANAGER = AstroidManager()
-register_all_brains(MANAGER)
+DIR_PATH = os.path.join(__file__, "../../../examples/custom_checkers/e9989_pycodestyle/")
 
 
 class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
@@ -59,5 +53,4 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
 if __name__ == "__main__":
     import pytest
 
-    print(CURRENT_DIR_PATH)
     pytest.main(["test_pycodestyle_checker.py"])

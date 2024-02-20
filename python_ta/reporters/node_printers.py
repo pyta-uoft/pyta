@@ -157,10 +157,12 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
     elif "continuation line under-indented for visual indent" in msg.msg:
         yield from render_pep8_errors_e128(msg, _node, source_lines)
-    elif "whitespace after '('" in msg.msg or "whitespace before ')'" in msg.msg:
-        yield from render_pep8_errors_e201_and_e202(msg, _node, source_lines)
-    elif "whitespace before '('" in msg.msg:
-        yield from render_pep8_errors_e211(msg, _node, source_lines)
+    elif (
+        "whitespace after '('" in msg.msg
+        or "whitespace before ')'" in msg.msg
+        or "whitespace before '('" in msg.msg
+    ):
+        yield from render_pep8_errors_e201_and_e202_and_e211(msg, _node, source_lines)
     elif "multiple spaces before operator" in msg.msg:
         yield from render_pep8_errors_e221(msg, _node, source_lines)
     elif "tab before operator" in msg.msg:
@@ -205,7 +207,8 @@ def render_blank_line(line):
 
 
 def render_pep8_errors_e101_and_e123(msg, _node, source_lines=None):
-    """Render a PEP8 indentation contains mixed spaces and tabs message."""
+    """Render a PEP8 indentation contains mixed spaces and tabs message
+    AND a PEP8 closing bracket does not match indentation of opening bracket's line message."""
     line = msg.line
     curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
     yield from render_context(line - 2, line, source_lines)
@@ -296,20 +299,10 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e201_and_e202(msg, _node, source_lines=None):
-    """Render a PEP8 whitespace after '(' message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
-
-    yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
-
-
-def render_pep8_errors_e211(msg, _node, source_lines=None):
-    """Render a PEP8 whitespace before '(' message."""
+def render_pep8_errors_e201_and_e202_and_e211(msg, _node, source_lines=None):
+    """Render a PEP8 whitespace after '(' message
+    AND a PEP8 whitespace before ')' message
+    AND a PEP8 whitespace before '(' message."""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])

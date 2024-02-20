@@ -8,7 +8,7 @@ Attributes:
         - The function's name.
     - args          (Arguments)
         - An arguments node. See arguments.py for more details.
-    - doc           (Optional[str])
+    - doc_node           (Optional[Const])
         - The docstring of the function.
     - body          (list[Statement])
         - The list of nodes inside the function.
@@ -20,7 +20,7 @@ Attributes:
 Example 1:
     FunctionDef(
         name='fun',
-        doc='\n    This is a function fun.\n    ',
+        doc_node=Const(value='\n    This is a function fun.\n    '),
         decorators=Decorators(nodes=[Name(name='wrapper')]),
         args=Arguments(
             vararg=None,
@@ -48,7 +48,7 @@ Example 1:
 Example 2:
 FunctionDef(
     name='no_doc_decor_return_paras_annotation',
-    doc=None,
+    doc_node=None,
     decorators=None,
     args=Arguments(
         vararg=None,

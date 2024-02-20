@@ -10,7 +10,7 @@ Attributes:
 Example:
     Module(
         name='',
-        doc=None,
+        doc_node=None,
         file='<?>',
         path=['<?>'],
         package=False,

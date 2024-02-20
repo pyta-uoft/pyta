@@ -30,7 +30,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
 
     def test_no_error_e123(self) -> None:
         """Tests that PEP8 error E123 closing bracket does not match indentation of opening bracket's line
-        is NOT triggerd"""
+        is NOT triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e123_no_error.py"))
         with self.assertNoMessages():
             self.checker.process_module(mod)

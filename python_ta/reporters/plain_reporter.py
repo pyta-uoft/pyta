@@ -29,6 +29,7 @@ class PlainReporter(PythonTaReporter):
         error_msgs, style_msgs = self.group_messages(self.messages[self.current_file])
 
         result = "PyTA Report for: " + self._colourify("bold", self.current_file) + self._BREAK
+        result += self._generate_report_date_time() + self._BREAK
         result += self._colourify("code-heading", self.code_err_title + self._BREAK)
         messages_result = self._colour_messages_by_type(error_msgs)
         if messages_result:

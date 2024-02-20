@@ -62,3 +62,5 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_no_error_e226(self) -> None:
         """Test that PEP8 error E226 (missing whitespace around arithmeic operator) is NOT triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_no_error.py"))
+        with self.assertNoMessages():
+            self.checker.process_module(mod)

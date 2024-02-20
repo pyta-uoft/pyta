@@ -149,8 +149,6 @@ def render_pep8_errors(msg, _node, source_lines=None):
         yield from render_pep8_errors_e128(msg, _node, source_lines)
     elif "E201" in msg.msg or "E202" in msg.msg or "E203" in msg.msg:
         yield from render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines)
-    elif "E211" in msg.msg:
-        yield from render_pep8_errors_e211(msg, _node, source_lines)
     elif "E221" in msg.msg:
         yield from render_pep8_errors_e221(msg, _node, source_lines)
     elif "E223" in msg.msg:

@@ -1,4 +1,3 @@
-"""Tests for PycodestyleChecker"""
 import os
 
 import pylint.testutils
@@ -35,3 +34,31 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e123_no_error.py"))
         with self.assertNoMessages():
             self.checker.process_module(mod)
+
+    def test_error_e203(self) -> None:
+        """Test that PEP8 error E203 (whitespace before ‘,’, ‘;’, or ‘:’) is triggered"""
+        mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e203_error.py"))
+        args = ("E203", "line 1, column 30: whitespace before ':'")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, args=args)
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e203(self) -> None:
+        """Test that PEP8 error E203 (whitespace before ‘,’, ‘;’, or ‘:’) is NOT triggered"""
+        mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e203_no_error.py"))
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e226(self) -> None:
+        """Test that PEP8 error E226 (missing whitespace around arithmetic operator) is triggered"""
+        mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_error.py"))
+        args = ("E226", "line 1, column 5: missing whitespace around arithmetic operator")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, args=args)
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e226(self) -> None:
+        """Test that PEP8 error E226 (missing whitespace around arithmeic operator) is NOT triggered"""
+        mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_no_error.py"))

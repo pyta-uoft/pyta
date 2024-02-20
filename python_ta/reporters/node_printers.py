@@ -133,69 +133,59 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
-    if (
-        "indentation contains mixed spaces and tabs" in msg.msg
-        or "closing bracket does not match indentation of opening bracket's line" in msg.msg
-    ):
+    if "E101" in msg.msg or "E123" in msg.msg:
         yield from render_pep8_errors_e101_and_e123(msg, _node, source_lines)
-    elif "expected an indented block (comment)" in msg.msg:
+    elif "E115" in msg.msg:
         yield from render_pep8_errors_e115(msg, _node, source_lines)
-    elif "unexpected indentation (comment)" in msg.msg:
+    elif "E116" in msg.msg:
         yield from render_pep8_errors_e116(msg, _node, source_lines)
-    elif (
-        "continuation line missing indentation or outdented" in msg.msg
-        or "continuation line over-indented for visual indent" in msg.msg
-        or "continuation line unaligned for hanging indent" in msg.msg
-    ):
+    elif "E122" in msg.msg or "E127" in msg.msg or "E131" in msg.msg:
         yield from render_pep8_errors_e122_and_e127_and_e131(msg, _node, source_lines)
-    elif "closing bracket does not match visual indentation" in msg.msg:
+    elif "E124" in msg.msg:
         yield from render_pep8_errors_e124(msg, _node, source_lines)
-    elif (
-        "continuation line with same indent as next logical line" in msg.msg
-        or "visually indented line with same indent as next logical line" in msg.msg
-    ):
+    elif "E125" in msg.msg or "E129" in msg.msg:
         yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
-    elif "continuation line under-indented for visual indent" in msg.msg:
+    elif "E128" in msg.msg:
         yield from render_pep8_errors_e128(msg, _node, source_lines)
-    elif (
-        "whitespace after '('" in msg.msg
-        or "whitespace before ')'" in msg.msg
-        or "whitespace before '('" in msg.msg
-    ):
-        yield from render_pep8_errors_e201_and_e202_and_e211(msg, _node, source_lines)
-    elif "multiple spaces before operator" in msg.msg:
+    elif "E201" in msg.msg or "E202" in msg.msg or "E203" in msg.msg:
+        yield from render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines)
+    elif "E211" in msg.msg:
+        yield from render_pep8_errors_e211(msg, _node, source_lines)
+    elif "E221" in msg.msg:
         yield from render_pep8_errors_e221(msg, _node, source_lines)
-    elif "tab before operator" in msg.msg:
+    elif "E223" in msg.msg:
         yield from render_pep8_errors_e223(msg, _node, source_lines)
-    elif "tab after operator" in msg.msg or "tab after keyword" in msg.msg:
+    elif "E224" in msg.msg or "E273" in msg.msg:
         yield from render_pep8_errors_e224_and_e273(msg, _node, source_lines)
-    elif "missing whitespace around bitwise or shift operator" in msg.msg:
+    elif "E226" in msg.msg:
+        yield from render_pep8_errors_e226(msg, _node, source_lines)
+    elif "E227" in msg.msg:
         yield from render_pep8_errors_e227(msg, _node, source_lines)
-    elif "missing whitespace around modulo operator" in msg.msg:
+    elif "E228" in msg.msg:
         yield from render_pep8_errors_e228(msg, _node, source_lines)
-    elif "unexpected spaces around keyword / parameter equals" in msg.msg:
+    elif "E251" in msg.msg:
         yield from render_pep8_errors_e251(msg, _node, source_lines)
-    elif "at least two spaces before inline comment" in msg.msg:
+    elif "E261" in msg.msg:
         yield from render_pep8_errors_e261(msg, _node, source_lines)
-    elif "block comment should start with '# '" in msg.msg:
+    elif "E265" in msg.msg:
         yield from render_pep8_errors_e265(msg, _node, source_lines)
-    elif "too many leading '#' for block comment" in msg.msg:
+    elif "E266" in msg.msg:
         yield from render_pep8_errors_e266(msg, _node, source_lines)
-    elif "multiple spaces before keyword" in msg.msg:
+    elif "E272" in msg.msg:
         yield from render_pep8_errors_e272(msg, _node, source_lines)
-    elif "missing whitespace after keyword" in msg.msg:
+    elif "E275" in msg.msg:
         yield from render_pep8_errors_e275(msg, _node, source_lines)
-    elif "expected 1 blank line," in msg.msg:
+    elif "E301" in msg.msg:
         yield from render_pep8_errors_e301(msg, _node, source_lines)
-    elif "expected 2 blank lines," in msg.msg:
+    elif "E302" in msg.msg:
         yield from render_pep8_errors_e302(msg, _node, source_lines)
-    elif "too many blank lines" in msg.msg:
+    elif "E303" in msg.msg:
         yield from render_pep8_errors_e303(msg, _node, source_lines)
-    elif "blank lines found after function decorator" in msg.msg:
+    elif "E304" in msg.msg:
         yield from render_pep8_errors_e304(msg, _node, source_lines)
-    elif "expected 2 blank lines after class or function definition" in msg.msg:
+    elif "E305" in msg.msg:
         yield from render_pep8_errors_e305(msg, _node, source_lines)
-    elif "expected 1 blank line before a nested definition" in msg.msg:
+    elif "E306" in msg.msg:
         yield from render_pep8_errors_e306(msg, _node, source_lines)
     else:
         yield from render_generic(msg, _node, source_lines)
@@ -299,10 +289,11 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e201_and_e202_and_e211(msg, _node, source_lines=None):
-    """Render a PEP8 whitespace after '(' message
-    AND a PEP8 whitespace before ')' message
-    AND a PEP8 whitespace before '(' message."""
+def render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines=None):
+    """Render a PEP8 whitespace after '(' message,
+    a PEP8 whitespace before ')' message,
+    a PEP8 whitespace before ‘,’, ‘;’, or ‘:’ message,
+    AND a PEP8 whitespace before '(' message.."""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
@@ -350,6 +341,18 @@ def render_pep8_errors_e224_and_e273(msg, _node, source_lines):
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
+def render_pep8_errors_e226(msg, _node, source_lines):
+    """Render a PEP8 missing whitespace around arithmetic operator message"""
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+    end_idx = col + 1
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, end_idx), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 3, source_lines)
 
 

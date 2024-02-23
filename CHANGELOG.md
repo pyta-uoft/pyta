@@ -16,11 +16,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Allowed specifying allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
 - Improved error display for pycodestyle (E9989) errors E123, E203, E222, E226, and E262
 
-### Enhancements
-
-- Include the pycodestyle error code to the error message for PEP8 style errors
-- Added date and time display to `PlainReporter` and `ColorReporter`
-
 ## [2.7.0] - 2024-12-14
 
 ### Enhancements

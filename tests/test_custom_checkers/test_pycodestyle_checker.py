@@ -50,6 +50,26 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
+    def test_error_e222(self) -> None:
+        """Test that PEP8 error E222 (multiple spaces after operator) triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e222_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="pep8-errors",
+                line=1,
+                node=None,
+                args=("E222", "line 1, column 3: multiple spaces after operator"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e222(self) -> None:
+        """Test that PEP8 error E222 (multiple spaces after operator) is not triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e222_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
     def test_error_e226(self) -> None:
         """Test that PEP8 error E226 (missing whitespace around arithmetic operator) is triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_error.py"))
@@ -62,5 +82,25 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_no_error_e226(self) -> None:
         """Test that PEP8 error E226 (missing whitespace around arithmeic operator) is NOT triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_no_error.py"))
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e262(self) -> None:
+        """Test that PEP8 error E262 (inline comment should start with '# ') triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e262_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="pep8-errors",
+                line=1,
+                node=None,
+                args=("E262", "line 1, column 7: inline comment should start with '# '"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e262(self) -> None:
+        """Test that PEP8 error E262 (inline comment should start with '# ') is not triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e262_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)

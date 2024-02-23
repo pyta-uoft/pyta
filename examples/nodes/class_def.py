@@ -13,7 +13,7 @@ Attributes:
         - The contents of the class body.
     - decorators            (Optional[Decorators])
         - The decorator to be applied on this function.
-    - doc_node                   (Optional[Const])
+    - doc_node              (Optional[Const])
         - The docstring of this function.
     - keywords               (Optional[list[Keyword]])
         - The keywords given to the class definition.

@@ -8,7 +8,7 @@ Attributes:
         - The function's name.
     - args          (Arguments)
         - An arguments node. See arguments.py for more details.
-    - doc_node           (Optional[Const])
+    - doc_node      (Optional[Const])
         - The docstring of the function.
     - body          (list[Statement])
         - The list of nodes inside the function.

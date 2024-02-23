@@ -15,7 +15,7 @@ Attributes:
         - The decorator to be applied on this function.
     - doc_node              (Optional[Const])
         - The docstring of this function.
-    - keywords               (Optional[list[Keyword]])
+    - keywords              (Optional[list[Keyword]])
         - The keywords given to the class definition.
     - name                  (str)
         - A raw string for the class name.

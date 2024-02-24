@@ -105,7 +105,7 @@ E0401 = "Unable to import %s. Check the spelling of the module name, or whether 
 W0401 = "Wildcard (*) imports add all objects from the imported module as global variables, which may result in name collisions. You should only import from %s what you need, or import the whole module (\"import module\") and use dot notation to access the module's functions/classes."
 W0404 = "Module %r was re-imported on line %s. A module should not be imported more than once."
 W0410 = "Imports of '__future__' must be the first non-docstring statement in the module."
-C0410 = "Import each module on line %s on separately, one per line."
+C0410 = "Import the modules (%s) individually, using a separate import statement for each module."
 C0414 = "The 'import as' is used to import a module and give it a different name in this file. If you don't want to rename the module, simply use 'import' instead."
 
 ["pylint.checkers.newstyle".NewStyleConflictChecker]

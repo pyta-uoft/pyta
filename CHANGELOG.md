@@ -17,6 +17,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved error display for pycodestyle (E9989) errors E123, E203 and E226
 
 ### Bug fixes
+
 - Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it
 
 ## [2.7.0] - 2024-12-14

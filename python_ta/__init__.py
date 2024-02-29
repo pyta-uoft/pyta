@@ -17,22 +17,14 @@ if __name__ == '__main__':
 __version__ = "2.7.1.dev"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
+# Must appear before other imports from pylint/python_ta.
 import builtins
-
-from pylint.lint import PyLinter
-
-from .config import (
-    find_local_config,
-    load_config,
-    load_messages_config,
-    override_config,
-)
-from .reporters.core import PythonTaReporter
 
 try:
     del builtins._
 except AttributeError:
     pass
+
 
 import importlib.util
 import logging
@@ -48,10 +40,18 @@ import pylint.config
 import pylint.lint
 import pylint.utils
 from astroid import MANAGER, modutils
+from pylint.lint import PyLinter
 from pylint.utils.pragma_parser import OPTION_PO
 
+from .config import (
+    find_local_config,
+    load_config,
+    load_messages_config,
+    override_config,
+)
 from .patches import patch_all
 from .reporters import REPORTERS
+from .reporters.core import PythonTaReporter
 from .upload import upload_to_server
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"

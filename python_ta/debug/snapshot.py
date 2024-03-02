@@ -4,12 +4,11 @@ Use the 'inspect' module to extract local variables from
 """
 import inspect
 import json
-import math
-import random
 from types import FrameType
+from typing import Dict, List
 
 
-def get_filtered_global_variables(frame: FrameType) -> dict:
+def get_filtered_global_variables(frame: FrameType) -> Dict:
     """
     Helper function for retriving global variables
     (i.e. top level variables in "__main__" frame's scope)
@@ -49,7 +48,7 @@ def snapshot():
     return variables
 
 
-def snapshot_to_json(snapshot_data: list[dict]):
+def snapshot_to_json(snapshot_data: List[Dict]):
     """
     Convert the snapshot data into a simplified JSON format, where each primitive value
     has its own entry with a matching ID.

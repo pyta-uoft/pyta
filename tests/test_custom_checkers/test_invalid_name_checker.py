@@ -13,6 +13,10 @@ from python_ta.checkers.invalid_name_checker import InvalidNameChecker
 
 class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InvalidNameChecker
+    CONFIG = {
+        "ignore_names": ["(ignored[a-zA-Z0-9_]*)$"],
+        "ignore_module_names": ["(ignored_[a-zA-Z0-9_]*)$"],
+    }
 
     def set_up(self) -> None:
         """Perform the set up before each test case executes."""
@@ -492,6 +496,61 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
+
+    def test_ignore_function_name(self):
+        """Test that the checker does not report an invalid function name that matches
+        at least one of the patterns in ignore-names
+        """
+        src = """
+        def ignored_very_long_function_name():
+            pass
+        """
+        mod = astroid.parse(src)
+        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(functiondef_node)
+
+    def test_ignore_class_name(self):
+        """Test that the checker does not report an invalid function name that matches
+        at least one of the patterns in ignore-names
+        """
+        src = """
+        class ignored_invalid_class_name():
+            pass
+        """
+        mod = astroid.parse(src)
+        classdef_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_classdef(classdef_node)
+
+    def test_ignore_variable_name(self):
+        """Test that the checker does not report an invalid variable name that matches
+        at least one of the patterns in ignore-names"""
+        src = """
+        def func():
+            ignoredInvalidVariableName = 10
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
+    def test_ignore_module_name(self):
+        """Test that the checker does not report an error when the module has an invalid name,
+        but it matches at least one of the pattens in ignore-module-names.
+        """
+        src = """
+        i = "hi"
+        """
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+        module_node.name = "ignored_InvalidModuleName"
+
+        with self.assertNoMessages():
+            self.checker.visit_module(module_node)
 
 
 def test_module_name_no_snippet() -> None:

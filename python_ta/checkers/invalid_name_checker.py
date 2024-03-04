@@ -111,7 +111,7 @@ def _is_within_name_length(node_type: str, name: str) -> str:
     return msg
 
 
-def _ignore_name(name: str, patterns: list[str]) -> bool:
+def _ignore_name(name: str, patterns: List[str]) -> bool:
     """Returns whether name matches any of the regular expressions provided in patterns"""
     return any(re.match(pattern, name) for pattern in patterns)
 

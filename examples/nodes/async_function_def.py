@@ -10,7 +10,7 @@ Attributes:
 Example:
     AsyncFunctionDef(
         name='animal',
-        doc='\n    This is function animal.\n    ',
+        doc_node=Const(value='\n    This is function animal.\n    '),
         decorators=None,
         args=Arguments(
             vararg=None,

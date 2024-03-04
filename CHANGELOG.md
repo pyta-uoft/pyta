@@ -16,6 +16,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Allowed specifying allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
 - Improved error display for pycodestyle (E9989) errors E123, E203, E222, E226, and E262
 
+### Bug fixes
+
+- Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it
+- Fixed bug where `_` was marked as a built-in when running PythonTA after running doctest
+
 ## [2.7.0] - 2024-12-14
 
 ### Enhancements

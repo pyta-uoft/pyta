@@ -14,7 +14,7 @@ Attributes:
 Example (nested in Expr):
     FunctionDef(
         name='fun',
-        doc=None,
+        doc_node=None,
         decorators=None,
         args=Arguments(
             vararg=None,

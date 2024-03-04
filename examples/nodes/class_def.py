@@ -13,9 +13,9 @@ Attributes:
         - The contents of the class body.
     - decorators            (Optional[Decorators])
         - The decorator to be applied on this function.
-    - doc                   (Optional[str])
+    - doc_node              (Optional[Const])
         - The docstring of this function.
-    - keywords               (Optional[list[Keyword]])
+    - keywords              (Optional[list[Keyword]])
         - The keywords given to the class definition.
     - name                  (str)
         - A raw string for the class name.
@@ -29,7 +29,7 @@ Attributes:
 Example:
     ClassDef(
         name='Foo',
-        doc=None,
+        doc_node=None,
         decorators=Decorators(nodes=[Name(name='wrapper')]),
         bases=[
             Name(name='base1'),

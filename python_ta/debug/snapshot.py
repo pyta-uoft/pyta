@@ -2,13 +2,13 @@
 Use the 'inspect' module to extract local variables from
  multiple stack frames. Useful for dynamic debugging.
 """
+from __future__ import annotations
+
 import inspect
-import json
 from types import FrameType
-from typing import Dict, List
 
 
-def get_filtered_global_variables(frame: FrameType) -> Dict:
+def get_filtered_global_variables(frame: FrameType) -> dict:
     """
     Helper function for retriving global variables
     (i.e. top level variables in "__main__" frame's scope)
@@ -48,7 +48,7 @@ def snapshot():
     return variables
 
 
-def snapshot_to_json(snapshot_data: List[Dict]):
+def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
     """
     Convert the snapshot data into a simplified JSON format, where each primitive value
     has its own entry with a matching ID.
@@ -66,10 +66,11 @@ def snapshot_to_json(snapshot_data: List[Dict]):
                 if var_id not in global_ids:
                     global_ids[var_id] = id_counter
                     var_id_diagram = id_counter
+                    id_counter += 1
                 else:
                     var_id_diagram = global_ids[var_id]
                 frame_variables[var_name] = var_id_diagram
-                id_counter += 1
+
                 # Create a separate entry for the variable's value
                 value_entry = {
                     "isClass": False,
@@ -91,5 +92,4 @@ def snapshot_to_json(snapshot_data: List[Dict]):
 
     # Combine the stack frames and value entries
     json_data.extend(value_entries)
-    final_json = json.dumps(json_data, indent=2)
-    return final_json
+    return json_data

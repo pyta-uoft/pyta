@@ -519,7 +519,7 @@ def test_snapshot_to_json():
         {"func1": {"test_var1a": "David is cool!", "test_var2a": "DCS"}},
         {"__main__": {"num": 9, "is_david_cool": True, "num_alias": 9}},
     ]
-    json_data = json.loads(snapshot_to_json(snapshot_data))
+    json_data = snapshot_to_json(snapshot_data)
     assert json_data == [
         {
             "isClass": True,

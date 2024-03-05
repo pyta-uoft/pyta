@@ -1,5 +1,6 @@
 """Test suite for testing the InvalidNameChecker."""
 import os
+import re
 import sys
 import unittest
 
@@ -14,8 +15,8 @@ from python_ta.checkers.invalid_name_checker import InvalidNameChecker
 class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InvalidNameChecker
     CONFIG = {
-        "ignore_names": ["(ignored[a-zA-Z0-9_]*)$"],
-        "ignore_module_names": ["(ignored_[a-zA-Z0-9_]*)$"],
+        "ignore_names": re.compile("(ignored[a-zA-Z0-9_]*)$"),
+        "ignore_module_names": re.compile("(ignored_[a-zA-Z0-9_]*)$"),
     }
 
     def set_up(self) -> None:

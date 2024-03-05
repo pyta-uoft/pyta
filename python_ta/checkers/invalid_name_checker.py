@@ -111,9 +111,9 @@ def _is_within_name_length(node_type: str, name: str) -> str:
     return msg
 
 
-def _ignore_name(name: str, patterns: List[str]) -> bool:
+def _ignore_name(name: str, pattern: re.Pattern) -> bool:
     """Returns whether name matches any of the regular expressions provided in patterns"""
-    return any(re.match(pattern, name) for pattern in patterns)
+    return pattern.pattern and pattern.match(name) is not None
 
 
 def _check_module_name(_node_type: str, name: str) -> List[str]:
@@ -300,19 +300,19 @@ class InvalidNameChecker(BaseChecker):
         (
             "ignore-names",
             {
-                "default": (),
-                "type": "csv",
-                "metavar": "<ignore-matching-names>",
-                "help": "Ignore C9103 naming convention violation for names that exactly match the patterns",
+                "default": "",
+                "type": "regexp",
+                "metavar": "<regexp>",
+                "help": "Ignore C9103 naming convention violation for names that exactly match the pattern",
             },
         ),
         (
             "ignore-module-names",
             {
-                "default": (),
-                "type": "csv",
-                "metavar": "<ignore-matching-module-names>",
-                "help": "Ignore C9104 module name violation for module names that exactly match the patterns",
+                "default": "",
+                "type": "regexp",
+                "metavar": "<regexp>",
+                "help": "Ignore C9104 module name violation for module names that exactly match the pattern",
             },
         ),
     )
@@ -352,12 +352,12 @@ class InvalidNameChecker(BaseChecker):
         """Visit an AssignName node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""
-        frame = node.frame(future=True)
-        assign_type = node.assign_type()
-
         # Do not check this node if included in the ignore-names option
         if _ignore_name(node.name, self.linter.config.ignore_names):
             return
+
+        frame = node.frame(future=True)
+        assign_type = node.assign_type()
 
         # Check names defined in comprehensions
         if isinstance(assign_type, nodes.Comprehension):

@@ -147,16 +147,16 @@ allow-local-imports = yes
 By default, PythonTA checks errors C9103 and C9104 (naming convention and module name violations) for all names, including all function, class, variable and module names.
 You can specify names to ignore when checking naming conventions by setting the following configurations in the `config` parameter in a call to `python_ta.check_all`:
 
-- Specify a list of regular expressions that match any function, class, variable names you would like to ignore using `ignore-names` configuration option.
-- Specify a list of regular expressions that match any module name you would like to ignore using the `ignore-module-names` configuration option.
+- Specify a regular expression that matches any function, class, variable names you would like to ignore using `ignore-names` configuration option.
+- Specify a regular expression that matches any module name you would like to ignore using the `ignore-module-names` configuration option.
 
-For example, this configuration option allows to ignore naming convention violations for unit test names and test module names.
+For example, the following configuration option allows to ignore naming convention violations for unit test names and test module names.
 
 ```python
 import python_ta
 options = {
-    "ignore-module-names": ["(test_[a-z0-9_]*)$"],
-    "ignore-names": ["(test_[a-z0-9_]*)$"]
+    "ignore-module-names": "(test_[a-z0-9_]*)$",
+    "ignore-names": "(test_[a-z0-9_]*)$"
 }
 python_ta.check_all(..., config=options)
 ```

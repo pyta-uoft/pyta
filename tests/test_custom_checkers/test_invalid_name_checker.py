@@ -554,6 +554,90 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_module(module_node)
 
 
+class TestInvalidNameCheckerDefaultConfig(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = InvalidNameChecker
+
+    def set_up(self) -> None:
+        """Perform the set up before each test case executes."""
+        self.setup_method()
+
+    def test_default_ignore_module_names_invalid(self):
+        """Test that the checker correctly reports an invalid module name
+        with the default configuration options.
+        """
+        src = """
+        i = "test module"
+        """
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+        module_node.name = "InvalidModuleName"
+        msg = (
+            f'Module name "{module_node.name}" should be in snake_case format. '
+            f"Modules should be all-lowercase names, with each name separated by underscores."
+        )
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="module-name-violation", node=module_node, args=msg, line=1
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(module_node)
+
+    def test_default_ignore_module_names_valid(self):
+        """Test that the checker does not report an error for valid module names
+        with the default configuration option.
+        """
+        src = """
+        i = "test module"
+        """
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+        module_node.name = "valid_module_name"
+
+        with self.assertNoMessages():
+            self.checker.visit_module(module_node)
+
+    def test_default_ignore_names_invalid(self):
+        """Test that the checker correctly reports an invalid name
+        with the default configuration options.
+        """
+        src = """
+        def NotSnakeCase():
+            pass
+        """
+        mod = astroid.parse(src)
+        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        name = functiondef_node.name
+        msg = (
+            f'Function name "{name}" should be in snake_case format. Function names should be '
+            f"lowercase, with words separated by underscores. A single leading underscore can "
+            f"be used to denote a private function."
+        )
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="naming-convention-violation", node=functiondef_node, args=msg
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(functiondef_node)
+
+    def test_default_ignore_names_valid(self):
+        """Test that the checker does not report an error for valid names
+        with the default configuration option.
+        """
+        src = """
+        def snake_case_format():
+            pass
+        """
+        mod = astroid.parse(src)
+        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(functiondef_node)
+
+
 def test_module_name_no_snippet() -> None:
     """Test that PythonTA does not build a snippet for the message added by this checker."""
     curr_dir = os.path.dirname(__file__)

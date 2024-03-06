@@ -48,48 +48,89 @@ def snapshot():
     return variables
 
 
-def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
+def process_value(value, global_ids, value_entries, id_counter):
     """
-    Convert the snapshot data into a simplified JSON format, where each primitive value
+    Recursively process a value, handling compound built-in data types
+    (lists, sets, tuples, and dicts) by creating a list or dict of IDs for their elements.
+    """
+    value_id = id(value)
+    if value_id not in global_ids:
+        global_ids[value_id] = id_counter[0]
+        value_id_diagram = id_counter[0]
+        id_counter[0] += 1
+
+        if isinstance(value, (list, set, tuple)):
+            # For lists, sets, and tuples, process each element and store their IDs
+            element_ids = [
+                process_value(element, global_ids, value_entries, id_counter) for element in value
+            ]
+
+            # Create the value entry with a list of IDs for its elements
+            value_entry = {
+                "isClass": False,
+                "name": type(value).__name__,
+                "id": value_id_diagram,
+                "value": element_ids,
+            }
+        elif isinstance(value, dict):
+            # For dicts, process each key-value pair and store their IDs
+            dict_ids = {}
+            for key, val in value.items():
+                key_id = process_value(key, global_ids, value_entries, id_counter)
+                val_id = process_value(val, global_ids, value_entries, id_counter)
+                dict_ids[key_id] = val_id  # Store the ID as an integer key
+
+            # Create the value entry with a dictionary of IDs for its keys and values
+            value_entry = {
+                "isClass": False,
+                "name": "dict",
+                "id": value_id_diagram,
+                "value": dict_ids,
+            }
+        else:
+            # Primitive types are directly stored
+            value_entry = {
+                "isClass": False,
+                "name": type(value).__name__,
+                "id": value_id_diagram,
+                "value": value,
+            }
+
+        value_entries.append(value_entry)
+    else:
+        value_id_diagram = global_ids[value_id]
+
+    return value_id_diagram
+
+
+def snapshot_to_json(snapshot_data):
+    """
+    Convert the snapshot data into a simplified JSON format, where each value
     has its own entry with a matching ID.
     """
+
     json_data = []
     value_entries = []
     global_ids = {}
-    id_counter = 1
+    id_counter = [1]  # Using a list for a mutable integer reference
 
     for frame in snapshot_data:
         frame_variables = {}
         for frame_name, frame_data in frame.items():
             for var_name, value in frame_data.items():
-                var_id = id(value)
-                if var_id not in global_ids:
-                    global_ids[var_id] = id_counter
-                    var_id_diagram = id_counter
-                    id_counter += 1
-                else:
-                    var_id_diagram = global_ids[var_id]
+                # Process each variable in the frame, handling compound and primitive types
+                var_id_diagram = process_value(value, global_ids, value_entries, id_counter)
                 frame_variables[var_name] = var_id_diagram
 
-                # Create a separate entry for the variable's value
-                value_entry = {
-                    "isClass": False,
-                    "name": type(value).__name__,
-                    "id": global_ids[var_id],
-                    "value": value,
-                }
-                value_entries.append(value_entry)
-
-            # Create an entry for the stack frame
+            # Add the frame itself as an entry
             json_object_frame = {
                 "isClass": True,
                 "name": frame_name,
                 "id": None,
-                "value": frame_variables,  # Reference the unique IDs for each variable
+                "value": frame_variables,  # Map of variable names to their unique IDs
                 "stack_frame": True,
             }
             json_data.append(json_object_frame)
 
-    # Combine the stack frames and value entries
     json_data.extend(value_entries)
     return json_data

@@ -15,6 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added date and time display to `PlainReporter` and `ColorReporter`
 - Allowed specifying allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
 - Improved error display for pycodestyle (E9989) errors E123, E203, E222, E226, and E262
+- Added the configuration option to ignore naming convention violations (C9103 and C9104) for names matching the provided regular expression.
 
 ### Bug fixes
 

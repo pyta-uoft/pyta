@@ -440,7 +440,7 @@ def render_pep8_errors_e262(msg, _node, source_lines=None):
     col = int(res.group().split()[-1])
 
     keyword = source_lines[line - 1][col:].split()[1]
-    keyword_idx = source_lines[line - 1].index(keyword)
+    keyword_idx = source_lines[line - 1][col:].index(keyword) + col
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, keyword_idx), LineType.ERROR, source_lines[line - 1])

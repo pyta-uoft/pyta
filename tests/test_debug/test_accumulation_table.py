@@ -13,7 +13,7 @@ import pytest
 import tabulate
 
 from python_ta.debug import AccumulationTable
-from python_ta.debug.snapshot import snapshot
+from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
 
 def test_one_accumulator() -> None:
@@ -509,6 +509,38 @@ def test_snapshot_main_stackframe() -> None:
             "team_num": 9,
         }
     }
+
+
+def test_snapshot_to_json():
+    """
+    Test snapshot_to_json with snapshot data.
+    """
+    snapshot_data = [
+        {"func1": {"test_var1a": "David is cool!", "test_var2a": "DCS"}},
+        {"__main__": {"num": 9, "is_david_cool": True, "num_alias": 9}},
+    ]
+    json_data = snapshot_to_json(snapshot_data)
+    assert json_data == [
+        {
+            "isClass": True,
+            "name": "func1",
+            "id": None,
+            "value": {"test_var1a": 1, "test_var2a": 2},
+            "stack_frame": True,
+        },
+        {
+            "isClass": True,
+            "name": "__main__",
+            "id": None,
+            "value": {"num": 3, "is_david_cool": 4, "num_alias": 3},
+            "stack_frame": True,
+        },
+        {"isClass": False, "name": "str", "id": 1, "value": "David is cool!"},
+        {"isClass": False, "name": "str", "id": 2, "value": "DCS"},
+        {"isClass": False, "name": "int", "id": 3, "value": 9},
+        {"isClass": False, "name": "bool", "id": 4, "value": True},
+        {"isClass": False, "name": "int", "id": 3, "value": 9},
+    ]
 
 
 def test_output_to_existing_file(tmp_path) -> None:

@@ -53,12 +53,15 @@ def _is_allowed_assignment(statement: nodes.NodeNG) -> bool:
     """
     Return whether or not <statement> is a constant assignment or type alias assignment.
     """
-    if not isinstance(statement, nodes.Assign):
+    if not isinstance(statement, nodes.Assign) and not isinstance(statement, nodes.AnnAssign):
         return False
 
     names = []
-    for target in statement.targets:
-        names.extend(node.name for node in target.nodes_of_class(nodes.AssignName, nodes.Name))
+    if isinstance(statement, nodes.Assign):
+        for target in statement.targets:
+            names.extend(node.name for node in target.nodes_of_class(nodes.AssignName, nodes.Name))
+    else:
+        names.append(statement.target.name)
 
     return all(
         re.match(UpperCaseStyle.CONST_NAME_RGX, name)

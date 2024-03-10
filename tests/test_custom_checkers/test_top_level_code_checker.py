@@ -86,6 +86,15 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_module(mod)
 
+    def test_no_message_annotated_constant_assignment(self):
+        """Top level constant assignment with annotation allowed, no message."""
+        src = """
+        MAX_DURATION: int = 30
+        """
+        mod = astroid.parse(src)
+        with self.assertNoMessages():
+            self.checker.visit_module(mod)
+
     def test_message_regular_assignment(self):
         """Top level regular assignment not allowed, raises a message."""
         src = """

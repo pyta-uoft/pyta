@@ -183,3 +183,20 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
         mod = astroid.parse(src)
         with self.assertNoMessages():
             self.checker.visit_module(mod)
+
+    def test_message_attribute_assignment(self):
+        """Top level code to assign attributes not allowed, raises a message."""
+        src = """
+        class X:
+            a = 5
+        Y = X()
+        Y.a = 6
+        """
+        mod = astroid.parse(src)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-top-level-code", node=mod.body[2], args=5
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(mod)

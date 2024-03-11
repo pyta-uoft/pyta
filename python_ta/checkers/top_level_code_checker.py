@@ -61,7 +61,9 @@ def _is_allowed_assignment(statement: nodes.NodeNG) -> bool:
         for target in statement.targets:
             names.extend(node.name for node in target.nodes_of_class(nodes.AssignName, nodes.Name))
     else:
-        names.append(statement.target.name)
+        names.extend(
+            node.name for node in statement.target.nodes_of_class(nodes.AssignName, nodes.Name)
+        )
 
     return all(
         re.match(UpperCaseStyle.CONST_NAME_RGX, name)

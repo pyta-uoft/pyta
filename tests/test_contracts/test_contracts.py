@@ -702,3 +702,20 @@ def test_invalid_attr_type_disable_contract_checking(disable_contract_checking) 
     my_person = Person()
     my_person.age = "John"
     assert my_person.age == "John"
+
+
+def test_nested_preconditions_contract_checking() -> None:
+    """
+    Test that an AssertionError is correctly raised when a precondition violation occurs while
+    checking the precondition for another function.
+    This test is based on the code found at ./test_nested_preconditions_example
+    """
+    from test_nested_preconditions_example import my_function
+
+    with pytest.raises(AssertionError) as exception_info:
+        my_function(-1)
+
+    assert (
+        str(exception_info.value)
+        == 'my_condition2 precondition "x > 0" was violated for arguments {x: -1} '
+    )

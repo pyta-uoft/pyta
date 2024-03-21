@@ -708,7 +708,7 @@ def test_nested_preconditions_contract_checking() -> None:
     """
     Test that an AssertionError is correctly raised when a precondition violation occurs while
     checking the precondition for another function.
-    This test is based on the code found at ./test_nested_preconditions_example
+    This test is based on the code found at ./test_nested_preconditions_example.py
     """
     from test_nested_preconditions_example import my_function
 
@@ -719,3 +719,19 @@ def test_nested_preconditions_contract_checking() -> None:
         str(exception_info.value)
         == 'my_condition2 precondition "x > 0" was violated for arguments {x: -1} '
     )
+
+
+def test_nested_method_preconditions_contract_checking() -> None:
+    """
+    Test that an AssertionError is correctly raised when a class method precondition violation
+    occurs while checking the precondition for another class method.
+    This test is based on the code found at ./test_nested_preconditions_example.py
+    """
+    from test_nested_preconditions_example import Student
+
+    student = Student("Bob", 1001001000, 2.5)
+
+    with pytest.raises(AssertionError) as exception_info:
+        student.function(-1)
+
+    assert 'condition2 precondition "x > 0" was violated' in str(exception_info.value)

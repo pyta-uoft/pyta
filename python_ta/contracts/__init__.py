@@ -408,6 +408,8 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 f"{instance.__class__.__qualname__}: {invariant}"
             )
             check = eval(compiled, {**global_scope, "self": instance})
+        except AssertionError as e:
+            raise AssertionError(str(e)) from None
         except:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:

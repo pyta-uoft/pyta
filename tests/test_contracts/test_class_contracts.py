@@ -424,5 +424,40 @@ def test_no_premature_check_from_deep_helper_in_init() -> None:
     assert dark_widget.secondary_color == "mahogany"
 
 
+def test_invariant_with_function_defined_in_module() -> None:
+    """Test that a representation invariant violation is detected when the invariant
+    contains a call to a function (top-level) defined by the user
+    This test is based on the code found at ./test_nested_preconditions_example.py
+    """
+    import test_nested_preconditions_example as example
+
+    with pytest.raises(AssertionError) as exception_info:
+        example.Student("Bob", 0000000000, 3.5, 18)
+
+    assert (
+        str(exception_info.value) == '"Student" representation invariant '
+        '"validate_student_number(self.student_number)" '
+        "was violated for instance attributes "
+        "{name: " + "'Bob'" + ", student_number: 0, gpa: 3.5, age: 18}"
+    )
+
+
+def test_invariant_with_class_method() -> None:
+    """Test that a representation invariant violation is detected when the invariant
+    contains a call to a function (class method) defined by the user.
+    This test is based on the code found at ./test_nested_preconditions_example.py
+    """
+    import test_nested_preconditions_example as example
+
+    with pytest.raises(AssertionError) as exception_info:
+        example.Student("Bob", 1001001000, 3.5, -1)
+
+    assert (
+        str(exception_info.value) == '"Student" representation invariant '
+        '"self.validate_age(self.age)" was violated for instance attributes '
+        "{name: " + "'Bob'" + ", student_number: 1001001000, gpa: 3.5, age: -1}"
+    )
+
+
 if __name__ == "__main__":
     pytest.main(["test_class_contracts.py"])

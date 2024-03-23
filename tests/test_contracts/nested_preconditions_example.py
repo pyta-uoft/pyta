@@ -40,19 +40,16 @@ class Student:
 
     Representation Invariants:
      - validate_student_number(self.student_number)
-     - self.condition2(self.gpa)
-     - self.validate_age(self.age)
+     - my_function(self.age)
     """
 
     name: str
     student_number: int
-    gpa: float
     age: int
 
-    def __init__(self, name, student_number, gpa, age):
+    def __init__(self, name, student_number, age):
         self.name = name
         self.student_number = student_number
-        self.gpa = gpa
         self.age = age
 
     def condition1(self, y: float):
@@ -75,6 +72,3 @@ class Student:
          - self.condition1(z)
         """
         return z
-
-    def validate_age(self, age):
-        return age > 0

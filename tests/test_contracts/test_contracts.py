@@ -2,6 +2,7 @@ import sys
 from typing import Dict, List, Set
 
 import pytest
+from nested_preconditions_example import Student, my_function
 
 import python_ta.contracts
 from python_ta.contracts import check_contracts
@@ -710,8 +711,6 @@ def test_nested_preconditions_contract_checking() -> None:
     checking the precondition for another function.
     This test is based on the code found at ./test_nested_preconditions_example.py
     """
-    from test_nested_preconditions_example import my_function
-
     with pytest.raises(AssertionError) as exception_info:
         my_function(-1)
 
@@ -727,9 +726,7 @@ def test_nested_method_preconditions_contract_checking() -> None:
     occurs while checking the precondition for another class method.
     This test is based on the code found at ./test_nested_preconditions_example.py
     """
-    from test_nested_preconditions_example import Student
-
-    student = Student("Bob", 1001001000, 2.5, 20)
+    student = Student("Bob", 1001001000, 19)
 
     with pytest.raises(AssertionError) as exception_info:
         student.function(-1.5)
@@ -740,12 +737,10 @@ def test_nested_method_preconditions_contract_checking() -> None:
 def test_precondition_violation_in_representation_invariant() -> None:
     """
     Test that an AssetionError is correclty raised when a representation invarinat of a class
-    contains a call to a function whose preconditio is being violated.
+    contains a call to a function whose precondition is being violated.
     This test is based on the code found at ./test_nested_preconditions_example.py
     """
-    from test_nested_preconditions_example import Student
-
     with pytest.raises(AssertionError) as exception_info:
-        Student("Bob", 1001001000, -0.5, 20)
+        Student("Bob", 1001001000, -19)
 
-    assert 'condition2 precondition "x > 0" was violated' in str(exception_info.value)
+    assert 'my_condition2 precondition "x > 0" was violated' in str(exception_info.value)

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple
 
 import astroid
 
@@ -21,6 +21,13 @@ def _extract_edge_labels(cfg: ControlFlowGraph) -> Tuple[int, int]:
     """
     labels = [edge.label for edge in cfg.get_edges()]
     return labels.count("True"), labels.count("False")
+
+
+def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[astroid.NodeNG]:
+    """Return the edge conditions in the given cfg as a list of AST nodes representing the condition."""
+
+    conditions = [edge.condition for edge in cfg.get_edges() if edge.condition is not None]
+    return conditions
 
 
 def test_label_if_no_else() -> None:
@@ -68,3 +75,53 @@ def test_label_if_elsif() -> None:
     expected_false_labels = 3
     expected_true_labels = 3
     assert _extract_edge_labels(build_cfg(src)) == (expected_true_labels, expected_false_labels)
+
+
+def test_condition_if_no_else() -> None:
+    """Test that the condition nodes from the if condition were correctly updated for an if block with no
+    else statement."""
+    src = """
+    x = 0
+    if x > 0:
+        x = 4
+    """
+    expected_num_conditions = 2
+    found_conditions = _extract_edge_conditions(build_cfg(src))
+    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    assert len(found_conditions) == expected_num_conditions
+
+
+def test_condition_if_else() -> None:
+    """Test that the condition nodes from the if condition were correctly updated for an if block with an
+    else statement."""
+    src = """
+    x = 0
+    if x > 0:
+        x = 4
+    else:
+        x = -1
+    """
+    expected_num_conditions = 2
+    found_conditions = _extract_edge_conditions(build_cfg(src))
+    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    assert len(found_conditions) == expected_num_conditions
+
+
+def test_condition_if_elsif() -> None:
+    """Test that the condition nodes from the if condition were correctly updated for an if block with
+    elsif statements."""
+    src = """
+    x = 0
+    if x > 5:
+        x = 6
+    elif x > 3:
+        x = 4
+    elif x > 0:
+        x = 1
+    else:
+        x = -1
+    """
+    expected_num_conditions = 6
+    found_conditions = _extract_edge_conditions(build_cfg(src))
+    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    assert len(found_conditions) == expected_num_conditions

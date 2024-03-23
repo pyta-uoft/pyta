@@ -156,7 +156,9 @@ class CFGVisitor:
         old_curr = self._current_block
 
         # Handle "then" branch and label it.
-        then_block = self._current_cfg.create_block(old_curr, edge_label="True")
+        then_block = self._current_cfg.create_block(
+            old_curr, edge_label="True", edge_condition=node.test
+        )
         self._current_block = then_block
         for child in node.body:
             child.accept(self)
@@ -167,7 +169,9 @@ class CFGVisitor:
             end_else = old_curr
         else:
             # Label the edge to the else block.
-            else_block = self._current_cfg.create_block(old_curr, edge_label="False")
+            else_block = self._current_cfg.create_block(
+                old_curr, edge_label="False", edge_condition=node.test
+            )
             self._current_block = else_block
             for child in node.orelse:
                 child.accept(self)
@@ -177,7 +181,9 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(end_if, after_if_block)
         # Label the edge if there was no "else" branch
         if node.orelse == []:
-            self._current_cfg.link_or_merge(end_else, after_if_block, edge_label="False")
+            self._current_cfg.link_or_merge(
+                end_else, after_if_block, edge_label="False", edge_condition=node.test
+            )
         else:
             self._current_cfg.link_or_merge(end_else, after_if_block)
 
@@ -207,7 +213,9 @@ class CFGVisitor:
         )
 
         # Handle "body" branch
-        body_block = self._current_cfg.create_block(test_block, edge_label="True")
+        body_block = self._current_cfg.create_block(
+            test_block, edge_label="True", edge_condition=node.test
+        )
         self._current_block = body_block
         for child in node.body:
             child.accept(self)
@@ -218,7 +226,9 @@ class CFGVisitor:
         self._control_boundaries.pop()
 
         # Handle "else" branch
-        else_block = self._current_cfg.create_block(test_block, edge_label="False")
+        else_block = self._current_cfg.create_block(
+            test_block, edge_label="False", edge_condition=node.test
+        )
         self._current_block = else_block
         for child in node.orelse:
             child.accept(self)

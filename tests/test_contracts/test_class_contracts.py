@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Set, Tuple
 
 import pytest
+from nested_preconditions_example import Student
 
 import python_ta.contracts
 from python_ta.contracts import check_all_contracts
@@ -422,6 +423,22 @@ def test_no_premature_check_from_deep_helper_in_init() -> None:
     assert dark_widget.theme == "dark"
     assert dark_widget.primary_color == "black"
     assert dark_widget.secondary_color == "mahogany"
+
+
+def test_invariant_with_function_defined_in_module() -> None:
+    """Test that a representation invariant violation is detected when the invariant
+    contains a call to a function (top-level, not class method) defined by the user.
+    This test is based on the code found at ./test_nested_preconditions_example.py
+    """
+    with pytest.raises(AssertionError) as exception_info:
+        Student("Bob", 0, 19)
+
+    assert (
+        str(exception_info.value) == '"Student" representation invariant '
+        '"validate_student_number(self.student_number)" '
+        "was violated for instance attributes "
+        "{name: " + "'Bob'" + ", student_number: 0, age: 19}"
+    )
 
 
 if __name__ == "__main__":

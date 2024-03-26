@@ -25,10 +25,12 @@ def _extract_num_labels(cfg: ControlFlowGraph) -> int:
     return sum(1 for edge in cfg.get_edges() if edge.label is not None)
 
 
-def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[astroid.NodeNG]:
-    """Return the edge conditions in the given cfg as a list of AST nodes representing the condition."""
+def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[str]:
+    """Return the edge conditions in the given cfg as a list of strings representing the condition."""
 
-    conditions = [edge.condition for edge in cfg.get_edges() if edge.condition is not None]
+    conditions = [
+        edge.condition.as_string() for edge in cfg.get_edges() if edge.condition is not None
+    ]
     return conditions
 
 
@@ -178,9 +180,7 @@ def test_while_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 2
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     assert all(condition == "i < 10" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
@@ -197,9 +197,7 @@ def test_while_else_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 2
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     assert all(condition == "i < 10" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
@@ -220,9 +218,7 @@ def test_complex_while_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 6
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     expected_conditions = ["i < 10", "j < 5", "j < 5", "i > 4", "i > 4", "i < 10"]
     assert found_conditions == expected_conditions
     assert len(found_conditions) == expected_num_conditions
@@ -246,9 +242,7 @@ def test_complex_while_else_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 6
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     expected_conditions = ["i < 10", "j < 5", "j < 5", "i > 4", "i > 4", "i < 10"]
     assert found_conditions == expected_conditions
     assert len(found_conditions) == expected_num_conditions

@@ -23,10 +23,12 @@ def _extract_edge_labels(cfg: ControlFlowGraph) -> Tuple[int, int]:
     return labels.count("True"), labels.count("False")
 
 
-def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[astroid.NodeNG]:
-    """Return the edge conditions in the given cfg as a list of AST nodes representing the condition."""
+def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[str]:
+    """Return the edge conditions in the given cfg as a list of strings representing the condition."""
 
-    conditions = [edge.condition for edge in cfg.get_edges() if edge.condition is not None]
+    conditions = [
+        edge.condition.as_string() for edge in cfg.get_edges() if edge.condition is not None
+    ]
     return conditions
 
 
@@ -86,9 +88,7 @@ def test_condition_if_no_else() -> None:
         x = 4
     """
     expected_num_conditions = 2
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     assert all(condition == "x > 0" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
@@ -104,9 +104,7 @@ def test_condition_if_else() -> None:
         x = -1
     """
     expected_num_conditions = 2
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     assert all(condition == "x > 0" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
@@ -126,9 +124,7 @@ def test_condition_if_elsif() -> None:
         x = -1
     """
     expected_num_conditions = 6
-    found_conditions = [
-        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
-    ]
+    found_conditions = _extract_edge_conditions(build_cfg(src))
     expected_conditions = ["x > 5", "x > 5", "x > 3", "x > 3", "x > 0", "x > 0"]
     assert found_conditions == expected_conditions
     assert len(found_conditions) == expected_num_conditions

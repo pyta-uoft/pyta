@@ -28,7 +28,7 @@ class ControlFlowGraph:
         self,
         pred: Optional[CFGBlock] = None,
         edge_label: Optional[Any] = None,
-        edge_condition: NodeNG = None,
+        edge_condition: Optional[NodeNG] = None,
     ) -> CFGBlock:
         """Create a new CFGBlock for this graph.
 
@@ -56,7 +56,7 @@ class ControlFlowGraph:
         source: CFGBlock,
         target: CFGBlock,
         edge_label: Optional[Any] = None,
-        edge_condition: NodeNG = None,
+        edge_condition: Optional[NodeNG] = None,
     ) -> None:
         """Link source to target, or merge source into target if source is empty.
 
@@ -202,20 +202,20 @@ class CFGEdge:
 
     Edges are directed, and in the future may be augmented with auxiliary metadata about the control flow.
 
-    Condition stores the AST node representing the condition tested in If and While statements.
+    The condition attribute stores the AST node representing the condition tested in If and While statements.
     """
 
     source: CFGBlock
     target: CFGBlock
     label: Optional[Any]
-    condition: NodeNG
+    condition: Optional[NodeNG]
 
     def __init__(
         self,
         source: CFGBlock,
         target: CFGBlock,
         edge_label: Optional[Any] = None,
-        condition: NodeNG = None,
+        condition: Optional[NodeNG] = None,
     ) -> None:
         self.source = source
         self.target = target

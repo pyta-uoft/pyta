@@ -178,8 +178,10 @@ def test_while_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 2
-    found_conditions = _extract_edge_conditions(build_cfg(src))
-    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    found_conditions = [
+        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
+    ]
+    assert all(condition == "i < 10" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
 
@@ -195,8 +197,10 @@ def test_while_else_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 2
-    found_conditions = _extract_edge_conditions(build_cfg(src))
-    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    found_conditions = [
+        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
+    ]
+    assert all(condition == "i < 10" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
 
@@ -216,8 +220,11 @@ def test_complex_while_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 6
-    found_conditions = _extract_edge_conditions(build_cfg(src))
-    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    found_conditions = [
+        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
+    ]
+    expected_conditions = ["i < 10", "j < 5", "j < 5", "i > 4", "i > 4", "i < 10"]
+    assert found_conditions == expected_conditions
     assert len(found_conditions) == expected_num_conditions
 
 
@@ -239,6 +246,9 @@ def test_complex_while_else_conditions() -> None:
     print('not else')
     """
     expected_num_conditions = 6
-    found_conditions = _extract_edge_conditions(build_cfg(src))
-    assert all(isinstance(condition, astroid.nodes.Compare) for condition in found_conditions)
+    found_conditions = [
+        condition.as_string() for condition in _extract_edge_conditions(build_cfg(src))
+    ]
+    expected_conditions = ["i < 10", "j < 5", "j < 5", "i > 4", "i > 4", "i < 10"]
+    assert found_conditions == expected_conditions
     assert len(found_conditions) == expected_num_conditions

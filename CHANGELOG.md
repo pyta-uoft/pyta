@@ -17,6 +17,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved error display for pycodestyle (E9989) errors E123, E203, E222, E226, and E262
 - Added the configuration option to ignore naming convention violations (C9103 and C9104) for names matching the provided regular expression.
 - Update to pylint v3.1 and and astroid v3.1
+- Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
 
 ### Bug fixes
 

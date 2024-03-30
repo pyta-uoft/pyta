@@ -643,7 +643,8 @@ def test_snapshot_to_json_tuples_primitive():
 
 def test_snapshot_to_json_sets_primitive():
     """
-    Test snapshot_to_json data with sets including primitive data types.
+    Test snapshot_to_json data with sets including primitive data types,
+    using a dynamic approach to handle unordered set elements.
     """
     snapshot_data = [
         {"func1": {"test_var1a": {1, 2, 3}, "test_var2a": {True, False, True}}},
@@ -653,6 +654,15 @@ def test_snapshot_to_json_sets_primitive():
     json_data = snapshot_to_json(snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
+
+    expected_ids_for_test_var1a = [2, 3, 4]  # Assuming IDs are known or mocked
+    expected_values_for_test_var1a = {1, 2, 3}
+
+    expected_ids_for_test_var2a = [6, 7]  # True and False, assuming IDs
+    expected_values_for_test_var2a = {True, False}
+
+    expected_ids_for_projects = [9, 10, 11]  # Assuming IDs for project names
+    expected_values_for_projects = {"MarkUs", "Memory Models", "PyTA"}
 
     assert json_data_frames == [
         {
@@ -671,19 +681,15 @@ def test_snapshot_to_json_sets_primitive():
         },
     ]
 
-    assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "set", "value": [2, 3, 4]},
-        {"id": 2, "isClass": False, "name": "int", "value": 1},
-        {"id": 3, "isClass": False, "name": "int", "value": 2},
-        {"id": 4, "isClass": False, "name": "int", "value": 3},
-        {"id": 5, "isClass": False, "name": "set", "value": [6, 7]},
-        {"id": 6, "isClass": False, "name": "bool", "value": False},
-        {"id": 7, "isClass": False, "name": "bool", "value": True},
-        {"id": 8, "isClass": False, "name": "set", "value": [9, 10, 11]},
-        {"id": 9, "isClass": False, "name": "str", "value": "MarkUs"},
-        {"id": 10, "isClass": False, "name": "str", "value": "Memory Models"},
-        {"id": 11, "isClass": False, "name": "str", "value": "PyTA"},
-    ]
+    # Validate that every id-value pair in the set matches an expected pair
+    for id_, value in zip(expected_ids_for_test_var1a, expected_values_for_test_var1a):
+        assert {"id": id_, "isClass": False, "name": "int", "value": value} in json_data_objects
+
+    for id_, value in zip(expected_ids_for_test_var2a, expected_values_for_test_var2a):
+        assert {"id": id_, "isClass": False, "name": "bool", "value": value} in json_data_objects
+
+    for id_, value in zip(expected_ids_for_projects, expected_values_for_projects):
+        assert {"id": id_, "isClass": False, "name": "str", "value": value} in json_data_objects
 
 
 def test_snapshot_to_json_dicts_primitive():

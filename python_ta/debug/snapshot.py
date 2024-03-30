@@ -2,6 +2,7 @@
 Use the 'inspect' module to extract local variables from
  multiple stack frames. Useful for dynamic debugging.
 """
+
 from __future__ import annotations
 
 import inspect

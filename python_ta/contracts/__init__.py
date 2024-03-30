@@ -408,6 +408,8 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 f"{instance.__class__.__qualname__}: {invariant}"
             )
             check = eval(compiled, {**global_scope, "self": instance})
+        except AssertionError as e:
+            raise AssertionError(str(e)) from None
         except:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
@@ -475,6 +477,8 @@ def _check_assertions(
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
             check = eval(compiled, {**wrapped.__globals__, **function_locals, **return_val_dict})
+        except AssertionError as e:
+            raise AssertionError(str(e)) from None
         except:
             _debug(f"Warning: could not evaluate {condition_type}: {assertion_str}")
         else:

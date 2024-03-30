@@ -111,6 +111,11 @@ def _is_within_name_length(node_type: str, name: str) -> str:
     return msg
 
 
+def _ignore_name(name: str, pattern: re.Pattern) -> bool:
+    """Returns whether name matches any of the regular expressions provided in patterns"""
+    return pattern.pattern and pattern.match(name) is not None
+
+
 def _check_module_name(_node_type: str, name: str) -> List[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     module names.
@@ -291,20 +296,42 @@ class InvalidNameChecker(BaseChecker):
             "Used when the name doesn't conform to standard Python naming conventions.",
         ),
     }
+    options = (
+        (
+            "ignore-names",
+            {
+                "default": "",
+                "type": "regexp",
+                "metavar": "<regexp>",
+                "help": "Ignore C9103 naming convention violation for names that exactly match the pattern",
+            },
+        ),
+        (
+            "ignore-module-names",
+            {
+                "default": "",
+                "type": "regexp",
+                "metavar": "<regexp>",
+                "help": "Ignore C9104 module name violation for module names that exactly match the pattern",
+            },
+        ),
+    )
 
     @only_required_for_messages("module-name-violation")
     def visit_module(self, node: nodes.Module) -> None:
         """Visit a Module node to check for any name violations.
 
         Snippets taken from pylint.checkers.base.name_checker.checker."""
-        self._check_name("module", node.name.split(".")[-1], node)
+        if not _ignore_name(node.name, self.linter.config.ignore_module_names):
+            self._check_name("module", node.name.split(".")[-1], node)
 
     @only_required_for_messages("naming-convention-violation")
     def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a Class node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""
-        self._check_name("class", node.name, node)
+        if not _ignore_name(node.name, self.linter.config.ignore_names):
+            self._check_name("class", node.name, node)
 
     @only_required_for_messages("naming-convention-violation")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
@@ -315,7 +342,8 @@ class InvalidNameChecker(BaseChecker):
             if utils.overrides_a_method(node.parent.frame(future=True), node.name):
                 return
 
-        self._check_name("method" if node.is_method() else "function", node.name, node)
+        if not _ignore_name(node.name, self.linter.config.ignore_names):
+            self._check_name("method" if node.is_method() else "function", node.name, node)
 
     visit_asyncfunctiondef = visit_functiondef
 
@@ -324,6 +352,10 @@ class InvalidNameChecker(BaseChecker):
         """Visit an AssignName node to check for any name violations.
 
         Taken from pylint.checkers.base.name_checker.checker."""
+        # Do not check this node if included in the ignore-names option
+        if _ignore_name(node.name, self.linter.config.ignore_names):
+            return
+
         frame = node.frame(future=True)
         assign_type = node.assign_type()
 

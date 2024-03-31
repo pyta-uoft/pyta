@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import inspect
 from types import FrameType
-from typing import Any, Dict, List
+from typing import Any
 
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
@@ -50,7 +50,7 @@ def snapshot():
     return variables
 
 
-def snapshot_to_json(snapshot_data: List[Dict]) -> List[Dict]:
+def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
     """
     Convert the snapshot data into a simplified JSON format, where each value
     has its own entry with a matching ID. This includes nesting the process_value
@@ -65,9 +65,12 @@ def snapshot_to_json(snapshot_data: List[Dict]) -> List[Dict]:
     def process_value(val: Any) -> int:
         """
         Recursively processes a value, handling compound built-in data types
-        by creating a list or dict of IDs for their elements. This process assigns
-        a unique ID to the input value. This ID is used to identify the processed
-        value in a global context.
+        (lists, sets, tuples, and dicts) by creating a list or dict of IDs for their elements.
+        This process assigns a unique ID to the input value. This ID, which uniquely identifies
+        the processed value in a global context, is returned by the function. The returned ID
+        ensures that each value is processed only once, facilitating the reconstruction of
+        the original data structure with its elements uniquely identified.
+
         """
         nonlocal id_counter  # This allows us to modify id_counter directly
         nonlocal global_ids, value_entries
@@ -87,9 +90,9 @@ def snapshot_to_json(snapshot_data: List[Dict]) -> List[Dict]:
                 }
             elif isinstance(val, dict):
                 dict_ids = {}
-                for key, value in val.items():
+                for key, v in val.items():
                     key_id = process_value(key)
-                    val_id = process_value(value)
+                    val_id = process_value(v)
                     dict_ids[key_id] = val_id
                 value_entry = {
                     "isClass": False,

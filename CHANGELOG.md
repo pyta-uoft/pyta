@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue where annotated constant variable assignment was not considered as permissible top level code and triggered error E9992
 - Fixed issue where top level class attribute assignment was considered as permissible top level code
 - Fixed issue where `check_contracts` fails silently when function preconditions contain precondition violations, and when a representation invariant contains a call to a top-level function (not built-in or imported library).
+- Fixed issue where methods called in representation invariants lead to infinite recursion.
 
 ### New checkers
 

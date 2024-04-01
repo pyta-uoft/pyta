@@ -78,8 +78,9 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
         if value_id not in global_ids:
             global_ids[value_id] = id_counter
             value_id_diagram = id_counter
-            id_counter += 1  # Now directly incrementing the integer
+            id_counter += 1  # Increment the unique ID
 
+            # Handle compound built-in data types
             if isinstance(val, (list, set, tuple)):
                 element_ids = [process_value(element) for element in val]
                 value_entry = {
@@ -100,7 +101,19 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     "id": value_id_diagram,
                     "value": dict_ids,
                 }
-            else:
+            # Handle user-defined classes
+            elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance
+                attr_ids = {}
+                for attr_name, attr_val in vars(val).items():
+                    attr_id = process_value(attr_val)
+                    attr_ids[attr_name] = attr_id
+                value_entry = {
+                    "isClass": True,
+                    "name": type(val).__name__,
+                    "id": value_id_diagram,
+                    "value": attr_ids,
+                }
+            else:  # Handle primitives and other types
                 value_entry = {
                     "isClass": False,
                     "name": type(val).__name__,

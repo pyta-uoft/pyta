@@ -907,6 +907,124 @@ def test_snapshot_to_json_dicts_of_dicts():
     ]
 
 
+def test_snapshot_to_json_user_defined_class_primitive():
+    """
+    Test snapshot_to_json with snapshot data including a user-defined class with primitive attributes,
+    corrected to match the observed output ordering.
+    """
+
+    class MyClass:
+        """
+        Represents a simple class with two attributes initialized upon instantiation.
+
+        Attributes:
+            attr1 (str): A string attribute initialized to "value1".
+            attr2 (int): An integer attribute initialized to 42.
+        """
+
+        def __init__(self):
+            self.attr1 = "value1"
+            self.attr2 = 42
+
+    my_object = MyClass()
+
+    snapshot_data = [
+        {"__main__": {"my_object": my_object}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "id": None,
+            "isClass": True,
+            "name": "__main__",
+            "stack_frame": True,
+            "value": {"my_object": 1},
+        },
+        {"id": 2, "isClass": False, "name": "str", "value": "value1"},
+        {"id": 3, "isClass": False, "name": "int", "value": 42},
+        {
+            "id": 1,
+            "isClass": True,
+            "name": "MyClass",
+            "value": {"attr1": 2, "attr2": 3},
+        },
+    ]
+
+    assert json_data == expected_output
+
+
+def test_snapshot_to_json_user_defined_class_nested():
+    """
+    Test snapshot_to_json with snapshot data including a user-defined class
+    with nested user-defined class attributes, corrected to match the observed output ordering.
+    """
+
+    class NestedClass:
+        """
+        Represents a nested class with two attributes.
+
+        Attributes:
+            nested_attr1 (str): A string attribute initialized to "nested value".
+            nested_attr2 (bool): A boolean attribute initialized to False.
+        """
+
+        def __init__(self):
+            self.nested_attr1 = "nested value"
+            self.nested_attr2 = False
+
+    class MyClass:
+        """
+        Represents a class with an attribute that is an instance of another class
+        and another primitive attribute.
+
+        Attributes:
+            attr1 (NestedClass): An instance of NestedClass as an attribute,
+            demonstrating composition.
+            attr2 (int): An integer attribute initialized to 99.
+        """
+
+        def __init__(self):
+            self.attr1 = NestedClass()
+            self.attr2 = 99
+
+    my_object = MyClass()
+
+    snapshot_data = [
+        {"__main__": {"my_object": my_object}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "id": None,
+            "isClass": True,
+            "name": "__main__",
+            "stack_frame": True,
+            "value": {"my_object": 1},
+        },
+        {"id": 3, "isClass": False, "name": "str", "value": "nested value"},
+        {"id": 4, "isClass": False, "name": "bool", "value": False},
+        {
+            "id": 2,
+            "isClass": True,
+            "name": "NestedClass",
+            "value": {"nested_attr1": 3, "nested_attr2": 4},
+        },
+        {"id": 5, "isClass": False, "name": "int", "value": 99},
+        {
+            "id": 1,
+            "isClass": True,
+            "name": "MyClass",
+            "value": {"attr1": 2, "attr2": 5},
+        },
+    ]
+
+    assert json_data == expected_output
+
+
 def test_output_to_existing_file(tmp_path) -> None:
     test_list = [10, 20, 30]
     sum_so_far = 0

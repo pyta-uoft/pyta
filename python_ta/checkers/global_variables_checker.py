@@ -1,5 +1,6 @@
 """Checker for global variables
 """
+
 import re
 from typing import List
 

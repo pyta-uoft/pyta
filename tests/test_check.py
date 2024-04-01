@@ -1,6 +1,7 @@
 """Run from the `pyta` root directory to use the local `python_ta` rather than
 installed `python_ta` package.
 """
+
 import subprocess
 import sys
 from os import environ, path, remove

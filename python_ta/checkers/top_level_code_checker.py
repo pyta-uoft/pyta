@@ -1,4 +1,5 @@
 """Checker for top-level code"""
+
 import re
 
 from astroid import nodes

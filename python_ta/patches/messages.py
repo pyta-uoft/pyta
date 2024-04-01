@@ -1,4 +1,5 @@
 """Patch pylint message-handling behaviour."""
+
 from pylint.interfaces import UNDEFINED
 from pylint.lint import PyLinter
 

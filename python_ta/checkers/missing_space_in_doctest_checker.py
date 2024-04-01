@@ -1,4 +1,5 @@
 """Checker for E9973 missing-space-in-doctest"""
+
 import re
 from typing import Match, Optional, Union
 

@@ -1,4 +1,5 @@
 """Checker for index ranges"""
+
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import only_required_for_messages

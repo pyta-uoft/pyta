@@ -1,4 +1,5 @@
 """Checker for the style of the file"""
+
 from typing import List, Tuple
 
 import pycodestyle

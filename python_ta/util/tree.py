@@ -1,6 +1,7 @@
 """
 Simple Tree class to be used for RecursionTable.
 """
+
 from __future__ import annotations
 
 from typing import Any

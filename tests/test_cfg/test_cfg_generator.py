@@ -1,6 +1,7 @@
 """
 Test suite for generating control flow graphs using the PythonTA API.
 """
+
 import os.path
 
 import pytest

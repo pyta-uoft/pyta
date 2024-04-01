@@ -1,6 +1,7 @@
 """
 Provides a function to generate and display the control flow graph of a given module.
 """
+
 import importlib.util
 import os.path
 import sys

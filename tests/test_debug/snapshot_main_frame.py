@@ -4,6 +4,7 @@ variables from the __main__ stack frame, particularly globally defined variables
 
 This module is intended exclusively for testing purposes and should not be used for any other purpose.
 """
+
 import json
 
 from python_ta.debug.snapshot import snapshot

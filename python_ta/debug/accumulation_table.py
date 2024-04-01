@@ -2,6 +2,7 @@
 Table data structure that prints a nicely formatted table
 for an accumulator loop
 """
+
 from __future__ import annotations
 
 import copy

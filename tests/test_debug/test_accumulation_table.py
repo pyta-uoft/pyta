@@ -907,122 +907,107 @@ def test_snapshot_to_json_dicts_of_dicts():
     ]
 
 
-# def test_snapshot_to_json_user_defined_class_primitive():
-#     """
-#     Test snapshot_to_json with snapshot data including a user-defined class with primitive attributes,
-#     corrected to match the observed output ordering.
-#     """
-#
-#     class MyClass:
-#         """
-#         Represents a simple class with two attributes initialized upon instantiation.
-#
-#         Attributes:
-#             attr1 (str): A string attribute initialized to "value1".
-#             attr2 (int): An integer attribute initialized to 42.
-#         """
-#
-#         def __init__(self):
-#             self.attr1 = "value1"
-#             self.attr2 = 42
-#
-#     my_object = MyClass()
-#
-#     snapshot_data = [
-#         {"__main__": {"my_object": my_object}},
-#     ]
-#
-#     json_data = snapshot_to_json(snapshot_data)
-#
-#     expected_output = [
-#         {
-#             "id": None,
-#             "isClass": True,
-#             "name": "__main__",
-#             "stack_frame": True,
-#             "value": {"my_object": 1},
-#         },
-#         {"id": 2, "isClass": False, "name": "str", "value": "value1"},
-#         {"id": 3, "isClass": False, "name": "int", "value": 42},
-#         {
-#             "id": 1,
-#             "isClass": True,
-#             "name": "MyClass",
-#             "value": {"attr1": 2, "attr2": 3},
-#         },
-#     ]
-#
-#     assert json_data == expected_output
+class OneClass:
+    """
+    Represents a simple class with two primitive attributes.
+
+    Attributes:
+        attr1 (str): A string attribute, initialized to "value1".
+        attr2 (int): An integer attribute, initialized to 42.
+    """
+
+    def __init__(self):
+        self.attr1 = "value1"
+        self.attr2 = 42
 
 
-# def test_snapshot_to_json_user_defined_class_nested():
-#     """
-#     Test snapshot_to_json with snapshot data including a user-defined class
-#     with nested user-defined class attributes, corrected to match the observed output ordering.
-#     """
-#
-#     class NestedClass:
-#         """
-#         Represents a nested class with two attributes.
-#
-#         Attributes:
-#             nested_attr1 (str): A string attribute initialized to "nested value".
-#             nested_attr2 (bool): A boolean attribute initialized to False.
-#         """
-#
-#         def __init__(self):
-#             self.nested_attr1 = "nested value"
-#             self.nested_attr2 = False
-#
-#     class MyClass:
-#         """
-#         Represents a class with an attribute that is an instance of another class
-#         and another primitive attribute.
-#
-#         Attributes:
-#             attr1 (NestedClass): An instance of NestedClass as an attribute,
-#             demonstrating composition.
-#             attr2 (int): An integer attribute initialized to 99.
-#         """
-#
-#         def __init__(self):
-#             self.attr1 = NestedClass()
-#             self.attr2 = 99
-#
-#     my_object = MyClass()
-#
-#     snapshot_data = [
-#         {"__main__": {"my_object": my_object}},
-#     ]
-#
-#     json_data = snapshot_to_json(snapshot_data)
-#
-#     expected_output = [
-#         {
-#             "id": None,
-#             "isClass": True,
-#             "name": "__main__",
-#             "stack_frame": True,
-#             "value": {"my_object": 1},
-#         },
-#         {"id": 3, "isClass": False, "name": "str", "value": "nested value"},
-#         {"id": 4, "isClass": False, "name": "bool", "value": False},
-#         {
-#             "id": 2,
-#             "isClass": True,
-#             "name": "NestedClass",
-#             "value": {"nested_attr1": 3, "nested_attr2": 4},
-#         },
-#         {"id": 5, "isClass": False, "name": "int", "value": 99},
-#         {
-#             "id": 1,
-#             "isClass": True,
-#             "name": "MyClass",
-#             "value": {"attr1": 2, "attr2": 5},
-#         },
-#     ]
-#
-#     assert json_data == expected_output
+class NestedClass:
+    """
+    Represents a class that contains an instance of OneClass as one of its attributes,
+    alongside a primitive integer attribute.
+
+    Attributes:
+        attr1 (OneClass): An instance of OneClass, demonstrating object composition.
+        attr2 (int): An integer attribute, initialized to 99.
+    """
+
+    def __init__(self):
+        self.attr1 = OneClass()
+        self.attr2 = 99
+
+
+def test_snapshot_to_json_one_class():
+    """
+    Test snapshot_to_json with snapshot data including an instance of OneClass.
+    """
+    one_class_instance = OneClass()
+
+    snapshot_data = [
+        {"__main__": {"one_class_instance": one_class_instance}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "id": None,
+            "isClass": True,
+            "name": "__main__",
+            "stack_frame": True,
+            "value": {"one_class_instance": 1},
+        },
+        {"id": 2, "isClass": False, "name": "str", "value": "value1"},
+        {"id": 3, "isClass": False, "name": "int", "value": 42},
+        {
+            "id": 1,
+            "isClass": True,
+            "name": "OneClass",
+            "value": {"attr1": 2, "attr2": 3},
+        },
+    ]
+
+    assert json_data == expected_output
+
+
+def test_snapshot_to_json_nested_class():
+    """
+    Test snapshot_to_json with snapshot data including an instance of NestedClass,
+    which contains an instance of OneClass as one of its attributes.
+    """
+    nested_class_instance = NestedClass()
+
+    snapshot_data = [
+        {"__main__": {"nested_class_instance": nested_class_instance}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "id": None,
+            "isClass": True,
+            "name": "__main__",
+            "stack_frame": True,
+            "value": {"nested_class_instance": 1},
+        },
+        {"id": 3, "isClass": False, "name": "str", "value": "value1"},  # From OneClass.attr1
+        {"id": 4, "isClass": False, "name": "int", "value": 42},  # From OneClass.attr2
+        {
+            "id": 2,
+            "isClass": True,
+            "name": "OneClass",  # The instance of OneClass within NestedClass
+            "value": {"attr1": 3, "attr2": 4},
+        },
+        {"id": 5, "isClass": False, "name": "int", "value": 99},  # NestedClass.attr2
+        {
+            "id": 1,
+            "isClass": True,
+            "name": "NestedClass",  # The top-level class being serialized
+            "value": {"attr1": 2, "attr2": 5},
+        },
+    ]
+
+    assert json_data == expected_output
 
 
 def test_output_to_existing_file(tmp_path) -> None:

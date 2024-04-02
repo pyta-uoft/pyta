@@ -1,6 +1,7 @@
 """
 Test suite for checking that the correct number of error occurrences are being displayed.
 """
+
 import contextlib
 import io
 import os

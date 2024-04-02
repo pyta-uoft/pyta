@@ -2,6 +2,7 @@
 
 Checks that `end_lineno` and `end_col_offset` node properties are set.
 """
+
 import os.path as path
 import sys
 import unittest

@@ -1,5 +1,6 @@
 """Patch pylint checker behaviour.
 """
+
 from pylint.checkers.base import NameChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class

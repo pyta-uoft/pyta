@@ -27,6 +27,7 @@ within the _transform method.
 Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
+
 from astroid import nodes
 from astroid.transforms import TransformVisitor
 

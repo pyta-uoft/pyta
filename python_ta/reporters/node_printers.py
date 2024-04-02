@@ -1,4 +1,5 @@
 """Specify how errors should be rendered."""
+
 import re
 from enum import Enum
 

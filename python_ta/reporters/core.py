@@ -1,5 +1,6 @@
 """This module provides the core functionality for all PythonTA reporters.
 """
+
 import os.path
 import sys
 from collections import defaultdict

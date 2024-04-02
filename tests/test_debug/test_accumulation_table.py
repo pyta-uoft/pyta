@@ -2,6 +2,7 @@
 Test suite for the AccumulationTable class on different
 types of accumulator loops
 """
+
 import copy
 import json
 import os

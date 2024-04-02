@@ -1,4 +1,5 @@
 """Tests for forward references in instance attribute type annotations."""
+
 from __future__ import annotations
 
 from typing import Any, Optional

@@ -1,4 +1,5 @@
 """Test suite for testing the InvalidNameChecker."""
+
 import os
 import re
 import sys

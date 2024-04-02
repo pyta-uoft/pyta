@@ -1,4 +1,5 @@
 """Tests for top level __init__.py logging functionality in pyta"""
+
 import logging
 import os
 import sys

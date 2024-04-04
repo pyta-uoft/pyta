@@ -1,20 +1,20 @@
-from typing import List, Set, Tuple
+from typing import List, Tuple
 
 import astroid
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
-def build_cfg(src: str) -> Set[ControlFlowGraph]:
+def build_cfg(src: str) -> List[ControlFlowGraph]:
     """Build a CFG for testing and return all CFGs built."""
     mod = astroid.parse(src)
     t = CFGVisitor()
     mod.accept(t)
     print(t.cfgs)
-    return set(t.cfgs.values())
+    return list(t.cfgs.values())
 
 
-def _extract_edge_conditions(cfgs: Set[ControlFlowGraph]) -> List[str]:
+def _extract_edge_conditions(cfgs: List[ControlFlowGraph]) -> List[str]:
     """Return the edge conditions in the given list of cfgs as a list of strings representing the condition."""
     conditions = [
         edge.condition.as_string()

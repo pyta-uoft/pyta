@@ -1,6 +1,8 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from astroid import nodes
+from astroid import nodes, parse
+
+from python_ta.contracts import parse_assertions
 
 from .graph import CFGBlock, ControlFlowGraph
 
@@ -124,7 +126,11 @@ class CFGVisitor:
         self._current_cfg.start.add_statement(func.args)
         func.cfg_block = self._current_cfg.start
 
-        self._current_block = self._current_cfg.create_block(self._current_cfg.start)
+        preconditions_node = _get_preconditions_node(func)
+
+        self._current_block = self._current_cfg.create_block(
+            self._current_cfg.start, edge_condition=preconditions_node
+        )
 
         for child in func.body:
             child.accept(self)
@@ -435,3 +441,16 @@ def _get_raise_exc(node: nodes.Raise) -> str:
         return f"{nodes.Raise.__name__} {next(exceptions).name}"
     except StopIteration:
         return nodes.Raise.__name__
+
+
+def _get_preconditions_node(func: nodes.FunctionDef) -> Optional[nodes.BoolOp]:
+    """A helper method that takes in a function definition node, retrieves its preconditions, and then parses them
+    into a AST node representing all the preconditions combined in an and statement. Returns None if there are no
+    preconditions."""
+    assertions = parse_assertions(func)
+    if not assertions:
+        return None
+    precondition_string = " and ".join(assertions)
+    condition, *_ = parse(precondition_string).nodes_of_class(nodes.Expr)
+    x = 5
+    return condition

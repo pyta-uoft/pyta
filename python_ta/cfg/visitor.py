@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from astroid import nodes
@@ -290,6 +291,16 @@ class CFGVisitor:
 
         old_curr = self._current_block
         for boundary, exits in reversed(self._control_boundaries):
+            if (
+                isinstance(boundary, nodes.FunctionDef) or isinstance(boundary, nodes.ClassDef)
+            ) and (isinstance(node, nodes.Break) or isinstance(node, nodes.Continue)):
+                logging.warning(
+                    f"'{type(node).__name__}' outside"
+                    f' {"function" if isinstance(node, nodes.Return) else "loop"}'
+                )
+                self.visit_generic(node)
+                break
+
             if isinstance(node, nodes.Raise):
                 exc_name = _get_raise_exc(node)
 
@@ -302,11 +313,13 @@ class CFGVisitor:
                 self._current_cfg.link(old_curr, exits[type(node).__name__])
                 old_curr.add_statement(node)
                 break
+
         else:
-            raise SyntaxError(
+            logging.warning(
                 f"'{type(node).__name__}' outside"
                 f' {"function" if isinstance(node, nodes.Return) else "loop"}'
             )
+
         unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 

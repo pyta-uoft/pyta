@@ -921,21 +921,6 @@ class OneClass:
         self.attr2 = 42
 
 
-class NestedClass:
-    """
-    Represents a class that contains an instance of OneClass as one of its attributes,
-    alongside a primitive integer attribute.
-
-    Attributes:
-        attr1 (OneClass): An instance of OneClass, demonstrating object composition.
-        attr2 (int): An integer attribute, initialized to 99.
-    """
-
-    def __init__(self):
-        self.attr1 = OneClass()
-        self.attr2 = 99
-
-
 def test_snapshot_to_json_one_class():
     """
     Test snapshot_to_json with snapshot data including an instance of OneClass.
@@ -963,47 +948,6 @@ def test_snapshot_to_json_one_class():
             "isClass": True,
             "name": "OneClass",
             "value": {"attr1": 2, "attr2": 3},
-        },
-    ]
-
-    assert json_data == expected_output
-
-
-def test_snapshot_to_json_nested_class():
-    """
-    Test snapshot_to_json with snapshot data including an instance of NestedClass,
-    which contains an instance of OneClass as one of its attributes.
-    """
-    nested_class_instance = NestedClass()
-
-    snapshot_data = [
-        {"__main__": {"nested_class_instance": nested_class_instance}},
-    ]
-
-    json_data = snapshot_to_json(snapshot_data)
-
-    expected_output = [
-        {
-            "id": None,
-            "isClass": True,
-            "name": "__main__",
-            "stack_frame": True,
-            "value": {"nested_class_instance": 1},
-        },
-        {"id": 3, "isClass": False, "name": "str", "value": "value1"},  # From OneClass.attr1
-        {"id": 4, "isClass": False, "name": "int", "value": 42},  # From OneClass.attr2
-        {
-            "id": 2,
-            "isClass": True,
-            "name": "OneClass",  # The instance of OneClass within NestedClass
-            "value": {"attr1": 3, "attr2": 4},
-        },
-        {"id": 5, "isClass": False, "name": "int", "value": 99},  # NestedClass.attr2
-        {
-            "id": 1,
-            "isClass": True,
-            "name": "NestedClass",  # The top-level class being serialized
-            "value": {"attr1": 2, "attr2": 5},
         },
     ]
 

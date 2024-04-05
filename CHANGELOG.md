@@ -16,11 +16,27 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Allowed specifying allowed names in configurations `allowed-import-modules` and `extra-imports` instead of just modules
 - Improved error display for pycodestyle (E9989) errors E123, E203, E222, E226, and E262
 - Added the configuration option to ignore naming convention violations (C9103 and C9104) for names matching the provided regular expression.
+- Update to pylint v3.1 and and astroid v3.1
+- Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
 
 ### Bug fixes
 
 - Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it
 - Fixed bug where `_` was marked as a built-in when running PythonTA after running doctest
+- Fixed issue where annotated constant variable assignment was not considered as permissible top level code and triggered error E9992
+- Fixed issue where top level class attribute assignment was considered as permissible top level code
+- Fixed issue where `check_contracts` fails silently when function preconditions contain precondition violations, and when a representation invariant contains a call to a top-level function (not built-in or imported library).
+
+### New checkers
+
+Pylint checkers v3.1:
+
+- `use-yield-from`
+- `deprecated-attribute`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.7.0] - 2024-12-14
 

@@ -1,4 +1,5 @@
 """Patch pylint error messages."""
+
 from importlib import import_module
 
 

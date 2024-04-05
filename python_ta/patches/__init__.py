@@ -1,5 +1,6 @@
 """Monkeypatch pylint behaviour.
 """
+
 from .checkers import patch_checkers
 from .error_messages import patch_error_messages
 from .messages import patch_messages

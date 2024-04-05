@@ -9,6 +9,7 @@ Below are some notes on how they are stored.
     - Postconditions are stored in an attribute __postconditions__ of the function as a list
     [(assertion, compiled, return_val_var_name)].
 """
+
 import inspect
 import logging
 import sys
@@ -101,13 +102,13 @@ Class = TypeVar("Class", bound=type)
 
 
 @overload
-def check_contracts(func: FunctionType, module_names: Optional[Set[str]] = None) -> FunctionType:
-    ...
+def check_contracts(
+    func: FunctionType, module_names: Optional[Set[str]] = None
+) -> FunctionType: ...
 
 
 @overload
-def check_contracts(func: Class, module_names: Optional[Set[str]] = None) -> Class:
-    ...
+def check_contracts(func: Class, module_names: Optional[Set[str]] = None) -> Class: ...
 
 
 def check_contracts(
@@ -408,6 +409,8 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 f"{instance.__class__.__qualname__}: {invariant}"
             )
             check = eval(compiled, {**global_scope, "self": instance})
+        except AssertionError as e:
+            raise AssertionError(str(e)) from None
         except:
             _debug(f"Warning: could not evaluate representation invariant: {invariant}")
         else:
@@ -475,6 +478,8 @@ def _check_assertions(
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
             check = eval(compiled, {**wrapped.__globals__, **function_locals, **return_val_dict})
+        except AssertionError as e:
+            raise AssertionError(str(e)) from None
         except:
             _debug(f"Warning: could not evaluate {condition_type}: {assertion_str}")
         else:

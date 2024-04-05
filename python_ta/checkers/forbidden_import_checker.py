@@ -1,5 +1,6 @@
 """Checker or use of forbidden imports.
 """
+
 from __future__ import annotations
 
 import os

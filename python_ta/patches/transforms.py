@@ -1,5 +1,6 @@
 """Patch to add transforms for setting type constraints and creating control flow graphs.
 """
+
 from pylint.lint import PyLinter
 
 from ..cfg.visitor import CFGVisitor

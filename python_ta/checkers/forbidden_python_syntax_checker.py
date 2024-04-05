@@ -1,5 +1,6 @@
 """Checker for reporting on the disallowed use of various Python syntax.
 """
+
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages

@@ -1,5 +1,6 @@
 """Checker for variables that might not be defined in the program.
 """
+
 from itertools import chain
 from typing import Generator, Set, Union
 

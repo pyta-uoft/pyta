@@ -1,4 +1,5 @@
 """Test suite for testing the ForbiddenPythonSyntaxChecker."""
+
 import astroid
 import pylint.testutils
 from astroid import nodes

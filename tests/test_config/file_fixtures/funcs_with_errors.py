@@ -1,4 +1,5 @@
 """Python script used for testing that the correct number of error occurrences are being displayed."""
+
 from typing import List
 
 # The following imports are used solely to trigger errors.

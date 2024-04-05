@@ -2,6 +2,7 @@
 Test suite for the RecursionTable class on different
 types of recursive functions.
 """
+
 from python_ta.debug import RecursionTable
 from python_ta.util.tree import Tree
 

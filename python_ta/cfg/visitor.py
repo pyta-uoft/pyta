@@ -446,8 +446,8 @@ def _get_raise_exc(node: nodes.Raise) -> str:
 
 def _get_preconditions_node(func: nodes.FunctionDef) -> Optional[nodes.NodeNG]:
     """A helper method that takes in a function definition node, retrieves its preconditions, and then parses them
-    into a AST node representing all the preconditions combined in an and statement. Returns None if there are no
-    preconditions."""
+    into a AST node representing all the valid Python preconditions combined in an and statement. Returns None if
+    there are no valid Python preconditions."""
     valid_assertions = [
         f"({assertion})"
         for assertion in parse_assertions(func)

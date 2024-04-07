@@ -449,7 +449,9 @@ def _get_preconditions_node(func: nodes.FunctionDef) -> Optional[nodes.NodeNG]:
     into a AST node representing all the preconditions combined in an and statement. Returns None if there are no
     preconditions."""
     valid_assertions = [
-        assertion for assertion in parse_assertions(func) if _is_python_precondition(assertion)
+        f"({assertion})"
+        for assertion in parse_assertions(func)
+        if _is_python_precondition(assertion)
     ]
     if not valid_assertions:
         return None

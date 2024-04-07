@@ -127,7 +127,7 @@ def test_condition_multiple_preconditions() -> None:
 
 def test_condition_invalid_precondition_multiple_preconditions() -> None:
     """Test that the condition node in a function CFG is not created for an invalid Python precondition with the
-    presence of other preconditions."""
+    but other preconditions are still created."""
     src = """def divide(x: int, y: int) -> int:
         \"\"\"Return x // y.
         Preconditions:
@@ -136,8 +136,9 @@ def test_condition_invalid_precondition_multiple_preconditions() -> None:
         \"\"\"
         return x // y
     """
-    expected_num_conditions = 0
+    expected_num_conditions = 1
     found_conditions = _extract_edge_conditions(build_cfg(src))
+    assert all(condition == "y != 0" for condition in found_conditions)
     assert len(found_conditions) == expected_num_conditions
 
 

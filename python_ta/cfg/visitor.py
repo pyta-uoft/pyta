@@ -448,11 +448,10 @@ def _get_preconditions_node(func: nodes.FunctionDef) -> Optional[nodes.NodeNG]:
     """A helper method that takes in a function definition node, retrieves its preconditions, and then parses them
     into a AST node representing all the preconditions combined in an and statement. Returns None if there are no
     preconditions."""
-    assertions = parse_assertions(func)
-    valid_assertions = [assertion for assertion in assertions if _is_python_precondition(assertion)]
-    # for now, return None if at least one non-valid assertion
-    # remove the length comparison and improve valid precondition checker to change this behaviour
-    if not valid_assertions or len(valid_assertions) != len(assertions):
+    valid_assertions = [
+        assertion for assertion in parse_assertions(func) if _is_python_precondition(assertion)
+    ]
+    if not valid_assertions:
         return None
     precondition_string = " and ".join(valid_assertions)
     condition = extract_node(precondition_string)

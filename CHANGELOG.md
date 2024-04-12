@@ -18,6 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added the configuration option to ignore naming convention violations (C9103 and C9104) for names matching the provided regular expression.
 - Update to pylint v3.1 and and astroid v3.1
 - Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
+- Stored valid Python function preconditions in initial edge to function code in generated function control flow graphs.
 
 ### Bug fixes
 

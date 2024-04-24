@@ -164,11 +164,6 @@ def add_class_invariants(klass: type) -> None:
 
         Check representation invariants for this class when not within an instance method of the class.
         """
-        if name == "currently_checking":
-            # This is a special attribute, so representation invariants should not be checked
-            super(klass, self).__setattr__(name, value)
-            return
-
         if not ENABLE_CONTRACT_CHECKING:
             super(klass, self).__setattr__(name, value)
             return
@@ -404,43 +399,43 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
 
 def _check_invariants(instance, klass: type, global_scope: dict) -> None:
     """Check that the representation invariants for the instance are satisfied."""
-    if hasattr(instance, "currently_checking"):
+    if hasattr(instance, "__pyta_currently_checking"):
         # If already checking invariants for this instance, skip to avoid infinite recursion
         return
 
-    instance.currently_checking = True
+    super(type(instance), instance).__setattr__("__pyta_currently_checking", True)
 
     rep_invariants = getattr(klass, "__representation_invariants__", set())
 
-    for invariant, compiled in rep_invariants:
-        try:
-            _debug(
-                "Checking representation invariant for "
-                f"{instance.__class__.__qualname__}: {invariant}"
-            )
-            check = eval(compiled, {**global_scope, "self": instance})
-        except AssertionError as e:
-            raise AssertionError(str(e)) from None
-        except:
-            _debug(f"Warning: could not evaluate representation invariant: {invariant}")
-        else:
-            if not check:
-                # Remove the "currenlty_checking" attribute before printing the error message to the user
-                if hasattr(instance, "currently_checking"):
-                    delattr(instance, "currently_checking")
-
-                curr_attributes = ", ".join(
-                    f"{k}: {_display_value(v)}" for k, v in vars(instance).items()
+    try:
+        for invariant, compiled in rep_invariants:
+            try:
+                _debug(
+                    "Checking representation invariant for "
+                    f"{instance.__class__.__qualname__}: {invariant}"
                 )
+                check = eval(compiled, {**global_scope, "self": instance})
+            except AssertionError as e:
+                raise AssertionError(str(e)) from None
+            except:
+                _debug(f"Warning: could not evaluate representation invariant: {invariant}")
+            else:
+                if not check:
+                    curr_attributes = ", ".join(
+                        f"{k}: {_display_value(v)}"
+                        for k, v in vars(instance).items()
+                        if k != "__pyta_currently_checking"
+                    )
 
-                curr_attributes = "{" + curr_attributes + "}"
+                    curr_attributes = "{" + curr_attributes + "}"
 
-                raise PyTAContractError(
-                    f'"{instance.__class__.__name__}" representation invariant "{invariant}" was violated for'
-                    f" instance attributes {curr_attributes}"
-                )
+                    raise PyTAContractError(
+                        f'"{instance.__class__.__name__}" representation invariant "{invariant}" was violated for'
+                        f" instance attributes {curr_attributes}"
+                    )
 
-    delattr(instance, "currently_checking")
+    finally:
+        delattr(instance, "__pyta_currently_checking")
 
 
 def _get_legal_return_val_var_name(var_dict: dict) -> str:

@@ -441,5 +441,80 @@ def test_invariant_with_function_defined_in_module() -> None:
     )
 
 
+class Course:
+    """Represent a course
+
+    Representation Invariants:
+     - self.num_students > 0
+     - self.validate_code(self.code)
+    """
+
+    code: str
+    num_students: int
+
+    def __init__(self, code: str, num_students: int):
+        self.code = code
+        self.num_students = num_students
+
+    def validate_code(self, code) -> bool:
+        """Validate the code for this course"""
+        return code != ""
+
+
+def test_method_invariant_no_violation() -> None:
+    """
+    Test that no infinite recursion occurs when the representation invariants
+    calls a method of the class, and there is NOT a violation.
+    """
+    course = Course("CSC108", 100)
+    assert course.code == "CSC108"
+    assert course.num_students == 100
+
+
+def test_method_invariant_violation() -> None:
+    """
+    Test that no infinite recursion occurs when the representation invariants
+    calls a method of the class, and there is a violation,
+    Also, test that the correct error is raised.
+    """
+    with pytest.raises(AssertionError) as exception_info:
+        Course("", 100)
+
+    assert (
+        str(exception_info.value) == '"Course" representation invariant '
+        '"self.validate_code(self.code)" was violated for instance attributes'
+        " {code: '', num_students: 100}"
+    )
+
+
+def test_method_invariant_set_valid() -> None:
+    """
+    Test that no infinite recursion occurs when directly setting an attribute
+    with a valid value used in a representation invariant calls a class method.
+    """
+    course = Course("CSC108", 100)
+    course.code = "CSC209"
+    assert course.code == "CSC209"
+    assert course.num_students == 100
+
+
+def test_method_invariant_set_invalid() -> None:
+    """
+    Test that no infinite recursion occurs when directly setting an attribute
+    with an invalid value used in a representation invariant calls a class method.
+    Also, test that the correct error is raised.
+    """
+    course = Course("CSC108", 100)
+
+    with pytest.raises(AssertionError) as exception_info:
+        course.code = ""
+
+    assert (
+        str(exception_info.value) == '"Course" representation invariant '
+        '"self.validate_code(self.code)" was violated for instance attributes'
+        " {code: '', num_students: 100}"
+    )
+
+
 if __name__ == "__main__":
     pytest.main(["test_class_contracts.py"])

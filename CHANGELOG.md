@@ -7,7 +7,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-### Enhancements
+### ✨ Enhancements
 
 - Add new boolean configuration `allow-local-imports` to allow for local imports
 - Extended the `snasphot` function to include the relevant variables defined at the top level (global variables).
@@ -20,16 +20,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
 - Stored valid Python function preconditions in initial edge to function code in generated function control flow graphs.
 
-### Bug fixes
-
-- Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it
-- Fixed bug where `_` was marked as a built-in when running PythonTA after running doctest
-- Fixed issue where annotated constant variable assignment was not considered as permissible top level code and triggered error E9992
-- Fixed issue where top level class attribute assignment was considered as permissible top level code
-- Fixed issue where `check_contracts` fails silently when function preconditions contain precondition violations, and when a representation invariant contains a call to a top-level function (not built-in or imported library).
-- Fixed issue where methods called in representation invariants lead to infinite recursion.
-
-### New checkers
+### 💫 New checkers
 
 Pylint checkers v3.1:
 
@@ -40,9 +31,22 @@ For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
 list only contains the Pylint checkers enabled by default in PythonTA.
 
+### 🐛 Bug fixes
+
+- Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it
+- Fixed bug where `_` was marked as a built-in when running PythonTA after running doctest
+- Fixed issue where annotated constant variable assignment was not considered as permissible top level code and triggered error E9992
+- Fixed issue where top level class attribute assignment was considered as permissible top level code
+- Fixed issue where `check_contracts` fails silently when function preconditions contain precondition violations, and when a representation invariant contains a call to a top-level function (not built-in or imported library).
+- Fixed issue where methods called in representation invariants lead to infinite recursion.
+
+### 🔧 Internal changes
+
+- Updated changelog and pull request template formats
+
 ## [2.7.0] - 2024-12-14
 
-### Enhancements
+### ✨ Enhancements
 
 - Added new configuration option `use-pyta-error-messages` to let users choose whether PythonTA should overwrite pylint's error messages.
 - Both PlainReporter and ColorReporter emphasize specific code chunks by using overline characters under any part that is highlighted as ERROR.
@@ -55,14 +59,14 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Created a `RecursionTable` context manager for recursive tracing using a tabular output.
 - Support Python 3.12 (requiring upgrade to pylint and astroid 3.0)
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fix bug in ending location setting for `Attribute` and `DelAttr` nodes when the same attribute
   was accessed twice on the same line.
 - Fix bug where the `naming-convention-violation` checker was checking variables defined in a module's main block. This was inconsistent with the `forbidden-global-variables` checker.
 - Fixed bug with `invalid-range-index`: do not attempt any inference of variables in `range` expressions. All range arguments involving variables will be ignored by this checker.
 
-### New checkers
+### 💫 New checkers
 
 Pylint checkers v3.0:
 
@@ -75,19 +79,19 @@ For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
 list only contains the Pylint checkers enabled by default in PythonTA.
 
-### Internal
+### 🔧 Internal changes
 
 - Remove experimental type inference code.
 
 ## [2.6.4] - 2024-11-10
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fixed bug with `invalid-range-index` when variables are used in `range` expressions.
 
 ## [2.6.3] - 2023-10-09
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Ensure pycodestyle W503, line break before binary operator, is disabled (regression from 2.6.2).
 - Fix `check_contracts` typings so PyCharm static checking will work
@@ -95,18 +99,18 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.6.2] - 2023-09-22
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fix `naming-convention-violation` bug where `_` was considered an invalid variable name.
 - Fix `naming-convention-violation` bug where top-level constants were being checked as regular variable names.
 
-### Enhancements
+### ✨ Enhancements
 
 - Created many custom renderers to make the code snippets for `pep8-errors` easier to understand.
 
 ## [2.6.1] - 2023-08-13
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Make `graphviz` an optional dependency, and clarify the installation requirements for visualizing
   control flow graphs.
@@ -115,7 +119,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.6.0] - 2023-08-06
 
-### Enhancements
+### ✨ Enhancements
 
 - Can now create control flow graphs using `python_ta.control_flow_graphs` to visualize the
   execution paths of Python code.
@@ -135,7 +139,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
   for an object.
 - Updated to [pycodestyle v2.11](https://github.com/PyCQA/pycodestyle/blob/main/CHANGES.txt).
 
-### Bug Fixes
+### 🐛 Bug fixes
 
 - Fixed bug where running `python3 -m python_ta --generate-config` yields a `FileNotFoundError`.
 - Fixed bug in how PythonTA reports error messages that occur when parsing configuration files.
@@ -149,7 +153,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
   new value after the error was raised, but now is correctly restored to the original value.
 - Remove line double-spacing in PlainReporter and ColorReporter output code snippets.
 
-### New checkers
+### 💫 New checkers
 
 Custom checkers:
 
@@ -176,26 +180,26 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.5.0] - 2023-04-27
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fixed bug in possibly-undefined checker where a comprehension variable is falsely flagged as possibly undefined.
 - Fixed bug where `check_errors` and `check_all` opens a webpage when a nonexistent or unreadable path is passed as an argument.
 - Fixed the CFG implementation to resolve a bug in the possibly-undefined checker where variables were falsely flagged as possibly undefined when the code conditionally raises an exception and the variable was referenced afterwards.
 - Fixed bug where the generated CFGs will highlight the except block as unreachable if the same exception it is handling was raised in the body of the tryexcept.
 
-### New checkers
+### 💫 New checkers
 
 Custom checkers:
 
 - `forbidden-python-syntax`: Flag code that is not permitted to be used on an assessment.
 
-### Other
+### 🔧 Internal changes
 
 - Pin dependency versions
 
 ## [2.4.2] - 2023-1-31
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fixed custom message formats based on Pylint 2.15 updates.
 - Fixed bug in shadowing-in-comprehension checker when target is a subscript node.
@@ -203,13 +207,13 @@ Custom checkers:
 
 ## [2.4.1] - 2023-1-13
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fixed PyTA contract checking for method calls when running modules in PyCharm using the "Run File in Python Console" action.
 
 ## [2.4.0] - 2022-12-21
 
-### Enhancements
+### ✨ Enhancements
 
 - `unnecessary_indexing_checker` has now been extended to check comprehensions in addition to for loops.
 - `invalid_for_target_checker` has now been extended to check comprehensions in addition to for loops.
@@ -219,13 +223,13 @@ Custom checkers:
 - Added constant `python_ta.contracts.ENABLE_CONTRACT_CHECKING` to only check contracts when its value is set to `True`.
 - `python_ta.debug.AccumulationTable` has extended loop detection to allow the loop to appear anywhere inside the with statement.
 
-### Bug Fixes
+### 🐛 Bug fixes
 
 - Fixed Issue #831: Contract Checker Bug. Now raises `AssertionError` when the expected type is `float` but got `int` instead.
 - PyTA contracts' type checking now raises `AssertionError` when the expected type is `int` but got `bool` instead.
 - Fixed PyTA contract checking when running modules in PyCharm using the "Run File in Python Console" action.
 
-### New checkers
+### 💫 New checkers
 
 Custom checkers:
 
@@ -233,24 +237,24 @@ Custom checkers:
 
 ## [2.3.3] - 2022-09-05
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Restored 'line_end', 'column_end', and 'snippet' fields in JSON reporter output.
 
 ## [2.3.2] - 2022-08-30
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Updated jsonreporter to get data from the new pylint Message class (#840)
 
-### Experimental
+### 🥽 Experimental
 
 - Added preliminary support for translation of constraints into Z3 solver.
   (This is currently not enabled by default in PythonTA.)
 
 ## [2.3.1] - 2022-08-08
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Add missing `toml` package to library dependencies.
 - Improve formatting of `None` and `float`s in `AccumulationTable` display.
@@ -258,7 +262,7 @@ Custom checkers:
 
 ## [2.3.0] - 2022-08-08
 
-### Enhancements
+### ✨ Enhancements
 
 - Added new command line argument `-v/--version`. User can print out current PythonTA version using `python -m python_ta -v`.
 - Preconditions, postconditions, and representation invariants are now parsed only once and compiled.
@@ -268,11 +272,11 @@ Custom checkers:
 - Added new `python_ta.debug` module with an `AccumulationTable` context manager for loop print debugging.
 - Improve message for R1710 (inconsistent-return-statements)
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Function `check_all_contracts` skips contract checks for functions and classes which are not defined in a module whose name is passed as an argument. If `decorate_main` argument is `True`, functions and classes defined in `__main__` module will be checked without needing to pass in additional arguments.
 
-### New checkers
+### 💫 New checkers
 
 Custom checkers:
 
@@ -300,7 +304,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.2.0] - 2021-12-09
 
-### Enhancements
+### ✨ Enhancements
 
 - Added support for postconditions in function docstring.
 - Improve error message of `unncessary-indexing` checker.
@@ -310,7 +314,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated to Pylint v2.12. See "New checks" below for the new checkers enabled by default.
 - Register ending location setter as pylint plugin.
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fix bugs in `unnecessary-indexing` checker:
   1. False positive when the same loop variable is used in two loops in sequence.
@@ -319,7 +323,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fix HTML report to link correctly to specific errors on the PythonTA documentation website.
 - Fix bug when setting ending locations for `ClassDef`s that have no decorators.
 
-### New checkers
+### 💫 New checkers
 
 Pylint checkers v2.12:
 
@@ -335,14 +339,14 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ## [2.1.1] - 2021-09-23
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fix HTML report to display file even when no errors are found.
 - Fix pylint cache directory creation (backport of change from pylint 2.11)
 
 ## [2.1.0] - 2021-09-16
 
-### Enhancements
+### ✨ Enhancements
 
 - Added `line_end` and `column_end` to `JSONReporter` output.
 
@@ -350,7 +354,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 PythonTA's adopting semantic versioning as of this release, so we've bumped the version to 2.0.
 
-### Enhancements
+### ✨ Enhancements
 
 - Added basic CLI. Users can now run PythonTA in the command line either as a standalone
   script (`$ python_ta my_file`) or as a Python module (`$ python -m python_ta my_file`).
@@ -359,7 +363,7 @@ PythonTA's adopting semantic versioning as of this release, so we've bumped the 
 - Added new configuration option `pycodestyle-ignore` to customize the pycodestyle errors
   checked by `pep8-errors`.
 
-### Changes
+### ✨ Changes
 
 - Changed HTML report template to make it more user-friendly.
 - Changed default HTML report output: by default now loads in a web browser without creating
@@ -372,7 +376,7 @@ PythonTA's adopting semantic versioning as of this release, so we've bumped the 
   loop targets that are attributes (e.g., `for obj.x in [1, 2, 3]`).
   ([#701](https://github.com/pyta-uoft/pyta/issues/701))
 
-### Bug fixes
+### 🐛 Bug fixes
 
 - Fixed bug with `python_ta.contracts`: do not check representation invariants
   when a helper method is called within an initializer.
@@ -385,11 +389,11 @@ PythonTA's adopting semantic versioning as of this release, so we've bumped the 
 - Fixed bug where PythonTA would crash on files that used encodings other than UTF-8.
   PythonTA now reports an error and displays the invalid characters to the user.
 
-### Deprecations
+### 🚧 Deprecations
 
 - Deprecated `pyta-reporter` option; use `output-format` instead.
 
-### New checkers
+### 💫 New checkers
 
 Custom checkers:
 
@@ -416,7 +420,7 @@ For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html).
 Note that the above list only contains the Pylint checkers enabled by default in PythonTA.
 
-### Internal
+### 🔧 Internal changes
 
 - Adopted semantic versioning.
 - Created a Changelog.

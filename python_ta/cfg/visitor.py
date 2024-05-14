@@ -1,7 +1,10 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from astroid import nodes
+from astroid import extract_node, nodes
+from astroid.exceptions import AstroidSyntaxError
+
+from python_ta.contracts import parse_assertions
 
 from .graph import CFGBlock, ControlFlowGraph
 
@@ -125,7 +128,11 @@ class CFGVisitor:
         self._current_cfg.start.add_statement(func.args)
         func.cfg_block = self._current_cfg.start
 
-        self._current_block = self._current_cfg.create_block(self._current_cfg.start)
+        preconditions_node = _get_preconditions_node(func)
+
+        self._current_block = self._current_cfg.create_block(
+            self._current_cfg.start, edge_condition=preconditions_node
+        )
 
         for child in func.body:
             child.accept(self)
@@ -448,3 +455,29 @@ def _get_raise_exc(node: nodes.Raise) -> str:
         return f"{nodes.Raise.__name__} {next(exceptions).name}"
     except StopIteration:
         return nodes.Raise.__name__
+
+
+def _get_preconditions_node(func: nodes.FunctionDef) -> Optional[nodes.NodeNG]:
+    """A helper method that takes in a function definition node, retrieves its preconditions, and then parses them
+    into a AST node representing all the valid Python preconditions combined in an and statement. Returns None if
+    there are no valid Python preconditions."""
+    valid_assertions = [
+        f"({assertion})"
+        for assertion in parse_assertions(func)
+        if _is_python_precondition(assertion)
+    ]
+    if not valid_assertions:
+        return None
+    precondition_string = " and ".join(valid_assertions)
+    condition = extract_node(precondition_string)
+    return condition
+
+
+def _is_python_precondition(precondition: str) -> bool:
+    """Given a precondition string, determine if it is a valid Python precondition that can be parsed and return
+    a boolean result."""
+    try:
+        _ = extract_node(precondition)
+        return True
+    except AstroidSyntaxError:
+        return False

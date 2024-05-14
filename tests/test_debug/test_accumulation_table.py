@@ -908,6 +908,53 @@ def test_snapshot_to_json_dicts_of_dicts():
     ]
 
 
+class OneClass:
+    """
+    Represents a simple class with two primitive attributes.
+
+    Attributes:
+        attr1 (str): A string attribute, initialized to "value1".
+        attr2 (int): An integer attribute, initialized to 42.
+    """
+
+    def __init__(self):
+        self.attr1 = "value1"
+        self.attr2 = 42
+
+
+def test_snapshot_to_json_one_class():
+    """
+    Test snapshot_to_json with snapshot data including an instance of OneClass.
+    """
+    one_class_instance = OneClass()
+
+    snapshot_data = [
+        {"__main__": {"one_class_instance": one_class_instance}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "id": None,
+            "isClass": True,
+            "name": "__main__",
+            "stack_frame": True,
+            "value": {"one_class_instance": 1},
+        },
+        {"id": 2, "isClass": False, "name": "str", "value": "value1"},
+        {"id": 3, "isClass": False, "name": "int", "value": 42},
+        {
+            "id": 1,
+            "isClass": True,
+            "name": "OneClass",
+            "value": {"attr1": 2, "attr2": 3},
+        },
+    ]
+
+    assert json_data == expected_output
+
+
 def test_output_to_existing_file(tmp_path) -> None:
     test_list = [10, 20, 30]
     sum_so_far = 0

@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update to pylint v3.1 and and astroid v3.1
 - Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
 - Stored valid Python function preconditions in initial edge to function code in generated function control flow graphs.
+- Report warning when control flow graph creation encounters a syntax error related to control flow
 
 ### 💫 New checkers
 
@@ -39,6 +40,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed issue where top level class attribute assignment was considered as permissible top level code
 - Fixed issue where `check_contracts` fails silently when function preconditions contain precondition violations, and when a representation invariant contains a call to a top-level function (not built-in or imported library).
 - Fixed issue where methods called in representation invariants lead to infinite recursion.
+- Fixed issue where `PossiblyUndefinedChecker` raised an error if the control flow graph was invalid due to syntax error
 
 ### 🔧 Internal changes
 

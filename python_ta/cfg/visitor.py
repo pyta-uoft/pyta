@@ -307,6 +307,7 @@ class CFGVisitor:
             return
 
         old_curr = self._current_block
+        unreachable_block = self._current_cfg.create_block()
         for boundary, exits in reversed(self._control_boundaries):
             if (
                 isinstance(boundary, nodes.FunctionDef) or isinstance(boundary, nodes.ClassDef)
@@ -315,7 +316,8 @@ class CFGVisitor:
                     f"'{type(node).__name__}' outside"
                     f' {"function" if isinstance(node, nodes.Return) else "loop"}'
                 )
-                self.visit_generic(node)
+                self._current_cfg.link(old_curr, unreachable_block)
+                old_curr.add_statement(node)
                 break
 
             if isinstance(node, nodes.Raise):
@@ -336,8 +338,9 @@ class CFGVisitor:
                 f"'{type(node).__name__}' outside"
                 f' {"function" if isinstance(node, nodes.Return) else "loop"}'
             )
+            self._current_cfg.link(old_curr, unreachable_block)
+            old_curr.add_statement(node)
 
-        unreachable_block = self._current_cfg.create_block()
         self._current_block = unreachable_block
 
     def visit_try(self, node: nodes.Try) -> None:

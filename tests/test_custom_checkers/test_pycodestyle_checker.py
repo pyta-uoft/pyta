@@ -70,6 +70,36 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
+    def test_error_e223(self) -> None:
+        """Test that PEP8 error E223 (tab before operator) triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e223_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e223(self) -> None:
+        """Test that PEP8 error E223 (tab before operator) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e223_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e224(self) -> None:
+        """Test that PEP8 error E224 (tab after operator) triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e224_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e224(self) -> None:
+        """Test that PEP8 error E224 (tab after operator) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e224_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
     def test_error_e226(self) -> None:
         """Test that PEP8 error E226 (missing whitespace around arithmetic operator) is triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_error.py"))
@@ -82,6 +112,36 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_no_error_e226(self) -> None:
         """Test that PEP8 error E226 (missing whitespace around arithmeic operator) is NOT triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e226_no_error.py"))
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e227(self) -> None:
+        """Test that PEP8 error E227 (missing whitespace around bitwise or shift operator) triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e227_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e227(self) -> None:
+        """Test that PEP8 error E227 (missing whitespace around bitwise or shift operator) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e227_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e228(self) -> None:
+        """Test that PEP8 error E228 (missing whitespace around modulo operator) triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e228_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e228(self) -> None:
+        """Test that PEP8 error E228 (missing whitespace around modulo operator) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e228_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
@@ -102,5 +162,20 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_no_error_e262(self) -> None:
         """Test that PEP8 error E262 (inline comment should start with '# ') is not triggered"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e262_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e265(self) -> None:
+        """Test that PEP8 error E265 (block comment should start with '# ') triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e265_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e265(self) -> None:
+        """Test that PEP8 error E265 (block comment should start with '# ') is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e265_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)

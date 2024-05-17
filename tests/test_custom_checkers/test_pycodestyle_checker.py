@@ -73,6 +73,8 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e223(self) -> None:
         """Test that PEP8 error E223 (tab before operator) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e223_error.py")
+        # NOTE: The error message relates to spaces becauses tabs are converted to spaces in most editors.
+        # args = ("E221", "line 1, column 1: multiple spaces before operator")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
             ignore_position=True,
@@ -88,6 +90,8 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e224(self) -> None:
         """Test that PEP8 error E224 (tab after operator) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e224_error.py")
+        # NOTE: The error message relates to spaces becauses tabs are converted to spaces in most editors.
+        # args = ("E222", "line 1, column 3: multiple spaces after operator")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
             ignore_position=True,
@@ -118,8 +122,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e227(self) -> None:
         """Test that PEP8 error E227 (missing whitespace around bitwise or shift operator) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e227_error.py")
+        args = ("E227", "line 1, column 5: missing whitespace around bitwise or shift operator")
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
             ignore_position=True,
         ):
             self.checker.process_module(mod)
@@ -133,8 +138,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e228(self) -> None:
         """Test that PEP8 error E228 (missing whitespace around modulo operator) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e228_error.py")
+        args = ("E228", "line 1, column 5: missing whitespace around modulo operator")
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
             ignore_position=True,
         ):
             self.checker.process_module(mod)
@@ -168,8 +174,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e265(self) -> None:
         """Test that PEP8 error E265 (block comment should start with '# ') triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e265_error.py")
+        args = ("E265", "line 1, column 0: block comment should start with '# '")
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
             ignore_position=True,
         ):
             self.checker.process_module(mod)

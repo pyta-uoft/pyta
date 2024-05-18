@@ -73,10 +73,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e223(self) -> None:
         """Test that PEP8 error E223 (tab before operator) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e223_error.py")
-        # NOTE: The error message relates to spaces becauses tabs are converted to spaces in most editors.
-        # args = ("E221", "line 1, column 1: multiple spaces before operator")
+        args = ("E223", "line 1, column 1: tab before operator")
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
             ignore_position=True,
         ):
             self.checker.process_module(mod)
@@ -90,10 +89,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_error_e224(self) -> None:
         """Test that PEP8 error E224 (tab after operator) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e224_error.py")
-        # NOTE: The error message relates to spaces becauses tabs are converted to spaces in most editors.
-        # args = ("E222", "line 1, column 3: multiple spaces after operator")
+        args = ("E224", "line 1, column 3: tab after operator")
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None),
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
             ignore_position=True,
         ):
             self.checker.process_module(mod)

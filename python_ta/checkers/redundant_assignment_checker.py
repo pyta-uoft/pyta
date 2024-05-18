@@ -89,7 +89,7 @@ class RedundantAssignmentChecker(BaseChecker):
             else:
                 in_facts = set.intersection(*outs)
             temp = self._transfer(b, in_facts)
-            if temp != out_facts[b]:
+            if b in out_facts and temp != out_facts[b]:
                 out_facts[b] = temp
                 worklist.extend([pred.source for pred in b.predecessors if pred.source.reachable])
 

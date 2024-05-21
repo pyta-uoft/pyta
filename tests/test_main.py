@@ -1,0 +1,77 @@
+"""Run from the `pyta` root directory to use the local `python_ta` rather than
+installed `python_ta` package.
+"""
+
+import subprocess
+import sys
+from os import environ
+from unittest.mock import Mock
+
+import python_ta
+
+
+def test_check_no_errors_zero() -> None:
+    """Test that python_ta exits with status code 0 when it does not detect errors."""
+    output = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--config",
+            "tests/test.pylintrc",
+            "tests/fixtures/no_errors.py",
+        ]
+    )
+
+    assert output.returncode == 0
+
+
+def test_check_errors_nonzero() -> None:
+    """Test that python_ta exits with non-zero status code when it detects errors."""
+    output = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--config",
+            "tests/test.pylintrc",
+            "examples/nodes/name.py",
+        ]
+    )
+
+    assert output.returncode != 0
+
+
+def test_check_exit_zero() -> None:
+    """Test that python_ta --exit-zero always exits with status code 0,
+    even when given a file with errors.
+    """
+    output = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--exit-zero",
+            "--config",
+            "tests/test.pylintrc",
+            "examples/nodes/name.py",
+        ],
+        env={**environ, "PYTHONIOENCODING": "utf-8"},
+    )
+
+    assert output.returncode == 0
+
+
+def test_check_version() -> None:
+    """Test that python_ta --version outputs python_ta.__version__ to stdout."""
+    stdout = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    ).stdout
+    assert stdout.rstrip("\n") == python_ta.__version__

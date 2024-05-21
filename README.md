@@ -108,7 +108,7 @@ Alexey Strokach,
 Sophy Sun,
 Utku Egemen Umut,
 Sarah Wang,
+Lana Wehbeh,
 Jasmine Wu,
 Philippe Yu,
-Yi Cheng (Michael) Zhao,
-Lana Wehbeh
+Yi Cheng (Michael) Zhao

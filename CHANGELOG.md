@@ -44,7 +44,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 ### 🔧 Internal changes
 
-- Updated changelog and pull request template formats
+- Updated changelog and pull request git putemplate formats
 - Added unit tests for pep8 errors E115, E122, E125, E127, E129, E131 for `pycodestyle_checker`
 
 ## [2.7.0] - 2024-12-14

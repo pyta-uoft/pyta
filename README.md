@@ -109,6 +109,6 @@ Sophy Sun,
 Utku Egemen Umut,
 Sarah Wang,
 Jasmine Wu,
+Raine Yang,
 Philippe Yu,
 Yi Cheng (Michael) Zhao
-Raine Yang

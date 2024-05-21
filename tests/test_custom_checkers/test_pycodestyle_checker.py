@@ -100,7 +100,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
             self.checker.process_module(mod)
 
     def test_no_error_e262(self) -> None:
-        """Test that PEP8 error E262 (inline comment should start with '#') is not triggered"""
+        """Test that PEP8 error E262 (inline comment should start with '# ') is not triggered"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e262_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)

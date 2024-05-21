@@ -224,6 +224,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         mod = MANAGER.ast_from_file(DIR_PATH + "e275_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
+
     def test_error_e301(self) -> None:
         """Test that PEP8 error E301 (expected 1 blank line, found 0) triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e301_error.py")

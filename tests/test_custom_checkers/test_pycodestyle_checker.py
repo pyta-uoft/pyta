@@ -111,9 +111,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=1,
+                line=12,
                 node=None,
-                args=("E304", "line 13, column 0: blank lines found after function decorator"),
+                args=("E304", "line 12, column 0: blank lines found after function decorator"),
             ),
             ignore_position=True,
         ):
@@ -131,9 +131,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=10,
+                line=6,
                 node=None,
-                args=("E303", "line 10, column 0: too many blank lines (3)"),
+                args=("E303", "line 6, column 0: too many blank lines (3)"),
             ),
             ignore_position=True,
         ):
@@ -151,9 +151,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=13,
+                line=5,
                 node=None,
-                args=("E301", "line 13, column 4: expected 1 blank line, found 0"),
+                args=("E301", "line 5, column 4: expected 1 blank line, found 0"),
             ),
             ignore_position=True,
         ):
@@ -171,9 +171,9 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=2,
+                line=1,
                 node=None,
-                args=("E275", "line 2, column 16: missing whitespace after keyword"),
+                args=("E275", "line 1, column 16: missing whitespace after keyword"),
             ),
             ignore_position=True,
         ):

@@ -56,7 +56,7 @@ To generate the documentation locally, run the commands:
 > make html
 ```
 
-Then open the file `docs/_build/index.html` in your web browser!
+Then open the file `docs/_build/html/index.html` in your web browser!
 
 ## Demo
 

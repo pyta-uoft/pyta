@@ -149,22 +149,6 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
-    def test_error_e265(self) -> None:
-        """Test that PEP8 error E265 (block comment should start with '# ') triggers"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e265_error.py")
-        args = ("E265", "line 1, column 0: block comment should start with '# '")
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
-            ignore_position=True,
-        ):
-            self.checker.process_module(mod)
-
-    def test_no_error_e265(self) -> None:
-        """Test that PEP8 error E265 (block comment should start with '# ') is NOT triggered"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e265_no_error.py")
-        with self.assertNoMessages():
-            self.checker.process_module(mod)
-
     def test_error_e262(self) -> None:
         """Test that PEP8 error E262 (inline comment should start with '# ') triggers"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e262_error.py")
@@ -182,6 +166,22 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_no_error_e262(self) -> None:
         """Test that PEP8 error E262 (inline comment should start with '# ') is not triggered"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e262_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e265(self) -> None:
+        """Test that PEP8 error E265 (block comment should start with '# ') triggers"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e265_error.py")
+        args = ("E265", "line 1, column 0: block comment should start with '# '")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="pep8-errors", line=1, node=None, args=args),
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e265(self) -> None:
+        """Test that PEP8 error E265 (block comment should start with '# ') is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e265_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 

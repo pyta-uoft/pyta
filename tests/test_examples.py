@@ -9,9 +9,11 @@ import itertools
 from pylint import lint
 from io import StringIO
 import sys
+import python_ta
 
 
 _EXAMPLES_PATH = "examples/pylint/"
+_CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
 _EXAMPLE_PREFIX_REGEX = r"[CEFRW]\d{4}"
 
 
@@ -50,7 +52,7 @@ def get_file_paths(paths: Union[str, List[str]]):
     return test_files
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def symbols_by_file() -> Dict[str, Set[str]]:
     """Run pylint on all the example files and return the map of file name to the
     set of Pylint messages it raises."""
@@ -91,6 +93,49 @@ def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) ->
 
     test_file_name = os.path.basename(test_file)
     file_symbols = symbols_by_file[test_file_name]
+
+    found_pylint_message = checker_name in file_symbols
+    assert found_pylint_message, f"Failed {test_file}. File does not add expected message."
+
+
+@pytest.fixture(scope="session")
+def symbols_by_file_pyta() -> Dict[str, Set[str]]:
+    """Run python_ta on all the example files and return the map of file name to the
+    set of PythonTA messages it raises."""
+    sys.stdout = StringIO()
+    python_ta.check_all(
+        module_name=get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]),
+        config={
+            "output-format": "python_ta.reporters.JSONReporter",
+        }
+    )
+
+    jsons_output = sys.stdout.getvalue()
+    sys.stdout = sys.__stdout__
+    pyta_list_output = json.loads(jsons_output)
+
+    file_to_symbol = {}
+    for path, group in itertools.groupby(pyta_list_output, key=lambda d: d["msgs"][0]["path"]):
+        symbols = {message["msgs"][0]["symbol"] for message in group}
+        file = os.path.basename(path)
+
+        file_to_symbol[file] = symbols
+
+    return file_to_symbol
+
+
+@pytest.mark.parametrize("test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]))
+def test_examples_files_pyta(test_file: str, symbols_by_file_pyta: Dict[str, Set[str]]) -> None:
+    """Creates all the new unit tests dynamically from the testing directory."""
+    base_name = os.path.basename(test_file)
+    if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
+        return
+    if not base_name.lower().endswith(".py"):
+        assert False
+    checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
+
+    test_file_name = os.path.basename(test_file)
+    file_symbols = symbols_by_file_pyta[test_file_name]
 
     found_pylint_message = checker_name in file_symbols
     assert found_pylint_message, f"Failed {test_file}. File does not add expected message."

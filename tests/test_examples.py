@@ -26,6 +26,7 @@ IGNORED_TESTS = [
     "w1503_redundant_unittest_assert.py",
     "e1140_unhashable_dict_key.py",
     "r0401_cyclic_import.py",  # R0401 required an additional unit test but should be kept here.
+    "e9999_forbidden_import_local.py"  # This file itself (as an empty file) should not be checked
 ]
 
 
@@ -115,7 +116,12 @@ def symbols_by_file_pyta() -> Dict[str, Set[str]]:
     pyta_list_output = json.loads(jsons_output)
 
     file_to_symbol = {}
-    for path, group in itertools.groupby(pyta_list_output, key=lambda d: d["msgs"][0]["path"]):
+
+    def get_msg_path(d):
+        assert d["msgs"], "The 'msgs' list should not be empty"
+        return d["msgs"][0]["path"]
+
+    for path, group in itertools.groupby(pyta_list_output, key=get_msg_path):
         symbols = {message["msgs"][0]["symbol"] for message in group}
         file = os.path.basename(path)
 

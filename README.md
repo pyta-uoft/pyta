@@ -56,7 +56,7 @@ To generate the documentation locally, run the commands:
 > make html
 ```
 
-Then open the file `docs/_build/html/index.html` in your web browser!
+Then open the file `docs/_build/index.html` in your web browser!
 
 ## Demo
 
@@ -66,7 +66,7 @@ included as a library). In the Python interpreter, try running:
 
 ```python
 >>> import python_ta
->>> python_ta.check_all('examples.custom_checkers.e9999_forbidden_import')
+>>> python_ta.check_all('examples.forbidden_import_example')
 [Some output should be shown]
 >>> python_ta.doc('E9999')
 ```

@@ -109,9 +109,6 @@ def test_config_generation() -> None:
 def test_no_config() -> None:
     """Test that python_ta exits with status code 0 when it does not detect errors
     and no config is specified.
-
-    NOTE: The exit code 0 for this file is already tested; this merely confirms that
-          the absence of a config does not affect the process.
     """
     output = subprocess.run(
         [

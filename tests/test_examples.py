@@ -1,4 +1,4 @@
-from typing import Dict, Set
+from typing import Dict, Set, Union, List
 
 import os
 import subprocess
@@ -27,16 +27,26 @@ IGNORED_TESTS = [
 ]
 
 
-def get_file_paths():
-    """Gets all the files from the examples folder for testing. This will
+def get_file_paths(paths: Union[str, List[str]]):
+    """
+    Gets all the files from the examples folder for testing. This will
     return all the full file paths to the file, meaning they will have the
-    _EXAMPLES_PATH prefix followed by the file name for each element.
-    A list of all the file paths will be returned."""
+    path prefix followed by the file name for each element.
+    A list of all the file paths will be returned.
+
+    :param paths: The paths to retrieve the files from.
+    """
     test_files = []
-    for _, _, files in os.walk(_EXAMPLES_PATH, topdown=True):
-        for filename in files:
-            if filename not in IGNORED_TESTS and filename.endswith(".py"):
-                test_files.append(_EXAMPLES_PATH + filename)
+
+    if isinstance(paths, str):
+        paths = [paths]
+
+    for path in paths:
+        for _, _, files in os.walk(path, topdown=True):
+            for filename in files:
+                if filename not in IGNORED_TESTS and filename.endswith(".py"):
+                    test_files.append(path + filename)
+
     return test_files
 
 
@@ -51,7 +61,7 @@ def symbols_by_file() -> Dict[str, Set[str]]:
             "--reports=n",
             "--rcfile=python_ta/config/.pylintrc",
             "--output-format=json",
-            *get_file_paths()
+            *get_file_paths(_EXAMPLES_PATH)
         ], exit=False
     )
     jsons_output = sys.stdout.getvalue()
@@ -69,7 +79,7 @@ def symbols_by_file() -> Dict[str, Set[str]]:
     return file_to_symbol
 
 
-@pytest.mark.parametrize("test_file", get_file_paths())
+@pytest.mark.parametrize("test_file", get_file_paths(_EXAMPLES_PATH))
 def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) -> None:
     """Creates all the new unit tests dynamically from the testing directory."""
     base_name = os.path.basename(test_file)

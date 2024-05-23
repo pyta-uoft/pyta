@@ -48,7 +48,7 @@ def test_check_on_bad_input():
         [222],
         222,
         ["examples/nodes/dict.py examples/nodes/const.py"],
-        [222, "examples/inline_config_comment.py", "../examples/nodes/dict.py"],
+        [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
         ["file_does_not_exist"],
     ]
     for item in _inputs:
@@ -196,7 +196,7 @@ def test_check_no_reporter_output() -> None:
     webbrowser.open = Mock(return_value=None)
     HTTPServer.handle_request = Mock(return_value=None)
 
-    _inputs = [["../examples/nodes/name.py"]]
+    _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory
         python_ta.check_all(item)

@@ -5,7 +5,6 @@ installed `python_ta` package.
 import subprocess
 import sys
 from os import environ
-from unittest.mock import Mock
 
 import python_ta
 
@@ -75,3 +74,26 @@ def test_check_version() -> None:
         text=True,
     ).stdout
     assert stdout.rstrip("\n") == python_ta.__version__
+
+
+def test_config_generation() -> None:
+    """Test that python_ta --generate-config prints the default config to stdout."""
+    stdout_config = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--generate-config",
+        ],
+        capture_output=True,
+        text=True,
+    ).stdout.rstrip("\n")
+    actual_config = subprocess.run(
+        [
+            "cat",
+            "python_ta/config/.pylintrc",
+        ],
+        capture_output=True,
+        text=True,
+    ).stdout.rstrip("\n")
+    assert stdout_config == actual_config

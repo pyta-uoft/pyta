@@ -68,11 +68,14 @@ def test_check_version() -> None:
             sys.executable,
             "-m",
             "python_ta",
+            "--config",
+            "tests/test.pylintrc",
             "--version",
         ],
         capture_output=True,
         text=True,
     ).stdout
+
     assert stdout.rstrip("\n") == python_ta.__version__
 
 
@@ -84,10 +87,13 @@ def test_config_generation() -> None:
             "-m",
             "python_ta",
             "--generate-config",
+            "--config",
+            "tests/test.pylintrc",
         ],
         capture_output=True,
         text=True,
     ).stdout.rstrip("\n")
+
     actual_config = subprocess.run(
         [
             "cat",
@@ -96,4 +102,26 @@ def test_config_generation() -> None:
         capture_output=True,
         text=True,
     ).stdout.rstrip("\n")
+
     assert stdout_config == actual_config
+
+
+def test_no_config() -> None:
+    """Test that python_ta exits with status code 0 when it does not detect errors
+    and no config is specified.
+
+    NOTE: The exit code 0 for this file is already tested; this merely confirms that
+          the absence of a config does not affect the process.
+    """
+    output = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "python_ta",
+            "--output-format",
+            "python_ta.reporters.PlainReporter",
+            "tests/fixtures/no_errors.py",
+        ],
+    )
+
+    assert output.returncode == 0

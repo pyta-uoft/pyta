@@ -66,7 +66,7 @@ included as a library). In the Python interpreter, try running:
 
 ```python
 >>> import python_ta
->>> python_ta.check_all('examples.forbidden_import_example')
+>>> python_ta.check_all('examples.custom_checkers.e9999_forbidden_import')
 [Some output should be shown]
 >>> python_ta.doc('E9999')
 ```

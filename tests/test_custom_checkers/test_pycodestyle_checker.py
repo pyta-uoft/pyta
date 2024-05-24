@@ -1,7 +1,8 @@
 import os
+
 import pylint.testutils
-from astroid.astroid_manager import MANAGER
 import pytest
+from astroid.astroid_manager import MANAGER
 
 from python_ta.checkers.pycodestyle_checker import PycodestyleChecker
 

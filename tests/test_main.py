@@ -8,7 +8,26 @@ from os import environ, path
 
 import python_ta
 
-CONFIG_FILE_PATH = path.join(path.dirname(path.dirname(__file__)), "python_ta/config/.pylintrc")
+# Find the source root directory
+source = path.dirname(__file__)
+while path.basename(source) != "pyta":
+    source = path.dirname(source)
+
+# Gives absolute path to source root directory (pyta)
+SOURCE_ROOT = source
+# SOURCE_ROOT = path.normpath(path.join(path.dirname(__file__), ".."))  # NOTE: Professor may prefer this approach
+
+# Defines relative path to the default config directory (python_ta/config)
+CONFIG_LOCATION = path.join("python_ta", "config")
+
+# Gives absolute path to the default config file ($SOURCE_ROOT/$CONFIG_LOCATION/.pylintrc)
+DEFAULT_CONFIG_FILE_PATH = path.join(SOURCE_ROOT, CONFIG_LOCATION, ".pylintrc")
+
+# Gives absolute path to the testing directory ($SOURCE_ROOT/tests)
+TEST_DIR = path.join(SOURCE_ROOT, "tests")
+
+# Gives absolute path to the config file used for testing ($TEST_DIR/test.pylintrc)
+TEST_CONFIG_FILE_PATH = path.join(TEST_DIR, "test.pylintrc")
 
 
 def test_check_no_errors_zero() -> None:
@@ -19,8 +38,8 @@ def test_check_no_errors_zero() -> None:
             "-m",
             "python_ta",
             "--config",
-            "tests/test.pylintrc",
-            "tests/fixtures/no_errors.py",
+            TEST_CONFIG_FILE_PATH,
+            path.join(TEST_DIR, "fixtures", "no_errors.py"),
         ]
     )
 
@@ -35,8 +54,8 @@ def test_check_errors_nonzero() -> None:
             "-m",
             "python_ta",
             "--config",
-            "tests/test.pylintrc",
-            "examples/nodes/name.py",
+            TEST_CONFIG_FILE_PATH,
+            path.join(SOURCE_ROOT, "examples", "nodes", "name.py"),
         ]
     )
 
@@ -54,8 +73,8 @@ def test_check_exit_zero() -> None:
             "python_ta",
             "--exit-zero",
             "--config",
-            "tests/test.pylintrc",
-            "examples/nodes/name.py",
+            TEST_CONFIG_FILE_PATH,
+            path.join(SOURCE_ROOT, "examples", "nodes", "name.py"),
         ],
         env={**environ, "PYTHONIOENCODING": "utf-8"},
     )
@@ -71,7 +90,7 @@ def test_check_version() -> None:
             "-m",
             "python_ta",
             "--config",
-            "tests/test.pylintrc",
+            TEST_CONFIG_FILE_PATH,
             "--version",
         ],
         capture_output=True,
@@ -90,14 +109,13 @@ def test_config_generation() -> None:
             "python_ta",
             "--generate-config",
             "--config",
-            "tests/test.pylintrc",
+            TEST_CONFIG_FILE_PATH,
         ],
         capture_output=True,
         text=True,
     ).stdout
 
-    pylintrc_location = CONFIG_FILE_PATH
-    with open(pylintrc_location, "r") as f:
+    with open(DEFAULT_CONFIG_FILE_PATH, "r") as f:
         actual_config = f.read()
 
     generated_config = generated_config[:-1]  # Remove trailing newline
@@ -116,7 +134,7 @@ def test_no_config() -> None:
             "python_ta",
             "--output-format",
             "python_ta.reporters.PlainReporter",
-            "tests/fixtures/no_errors.py",
+            path.join(TEST_DIR, "fixtures", "no_errors.py"),
         ],
     )
 

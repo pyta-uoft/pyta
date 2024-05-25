@@ -6,7 +6,15 @@ import click
 
 from python_ta import __version__, check_all, check_errors
 
-CONFIG_FILE_PATH = path.join(path.dirname(__file__), "config/.pylintrc")
+# Gives absolute path to source root directory (pyta)
+SOURCE_ROOT = path.normpath(path.join(path.dirname(__file__), ".."))
+
+# Defines relative path to the default config directory (python_ta/config)
+CONFIG_LOCATION = path.join("python_ta", "config")
+
+# Gives absolute path to the default config file ($SOURCE_ROOT/$CONFIG_LOCATION/.pylintrc)
+CONFIG_FILE_PATH = path.join(SOURCE_ROOT, CONFIG_LOCATION, ".pylintrc")
+
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
@@ -56,8 +64,7 @@ def main(
 
     # `config` is None if `-c` flag is not set
     if generate_config:
-        pylintrc_location = CONFIG_FILE_PATH
-        with open(pylintrc_location, "r") as f:
+        with open(CONFIG_FILE_PATH, "r") as f:
             contents = f.read()
             print(contents)
             sys.exit(0)

@@ -4,7 +4,7 @@ installed `python_ta` package.
 
 import subprocess
 import sys
-from os import environ
+from os import environ, path
 
 import python_ta
 
@@ -81,7 +81,7 @@ def test_check_version() -> None:
 
 def test_config_generation() -> None:
     """Test that python_ta --generate-config prints the default config to stdout."""
-    stdout_config = subprocess.run(
+    generated_config = subprocess.run(
         [
             sys.executable,
             "-m",
@@ -92,18 +92,15 @@ def test_config_generation() -> None:
         ],
         capture_output=True,
         text=True,
-    ).stdout.rstrip("\n")
+    ).stdout
 
-    actual_config = subprocess.run(
-        [
-            "cat",
-            "python_ta/config/.pylintrc",
-        ],
-        capture_output=True,
-        text=True,
-    ).stdout.rstrip("\n")
+    pylintrc_location = path.join(path.dirname(__file__), "../python_ta/config/.pylintrc")
+    with open(pylintrc_location, "r") as f:
+        actual_config = f.read()
 
-    assert stdout_config == actual_config
+    generated_config = generated_config[:-1]  # Remove trailing newline
+
+    assert generated_config == actual_config
 
 
 def test_no_config() -> None:

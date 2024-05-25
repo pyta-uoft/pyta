@@ -8,6 +8,8 @@ from os import environ, path
 
 import python_ta
 
+CONFIG_FILE_PATH = path.join(path.dirname(path.dirname(__file__)), "python_ta/config/.pylintrc")
+
 
 def test_check_no_errors_zero() -> None:
     """Test that python_ta exits with status code 0 when it does not detect errors."""
@@ -94,7 +96,7 @@ def test_config_generation() -> None:
         text=True,
     ).stdout
 
-    pylintrc_location = path.join(path.dirname(__file__), "../python_ta/config/.pylintrc")
+    pylintrc_location = CONFIG_FILE_PATH
     with open(pylintrc_location, "r") as f:
         actual_config = f.read()
 

@@ -1,11 +1,12 @@
-import os
 import sys
+from os import path
 from typing import List, Optional
 
 import click
 
 from python_ta import __version__, check_all, check_errors
 
+CONFIG_FILE_PATH = path.join(path.dirname(__file__), "config/.pylintrc")
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
@@ -55,7 +56,7 @@ def main(
 
     # `config` is None if `-c` flag is not set
     if generate_config:
-        pylintrc_location = os.path.join(os.path.dirname(__file__), "config/.pylintrc")
+        pylintrc_location = CONFIG_FILE_PATH
         with open(pylintrc_location, "r") as f:
             contents = f.read()
             print(contents)

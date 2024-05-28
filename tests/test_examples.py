@@ -100,7 +100,7 @@ def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) ->
     assert found_pylint_message, f"Failed {test_file}. File does not add expected message."
 
 
-def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> Dict[str, Set[str]]:
+def _symbols_by_file_pyta(paths: List[str], include_msg: bool = False) -> Dict[str, Set[str]]:
     """
     Run python_ta on all the example files and return the map of file name to the
     set of PythonTA messages it raises.

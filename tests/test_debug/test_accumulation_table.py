@@ -14,7 +14,7 @@ import pytest
 import tabulate
 
 from python_ta.debug import AccumulationTable
-from tests.test_debug.snapshot import snapshot, snapshot_to_json
+from tests.test_debug.test_snapshot import snapshot, snapshot_to_json
 
 
 def test_one_accumulator() -> None:

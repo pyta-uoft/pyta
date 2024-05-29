@@ -5,16 +5,16 @@ types of accumulator loops
 
 import copy
 import json
-import os
 import shutil
 import subprocess
 import sys
+from os import path
 
 import pytest
 import tabulate
 
 from python_ta.debug import AccumulationTable
-from python_ta.debug.snapshot import snapshot, snapshot_to_json
+from tests.test_debug.snapshot import snapshot, snapshot_to_json
 
 
 def test_one_accumulator() -> None:
@@ -504,8 +504,8 @@ def test_snapshot_main_stackframe() -> None:
     as a pytest module rather than the test file itself, causing global variables to be
     absent in the <module> stack frame. This behavior is inherent to pytest and cannot be modified.
     """
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    snapshot_main_frame_path = os.path.join(current_directory, "snapshot_main_frame.py")
+    current_directory = path.dirname(path.abspath(__file__))
+    snapshot_main_frame_path = path.join(current_directory, "snapshot_main_frame.py")
     main_frame = subprocess.run(
         [sys.executable, snapshot_main_frame_path], capture_output=True, text=True
     )

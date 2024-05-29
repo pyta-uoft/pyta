@@ -48,6 +48,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Added unit tests for PEP8 errors E115, E122, E125, E127, E129, E131 for `PycodestyleChecker`
 - Added unit tests for PEP8 errors E223, E224, E227, E228, E265 for `PycodestyleChecker`
 - Updated `README.md` to reflect updated folder structure
+- Updated GitHub Action tests to ignore `test_accumulation_table.py` and add verbose output for debug testing
 
 ## [2.7.0] - 2024-12-14
 

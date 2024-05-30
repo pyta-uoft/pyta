@@ -185,102 +185,122 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
-    def test_error_e266(self) -> None:
-        """Test that PEP8 error E266 (too many leading '#' for block comment) triggers"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e266_error.py")
+    def test_error_e115(self) -> None:
+        """Test that PEP8 error E115 (Expected an indented block) is triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e115_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=1,
-                node=None,
-                args=("E266", "line 1, column 0: too many leading '#' for block comment"),
-            ),
-            ignore_position=True,
+                line=2,
+                args=("E115", "line 2, column 0: expected an indented block (comment)"),
+            )
         ):
             self.checker.process_module(mod)
 
-    def test_no_error_e266(self) -> None:
-        """Test that PEP8 error E266 (too many leading '#' for block comment) is not triggered"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e266_no_error.py")
+    def test_no_error_e115(self) -> None:
+        """Test that PEP8 error E115 (Expected an indented block) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e115_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
-    def test_error_e275(self) -> None:
-        """Test that PEP8 error E275 (missing whitespace after keyword) triggers"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e275_error.py")
+    def test_error_e122(self) -> None:
+        """Test that PEP8 error E122 (Continuation line missing indentation or outdented) is triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e122_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=1,
-                node=None,
-                args=("E275", "line 1, column 16: missing whitespace after keyword"),
-            ),
-            ignore_position=True,
+                line=2,
+                args=(
+                    "E122",
+                    "line 2, column 0: continuation line missing indentation or outdented",
+                ),
+            )
         ):
             self.checker.process_module(mod)
 
-    def test_no_error_e275(self) -> None:
-        """Test that PEP8 error E275 (missing whitespace after keyword) is not triggered"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e275_no_error.py")
+    def test_no_error_e122(self) -> None:
+        """Test that PEP8 error E122 (Continuation line missing indentation or outdented) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e122_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
-    def test_error_e301(self) -> None:
-        """Test that PEP8 error E301 (expected 1 blank line, found 0) triggers"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e301_error.py")
+    def test_error_e127(self) -> None:
+        """Test that PEP8 error E127 (Continuation line over-indented for visual indent) is triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e127_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=5,
-                node=None,
-                args=("E301", "line 5, column 4: expected 1 blank line, found 0"),
-            ),
-            ignore_position=True,
+                line=2,
+                args=(
+                    "E127",
+                    "line 2, column 19: continuation line over-indented for visual indent",
+                ),
+            )
         ):
             self.checker.process_module(mod)
 
-    def test_no_error_e301(self) -> None:
-        """Test that PEP8 error E301 (expected 1 blank line, found 0) is not triggered"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e301_no_error.py")
+    def test_no_error_e127(self) -> None:
+        """Test that PEP8 error E127 (Continuation line over-indented for visual indent) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e127_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
-    def test_error_e303(self) -> None:
-        """Test that PEP8 error E303 (Too many blank lines (3)) triggers"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e303_error.py")
+    def test_error_e131(self) -> None:
+        """Test that PEP8 error E131 (Continuation line unaligned for hanging indent) is triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e131_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=6,
-                node=None,
-                args=("E303", "line 6, column 0: too many blank lines (3)"),
-            ),
-            ignore_position=True,
+                line=4,
+                args=("E131", "line 4, column 8: continuation line unaligned for hanging indent"),
+            )
         ):
             self.checker.process_module(mod)
 
-    def test_no_error_e303(self) -> None:
-        """Test that PEP8 error E303 (too many blank lines (3)) is not triggered"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e303_no_error.py")
+    def test_no_error_e131(self) -> None:
+        """Test that PEP8 error E131 (Continuation line unaligned for hanging indent) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e131_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
-    def test_error_e304(self) -> None:
-        """Test that PEP8 error E304 (Blank line found after function decorator) triggers"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e304_error.py")
+    def test_error_e125(self) -> None:
+        """Test that PEP8 error E125 (Continuation line with same indent as next logical line) is triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e125_error.py")
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="pep8-errors",
-                line=12,
-                node=None,
-                args=("E304", "line 12, column 0: blank lines found after function decorator"),
-            ),
-            ignore_position=True,
+                line=2,
+                args=(
+                    "E125",
+                    "line 2, column 4: continuation line with same indent as next logical line",
+                ),
+            )
         ):
             self.checker.process_module(mod)
 
-    def test_no_error_e304(self) -> None:
-        """Test that PEP8 error E304 (Blank line found after function decorator) is not triggered"""
-        mod = MANAGER.ast_from_file(DIR_PATH + "e304_no_error.py")
+    def test_no_error_e125(self) -> None:
+        """Test that PEP8 error E125 (Continuation line with same indent as next logical line) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e125_no_error.py")
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_error_e129(self) -> None:
+        """Test that PEP8 error E129 (Visually indented line with same indent as next logical line) is triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e129_error.py")
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="pep8-errors",
+                line=4,
+                args=(
+                    "E129",
+                    "line 4, column 4: visually indented line with same indent as next logical line",
+                ),
+            )
+        ):
+            self.checker.process_module(mod)
+
+    def test_no_error_e129(self) -> None:
+        """Test that PEP8 error E129 (Visually indented line with same indent as next logical line) is NOT triggered"""
+        mod = MANAGER.ast_from_file(DIR_PATH + "e129_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)

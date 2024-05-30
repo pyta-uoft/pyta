@@ -360,7 +360,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
             self.checker.process_module(mod)
 
     def test_no_error_e301(self) -> None:
-        """Test that PEP8 error E301 (expected 1 blank line, found 0) triggers"""
+        """Test that PEP8 error E301 (expected 1 blank line, found 0) is not triggered"""
         mod = MANAGER.ast_from_file(DIR_PATH + "e301_no_error.py")
         with self.assertNoMessages():
             self.checker.process_module(mod)

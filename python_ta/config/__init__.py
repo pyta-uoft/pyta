@@ -15,6 +15,8 @@ from pylint.config.config_initialization import _config_initialization
 from pylint.config.exceptions import _UnrecognizedOptionError
 from pylint.lint import PyLinter
 
+DEFAULT_CONFIG_LOCATION = os.path.join("config", ".pylintrc")
+
 
 def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
     """Search for a `.pylintrc` configuration file provided in same (user)

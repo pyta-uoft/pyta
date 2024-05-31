@@ -6,7 +6,9 @@ from astroid.astroid_manager import MANAGER
 
 from python_ta.checkers.pycodestyle_checker import PycodestyleChecker
 
-DIR_PATH = os.path.join(__file__, "../../../examples/custom_checkers/e9989_pycodestyle/")
+DIR_PATH = os.path.normpath(
+    os.path.join(__file__, "../../../examples/custom_checkers/e9989_pycodestyle/")
+)
 
 # Define parameter sets for different error and no-error tests
 error_params = [

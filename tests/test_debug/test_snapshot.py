@@ -1,3 +1,7 @@
+"""
+Test suite for snapshot functions
+"""
+
 import json
 import os
 import subprocess

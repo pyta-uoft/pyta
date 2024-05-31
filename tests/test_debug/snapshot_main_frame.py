@@ -7,7 +7,7 @@ This module is intended exclusively for testing purposes and should not be used 
 
 import json
 
-from tests.test_debug.test_snapshot import snapshot
+from python_ta.debug.snapshot import snapshot
 
 # globally defined variables
 team_lead = "David Liu"

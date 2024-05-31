@@ -3,8 +3,8 @@ installed `python_ta` package.
 """
 
 import subprocess
+import sys
 from os import environ, path
-from sys import executable as sys_executable
 
 import python_ta
 from python_ta.config import DEFAULT_CONFIG_LOCATION
@@ -17,7 +17,7 @@ def test_check_no_errors_zero() -> None:
     """Test that python_ta exits with status code 0 when it does not detect errors."""
     output = subprocess.run(
         [
-            sys_executable,
+            sys.executable,
             "-m",
             "python_ta",
             "--config",
@@ -33,7 +33,7 @@ def test_check_errors_nonzero() -> None:
     """Test that python_ta exits with non-zero status code when it detects errors."""
     output = subprocess.run(
         [
-            sys_executable,
+            sys.executable,
             "-m",
             "python_ta",
             "--config",
@@ -51,7 +51,7 @@ def test_check_exit_zero() -> None:
     """
     output = subprocess.run(
         [
-            sys_executable,
+            sys.executable,
             "-m",
             "python_ta",
             "--exit-zero",
@@ -69,7 +69,7 @@ def test_check_version() -> None:
     """Test that python_ta --version outputs python_ta.__version__ to stdout."""
     stdout = subprocess.run(
         [
-            sys_executable,
+            sys.executable,
             "-m",
             "python_ta",
             "--config",
@@ -87,7 +87,7 @@ def test_config_generation() -> None:
     """Test that python_ta --generate-config prints the default config to stdout."""
     generated_config = subprocess.run(
         [
-            sys_executable,
+            sys.executable,
             "-m",
             "python_ta",
             "--generate-config",
@@ -113,7 +113,7 @@ def test_no_config() -> None:
     """
     output = subprocess.run(
         [
-            sys_executable,
+            sys.executable,
             "-m",
             "python_ta",
             "--output-format",

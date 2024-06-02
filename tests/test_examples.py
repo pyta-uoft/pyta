@@ -13,10 +13,10 @@ import python_ta
 
 _EXAMPLES_PATH = "examples/pylint/"
 _CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
-_PYCODESTYLE_PATH = "examples/custom_checkers/e9989_pycodestyle/"
+_PYCODESTYLE_PATH = "../examples/custom_checkers/e9989_pycodestyle/"
 
-_EXAMPLE_PREFIX_REGEX = r"[CEFRW]\d{4}"
-_PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}"
+_EXAMPLE_PREFIX_REGEX = r"[cerfw]\d{4}"
+_PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
 
 
 # The following tests appear to always fail (further investigation needed).
@@ -31,14 +31,15 @@ IGNORED_TESTS = [
 ]
 
 
-def get_file_paths(paths: Union[str, List[str]]):
+def get_file_paths(paths: Union[str, List[str]]) -> List[str]:
     """
-    Gets all the files from the examples folder for testing. This will
-    return all the full file paths to the file, meaning they will have the
-    path prefix followed by the file name for each element.
+    Get all the Python files from the specified directories for testing. This will
+    return the full file paths for each Python file, excluding those listed in IGNORED_TESTS.
+    The file paths will have the directory path prefixed to the file name for each element.
     A list of all the file paths will be returned.
 
-    :param paths: The paths to retrieve the files from.
+    :param paths: The path or list of paths to retrieve the Python files from.
+    :return: A list of full file paths to the Python files.
     """
     test_files = []
 
@@ -54,59 +55,16 @@ def get_file_paths(paths: Union[str, List[str]]):
     return test_files
 
 
-@pytest.fixture(scope="session")
-def symbols_by_file() -> Dict[str, Set[str]]:
-    """Run pylint on all the example files and return the map of file name to the
-    set of Pylint messages it raises."""
-
-    sys.stdout = StringIO()
-    lint.Run(
-        [
-            "--reports=n",
-            "--rcfile=python_ta/config/.pylintrc",
-            "--output-format=json",
-            *get_file_paths(_EXAMPLES_PATH)
-        ], exit=False
-    )
-    jsons_output = sys.stdout.getvalue()
-    sys.stdout = sys.__stdout__
-
-    pylint_list_output = json.loads(jsons_output)
-
-    file_to_symbol = {}
-    for path, group in itertools.groupby(pylint_list_output, key=lambda d: d["path"]):
-        symbols = {message["symbol"] for message in group}
-        file = os.path.basename(path)
-
-        file_to_symbol[file] = symbols
-
-    return file_to_symbol
-
-
-@pytest.mark.parametrize("test_file", get_file_paths(_EXAMPLES_PATH))
-def test_examples_files(test_file: str, symbols_by_file: Dict[str, Set[str]]) -> None:
-    """Creates all the new unit tests dynamically from the testing directory."""
-    base_name = os.path.basename(test_file)
-    if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
-        return
-    if not base_name.lower().endswith(".py"):
-        assert False
-    checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
-
-    test_file_name = os.path.basename(test_file)
-    file_symbols = symbols_by_file[test_file_name]
-
-    found_pylint_message = checker_name in file_symbols
-    assert found_pylint_message, f"Failed {test_file}. File does not add expected message."
-
-
 def _symbols_by_file_pyta(paths: List[str], include_msg: bool = False) -> Dict[str, Set[str]]:
     """
-    Run python_ta on all the example files and return the map of file name to the
-    set of PythonTA messages it raises.
+    Run python_ta.check_all() on files from specified directories and return the map of file name to the
+    set of PythonTA messages it raises. If include_msg is set True, PythonTA message descriptions are
+    included along with message symbols.
 
     :param paths: The paths to retrieve the files from.
-    :param include_msg: whether to include msgs[msg] in the symbol set
+    :param include_msg: whether to include message descriptions in the symbol set
+    :return: A dictionary mapping each file name to a set of PythonTA message symbols
+    (and descriptions if include_msg is True).
     """
     sys.stdout = StringIO()
     python_ta.check_all(
@@ -136,61 +94,75 @@ def _symbols_by_file_pyta(paths: List[str], include_msg: bool = False) -> Dict[s
 
 
 @pytest.fixture(scope="session")
-def check_examples_pyta() -> Dict[str, Set[str]]:
+def pyta_examples_symbols() -> Dict[str, Set[str]]:
     """
-    Checking the examples files with python_ta
+    A pytest fixture that runs once per test session.
+    This fixture analyzes example files using python_ta and returns a dictionary mapping each file name
+    to the set of PythonTA message symbols raised.
+
+    :return: A dictionary mapping file names to sets of PythonTA message symbols.
     """
     return _symbols_by_file_pyta([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH])
 
 
 @pytest.fixture(scope="session")
-def check_pycodestyle_pyta() -> Dict[str, Set[str]]:
+def pyta_pycodestyle_symbols() -> Dict[str, Set[str]]:
     """
-    Checking the pycodestyle error files with python_ta, including the error message to
-    check for the specific error type
+    A pytest fixture that runs once per test session.
+    This fixture analyzes pycodestyle error test cases using python_ta and returns a dictionary mapping each file name
+    to the set of PythonTA message symbols and descriptions.
+
+    :return: A dictionary mapping file names to sets of PythonTA message symbols and descriptions.
     """
     return _symbols_by_file_pyta([_PYCODESTYLE_PATH], include_msg=True)
 
 
 @pytest.mark.parametrize("test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]))
-def test_examples_files_pyta(test_file: str, check_examples_pyta: Dict[str, Set[str]]) -> None:
-    """Creates all the new unit tests dynamically from the testing directory."""
-    base_name = os.path.basename(test_file)
+def test_examples_files_pyta(test_file: str, pyta_examples_symbols: Dict[str, Set[str]]) -> None:
+    """
+    Dynamically creates and runs unit tests for Python files in the examples and custom checker directories.
+    This test function deduces the error type from the file name and checks if the expected error message is present
+    in PythonTA's report.
+    """
+    base_name = os.path.basename(test_file).lower()
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
         return
-    if not base_name.lower().endswith(".py"):
+    if not base_name.endswith(".py"):
         assert False
     checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
 
     test_file_name = os.path.basename(test_file)
-    file_symbols = check_examples_pyta[test_file_name]
+    file_symbols = pyta_examples_symbols[test_file_name]
 
     found_pylint_message = checker_name in file_symbols
     assert found_pylint_message, f"Failed {test_file}. File does not add expected message."
 
 
 @pytest.mark.parametrize("test_file", get_file_paths(_PYCODESTYLE_PATH))
-def test_pycodestyle_errors_pyta(test_file: str, check_pycodestyle_pyta: Dict[str, Set[str]]) -> None:
+def test_pycodestyle_errors_pyta(test_file: str, pyta_pycodestyle_symbols: Dict[str, Set[str]]) -> None:
     """
-    Run python_ta on all pycodestyle error test cases
+    Dynamically creates and runs unit tests for pycodestyle error test cases.
+    This test function deduces the PEP8 error code from the file names. It checks if pycodestyle error is present
+    in PythonTA's report and if the correct PEP8 error type is in the message description.
     """
-    base_name = os.path.basename(test_file)
-    if not re.match(_PYCODESTYLE_PREFIX_REGEX, base_name[:4]):
+    base_name = os.path.basename(test_file).lower()
+    if not re.match(_PYCODESTYLE_PREFIX_REGEX, base_name):
         return
-    if not base_name.lower().endswith(".py"):
+    if not base_name.endswith(".py"):
         assert False
 
-    # get the specific PEP8 error code
+    # skip the test case if it does not have errors
     has_error = base_name[5:] == "error.py"
-    error_code = base_name[:4].upper()
+    if not has_error:
+        return
 
+    error_code = base_name[:4].upper()  # get the specific PEP8 error code
     test_file_name = os.path.basename(test_file)
-    file_symbols = check_pycodestyle_pyta[test_file_name]
+    file_symbols = pyta_pycodestyle_symbols[test_file_name]
 
-    if has_error:
-        found_pycodestyle_message = "pep8-errors" in file_symbols
-        assert found_pycodestyle_message, f"Failed {test_file}. File does not add expected message."
-        assert any(error_code in msg for msg in file_symbols), f"Failed {test_file}. The correct PEP8 error type is not in reported message."
+    found_pycodestyle_message = "pep8-errors" in file_symbols
+    assert found_pycodestyle_message, f"Failed {test_file}. File does not add expected message."
+    assert any(error_code in msg for msg in file_symbols), f"Failed {test_file}. The correct PEP8 error type is not in reported message."
 
 
 def test_cyclic_import() -> None:

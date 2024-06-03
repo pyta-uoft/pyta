@@ -53,6 +53,8 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated `README.md` to reflect updated folder structure
 - Parametrized tests for `PycodestyleChecker`
 - Allowed GitHub Action tests to run on _all_ pull requests, including drafts
+- Updated dependencies in `pyproject.toml`
+- Updated dependabot configuration
 
 ## [2.7.0] - 2024-12-14
 

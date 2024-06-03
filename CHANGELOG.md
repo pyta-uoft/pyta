@@ -49,8 +49,13 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Added unit tests for PEP8 errors E223, E224, E227, E228, E265 for `PycodestyleChecker`
 - Refactored `test_check_on_dir` in `test_check.py` module to test on `sample_dir`, a subset of `examples`
 - Added unit test `test_examples_files_pyta` in `test_examples.py` to check every file in `examples` with PythonTA
+- Added unit tests for PEP8 errors E266, E275, E301, E303, E304 for `PycodestyleChecker`
+- Moved tests related to `__main__.py` from `test_check.py` to `test_main.py`
+- Added more unit tests to `test_main.py` to increase coverage of `__main__.py` to 100%
 - Updated `README.md` to reflect updated folder structure
 - Added unit test `test_pycodestyle_errors_pyta` in `test_examples.py` to check every file in `e9989_pycodestyle` with PythonTA for PEP8 errors
+- Parametrized tests for `PycodestyleChecker`
+- Allowed GitHub Action tests to run on _all_ pull requests, including drafts
 
 ## [2.7.0] - 2024-12-14
 

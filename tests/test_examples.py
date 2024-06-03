@@ -13,7 +13,7 @@ import python_ta
 
 _EXAMPLES_PATH = "examples/pylint/"
 _CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
-_PYCODESTYLE_PATH = "../examples/custom_checkers/e9989_pycodestyle/"
+_PYCODESTYLE_PATH = "examples/custom_checkers/e9989_pycodestyle/"
 
 _EXAMPLE_PREFIX_REGEX = r"[cerfw]\d{4}"
 _PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
@@ -23,11 +23,12 @@ _PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
 IGNORED_TESTS = [
     "e1131_unsupported_binary_operation.py",
     "e0118_used_prior_global_declaration.py",
-    "w0125_using_constant_test.py",
     "w0631_undefined_loop_variable.py",
     "w1503_redundant_unittest_assert.py",
     "e1140_unhashable_dict_key.py",
     "r0401_cyclic_import.py",  # R0401 required an additional unit test but should be kept here.
+    "e9999_forbidden_import_local.py",   # This file itself (as an empty file) should not be tested
+    "c9104_ModuleNameViolation.py",  # Due to different naming format, this file is handled separately
 ]
 
 
@@ -47,10 +48,12 @@ def get_file_paths(paths: Union[str, List[str]]) -> List[str]:
         paths = [paths]
 
     for path in paths:
-        for _, _, files in os.walk(path, topdown=True):
+        for root, _, files in os.walk(path, topdown=True):
             for filename in files:
                 if filename not in IGNORED_TESTS and filename.endswith(".py"):
-                    test_files.append(path + filename)
+                    full_path = os.path.join(root, filename)
+                    rel_path = os.path.relpath(full_path, path)
+                    test_files.append(os.path.join(path, rel_path))
 
     return test_files
 
@@ -124,10 +127,10 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: Dict[str, Se
     This test function deduces the error type from the file name and checks if the expected error message is present
     in PythonTA's report.
     """
-    base_name = os.path.basename(test_file).lower()
+    base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
         return
-    if not base_name.endswith(".py"):
+    if not base_name.lower().endswith(".py"):
         assert False
     checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
 
@@ -135,7 +138,7 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: Dict[str, Se
     file_symbols = pyta_examples_symbols[test_file_name]
 
     found_pylint_message = checker_name in file_symbols
-    assert found_pylint_message, f"Failed {test_file}. File does not add expected message."
+    assert found_pylint_message, f"Failed {test_file}. File does not add expected message  {file_symbols}."
 
 
 @pytest.mark.parametrize("test_file", get_file_paths(_PYCODESTYLE_PATH))
@@ -145,10 +148,10 @@ def test_pycodestyle_errors_pyta(test_file: str, pyta_pycodestyle_symbols: Dict[
     This test function deduces the PEP8 error code from the file names. It checks if pycodestyle error is present
     in PythonTA's report and if the correct PEP8 error type is in the message description.
     """
-    base_name = os.path.basename(test_file).lower()
-    if not re.match(_PYCODESTYLE_PREFIX_REGEX, base_name):
+    base_name = os.path.basename(test_file)
+    if not re.match(_PYCODESTYLE_PREFIX_REGEX, base_name.lower()):
         return
-    if not base_name.endswith(".py"):
+    if not base_name.lower().endswith(".py"):
         assert False
 
     # skip the test case if it does not have errors
@@ -163,6 +166,38 @@ def test_pycodestyle_errors_pyta(test_file: str, pyta_pycodestyle_symbols: Dict[
     found_pycodestyle_message = "pep8-errors" in file_symbols
     assert found_pycodestyle_message, f"Failed {test_file}. File does not add expected message."
     assert any(error_code in msg for msg in file_symbols), f"Failed {test_file}. The correct PEP8 error type is not in reported message."
+
+
+def test_c9104_module_name_violation() -> None:
+    """
+    Test that examples/custom_checkers/c9104_ModuleNameViolation.py adds C9104 module-name-violation.
+    This test is separate as the naming convention for this file is different from the rest of the examples.
+    """
+    module_name_violation = "examples/custom_checkers/c9104_ModuleNameViolation.py"
+    sys.stdout = StringIO()
+    python_ta.check_all(
+        module_name=module_name_violation,
+        config={
+            "output-format": "python_ta.reporters.JSONReporter",
+        }
+    )
+
+    jsons_output = sys.stdout.getvalue()
+    sys.stdout = sys.__stdout__
+    pyta_list_output = json.loads(jsons_output)
+
+    file_to_symbol = {}
+    for path, group in itertools.groupby(pyta_list_output, key=lambda d: os.path.basename(d["filename"])):
+        symbols = set()
+        for message in group:
+            for msg in message["msgs"]:
+                symbols.add(msg["symbol"])
+
+        file = os.path.basename(path)
+        file_to_symbol[file] = symbols
+
+    found_module_name_violation = "module-name-violation" in file_to_symbol[os.path.basename(module_name_violation)]
+    assert found_module_name_violation, f"Failed {module_name_violation}. File does not add expected message."
 
 
 def test_cyclic_import() -> None:

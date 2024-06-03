@@ -10,8 +10,3 @@ for i in range(1, 10):  # forbidden python syntax
         break  # forbidden python syntax
 
 squares = [i ** 2 for i in range(1, 10)]  # forbidden python syntax
-
-
-if __name__ == '__main__':
-    import python_ta
-    python_ta.check_all()

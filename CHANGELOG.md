@@ -53,7 +53,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated `README.md` to reflect updated folder structure
 - Parametrized tests for `PycodestyleChecker`
 - Moved tests related to `snapshot.py` out of `test_accumulation_table.py` and into new module `test_snapshot.py`
-- Updated GitHub Action tests to avoid running `test_accumulation_table.py` with coverage and add verbose output for debug testing
+- Updated GitHub Action tests to avoid running `test_accumulation_table.py` and `test_recursion_table.py` with coverage and add verbose output for debug testing
 - Allowed GitHub Action tests to run on _all_ pull requests, including drafts
 
 ## [2.7.0] - 2024-12-14

@@ -37,8 +37,8 @@ jobs:
           pip install -e .[dev,cfg,z3]
       - name: Run tests
         run: |
-          pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug/test_accumulation_table.py
-          pytest -vv tests/test_debug/test_accumulation_table.py
+          pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug/test_accumulation_table.py --ignore=tests/test_debug/test_recursion_table.py
+          pytest -vv tests/test_debug/test_accumulation_table.py tests/test_debug/test_recursion_table.py
       - name: Upload test coverage to coveralls.io
         uses: coverallsapp/github-action@v2
         env:

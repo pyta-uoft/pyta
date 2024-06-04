@@ -9,6 +9,7 @@ on:
 
 jobs:
   test:
+    using: "node20"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -50,6 +51,7 @@ jobs:
   finish:
     needs: test
     if: github.event.pull_request.draft == false
+    using: "node20"
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
@@ -61,6 +63,7 @@ jobs:
           carryforward: "run-3.8,run-3.9,run-3.10,run-3.11,run-3.12"
 
   docs:
+    using: "node20"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

@@ -18,7 +18,11 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-exclude: examples | tests/fixtures/sample_dir
+exclude: |
+  (?x)^(
+  examples|
+  tests/fixtures/sample_dir
+  )$
 
 ci:
   autoupdate_schedule: quarterly

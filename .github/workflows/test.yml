@@ -9,23 +9,22 @@ on:
 
 jobs:
   test:
-    using: "node20"
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@latest
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@latest
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up graphviz
         run: |
           sudo apt-get install -y graphviz
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@latest
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
@@ -41,7 +40,7 @@ jobs:
           pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug/test_accumulation_table.py --ignore=tests/test_debug/test_recursion_table.py
           pytest -vv tests/test_debug/test_accumulation_table.py tests/test_debug/test_recursion_table.py
       - name: Upload test coverage to coveralls.io
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@latest
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -51,11 +50,10 @@ jobs:
   finish:
     needs: test
     if: github.event.pull_request.draft == false
-    using: "node20"
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@latest
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -65,13 +63,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@latest
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@latest
         with:
           python-version: 3.11
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@latest
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}

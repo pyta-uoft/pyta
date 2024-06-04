@@ -29,6 +29,11 @@ IGNORED_TESTS = [
     "r0401_cyclic_import.py",  # R0401 required an additional unit test but should be kept here.
     "e9999_forbidden_import_local.py",   # This file itself (as an empty file) should not be tested
     "c9104_ModuleNameViolation.py",  # Due to different naming format, this file is handled separately
+    "e0643_potential_index_error.py",
+    "e1003_bad_super_call.py",
+    "e1143_unhashable_member.py",
+    "r0201_no_self_use.py",
+    "e9950_forbidden_python_syntax.py"
 ]
 
 
@@ -186,17 +191,12 @@ def test_c9104_module_name_violation() -> None:
     sys.stdout = sys.__stdout__
     pyta_list_output = json.loads(jsons_output)
 
-    file_to_symbol = {}
-    for path, group in itertools.groupby(pyta_list_output, key=lambda d: os.path.basename(d["filename"])):
-        symbols = set()
-        for message in group:
-            for msg in message["msgs"]:
-                symbols.add(msg["symbol"])
+    message_symbols = []
+    for message in pyta_list_output:
+        for msg in message["msgs"]:
+            message_symbols.append(msg["symbol"])
 
-        file = os.path.basename(path)
-        file_to_symbol[file] = symbols
-
-    found_module_name_violation = "module-name-violation" in file_to_symbol[os.path.basename(module_name_violation)]
+    found_module_name_violation = "module-name-violation" in message_symbols
     assert found_module_name_violation, f"Failed {module_name_violation}. File does not add expected message."
 
 

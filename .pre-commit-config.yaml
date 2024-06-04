@@ -20,7 +20,7 @@ repos:
       - id: prettier
 exclude: |
   (?x)^(
-      examples
+      examples|
       tests/fixtures/sample_dir
   )
 

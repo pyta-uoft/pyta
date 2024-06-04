@@ -55,7 +55,8 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Moved tests related to `snapshot.py` out of `test_accumulation_table.py` and into new module `test_snapshot.py`
 - Updated GitHub Action tests to avoid running `test_accumulation_table.py` and `test_recursion_table.py` with coverage and add verbose output for debug testing
 - Allowed GitHub Action tests to run on _all_ pull requests, including drafts
-- Updated dependabot configuration to use `node20` for GitHub Actions
+- Updated dependencies for GitHub Actions to use the latest versions
+- Updated dependabot configuration to auto-update dependencies for GitHub Actions in the future
 
 ## [2.7.0] - 2024-12-14
 

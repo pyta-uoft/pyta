@@ -60,6 +60,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Allowed GitHub Action tests to run on _all_ pull requests, including drafts
 - Updated dependencies for GitHub Actions to use the latest versions
 - Updated dependabot configuration to auto-update dependencies for GitHub Actions in the future
+- Updated usage messages in `examples/sample_usage/` of `draw_cfg.py` and `print_ast.py` to be accurate on all operating systems
 
 ## [2.7.0] - 2024-12-14
 

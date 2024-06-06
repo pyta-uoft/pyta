@@ -52,6 +52,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Added more unit tests to `test_main.py` to increase coverage of `__main__.py` to 100%
 - Updated `README.md` to reflect updated folder structure
 - Parametrized tests for `PycodestyleChecker`
+- Added option that runs black formatting tool to python_ta.check_all
 
 ## [2.7.0] - 2024-12-14
 

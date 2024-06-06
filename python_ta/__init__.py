@@ -20,6 +20,7 @@ __version__ = "2.7.1.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.
 import builtins
+import subprocess
 
 try:
     del builtins._
@@ -83,6 +84,7 @@ def check_all(
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
+    autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
     """Check a module for errors and style warnings, printing a report."""
     return _check(
@@ -91,6 +93,7 @@ def check_all(
         local_config=config,
         output=output,
         load_default_config=load_default_config,
+        autoformat=autoformat,
     )
 
 
@@ -100,6 +103,7 @@ def _check(
     local_config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
+    autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
@@ -156,6 +160,14 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
+                if autoformat:
+                    result = subprocess.run(
+                        ["black"] + [file_py],
+                        encoding="utf-8",
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                    )
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out
@@ -191,9 +203,9 @@ def _check(
                 )
             if linter.config.pyta_error_permission:
                 errs = list(current_reporter.messages.values())
-            if (
-                f_paths != [] or errs != []
-            ):  # Only call upload_to_server() if there's something to upload
+
+            # Only call upload_to_server() if there's something to upload
+            if f_paths != [] or errs != []:
                 # Checks if default configuration was used without changing options through the local_config argument
                 if linter.config_file[-19:-10] != "python_ta" or local_config != "":
                     config = linter.config.__dict__
@@ -204,6 +216,7 @@ def _check(
                     url=linter.config.pyta_server_address,
                     version=__version__,
                 )
+
         # Only generate reports (display the webpage) if there were valid files to check
         if is_any_file_checked:
             linter.generate_reports()

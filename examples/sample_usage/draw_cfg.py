@@ -1,6 +1,8 @@
 import python_ta.cfg.cfg_generator as cfg_generator
+from sys import executable
+from os import path
 
-USAGE = "USAGE: python -m examples.sample_usage.draw_cfg <your-file.py>"
+USAGE = f"USAGE: {path.basename(executable)} -m examples.sample_usage.draw_cfg <your-file.py>"
 
 
 def main(filepath: str) -> None:

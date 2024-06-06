@@ -2,11 +2,12 @@
 Sanity checker to pretty print the abstract syntax tree (AST) structure.
 """
 import sys
+from os import path
 
 import astroid
 from colorama import Back, Fore
 
-USAGE = "Usage: python -m examples.sample_usage.print_ast <your-file.py>"
+USAGE = f"Usage: {path.basename(sys.executable)} -m examples.sample_usage.print_ast <your-file.py>"
 FILL = "  "
 # Unicode Box Drawing Characters.
 CHAR_PIPE = "┃"

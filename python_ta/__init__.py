@@ -116,6 +116,7 @@ def _check(
     `output` is an absolute or relative path to capture pyta data output. Default std out.
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
+    `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
@@ -160,9 +161,18 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
+
                 if autoformat:
-                    result = subprocess.run(
-                        ["black"] + [file_py],
+                    linelen = local_config["max-line-length"] if local_config != "" else 88
+                    subprocess.run(
+                        [
+                            sys.executable,
+                            "-m",
+                            "black",
+                            "--skip-string-normalization",
+                            "--line-length=" + str(linelen),
+                            file_py,
+                        ],
                         encoding="utf-8",
                         capture_output=True,
                         text=True,

@@ -614,6 +614,31 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
+def render_missing_return_statements(msg, _node, source_lines=None):
+    """
+    Render a missing return statements message
+    """
+    line = msg.line
+    end = _node.tolineno
+
+    yield from render_context(line, line + 1, source_lines)
+
+    # calculate indentation for the insertion point
+    body = source_lines[end - 1]
+    indentation = len(body) - len(body.lstrip())
+    insertion_text = body[:indentation] + '"""MISSING RETURN STATEMENT"""'
+
+    # insert the message
+    yield (
+        None,
+        slice(indentation, None),
+        LineType.ERROR,
+        insertion_text,
+    )
+
+    yield from render_context(end + 1, end + 2, source_lines)
+
+
 CUSTOM_MESSAGES = {
     "missing-module-docstring": render_missing_docstring,
     "missing-class-docstring": render_missing_docstring,
@@ -624,6 +649,7 @@ CUSTOM_MESSAGES = {
     "too-many-arguments": render_too_many_arguments,
     "missing-space-in-doctest": render_missing_space_in_doctest,
     "pep8-errors": render_pep8_errors,
+    "missing-return-statements": render_missing_return_statements,
 }
 
 

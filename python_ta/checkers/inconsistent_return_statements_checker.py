@@ -45,7 +45,11 @@ class InconsistentReturnChecker(BaseChecker):
         Construct a CFG from the function. Check for inconsistent returns if there are
         multiple return statements, and missing return statements if there are none.
         """
-        if node.returns in [None, "None"]:
+        if (
+            node.returns is None
+            or isinstance(node.returns, nodes.Const)
+            and node.returns.value is None
+        ):
             return
 
         # get the end of CFG
@@ -54,7 +58,7 @@ class InconsistentReturnChecker(BaseChecker):
         end = [block for block in cfg.get_blocks_postorder()][0]
         end_blocks = [edge.source for edge in end.predecessors]
 
-        # gather all return statements and
+        # gather all return statements
         for block in end_blocks:
             has_return = False  # whether a return statement exists for this branch
             for statement in block.statements:
@@ -66,7 +70,7 @@ class InconsistentReturnChecker(BaseChecker):
 
             # check for missing return statement
             if not has_return:
-                self.add_message("missing-return-statements", node=node)
+                self.add_message("missing-return-statements", node=block.statements[-1])
 
 
 def register(linter: PyLinter) -> None:

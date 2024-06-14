@@ -163,7 +163,7 @@ python_ta.check_all(..., config=options)
 
 ## Enabling the black formatting tool
 
-PythonTA allows you to choose whether you want to enable the black code formatting tool to run on your code. The default value for this option is False, i.e. PythonTA by default will not run the black formatting tool.
+PythonTA allows you to choose whether you want to enable the black code formatting tool to run on your code. The default value for this option is False, i.e. PythonTA by default will not run the black formatting tool. The autoformat feature is compatible with any versions of black installed.
 
 ```python
 import python_ta

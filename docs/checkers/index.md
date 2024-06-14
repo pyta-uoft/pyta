@@ -1028,7 +1028,7 @@ variable, etc.).
 A special character accepted in all types of names is `_`. Numbers are allowed in all names, but
 names must not begin with a number.
 
-```{literalinclude} /../examples/pylint/c0103_invalid_name.py
+```{literalinclude} /../examples/pylint/c0103_naming_convention_violation.py
 
 ```
 
@@ -2165,7 +2165,7 @@ When writing Python programs, your variables should always be defined within fun
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/e9997_global_variables.py
+```{literalinclude} /../examples/custom_checkers/e9997_forbidden_global_variables.py
 ---
 lines: 16-20
 ---
@@ -2200,7 +2200,7 @@ assignment to constants, and the main block.
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/e9992_top_level_code.py
+```{literalinclude} /../examples/custom_checkers/e9992_forbidden_top_level_code.py
 
 ```
 
@@ -2225,7 +2225,7 @@ required. If `print` calls are used to debug the code, they should be removed pr
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/e9998_forbidden_io_function.py
+```{literalinclude} /../examples/custom_checkers/e9998_forbidden_IO_function.py
 
 ```
 
@@ -3246,7 +3246,7 @@ print("Hello World!")  # This file ends with a single newline character! :)
 This error occurs when there is an encoding declaration at the top of the Python file or if any
 identifier uses non-ASCII characters.
 
-```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
+```{literalinclude} /../examples/pylint/c2503_non_ascii_name.py
 
 ```
 

@@ -2,6 +2,7 @@
 installed `python_ta` package.
 """
 
+import os
 from os import path, remove
 from unittest.mock import Mock
 
@@ -11,17 +12,30 @@ import python_ta
 def test_check_on_dir():
     """The function, check_all() should handle a top-level dir as input."""
     reporter = python_ta.check_all(
-        "examples",
+        "tests/fixtures/sample_dir",
         config={
             "output-format": "python_ta.reporters.JSONReporter",
             "pyta-error-permission": "no",
             "pyta-file-permission": "no",
         },
     )
+
+    # get file names from sample_dir
+    sample_files = []
+    for _, _, files in os.walk("tests/fixtures/sample_dir"):
+        for file in files:
+            if file.lower().endswith(".py"):
+                sample_files.append(file)
+
     for filename, messages in reporter.messages.items():
         assert "astroid-error" not in {
             msg.message.symbol for msg in messages
         }, f"astroid-error encountered for {filename}"
+        name = os.path.basename(filename)
+        assert name in sample_files, f"{name} not in sample_files"
+        sample_files.remove(name)
+
+    assert not sample_files, f"the following files not checked by python_ta: {sample_files}"
 
 
 def test_check_on_file():

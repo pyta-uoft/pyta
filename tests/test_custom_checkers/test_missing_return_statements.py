@@ -38,10 +38,14 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))
 
-        # since it's hard to pinpoint the specific node that emits the message, we only check whether the message exists
-        self.checker.visit_functiondef(func_node)
-        messages = self.linter.release_messages()
-        assert any(msg.msg_id == "missing-return-statements" for msg in messages)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
 
     def test_missing_return_in_branch(self):
         src = """
@@ -57,9 +61,14 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))
 
-        self.checker.visit_functiondef(func_node)
-        messages = self.linter.release_messages()
-        assert any(msg.msg_id == "missing-return-statements" for msg in messages)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
 
     def test_function_with_multiple_branches(self):
         src = """
@@ -76,9 +85,14 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))
 
-        self.checker.visit_functiondef(func_node)
-        messages = self.linter.release_messages()
-        assert any(msg.msg_id == "missing-return-statements" for msg in messages)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
 
     def test_function_with_nested_functions(self):
         src = """
@@ -90,11 +104,17 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
 
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        _, inner_func_node = mod.nodes_of_class(nodes.FunctionDef)
+        outer_func_node, inner_func_node = mod.nodes_of_class(nodes.FunctionDef)
 
-        self.checker.visit_functiondef(inner_func_node)
-        messages = self.linter.release_messages()
-        assert any(msg.msg_id == "missing-return-statements" for msg in messages)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=inner_func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(outer_func_node)
+            self.checker.visit_functiondef(inner_func_node)
 
     def test_function_with_try_except(self):
         src = """
@@ -109,6 +129,15 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))
 
-        self.checker.visit_functiondef(func_node)
-        messages = self.linter.release_messages()
-        assert any(msg.msg_id == "missing-return-statements" for msg in messages)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)

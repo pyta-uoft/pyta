@@ -70,7 +70,10 @@ class InconsistentReturnChecker(BaseChecker):
 
             # check for missing return statement
             if not has_return:
-                self.add_message("missing-return-statements", node=block.statements[-1])
+                # for rendering purpose, the line is set to the last line of the function branch where return statement is missing
+                self.add_message(
+                    "missing-return-statements", node=node, line=block.statements[-1].fromlineno
+                )
 
 
 def register(linter: PyLinter) -> None:

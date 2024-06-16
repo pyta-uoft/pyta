@@ -621,6 +621,11 @@ def render_missing_return_statements(msg, _node, source_lines=None):
     line = msg.line
     end = _node.tolineno
 
+    # render function header and context
+    if line - 1 > _node.fromlineno:
+        yield from render_context(_node.fromlineno, _node.fromlineno + 1, source_lines)
+        if line - 1 > _node.fromlineno + 1:
+            yield (None, slice(None, None), LineType.CONTEXT, '"""MORE CODE OMITTED"""')
     yield from render_context(line - 1, line + 1, source_lines)
 
     # calculate indentation for the insertion point

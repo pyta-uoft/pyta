@@ -621,7 +621,7 @@ def render_missing_return_statements(msg, _node, source_lines=None):
     line = msg.line
     end = _node.tolineno
 
-    yield from render_context(line, line + 1, source_lines)
+    yield from render_context(line - 1, line + 1, source_lines)
 
     # calculate indentation for the insertion point
     body = source_lines[end - 1]

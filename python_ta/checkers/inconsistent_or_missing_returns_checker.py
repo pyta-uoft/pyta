@@ -55,7 +55,9 @@ class InconsistentReturnChecker(BaseChecker):
         # get the end of CFG
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
-        end = [block for block in cfg.get_blocks_postorder()][0]
+        # The last element of cfg.get_blocks_postorder() does not guarantee to be the end block.
+        # However, based on the initialization of CFG, end block must have id == 1
+        end = [block for block in cfg.get_blocks_postorder() if block.id == 1][0]
         end_blocks = [edge.source for edge in end.predecessors]
 
         # gather all return statements

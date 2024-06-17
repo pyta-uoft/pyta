@@ -13,12 +13,12 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
 
     def test_ignore_none_return(self):
         src = """
-                def test():
-                    print("no return")
+        def no_return():
+            print("no return")
 
-                def test2() -> None:
-                    print("no return")
-                """
+        def no_return_2() -> None:
+            print("no return")
+        """
 
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
@@ -28,10 +28,36 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_functiondef(func_node)
             self.checker.visit_functiondef(func_node2)
 
+    def test_correct_return(self):
+        src = """
+        def correct_return() -> int:
+            return 1
+
+        def correct_return_while() -> int:
+            a = 10
+            while a > 5:
+                a -= 1
+            return a
+
+        def correct_return_for(lst: list[int]) -> int:
+            for e in lst:
+                e += 1
+            return lst[0]
+        """
+
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node, func_node2, func_node3 = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_functiondef(func_node2)
+            self.checker.visit_functiondef(func_node3)
+
     def test_missing_return(self):
         src = """
-            def missing_return() -> int:
-                print("no return")
+        def missing_return() -> int:
+            print("no return")
         """
 
         mod = astroid.parse(src)
@@ -134,6 +160,45 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statements",
                 node=func_node,
             ),
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_missing_return_with_while(self):
+        src = """
+        def while_loop() -> int:
+            a = 10
+            while a > 5:
+                a -= 1
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statements",
+                node=func_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_missing_return_with_for(self):
+        src = """
+        def for_loop() -> int:
+            for i in range(0, 10):
+                print(i)
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statements",
                 node=func_node,

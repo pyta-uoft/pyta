@@ -13,20 +13,16 @@ class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
 
     def test_ignore_none_return(self):
         src = """
-                def test():
-                    print("no return")
-
-                def test2() -> None:
-                    print("no return")
-                """
+        def test() -> None:
+            print("no return")
+        """
 
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        func_node, func_node2 = mod.nodes_of_class(nodes.FunctionDef)
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
-            self.checker.visit_functiondef(func_node2)
 
     def test_consistent_return(self):
         src = """
@@ -67,7 +63,7 @@ class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_functiondef(func_node)
 
-    def test_nested_inconsistent_returns(self):
+    def test_nested_returns_inconsistent(self):
         src = """
         def nested_inconsistent_returns() -> int:
             def inner_func():
@@ -103,6 +99,47 @@ class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
                 print("done")
         """
 
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+        _, inconsistent_return_node = mod.nodes_of_class(nodes.Return)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="inconsistent-returns",
+                node=inconsistent_return_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_no_return_annotations_consistent(self):
+        src = """
+        def func1():
+            return
+
+        def func2():
+            if True:
+                return
+            else:
+                print("no return")
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node, func_node2 = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_functiondef(func_node2)
+
+    def test_no_return_annotations_inconsistent(self):
+        src = """
+        def func():
+            if True:
+                return 1
+            else:
+                return
+        """
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))

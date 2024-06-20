@@ -45,37 +45,37 @@ class InconsistentReturnChecker(BaseChecker):
         Construct a CFG from the function. Check for inconsistent returns if there are
         multiple return statements, and missing return statements if there are none.
         """
-        if (
-            node.returns is None
-            or isinstance(node.returns, nodes.Const)
-            and node.returns.value is None
-        ):
+        if isinstance(node.returns, nodes.Const) and node.returns.value is None:
             return
 
-        # get the end of CFG
-        cfg = ControlFlowGraph()
-        cfg.start = node.cfg_block
-        # The last element of cfg.get_blocks_postorder() does not guarantee to be the end block.
-        # However, based on the initialization of CFG, end block must have id == 1
-        end = [block for block in cfg.get_blocks_postorder() if block.id == 1][0]
+        has_return_annotation = node.returns is not None
+        any_branches_have_return = False
+
+        # get the blocks connected to the end of cfg
+        end = node.cfg.end
         end_blocks = [edge.source for edge in end.predecessors]
 
-        # gather all return statements
+        # gather the return statement of each code block
+        return_statements = {}
         for block in end_blocks:
-            has_return = False  # whether a return statement exists for this branch
+            return_statements[block] = None
             statement = block.statements[-1]
             if isinstance(statement, nodes.Return):
-                has_return = True
-                if statement.value is None:
-                    # check for inconsistent returns
-                    self.add_message("inconsistent-returns", node=statement)
+                return_statements[block] = statement
+                if return_statements[block].value is not None:
+                    any_branches_have_return = True
 
-            # check for missing return statement
-            if not has_return:
-                # for rendering purpose, the line is set to the last line of the function branch where return statement is missing
-                self.add_message(
-                    "missing-return-statement", node=node, line=block.statements[-1].fromlineno
-                )
+        # check for inconsistent or missing returns
+        if has_return_annotation or any_branches_have_return:
+            for block in return_statements:
+                statement = return_statements[block]
+                if statement is None:
+                    # for rendering purpose, the line is set to the last line of the function branch where return statement is missing
+                    self.add_message(
+                        "missing-return-statement", node=node, line=block.statements[-1].fromlineno
+                    )
+                elif statement.value is None:
+                    self.add_message("inconsistent-returns", node=statement)
 
 
 def register(linter: PyLinter) -> None:

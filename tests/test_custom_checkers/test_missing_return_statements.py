@@ -13,20 +13,16 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
 
     def test_ignore_none_return(self):
         src = """
-        def no_return():
-            print("no return")
-
-        def no_return_2() -> None:
+        def no_return() -> None:
             print("no return")
         """
 
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        func_node, func_node2 = mod.nodes_of_class(nodes.FunctionDef)
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
-            self.checker.visit_functiondef(func_node2)
 
     def test_correct_return(self):
         src = """
@@ -206,3 +202,66 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
+
+    def test_no_return_annotations_not_missing(self):
+        src = """
+        def func1():
+            print("no return")
+
+        def func2():
+            a = 1
+            if a > 2:
+                return
+            print(a)
+
+        def func3():
+            if True:
+                print("True")
+            else:
+                print("False")
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func1_node, func2_node, func3_node = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func1_node)
+            self.checker.visit_functiondef(func2_node)
+            self.checker.visit_functiondef(func3_node)
+
+    def test_no_return_annotations_missing(self):
+        src = """
+        def func1():
+            if True:
+                print("no return")
+            else:
+                return 1
+
+        def func2():
+            a = 1
+            while a > 0:
+                if a > 2:
+                    return a
+                a -= 1
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func1_node, func2_node = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statement",
+                node=func1_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func1_node)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statement",
+                node=func2_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func2_node)

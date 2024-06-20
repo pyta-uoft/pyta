@@ -28,7 +28,7 @@ class InconsistentReturnChecker(BaseChecker):
         ),
         "R9711": (
             "Missing return statement in function",
-            "missing-return-statements",
+            "missing-return-statement",
             "Used when a function does not have a return statement and whose return type is not None",
         ),
     }
@@ -74,7 +74,7 @@ class InconsistentReturnChecker(BaseChecker):
             if not has_return:
                 # for rendering purpose, the line is set to the last line of the function branch where return statement is missing
                 self.add_message(
-                    "missing-return-statements", node=node, line=block.statements[-1].fromlineno
+                    "missing-return-statement", node=node, line=block.statements[-1].fromlineno
                 )
 
 

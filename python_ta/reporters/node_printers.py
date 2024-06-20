@@ -614,7 +614,7 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_missing_return_statements(msg, _node, source_lines=None):
+def render_missing_return_statement(msg, _node, source_lines=None):
     """
     Render a missing return statements message
     """
@@ -654,7 +654,7 @@ CUSTOM_MESSAGES = {
     "too-many-arguments": render_too_many_arguments,
     "missing-space-in-doctest": render_missing_space_in_doctest,
     "pep8-errors": render_pep8_errors,
-    "missing-return-statements": render_missing_return_statements,
+    "missing-return-statement": render_missing_return_statement,
 }
 
 

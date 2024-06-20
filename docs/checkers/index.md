@@ -918,11 +918,11 @@ returning `None`.
 
 (R9711)=
 
-### Missing return statements (R9711)
+### Missing return statement (R9711)
 
 This error occurs when a function is missing return statements in at least one branch, when the function's return type annotation is not "None".
 
-```{literalinclude} /../examples/custom_checkers/r9711_missing_return_statements.py
+```{literalinclude} /../examples/custom_checkers/r9711_missing_return_statement.py
 
 ```
 

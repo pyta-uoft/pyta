@@ -63,12 +63,12 @@ class InconsistentReturnChecker(BaseChecker):
         # gather all return statements
         for block in end_blocks:
             has_return = False  # whether a return statement exists for this branch
-            for statement in block.statements:
-                if isinstance(statement, nodes.Return):
-                    has_return = True
-                    if statement.value is None:
-                        # check for inconsistent returns
-                        self.add_message("inconsistent-returns", node=statement)
+            statement = block.statements[-1]
+            if isinstance(statement, nodes.Return):
+                has_return = True
+                if statement.value is None:
+                    # check for inconsistent returns
+                    self.add_message("inconsistent-returns", node=statement)
 
             # check for missing return statement
             if not has_return:

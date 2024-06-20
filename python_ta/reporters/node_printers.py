@@ -618,20 +618,15 @@ def render_missing_return_statement(msg, _node, source_lines=None):
     """
     Render a missing return statements message
     """
-    line = msg.line
-    end = _node.tolineno
+    # add function name to reported message
+    msg.msg += f" `{_node.name}`"
 
-    # render function header and context
-    if line - 1 > _node.fromlineno:
-        yield from render_context(_node.fromlineno, _node.fromlineno + 1, source_lines)
-        if line - 1 > _node.fromlineno + 1:
-            yield (None, slice(None, None), LineType.CONTEXT, '"""MORE CODE OMITTED"""')
-    yield from render_context(line - 1, line + 1, source_lines)
+    yield from render_context(msg.line - 1, msg.line + 1, source_lines)
 
     # calculate indentation for the insertion point
-    body = source_lines[end - 1]
+    body = source_lines[msg.line - 1]
     indentation = len(body) - len(body.lstrip())
-    insertion_text = body[:indentation] + '"""MISSING RETURN STATEMENT"""'
+    insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE"
 
     # insert the message
     yield (
@@ -641,7 +636,7 @@ def render_missing_return_statement(msg, _node, source_lines=None):
         insertion_text,
     )
 
-    yield from render_context(end + 1, end + 2, source_lines)
+    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
 
 
 CUSTOM_MESSAGES = {

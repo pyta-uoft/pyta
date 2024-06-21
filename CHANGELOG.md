@@ -61,6 +61,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated dependencies for GitHub Actions to use the latest versions
 - Updated dependabot configuration to auto-update dependencies for GitHub Actions in the future
 - Updated usage messages in `examples/sample_usage/` of `draw_cfg.py` and `print_ast.py` to be accurate on all operating systems
+- Added `z3_vars` attribute to `ControlFlowGraph` to store variables to be used in Z3 solver
 
 ## [2.7.0] - 2024-12-14
 

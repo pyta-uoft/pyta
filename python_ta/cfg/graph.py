@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Generator, List, Optional, Set, Tuple, Union
 
+import z3
 from astroid import Break, Continue, NodeNG, Raise, Return
+
+from ..transforms import ExprWrapper
 
 
 class ControlFlowGraph:
@@ -16,6 +19,8 @@ class ControlFlowGraph:
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
+    # map from variable names to z3 variables
+    z3_vars: dict[str, z3.ExprRef]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0
@@ -23,6 +28,7 @@ class ControlFlowGraph:
         self.unreachable_blocks = set()
         self.start = self.create_block()
         self.end = self.create_block()
+        self.z3_vars = {}
 
     def create_block(
         self,

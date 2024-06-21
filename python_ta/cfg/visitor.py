@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from astroid import extract_node, nodes
+import z3
+from astroid import Uninferable, extract_node, nodes, parse
 from astroid.exceptions import AstroidSyntaxError
 
 from python_ta.contracts import parse_assertions
@@ -55,7 +56,7 @@ class CFGVisitor:
         if attr.startswith("visit_"):
             return self.visit_generic
         else:
-            raise AttributeError(f"'CFGVisitor' object has not attribute '{attr}'")
+            raise AttributeError(f"'CFGVisitor' object has no attribute '{attr}'")
 
     def visit_generic(self, node: nodes.NodeNG) -> None:
         """By default, add the expression to the end of the current block."""
@@ -127,6 +128,31 @@ class CFGVisitor:
 
         self._current_cfg.start.add_statement(func.args)
         func.cfg_block = self._current_cfg.start
+
+        if func.name != "__main__":
+            # Parse types
+            types = {}
+            annotations = func.args.annotations
+            arguments = func.args.args
+            for ann, arg in zip(annotations, arguments):
+                if ann is None:
+                    continue
+                # ann is not None i.e. arg has a type annotation
+                var_name = arg.name
+                inferred = ann.inferred()
+                if len(inferred) > 0 and inferred[0] is not Uninferable:
+                    if isinstance(inferred[0], nodes.ClassDef):
+                        types[arg.name] = inferred[0].name
+
+                typ = types[var_name]
+                type_to_z3 = {
+                    "int": z3.Int,
+                    "float": z3.Real,
+                    "bool": z3.Bool,
+                }
+                if typ in type_to_z3:
+                    z3_var = type_to_z3[typ](var_name)
+                    self._current_cfg.z3_vars[var_name] = z3_var
 
         preconditions_node = _get_preconditions_node(func)
 
@@ -480,7 +506,8 @@ def _is_python_precondition(precondition: str) -> bool:
     """Given a precondition string, determine if it is a valid Python precondition that can be parsed and return
     a boolean result."""
     try:
-        _ = extract_node(precondition)
+        # _ = extract_node(precondition)
+        _ = parse(precondition)
         return True
     except AstroidSyntaxError:
         return False

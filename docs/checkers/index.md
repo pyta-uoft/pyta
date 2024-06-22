@@ -897,9 +897,9 @@ def my_func() -> None:
 
 ### Inconsistent returns (R9710)
 
-As a replacement of pylint error message R1710, this error occurs when you have a function that sometimes returns a non-`None` value and sometimes _
-implicitly_ returns `None`. This is an issue because in Python, we prefer making code explicit
-rather than implicit.
+This error occurs when you have a function that sometimes has return statements with
+non-`None` values and sometimes has only `return`. This is an issue because in Python, we prefer making code explicit
+rather than implicit. This error replaces pylint's [R1710](https://pylint.pycqa.org/en/latest/user_guide/messages/refactor/inconsistent-return-statements.html).
 
 ```{literalinclude} /../examples/custom_checkers/r9710_inconsistent_returns.py
 

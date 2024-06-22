@@ -618,9 +618,6 @@ def render_missing_return_statement(msg, _node, source_lines=None):
     """
     Render a missing return statements message
     """
-    # add function name to reported message
-    msg.msg += f" `{_node.name}`"
-
     yield from render_context(msg.line - 1, msg.line + 1, source_lines)
 
     # calculate indentation for the insertion point

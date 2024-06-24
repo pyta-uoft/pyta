@@ -2,7 +2,7 @@
 Check for inconsistent return statements in functions and missing return statements in non-None functions.
 """
 
-from typing import Optional
+from typing import Optional, Set
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -82,7 +82,7 @@ class InconsistentReturnChecker(BaseChecker):
                 elif statement.value is None:
                     self.add_message("inconsistent-returns", node=statement)
 
-    def _search_for_end_line(self, block, visited: set[int]):
+    def _search_for_end_line(self, block, visited: Set[int]):
         """
         Recursively search for the line number of the end of a nested block
         """

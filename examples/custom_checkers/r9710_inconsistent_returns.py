@@ -18,7 +18,3 @@ def str_to_int(s: str) -> Optional[int]:
     except ValueError:
         return  # Error: this should be `return None` instead.
 
-
-if __name__ == "__main__":
-    import python_ta
-    python_ta.check_all()

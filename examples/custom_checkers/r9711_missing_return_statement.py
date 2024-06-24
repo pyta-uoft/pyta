@@ -28,8 +28,3 @@ def day_name_to_number(day: str) -> int:
         return 5
     elif day == 'Sunday':
         return 6
-
-
-if __name__ == "__main__":
-    import python_ta
-    python_ta.check_all()

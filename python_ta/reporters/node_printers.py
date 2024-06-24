@@ -614,16 +614,24 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_missing_return_statement(msg, _node, source_lines=None):
+def render_missing_return_statement(msg, node, source_lines=None):
     """
     Render a missing return statements message
     """
-    yield from render_context(msg.line - 1, msg.line + 1, source_lines)
+    yield from render_context(msg.end_line - 1, msg.end_line + 1, source_lines)
 
     # calculate indentation for the insertion point
-    body = source_lines[msg.line - 1]
-    indentation = len(body) - len(body.lstrip())
-    insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE"
+    body = source_lines[msg.end_line - 1]
+    indentation = len(source_lines[msg.line - 1]) - len(source_lines[msg.line - 1].lstrip())
+
+    # determine whether reaching the end of function
+    function_indentation = len(source_lines[node.lineno - 1]) - len(
+        source_lines[node.lineno - 1].lstrip()
+    )
+    if msg.end_line == node.end_lineno and indentation == function_indentation + 4:
+        insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE"
+    else:
+        insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE (OR BELOW)"
 
     # insert the message
     yield (
@@ -633,7 +641,7 @@ def render_missing_return_statement(msg, _node, source_lines=None):
         insertion_text,
     )
 
-    yield from render_context(msg.line + 1, msg.line + 3, source_lines)
+    yield from render_context(msg.end_line + 1, msg.end_line + 3, source_lines)
 
 
 CUSTOM_MESSAGES = {

@@ -6,9 +6,8 @@ from typing import Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
+from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
-
-from python_ta.cfg import ControlFlowGraph
 
 
 class InconsistentReturnChecker(BaseChecker):
@@ -31,6 +30,7 @@ class InconsistentReturnChecker(BaseChecker):
     def __init__(self, linter: Optional[PyLinter] = None) -> None:
         super().__init__(linter=linter)
 
+    @only_required_for_messages("missing-return-statement", "inconsistent-returns")
     def visit_functiondef(self, node) -> None:
         """Visit a function definition"""
         self._check_return_statements(node)
@@ -65,16 +65,43 @@ class InconsistentReturnChecker(BaseChecker):
         if has_return_annotation or has_return_value:
             for block in return_statements:
                 statement = return_statements[block]
+                end_lines = self._search_for_end_line(block, set())
                 if statement is None:
-                    # for rendering purpose, the line is set to the last line of the function branch where return statement is missing
+                    """
+                    For rendering purpose:
+                    line: the line where the error occurs, used to calculate indentation
+                    end_line: the line to insert the error message
+                    """
                     self.add_message(
                         "missing-return-statement",
                         node=node,
-                        line=block.statements[-1].fromlineno,
+                        line=block.statements[-1].tolineno,
+                        end_lineno=max((line for line in end_lines)),
                         args=node.name,
                     )
                 elif statement.value is None:
                     self.add_message("inconsistent-returns", node=statement)
+
+    def _search_for_end_line(self, block, visited: set[int]):
+        """
+        Recursively search for the line number of the end of a nested block
+        """
+        if block.id in visited or block.id == 1:
+            return
+
+        visited.add(block.id)
+        end = block.statements[-1].lineno
+        # the only successors are end block or visited
+        if all(
+            successor.target.id == 1 or successor.target.id in visited
+            for successor in block.successors
+        ):
+            yield end
+        else:
+            for successor in block.successors:
+                yield from self._search_for_end_line(successor.target, visited)
+
+        visited.remove(block.id)
 
 
 def register(linter: PyLinter) -> None:

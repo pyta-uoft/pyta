@@ -64,6 +64,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="missing_return",
             ),
             ignore_position=True,
         ):
@@ -87,6 +88,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="missing_return_in_branch",
             ),
             ignore_position=True,
         ):
@@ -111,6 +113,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="multiple_branches",
             ),
             ignore_position=True,
         ):
@@ -132,6 +135,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=inner_func_node,
+                args="inner_function",
             ),
             ignore_position=True,
         ):
@@ -155,10 +159,12 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="try_except",
             ),
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="try_except",
             ),
             ignore_position=True,
         ):
@@ -179,6 +185,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="while_loop",
             ),
             ignore_position=True,
         ):
@@ -198,6 +205,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
+                args="for_loop",
             ),
             ignore_position=True,
         ):
@@ -252,6 +260,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func1_node,
+                args="func1",
             ),
             ignore_position=True,
         ):
@@ -259,8 +268,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="missing-return-statement",
-                node=func2_node,
+                msg_id="missing-return-statement", node=func2_node, args="func2"
             ),
             ignore_position=True,
         ):

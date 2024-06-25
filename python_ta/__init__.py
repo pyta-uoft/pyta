@@ -68,6 +68,7 @@ def check_errors(
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
+    autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(
@@ -76,6 +77,7 @@ def check_errors(
         local_config=config,
         output=output,
         load_default_config=load_default_config,
+        autoformat=autoformat,
     )
 
 
@@ -163,7 +165,9 @@ def _check(
                 )
 
                 if autoformat:
-                    linelen = local_config["max-line-length"] if local_config != "" else 88
+                    linelen = (
+                        local_config["max-line-length"] if "max-line-length" in local_config else 88
+                    )
                     subprocess.run(
                         [
                             sys.executable,
@@ -214,8 +218,9 @@ def _check(
             if linter.config.pyta_error_permission:
                 errs = list(current_reporter.messages.values())
 
-            # Only call upload_to_server() if there's something to upload
-            if f_paths != [] or errs != []:
+            if (
+                f_paths != [] or errs != []
+            ):  # Only call upload_to_server() if there's something to upload
                 # Checks if default configuration was used without changing options through the local_config argument
                 if linter.config_file[-19:-10] != "python_ta" or local_config != "":
                     config = linter.config.__dict__
@@ -226,7 +231,6 @@ def _check(
                     url=linter.config.pyta_server_address,
                     version=__version__,
                 )
-
         # Only generate reports (display the webpage) if there were valid files to check
         if is_any_file_checked:
             linter.generate_reports()

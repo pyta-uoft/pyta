@@ -26,13 +26,19 @@ class ExprWrapper:
     node: astroid.NodeNG
     types: Dict[str, str]
 
-    def __init__(self, expr: nodes.Expr, types=None):
-        self.node = expr.value
-        if types is None:
-            types = {}
+    def __init__(self, node: astroid.NodeNG, types={}):
         self.types = types
 
-    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
+        if isinstance(node, astroid.Expr):
+            self.node = node.value  # take node attribute to be the value of the expression
+        elif isinstance(node, astroid.FunctionDef):
+            self.node = node  # take node attribute to be the function declaration node itself
+        else:
+            raise Z3ParseException(
+                "Node must be an astroid expression or function declaration node."
+            )
+
+    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef | List[z3.ExprRef]:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
@@ -52,6 +58,8 @@ class ExprWrapper:
             node = node.value
         elif isinstance(node, nodes.Name):
             node = self.apply_name(node.name)
+        elif isinstance(node, nodes.FunctionDef):
+            node = self.parse_function_def(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -160,3 +168,27 @@ class ExprWrapper:
         values = [self.reduce(x) for x in values]
 
         return self.apply_bool_op(op, values)
+
+    def parse_function_def(self, node: astroid.FunctionDef) -> List[z3.ExprRef]:
+        """
+        Convert an astroid FunctionDef node to a z3 expression.
+        This method is used to handle function parameters and their type annotations.
+        """
+        z3_vars = []  # initialize list of z3 variables
+
+        annotations = node.args.annotations
+        arguments = node.args.args
+        for ann, arg in zip(annotations, arguments):
+            if ann is None:
+                continue
+            inferred = ann.inferred()
+            if (
+                len(inferred) > 0
+                and inferred[0] is not astroid.Uninferable
+                and isinstance(inferred[0], astroid.ClassDef)
+            ):
+                self.types[arg.name] = inferred[0].name
+
+            z3_vars.append(self.apply_name(arg.name))
+
+        return z3_vars

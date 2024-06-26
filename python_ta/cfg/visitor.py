@@ -1,12 +1,12 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import z3
-from astroid import Uninferable, extract_node, nodes, parse
+from astroid import extract_node, nodes, parse
 from astroid.exceptions import AstroidSyntaxError
 
 from python_ta.contracts import parse_assertions
 
+from ..transforms import ExprWrapper
 from .graph import CFGBlock, ControlFlowGraph
 
 
@@ -131,28 +131,17 @@ class CFGVisitor:
 
         if func.name != "__main__":
             # Parse types
-            types = {}
-            annotations = func.args.annotations
-            arguments = func.args.args
-            for ann, arg in zip(annotations, arguments):
-                if ann is None:
-                    continue
-                # ann is not None i.e. arg has a type annotation
-                var_name = arg.name
-                inferred = ann.inferred()
-                if len(inferred) > 0 and inferred[0] is not Uninferable:
-                    if isinstance(inferred[0], nodes.ClassDef):
-                        types[arg.name] = inferred[0].name
-
-                typ = types[var_name]
-                type_to_z3 = {
-                    "int": z3.Int,
-                    "float": z3.Real,
-                    "bool": z3.Bool,
-                }
-                if typ in type_to_z3:
-                    z3_var = type_to_z3[typ](var_name)
-                    self._current_cfg.z3_vars[var_name] = z3_var
+            expr = ExprWrapper(func.args)
+            z3_vars_list = expr.reduce()
+            # Confirm that type list is given
+            if isinstance(z3_vars_list, list):
+                self._current_cfg._z3_vars.update(
+                    {z3_var.decl().name(): z3_var for z3_var in z3_vars_list}
+                )
+            else:  # type z3.ExprRef given
+                logging.warning(
+                    "ExprWrapper.reduce() did not return a list of z3 variables when given a function definition"
+                )
 
         preconditions_node = _get_preconditions_node(func)
 

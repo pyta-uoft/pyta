@@ -43,7 +43,7 @@ class ExprWrapper:
                 "Node must be an astroid expression or function declaration node."
             )
 
-    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef | List[z3.ExprRef] | None:
+    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
@@ -66,7 +66,7 @@ class ExprWrapper:
         elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
         elif isinstance(node, nodes.FunctionDef):
-            node = self.parse_function_def(node)
+            node = self.parse_function_def(node)[0]
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 

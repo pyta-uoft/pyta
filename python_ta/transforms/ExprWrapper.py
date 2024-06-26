@@ -1,8 +1,13 @@
 from typing import Dict, List, Optional, Union
 
 import astroid
-import z3
 from astroid import nodes
+
+try:
+    import z3
+except ImportError:
+    z3 = None
+assert z3 is not None, "ExprWrapper module requires z3 to be installed."
 
 
 class Z3ParseException(Exception):
@@ -57,6 +62,8 @@ class ExprWrapper:
         elif isinstance(node, nodes.Const):
             node = node.value
         elif isinstance(node, nodes.Name):
+            node = self.apply_name(node.name)
+        elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
         elif isinstance(node, nodes.FunctionDef):
             node = self.parse_function_def(node)
@@ -189,6 +196,6 @@ class ExprWrapper:
             ):
                 self.types[arg.name] = inferred[0].name
 
-            z3_vars.append(self.apply_name(arg.name))
+            z3_vars.append(self.reduce(arg))
 
         return z3_vars

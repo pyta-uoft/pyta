@@ -3,10 +3,9 @@ from __future__ import annotations
 from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
-    import z3
+    from z3 import ExprRef
 except ImportError:
-    z3 = None
-# assert z3 is not None, "CFG module requires z3 to be installed."
+    ExprRef = None
 
 from astroid import Break, Continue, NodeNG, Raise, Return
 
@@ -23,7 +22,7 @@ class ControlFlowGraph:
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
     # map from variable names to z3 variables
-    _z3_vars: Dict[str, z3.ExprRef]
+    _z3_vars: Dict[str, ExprRef]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0

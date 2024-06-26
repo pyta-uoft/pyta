@@ -131,7 +131,7 @@ class CFGVisitor:
 
         if func.name != "__main__":
             # Parse types
-            expr = ExprWrapper(func.args)
+            expr = ExprWrapper(func)
             z3_vars_list = expr.reduce()
             # Confirm that type list is given
             if isinstance(z3_vars_list, list):

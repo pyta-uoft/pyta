@@ -7,7 +7,7 @@ try:
     import z3
 except ImportError:
     z3 = None
-assert z3 is not None, "ExprWrapper module requires z3 to be installed."
+# assert z3 is not None, "ExprWrapper module requires z3 to be installed."
 
 
 class Z3ParseException(Exception):
@@ -43,7 +43,7 @@ class ExprWrapper:
                 "Node must be an astroid expression or function declaration node."
             )
 
-    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef | List[z3.ExprRef]:
+    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef | List[z3.ExprRef] | None:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.

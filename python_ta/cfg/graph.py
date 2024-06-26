@@ -20,7 +20,7 @@ class ControlFlowGraph:
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
     # map from variable names to z3 variables
-    z3_vars: dict[str, z3.ExprRef]
+    _z3_vars: dict[str, z3.ExprRef]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0

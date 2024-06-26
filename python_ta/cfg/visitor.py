@@ -131,7 +131,7 @@ class CFGVisitor:
 
         if func.name != "__main__":
             # Parse types
-            expr = ExprWrapper(func)
+            expr = ExprWrapper(func)  # *********
             z3_vars_list = expr.parse_function_def(func)
             # Confirm that type list is given
             if isinstance(z3_vars_list, list):
@@ -495,7 +495,8 @@ def _is_python_precondition(precondition: str) -> bool:
     """Given a precondition string, determine if it is a valid Python precondition that can be parsed and return
     a boolean result."""
     try:
-        _ = parse(precondition)
+        _ = extract_node(precondition)
+        # _ = parse(precondition)
         return True
     except AstroidSyntaxError:
         return False

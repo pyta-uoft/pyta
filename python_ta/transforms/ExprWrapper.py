@@ -63,6 +63,8 @@ class ExprWrapper:
             node = node.value
         elif isinstance(node, nodes.Name):
             node = self.apply_name(node.name)
+        elif isinstance(node, nodes.Assign):
+            node = self.reduce(node.targets[0])
         elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
         elif isinstance(node, nodes.FunctionDef):

@@ -30,7 +30,7 @@ class ControlFlowGraph:
         self.unreachable_blocks = set()
         self.start = self.create_block()
         self.end = self.create_block()
-        self.z3_vars = {}
+        self._z3_vars = {}
 
     def create_block(
         self,

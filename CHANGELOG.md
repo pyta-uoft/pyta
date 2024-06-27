@@ -66,6 +66,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Extended functionality of `ExprWrapper` class to include function definitions and name assignments
 - Added to `CFGVisitor.visit_functiondef` method to update the `ControlFlowGraph`'s `_z3_vars` attribute
 - Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
+- Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
 
 ## [2.7.0] - 2024-12-14
 

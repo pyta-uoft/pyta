@@ -20,7 +20,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
 - Stored valid Python function preconditions in initial edge to function code in generated function control flow graphs.
 - Report warning when control flow graph creation encounters a syntax error related to control flow
-- Added option that runs black formatting tool to python_ta.check_all()
+- Added autoformat option that runs black formatting tool to python_ta.check_all()
 
 ### 💫 New checkers
 

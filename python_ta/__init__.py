@@ -217,7 +217,6 @@ def _check(
                 )
             if linter.config.pyta_error_permission:
                 errs = list(current_reporter.messages.values())
-
             if (
                 f_paths != [] or errs != []
             ):  # Only call upload_to_server() if there's something to upload

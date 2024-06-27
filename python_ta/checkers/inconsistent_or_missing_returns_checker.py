@@ -69,7 +69,6 @@ class InconsistentReturnChecker(BaseChecker):
         if has_return_annotation or has_return_value:
             for block in return_statements:
                 statement = return_statements[block]
-                end_lines = self._search_for_end_line(block, set())
                 if statement is None:
                     """
                     For rendering purpose:
@@ -80,33 +79,11 @@ class InconsistentReturnChecker(BaseChecker):
                         "missing-return-statement",
                         node=node,
                         line=block.statements[-1].tolineno,
-                        # end_lineno=block.statements[-1].end_lineno,
-                        end_lineno=max((line for line in end_lines)),
+                        end_lineno=block.statements[-1].end_lineno,
                         args=node.name,
                     )
                 elif statement.value is None:
                     self.add_message("inconsistent-returns", node=statement)
-
-    def _search_for_end_line(self, block, visited: Set[int]):
-        """
-        Recursively search for the line number of the end of a nested block
-        """
-        if block.id in visited or block.id == 1:
-            return
-
-        visited.add(block.id)
-        end = block.statements[-1].lineno
-        # the only successors are end block or visited
-        if all(
-            successor.target.id == 1 or successor.target.id in visited
-            for successor in block.successors
-        ):
-            yield end
-        else:
-            for successor in block.successors:
-                yield from self._search_for_end_line(successor.target, visited)
-
-        visited.remove(block.id)
 
 
 def register(linter: PyLinter) -> None:

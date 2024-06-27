@@ -496,7 +496,6 @@ def _is_python_precondition(precondition: str) -> bool:
     a boolean result."""
     try:
         _ = extract_node(precondition)
-        # _ = parse(precondition)
         return True
     except AstroidSyntaxError:
         return False

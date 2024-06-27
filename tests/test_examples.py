@@ -141,8 +141,7 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: Dict[str, Se
         assert False
     checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
 
-    test_file_name = os.path.basename(test_file)
-    file_symbols = pyta_examples_symbols[test_file_name]
+    file_symbols = pyta_examples_symbols[base_name]
 
     found_pylint_message = checker_name in file_symbols
     assert (

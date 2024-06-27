@@ -65,8 +65,11 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="missing_return",
+                line=3,
+                end_line=3,
+                col_offset=0,
+                end_col_offset=18,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -89,8 +92,11 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="missing_return_in_branch",
+                line=5,
+                end_line=5,
+                col_offset=0,
+                end_col_offset=28,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -114,8 +120,11 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="multiple_branches",
+                line=6,
+                end_line=6,
+                col_offset=0,
+                end_col_offset=21,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -136,8 +145,11 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=inner_func_node,
                 args="inner_function",
+                line=4,
+                end_line=4,
+                col_offset=4,
+                end_col_offset=22,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(outer_func_node)
             self.checker.visit_functiondef(inner_func_node)
@@ -160,13 +172,20 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="try_except",
+                line=6,
+                end_line=6,
+                col_offset=0,
+                end_col_offset=14,
             ),
             pylint.testutils.MessageTest(
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="try_except",
+                line=4,
+                end_line=4,
+                col_offset=0,
+                end_col_offset=14,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -186,8 +205,11 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="while_loop",
+                line=4,
+                end_line=5,
+                col_offset=0,
+                end_col_offset=14,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -206,8 +228,11 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="for_loop",
+                line=3,
+                end_line=4,
+                col_offset=0,
+                end_col_offset=12,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -261,15 +286,23 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func1_node,
                 args="func1",
+                line=4,
+                end_line=4,
+                col_offset=0,
+                end_col_offset=9,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func1_node)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="missing-return-statement", node=func2_node, args="func2"
+                msg_id="missing-return-statement",
+                node=func2_node,
+                args="func2",
+                line=10,
+                end_line=13,
+                col_offset=0,
+                end_col_offset=9,
             ),
-            ignore_position=True,
         ):
             self.checker.visit_functiondef(func2_node)

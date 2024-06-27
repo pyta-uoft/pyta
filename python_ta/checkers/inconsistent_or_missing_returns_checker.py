@@ -11,7 +11,6 @@ from pylint.lint import PyLinter
 
 
 class InconsistentReturnChecker(BaseChecker):
-
     name = "inconsistent-or-missing-returns"
     msgs = {
         "R9710": (
@@ -58,7 +57,12 @@ class InconsistentReturnChecker(BaseChecker):
             statement = block.statements[-1]
             if isinstance(statement, nodes.Return):
                 return_statements[block] = statement
-                if return_statements[block].value is not None:
+                # if the return statement is not `return` or `return None`
+                if not (
+                    statement.value is None
+                    or isinstance(statement.value, nodes.Const)
+                    and statement.value.value is None
+                ):
                     has_return_value = True
 
         # check for inconsistent or missing returns
@@ -76,6 +80,7 @@ class InconsistentReturnChecker(BaseChecker):
                         "missing-return-statement",
                         node=node,
                         line=block.statements[-1].tolineno,
+                        # end_lineno=block.statements[-1].end_lineno,
                         end_lineno=max((line for line in end_lines)),
                         args=node.name,
                     )

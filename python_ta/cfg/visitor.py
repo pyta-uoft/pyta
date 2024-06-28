@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from astroid import extract_node, nodes, parse
+from astroid import extract_node, nodes
 from astroid.exceptions import AstroidSyntaxError
 
 from python_ta.contracts import parse_assertions

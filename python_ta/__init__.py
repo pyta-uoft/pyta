@@ -20,6 +20,7 @@ __version__ = "2.7.1.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.
 import builtins
+import subprocess
 
 try:
     del builtins._
@@ -67,6 +68,7 @@ def check_errors(
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
+    autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(
@@ -75,6 +77,7 @@ def check_errors(
         local_config=config,
         output=output,
         load_default_config=load_default_config,
+        autoformat=autoformat,
     )
 
 
@@ -83,6 +86,7 @@ def check_all(
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
+    autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
     """Check a module for errors and style warnings, printing a report."""
     return _check(
@@ -91,6 +95,7 @@ def check_all(
         local_config=config,
         output=output,
         load_default_config=load_default_config,
+        autoformat=autoformat,
     )
 
 
@@ -100,6 +105,7 @@ def _check(
     local_config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
+    autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
@@ -112,6 +118,7 @@ def _check(
     `output` is an absolute or relative path to capture pyta data output. Default std out.
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
+    `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
@@ -156,6 +163,25 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
+
+                if autoformat:
+                    linelen = (
+                        local_config["max-line-length"] if "max-line-length" in local_config else 88
+                    )
+                    subprocess.run(
+                        [
+                            sys.executable,
+                            "-m",
+                            "black",
+                            "--skip-string-normalization",
+                            "--line-length=" + str(linelen),
+                            file_py,
+                        ],
+                        encoding="utf-8",
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                    )
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out

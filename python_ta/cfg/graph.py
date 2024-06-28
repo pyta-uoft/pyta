@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Generator, List, Optional, Set
+from typing import Any, Dict, Generator, List, Optional, Set, Union
 
 try:
     from z3 import ExprRef
@@ -21,8 +21,8 @@ class ControlFlowGraph:
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
-    # map from variable names to z3 variables
-    _z3_vars: Dict[str, ExprRef]
+    # map from variable names to z3 variables (i.e. ExprRef instances, if z3 is installed)
+    _z3_vars: Dict[str, Any]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0

@@ -67,7 +67,6 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Added protected `_z3_vars` attribute to `ControlFlowGraph` to store variables to be used in Z3 solver
 - Removed unused imports from `python_ta/cfg/graph.py`
 - Extended functionality of `ExprWrapper` class to include function definitions and name assignments
-- Added to `CFGVisitor.visit_functiondef` method to update the `ControlFlowGraph`'s `_z3_vars` attribute
 - Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
 
 ## [2.7.0] - 2024-12-14

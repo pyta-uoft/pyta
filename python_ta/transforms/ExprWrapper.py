@@ -178,12 +178,9 @@ class ExprWrapper:
 
         return self.apply_bool_op(op, values)
 
-    def parse_function_def(self, node: astroid.FunctionDef) -> List[z3.ExprRef]:
-        """
-        Convert an astroid FunctionDef node to a z3 expression.
-        This method is used to handle function parameters and their type annotations.
-        """
-        z3_vars = []  # initialize list of z3 variables
+    def parse_function_def(self, node: astroid.FunctionDef) -> Dict[str, z3.ExprRef]:
+        """Convert an astroid FunctionDef node's parameters to z3 variables."""
+        z3_vars = {}  # initialize mapping of z3 variables
 
         annotations = node.args.annotations
         arguments = node.args.args
@@ -198,6 +195,6 @@ class ExprWrapper:
             ):
                 self.types[arg.name] = inferred[0].name
 
-            z3_vars.append(self.reduce(arg))
+            z3_vars[arg.name] = self.reduce(arg)
 
         return z3_vars

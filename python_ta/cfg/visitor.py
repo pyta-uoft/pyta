@@ -132,16 +132,8 @@ class CFGVisitor:
         if z3 is not None:
             # Parse types
             expr = ExprWrapper(func)
-            z3_vars_list = expr.parse_function_def(func)
-            # Confirm that type list is given
-            if isinstance(z3_vars_list, list):
-                self._current_cfg._z3_vars.update(
-                    {z3_var.decl().name(): z3_var for z3_var in z3_vars_list}
-                )
-            else:  # type z3.ExprRef given
-                logging.warning(
-                    "ExprWrapper.reduce() did not return a list of z3 variables when given a function definition"
-                )
+            z3_vars = expr.parse_function_def(func)
+            self._current_cfg._z3_vars.update(z3_vars)
 
         preconditions_node = _get_preconditions_node(func)
 

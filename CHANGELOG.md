@@ -20,6 +20,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Stored actual AST condition node in edges leading out of If/While blocks in generated control flow graphs.
 - Stored valid Python function preconditions in initial edge to function code in generated function control flow graphs.
 - Report warning when control flow graph creation encounters a syntax error related to control flow
+- Added autoformat option that runs black formatting tool to python_ta.check_all()
 
 ### 💫 New checkers
 
@@ -61,6 +62,8 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated dependencies for GitHub Actions to use the latest versions
 - Updated dependabot configuration to auto-update dependencies for GitHub Actions in the future
 - Updated usage messages in `examples/sample_usage/` of `draw_cfg.py` and `print_ast.py` to be accurate on all operating systems
+- Removed redundant line from `tests/test_examples.py`
+- Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
 - Added protected `_z3_vars` attribute to `ControlFlowGraph` to store variables to be used in Z3 solver
 - Removed unused imports from `python_ta/cfg/graph.py`
 - Extended functionality of `ExprWrapper` class to include function definitions and name assignments

@@ -55,7 +55,7 @@ class CFGVisitor:
         if attr.startswith("visit_"):
             return self.visit_generic
         else:
-            raise AttributeError(f"'CFGVisitor' object has not attribute '{attr}'")
+            raise AttributeError(f"'CFGVisitor' object has no attribute '{attr}'")
 
     def visit_generic(self, node: nodes.NodeNG) -> None:
         """By default, add the expression to the end of the current block."""

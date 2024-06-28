@@ -2,7 +2,7 @@
 Check for inconsistent return statements in functions and missing return statements in non-None functions.
 """
 
-from typing import Optional, Set
+from typing import Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -74,12 +74,24 @@ class InconsistentReturnChecker(BaseChecker):
                     For rendering purpose:
                     line: the line where the error occurs, used to calculate indentation
                     end_line: the line to insert the error message
+
+                    For `while` and `for` loops, line and end_line need to set to those of the parent node
+                    to make sure the message is rendered at the end of the loop
                     """
+                    last_statement = block.statements[-1]
+                    line = last_statement.lineno
+                    end_line = last_statement.end_lineno
+                    if isinstance(last_statement.parent, nodes.While) or isinstance(
+                        last_statement.parent, nodes.For
+                    ):
+                        line = last_statement.parent.lineno
+                        end_line = last_statement.parent.end_lineno
+
                     self.add_message(
                         "missing-return-statement",
                         node=node,
-                        line=block.statements[-1].tolineno,
-                        end_lineno=block.statements[-1].end_lineno,
+                        line=line,
+                        end_lineno=end_line,
                         args=node.name,
                     )
                 elif statement.value is None:

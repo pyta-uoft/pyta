@@ -67,23 +67,18 @@ class InconsistentReturnChecker(BaseChecker):
 
         # check for inconsistent or missing returns
         if has_return_annotation or has_return_value:
-            for block in return_statements:
-                statement = return_statements[block]
+            for block, statement in return_statements.items():
                 if statement is None:
-                    """
-                    For rendering purpose:
-                    line: the line where the error occurs, used to calculate indentation
-                    end_line: the line to insert the error message
+                    # For rendering purpose:
+                    # line: the line where the error occurs, used to calculate indentation
+                    # end_line: the line to insert the error message
 
-                    For `while` and `for` loops, line and end_line need to set to those of the parent node
-                    to make sure the message is rendered at the end of the loop
-                    """
+                    # For `while` and `for` loops, line and end_line need to set to those of the parent node
+                    # to make sure the message is rendered at the end of the loop
                     last_statement = block.statements[-1]
                     line = last_statement.lineno
                     end_line = last_statement.end_lineno
-                    if isinstance(last_statement.parent, nodes.While) or isinstance(
-                        last_statement.parent, nodes.For
-                    ):
+                    if isinstance(last_statement.parent, (nodes.While, nodes.For)):
                         line = last_statement.parent.lineno
                         end_line = last_statement.parent.end_lineno
 

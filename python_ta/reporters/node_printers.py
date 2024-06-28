@@ -625,10 +625,12 @@ def render_missing_return_statement(msg, node, source_lines=None):
     indentation = len(source_lines[msg.line - 1]) - len(source_lines[msg.line - 1].lstrip())
 
     # determine whether reaching the end of function
-    function_indentation = len(source_lines[node.lineno - 1]) - len(
-        source_lines[node.lineno - 1].lstrip()
+    first_statement_line = node.body[0].lineno
+    function_indentation = len(source_lines[first_statement_line - 1]) - len(
+        source_lines[first_statement_line - 1].lstrip()
     )
-    if msg.end_line == node.end_lineno and indentation == function_indentation + 4:
+
+    if msg.end_line == node.end_lineno and indentation == function_indentation:
         insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE"
     else:
         insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE (OR BELOW)"

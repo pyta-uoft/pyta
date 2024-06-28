@@ -7,7 +7,9 @@ try:
 except ImportError:
     ExprRef = Any
 
-from astroid import Break, Continue, NodeNG, Raise, Return
+from astroid import Arguments, Break, Continue, NodeNG, Raise, Return
+
+from ..transforms import ExprWrapper
 
 
 class ControlFlowGraph:
@@ -31,6 +33,17 @@ class ControlFlowGraph:
         self.start = self.create_block()
         self.end = self.create_block()
         self._z3_vars = {}
+
+    def add_arguments(self, args: Arguments) -> None:
+        self.start.add_statement(args)
+        func = args.parent
+        func.cfg_block = self.start
+
+        if ExprRef is not Any:
+            # Parse types
+            expr = ExprWrapper(func)
+            z3_vars = expr.parse_function_def(func)
+            self._z3_vars.update(z3_vars)
 
     def create_block(
         self,

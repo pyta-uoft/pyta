@@ -6,7 +6,6 @@ from astroid.exceptions import AstroidSyntaxError
 
 from python_ta.contracts import parse_assertions
 
-from ..transforms import ExprWrapper, z3
 from .graph import CFGBlock, ControlFlowGraph
 
 
@@ -126,14 +125,7 @@ class CFGVisitor:
             )
         )
 
-        self._current_cfg.start.add_statement(func.args)
-        func.cfg_block = self._current_cfg.start
-
-        if z3 is not None:
-            # Parse types
-            expr = ExprWrapper(func)
-            z3_vars = expr.parse_function_def(func)
-            self._current_cfg._z3_vars.update(z3_vars)
+        self._current_cfg.add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
 

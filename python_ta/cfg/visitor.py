@@ -131,7 +131,7 @@ class CFGVisitor:
 
         if z3 is not None:
             # Parse types
-            expr = ExprWrapper(func)  # *********
+            expr = ExprWrapper(func)
             z3_vars_list = expr.parse_function_def(func)
             # Confirm that type list is given
             if isinstance(z3_vars_list, list):

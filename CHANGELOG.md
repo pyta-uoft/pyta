@@ -68,6 +68,10 @@ Custom checkers:
 - Updated usage messages in `examples/sample_usage/` of `draw_cfg.py` and `print_ast.py` to be accurate on all operating systems
 - Removed redundant line from `tests/test_examples.py`
 - Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
+- Added protected `_z3_vars` attribute to `ControlFlowGraph` to store variables to be used in Z3 solver
+- Removed unused imports from `python_ta/cfg/graph.py`
+- Extended functionality of `ExprWrapper` class to include function definitions' arguments and name assignments
+- Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
 
 ## [2.7.0] - 2024-12-14
 

@@ -625,7 +625,7 @@ def render_missing_return_statement(msg, node, source_lines=None):
     indentation = len(source_lines[msg.line - 1]) - len(source_lines[msg.line - 1].lstrip())
 
     # determine whether reaching the end of function
-    first_statement_line = node.body[0].lineno
+    first_statement_line = node.end_lineno if len(node.body) == 0 else node.body[0].lineno
     function_indentation = len(source_lines[first_statement_line - 1]) - len(
         source_lines[first_statement_line - 1].lstrip()
     )

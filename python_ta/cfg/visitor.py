@@ -126,6 +126,8 @@ class CFGVisitor:
             )
         )
 
+        # Current CFG block is self._current_cfg.start while initially creating the function cfg
+        func.args.accept(self)
         self._current_cfg.add_arguments(func.args)
         func.cfg = self._current_cfg
 

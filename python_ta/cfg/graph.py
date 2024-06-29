@@ -41,7 +41,7 @@ class ControlFlowGraph:
         if ExprRef is not Any:
             # Parse types
             expr = ExprWrapper(args)
-            z3_vars = expr.parse_args(args)
+            z3_vars = expr.parse_arguments(args)
             self._z3_vars.update(z3_vars)
 
     def create_block(

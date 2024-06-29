@@ -1,14 +1,4 @@
-import math
 from typing import List, Optional
-
-
-def add_sqrts(x: float, y: float) -> Optional[float]:
-    """Return the sum of the square roots of x and y, or None if
-    either number is negative."""
-    if x >= 0 and y >= 0:
-        return math.sqrt(x) + math.sqrt(y)
-    else:
-        return  # Error: this should be `return None` instead.
 
 
 def index_of(numbers: List[int], n: int) -> Optional[int]:

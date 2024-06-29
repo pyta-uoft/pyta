@@ -33,6 +33,10 @@ For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
 list only contains the Pylint checkers enabled by default in PythonTA.
 
+Custom checkers:
+
+- `inconsistent-returns` and `missing-return-statement`: Provide clearer error messages when reporting missing return statements. This replaces pylint's [R1710](https://pylint.pycqa.org/en/latest/user_guide/messages/refactor/inconsistent-return-statements.html) check.
+
 ### 🐛 Bug fixes
 
 - Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it
@@ -66,7 +70,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
 - Added protected `_z3_vars` attribute to `ControlFlowGraph` to store variables to be used in Z3 solver
 - Removed unused imports from `python_ta/cfg/graph.py`
-- Extended functionality of `ExprWrapper` class to include function definitions and name assignments
+- Extended functionality of `ExprWrapper` class to include function definitions' arguments and name assignments
 - Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
 
 ## [2.7.0] - 2024-12-14

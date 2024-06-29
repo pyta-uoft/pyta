@@ -77,6 +77,7 @@ class CFGVisitor:
         self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
         module.cfg_block = self._current_cfg.start
+        module.cfg = self._current_cfg
 
         for child in module.body:
             child.accept(self)
@@ -126,6 +127,7 @@ class CFGVisitor:
         )
 
         self._current_cfg.add_arguments(func.args)
+        func.cfg = self._current_cfg
 
         preconditions_node = _get_preconditions_node(func)
 

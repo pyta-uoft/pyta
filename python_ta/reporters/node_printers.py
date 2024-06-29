@@ -614,6 +614,38 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
+def render_missing_return_statement(msg, node, source_lines=None):
+    """
+    Render a missing return statements message
+    """
+    yield from render_context(msg.line, msg.end_line + 1, source_lines)
+
+    # calculate indentation for the insertion point
+    body = source_lines[msg.end_line - 1]
+    indentation = len(source_lines[msg.line - 1]) - len(source_lines[msg.line - 1].lstrip())
+
+    # determine whether reaching the end of function
+    first_statement_line = node.end_lineno if len(node.body) == 0 else node.body[0].lineno
+    function_indentation = len(source_lines[first_statement_line - 1]) - len(
+        source_lines[first_statement_line - 1].lstrip()
+    )
+
+    if msg.end_line == node.end_lineno and indentation == function_indentation:
+        insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE"
+    else:
+        insertion_text = body[:indentation] + "# INSERT RETURN STATEMENT HERE (OR BELOW)"
+
+    # insert the message
+    yield (
+        None,
+        slice(indentation, None),
+        LineType.ERROR,
+        insertion_text,
+    )
+
+    yield from render_context(msg.end_line + 1, msg.end_line + 3, source_lines)
+
+
 CUSTOM_MESSAGES = {
     "missing-module-docstring": render_missing_docstring,
     "missing-class-docstring": render_missing_docstring,
@@ -624,6 +656,7 @@ CUSTOM_MESSAGES = {
     "too-many-arguments": render_too_many_arguments,
     "missing-space-in-doctest": render_missing_space_in_doctest,
     "pep8-errors": render_pep8_errors,
+    "missing-return-statement": render_missing_return_statement,
 }
 
 

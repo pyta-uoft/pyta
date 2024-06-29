@@ -33,6 +33,10 @@ For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
 list only contains the Pylint checkers enabled by default in PythonTA.
 
+Custom checkers:
+
+- `inconsistent-returns` and `missing-return-statement`: Provide clearer error messages when reporting missing return statements. This replaces pylint's [R1710](https://pylint.pycqa.org/en/latest/user_guide/messages/refactor/inconsistent-return-statements.html) check.
+
 ### 🐛 Bug fixes
 
 - Fixed issue with error message of C0410 by reformating it to properly fit with the list of modules imported that are provided to it

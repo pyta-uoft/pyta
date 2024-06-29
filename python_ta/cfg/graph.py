@@ -36,6 +36,7 @@ class ControlFlowGraph:
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
+        args.parent.cfg = self
         args.parent.cfg_block = self.start
 
         if ExprRef is not Any:

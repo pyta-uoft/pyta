@@ -36,13 +36,12 @@ class ControlFlowGraph:
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
-        func = args.parent
-        func.cfg_block = self.start
+        args.parent.cfg_block = self.start
 
         if ExprRef is not Any:
             # Parse types
-            expr = ExprWrapper(func)
-            z3_vars = expr.parse_function_def(func)
+            expr = ExprWrapper(args)
+            z3_vars = expr.parse_args(args)
             self._z3_vars.update(z3_vars)
 
     def create_block(

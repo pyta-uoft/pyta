@@ -64,6 +64,8 @@ class InconsistentReturnChecker(BaseChecker):
                     and statement.value.value is None
                 ):
                     has_return_value = True
+            elif isinstance(statement, nodes.Raise):
+                return_statements[block] = statement
 
         # check for inconsistent or missing returns
         if has_return_annotation or has_return_value:
@@ -78,7 +80,7 @@ class InconsistentReturnChecker(BaseChecker):
                     last_statement = block.statements[-1]
                     line = last_statement.lineno
                     end_line = last_statement.end_lineno
-                    if isinstance(last_statement.parent, (nodes.While, nodes.For)):
+                    if isinstance(last_statement.parent, (nodes.While, nodes.For, nodes.If)):
                         line = last_statement.parent.lineno
                         end_line = last_statement.parent.end_lineno
 
@@ -89,7 +91,7 @@ class InconsistentReturnChecker(BaseChecker):
                         end_lineno=end_line,
                         args=node.name,
                     )
-                elif statement.value is None:
+                elif isinstance(statement, nodes.Return) and statement.value is None:
                     self.add_message("inconsistent-returns", node=statement)
 
 

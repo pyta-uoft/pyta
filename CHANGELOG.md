@@ -34,7 +34,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 Custom checkers:
 
-- `inconsistent-returns` and`missing-return-statement`: Provide clearer error messages when reporting missing return statements. This replaces pylint's [R1710](https://pylint.pycqa.org/en/latest/user_guide/messages/refactor/inconsistent-return-statements.html) check.
+- `inconsistent-returns` and `missing-return-statement`: Provide clearer error messages when reporting missing return statements. This replaces pylint's [R1710](https://pylint.pycqa.org/en/latest/user_guide/messages/refactor/inconsistent-return-statements.html) check.
 
 ### 🐛 Bug fixes
 

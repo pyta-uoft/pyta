@@ -92,15 +92,15 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="missing_return_in_branch",
-                line=5,
-                end_line=5,
+                line=4,
+                end_line=7,
                 col_offset=0,
                 end_col_offset=28,
             ),
         ):
             self.checker.visit_functiondef(func_node)
 
-    def test_function_with_multiple_branches(self):
+    def test_missing_return_with_multiple_branches(self):
         src = """
         def multiple_branches() -> int:
             if False:
@@ -120,15 +120,15 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="multiple_branches",
-                line=6,
-                end_line=6,
+                line=5,
+                end_line=8,
                 col_offset=0,
                 end_col_offset=21,
             ),
         ):
             self.checker.visit_functiondef(func_node)
 
-    def test_function_with_nested_functions(self):
+    def test_missing_return_with_nested_functions(self):
         src = """
         def outer_function():
             def inner_function() -> int:
@@ -154,7 +154,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_functiondef(outer_func_node)
             self.checker.visit_functiondef(inner_func_node)
 
-    def test_function_with_try_except(self):
+    def test_missing_return_with_try_except(self):
         src = """
         def try_except() -> int:
             try:
@@ -236,7 +236,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_functiondef(func_node)
 
-    def test_no_return_annotations_not_missing(self):
+    def test_correct_return_no_return_annotations(self):
         src = """
         def func1():
             print("no return")
@@ -262,7 +262,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_functiondef(func2_node)
             self.checker.visit_functiondef(func3_node)
 
-    def test_no_return_annotations_missing(self):
+    def test_missing_return_no_return_annotations(self):
         src = """
         def func1():
             if True:
@@ -286,8 +286,8 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func1_node,
                 args="func1",
-                line=4,
-                end_line=4,
+                line=3,
+                end_line=6,
                 col_offset=0,
                 end_col_offset=9,
             ),
@@ -306,3 +306,45 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             ),
         ):
             self.checker.visit_functiondef(func2_node)
+
+    def test_correct_return_raise_statement(self):
+        src = """
+        def division(x, y) -> int:
+            if y == 0:
+                raise Exception
+            else:
+                return x / y
+        """
+
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+
+    def test_missing_return_raise_statement(self):
+        src = """
+        def division_missing_return(x, y) -> int:
+            if y == 0:
+                raise Exception
+            elif x > y:
+                return x / y
+        """
+
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statement",
+                node=func_node,
+                args="division_missing_return",
+                line=5,
+                end_line=6,
+                col_offset=0,
+                end_col_offset=27,
+            ),
+        ):
+            self.checker.visit_functiondef(func_node)

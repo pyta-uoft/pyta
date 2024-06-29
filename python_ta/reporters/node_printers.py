@@ -618,7 +618,7 @@ def render_missing_return_statement(msg, node, source_lines=None):
     """
     Render a missing return statements message
     """
-    yield from render_context(msg.end_line - 1, msg.end_line + 1, source_lines)
+    yield from render_context(msg.line, msg.end_line + 1, source_lines)
 
     # calculate indentation for the insertion point
     body = source_lines[msg.end_line - 1]

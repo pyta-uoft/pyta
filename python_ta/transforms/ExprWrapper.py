@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import astroid
 import z3
@@ -52,6 +52,8 @@ class ExprWrapper:
             node = node.value
         elif isinstance(node, nodes.Name):
             node = self.apply_name(node.name)
+        elif isinstance(node, (nodes.List, nodes.Tuple, nodes.Set)):
+            node = self.parse_container_op(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -97,7 +99,9 @@ class ExprWrapper:
 
         return left
 
-    def apply_bin_op(self, left: z3.ExprRef, op: str, right: z3.ExprRef) -> z3.ExprRef:
+    def apply_bin_op(
+        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, List[z3.ExprRef]]
+    ) -> z3.ExprRef:
         """Given left, right, op, apply the binary operation."""
         try:
             if op == "+":
@@ -120,6 +124,10 @@ class ExprWrapper:
                 return left < right
             elif op == ">":
                 return left > right
+            elif op == "in":
+                return z3.Or(*[left == element for element in right])
+            elif op == "not in":
+                return z3.And(*[left != element for element in right])
             else:
                 raise Z3ParseException(f"Unhandled binary operation {op}.")
         except TypeError:
@@ -160,3 +168,9 @@ class ExprWrapper:
         values = [self.reduce(x) for x in values]
 
         return self.apply_bool_op(op, values)
+
+    def parse_container_op(
+        self, node: Union[nodes.List, nodes.Set, nodes.Tuple]
+    ) -> List[z3.ExprRef]:
+        """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
+        return [self.reduce(element) for element in node.elts]

@@ -56,14 +56,15 @@ def test_bool_constraints():
         assert solver.check() == z3.sat
 
 
-def test_list_constraints():
+def test_container_constraints():
     z3v = Z3Visitor()
     code = """
     def f(x: int):
         '''
         Preconditions:
             - x in [1, 2, 3]
-            - x not in [4, 5, 6, 7, 8]
+            - x not in {4, 5, 6, 7, 8}
+            - x in (1, 2)
         '''
         pass
     """
@@ -72,7 +73,11 @@ def test_list_constraints():
     # Declare variables
     x = z3.Int("x")
     # Construct expected
-    expected = [z3.Or(x == 1, x == 2, x == 3), z3.And(x != 4, x != 5, x != 6, x != 7, x != 8)]
+    expected = [
+        z3.Or(x == 1, x == 2, x == 3),
+        z3.And(x != 4, x != 5, x != 6, x != 7, x != 8),
+        z3.Or(x == 1, x == 2),
+    ]
     actual = function_def.z3_constraints
     assert actual != []
     for e, a in zip(expected, actual):

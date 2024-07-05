@@ -124,12 +124,14 @@ class ExprWrapper:
                 return left < right
             elif op == ">":
                 return left > right
-            elif op == "in":
+            elif op == "in" and isinstance(right, list):
                 return z3.Or(*[left == element for element in right])
-            elif op == "not in":
+            elif op == "not in" and isinstance(right, list):
                 return z3.And(*[left != element for element in right])
             else:
-                raise Z3ParseException(f"Unhandled binary operation {op}.")
+                raise Z3ParseException(
+                    f"Unhandled binary operation {op} with operator types {left} and {right}."
+                )
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
 

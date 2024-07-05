@@ -98,7 +98,7 @@ def test_container_constraints():
         pass
     """,
         """
-    def not_in_list(x: int):
+    def not_in_set(x: int):
         '''
         Preconditions:
             - x not in {1, 2, 3}

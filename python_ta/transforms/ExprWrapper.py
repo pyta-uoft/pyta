@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import astroid
 from astroid import nodes
+from pylint.checkers.utils import safe_infer
 
 try:
     from z3 import And, Bool, ExprRef, Int, Not, Or, Real
@@ -189,13 +190,12 @@ class ExprWrapper:
         for ann, arg in zip(annotations, arguments):
             if ann is None:
                 continue
-            inferred = ann.inferred()
-            if (
-                len(inferred) > 0
-                and inferred[0] is not astroid.Uninferable
-                and isinstance(inferred[0], astroid.ClassDef)
-            ):
-                self.types[arg.name] = inferred[0].name
+
+            inferred = safe_infer(ann)
+            if inferred is None or inferred is astroid.Uninferable:
+                continue
+
+            self.types[arg.name] = inferred.name
 
             if arg.name in self.types and self.types[arg.name] in ["int", "float", "bool"]:
                 z3_vars[arg.name] = self.reduce(arg)

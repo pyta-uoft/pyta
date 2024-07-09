@@ -83,21 +83,33 @@ container_list = [
         pass
     """,
     """
-    def in_empty_container(x: int):
+    def in_empty_list(x: int):
         '''
         Preconditions:
             - x in []
-            - x in set()
+        '''
+        pass
+    """,
+    """
+    def in_empty_tuple(x: int):
+        '''
+        Preconditions:
             - x in ()
         '''
         pass
     """,
     """
-    def not_in_empty_container(x: int):
+    def not_in_empty_list(x: int):
         '''
         Preconditions:
             - x not in []
-            - x not in set()
+        '''
+        pass
+    """,
+    """
+    def not_in_empty_tuple(x: int):
+        '''
+        Preconditions:
             - x not in ()
         '''
         pass
@@ -126,8 +138,10 @@ container_expected = [
     [z3.And(x != 1, x != 2, x != 3)],
     [z3.And(x != 1, x != 2, x != 3)],
     [z3.And(x != 1, x != 2, x != 3)],
-    [z3.BoolVal(False), z3.BoolVal(False)],
-    [z3.BoolVal(True), z3.BoolVal(True)],
+    [z3.BoolVal(False)],
+    [z3.BoolVal(False)],
+    [z3.BoolVal(True)],
+    [z3.BoolVal(True)],
 ]
 
 # lists of all test cases

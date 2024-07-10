@@ -226,14 +226,14 @@ def test_snapshot_to_json_tuples_primitive():
     ]
 
     assert json_data_objects == [
-        {"id": 1, "type": "list", "value": [2, 3, 4]},
+        {"id": 1, "type": "tuple", "value": [2, 3, 4]},
         {"id": 2, "type": "int", "value": 1},
         {"id": 3, "type": "int", "value": 2},
         {"id": 4, "type": "int", "value": 3},
-        {"id": 5, "type": "list", "value": [6, 7, 6]},
+        {"id": 5, "type": "tuple", "value": [6, 7, 6]},
         {"id": 6, "type": "bool", "value": True},
         {"id": 7, "type": "bool", "value": False},
-        {"id": 8, "type": "list", "value": [9, 10, 11]},
+        {"id": 8, "type": "tuple", "value": [9, 10, 11]},
         {"id": 9, "type": "str", "value": "PyTA"},
         {"id": 10, "type": "str", "value": "MarkUs"},
         {"id": 11, "type": "str", "value": "Memory Models"},

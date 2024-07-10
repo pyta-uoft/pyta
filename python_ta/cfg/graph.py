@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Generator, List, Optional, Set, Union
+from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
     from z3 import ExprRef
+
+    from ..transforms import ExprWrapper
 except ImportError:
     ExprRef = Any
+    ExprWrapper = Any
 
 from astroid import Arguments, Break, Continue, NodeNG, Raise, Return
-
-from ..transforms import ExprWrapper
 
 
 class ControlFlowGraph:

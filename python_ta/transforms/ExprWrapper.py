@@ -3,11 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 import astroid
 from astroid import nodes
 from pylint.checkers.utils import safe_infer
-
-try:
-    from z3 import And, Bool, ExprRef, Int, Not, Or, Real
-except ImportError:
-    ExprRef, Int, Real, Bool, And, Or, Not = Any, Any, Any, Any, Any, Any, Any
+from z3 import And, Bool, ExprRef, Int, Not, Or, Real
 
 
 class Z3ParseException(Exception):
@@ -51,9 +47,6 @@ class ExprWrapper:
         if node is None:
             node = self.node
 
-        if ExprRef is Any:
-            return node
-
         if isinstance(node, nodes.BoolOp):
             node = self.parse_bool_op(node)
         elif isinstance(node, nodes.UnaryOp):
@@ -70,10 +63,6 @@ class ExprWrapper:
             node = self.reduce(node.targets[0])
         elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
-        # elif isinstance(node, nodes.Arguments):
-        #     node = self.parse_arguments(node)[0]
-        # elif isinstance(node, nodes.FunctionDef):
-        #     node = self.parse_arguments(node.args)[0]
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -179,6 +168,7 @@ class ExprWrapper:
         """Convert an astroid BoolOp node to a z3 expression."""
         op, values = node.op, node.values
         values = [self.reduce(x) for x in values]
+
         return self.apply_bool_op(op, values)
 
     def parse_arguments(self, node: astroid.Arguments) -> Dict[str, ExprRef]:
@@ -192,12 +182,12 @@ class ExprWrapper:
                 continue
 
             inferred = safe_infer(ann)
-            if inferred is None or inferred is astroid.Uninferable:
+            if inferred is None or inferred is astroid.Uninferable or inferred is not astroid.Name:
                 continue
 
             self.types[arg.name] = inferred.name
 
-            if arg.name in self.types and self.types[arg.name] in ["int", "float", "bool"]:
+            if arg.name in self.types and self.types[arg.name] in {"int", "float", "bool"}:
                 z3_vars[arg.name] = self.reduce(arg)
 
         return z3_vars

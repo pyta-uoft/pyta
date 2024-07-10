@@ -194,7 +194,11 @@ class ExprWrapper:
                 continue
 
             inferred = safe_infer(ann)
-            if inferred is None or inferred is astroid.Uninferable or inferred is not astroid.Name:
+            if (
+                inferred is None
+                or inferred is astroid.Uninferable
+                or not isinstance(inferred, astroid.Name)
+            ):
                 continue
 
             self.types[arg.name] = inferred.name

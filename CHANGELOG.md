@@ -68,6 +68,7 @@ Custom checkers:
 - Updated usage messages in `examples/sample_usage/` of `draw_cfg.py` and `print_ast.py` to be accurate on all operating systems
 - Removed redundant line from `tests/test_examples.py`
 - Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
+- Updated `ExprWrapper` to support `set/list/tuple` literals and `in/not in` operators
 
 ## [2.7.0] - 2024-12-14
 

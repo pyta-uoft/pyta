@@ -69,6 +69,7 @@ Custom checkers:
 - Removed redundant line from `tests/test_examples.py`
 - Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
 - Updated `ExprWrapper` to support `set/list/tuple` literals and `in/not in` operators
+- Updated `snapshot.py` and `test_snapshot.py` to align with MemoryViz 2.0 updates
 
 ## [2.7.0] - 2024-12-14
 

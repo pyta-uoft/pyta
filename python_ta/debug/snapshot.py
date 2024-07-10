@@ -84,8 +84,7 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
             if isinstance(val, (list, set, tuple)):
                 element_ids = [process_value(element) for element in val]
                 value_entry = {
-                    "isClass": False,
-                    "name": type(val).__name__,
+                    "type": type(val).__name__,
                     "id": value_id_diagram,
                     "value": element_ids,
                 }
@@ -96,8 +95,7 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     val_id = process_value(v)
                     dict_ids[key_id] = val_id
                 value_entry = {
-                    "isClass": False,
-                    "name": "dict",
+                    "type": "dict",
                     "id": value_id_diagram,
                     "value": dict_ids,
                 }
@@ -108,15 +106,14 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     attr_id = process_value(attr_val)
                     attr_ids[attr_name] = attr_id
                 value_entry = {
-                    "isClass": True,
-                    "name": type(val).__name__,
+                    "type": ".class",
+                    "name": val.__class__.__name__,
                     "id": value_id_diagram,
                     "value": attr_ids,
                 }
             else:  # Handle primitives and other types
                 value_entry = {
-                    "isClass": False,
-                    "name": type(val).__name__,
+                    "type": type(val).__name__,
                     "id": value_id_diagram,
                     "value": val,
                 }
@@ -135,11 +132,10 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                 frame_variables[var_name] = var_id_diagram
 
             json_object_frame = {
-                "isClass": True,
+                "type": ".frame",
                 "name": frame_name,
                 "id": None,
                 "value": frame_variables,
-                "stack_frame": True,
             }
             json_data.append(json_object_frame)
 

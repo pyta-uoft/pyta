@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import astroid
 from astroid import nodes
@@ -63,6 +63,8 @@ class ExprWrapper:
             node = self.reduce(node.targets[0])
         elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
+        elif isinstance(node, (nodes.List, nodes.Tuple, nodes.Set)):
+            node = self.parse_container_op(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -108,7 +110,7 @@ class ExprWrapper:
 
         return left
 
-    def apply_bin_op(self, left: ExprRef, op: str, right: ExprRef) -> ExprRef:
+    def apply_bin_op(self, left: ExprRef, op: str, right: Union[ExprRef, List[ExprRef]]) -> ExprRef:
         """Given left, right, op, apply the binary operation."""
         try:
             if op == "+":
@@ -131,8 +133,14 @@ class ExprWrapper:
                 return left < right
             elif op == ">":
                 return left > right
+            elif op == "in" and isinstance(right, list):
+                return Or(*[left == element for element in right])
+            elif op == "not in" and isinstance(right, list):
+                return And(*[left != element for element in right])
             else:
-                raise Z3ParseException(f"Unhandled binary operation {op}.")
+                raise Z3ParseException(
+                    f"Unhandled binary operation {op} with operator types {left} and {right}."
+                )
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
 
@@ -170,6 +178,10 @@ class ExprWrapper:
         values = [self.reduce(x) for x in values]
 
         return self.apply_bool_op(op, values)
+
+    def parse_container_op(self, node: Union[nodes.List, nodes.Set, nodes.Tuple]) -> List[ExprRef]:
+        """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
+        return [self.reduce(element) for element in node.elts]
 
     def parse_arguments(self, node: astroid.Arguments) -> Dict[str, ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""

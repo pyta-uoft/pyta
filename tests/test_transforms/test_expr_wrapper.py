@@ -17,10 +17,11 @@ def test_expr_wrapper_invalid_node() -> None:
 
 
 def test_expr_wrapper_assignment() -> None:
-    assignment = "n = x + y - z"
+    assignment = "n = 2 + 3"
 
     mod = parse(assignment)
     node = mod.body[0]
-
     expr = ExprWrapper(node)
+
     assert expr.node is node.value
+    assert expr.reduce() == 5

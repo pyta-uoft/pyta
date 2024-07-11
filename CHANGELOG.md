@@ -73,6 +73,7 @@ Custom checkers:
 - Removed unused imports from `python_ta/cfg/graph.py`
 - Extended functionality of `ExprWrapper` class to include function definitions' arguments and name assignments
 - Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
+- Added tests to `test_z3_visitor.py` to increase coverage of `visitor.py`, `graph.py`, and `ExprWrapper.py`
 
 ## [2.7.0] - 2024-12-14
 

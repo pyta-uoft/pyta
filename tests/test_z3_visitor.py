@@ -4,7 +4,17 @@ import astroid
 import pytest
 import z3
 
+from python_ta.cfg import ControlFlowGraph
 from python_ta.transforms.z3_visitor import Z3Visitor
+
+# test cases for z3 variables
+z3_vars_example = """
+def f(x: int, y: float, z: bool, a: str):
+    '''
+    This is a function to test z3 vars
+    '''
+    n = x + y - z
+"""
 
 # test cases for arithmetic expressions
 arithmetic_list = [
@@ -147,6 +157,25 @@ container_expected = [
 # lists of all test cases
 code_list = [arithmetic_list, boolean_list, container_list]
 expected_list = [arithmetic_expected, boolean_expected, container_expected]
+
+
+def test_z3_vars():
+    """
+    Test the z3 variables
+    """
+    mod = astroid.parse(z3_vars_example)
+    node = mod.body[0]
+
+    cfg = ControlFlowGraph()
+    cfg.add_arguments(node.args)
+
+    # Note that this assert implicitly includes the assertion that 'a' not in cfg._z3_vars
+    assert all(
+        {
+            varname in cfg._z3_vars and isinstance(cfg._z3_vars[varname], z3.ExprRef)
+            for varname in {"x", "y", "z"}
+        }
+    )
 
 
 def _get_constraints_from_code(code) -> List[z3.ExprRef]:

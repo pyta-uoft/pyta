@@ -32,11 +32,13 @@ class ExprWrapper:
 
         if isinstance(node, astroid.Expr):
             self.node = node.value  # take node attribute to be the value of the expression
+        elif isinstance(node, astroid.Assign):
+            self.node = node.value  # take node attribute as expression (right side) of assignment
         elif isinstance(node, astroid.Arguments):
             self.node = node  # take node attribute to be the function declaration node itself
         else:
             raise Z3ParseException(
-                "Node must be an astroid expression or function declaration's arguments node."
+                "Node must be an astroid expression, assignment, or arguments node."
             )
 
     def reduce(self, node: astroid.NodeNG = None) -> ExprRef:
@@ -59,8 +61,6 @@ class ExprWrapper:
             node = node.value
         elif isinstance(node, nodes.Name):
             node = self.apply_name(node.name)
-        elif isinstance(node, nodes.Assign):
-            node = self.reduce(node.targets[0])
         elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
         elif isinstance(node, (nodes.List, nodes.Tuple, nodes.Set)):

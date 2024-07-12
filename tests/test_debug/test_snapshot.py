@@ -137,14 +137,14 @@ def test_snapshot_to_json_primitive():
     assert json_data == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 2},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"num": 3, "is_david_cool": 4, "num_alias": 3},
         },
         {"type": "str", "id": 1, "value": "David is cool!"},
@@ -170,14 +170,14 @@ def test_snapshot_to_json_lists_primitive_only():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"projects": 8},
         },
     ]
@@ -213,14 +213,14 @@ def test_snapshot_to_json_tuples_primitive():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"projects": 8},
         },
     ]
@@ -266,14 +266,14 @@ def test_snapshot_to_json_sets_primitive():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"projects": 8},
         },
     ]
@@ -306,8 +306,8 @@ def test_snapshot_to_json_dicts_primitive():
         {"type": ".frame", "name": "func1", "id": None, "value": {"var1": 1}},
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"var2": 6},
         },
     ]
@@ -353,14 +353,14 @@ def test_snapshot_to_json_lists_of_dicts():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"test_list1": 1, "test_list2": 8},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"projects": 15},
         },
     ]
@@ -406,14 +406,14 @@ def test_snapshot_to_json_dicts_of_lists():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"var1": 1, "var2": 5},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"config": 9, "values": 13},
         },
     ]
@@ -459,14 +459,14 @@ def test_snapshot_to_json_dicts_of_dicts():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "name": "func1",
             "id": None,
+            "name": "func1",
             "value": {"nested1": 1, "nested2": 6},
         },
         {
             "type": ".frame",
-            "name": "__main__",
             "id": None,
+            "name": "__main__",
             "value": {"configurations": 11},
         },
     ]

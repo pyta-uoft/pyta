@@ -180,7 +180,7 @@ def test_constraint(code, expected):
             assert solver.check() == z3.sat
 
 
-def test_z3_var_initialization():
+def test_cfg_z3_vars_initialization():
     """
     Test that the cfg's z3 variable mapping is correctly initialized.
     """

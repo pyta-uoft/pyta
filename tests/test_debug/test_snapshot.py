@@ -136,23 +136,21 @@ def test_snapshot_to_json_primitive():
     json_data = snapshot_to_json(snapshot_data)
     assert json_data == [
         {
-            "isClass": True,
-            "name": "func1",
+            "type": ".frame",
             "id": None,
+            "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 2},
-            "stack_frame": True,
         },
         {
-            "isClass": True,
-            "name": "__main__",
+            "type": ".frame",
             "id": None,
+            "name": "__main__",
             "value": {"num": 3, "is_david_cool": 4, "num_alias": 3},
-            "stack_frame": True,
         },
-        {"isClass": False, "name": "str", "id": 1, "value": "David is cool!"},
-        {"isClass": False, "name": "str", "id": 2, "value": "DCS"},
-        {"isClass": False, "name": "int", "id": 3, "value": 9},
-        {"isClass": False, "name": "bool", "id": 4, "value": True},
+        {"type": "str", "id": 1, "value": "David is cool!"},
+        {"type": "str", "id": 2, "value": "DCS"},
+        {"type": "int", "id": 3, "value": 9},
+        {"type": "bool", "id": 4, "value": True},
     ]
 
 
@@ -171,33 +169,31 @@ def test_snapshot_to_json_lists_primitive_only():
 
     assert json_data_frames == [
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "func1",
-            "stack_frame": True,
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"projects": 8},
         },
     ]
 
     assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "list", "value": [2, 3, 4]},
-        {"id": 2, "isClass": False, "name": "int", "value": 1},
-        {"id": 3, "isClass": False, "name": "int", "value": 2},
-        {"id": 4, "isClass": False, "name": "int", "value": 3},
-        {"id": 5, "isClass": False, "name": "list", "value": [6, 7, 6]},
-        {"id": 6, "isClass": False, "name": "bool", "value": True},
-        {"id": 7, "isClass": False, "name": "bool", "value": False},
-        {"id": 8, "isClass": False, "name": "list", "value": [9, 10, 11]},
-        {"id": 9, "isClass": False, "name": "str", "value": "PyTA"},
-        {"id": 10, "isClass": False, "name": "str", "value": "MarkUs"},
-        {"id": 11, "isClass": False, "name": "str", "value": "Memory Models"},
+        {"id": 1, "type": "list", "value": [2, 3, 4]},
+        {"id": 2, "type": "int", "value": 1},
+        {"id": 3, "type": "int", "value": 2},
+        {"id": 4, "type": "int", "value": 3},
+        {"id": 5, "type": "list", "value": [6, 7, 6]},
+        {"id": 6, "type": "bool", "value": True},
+        {"id": 7, "type": "bool", "value": False},
+        {"id": 8, "type": "list", "value": [9, 10, 11]},
+        {"id": 9, "type": "str", "value": "PyTA"},
+        {"id": 10, "type": "str", "value": "MarkUs"},
+        {"id": 11, "type": "str", "value": "Memory Models"},
     ]
 
 
@@ -216,33 +212,31 @@ def test_snapshot_to_json_tuples_primitive():
 
     assert json_data_frames == [
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "func1",
-            "stack_frame": True,
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"projects": 8},
         },
     ]
 
     assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "tuple", "value": [2, 3, 4]},
-        {"id": 2, "isClass": False, "name": "int", "value": 1},
-        {"id": 3, "isClass": False, "name": "int", "value": 2},
-        {"id": 4, "isClass": False, "name": "int", "value": 3},
-        {"id": 5, "isClass": False, "name": "tuple", "value": [6, 7, 6]},
-        {"id": 6, "isClass": False, "name": "bool", "value": True},
-        {"id": 7, "isClass": False, "name": "bool", "value": False},
-        {"id": 8, "isClass": False, "name": "tuple", "value": [9, 10, 11]},
-        {"id": 9, "isClass": False, "name": "str", "value": "PyTA"},
-        {"id": 10, "isClass": False, "name": "str", "value": "MarkUs"},
-        {"id": 11, "isClass": False, "name": "str", "value": "Memory Models"},
+        {"id": 1, "type": "tuple", "value": [2, 3, 4]},
+        {"id": 2, "type": "int", "value": 1},
+        {"id": 3, "type": "int", "value": 2},
+        {"id": 4, "type": "int", "value": 3},
+        {"id": 5, "type": "tuple", "value": [6, 7, 6]},
+        {"id": 6, "type": "bool", "value": True},
+        {"id": 7, "type": "bool", "value": False},
+        {"id": 8, "type": "tuple", "value": [9, 10, 11]},
+        {"id": 9, "type": "str", "value": "PyTA"},
+        {"id": 10, "type": "str", "value": "MarkUs"},
+        {"id": 11, "type": "str", "value": "Memory Models"},
     ]
 
 
@@ -271,30 +265,28 @@ def test_snapshot_to_json_sets_primitive():
 
     assert json_data_frames == [
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "func1",
-            "stack_frame": True,
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"projects": 8},
         },
     ]
 
     # Validate that every id-value pair in the set matches an expected pair
     for id_, value in zip(expected_ids_for_test_var1a, expected_values_for_test_var1a):
-        assert {"id": id_, "isClass": False, "name": "int", "value": value} in json_data_objects
+        assert {"id": id_, "type": "int", "value": value} in json_data_objects
 
     for id_, value in zip(expected_ids_for_test_var2a, expected_values_for_test_var2a):
-        assert {"id": id_, "isClass": False, "name": "bool", "value": value} in json_data_objects
+        assert {"id": id_, "type": "bool", "value": value} in json_data_objects
 
     for id_, value in zip(expected_ids_for_projects, expected_values_for_projects):
-        assert {"id": id_, "isClass": False, "name": "str", "value": value} in json_data_objects
+        assert {"id": id_, "type": "str", "value": value} in json_data_objects
 
 
 def test_snapshot_to_json_dicts_primitive():
@@ -311,26 +303,25 @@ def test_snapshot_to_json_dicts_primitive():
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
     assert json_data_frames == [
-        {"id": None, "isClass": True, "name": "func1", "stack_frame": True, "value": {"var1": 1}},
+        {"type": ".frame", "name": "func1", "id": None, "value": {"var1": 1}},
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"var2": 6},
         },
     ]
     assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "dict", "value": {2: 3, 4: 5}},
-        {"id": 2, "isClass": False, "name": "str", "value": "a"},
-        {"id": 3, "isClass": False, "name": "int", "value": 1},
-        {"id": 4, "isClass": False, "name": "str", "value": "b"},
-        {"id": 5, "isClass": False, "name": "int", "value": 2},
-        {"id": 6, "isClass": False, "name": "dict", "value": {7: 8, 9: 10}},
-        {"id": 7, "isClass": False, "name": "str", "value": "c"},
-        {"id": 8, "isClass": False, "name": "int", "value": 3},
-        {"id": 9, "isClass": False, "name": "str", "value": "d"},
-        {"id": 10, "isClass": False, "name": "int", "value": 4},
+        {"id": 1, "type": "dict", "value": {2: 3, 4: 5}},
+        {"id": 2, "type": "str", "value": "a"},
+        {"id": 3, "type": "int", "value": 1},
+        {"id": 4, "type": "str", "value": "b"},
+        {"id": 5, "type": "int", "value": 2},
+        {"id": 6, "type": "dict", "value": {7: 8, 9: 10}},
+        {"id": 7, "type": "str", "value": "c"},
+        {"id": 8, "type": "int", "value": 3},
+        {"id": 9, "type": "str", "value": "d"},
+        {"id": 10, "type": "int", "value": 4},
     ]
 
 
@@ -361,44 +352,42 @@ def test_snapshot_to_json_lists_of_dicts():
 
     assert json_data_frames == [
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "func1",
-            "stack_frame": True,
             "value": {"test_list1": 1, "test_list2": 8},
         },
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"projects": 15},
         },
     ]
     assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "list", "value": [2, 5]},
-        {"id": 2, "isClass": False, "name": "dict", "value": {3: 4}},
-        {"id": 3, "isClass": False, "name": "str", "value": "key1"},
-        {"id": 4, "isClass": False, "name": "int", "value": 1},
-        {"id": 5, "isClass": False, "name": "dict", "value": {6: 7}},
-        {"id": 6, "isClass": False, "name": "str", "value": "key2"},
-        {"id": 7, "isClass": False, "name": "int", "value": 2},
-        {"id": 8, "isClass": False, "name": "list", "value": [9, 12]},
-        {"id": 9, "isClass": False, "name": "dict", "value": {10: 11}},
-        {"id": 10, "isClass": False, "name": "str", "value": "key3"},
-        {"id": 11, "isClass": False, "name": "int", "value": 3},
-        {"id": 12, "isClass": False, "name": "dict", "value": {13: 14}},
-        {"id": 13, "isClass": False, "name": "str", "value": "key4"},
-        {"id": 14, "isClass": False, "name": "int", "value": 4},
-        {"id": 15, "isClass": False, "name": "list", "value": [16, 21]},
-        {"id": 16, "isClass": False, "name": "dict", "value": {17: 18, 19: 20}},
-        {"id": 17, "isClass": False, "name": "str", "value": "name"},
-        {"id": 18, "isClass": False, "name": "str", "value": "Project1"},
-        {"id": 19, "isClass": False, "name": "str", "value": "status"},
-        {"id": 20, "isClass": False, "name": "str", "value": "active"},
-        {"id": 21, "isClass": False, "name": "dict", "value": {17: 22, 19: 23}},
-        {"id": 22, "isClass": False, "name": "str", "value": "Project2"},
-        {"id": 23, "isClass": False, "name": "str", "value": "inactive"},
+        {"id": 1, "type": "list", "value": [2, 5]},
+        {"id": 2, "type": "dict", "value": {3: 4}},
+        {"id": 3, "type": "str", "value": "key1"},
+        {"id": 4, "type": "int", "value": 1},
+        {"id": 5, "type": "dict", "value": {6: 7}},
+        {"id": 6, "type": "str", "value": "key2"},
+        {"id": 7, "type": "int", "value": 2},
+        {"id": 8, "type": "list", "value": [9, 12]},
+        {"id": 9, "type": "dict", "value": {10: 11}},
+        {"id": 10, "type": "str", "value": "key3"},
+        {"id": 11, "type": "int", "value": 3},
+        {"id": 12, "type": "dict", "value": {13: 14}},
+        {"id": 13, "type": "str", "value": "key4"},
+        {"id": 14, "type": "int", "value": 4},
+        {"id": 15, "type": "list", "value": [16, 21]},
+        {"id": 16, "type": "dict", "value": {17: 18, 19: 20}},
+        {"id": 17, "type": "str", "value": "name"},
+        {"id": 18, "type": "str", "value": "Project1"},
+        {"id": 19, "type": "str", "value": "status"},
+        {"id": 20, "type": "str", "value": "active"},
+        {"id": 21, "type": "dict", "value": {17: 22, 19: 23}},
+        {"id": 22, "type": "str", "value": "Project2"},
+        {"id": 23, "type": "str", "value": "inactive"},
     ]
 
 
@@ -416,37 +405,35 @@ def test_snapshot_to_json_dicts_of_lists():
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
     assert json_data_frames == [
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "func1",
-            "stack_frame": True,
             "value": {"var1": 1, "var2": 5},
         },
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"config": 9, "values": 13},
         },
     ]
     assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "list", "value": [2, 3, 4]},
-        {"id": 2, "isClass": False, "name": "str", "value": "a"},
-        {"id": 3, "isClass": False, "name": "str", "value": "b"},
-        {"id": 4, "isClass": False, "name": "str", "value": "c"},
-        {"id": 5, "isClass": False, "name": "list", "value": [6, 7, 8]},
-        {"id": 6, "isClass": False, "name": "int", "value": 1},
-        {"id": 7, "isClass": False, "name": "int", "value": 2},
-        {"id": 8, "isClass": False, "name": "int", "value": 3},
-        {"id": 9, "isClass": False, "name": "list", "value": [10, 11, 12]},
-        {"id": 10, "isClass": False, "name": "str", "value": "debug"},
-        {"id": 11, "isClass": False, "name": "str", "value": "verbose"},
-        {"id": 12, "isClass": False, "name": "str", "value": "production"},
-        {"id": 13, "isClass": False, "name": "list", "value": [14, 15, 16]},
-        {"id": 14, "isClass": False, "name": "int", "value": 100},
-        {"id": 15, "isClass": False, "name": "int", "value": 200},
-        {"id": 16, "isClass": False, "name": "int", "value": 300},
+        {"id": 1, "type": "list", "value": [2, 3, 4]},
+        {"id": 2, "type": "str", "value": "a"},
+        {"id": 3, "type": "str", "value": "b"},
+        {"id": 4, "type": "str", "value": "c"},
+        {"id": 5, "type": "list", "value": [6, 7, 8]},
+        {"id": 6, "type": "int", "value": 1},
+        {"id": 7, "type": "int", "value": 2},
+        {"id": 8, "type": "int", "value": 3},
+        {"id": 9, "type": "list", "value": [10, 11, 12]},
+        {"id": 10, "type": "str", "value": "debug"},
+        {"id": 11, "type": "str", "value": "verbose"},
+        {"id": 12, "type": "str", "value": "production"},
+        {"id": 13, "type": "list", "value": [14, 15, 16]},
+        {"id": 14, "type": "int", "value": 100},
+        {"id": 15, "type": "int", "value": 200},
+        {"id": 16, "type": "int", "value": 300},
     ]
 
 
@@ -471,44 +458,42 @@ def test_snapshot_to_json_dicts_of_dicts():
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
     assert json_data_frames == [
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "func1",
-            "stack_frame": True,
             "value": {"nested1": 1, "nested2": 6},
         },
         {
+            "type": ".frame",
             "id": None,
-            "isClass": True,
             "name": "__main__",
-            "stack_frame": True,
             "value": {"configurations": 11},
         },
     ]
     assert json_data_objects == [
-        {"id": 1, "isClass": False, "name": "dict", "value": {2: 3, 4: 5}},
-        {"id": 2, "isClass": False, "name": "str", "value": "inner1"},
-        {"id": 3, "isClass": False, "name": "int", "value": 1},
-        {"id": 4, "isClass": False, "name": "str", "value": "inner2"},
-        {"id": 5, "isClass": False, "name": "int", "value": 2},
-        {"id": 6, "isClass": False, "name": "dict", "value": {7: 8, 9: 10}},
-        {"id": 7, "isClass": False, "name": "str", "value": "inner3"},
-        {"id": 8, "isClass": False, "name": "int", "value": 3},
-        {"id": 9, "isClass": False, "name": "str", "value": "inner4"},
-        {"id": 10, "isClass": False, "name": "int", "value": 4},
-        {"id": 11, "isClass": False, "name": "dict", "value": {12: 13, 18: 19}},
-        {"id": 12, "isClass": False, "name": "str", "value": "config1"},
-        {"id": 13, "isClass": False, "name": "dict", "value": {14: 15, 16: 17}},
-        {"id": 14, "isClass": False, "name": "str", "value": "settingA"},
-        {"id": 15, "isClass": False, "name": "str", "value": "valueA"},
-        {"id": 16, "isClass": False, "name": "str", "value": "settingB"},
-        {"id": 17, "isClass": False, "name": "str", "value": "valueB"},
-        {"id": 18, "isClass": False, "name": "str", "value": "config2"},
-        {"id": 19, "isClass": False, "name": "dict", "value": {20: 21, 22: 23}},
-        {"id": 20, "isClass": False, "name": "str", "value": "settingC"},
-        {"id": 21, "isClass": False, "name": "str", "value": "valueC"},
-        {"id": 22, "isClass": False, "name": "str", "value": "settingD"},
-        {"id": 23, "isClass": False, "name": "str", "value": "valueD"},
+        {"id": 1, "type": "dict", "value": {2: 3, 4: 5}},
+        {"id": 2, "type": "str", "value": "inner1"},
+        {"id": 3, "type": "int", "value": 1},
+        {"id": 4, "type": "str", "value": "inner2"},
+        {"id": 5, "type": "int", "value": 2},
+        {"id": 6, "type": "dict", "value": {7: 8, 9: 10}},
+        {"id": 7, "type": "str", "value": "inner3"},
+        {"id": 8, "type": "int", "value": 3},
+        {"id": 9, "type": "str", "value": "inner4"},
+        {"id": 10, "type": "int", "value": 4},
+        {"id": 11, "type": "dict", "value": {12: 13, 18: 19}},
+        {"id": 12, "type": "str", "value": "config1"},
+        {"id": 13, "type": "dict", "value": {14: 15, 16: 17}},
+        {"id": 14, "type": "str", "value": "settingA"},
+        {"id": 15, "type": "str", "value": "valueA"},
+        {"id": 16, "type": "str", "value": "settingB"},
+        {"id": 17, "type": "str", "value": "valueB"},
+        {"id": 18, "type": "str", "value": "config2"},
+        {"id": 19, "type": "dict", "value": {20: 21, 22: 23}},
+        {"id": 20, "type": "str", "value": "settingC"},
+        {"id": 21, "type": "str", "value": "valueC"},
+        {"id": 22, "type": "str", "value": "settingD"},
+        {"id": 23, "type": "str", "value": "valueD"},
     ]
 
 
@@ -541,16 +526,15 @@ def test_snapshot_to_json_one_class():
     expected_output = [
         {
             "id": None,
-            "isClass": True,
+            "type": ".frame",
             "name": "__main__",
-            "stack_frame": True,
             "value": {"one_class_instance": 1},
         },
-        {"id": 2, "isClass": False, "name": "str", "value": "value1"},
-        {"id": 3, "isClass": False, "name": "int", "value": 42},
+        {"id": 2, "type": "str", "value": "value1"},
+        {"id": 3, "type": "int", "value": 42},
         {
             "id": 1,
-            "isClass": True,
+            "type": ".class",
             "name": "OneClass",
             "value": {"attr1": 2, "attr2": 3},
         },

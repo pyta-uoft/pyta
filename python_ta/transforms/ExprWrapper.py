@@ -1,9 +1,9 @@
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import astroid
+import z3
 from astroid import nodes
 from pylint.checkers.utils import safe_infer
-from z3 import And, Bool, ExprRef, Int, Not, Or, Real
 
 
 class Z3ParseException(Exception):
@@ -27,7 +27,9 @@ class ExprWrapper:
     node: astroid.NodeNG
     types: Dict[str, str]
 
-    def __init__(self, node: astroid.NodeNG, types={}):
+    def __init__(self, node: astroid.NodeNG, types=None):
+        if types is None:
+            types = {}
         self.types = types
 
         if isinstance(node, astroid.Expr):
@@ -37,11 +39,11 @@ class ExprWrapper:
         elif isinstance(node, astroid.Arguments):
             self.node = node  # take node attribute to be the function declaration node itself
         else:
-            raise Z3ParseException(
-                "Node must be an astroid expression, assignment, or arguments node."
+            raise ValueError(
+                "'node' param must be an astroid expression, assignment, or arguments node."
             )
 
-    def reduce(self, node: astroid.NodeNG = None) -> ExprRef:
+    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
@@ -70,16 +72,16 @@ class ExprWrapper:
 
         return node
 
-    def apply_name(self, name: str) -> ExprRef:
+    def apply_name(self, name: str) -> z3.ExprRef:
         """
         Set up the appropriate variable representation in Z3 based on name and type.
         If an error is encountered or a case is unconsidered, return None.
         """
         typ = self.types[name]
         type_to_z3 = {
-            "int": Int,
-            "float": Real,
-            "bool": Bool,
+            "int": z3.Int,
+            "float": z3.Real,
+            "bool": z3.Bool,
         }
         if typ in type_to_z3:
             x = type_to_z3[typ](name)
@@ -88,7 +90,7 @@ class ExprWrapper:
 
         return x
 
-    def parse_compare(self, node: astroid.Compare) -> ExprRef:
+    def parse_compare(self, node: astroid.Compare) -> z3.ExprRef:
         """Convert an astroid Compare node to z3 expression."""
         left, ops = node.left, node.ops
         left = self.reduce(left)
@@ -98,10 +100,10 @@ class ExprWrapper:
             left = self.apply_bin_op(left, op, right)
         return left
 
-    def apply_unary_op(self, left: ExprRef, op: str) -> ExprRef:
+    def apply_unary_op(self, left: z3.ExprRef, op: str) -> z3.ExprRef:
         """Apply z3 unary operation indicated by op."""
         op_to_z3 = {
-            "not": Not,
+            "not": z3.Not,
         }
         if op in op_to_z3:
             left = op_to_z3[op](left)
@@ -110,7 +112,9 @@ class ExprWrapper:
 
         return left
 
-    def apply_bin_op(self, left: ExprRef, op: str, right: Union[ExprRef, List[ExprRef]]) -> ExprRef:
+    def apply_bin_op(
+        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, List[z3.ExprRef]]
+    ) -> z3.ExprRef:
         """Given left, right, op, apply the binary operation."""
         try:
             if op == "+":
@@ -134,9 +138,9 @@ class ExprWrapper:
             elif op == ">":
                 return left > right
             elif op == "in" and isinstance(right, list):
-                return Or(*[left == element for element in right])
+                return z3.Or(*[left == element for element in right])
             elif op == "not in" and isinstance(right, list):
-                return And(*[left != element for element in right])
+                return z3.And(*[left != element for element in right])
             else:
                 raise Z3ParseException(
                     f"Unhandled binary operation {op} with operator types {left} and {right}."
@@ -144,12 +148,12 @@ class ExprWrapper:
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
 
-    def apply_bool_op(self, op: str, values: Union[ExprRef, List[ExprRef]]) -> ExprRef:
+    def apply_bool_op(self, op: str, values: Union[z3.ExprRef, List[z3.ExprRef]]) -> z3.ExprRef:
         """Apply boolean operation given by op to values."""
         op_to_z3 = {
-            "and": And,
-            "or": Or,
-            "not": Not,
+            "and": z3.And,
+            "or": z3.Or,
+            "not": z3.Not,
         }
         if op in op_to_z3:
             value = op_to_z3[op](values)
@@ -158,13 +162,13 @@ class ExprWrapper:
 
         return value
 
-    def parse_unary_op(self, node: astroid.UnaryOp) -> ExprRef:
+    def parse_unary_op(self, node: astroid.UnaryOp) -> z3.ExprRef:
         """Convert an astroid UnaryOp node to a z3 expression."""
         left, op = node.operand, node.op
         left = self.reduce(left)
         return self.apply_unary_op(left, op)
 
-    def parse_bin_op(self, node: astroid.BinOp) -> ExprRef:
+    def parse_bin_op(self, node: astroid.BinOp) -> z3.ExprRef:
         """Convert an astroid BinOp node to a z3 expression."""
         left, op, right = node.left, node.op, node.right
         left = self.reduce(left)
@@ -172,20 +176,22 @@ class ExprWrapper:
 
         return self.apply_bin_op(left, op, right)
 
-    def parse_bool_op(self, node: astroid.BoolOp) -> ExprRef:
+    def parse_bool_op(self, node: astroid.BoolOp) -> z3.ExprRef:
         """Convert an astroid BoolOp node to a z3 expression."""
         op, values = node.op, node.values
         values = [self.reduce(x) for x in values]
 
         return self.apply_bool_op(op, values)
 
-    def parse_container_op(self, node: Union[nodes.List, nodes.Set, nodes.Tuple]) -> List[ExprRef]:
+    def parse_container_op(
+        self, node: Union[nodes.List, nodes.Set, nodes.Tuple]
+    ) -> List[z3.ExprRef]:
         """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
         return [self.reduce(element) for element in node.elts]
 
-    def parse_arguments(self, node: astroid.Arguments) -> Dict[str, ExprRef]:
+    def parse_arguments(self, node: astroid.Arguments) -> Dict[str, z3.ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""
-        z3_vars = {}  # initialize mapping of z3 variables
+        z3_vars = {}
 
         annotations = node.annotations
         arguments = node.args

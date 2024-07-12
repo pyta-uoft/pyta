@@ -159,25 +159,6 @@ code_list = [arithmetic_list, boolean_list, container_list]
 expected_list = [arithmetic_expected, boolean_expected, container_expected]
 
 
-def test_z3_vars():
-    """
-    Test the z3 variables
-    """
-    mod = astroid.parse(z3_vars_example)
-    node = mod.body[0]
-
-    cfg = ControlFlowGraph()
-    cfg.add_arguments(node.args)
-
-    # Note that this assert implicitly includes the assertion that 'a' not in cfg._z3_vars
-    assert all(
-        {
-            varname in cfg._z3_vars and isinstance(cfg._z3_vars[varname], z3.ExprRef)
-            for varname in {"x", "y", "z"}
-        }
-    )
-
-
 def _get_constraints_from_code(code) -> List[z3.ExprRef]:
     """
     Return the z3 constraints of the given function
@@ -197,3 +178,19 @@ def test_constraint(code, expected):
             solver = z3.Solver()
             solver.add(a == e)
             assert solver.check() == z3.sat
+
+
+def test_z3_var_initialization():
+    """
+    Test that the cfg's z3 variable mapping is correctly initialized.
+    """
+    node = astroid.extract_node(z3_vars_example)
+
+    cfg = ControlFlowGraph()
+    cfg.add_arguments(node.args)
+
+    # Note that this first assert implicitly includes the assertion that 'a' not in cfg._z3_vars
+    assert len(cfg._z3_vars) == 3
+    assert cfg._z3_vars["x"] == z3.Int("x")
+    assert cfg._z3_vars["y"] == z3.Real("y")
+    assert cfg._z3_vars["z"] == z3.Bool("z")

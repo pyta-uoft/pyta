@@ -1,26 +1,20 @@
 """Tests for ExprWrapper in python_ta.transforms."""
 
-from astroid import parse
+import pytest
+from astroid import extract_node
 
-from python_ta.transforms import ExprWrapper, Z3ParseException
+from python_ta.transforms import ExprWrapper
 
 
 def test_expr_wrapper_invalid_node() -> None:
-    exception_caught = False
-
-    try:
-        ExprWrapper(None)
-    except Z3ParseException:
-        exception_caught = True
-
-    assert exception_caught
+    with pytest.raises(ValueError):
+        ExprWrapper("not a node")
 
 
 def test_expr_wrapper_assignment() -> None:
     assignment = "n = 2 + 3"
 
-    mod = parse(assignment)
-    node = mod.body[0]
+    node = extract_node(assignment)
     expr = ExprWrapper(node)
 
     assert expr.node is node.value

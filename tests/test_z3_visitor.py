@@ -116,6 +116,47 @@ container_list = [
     """,
 ]
 
+# test cases for strings expressions
+string_list = [
+    """
+    def string_equality(x: str, y: str, z: str):
+        '''
+        Preconditions:
+            - x == y
+            - z == x + y
+        '''
+        pass
+    """,
+    """
+    def in_string(x: str, y: str):
+        '''
+        Preconditions:
+            - x in "abc"
+            - x in y
+        '''
+        pass
+    """,
+    """
+    def not_in_string_literal(x: str, y: str):
+        '''
+        Preconditions:
+            - x not in "abc"
+            - x not in y
+        '''
+        pass
+    """,
+    """
+    def string_indexing(x: str, y: str):
+        '''
+        Preconditions:
+            - x[0] == y
+            - x[1] == "a"
+            - x[-1] == "b"
+        '''
+        pass
+    """,
+]
+
 
 # expected arithmetic expressions
 x = z3.Int("x")
@@ -144,9 +185,24 @@ container_expected = [
     [z3.BoolVal(True)],
 ]
 
+# expected string expressions
+x = z3.String("x")
+y = z3.String("y")
+z = z3.String("z")
+string_expected = [
+    [x == y, z == x + y],
+    [z3.Contains("abc", x), z3.Contains(y, x)],
+    [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
+    [
+        z3.SubString(x, 0, 0) == y,
+        z3.SubString(x, 1, 1) == "a",
+        z3.SubString(x, z3.Length(x) - 1, z3.Length(x) - 1) == "b",
+    ],
+]
+
 # lists of all test cases
-code_list = [arithmetic_list, boolean_list, container_list]
-expected_list = [arithmetic_expected, boolean_expected, container_expected]
+code_list = [arithmetic_list, boolean_list, container_list, string_list]
+expected_list = [arithmetic_expected, boolean_expected, container_expected, string_expected]
 
 
 def _get_constraints_from_code(code) -> List[z3.ExprRef]:

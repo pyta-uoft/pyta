@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Union
 
 import astroid
 import z3
@@ -32,7 +32,7 @@ class ExprWrapper:
             types = {}
         self.types = types
 
-    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
+    def reduce(self, node: astroid.NodeNG = None) -> Union[z3.ExprRef, List[z3.ExprRef]]:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
@@ -54,6 +54,8 @@ class ExprWrapper:
             node = self.apply_name(node.name)
         elif isinstance(node, (nodes.List, nodes.Tuple, nodes.Set)):
             node = self.parse_container_op(node)
+        elif isinstance(node, nodes.Subscript):
+            node = self.parse_index_op(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -69,6 +71,7 @@ class ExprWrapper:
             "int": z3.Int,
             "float": z3.Real,
             "bool": z3.Bool,
+            "str": z3.String,
         }
         if typ in type_to_z3:
             x = type_to_z3[typ](name)
@@ -124,10 +127,10 @@ class ExprWrapper:
                 return left < right
             elif op == ">":
                 return left > right
-            elif op == "in" and isinstance(right, list):
-                return z3.Or(*[left == element for element in right])
-            elif op == "not in" and isinstance(right, list):
-                return z3.And(*[left != element for element in right])
+            elif op == "in":
+                return self.apply_in_op(left, right)
+            elif op == "not in":
+                return self.apply_in_op(left, right, negate=True)
             else:
                 raise Z3ParseException(
                     f"Unhandled binary operation {op} with operator types {left} and {right}."
@@ -176,3 +179,35 @@ class ExprWrapper:
     ) -> List[z3.ExprRef]:
         """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
         return [self.reduce(element) for element in node.elts]
+
+    def apply_in_op(
+        self, left: z3.ExprRef, right: Union[z3.ExprRef, List[z3.ExprRef], str], negate=False
+    ) -> z3.ExprRef:
+        """
+        Apply `in` or `not in` operator on a list or string and return the
+        resulting z3 expression. Raise Z3ParseException if the operands
+        do not support `in` operator
+        """
+        if isinstance(right, list):  # container tyoe (list/set/tuple)
+            return (
+                z3.And(*[left != element for element in right])
+                if negate
+                else z3.Or(*[left == element for element in right])
+            )
+        elif isinstance(right, (str, z3.SeqRef)):  # string literal or variable
+            return z3.Not(z3.Contains(right, left)) if negate else z3.Contains(right, left)
+        else:
+            op = "not in" if negate else "in"
+            raise Z3ParseException(
+                f"Unhandled binary operation {op} with operator types {left} and {right}."
+            )
+
+    def parse_index_op(self, node: nodes.Subscript) -> Union[z3.ExprRef, List[z3.ExprRef]]:
+        """Convert an astroid Subscript node to a list of z3 expressions."""
+        index = node.slice.value  # TODO: fixed nested expressions inside the index
+        value = self.reduce(node.value)
+        if isinstance(value, z3.SeqRef):
+            # handle negative indexing
+            if index < 0:
+                index += z3.Length(value)
+            return z3.SubString(value, index, index)

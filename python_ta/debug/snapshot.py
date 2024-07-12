@@ -107,7 +107,7 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     attr_ids[attr_name] = attr_id
                 value_entry = {
                     "type": ".class",
-                    "name": val.__class__.__name__,
+                    "name": type(val).__name__,
                     "id": value_id_diagram,
                     "value": attr_ids,
                 }

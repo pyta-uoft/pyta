@@ -146,12 +146,53 @@ string_list = [
         pass
     """,
     """
-    def string_indexing(x: str, y: str):
+    def string_indexing_positive(x: str, y: str):
         '''
         Preconditions:
             - x[0] == y
             - x[1] == "a"
+        '''
+        pass
+    """,
+    """
+    def string_indexing_negative(x: str, y: str):
+        '''
+        Preconditions:
             - x[-1] == "b"
+            - x[-2] == y
+        '''
+        pass
+    """,
+    """
+    def string_slicing_positive(x: str, y: str, z: str):
+        '''
+        Preconditions:
+            - x[1:4] == y
+            - x[4:5] == "a"
+            - x[4:] == "abc"
+            - x[:3] == "def"
+            - x[:] == z
+        '''
+        pass
+    """,
+    """
+    def string_slicing_negative(x: str, y: str, z: str):
+        '''
+        Preconditions:
+            - x[-4:-1] == y
+            - x[-4:-3] == "a"
+            - x[-4:] == "abc"
+            - x[:-3] == "def"
+        '''
+        pass
+    """
+    """
+    def string_step_length(x: str, y: str):
+        '''
+        Preconditions:
+            - x[1:5:2] == y
+            - x[:5:4] == "ab"
+            - x[6:3:-2] == "cd"
         '''
         pass
     """,
@@ -196,7 +237,28 @@ string_expected = [
     [
         z3.SubString(x, 0, 0) == y,
         z3.SubString(x, 1, 1) == "a",
+    ],
+    [
         z3.SubString(x, z3.Length(x) - 1, z3.Length(x) - 1) == "b",
+        z3.SubString(x, z3.Length(x) - 2, z3.Length(x) - 2) == y,
+    ],
+    [
+        z3.SubString(x, 1, 4) == y,
+        z3.SubString(x, 4, 5) == "a",
+        z3.SubString(x, 4, z3.Length(x)) == "abc",
+        z3.SubString(x, 0, 3) == "def",
+        x == z,
+    ],
+    [
+        z3.SubString(x, z3.Length(x) - 4, z3.Length(x) - 1) == y,
+        z3.SubString(x, z3.Length(x) - 4, z3.Length(x) - 3) == "a",
+        z3.SubString(x, z3.Length(x) - 4, z3.Length(x)) == "abc",
+        z3.SubString(x, 0, z3.Length(x) - 3) == "def",
+    ],
+    [
+        z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 3)) == y,
+        z3.Concat(z3.SubString(x, 0, 0), z3.SubString(x, 4, 4)) == "ab",
+        z3.Concat(z3.SubString(x, 6, 6), z3.SubString(x, 4, 4)) == "cd",
     ],
 ]
 

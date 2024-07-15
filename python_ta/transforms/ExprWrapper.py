@@ -246,7 +246,11 @@ class ExprWrapper:
                 )
                 step = 1 if slice.step is None else self._parse_number_literal(slice.step)
 
-                if isinstance(lower, int) and isinstance(upper, int) and isinstance(step, int):
+                if (
+                    isinstance(lower, int)
+                    and isinstance(upper, (int, z3.ArithRef))
+                    and isinstance(step, int)
+                ):
 
                     if step == 1:
                         return z3.SubString(value, lower, upper)

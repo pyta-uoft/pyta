@@ -286,3 +286,58 @@ def test_constraint(code, expected):
             solver = z3.Solver()
             solver.add(a == e)
             assert solver.check() == z3.sat
+
+
+# test cases for invalid inputs
+#
+# Explanation on unhandled_slicing_index:
+#   a string slicing operation with indeterminanat upper bound
+#   (such as the variable's lnegth) and a step length greater
+#   than 1 is currently not supported.
+invalid_input_list = [
+    """
+    def invalid_in_op_type(x: int, y: bool):
+        '''
+        Preconditions:
+            - x in y
+        '''
+        pass
+    """,
+    """
+    def invalid_string_index(x: str, a):
+        '''
+        Preconditions:
+            - x[a] == "a"
+        '''
+        pass
+    """,
+    """
+    def invalid_slicing_index(x: str, a, b, c):
+        '''
+        Preconditions:
+            - x[a:b:c] == "a"
+        '''
+        pass
+    """,
+    """
+    def invalid_subscript_type(x: int):
+        '''
+        Preconditions:
+            - x[1] == 0
+        '''
+        pasd
+    """,
+    """
+    def unhandled_slicing_index(x: str):
+        '''
+        Preconditions:
+            - x[::2] == "abc"
+        '''
+        pass
+    """,
+]
+
+
+@pytest.mark.parametrize("invalid_code", invalid_input_list)
+def test_invalid_input(invalid_code):
+    assert _get_constraints_from_code(invalid_code) == []

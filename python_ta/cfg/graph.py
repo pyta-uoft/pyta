@@ -1,8 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Generator, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, Set
 
-from astroid import Break, Continue, NodeNG, Raise, Return
+try:
+    from z3 import ExprRef
+
+    from ..transforms import ExprWrapper
+except ImportError:
+    ExprRef = Any
+    ExprWrapper = Any
+
+from astroid import Arguments, Break, Continue, NodeNG, Raise, Return
 
 
 class ControlFlowGraph:
@@ -16,6 +24,8 @@ class ControlFlowGraph:
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
+    # map from variable names to z3 variables
+    _z3_vars: Dict[str, ExprRef]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0
@@ -23,6 +33,18 @@ class ControlFlowGraph:
         self.unreachable_blocks = set()
         self.start = self.create_block()
         self.end = self.create_block()
+        self._z3_vars = {}
+
+    def add_arguments(self, args: Arguments) -> None:
+        self.start.add_statement(args)
+        args.parent.cfg = self
+        args.parent.cfg_block = self.start
+
+        if ExprRef is not Any:
+            # Parse types
+            expr = ExprWrapper(args)
+            z3_vars = expr.parse_arguments(args)
+            self._z3_vars.update(z3_vars)
 
     def create_block(
         self,

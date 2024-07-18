@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Union
 import astroid
 import z3
 from astroid import nodes
+from pylint.checkers.utils import safe_infer
 
 
 class Z3ParseException(Exception):
@@ -26,13 +27,23 @@ class ExprWrapper:
     node: astroid.NodeNG
     types: Dict[str, str]
 
-    def __init__(self, expr: nodes.Expr, types=None):
-        self.node = expr.value
+    def __init__(self, node: astroid.NodeNG, types=None):
         if types is None:
             types = {}
         self.types = types
 
-    def reduce(self, node: astroid.NodeNG = None) -> Union[z3.ExprRef, List[z3.ExprRef]]:
+        if isinstance(node, astroid.Expr):
+            self.node = node.value  # take node attribute to be the value of the expression
+        elif isinstance(node, astroid.Assign):
+            self.node = node.value  # take node attribute as expression (right side) of assignment
+        elif isinstance(node, astroid.Arguments):
+            self.node = node  # take node attribute to be the function declaration node itself
+        else:
+            raise ValueError(
+                "'node' param must be an astroid expression, assignment, or arguments node."
+            )
+
+    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
@@ -51,6 +62,8 @@ class ExprWrapper:
         elif isinstance(node, nodes.Const):
             node = node.value
         elif isinstance(node, nodes.Name):
+            node = self.apply_name(node.name)
+        elif isinstance(node, nodes.AssignName):
             node = self.apply_name(node.name)
         elif isinstance(node, (nodes.List, nodes.Tuple, nodes.Set)):
             node = self.parse_container_op(node)
@@ -156,7 +169,6 @@ class ExprWrapper:
         """Convert an astroid UnaryOp node to a z3 expression."""
         left, op = node.operand, node.op
         left = self.reduce(left)
-
         return self.apply_unary_op(left, op)
 
     def parse_bin_op(self, node: astroid.BinOp) -> z3.ExprRef:
@@ -271,3 +283,24 @@ class ExprWrapper:
 
         else:
             raise Z3ParseException(f"Unhandled subscript operand type {value}")
+
+    def parse_arguments(self, node: astroid.Arguments) -> Dict[str, z3.ExprRef]:
+        """Convert an astroid Arguments node's parameters to z3 variables."""
+        z3_vars = {}
+
+        annotations = node.annotations
+        arguments = node.args
+        for ann, arg in zip(annotations, arguments):
+            if ann is None:
+                continue
+
+            inferred = safe_infer(ann)
+            if inferred is None or not isinstance(inferred, astroid.ClassDef):
+                continue
+
+            self.types[arg.name] = inferred.name
+
+            if arg.name in self.types and self.types[arg.name] in {"int", "float", "bool"}:
+                z3_vars[arg.name] = self.reduce(arg)
+
+        return z3_vars

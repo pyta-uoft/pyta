@@ -126,9 +126,8 @@ class CFGVisitor:
             )
         )
 
-        self._current_cfg.start.add_statement(func.args)
-        func.cfg_block = self._current_cfg.start
-        func.cfg = self._current_cfg
+        # Current CFG block is self._current_cfg.start while initially creating the function cfg
+        self._current_cfg.add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
 

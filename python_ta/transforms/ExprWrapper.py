@@ -55,7 +55,7 @@ class ExprWrapper:
         elif isinstance(node, (nodes.List, nodes.Tuple, nodes.Set)):
             node = self.parse_container_op(node)
         elif isinstance(node, nodes.Subscript):
-            node = self.parse_index_op(node)
+            node = self.parse_subscript_op(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -188,7 +188,7 @@ class ExprWrapper:
         resulting z3 expression. Raise Z3ParseException if the operands
         do not support `in` operator
         """
-        if isinstance(right, list):  # container tyoe (list/set/tuple)
+        if isinstance(right, list):  # container type (list/set/tuple)
             return (
                 z3.And(*[left != element for element in right])
                 if negate
@@ -221,7 +221,7 @@ class ExprWrapper:
         else:
             return None
 
-    def parse_index_op(self, node: nodes.Subscript) -> z3.ExprRef:
+    def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
         """
         Convert an astroid Subscript node to z3 expression.
         This method only supports string values and integer literal (both positive and negative) indexes

@@ -284,7 +284,7 @@ class ExprWrapper:
 
         else:
             raise Z3ParseException(f"Unhandled subscript operand type {value}")
-            
+
     def parse_arguments(self, node: astroid.Arguments) -> Dict[str, z3.ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""
         z3_vars = {}

@@ -352,7 +352,7 @@ invalid_input_list = [
 def test_invalid_input(invalid_code):
     assert _get_constraints_from_code(invalid_code) == []
 
-    
+
 def test_cfg_z3_vars_initialization():
     """
     Test that the cfg's z3 variable mapping is correctly initialized.

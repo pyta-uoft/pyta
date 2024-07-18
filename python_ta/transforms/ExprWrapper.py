@@ -245,8 +245,7 @@ class ExprWrapper:
             # handle indexing
             index = self._parse_number_literal(slice)
             if isinstance(index, int):
-                abs_index = index if index >= 0 else z3.Length(value) - index
-                return z3.SubString(value, abs_index, abs_index)
+                return z3.SubString(value, index, index)
 
             # handle slicing
             elif isinstance(slice, nodes.Slice):
@@ -268,9 +267,9 @@ class ExprWrapper:
                         return z3.SubString(value, lower, upper)
                     else:
                         # unhandled case: the upper bound is indeterminant
-                        if step > 1 and upper == z3.Length(value):
+                        if upper == z3.Length(value):
                             raise Z3ParseException(
-                                "Unable to convert a slicing operation with a step length greater than 1 and an indeterminant upper bound"
+                                "Unable to convert a slicing operation with a non-unit step length and an indeterminant upper bound"
                             )
 
                         return z3.Concat(

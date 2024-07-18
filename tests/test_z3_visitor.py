@@ -342,6 +342,7 @@ invalid_input_list = [
         '''
         Preconditions:
             - x[::2] == "abc"
+            - x[::-2] == "abc"
         '''
         pass
     """,

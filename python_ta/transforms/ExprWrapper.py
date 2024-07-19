@@ -299,7 +299,7 @@ class ExprWrapper:
 
             self.types[arg.name] = inferred.name
 
-            if arg.name in self.types and self.types[arg.name] in {"int", "float", "bool"}:
+            if arg.name in self.types and self.types[arg.name] in {"int", "float", "bool", "str"}:
                 z3_vars[arg.name] = self.reduce(arg)
 
         return z3_vars

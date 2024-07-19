@@ -75,6 +75,7 @@ Custom checkers:
 - Extended functionality of `ExprWrapper` class to include function definitions' arguments and name assignments
 - Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
 - Added tests to maintain/increase coverage of `visitor.py`, `graph.py`, and `ExprWrapper.py`
+- Removed deprecated and redundant `future` argument from `node.frame()` call in `invalid_name_checker.py`
 
 ## [2.7.0] - 2024-12-14
 

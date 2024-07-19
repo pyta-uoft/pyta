@@ -70,7 +70,7 @@ Custom checkers:
 - Fixed minor typo in an error message in `python_ta/cfg/visitor.py`
 - Updated `ExprWrapper` to support `set/list/tuple` literals and `in/not in` operators
 - Updated `snapshot.py` and `test_snapshot.py` to align with MemoryViz 0.2.0 updates
-- Update `ExprWrapper` to support string variables and `==`, `in/not in`, indexing and slicing operators
+- Updated `ExprWrapper` to support string variables and `==`, `in/not in`, indexing and slicing operators
 - Added protected `_z3_vars` attribute to `ControlFlowGraph` to store variables to be used in Z3 solver
 - Removed unused imports from `python_ta/cfg/graph.py`
 - Extended functionality of `ExprWrapper` class to include function definitions' arguments and name assignments

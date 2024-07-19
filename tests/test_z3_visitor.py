@@ -147,7 +147,7 @@ string_list = [
         pass
     """,
     """
-    def not_in_string_literal(x: str, y: str):
+    def not_in_string(x: str, y: str):
         '''
         Preconditions:
             - x not in "abc"
@@ -245,30 +245,30 @@ string_expected = [
     [z3.Contains("abc", x), z3.Contains(y, x)],
     [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
     [
-        z3.SubString(x, 0, 0) == y,
+        z3.SubString(x, 0, 1) == y,
         z3.SubString(x, 1, 1) == "a",
     ],
     [
-        z3.SubString(x, z3.Length(x) - 1, z3.Length(x) - 1) == "b",
-        z3.SubString(x, z3.Length(x) - 2, z3.Length(x) - 2) == y,
+        z3.SubString(x, z3.Length(x) - 1, 1) == "b",
+        z3.SubString(x, z3.Length(x) - 2, 1) == y,
     ],
     [
-        z3.SubString(x, 1, 4) == y,
-        z3.SubString(x, 4, 5) == "a",
-        z3.SubString(x, 4, z3.Length(x)) == "abc",
+        z3.SubString(x, 1, 3) == y,
+        z3.SubString(x, 4, 1) == "a",
+        z3.SubString(x, 4, z3.Length(x) - 4) == "abc",
         z3.SubString(x, 0, 3) == "def",
         x == z,
     ],
     [
-        z3.SubString(x, z3.Length(x) - 4, z3.Length(x) - 1) == y,
-        z3.SubString(x, z3.Length(x) - 4, z3.Length(x) - 3) == "a",
-        z3.SubString(x, z3.Length(x) - 4, z3.Length(x)) == "abc",
+        z3.SubString(x, z3.Length(x) - 4, 3) == y,
+        z3.SubString(x, z3.Length(x) - 4, 1) == "a",
+        z3.SubString(x, z3.Length(x) - 4, 4) == "abc",
         z3.SubString(x, 0, z3.Length(x) - 3) == "def",
     ],
     [
-        z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 3)) == y,
-        z3.Concat(z3.SubString(x, 0, 0), z3.SubString(x, 4, 4)) == "ab",
-        z3.Concat(z3.SubString(x, 6, 6), z3.SubString(x, 4, 4)) == "cd",
+        z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 1)) == y,
+        z3.Concat(z3.SubString(x, 0, 1), z3.SubString(x, 4, 1)) == "ab",
+        z3.Concat(z3.SubString(x, 6, 1), z3.SubString(x, 4, 1)) == "cd",
     ],
 ]
 
@@ -302,8 +302,8 @@ def test_constraint(code, expected):
 #
 # Explanation on unhandled_slicing_index:
 #   a string slicing operation with indeterminanat upper bound
-#   (such as the variable's lnegth) and a step length greater
-#   than 1 is currently not supported.
+#   (such as the variable's lnegth) and a step length not equal
+#   to 1 is currently not supported.
 invalid_input_list = [
     """
     def invalid_in_op_type(x: int, y: bool):

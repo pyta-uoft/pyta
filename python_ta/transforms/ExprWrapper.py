@@ -187,13 +187,16 @@ class ExprWrapper:
         return self.apply_bool_op(op, values)
 
     def parse_container_op(
-        self, node: Union[nodes.List, nodes.Set, nodes.Tuple]
+        self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
     ) -> List[z3.ExprRef]:
         """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
         return [self.reduce(element) for element in node.elts]
 
     def apply_in_op(
-        self, left: z3.ExprRef, right: Union[z3.ExprRef, List[z3.ExprRef], str], negate=False
+        self,
+        left: Union[z3.ExprRef, str],
+        right: Union[z3.ExprRef, List[z3.ExprRef], str],
+        negate: bool = False,
     ) -> z3.ExprRef:
         """
         Apply `in` or `not in` operator on a list or string and return the
@@ -206,7 +209,9 @@ class ExprWrapper:
                 if negate
                 else z3.Or(*[left == element for element in right])
             )
-        elif isinstance(right, (str, z3.SeqRef)):  # string literal or variable
+        elif isinstance(left, (str, z3.SeqRef)) and isinstance(
+            right, (str, z3.SeqRef)
+        ):  # string type
             return z3.Not(z3.Contains(right, left)) if negate else z3.Contains(right, left)
         else:
             op = "not in" if negate else "in"
@@ -214,7 +219,7 @@ class ExprWrapper:
                 f"Unhandled binary operation {op} with operator types {left} and {right}."
             )
 
-    def _parse_number_literal(self, node) -> Optional:
+    def _parse_number_literal(self, node: astroid.NodeNG) -> Optional[Union[int, float]]:
         """
         If the subtree from `node` represent a number literal, return the value
         Otherwise, return None
@@ -233,55 +238,50 @@ class ExprWrapper:
         else:
             return None
 
-    def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
+    def parse_subscript_op(self, node: astroid.Subscript) -> z3.ExprRef:
         """
         Convert an astroid Subscript node to z3 expression.
         This method only supports string values and integer literal (both positive and negative) indexes
         """
         value = self.reduce(node.value)
-        if isinstance(value, z3.SeqRef):
-            slice = node.slice
+        slice = node.slice
 
-            # handle indexing
-            index = self._parse_number_literal(slice)
-            if isinstance(index, int):
-                return z3.SubString(value, index, index)
-
-            # handle slicing
-            elif isinstance(slice, nodes.Slice):
-                lower = 0 if slice.lower is None else self._parse_number_literal(slice.lower)
-                upper = (
-                    z3.Length(value)
-                    if slice.upper is None
-                    else self._parse_number_literal(slice.upper)
-                )
-                step = 1 if slice.step is None else self._parse_number_literal(slice.step)
-
-                if (
-                    isinstance(lower, int)
-                    and isinstance(upper, (int, z3.ArithRef))
-                    and isinstance(step, int)
-                ):
-
-                    if step == 1:
-                        return z3.SubString(value, lower, upper)
-                    else:
-                        # unhandled case: the upper bound is indeterminant
-                        if upper == z3.Length(value):
-                            raise Z3ParseException(
-                                "Unable to convert a slicing operation with a non-unit step length and an indeterminant upper bound"
-                            )
-
-                        return z3.Concat(
-                            *(z3.SubString(value, i, i) for i in range(lower, upper, step))
-                        )
-                else:
-                    raise Z3ParseException(f"Invalid slice {slice}")
-            else:
-                raise Z3ParseException(f"Invalid index {slice}")
-
-        else:
+        # check for invalid node type
+        if not z3.is_seq(value):
             raise Z3ParseException(f"Unhandled subscript operand type {value}")
+
+        # handle indexing
+        index = self._parse_number_literal(slice)
+        if isinstance(index, int):
+            return z3.SubString(value, index, 1)
+
+        # handle slicing
+        if isinstance(slice, nodes.Slice):
+            lower = 0 if slice.lower is None else self._parse_number_literal(slice.lower)
+            upper = (
+                z3.Length(value) if slice.upper is None else self._parse_number_literal(slice.upper)
+            )
+            step = 1 if slice.step is None else self._parse_number_literal(slice.step)
+
+            if not (
+                isinstance(lower, int)
+                and isinstance(upper, (int, z3.ArithRef))
+                and isinstance(step, int)
+            ):
+                raise Z3ParseException(f"Invalid slicing indexes {lower}, {upper}, {step}")
+
+            if step == 1:
+                return z3.SubString(value, lower, upper - lower)
+
+            # unhandled case: the upper bound is indeterminant
+            if step != 1 and upper == z3.Length(value):
+                raise Z3ParseException(
+                    "Unable to convert a slicing operation with a non-unit step length and an indeterminant upper bound"
+                )
+
+            return z3.Concat(*(z3.SubString(value, i, 1) for i in range(lower, upper, step)))
+
+        raise Z3ParseException(f"Unhandled subscript operator type {slice}")
 
     def parse_arguments(self, node: astroid.Arguments) -> Dict[str, z3.ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""

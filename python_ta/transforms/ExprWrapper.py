@@ -211,7 +211,7 @@ class ExprWrapper:
             )
         elif isinstance(left, (str, z3.SeqRef)) and isinstance(
             right, (str, z3.SeqRef)
-        ):  # string type
+        ):  # string literal or variable
             return z3.Not(z3.Contains(right, left)) if negate else z3.Contains(right, left)
         else:
             op = "not in" if negate else "in"

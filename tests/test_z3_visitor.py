@@ -363,8 +363,8 @@ def test_cfg_z3_vars_initialization():
     cfg = ControlFlowGraph()
     cfg.add_arguments(node.args)
 
-    # Note that this first assert implicitly includes the assertion that 'a' not in cfg._z3_vars
-    assert len(cfg._z3_vars) == 3
+    assert len(cfg._z3_vars) == 4
     assert cfg._z3_vars["x"] == z3.Int("x")
     assert cfg._z3_vars["y"] == z3.Real("y")
     assert cfg._z3_vars["z"] == z3.Bool("z")
+    assert cfg._z3_vars["a"] == z3.String("a")

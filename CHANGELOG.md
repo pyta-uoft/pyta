@@ -77,6 +77,8 @@ Custom checkers:
 - Added `z3` to dependencies installed as part of the `docs` job in the GitHub Actions workflow
 - Added tests to maintain/increase coverage of `visitor.py`, `graph.py`, and `ExprWrapper.py`
 - Removed deprecated and redundant `future` argument from `node.frame()` call in `invalid_name_checker.py`
+- Updated pylint to v3.2.6 and astroid to v3.2.4 (no new checks were enabled by default)
+- Excluded `node_modules/` folder from package autodiscovery
 
 ## [2.7.0] - 2024-12-14
 

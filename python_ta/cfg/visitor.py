@@ -1,12 +1,14 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import z3
 from astroid import extract_node, nodes
 from astroid.exceptions import AstroidSyntaxError
 
 from python_ta.contracts import parse_assertions
+from python_ta.transforms.z3_visitor import Z3Visitor
 
-from .graph import CFGBlock, ControlFlowGraph
+from .graph import CFGBlock, ControlFlowGraph, Z3Environment
 
 
 class CFGVisitor:
@@ -47,6 +49,7 @@ class CFGVisitor:
         if options is not None:
             self.options.update(options)
         self.cfg_count = 0
+        self.z3_visitor = Z3Visitor()
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
@@ -69,6 +72,9 @@ class CFGVisitor:
             for child in module.body:
                 # Check any classes or function definitions for the target function/method
                 if isinstance(child, nodes.FunctionDef) or isinstance(child, nodes.ClassDef):
+                    self.z3_visitor.visitor.visit(
+                        child
+                    )  # set up z3 constraints from function preconditions
                     child.accept(self)
             return
 
@@ -80,6 +86,9 @@ class CFGVisitor:
         module.cfg = self._current_cfg
 
         for child in module.body:
+            self.z3_visitor.visitor.visit(
+                child
+            )  # set up z3 constraints from function preconditions
             child.accept(self)
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
@@ -90,8 +99,14 @@ class CFGVisitor:
         for child in node.body:
             if functions_to_render:
                 if isinstance(child, nodes.FunctionDef):
+                    self.z3_visitor.visitor.visit(
+                        child
+                    )  # set up z3 constraints from function preconditions
                     child.accept(self)
             else:
+                self.z3_visitor.visitor.visit(
+                    child
+                )  # set up z3 constraints from function preconditions
                 child.accept(self)
 
     def visit_functiondef(self, func: nodes.FunctionDef) -> None:
@@ -131,6 +146,10 @@ class CFGVisitor:
 
         preconditions_node = _get_preconditions_node(func)
 
+        self._current_cfg.z3_environment.initialize(
+            self._current_cfg.get_z3_variables(), func.z3_constraints, previous_cfg.z3_environment
+        )
+
         self._current_block = self._current_cfg.create_block(
             self._current_cfg.start, edge_condition=preconditions_node
         )
@@ -145,6 +164,11 @@ class CFGVisitor:
 
         self._current_block = previous_block
         self._current_cfg = previous_cfg
+
+    def visit_assign(self, node: nodes.Assign) -> None:
+        for target in node.targets:
+            if isinstance(target, nodes.AssignName):
+                self._current_cfg.z3_environment.assign(target.name)
 
     def visit_if(self, node: nodes.If) -> None:
         # When only creating cfgs for functions, _current_cfg will only be None outside of functions
@@ -164,6 +188,14 @@ class CFGVisitor:
         node.cfg_block = self._current_block
         old_curr = self._current_block
 
+        # Parse if condition as z3 constraint
+        test_expr = nodes.Expr(
+            lineno=0, col_offset=0, parent=None, end_lineno=0, end_col_offset=0
+        )  # wrap node.test in an expression statement
+        test_expr.value = node.test
+        constraint = self._current_cfg.z3_environment.parse_constraint(test_expr)
+        self._current_cfg.z3_environment.add_constraint(constraint)
+
         # Handle "then" branch and label it.
         then_block = self._current_cfg.create_block(
             old_curr, edge_label="True", edge_condition=node.test
@@ -172,6 +204,12 @@ class CFGVisitor:
         for child in node.body:
             child.accept(self)
         end_if = self._current_block
+
+        # Add the negation of if condition as edge constraint for else branch
+        self._current_cfg.z3_environment.remove_constraint(constraint)
+        if constraint is not None:
+            constraint = z3.Not(constraint)
+            self._current_cfg.z3_environment.add_constraint(constraint)
 
         # Handle "else" branch.
         if node.orelse == []:
@@ -185,6 +223,8 @@ class CFGVisitor:
             for child in node.orelse:
                 child.accept(self)
             end_else = self._current_block
+
+        self._current_cfg.z3_environment.remove_constraint(constraint)
 
         after_if_block = self._current_cfg.create_block()
         self._current_cfg.link_or_merge(end_if, after_if_block)

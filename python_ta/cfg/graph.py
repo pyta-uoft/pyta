@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Generator, List, Optional, Set
 
+import z3
+
 try:
     from z3 import ExprRef
 
@@ -11,6 +13,8 @@ except ImportError:
     ExprWrapper = Any
 
 from astroid import Arguments, Break, Continue, NodeNG, Raise, Return
+
+from ..transforms import Z3ParseException
 
 
 class ControlFlowGraph:
@@ -24,6 +28,8 @@ class ControlFlowGraph:
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
+    # z3 variable environment
+    z3_environment: Z3Environment
     # map from variable names to z3 variables
     _z3_vars: Dict[str, ExprRef]
 
@@ -34,6 +40,7 @@ class ControlFlowGraph:
         self.start = self.create_block()
         self.end = self.create_block()
         self._z3_vars = {}
+        self.z3_environment = Z3Environment()
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
@@ -71,7 +78,7 @@ class ControlFlowGraph:
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
         """Link source to target."""
         if not source.is_jump():
-            CFGEdge(source, target)
+            CFGEdge(source, target, z3_constraints=self.z3_environment.update_constraints())
 
     def link_or_merge(
         self,
@@ -104,7 +111,13 @@ class ControlFlowGraph:
             # represent any part of the program so it is redundant.
             self.unreachable_blocks.remove(source)
         else:
-            CFGEdge(source, target, edge_label, edge_condition)
+            CFGEdge(
+                source,
+                target,
+                edge_label,
+                edge_condition,
+                z3_constraints=self.z3_environment.update_constraints(),
+            )
 
     def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
         """Link source to multiple target, or merge source into targets if source is empty.
@@ -120,7 +133,7 @@ class ControlFlowGraph:
         if source.statements == []:
             for edge in source.predecessors:
                 for t in targets:
-                    CFGEdge(edge.source, t)
+                    CFGEdge(edge.source, t, z3_constraints=self.z3_environment.update_constraints())
                 edge.source.successors.remove(edge)
             source.predecessors = []
             self.unreachable_blocks.remove(source)
@@ -177,6 +190,9 @@ class ControlFlowGraph:
             if block in self.unreachable_blocks:
                 self.unreachable_blocks.remove(block)
 
+    def get_z3_variables(self) -> Dict[str, ExprRef]:
+        return self._z3_vars
+
 
 class CFGBlock:
     """A node in a control flow graph.
@@ -231,6 +247,7 @@ class CFGEdge:
     target: CFGBlock
     label: Optional[Any]
     condition: Optional[NodeNG]
+    z3_constraints: List[ExprRef]
 
     def __init__(
         self,
@@ -238,6 +255,7 @@ class CFGEdge:
         target: CFGBlock,
         edge_label: Optional[Any] = None,
         condition: Optional[NodeNG] = None,
+        z3_constraints: Optional[List[ExprRef]] = None,
     ) -> None:
         self.source = source
         self.target = target
@@ -245,3 +263,148 @@ class CFGEdge:
         self.condition = condition
         self.source.successors.append(self)
         self.target.predecessors.append(self)
+        self.z3_constraints = z3_constraints
+
+
+class Z3Environment:
+    """
+    Z3 Environment stores the Z3 variables and constraints in the current scope
+
+    variable_status: the dictionary of each variable in the current environment and whether it is being reassigned
+    variable_type: the dictionary of each variable in the current environment and its type
+    constraints: the list of z3 constraints in the current environment
+    enclosing: the environment in the outer scope
+    """
+
+    variable_status: Dict[str, bool]
+    variable_type: Dict[str, str]
+    constraints: List[z3.ExprRef]
+    enclosing: Optional[Z3Environment]
+
+    def __init__(self):
+        self.variable_status = {}
+        self.variable_type = {}
+        self.constraints = []
+        self.enclosing = None
+
+    def initialize(
+        self,
+        variables: Dict[str, ExprRef],
+        constraints: List[ExprRef],
+        enclosing: Optional[Z3Environment] = None,
+    ) -> None:
+        """Initialize the environment with function parameters and preconditions"""
+        self.variable_status = {var: True for var in variables.keys()}
+        self.variable_type = {var: _z3_to_python_type(expr) for var, expr in variables.items()}
+        self.constraints = constraints
+        self.enclosing = enclosing
+
+    def assign(self, name: str) -> None:
+        """Handle a variable assignment statement"""
+        if name in self.variable_status:
+            self.variable_status[name] = False
+
+    def get_variable_status(self, name: str) -> bool:
+        """
+        Returns whether the variable with given name is reassigned
+        Returns False for non-existent variable
+        """
+        if name in self.variable_status:
+            return self.variable_status[name]
+        elif self.enclosing is not None:
+            return self.enclosing.get_variable_status(name)
+        else:
+            return False
+
+    def get_all_variable_types(self) -> Dict[str, str]:
+        """
+        Returns a combined variable_type dictionary for this and all outer environments
+        """
+        types = {}
+        # note: update dictionary from outer scope to inner scope to account for shadowing
+        if self.enclosing is not None:
+            types.update(self.enclosing.get_all_variable_types())
+
+        types.update(self.variable_type)
+        return types
+
+    def update_constraints(self) -> ExprRef:
+        """
+        Returns all z3 constraints in current and all parent environments
+        Removes constraints with reassigned variables
+        """
+        result = []
+        updated_constraints = []
+        for constraint in self.constraints:
+            reassigned = False
+            # discard expressions with reassigned variables
+            variables = _get_vars(constraint)
+            for variable in variables:
+                if not self.get_variable_status(variable):
+                    reassigned = True
+                    break
+            if not reassigned:
+                result.append(constraint)
+                updated_constraints.append(constraint)
+
+        if self.enclosing is not None:
+            result.extend(self.enclosing.update_constraints())
+
+        self.constraints = updated_constraints
+        return result
+
+    def add_constraint(self, constraint: ExprRef) -> None:
+        """
+        Add a new z3 constraint to environment
+        """
+        if constraint is not None:
+            self.constraints.append(constraint)
+
+    def parse_constraint(self, node: NodeNG):
+        """
+        Parse an Astroid node to a Z3 constraint
+        Return the resulting expression
+        """
+        ew = ExprWrapper(node, self.get_all_variable_types())
+        try:
+            return ew.reduce()
+        except (z3.Z3Exception, Z3ParseException):
+            return None
+
+    def remove_constraint(self, constraint: ExprRef) -> None:
+        """
+        Remove a z3 constraint from environment
+        """
+        if constraint in self.constraints:
+            self.constraints.remove(constraint)
+
+
+def _get_vars(expr: ExprRef) -> Set[str]:
+    """
+    Retrieve all z3 variables from a z3 expression
+    """
+    variables = set()
+
+    def traverse(e):
+        if z3.is_const(e) and e.decl().kind() == z3.Z3_OP_UNINTERPRETED:
+            variables.add(e.decl().name())
+        else:
+            for child in e.children():
+                traverse(child)
+
+    traverse(expr)
+    return variables
+
+
+def _z3_to_python_type(expr: ExprRef) -> str:
+    """
+    Converts a z3 type to corresponding python type in string
+    Returns None for unhandled types
+    """
+    z3_type_to_python = {
+        z3.IntSort(): "int",
+        z3.RealSort(): "float",
+        z3.BoolSort(): "bool",
+        z3.StringSort(): "str",
+    }
+    return z3_type_to_python.get(expr.sort())

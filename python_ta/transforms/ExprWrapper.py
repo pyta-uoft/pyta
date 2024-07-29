@@ -79,7 +79,7 @@ class ExprWrapper:
         Set up the appropriate variable representation in Z3 based on name and type.
         If an error is encountered or a case is unconsidered, return None.
         """
-        typ = self.types[name]
+        typ = self.types.get(name)
         type_to_z3 = {
             "int": z3.Int,
             "float": z3.Real,
@@ -132,6 +132,8 @@ class ExprWrapper:
                 return left**right
             elif op == "==":
                 return left == right
+            elif op == "!=":
+                return left != right
             elif op == "<=":
                 return left <= right
             elif op == ">=":

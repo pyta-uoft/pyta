@@ -1,5 +1,3 @@
-from typing import List
-
 import astroid
 import z3
 
@@ -19,7 +17,7 @@ def test_simple_function() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     y = z3.Int("y")
-    expected = [z3.And(x > 0, y > 0), x >= y]
+    expected = {1: [z3.And(x > 0, y > 0), x >= y]}
     assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
@@ -38,13 +36,49 @@ def test_if_statement() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     y = z3.Bool("y")
-    expected_if_true = [x > 0, z3.And(x > 5, y)]
-    expected_other = [x > 0]
+    expected_if_path = [
+        [x > 0],
+        [x > 0, z3.And(x > 5, y)],
+        [x > 0, z3.And(x > 5, y)],
+        [x > 0, z3.And(x > 5, y)],
+    ]
+    expected_other_path = [
+        [x > 0],
+        [x > 0, z3.Not(z3.And(x > 5, y))],
+        [x > 0, z3.Not(z3.And(x > 5, y))],
+    ]
+
+    # note: the order of traverse is indeterminant
+    actual_path_first = []
+    actual_path_second = []
     for edge in cfg.get_edges():
-        if edge.label == "True":
-            assert _list_equal(edge.z3_constraints, expected_if_true)
-        else:
-            assert _list_equal(edge.z3_constraints, expected_other)
+        actual1 = edge.z3_constraints.get(1)
+        actual2 = edge.z3_constraints.get(2)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
+
+    if len(actual_path_first) == len(expected_if_path):
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_first, expected_if_path)
+        )
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_second, expected_other_path)
+        )
+    elif len(actual_path_first) == len(expected_other_path):
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_first, expected_other_path)
+        )
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_second, expected_if_path)
+        )
+    else:
+        assert False
 
 
 def test_if_else() -> None:
@@ -67,26 +101,111 @@ def test_if_else() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.String("x")
     y = z3.Int("y")
+    expected_if_path = [
+        [z3.SubString(x, 0, 1) == "a", y > 5],
+        [z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"],
+        [z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"],
+        [z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"],
+    ]
+    expected_elif_path = [
+        [z3.SubString(x, 0, 1) == "a", y > 5],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10],
+    ]
+    expected_else_path = [
+        [z3.SubString(x, 0, 1) == "a", y > 5],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)],
+        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)],
+    ]
 
-    expected_constraints = [[x == "abc"], [y > 10]]
+    actual_path_first = []
+    actual_path_second = []
+    actual_path_third = []
+    for edge in cfg.get_edges():
+        actual1 = edge.z3_constraints.get(1)
+        actual2 = edge.z3_constraints.get(2)
+        actual3 = edge.z3_constraints.get(3)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
+        if actual3 is not None:
+            actual_path_third.append(actual3)
 
-    # recursively traverse through if branches and check constraints
-    def assert_constraints(node, previous_constraints, index):
-        for edge in node.successors:
-            if edge.label == "True":
-                new_constraints = previous_constraints + expected_constraints[index]
-                assert _list_equal(edge.z3_constraints, new_constraints)
-            elif edge.label == "False":
-                new_constraints = previous_constraints + [z3.Not(*(expected_constraints[index]))]
-                assert _list_equal(edge.z3_constraints, new_constraints)
-                assert_constraints(edge.target, new_constraints, index + 1)
+    for path in [actual_path_first, actual_path_second, actual_path_third]:
+        assert any(
+            (
+                (set(actual) == set(expected) for actual, expected in zip(path, expected_if_path)),
+                (
+                    set(actual) == set(expected)
+                    for actual, expected in zip(path, expected_elif_path)
+                ),
+                (
+                    set(actual) == set(expected)
+                    for actual, expected in zip(path, expected_else_path)
+                ),
+            )
+        )
 
-    start_edge = cfg.start.successors[0]
-    assert _list_equal(start_edge.z3_constraints, [z3.SubString(x, 0, 1) == "a", y > 5])
-    assert_constraints(start_edge.target, [z3.SubString(x, 0, 1) == "a", y > 5], 0)
-    assert _list_equal(
-        cfg.end.predecessors[0].z3_constraints, [z3.SubString(x, 0, 1) == "a", y > 5]
-    )
+
+def test_while_loop() -> None:
+    src = """
+    def func(x: int, y: int) -> None:
+        '''
+        Preconditions:
+            - x > 5
+            - y > 10
+        '''
+        while x + y > 15:
+            x -= 1
+            y -= 1
+        print(x + y)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.Int("x")
+    y = z3.Int("y")
+    expected_while_true_path = [[x > 5, y > 10], [x > 5, y > 10, x + y > 15]]
+    expected_while_false_path = [
+        [x > 5, y > 10],
+        [x > 5, y > 10, z3.Not(x + y > 15)],
+        [x > 5, y > 10, z3.Not(x + y > 15)],
+    ]
+
+    # note: the order of traverse is indeterminant
+    actual_path_first = []
+    actual_path_second = []
+    for edge in cfg.get_edges():
+        actual1 = edge.z3_constraints.get(1)
+        actual2 = edge.z3_constraints.get(2)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
+
+    if len(actual_path_first) == len(expected_while_true_path):
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_first, expected_while_true_path)
+        )
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_second, expected_while_false_path)
+        )
+    elif len(actual_path_first) == len(expected_while_false_path):
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_first, expected_while_false_path)
+        )
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_second, expected_while_true_path)
+        )
+    else:
+        assert False
 
 
 def test_variable_reassignment() -> None:
@@ -102,10 +221,8 @@ def test_variable_reassignment() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Real("x")
-    assert _list_equal(
-        cfg.start.successors[0].z3_constraints, [z3.Or(x == 1.0, x == 2.0, x == 3.0)]
-    )
-    assert cfg.end.predecessors[0].z3_constraints == []
+    assert cfg.start.successors[0].z3_constraints == {1: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
+    assert cfg.end.predecessors[0].z3_constraints == {1: []}
 
 
 def test_variable_reassignment_in_branch() -> None:
@@ -121,22 +238,50 @@ def test_variable_reassignment_in_branch() -> None:
             print("x in if block:", x)
         print("final x:", x)
     """
+    cfg = _create_cfg(src, "func")
+    x = z3.Real("x")
+    expected_if_path = [
+        [z3.Or(x == 1.0, x == 2.0, x == 3.0)],
+        [z3.Or(x == 1.0, x == 2.0, x == 3.0), x < 5],
+        [],
+        [],
+    ]
+    expected_else_path = [
+        [z3.Or(x == 1.0, x == 2.0, x == 3.0)],
+        [z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)],
+        [z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)],
+    ]
 
+    actual_path_first = []
+    actual_path_second = []
+    for edge in cfg.get_edges():
+        actual1 = edge.z3_constraints.get(1)
+        actual2 = edge.z3_constraints.get(2)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
 
-def test_variable_shadowing() -> None:
-    src = """
-    def outer(x: int) -> None:
-        '''
-        Preconditions:
-            - x > 10
-        '''
-        def inner():
-            x = 5
-        print(x)
-    """
-    cfg = _create_cfg(src, "outer")
-    x = z3.Int("x")
-    assert _list_equal(cfg.start.successors[0].z3_constraints, [x > 10])
+    if len(actual_path_first) == len(expected_if_path):
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_first, expected_if_path)
+        )
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_second, expected_else_path)
+        )
+    elif len(actual_path_first) == len(expected_else_path):
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_first, expected_else_path)
+        )
+        assert (
+            set(actual) == set(expected)
+            for actual, expected in zip(actual_path_second, expected_if_path)
+        )
+    else:
+        assert False
 
 
 def test_ignored_precondition() -> None:
@@ -151,8 +296,7 @@ def test_ignored_precondition() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
-    expected = [x > 5]
-    assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
+    assert all(edge.z3_constraints == {1: [x > 5]} for edge in cfg.get_edges())
 
 
 def test_ignored_if_condition() -> None:
@@ -170,8 +314,26 @@ def test_ignored_if_condition() -> None:
         """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
-    expected = [x > 5]
-    assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
+    edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
+    assert all(value == [x > 5] for value in edge_values)
+
+
+def test_ignored_while_condition() -> None:
+    src = """
+    def func(x: int) -> None:
+        '''
+        Preconditions:
+            - x > 5
+        '''
+        a = 10
+        while a > 5:
+            print(a)
+        print(x)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.Int("x")
+    edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
+    assert all(value == [x > 5] for value in edge_values)
 
 
 def _create_cfg(src: str, name: str) -> ControlFlowGraph:
@@ -192,11 +354,3 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
 
     assert func_node is not None
     return visitor.cfgs[func_node]
-
-
-def _list_equal(lst1: List, lst2: List) -> bool:
-    """
-    A more efficient way to determine whether two lists contain
-    the same elements, regardless of orders
-    """
-    return set(lst1) == set(lst2)

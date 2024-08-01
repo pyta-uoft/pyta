@@ -12,7 +12,18 @@ except ImportError:
     ExprRef = Any
     ExprWrapper = Any
 
-from astroid import Arguments, Break, Continue, NodeNG, Raise, Return
+from astroid import (
+    Arguments,
+    Assign,
+    AssignName,
+    Break,
+    Continue,
+    Expr,
+    NodeNG,
+    Raise,
+    Return,
+    UnaryOp,
+)
 
 from ..transforms import Z3ParseException
 
@@ -30,6 +41,8 @@ class ControlFlowGraph:
     unreachable_blocks: Set[CFGBlock]
     # z3 variable environment
     z3_environment: Z3Environment
+    # z3 constraints of preconditions
+    precondition_constraints: Optional[List[ExprRef]]
     # map from variable names to z3 variables
     _z3_vars: Dict[str, ExprRef]
 
@@ -40,7 +53,7 @@ class ControlFlowGraph:
         self.start = self.create_block()
         self.end = self.create_block()
         self._z3_vars = {}
-        self.z3_environment = Z3Environment()
+        self.precondition_constraints = None
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
@@ -78,7 +91,7 @@ class ControlFlowGraph:
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
         """Link source to target."""
         if not source.is_jump():
-            CFGEdge(source, target, z3_constraints=self.z3_environment.update_constraints())
+            CFGEdge(source, target)
 
     def link_or_merge(
         self,
@@ -116,7 +129,6 @@ class ControlFlowGraph:
                 target,
                 edge_label,
                 edge_condition,
-                z3_constraints=self.z3_environment.update_constraints(),
             )
 
     def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
@@ -133,7 +145,7 @@ class ControlFlowGraph:
         if source.statements == []:
             for edge in source.predecessors:
                 for t in targets:
-                    CFGEdge(edge.source, t, z3_constraints=self.z3_environment.update_constraints())
+                    CFGEdge(edge.source, t)
                 edge.source.successors.remove(edge)
             source.predecessors = []
             self.unreachable_blocks.remove(source)
@@ -184,14 +196,66 @@ class ControlFlowGraph:
             yield edge
             yield from self._get_edges(edge.target, visited)
 
+    def _get_paths(self) -> List[List[CFGEdge]]:
+        """
+        Get edges that represent paths from start to end node
+        """
+        all_path_nodes = list(_dfs(self.start, [], set()))
+        paths = []
+        # get the list of paths from connecting nodes
+        for path_nodes in all_path_nodes:
+            path = []
+            for i in range(0, len(path_nodes) - 1):
+                for edge in path_nodes[i].successors:
+                    if edge.target == path_nodes[i + 1]:
+                        path.append(edge)
+                        break
+            paths.append(path)
+        return paths
+
     def update_block_reachability(self) -> None:
         for block in self.get_blocks():
             block.reachable = True
             if block in self.unreachable_blocks:
                 self.unreachable_blocks.remove(block)
 
-    def get_z3_variables(self) -> Dict[str, ExprRef]:
-        return self._z3_vars
+    def update_edge_z3_constraints(self) -> None:
+        """
+        Traverse through edges and add z3 constraints on every edge
+        Constraints are generated from function preconditions, if
+        conditions, and while conditions
+        Constraints with reassigned variables are not included in subsequent edges
+        """
+        path_id = 0
+        for path in self._get_paths():
+            # starting a new path
+            path_id += 1
+            self.z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
+            for edge in path:
+                # traverse through edge
+                if edge.condition is not None:
+                    condition = Expr(
+                        lineno=0, col_offset=0, parent=None, end_lineno=0, end_col_offset=0
+                    )  # wrap condition in an expression statement
+                    condition.value = edge.condition
+                    if edge.label == "True":
+                        self.z3_environment.add_constraint(
+                            self.z3_environment.parse_constraint(condition)
+                        )
+                    elif edge.label == "False":
+                        condition_constraint = self.z3_environment.parse_constraint(condition)
+                        if condition_constraint is not None:
+                            self.z3_environment.add_constraint(z3.Not(condition_constraint))
+
+                edge.z3_constraints[path_id] = self.z3_environment.update_constraints()
+
+                # traverse into target node
+                for node in edge.target.statements:
+                    if isinstance(node, Assign):
+                        # mark reassigned variables
+                        for target in node.targets:
+                            if isinstance(target, AssignName):
+                                self.z3_environment.assign(target.name)
 
 
 class CFGBlock:
@@ -247,7 +311,7 @@ class CFGEdge:
     target: CFGBlock
     label: Optional[Any]
     condition: Optional[NodeNG]
-    z3_constraints: List[ExprRef]
+    z3_constraints: Dict[int, List[ExprRef]]
 
     def __init__(
         self,
@@ -255,7 +319,6 @@ class CFGEdge:
         target: CFGBlock,
         edge_label: Optional[Any] = None,
         condition: Optional[NodeNG] = None,
-        z3_constraints: Optional[List[ExprRef]] = None,
     ) -> None:
         self.source = source
         self.target = target
@@ -263,74 +326,36 @@ class CFGEdge:
         self.condition = condition
         self.source.successors.append(self)
         self.target.predecessors.append(self)
-        self.z3_constraints = z3_constraints
+        self.z3_constraints = {}
 
 
 class Z3Environment:
     """
-    Z3 Environment stores the Z3 variables and constraints in the current scope
+    Z3 Environment stores the Z3 variables and constraints in the current CFG path
 
     variable_status: the dictionary of each variable in the current environment and whether it is being reassigned
     variable_type: the dictionary of each variable in the current environment and its type
     constraints: the list of z3 constraints in the current environment
-    enclosing: the environment in the outer scope
     """
 
     variable_status: Dict[str, bool]
     variable_type: Dict[str, str]
     constraints: List[z3.ExprRef]
-    enclosing: Optional[Z3Environment]
 
-    def __init__(self):
-        self.variable_status = {}
-        self.variable_type = {}
-        self.constraints = []
-        self.enclosing = None
-
-    def initialize(
-        self,
-        variables: Dict[str, ExprRef],
-        constraints: List[ExprRef],
-        enclosing: Optional[Z3Environment] = None,
-    ) -> None:
+    def __init__(self, variables: Dict[str, ExprRef], constraints: List[ExprRef]) -> None:
         """Initialize the environment with function parameters and preconditions"""
         self.variable_status = {var: True for var in variables.keys()}
         self.variable_type = {var: _z3_to_python_type(expr) for var, expr in variables.items()}
-        self.constraints = constraints
-        self.enclosing = enclosing
+        self.constraints = constraints.copy()
 
     def assign(self, name: str) -> None:
         """Handle a variable assignment statement"""
         if name in self.variable_status:
             self.variable_status[name] = False
 
-    def get_variable_status(self, name: str) -> bool:
+    def update_constraints(self) -> List[ExprRef]:
         """
-        Returns whether the variable with given name is reassigned
-        Returns False for non-existent variable
-        """
-        if name in self.variable_status:
-            return self.variable_status[name]
-        elif self.enclosing is not None:
-            return self.enclosing.get_variable_status(name)
-        else:
-            return False
-
-    def get_all_variable_types(self) -> Dict[str, str]:
-        """
-        Returns a combined variable_type dictionary for this and all outer environments
-        """
-        types = {}
-        # note: update dictionary from outer scope to inner scope to account for shadowing
-        if self.enclosing is not None:
-            types.update(self.enclosing.get_all_variable_types())
-
-        types.update(self.variable_type)
-        return types
-
-    def update_constraints(self) -> ExprRef:
-        """
-        Returns all z3 constraints in current and all parent environments
+        Returns all z3 constraints in the environments
         Removes constraints with reassigned variables
         """
         result = []
@@ -340,15 +365,12 @@ class Z3Environment:
             # discard expressions with reassigned variables
             variables = _get_vars(constraint)
             for variable in variables:
-                if not self.get_variable_status(variable):
+                if not self.variable_status.get(variable, False):
                     reassigned = True
                     break
             if not reassigned:
                 result.append(constraint)
                 updated_constraints.append(constraint)
-
-        if self.enclosing is not None:
-            result.extend(self.enclosing.update_constraints())
 
         self.constraints = updated_constraints
         return result
@@ -365,18 +387,39 @@ class Z3Environment:
         Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
-        ew = ExprWrapper(node, self.get_all_variable_types())
+        ew = ExprWrapper(node, self.variable_type)
         try:
             return ew.reduce()
         except (z3.Z3Exception, Z3ParseException):
             return None
 
-    def remove_constraint(self, constraint: ExprRef) -> None:
-        """
-        Remove a z3 constraint from environment
-        """
-        if constraint in self.constraints:
-            self.constraints.remove(constraint)
+
+def _dfs(current_block: CFGBlock, current_path: list[CFGBlock], visited: set[int]):
+    """
+    Perform a depth-first search on the CFG to find all paths from the start block to the end block.
+    """
+    # Each block is visited at most once in one searching path
+    if current_block.id in visited:
+        return
+
+    visited.add(current_block.id)
+    current_path.append(current_block)
+
+    # base case: the current block is the end block or has no successors not being visited
+    if not current_block.successors or all(
+        [successor.target.id in visited for successor in current_block.successors]
+    ):
+        # return one found path
+        yield current_path.copy()
+    else:
+        # recursive case: visit all unvisited successors
+        for edge in current_block.successors:
+            # search through all sub-graphs
+            yield from _dfs(edge.target, current_path, visited)
+
+    # backtracking
+    current_path.pop()
+    visited.remove(current_block.id)
 
 
 def _get_vars(expr: ExprRef) -> Set[str]:
@@ -388,7 +431,7 @@ def _get_vars(expr: ExprRef) -> Set[str]:
     def traverse(e):
         if z3.is_const(e) and e.decl().kind() == z3.Z3_OP_UNINTERPRETED:
             variables.add(e.decl().name())
-        else:
+        elif hasattr(e, "children"):
             for child in e.children():
                 traverse(child)
 

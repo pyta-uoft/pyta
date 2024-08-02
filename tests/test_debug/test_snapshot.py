@@ -49,6 +49,24 @@ def func_cyclic() -> list:
     return snapshot()
 
 
+def func_save_simple() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot(True)
+
+
+def func_save_layered() -> list:
+    """
+    Function for snapshot() testing.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
+    return func_save_simple()
+
+
 def test_snapshot_one_level() -> None:
     """
     Examines whether the snapshot() function accurately captures
@@ -541,3 +559,22 @@ def test_snapshot_to_json_one_class():
     ]
 
     assert json_data == expected_output
+
+
+c
+
+
+def test_snapshot_save():
+    generated_svg_file = str(func_save_simple())
+
+    with open(generated_svg_file, mode="r", encoding="utf-8") as gen_svg:
+        generated_svg = gen_svg.read()
+
+    with open("func_save_simple.svg", mode="r", encoding="utf-8") as expected_svg_file:
+        expected_svg = expected_svg_file.read()
+
+    assert generated_svg == expected_svg
+
+
+# Todo: File names? What should snapshot return with save?
+# Call memory viz with a seed so can test properly, create a snapshots folder

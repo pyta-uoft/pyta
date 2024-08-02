@@ -71,7 +71,6 @@ class CFGVisitor:
             for child in module.body:
                 # Check any classes or function definitions for the target function/method
                 if isinstance(child, nodes.FunctionDef) or isinstance(child, nodes.ClassDef):
-                    self._apply_z3_visitor(child)
                     child.accept(self)
             return
 
@@ -83,7 +82,6 @@ class CFGVisitor:
         module.cfg = self._current_cfg
 
         for child in module.body:
-            self._apply_z3_visitor(child)
             child.accept(self)
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
@@ -94,10 +92,8 @@ class CFGVisitor:
         for child in node.body:
             if functions_to_render:
                 if isinstance(child, nodes.FunctionDef):
-                    self._apply_z3_visitor(child)
                     child.accept(self)
             else:
-                self._apply_z3_visitor(child)
                 child.accept(self)
 
     def visit_functiondef(self, func: nodes.FunctionDef) -> None:
@@ -121,7 +117,6 @@ class CFGVisitor:
         self.cfgs[func] = ControlFlowGraph(self.cfg_count)
         self.cfg_count += 1
         self._current_cfg = self.cfgs[func]
-        self._current_cfg.precondition_constraints = func.z3_constraints
 
         self._control_boundaries.append(
             (
@@ -137,13 +132,15 @@ class CFGVisitor:
         self._current_cfg.add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
+        # TODO: apply Z3 visitor
+        self._apply_z3_visitor(func)
+        self._current_cfg.precondition_constraints = func.z3_constraints
 
         self._current_block = self._current_cfg.create_block(
             self._current_cfg.start, edge_condition=preconditions_node
         )
 
         for child in func.body:
-            self._apply_z3_visitor(child)
             child.accept(self)
 
         self._control_boundaries.pop()
@@ -440,10 +437,8 @@ class CFGVisitor:
         """
         Apply z3 visitor to a function definition node and convert function preconditions to z3 constraints
         """
-        if not isinstance(node, nodes.FunctionDef) or _get_preconditions_node(node) is not None:
+        if isinstance(node, nodes.FunctionDef):
             self.z3_visitor.visitor.visit(node)
-        elif isinstance(node, nodes.FunctionDef):
-            node.z3_constraints = {}
 
 
 def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:

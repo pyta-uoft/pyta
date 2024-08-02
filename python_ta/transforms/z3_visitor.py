@@ -1,5 +1,5 @@
 import astroid
-from astroid import Uninferable, nodes
+from astroid import AstroidError, Uninferable, nodes
 from astroid.transforms import TransformVisitor
 from z3.z3types import Z3Exception
 
@@ -39,11 +39,11 @@ class Z3Visitor:
         # Get z3 constraints
         z3_constraints = []
         for pre in preconditions:
-            pre = astroid.parse(pre).body[0]
-            ew = ExprWrapper(pre, types)
             try:
+                pre = astroid.parse(pre).body[0]
+                ew = ExprWrapper(pre, types)
                 transformed = ew.reduce()
-            except (Z3Exception, Z3ParseException):
+            except (AstroidError, Z3Exception, Z3ParseException):
                 transformed = None
             if transformed is not None:
                 z3_constraints.append(transformed)

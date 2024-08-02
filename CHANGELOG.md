@@ -46,6 +46,7 @@ Custom checkers:
 - Fixed issue where `check_contracts` fails silently when function preconditions contain precondition violations, and when a representation invariant contains a call to a top-level function (not built-in or imported library).
 - Fixed issue where methods called in representation invariants lead to infinite recursion.
 - Fixed issue where `PossiblyUndefinedChecker` raised an error if the control flow graph was invalid due to syntax error
+- Fixed issue where `Z3Visitor` raised an error if the function preconditions are not valid python expressions
 
 ### 🔧 Internal changes
 
@@ -79,6 +80,7 @@ Custom checkers:
 - Removed deprecated and redundant `future` argument from `node.frame()` call in `invalid_name_checker.py`
 - Updated pylint to v3.2.6 and astroid to v3.2.4 (no new checks were enabled by default)
 - Excluded `node_modules/` folder from package autodiscovery
+- Update `graph.py` to augment control flow graph edges with z3 constraints
 
 ## [2.7.0] - 2024-12-14
 

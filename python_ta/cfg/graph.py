@@ -22,7 +22,6 @@ from astroid import (
     NodeNG,
     Raise,
     Return,
-    UnaryOp,
 )
 
 from ..transforms import Z3ParseException

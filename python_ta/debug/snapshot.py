@@ -6,8 +6,23 @@ Use the 'inspect' module to extract local variables from
 from __future__ import annotations
 
 import inspect
+import json
+import subprocess
+import tempfile
 from types import FrameType
-from typing import Any
+from typing import Any, Optional
+
+import pytest
+
+
+def json_temp_file(source):
+    """Creates a temporary file for the snapshot's JSON"""
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", delete=False, suffix=".json", prefix="snapshot_"
+    ) as f:
+        f.write(str(source))
+
+    return f.name
 
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
@@ -29,11 +44,13 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
     return {"__main__": true_global_vars}
 
 
-def snapshot():
+def snapshot(save: Optional[bool] = False):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
     each mapping function names to their respective local variables.
     Excludes the global module context.
+
+    When save is True, a MemoryViz-created svg is produced
     """
     variables = []
     frame = inspect.currentframe().f_back
@@ -47,7 +64,17 @@ def snapshot():
 
         frame = frame.f_back
 
-    return variables
+    if save:
+        json_compatible_vars = snapshot_to_json(variables)
+        file_path = json_temp_file(json_compatible_vars)
+        subprocess.run(
+            ["npx", "memory-viz", file_path], shell=True, check=True, capture_output=True, text=True
+        )
+
+        return file_path
+
+    else:
+        return variables
 
 
 def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
@@ -84,7 +111,7 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
             if isinstance(val, (list, set, tuple)):
                 element_ids = [process_value(element) for element in val]
                 value_entry = {
-                    "type": type(val).__name__,
+                    "type": str(type(val).__name__),
                     "id": value_id_diagram,
                     "value": element_ids,
                 }
@@ -107,13 +134,13 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     attr_ids[attr_name] = attr_id
                 value_entry = {
                     "type": ".class",
-                    "name": type(val).__name__,
+                    "name": str(type(val).__name__),
                     "id": value_id_diagram,
                     "value": attr_ids,
                 }
             else:  # Handle primitives and other types
                 value_entry = {
-                    "type": type(val).__name__,
+                    "type": str(type(val).__name__),
                     "id": value_id_diagram,
                     "value": val,
                 }
@@ -133,11 +160,11 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
 
             json_object_frame = {
                 "type": ".frame",
-                "name": frame_name,
+                "name": str(frame_name),
                 "id": None,
                 "value": frame_variables,
             }
             json_data.append(json_object_frame)
 
     json_data.extend(value_entries)
-    return json_data
+    return json.dumps(json_data)

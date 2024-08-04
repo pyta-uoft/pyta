@@ -199,17 +199,33 @@ class ControlFlowGraph:
         """
         Get edges that represent paths from start to end node
         """
-        all_path_nodes = list(_dfs(self.start, [], set()))
         paths = []
-        # get the list of paths from connecting nodes
-        for path_nodes in all_path_nodes:
-            path = []
-            for i in range(0, len(path_nodes) - 1):
-                for edge in path_nodes[i].successors:
-                    if edge.target == path_nodes[i + 1]:
-                        path.append(edge)
-                        break
-            paths.append(path)
+
+        def _visited(edge, visited_edges, visited_nodes):
+            return edge in visited_edges or edge.target in visited_nodes
+
+        def _dfs(current_edge, current_path, visited_edges, visited_nodes):
+            # note: both visited edges and visited nodes need to be tracked to correctly handle cycles
+            if _visited(current_edge, visited_edges, visited_nodes):
+                return
+
+            visited_edges.add(current_edge)
+            visited_nodes.add(current_edge.source)
+            current_path.append(current_edge)
+
+            if current_edge.target == self.end or all(
+                _visited(edge, visited_edges, visited_nodes)
+                for edge in current_edge.target.successors
+            ):
+                paths.append(current_path.copy())
+            else:
+                for edge in current_edge.target.successors:
+                    _dfs(edge, current_path, visited_edges, visited_nodes)
+
+            current_path.pop()
+            visited_edges.remove(current_edge)
+
+        _dfs(self.start.successors[0], [], set(), set())
         return paths
 
     def update_block_reachability(self) -> None:
@@ -391,34 +407,6 @@ class Z3Environment:
             return ew.reduce()
         except (z3.Z3Exception, Z3ParseException):
             return None
-
-
-def _dfs(current_block: CFGBlock, current_path: list[CFGBlock], visited: set[int]):
-    """
-    Perform a depth-first search on the CFG to find all paths from the start block to the end block.
-    """
-    # Each block is visited at most once in one searching path
-    if current_block.id in visited:
-        return
-
-    visited.add(current_block.id)
-    current_path.append(current_block)
-
-    # base case: the current block is the end block or has no successors not being visited
-    if not current_block.successors or all(
-        [successor.target.id in visited for successor in current_block.successors]
-    ):
-        # return one found path
-        yield current_path.copy()
-    else:
-        # recursive case: visit all unvisited successors
-        for edge in current_block.successors:
-            # search through all sub-graphs
-            yield from _dfs(edge.target, current_path, visited)
-
-    # backtracking
-    current_path.pop()
-    visited.remove(current_block.id)
 
 
 def _get_vars(expr: ExprRef) -> Set[str]:

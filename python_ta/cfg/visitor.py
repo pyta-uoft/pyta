@@ -132,7 +132,6 @@ class CFGVisitor:
         self._current_cfg.add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
-        # TODO: apply Z3 visitor
         self._apply_z3_visitor(func)
         self._current_cfg.precondition_constraints = func.z3_constraints
 
@@ -433,12 +432,13 @@ class CFGVisitor:
         for child in node.body:
             child.accept(self)
 
-    def _apply_z3_visitor(self, node: nodes.NodeNG) -> None:
+    def _apply_z3_visitor(self, node: nodes.FunctionDef) -> None:
         """
         Apply z3 visitor to a function definition node and convert function preconditions to z3 constraints
         """
-        if isinstance(node, nodes.FunctionDef):
-            self.z3_visitor.visitor.visit(node)
+        self.z3_visitor.visitor.visit(node)
+        if not hasattr(node, "z3_constraints"):
+            node.z3_constraints = {}
 
 
 def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:

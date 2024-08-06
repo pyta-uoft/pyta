@@ -132,8 +132,6 @@ class CFGVisitor:
         self._current_cfg.add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
-        self._apply_z3_visitor(func)
-        self._current_cfg.precondition_constraints = func.z3_constraints
 
         self._current_block = self._current_cfg.create_block(
             self._current_cfg.start, edge_condition=preconditions_node
@@ -146,7 +144,11 @@ class CFGVisitor:
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_cfg.update_block_reachability()
-        self._current_cfg.update_edge_z3_constraints()
+
+        self.z3_visitor.visitor.visit(func)
+        if hasattr(func, "z3_constraints"):
+            self._current_cfg.precondition_constraints = func.z3_constraints
+            self._current_cfg.update_edge_z3_constraints()
 
         self._current_block = previous_block
         self._current_cfg = previous_cfg
@@ -431,14 +433,6 @@ class CFGVisitor:
 
         for child in node.body:
             child.accept(self)
-
-    def _apply_z3_visitor(self, node: nodes.FunctionDef) -> None:
-        """
-        Apply z3 visitor to a function definition node and convert function preconditions to z3 constraints
-        """
-        self.z3_visitor.visitor.visit(node)
-        if not hasattr(node, "z3_constraints"):
-            node.z3_constraints = {}
 
 
 def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:

@@ -6,7 +6,6 @@ from astroid.exceptions import AstroidSyntaxError
 
 from python_ta.contracts import parse_assertions
 
-from ..transforms.z3_visitor import Z3Visitor
 from .graph import CFGBlock, ControlFlowGraph
 
 
@@ -48,7 +47,6 @@ class CFGVisitor:
         if options is not None:
             self.options.update(options)
         self.cfg_count = 0
-        self.z3_visitor = Z3Visitor()
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
@@ -145,7 +143,6 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_cfg.update_block_reachability()
 
-        self.z3_visitor.visitor.visit(func)
         if hasattr(func, "z3_constraints"):
             self._current_cfg.precondition_constraints = func.z3_constraints
             self._current_cfg.update_edge_z3_constraints()

@@ -2,6 +2,7 @@ import astroid
 import z3
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
+from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 def test_simple_function() -> None:
@@ -341,7 +342,8 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     Return the control flow graph of given function
     generated from the source code
     """
-    mod = astroid.parse(src)
+    z3v = Z3Visitor()
+    mod = z3v.visitor.visit(astroid.parse(src))
     visitor = CFGVisitor()
     mod.accept(visitor)
 

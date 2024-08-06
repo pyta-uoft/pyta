@@ -1,5 +1,5 @@
 import astroid
-from astroid import AstroidError, Uninferable, nodes
+from astroid import AstroidError, InferenceError, Uninferable, nodes
 from astroid.transforms import TransformVisitor
 from z3.z3types import Z3Exception
 
@@ -29,8 +29,11 @@ class Z3Visitor:
         for ann, arg in zip(annotations, arguments):
             if ann is None:
                 continue
-            # TODO: what to do about subscripts ex. Set[int], List[Set[int]], ...
-            inferred = ann.inferred()
+            try:
+                # TODO: what to do about subscripts ex. Set[int], List[Set[int]], ...
+                inferred = ann.inferred()
+            except InferenceError:
+                continue
             if len(inferred) > 0 and inferred[0] is not Uninferable:
                 if isinstance(inferred[0], nodes.ClassDef):
                     types[arg.name] = inferred[0].name

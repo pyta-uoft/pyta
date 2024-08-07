@@ -1,5 +1,5 @@
 import astroid
-from astroid import AstroidError, InferenceError, Uninferable, nodes
+from astroid import AstroidError, Uninferable, nodes
 from astroid.transforms import TransformVisitor
 from astroid.util import safe_infer
 from z3.z3types import Z3Exception

@@ -33,6 +33,13 @@ class ExprWrapper:
         self.types = types
         self.node = node
 
+        if not isinstance(node, astroid.NodeNG):
+            raise ValueError("'node' must be a valid astroid node")
+
+        # extract expression out of expression statement
+        if isinstance(node, (astroid.Expr, astroid.Assign)):
+            self.node = node.value
+
     def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
@@ -40,10 +47,6 @@ class ExprWrapper:
         """
         if node is None:
             node = self.node
-
-        # extract expression out of expression statement
-        if isinstance(node, (astroid.Expr, astroid.Assign)):
-            node = node.value
 
         if isinstance(node, nodes.BoolOp):
             node = self.parse_bool_op(node)

@@ -15,16 +15,6 @@ from typing import Any, Optional
 import pytest
 
 
-def json_temp_file(source):
-    """Creates a temporary file for the snapshot's JSON"""
-    with tempfile.NamedTemporaryFile(
-        mode="w", encoding="utf-8", delete=False, suffix=".json", prefix="snapshot_"
-    ) as f:
-        f.write(str(source))
-
-    return f.name
-
-
 def get_filtered_global_variables(frame: FrameType) -> dict:
     """
     Helper function for retriving global variables
@@ -44,7 +34,11 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
     return {"__main__": true_global_vars}
 
 
-def snapshot(save: Optional[bool] = False):
+def snapshot(
+    save: Optional[bool] = False,
+    memory_viz_args: Optional[list[str]] = None,
+    memory_viz_version: Optional[str] = "latest",
+):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
     each mapping function names to their respective local variables.
@@ -66,12 +60,22 @@ def snapshot(save: Optional[bool] = False):
 
     if save:
         json_compatible_vars = snapshot_to_json(variables)
-        file_path = json_temp_file(json_compatible_vars)
-        subprocess.run(
-            ["npx", "memory-viz", file_path], shell=True, check=True, capture_output=True, text=True
+        command = ["npx", "memory-viz"]
+        if memory_viz_args:
+            command.extend(memory_viz_args)
+
+        result = subprocess.run(
+            command,
+            input=str(json_compatible_vars),
+            shell=True,
+            check=True,
+            capture_output=True,
+            text=True,
         )
 
-        return file_path
+        print(result.stdout)
+
+        return variables
 
     else:
         return variables

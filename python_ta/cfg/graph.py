@@ -3,12 +3,19 @@ from __future__ import annotations
 from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
-    from z3 import ExprRef
+    from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
 
     from ..transforms import ExprWrapper
+
+    z3_dependency_available = True
 except ImportError:
     ExprRef = Any
     ExprWrapper = Any
+    Not = Any
+    Z3Exception = Any
+    is_const = Any
+    Z3_OP_UNINTERPRETED = Any
+    z3_dependency_available = False
 
 from astroid import (
     Arguments,
@@ -239,6 +246,9 @@ class ControlFlowGraph:
         - While conditions
 
         Constraints with reassigned variables are not included in subsequent edges."""
+        if not z3_dependency_available:
+            return
+
         for path_id, path in enumerate(self._get_paths()):
             # starting a new path
             z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
@@ -254,7 +264,7 @@ class ControlFlowGraph:
                         if edge.label == "True":
                             z3_environment.add_constraint(condition_z3_constraint)
                         elif edge.label == "False":
-                            z3_environment.add_constraint(z3.Not(condition_z3_constraint))
+                            z3_environment.add_constraint(Not(condition_z3_constraint))
 
                 edge.z3_constraints[path_id] = z3_environment.update_constraints()
 
@@ -397,7 +407,7 @@ class Z3Environment:
         ew = ExprWrapper(node, self.variable_type)
         try:
             return ew.reduce()
-        except (z3.Z3Exception, Z3ParseException):
+        except (Z3Exception, Z3ParseException):
             return None
 
 
@@ -408,7 +418,7 @@ def _get_vars(expr: ExprRef) -> Set[str]:
     variables = set()
 
     def traverse(e):
-        if z3.is_const(e) and e.decl().kind() == z3.Z3_OP_UNINTERPRETED:
+        if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
             variables.add(e.decl().name())
         elif hasattr(e, "children"):
             for child in e.children():

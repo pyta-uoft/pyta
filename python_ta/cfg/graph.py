@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, Generator, List, Optional, Set
 
-import z3
-
 try:
     from z3 import ExprRef
 
@@ -38,10 +36,8 @@ class ControlFlowGraph:
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
     unreachable_blocks: Set[CFGBlock]
-    # z3 variable environment
-    z3_environment: Z3Environment
     # z3 constraints of preconditions
-    precondition_constraints: Optional[List[ExprRef]]
+    precondition_constraints: List[ExprRef]
     # map from variable names to z3 variables
     _z3_vars: Dict[str, ExprRef]
 
@@ -52,7 +48,7 @@ class ControlFlowGraph:
         self.start = self.create_block()
         self.end = self.create_block()
         self._z3_vars = {}
-        self.precondition_constraints = None
+        self.precondition_constraints = []
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
@@ -123,12 +119,7 @@ class ControlFlowGraph:
             # represent any part of the program so it is redundant.
             self.unreachable_blocks.remove(source)
         else:
-            CFGEdge(
-                source,
-                target,
-                edge_label,
-                edge_condition,
-            )
+            CFGEdge(source, target, edge_label, edge_condition)
 
     def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
         """Link source to multiple target, or merge source into targets if source is empty.
@@ -196,15 +187,20 @@ class ControlFlowGraph:
             yield from self._get_edges(edge.target, visited)
 
     def _get_paths(self) -> List[List[CFGEdge]]:
-        """
-        Get edges that represent paths from start to end node
-        """
+        """Get edges that represent paths from start to end node in depth-first order."""
         paths = []
 
-        def _visited(edge, visited_edges, visited_nodes):
+        def _visited(
+            edge: CFGEdge, visited_edges: Set[CFGEdge], visited_nodes: Set[CFGBlock]
+        ) -> bool:
             return edge in visited_edges or edge.target in visited_nodes
 
-        def _dfs(current_edge, current_path, visited_edges, visited_nodes):
+        def _dfs(
+            current_edge: CFGEdge,
+            current_path: List[CFGEdge],
+            visited_edges: Set[CFGEdge],
+            visited_nodes: Set[CFGBlock],
+        ):
             # note: both visited edges and visited nodes need to be tracked to correctly handle cycles
             if _visited(current_edge, visited_edges, visited_nodes):
                 return
@@ -235,17 +231,17 @@ class ControlFlowGraph:
                 self.unreachable_blocks.remove(block)
 
     def update_edge_z3_constraints(self) -> None:
-        """
-        Traverse through edges and add z3 constraints on every edge
-        Constraints are generated from function preconditions, if
-        conditions, and while conditions
-        Constraints with reassigned variables are not included in subsequent edges
-        """
-        path_id = 0
-        for path in self._get_paths():
+        """Traverse through edges and add Z3 constraints on each edge.
+
+        Constraints are generated from:
+        - Function preconditions
+        - If conditions
+        - While conditions
+
+        Constraints with reassigned variables are not included in subsequent edges."""
+        for path_id, path in enumerate(self._get_paths()):
             # starting a new path
-            path_id += 1
-            self.z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
+            z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
             for edge in path:
                 # traverse through edge
                 if edge.condition is not None:
@@ -253,16 +249,14 @@ class ControlFlowGraph:
                         lineno=0, col_offset=0, parent=None, end_lineno=0, end_col_offset=0
                     )  # wrap condition in an expression statement
                     condition.value = edge.condition
-                    if edge.label == "True":
-                        self.z3_environment.add_constraint(
-                            self.z3_environment.parse_constraint(condition)
-                        )
-                    elif edge.label == "False":
-                        condition_constraint = self.z3_environment.parse_constraint(condition)
-                        if condition_constraint is not None:
-                            self.z3_environment.add_constraint(z3.Not(condition_constraint))
+                    condition_z3_constraint = z3_environment.parse_constraint(condition)
+                    if condition_z3_constraint is not None:
+                        if edge.label == "True":
+                            z3_environment.add_constraint(condition_z3_constraint)
+                        elif edge.label == "False":
+                            z3_environment.add_constraint(z3.Not(condition_z3_constraint))
 
-                edge.z3_constraints[path_id] = self.z3_environment.update_constraints()
+                edge.z3_constraints[path_id] = z3_environment.update_constraints()
 
                 # traverse into target node
                 for node in edge.target.statements:
@@ -270,7 +264,7 @@ class ControlFlowGraph:
                         # mark reassigned variables
                         for target in node.targets:
                             if isinstance(target, AssignName):
-                                self.z3_environment.assign(target.name)
+                                z3_environment.assign(target.name)
 
 
 class CFGBlock:
@@ -345,59 +339,57 @@ class CFGEdge:
 
 
 class Z3Environment:
-    """
-    Z3 Environment stores the Z3 variables and constraints in the current CFG path
+    """Z3 Environment stores the Z3 variables and constraints in the current CFG path
 
-    variable_status: the dictionary of each variable in the current environment and whether it is being reassigned
-    variable_type: the dictionary of each variable in the current environment and its type
-    constraints: the list of z3 constraints in the current environment
+    variable_unassigned:
+        A dictionary mapping each variable in the current environment to a boolean indicating
+        whether it has been reassigned (False) or remains unassigned (True).
+
+    variable_type:
+        A dictionary mapping each variable in the current environment to its data type.
+
+    constraints:
+        A list of Z3 constraints in the current environment.
     """
 
-    variable_status: Dict[str, bool]
+    variable_unassigned: Dict[str, bool]
     variable_type: Dict[str, str]
-    constraints: List[z3.ExprRef]
+    constraints: List[ExprRef]
 
     def __init__(self, variables: Dict[str, ExprRef], constraints: List[ExprRef]) -> None:
         """Initialize the environment with function parameters and preconditions"""
-        self.variable_status = {var: True for var in variables.keys()}
+        self.variable_unassigned = {var: True for var in variables.keys()}
         self.variable_type = {var: _z3_to_python_type(expr) for var, expr in variables.items()}
         self.constraints = constraints.copy()
 
     def assign(self, name: str) -> None:
         """Handle a variable assignment statement"""
-        if name in self.variable_status:
-            self.variable_status[name] = False
+        if name in self.variable_unassigned:
+            self.variable_unassigned[name] = False
 
     def update_constraints(self) -> List[ExprRef]:
         """
         Returns all z3 constraints in the environments
         Removes constraints with reassigned variables
         """
-        result = []
         updated_constraints = []
         for constraint in self.constraints:
-            reassigned = False
             # discard expressions with reassigned variables
             variables = _get_vars(constraint)
-            for variable in variables:
-                if not self.variable_status.get(variable, False):
-                    reassigned = True
-                    break
+            reassigned = any(self.variable_unassigned.get(variable, True) for variable in variables)
             if not reassigned:
-                result.append(constraint)
                 updated_constraints.append(constraint)
 
         self.constraints = updated_constraints
-        return result
+        return updated_constraints.copy()
 
     def add_constraint(self, constraint: ExprRef) -> None:
         """
         Add a new z3 constraint to environment
         """
-        if constraint is not None:
-            self.constraints.append(constraint)
+        self.constraints.append(constraint)
 
-    def parse_constraint(self, node: NodeNG):
+    def parse_constraint(self, node: NodeNG) -> Optional[ExprRef]:
         """
         Parse an Astroid node to a Z3 constraint
         Return the resulting expression

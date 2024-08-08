@@ -25,23 +25,20 @@ class ExprWrapper:
     """
 
     node: astroid.NodeNG
-    types: Dict[str, str]
+    types: Dict[str, Union[str, z3.ExprRef]]
 
     def __init__(self, node: astroid.NodeNG, types=None):
         if types is None:
             types = {}
         self.types = types
+        self.node = node
 
-        if isinstance(node, astroid.Expr):
-            self.node = node.value  # take node attribute to be the value of the expression
-        elif isinstance(node, astroid.Assign):
-            self.node = node.value  # take node attribute as expression (right side) of assignment
-        elif isinstance(node, astroid.Arguments):
-            self.node = node  # take node attribute to be the function declaration node itself
-        else:
-            raise ValueError(
-                "'node' param must be an astroid expression, assignment, or arguments node."
-            )
+        if not isinstance(node, astroid.NodeNG):
+            raise ValueError("'node' must be a valid astroid node")
+
+        # extract expression out of expression statement
+        if isinstance(node, (astroid.Expr, astroid.Assign)):
+            self.node = node.value
 
     def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
         """
@@ -79,15 +76,17 @@ class ExprWrapper:
         Set up the appropriate variable representation in Z3 based on name and type.
         If an error is encountered or a case is unconsidered, return None.
         """
-        typ = self.types[name]
+        typ = self.types.get(name)
         type_to_z3 = {
             "int": z3.Int,
             "float": z3.Real,
             "bool": z3.Bool,
             "str": z3.String,
         }
-        if typ in type_to_z3:
+        if typ in type_to_z3:  # convert string value to z3 variable
             x = type_to_z3[typ](name)
+        elif isinstance(typ, z3.ExprRef):  # the value is already a z3 variable
+            x = typ
         else:
             raise Z3ParseException(f"Unhandled type {typ}.")
 

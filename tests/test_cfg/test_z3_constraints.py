@@ -49,7 +49,6 @@ def test_if_statement() -> None:
         [x > 0, z3.Not(z3.And(x > 5, y))],
     ]
 
-    # note: the order of traverse is indeterminant
     actual_path_first = []
     actual_path_second = []
     for edge in cfg.get_edges():
@@ -60,26 +59,14 @@ def test_if_statement() -> None:
         if actual2 is not None:
             actual_path_second.append(actual2)
 
-    if len(actual_path_first) == len(expected_if_path):
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_first, expected_if_path)
-        )
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_second, expected_other_path)
-        )
-    elif len(actual_path_first) == len(expected_other_path):
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_first, expected_other_path)
-        )
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_second, expected_if_path)
-        )
-    else:
-        assert False
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_first, expected_if_path)
+    )
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_second, expected_other_path)
+    )
 
 
 def test_if_else() -> None:
@@ -137,20 +124,18 @@ def test_if_else() -> None:
         if actual3 is not None:
             actual_path_third.append(actual3)
 
-    for path in [actual_path_first, actual_path_second, actual_path_third]:
-        assert any(
-            (
-                (set(actual) == set(expected) for actual, expected in zip(path, expected_if_path)),
-                (
-                    set(actual) == set(expected)
-                    for actual, expected in zip(path, expected_elif_path)
-                ),
-                (
-                    set(actual) == set(expected)
-                    for actual, expected in zip(path, expected_else_path)
-                ),
-            )
-        )
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_first, expected_if_path)
+    )
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_second, expected_elif_path)
+    )
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_third, expected_else_path)
+    )
 
 
 def test_while_loop() -> None:
@@ -187,26 +172,14 @@ def test_while_loop() -> None:
         if actual2 is not None:
             actual_path_second.append(actual2)
 
-    if len(actual_path_first) == len(expected_while_true_path):
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_first, expected_while_true_path)
-        )
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_second, expected_while_false_path)
-        )
-    elif len(actual_path_first) == len(expected_while_false_path):
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_first, expected_while_false_path)
-        )
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_second, expected_while_true_path)
-        )
-    else:
-        assert False
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_first, expected_while_true_path)
+    )
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_second, expected_while_false_path)
+    )
 
 
 def test_variable_reassignment() -> None:
@@ -263,26 +236,14 @@ def test_variable_reassignment_in_branch() -> None:
         if actual2 is not None:
             actual_path_second.append(actual2)
 
-    if len(actual_path_first) == len(expected_if_path):
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_first, expected_if_path)
-        )
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_second, expected_else_path)
-        )
-    elif len(actual_path_first) == len(expected_else_path):
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_first, expected_else_path)
-        )
-        assert (
-            set(actual) == set(expected)
-            for actual, expected in zip(actual_path_second, expected_if_path)
-        )
-    else:
-        assert False
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_first, expected_if_path)
+    )
+    assert (
+        set(actual) == set(expected)
+        for actual, expected in zip(actual_path_second, expected_else_path)
+    )
 
 
 def test_ignored_precondition() -> None:

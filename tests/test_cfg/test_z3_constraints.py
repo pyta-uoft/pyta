@@ -18,7 +18,7 @@ def test_simple_function() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     y = z3.Int("y")
-    expected = {1: [z3.And(x > 0, y > 0), x >= y]}
+    expected = {0: [z3.And(x > 0, y > 0), x >= y]}
     assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
@@ -53,8 +53,8 @@ def test_if_statement() -> None:
     actual_path_first = []
     actual_path_second = []
     for edge in cfg.get_edges():
-        actual1 = edge.z3_constraints.get(1)
-        actual2 = edge.z3_constraints.get(2)
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
         if actual1 is not None:
             actual_path_first.append(actual1)
         if actual2 is not None:
@@ -127,9 +127,9 @@ def test_if_else() -> None:
     actual_path_second = []
     actual_path_third = []
     for edge in cfg.get_edges():
-        actual1 = edge.z3_constraints.get(1)
-        actual2 = edge.z3_constraints.get(2)
-        actual3 = edge.z3_constraints.get(3)
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
+        actual3 = edge.z3_constraints.get(2)
         if actual1 is not None:
             actual_path_first.append(actual1)
         if actual2 is not None:
@@ -180,8 +180,8 @@ def test_while_loop() -> None:
     actual_path_first = []
     actual_path_second = []
     for edge in cfg.get_edges():
-        actual1 = edge.z3_constraints.get(1)
-        actual2 = edge.z3_constraints.get(2)
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
         if actual1 is not None:
             actual_path_first.append(actual1)
         if actual2 is not None:
@@ -222,8 +222,8 @@ def test_variable_reassignment() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Real("x")
-    assert cfg.start.successors[0].z3_constraints == {1: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
-    assert cfg.end.predecessors[0].z3_constraints == {1: []}
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
+    assert cfg.end.predecessors[0].z3_constraints == {0: []}
 
 
 def test_variable_reassignment_in_branch() -> None:
@@ -256,8 +256,8 @@ def test_variable_reassignment_in_branch() -> None:
     actual_path_first = []
     actual_path_second = []
     for edge in cfg.get_edges():
-        actual1 = edge.z3_constraints.get(1)
-        actual2 = edge.z3_constraints.get(2)
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
         if actual1 is not None:
             actual_path_first.append(actual1)
         if actual2 is not None:
@@ -297,7 +297,7 @@ def test_ignored_precondition() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
-    assert all(edge.z3_constraints == {1: [x > 5]} for edge in cfg.get_edges())
+    assert all(edge.z3_constraints == {0: [x > 5]} for edge in cfg.get_edges())
 
 
 def test_ignored_if_condition() -> None:

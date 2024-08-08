@@ -255,11 +255,7 @@ class ControlFlowGraph:
             for edge in path:
                 # traverse through edge
                 if edge.condition is not None:
-                    condition = Expr(
-                        lineno=0, col_offset=0, parent=None, end_lineno=0, end_col_offset=0
-                    )  # wrap condition in an expression statement
-                    condition.value = edge.condition
-                    condition_z3_constraint = z3_environment.parse_constraint(condition)
+                    condition_z3_constraint = z3_environment.parse_constraint(edge.condition)
                     if condition_z3_constraint is not None:
                         if edge.label == "True":
                             z3_environment.add_constraint(condition_z3_constraint)
@@ -369,7 +365,7 @@ class Z3Environment:
     def __init__(self, variables: Dict[str, ExprRef], constraints: List[ExprRef]) -> None:
         """Initialize the environment with function parameters and preconditions"""
         self.variable_unassigned = {var: True for var in variables.keys()}
-        self.variable_type = {var: _z3_to_python_type(expr) for var, expr in variables.items()}
+        self.variable_type = variables
         self.constraints = constraints.copy()
 
     def assign(self, name: str) -> None:
@@ -386,7 +382,9 @@ class Z3Environment:
         for constraint in self.constraints:
             # discard expressions with reassigned variables
             variables = _get_vars(constraint)
-            reassigned = any(self.variable_unassigned.get(variable, True) for variable in variables)
+            reassigned = any(
+                not self.variable_unassigned.get(variable, False) for variable in variables
+            )
             if not reassigned:
                 updated_constraints.append(constraint)
 
@@ -426,17 +424,3 @@ def _get_vars(expr: ExprRef) -> Set[str]:
 
     traverse(expr)
     return variables
-
-
-def _z3_to_python_type(expr: ExprRef) -> str:
-    """
-    Converts a z3 type to corresponding python type in string
-    Returns None for unhandled types
-    """
-    z3_type_to_python = {
-        z3.IntSort(): "int",
-        z3.RealSort(): "float",
-        z3.BoolSort(): "bool",
-        z3.StringSort(): "str",
-    }
-    return z3_type_to_python.get(expr.sort())

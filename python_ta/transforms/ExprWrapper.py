@@ -25,7 +25,7 @@ class ExprWrapper:
     """
 
     node: astroid.NodeNG
-    types: Dict[str, str | z3.ExprRef]
+    types: Dict[str, Union[str, z3.ExprRef]]
 
     def __init__(self, node: astroid.NodeNG, types=None):
         if types is None:

@@ -79,6 +79,7 @@ Custom checkers:
 - Removed deprecated and redundant `future` argument from `node.frame()` call in `invalid_name_checker.py`
 - Updated pylint to v3.2.6 and astroid to v3.2.4 (no new checks were enabled by default)
 - Excluded `node_modules/` folder from package autodiscovery
+- Refactored `Z3Visitor` to use `safe_infer()` instead of `inferred()` and added handling of `AstroidError`.
 
 ## [2.7.0] - 2024-12-14
 

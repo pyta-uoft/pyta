@@ -135,6 +135,7 @@ string_list = [
         Preconditions:
             - x == y
             - z == x + y
+            - x != z
         '''
         pass
     """,
@@ -242,7 +243,7 @@ x = z3.String("x")
 y = z3.String("y")
 z = z3.String("z")
 string_expected = [
-    [x == y, z == x + y],
+    [x == y, z == x + y, x != z],
     [z3.Contains("abc", x), z3.Contains(y, x)],
     [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
     [

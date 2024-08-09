@@ -32,9 +32,8 @@ class Z3Visitor:
                 continue
             # TODO: what to do about subscripts ex. Set[int], List[Set[int]], ...
             inferred = safe_infer(ann)
-            if inferred is not Uninferable:
-                if isinstance(inferred, nodes.ClassDef):
-                    types[arg.name] = inferred.name
+            if isinstance(inferred, nodes.ClassDef):
+                types[arg.name] = inferred.name
         # Parse preconditions
         preconditions = parse_assertions(node, parse_token="Precondition")
         # Get z3 constraints

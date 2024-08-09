@@ -1,6 +1,7 @@
 import astroid
-from astroid import Uninferable, nodes
+from astroid import AstroidError, Uninferable, nodes
 from astroid.transforms import TransformVisitor
+from astroid.util import safe_infer
 from z3.z3types import Z3Exception
 
 from ..contracts import parse_assertions
@@ -30,10 +31,9 @@ class Z3Visitor:
             if ann is None:
                 continue
             # TODO: what to do about subscripts ex. Set[int], List[Set[int]], ...
-            inferred = ann.inferred()
-            if len(inferred) > 0 and inferred[0] is not Uninferable:
-                if isinstance(inferred[0], nodes.ClassDef):
-                    types[arg.name] = inferred[0].name
+            inferred = safe_infer(ann)
+            if isinstance(inferred, nodes.ClassDef):
+                types[arg.name] = inferred.name
         # Parse preconditions
         preconditions = parse_assertions(node, parse_token="Precondition")
         # Get z3 constraints
@@ -43,7 +43,7 @@ class Z3Visitor:
             ew = ExprWrapper(pre, types)
             try:
                 transformed = ew.reduce()
-            except (Z3Exception, Z3ParseException):
+            except (AstroidError, Z3Exception, Z3ParseException):
                 transformed = None
             if transformed is not None:
                 z3_constraints.append(transformed)

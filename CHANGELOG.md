@@ -80,6 +80,7 @@ Custom checkers:
 - Updated pylint to v3.2.6 and astroid to v3.2.4 (no new checks were enabled by default)
 - Excluded `node_modules/` folder from package autodiscovery
 - Added support for the `!=` operator and replaced dictionary indexing with `.get` in `ExprWrapper`.
+- Refactored `Z3Visitor` to use `safe_infer()` instead of `inferred()` and added handling of `AstroidError`.
 
 ## [2.7.0] - 2024-12-14
 

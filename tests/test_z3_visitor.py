@@ -24,6 +24,7 @@ arithmetic_list = [
         Preconditions:
             - x ** 2 + y ** 2 == z ** 2
             - x > 0 and y > 0 and z == 0
+            - x + y != z
         '''
         pass
     """
@@ -213,7 +214,7 @@ string_list = [
 x = z3.Int("x")
 y = z3.Int("y")
 z = z3.Real("z")
-arithmetic_expected = [[x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0])]]
+arithmetic_expected = [[x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0]), x + y != z]]
 
 # expected boolean expressions
 x = z3.Bool("x")

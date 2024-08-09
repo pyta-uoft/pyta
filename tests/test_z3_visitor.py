@@ -24,6 +24,7 @@ arithmetic_list = [
         Preconditions:
             - x ** 2 + y ** 2 == z ** 2
             - x > 0 and y > 0 and z == 0
+            - x + y != z
         '''
         pass
     """
@@ -134,6 +135,7 @@ string_list = [
         Preconditions:
             - x == y
             - z == x + y
+            - x != z
         '''
         pass
     """,
@@ -213,7 +215,7 @@ string_list = [
 x = z3.Int("x")
 y = z3.Int("y")
 z = z3.Real("z")
-arithmetic_expected = [[x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0])]]
+arithmetic_expected = [[x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0]), x + y != z]]
 
 # expected boolean expressions
 x = z3.Bool("x")
@@ -241,7 +243,7 @@ x = z3.String("x")
 y = z3.String("y")
 z = z3.String("z")
 string_expected = [
-    [x == y, z == x + y],
+    [x == y, z == x + y, x != z],
     [z3.Contains("abc", x), z3.Contains(y, x)],
     [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
     [

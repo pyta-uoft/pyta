@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, List, Optional, Set
 try:
     from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
 
-    from ..transforms import ExprWrapper
+    from ..transforms import ExprWrapper, Z3ParseException
 
     z3_dependency_available = True
 except ImportError:
@@ -15,6 +15,7 @@ except ImportError:
     Z3Exception = Any
     is_const = Any
     Z3_OP_UNINTERPRETED = Any
+    Z3ParseException = Any
     z3_dependency_available = False
 
 from astroid import (
@@ -28,8 +29,6 @@ from astroid import (
     Raise,
     Return,
 )
-
-from ..transforms import Z3ParseException
 
 
 class ControlFlowGraph:
@@ -246,7 +245,8 @@ class ControlFlowGraph:
         - If conditions
         - While conditions
 
-        Constraints with reassigned variables are not included in subsequent edges."""
+        Constraints with reassigned variables are not included in subsequent edges.
+        """
         if not z3_dependency_available:
             return
 
@@ -352,21 +352,21 @@ class Z3Environment:
         A dictionary mapping each variable in the current environment to a boolean indicating
         whether it has been reassigned (False) or remains unassigned (True).
 
-    variable_type:
-        A dictionary mapping each variable in the current environment to its data type.
+    variables:
+        A dictionary mapping each variable in the current environment to its z3 variable.
 
     constraints:
         A list of Z3 constraints in the current environment.
     """
 
     variable_unassigned: Dict[str, bool]
-    variable_type: Dict[str, str]
+    variables: Dict[str, ExprRef]
     constraints: List[ExprRef]
 
     def __init__(self, variables: Dict[str, ExprRef], constraints: List[ExprRef]) -> None:
         """Initialize the environment with function parameters and preconditions"""
-        self.variable_unassigned = {var: True for var in variables.keys()}
-        self.variable_type = variables
+        self.variable_unassigned = {var: True for var in variables}
+        self.variables = variables
         self.constraints = constraints.copy()
 
     def assign(self, name: str) -> None:
@@ -399,7 +399,7 @@ class Z3Environment:
         """Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
-        ew = ExprWrapper(node, self.variable_type)
+        ew = ExprWrapper(node, self.variables)
         try:
             return ew.reduce()
         except (Z3Exception, Z3ParseException):
@@ -407,12 +407,10 @@ class Z3Environment:
 
 
 def _get_vars(expr: ExprRef) -> Set[str]:
-    """
-    Retrieve all z3 variables from a z3 expression
-    """
+    """Retrieve all z3 variables from a z3 expression"""
     variables = set()
 
-    def traverse(e: ExprRef):
+    def traverse(e: ExprRef) -> None:
         if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
             variables.add(e.decl().name())
         elif hasattr(e, "children"):

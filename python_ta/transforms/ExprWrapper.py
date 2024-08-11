@@ -132,6 +132,8 @@ class ExprWrapper:
                 return left**right
             elif op == "==":
                 return left == right
+            elif op == "!=":
+                return left != right
             elif op == "<=":
                 return left <= right
             elif op == ">=":

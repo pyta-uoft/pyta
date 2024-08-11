@@ -21,7 +21,7 @@ class ExprWrapper:
 
     Instance attributes:
         - node: astroid node obtained given by the value attribute of astroid expression.
-        - types: dictionary mapping variable names in astroid expression to their type name.
+        - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
     """
 
     node: astroid.NodeNG

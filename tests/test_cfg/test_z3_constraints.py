@@ -38,10 +38,10 @@ def test_if_statement() -> None:
     x = z3.Int("x")
     y = z3.Bool("y")
     expected_if_path = [
-        [x > 0],
-        [x > 0, z3.And(x > 5, y)],
-        [x > 0, z3.And(x > 5, y)],
-        [x > 0, z3.And(x > 5, y)],
+        {x > 0},
+        {x > 0, z3.And(x > 5, y)},
+        {x > 0, z3.And(x > 5, y)},
+        {x > 0, z3.And(x > 5, y)},
     ]
     expected_other_path = [
         [x > 0],
@@ -59,13 +59,13 @@ def test_if_statement() -> None:
         if actual2 is not None:
             actual_path_second.append(actual2)
 
+    assert len(actual_path_first) == len(expected_if_path)
+    assert len(actual_path_second) == len(expected_other_path)
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_first, expected_if_path)
+        set(actual) == expected for actual, expected in zip(actual_path_first, expected_if_path)
     )
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_second, expected_other_path)
+        set(actual) == expected for actual, expected in zip(actual_path_second, expected_other_path)
     )
 
 
@@ -90,24 +90,24 @@ def test_if_else() -> None:
     x = z3.String("x")
     y = z3.Int("y")
     expected_if_path = [
-        [z3.SubString(x, 0, 1) == "a", y > 5],
-        [z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"],
-        [z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"],
-        [z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"],
+        {z3.SubString(x, 0, 1) == "a", y > 5},
+        {z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"},
+        {z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"},
+        {z3.SubString(x, 0, 1) == "a", y > 5, x == "abc"},
     ]
     expected_elif_path = [
-        [z3.SubString(x, 0, 1) == "a", y > 5],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10],
+        {z3.SubString(x, 0, 1) == "a", y > 5},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), y > 10},
     ]
     expected_else_path = [
-        [z3.SubString(x, 0, 1) == "a", y > 5],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)],
-        [z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)],
+        {z3.SubString(x, 0, 1) == "a", y > 5},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc")},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)},
+        {z3.SubString(x, 0, 1) == "a", y > 5, z3.Not(x == "abc"), z3.Not(y > 10)},
     ]
 
     actual_path_first = []
@@ -124,17 +124,17 @@ def test_if_else() -> None:
         if actual3 is not None:
             actual_path_third.append(actual3)
 
+    assert len(actual_path_first) == len(expected_if_path)
+    assert len(actual_path_second) == len(expected_elif_path)
+    assert len(actual_path_third) == len(expected_else_path)
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_first, expected_if_path)
+        set(actual) == expected for actual, expected in zip(actual_path_first, expected_if_path)
     )
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_second, expected_elif_path)
+        set(actual) == expected for actual, expected in zip(actual_path_second, expected_elif_path)
     )
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_third, expected_else_path)
+        set(actual) == expected for actual, expected in zip(actual_path_third, expected_else_path)
     )
 
 
@@ -154,11 +154,11 @@ def test_while_loop() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     y = z3.Int("y")
-    expected_while_true_path = [[x > 5, y > 10], [x > 5, y > 10, x + y > 15]]
+    expected_while_true_path = [{x > 5, y > 10}, {x > 5, y > 10, x + y > 15}]
     expected_while_false_path = [
-        [x > 5, y > 10],
-        [x > 5, y > 10, z3.Not(x + y > 15)],
-        [x > 5, y > 10, z3.Not(x + y > 15)],
+        {x > 5, y > 10},
+        {x > 5, y > 10, z3.Not(x + y > 15)},
+        {x > 5, y > 10, z3.Not(x + y > 15)},
     ]
 
     # note: the order of traverse is indeterminant
@@ -172,12 +172,14 @@ def test_while_loop() -> None:
         if actual2 is not None:
             actual_path_second.append(actual2)
 
+    assert len(actual_path_first) == len(expected_while_true_path)
+    assert len(actual_path_second) == len(expected_while_false_path)
     assert (
-        set(actual) == set(expected)
+        set(actual) == expected
         for actual, expected in zip(actual_path_first, expected_while_true_path)
     )
     assert (
-        set(actual) == set(expected)
+        set(actual) == expected
         for actual, expected in zip(actual_path_second, expected_while_false_path)
     )
 
@@ -215,15 +217,15 @@ def test_variable_reassignment_in_branch() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Real("x")
     expected_if_path = [
-        [z3.Or(x == 1.0, x == 2.0, x == 3.0)],
-        [z3.Or(x == 1.0, x == 2.0, x == 3.0), x < 5],
-        [],
-        [],
+        {z3.Or(x == 1.0, x == 2.0, x == 3.0)},
+        {z3.Or(x == 1.0, x == 2.0, x == 3.0), x < 5},
+        {},
+        {},
     ]
     expected_else_path = [
-        [z3.Or(x == 1.0, x == 2.0, x == 3.0)],
-        [z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)],
-        [z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)],
+        {z3.Or(x == 1.0, x == 2.0, x == 3.0)},
+        {z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)},
+        {z3.Or(x == 1.0, x == 2.0, x == 3.0), z3.Not(x < 5)},
     ]
 
     actual_path_first = []
@@ -236,13 +238,13 @@ def test_variable_reassignment_in_branch() -> None:
         if actual2 is not None:
             actual_path_second.append(actual2)
 
+    assert len(actual_path_first) == len(expected_if_path)
+    assert len(actual_path_second) == len(expected_else_path)
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_first, expected_if_path)
+        set(actual) == expected for actual, expected in zip(actual_path_first, expected_if_path)
     )
     assert (
-        set(actual) == set(expected)
-        for actual, expected in zip(actual_path_second, expected_else_path)
+        set(actual) == expected for actual, expected in zip(actual_path_second, expected_else_path)
     )
 
 

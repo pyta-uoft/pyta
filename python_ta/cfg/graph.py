@@ -227,6 +227,7 @@ class ControlFlowGraph:
 
             current_path.pop()
             visited_edges.remove(current_edge)
+            visited_nodes.remove(current_edge.source)
 
         _dfs(self.start.successors[0], [], set(), set())
         return paths
@@ -374,8 +375,7 @@ class Z3Environment:
             self.variable_unassigned[name] = False
 
     def update_constraints(self) -> List[ExprRef]:
-        """
-        Returns all z3 constraints in the environments
+        """Returns all z3 constraints in the environments
         Removes constraints with reassigned variables
         """
         updated_constraints = []
@@ -392,14 +392,11 @@ class Z3Environment:
         return updated_constraints.copy()
 
     def add_constraint(self, constraint: ExprRef) -> None:
-        """
-        Add a new z3 constraint to environment
-        """
+        """Add a new z3 constraint to environment"""
         self.constraints.append(constraint)
 
     def parse_constraint(self, node: NodeNG) -> Optional[ExprRef]:
-        """
-        Parse an Astroid node to a Z3 constraint
+        """Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
         ew = ExprWrapper(node, self.variable_type)
@@ -415,7 +412,7 @@ def _get_vars(expr: ExprRef) -> Set[str]:
     """
     variables = set()
 
-    def traverse(e):
+    def traverse(e: ExprRef):
         if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
             variables.add(e.decl().name())
         elif hasattr(e, "children"):

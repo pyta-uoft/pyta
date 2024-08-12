@@ -32,9 +32,6 @@ class ExprWrapper:
             types = {}
         self.types = types
 
-        if not isinstance(node, astroid.NodeNG):
-            raise ValueError("'node' must be a valid astroid node")
-
         # extract expression out of expression statement
         if isinstance(node, (astroid.Expr, astroid.Assign)):
             self.node = node.value

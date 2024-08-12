@@ -6,11 +6,6 @@ from astroid import extract_node
 from python_ta.transforms import ExprWrapper
 
 
-def test_expr_wrapper_invalid_node() -> None:
-    with pytest.raises(ValueError):
-        ExprWrapper("not a node")
-
-
 def test_expr_wrapper_assignment() -> None:
     assignment = "n = 2 + 3"
 

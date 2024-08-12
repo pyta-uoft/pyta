@@ -143,6 +143,10 @@ class CFGVisitor:
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_cfg.update_block_reachability()
 
+        if hasattr(func, "z3_constraints"):
+            self._current_cfg.precondition_constraints = func.z3_constraints
+            self._current_cfg.update_edge_z3_constraints()
+
         self._current_block = previous_block
         self._current_cfg = previous_cfg
 

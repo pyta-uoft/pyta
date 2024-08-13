@@ -8,6 +8,7 @@ from __future__ import annotations
 import inspect
 import json
 import logging
+import shutil
 import subprocess
 import sys
 from types import FrameType
@@ -45,7 +46,10 @@ def snapshot(
     each mapping function names to their respective local variables.
     Excludes the global module context.
 
-    When save is True, a MemoryViz-created svg is produced
+    When save is True, a MemoryViz-created svg is produced.
+    memory_viz_args can be used to pass in options to the MemoryViz CLI.
+    memory_viz_version can be used to dictate version, with a default of the latest version.
+    Note that this function is compatible only with version 0.3.1 and above.
     """
     variables = []
     frame = inspect.currentframe().f_back
@@ -60,25 +64,28 @@ def snapshot(
         frame = frame.f_back
 
     if save:
-        print(sys.executable)
         json_compatible_vars = snapshot_to_json(variables)
+
+        # Set up command
         command = ["npx", "memory-viz"]
         if memory_viz_args:
             command.extend(memory_viz_args)
 
         # Ensure valid memory_viz version
-        if memory_viz_version != "latest":
-            user_version = parse(memory_viz_version)
-            if user_version < Version("0.3.1"):
-                logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
+        if memory_viz_version != "latest" and parse(memory_viz_version) < Version("0.3.1"):
+            logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
 
+        # Create a child to call the MemoryViz CLI
+        npx_path = shutil.which("npx")
         subprocess.run(
             command,
             input=json.dumps(json_compatible_vars),
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            executable=npx_path,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            encoding="utf-8",
             text=True,
+            check=True,
         )
 
     return variables

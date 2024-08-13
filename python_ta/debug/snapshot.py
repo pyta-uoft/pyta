@@ -7,9 +7,13 @@ from __future__ import annotations
 
 import inspect
 import json
+import logging
 import subprocess
+import sys
 from types import FrameType
 from typing import Any, Optional
+
+from packaging.version import Version, parse
 
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
@@ -56,15 +60,21 @@ def snapshot(
         frame = frame.f_back
 
     if save:
+        print(sys.executable)
         json_compatible_vars = snapshot_to_json(variables)
-        command = ["npx", "memory-viz@" + memory_viz_version]
+        command = ["npx", "memory-viz"]
         if memory_viz_args:
             command.extend(memory_viz_args)
+
+        # Ensure valid memory_viz version
+        if memory_viz_version != "latest":
+            user_version = parse(memory_viz_version)
+            if user_version < Version("0.3.1"):
+                logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
 
         subprocess.run(
             command,
             input=json.dumps(json_compatible_vars),
-            shell=True,
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

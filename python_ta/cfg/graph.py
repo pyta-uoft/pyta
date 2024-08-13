@@ -24,7 +24,6 @@ from astroid import (
     AssignName,
     Break,
     Continue,
-    Expr,
     NodeNG,
     Raise,
     Return,
@@ -72,6 +71,7 @@ class ControlFlowGraph:
         pred: Optional[CFGBlock] = None,
         edge_label: Optional[Any] = None,
         edge_condition: Optional[NodeNG] = None,
+        edge_negate: Optional[bool] = None,
     ) -> CFGBlock:
         """Create a new CFGBlock for this graph.
 
@@ -80,13 +80,15 @@ class ControlFlowGraph:
         If edge_label is specified, set the corresponding edge in the CFG with that label.
 
         If edge_condition is specified, store the condition node in the corresponding edge.
+
+        edge_negate is not None only if edge_condition is specified
         """
         new_block = CFGBlock(self.block_count)
         self.unreachable_blocks.add(new_block)
 
         self.block_count += 1
         if pred:
-            self.link_or_merge(pred, new_block, edge_label, edge_condition)
+            self.link_or_merge(pred, new_block, edge_label, edge_condition, edge_negate)
         return new_block
 
     def link(self, source: CFGBlock, target: CFGBlock) -> None:
@@ -100,6 +102,7 @@ class ControlFlowGraph:
         target: CFGBlock,
         edge_label: Optional[Any] = None,
         edge_condition: Optional[NodeNG] = None,
+        edge_negate: Optional[bool] = None,
     ) -> None:
         """Link source to target, or merge source into target if source is empty.
 
@@ -111,6 +114,8 @@ class ControlFlowGraph:
         If edge_label is specified, set the corresponding edge in the CFG with that label.
 
         If edge_condition is specified, store the condition node in the corresponding edge.
+
+        edge_negate is not None only if edge_condition is specified
         """
         if source.is_jump():
             return
@@ -125,7 +130,7 @@ class ControlFlowGraph:
             # represent any part of the program so it is redundant.
             self.unreachable_blocks.remove(source)
         else:
-            CFGEdge(source, target, edge_label, edge_condition)
+            CFGEdge(source, target, edge_label, edge_condition, edge_negate)
 
     def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
         """Link source to multiple target, or merge source into targets if source is empty.
@@ -258,10 +263,12 @@ class ControlFlowGraph:
                 if edge.condition is not None:
                     condition_z3_constraint = z3_environment.parse_constraint(edge.condition)
                     if condition_z3_constraint is not None:
-                        if edge.label == "True":
-                            z3_environment.add_constraint(condition_z3_constraint)
-                        elif edge.label == "False":
-                            z3_environment.add_constraint(Not(condition_z3_constraint))
+                        if edge.negate is not None:
+                            z3_environment.add_constraint(
+                                Not(condition_z3_constraint)
+                                if edge.negate
+                                else condition_z3_constraint
+                            )
 
                 edge.z3_constraints[path_id] = z3_environment.update_constraints()
 
@@ -321,12 +328,15 @@ class CFGEdge:
     Edges are directed, and in the future may be augmented with auxiliary metadata about the control flow.
 
     The condition attribute stores the AST node representing the condition tested in If and While statements.
+    The negate attribute stores the condition should be False (when `negate` is True) or condition should be true
+    (when `negate` is False)
     """
 
     source: CFGBlock
     target: CFGBlock
     label: Optional[Any]
     condition: Optional[NodeNG]
+    negate: Optional[bool]
     z3_constraints: Dict[int, List[ExprRef]]
 
     def __init__(
@@ -335,11 +345,13 @@ class CFGEdge:
         target: CFGBlock,
         edge_label: Optional[Any] = None,
         condition: Optional[NodeNG] = None,
+        negate: Optional[bool] = None,
     ) -> None:
         self.source = source
         self.target = target
         self.label = edge_label
         self.condition = condition
+        self.negate = negate
         self.source.successors.append(self)
         self.target.predecessors.append(self)
         self.z3_constraints = {}

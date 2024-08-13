@@ -140,6 +140,8 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int], end: CFG
     for edge in block.successors:
         if edge.label is not None:
             graph.edge(node_id, f"{graph.name}_{edge.target.id}", str(edge.label))
+        elif edge.negate is not None:
+            graph.edge(node_id, f"{graph.name}_{edge.target.id}", str(edge.negate))
         else:
             graph.edge(node_id, f"{graph.name}_{edge.target.id}")
         _visit(edge.target, graph, visited, end)

@@ -334,7 +334,7 @@ class CFGEdge:
 
     source: CFGBlock
     target: CFGBlock
-    label: Optional[Any]
+    label: Optional[str]
     condition: Optional[NodeNG]
     negate: Optional[bool]
     z3_constraints: Dict[int, List[ExprRef]]
@@ -343,7 +343,7 @@ class CFGEdge:
         self,
         source: CFGBlock,
         target: CFGBlock,
-        edge_label: Optional[Any] = None,
+        edge_label: Optional[str] = None,
         condition: Optional[NodeNG] = None,
         negate: Optional[bool] = None,
     ) -> None:
@@ -356,10 +356,10 @@ class CFGEdge:
         self.target.predecessors.append(self)
         self.z3_constraints = {}
 
-    def get_label(self) -> Optional[Any]:
+    def get_label(self) -> Optional[str]:
         """Return the edge label if specified.
-        If label is None, return edge.negate if sepcified
-        Return None if both edge.label and edge.negate are None
+        If `edge.label` is None, return the edge condition determined by the negation of `edge.negate`.
+        Return None if both `edge.label` and `edge.negate` are None.
         """
         if self.label is not None:
             return self.label

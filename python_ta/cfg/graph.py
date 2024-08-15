@@ -356,6 +356,17 @@ class CFGEdge:
         self.target.predecessors.append(self)
         self.z3_constraints = {}
 
+    def get_label(self) -> Optional[Any]:
+        """Return the edge label if specified.
+        If label is None, return edge.negate if sepcified
+        Return None if both edge.label and edge.negate are None
+        """
+        if self.label is not None:
+            return self.label
+        elif self.negate is not None:
+            return str(not self.negate)
+        return None
+
 
 class Z3Environment:
     """Z3 Environment stores the Z3 variables and constraints in the current CFG path

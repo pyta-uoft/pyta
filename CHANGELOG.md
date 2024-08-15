@@ -82,6 +82,7 @@ Custom checkers:
 - Updated `graph.py` to augment control flow graph edges with z3 constraints
 - Added support for the `!=` operator and replaced dictionary indexing with `.get` in `ExprWrapper`.
 - Refactored `Z3Visitor` to use `safe_infer()` instead of `inferred()` and added handling of `AstroidError`.
+- Add `negate` attribute to `CFGEdge`
 
 ## [2.7.0] - 2024-12-14
 

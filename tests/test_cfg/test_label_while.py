@@ -16,13 +16,13 @@ def build_cfg(src: str) -> ControlFlowGraph:
 
 def _extract_labels(cfg: ControlFlowGraph) -> Set[str]:
     """Return a set of all the labels in this cfg."""
-    labels = {edge.label for edge in cfg.get_edges() if edge.label is not None}
+    labels = {edge.get_label() for edge in cfg.get_edges() if edge.get_label() is not None}
     return labels
 
 
 def _extract_num_labels(cfg: ControlFlowGraph) -> int:
     """Return the number of labelled edges in the cfg."""
-    return sum(1 for edge in cfg.get_edges() if edge.label is not None)
+    return sum(1 for edge in cfg.get_edges() if edge.get_label() is not None)
 
 
 def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[str]:

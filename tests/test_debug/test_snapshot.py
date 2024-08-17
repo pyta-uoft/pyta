@@ -561,20 +561,66 @@ def test_snapshot_to_json_one_class():
     assert json_data == expected_output
 
 
-c
+def test_snapshot_save_create_svg():
+    """Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path."""
 
+    # Calls snapshot in separate file
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "test_snapshot_save_file.py")
+    print(snapshot_save_path)
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path], capture_output=True, text=True, check=True
+    )
 
-def test_snapshot_save():
-    generated_svg_file = str(func_save_simple())
-
-    with open(generated_svg_file, mode="r", encoding="utf-8") as gen_svg:
+    # Read generated file
+    with open(
+        os.path.join(
+            current_directory, "snapshot_testing_snapshots", "snapshot_testing_snapshots.svg"
+        ),
+        mode="r",
+        encoding="utf-8",
+    ) as gen_svg:
         generated_svg = gen_svg.read()
 
-    with open("func_save_simple.svg", mode="r", encoding="utf-8") as expected_svg_file:
+    # Read expected file
+    with open(
+        os.path.join(
+            current_directory,
+            "snapshot_testing_snapshots",
+            "snapshot_testing_snapshots_expected.svg",
+        ),
+        mode="r",
+        encoding="utf-8",
+    ) as expected_svg_file:
         expected_svg = expected_svg_file.read()
 
     assert generated_svg == expected_svg
 
 
-# Todo: File names? What should snapshot return with save?
-# Call memory viz with a seed so can test properly, create a snapshots folder
+def test_snapshot_save_stdout():
+    """Test that snapshot's save feature successfully returns a MemoryViz svg of the stack frame to stdout."""
+
+    # Calls snapshot in separate file
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "test_snapshot_save_stdout.py")
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path],
+        capture_output=True,
+        encoding="utf-8",
+        text=True,
+        check=True,
+    )
+
+    # Read expected svg file
+    with open(
+        os.path.join(
+            current_directory,
+            "snapshot_testing_snapshots",
+            "snapshot_testing_snapshots_expected_stdout.svg",
+        ),
+        mode="r",
+        encoding="utf-8",
+    ) as expected_svg_file:
+        expected_svg = expected_svg_file.read()
+
+    assert expected_svg == result.stdout

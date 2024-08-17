@@ -561,6 +561,29 @@ def test_snapshot_to_json_one_class():
     assert json_data == expected_output
 
 
+def test_snapshot_no_save_file():
+    file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "snapshot_testing_snapshots"
+    )
+
+    snapshot(
+        False,
+        [
+            "--output=" + file_path,
+            "--roughjs-config",
+            "seed=12345",
+        ],
+    )
+
+    assert not os.path.exists(os.path.join(file_path, "snapshot_testing_snapshots.svg"))
+
+
+def test_snapshot_no_save_stdout(capsys):
+    snapshot(False)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+
 def test_snapshot_save_create_svg():
     """Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path."""
 

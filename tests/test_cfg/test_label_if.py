@@ -19,7 +19,7 @@ def _extract_edge_labels(cfg: ControlFlowGraph) -> Tuple[int, int]:
 
     The returned 2-tuple is of the form (# of True, # of False).
     """
-    labels = [edge.label for edge in cfg.get_edges()]
+    labels = [edge.get_label() for edge in cfg.get_edges()]
     return labels.count("True"), labels.count("False")
 
 

@@ -356,7 +356,7 @@ class InvalidNameChecker(BaseChecker):
         if _ignore_name(node.name, self.linter.config.ignore_names):
             return
 
-        frame = node.frame(future=True)
+        frame = node.frame()
         assign_type = node.assign_type()
 
         # Check names defined in comprehensions

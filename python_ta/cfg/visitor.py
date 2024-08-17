@@ -126,9 +126,8 @@ class CFGVisitor:
             )
         )
 
-        self._current_cfg.start.add_statement(func.args)
-        func.cfg_block = self._current_cfg.start
-        func.cfg = self._current_cfg
+        # Current CFG block is self._current_cfg.start while initially creating the function cfg
+        self._current_cfg.add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
 
@@ -143,6 +142,10 @@ class CFGVisitor:
 
         self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
         self._current_cfg.update_block_reachability()
+
+        if hasattr(func, "z3_constraints"):
+            self._current_cfg.precondition_constraints = func.z3_constraints
+            self._current_cfg.update_edge_z3_constraints()
 
         self._current_block = previous_block
         self._current_cfg = previous_cfg
@@ -167,7 +170,7 @@ class CFGVisitor:
 
         # Handle "then" branch and label it.
         then_block = self._current_cfg.create_block(
-            old_curr, edge_label="True", edge_condition=node.test
+            old_curr, edge_condition=node.test, edge_negate=False
         )
         self._current_block = then_block
         for child in node.body:
@@ -180,7 +183,7 @@ class CFGVisitor:
         else:
             # Label the edge to the else block.
             else_block = self._current_cfg.create_block(
-                old_curr, edge_label="False", edge_condition=node.test
+                old_curr, edge_condition=node.test, edge_negate=True
             )
             self._current_block = else_block
             for child in node.orelse:
@@ -192,7 +195,10 @@ class CFGVisitor:
         # Label the edge if there was no "else" branch
         if node.orelse == []:
             self._current_cfg.link_or_merge(
-                end_else, after_if_block, edge_label="False", edge_condition=node.test
+                end_else,
+                after_if_block,
+                edge_condition=node.test,
+                edge_negate=True,
             )
         else:
             self._current_cfg.link_or_merge(end_else, after_if_block)
@@ -224,7 +230,7 @@ class CFGVisitor:
 
         # Handle "body" branch
         body_block = self._current_cfg.create_block(
-            test_block, edge_label="True", edge_condition=node.test
+            test_block, edge_condition=node.test, edge_negate=False
         )
         self._current_block = body_block
         for child in node.body:
@@ -237,7 +243,7 @@ class CFGVisitor:
 
         # Handle "else" branch
         else_block = self._current_cfg.create_block(
-            test_block, edge_label="False", edge_condition=node.test
+            test_block, edge_condition=node.test, edge_negate=True
         )
         self._current_block = else_block
         for child in node.orelse:

@@ -623,4 +623,4 @@ def test_snapshot_save_stdout():
     ) as expected_svg_file:
         expected_svg = expected_svg_file.read()
 
-    assert expected_svg == result.stdout
+    assert result.stdout == expected_svg

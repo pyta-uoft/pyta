@@ -544,6 +544,11 @@ def test_snapshot_to_json_one_class():
 
 
 def test_snapshot_no_save_file():
+    """
+    Tests that snapshot's save feature is not triggered when save = False
+    and ensures no svg files are created.
+    """
+
     file_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "snapshot_testing_snapshots"
     )
@@ -561,13 +566,18 @@ def test_snapshot_no_save_file():
 
 
 def test_snapshot_no_save_stdout(capsys):
+    """
+    Tests that snapshot's save feature is not triggered when save = False
+    """
     snapshot(False)
     captured = capsys.readouterr()
     assert captured.out == ""
 
 
 def test_snapshot_save_create_svg(tmp_path):
-    """Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path."""
+    """
+    Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path.
+    """
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -604,7 +614,9 @@ def test_snapshot_save_create_svg(tmp_path):
 
 
 def test_snapshot_save_stdout():
-    """Test that snapshot's save feature successfully returns a MemoryViz svg of the stack frame to stdout."""
+    """
+    Test that snapshot's save feature successfully returns a MemoryViz svg of the stack frame to stdout.
+    """
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))

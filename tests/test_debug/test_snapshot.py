@@ -49,24 +49,6 @@ def func_cyclic() -> list:
     return snapshot()
 
 
-def func_save_simple() -> list:
-    """
-    Function for snapshot() testing.
-    """
-    test_var1a = "David is cool!"
-    test_var2a = "Students Developing Software"
-    return snapshot(True)
-
-
-def func_save_layered() -> list:
-    """
-    Function for snapshot() testing.
-    """
-    test_var1b = {"SDS_coolest_project": "PyTA"}
-    test_var2b = ("Aina", "Merrick", "Varun", "Utku")
-    return func_save_simple()
-
-
 def test_snapshot_one_level() -> None:
     """
     Examines whether the snapshot() function accurately captures
@@ -584,22 +566,23 @@ def test_snapshot_no_save_stdout(capsys):
     assert captured.out == ""
 
 
-def test_snapshot_save_create_svg():
+def test_snapshot_save_create_svg(tmp_path):
     """Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path."""
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))
     snapshot_save_path = os.path.join(current_directory, "test_snapshot_save_file.py")
-    print(snapshot_save_path)
     result = subprocess.run(
-        [sys.executable, snapshot_save_path], capture_output=True, text=True, check=True
+        [sys.executable, snapshot_save_path, os.path.abspath(tmp_path)],
+        capture_output=True,
+        text=True,
+        check=True,
+        encoding="utf-8",
     )
 
     # Read generated file
     with open(
-        os.path.join(
-            current_directory, "snapshot_testing_snapshots", "snapshot_testing_snapshots.svg"
-        ),
+        os.path.join(tmp_path, "test_snapshot_save_create_svg0.svg"),
         mode="r",
         encoding="utf-8",
     ) as gen_svg:

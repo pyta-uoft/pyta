@@ -6,6 +6,7 @@ This module is intended exclusively for testing purposes and should not be used 
 """
 
 import os
+import sys
 
 from python_ta.debug.snapshot import snapshot
 
@@ -14,8 +15,7 @@ test_var2a = "Students Developing Software"
 snapshot(
     True,
     [
-        "--output="
-        + os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshot_testing_snapshots"),
+        "--output=" + os.path.abspath(sys.argv[1]),
         "--roughjs-config",
         "seed=12345",
     ],

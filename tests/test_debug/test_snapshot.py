@@ -581,7 +581,7 @@ def test_snapshot_save_create_svg(tmp_path):
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    snapshot_save_path = os.path.join(current_directory, "test_snapshot_save_file.py")
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_file.py")
     result = subprocess.run(
         [sys.executable, snapshot_save_path, os.path.abspath(tmp_path)],
         capture_output=True,
@@ -620,7 +620,7 @@ def test_snapshot_save_stdout():
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    snapshot_save_path = os.path.join(current_directory, "test_snapshot_save_stdout.py")
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_stdout.py")
     result = subprocess.run(
         [sys.executable, snapshot_save_path],
         capture_output=True,

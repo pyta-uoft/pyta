@@ -24,9 +24,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
       - name: Install npm packages
-        run: npm ci
+        run: npm install
       - name: Set up graphviz
         run: |
           sudo apt-get install -y graphviz

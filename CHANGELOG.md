@@ -21,6 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Stored valid Python function preconditions in initial edge to function code in generated function control flow graphs.
 - Report warning when control flow graph creation encounters a syntax error related to control flow
 - Added autoformat option that runs black formatting tool to python_ta.check_all()
+- Extended the `snapshot` function to optionally generate a svg of the snapshot using MemoryViz when save parameter is true.
 
 ### 💫 New checkers
 

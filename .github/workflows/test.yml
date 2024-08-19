@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        node-version: [18, 20]
 
     steps:
       - uses: actions/checkout@v4.1.7
@@ -21,10 +20,10 @@ jobs:
         uses: actions/setup-python@v5.1.1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Set up Node.js ${{ matrix.node-version }}
+      - name: Set up Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18
       - name: Install npm packages
         run: npm ci
       - name: Set up graphviz

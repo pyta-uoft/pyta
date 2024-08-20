@@ -3,7 +3,7 @@
 import pytest
 from astroid import extract_node
 
-from python_ta.transforms import ExprWrapper
+from python_ta.transforms.ExprWrapper import ExprWrapper
 
 
 def test_expr_wrapper_assignment() -> None:

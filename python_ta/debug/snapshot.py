@@ -48,8 +48,9 @@ def snapshot(
 
     When save is True, a MemoryViz-created svg is produced.
     memory_viz_args can be used to pass in options to the MemoryViz CLI.
+    For details on the MemoryViz CLI, see https://www.cs.toronto.edu/~david/memory-viz/docs/cli.
     memory_viz_version can be used to dictate version, with a default of the latest version.
-    Note that this function is compatible only with version 0.3.1 and above.
+    Note that this function is compatible only with MemoryViz version 0.3.1 and above.
     """
     variables = []
     frame = inspect.currentframe().f_back

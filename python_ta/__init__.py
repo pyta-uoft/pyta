@@ -15,7 +15,7 @@ if __name__ == '__main__':
     python_ta.check_all()
 """
 
-__version__ = "2.8.0"  # Version number
+__version__ = "2.8.1"  # Version number
 
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.

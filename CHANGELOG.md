@@ -9,6 +9,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+### 💫 New checkers
+
+### 🐛 Bug fixes
+
+### 🔧 Internal changes
+
+## [2.8.0] - 2024-08-19
+
+### ✨ Enhancements
+
 - Add new boolean configuration `allow-local-imports` to allow for local imports
 - Extended the `snasphot` function to include the relevant variables defined at the top level (global variables).
 - Include the pycodestyle error code to the error message for PEP8 style errors
@@ -85,7 +95,7 @@ Custom checkers:
 - Refactored `Z3Visitor` to use `safe_infer()` instead of `inferred()` and added handling of `AstroidError`.
 - Add `negate` attribute to `CFGEdge`
 
-## [2.7.0] - 2024-12-14
+## [2.7.0] - 2023-12-14
 
 ### ✨ Enhancements
 
@@ -124,7 +134,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 
 - Remove experimental type inference code.
 
-## [2.6.4] - 2024-11-10
+## [2.6.4] - 2023-11-10
 
 ### 🐛 Bug fixes
 

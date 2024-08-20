@@ -68,7 +68,7 @@ version = {attr = "python_ta.__version__"}
 #readme = {file = "README.md", content-type = "text/markdown"}
 
 [tool.setuptools.packages.find]
-exclude = ["node_modules"]
+include = ["python_ta*"]
 
 [tool.black]
 extend-exclude = '''

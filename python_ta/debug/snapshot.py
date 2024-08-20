@@ -6,8 +6,15 @@ Use the 'inspect' module to extract local variables from
 from __future__ import annotations
 
 import inspect
+import json
+import logging
+import shutil
+import subprocess
+import sys
 from types import FrameType
-from typing import Any
+from typing import Any, Optional
+
+from packaging.version import Version, parse
 
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
@@ -29,11 +36,21 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
     return {"__main__": true_global_vars}
 
 
-def snapshot():
+def snapshot(
+    save: bool = False,
+    memory_viz_args: Optional[list[str]] = None,
+    memory_viz_version: str = "latest",
+):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
     each mapping function names to their respective local variables.
     Excludes the global module context.
+
+    When save is True, a MemoryViz-created svg is produced.
+    memory_viz_args can be used to pass in options to the MemoryViz CLI.
+    For details on the MemoryViz CLI, see https://www.cs.toronto.edu/~david/memory-viz/docs/cli.
+    memory_viz_version can be used to dictate version, with a default of the latest version.
+    Note that this function is compatible only with MemoryViz version 0.3.1 and above.
     """
     variables = []
     frame = inspect.currentframe().f_back
@@ -46,6 +63,31 @@ def snapshot():
             variables.append(global_vars)
 
         frame = frame.f_back
+
+    if save:
+        json_compatible_vars = snapshot_to_json(variables)
+
+        # Set up command
+        command = ["npx", "memory-viz"]
+        if memory_viz_args:
+            command.extend(memory_viz_args)
+
+        # Ensure valid memory_viz version
+        if memory_viz_version != "latest" and parse(memory_viz_version) < Version("0.3.1"):
+            logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
+
+        # Create a child to call the MemoryViz CLI
+        npx_path = shutil.which("npx")
+        subprocess.run(
+            command,
+            input=json.dumps(json_compatible_vars),
+            executable=npx_path,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            encoding="utf-8",
+            text=True,
+            check=True,
+        )
 
     return variables
 

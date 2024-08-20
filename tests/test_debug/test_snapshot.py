@@ -541,3 +541,104 @@ def test_snapshot_to_json_one_class():
     ]
 
     assert json_data == expected_output
+
+
+def test_snapshot_no_save_file():
+    """
+    Tests that snapshot's save feature is not triggered when save = False
+    and ensures no svg files are created.
+    """
+
+    file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "snapshot_testing_snapshots"
+    )
+
+    snapshot(
+        False,
+        [
+            "--output=" + file_path,
+            "--roughjs-config",
+            "seed=12345",
+        ],
+    )
+
+    assert not os.path.exists(os.path.join(file_path, "snapshot_testing_snapshots.svg"))
+
+
+def test_snapshot_no_save_stdout(capsys):
+    """
+    Tests that snapshot's save feature is not triggered when save = False
+    """
+    snapshot(False)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+
+def test_snapshot_save_create_svg(tmp_path):
+    """
+    Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path.
+    """
+
+    # Calls snapshot in separate file
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_file.py")
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path, os.path.abspath(tmp_path)],
+        capture_output=True,
+        text=True,
+        check=True,
+        encoding="utf-8",
+    )
+
+    # Read generated file
+    with open(
+        os.path.join(tmp_path, "test_snapshot_save_create_svg0.svg"),
+        mode="r",
+        encoding="utf-8",
+    ) as gen_svg:
+        generated_svg = gen_svg.read()
+
+    # Read expected file
+    with open(
+        os.path.join(
+            current_directory,
+            "snapshot_testing_snapshots",
+            "snapshot_testing_snapshots_expected.svg",
+        ),
+        mode="r",
+        encoding="utf-8",
+    ) as expected_svg_file:
+        expected_svg = expected_svg_file.read()
+
+    assert generated_svg == expected_svg
+
+
+def test_snapshot_save_stdout():
+    """
+    Test that snapshot's save feature successfully returns a MemoryViz svg of the stack frame to stdout.
+    """
+
+    # Calls snapshot in separate file
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_stdout.py")
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path],
+        capture_output=True,
+        encoding="utf-8",
+        text=True,
+        check=True,
+    )
+
+    # Read expected svg file
+    with open(
+        os.path.join(
+            current_directory,
+            "snapshot_testing_snapshots",
+            "snapshot_testing_snapshots_expected_stdout.svg",
+        ),
+        mode="r",
+        encoding="utf-8",
+    ) as expected_svg_file:
+        expected_svg = expected_svg_file.read()
+
+    assert result.stdout == expected_svg

@@ -13,9 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Fix loading of setendings plugin when z3-solver is not installed
-
 ### 🔧 Internal changes
+
+## [2.8.1] - 2024-08-19
+
+### 🐛 Bug fixes
+
+- Fix loading of setendings plugin when z3-solver is not installed
 
 ## [2.8.0] - 2024-08-19
 

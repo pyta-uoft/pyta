@@ -15,6 +15,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Renamed `ExprWrapper` class to `Z3Parser`
+- Renamed `ExprWrapper` module to `z3_parser` and moved it to new directory `python_ta.z3`
+- Removed `node` attribute for `Z3Parser`
+- Renamed `reduce` method of `Z3Parser` to `parse`
+
 ## [2.8.1] - 2024-08-19
 
 ### 🐛 Bug fixes

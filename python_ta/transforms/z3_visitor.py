@@ -4,9 +4,8 @@ from astroid.transforms import TransformVisitor
 from astroid.util import safe_infer
 from z3.z3types import Z3Exception
 
-from python_ta.z3.z3_parser import Z3ParseException, Z3Parser
-
 from ..contracts import parse_assertions
+from ..z3.z3_parser import Z3ParseException, Z3Parser
 
 
 class Z3Visitor:

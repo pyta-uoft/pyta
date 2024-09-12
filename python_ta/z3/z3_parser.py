@@ -17,7 +17,7 @@ class Z3ParseException(Exception):
 
 class Z3Parser:
     """
-    Convert an astroid expression node into a z3 expression.
+    Class that converts an astroid expression node into a z3 expression.
 
     Instance attributes:
         - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
@@ -25,12 +25,12 @@ class Z3Parser:
 
     types: Dict[str, Union[str, z3.ExprRef]]
 
-    def __init__(self, types=None):
+    def __init__(self, types: Optional[Dict[str, Union[str, z3.ExprRef]]] = None):
         if types is None:
             types = {}
         self.types = types
 
-    def parse(self, node: astroid.NodeNG = None) -> z3.ExprRef:
+    def parse(self, node: astroid.NodeNG) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.

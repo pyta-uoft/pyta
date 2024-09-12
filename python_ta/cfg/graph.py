@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, List, Optional, Set
 try:
     from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
 
-    from python_ta.z3.z3_parser import Z3ParseException, Z3Parser
+    from ..z3.z3_parser import Z3ParseException, Z3Parser
 
     z3_dependency_available = True
 except ImportError:

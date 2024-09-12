@@ -1,4 +1,4 @@
-"""Tests for Z3Parser in python_ta.transforms."""
+"""Tests for Z3Parser in python_ta.z3."""
 
 from astroid import extract_node
 

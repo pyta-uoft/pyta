@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Union
+from typing import Union
 
 # This creates a type alias, to save us typing "Union[int, tuple]" everywhere
 NodeAddress = Union[int, tuple]
@@ -20,7 +20,7 @@ class Node:
 # The AbstractNetwork class
 ###############################################################################
 class AbstractNetwork:
-    _nodes: Dict[NodeAddress, Node]
+    _nodes: dict[NodeAddress, Node]
 
     def __init__(self) -> None:
         self._nodes = {}

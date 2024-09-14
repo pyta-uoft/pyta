@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple
 
 import pytest
 from nested_preconditions_example import Student
@@ -25,7 +26,7 @@ class Person:
 
     age: int
     name: str
-    fav_foods: List[str]
+    fav_foods: list[str]
 
     def __init__(self, name, age, fav_food):
         self.name = name
@@ -100,7 +101,7 @@ class SetWrapper:
         - all(x in self.set for x in {1, 2, 3})
     """
 
-    set: Set[int]
+    set: set[int]
 
 
 @pytest.fixture
@@ -383,7 +384,7 @@ class ThemedWidget:
     primary_color: str
     secondary_color: str
 
-    def __init__(self, theme: str, color_palette: Tuple[str, str], options: Dict = None) -> None:
+    def __init__(self, theme: str, color_palette: tuple[str, str], options: dict = None) -> None:
         if options:
             self.setup_options(options)
         else:
@@ -391,7 +392,7 @@ class ThemedWidget:
         self.apply_theme(theme)
         self.apply_color_palette(color_palette)
 
-    def setup_options(self, options: Dict) -> None:
+    def setup_options(self, options: dict) -> None:
         if "size" in options:
             self.setup_size(options["size"])
 
@@ -401,7 +402,7 @@ class ThemedWidget:
     def apply_theme(self, theme: str) -> None:
         self.theme = theme
 
-    def apply_color_palette(self, color_palette: Tuple[str, str]) -> None:
+    def apply_color_palette(self, color_palette: tuple[str, str]) -> None:
         self.primary_color, self.secondary_color = color_palette
 
 

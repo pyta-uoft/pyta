@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import itertools
 import json
 import os
 import re
 import sys
 from io import StringIO
-from typing import Dict, List, Set, Union
+from typing import Union
 
 import pytest
 from pylint import lint
@@ -37,7 +39,7 @@ IGNORED_TESTS = [
 ]
 
 
-def get_file_paths(paths: Union[str, List[str]]) -> List[str]:
+def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     """
     Get all the Python files from the specified directories for testing. This will
     return the full file paths for each Python file, excluding those listed in IGNORED_TESTS.
@@ -63,7 +65,7 @@ def get_file_paths(paths: Union[str, List[str]]) -> List[str]:
     return test_files
 
 
-def _symbols_by_file_pyta(paths: List[str], include_msg: bool = False) -> Dict[str, Set[str]]:
+def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[str, set[str]]:
     """
     Run python_ta.check_all() on files from specified directories and return the map of file name to the
     set of PythonTA messages it raises. If include_msg is set True, PythonTA message descriptions are
@@ -104,7 +106,7 @@ def _symbols_by_file_pyta(paths: List[str], include_msg: bool = False) -> Dict[s
 
 
 @pytest.fixture(scope="session")
-def pyta_examples_symbols() -> Dict[str, Set[str]]:
+def pyta_examples_symbols() -> dict[str, set[str]]:
     """
     A pytest fixture that runs once per test session.
     This fixture analyzes example files using python_ta and returns a dictionary mapping each file name
@@ -116,7 +118,7 @@ def pyta_examples_symbols() -> Dict[str, Set[str]]:
 
 
 @pytest.fixture(scope="session")
-def pyta_pycodestyle_symbols() -> Dict[str, Set[str]]:
+def pyta_pycodestyle_symbols() -> dict[str, set[str]]:
     """
     A pytest fixture that runs once per test session.
     This fixture analyzes pycodestyle error test cases using python_ta and returns a dictionary mapping each file name
@@ -128,7 +130,7 @@ def pyta_pycodestyle_symbols() -> Dict[str, Set[str]]:
 
 
 @pytest.mark.parametrize("test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]))
-def test_examples_files_pyta(test_file: str, pyta_examples_symbols: Dict[str, Set[str]]) -> None:
+def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, set[str]]) -> None:
     """
     Dynamically creates and runs unit tests for Python files in the examples and custom checker directories.
     This test function deduces the error type from the file name and checks if the expected error message is present
@@ -151,7 +153,7 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: Dict[str, Se
 
 @pytest.mark.parametrize("test_file", get_file_paths(_PYCODESTYLE_PATH))
 def test_pycodestyle_errors_pyta(
-    test_file: str, pyta_pycodestyle_symbols: Dict[str, Set[str]]
+    test_file: str, pyta_pycodestyle_symbols: dict[str, set[str]]
 ) -> None:
     """
     Dynamically creates and runs unit tests for pycodestyle error test cases.

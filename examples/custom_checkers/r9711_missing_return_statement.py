@@ -1,7 +1,8 @@
-from typing import List, Optional
+from __future__ import annotations
+from typing import Optional
 
 
-def index_of(numbers: List[int], n: int) -> Optional[int]:
+def index_of(numbers: list[int], n: int) -> Optional[int]:
     """Return the index of the first occurrence of n in numbers,
     or None if n doesn't appear in the list.
     """

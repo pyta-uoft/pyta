@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import astroid
 import pytest
@@ -279,7 +279,7 @@ code_list = [arithmetic_list, boolean_list, container_list, string_list]
 expected_list = [arithmetic_expected, boolean_expected, container_expected, string_expected]
 
 
-def _get_constraints_from_code(code) -> List[z3.ExprRef]:
+def _get_constraints_from_code(code) -> list[z3.ExprRef]:
     """
     Return the z3 constraints of the given function
     """

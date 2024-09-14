@@ -2,7 +2,7 @@
 Test suite for checking the functionality of validate_invariants.
 """
 
-from typing import List
+from __future__ import annotations
 
 import pytest
 
@@ -20,9 +20,9 @@ class Person:
 
     given_name: str
     age: int
-    friends: List[str]
+    friends: list[str]
 
-    def __init__(self, given_name: str, age: int, friends: List[str]) -> None:
+    def __init__(self, given_name: str, age: int, friends: list[str]) -> None:
         """Initialize a new Person object."""
         self.given_name = given_name
         self.age = age

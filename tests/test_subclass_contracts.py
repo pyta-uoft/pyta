@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import pytest
 
@@ -51,7 +51,7 @@ class Teacher(Employee):
     - self.wage == self.wage_per_class * len(self.currently_teaching)
     """
 
-    currently_teaching: List[str]
+    currently_teaching: list[str]
     wage_per_class: float
 
     def __init__(self, name, wage_per_class, currently_teaching):

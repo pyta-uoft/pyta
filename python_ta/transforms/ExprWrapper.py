@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union, dict, list
 
 import astroid
 import z3
@@ -25,7 +25,7 @@ class ExprWrapper:
     """
 
     node: astroid.NodeNG
-    types: Dict[str, Union[str, z3.ExprRef]]
+    types: dict[str, Union[str, z3.ExprRef]]
 
     def __init__(self, node: astroid.NodeNG, types=None):
         if types is None:
@@ -113,7 +113,7 @@ class ExprWrapper:
         return left
 
     def apply_bin_op(
-        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, List[z3.ExprRef]]
+        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, list[z3.ExprRef]]
     ) -> z3.ExprRef:
         """Given left, right, op, apply the binary operation."""
         try:
@@ -150,7 +150,7 @@ class ExprWrapper:
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
 
-    def apply_bool_op(self, op: str, values: Union[z3.ExprRef, List[z3.ExprRef]]) -> z3.ExprRef:
+    def apply_bool_op(self, op: str, values: Union[z3.ExprRef, list[z3.ExprRef]]) -> z3.ExprRef:
         """Apply boolean operation given by op to values."""
         op_to_z3 = {
             "and": z3.And,
@@ -187,14 +187,14 @@ class ExprWrapper:
 
     def parse_container_op(
         self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
-    ) -> List[z3.ExprRef]:
-        """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
+    ) -> list[z3.ExprRef]:
+        """Convert an astroid list, Set, tuple node to a list of z3 expressions."""
         return [self.reduce(element) for element in node.elts]
 
     def apply_in_op(
         self,
         left: Union[z3.ExprRef, str],
-        right: Union[z3.ExprRef, List[z3.ExprRef], str],
+        right: Union[z3.ExprRef, list[z3.ExprRef], str],
         negate: bool = False,
     ) -> z3.ExprRef:
         """
@@ -282,7 +282,7 @@ class ExprWrapper:
 
         raise Z3ParseException(f"Unhandled subscript operator type {slice}")
 
-    def parse_arguments(self, node: astroid.Arguments) -> Dict[str, z3.ExprRef]:
+    def parse_arguments(self, node: astroid.Arguments) -> dict[str, z3.ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""
         z3_vars = {}
 

@@ -1,8 +1,10 @@
 """Checker for variables that might not be defined in the program.
 """
 
+from __future__ import annotations
+
 from itertools import chain
-from typing import Generator, Set, Union
+from typing import Generator, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
@@ -27,7 +29,7 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
-        self._possibly_undefined: Set[nodes.Name] = set()
+        self._possibly_undefined: set[nodes.Name] = set()
 
     @only_required_for_messages("possibly-undefined")
     def visit_name(self, node: nodes.Name) -> None:
@@ -74,7 +76,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                 out_facts[b] = temp
                 worklist.extend([succ.target for succ in b.successors])
 
-    def _transfer(self, block: CFGBlock, in_facts: Set[str], local_vars: Set[str]) -> Set[str]:
+    def _transfer(self, block: CFGBlock, in_facts: set[str], local_vars: set[str]) -> set[str]:
         gen = in_facts.copy()
         kill = set()
         for statement in block.statements:
@@ -97,7 +99,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                         self._possibly_undefined.remove(node)
         return gen.difference(kill)
 
-    def _get_assigns(self, node: Union[nodes.FunctionDef, nodes.Module]) -> Set[str]:
+    def _get_assigns(self, node: Union[nodes.FunctionDef, nodes.Module]) -> set[str]:
         """Returns a set of all local and parameter variables that could be
         defined in the program (either a function or module).
 

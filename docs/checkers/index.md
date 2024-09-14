@@ -683,7 +683,8 @@ example below is considered to have _six_ nested blocks, not seven.
 The code above can be fixed using a helper function:
 
 ```python
-def drop_none(lst: List[Optional[int]]) -> List[int]:
+
+def drop_none(lst: list[Optional[int]]) -> list[int]:
     """Return a copy of `lst` with all `None` elements removed."""
     new_lst = []
     for element in lst:
@@ -692,8 +693,8 @@ def drop_none(lst: List[Optional[int]]) -> List[int]:
     return new_lst
 
 
-def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
-               z_list: List[Optional[int]]) -> List[Tuple[int, int, int]]:
+def cross_join(x_list: list[Optional[int]], y_list: list[Optional[int]],
+               z_list: list[Optional[int]]) -> list[tuple[int, int, int]]:
     """Perform an all-by-all join of all elements in the input lists."""
     cross_join_list = []
     for x in drop_none(x_list):
@@ -706,8 +707,8 @@ def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
 or using list comprehension:
 
 ```python
-def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
-               z_list: List[Optional[int]]) -> List[Tuple[int, int, int]]:
+def cross_join(x_list: list[Optional[int]], y_list: list[Optional[int]],
+               z_list: list[Optional[int]]) -> list[tuple[int, int, int]]:
     """Perform an all-by-all join of all elements in the input lists."""
     cross_join_list = [
         (x, y, z)
@@ -2349,7 +2350,7 @@ lines: 5-11
 We can simplify the above code by changing the loop to go over the elements of the list directly:
 
 ```python
-def sum_items(lst: List[int]) -> int:
+def sum_items(lst: list[int]) -> int:
     """Return the sum of a list of numbers."""
     s = 0
     for x in lst:
@@ -2381,7 +2382,7 @@ One common example is if we want to iterate over two lists in parallel:
 For loop:
 
 ```python
-def print_sum(lst1: List[int], lst2: List[int]) -> None:
+def print_sum(lst1: list[int], lst2: list[int]) -> None:
     """Print the sums of each corresponding pair of items in lst1 and lst2.
     Precondition: lst1 and lst2 have the same length.
     """
@@ -2392,7 +2393,7 @@ def print_sum(lst1: List[int], lst2: List[int]) -> None:
 Comprehension:
 
 ```python
-def parallel_lst(lst1: List[int], lst2: List[int]) -> list:
+def parallel_lst(lst1: list[int], lst2: list[int]) -> list:
     """Return a list of the concatenation of the values of lst1 and lst2 at index i.
     Precondition: lst1 and lst2 have the same length."""
     return [lst1[i] + lst2[i] for i in range(len(lst1))]
@@ -2427,7 +2428,7 @@ For example:
 For loop:
 
 ```python
-def example1(lst: List[int]) -> int:
+def example1(lst: list[int]) -> int:
     s = 0
     for number in lst:  # Fixed
         s += number
@@ -2437,7 +2438,7 @@ def example1(lst: List[int]) -> int:
 Comprehension:
 
 ```python
-def example7(lst: List[int]) -> List[int]:
+def example7(lst: list[int]) -> list[int]:
     return [number for number in lst]  # Fixed
 ```
 
@@ -2531,7 +2532,7 @@ Example:
 To fix these errors, one may make the following changes.
 
 ```python
-from typing import List
+from __future__ import annotations
 import datetime
 
 
@@ -2541,7 +2542,7 @@ class Person:
 
 def add_two_numbers(
     x: int,
-    y: List[float],
+    y: list[float],
     z: type = complex
 ) -> int:
     return (x + y) * z
@@ -2939,9 +2940,10 @@ then check for `None` inside the function body. For example, the following code 
 output:
 
 ```python
-from typing import List, Optional
+from __future__ import annotations
+from typing import Optional
 
-def make_list(n: int, lst: Optional[List[int]]=None) -> List[int]:
+def make_list(n: int, lst: Optional[list[int]]=None) -> list[int]:
     if lst is None:
         lst = []
     for i in range(n):
@@ -3122,7 +3124,7 @@ Corrected version:
 class Company:
     """A company with some employees."""
 
-    def __init__(self, employees: List[str]) -> None:
+    def __init__(self, employees: list[str]) -> None:
         self._employees = employees
 
     def __len__(self) -> int:

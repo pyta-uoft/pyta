@@ -1,6 +1,6 @@
 """Checker for the style of the file"""
 
-from typing import List, Tuple
+from __future__ import annotations
 
 import pycodestyle
 from astroid import nodes
@@ -23,7 +23,7 @@ class PycodestyleChecker(BaseRawFileChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<pycodestyle-ignore>",
-                "help": "List of Pycodestyle errors to ignore",
+                "help": "list of Pycodestyle errors to ignore",
             },
         ),
     )
@@ -41,7 +41,7 @@ class PycodestyleChecker(BaseRawFileChecker):
 
 
 class JSONReport(pycodestyle.StandardReport):
-    def get_file_results(self) -> List[Tuple]:
+    def get_file_results(self) -> list[tuple]:
         self._deferred_print.sort()
         return [
             (line_number, f"line {line_number}, column {offset}: {text}", code)

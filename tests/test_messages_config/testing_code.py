@@ -1,9 +1,9 @@
-from typing import List
+from __future__ import annotations
 
 reversed(12345)  # Error on this line
 
 
-def add(lst: List[int]) -> int:
+def add(lst: list[int]) -> int:
     """Return the sum of the elements in the given list."""
     temp = 0
     for item in lst:

@@ -21,7 +21,7 @@ class Node:
         self.next = None
 
     def bad_method(self) -> None:
-        """Set self.next to an invalid value, violating the type annotation."""
+        """set self.next to an invalid value, violating the type annotation."""
         self.next = 1
 
 

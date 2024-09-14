@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import sys
-from typing import Dict, List, Set
 
 import pytest
 from nested_preconditions_example import Student, my_function
@@ -29,10 +30,10 @@ def test_nullary_return_float() -> None:
 
 
 def test_nullary_return_dict() -> None:
-    """Calling a nullary function with the correct return type (Dict)."""
+    """Calling a nullary function with the correct return type (dict)."""
 
     @check_contracts
-    def nullary() -> Dict[str, int]:
+    def nullary() -> dict[str, int]:
         return {"one": 1}
 
     nullary()
@@ -70,10 +71,10 @@ def test_nullary_return_wrong_type() -> None:
 
 
 def test_nullary_return_dict_wrong() -> None:
-    """Calling a nullary function with the incorrect return type (Dict)."""
+    """Calling a nullary function with the incorrect return type (dict)."""
 
     @check_contracts
-    def nullary() -> Dict[str, int]:
+    def nullary() -> dict[str, int]:
         return {1: 1}
 
     with pytest.raises(AssertionError):
@@ -146,7 +147,7 @@ def test_nullary_no_return_type() -> None:
 
 
 @check_contracts
-def _my_sum(numbers: List[int]) -> int:
+def _my_sum(numbers: list[int]) -> int:
     return sum(numbers)
 
 
@@ -241,7 +242,7 @@ def test_parameter_int_bool_disable_contract_checking(disable_contract_checking)
 
 
 @check_contracts
-def _my_sum_one_precondition(numbers: List[int]) -> int:
+def _my_sum_one_precondition(numbers: list[int]) -> int:
     """Return the sum of a list of numbers.
 
     Precondition: len(numbers) > 2
@@ -280,12 +281,12 @@ def test_my_sum_one_disable_contract_checking(disable_contract_checking) -> None
 # Checking to see if functions we defined are in-scope for preconditions
 
 
-def is_even(lst: List[int]) -> bool:
+def is_even(lst: list[int]) -> bool:
     return all([(not x & 1) for x in lst])
 
 
 @check_contracts
-def _is_even_sum(numbers: List[int]) -> int:
+def _is_even_sum(numbers: list[int]) -> int:
     """Return the sum of a list of numbers.
 
     Precondition: is_even(numbers)
@@ -310,7 +311,7 @@ def test_is_even_sum_violation() -> None:
 
 
 @check_contracts
-def search(numbers: Set[int]) -> bool:
+def search(numbers: set[int]) -> bool:
     """Search for a number in a set.
 
     Illustrates a preconditions with a double comprehension.
@@ -400,7 +401,7 @@ def test_invalid_typing_generic_argument() -> None:
     """
 
     @check_contracts
-    def unary(arg: List[str]) -> None:
+    def unary(arg: list[str]) -> None:
         return
 
     with pytest.raises(AssertionError):
@@ -453,7 +454,7 @@ def test_get_double_disabled_contract_checking(disable_contract_checking) -> Non
 
 # Test that postcondition checks involving function parameters pass and fail as expected
 @check_contracts
-def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:
+def _add_to_set_valid(num_set: set[int], new_num: int) -> None:
     """
     Add a number to the provided set if the number does not already exist in the set.
 
@@ -465,7 +466,7 @@ def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:
 
 
 @check_contracts
-def _add_to_set_invalid(num_set: Set[int], new_num: int) -> None:
+def _add_to_set_invalid(num_set: set[int], new_num: int) -> None:
     """
     Add new_num to the num_set. This is implemented incorrectly to make the postcondition check fail.
 
@@ -496,7 +497,7 @@ def test_add_to_set_invalid() -> None:
 
 # Test that postcondition checks that use custom functions in scope pass and fail as expected
 @check_contracts
-def _get_even_nums_valid(lst: List[int]) -> List[int]:
+def _get_even_nums_valid(lst: list[int]) -> list[int]:
     """
     Return a list of all even numbers in the input list.
 
@@ -506,7 +507,7 @@ def _get_even_nums_valid(lst: List[int]) -> List[int]:
 
 
 @check_contracts
-def _get_even_nums_invalid(lst: List[int]) -> List[int]:
+def _get_even_nums_invalid(lst: list[int]) -> list[int]:
     """
     Return a list of all odd numbers in the input list, which should cause the postcondition check to fail.
 

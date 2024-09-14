@@ -1,7 +1,9 @@
 """Checker used for identifying names that don't conform to Python naming conventions."""
 
+from __future__ import annotations
+
 import re
-from typing import List, Optional
+from typing import Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
@@ -14,7 +16,7 @@ from python_ta.utils import _is_in_main
 # Bad variable names.
 BAD_NAMES = {"l", "I", "O"}
 
-# Set a limit in name length to keep certain variable names short.
+# set a limit in name length to keep certain variable names short.
 VAR_NAME_LENGTHS = {
     "module": 30,
     "constant": 30,
@@ -116,7 +118,7 @@ def _ignore_name(name: str, pattern: re.Pattern) -> bool:
     return pattern.pattern and pattern.match(name) is not None
 
 
-def _check_module_name(_node_type: str, name: str) -> List[str]:
+def _check_module_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     module names.
 
@@ -132,7 +134,7 @@ def _check_module_name(_node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_const_name(node_type: str, name: str) -> List[str]:
+def _check_const_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     constant and class constant names.
 
@@ -152,7 +154,7 @@ def _check_const_name(node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_class_name(_node_type: str, name: str) -> List[str]:
+def _check_class_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     class names.
 
@@ -170,7 +172,7 @@ def _check_class_name(_node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_function_and_variable_name(node_type: str, name: str) -> List[str]:
+def _check_function_and_variable_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     function and variable names.
 
@@ -188,7 +190,7 @@ def _check_function_and_variable_name(node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_method_and_attr_name(node_type: str, name: str) -> List[str]:
+def _check_method_and_attr_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     method and instance or class attribute names.
 
@@ -208,7 +210,7 @@ def _check_method_and_attr_name(node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_argument_name(_node_type: str, name: str) -> List[str]:
+def _check_argument_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     argument names.
 
@@ -226,7 +228,7 @@ def _check_argument_name(_node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_typevar_name(_node_type: str, name: str) -> List[str]:
+def _check_typevar_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     type variable names.
 
@@ -243,7 +245,7 @@ def _check_typevar_name(_node_type: str, name: str) -> List[str]:
     return error_msgs
 
 
-def _check_type_alias_name(_node_type: str, name: str) -> List[str]:
+def _check_type_alias_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
     type alias names.
 

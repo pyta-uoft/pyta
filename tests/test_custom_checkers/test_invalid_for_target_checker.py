@@ -1,4 +1,4 @@
-from typing import list
+from __future__ import annotations
 
 import astroid
 import pylint.testutils

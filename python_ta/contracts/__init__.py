@@ -26,7 +26,7 @@ from typeguard import CollectionCheckStrategy, TypeCheckError, check_type
 
 ENABLE_CONTRACT_CHECKING = True
 """
-set to True to enable contract checking.
+Set to True to enable contract checking.
 """
 
 DEBUG_CONTRACTS = False

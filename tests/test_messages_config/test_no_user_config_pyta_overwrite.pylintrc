@@ -2,7 +2,7 @@
 
 # Make sure to register custom options tuple first in `python_ta/__init__.py`
 # ===========================================================
-# set whether the default error messages by pylint should be overwritten by python TA's custom messages
+# Set whether the default error messages by pylint should be overwritten by python TA's custom messages
 use-pyta-error-messages = yes
 
 [REPORTS]

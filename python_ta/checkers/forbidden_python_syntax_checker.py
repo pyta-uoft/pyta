@@ -29,7 +29,7 @@ class ForbiddenPythonSyntaxChecker(BaseChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<disallowed-syntax>",
-                "help": "list of Python syntax that are not allowed to be used.",
+                "help": "List of Python syntax that are not allowed to be used.",
             },
         ),
     )

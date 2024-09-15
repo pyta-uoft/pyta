@@ -18,7 +18,7 @@ def reset_dir(request, monkeypatch):
 @pytest.fixture
 def create_cfg():
     """Create the CFG for each test that uses the code in a file fixture."""
-    # setup: store the paths of the files being used/created
+    # Setup: store the paths of the files being used/created
     script_name = "file_fixtures/my_file.py"
     dot_file_path = os.path.splitext(os.path.basename(script_name))[0]
     svg_file_path = dot_file_path + ".svg"

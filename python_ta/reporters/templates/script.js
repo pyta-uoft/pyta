@@ -13,7 +13,7 @@ $(".sidebar button").click(function () {
  * https://carlanderson.xyz/how-to-animate-on-height-auto/
  */
 function toggleElement(elem) {
-  const expanded = elem.classlist.contains("expanded")
+  const expanded = elem.classList.contains("expanded")
   elem.style.height = ""
   elem.style.transition = "none"
 
@@ -24,8 +24,8 @@ function toggleElement(elem) {
     elem.style.height = startHeight
   }
 
-  elem.classlist.toggle("hide-and-maintain-width")
-  elem.classlist.toggle("expanded")
+  elem.classList.toggle("hide-and-maintain-width")
+  elem.classList.toggle("expanded")
 
   let height
   if (expanded) {
@@ -45,8 +45,8 @@ function toggleElement(elem) {
   })
 
   // Clear the saved height values after the transition
-  elem.addEventlistener("transitionend", () => {
+  elem.addEventListener("transitionend", () => {
     elem.style.height = ""
-    elem.removeEventlistener("transitionend", arguments.callee)
+    elem.removeEventListener("transitionend", arguments.callee)
   })
 }

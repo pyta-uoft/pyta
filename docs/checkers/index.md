@@ -683,7 +683,6 @@ example below is considered to have _six_ nested blocks, not seven.
 The code above can be fixed using a helper function:
 
 ```python
-
 def drop_none(lst: list[Optional[int]]) -> list[int]:
     """Return a copy of `lst` with all `None` elements removed."""
     new_lst = []

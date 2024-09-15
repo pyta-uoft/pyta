@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import astroid
 from astroid import AstroidError, nodes
 from astroid.transforms import TransformVisitor
@@ -30,7 +32,7 @@ class Z3Visitor:
         for ann, arg in zip(annotations, arguments):
             if ann is None:
                 continue
-            # TODO: what to do about subscripts ex. Set[int], list[Set[int]], ...
+            # TODO: what to do about subscripts ex. set[int], list[set[int]], ...
             inferred = safe_infer(ann)
             if isinstance(inferred, nodes.ClassDef):
                 types[arg.name] = inferred.name

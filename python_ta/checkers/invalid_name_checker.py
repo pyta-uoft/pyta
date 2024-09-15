@@ -16,7 +16,7 @@ from python_ta.utils import _is_in_main
 # Bad variable names.
 BAD_NAMES = {"l", "I", "O"}
 
-# set a limit in name length to keep certain variable names short.
+# Set a limit in name length to keep certain variable names short.
 VAR_NAME_LENGTHS = {
     "module": 30,
     "constant": 30,

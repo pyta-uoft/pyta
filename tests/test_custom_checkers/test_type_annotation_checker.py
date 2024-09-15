@@ -12,8 +12,7 @@ class TestTypeAnnotationChecker(pylint.testutils.CheckerTestCase):
         """Ensure that checker catches when type is assigned instead of annotated
         in function parameters."""
         src = """
-        from typing import list
-
+        from __future__ import annotations
 
         def add_two_numbers(
             x=int, # Error on this line

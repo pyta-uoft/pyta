@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 y[0]
 z [  0 ]
 a[:]
@@ -15,8 +16,6 @@ j[:][:]
 k[::]
 l[:]     [:]
 x = m[  :  ]
-
-
 
 
 def add(numbers: list[int]) -> list[int]:

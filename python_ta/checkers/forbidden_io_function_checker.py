@@ -32,7 +32,7 @@ class IOFunctionChecker(BaseChecker):
                 "default": FORBIDDEN_BUILTIN,
                 "type": "csv",
                 "metavar": "<builtin function names>",
-                "help": "list of built-in function names that should not be used.",
+                "help": "List of built-in function names that should not be used.",
             },
         ),
         (

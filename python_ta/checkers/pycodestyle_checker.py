@@ -23,7 +23,7 @@ class PycodestyleChecker(BaseRawFileChecker):
                 "default": (),
                 "type": "csv",
                 "metavar": "<pycodestyle-ignore>",
-                "help": "list of Pycodestyle errors to ignore",
+                "help": "List of Pycodestyle errors to ignore",
             },
         ),
     )

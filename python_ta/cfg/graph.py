@@ -5,12 +5,12 @@ from typing import Any, Generator, Optional
 try:
     from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
 
-    from ..transforms.ExprWrapper import ExprWrapper, Z3ParseException
+    from ..z3.z3_parser import Z3ParseException, Z3Parser
 
     z3_dependency_available = True
 except ImportError:
     ExprRef = Any
-    ExprWrapper = Any
+    Z3Parser = Any
     Not = Any
     Z3Exception = Any
     is_const = Any
@@ -62,8 +62,8 @@ class ControlFlowGraph:
 
         if ExprRef is not Any:
             # Parse types
-            expr = ExprWrapper(args)
-            z3_vars = expr.parse_arguments(args)
+            parser = Z3Parser()
+            z3_vars = parser.parse_arguments(args)
             self._z3_vars.update(z3_vars)
 
     def create_block(
@@ -422,9 +422,9 @@ class Z3Environment:
         """Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
-        ew = ExprWrapper(node, self.variables)
+        parser = Z3Parser(self.variables)
         try:
-            return ew.reduce()
+            return parser.parse(node)
         except (Z3Exception, Z3ParseException):
             return None
 

@@ -5,23 +5,18 @@ from python_ta.debug import SnapshotManager
 expected_result_dir = "snapshot_manager_testing_snapshots"
 
 
-# TODO: tests like these can make the suite pretty slow
 def test_one_line(tmp_path) -> None:
-    with SnapshotManager() as manager:
+    with SnapshotManager(output_filepath=os.path.abspath(tmp_path)) as manager:
         num = 123
-    # TODO:  use manager to get the number of expected files
     snapshot_count = manager.get_snapshot_count()
     assert all(
-        os.path.exists(f"{tmp_path.name}/snapshot-{snapshot_count}.svg")
-        for i in range(snapshot_count)
+        os.path.exists(os.path.join(tmp_path, f"snapshot-{i}.svg")) for i in range(snapshot_count)
     )
     for i in range(snapshot_count):
         with (
-            open(f"{tmp_path.name}/snapshot-{i}.svg", mode="r", encoding="utf-8") as actual_file,
+            open(os.path.join(tmp_path, f"snapshot-{i}.svg")) as actual_file,
             open(
                 f"snapshot_manager_testing_snapshots/one_line/snapshot-{i}.svg",
-                mode="r",
-                encoding="utf-8",
             ) as expected_file,
         ):
             actual_svg = actual_file.read()

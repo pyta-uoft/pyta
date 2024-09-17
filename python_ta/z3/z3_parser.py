@@ -15,37 +15,26 @@ class Z3ParseException(Exception):
     pass
 
 
-class ExprWrapper:
+class Z3Parser:
     """
-    Wrapper class to convert an astroid expression node into a z3 expression.
+    Class that converts an astroid expression node into a z3 expression.
 
     Instance attributes:
-        - node: astroid node obtained given by the value attribute of astroid expression.
         - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
     """
 
-    node: astroid.NodeNG
     types: Dict[str, Union[str, z3.ExprRef]]
 
-    def __init__(self, node: astroid.NodeNG, types=None):
+    def __init__(self, types: Optional[Dict[str, Union[str, z3.ExprRef]]] = None):
         if types is None:
             types = {}
         self.types = types
 
-        # extract expression out of expression statement
-        if isinstance(node, (astroid.Expr, astroid.Assign)):
-            self.node = node.value
-        else:
-            self.node = node
-
-    def reduce(self, node: astroid.NodeNG = None) -> z3.ExprRef:
+    def parse(self, node: astroid.NodeNG) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
         """
-        if node is None:
-            node = self.node
-
         if isinstance(node, nodes.BoolOp):
             node = self.parse_bool_op(node)
         elif isinstance(node, nodes.UnaryOp):
@@ -54,6 +43,8 @@ class ExprWrapper:
             node = self.parse_compare(node)
         elif isinstance(node, nodes.BinOp):
             node = self.parse_bin_op(node)
+        elif isinstance(node, (nodes.Expr, nodes.Assign)):
+            node = self.parse(node.value)
         elif isinstance(node, nodes.Const):
             node = node.value
         elif isinstance(node, nodes.Name):
@@ -81,10 +72,10 @@ class ExprWrapper:
             "bool": z3.Bool,
             "str": z3.String,
         }
-        if typ in type_to_z3:  # convert string value to z3 variable
-            x = type_to_z3[typ](name)
-        elif isinstance(typ, z3.ExprRef):  # the value is already a z3 variable
+        if isinstance(typ, z3.ExprRef):  # the value is already a z3 variable
             x = typ
+        elif typ in type_to_z3:  # convert string value to z3 variable
+            x = type_to_z3[typ](name)
         else:
             raise Z3ParseException(f"Unhandled type {typ}.")
 
@@ -93,10 +84,10 @@ class ExprWrapper:
     def parse_compare(self, node: astroid.Compare) -> z3.ExprRef:
         """Convert an astroid Compare node to z3 expression."""
         left, ops = node.left, node.ops
-        left = self.reduce(left)
+        left = self.parse(left)
         for item in ops:
             op, right = item
-            right = self.reduce(right)
+            right = self.parse(right)
             left = self.apply_bin_op(left, op, right)
         return left
 
@@ -167,21 +158,21 @@ class ExprWrapper:
     def parse_unary_op(self, node: astroid.UnaryOp) -> z3.ExprRef:
         """Convert an astroid UnaryOp node to a z3 expression."""
         left, op = node.operand, node.op
-        left = self.reduce(left)
+        left = self.parse(left)
         return self.apply_unary_op(left, op)
 
     def parse_bin_op(self, node: astroid.BinOp) -> z3.ExprRef:
         """Convert an astroid BinOp node to a z3 expression."""
         left, op, right = node.left, node.op, node.right
-        left = self.reduce(left)
-        right = self.reduce(right)
+        left = self.parse(left)
+        right = self.parse(right)
 
         return self.apply_bin_op(left, op, right)
 
     def parse_bool_op(self, node: astroid.BoolOp) -> z3.ExprRef:
         """Convert an astroid BoolOp node to a z3 expression."""
         op, values = node.op, node.values
-        values = [self.reduce(x) for x in values]
+        values = [self.parse(x) for x in values]
 
         return self.apply_bool_op(op, values)
 
@@ -189,7 +180,7 @@ class ExprWrapper:
         self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
     ) -> List[z3.ExprRef]:
         """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
-        return [self.reduce(element) for element in node.elts]
+        return [self.parse(element) for element in node.elts]
 
     def apply_in_op(
         self,
@@ -242,7 +233,7 @@ class ExprWrapper:
         Convert an astroid Subscript node to z3 expression.
         This method only supports string values and integer literal (both positive and negative) indexes
         """
-        value = self.reduce(node.value)
+        value = self.parse(node.value)
         slice = node.slice
 
         # check for invalid node type
@@ -299,6 +290,6 @@ class ExprWrapper:
             self.types[arg.name] = inferred.name
 
             if arg.name in self.types and self.types[arg.name] in {"int", "float", "bool", "str"}:
-                z3_vars[arg.name] = self.reduce(arg)
+                z3_vars[arg.name] = self.parse(arg)
 
         return z3_vars

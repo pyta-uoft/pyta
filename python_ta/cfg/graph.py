@@ -3,12 +3,14 @@ from __future__ import annotations
 from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
+    import z3
     from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
 
     from ..transforms.ExprWrapper import ExprWrapper, Z3ParseException
 
     z3_dependency_available = True
 except ImportError:
+    z3 = Any
     ExprRef = Any
     ExprWrapper = Any
     Not = Any
@@ -197,7 +199,7 @@ class ControlFlowGraph:
             yield edge
             yield from self._get_edges(edge.target, visited)
 
-    def _get_paths(self) -> List[List[CFGEdge]]:
+    def get_paths(self) -> List[List[CFGEdge]]:
         """Get edges that represent paths from start to end node in depth-first order."""
         paths = []
 
@@ -255,7 +257,7 @@ class ControlFlowGraph:
         if not z3_dependency_available:
             return
 
-        for path_id, path in enumerate(self._get_paths()):
+        for path_id, path in enumerate(self.get_paths()):
             # starting a new path
             z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
             for edge in path:
@@ -279,6 +281,21 @@ class ControlFlowGraph:
                         for target in node.targets:
                             if isinstance(target, AssignName):
                                 z3_environment.assign(target.name)
+
+    def update_edge_feasibility(self) -> None:
+        """Traverse through edges in DFS order and update is_feasible
+        attribute of each edge. Edges that are unreachable with the given
+        set of Z3 constraints will have is_feasible set to False
+        """
+        if not z3_dependency_available:
+            return
+
+        for path_id, path in enumerate(self.get_paths()):
+            solver = z3.Solver()
+            for edge in path:
+                solver.add(edge.z3_constraints[path_id])
+                if solver.check() == z3.sat:
+                    edge.is_feasible = True
 
 
 class CFGBlock:
@@ -338,6 +355,7 @@ class CFGEdge:
     condition: Optional[NodeNG]
     negate: Optional[bool]
     z3_constraints: Dict[int, List[ExprRef]]
+    is_feasible: bool
 
     def __init__(
         self,
@@ -355,6 +373,7 @@ class CFGEdge:
         self.source.successors.append(self)
         self.target.predecessors.append(self)
         self.z3_constraints = {}
+        self.is_feasible = False
 
     def get_label(self) -> Optional[str]:
         """Return the edge label if specified.

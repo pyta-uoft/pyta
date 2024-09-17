@@ -12,22 +12,27 @@ from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
 class SnapshotManager:
     output_filepath: Optional[str]
-    snapshots: List[List[dict]]
+    memory_viz_args: Optional[list[str]]
+    memory_viz_version: str = "latest"
+    snapshot_counts = 0
 
-    def __init__(self, output_filepath: Optional[str] = ".") -> None:
+    def __init__(
+        self, memory_viz_args: Optional[list[str]] = None, output_filepath: Optional[str] = "."
+    ) -> None:
+        if memory_viz_args is None:
+            memory_viz_args = ["--roughjs-config", "seed=12345"]
         self.output_filepath = output_filepath
-        self.snapshots = []
+        self.memory_viz_args = memory_viz_args
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         if event == "line" and frame.f_locals:
-            # TODO: the snapshot returns everything in the call stack above, so hard coding \
-            #  to only look at the second frame probably won't work
-            var_data = [snapshot()[1]]
+            var_data = snapshot()
             json_data = snapshot_to_json(var_data)
-            self.snapshots.append(json_data)
+            self._output_snapshot(json_data)
+            self.snapshot_counts += 1
 
     def get_snapshot_count(self):
-        return len(self.snapshots)
+        return self.snapshot_counts
 
     def __enter__(self):
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
@@ -37,19 +42,21 @@ class SnapshotManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         sys.settrace(None)
-        # TODO: to produce consistent svgs for testing, we use a fixed seed. We can set this as \
-        #  a default option
-        command = ["npx", "memory-viz", "--roughjs-config", "seed=12345"]
+
+    def _output_snapshot(self, data):
+        command = ["npx", "memory-viz"]
+        command.extend(self.memory_viz_args)
+        command.extend(
+            ["--output", os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg")]
+        )
         npx_path = shutil.which("npx")
-        for i, snapshot_json in enumerate(self.snapshots):
-            command.extend(["--output", os.path.join(self.output_filepath, f"snapshot-{i}.svg")])
-            subprocess.run(
-                command,
-                input=json.dumps(snapshot_json),
-                executable=npx_path,
-                stdout=sys.stdout,
-                stderr=sys.stderr,
-                encoding="utf-8",
-                text=True,
-                check=True,
-            )
+        subprocess.run(
+            command,
+            input=json.dumps(data),
+            executable=npx_path,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            encoding="utf-8",
+            text=True,
+            check=True,
+        )

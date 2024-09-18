@@ -68,13 +68,14 @@ def snapshot(
 
         # Set up command
         command = ["npx", "memory-viz"]
-        if memory_viz_args:
-            command.append(f"@{memory_viz_version}")
+        # if memory_viz_args:
+        #     command.append(f"@{memory_viz_version}")
 
         # Ensure valid memory_viz version
         if memory_viz_version != "latest" and parse(memory_viz_version) < Version("0.3.1"):
             logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
-
+        else:
+            command[1] = f"memory-viz@{memory_viz_version}"
         # Create a child to call the MemoryViz CLI
         npx_path = shutil.which("npx")
         subprocess.run(

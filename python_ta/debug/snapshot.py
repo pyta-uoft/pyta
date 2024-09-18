@@ -54,7 +54,6 @@ def snapshot(
     """
     variables = []
     frame = inspect.currentframe().f_back
-
     while frame:
         if frame.f_code.co_name != "<module>":
             variables.append({frame.f_code.co_name: frame.f_locals})

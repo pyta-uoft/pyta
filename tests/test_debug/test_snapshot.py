@@ -2,6 +2,8 @@
 Test suite for snapshot functions
 """
 
+from __future__ import annotations
+
 import json
 import os
 import subprocess
@@ -583,7 +585,11 @@ def test_snapshot_save_create_svg(tmp_path):
     current_directory = os.path.dirname(os.path.abspath(__file__))
     snapshot_save_path = os.path.join(current_directory, "snapshot_save_file.py")
     result = subprocess.run(
-        [sys.executable, snapshot_save_path, os.path.abspath(tmp_path)],
+        [
+            sys.executable,
+            snapshot_save_path,
+            os.path.join(tmp_path, "test_snapshot_save_create_svg0.svg"),
+        ],
         capture_output=True,
         text=True,
         check=True,

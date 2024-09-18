@@ -13,6 +13,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fixed issue with `snapshot.py` where the `memory_viz_args` parameter was not being respected.
+
 ### 🔧 Internal changes
 
 - Renamed `ExprWrapper` class to `Z3Parser`

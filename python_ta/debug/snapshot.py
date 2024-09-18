@@ -69,7 +69,7 @@ def snapshot(
         # Set up command
         command = ["npx", "memory-viz"]
         if memory_viz_args:
-            command.extend(memory_viz_args)
+            command.append(memory_viz_args)
 
         # Ensure valid memory_viz version
         if memory_viz_version != "latest" and parse(memory_viz_version) < Version("0.3.1"):

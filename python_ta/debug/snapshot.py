@@ -54,6 +54,7 @@ def snapshot(
     """
     variables = []
     frame = inspect.currentframe().f_back
+
     while frame:
         if frame.f_code.co_name != "<module>":
             variables.append({frame.f_code.co_name: frame.f_locals})
@@ -67,15 +68,14 @@ def snapshot(
         json_compatible_vars = snapshot_to_json(variables)
 
         # Set up command
-        command = ["npx", "memory-viz"]
-        # if memory_viz_args:
-        #     command.append(f"@{memory_viz_version}")
+        command = ["npx", f"memory-viz@{memory_viz_version}"]
+        if memory_viz_args:
+            command.extend(memory_viz_args)
 
         # Ensure valid memory_viz version
         if memory_viz_version != "latest" and parse(memory_viz_version) < Version("0.3.1"):
             logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
-        else:
-            command[1] = f"memory-viz@{memory_viz_version}"
+
         # Create a child to call the MemoryViz CLI
         npx_path = shutil.which("npx")
         subprocess.run(

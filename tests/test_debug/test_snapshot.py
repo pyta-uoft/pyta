@@ -658,15 +658,15 @@ def func_with_include_nested(include: Optional[list[str]] = None):
     return func_with_include(include=include)
 
 
-def func_with_unserializable_object():
+def func_with_unserializable_objects():
     path = pathlib.PosixPath("some path")
-    vars_in_func = [snapshot()[0]]
-    processed_result = snapshot_to_json(vars_in_func)
+    vars_in_curr_func = [snapshot()[0]]
+    processed_result = snapshot_to_json(vars_in_curr_func)
     json.dumps(processed_result)
     return processed_result
 
 
-def test_snapshot_only_include_called_function():
+def test_snapshot_only_includes_function_self():
     result = func_with_include(include=["func_with_include"])
     assert result == [
         {
@@ -679,7 +679,7 @@ def test_snapshot_only_include_called_function():
     ]
 
 
-def test_snapshot_gets_nested_vars():
+def test_snapshot_includes_multiple_functions():
     result = func_with_include_nested(include=["func_with_include", "func_with_include_nested"])
     assert result == [
         {
@@ -699,7 +699,7 @@ def test_snapshot_gets_nested_vars():
     ]
 
 
-def test_snapshot_only_gets_outer_var():
+def test_snapshot_only_includes_specified_function():
     result = func_with_include_nested(include=["func_with_include_nested"])
     assert result == [
         {
@@ -713,11 +713,11 @@ def test_snapshot_only_gets_outer_var():
 
 
 def test_snapshot_serializes_unserializable_value():
-    result = func_with_unserializable_object()
+    result = func_with_unserializable_objects()
     assert result == [
         {
             "id": None,
-            "name": "func_with_unserializable_object",
+            "name": "func_with_unserializable_objects",
             "type": ".frame",
             "value": {"path": 1},
         },

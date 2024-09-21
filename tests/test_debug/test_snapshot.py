@@ -4,8 +4,10 @@ Test suite for snapshot functions
 
 import json
 import os
+import pathlib
 import subprocess
 import sys
+from typing import Optional
 
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
@@ -642,3 +644,82 @@ def test_snapshot_save_stdout():
         expected_svg = expected_svg_file.read()
 
     assert result.stdout == expected_svg
+
+
+def func_with_include(include: Optional[list[str]] = None):
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot(include=include)
+
+
+def func_with_include_nested(include: Optional[list[str]] = None):
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Leo", "tester")
+    return func_with_include(include=include)
+
+
+def func_with_unserializable_object():
+    path = pathlib.PosixPath("some path")
+    vars_in_func = [snapshot()[0]]
+    processed_result = snapshot_to_json(vars_in_func)
+    json.dumps(processed_result)
+    return processed_result
+
+
+def test_snapshot_only_include_called_function():
+    result = func_with_include(include=["func_with_include"])
+    assert result == [
+        {
+            "func_with_include": {
+                "include": ["func_with_include"],
+                "test_var1a": "David is cool!",
+                "test_var2a": "Students Developing Software",
+            }
+        }
+    ]
+
+
+def test_snapshot_gets_nested_vars():
+    result = func_with_include_nested(include=["func_with_include", "func_with_include_nested"])
+    assert result == [
+        {
+            "func_with_include": {
+                "include": ["func_with_include", "func_with_include_nested"],
+                "test_var1a": "David is cool!",
+                "test_var2a": "Students Developing Software",
+            },
+        },
+        {
+            "func_with_include_nested": {
+                "include": ["func_with_include", "func_with_include_nested"],
+                "test_var1b": {"SDS_coolest_project": "PyTA"},
+                "test_var2b": ("Leo", "tester"),
+            },
+        },
+    ]
+
+
+def test_snapshot_only_gets_outer_var():
+    result = func_with_include_nested(include=["func_with_include_nested"])
+    assert result == [
+        {
+            "func_with_include_nested": {
+                "include": ["func_with_include_nested"],
+                "test_var1b": {"SDS_coolest_project": "PyTA"},
+                "test_var2b": ("Leo", "tester"),
+            },
+        }
+    ]
+
+
+def test_snapshot_serializes_unserializable_value():
+    result = func_with_unserializable_object()
+    assert result == [
+        {
+            "id": None,
+            "name": "func_with_unserializable_object",
+            "type": ".frame",
+            "value": {"path": 1},
+        },
+        {"id": 1, "type": "PosixPath", "value": repr(pathlib.PosixPath("some path"))},
+    ]

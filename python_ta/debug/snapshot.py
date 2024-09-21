@@ -8,6 +8,7 @@ from __future__ import annotations
 import inspect
 import json
 import logging
+import re
 import shutil
 import subprocess
 import sys
@@ -40,6 +41,7 @@ def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
     memory_viz_version: str = "latest",
+    include: Optional[list[str]] = [".*"],
 ):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
@@ -56,11 +58,12 @@ def snapshot(
     frame = inspect.currentframe().f_back
 
     while frame:
-        if frame.f_code.co_name != "<module>":
-            variables.append({frame.f_code.co_name: frame.f_locals})
-        else:
-            global_vars = get_filtered_global_variables(frame)
-            variables.append(global_vars)
+        if any(re.search(regex, frame.f_code.co_name) for regex in include):
+            if frame.f_code.co_name != "<module>":
+                variables.append({frame.f_code.co_name: frame.f_locals})
+            else:
+                global_vars = get_filtered_global_variables(frame)
+                variables.append(global_vars)
 
         frame = frame.f_back
 
@@ -154,10 +157,15 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     "value": attr_ids,
                 }
             else:  # Handle primitives and other types
+                try:
+                    json.dumps(val)
+                    jsonable_val = val
+                except TypeError:
+                    jsonable_val = repr(val)
                 value_entry = {
                     "type": type(val).__name__,
                     "id": value_id_diagram,
-                    "value": val,
+                    "value": jsonable_val,
                 }
 
             value_entries.append(value_entry)

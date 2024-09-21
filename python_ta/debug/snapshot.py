@@ -53,6 +53,8 @@ def snapshot(
     For details on the MemoryViz CLI, see https://www.cs.toronto.edu/~david/memory-viz/docs/cli.
     memory_viz_version can be used to dictate version, with a default of the latest version.
     Note that this function is compatible only with MemoryViz version 0.3.1 and above.
+    include can be used to specify a list of function names which variables will be captured.
+    By default, all variables in all functions will be captured.
     """
     variables = []
     frame = inspect.currentframe().f_back

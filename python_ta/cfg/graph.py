@@ -24,6 +24,7 @@ from astroid import (
     Arguments,
     Assign,
     AssignName,
+    AugAssign,
     Break,
     Continue,
     NodeNG,
@@ -276,11 +277,17 @@ class ControlFlowGraph:
 
                 # traverse into target node
                 for node in edge.target.statements:
-                    if isinstance(node, Assign):
-                        # mark reassigned variables
-                        for target in node.targets:
-                            if isinstance(target, AssignName):
-                                z3_environment.assign(target.name)
+                    if isinstance(node, (Assign, AugAssign)):
+                        self._handle_variable_reassignment(node, z3_environment)
+
+    def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
+        """Check for reassignment statements and invoke Z3 environment"""
+        if isinstance(node, Assign):
+            for target in node.targets:
+                if isinstance(target, AssignName):
+                    env.assign(target.name)
+        elif isinstance(node, AugAssign):
+            env.assign(node.target.name)
 
     def update_edge_feasibility(self) -> None:
         """Traverse through edges in DFS order and update is_feasible

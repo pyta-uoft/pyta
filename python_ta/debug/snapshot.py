@@ -41,7 +41,7 @@ def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
     memory_viz_version: str = "latest",
-    include: Optional[list[str]] = [".*"],
+    include: Optional[tuple[str, ...]] = (".*",),
 ):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,

@@ -646,13 +646,13 @@ def test_snapshot_save_stdout():
     assert result.stdout == expected_svg
 
 
-def func_with_include(include: Optional[list[str]] = None):
+def func_with_include(include: Optional[tuple[str, ...]] = None):
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
     return snapshot(include=include)
 
 
-def func_with_include_nested(include: Optional[list[str]] = None):
+def func_with_include_nested(include: Optional[tuple[str, ...]] = None):
     test_var1b = {"SDS_coolest_project": "PyTA"}
     test_var2b = ("Leo", "tester")
     return func_with_include(include=include)
@@ -667,11 +667,11 @@ def func_with_unserializable_objects():
 
 
 def test_snapshot_only_includes_function_self():
-    result = func_with_include(include=["func_with_include"])
+    result = func_with_include(include=("func_with_include",))
     assert result == [
         {
             "func_with_include": {
-                "include": ["func_with_include"],
+                "include": ("func_with_include",),
                 "test_var1a": "David is cool!",
                 "test_var2a": "Students Developing Software",
             }
@@ -680,18 +680,29 @@ def test_snapshot_only_includes_function_self():
 
 
 def test_snapshot_includes_multiple_functions():
-    result = func_with_include_nested(include=["func_with_include", "func_with_include_nested"])
+    result = func_with_include_nested(
+        include=(
+            "func_with_include",
+            "func_with_include_nested",
+        )
+    )
     assert result == [
         {
             "func_with_include": {
-                "include": ["func_with_include", "func_with_include_nested"],
+                "include": (
+                    "func_with_include",
+                    "func_with_include_nested",
+                ),
                 "test_var1a": "David is cool!",
                 "test_var2a": "Students Developing Software",
             },
         },
         {
             "func_with_include_nested": {
-                "include": ["func_with_include", "func_with_include_nested"],
+                "include": (
+                    "func_with_include",
+                    "func_with_include_nested",
+                ),
                 "test_var1b": {"SDS_coolest_project": "PyTA"},
                 "test_var2b": ("Leo", "tester"),
             },
@@ -700,11 +711,11 @@ def test_snapshot_includes_multiple_functions():
 
 
 def test_snapshot_only_includes_specified_function():
-    result = func_with_include_nested(include=["func_with_include_nested"])
+    result = func_with_include_nested(include=("func_with_include_nested",))
     assert result == [
         {
             "func_with_include_nested": {
-                "include": ["func_with_include_nested"],
+                "include": ("func_with_include_nested",),
                 "test_var1b": {"SDS_coolest_project": "PyTA"},
                 "test_var2b": ("Leo", "tester"),
             },

@@ -1,16 +1,21 @@
 import os.path
 
+import pytest
+
 from python_ta.debug import SnapshotManager
 
+SNAPSHOT_DIR = "snapshot_manager_testing_snapshots"
+TEST_RESULTS_DIR = "snapshot_manager_testing_results"
 
-def func_one_line(tmp_path) -> SnapshotManager:
-    with SnapshotManager(output_filepath=tmp_path, include=("func_one_line",)) as manager:
+
+def func_one_line(output_path=None) -> SnapshotManager:
+    with SnapshotManager(output_filepath=output_path, include=("func_one_line",)) as manager:
         num = 123
     return manager
 
 
-def func_multi_line() -> SnapshotManager:
-    with SnapshotManager(include=("func_multi_line",)) as manager:
+def func_multi_line(output_path=None) -> SnapshotManager:
+    with SnapshotManager(output_filepath=output_path, include=("func_multi_line",)) as manager:
         num = 123
         some_string = "Hello, world"
         num2 = 321
@@ -18,15 +23,15 @@ def func_multi_line() -> SnapshotManager:
     return manager
 
 
-def func_mutation():
-    with SnapshotManager(include=("func_mutation",)) as manager:
+def func_mutation(output_path=None) -> SnapshotManager:
+    with SnapshotManager(output_filepath=output_path, include=("func_mutation",)) as manager:
         num = 123
         num = 321
     return manager
 
 
-def func_for_loop():
-    with SnapshotManager(include=("func_for_loop",)) as manager:
+def func_for_loop(output_path=None) -> SnapshotManager:
+    with SnapshotManager(output_filepath=output_path, include=("func_for_loop",)) as manager:
         nums = [1, 2, 3]
         for i in range(len(nums)):
             nums[i] = nums[i] + 1
@@ -34,43 +39,43 @@ def func_for_loop():
 
 
 # TODO: we are taking a snapshot even for statements, clarify if this is necessary
-def func_if_else() -> None:
-    with SnapshotManager():
+def func_if_else(output_path=None) -> SnapshotManager:
+    with SnapshotManager(output_filepath=output_path, include=("func_if_else",)) as manager:
         num = 10
         if num > 5:
             result = "greater"
         else:
             result = "lesser"
+    return manager
 
 
-def func_while() -> None:
-    line_count = 2
-    with SnapshotManager():
+def func_while(output_path=None) -> SnapshotManager:
+    with SnapshotManager(output_filepath=output_path, include=("func_while",)) as manager:
         num = 0
         while num < 3:
             num += 1
 
-    assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
+    return manager
 
 
-def assert_output_files_match(snapshot_count: int, output_path: str, actual_path: str):
+def assert_output_files_match(snapshot_count: int, output_path: str, expected_path: str):
     for i in range(snapshot_count):
+        actual_file = os.path.join(output_path, f"snapshot-{i}.svg")
+        expected_file = os.path.join(expected_path, f"snapshot-{i}.svg")
         with (
-            open(os.path.join(output_path, f"snapshot-{i}.svg")) as actual_file,
-            open(os.path.join(actual_path, f"snapshot-{i}.svg")) as expected_file,
+            open(actual_file) as actual_file,
+            open(expected_file) as expected_file,
         ):
             actual_svg = actual_file.read()
             expected_svg = expected_file.read()
             assert actual_svg == expected_svg
 
 
-def test_multi_line(tmp_path) -> None:
-    manager = func_multi_line()
-    snapshot_count = manager.get_snapshot_count()
-    # assert_output_files_match(snapshot_count, tmp_path.name, "snapshot_manager_testing_snapshots/one_line")
-
-
-def test_one_line(tmp_path: str) -> None:
-    manager = func_one_line(tmp_path)
-    snapshot_count = manager.get_snapshot_count()
-    # assert_output_files_match(snapshot_count, tmp_path.name, "snapshot_manager_testing_snapshots/one_line")
+@pytest.mark.parametrize("test_func", [func_one_line, func_multi_line, func_mutation])
+# TODO: find a good way to take snapshots
+def test_snapshot_manger(test_func):
+    actual_path = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
+    os.makedirs(actual_path, exist_ok=True)
+    manager = test_func(actual_path)
+    expected_path = os.path.join("snapshot_manager_testing_snapshots", test_func.__name__)
+    assert_output_files_match(manager.get_snapshot_count(), actual_path, expected_path)

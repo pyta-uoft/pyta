@@ -55,9 +55,13 @@ class SnapshotManager:
     def _output_snapshot(self, data):
         command = ["npx", "memory-viz"]
         command.extend(self.memory_viz_args)
-        command.extend(
-            ["--output", os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg")]
-        )
+        if self.output_filepath is not None:
+            command.extend(
+                [
+                    "--output",
+                    os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
+                ]
+            )
         npx_path = shutil.which("npx")
         subprocess.run(
             command,

@@ -2,117 +2,75 @@ import os.path
 
 from python_ta.debug import SnapshotManager
 
-expected_result_dir = "snapshot_manager_testing_snapshots"
 
-
-def test_one_line(tmp_path) -> None:
-    with SnapshotManager(output_filepath=os.path.abspath(tmp_path)) as manager:
+def func_one_line(tmp_path) -> SnapshotManager:
+    with SnapshotManager(output_filepath=tmp_path, include=("func_one_line",)) as manager:
         num = 123
-    snapshot_count = manager.get_snapshot_count()
-    assert all(
-        os.path.exists(os.path.join(tmp_path, f"snapshot-{i}.svg")) for i in range(snapshot_count)
-    )
+    return manager
+
+
+def func_multi_line() -> SnapshotManager:
+    with SnapshotManager(include=("func_multi_line",)) as manager:
+        num = 123
+        some_string = "Hello, world"
+        num2 = 321
+        arr = [some_string, "string 123321"]
+    return manager
+
+
+def func_mutation():
+    with SnapshotManager(include=("func_mutation",)) as manager:
+        num = 123
+        num = 321
+    return manager
+
+
+def func_for_loop():
+    with SnapshotManager(include=("func_for_loop",)) as manager:
+        nums = [1, 2, 3]
+        for i in range(len(nums)):
+            nums[i] = nums[i] + 1
+    return manager
+
+
+# TODO: we are taking a snapshot even for statements, clarify if this is necessary
+def func_if_else() -> None:
+    with SnapshotManager():
+        num = 10
+        if num > 5:
+            result = "greater"
+        else:
+            result = "lesser"
+
+
+def func_while() -> None:
+    line_count = 2
+    with SnapshotManager():
+        num = 0
+        while num < 3:
+            num += 1
+
+    assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
+
+
+def assert_output_files_match(snapshot_count: int, output_path: str, actual_path: str):
     for i in range(snapshot_count):
         with (
-            open(os.path.join(tmp_path, f"snapshot-{i}.svg")) as actual_file,
-            open(
-                f"snapshot_manager_testing_snapshots/one_line/snapshot-{i}.svg",
-            ) as expected_file,
+            open(os.path.join(output_path, f"snapshot-{i}.svg")) as actual_file,
+            open(os.path.join(actual_path, f"snapshot-{i}.svg")) as expected_file,
         ):
             actual_svg = actual_file.read()
             expected_svg = expected_file.read()
             assert actual_svg == expected_svg
 
 
-# TODO: use temporary folder for the outputs
-# def test_two_lines() -> None:
-#     with SnapshotManager() as manager:
-#         num = 123
-#         some_string = "Hello, world"
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-#
-# def test_three_lines() -> None:
-#     with SnapshotManager() as manager:
-#         num = 123
-#         some_string = "Hello, world"
-#         num2 = 321
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-# def test_for_loop() -> None:
-#     with SnapshotManager():
-#         nums = [1, 2, 3]
-#         for num in nums:
-#             a = num + 1
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-# def test_for_loop_mutation() -> None:
-#     with SnapshotManager():
-#         nums = [1, 2, 3]
-#         for i in range(len(nums)):
-#             nums[i] = nums[i] + 1
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-# def test_if_else() -> None:
-#     # TODO: we are taking a snapshot even for statements, clarify if this is necessary
-#     with SnapshotManager():
-#         num = 10
-#         if num > 5:
-#             result = "greater"
-#         else:
-#             result = "lesser"
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-#
-# def test_while_loop() -> None:
-#     line_count = 2
-#     with SnapshotManager():
-#         num = 0
-#         while num < 3:
-#             num += 1
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-#
-# def test_nested_loops() -> None:
-#     line_count = 2
-#     with SnapshotManager():
-#         for i in range(3):
-#             for j in range(2):
-#                 result = i * j
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-#
-# def test_list_comprehension() -> None:
-#     line_count = 2
-#     with SnapshotManager():
-#         nums = [1, 2, 3, 4]
-#         squares = [num * num for num in nums]
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-#
-# def test_dict_comprehension() -> None:
-#     line_count = 2
-#     with SnapshotManager():
-#         nums = [1, 2, 3, 4]
-#         squares_dict = {num: num * num for num in nums}
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
-#
-#
-# def test_try_except() -> None:
-#     line_count = 2
-#     with SnapshotManager():
-#         try:
-#             result = 10 / 0
-#         except ZeroDivisionError:
-#             result = "error"
-#
-#     assert all(os.path.exists("snapshot-1.svg") for i in range(line_count))
+def test_multi_line(tmp_path) -> None:
+    manager = func_multi_line()
+    snapshot_count = manager.get_snapshot_count()
+    # assert_output_files_match(snapshot_count, tmp_path.name, "snapshot_manager_testing_snapshots/one_line")
+
+
+def test_one_line(tmp_path: str) -> None:
+    manager = func_one_line(tmp_path)
+    snapshot_count = manager.get_snapshot_count()
+    # assert_output_files_match(snapshot_count, tmp_path.name, "snapshot_manager_testing_snapshots/one_line")

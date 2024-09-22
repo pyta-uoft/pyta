@@ -10,26 +10,35 @@ from typing import Any, List, Optional
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
 
+# TODO: decide what control we want to give the user
 class SnapshotManager:
     output_filepath: Optional[str]
     memory_viz_args: Optional[list[str]]
     memory_viz_version: str = "latest"
     snapshot_counts = 0
+    include: Optional[tuple[str, ...]]
+    # TODO: do we want to let user hide specific variables, such as the manager itself?
 
     def __init__(
-        self, memory_viz_args: Optional[list[str]] = None, output_filepath: Optional[str] = "."
+        self,
+        memory_viz_args: Optional[list[str]] = None,
+        output_filepath: Optional[str] = ".",
+        include: Optional[tuple[str, ...]] = (".*",),
     ) -> None:
         if memory_viz_args is None:
             memory_viz_args = ["--roughjs-config", "seed=12345"]
         self.output_filepath = output_filepath
         self.memory_viz_args = memory_viz_args
+        self.include = include
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         if event == "line" and frame.f_locals:
-            var_data = snapshot()
+            # TODO: use snapshot(save=True)
+            var_data = snapshot(include=self.include)
             json_data = snapshot_to_json(var_data)
-            self._output_snapshot(json_data)
-            self.snapshot_counts += 1
+            if json_data:
+                self._output_snapshot(json_data)
+                self.snapshot_counts += 1
 
     def get_snapshot_count(self):
         return self.snapshot_counts

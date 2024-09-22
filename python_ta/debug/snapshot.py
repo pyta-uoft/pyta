@@ -68,7 +68,7 @@ def snapshot(
         json_compatible_vars = snapshot_to_json(variables)
 
         # Set up command
-        command = ["npx", "memory-viz"]
+        command = ["npx", f"memory-viz@{memory_viz_version}"]
         if memory_viz_args:
             command.extend(memory_viz_args)
 

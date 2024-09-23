@@ -85,11 +85,12 @@ def test_snapshot_manger(test_func):
 
     manager = test_func(actual_dir)
 
-    expected_dir = os.path.join("snapshot_manager_testing_snapshots", test_func.__name__)
+    expected_dir = os.path.join(SNAPSHOT_DIR, test_func.__name__)
     if save_snapshots:
         shutil.rmtree(expected_dir, ignore_errors=True)
         shutil.copytree(actual_dir, expected_dir, dirs_exist_ok=True)
     else:
         assert_output_files_match(manager.get_snapshot_count(), actual_dir, expected_dir)
 
+    # clean up the test dir
     shutil.rmtree(actual_dir)

@@ -2,10 +2,15 @@
 Test suite for snapshot functions
 """
 
+from __future__ import annotations
+
 import json
 import os
+import pathlib
+import re
 import subprocess
 import sys
+from typing import Iterable, Optional
 
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
@@ -642,3 +647,93 @@ def test_snapshot_save_stdout():
         expected_svg = expected_svg_file.read()
 
     assert result.stdout == expected_svg
+
+
+def func_with_include(include: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot(include=include)
+
+
+def func_with_include_nested(include: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Leo", "tester")
+    return func_with_include(include=include)
+
+
+def func_with_unserializable_objects() -> list[dict]:
+    path = pathlib.PosixPath("some path")
+    vars_in_curr_func = [snapshot()[0]]
+    processed_result = snapshot_to_json(vars_in_curr_func)
+    json.dumps(processed_result)
+    return processed_result
+
+
+def test_snapshot_only_includes_function_self():
+    result = func_with_include(include=("func_with_include",))
+    assert result == [
+        {
+            "func_with_include": {
+                "include": ("func_with_include",),
+                "test_var1a": "David is cool!",
+                "test_var2a": "Students Developing Software",
+            }
+        }
+    ]
+
+
+def test_snapshot_includes_multiple_functions():
+    result = func_with_include_nested(
+        include=(
+            "func_with_include",
+            "func_with_include_nested",
+        )
+    )
+    assert result == [
+        {
+            "func_with_include": {
+                "include": (
+                    "func_with_include",
+                    "func_with_include_nested",
+                ),
+                "test_var1a": "David is cool!",
+                "test_var2a": "Students Developing Software",
+            },
+        },
+        {
+            "func_with_include_nested": {
+                "include": (
+                    "func_with_include",
+                    "func_with_include_nested",
+                ),
+                "test_var1b": {"SDS_coolest_project": "PyTA"},
+                "test_var2b": ("Leo", "tester"),
+            },
+        },
+    ]
+
+
+def test_snapshot_only_includes_specified_function():
+    result = func_with_include_nested(include=("func_with_include_nested",))
+    assert result == [
+        {
+            "func_with_include_nested": {
+                "include": ("func_with_include_nested",),
+                "test_var1b": {"SDS_coolest_project": "PyTA"},
+                "test_var2b": ("Leo", "tester"),
+            },
+        }
+    ]
+
+
+def test_snapshot_serializes_unserializable_value():
+    result = func_with_unserializable_objects()
+    assert result == [
+        {
+            "id": None,
+            "name": "func_with_unserializable_objects",
+            "type": ".frame",
+            "value": {"path": 1},
+        },
+        {"id": 1, "type": "PosixPath", "value": repr(pathlib.PosixPath("some path"))},
+    ]

@@ -9,9 +9,14 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Added `include` filter to `snapshot`
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes
+
+- Fixed issue where `snapshot` errors on unserializable values
+- Fixed issue within `Snapshot.py` where the `memory_viz_version` parameter was not respected
 
 ### 🔧 Internal changes
 

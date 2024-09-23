@@ -8,11 +8,12 @@ from __future__ import annotations
 import inspect
 import json
 import logging
+import re
 import shutil
 import subprocess
 import sys
 from types import FrameType
-from typing import Any, Optional
+from typing import Any, Iterable, Optional
 
 from packaging.version import Version, parse
 
@@ -40,6 +41,7 @@ def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
     memory_viz_version: str = "latest",
+    include: Optional[Iterable[str | re.Pattern]] = None,
 ):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
@@ -51,16 +53,20 @@ def snapshot(
     For details on the MemoryViz CLI, see https://www.cs.toronto.edu/~david/memory-viz/docs/cli.
     memory_viz_version can be used to dictate version, with a default of the latest version.
     Note that this function is compatible only with MemoryViz version 0.3.1 and above.
+    include can be used to specify a collection of function names, either as strings or regular expressions,
+    whose variables will be captured. By default, all variables in all functions will be captured if no `include`
+    argument is provided.
     """
     variables = []
     frame = inspect.currentframe().f_back
 
     while frame:
-        if frame.f_code.co_name != "<module>":
-            variables.append({frame.f_code.co_name: frame.f_locals})
-        else:
-            global_vars = get_filtered_global_variables(frame)
-            variables.append(global_vars)
+        if include is None or any(re.search(regex, frame.f_code.co_name) for regex in include):
+            if frame.f_code.co_name != "<module>":
+                variables.append({frame.f_code.co_name: frame.f_locals})
+            else:
+                global_vars = get_filtered_global_variables(frame)
+                variables.append(global_vars)
 
         frame = frame.f_back
 
@@ -154,10 +160,15 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     "value": attr_ids,
                 }
             else:  # Handle primitives and other types
+                try:
+                    json.dumps(val)
+                    jsonable_val = val
+                except TypeError:
+                    jsonable_val = repr(val)
                 value_entry = {
                     "type": type(val).__name__,
                     "id": value_id_diagram,
-                    "value": val,
+                    "value": jsonable_val,
                 }
 
             value_entries.append(value_entry)

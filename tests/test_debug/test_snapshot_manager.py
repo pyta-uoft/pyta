@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os.path
 import shutil
 
@@ -63,10 +65,7 @@ def assert_output_files_match(snapshot_count: int, output_path: str, expected_pa
     for i in range(snapshot_count):
         actual_file = os.path.join(output_path, f"snapshot-{i}.svg")
         expected_file = os.path.join(expected_path, f"snapshot-{i}.svg")
-        with (
-            open(actual_file) as actual_file,
-            open(expected_file) as expected_file,
-        ):
+        with open(actual_file) as actual_file, open(expected_file) as expected_file:
             actual_svg = actual_file.read()
             expected_svg = expected_file.read()
             assert actual_svg == expected_svg

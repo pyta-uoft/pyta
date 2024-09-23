@@ -1,8 +1,7 @@
+from __future__ import annotations
+
 import inspect
-import json
 import os
-import shutil
-import subprocess
 import sys
 import types
 from typing import Any, List, Optional
@@ -33,14 +32,15 @@ class SnapshotManager:
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         if event == "line" and frame.f_locals:
+            memory_viz_args_copy = self.memory_viz_args.copy()
             if self.output_filepath:
-                self.memory_viz_args.extend(
+                memory_viz_args_copy.extend(
                     [
                         "--output",
                         os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
                     ]
                 )
-            snapshot(include=self.include, save=True, memory_viz_args=self.memory_viz_args)
+            snapshot(include=self.include, save=True, memory_viz_args=memory_viz_args_copy)
             self.snapshot_counts += 1
 
     def get_snapshot_count(self):

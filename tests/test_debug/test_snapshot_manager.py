@@ -1,11 +1,12 @@
 import os.path
+import shutil
 
 import pytest
 
 from python_ta.debug import SnapshotManager
 
 SNAPSHOT_DIR = "snapshot_manager_testing_snapshots"
-TEST_RESULTS_DIR = "snapshot_manager_testing_results"
+TEST_RESULTS_DIR = "/tmp/test_results"
 
 
 def func_one_line(output_path=None) -> SnapshotManager:
@@ -71,11 +72,24 @@ def assert_output_files_match(snapshot_count: int, output_path: str, expected_pa
             assert actual_svg == expected_svg
 
 
-@pytest.mark.parametrize("test_func", [func_one_line, func_multi_line, func_mutation])
+@pytest.mark.parametrize(
+    "test_func", [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while]
+)
 # TODO: find a good way to take snapshots
 def test_snapshot_manger(test_func):
-    actual_path = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
-    os.makedirs(actual_path, exist_ok=True)
-    manager = test_func(actual_path)
-    expected_path = os.path.join("snapshot_manager_testing_snapshots", test_func.__name__)
-    assert_output_files_match(manager.get_snapshot_count(), actual_path, expected_path)
+    # set up to ensure the output dir exists
+    save_snapshots = False
+
+    actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
+    os.makedirs(actual_dir, exist_ok=True)
+
+    manager = test_func(actual_dir)
+
+    expected_dir = os.path.join("snapshot_manager_testing_snapshots", test_func.__name__)
+    if save_snapshots:
+        shutil.rmtree(expected_dir, ignore_errors=True)
+        shutil.copytree(actual_dir, expected_dir, dirs_exist_ok=True)
+    else:
+        assert_output_files_match(manager.get_snapshot_count(), actual_dir, expected_dir)
+
+    shutil.rmtree(actual_dir)

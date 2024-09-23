@@ -242,7 +242,7 @@ def test_variable_reassignment() -> None:
         '''
         if x < 10:
             print("unreachable")
-        x -= 5
+        x = 5
         if x < 10:
             print("reachable")
     """
@@ -261,24 +261,6 @@ def test_variable_reassignment() -> None:
     assert all(
         edge.is_feasible == expected for edge, expected in zip(paths[3], expected_other_path2)
     )
-
-
-# TODO: determine and implement the expected behavior of this test case
-# def test_feasible_reassignment_in_while() -> None:
-#     src = """
-#     def func(x: int, y: int, condition: bool) -> None:
-#         '''
-#         Preconditions:
-#             - x > y
-#             - condition
-#         '''
-#         while condition:
-#             if x < y:
-#                 break
-#             y += 1
-#         print("break")
-#     """
-#     cfg = _create_cfg(src, "func")
 
 
 def _create_cfg(src: str, name: str) -> ControlFlowGraph:

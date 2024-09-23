@@ -3,14 +3,20 @@ from __future__ import annotations
 from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
-    import z3
-    from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
+    from z3 import (
+        Z3_OP_UNINTERPRETED,
+        ExprRef,
+        Not,
+        Solver,
+        Z3Exception,
+        is_const,
+        unsat,
+    )
 
     from ..z3.z3_parser import Z3ParseException, Z3Parser
 
     z3_dependency_available = True
 except ImportError:
-    z3 = Any
     ExprRef = Any
     Z3Parser = Any
     Not = Any
@@ -18,6 +24,8 @@ except ImportError:
     is_const = Any
     Z3_OP_UNINTERPRETED = Any
     Z3ParseException = Any
+    Solver = Any
+    unsat = Any
     z3_dependency_available = False
 
 from astroid import (
@@ -277,17 +285,11 @@ class ControlFlowGraph:
 
                 # traverse into target node
                 for node in edge.target.statements:
-                    if isinstance(node, (Assign, AugAssign)):
-                        self._handle_variable_reassignment(node, z3_environment)
-
-    def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
-        """Check for reassignment statements and invoke Z3 environment"""
-        if isinstance(node, Assign):
-            for target in node.targets:
-                if isinstance(target, AssignName):
-                    env.assign(target.name)
-        elif isinstance(node, AugAssign):
-            env.assign(node.target.name)
+                    if isinstance(node, Assign):
+                        # mark reassigned variables
+                        for target in node.targets:
+                            if isinstance(target, AssignName):
+                                z3_environment.assign(target.name)
 
     def update_edge_feasibility(self) -> None:
         """Traverse through edges in DFS order and update is_feasible
@@ -297,12 +299,15 @@ class ControlFlowGraph:
         if not z3_dependency_available:
             return
 
-        for path_id, path in enumerate(self.get_paths()):
-            solver = z3.Solver()
-            for edge in path:
-                solver.add(edge.z3_constraints[path_id])
-                if solver.check() == z3.sat:
-                    edge.is_feasible = True
+        def _check_unsat(constraints: List[ExprRef]) -> bool:
+            solver = Solver()
+            solver.add(constraints)
+            return solver.check() == unsat
+
+        for edge in self.get_edges():
+            edge.is_feasible = not all(
+                _check_unsat(constraints) for constraints in edge.z3_constraints.values()
+            )
 
 
 class CFGBlock:
@@ -380,7 +385,7 @@ class CFGEdge:
         self.source.successors.append(self)
         self.target.predecessors.append(self)
         self.z3_constraints = {}
-        self.is_feasible = False
+        self.is_feasible = True
 
     def get_label(self) -> Optional[str]:
         """Return the edge label if specified.

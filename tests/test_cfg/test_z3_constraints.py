@@ -467,18 +467,25 @@ def test_continue_in_while() -> None:
 
 def test_variable_reassignment() -> None:
     src = """
-    def func(x: float) -> None:
+    def func(x: float, y: int) -> None:
         '''
         Preconditions:
             - x in [1.0, 2.0, 3.0]
+            - y > 5
         '''
         print("initial x:", x)
+        print("initial y:", y)
         x = "x"
+        y -= 5
         print("final x:", x)
+        print("final y:", y)
     """
     cfg = _create_cfg(src, "func")
     x = z3.Real("x")
-    assert cfg.start.successors[0].z3_constraints == {0: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
+    y = z3.Int("y")
+    assert cfg.start.successors[0].z3_constraints == {
+        0: [z3.Or(x == 1.0, x == 2.0, x == 3.0), y > 5]
+    }
     assert cfg.end.predecessors[0].z3_constraints == {0: []}
 
 

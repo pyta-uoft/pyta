@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import List, Set
+from typing import List, Set, Tuple
 
 import pytest
 from nested_preconditions_example import Student
@@ -385,7 +385,7 @@ class ThemedWidget:
     primary_color: str
     secondary_color: str
 
-    def __init__(self, theme: str, color_palette: tuple[str, str], options: dict = None) -> None:
+    def __init__(self, theme: str, color_palette: Tuple[str, str], options: dict = None) -> None:
         if options:
             self.setup_options(options)
         else:
@@ -403,7 +403,7 @@ class ThemedWidget:
     def apply_theme(self, theme: str) -> None:
         self.theme = theme
 
-    def apply_color_palette(self, color_palette: tuple[str, str]) -> None:
+    def apply_color_palette(self, color_palette: Tuple[str, str]) -> None:
         self.primary_color, self.secondary_color = color_palette
 
 

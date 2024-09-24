@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from typing import Dict, List, Set
 
 import pytest
 from nested_preconditions_example import Student, my_function
@@ -33,7 +34,7 @@ def test_nullary_return_dict() -> None:
     """Calling a nullary function with the correct return type (dict)."""
 
     @check_contracts
-    def nullary() -> dict[str, int]:
+    def nullary() -> Dict[str, int]:
         return {"one": 1}
 
     nullary()
@@ -74,7 +75,7 @@ def test_nullary_return_dict_wrong() -> None:
     """Calling a nullary function with the incorrect return type (dict)."""
 
     @check_contracts
-    def nullary() -> dict[str, int]:
+    def nullary() -> Dict[str, int]:
         return {1: 1}
 
     with pytest.raises(AssertionError):
@@ -147,7 +148,7 @@ def test_nullary_no_return_type() -> None:
 
 
 @check_contracts
-def _my_sum(numbers: list[int]) -> int:
+def _my_sum(numbers: List[int]) -> int:
     return sum(numbers)
 
 
@@ -286,7 +287,7 @@ def is_even(lst: list[int]) -> bool:
 
 
 @check_contracts
-def _is_even_sum(numbers: list[int]) -> int:
+def _is_even_sum(numbers: List[int]) -> int:
     """Return the sum of a list of numbers.
 
     Precondition: is_even(numbers)
@@ -311,7 +312,7 @@ def test_is_even_sum_violation() -> None:
 
 
 @check_contracts
-def search(numbers: set[int]) -> bool:
+def search(numbers: Set[int]) -> bool:
     """Search for a number in a set.
 
     Illustrates a preconditions with a double comprehension.

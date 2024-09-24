@@ -4,6 +4,8 @@ Test suite for checking the functionality of validate_invariants.
 
 from __future__ import annotations
 
+from typing import List
+
 import pytest
 
 from python_ta.contracts import check_contracts, validate_invariants
@@ -20,9 +22,9 @@ class Person:
 
     given_name: str
     age: int
-    friends: list[str]
+    friends: List[str]
 
-    def __init__(self, given_name: str, age: int, friends: list[str]) -> None:
+    def __init__(self, given_name: str, age: int, friends: List[str]) -> None:
         """Initialize a new Person object."""
         self.given_name = given_name
         self.age = age

@@ -243,7 +243,7 @@ def test_parameter_int_bool_disable_contract_checking(disable_contract_checking)
 
 
 @check_contracts
-def _my_sum_one_precondition(numbers: list[int]) -> int:
+def _my_sum_one_precondition(numbers: List[int]) -> int:
     """Return the sum of a list of numbers.
 
     Precondition: len(numbers) > 2
@@ -402,7 +402,7 @@ def test_invalid_typing_generic_argument() -> None:
     """
 
     @check_contracts
-    def unary(arg: list[str]) -> None:
+    def unary(arg: List[str]) -> None:
         return
 
     with pytest.raises(AssertionError):
@@ -455,7 +455,7 @@ def test_get_double_disabled_contract_checking(disable_contract_checking) -> Non
 
 # Test that postcondition checks involving function parameters pass and fail as expected
 @check_contracts
-def _add_to_set_valid(num_set: set[int], new_num: int) -> None:
+def _add_to_set_valid(num_set: Set[int], new_num: int) -> None:
     """
     Add a number to the provided set if the number does not already exist in the set.
 
@@ -467,7 +467,7 @@ def _add_to_set_valid(num_set: set[int], new_num: int) -> None:
 
 
 @check_contracts
-def _add_to_set_invalid(num_set: set[int], new_num: int) -> None:
+def _add_to_set_invalid(num_set: Set[int], new_num: int) -> None:
     """
     Add new_num to the num_set. This is implemented incorrectly to make the postcondition check fail.
 
@@ -498,7 +498,7 @@ def test_add_to_set_invalid() -> None:
 
 # Test that postcondition checks that use custom functions in scope pass and fail as expected
 @check_contracts
-def _get_even_nums_valid(lst: list[int]) -> list[int]:
+def _get_even_nums_valid(lst: List[int]) -> List[int]:
     """
     Return a list of all even numbers in the input list.
 
@@ -508,7 +508,7 @@ def _get_even_nums_valid(lst: list[int]) -> list[int]:
 
 
 @check_contracts
-def _get_even_nums_invalid(lst: list[int]) -> list[int]:
+def _get_even_nums_invalid(lst: List[int]) -> List[int]:
     """
     Return a list of all odd numbers in the input list, which should cause the postcondition check to fail.
 

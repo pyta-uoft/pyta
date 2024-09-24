@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import List, Set
 
 import pytest
 from nested_preconditions_example import Student
@@ -26,7 +27,7 @@ class Person:
 
     age: int
     name: str
-    fav_foods: list[str]
+    fav_foods: List[str]
 
     def __init__(self, name, age, fav_food):
         self.name = name
@@ -101,7 +102,7 @@ class SetWrapper:
         - all(x in self.set for x in {1, 2, 3})
     """
 
-    set: set[int]
+    set: Set[int]
 
 
 @pytest.fixture

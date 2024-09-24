@@ -15,7 +15,7 @@
             fill: rgb(0, 0, 0);
             text-anchor: start;
         }
-        text.id {
+        text.id { 
             fill: rgb(150, 100, 28);
             text-anchor: middle;
         }

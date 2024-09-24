@@ -26,6 +26,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Renamed `reduce` method of `Z3Parser` to `parse`
 - Renamed `test_expr_wrapper` to `test_z3_parser`
 - Refactored codebase to use modern type annotations. Replaced `List` with `list`, `Dict` with `dict`, `Set` with `set`, and `Tuple` with `tuple`
+- Checked for variable reassignment in `AugAssign` and `AnnAssign` node in parsing edge Z3 constraints
 
 ## [2.8.1] - 2024-08-19
 

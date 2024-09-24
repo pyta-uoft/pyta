@@ -19,6 +19,7 @@ except ImportError:
     z3_dependency_available = False
 
 from astroid import (
+    AnnAssign,
     Arguments,
     Assign,
     AssignName,
@@ -275,7 +276,7 @@ class ControlFlowGraph:
 
                 # traverse into target node
                 for node in edge.target.statements:
-                    if isinstance(node, (Assign, AugAssign)):
+                    if isinstance(node, (Assign, AugAssign, AnnAssign)):
                         self._handle_variable_reassignment(node, z3_environment)
 
     def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
@@ -284,7 +285,7 @@ class ControlFlowGraph:
             for target in node.targets:
                 if isinstance(target, AssignName):
                     env.assign(target.name)
-        elif isinstance(node, AugAssign):
+        elif isinstance(node, (AugAssign, AnnAssign)):
             env.assign(node.target.name)
 
 

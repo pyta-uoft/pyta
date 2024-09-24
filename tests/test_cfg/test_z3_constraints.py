@@ -467,25 +467,52 @@ def test_continue_in_while() -> None:
 
 def test_variable_reassignment() -> None:
     src = """
-    def func(x: float, y: int) -> None:
+    def func(x: float) -> None:
         '''
         Preconditions:
             - x in [1.0, 2.0, 3.0]
-            - y > 5
         '''
         print("initial x:", x)
-        print("initial y:", y)
         x = "x"
-        y -= 5
         print("final x:", x)
-        print("final y:", y)
     """
     cfg = _create_cfg(src, "func")
     x = z3.Real("x")
-    y = z3.Int("y")
-    assert cfg.start.successors[0].z3_constraints == {
-        0: [z3.Or(x == 1.0, x == 2.0, x == 3.0), y > 5]
-    }
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.Or(x == 1.0, x == 2.0, x == 3.0)]}
+    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+
+
+def test_variable_augumented_reassign() -> None:
+    src = """
+    def func(x: int) -> None:
+        '''
+        Preconditions:
+            - x > 10
+        '''
+        print("initial x:", x)
+        x -= 5
+        print("final x:", x)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.Int("x")
+    assert cfg.start.successors[0].z3_constraints == {0: [x > 10]}
+    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+
+
+def test_variable_annotated_reassignment() -> None:
+    src = """
+    def func(x: str) -> None:
+        '''
+        Preconditions:
+            - x[0:2] == "ab"
+        '''
+        print("initial x:", x)
+        x: str = "cd"
+        print("final x:", x)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.String("x")
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.SubString(x, 0, 2) == "ab"]}
     assert cfg.end.predecessors[0].z3_constraints == {0: []}
 
 

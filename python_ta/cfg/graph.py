@@ -32,7 +32,6 @@ from astroid import (
     Arguments,
     Assign,
     AssignName,
-    AugAssign,
     Break,
     Continue,
     NodeNG,

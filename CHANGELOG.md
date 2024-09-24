@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Removed `node` attribute for `Z3Parser`
 - Renamed `reduce` method of `Z3Parser` to `parse`
 - Renamed `test_expr_wrapper` to `test_z3_parser`
+- Checked for variable reassignment in `AugAssign` and `AnnAssign` node in parsing edge Z3 constraints
 
 ## [2.8.1] - 2024-08-19
 

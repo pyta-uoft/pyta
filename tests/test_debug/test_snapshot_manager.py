@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import os.path
-import shutil
 
 import pytest
+from pytest_snapshot.plugin import Snapshot
 
 from python_ta.debug import SnapshotManager
 
-SNAPSHOT_DIR = "snapshot_manager_testing_snapshots"
+SNAPSHOT_DIR = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "snapshot_manager_testing_snapshots"
+)
 TEST_RESULTS_DIR = "/tmp/test_results"
 
 
@@ -61,35 +63,27 @@ def func_while(output_path=None) -> SnapshotManager:
     return manager
 
 
-def assert_output_files_match(snapshot_count: int, output_path: str, expected_path: str):
+def assert_output_files_match(
+    snapshot_count: int, output_path: str, snapshot: Snapshot, function_name: str
+):
+    actual_svgs = {}
     for i in range(snapshot_count):
-        actual_file = os.path.join(output_path, f"snapshot-{i}.svg")
-        expected_file = os.path.join(expected_path, f"snapshot-{i}.svg")
-        with open(actual_file) as actual_file, open(expected_file) as expected_file:
+        file_name = f"snapshot-{i}.svg"
+        actual_file = os.path.join(output_path, file_name)
+        with open(actual_file) as actual_file:
             actual_svg = actual_file.read()
-            expected_svg = expected_file.read()
-            assert actual_svg == expected_svg
+            actual_svgs[file_name] = actual_svg
+    snapshot.assert_match_dir(actual_svgs, function_name)
 
 
 @pytest.mark.parametrize(
     "test_func", [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while]
 )
-# TODO: find a good way to take snapshots
-def test_snapshot_manger(test_func):
-    # set up to ensure the output dir exists
-    save_snapshots = False
-
+def test_snapshot_manger(test_func, snapshot):
+    snapshot.snapshot_dir = SNAPSHOT_DIR
     actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
     os.makedirs(actual_dir, exist_ok=True)
-
     manager = test_func(actual_dir)
-
-    expected_dir = os.path.join(SNAPSHOT_DIR, test_func.__name__)
-    if save_snapshots:
-        shutil.rmtree(expected_dir, ignore_errors=True)
-        shutil.copytree(actual_dir, expected_dir, dirs_exist_ok=True)
-    else:
-        assert_output_files_match(manager.get_snapshot_count(), actual_dir, expected_dir)
-
-    # clean up the test dir
-    shutil.rmtree(actual_dir)
+    assert_output_files_match(
+        manager.get_snapshot_count(), actual_dir, snapshot, test_func.__name__
+    )

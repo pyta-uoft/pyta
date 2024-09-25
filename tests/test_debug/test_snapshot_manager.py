@@ -61,11 +61,19 @@ def assert_output_files_match(output_path: str, snapshot: Snapshot, function_nam
     actual_svgs = {}
     files = os.listdir(output_path)
     for file in files:
-        actual_file = os.path.join(output_path, file)
-        with open(actual_file) as actual_file:
+        actual_path = os.path.join(output_path, file)
+        with open(actual_path) as actual_file:
             actual_svg = actual_file.read()
             actual_svgs[file] = actual_svg
     snapshot.assert_match_dir(actual_svgs, function_name)
+
+
+# TODO: consider putting this in a test suite and have proper setup and teardown
+def setup_test_directory(func_name: str):
+    actual_dir = os.path.join(TEST_RESULTS_DIR, func_name)
+    shutil.rmtree(actual_dir, ignore_errors=True)
+    os.makedirs(actual_dir, exist_ok=True)
+    return actual_dir
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
@@ -73,12 +81,64 @@ def assert_output_files_match(output_path: str, snapshot: Snapshot, function_nam
     "test_func",
     [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while, func_if_else],
 )
-def test_snapshot_manger(test_func, snapshot):
+def test_snapshot_manger_with_functions(test_func, snapshot):
     snapshot.snapshot_dir = SNAPSHOT_DIR
-    actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
-    shutil.rmtree(actual_dir, ignore_errors=True)
-    os.makedirs(actual_dir, exist_ok=True)
+    actual_dir = setup_test_directory(test_func.__name__)
 
     test_func(actual_dir)
 
     assert_output_files_match(actual_dir, snapshot, test_func.__name__)
+
+
+def func_no_memory_viz_args():
+    # this will output to the current directory
+    with SnapshotManager(include=("func_no_memory_viz_args",)):
+        s = "Hello"
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_outputs_to_default_directory_with_no_memory_viz_args(snapshot):
+    if os.path.exists("snapshot-0.svg"):
+        os.remove("snapshot-0.svg")
+    snapshot.snapshot_dir = SNAPSHOT_DIR
+    setup_test_directory(func_no_memory_viz_args.__name__)
+
+    func_no_memory_viz_args()
+
+    # find snapshot-1 in the current directory
+    with open("snapshot-0.svg") as actual_file:
+        snapshot.assert_match_dir(
+            {"snapshot-0.svg": actual_file.read()}, func_no_memory_viz_args.__name__
+        )
+
+
+def func_with_args():
+    with SnapshotManager(
+        include=("func_with_args",), memory_viz_args=["--roughjs-config", "seed=12345"]
+    ):
+        flag = "not --output"
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_func_with_non_output_flags(snapshot):
+    if os.path.exists("snapshot-0.svg"):
+        os.remove("snapshot-0.svg")
+    snapshot.snapshot_dir = SNAPSHOT_DIR
+    setup_test_directory(func_with_args.__name__)
+
+    func_with_args()
+
+    # find snapshot-1 in the current directory
+    with open("snapshot-0.svg") as actual_file:
+        snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_using_output_flag():
+    with pytest.raises(
+        ValueError, match="Use the output_filepath argument to specify a different output path."
+    ):
+        with SnapshotManager(
+            include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
+        ):
+            pass

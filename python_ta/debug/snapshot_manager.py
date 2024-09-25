@@ -20,7 +20,7 @@ class SnapshotManager:
     def __init__(
         self,
         memory_viz_args: Optional[list[str]] = None,
-        memory_viz_version: str = None,
+        memory_viz_version: str = "latest",
         include: Optional[Iterable[str | re.Pattern]] = None,
         output_filepath: Optional[str] = None,
     ) -> None:
@@ -31,21 +31,20 @@ class SnapshotManager:
         self.snapshot_counts = 0
         self.include = include
 
-        if output_filepath is not None:
-            if "--output" in memory_viz_args:
-                raise ValueError("The --output argument is already defined in memory_viz_args.")
-        self.output_filepath = output_filepath
+        if any("--output" in arg for arg in memory_viz_args):
+            raise ValueError("Use the output_filepath argument to specify a different output path.")
+
+        self.output_filepath = output_filepath if output_filepath else "."
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         if event == "line" and frame.f_locals:
             memory_viz_args_copy = self.memory_viz_args.copy()
-            if self.output_filepath:
-                memory_viz_args_copy.extend(
-                    [
-                        "--output",
-                        os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
-                    ]
-                )
+            memory_viz_args_copy.extend(
+                [
+                    "--output",
+                    os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
+                ]
+            )
             snapshot(
                 include=self.include,
                 save=True,

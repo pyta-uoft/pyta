@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os.path
+import shutil
+import sys
 
 import pytest
 from pytest_snapshot.plugin import Snapshot
@@ -76,10 +78,12 @@ def assert_output_files_match(
     snapshot.assert_match_dir(actual_svgs, function_name)
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 @pytest.mark.parametrize(
     "test_func", [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while]
 )
 def test_snapshot_manger(test_func, snapshot):
+    shutil.rmtree(f"{TEST_RESULTS_DIR}/{test_func.__name__}", ignore_errors=True)
     snapshot.snapshot_dir = SNAPSHOT_DIR
     actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
     os.makedirs(actual_dir, exist_ok=True)

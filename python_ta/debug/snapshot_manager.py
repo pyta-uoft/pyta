@@ -4,9 +4,9 @@ import inspect
 import os
 import sys
 import types
-from typing import Any, List, Optional
+from typing import Any, Optional
 
-from python_ta.debug.snapshot import snapshot, snapshot_to_json
+from python_ta.debug.snapshot import snapshot
 
 
 # TODO: decide what control we want to give the user
@@ -54,3 +54,4 @@ class SnapshotManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         sys.settrace(None)
+        inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Generator, Optional
+from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
     from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
@@ -42,11 +42,11 @@ class ControlFlowGraph:
     # block_count is used as an "autoincrement" to ensure the block ids are unique.
     block_count: int
     # blocks (with at least one statement) that will never be executed in runtime.
-    unreachable_blocks: set[CFGBlock]
+    unreachable_blocks: Set[CFGBlock]
     # z3 constraints of preconditions
-    precondition_constraints: list[ExprRef]
+    precondition_constraints: List[ExprRef]
     # map from variable names to z3 variables
-    _z3_vars: dict[str, ExprRef]
+    _z3_vars: Dict[str, ExprRef]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0
@@ -134,7 +134,7 @@ class ControlFlowGraph:
         else:
             CFGEdge(source, target, edge_label, edge_condition, edge_negate)
 
-    def multiple_link_or_merge(self, source: CFGBlock, targets: list[CFGBlock]) -> None:
+    def multiple_link_or_merge(self, source: CFGBlock, targets: List[CFGBlock]) -> None:
         """Link source to multiple target, or merge source into targets if source is empty.
 
         An "empty" node for this purpose is when source has no statements.
@@ -160,7 +160,7 @@ class ControlFlowGraph:
         """Generate a sequence of all blocks in this graph."""
         yield from self._get_blocks(self.start, set())
 
-    def _get_blocks(self, block: CFGBlock, visited: set[int]) -> Generator[CFGBlock, None, None]:
+    def _get_blocks(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:
         if block.id in visited:
             return
 
@@ -189,7 +189,7 @@ class ControlFlowGraph:
         """Generate a sequence of all edges in this graph."""
         yield from self._get_edges(self.start, set())
 
-    def _get_edges(self, block: CFGBlock, visited: set[int]) -> Generator[CFGEdge, None, None]:
+    def _get_edges(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGEdge, None, None]:
         if block.id in visited:
             return
 
@@ -199,20 +199,20 @@ class ControlFlowGraph:
             yield edge
             yield from self._get_edges(edge.target, visited)
 
-    def _get_paths(self) -> list[list[CFGEdge]]:
+    def get_paths(self) -> List[List[CFGEdge]]:
         """Get edges that represent paths from start to end node in depth-first order."""
         paths = []
 
         def _visited(
-            edge: CFGEdge, visited_edges: set[CFGEdge], visited_nodes: set[CFGBlock]
+            edge: CFGEdge, visited_edges: Set[CFGEdge], visited_nodes: Set[CFGBlock]
         ) -> bool:
             return edge in visited_edges or edge.target in visited_nodes
 
         def _dfs(
             current_edge: CFGEdge,
-            current_path: list[CFGEdge],
-            visited_edges: set[CFGEdge],
-            visited_nodes: set[CFGBlock],
+            current_path: List[CFGEdge],
+            visited_edges: Set[CFGEdge],
+            visited_nodes: Set[CFGBlock],
         ):
             # note: both visited edges and visited nodes need to be tracked to correctly handle cycles
             if _visited(current_edge, visited_edges, visited_nodes):
@@ -298,11 +298,11 @@ class CFGBlock:
     # A unique identifier
     id: int
     # The statements in this block.
-    statements: list[NodeNG]
+    statements: List[NodeNG]
     # This block's in-edges (from blocks that can execute immediately before this one).
-    predecessors: list[CFGEdge]
+    predecessors: List[CFGEdge]
     # This block's out-edges (to blocks that can execute immediately after this one).
-    successors: list[CFGEdge]
+    successors: List[CFGEdge]
     # Whether there exists a path from the start block to this block.
     reachable: bool
 
@@ -345,7 +345,7 @@ class CFGEdge:
     label: Optional[str]
     condition: Optional[NodeNG]
     negate: Optional[bool]
-    z3_constraints: dict[int, list[ExprRef]]
+    z3_constraints: Dict[int, List[ExprRef]]
 
     def __init__(
         self,
@@ -390,11 +390,11 @@ class Z3Environment:
         A list of Z3 constraints in the current environment.
     """
 
-    variable_unassigned: dict[str, bool]
-    variables: dict[str, ExprRef]
-    constraints: list[ExprRef]
+    variable_unassigned: Dict[str, bool]
+    variables: Dict[str, ExprRef]
+    constraints: List[ExprRef]
 
-    def __init__(self, variables: dict[str, ExprRef], constraints: list[ExprRef]) -> None:
+    def __init__(self, variables: Dict[str, ExprRef], constraints: List[ExprRef]) -> None:
         """Initialize the environment with function parameters and preconditions"""
         self.variable_unassigned = {var: True for var in variables}
         self.variables = variables
@@ -405,7 +405,7 @@ class Z3Environment:
         if name in self.variable_unassigned:
             self.variable_unassigned[name] = False
 
-    def update_constraints(self) -> list[ExprRef]:
+    def update_constraints(self) -> List[ExprRef]:
         """Returns all z3 constraints in the environments
         Removes constraints with reassigned variables
         """
@@ -437,7 +437,7 @@ class Z3Environment:
             return None
 
 
-def _get_vars(expr: ExprRef) -> set[str]:
+def _get_vars(expr: ExprRef) -> Set[str]:
     """Retrieve all z3 variables from a z3 expression"""
     variables = set()
 

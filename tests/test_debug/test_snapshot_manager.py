@@ -83,11 +83,13 @@ def assert_output_files_match(
     "test_func", [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while]
 )
 def test_snapshot_manger(test_func, snapshot):
-    shutil.rmtree(f"{TEST_RESULTS_DIR}/{test_func.__name__}", ignore_errors=True)
     snapshot.snapshot_dir = SNAPSHOT_DIR
     actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
+    shutil.rmtree(actual_dir, ignore_errors=True)
     os.makedirs(actual_dir, exist_ok=True)
+
     manager = test_func(actual_dir)
+
     assert_output_files_match(
         manager.get_snapshot_count(), actual_dir, snapshot, test_func.__name__
     )

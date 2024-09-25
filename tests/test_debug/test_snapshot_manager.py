@@ -82,9 +82,23 @@ def wait_for_file(seconds: int):
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_func_with_non_output_flags(snapshot):
+    if os.path.exists("snapshot-0.svg"):
+        os.remove("snapshot-0.svg")
+    snapshot.snapshot_dir = SNAPSHOT_DIR
+    setup_test_directory(func_with_args.__name__)
+
+    func_with_args()
+
+    # find snapshot-1 in the current directory
+    with open("snapshot-0.svg") as actual_file:
+        snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 @pytest.mark.parametrize(
     "test_func",
-    [func_multi_line, func_mutation, func_for_loop, func_while, func_if_else],
+    [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while, func_if_else],
 )
 def test_snapshot_manger_with_functions(test_func, snapshot):
     snapshot.snapshot_dir = SNAPSHOT_DIR
@@ -123,20 +137,6 @@ def func_with_args():
         include=("func_with_args",), memory_viz_args=["--roughjs-config", "seed=12345"]
     ):
         flag = "not --output"
-
-
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_func_with_non_output_flags(snapshot):
-    if os.path.exists("snapshot-0.svg"):
-        os.remove("snapshot-0.svg")
-    snapshot.snapshot_dir = SNAPSHOT_DIR
-    setup_test_directory(func_with_args.__name__)
-
-    func_with_args()
-
-    # find snapshot-1 in the current directory
-    with open("snapshot-0.svg") as actual_file:
-        snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")

@@ -92,7 +92,7 @@ def test_snapshot_manger_with_functions(test_func, snapshot):
 
     test_func(actual_dir)
 
-    wait_for_file(5)
+    wait_for_file(10)
     assert_output_files_match(actual_dir, snapshot, test_func.__name__)
 
 

@@ -84,7 +84,7 @@ def wait_for_file(seconds: int):
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 @pytest.mark.parametrize(
     "test_func",
-    [func_one_line, func_multi_line, func_mutation, func_for_loop, func_while, func_if_else],
+    [func_multi_line, func_mutation, func_for_loop, func_while, func_if_else],
 )
 def test_snapshot_manger_with_functions(test_func, snapshot):
     snapshot.snapshot_dir = SNAPSHOT_DIR

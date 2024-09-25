@@ -12,7 +12,7 @@ from python_ta.debug.snapshot import snapshot
 
 class SnapshotManager:
     memory_viz_args: Optional[list[str]]
-    memory_viz_version: str = "latest"
+    memory_viz_version: str
     snapshot_counts: int
     include: Optional[Iterable[str | re.Pattern]]
     output_filepath: Optional[str]
@@ -20,11 +20,13 @@ class SnapshotManager:
     def __init__(
         self,
         memory_viz_args: Optional[list[str]] = None,
-        include: Optional[tuple[str, ...]] = None,
+        memory_viz_version: str = None,
+        include: Optional[Iterable[str | re.Pattern]] = None,
         output_filepath: Optional[str] = None,
     ) -> None:
         if memory_viz_args is None:
             memory_viz_args = ["--roughjs-config", "seed=12345"]
+        self.memory_viz_version = memory_viz_version
         self.memory_viz_args = memory_viz_args
         self.snapshot_counts = 0
         self.include = include
@@ -33,9 +35,6 @@ class SnapshotManager:
             if "--output" in memory_viz_args:
                 raise ValueError("The --output argument is already defined in memory_viz_args.")
         self.output_filepath = output_filepath
-
-    def get_snapshot_count(self):
-        return self.snapshot_counts
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         if event == "line" and frame.f_locals:
@@ -47,7 +46,12 @@ class SnapshotManager:
                         os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
                     ]
                 )
-            snapshot(include=self.include, save=True, memory_viz_args=memory_viz_args_copy)
+            snapshot(
+                include=self.include,
+                save=True,
+                memory_viz_args=memory_viz_args_copy,
+                memory_viz_version=self.memory_viz_version,
+            )
             self.snapshot_counts += 1
 
     def __enter__(self):

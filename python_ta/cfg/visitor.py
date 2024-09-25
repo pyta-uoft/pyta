@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from astroid import extract_node, nodes
 from astroid.exceptions import AstroidSyntaxError
@@ -31,15 +29,15 @@ class CFGVisitor:
         (compound statement [while], {'Break'/'Continue': CFGBlock to link to})
     """
 
-    cfgs: dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]
-    options: dict[str, Any]
+    cfgs: Dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]
+    options: Dict[str, Any]
     # cfg_count is used as an "auto-increment" to ensure cfg ids are unique.
     cfg_count: int
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
-    _control_boundaries: list[tuple[nodes.NodeNG, dict[str, CFGBlock]]]
+    _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
 
-    def __init__(self, options: Optional[dict[str, Any]] = None) -> None:
+    def __init__(self, options: Optional[Dict[str, Any]] = None) -> None:
         super().__init__()
         self.cfgs = {}
         self.options = {
@@ -437,13 +435,13 @@ class CFGVisitor:
             child.accept(self)
 
 
-def _extract_exceptions(node: nodes.ExceptHandler) -> list[str]:
+def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:
     """A helper method that returns a list of all the exceptions handled by this except block as a
     list of strings.
     """
     exceptions = node.type
     exceptions_so_far = []
-    # ExceptHandler.type will either be tuple, NodeNG, or None.
+    # ExceptHandler.type will either be Tuple, NodeNG, or None.
     if exceptions is None:
         return exceptions_so_far
 

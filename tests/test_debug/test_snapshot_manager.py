@@ -3,6 +3,7 @@ from __future__ import annotations
 import os.path
 import shutil
 import sys
+import time
 
 import pytest
 from pytest_snapshot.plugin import Snapshot
@@ -76,6 +77,10 @@ def setup_test_directory(func_name: str):
     return actual_dir
 
 
+def wait_for_file(seconds: int):
+    time.sleep(seconds)
+
+
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 @pytest.mark.parametrize(
     "test_func",
@@ -87,6 +92,7 @@ def test_snapshot_manger_with_functions(test_func, snapshot):
 
     test_func(actual_dir)
 
+    wait_for_file(5)
     assert_output_files_match(actual_dir, snapshot, test_func.__name__)
 
 

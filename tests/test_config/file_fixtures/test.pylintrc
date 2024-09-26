@@ -3,15 +3,15 @@
 # Default max amount of messages for reporter to display.
 pyta-number-of-messages = 10
 
-# set whether the default error messages by pylint should be overwritten by python TA's custom messages
+# Set whether the default error messages by pylint should be overwritten by python TA's custom messages
 overwrite-error-messages = yes
 
 [ELIF]
 
-# set maximum allowed if nesting.
+# Set maximum allowed if nesting.
 max-nested-blocks = 5
 
 [FORMAT]
 
-# set the maximum line length.
+# Set the maximum line length.
 max-line-length = 120

@@ -35,6 +35,7 @@ class SnapshotManager:
             raise ValueError("Use the output_filepath argument to specify a different output path.")
 
         self.output_filepath = output_filepath if output_filepath else "."
+        print(os.path.join(os.path.abspath(self.output_filepath), f"snapshot.svg"))
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         if event == "line" and frame.f_locals:
@@ -42,10 +43,12 @@ class SnapshotManager:
             memory_viz_args_copy.extend(
                 [
                     "--output",
-                    os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
+                    os.path.join(
+                        os.path.abspath(self.output_filepath),
+                        f"snapshot-{self.snapshot_counts}.svg",
+                    ),
                 ]
             )
-            print(f"memory_viz_args_copy: {memory_viz_args_copy}")
             snapshot(
                 include=self.include,
                 save=True,

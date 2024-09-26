@@ -312,9 +312,10 @@ class ControlFlowGraph:
             return solver.check() == unsat
 
         for edge in self.get_edges():
-            edge.is_feasible = not all(
-                _check_unsat(constraints) for constraints in edge.z3_constraints.values()
-            )
+            if len(edge.z3_constraints) > 0:
+                edge.is_feasible = not all(
+                    _check_unsat(constraints) for constraints in edge.z3_constraints.values()
+                )
 
 
 class CFGBlock:

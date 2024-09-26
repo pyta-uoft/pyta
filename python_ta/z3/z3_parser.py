@@ -182,7 +182,7 @@ class Z3Parser:
     def parse_container_op(
         self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
     ) -> list[z3.ExprRef]:
-        """Convert an astroid list, Set, tuple node to a list of z3 expressions."""
+        """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
         return [self.parse(element) for element in node.elts]
 
     def apply_in_op(

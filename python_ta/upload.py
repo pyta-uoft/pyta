@@ -9,7 +9,7 @@ import requests
 
 
 def errors_to_dict(errors: list[NamedTuple]) -> dict[str, list[str]]:
-    """Convert PyTA errors from MessageSet format to a json format dictionary."""
+    """Convert PyTA errors from MessageSet format to a json format Dictionary."""
     error_info = ["msg_id", "msg", "symbol", "module", "category", "line"]
     error_types = ["code", "style"]
     err_as_dict = {}

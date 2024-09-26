@@ -12,7 +12,6 @@ class Employee:
     Represents an employee
 
     Representation Invariants:
-    Representation Invariants:
     - len(self.name) > 0
     - self.wage >= 15
     """

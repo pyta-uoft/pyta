@@ -14,6 +14,7 @@ class TestTypeAnnotationChecker(pylint.testutils.CheckerTestCase):
         src = """
         from typing import List
 
+
         def add_two_numbers(
             x=int, # Error on this line
             y=List[float], # Error on this line

@@ -31,12 +31,12 @@ Set to True to enable contract checking.
 
 DEBUG_CONTRACTS = False
 """
-set to True to display debugging messages when checking contracts.
+Set to True to display debugging messages when checking contracts.
 """
 
 RENAME_MAIN_TO_PYDEV_UMD = True
 """
-set to False to disable workaround for PyCharm's "Run File in Python Console" action.
+Set to False to disable workaround for PyCharm's "Run File in Python Console" action.
 In most cases you should not need to change this!
 """
 
@@ -163,7 +163,7 @@ def add_class_invariants(klass: type) -> None:
     cls_annotations = None  # This is a cached value set the first time new_setattr is called
 
     def new_setattr(self: klass, name: str, value: Any) -> None:
-        """set the value of the given attribute on self to the given value.
+        """Set the value of the given attribute on self to the given value.
 
         Check representation invariants for this class when not within an instance method of the class.
         """

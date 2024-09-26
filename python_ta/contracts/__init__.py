@@ -580,8 +580,8 @@ def _display_annotation(annotation: Any) -> str:
     'int'
     >>> _display_annotation(list[int])
     'list[int]'
-    >>> from typing import list
-    >>> _display_annotation(list[int])
+    >>> from typing import List
+    >>> _display_annotation(List[int])
     'typing.list[int]'
     """
     if annotation is type(None):  # Use 'None' instead of 'NoneType'

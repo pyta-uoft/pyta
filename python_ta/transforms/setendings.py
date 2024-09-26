@@ -478,7 +478,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
     def set_endings_from_source(node):
         # Tuple nodes have an end_col_offset that includes the end paren,
         # but their col_offset does not include the start paren.
-        # To address this, we override the tuple node's end_col_offset.
+        # To address this, we override the Tuple node's end_col_offset.
         if not hasattr(node, "end_col_offset") or isinstance(node, nodes.Tuple):
             set_from_last_child(node)
 

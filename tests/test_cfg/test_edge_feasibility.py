@@ -6,7 +6,7 @@ from python_ta.transforms.z3_visitor import Z3Visitor
 
 def test_unfeasible_simple_function() -> None:
     src = """
-    def func(x: str) -> int:
+    def func(x: str) -> None:
         '''
         Preconditions:
             - x[0] == "a"
@@ -20,7 +20,7 @@ def test_unfeasible_simple_function() -> None:
 
 def test_unfeasible_if_condition() -> None:
     src = """
-    def func(x: int) -> int:
+    def func(x: int) -> None:
         '''
         Preconditions:
             - x > 0
@@ -70,7 +70,7 @@ def test_unfeasible_if_else() -> None:
 
 def test_unfeasible_while_condition() -> None:
     src = """
-    def func(x: int, y: int) -> int:
+    def func(x: int, y: int) -> None:
         '''
         Preconditions:
             - x > 10

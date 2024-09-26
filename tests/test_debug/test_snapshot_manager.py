@@ -81,6 +81,13 @@ def wait_for_file(seconds: int):
     time.sleep(seconds)
 
 
+def func_with_args():
+    with SnapshotManager(
+        include=("func_with_args",), memory_viz_args=["--roughjs-config", "seed=12345"]
+    ):
+        flag = "not --output"
+
+
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 def test_func_with_non_output_flags(snapshot):
     if os.path.exists("snapshot-0.svg"):
@@ -90,7 +97,9 @@ def test_func_with_non_output_flags(snapshot):
 
     func_with_args()
 
-    # find snapshot-1 in the current directory
+    # print current directory and content
+    print(os.getcwd())
+    print(os.listdir(os.getcwd()))
     with open("snapshot-0.svg") as actual_file:
         snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
 
@@ -106,7 +115,7 @@ def test_snapshot_manger_with_functions(test_func, snapshot):
 
     test_func(actual_dir)
 
-    wait_for_file(10)
+    wait_for_file(5)
     assert_output_files_match(actual_dir, snapshot, test_func.__name__)
 
 
@@ -130,13 +139,6 @@ def test_outputs_to_default_directory_with_no_memory_viz_args(snapshot):
         snapshot.assert_match_dir(
             {"snapshot-0.svg": actual_file.read()}, func_no_memory_viz_args.__name__
         )
-
-
-def func_with_args():
-    with SnapshotManager(
-        include=("func_with_args",), memory_viz_args=["--roughjs-config", "seed=12345"]
-    ):
-        flag = "not --output"
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")

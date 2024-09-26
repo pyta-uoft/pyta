@@ -45,6 +45,7 @@ class SnapshotManager:
                     os.path.join(self.output_filepath, f"snapshot-{self.snapshot_counts}.svg"),
                 ]
             )
+            print(f"memory_viz_args_copy: {memory_viz_args_copy}")
             snapshot(
                 include=self.include,
                 save=True,

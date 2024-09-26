@@ -31,7 +31,7 @@ def test_nullary_return_float() -> None:
 
 
 def test_nullary_return_dict() -> None:
-    """Calling a nullary function with the correct return type (dict)."""
+    """Calling a nullary function with the correct return type (Dict)."""
 
     @check_contracts
     def nullary() -> Dict[str, int]:
@@ -72,7 +72,7 @@ def test_nullary_return_wrong_type() -> None:
 
 
 def test_nullary_return_dict_wrong() -> None:
-    """Calling a nullary function with the incorrect return type (dict)."""
+    """Calling a nullary function with the incorrect return type (Dict)."""
 
     @check_contracts
     def nullary() -> Dict[str, int]:

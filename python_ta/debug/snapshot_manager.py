@@ -20,7 +20,7 @@ class SnapshotManager:
     def __init__(
         self,
         memory_viz_args: Optional[list[str]] = None,
-        memory_viz_version: str = "latest",
+        memory_viz_version: str = "0.3.2",
         include: Optional[Iterable[str | re.Pattern]] = None,
         output_filepath: Optional[str] = None,
     ) -> None:

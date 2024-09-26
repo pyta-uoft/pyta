@@ -61,6 +61,7 @@ class SnapshotManager:
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_frame.f_trace = self._trace_func
         sys.settrace(lambda frame, event, arg: None)
+        print(f"Wrote {self.snapshot_counts} snapshots to {self.output_filepath}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

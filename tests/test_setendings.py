@@ -422,8 +422,8 @@ class TestEndingLocations(unittest.TestCase):
             (17, 17, 0, 12),
             (17, 17, 0, 4),
             (18, 18, 4, 12),
-            (22, 22, 17, 26),
-            (22, 22, 31, 40),
+            (21, 21, 17, 26),
+            (21, 21, 31, 40),
         ]
         module = self.get_file_as_module("subscript.py")
         self.set_and_check(module, nodes.Subscript, expected)

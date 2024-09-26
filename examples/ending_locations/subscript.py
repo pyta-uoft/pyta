@@ -18,6 +18,5 @@ l[:]     [:]
 x = m[  :  ]
 
 
-
 def add(numbers: list[int]) -> list[int]:
     return numbers + [1]

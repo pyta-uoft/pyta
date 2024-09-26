@@ -258,7 +258,7 @@ def reset_linter(
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
-    # tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
+    # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
         (
             "pyta-number-of-messages",

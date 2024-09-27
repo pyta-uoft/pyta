@@ -168,7 +168,19 @@ def test_feasible_simple_function() -> None:
         print(x)
     """
     cfg = _create_cfg(src, "func")
-    assert all(edge.is_feasible for edge in cfg.get_paths()[0])
+    assert all(edge.is_feasible for edge in cfg.get_edges())
+
+
+def test_feasible_no_precondition() -> None:
+    src = """
+    def func(x: int) -> None:
+        print(x)
+        if x > 5:
+            print("x greater than 5")
+        print("end")
+    """
+    cfg = _create_cfg(src, "func")
+    assert all(edge.is_feasible for edge in cfg.get_edges())
 
 
 def test_feasible_if_condition() -> None:
@@ -230,7 +242,7 @@ def test_feasible_for_loop() -> None:
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    assert all(edge.is_feasible for path in cfg.get_paths() for edge in path)
+    assert all(edge.is_feasible for edge in cfg.get_edges())
 
 
 def test_variable_reassignment() -> None:

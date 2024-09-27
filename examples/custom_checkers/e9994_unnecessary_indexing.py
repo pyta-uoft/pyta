@@ -1,8 +1,8 @@
 """Example for E9994: unnecessary-indexing."""
-from typing import List
+from __future__ import annotations
 
 
-def sum_items(lst: List[int]) -> int:
+def sum_items(lst: list[int]) -> int:
     """Return the sum of a list of numbers."""
     s = 0
     for i in range(len(lst)):  # Error on this line (i is highlighted).
@@ -11,7 +11,7 @@ def sum_items(lst: List[int]) -> int:
     return s
 
 
-def sum_items2(lst: List[int]) -> int:
+def sum_items2(lst: list[int]) -> int:
     """Return the sum of a list of numbers."""
     s = 0
     for i in range(0, len(lst)):  # Error on this line (i is highlighted).
@@ -20,7 +20,7 @@ def sum_items2(lst: List[int]) -> int:
     return s
 
 
-def sum_items3(lst: List[int]) -> int:
+def sum_items3(lst: list[int]) -> int:
     """Return the sum of a list of numbers."""
     s = 0
     for i in range(0, len(lst), 1):  # Error on this line (i is highlighted).
@@ -29,7 +29,7 @@ def sum_items3(lst: List[int]) -> int:
     return s
 
 
-def sum_pairs(lst1: List[int], lst2: List[int]) -> int:
+def sum_pairs(lst1: list[int], lst2: list[int]) -> int:
     """Return the sum of corresponding products of two list of numbers."""
     s = 0
     # NO error reported; the loop index is used to index lst2 as well.
@@ -39,7 +39,7 @@ def sum_pairs(lst1: List[int], lst2: List[int]) -> int:
     return s
 
 
-def nested_sum(items: List[List[int]]) -> int:
+def nested_sum(items: list[list[int]]) -> int:
     """Return a repeated sum of the items in the list."""
     s = 0
     for i in range(len(items)):  # Error on this line (i is highlighted).
@@ -81,7 +81,7 @@ def nested_comprehensions4(items: list) -> None:
         print([[items[j] for _ in range(10)] for j in [1, 2, 3]])
 
 
-def loop_variable_reassigned(items: List[int]) -> int:
+def loop_variable_reassigned(items: list[int]) -> int:
     """Illustrate this checker on a loop where the loop variable is reassigned
     in the loop body."""
     s = 0

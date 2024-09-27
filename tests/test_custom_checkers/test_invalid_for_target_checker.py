@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import astroid
 import pylint.testutils
@@ -365,7 +365,7 @@ class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_comprehension(comp_node)
 
 
-def _extract_nodes(src: str, node_types: List[type]) -> List[nodes.NodeNG]:
+def _extract_nodes(src: str, node_types: list[type]) -> list[nodes.NodeNG]:
     mod = astroid.parse(src)
 
     extracted_nodes = []

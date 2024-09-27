@@ -2,6 +2,8 @@
 Test suite for checking the functionality of validate_invariants.
 """
 
+from __future__ import annotations
+
 from typing import List
 
 import pytest

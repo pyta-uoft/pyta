@@ -10,7 +10,7 @@ class StatReporter(PlainReporter):
 
         Clear the two class-level message lists.
 
-        @type source_lines: List[str]
+        @type source_lines: list[str]
         @rtype: None
         """
         super().__init__(source_lines)

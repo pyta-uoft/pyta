@@ -8,9 +8,9 @@ def _individual_calc(error_msgs, style_msgs):
     Analyses the given lists of error and style Message objects error_msgs and
     style_msgs for an individual.
 
-    @param List[Message] error_msgs: all of this individual's code errors
-    @param List[Message] style_msgs: all of this individual's style issues
-    @rtype: List[Tuple[str, List]]
+    @param list[Message] error_msgs: all of this individual's code errors
+    @param list[Message] style_msgs: all of this individual's style issues
+    @rtype: list[tuple[str, list]]
     """
     # {msg.symbol + "(" + msg.object + ")": count}
     all_msgs = error_msgs + style_msgs
@@ -38,9 +38,9 @@ def summary(all_msgs):
     overall summary of the course's performance (if applicable).
     Called by pyta_statistics.
 
-    @param OrderedDict[str, Tuple[List[Message], List[Message]]] all_msgs:
+    @param OrderedDict[str, tuple[list[Message], list[Message]]] all_msgs:
         the tuple of code and error messages for each student's files
-    @rtype: Tuple[OrderedDict[str, List]]]
+    @rtype: tuple[OrderedDict[str, list]]]
     """
     num_stu = len(all_msgs)
 
@@ -110,8 +110,8 @@ def summary(all_msgs):
 def _calc_helper(msgs):
     """Returns frequent messages in numbers and in percentages.
 
-    @param List[Message] msgs: Message objects for all errors found by linters
-    @rtype: List[List]
+    @param list[Message] msgs: Message objects for all errors found by linters
+    @rtype: list[list]
     """
     # get dict of values {id:int, id2:int}
     msgs_dict = _message_counter(msgs)
@@ -128,8 +128,8 @@ def _calc_helper(msgs):
 def _message_counter(msgs):
     """Return the number of errors for every type of error in msgs.
 
-    @param List[Message] msgs: the messages to count
-    @rtype: Dict[str, int]
+    @param list[Message] msgs: the messages to count
+    @rtype: dict[str, int]
     """
     msgs_dict = {}
 
@@ -146,9 +146,9 @@ def _frequent_messages(comp_dict, top=5):
     list.
     Return <top> most frequently occurring errors.
 
-    @type comp_dict: Dict[str, number]
+    @type comp_dict: dict[str, number]
     @type top: int
-    @rtype: List[Tuple[str, number]]
+    @rtype: list[tuple[str, number]]
     """
     # get key-value pair in a list
     most_frequently = list(comp_dict.items())

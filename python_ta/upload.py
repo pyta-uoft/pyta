@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import uuid
-from typing import Dict, List, NamedTuple
+from typing import NamedTuple
 
 import requests
 
 
-def errors_to_dict(errors: List[NamedTuple]) -> Dict[str, List[str]]:
+def errors_to_dict(errors: list[NamedTuple]) -> dict[str, list[str]]:
     """Convert PyTA errors from MessageSet format to a json format Dictionary."""
     error_info = ["msg_id", "msg", "symbol", "module", "category", "line"]
     error_types = ["code", "style"]
@@ -27,7 +29,7 @@ def errors_to_dict(errors: List[NamedTuple]) -> Dict[str, List[str]]:
 
 
 def upload_to_server(
-    errors: List[NamedTuple], paths: List[str], config: Dict[str, str], url: str, version: str
+    errors: list[NamedTuple], paths: list[str], config: dict[str, str], url: str, version: str
 ) -> None:
     """Send POST request to server with formatted data."""
     unique_id = get_hashed_id()  # Generates a device-specific ID

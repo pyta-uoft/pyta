@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from __future__ import annotations
 
 import astroid
 
@@ -12,11 +12,11 @@ def build_cfg(src: str) -> ControlFlowGraph:
     return t.cfgs[mod]
 
 
-def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
+def _extract_blocks(cfg: ControlFlowGraph) -> list[list[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
 
-def _extract_edges(cfg: ControlFlowGraph) -> List[List[List[str]]]:
+def _extract_edges(cfg: ControlFlowGraph) -> list[list[list[str]]]:
     edges = [[edge.source.statements, edge.target.statements] for edge in cfg.get_edges()]
     expanded_edges = [
         [[source.as_string() for source in edge[0]], [target.as_string() for target in edge[1]]]

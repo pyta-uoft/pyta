@@ -1,6 +1,6 @@
-from typing import Tuple
+from __future__ import annotations
 
-def set_values() -> Tuple[int, int]:
+def set_values() -> tuple[int, int]:
     """Return a tuple of two integers."""
     var1 = 1
     var2 = 2

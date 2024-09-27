@@ -1,7 +1,7 @@
-from typing import List
+from __future__ import annotations
 import unittest
 
-def is_sorted(lst: List[float]) -> bool:
+def is_sorted(lst: list[float]) -> bool:
     """Check if <lst> is sorted in ascending order."""
     return lst == sorted(lst)
 

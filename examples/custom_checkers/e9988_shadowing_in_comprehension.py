@@ -1,5 +1,5 @@
 """Example for E9988: shadowing-in-comprehension."""
-from typing import List
+from __future__ import annotations
 
 
 # There are four different types of comprehensions:
@@ -7,7 +7,7 @@ from typing import List
 # below are examples with each type of comprehensions in respective order
 
 
-def num_lst(n: int) -> List[int]:
+def num_lst(n: int) -> list[int]:
     """Return a list of integers from 0 to <n>, in that order."""
     return [n for n in range(n)]
 
@@ -28,7 +28,7 @@ def common_items(lst1: list, lst2: list) -> int:
     return s
 
 
-def print_pos(lst: List[int]) -> None:
+def print_pos(lst: list[int]) -> None:
     """Print items in lst one by one if they are greater than 0."""
     for k in (k for k in lst if k > 0):
         print(k)

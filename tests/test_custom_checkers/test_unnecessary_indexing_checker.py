@@ -31,7 +31,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_sum_items_msg(self):
         """Return the sum of a list of numbers."""
         src = """
-        def sum_items(lst: List[int]) -> int:
+        def sum_items(lst: list[int]) -> int:
             s = 0
             for i in range(len(lst)):  #@
                 s += lst[i]
@@ -53,7 +53,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_sum_items2_msg(self):
         """Return the sum of a list of numbers."""
         src = """
-        def sum_items2(lst: List[int]) -> int:
+        def sum_items2(lst: list[int]) -> int:
             s = 0
             for i in range(0, len(lst)):  #@
                 s += lst[i]
@@ -75,7 +75,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_sum_items3_msg(self):
         """Return the sum of a list of numbers."""
         src = """
-        def sum_items3(lst: List[int]) -> int:
+        def sum_items3(lst: list[int]) -> int:
             s = 0
             for i in range(0, len(lst), 1):  #@
                 s += lst[i]
@@ -99,7 +99,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
 
         NO error reported; the loop index is used to index lst2 as well."""
         src = """
-        def sum_pairs(lst1: List[int], lst2: List[int]) -> int:
+        def sum_pairs(lst1: list[int], lst2: list[int]) -> int:
             s = 0
             for i in range(len(lst1)):
                 s += lst1[i] * lst2[i]
@@ -114,7 +114,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_nested_sum_msg(self):
         """Return a repeated sum of the items in the list."""
         src = """
-        def nested_sum(items: List[List[int]]) -> int:
+        def nested_sum(items: list[list[int]]) -> int:
             s = 0
             for i in range(len(items)):  #@
                 s += sum([2 * x for x in items[i]])
@@ -209,7 +209,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         NO error reported; the loop variable assignment i is unused,
         but is not redundant."""
         src = """
-        def loop_variable_reassigned(items: List[int]) -> int:
+        def loop_variable_reassigned(items: list[int]) -> int:
             s = 0
             for i in range(len(items)):
                 i = 0
@@ -225,7 +225,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_sum_items_no_msg(self):
         """Elements are accessed directly, no unnecessary indexing"""
         src = """
-        def sum_items(items: List[int]) -> int:
+        def sum_items(items: list[int]) -> int:
             s = 0
             for x in items:
                s += x
@@ -240,7 +240,7 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
     def test_iter_var_unused_no_msg(self):
         """Index variable i is unused in the code, no unnecessary indexing performed"""
         src = """
-        def iter_var_unused(items: List[int]) -> int:
+        def iter_var_unused(items: list[int]) -> int:
             s = 0
             for i in range(len(items)):
                 s += 1

@@ -2,10 +2,12 @@
 Provides a function to generate and display the control flow graph of a given module.
 """
 
+from __future__ import annotations
+
 import importlib.util
 import os.path
 import sys
-from typing import Any, Dict, Optional, Set
+from typing import Any, Optional
 
 import graphviz
 from astroid import nodes
@@ -19,7 +21,7 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def generate_cfg(
-    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[dict[str, Any]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -43,7 +45,7 @@ def generate_cfg(
 
 
 def _generate(
-    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[dict[str, Any]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -92,7 +94,7 @@ def _get_valid_file_path(mod: str = "") -> Optional[str]:
 
 
 def _display(
-    cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, auto_open: bool = False
+    cfgs: dict[nodes.NodeNG, ControlFlowGraph], filename: str, auto_open: bool = False
 ) -> None:
     graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
     for node, cfg in cfgs.items():
@@ -116,7 +118,7 @@ def _display(
     graph.render(filename, view=auto_open)
 
 
-def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int], end: CFGBlock) -> None:
+def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFGBlock) -> None:
     """
     Visit a CFGBlock and add it to the control flow graph.
     """

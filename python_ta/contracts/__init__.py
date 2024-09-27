@@ -10,12 +10,14 @@ Below are some notes on how they are stored.
     [(assertion, compiled, return_val_var_name)].
 """
 
+from __future__ import annotations
+
 import inspect
 import logging
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Tuple, TypeVar, Union, overload
+from typing import Any, Callable, Optional, TypeVar, Union, overload
 
 import wrapt
 from typeguard import CollectionCheckStrategy, TypeCheckError, check_type
@@ -103,16 +105,16 @@ Class = TypeVar("Class", bound=type)
 
 @overload
 def check_contracts(
-    func: FunctionType, module_names: Optional[Set[str]] = None
+    func: FunctionType, module_names: Optional[set[str]] = None
 ) -> FunctionType: ...
 
 
 @overload
-def check_contracts(func: Class, module_names: Optional[Set[str]] = None) -> Class: ...
+def check_contracts(func: Class, module_names: Optional[set[str]] = None) -> Class: ...
 
 
 def check_contracts(
-    func_or_class: Union[Class, FunctionType], module_names: Optional[Set[str]] = None
+    func_or_class: Union[Class, FunctionType], module_names: Optional[set[str]] = None
 ) -> Union[Class, FunctionType]:
     """A decorator to enable contract checking for a function or class.
 
@@ -250,7 +252,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function preconditions
     if not hasattr(target, "__preconditions__"):
-        target.__preconditions__: List[Tuple[str, CodeType]] = []
+        target.__preconditions__: list[tuple[str, CodeType]] = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
             try:
@@ -280,7 +282,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
     # Check function postconditions
     if not hasattr(target, "__postconditions__"):
-        target.__postconditions__: List[Tuple[str, CodeType, str]] = []
+        target.__postconditions__: list[tuple[str, CodeType, str]] = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
@@ -511,7 +513,7 @@ def _check_assertions(
                 )
 
 
-def parse_assertions(obj: Any, parse_token: str = "Precondition") -> List[str]:
+def parse_assertions(obj: Any, parse_token: str = "Precondition") -> list[str]:
     """Return a list of preconditions/postconditions/representation invariants parsed from the given entity's docstring.
 
     Uses parse_token to determine what to look for. parse_token defaults to Precondition.
@@ -638,7 +640,7 @@ def _debug(msg: str) -> None:
 def _set_invariants(klass: type) -> None:
     """Retrieve and set the representation invariants of this class"""
     # Update representation invariants from this class' docstring and those of its superclasses.
-    rep_invariants: List[Tuple[str, CodeType]] = []
+    rep_invariants: list[tuple[str, CodeType]] = []
 
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):

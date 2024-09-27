@@ -1,7 +1,9 @@
 """Checker for unnecessary indexing in a loop.
 """
 
-from typing import List, Optional, Union
+from __future__ import annotations
+
+from typing import Optional, Union
 
 from astroid import nodes
 from astroid.const import Context
@@ -148,7 +150,7 @@ def _is_redundant(
 
 def _index_name_nodes(
     index: str, loop_node: Union[nodes.For, nodes.Comprehension]
-) -> List[Union[nodes.AssignName, nodes.Name]]:
+) -> list[Union[nodes.AssignName, nodes.Name]]:
     """Return a list of <index> AssignName and Name nodes contained in the body of <loop_node>.
 
     Remove uses of variables that shadow <index>.

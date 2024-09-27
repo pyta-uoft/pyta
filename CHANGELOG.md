@@ -26,6 +26,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Renamed `reduce` method of `Z3Parser` to `parse`
 - Renamed `test_expr_wrapper` to `test_z3_parser`
 - Added `is_feasible` attribute for `CFGEdge` and implemented update to edge feasibility based on lists of Z3 constraints
+- Refactored codebase to use modern type annotations. Replaced `List` with `list`, `Dict` with `dict`, `Set` with `set`, and `Tuple` with `tuple`
 - Checked for variable reassignment in `AugAssign` and `AnnAssign` node in parsing edge Z3 constraints
 - Rendered logically infeasible control flow graph edges in light grey
 

@@ -1,8 +1,8 @@
 """Examples for E9984: invalid-for-target."""
-from typing import List, Tuple
+from __future__ import annotations
 
 
-def example1(lst: List[int]) -> int:
+def example1(lst: list[int]) -> int:
     """For loop target is an element of a list."""
     s = 0
     for lst[0] in lst:  # Error on this line. lst[0] is highlighted.
@@ -10,7 +10,7 @@ def example1(lst: List[int]) -> int:
     return s
 
 
-def example2(lst: List[int]) -> List[int]:
+def example2(lst: list[int]) -> list[int]:
     """For loop target is a slice of a list."""
     s = []
     for lst[0:1] in lst:  # Error on this line. lst[0:1] is highlighted.
@@ -18,7 +18,7 @@ def example2(lst: List[int]) -> List[int]:
     return s
 
 
-def example3(lst: List[int]) -> int:
+def example3(lst: list[int]) -> int:
     """For loop target is an object's attribute"""
     x = type("EmptyClass", (), {})
     s = 0
@@ -27,7 +27,7 @@ def example3(lst: List[int]) -> int:
     return s
 
 
-def example4(lst: List[Tuple[int, int]]) -> int:
+def example4(lst: list[tuple[int, int]]) -> int:
     """There are more than one for loop targets."""
     s = 0
     for lst[0], i in lst:  # Error on this line. lst[0] is highlighted.
@@ -35,7 +35,7 @@ def example4(lst: List[Tuple[int, int]]) -> int:
     return s
 
 
-def example5(lst: List[Tuple[int, int]]) -> int:
+def example5(lst: list[tuple[int, int]]) -> int:
     """Multiple for loop targets are in a list"""
     s = 0
     for [lst[0], i] in lst:  # Error on this line. lst[0] is highlighted.
@@ -43,7 +43,7 @@ def example5(lst: List[Tuple[int, int]]) -> int:
     return s
 
 
-def example6(lst: List[Tuple[int, Tuple[int, int]]]) -> int:
+def example6(lst: list[tuple[int, tuple[int, int]]]) -> int:
     """For loop targets nested in lists or tuples"""
     s = 0
     for i, [j, lst[0]] in lst:  # Error on this line. lst[0] is highlighted.
@@ -51,17 +51,17 @@ def example6(lst: List[Tuple[int, Tuple[int, int]]]) -> int:
     return s
 
 
-def example7(lst: List[int]) -> List[int]:
+def example7(lst: list[int]) -> list[int]:
     """Comprehension target is an element of a list."""
     return [lst[0] for lst[0] in lst]  # Error on this line. lst[0] is highlighted.
 
 
-def example8(lst: List[int]) -> List[int]:
+def example8(lst: list[int]) -> list[int]:
     """Comprehension target is a slice of a list."""
     return [lst[0] for lst[0:1] in lst]  # Error on this line. lst[0:1] is highlighted.
 
 
-def example9(lst: List[int]) -> list:
+def example9(lst: list[int]) -> list:
     """Comprehension target is an object's attribute"""
     x = type("EmptyClass", (), {})
     return [x.attr for x.attr in lst]  # Error on this line. x.attr is highlighted

@@ -1,11 +1,11 @@
-from typing import List, Tuple
+from __future__ import annotations
 
 import astroid
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
-def build_cfg(src: str) -> List[ControlFlowGraph]:
+def build_cfg(src: str) -> list[ControlFlowGraph]:
     """Build a CFG for testing and return all CFGs built."""
     mod = astroid.parse(src)
     t = CFGVisitor()
@@ -13,7 +13,7 @@ def build_cfg(src: str) -> List[ControlFlowGraph]:
     return list(t.cfgs.values())
 
 
-def _extract_edge_conditions(cfgs: List[ControlFlowGraph]) -> List[str]:
+def _extract_edge_conditions(cfgs: list[ControlFlowGraph]) -> list[str]:
     """Return the edge conditions in the given list of cfgs as a list of strings representing the condition."""
     conditions = [
         edge.condition.as_string()

@@ -16,14 +16,14 @@ class SnapshotManager:
     A class used for snapshot-based debugging to analyze memory usage at each line in the calling function.
 
     Instance attributes:
-        memory_viz_args: The arguments to pass to the MemoryViz CLI
-        memory_viz_version: The version of MemoryViz to use
-        include: A collection of function names, either as strings or regular expressions, whose variables will be captured
+        memory_viz_args: The arguments to pass to the MemoryViz CLI.
+        memory_viz_version: The version of MemoryViz to use.
+        include: A collection of function names, either as strings or regular expressions, whose variables will be captured.
         output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
     """
 
     memory_viz_args: Optional[list[str]]
-    memory_viz_version: str
+    memory_viz_version: Optional[str]
     _snapshot_counts: int
     include: Optional[Iterable[str | re.Pattern]]
     output_directory: Optional[str]
@@ -31,15 +31,15 @@ class SnapshotManager:
     def __init__(
         self,
         memory_viz_args: Optional[list[str]] = None,
-        memory_viz_version: str = "latest",
+        memory_viz_version: Optional[str] = "latest",
         include: Optional[Iterable[str | re.Pattern]] = None,
         output_directory: Optional[str] = None,
     ) -> None:
         """Initialize a SnapshotManager context manager for snapshot-based debugging.
 
         Args:
-            memory_viz_args: The arguments to pass to the memory visualizer.
-            memory_viz_version: The version of the memory visualizer to use.
+            memory_viz_args: The arguments to pass to the MemoryViz CLI.
+            memory_viz_version: The version of MemoryViz to use.
             include: A collection of function names, either as strings or regular expressions, whose variables will be captured.
             output_directory: The directory to save the snapshots, defaulting to the current directory.
                 **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.

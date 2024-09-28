@@ -4,8 +4,8 @@ This page describes two additional PythonTA features:
 
 1. Print-based debugging for loops and recursion
    1. This feature makes tracing easier by printing the state of each loop iteration or recursive function call in a nicely-formatted table using the [tabulate] library.
-2. Memory debugging through by generaing the Python memory model.
-   1. This feature makes it easier to visualize the Python memory model by leveraging the [`MemoryViz`](https://github.com/david-yz-liu/memory-viz) library.
+2. Memory debugging
+   1. This feature makes it easier to visualize the Python memory model by leveraging the [MemoryViz](https://github.com/david-yz-liu/memory-viz) library.
 
 These additional features are found in the `python.debug` submodule.
 
@@ -277,7 +277,7 @@ if __name__ == '__main__':
     func_multi_line()
 ```
 
-When this is run, variables within the `func_multi_line` function are captured, and memory models are outputted to the calling directory for every line of code. For the expected output of this function, see the snapshots in `tests/test_debug/snapshot_manager_testing_snapshots/func_multi_line`.
+When this function is run, variables within `func_multi_line` are captured, and memory models are output to the calling directory for every line of code. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_manager_testing_snapshots/func_multi_line`.
 
 ### API
 

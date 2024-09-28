@@ -1,8 +1,13 @@
-# Loop and Recursion Tracing
+# Debugging with Tracing
 
-This page describes an additional PythonTA feature: print-based debugging for loops and recursion.
-This feature makes tracing easier by printing the state of each loop iteration or recursive function call in a nicely-formatted table using the [tabulate] library.
-This functionality is found in the `python_ta.debug` submodule.
+This page describes two additional PythonTA features:
+
+1. Print-based debugging for loops and recursion
+   1. This feature makes tracing easier by printing the state of each loop iteration or recursive function call in a nicely-formatted table using the [tabulate] library.
+2. Memory debugging through by generaing the Python memory model.
+   1. This feature makes it easier to visualize the Python memory model by leveraging the [`MemoryViz`](https://github.com/david-yz-liu/memory-viz) library.
+
+These additional features are found in the `python.debug` submodule.
 
 ## Loop tracing with `AccumulationTable`
 
@@ -250,3 +255,39 @@ The `RecursionTable` is a new PythonTA feature and currently has the following k
 
 [tabulate]: https://github.com/astanin/python-tabulate
 [`sys.settrace`]: https://docs.python.org/3/library/sys.html#sys.settrace
+
+## Tracing the Python Memory Model
+
+The following section will focus on tracing the Python memory model. This feature uses the `python_ta.debug.SnapshotManager` as a context manager.
+
+### Example usage
+
+```python
+# demo.py
+from python_ta.debug import SnapshotManager
+
+def func_multi_line(output_path=None) -> None:
+    with SnapshotManager(output_directory=output_path, include=("func_multi_line",)):
+        num = 123
+        some_string = "Hello, world"
+        num2 = 321
+        arr = [some_string, "string 123321"]
+
+if __name__ == '__main__':
+    func_multi_line()
+```
+
+When this is run, variables within the `func_multi_line` function are captured, and memory models are outputted to the calling directory for every line of code. For the expected output of this function, see the snapshots in `tests/test_debug/snapshot_manager_testing_snapshots/func_multi_line`.
+
+### API
+
+```{eval-rst}
+.. automethod:: python_ta.debug.SnapshotManager.__init__
+```
+
+### Current Limitations
+
+The `SnapshotManager` has the following limitations:
+
+1. The context manager does not step into any function calls. Calling functions inside the function may lead to undefined behaviors.
+2. `SnapshotManager` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).

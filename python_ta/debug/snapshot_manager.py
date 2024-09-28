@@ -15,26 +15,34 @@ class SnapshotManager:
     Class used to manage the snapshots taken during the execution of a program.
 
     Instance attributes:
-        memory_viz_args: The arguments to pass to the memory visualizer
-        memory_viz_version: The version of the memory visualizer to use
+        memory_viz_args: The arguments to pass to the MemoryViz CLI
+        memory_viz_version: The version of MemoryViz to use
         include: A collection of function names, either as strings or regular expressions, whose variables will be captured
-        output_filepath: The path to save the snapshots
+        output_directory: The path to save the snapshots
     """
 
     memory_viz_args: Optional[list[str]]
     memory_viz_version: str
     _snapshot_counts: int
     include: Optional[Iterable[str | re.Pattern]]
-    output_filepath: Optional[str]
+    output_directory: Optional[str]
 
     def __init__(
         self,
         memory_viz_args: Optional[list[str]] = None,
         memory_viz_version: str = "latest",
         include: Optional[Iterable[str | re.Pattern]] = None,
-        output_filepath: Optional[str] = None,
+        output_directory: Optional[str] = None,
     ) -> None:
-        """Initialize a SnapshotManager context manager for snapshot-based debugging."""
+        """Initialize a SnapshotManager context manager for snapshot-based debugging.
+
+        Args:
+            memory_viz_args: The arguments to pass to the memory visualizer.
+            memory_viz_version: The version of the memory visualizer to use
+            include: A collection of function names, either as strings or regular expressions, whose variables will be captured
+            output_directory: The path to save the snapshots. Use this argument instead of the `--output` flag to specify the output directory.
+                Defaults to the current directory.
+        """
         if memory_viz_args is None:
             memory_viz_args = ["--roughjs-config", "seed=12345"]
         self.memory_viz_version = memory_viz_version
@@ -43,9 +51,11 @@ class SnapshotManager:
         self.include = include
 
         if any("--output" in arg for arg in memory_viz_args):
-            raise ValueError("Use the output_filepath argument to specify a different output path.")
+            raise ValueError(
+                "Use the output_directory argument to specify a different output path."
+            )
 
-        self.output_filepath = output_filepath if output_filepath else "."
+        self.output_directory = output_directory if output_directory else "."
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Trace function to take snapshots at each line of code."""
@@ -55,7 +65,7 @@ class SnapshotManager:
                 [
                     "--output",
                     os.path.join(
-                        os.path.abspath(self.output_filepath),
+                        os.path.abspath(self.output_directory),
                         f"snapshot-{self._snapshot_counts}.svg",
                     ),
                 ]

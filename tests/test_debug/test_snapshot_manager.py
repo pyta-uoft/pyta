@@ -15,34 +15,34 @@ SNAPSHOT_DIR = os.path.join(
 TEST_RESULTS_DIR = "/tmp/test_results"
 
 
-def func_one_line(output_path=None) -> None:
-    with SnapshotManager(output_directory=output_path, include=("func_one_line",)):
+def func_one_line(output_directory: str = None) -> None:
+    with SnapshotManager(output_directory=output_directory, include=("func_one_line",)):
         num = 123
 
 
-def func_multi_line(output_path=None) -> None:
-    with SnapshotManager(output_directory=output_path, include=("func_multi_line",)):
+def func_multi_line(output_directory: str = None) -> None:
+    with SnapshotManager(output_directory=output_directory, include=("func_multi_line",)):
         num = 123
         some_string = "Hello, world"
         num2 = 321
         arr = [some_string, "string 123321"]
 
 
-def func_mutation(output_path=None) -> None:
-    with SnapshotManager(output_directory=output_path, include=("func_mutation",)):
+def func_mutation(output_directory: str = None) -> None:
+    with SnapshotManager(output_directory=output_directory, include=("func_mutation",)):
         num = 123
         num = 321
 
 
-def func_for_loop(output_path=None) -> None:
-    with SnapshotManager(output_directory=output_path, include=("func_for_loop",)):
+def func_for_loop(output_directory: str = None) -> None:
+    with SnapshotManager(output_directory=output_directory, include=("func_for_loop",)):
         nums = [1, 2, 3]
         for i in range(len(nums)):
             nums[i] = nums[i] + 1
 
 
-def func_if_else(output_path=None) -> None:
-    with SnapshotManager(output_directory=output_path, include=("func_if_else",)):
+def func_if_else(output_directory: str = None) -> None:
+    with SnapshotManager(output_directory=output_directory, include=("func_if_else",)):
         num = 10
         if num > 5:
             result = "greater"
@@ -50,8 +50,8 @@ def func_if_else(output_path=None) -> None:
             result = "lesser"
 
 
-def func_while(output_path=None) -> None:
-    with SnapshotManager(output_directory=output_path, include=("func_while",)):
+def func_while(output_directory: str = None) -> None:
+    with SnapshotManager(output_directory=output_directory, include=("func_while",)):
         num = 0
         while num < 3:
             num += 1
@@ -143,7 +143,7 @@ def test_outputs_to_default_directory_with_no_memory_viz_args(snapshot, setup_cu
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 def test_using_output_flag():
     with pytest.raises(
-        ValueError, match="Use the output_directory argument to specify a different output path."
+        ValueError, match="Use the output_directory parameter to specify a different output path."
     ):
         with SnapshotManager(
             include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]

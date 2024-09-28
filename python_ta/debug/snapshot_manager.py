@@ -13,13 +13,13 @@ from python_ta.debug.snapshot import snapshot
 
 class SnapshotManager:
     """
-    Class used to manage the snapshots taken during the execution of a program.
+    A class used for snapshot-based debugging to analyze memory usage at each line in the calling function.
 
     Instance attributes:
         memory_viz_args: The arguments to pass to the MemoryViz CLI
         memory_viz_version: The version of MemoryViz to use
         include: A collection of function names, either as strings or regular expressions, whose variables will be captured
-        output_directory: The path to save the snapshots
+        output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
     """
 
     memory_viz_args: Optional[list[str]]
@@ -41,27 +41,28 @@ class SnapshotManager:
             memory_viz_args: The arguments to pass to the memory visualizer.
             memory_viz_version: The version of the memory visualizer to use.
             include: A collection of function names, either as strings or regular expressions, whose variables will be captured.
-            output_directory: The path to save the snapshots, defaulting to the current directory.
+            output_directory: The directory to save the snapshots, defaulting to the current directory.
                 **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.
         """
         if sys.version_info < (3, 10, 0):
             logging.warning("You need Python 3.10 or later to use SnapshotManager.")
-        if memory_viz_args is None:
-            memory_viz_args = ["--roughjs-config", "seed=12345"]
         self.memory_viz_version = memory_viz_version
-        self.memory_viz_args = memory_viz_args
+
+        if memory_viz_args:
+            if any("--output" in arg for arg in memory_viz_args):
+                raise ValueError(
+                    "Use the output_directory parameter to specify a different output path."
+                )
+            self.memory_viz_args = memory_viz_args
+        else:
+            self.memory_viz_args = ["--roughjs-config", "seed=12345"]
         self._snapshot_counts = 0
         self.include = include
-
-        if any("--output" in arg for arg in memory_viz_args):
-            raise ValueError(
-                "Use the output_directory argument to specify a different output path."
-            )
 
         self.output_directory = output_directory if output_directory else "."
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
-        """Trace function to take snapshots at each line of code."""
+        """Take a snapshot of the variables in the functions specified in `self.include`"""
         if event == "line" and frame.f_locals:
             memory_viz_args_copy = self.memory_viz_args.copy()
             memory_viz_args_copy.extend(

@@ -5,7 +5,7 @@ import os
 import re
 import sys
 import types
-from typing import Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from python_ta.debug.snapshot import snapshot
 
@@ -47,7 +47,7 @@ class SnapshotManager:
 
         self.output_filepath = output_filepath if output_filepath else "."
 
-    def _trace_func(self, frame: types.FrameType, event: str) -> None:
+    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Trace function to take snapshots at each line of code."""
         if event == "line" and frame.f_locals:
             memory_viz_args_copy = self.memory_viz_args.copy()
@@ -75,7 +75,7 @@ class SnapshotManager:
         sys.settrace(lambda _: None)
         return self
 
-    def __exit__(self) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Remove the trace function."""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None

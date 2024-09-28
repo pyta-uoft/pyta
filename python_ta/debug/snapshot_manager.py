@@ -39,10 +39,10 @@ class SnapshotManager:
 
         Args:
             memory_viz_args: The arguments to pass to the memory visualizer.
-            memory_viz_version: The version of the memory visualizer to use
-            include: A collection of function names, either as strings or regular expressions, whose variables will be captured
-            output_directory: The path to save the snapshots. Use this argument instead of the `--output` flag to specify the output directory.
-                Defaults to the current directory.
+            memory_viz_version: The version of the memory visualizer to use.
+            include: A collection of function names, either as strings or regular expressions, whose variables will be captured.
+            output_directory: The path to save the snapshots, defaulting to the current directory.
+                **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.
         """
         if sys.version_info < (3, 10, 0):
             logging.warning("You need Python 3.10 or later to use SnapshotManager.")

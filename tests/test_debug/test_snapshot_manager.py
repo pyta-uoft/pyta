@@ -3,7 +3,6 @@ from __future__ import annotations
 import os.path
 import shutil
 import sys
-import time
 
 import pytest
 from pytest_snapshot.plugin import Snapshot
@@ -99,10 +98,6 @@ def setup_curr_dir_testing(snapshot):
         os.remove(file_name)
     yield
     os.remove(file_name)
-
-
-def wait_for_file(seconds: int):
-    time.sleep(seconds)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")

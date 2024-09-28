@@ -43,6 +43,8 @@ class SnapshotManager:
             output_directory: The path to save the snapshots. Use this argument instead of the `--output` flag to specify the output directory.
                 Defaults to the current directory.
         """
+        if sys.version_info < (3, 10, 0):
+            logging.warning("You need Python 3.10 or later to use SnapshotManager.")
         if memory_viz_args is None:
             memory_viz_args = ["--roughjs-config", "seed=12345"]
         self.memory_viz_version = memory_viz_version
@@ -82,10 +84,10 @@ class SnapshotManager:
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_frame.f_trace = self._trace_func
-        sys.settrace(lambda _: None)
+        sys.settrace(lambda *_args: None)
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Remove the trace function."""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None

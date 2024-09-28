@@ -289,5 +289,6 @@ When this is run, variables within the `func_multi_line` function are captured, 
 
 The `SnapshotManager` has the following limitations:
 
-1. The context manager does not step into any function calls. Calling functions inside the function may lead to undefined behaviors.
-2. `SnapshotManager` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
+1. Due to the differences in the Python interpreters, this context manager only works for Python versions >= 3.10.
+2. The context manager does not step into any function calls. Calling functions inside the function may lead to undefined behaviors.
+3. `SnapshotManager` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).

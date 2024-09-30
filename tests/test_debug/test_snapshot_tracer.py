@@ -16,6 +16,7 @@ SNAPSHOT_DIR = os.path.join(
 TEST_RESULTS_DIR = "/tmp/test_results"
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
 
+
 # Function inputs for testing the SnapshotTracer
 
 
@@ -169,59 +170,61 @@ def setup_curr_dir_testing(snapshot) -> Iterator[None]:
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-@pytest.mark.parametrize(
-    "test_func",
-    [
-        func_one_line,
-        func_multi_line,
-        func_mutation,
-        func_for_loop,
-        func_while,
-        func_if_else,
-    ],
-)
-def test_snapshot_tracer_with_functions(test_func, snapshot, test_directory):
+class TestSnapshotTracer:
     """
-    Test SnapshotTracer with various simple functions.
+    Tests for SnapshotTracer. These tests are skipped if the Python version is less than 3.10.
     """
-    test_func(test_directory)
 
-    assert_output_files_match(test_directory, snapshot, test_func.__name__)
+    @pytest.mark.parametrize(
+        "test_func",
+        [
+            func_one_line,
+            func_multi_line,
+            func_mutation,
+            func_for_loop,
+            func_while,
+            func_if_else,
+        ],
+    )
+    def test_snapshot_tracer_with_functions(self, test_func, snapshot, test_directory):
+        """
+        Test SnapshotTracer with various simple functions.
+        """
+        test_func(test_directory)
 
+        assert_output_files_match(test_directory, snapshot, test_func.__name__)
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_func_with_non_output_flags(snapshot, setup_curr_dir_testing):
-    """
-    Test SnapshotTracer outputs to the current directory when `memory_viz_args` are passed.
-    """
-    func_with_args()
+    def test_func_with_non_output_flags(self, snapshot, setup_curr_dir_testing):
+        """
+        Test SnapshotTracer outputs to the current directory when `memory_viz_args` are passed.
+        """
+        func_with_args()
 
-    with open("snapshot-0.svg") as actual_file:
-        snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
+        with open("snapshot-0.svg") as actual_file:
+            snapshot.assert_match_dir(
+                {"snapshot-0.svg": actual_file.read()}, func_with_args.__name__
+            )
 
-
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_using_output_flag():
-    """
-    Test SnapshotTracer raises an error when the `memory_viz_args` includes the `--output` flag.
-    """
-    with pytest.raises(
-        ValueError, match="Use the output_directory parameter to specify a different output path."
-    ):
-        with SnapshotTracer(
-            include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
+    def test_using_output_flag(self):
+        """
+        Test SnapshotTracer raises an error when the `memory_viz_args` includes the `--output` flag.
+        """
+        with pytest.raises(
+            ValueError,
+            match="Use the output_directory parameter to specify a different output path.",
         ):
-            pass
+            with SnapshotTracer(
+                include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
+            ):
+                pass
 
+    def test_no_output_directory(self, snapshot, setup_curr_dir_testing):
+        """
+        Test SnapshotTracer outputs to the current directory when `output_directory` is not specified.
+        """
+        func_no_memory_viz_args()
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_no_output_directory(snapshot, setup_curr_dir_testing):
-    """
-    Test SnapshotTracer outputs to the current directory when `output_directory` is not specified.
-    """
-    func_no_memory_viz_args()
-
-    with open("snapshot-0.svg") as actual_file:
-        snapshot.assert_match_dir(
-            {"snapshot-0.svg": actual_file.read()}, func_no_memory_viz_args.__name__
-        )
+        with open("snapshot-0.svg") as actual_file:
+            snapshot.assert_match_dir(
+                {"snapshot-0.svg": actual_file.read()}, func_no_memory_viz_args.__name__
+            )

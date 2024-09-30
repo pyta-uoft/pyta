@@ -13,8 +13,7 @@ import graphviz
 from astroid import nodes
 from astroid.builder import AstroidBuilder
 
-from python_ta.transforms.z3_visitor import Z3Visitor
-
+from ..transforms.z3_visitor import Z3Visitor
 from .graph import CFGBlock, ControlFlowGraph
 from .visitor import CFGVisitor
 

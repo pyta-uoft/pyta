@@ -25,7 +25,7 @@ class SnapshotTracer:
     _snapshot_args: dict[str, Any]
 
     def __init__(self, output_directory: Optional[str] = None, **kwargs) -> None:
-        """Initialize a SnapshotManager context manager for snapshot-based debugging.
+        """Initialize a context manager for snapshot-based debugging.
 
         Args:
             output_directory: The directory to save the snapshots, defaulting to the current directory.
@@ -33,7 +33,7 @@ class SnapshotTracer:
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):
-            logging.warning("You need Python 3.10 or later to use SnapshotManager.")
+            logging.warning("You need Python 3.10 or later to use SnapshotTracer.")
         if any("--output" in arg for arg in kwargs.get("memory_viz_args", [])):
             raise ValueError(
                 "Use the output_directory parameter to specify a different output path."

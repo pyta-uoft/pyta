@@ -3,6 +3,7 @@ from __future__ import annotations
 import os.path
 import shutil
 import sys
+from typing import Iterator
 
 import pytest
 from pytest_snapshot.plugin import Snapshot
@@ -119,11 +120,16 @@ def func_no_memory_viz_args() -> None:
 # Helpers
 
 
-def assert_output_files_match(output_path: str, snapshot: Snapshot, function_name: str):
+def assert_output_files_match(
+    output_directory: str, snapshot: Snapshot, function_name: str
+) -> None:
+    """
+    Assert that the output files in the output directory match the expected output.
+    """
     actual_svgs = {}
-    files = os.listdir(output_path)
+    files = os.listdir(output_directory)
     for file in files:
-        actual_path = os.path.join(output_path, file)
+        actual_path = os.path.join(output_directory, file)
         with open(actual_path) as actual_file:
             actual_svg = actual_file.read()
             actual_svgs[file] = actual_svg
@@ -134,7 +140,10 @@ def assert_output_files_match(output_path: str, snapshot: Snapshot, function_nam
 
 
 @pytest.fixture(scope="function")
-def test_directory(test_func, snapshot):
+def test_directory(test_func, snapshot) -> Iterator[str]:
+    """
+    Set up and tear down the test directory for the SnapshotTracer tests.
+    """
     snapshot.snapshot_dir = SNAPSHOT_DIR
     actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
     shutil.rmtree(actual_dir, ignore_errors=True)
@@ -144,7 +153,10 @@ def test_directory(test_func, snapshot):
 
 
 @pytest.fixture(scope="function")
-def setup_curr_dir_testing(snapshot):
+def setup_curr_dir_testing(snapshot) -> Iterator[None]:
+    """
+    Set up and tear down the current directory for the SnapshotTracer tests.
+    """
     snapshot.snapshot_dir = SNAPSHOT_DIR
     file_name = "snapshot-0.svg"
     if os.path.exists(file_name):
@@ -170,7 +182,7 @@ def setup_curr_dir_testing(snapshot):
 )
 def test_snapshot_tracer_with_functions(test_func, snapshot, test_directory):
     """
-    Test SnapshotTracer with various functions.
+    Test SnapshotTracer with various simple functions.
     """
     test_func(test_directory)
 

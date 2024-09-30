@@ -20,8 +20,8 @@ class SnapshotTracer:
         output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
     """
 
-    _snapshot_counts: int
     output_directory: Optional[str]
+    _snapshot_counts: int
     _snapshot_args: dict[str, Any]
 
     def __init__(self, output_directory: Optional[str] = None, **kwargs) -> None:
@@ -39,14 +39,14 @@ class SnapshotTracer:
                 "Use the output_directory parameter to specify a different output path."
             )
         self._snapshot_args = kwargs
-        self.output_directory = output_directory if output_directory else "."
+        self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
         self._snapshot_counts = 0
+        self.output_directory = output_directory if output_directory else "."
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
         if event == "line" and frame.f_locals:
-            snapshot_args = copy.deepcopy(self._snapshot_args)
-            snapshot_args["memory_viz_args"].extend(
+            self._snapshot_args["memory_viz_args"].extend(
                 [
                     "--output",
                     os.path.join(
@@ -57,7 +57,7 @@ class SnapshotTracer:
             )
             snapshot(
                 save=True,
-                **snapshot_args,
+                **self._snapshot_args,
             )
             self._snapshot_counts += 1
 

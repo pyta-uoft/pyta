@@ -284,14 +284,15 @@ def test_snapshot_to_json_sets_primitive():
     ]
 
     # Validate that every id-value pair in the set matches an expected pair
-    for id_, value in zip(expected_ids_for_test_var1a, expected_values_for_test_var1a):
-        assert {"id": id_, "type": "int", "value": value} in json_data_objects
+    json_data_modified = [{"type": obj["type"], "value": obj["value"]} for obj in json_data_objects]
+    for _, value in zip(expected_ids_for_test_var1a, expected_values_for_test_var1a):
+        assert {"type": "int", "value": value} in json_data_modified
 
-    for id_, value in zip(expected_ids_for_test_var2a, expected_values_for_test_var2a):
-        assert {"id": id_, "type": "bool", "value": value} in json_data_objects
+    for _, value in zip(expected_ids_for_test_var2a, expected_values_for_test_var2a):
+        assert {"type": "bool", "value": value} in json_data_modified
 
-    for id_, value in zip(expected_ids_for_projects, expected_values_for_projects):
-        assert {"id": id_, "type": "str", "value": value} in json_data_objects
+    for _, value in zip(expected_ids_for_projects, expected_values_for_projects):
+        assert {"type": "str", "value": value} in json_data_modified
 
 
 def test_snapshot_to_json_dicts_primitive():

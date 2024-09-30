@@ -7,21 +7,38 @@ import sys
 import pytest
 from pytest_snapshot.plugin import Snapshot
 
-from python_ta.debug import SnapshotManager
+from python_ta.debug import SnapshotTracer
 
 SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_manager_testing_snapshots"
 )
 TEST_RESULTS_DIR = "/tmp/test_results"
+MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
+
+# Function inputs for testing the SnapshotTracer
 
 
 def func_one_line(output_directory: str = None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_one_line",)):
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include=("func_one_line",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+    ):
         num = 123
 
 
 def func_multi_line(output_directory: str = None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_multi_line",)):
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include=("func_multi_line",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+    ):
         num = 123
         some_string = "Hello, world"
         num2 = 321
@@ -29,20 +46,41 @@ def func_multi_line(output_directory: str = None) -> None:
 
 
 def func_mutation(output_directory: str = None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_mutation",)):
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include=("func_mutation",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+    ):
         num = 123
         num = 321
 
 
 def func_for_loop(output_directory: str = None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_for_loop",)):
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include=("func_for_loop",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+    ):
         nums = [1, 2, 3]
         for i in range(len(nums)):
             nums[i] = nums[i] + 1
 
 
 def func_if_else(output_directory: str = None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_if_else",)):
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include=("func_if_else",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+    ):
         num = 10
         if num > 5:
             result = "greater"
@@ -51,17 +89,34 @@ def func_if_else(output_directory: str = None) -> None:
 
 
 def func_while(output_directory: str = None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_while",)):
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory, include=("func_while",), memory_viz_args=MEMORY_VIZ_ARGS
+    ):
         num = 0
         while num < 3:
             num += 1
 
 
-def func_with_args():
-    with SnapshotManager(
-        include=("func_with_args",), memory_viz_args=["--roughjs-config", "seed=12345"]
-    ):
+def func_with_args() -> None:
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(include=("func_with_args",), memory_viz_args=MEMORY_VIZ_ARGS):
         flag = "not --output"
+
+
+def func_no_memory_viz_args() -> None:
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(include=("func_no_memory_viz_args",), memory_viz_args=MEMORY_VIZ_ARGS):
+        s = "Hello"
+
+
+# Helpers
 
 
 def assert_output_files_match(output_path: str, snapshot: Snapshot, function_name: str):
@@ -75,15 +130,13 @@ def assert_output_files_match(output_path: str, snapshot: Snapshot, function_nam
     snapshot.assert_match_dir(actual_svgs, function_name)
 
 
-def func_no_memory_viz_args():
-    with SnapshotManager(include=("func_no_memory_viz_args",)):
-        s = "Hello"
+# Fixtures
 
 
 @pytest.fixture(scope="function")
-def test_directory(func_name, snapshot):
+def test_directory(test_func, snapshot):
     snapshot.snapshot_dir = SNAPSHOT_DIR
-    actual_dir = os.path.join(TEST_RESULTS_DIR, func_name)
+    actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
     shutil.rmtree(actual_dir, ignore_errors=True)
     os.makedirs(actual_dir, exist_ok=True)
     yield actual_dir
@@ -100,52 +153,63 @@ def setup_curr_dir_testing(snapshot):
     os.remove(file_name)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_func_with_non_output_flags(snapshot, setup_curr_dir_testing):
-    func_with_args()
-
-    with open("snapshot-0.svg") as actual_file:
-        snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
-
-
-functions_to_test = [
-    func_one_line,
-    func_multi_line,
-    func_mutation,
-    func_for_loop,
-    func_while,
-    func_if_else,
-]
-func_with_names = [(func, func.__name__) for func in functions_to_test]
+# Tests
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
 @pytest.mark.parametrize(
-    "test_func,func_name",
-    func_with_names,
+    "test_func",
+    [
+        func_one_line,
+        func_multi_line,
+        func_mutation,
+        func_for_loop,
+        func_while,
+        func_if_else,
+    ],
 )
-def test_snapshot_manger_with_functions(test_func, snapshot, test_directory):
+def test_snapshot_tracer_with_functions(test_func, snapshot, test_directory):
+    """
+    Test SnapshotTracer with various functions.
+    """
     test_func(test_directory)
 
     assert_output_files_match(test_directory, snapshot, test_func.__name__)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_outputs_to_default_directory_with_no_memory_viz_args(snapshot, setup_curr_dir_testing):
+def test_func_with_non_output_flags(snapshot, setup_curr_dir_testing):
+    """
+    Test SnapshotTracer outputs to the current directory when `memory_viz_args` are passed.
+    """
+    func_with_args()
+
+    with open("snapshot-0.svg") as actual_file:
+        snapshot.assert_match_dir({"snapshot-0.svg": actual_file.read()}, func_with_args.__name__)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_using_output_flag():
+    """
+    Test SnapshotTracer raises an error when the `memory_viz_args` includes the `--output` flag.
+    """
+    with pytest.raises(
+        ValueError, match="Use the output_directory parameter to specify a different output path."
+    ):
+        with SnapshotTracer(
+            include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
+        ):
+            pass
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_no_output_directory(snapshot, setup_curr_dir_testing):
+    """
+    Test SnapshotTracer outputs to the current directory when `output_directory` is not specified.
+    """
     func_no_memory_viz_args()
 
     with open("snapshot-0.svg") as actual_file:
         snapshot.assert_match_dir(
             {"snapshot-0.svg": actual_file.read()}, func_no_memory_viz_args.__name__
         )
-
-
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
-def test_using_output_flag():
-    with pytest.raises(
-        ValueError, match="Use the output_directory parameter to specify a different output path."
-    ):
-        with SnapshotManager(
-            include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
-        ):
-            pass

@@ -16,13 +16,14 @@ class SnapshotTracer:
     A class used for snapshot-based debugging to visualize program memory at each line in the calling function.
 
     Instance attributes:
-        include: A collection of function names, either as strings or regular expressions, whose variables will be captured.
         output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
+        _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
+        _snapshot_counts: The number of snapshots taken.
     """
 
     output_directory: Optional[str]
-    _snapshot_counts: int
     _snapshot_args: dict[str, Any]
+    _snapshot_counts: int
 
     def __init__(self, output_directory: Optional[str] = None, **kwargs) -> None:
         """Initialize a context manager for snapshot-based debugging.

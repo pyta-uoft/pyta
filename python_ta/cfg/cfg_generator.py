@@ -61,8 +61,13 @@ def _generate(
         return
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
-    z3v = Z3Visitor()
-    module = z3v.visitor.visit(AstroidBuilder().file_build(abs_path))
+    module = AstroidBuilder().file_build(abs_path)
+
+    # invoke Z3Visitor if z3 dependency is available
+    if _check_dependency("z3"):
+        z3v = Z3Visitor()
+        module = z3v.visitor.visit(module)
+
     visitor = CFGVisitor(options=visitor_options)
     module.accept(visitor)
 
@@ -150,3 +155,12 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFG
         else:
             graph.edge(node_id, f"{graph.name}_{edge.target.id}", color=color)
         _visit(edge.target, graph, visited, end)
+
+
+# check whether a dependency is available
+def _check_dependency(module_name):
+    try:
+        __import__(module_name)
+        return True
+    except ImportError:
+        return False

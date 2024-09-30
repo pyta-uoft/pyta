@@ -23,7 +23,7 @@ exclude: |
       examples|
       tests/fixtures/sample_dir|
       tests/test_debug/snapshot_testing_snapshots|
-      tests/test_debug/snapshot_manager_testing_snapshots
+      tests/test_debug/snapshot_tracer_testing_snapshots
   )
 
 ci:

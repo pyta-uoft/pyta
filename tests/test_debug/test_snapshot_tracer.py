@@ -11,7 +11,7 @@ from pytest_snapshot.plugin import Snapshot
 from python_ta.debug import SnapshotTracer
 
 SNAPSHOT_DIR = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), "snapshot_manager_testing_snapshots"
+    os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
 )
 TEST_RESULTS_DIR = "/tmp/test_results"
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]

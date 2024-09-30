@@ -256,20 +256,24 @@ The `RecursionTable` is a new PythonTA feature and currently has the following k
 
 ## Tracing the Python Memory Model
 
-The following section will focus on tracing the Python memory model. This feature uses the `python_ta.debug.SnapshotManager` as a context manager.
+The following section will focus on tracing the Python memory model. This feature uses the `python_ta.debug.SnapshotTracer` as a context manager.
 
 ### Example usage
 
+[//]: # "TODO: update this test"
+
 ```python
 # demo.py
-from python_ta.debug import SnapshotManager
+from python_ta.debug import SnapshotTracer
+
 
 def func_multi_line(output_directory=None) -> None:
-    with SnapshotManager(output_directory=output_directory, include=("func_multi_line",)):
+    with SnapshotTracer(output_directory=output_directory, include=("func_multi_line",)):
         num = 123
         some_string = "Hello, world"
         num2 = 321
         arr = [some_string, "string 123321"]
+
 
 if __name__ == '__main__':
     func_multi_line()
@@ -280,13 +284,13 @@ When this function is run, variables within `func_multi_line` are captured, and 
 ### API
 
 ```{eval-rst}
-.. automethod:: python_ta.debug.SnapshotManager.__init__
+.. automethod:: python_ta.debug.SnapshotTracer.__init__
 ```
 
 ### Current Limitations
 
-The `SnapshotManager` has the following limitations:
+The `SnapshotTracer` has the following limitations:
 
 1. Due to the differences in the Python interpreters, this context manager only works for Python versions >= 3.10.
 2. The context manager does not step into any function calls. Calling functions inside the function may lead to undefined behaviors.
-3. `SnapshotManager` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
+3. `SnapshotTracer` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).

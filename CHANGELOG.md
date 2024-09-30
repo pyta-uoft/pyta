@@ -10,7 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Added `include` filter to `snapshot`
-- Added new `python_ta.debug` module with an `SnapshotManager` context manager for generating memory models
+- Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 
 ### 💫 New checkers
 

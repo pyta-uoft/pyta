@@ -4,10 +4,9 @@ import copy
 import inspect
 import logging
 import os
-import re
 import sys
 import types
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
 from .snapshot import snapshot
 

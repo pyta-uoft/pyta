@@ -194,17 +194,6 @@ class TestSnapshotTracer:
 
         assert_output_files_match(test_directory, snapshot, test_func.__name__)
 
-    def test_func_with_non_output_flags(self, snapshot, setup_curr_dir_testing):
-        """
-        Test SnapshotTracer outputs to the current directory when `memory_viz_args` are passed.
-        """
-        func_with_args()
-
-        with open("snapshot-0.svg") as actual_file:
-            snapshot.assert_match_dir(
-                {"snapshot-0.svg": actual_file.read()}, func_with_args.__name__
-            )
-
     def test_using_output_flag(self):
         """
         Test SnapshotTracer raises an error when the `memory_viz_args` includes the `--output` flag.

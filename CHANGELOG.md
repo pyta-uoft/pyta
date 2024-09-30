@@ -29,6 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored codebase to use modern type annotations. Replaced `List` with `list`, `Dict` with `dict`, `Set` with `set`, and `Tuple` with `tuple`
 - Checked for variable reassignment in `AugAssign` and `AnnAssign` node in parsing edge Z3 constraints
 - Rendered logically infeasible control flow graph edges in light grey
+- Modified `test_snapshot_to_json_sets_primitive` for Python 3.8 compatibility
 
 ## [2.8.1] - 2024-08-19
 

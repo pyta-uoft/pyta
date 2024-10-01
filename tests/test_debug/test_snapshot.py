@@ -830,3 +830,29 @@ def test_snapshot_excludes_variables_in_nested_frames():
             }
         },
     ]
+
+
+def test_snapshot_excludes_variables_with_regex():
+    """
+    Test snapshot() excludes variables in nested frames using regex.
+    """
+    result = func_with_exclude_nested(
+        exclude_vars=[re.compile("test_var1.*")],
+        include=["func_with_exclude", "func_with_exclude_nested"],
+    )
+    assert result == [
+        {
+            "func_with_exclude": {
+                "exclude_vars": [re.compile(r"test_var1.*")],
+                "include": ["func_with_exclude", "func_with_exclude_nested"],
+                "test_var2a": "Students Developing Software",
+            }
+        },
+        {
+            "func_with_exclude_nested": {
+                "exclude_vars": [re.compile(r"test_var1.*")],
+                "include": ["func_with_exclude", "func_with_exclude_nested"],
+                "test_var2b": ("Leo", "tester"),
+            }
+        },
+    ]

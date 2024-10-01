@@ -13,6 +13,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+- `function-parameters-not-mentioned`: Provide error message when a function parameter is not mentioned by name in the function's docstring.
+
 ### 🐛 Bug fixes
 
 - Fixed issue where `snapshot` errors on unserializable values

@@ -9,7 +9,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
-- Added `include` filter to `snapshot`
+- Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 
 ### 💫 New checkers

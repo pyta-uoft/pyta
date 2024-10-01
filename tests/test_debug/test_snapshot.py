@@ -54,22 +54,24 @@ def func_cyclic() -> list:
     return snapshot()
 
 
-def func_with_include(include: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
+def func_with_include(include_frames: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
     """
-    Function for snapshot() testing with include parameter.
+    Function for snapshot() testing with include_frames parameter.
     """
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
-    return snapshot(include=include)
+    return snapshot(include_frames=include_frames)
 
 
-def func_with_include_nested(include: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
+def func_with_include_nested(
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
+) -> list[dict]:
     """
-    Function for snapshot() testing with include parameter.
+    Function for snapshot() testing with include_frames parameter.
     """
     test_var1b = {"SDS_coolest_project": "PyTA"}
     test_var2b = ("Leo", "tester")
-    return func_with_include(include=include)
+    return func_with_include(include_frames=include_frames)
 
 
 def func_with_unserializable_objects() -> list[dict]:
@@ -85,26 +87,26 @@ def func_with_unserializable_objects() -> list[dict]:
 
 def func_with_exclude(
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
-    include: Optional[Iterable[str | re.Pattern]] = None,
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
 ) -> list[dict]:
     """
-    Function for snapshot() testing with exclude parameter.
+    Function for snapshot() testing with exclude_vars parameter.
     """
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
-    return snapshot(exclude_vars=exclude_vars, include=include)
+    return snapshot(exclude_vars=exclude_vars, include_frames=include_frames)
 
 
 def func_with_exclude_nested(
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
-    include: Optional[Iterable[str | re.Pattern]] = None,
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
 ) -> list[dict]:
     """
-    Function for snapshot() testing with exclude parameter.
+    Function for snapshot() testing with exclude_vars parameter.
     """
     test_var1b = {"SDS_coolest_project": "PyTA"}
     test_var2b = ("Leo", "tester")
-    return func_with_exclude(exclude_vars=exclude_vars, include=include)
+    return func_with_exclude(exclude_vars=exclude_vars, include_frames=include_frames)
 
 
 def test_snapshot_one_level() -> None:
@@ -704,11 +706,11 @@ def test_snapshot_save_stdout():
 
 
 def test_snapshot_only_includes_function_self():
-    result = func_with_include(include=("func_with_include",))
+    result = func_with_include(include_frames=("func_with_include",))
     assert result == [
         {
             "func_with_include": {
-                "include": ("func_with_include",),
+                "include_frames": ("func_with_include",),
                 "test_var1a": "David is cool!",
                 "test_var2a": "Students Developing Software",
             }
@@ -718,7 +720,7 @@ def test_snapshot_only_includes_function_self():
 
 def test_snapshot_includes_multiple_functions():
     result = func_with_include_nested(
-        include=(
+        include_frames=(
             "func_with_include",
             "func_with_include_nested",
         )
@@ -726,7 +728,7 @@ def test_snapshot_includes_multiple_functions():
     assert result == [
         {
             "func_with_include": {
-                "include": (
+                "include_frames": (
                     "func_with_include",
                     "func_with_include_nested",
                 ),
@@ -736,7 +738,7 @@ def test_snapshot_includes_multiple_functions():
         },
         {
             "func_with_include_nested": {
-                "include": (
+                "include_frames": (
                     "func_with_include",
                     "func_with_include_nested",
                 ),
@@ -748,11 +750,11 @@ def test_snapshot_includes_multiple_functions():
 
 
 def test_snapshot_only_includes_specified_function():
-    result = func_with_include_nested(include=("func_with_include_nested",))
+    result = func_with_include_nested(include_frames=("func_with_include_nested",))
     assert result == [
         {
             "func_with_include_nested": {
-                "include": ("func_with_include_nested",),
+                "include_frames": ("func_with_include_nested",),
                 "test_var1b": {"SDS_coolest_project": "PyTA"},
                 "test_var2b": ("Leo", "tester"),
             },
@@ -777,12 +779,12 @@ def test_snapshot_excludes_one_variable_in_current_frame():
     """
     Test snapshot() excludes one variable in the current frame.
     """
-    result = func_with_exclude(exclude_vars=["test_var1a"], include=["func_with_exclude"])
+    result = func_with_exclude(exclude_vars=["test_var1a"], include_frames=["func_with_exclude"])
     assert result == [
         {
             "func_with_exclude": {
                 "exclude_vars": ["test_var1a"],
-                "include": ["func_with_exclude"],
+                "include_frames": ["func_with_exclude"],
                 "test_var2a": "Students Developing Software",
             }
         }
@@ -794,13 +796,13 @@ def test_snapshot_excludes_multiple_variables():
     Test snapshot() excludes multiple variables in the current frame.
     """
     result = func_with_exclude(
-        exclude_vars=["test_var1a", "test_var2a"], include=["func_with_exclude"]
+        exclude_vars=["test_var1a", "test_var2a"], include_frames=["func_with_exclude"]
     )
     assert result == [
         {
             "func_with_exclude": {
                 "exclude_vars": ["test_var1a", "test_var2a"],
-                "include": ["func_with_exclude"],
+                "include_frames": ["func_with_exclude"],
             }
         }
     ]
@@ -811,13 +813,14 @@ def test_snapshot_excludes_variables_in_nested_frames():
     Test snapshot() excludes variables in nested frames.
     """
     result = func_with_exclude_nested(
-        exclude_vars=["test_var1b"], include=["func_with_exclude", "func_with_exclude_nested"]
+        exclude_vars=["test_var1b"],
+        include_frames=["func_with_exclude", "func_with_exclude_nested"],
     )
     assert result == [
         {
             "func_with_exclude": {
                 "exclude_vars": ["test_var1b"],
-                "include": ["func_with_exclude", "func_with_exclude_nested"],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
                 "test_var1a": "David is cool!",
                 "test_var2a": "Students Developing Software",
             }
@@ -825,7 +828,7 @@ def test_snapshot_excludes_variables_in_nested_frames():
         {
             "func_with_exclude_nested": {
                 "exclude_vars": ["test_var1b"],
-                "include": ["func_with_exclude", "func_with_exclude_nested"],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
                 "test_var2b": ("Leo", "tester"),
             }
         },
@@ -838,20 +841,20 @@ def test_snapshot_excludes_variables_with_regex():
     """
     result = func_with_exclude_nested(
         exclude_vars=[re.compile("test_var1.*")],
-        include=["func_with_exclude", "func_with_exclude_nested"],
+        include_frames=["func_with_exclude", "func_with_exclude_nested"],
     )
     assert result == [
         {
             "func_with_exclude": {
                 "exclude_vars": [re.compile("test_var1.*")],
-                "include": ["func_with_exclude", "func_with_exclude_nested"],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
                 "test_var2a": "Students Developing Software",
             }
         },
         {
             "func_with_exclude_nested": {
                 "exclude_vars": [re.compile("test_var1.*")],
-                "include": ["func_with_exclude", "func_with_exclude_nested"],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
                 "test_var2b": ("Leo", "tester"),
             }
         },

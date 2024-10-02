@@ -31,19 +31,19 @@ class FunctionParameterNotMentionedChecker(BaseChecker):
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
         docstring = node.doc_node.value if node.doc_node and node.doc_node.value else ""
-        self._check_parameters(self._strip_docstring_of_doctest(docstring), node.argnames(), node)
+        for parameter in node.args.args:
+            self._check_parameters(
+                self._strip_docstring_of_doctest(docstring), parameter.name, parameter
+            )
 
     # Helper Function
-    def _check_parameters(self, docstring: str, parameters: list[str], node: nodes.NodeNG) -> None:
+    def _check_parameters(self, docstring: str, parameter: str, node: nodes.NodeNG) -> None:
         """Check if every parameter is mentioned in the docstring"""
         translator = str.maketrans("", "", string.punctuation)
         docstring = docstring.translate(translator)
         words = {word for line in docstring.split("\n") for word in line.split()}
-        for parameter in parameters:
-            if parameter not in words:
-                self.add_message(
-                    "unmentioned-parameter", node=node, args=parameter, line=node.lineno
-                )
+        if parameter not in words:
+            self.add_message("unmentioned-parameter", node=node, args=parameter, line=node.lineno)
 
     def _strip_docstring_of_doctest(self, docstring: str) -> str:
         """Return the docstring without the doctest"""

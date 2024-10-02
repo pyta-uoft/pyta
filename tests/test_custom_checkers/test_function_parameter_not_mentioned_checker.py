@@ -13,6 +13,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
     def setUp(self):
         self.setup_method()
 
+    # TODO: The follwoing cases need to change, the node is no longer a function node, but instead a parameter node
     def test_no_missing_parameter(self) -> None:
         """Test the checker on a function with no missing parameters"""
         src = '''
@@ -58,7 +59,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[0],
                 args="x",
                 line=2,
             ),
@@ -79,13 +80,13 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[0],
                 args="x",
                 line=1,
             ),
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[1],
                 args="y",
                 line=1,
             ),
@@ -140,7 +141,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[0],
                 args="x",
                 line=1,
             ),
@@ -186,7 +187,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[0],
                 args="x",
                 line=1,
             ),
@@ -222,7 +223,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[0],
                 args="x",
                 line=1,
             ),
@@ -242,7 +243,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[0],
                 args="x",
                 line=1,
             ),
@@ -292,7 +293,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="unmentioned-parameter",
-                node=function_node,
+                node=function_node.args.args[1],
                 args="y",
                 line=1,
             ),

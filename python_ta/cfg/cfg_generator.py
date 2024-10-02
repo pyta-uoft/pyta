@@ -13,6 +13,14 @@ import graphviz
 from astroid import nodes
 from astroid.builder import AstroidBuilder
 
+try:
+    from ..transforms.z3_visitor import Z3Visitor
+
+    z3_dependency_available = True
+except ImportError:
+    Z3Visitor = Any
+    z3_dependency_available = False
+
 from .graph import CFGBlock, ControlFlowGraph
 from .visitor import CFGVisitor
 
@@ -61,6 +69,12 @@ def _generate(
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
     module = AstroidBuilder().file_build(abs_path)
+
+    # invoke Z3Visitor if z3 dependency is available
+    if z3_dependency_available:
+        z3v = Z3Visitor()
+        module = z3v.visitor.visit(module)
+
     visitor = CFGVisitor(options=visitor_options)
     module.accept(visitor)
 
@@ -140,8 +154,11 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFG
     visited.add(node_id)
 
     for edge in block.successors:
+        color = "black" if edge.is_feasible else "lightgrey"
         if edge.get_label() is not None:
-            graph.edge(node_id, f"{graph.name}_{edge.target.id}", edge.get_label())
+            graph.edge(
+                node_id, f"{graph.name}_{edge.target.id}", label=edge.get_label(), color=color
+            )
         else:
-            graph.edge(node_id, f"{graph.name}_{edge.target.id}")
+            graph.edge(node_id, f"{graph.name}_{edge.target.id}", color=color)
         _visit(edge.target, graph, visited, end)

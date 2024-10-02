@@ -3,7 +3,15 @@ from __future__ import annotations
 from typing import Any, Dict, Generator, List, Optional, Set
 
 try:
-    from z3 import Z3_OP_UNINTERPRETED, ExprRef, Not, Z3Exception, is_const
+    from z3 import (
+        Z3_OP_UNINTERPRETED,
+        ExprRef,
+        Not,
+        Solver,
+        Z3Exception,
+        is_const,
+        unsat,
+    )
 
     from ..z3.z3_parser import Z3ParseException, Z3Parser
 
@@ -16,6 +24,8 @@ except ImportError:
     is_const = Any
     Z3_OP_UNINTERPRETED = Any
     Z3ParseException = Any
+    Solver = Any
+    unsat = Any
     z3_dependency_available = False
 
 from astroid import (
@@ -288,6 +298,25 @@ class ControlFlowGraph:
         elif isinstance(node, (AugAssign, AnnAssign)):
             env.assign(node.target.name)
 
+    def update_edge_feasibility(self) -> None:
+        """Traverse through edges in DFS order and update is_feasible
+        attribute of each edge. Edges that are unreachable with the given
+        set of Z3 constraints will have is_feasible set to False
+        """
+        if not z3_dependency_available:
+            return
+
+        def _check_unsat(constraints: List[ExprRef]) -> bool:
+            solver = Solver()
+            solver.add(constraints)
+            return solver.check() == unsat
+
+        for edge in self.get_edges():
+            if len(edge.z3_constraints) > 0:
+                edge.is_feasible = not all(
+                    _check_unsat(constraints) for constraints in edge.z3_constraints.values()
+                )
+
 
 class CFGBlock:
     """A node in a control flow graph.
@@ -346,6 +375,7 @@ class CFGEdge:
     condition: Optional[NodeNG]
     negate: Optional[bool]
     z3_constraints: Dict[int, List[ExprRef]]
+    is_feasible: bool
 
     def __init__(
         self,
@@ -363,6 +393,7 @@ class CFGEdge:
         self.source.successors.append(self)
         self.target.predecessors.append(self)
         self.z3_constraints = {}
+        self.is_feasible = True
 
     def get_label(self) -> Optional[str]:
         """Return the edge label if specified.

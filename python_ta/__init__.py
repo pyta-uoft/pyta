@@ -15,8 +15,9 @@ if __name__ == '__main__':
     python_ta.check_all()
 """
 
-__version__ = "2.8.2.dev"  # Version number
+from __future__ import annotations
 
+__version__ = "2.8.2.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.
 import builtins
@@ -36,7 +37,7 @@ import tokenize
 import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
-from typing import AnyStr, Generator, List, Optional, TextIO, Union
+from typing import AnyStr, Generator, Optional, TextIO, Union
 
 import pylint.config
 import pylint.lint
@@ -64,7 +65,7 @@ PYLINT_PATCHED = False
 
 
 def check_errors(
-    module_name: Union[List[str], str] = "",
+    module_name: Union[list[str], str] = "",
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
@@ -82,7 +83,7 @@ def check_errors(
 
 
 def check_all(
-    module_name: Union[List[str], str] = "",
+    module_name: Union[list[str], str] = "",
     config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
@@ -100,7 +101,7 @@ def check_all(
 
 
 def _check(
-    module_name: Union[List[str], str] = "",
+    module_name: Union[list[str], str] = "",
     level: str = "all",
     local_config: Union[dict, str] = "",
     output: Optional[TextIO] = None,
@@ -441,7 +442,7 @@ def _verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
     return True
 
 
-def _get_valid_files_to_check(module_name: Union[List[str], str]) -> Generator[AnyStr, None, None]:
+def _get_valid_files_to_check(module_name: Union[list[str], str]) -> Generator[AnyStr, None, None]:
     """A generator for all valid files to check."""
     # Allow call to check with empty args
     if module_name == "":

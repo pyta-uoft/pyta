@@ -1,4 +1,6 @@
-from typing import Dict, List, Tuple, Union
+from __future__ import annotations
+
+from typing import Union
 
 import astroid
 from astroid import nodes
@@ -6,14 +8,14 @@ from astroid import nodes
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 
-def build_cfgs(src: str) -> Dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]:
+def build_cfgs(src: str) -> dict[Union[nodes.FunctionDef, nodes.Module], ControlFlowGraph]:
     mod = astroid.parse(src)
     t = CFGVisitor()
     mod.accept(t)
     return t.cfgs
 
 
-def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
+def _extract_blocks(cfg: ControlFlowGraph) -> list[list[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
 

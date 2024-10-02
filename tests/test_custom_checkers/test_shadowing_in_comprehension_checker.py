@@ -65,7 +65,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
     def test_list_comp(self):
         """Test checker with a list comprehension"""
         src = '''
-        def num_lst(n: int) -> List[int]:
+        def num_lst(n: int) -> list[int]:
             """Return a list of integers from 0 to <n>, in that order."""
             return [n for n in range(n)]
         '''
@@ -131,7 +131,7 @@ class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):
     def test_print_pos(self):
         """Test checker with a generator"""
         src = '''
-        def print_pos(lst: List[int]) -> None:
+        def print_pos(lst: list[int]) -> None:
             """Print items in lst one by one if they are greater than 0."""
             for k in (k for k in lst if k > 0):
                 print(k)

@@ -19,9 +19,11 @@ except ImportError:
     z3_dependency_available = False
 
 from astroid import (
+    AnnAssign,
     Arguments,
     Assign,
     AssignName,
+    AugAssign,
     Break,
     Continue,
     NodeNG,
@@ -197,7 +199,7 @@ class ControlFlowGraph:
             yield edge
             yield from self._get_edges(edge.target, visited)
 
-    def _get_paths(self) -> List[List[CFGEdge]]:
+    def get_paths(self) -> List[List[CFGEdge]]:
         """Get edges that represent paths from start to end node in depth-first order."""
         paths = []
 
@@ -255,7 +257,7 @@ class ControlFlowGraph:
         if not z3_dependency_available:
             return
 
-        for path_id, path in enumerate(self._get_paths()):
+        for path_id, path in enumerate(self.get_paths()):
             # starting a new path
             z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
             for edge in path:
@@ -274,11 +276,17 @@ class ControlFlowGraph:
 
                 # traverse into target node
                 for node in edge.target.statements:
-                    if isinstance(node, Assign):
-                        # mark reassigned variables
-                        for target in node.targets:
-                            if isinstance(target, AssignName):
-                                z3_environment.assign(target.name)
+                    if isinstance(node, (Assign, AugAssign, AnnAssign)):
+                        self._handle_variable_reassignment(node, z3_environment)
+
+    def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
+        """Check for reassignment statements and invoke Z3 environment"""
+        if isinstance(node, Assign):
+            for target in node.targets:
+                if isinstance(target, AssignName):
+                    env.assign(target.name)
+        elif isinstance(node, (AugAssign, AnnAssign)):
+            env.assign(node.target.name)
 
 
 class CFGBlock:

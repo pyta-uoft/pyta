@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import json
-from typing import Dict, List
 
 from pylint.reporters.ureports.nodes import BaseLayout
 
@@ -16,7 +17,7 @@ class JSONReporter(PythonTaReporter):
 
     OUTPUT_FILENAME = "pyta_report.json"
 
-    messages: Dict[str, List[NewMessage]]
+    messages: dict[str, list[NewMessage]]
 
     def display_messages(self, layout: BaseLayout) -> None:
         """Hook for displaying the messages of the reporter
@@ -39,7 +40,7 @@ class JSONReporter(PythonTaReporter):
 
         self.writeln(json.dumps(output, indent=4))
 
-    def _output_messages(self, msgs: List[NewMessage]) -> List[Dict]:
+    def _output_messages(self, msgs: list[NewMessage]) -> list[dict]:
         """Returns a list of dictionaries containing formatted error messages."""
         max_messages = self.linter.config.pyta_number_of_messages
         num_occurrences = {msg.message.msg_id: 0 for msg in msgs}

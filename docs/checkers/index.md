@@ -1022,6 +1022,18 @@ This error occurs when a module, function, class or method has an empty docstrin
 
 ```
 
+(C9960)=
+
+### Unmentioned Parameter (C9960)
+
+This error occurs when a function parameter is not explicitly mentioned in the docstring, even though it is defined in
+the function signature. Parameters should be clearly documented in the function's docstring, not just within doctests
+or other parts of the function.
+
+```{literalinclude} /../examples/pylint/c9960_unmentioned_parameter.py
+
+```
+
 (C0103)=
 
 ### Invalid name (C0103)

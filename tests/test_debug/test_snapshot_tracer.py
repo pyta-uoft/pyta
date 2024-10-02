@@ -14,6 +14,7 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
 )
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
+MEMORY_VIZ_VERSION = "0.3.2"
 
 
 # Function inputs for testing the SnapshotTracer
@@ -28,6 +29,7 @@ def func_one_line(output_directory: str = None) -> None:
         include_frames=("func_one_line",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         num = 123
 
@@ -41,6 +43,7 @@ def func_multi_line(output_directory: str = None) -> None:
         include_frames=("func_multi_line",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         num = 123
         some_string = "Hello, world"
@@ -57,6 +60,7 @@ def func_mutation(output_directory: str = None) -> None:
         include_frames=("func_mutation",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         num = 123
         num = 321
@@ -71,6 +75,7 @@ def func_for_loop(output_directory: str = None) -> None:
         include_frames=("func_for_loop",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         nums = [1, 2, 3]
         for i in range(len(nums)):
@@ -86,6 +91,7 @@ def func_if_else(output_directory: str = None) -> None:
         include_frames=("func_if_else",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         num = 10
         if num > 5:
@@ -103,6 +109,7 @@ def func_while(output_directory: str = None) -> None:
         include_frames=("func_while",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         num = 0
         while num < 3:
@@ -113,7 +120,11 @@ def func_no_output_dir() -> None:
     """
     Function for testing SnapshotTracer
     """
-    with SnapshotTracer(include_frames=("func_no_output_dir",), memory_viz_args=MEMORY_VIZ_ARGS):
+    with SnapshotTracer(
+        include_frames=("func_no_output_dir",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ):
         s = "Hello"
 
 
@@ -193,7 +204,9 @@ class TestSnapshotTracer:
             match="Use the output_directory parameter to specify a different output path.",
         ):
             with SnapshotTracer(
-                include_frames=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
+                include_frames=("func_duplicate_output_path",),
+                memory_viz_args=["--output", "."],
+                memory_viz_version=MEMORY_VIZ_VERSION,
             ):
                 pass
 

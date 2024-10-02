@@ -92,7 +92,7 @@ def snapshot(
 
         frame = frame.f_back
 
-    if save and len(variables) > 0:
+    if save:
         json_compatible_vars = snapshot_to_json(variables)
 
         # Set up command

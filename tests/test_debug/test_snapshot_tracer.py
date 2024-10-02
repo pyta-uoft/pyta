@@ -182,6 +182,7 @@ class TestSnapshotTracer:
             func_if_else,
         ],
     )
+    @pytest.mark.skip(reason="Pending until MemoryViz is fixed")
     def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
         """
         Test SnapshotTracer with various simple functions.

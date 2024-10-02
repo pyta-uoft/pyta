@@ -3,6 +3,7 @@ Test suite for generating control flow graphs using the PythonTA API.
 """
 
 import os.path
+from unittest.mock import patch
 
 import pytest
 
@@ -141,3 +142,13 @@ def test_mod_not_str(capsys) -> None:
     captured = capsys.readouterr()
 
     assert captured.out == expected
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_z3_dependency_uninstalled(snapshot, create_cfg) -> None:
+    """Test that generate_cfg does not raise any error when z3 is not installed"""
+    _, _, gv_file_io = create_cfg
+
+    # Check that the contents match with the snapshot
+    snapshot.snapshot_dir = "snapshots"
+    snapshot.assert_match(gv_file_io.read(), "my_file.gv")

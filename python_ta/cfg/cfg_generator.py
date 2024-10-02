@@ -13,7 +13,14 @@ import graphviz
 from astroid import nodes
 from astroid.builder import AstroidBuilder
 
-from ..transforms.z3_visitor import Z3Visitor
+try:
+    from ..transforms.z3_visitor import Z3Visitor
+
+    z3_dependency_available = True
+except ImportError:
+    Z3Visitor = Any
+    z3_dependency_available = False
+
 from .graph import CFGBlock, ControlFlowGraph
 from .visitor import CFGVisitor
 
@@ -64,7 +71,7 @@ def _generate(
     module = AstroidBuilder().file_build(abs_path)
 
     # invoke Z3Visitor if z3 dependency is available
-    if _check_dependency("z3"):
+    if z3_dependency_available:
         z3v = Z3Visitor()
         module = z3v.visitor.visit(module)
 
@@ -155,12 +162,3 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFG
         else:
             graph.edge(node_id, f"{graph.name}_{edge.target.id}", color=color)
         _visit(edge.target, graph, visited, end)
-
-
-# check whether a dependency is available
-def _check_dependency(module_name):
-    try:
-        __import__(module_name)
-        return True
-    except ImportError:
-        return False

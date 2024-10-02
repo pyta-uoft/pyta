@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import astroid
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
@@ -273,6 +275,30 @@ def test_variable_reassignment() -> None:
     assert all(
         edge.is_feasible == expected for edge, expected in zip(paths[3], expected_other_path2)
     )
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_z3_dependency_uninstalled() -> None:
+    src = """
+    def func(x: str) -> None:
+        '''
+        Preconditions:
+            - x[0] == "a"
+            - x[0:2] == "bc"
+        '''
+        print(x)
+    """
+    visitor = CFGVisitor()
+    mod = astroid.parse(src)
+    mod.accept(visitor)
+    func_node = None
+    for node in mod.body:
+        if isinstance(node, astroid.FunctionDef) and node.name == "func":
+            func_node = node
+            break
+    cfg = visitor.cfgs[func_node]
+
+    assert all(edge.is_feasible for edge in cfg.get_edges())
 
 
 def _create_cfg(src: str, name: str) -> ControlFlowGraph:

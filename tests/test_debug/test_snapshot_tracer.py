@@ -27,6 +27,7 @@ def func_one_line(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=("func_one_line",),
+        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -39,6 +40,7 @@ def func_multi_line(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=("func_multi_line",),
+        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -54,6 +56,7 @@ def func_mutation(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=("func_mutation",),
+        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -67,6 +70,7 @@ def func_for_loop(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=("func_for_loop",),
+        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         nums = [1, 2, 3]
@@ -81,6 +85,7 @@ def func_if_else(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=("func_if_else",),
+        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 10
@@ -97,6 +102,7 @@ def func_while(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=("func_while",),
+        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 0

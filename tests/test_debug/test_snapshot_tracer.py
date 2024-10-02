@@ -26,7 +26,7 @@ def func_one_line(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include=("func_one_line",),
+        include_frames=("func_one_line",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -38,7 +38,7 @@ def func_multi_line(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include=("func_multi_line",),
+        include_frames=("func_multi_line",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -53,7 +53,7 @@ def func_mutation(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include=("func_mutation",),
+        include_frames=("func_mutation",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -66,7 +66,7 @@ def func_for_loop(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include=("func_for_loop",),
+        include_frames=("func_for_loop",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         nums = [1, 2, 3]
@@ -80,7 +80,7 @@ def func_if_else(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include=("func_if_else",),
+        include_frames=("func_if_else",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 10
@@ -95,7 +95,9 @@ def func_while(output_directory: str = None) -> None:
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory, include=("func_while",), memory_viz_args=MEMORY_VIZ_ARGS
+        output_directory=output_directory,
+        include_frames=("func_while",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 0
         while num < 3:
@@ -106,7 +108,7 @@ def func_with_args() -> None:
     """
     Function for testing SnapshotTracer
     """
-    with SnapshotTracer(include=("func_with_args",), memory_viz_args=MEMORY_VIZ_ARGS):
+    with SnapshotTracer(include_frames=("func_with_args",), memory_viz_args=MEMORY_VIZ_ARGS):
         flag = "not --output"
 
 
@@ -114,7 +116,9 @@ def func_no_memory_viz_args() -> None:
     """
     Function for testing SnapshotTracer
     """
-    with SnapshotTracer(include=("func_no_memory_viz_args",), memory_viz_args=MEMORY_VIZ_ARGS):
+    with SnapshotTracer(
+        include_frames=("func_no_memory_viz_args",), memory_viz_args=MEMORY_VIZ_ARGS
+    ):
         s = "Hello"
 
 
@@ -196,14 +200,14 @@ class TestSnapshotTracer:
 
     def test_using_output_flag(self):
         """
-        Test SnapshotTracer raises an error when the `memory_viz_args` includes the `--output` flag.
+        Test SnapshotTracer raises an error when the `memory_viz_args` include_framess the `--output` flag.
         """
         with pytest.raises(
             ValueError,
             match="Use the output_directory parameter to specify a different output path.",
         ):
             with SnapshotTracer(
-                include=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
+                include_frames=("func_duplicate_output_path",), memory_viz_args=["--output", "."]
             ):
                 pass
 

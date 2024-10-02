@@ -56,11 +56,12 @@ class SnapshotTracer:
                     ),
                 ]
             )
-            snapshot(
+            variables = snapshot(
                 save=True,
                 **self._snapshot_args,
             )
-            self._snapshot_counts += 1
+            if len(variables) > 0:
+                self._snapshot_counts += 1
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""

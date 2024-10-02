@@ -84,14 +84,15 @@ def snapshot(
         ):
             if frame.f_code.co_name != "<module>":
                 local_vars = get_filtered_local_variables(frame, exclude_vars)
-                variables.append({frame.f_code.co_name: local_vars})
+                if len(local_vars) > 0:
+                    variables.append({frame.f_code.co_name: local_vars})
             else:
                 global_vars = get_filtered_global_variables(frame)
                 variables.append(global_vars)
 
         frame = frame.f_back
 
-    if save:
+    if save and len(variables) > 0:
         json_compatible_vars = snapshot_to_json(variables)
 
         # Set up command

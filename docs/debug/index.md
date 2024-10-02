@@ -1,4 +1,4 @@
-# Debugging with Tracing
+# Loop, Recursion and Memory Tracing
 
 This page describes two additional PythonTA features:
 
@@ -285,7 +285,7 @@ if __name__ == '__main__':
     func_multi_line()
 ```
 
-When this function runs, the variables within `func_multi_line` are captured, and memory models are outputted to the calling directory for each line of code. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
+When this function runs, the variables within `func_multi_line` are captured, and memory models are outputted to `output_directory` for each line of code. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
 
 ### API
 

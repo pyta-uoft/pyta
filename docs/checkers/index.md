@@ -1030,7 +1030,7 @@ This error occurs when a function parameter is not explicitly mentioned in the d
 the function signature. Parameters should be clearly documented in the function's docstring, not just within doctests
 or other parts of the function.
 
-```{literalinclude} {literalinclude} /../examples/custom_checkers/c9960_unmentioned_parameter.py
+```{literalinclude} /../examples/custom_checkers/c9960_unmentioned_parameter.py
 
 ```
 

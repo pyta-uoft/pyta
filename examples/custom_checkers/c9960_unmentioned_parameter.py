@@ -3,6 +3,7 @@ def multiply(a, b) -> int:
     """Multiply two numbers."""  # C9960: 'a' and 'b' are not mentioned
     return a * b
 
+
 def divide(numerator, denominator) -> float:
     """
     Divide the numerator by the denominator.
@@ -11,6 +12,7 @@ def divide(numerator, denominator) -> float:
     numerator: The number to be divided.
     """  # C9960: 'denominator' is not mentioned
     return numerator / denominator
+
 
 def generate_list(n: int) -> list:
     """

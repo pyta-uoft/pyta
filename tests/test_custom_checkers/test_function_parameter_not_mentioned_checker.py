@@ -57,10 +57,10 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="x",
-                line=1,
+                line=2,
             ),
             ignore_position=True,
         ):
@@ -78,13 +78,13 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="x",
                 line=1,
             ),
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="y",
                 line=1,
@@ -139,13 +139,32 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="x",
                 line=1,
             ),
             ignore_position=True,
         ):
+            self.checker.visit_functiondef(function_node)
+
+    def test_no_missing_parameter_after_doctest(self) -> None:
+        """Test the checker on a function with a missing parameter in the doctest"""
+        src = '''
+        def f(x: int) -> list:
+            """Does not include parameter here
+
+            >>> f(1)
+            [x for x in range(10)]
+
+            But I named x here
+            """
+            pass
+        '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
 
     def test_missing_parameter_in_multiple_doctest(self) -> None:
@@ -166,7 +185,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="x",
                 line=1,
@@ -202,7 +221,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="x",
                 line=1,
@@ -222,7 +241,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="x",
                 line=1,
@@ -272,7 +291,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="function-parameters-not-mentioned",
+                msg_id="unmentioned-parameter",
                 node=function_node,
                 args="y",
                 line=1,

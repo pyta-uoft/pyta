@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Optional
+import doctest
+import string
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -13,23 +14,20 @@ from pylint.lint import PyLinter
 
 class FunctionParameterNotMentionedChecker(BaseChecker):
     """
-    A class checker to check if every function parameter is mentioned by name within it's the docstring.
-    By default, this checker will be disabled.
+    A class to check if every function parameter is mentioned by name within the function's the docstring.
+    By default, this checker is disabled.
     """
 
-    name = "function_parameters_not_mentioned"
+    name = "unmentioned-parameter"
     msgs = {
         "C9960": (
             "The parameter '%s' is not mentioned in the docstring",
-            "function-parameters-not-mentioned",
+            "unmentioned-parameter",
             "Used when a function parameter is not mentioned in the docstring",
         )
     }
 
-    def __init__(self, linter: Optional[PyLinter] = None) -> None:
-        super().__init__(linter=linter)
-
-    @only_required_for_messages("function-parameters-not-mentioned")
+    @only_required_for_messages("unmentioned-parameter")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
         docstring = node.doc_node.value if node.doc_node and node.doc_node.value else ""
@@ -38,20 +36,19 @@ class FunctionParameterNotMentionedChecker(BaseChecker):
     # Helper Function
     def _check_parameters(self, docstring: str, parameters: list[str], node: nodes.NodeNG) -> None:
         """Check if every parameter is mentioned in the docstring"""
-        words = {word.strip(".,:") for line in docstring.split("\n") for word in line.split()}
+        translator = str.maketrans("", "", string.punctuation)
+        docstring = docstring.translate(translator)
+        words = {word for line in docstring.split("\n") for word in line.split()}
         for parameter in parameters:
-            if not (words and parameter in words):
+            if parameter not in words:
                 self.add_message(
-                    "function-parameters-not-mentioned", node=node, args=parameter, line=node.lineno
+                    "unmentioned-parameter", node=node, args=parameter, line=node.lineno
                 )
 
     def _strip_docstring_of_doctest(self, docstring: str) -> str:
         """Return the docstring without the doctest"""
-        start_index = docstring.find(">>>")
-        contains_doctest = start_index != -1
-        if contains_doctest:
-            return docstring[:start_index]
-        return docstring
+        parsed = doctest.DocTestParser().parse(docstring)
+        return "".join(part for part in parsed if not isinstance(part, doctest.Example))
 
 
 def register(linter: PyLinter) -> None:

@@ -32,13 +32,13 @@ class FunctionParameterNotMentionedChecker(BaseChecker):
         """Visit a function definition"""
         docstring = node.doc_node.value if node.doc_node and node.doc_node.value else ""
         for parameter in node.args.args:
-            self._check_parameters(
+            self._check_parameter(
                 self._strip_docstring_of_doctest(docstring), parameter.name, parameter
             )
 
     # Helper Function
-    def _check_parameters(self, docstring: str, parameter: str, node: nodes.NodeNG) -> None:
-        """Check if every parameter is mentioned in the docstring"""
+    def _check_parameter(self, docstring: str, parameter: str, node: nodes.NodeNG) -> None:
+        """Check's if parameter is mentioned in the docstring"""
         translator = str.maketrans("", "", string.punctuation)
         docstring = docstring.translate(translator)
         words = {word for line in docstring.split("\n") for word in line.split()}

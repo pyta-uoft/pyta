@@ -109,21 +109,11 @@ def func_while(output_directory: str = None) -> None:
             num += 1
 
 
-def func_with_args() -> None:
+def func_no_output_dir() -> None:
     """
     Function for testing SnapshotTracer
     """
-    with SnapshotTracer(include_frames=("func_with_args",), memory_viz_args=MEMORY_VIZ_ARGS):
-        flag = "not --output"
-
-
-def func_no_memory_viz_args() -> None:
-    """
-    Function for testing SnapshotTracer
-    """
-    with SnapshotTracer(
-        include_frames=("func_no_memory_viz_args",), memory_viz_args=MEMORY_VIZ_ARGS
-    ):
+    with SnapshotTracer(include_frames=("func_no_output_dir",), memory_viz_args=MEMORY_VIZ_ARGS):
         s = "Hello"
 
 
@@ -211,9 +201,9 @@ class TestSnapshotTracer:
         """
         Test SnapshotTracer outputs to the current directory when `output_directory` is not specified.
         """
-        func_no_memory_viz_args()
+        func_no_output_dir()
 
         with open("snapshot-0.svg") as actual_file:
             snapshot.assert_match_dir(
-                {"snapshot-0.svg": actual_file.read()}, func_no_memory_viz_args.__name__
+                {"snapshot-0.svg": actual_file.read()}, func_no_output_dir.__name__
             )

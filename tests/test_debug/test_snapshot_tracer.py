@@ -150,7 +150,7 @@ def assert_output_files_match(
 
 
 @pytest.fixture(scope="function")
-def setup_curr_dir_testing(snapshot) -> Iterator[None]:
+def setup_curr_dir_testing(snapshot: Snapshot) -> Iterator[None]:
     """
     Set up and tear down the current directory for the SnapshotTracer tests.
     """
@@ -171,6 +171,7 @@ class TestSnapshotTracer:
     Tests for SnapshotTracer. These tests are skipped if the Python version is less than 3.10.
     """
 
+    # TODO: remove skip when MemoryViz is fixed
     @pytest.mark.parametrize(
         "test_func",
         [

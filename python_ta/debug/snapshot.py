@@ -84,8 +84,7 @@ def snapshot(
         ):
             if frame.f_code.co_name != "<module>":
                 local_vars = get_filtered_local_variables(frame, exclude_vars)
-                if len(local_vars) > 0:
-                    variables.append({frame.f_code.co_name: local_vars})
+                variables.append({frame.f_code.co_name: local_vars})
             else:
                 global_vars = get_filtered_global_variables(frame)
                 variables.append(global_vars)

@@ -13,7 +13,6 @@ from python_ta.debug import SnapshotTracer
 SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
 )
-TEST_RESULTS_DIR = "/tmp/test_results"
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
 
 
@@ -151,19 +150,6 @@ def assert_output_files_match(
 
 
 @pytest.fixture(scope="function")
-def test_directory(test_func, snapshot) -> Iterator[str]:
-    """
-    Set up and tear down the test directory for the SnapshotTracer tests.
-    """
-    snapshot.snapshot_dir = SNAPSHOT_DIR
-    actual_dir = os.path.join(TEST_RESULTS_DIR, test_func.__name__)
-    shutil.rmtree(actual_dir, ignore_errors=True)
-    os.makedirs(actual_dir, exist_ok=True)
-    yield actual_dir
-    shutil.rmtree(actual_dir, ignore_errors=True)
-
-
-@pytest.fixture(scope="function")
 def setup_curr_dir_testing(snapshot) -> Iterator[None]:
     """
     Set up and tear down the current directory for the SnapshotTracer tests.
@@ -196,13 +182,15 @@ class TestSnapshotTracer:
             func_if_else,
         ],
     )
-    def test_snapshot_tracer_with_functions(self, test_func, snapshot, test_directory):
+    def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
         """
         Test SnapshotTracer with various simple functions.
         """
-        test_func(test_directory)
+        snapshot.snapshot_dir = SNAPSHOT_DIR
 
-        assert_output_files_match(test_directory, snapshot, test_func.__name__)
+        test_func(str(tmp_path))
+
+        assert_output_files_match(str(tmp_path), snapshot, test_func.__name__)
 
     def test_using_output_flag(self):
         """

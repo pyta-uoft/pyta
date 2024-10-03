@@ -96,7 +96,6 @@ disable=
     W1201, W1202,
     I0023,
     I1101,
-    C9960,
     lambda-expressions,
     similarities,
     spelling,

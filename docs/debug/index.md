@@ -1,8 +1,11 @@
-# Loop and Recursion Tracing
+# Loop, Recursion and Memory Tracing
 
-This page describes an additional PythonTA feature: print-based debugging for loops and recursion.
-This feature makes tracing easier by printing the state of each loop iteration or recursive function call in a nicely-formatted table using the [tabulate] library.
-This functionality is found in the `python_ta.debug` submodule.
+This page describes two additional PythonTA features:
+
+1. Print-based debugging for loops and recursion: This feature makes tracing easier by printing the state of each loop iteration or recursive function call in a nicely-formatted table using the [tabulate] library.
+2. Snapshot-based debugging for visualizing the memory diagram: This feature makes it easier to visualize the Python memory model by leveraging the [MemoryViz](https://github.com/david-yz-liu/memory-viz) library.
+
+These additional features are found in the `python.debug` submodule.
 
 ## Loop tracing with `AccumulationTable`
 
@@ -250,3 +253,50 @@ The `RecursionTable` is a new PythonTA feature and currently has the following k
 
 [tabulate]: https://github.com/astanin/python-tabulate
 [`sys.settrace`]: https://docs.python.org/3/library/sys.html#sys.settrace
+
+## Tracing the Python Memory Model
+
+The following section will focus on tracing the Python memory model. This feature uses the `python_ta.debug.SnapshotTracer` as a context manager to visualize program memory.
+
+### Example usage
+
+```python
+# demo.py
+from python_ta.debug import SnapshotTracer
+
+
+def func_multi_line(output_directory: str = None) -> None:
+    """
+    Function for testing SnapshotTracer
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include_frames=("func_multi_line",),
+        exclude_vars=("output_directory",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+    ):
+        num = 123
+        some_string = "Hello, world"
+        num2 = 321
+        arr = [some_string, "string 123321"]
+
+
+if __name__ == '__main__':
+    func_multi_line()
+```
+
+When this function runs, the variables within `func_multi_line` are captured, and memory models are outputted to `output_directory` for each line of code. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
+
+### API
+
+```{eval-rst}
+.. automethod:: python_ta.debug.SnapshotTracer.__init__
+```
+
+### Current Limitations
+
+The `SnapshotTracer` has the following limitations:
+
+1. Due to differences in Python interpreters, this context manager only works with Python versions >= 3.10.
+2. The context manager does not step into any function calls. Calling functions within the traced function may lead to undefined behavior.
+3. `SnapshotTracer` uses [`sys.settrace`] to update variable states, and therefore is not compatible with other libraries (e.g., debuggers, code coverage tools).

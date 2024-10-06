@@ -1028,7 +1028,7 @@ This error occurs when a module, function, class or method has an empty docstrin
 
 This error occurs when a function parameter is not explicitly mentioned in the docstring, even though it is defined in
 the function signature. Parameters should be clearly documented in the function's docstring, not just within doctests
-or other parts of the function.
+or other parts of the function. By default, this checker is disabled in PyTA.
 
 ```{literalinclude} /../examples/custom_checkers/c9960_unmentioned_parameter.py
 

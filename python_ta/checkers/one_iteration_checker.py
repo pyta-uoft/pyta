@@ -19,6 +19,17 @@ class OneIterationChecker(BaseChecker):
             '(e.g., by returning or using the "break" keyword).',
         )
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Only check for logically feasible nodes based on edge z3 constraints",
+            },
+        ),
+    )
 
     @only_required_for_messages("one-iteration")
     def visit_for(self, node: nodes.For) -> None:
@@ -49,6 +60,10 @@ class OneIterationChecker(BaseChecker):
             return False
 
         preds = start.cfg_block.predecessors
+
+        # filter out unfeasible edges if z3 option is on
+        if self.linter.config.z3:
+            preds = [pred for pred in preds if pred.is_feasible]
 
         if preds == []:
             return False

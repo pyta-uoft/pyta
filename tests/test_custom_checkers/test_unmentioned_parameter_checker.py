@@ -2,18 +2,15 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
-from python_ta.checkers.function_parameter_not_mentioned_checker import (
-    FunctionParameterNotMentionedChecker,
-)
+from python_ta.checkers.unmentioned_parameter_checker import UnmentionedParameterChecker
 
 
-class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase):
-    CHECKER_CLASS = FunctionParameterNotMentionedChecker
+class TestUnmentionedParameterChecker(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = UnmentionedParameterChecker
 
     def setUp(self):
         self.setup_method()
 
-    # TODO: The follwoing cases need to change, the node is no longer a function node, but instead a parameter node
     def test_no_missing_parameter(self) -> None:
         """Test the checker on a function with no missing parameters"""
         src = '''
@@ -28,8 +25,8 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         with self.assertNoMessages():
             self.checker.visit_functiondef(function_node)
 
-    def test_multiple_missing_parameters(self) -> None:
-        """Test the checker on a function with 2 missing parameters"""
+    def test_no_missing_parameters_multiple(self) -> None:
+        """Test a function with multiple parameters and no missing parameters"""
         src = '''
         def f(x: int, y: int) -> int:
             """Return x plus y
@@ -71,7 +68,7 @@ class TestFunctionParameterNotMentionedChecker(pylint.testutils.CheckerTestCase)
         """Test the checker on a function with multiple missing parameters"""
         src = '''
                 def f(x: int, y: int) -> int:
-                    """Both Parameters not mentioned
+                    """Both parameters not mentioned
                     """
                     pass
                 '''

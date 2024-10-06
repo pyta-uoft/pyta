@@ -1,4 +1,4 @@
-"""checker that every function parameter is mentioned by name in the docstring text.
+"""Checker to check that every function parameter is mentioned by name in the docstring text.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
 
-class FunctionParameterNotMentionedChecker(BaseChecker):
+class UnmentionedParameterChecker(BaseChecker):
     """
     A class to check if every function parameter is mentioned by name within the function's the docstring.
     By default, this checker is disabled.
@@ -38,7 +38,7 @@ class FunctionParameterNotMentionedChecker(BaseChecker):
 
     # Helper Function
     def _check_parameter(self, docstring: str, parameter: str, node: nodes.NodeNG) -> None:
-        """Check's if parameter is mentioned in the docstring"""
+        """Return whether parameter is mentioned in the docstring"""
         translator = str.maketrans("", "", string.punctuation)
         docstring = docstring.translate(translator)
         words = {word for line in docstring.split("\n") for word in line.split()}

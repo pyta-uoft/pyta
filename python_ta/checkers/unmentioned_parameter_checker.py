@@ -53,4 +53,4 @@ class UnmentionedParameterChecker(BaseChecker):
 
 def register(linter: PyLinter) -> None:
     """Required method to auto register this checker on the linter"""
-    linter.register_checker(FunctionParameterNotMentionedChecker(linter))
+    linter.register_checker(UnmentionedParameterChecker(linter))

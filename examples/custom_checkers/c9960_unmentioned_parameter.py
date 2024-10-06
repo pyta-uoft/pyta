@@ -1,10 +1,12 @@
 """Example for C9960 unmentioned-parameter"""
-def multiply(a, b) -> int:
+
+
+def multiply(a: int, b: int) -> int:
     """Multiply two numbers."""  # C9960: 'a' and 'b' are not mentioned
     return a * b
 
 
-def divide(numerator, denominator) -> float:
+def divide(numerator: int, denominator: int) -> float:
     """
     Divide the numerator by the denominator.
 

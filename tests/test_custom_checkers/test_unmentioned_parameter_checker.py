@@ -297,3 +297,54 @@ class TestUnmentionedParameterChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_functiondef(function_node)
+
+    def test_no_missing_parameter_with_tabs(self) -> None:
+        """Test the checker on a function where parameters in the docstring are separated by tabs."""
+        src = '''
+        def f(x: int, y: int) -> int:
+            """I separat the parameters with tabs
+            x\ty
+            """
+            pass
+        '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(function_node)
+
+    def test_parameter_with_underscore(self) -> None:
+        """Test the checker on a function with a parameter that contains underscores."""
+        src = '''
+        def f(param_name: int) -> None:
+            """Process the param_name.
+
+            """
+            pass
+        '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(function_node)
+
+    def test_missing_parameter_with_underscore(self) -> None:
+        """Test the checker on a function where a parameter with an underscore is not mentioned."""
+        src = '''
+        def f(param_name: int) -> None:
+            """Does not mention the paramname."""
+            pass
+        '''
+        mod = astroid.parse(src)
+        function_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unmentioned-parameter",
+                node=function_node.args.args[0],
+                args="param_name",
+                line=2,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(function_node)

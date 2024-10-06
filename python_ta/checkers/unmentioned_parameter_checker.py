@@ -39,11 +39,17 @@ class UnmentionedParameterChecker(BaseChecker):
     # Helper Function
     def _check_parameter(self, docstring: str, parameter: str, node: nodes.NodeNG) -> None:
         """Return whether parameter is mentioned in the docstring"""
-        translator = str.maketrans("", "", string.punctuation)
-        docstring = docstring.translate(translator)
+        docstring = docstring.translate(self._make_translation_table(parameter))
         words = {word for line in docstring.split("\n") for word in line.split()}
         if parameter not in words:
             self.add_message("unmentioned-parameter", node=node, args=parameter, line=node.lineno)
+
+    def _make_translation_table(self, parameter: str) -> dict:
+        """Return a translation table that removes all punctuation, expect for the punctuation within parameter"""
+        punctuation_in_parameter = {char for char in parameter if char in string.punctuation}
+        return str.maketrans(
+            {char: " " for char in string.punctuation if char not in punctuation_in_parameter}
+        )
 
     def _strip_docstring_of_doctest(self, docstring: str) -> str:
         """Return the docstring without the doctest"""

@@ -13,8 +13,7 @@ from pylint.lint import PyLinter
 
 
 class UnmentionedParameterChecker(BaseChecker):
-    """
-    A class to check if every function parameter is mentioned by name within the function's the docstring.
+    """A class to check if every function parameter is mentioned by name within the function's the docstring.
     By default, this checker is disabled.
     """
 

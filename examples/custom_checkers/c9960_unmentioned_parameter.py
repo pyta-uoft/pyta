@@ -7,7 +7,7 @@ def multiply(a: int, b: int) -> int:  # C9960: 'a' and 'b' are not mentioned
 
 
 def divide(numerator: int, denominator: int) -> float:  # C9960: 'denominator' is not mentioned
-    """Divide the numerator by the denominator.
+    """Divide the numerator as specified.
 
     Parameters:
     numerator: The number to be divided.

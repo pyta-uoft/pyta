@@ -28,8 +28,10 @@ class UnmentionedParameterChecker(BaseChecker):
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit a function definition"""
         docstring = node.doc_node.value if node.doc_node and node.doc_node.value else ""
-        remove_puncuation = str.maketrans({char: " " for char in string.punctuation if char != "_"})
-        docstring = self._strip_docstring_of_doctest(docstring).translate(remove_puncuation)
+        remove_punctuation = str.maketrans(
+            {char: " " for char in string.punctuation if char != "_"}
+        )
+        docstring = self._strip_docstring_of_doctest(docstring).translate(remove_punctuation)
         docstring_words = {word for line in docstring.split("\n") for word in line.split()}
         for parameter in node.args.args:
             self._check_parameter(docstring_words, parameter.name, parameter)

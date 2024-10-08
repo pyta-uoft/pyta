@@ -26,6 +26,17 @@ class PossiblyUndefinedChecker(BaseChecker):
             "Reported when a statement uses a variable that might not be assigned.",
         )
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Only check for logically feasible nodes based on edge z3 constraints",
+            },
+        ),
+    )
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
@@ -74,7 +85,13 @@ class PossiblyUndefinedChecker(BaseChecker):
             temp = self._transfer(b, in_facts, all_assigns)
             if temp != out_facts[b]:
                 out_facts[b] = temp
-                worklist.extend([succ.target for succ in b.successors])
+                worklist.extend(
+                    [
+                        succ.target
+                        for succ in b.successors
+                        if not self.linter.config.z3 or succ.is_feasible
+                    ]
+                )
 
     def _transfer(self, block: CFGBlock, in_facts: set[str], local_vars: set[str]) -> set[str]:
         gen = in_facts.copy()

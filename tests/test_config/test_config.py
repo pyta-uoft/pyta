@@ -4,9 +4,7 @@ Test suite for checking whether configuration worked correctly with user-inputte
 
 import json
 import os
-import webbrowser
-from http.server import HTTPServer
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import mock_open, patch
 
 import pytest
 from pylint import lint

@@ -24,6 +24,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Added mock `webbrowser.open` in tests to prevent browser tabs and HTTP requests during `python_ta.check_all()` executions.
 - Renamed `ExprWrapper` class to `Z3Parser`
 - Renamed `ExprWrapper` module to `z3_parser` and moved it to new directory `python_ta.z3`
 - Removed `node` attribute for `Z3Parser`

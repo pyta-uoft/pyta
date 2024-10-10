@@ -9,9 +9,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
-- Added `include` filter to `snapshot`
+- Added `include_frames` filter to `snapshot`
+- Added `exclude_vars` filter to `snapshot`
+- Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 
 ### 💫 New checkers
+
+- `unmentioned-parameter`: Provide error message when a function parameter is not mentioned by name in the function's docstring. By default, this checker is disabled.
 
 ### 🐛 Bug fixes
 

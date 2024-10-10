@@ -37,11 +37,27 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
     return {"__main__": true_global_vars}
 
 
+def get_filtered_local_variables(
+    frame: FrameType, exclude_vars: Optional[Iterable[str | re.Pattern]]
+) -> dict:
+    """
+    Helper function for filtering local variables in a frame.
+    """
+    if exclude_vars:
+        return {
+            var: frame.f_locals[var]
+            for var in frame.f_locals
+            if not any(re.search(regex, var) for regex in exclude_vars)
+        }
+    return frame.f_locals
+
+
 def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
     memory_viz_version: str = "latest",
-    include: Optional[Iterable[str | re.Pattern]] = None,
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
+    exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
 ):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
@@ -53,17 +69,22 @@ def snapshot(
     For details on the MemoryViz CLI, see https://www.cs.toronto.edu/~david/memory-viz/docs/cli.
     memory_viz_version can be used to dictate version, with a default of the latest version.
     Note that this function is compatible only with MemoryViz version 0.3.1 and above.
-    include can be used to specify a collection of function names, either as strings or regular expressions,
-    whose variables will be captured. By default, all variables in all functions will be captured if no `include`
+    include_frames can be used to specify a collection of function names, either as strings or regular expressions,
+    whose variables will be captured. By default, all variables in all functions will be captured if no `include_frames`
     argument is provided.
+    exclude_vars can be used to specify a collection of variable names, either as strings or regular expressions,
+    that will be excluded from the snapshot. By default, all variables will be captured if no `exclude_vars` is provided.
     """
     variables = []
     frame = inspect.currentframe().f_back
 
     while frame:
-        if include is None or any(re.search(regex, frame.f_code.co_name) for regex in include):
+        if include_frames is None or any(
+            re.search(regex, frame.f_code.co_name) for regex in include_frames
+        ):
             if frame.f_code.co_name != "<module>":
-                variables.append({frame.f_code.co_name: frame.f_locals})
+                local_vars = get_filtered_local_variables(frame, exclude_vars)
+                variables.append({frame.f_code.co_name: local_vars})
             else:
                 global_vars = get_filtered_global_variables(frame)
                 variables.append(global_vars)

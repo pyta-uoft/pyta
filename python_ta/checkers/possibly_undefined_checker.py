@@ -67,7 +67,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
-        blocks = list(cfg.get_blocks_postorder())
+        blocks = list(cfg.get_blocks_postorder(exclude_unfeasible=self.linter.config.z3))
         blocks.reverse()
 
         all_assigns = self._get_assigns(node)

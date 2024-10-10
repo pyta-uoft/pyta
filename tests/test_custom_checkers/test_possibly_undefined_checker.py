@@ -4,6 +4,7 @@ from astroid import nodes
 
 from python_ta.cfg import CFGVisitor
 from python_ta.checkers.possibly_undefined_checker import PossiblyUndefinedChecker
+from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
@@ -469,3 +470,147 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
+
+    def test_z3_unfeasible_branch(self) -> None:
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            if x > 3:
+                a = 10
+            else:
+                pass
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        *_, name_node = mod.nodes_of_class(nodes.Name)
+
+        with self.assertNoMessages():
+            self.checker.linter.config.z3 = True
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_name(name_node)
+
+    def test_z3_unfeasible_assignment(self) -> None:
+        src = """
+        def func(x: str) -> int:
+            '''
+            Preconditions:
+                - x in ["a", "b", "c"]
+            '''
+            if x == "a":
+                a = 5
+            elif x == "d":
+                a = 10
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        *_, name_node = mod.nodes_of_class(nodes.Name)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="possibly-undefined", node=name_node),
+            ignore_position=True,
+        ):
+            self.checker.linter.config.z3 = True
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_name(name_node)
+
+    def test_z3_unfeasible_deletion(self) -> None:
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            a = 0
+            if x < 0:
+                del a
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        *_, name_node = mod.nodes_of_class(nodes.Name)
+
+        with self.assertNoMessages():
+            self.checker.linter.config.z3 = True
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_name(name_node)
+
+    def test_z3_unfeasible_variable_use(self) -> None:
+        src = """
+        def func(x: int, y: int) -> int:
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            if y > 10:
+                a = 0
+            if x < 10:
+                return a
+            return 0
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        *_, name_node = mod.nodes_of_class(nodes.Name)
+
+        with self.assertNoMessages():
+            self.checker.linter.config.z3 = True
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_name(name_node)
+
+    def test_z3_variable_defined_by_precondition(self) -> None:
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x == 0
+            '''
+            if x == 0:
+                a = 10
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        *_, name_node = mod.nodes_of_class(nodes.Name)
+
+        with self.assertNoMessages():
+            self.checker.linter.config.z3 = True
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_name(name_node)
+
+    def test_z3_partially_unfeasible_assignment(self) -> None:
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x in {1, 2}
+            '''
+            if x == 3:
+                a = 5
+            else:
+                a = 10
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = mod.body[0]
+        *_, name_node = mod.nodes_of_class(nodes.Name)
+
+        with self.assertNoMessages():
+            self.checker.linter.config.z3 = True
+            self.checker.visit_functiondef(func_node)
+            self.checker.visit_name(name_node)

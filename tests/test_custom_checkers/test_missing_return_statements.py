@@ -401,7 +401,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
             self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
 
-    def test_z3_feasible_inconsistent_return(self):
+    def test_z3_feasible_missing_return(self):
         src = """
         def feasible_missing_return(x: bool, y: int) -> int:
             '''

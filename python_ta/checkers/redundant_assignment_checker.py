@@ -39,6 +39,17 @@ class RedundantAssignmentChecker(BaseChecker):
             "This assignment statement is redundant;" " You can remove it from the program.",
         )
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Only check for logically feasible nodes based on edge z3 constraints",
+            },
+        ),
+    )
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
@@ -76,7 +87,7 @@ class RedundantAssignmentChecker(BaseChecker):
         out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
-        worklist = list(cfg.get_blocks_postorder())
+        worklist = list(cfg.get_blocks_postorder(exclude_unfeasible=self.linter.config.z3))
         worklist.reverse()
 
         all_assigns = self._get_assigns(node)
@@ -93,7 +104,13 @@ class RedundantAssignmentChecker(BaseChecker):
             temp = self._transfer(b, in_facts)
             if b in out_facts and temp != out_facts[b]:
                 out_facts[b] = temp
-                worklist.extend([pred.source for pred in b.predecessors if pred.source.reachable])
+                worklist.extend(
+                    [
+                        pred.source
+                        for pred in b.predecessors
+                        if pred.source.reachable and not self.linter.config.z3 or pred.is_feasible
+                    ]
+                )
 
     def _transfer(self, block: CFGBlock, out_facts: set[str]) -> set[str]:
         gen = out_facts.copy()

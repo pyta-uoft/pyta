@@ -64,10 +64,6 @@ class InconsistentReturnChecker(BaseChecker):
         # gather the return statement of each code block
         return_statements = {}
         for block in end_blocks:
-            # ignore unfeasible edges if z3 option is on
-            if self.linter.config.z3 and all(not edge.is_feasible for edge in block.predecessors):
-                continue
-
             return_statements[block] = None
             statement = block.statements[-1]
             if isinstance(statement, nodes.Return):
@@ -86,6 +82,12 @@ class InconsistentReturnChecker(BaseChecker):
         if has_return_annotation or has_return_value:
             for block, statement in return_statements.items():
                 if statement is None:
+                    # ignore unfeasible edges for missing return if z3 option is on
+                    if self.linter.config.z3 and all(
+                        not edge.is_feasible for edge in block.predecessors
+                    ):
+                        continue
+
                     # For rendering purpose:
                     # line: the line where the error occurs, used to calculate indentation
                     # end_line: the line to insert the error message

@@ -170,8 +170,15 @@ class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
         mod = z3v.visitor.visit(astroid.parse(src))
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+        inconsistent_return_node, _ = mod.nodes_of_class(nodes.Return)
 
-        with self.assertNoMessages():
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="inconsistent-returns",
+                node=inconsistent_return_node,
+            ),
+            ignore_position=True,
+        ):
             self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
 

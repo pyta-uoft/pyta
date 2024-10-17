@@ -36,6 +36,7 @@ dev = [
     "pytest-cov >= 4.0,< 5.1",
     "sphinx",
     "sphinx-rtd-theme",
+    "pytest-mock",
 ]
 cfg = [
     "graphviz",

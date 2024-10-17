@@ -36,6 +36,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Rendered logically infeasible control flow graph edges in light grey
 - Modified `test_snapshot_to_json_sets_primitive` for Python 3.8 compatibility
 - Added `pytest-mock` as a development dependency
+- Added unit tests for `one_iteration_checker`
 
 ## [2.8.1] - 2024-08-19
 

@@ -639,12 +639,12 @@ class TestInvalidNameCheckerDefaultConfig(pylint.testutils.CheckerTestCase):
             self.checker.visit_functiondef(functiondef_node)
 
 
-def test_module_name_no_snippet(prevent_webbrowser_and_httpserver) -> None:
+def test_module_name_no_snippet() -> None:
     """Test that PythonTA does not build a snippet for the message added by this checker."""
     curr_dir = os.path.dirname(__file__)
     file_fixture = os.path.join(curr_dir, "file_fixtures", "badModuleName.py")
-    reporter = python_ta.check_all(module_name=file_fixture)
+    config = os.path.join(os.path.dirname(curr_dir), "test.pylintrc")
+    reporter = python_ta.check_all(module_name=file_fixture, config=config)
 
     snippet = reporter.messages[file_fixture][0].snippet
-
     assert snippet == ""

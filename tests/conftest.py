@@ -19,5 +19,14 @@ def disable_contract_checking():
 def prevent_webbrowser_and_httpserver():
     """Automatically mock webbrowser.open and HTTPServer.handle_request in all tests. this prevents any owser/server
     code running when running Pytest to avoid CI timeouts, and unexpected browser popups."""
+    original_webbrowser_open, original_httpserver_handle_request = (
+        webbrowser.open,
+        HTTPServer.handle_request,
+    )
     webbrowser.open = Mock(return_value=None)
     HTTPServer.handle_request = Mock(return_value=None)
+    yield
+    webbrowser.open, HTTPServer.handle_request = (
+        original_webbrowser_open,
+        original_httpserver_handle_request,
+    )

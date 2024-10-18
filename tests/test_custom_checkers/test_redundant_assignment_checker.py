@@ -244,3 +244,35 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_augassign(augassign_node)
+
+    def test_parallel_assign_redundant(self):
+        src = """
+        x, y = 0, 0
+        x, y = 10, 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        assign_node, *_ = mod.nodes_of_class(nodes.Assign)
+
+        self.checker.visit_module(mod)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_node),
+            ignore_position=True,
+        ):
+            self.checker.visit_assign(assign_node)
+
+    def test_parallel_assign_one_variableredundant(self):
+        src = """
+        x, y = 0, 0
+        y = 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        assign_node, *_ = mod.nodes_of_class(nodes.Assign)
+
+        self.checker.visit_module(mod)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_node),
+            ignore_position=True,
+        ):
+            self.checker.visit_assign(assign_node)

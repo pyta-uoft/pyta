@@ -112,10 +112,14 @@ class RedundantAssignmentChecker(BaseChecker):
                 nodes.FunctionDef,
             ):
                 if isinstance(node, nodes.AssignName):
+                    # handle parallel assignment
+                    parent = (
+                        node.parent.parent if isinstance(node.parent, nodes.Tuple) else node.parent
+                    )
                     if node.name in gen.difference(kill):
-                        self._redundant_assignment.add(node.parent)
-                    elif node.parent in self._redundant_assignment:
-                        self._redundant_assignment.remove(node.parent)
+                        self._redundant_assignment.add(parent)
+                    elif parent in self._redundant_assignment:
+                        self._redundant_assignment.remove(parent)
 
                     # When node.parent is an AugAssign, the name counts as a use of the variable,
                     # and so is added to kill.

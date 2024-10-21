@@ -647,4 +647,5 @@ def test_module_name_no_snippet() -> None:
     reporter = python_ta.check_all(module_name=file_fixture, config=config)
 
     snippet = reporter.messages[file_fixture][0].snippet
+
     assert snippet == ""

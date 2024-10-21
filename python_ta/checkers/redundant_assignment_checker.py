@@ -108,7 +108,7 @@ class RedundantAssignmentChecker(BaseChecker):
                     [
                         pred.source
                         for pred in b.predecessors
-                        if pred.source.reachable and not self.linter.config.z3 or pred.is_feasible
+                        if pred.source.reachable and (not self.linter.config.z3 or pred.is_feasible)
                     ]
                 )
 

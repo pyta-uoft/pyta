@@ -12,6 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
+- Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, `one-iteration`, and `possibly-undefined` checkers
 
 ### 💫 New checkers
 

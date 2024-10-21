@@ -261,7 +261,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assign(assign_node)
 
-    def test_parallel_assign_one_variableredundant(self):
+    def test_parallel_assign_one_variable_redundant(self):
         src = """
         x, y = 0, 0
         y = 10

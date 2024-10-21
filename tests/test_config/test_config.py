@@ -192,7 +192,7 @@ def test_print_messages_config_parsing_error(capsys) -> None:
     assert "W0012" in out
 
 
-def test_no_snippet_for_config_parsing_errors() -> None:
+def test_no_snippet_for_config_parsing_errors(prevent_webbrowser_and_httpserver) -> None:
     """Test that there is no snippet being built for errors that come from parsing the config file."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
@@ -209,7 +209,7 @@ def test_no_snippet_for_config_parsing_errors() -> None:
     assert all(snippet == "" for snippet in snippets)
 
 
-def test_config_parse_error(capsys) -> None:
+def test_config_parse_error(capsys, prevent_webbrowser_and_httpserver) -> None:
     """Test that F0011 (config-parse-error) correctly gets reported."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")
@@ -220,7 +220,7 @@ def test_config_parse_error(capsys) -> None:
     assert msg_id == "F0011"
 
 
-def test_config_parse_error_has_no_snippet() -> None:
+def test_config_parse_error_has_no_snippet(prevent_webbrowser_and_httpserver) -> None:
     """Test that F0011 (config-parse-error) correctly gets reported with no code snippet."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_f0011.pylintrc")

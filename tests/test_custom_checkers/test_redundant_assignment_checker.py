@@ -247,7 +247,6 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
     def test_annassign_redundant(self):
         src = """
-        y_pos = 5
         y_pos: int = 10
         y_pos = 10
         """

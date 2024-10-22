@@ -1,12 +1,14 @@
 """This module provides the core functionality for all PythonTA reporters.
 """
 
+from __future__ import annotations
+
 import os.path
 import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from astroid import NodeNG
 from pylint.message import Message
@@ -28,7 +30,7 @@ class NewMessage:
     def __getattr__(self, item):
         return getattr(self.message, item)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Return a dictionary containing the fields of this message.
 
         Useful for JSON output.
@@ -68,7 +70,7 @@ class PythonTaReporter(BaseReporter):
     _AFTER_NUM_SPACES = 2
 
     # The error messages to report, mapping filename to a list of messages.
-    messages: Dict[str, List[Message]]
+    messages: dict[str, list[Message]]
 
     def __init__(self) -> None:
         """Initialize this reporter."""
@@ -129,8 +131,8 @@ class PythonTaReporter(BaseReporter):
             curr_messages[-1] = NewMessage(msg, node, snippet)
 
     def group_messages(
-        self, messages: List[Message]
-    ) -> Tuple[Dict[str, List[Message]], Dict[str, List[Message]]]:
+        self, messages: list[Message]
+    ) -> tuple[dict[str, list[Message]], dict[str, list[Message]]]:
         """Group messages for the current file by their (error/style) and type (msg_id)."""
         error_msgs_by_type = defaultdict(list)
         style_msgs_by_type = defaultdict(list)

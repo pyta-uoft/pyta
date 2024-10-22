@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import astroid
 
@@ -13,11 +13,11 @@ def build_cfg(src: str) -> ControlFlowGraph:
     return t.cfgs[mod]
 
 
-def _extract_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
+def _extract_blocks(cfg: ControlFlowGraph) -> list[list[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
 
-def _extract_unreachable_blocks(cfg: ControlFlowGraph) -> List[List[str]]:
+def _extract_unreachable_blocks(cfg: ControlFlowGraph) -> list[list[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.unreachable_blocks]
 
 

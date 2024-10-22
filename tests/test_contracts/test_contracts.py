@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from typing import Dict, List, Set
 
@@ -280,7 +282,7 @@ def test_my_sum_one_disable_contract_checking(disable_contract_checking) -> None
 # Checking to see if functions we defined are in-scope for preconditions
 
 
-def is_even(lst: List[int]) -> bool:
+def is_even(lst: list[int]) -> bool:
     return all([(not x & 1) for x in lst])
 
 

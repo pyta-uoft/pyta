@@ -1,8 +1,9 @@
 """Example for too many nested blocks"""
-from typing import List, Tuple, Optional
+from __future__ import annotations
+from typing import Optional
 
-def cross_join(x_list: List[Optional[int]], y_list: List[Optional[int]],
-               z_list: List[Optional[int]]) -> List[Tuple[int, int, int]]:
+def cross_join(x_list: list[Optional[int]], y_list: list[Optional[int]],
+               z_list: list[Optional[int]]) -> list[tuple[int, int, int]]:
     """Perform an all-by-all join of all elements in the input lists.
 
     Note: This function skips elements which are None.

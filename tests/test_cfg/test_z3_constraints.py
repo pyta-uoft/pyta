@@ -482,6 +482,40 @@ def test_variable_reassignment() -> None:
     assert cfg.end.predecessors[0].z3_constraints == {0: []}
 
 
+def test_variable_augumented_reassign() -> None:
+    src = """
+    def func(x: int) -> None:
+        '''
+        Preconditions:
+            - x > 10
+        '''
+        print("initial x:", x)
+        x -= 5
+        print("final x:", x)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.Int("x")
+    assert cfg.start.successors[0].z3_constraints == {0: [x > 10]}
+    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+
+
+def test_variable_annotated_reassignment() -> None:
+    src = """
+    def func(x: str) -> None:
+        '''
+        Preconditions:
+            - x[0:2] == "ab"
+        '''
+        print("initial x:", x)
+        x: str = "cd"
+        print("final x:", x)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.String("x")
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.SubString(x, 0, 2) == "ab"]}
+    assert cfg.end.predecessors[0].z3_constraints == {0: []}
+
+
 def test_variable_reassignment_in_branch() -> None:
     src = """
     def func(x: float) -> None:

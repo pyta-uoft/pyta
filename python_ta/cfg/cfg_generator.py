@@ -2,14 +2,24 @@
 Provides a function to generate and display the control flow graph of a given module.
 """
 
+from __future__ import annotations
+
 import importlib.util
 import os.path
 import sys
-from typing import Any, Dict, Optional, Set
+from typing import Any, Optional
 
 import graphviz
 from astroid import nodes
 from astroid.builder import AstroidBuilder
+
+try:
+    from ..transforms.z3_visitor import Z3Visitor
+
+    z3_dependency_available = True
+except ImportError:
+    Z3Visitor = Any
+    z3_dependency_available = False
 
 from .graph import CFGBlock, ControlFlowGraph
 from .visitor import CFGVisitor
@@ -19,7 +29,7 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def generate_cfg(
-    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[dict[str, Any]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -43,7 +53,7 @@ def generate_cfg(
 
 
 def _generate(
-    mod: str = "", auto_open: bool = False, visitor_options: Optional[Dict[str, Any]] = None
+    mod: str = "", auto_open: bool = False, visitor_options: Optional[dict[str, Any]] = None
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -59,6 +69,12 @@ def _generate(
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
     module = AstroidBuilder().file_build(abs_path)
+
+    # invoke Z3Visitor if z3 dependency is available
+    if z3_dependency_available:
+        z3v = Z3Visitor()
+        module = z3v.visitor.visit(module)
+
     visitor = CFGVisitor(options=visitor_options)
     module.accept(visitor)
 
@@ -92,7 +108,7 @@ def _get_valid_file_path(mod: str = "") -> Optional[str]:
 
 
 def _display(
-    cfgs: Dict[nodes.NodeNG, ControlFlowGraph], filename: str, auto_open: bool = False
+    cfgs: dict[nodes.NodeNG, ControlFlowGraph], filename: str, auto_open: bool = False
 ) -> None:
     graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
     for node, cfg in cfgs.items():
@@ -116,7 +132,7 @@ def _display(
     graph.render(filename, view=auto_open)
 
 
-def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int], end: CFGBlock) -> None:
+def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFGBlock) -> None:
     """
     Visit a CFGBlock and add it to the control flow graph.
     """
@@ -138,8 +154,11 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: Set[int], end: CFG
     visited.add(node_id)
 
     for edge in block.successors:
+        color = "black" if edge.is_feasible else "lightgrey"
         if edge.get_label() is not None:
-            graph.edge(node_id, f"{graph.name}_{edge.target.id}", edge.get_label())
+            graph.edge(
+                node_id, f"{graph.name}_{edge.target.id}", label=edge.get_label(), color=color
+            )
         else:
-            graph.edge(node_id, f"{graph.name}_{edge.target.id}")
+            graph.edge(node_id, f"{graph.name}_{edge.target.id}", color=color)
         _visit(edge.target, graph, visited, end)

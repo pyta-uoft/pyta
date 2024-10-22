@@ -1,8 +1,9 @@
 """Checker for global variables
 """
 
+from __future__ import annotations
+
 import re
-from typing import List
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -81,7 +82,7 @@ class GlobalVariablesChecker(BaseChecker):
                 self.add_message("forbidden-global-variables", node=node, args=args)
 
 
-def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG) -> List[nodes.NodeNG]:
+def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG) -> list[nodes.NodeNG]:
     """Return a list of all top-level Name or AssignName nodes for a given
     global, non-constant and non-type alias variable.
     """

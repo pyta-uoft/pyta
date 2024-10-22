@@ -9,7 +9,9 @@ An assignment statement is redundant if it satisfies the following two propertie
     the behavior of the program.
 """
 
-from typing import Set, Union
+from __future__ import annotations
+
+from typing import Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -40,7 +42,7 @@ class RedundantAssignmentChecker(BaseChecker):
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
-        self._redundant_assignment: Set[nodes.Assign] = set()
+        self._redundant_assignment: set[nodes.Assign] = set()
 
     @only_required_for_messages("redundant-assignment")
     def visit_assign(self, node: nodes.Assign) -> None:
@@ -51,6 +53,12 @@ class RedundantAssignmentChecker(BaseChecker):
     @only_required_for_messages("redundant-assignment")
     def visit_augassign(self, node: nodes.AugAssign) -> None:
         """ "Visit the augmented assign node"""
+        if node in self._redundant_assignment:
+            self.add_message("redundant-assignment", node=node)
+
+    @only_required_for_messages("redundant-assignment")
+    def visit_annassign(self, node: nodes.AnnAssign) -> None:
+        """Visit the annotated assign node"""
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
@@ -93,7 +101,7 @@ class RedundantAssignmentChecker(BaseChecker):
                 out_facts[b] = temp
                 worklist.extend([pred.source for pred in b.predecessors if pred.source.reachable])
 
-    def _transfer(self, block: CFGBlock, out_facts: Set[str]) -> Set[str]:
+    def _transfer(self, block: CFGBlock, out_facts: set[str]) -> set[str]:
         gen = out_facts.copy()
         kill = set()
         for statement in reversed(block.statements):
@@ -135,7 +143,7 @@ class RedundantAssignmentChecker(BaseChecker):
 
         return gen.difference(kill)
 
-    def _get_assigns(self, node: Union[nodes.FunctionDef, nodes.Module]) -> Set[str]:
+    def _get_assigns(self, node: Union[nodes.FunctionDef, nodes.Module]) -> set[str]:
         """Returns a set of all local and parameter variables that could be
         defined in the program (either a function or module).
 

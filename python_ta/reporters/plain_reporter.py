@@ -1,4 +1,4 @@
-from typing import Dict, List
+from __future__ import annotations
 
 from .core import NewMessage, PythonTaReporter
 from .node_printers import LineType
@@ -47,7 +47,7 @@ class PlainReporter(PythonTaReporter):
 
         self.writeln(result)
 
-    def _colour_messages_by_type(self, messages: Dict[str, List[NewMessage]]) -> str:
+    def _colour_messages_by_type(self, messages: dict[str, list[NewMessage]]) -> str:
         """
         Return string of properly formatted members of the messages dict
         (error or style) indicated by style.

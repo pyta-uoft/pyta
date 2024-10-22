@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import sys
 from os import path
-from typing import List, Optional
+from typing import Optional
 
 import click
 
@@ -41,7 +43,7 @@ def main(
     version: bool,
     config: Optional[str],
     errors_only: bool,
-    filenames: List[str],
+    filenames: list[str],
     exit_zero: bool,
     generate_config: bool,
     output_format: str,

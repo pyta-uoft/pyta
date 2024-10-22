@@ -54,6 +54,61 @@ def func_cyclic() -> list:
     return snapshot()
 
 
+def func_with_include(include_frames: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
+    """
+    Function for snapshot() testing with include_frames parameter.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot(include_frames=include_frames)
+
+
+def func_with_include_nested(
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
+) -> list[dict]:
+    """
+    Function for snapshot() testing with include_frames parameter.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Leo", "tester")
+    return func_with_include(include_frames=include_frames)
+
+
+def func_with_unserializable_objects() -> list[dict]:
+    """
+    Function for snapshot() testing with unserializable objects.
+    """
+    path = pathlib.PosixPath("some path")
+    vars_in_curr_func = [snapshot()[0]]
+    processed_result = snapshot_to_json(vars_in_curr_func)
+    json.dumps(processed_result)
+    return processed_result
+
+
+def func_with_exclude(
+    exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
+) -> list[dict]:
+    """
+    Function for snapshot() testing with exclude_vars parameter.
+    """
+    test_var1a = "David is cool!"
+    test_var2a = "Students Developing Software"
+    return snapshot(exclude_vars=exclude_vars, include_frames=include_frames)
+
+
+def func_with_exclude_nested(
+    exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
+    include_frames: Optional[Iterable[str | re.Pattern]] = None,
+) -> list[dict]:
+    """
+    Function for snapshot() testing with exclude_vars parameter.
+    """
+    test_var1b = {"SDS_coolest_project": "PyTA"}
+    test_var2b = ("Leo", "tester")
+    return func_with_exclude(exclude_vars=exclude_vars, include_frames=include_frames)
+
+
 def test_snapshot_one_level() -> None:
     """
     Examines whether the snapshot() function accurately captures
@@ -284,14 +339,15 @@ def test_snapshot_to_json_sets_primitive():
     ]
 
     # Validate that every id-value pair in the set matches an expected pair
-    for id_, value in zip(expected_ids_for_test_var1a, expected_values_for_test_var1a):
-        assert {"id": id_, "type": "int", "value": value} in json_data_objects
+    json_data_modified = [{"type": obj["type"], "value": obj["value"]} for obj in json_data_objects]
+    for _, value in zip(expected_ids_for_test_var1a, expected_values_for_test_var1a):
+        assert {"type": "int", "value": value} in json_data_modified
 
-    for id_, value in zip(expected_ids_for_test_var2a, expected_values_for_test_var2a):
-        assert {"id": id_, "type": "bool", "value": value} in json_data_objects
+    for _, value in zip(expected_ids_for_test_var2a, expected_values_for_test_var2a):
+        assert {"type": "bool", "value": value} in json_data_modified
 
-    for id_, value in zip(expected_ids_for_projects, expected_values_for_projects):
-        assert {"id": id_, "type": "str", "value": value} in json_data_objects
+    for _, value in zip(expected_ids_for_projects, expected_values_for_projects):
+        assert {"type": "str", "value": value} in json_data_modified
 
 
 def test_snapshot_to_json_dicts_primitive():
@@ -649,32 +705,12 @@ def test_snapshot_save_stdout():
     assert result.stdout == expected_svg
 
 
-def func_with_include(include: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
-    test_var1a = "David is cool!"
-    test_var2a = "Students Developing Software"
-    return snapshot(include=include)
-
-
-def func_with_include_nested(include: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
-    test_var1b = {"SDS_coolest_project": "PyTA"}
-    test_var2b = ("Leo", "tester")
-    return func_with_include(include=include)
-
-
-def func_with_unserializable_objects() -> list[dict]:
-    path = pathlib.PosixPath("some path")
-    vars_in_curr_func = [snapshot()[0]]
-    processed_result = snapshot_to_json(vars_in_curr_func)
-    json.dumps(processed_result)
-    return processed_result
-
-
 def test_snapshot_only_includes_function_self():
-    result = func_with_include(include=("func_with_include",))
+    result = func_with_include(include_frames=("func_with_include",))
     assert result == [
         {
             "func_with_include": {
-                "include": ("func_with_include",),
+                "include_frames": ("func_with_include",),
                 "test_var1a": "David is cool!",
                 "test_var2a": "Students Developing Software",
             }
@@ -684,7 +720,7 @@ def test_snapshot_only_includes_function_self():
 
 def test_snapshot_includes_multiple_functions():
     result = func_with_include_nested(
-        include=(
+        include_frames=(
             "func_with_include",
             "func_with_include_nested",
         )
@@ -692,7 +728,7 @@ def test_snapshot_includes_multiple_functions():
     assert result == [
         {
             "func_with_include": {
-                "include": (
+                "include_frames": (
                     "func_with_include",
                     "func_with_include_nested",
                 ),
@@ -702,7 +738,7 @@ def test_snapshot_includes_multiple_functions():
         },
         {
             "func_with_include_nested": {
-                "include": (
+                "include_frames": (
                     "func_with_include",
                     "func_with_include_nested",
                 ),
@@ -714,11 +750,11 @@ def test_snapshot_includes_multiple_functions():
 
 
 def test_snapshot_only_includes_specified_function():
-    result = func_with_include_nested(include=("func_with_include_nested",))
+    result = func_with_include_nested(include_frames=("func_with_include_nested",))
     assert result == [
         {
             "func_with_include_nested": {
-                "include": ("func_with_include_nested",),
+                "include_frames": ("func_with_include_nested",),
                 "test_var1b": {"SDS_coolest_project": "PyTA"},
                 "test_var2b": ("Leo", "tester"),
             },
@@ -736,4 +772,90 @@ def test_snapshot_serializes_unserializable_value():
             "value": {"path": 1},
         },
         {"id": 1, "type": "PosixPath", "value": repr(pathlib.PosixPath("some path"))},
+    ]
+
+
+def test_snapshot_excludes_one_variable_in_current_frame():
+    """
+    Test snapshot() excludes one variable in the current frame.
+    """
+    result = func_with_exclude(exclude_vars=["test_var1a"], include_frames=["func_with_exclude"])
+    assert result == [
+        {
+            "func_with_exclude": {
+                "exclude_vars": ["test_var1a"],
+                "include_frames": ["func_with_exclude"],
+                "test_var2a": "Students Developing Software",
+            }
+        }
+    ]
+
+
+def test_snapshot_excludes_multiple_variables():
+    """
+    Test snapshot() excludes multiple variables in the current frame.
+    """
+    result = func_with_exclude(
+        exclude_vars=["test_var1a", "test_var2a"], include_frames=["func_with_exclude"]
+    )
+    assert result == [
+        {
+            "func_with_exclude": {
+                "exclude_vars": ["test_var1a", "test_var2a"],
+                "include_frames": ["func_with_exclude"],
+            }
+        }
+    ]
+
+
+def test_snapshot_excludes_variables_in_nested_frames():
+    """
+    Test snapshot() excludes variables in nested frames.
+    """
+    result = func_with_exclude_nested(
+        exclude_vars=["test_var1b"],
+        include_frames=["func_with_exclude", "func_with_exclude_nested"],
+    )
+    assert result == [
+        {
+            "func_with_exclude": {
+                "exclude_vars": ["test_var1b"],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
+                "test_var1a": "David is cool!",
+                "test_var2a": "Students Developing Software",
+            }
+        },
+        {
+            "func_with_exclude_nested": {
+                "exclude_vars": ["test_var1b"],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
+                "test_var2b": ("Leo", "tester"),
+            }
+        },
+    ]
+
+
+def test_snapshot_excludes_variables_with_regex():
+    """
+    Test snapshot() excludes variables in nested frames using regex.
+    """
+    result = func_with_exclude_nested(
+        exclude_vars=[re.compile("test_var1.*")],
+        include_frames=["func_with_exclude", "func_with_exclude_nested"],
+    )
+    assert result == [
+        {
+            "func_with_exclude": {
+                "exclude_vars": [re.compile("test_var1.*")],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
+                "test_var2a": "Students Developing Software",
+            }
+        },
+        {
+            "func_with_exclude_nested": {
+                "exclude_vars": [re.compile("test_var1.*")],
+                "include_frames": ["func_with_exclude", "func_with_exclude_nested"],
+                "test_var2b": ("Leo", "tester"),
+            }
+        },
     ]

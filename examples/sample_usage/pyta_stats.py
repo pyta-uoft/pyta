@@ -47,9 +47,9 @@ def pyta_statistics(directory, config=""):
 def _print_stats(individual_stats, summary_stats):
     """Pretty prints the statistics aggregated by summary.
 
-    @param OrderedDict[str, List] individual_stats:
+    @param OrderedDict[str, list] individual_stats:
         stats computed per student/group
-    @param OrderedDict[str, List | OrderedDict] summary_stats:
+    @param OrderedDict[str, list | OrderedDict] summary_stats:
         stats computed over all the students
     @rtype: dict
 
@@ -157,7 +157,7 @@ def _print_stats(individual_stats, summary_stats):
 def _print_top_errors(stats, tabs=1, aggregate=True):
     """Pretty prints a list of most frequent errors and their counts.
 
-    @param List[Tuple[str, int | Tuple]] stats: the errors & counts to print
+    @param list[tuple[str, int | tuple]] stats: the errors & counts to print
     @param int tabs: the number of tabs to print before every line
     @param bool aggregate: whether stats are aggregate (i.e.: no percentages)
     @rtype: None

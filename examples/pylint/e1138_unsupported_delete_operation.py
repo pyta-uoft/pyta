@@ -1,9 +1,9 @@
-from typing import List
+from __future__ import annotations
 
 class NamedList:
     """A contaner class for storing a list of named integers."""
 
-    def __init__(self, names: List[str], values: List[int]) -> None:
+    def __init__(self, names: list[str], values: list[int]) -> None:
         self._names = names
         self._values = values
 

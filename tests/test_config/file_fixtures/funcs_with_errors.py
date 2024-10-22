@@ -1,6 +1,6 @@
 """Python script used for testing that the correct number of error occurrences are being displayed."""
 
-from typing import List
+from __future__ import annotations
 
 # The following imports are used solely to trigger errors.
 import packaging
@@ -9,7 +9,7 @@ import pygments
 import pylint
 
 
-def sum_items(lst: List[int]) -> int:
+def sum_items(lst: list[int]) -> int:
     """..."""
     s = 0
     for i in range(len(lst)):
@@ -17,7 +17,7 @@ def sum_items(lst: List[int]) -> int:
     return s
 
 
-def sum_items2(lst: List[int]) -> int:
+def sum_items2(lst: list[int]) -> int:
     """..."""
     s = 0
     for i in range(0, len(lst)):
@@ -25,7 +25,7 @@ def sum_items2(lst: List[int]) -> int:
     return s
 
 
-def sum_items3(lst: List[int]) -> int:
+def sum_items3(lst: list[int]) -> int:
     """..."""
     s = 0
     for i in range(0, len(lst), 1):

@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import os.path
 import sys
 import traceback
 import types
-from typing import List, TextIO, Tuple
+from typing import TextIO
 
 import click
 
@@ -13,7 +15,7 @@ from . import check_all_contracts
 @click.argument("file", type=click.File(mode="r"))
 @click.option("--extra-mod-name", "-e", multiple=True, help="Name of imported module to also check")
 @click.option("--no-decorate-main", is_flag=True, default=True, help="Disable decorating FILE")
-def check_contracts(file: TextIO, extra_mod_name: Tuple, no_decorate_main: bool):
+def check_contracts(file: TextIO, extra_mod_name: tuple, no_decorate_main: bool):
     """Run FILE as Python script with PythonTA's contract checking enabled.
 
     FILE the Python script as if you were to just run `python FILE`
@@ -51,8 +53,8 @@ class ContractsRunnerModule(types.ModuleType):
         self,
         name: str,
         main_lineno: int,
-        lines: List[str],
-        extra_mod_names: Tuple,
+        lines: list[str],
+        extra_mod_names: tuple,
         no_main: bool,
     ) -> None:
         super().__init__(name)

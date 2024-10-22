@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from __future__ import annotations
 
 import astroid
 
@@ -14,7 +14,7 @@ def build_cfg(src: str) -> ControlFlowGraph:
     return t.cfgs[mod]
 
 
-def _extract_edge_labels(cfg: ControlFlowGraph) -> Tuple[int, int]:
+def _extract_edge_labels(cfg: ControlFlowGraph) -> tuple[int, int]:
     """Return the number of True/False edge labels in the given cfg.
 
     The returned 2-tuple is of the form (# of True, # of False).
@@ -23,7 +23,7 @@ def _extract_edge_labels(cfg: ControlFlowGraph) -> Tuple[int, int]:
     return labels.count("True"), labels.count("False")
 
 
-def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[str]:
+def _extract_edge_conditions(cfg: ControlFlowGraph) -> list[str]:
     """Return the edge conditions in the given cfg as a list of strings representing the condition."""
 
     conditions = [

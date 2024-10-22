@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 import datetime
 
 
@@ -8,7 +8,7 @@ class Person:
 
 def add_two_numbers(
     x=int, # Error on this line
-    y=List[float], # Error on this line
+    y=list[float], # Error on this line
     z: type = complex # No error on this line
 ) -> int:
     return (x + y) * z

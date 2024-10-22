@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import Optional, Union
 
 import astroid
 import z3
@@ -23,9 +25,10 @@ class Z3Parser:
         - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
     """
 
-    types: Dict[str, Union[str, z3.ExprRef]]
+    node: astroid.NodeNG
+    types: dict[str, Union[str, z3.ExprRef]]
 
-    def __init__(self, types: Optional[Dict[str, Union[str, z3.ExprRef]]] = None):
+    def __init__(self, types: Optional[dict[str, Union[str, z3.ExprRef]]] = None):
         if types is None:
             types = {}
         self.types = types
@@ -104,7 +107,7 @@ class Z3Parser:
         return left
 
     def apply_bin_op(
-        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, List[z3.ExprRef]]
+        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, list[z3.ExprRef]]
     ) -> z3.ExprRef:
         """Given left, right, op, apply the binary operation."""
         try:
@@ -141,7 +144,7 @@ class Z3Parser:
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
 
-    def apply_bool_op(self, op: str, values: Union[z3.ExprRef, List[z3.ExprRef]]) -> z3.ExprRef:
+    def apply_bool_op(self, op: str, values: Union[z3.ExprRef, list[z3.ExprRef]]) -> z3.ExprRef:
         """Apply boolean operation given by op to values."""
         op_to_z3 = {
             "and": z3.And,
@@ -178,14 +181,14 @@ class Z3Parser:
 
     def parse_container_op(
         self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
-    ) -> List[z3.ExprRef]:
+    ) -> list[z3.ExprRef]:
         """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
         return [self.parse(element) for element in node.elts]
 
     def apply_in_op(
         self,
         left: Union[z3.ExprRef, str],
-        right: Union[z3.ExprRef, List[z3.ExprRef], str],
+        right: Union[z3.ExprRef, list[z3.ExprRef], str],
         negate: bool = False,
     ) -> z3.ExprRef:
         """
@@ -273,7 +276,7 @@ class Z3Parser:
 
         raise Z3ParseException(f"Unhandled subscript operator type {slice}")
 
-    def parse_arguments(self, node: astroid.Arguments) -> Dict[str, z3.ExprRef]:
+    def parse_arguments(self, node: astroid.Arguments) -> dict[str, z3.ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""
         z3_vars = {}
 

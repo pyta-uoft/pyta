@@ -1,4 +1,4 @@
-from typing import List, Set
+from __future__ import annotations
 
 import astroid
 
@@ -14,7 +14,7 @@ def build_cfg(src: str) -> ControlFlowGraph:
     return t.cfgs[mod]
 
 
-def _extract_labels(cfg: ControlFlowGraph) -> Set[str]:
+def _extract_labels(cfg: ControlFlowGraph) -> set[str]:
     """Return a set of all the labels in this cfg."""
     labels = {edge.get_label() for edge in cfg.get_edges() if edge.get_label() is not None}
     return labels
@@ -25,7 +25,7 @@ def _extract_num_labels(cfg: ControlFlowGraph) -> int:
     return sum(1 for edge in cfg.get_edges() if edge.get_label() is not None)
 
 
-def _extract_edge_conditions(cfg: ControlFlowGraph) -> List[str]:
+def _extract_edge_conditions(cfg: ControlFlowGraph) -> list[str]:
     """Return the edge conditions in the given cfg as a list of strings representing the condition."""
 
     conditions = [

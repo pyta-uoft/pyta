@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 y[0]
 z [  0 ]
 a[:]
@@ -16,8 +18,5 @@ l[:]     [:]
 x = m[  :  ]
 
 
-from typing import List
-
-
-def add(numbers: List[int]) -> List[int]:
+def add(numbers: list[int]) -> list[int]:
     return numbers + [1]

@@ -1,6 +1,6 @@
-from typing import List
+from __future__ import annotations
 
-def add_fruit(fruit_basket: List[str], fruit: str) -> None:
+def add_fruit(fruit_basket: list[str], fruit: str) -> None:
     """Add fruit to fruit_basket."""
     fruit_basket.append(fruit)
     return None

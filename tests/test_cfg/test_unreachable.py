@@ -1,4 +1,6 @@
-from typing import Generator, Optional, Set, Tuple
+from __future__ import annotations
+
+from typing import Generator, Optional
 
 import astroid
 
@@ -16,7 +18,7 @@ def build_cfg(src: str, is_function: Optional[bool] = False) -> ControlFlowGraph
     return t.cfgs[mod]
 
 
-def extract_blocks(cfg: ControlFlowGraph) -> Tuple[Set, Set]:
+def extract_blocks(cfg: ControlFlowGraph) -> tuple[set, set]:
     """Returns (unreachable_set, reachable_set)"""
     reachable = (set(), set())
     for block in get_blocks(cfg.end):
@@ -30,7 +32,7 @@ def get_blocks(end_block: CFGBlock) -> Generator[CFGBlock, None, None]:
     yield from _get_blocks(end_block, set())
 
 
-def _get_blocks(block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:
+def _get_blocks(block: CFGBlock, visited: set[int]) -> Generator[CFGBlock, None, None]:
     if block.id in visited:
         return
 

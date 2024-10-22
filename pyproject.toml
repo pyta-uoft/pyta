@@ -32,8 +32,9 @@ dev = [
     "myst-parser",
     "pre-commit",
     "pytest",
-    "pytest-snapshot",
     "pytest-cov >= 4.0,< 5.1",
+    "pytest-mock",
+    "pytest-snapshot",
     "sphinx",
     "sphinx-rtd-theme",
 ]

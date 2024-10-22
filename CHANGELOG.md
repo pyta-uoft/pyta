@@ -21,6 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed issue where `snapshot` errors on unserializable values
 - Fixed issue within `Snapshot.py` where the `memory_viz_version` parameter was not respected
+- Fixed issue where annotated assignment statements were not checked by `redundant_assignment_checker`
 
 ### 🔧 Internal changes
 

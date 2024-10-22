@@ -12,6 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
+- Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
 
 ### 💫 New checkers
 

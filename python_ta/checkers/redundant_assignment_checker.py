@@ -67,6 +67,12 @@ class RedundantAssignmentChecker(BaseChecker):
         if node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node)
 
+    @only_required_for_messages("redundant-assignment")
+    def visit_annassign(self, node: nodes.AnnAssign) -> None:
+        """Visit the annotated assign node"""
+        if node in self._redundant_assignment:
+            self.add_message("redundant-assignment", node=node)
+
     def visit_module(self, node: nodes.Module) -> None:
         """Visit the module"""
         self._analyze(node)

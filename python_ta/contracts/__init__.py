@@ -243,6 +243,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                     check_type(arg, annotations[param])
             except (TypeError, TypeCheckError):
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
+
                 raise PyTAContractError(
                     f"{wrapped.__name__} argument {_display_value(arg)} did not match type "
                     f"annotation for parameter {param}: {_display_annotation(annotations[param])}"

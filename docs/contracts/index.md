@@ -72,6 +72,12 @@ You can set the `ENABLE_CONTRACT_CHECKING` constant to `True` to enable all cont
 .. autodata:: python_ta.contracts.ENABLE_CONTRACT_CHECKING
 ```
 
+You can set the `STRICT_NUMERIC_TYPES` constant to `False` to allow implicit conversions between numeric types (i.e, an int can be used where a float is expected)
+
+```{eval-rst}
+.. autodata:: python_ta.contracts.STRICT_NUMERIC_TYPES
+```
+
 You can set the `DEBUG_CONTRACTS` constant to `True` to enable debugging information to be printed when checking contracts.
 
 ```{eval-rst}

@@ -246,7 +246,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_augassign(augassign_node)
 
-        def test_annassign_redundant(self):
+    def test_annassign_redundant(self):
         src = """
         y_pos: int = 10
         y_pos = 10

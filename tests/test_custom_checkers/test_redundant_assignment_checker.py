@@ -287,12 +287,12 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
         mod.accept(CFGVisitor())
-        _, assign_2 = mod.nodes_of_class(nodes.Assign)
+        assign_1, _ = mod.nodes_of_class(nodes.Assign)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_2),
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
             ignore_position=True,
         ):
             self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(mod.body[0])
-            self.checker.visit_assign(assign_2)
+            self.checker.visit_assign(assign_1)

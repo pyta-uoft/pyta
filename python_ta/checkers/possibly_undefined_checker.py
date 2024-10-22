@@ -77,7 +77,11 @@ class PossiblyUndefinedChecker(BaseChecker):
         worklist = blocks
         while len(worklist) != 0:
             b = worklist.pop()
-            outs = [out_facts[p.source] for p in b.predecessors if p.source in out_facts]
+            outs = [
+                out_facts[p.source]
+                for p in b.predecessors
+                if p.source in out_facts and (not self.linter.config.z3 or p.is_feasible)
+            ]
             if outs == []:
                 in_facts = set()
             else:

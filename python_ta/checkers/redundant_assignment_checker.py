@@ -96,7 +96,11 @@ class RedundantAssignmentChecker(BaseChecker):
 
         while len(worklist) != 0:
             b = worklist.pop()
-            outs = [out_facts[p.target] for p in b.successors if p.target in out_facts]
+            outs = [
+                out_facts[p.target]
+                for p in b.successors
+                if p.target in out_facts and (not self.linter.config.z3 or p.is_feasible)
+            ]
             if outs == []:
                 in_facts = set()
             else:

@@ -79,8 +79,7 @@ def func_with_unserializable_objects() -> list[dict]:
     Function for snapshot() testing with unserializable objects.
     """
     path = pathlib.PosixPath("some path")
-    vars_in_curr_func = [snapshot()[0]]
-    processed_result = snapshot_to_json(vars_in_curr_func)
+    processed_result = snapshot_to_json([snapshot()[0]])
     json.dumps(processed_result)
     return processed_result
 

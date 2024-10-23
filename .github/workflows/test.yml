@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4.2.0
@@ -62,7 +62,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           parallel-finished: true
-          carryforward: "run-3.8,run-3.9,run-3.10,run-3.11,run-3.12"
+          carryforward: "run-3.9,run-3.10,run-3.11,run-3.12,run-3.13"
 
   docs:
     runs-on: ubuntu-latest

@@ -12,6 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
+- Included the name of redundant variable in `E9959 redundant-assignment` message
 
 ### 💫 New checkers
 
@@ -21,7 +22,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed issue where `snapshot` errors on unserializable values
 - Fixed issue within `Snapshot.py` where the `memory_viz_version` parameter was not respected
-- Fixed issue where parallel assignment statements were not checked by `redundant_assignment_checker`
+- Fixed issue where parallel assignment statements and assignment to multiple targets were not checked by `redundant_assignment_checker`
 - Fixed issue where annotated assignment statements were not checked by `redundant_assignment_checker`
 
 ### 🔧 Internal changes

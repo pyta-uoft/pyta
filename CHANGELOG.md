@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 - Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, `one-iteration`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
+- Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
 
 ### 💫 New checkers
 
@@ -39,6 +40,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added unit tests for `one_iteration_checker`
 - Added mock `webbrowser.open` in tests to prevent browser tabs and HTTP requests during `python_ta.check_all()` executions.
 - Added `pytest-mock` as a development dependency
+- Make `test_snapshot.py::test_snapshot_serializes_unserializable_value` able to run on Windows.
 
 ## [2.8.1] - 2024-08-19
 

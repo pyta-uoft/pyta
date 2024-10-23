@@ -76,9 +76,7 @@ class OneIterationChecker(BaseChecker):
                 if isinstance(node, nodes.For) and stmt is node.iter:
                     continue
                 # the predecessor node is unfeasible
-                if self.linter.config.z3 and all(
-                    not e.is_feasible for e in pred.source.predecessors
-                ):
+                if self.linter.config.z3 and not pred.source.is_feasible:
                     continue
                 return False
         return True

@@ -365,6 +365,10 @@ class CFGBlock:
         if len(self.statements) > 0:
             return self.statements[-1]
 
+    @property
+    def is_feasible(self) -> bool:
+        return any(edge.is_feasible for edge in self.predecessors)
+
     def is_jump(self) -> bool:
         """Returns True if the block has a statement that branches
         the control flow (ex: `break`)"""

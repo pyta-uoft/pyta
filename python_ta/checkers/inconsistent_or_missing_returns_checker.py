@@ -83,9 +83,7 @@ class InconsistentReturnChecker(BaseChecker):
             for block, statement in return_statements.items():
                 if statement is None:
                     # ignore unfeasible edges for missing return if z3 option is on
-                    if self.linter.config.z3 and all(
-                        not edge.is_feasible for edge in block.predecessors
-                    ):
+                    if self.linter.config.z3 and not block.is_feasible:
                         continue
 
                     # For rendering purpose:

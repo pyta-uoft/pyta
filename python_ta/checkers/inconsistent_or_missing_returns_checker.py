@@ -32,7 +32,7 @@ class InconsistentReturnChecker(BaseChecker):
                 "default": False,
                 "type": "yn",
                 "metavar": "<y or n>",
-                "help": "Only check for logically feasible nodes based on edge z3 constraints",
+                "help": "Use Z3 to restrict control flow checks to paths that are logically feasible.",
             },
         ),
     )

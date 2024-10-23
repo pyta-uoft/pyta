@@ -23,7 +23,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         "E9969": (
             "This variable might not be defined when this statement is executed.",
             "possibly-undefined",
-            "Reported when a statement uses a variable that might not be assigned.",
+            "Use Z3 to restrict control flow checks to paths that are logically feasible.",
         )
     }
     options = (

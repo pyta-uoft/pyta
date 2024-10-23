@@ -800,3 +800,57 @@ def test_parameter_bool_int_without_strict(disable_strict_numeric_types) -> None
 
     with pytest.raises(AssertionError):
         parameter_bool(1)
+
+
+def test_return_int_float_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is raised when a function with an integer return-type,
+    returns a float, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_int() -> int:
+        return 1.0
+
+    with pytest.raises(AssertionError):
+        return_int()
+
+
+def test_return_float_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function with a float return-type,
+    returns an integer, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_float() -> float:
+        return 1
+
+    return_float()
+
+
+def test_return_int_bool_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function with an integer return-type,
+    returns a boolean, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_int() -> int:
+        return True
+
+    return_int()
+
+
+def test_return_bool_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is raised when a function with a boolean return-type,
+    returns an integer, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_bool() -> bool:
+        return 1
+
+    with pytest.raises(AssertionError):
+        return_bool()

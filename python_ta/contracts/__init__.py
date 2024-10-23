@@ -42,7 +42,7 @@ In most cases you should not need to change this!
 
 STRICT_NUMERIC_TYPES = True
 """
-Set to False to allow implicit conversions between numeric types (i.e, an int can be used where a float is expected).
+Set to False to allow more specific numeric types to be accepted by more general type annotations.
 """
 
 _PYDEV_UMD_NAME = "pydev_umd"

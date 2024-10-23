@@ -471,6 +471,14 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
 
+
+class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = PossiblyUndefinedChecker
+
+    def setup_method(self) -> None:
+        super().setup_method()
+        self.linter.config.z3 = True
+
     def test_z3_unfeasible_branch(self) -> None:
         src = """
         def func(x: int) -> int:
@@ -491,7 +499,6 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
@@ -518,7 +525,6 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(msg_id="possibly-undefined", node=name_node),
             ignore_position=True,
         ):
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
@@ -541,7 +547,6 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
@@ -565,7 +570,6 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
@@ -587,7 +591,6 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
@@ -611,6 +614,5 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
         with self.assertNoMessages():
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)

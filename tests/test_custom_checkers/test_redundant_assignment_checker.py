@@ -262,6 +262,14 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_annassign(annassign_node)
 
+
+class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = RedundantAssignmentChecker
+
+    def setup_method(self) -> None:
+        super().setup_method()
+        self.linter.config.z3 = True
+
     def test_z3_unfeasible_variable_use(self):
         src = """
         def func(x: int) -> int:
@@ -284,7 +292,6 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
             ignore_position=True,
         ):
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(mod.body[0])
             self.checker.visit_assign(assign_1)
 
@@ -309,6 +316,5 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
             ignore_position=True,
         ):
-            self.checker.linter.config.z3 = True
             self.checker.visit_functiondef(mod.body[0])
             self.checker.visit_assign(assign_1)

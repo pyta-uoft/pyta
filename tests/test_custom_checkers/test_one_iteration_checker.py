@@ -441,6 +441,14 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_while(while_node)
 
+
+class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = OneIterationChecker
+
+    def setup_method(self) -> None:
+        super().setup_method()
+        self.linter.config.z3 = True
+
     def test_z3_one_iteration_by_precondition(self):
         src = """
         def func(x: int):
@@ -464,7 +472,6 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
-            self.linter.config.z3 = True
             self.checker.visit_while(while_node)
 
     def test_z3_one_iteration_break_by_precondition(self):
@@ -492,7 +499,6 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
-            self.linter.config.z3 = True
             self.checker.visit_while(while_node)
 
     def test_z3_multiple_iterations(self):
@@ -514,7 +520,6 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertNoMessages():
-            self.linter.config.z3 = True
             self.checker.visit_while(while_node)
 
     def test_z3_one_iteration_for_loop(self):
@@ -535,7 +540,6 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
         for_node = next(mod.nodes_of_class(nodes.For))
 
         with self.assertNoMessages():
-            self.linter.config.z3 = True
             self.checker.visit_while(for_node)
 
     def test_z3_one_iteration_unfeasible_loop(self):
@@ -556,5 +560,4 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertNoMessages():
-            self.linter.config.z3 = True
             self.checker.visit_while(while_node)

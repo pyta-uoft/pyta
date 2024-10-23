@@ -657,7 +657,6 @@ def test_get_quotient_with_pre_and_post_invalid_output() -> None:
     assert "$return_value % 10 == 0" in msg
 
 
-@pytest.mark.skipif(sys.version_info < (3, 9), reason="built-in generics not yet supported")
 def test_invalid_built_in_generic_argument() -> None:
     """Test that subclass checking on a type parameter that is a GenericAlias does not
     throw an error (as issubclass does not take in a GenericAlias as its second argument).

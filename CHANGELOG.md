@@ -12,6 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
+- Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
 - Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
 
 ### 💫 New checkers
@@ -22,6 +23,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed issue where `snapshot` errors on unserializable values
 - Fixed issue within `Snapshot.py` where the `memory_viz_version` parameter was not respected
+- Fixed issue where annotated assignment statements were not checked by `redundant_assignment_checker`
 
 ### 🔧 Internal changes
 
@@ -38,6 +40,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added unit tests for `one_iteration_checker`
 - Added mock `webbrowser.open` in tests to prevent browser tabs and HTTP requests during `python_ta.check_all()` executions.
 - Added `pytest-mock` as a development dependency
+- Make `test_snapshot.py::test_snapshot_serializes_unserializable_value` able to run on Windows.
 
 ## [2.8.1] - 2024-08-19
 

@@ -124,10 +124,6 @@ def _check(
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
 
-    # check the python version
-    if sys.version_info < (3, 7, 0):
-        logging.warning("You need Python 3.7 or later to run PythonTA.")
-
     linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter
     current_reporter.set_output(output)

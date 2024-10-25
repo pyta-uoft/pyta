@@ -155,6 +155,14 @@ class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_functiondef(func_node)
 
+
+class TestInconsistentReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = InconsistentReturnChecker
+
+    def setup_method(self) -> None:
+        super().setup_method()
+        self.linter.config.z3 = True
+
     def test_z3_unfeasible_inconsistent_return(self):
         src = """
         def func(x: int) -> int:

@@ -14,6 +14,14 @@ def disable_contract_checking():
 
 
 @pytest.fixture()
+def disable_strict_numeric_types():
+    """Fixture for setting python_ta.contracts.STRICT_NUMERIC_TYPES = False."""
+    python_ta.contracts.STRICT_NUMERIC_TYPES = False
+    yield
+    python_ta.contracts.STRICT_NUMERIC_TYPES = True
+
+
+@pytest.fixture()
 def prevent_webbrowser_and_httpserver(mocker):
     """Automatically mock webbrowser.open and HTTPServer.handle_request in all tests. this prevents any browser/server
     code running when running Pytest to avoid CI timeouts, and unexpected browser popups."""

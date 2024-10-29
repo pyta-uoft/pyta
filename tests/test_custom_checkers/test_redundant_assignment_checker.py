@@ -277,7 +277,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="redundant-assignment", node=assign_node, args="x,y"
+                msg_id="redundant-assignment", node=assign_node, args="x, y"
             ),
             ignore_position=True,
         ):
@@ -313,7 +313,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         self.checker.visit_module(mod)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="redundant-assignment", node=assign_node, args="x,y,z"
+                msg_id="redundant-assignment", node=assign_node, args="x, y, z"
             ),
             ignore_position=True,
         ):

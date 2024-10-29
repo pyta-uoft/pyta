@@ -19,6 +19,17 @@ class OneIterationChecker(BaseChecker):
             '(e.g., by returning or using the "break" keyword).',
         )
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Use Z3 to restrict control flow checks to paths that are logically feasible.",
+            },
+        ),
+    )
 
     @only_required_for_messages("one-iteration")
     def visit_for(self, node: nodes.For) -> None:
@@ -53,10 +64,19 @@ class OneIterationChecker(BaseChecker):
         if preds == []:
             return False
 
+        # check whether the loop block is unfeasible
+        if self.linter.config.z3 and all(
+            not pred.is_feasible for pred in preds if not node.parent_of(pred.source.statements[0])
+        ):
+            return False
+
         for pred in preds:
             stmt = pred.source.statements[0]
             if node.parent_of(stmt) and pred.source.reachable:
                 if isinstance(node, nodes.For) and stmt is node.iter:
+                    continue
+                # check whether the predecessor node is unfeasible
+                if self.linter.config.z3 and not pred.source.is_feasible:
                     continue
                 return False
         return True

@@ -169,3 +169,34 @@ def test_condition_multiple_preconditions_multiple_functions() -> None:
     expected_conditions = ["y != 0 and x > 0 and x + y < 100", "b > 0 and a > 0 and a + b != 100"]
     assert found_conditions == expected_conditions
     assert len(found_conditions) == expected_num_conditions
+
+
+def test_condition_blank_precondition() -> None:
+    """Test that the condition node in a function CFG is created properly if there is a blank precondition."""
+    src = """def divide(x: int, y: int) -> int:
+        \"\"\"Return x // y.
+        Precondition:
+        \"\"\"
+        return x // y
+    """
+    expected_num_conditions = 0
+    found_conditions = _extract_edge_conditions(build_cfg(src))
+    assert len(found_conditions) == expected_num_conditions
+
+
+def test_condition_blank_precondition_mixed() -> None:
+    """Test that the condition node in a function CFG is created properly if there is a blank precondition
+    mixed in with non-blank preconditions.
+    """
+    src = """def divide(x: int, y: int) -> int:
+        \"\"\"Return x // y.
+        Preconditions:
+        -
+        - y != 0
+        \"\"\"
+        return x // y
+    """
+    expected_num_conditions = 1
+    found_conditions = _extract_edge_conditions(build_cfg(src))
+    assert all(condition == "y != 0" for condition in found_conditions)
+    assert len(found_conditions) == expected_num_conditions

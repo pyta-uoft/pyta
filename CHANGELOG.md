@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 - Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
 - Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
+- Added `z3` option to `one-iteration-checker` to only check for feasible code blocks based on edge z3 constraints
 
 ### 💫 New checkers
 

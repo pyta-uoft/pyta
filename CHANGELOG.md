@@ -12,7 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
-- Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, `one-iteration`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
+- Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
 - Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
 
 ### 💫 New checkers

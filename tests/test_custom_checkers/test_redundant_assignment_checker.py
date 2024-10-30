@@ -361,7 +361,7 @@ class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(mod.body[0])
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1, args="a"),
             ignore_position=True,
         ):
             self.checker.visit_assign(assign_1)
@@ -385,7 +385,7 @@ class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
 
         self.checker.visit_functiondef(mod.body[0])
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1, args="a"),
             ignore_position=True,
         ):
             self.checker.visit_assign(assign_1)

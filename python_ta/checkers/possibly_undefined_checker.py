@@ -23,7 +23,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         "E9969": (
             "This variable might not be defined when this statement is executed.",
             "possibly-undefined",
-            "Use Z3 to restrict control flow checks to paths that are logically feasible.",
+            "Reported when a statement uses a variable that might not be assigned.",
         )
     }
     options = (
@@ -33,7 +33,7 @@ class PossiblyUndefinedChecker(BaseChecker):
                 "default": False,
                 "type": "yn",
                 "metavar": "<y or n>",
-                "help": "Only check for logically feasible nodes based on edge z3 constraints",
+                "help": "Use Z3 to restrict control flow checks to paths that are logically feasible.",
             },
         ),
     )

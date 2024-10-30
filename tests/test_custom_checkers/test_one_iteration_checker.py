@@ -446,31 +446,6 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = OneIterationChecker
     CONFIG = {"z3": True}
 
-    def test_z3_one_iteration_by_precondition(self):
-        src = """
-        def func(x: int):
-            '''
-            Preconditions:
-                - x > 10
-            '''
-            while x < 0:
-                print("unfeasible")
-            print("end")
-        """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        while_node = next(mod.nodes_of_class(nodes.While))
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="one-iteration",
-                node=while_node,
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_while(while_node)
-
     def test_z3_one_iteration_break_by_precondition(self):
         src = """
         def func(x: int) -> int:
@@ -539,7 +514,27 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_while(for_node)
 
-    def test_z3_one_iteration_unfeasible_loop(self):
+    def test_z3_one_iteration_unfeasible_loop_body(self):
+        src = """
+        def func(x: int):
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            while x < 0:
+                print("unfeasible")
+                break
+            print("end")
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+    def test_z3_one_iteration_unfeasible_loop_statement(self):
         src = """
         def func(x: int):
             '''
@@ -547,8 +542,9 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
                 - x > 10
             '''
             if x < 0:
-                while x < 0:
+                while x > 0:
                     print("unfeasible")
+                    break
             print("end")
         """
         z3v = Z3Visitor()

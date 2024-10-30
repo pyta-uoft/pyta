@@ -64,19 +64,15 @@ class OneIterationChecker(BaseChecker):
         if preds == []:
             return False
 
-        # check whether the loop block is unfeasible
-        if self.linter.config.z3 and all(
-            not pred.is_feasible for pred in preds if not node.parent_of(pred.source.statements[0])
-        ):
-            return False
+        if self.linter.config.z3:
+            if not start.cfg_block.is_feasible:
+                return False
+            preds = [pred for pred in preds if pred.source.is_feasible]
 
         for pred in preds:
             stmt = pred.source.statements[0]
             if node.parent_of(stmt) and pred.source.reachable:
                 if isinstance(node, nodes.For) and stmt is node.iter:
-                    continue
-                # check whether the predecessor node is unfeasible
-                if self.linter.config.z3 and not pred.source.is_feasible:
                     continue
                 return False
         return True

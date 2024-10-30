@@ -169,7 +169,7 @@ class ControlFlowGraph:
     def get_blocks(self, only_feasible: bool = False) -> Generator[CFGBlock, None, None]:
         """Generate a sequence of all blocks in this graph.
 
-        When only_feasible is True, only generate blocks feasible from start based on edge z3 constraints
+        When only_feasible is True, only generate blocks feasible from start based on edge z3 constraints.
         """
         yield from self._get_blocks(self.start, set(), only_feasible)
 
@@ -190,7 +190,7 @@ class ControlFlowGraph:
         """Return the sequence of all blocks in this graph in the order of
         a post-order traversal.
 
-        When only_feasible is True, only generate blocks feasible from start based on edge z3 constraints
+        When only_feasible is True, only generate blocks feasible from start based on edge z3 constraints.
         """
         yield from self._get_blocks_postorder(self.start, set(), only_feasible)
 

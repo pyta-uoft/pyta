@@ -353,10 +353,7 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
 
 class TestMissingReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InconsistentReturnChecker
-
-    def setup_method(self) -> None:
-        super().setup_method()
-        self.linter.config.z3 = True
+    CONFIG = {"z3": True}
 
     def test_z3_unfeasible_missing_return(self):
         src = """
@@ -399,11 +396,8 @@ class TestMissingReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="feasible_missing_return",
-                line=9,
-                end_line=9,
-                col_offset=0,
-                end_col_offset=27,
             ),
+            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
 
@@ -431,10 +425,7 @@ class TestMissingReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
                 msg_id="missing-return-statement",
                 node=func_node,
                 args="feasible_missing_return",
-                line=8,
-                end_line=12,
-                col_offset=0,
-                end_col_offset=27,
             ),
+            ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)

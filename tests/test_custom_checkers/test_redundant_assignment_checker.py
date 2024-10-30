@@ -265,10 +265,7 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
 
 class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = RedundantAssignmentChecker
-
-    def setup_method(self) -> None:
-        super().setup_method()
-        self.linter.config.z3 = True
+    CONFIG = {"z3": True}
 
     def test_z3_unfeasible_variable_use(self):
         src = """

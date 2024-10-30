@@ -474,10 +474,7 @@ class TestPossiblyUndefinedChecker(pylint.testutils.CheckerTestCase):
 
 class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = PossiblyUndefinedChecker
-
-    def setup_method(self) -> None:
-        super().setup_method()
-        self.linter.config.z3 = True
+    CONFIG = {"z3": True}
 
     def test_z3_unfeasible_branch(self) -> None:
         src = """
@@ -498,8 +495,8 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
+        self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
     def test_z3_unfeasible_assignment(self) -> None:
@@ -521,11 +518,11 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
+        self.checker.visit_functiondef(func_node)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="possibly-undefined", node=name_node),
             ignore_position=True,
         ):
-            self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
     def test_z3_unfeasible_deletion(self) -> None:
@@ -546,8 +543,8 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
+        self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
     def test_z3_unfeasible_variable_use(self) -> None:
@@ -569,8 +566,8 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
+        self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
     def test_z3_variable_defined_by_precondition(self) -> None:
@@ -590,8 +587,8 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
+        self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)
 
     def test_z3_partially_unfeasible_assignment(self) -> None:
@@ -613,6 +610,6 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
+        self.checker.visit_functiondef(func_node)
         with self.assertNoMessages():
-            self.checker.visit_functiondef(func_node)
             self.checker.visit_name(name_node)

@@ -285,11 +285,11 @@ class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         assign_1, *_ = mod.nodes_of_class(nodes.Assign)
 
+        self.checker.visit_functiondef(mod.body[0])
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
             ignore_position=True,
         ):
-            self.checker.visit_functiondef(mod.body[0])
             self.checker.visit_assign(assign_1)
 
     def test_z3_redundant_reassignment_by_precondition(self):
@@ -309,9 +309,9 @@ class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         assign_1, _ = mod.nodes_of_class(nodes.Assign)
 
+        self.checker.visit_functiondef(mod.body[0])
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1),
             ignore_position=True,
         ):
-            self.checker.visit_functiondef(mod.body[0])
             self.checker.visit_assign(assign_1)

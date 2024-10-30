@@ -34,33 +34,39 @@ class RedundantAssignmentChecker(BaseChecker):
     name = "redundant_assignment"
     msgs = {
         "E9959": (
-            "This assignment statement is redundant;" " You can remove it from the program.",
+            "Assigning to variable(s) %s here is redundant, because they are not used before getting reassigned later."
+            " You can remove the assignment(s) without changing the behaviour of this code.",
             "redundant-assignment",
-            "This assignment statement is redundant;" " You can remove it from the program.",
+            "Assigning to variable(s) is redundant, because they are not used before getting reassigned later."
+            " You can remove the assignment(s) without changing the behaviour of this code.",
         )
     }
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
-        self._redundant_assignment: set[nodes.Assign] = set()
+        self._redundant_assignment: dict[
+            nodes.Assign | nodes.AugAssign | nodes.AnnAssign, list[str]
+        ] = {}
 
     @only_required_for_messages("redundant-assignment")
     def visit_assign(self, node: nodes.Assign) -> None:
         """Visit the assign node"""
         if node in self._redundant_assignment:
-            self.add_message("redundant-assignment", node=node)
+            self.add_message(
+                "redundant-assignment", node=node, args=", ".join(self._redundant_assignment[node])
+            )
 
     @only_required_for_messages("redundant-assignment")
     def visit_augassign(self, node: nodes.AugAssign) -> None:
         """ "Visit the augmented assign node"""
         if node in self._redundant_assignment:
-            self.add_message("redundant-assignment", node=node)
+            self.add_message("redundant-assignment", node=node, args=node.target.name)
 
     @only_required_for_messages("redundant-assignment")
     def visit_annassign(self, node: nodes.AnnAssign) -> None:
         """Visit the annotated assign node"""
         if node in self._redundant_assignment:
-            self.add_message("redundant-assignment", node=node)
+            self.add_message("redundant-assignment", node=node, args=node.target.name)
 
     def visit_module(self, node: nodes.Module) -> None:
         """Visit the module"""
@@ -120,10 +126,24 @@ class RedundantAssignmentChecker(BaseChecker):
                 nodes.FunctionDef,
             ):
                 if isinstance(node, nodes.AssignName):
+                    # checking for parent node that accounts for parallel assignment
+                    parent = (
+                        node.parent.parent if isinstance(node.parent, nodes.Tuple) else node.parent
+                    )
                     if node.name in gen.difference(kill):
-                        self._redundant_assignment.add(node.parent)
-                    elif node.parent in self._redundant_assignment:
-                        self._redundant_assignment.remove(node.parent)
+                        # add redundant assignment
+                        if parent not in self._redundant_assignment:
+                            self._redundant_assignment[parent] = []
+                        if node.name not in self._redundant_assignment[parent]:
+                            self._redundant_assignment[parent].append(node.name)
+                    elif (
+                        parent in self._redundant_assignment
+                        and node.name in self._redundant_assignment[parent]
+                    ):
+                        # remove redundant assignment
+                        self._redundant_assignment[parent].remove(node.name)
+                        if len(self._redundant_assignment[parent]) == 0:
+                            self._redundant_assignment.pop(parent)
 
                     # When node.parent is an AugAssign, the name counts as a use of the variable,
                     # and so is added to kill.

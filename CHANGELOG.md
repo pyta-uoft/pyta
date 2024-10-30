@@ -26,6 +26,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue within `Snapshot.py` where the `memory_viz_version` parameter was not respected
 - Fixed issue where parallel assignment statements and assignment to multiple targets were not checked by `redundant_assignment_checker`
 - Fixed issue where annotated assignment statements were not checked by `redundant_assignment_checker`
+- Fixed issue where empty preconditions were preventing CFGs from being generated
 
 ### 🔧 Internal changes
 

@@ -72,6 +72,12 @@ You can set the `ENABLE_CONTRACT_CHECKING` constant to `True` to enable all cont
 .. autodata:: python_ta.contracts.ENABLE_CONTRACT_CHECKING
 ```
 
+You can set the `STRICT_NUMERIC_TYPES` constant to `False` to allow more specific numeric types to be accepted by more general type annotations, as described in [PEP 484](https://peps.python.org/pep-0484/#the-numeric-tower). For example, this allows `int` values to be accepted by `float` type annotations.
+
+```{eval-rst}
+.. autodata:: python_ta.contracts.STRICT_NUMERIC_TYPES
+```
+
 You can set the `DEBUG_CONTRACTS` constant to `True` to enable debugging information to be printed when checking contracts.
 
 ```{eval-rst}

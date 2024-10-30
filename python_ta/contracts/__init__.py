@@ -40,6 +40,11 @@ Set to False to disable workaround for PyCharm's "Run File in Python Console" ac
 In most cases you should not need to change this!
 """
 
+STRICT_NUMERIC_TYPES = True
+"""
+Set to False to allow more specific numeric types to be accepted by more general type annotations.
+"""
+
 _PYDEV_UMD_NAME = "pydev_umd"
 
 
@@ -232,7 +237,10 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         if param in annotations:
             try:
                 _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
-                check_type_strict(param, arg, annotations[param])
+                if STRICT_NUMERIC_TYPES:
+                    check_type_strict(param, arg, annotations[param])
+                else:
+                    check_type(arg, annotations[param])
             except (TypeError, TypeCheckError):
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
@@ -273,7 +281,10 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         return_type = annotations["return"]
         try:
             _debug(f"Checking return type from call to {wrapped.__qualname__}")
-            check_type_strict("return", r, return_type)
+            if STRICT_NUMERIC_TYPES:
+                check_type_strict("return", r, return_type)
+            else:
+                check_type(r, return_type)
         except (TypeError, TypeCheckError):
             raise PyTAContractError(
                 f"{wrapped.__name__}'s return value {_display_value(r)} did not match "

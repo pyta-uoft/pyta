@@ -4,6 +4,7 @@ from astroid import nodes
 
 from python_ta.cfg.visitor import CFGVisitor
 from python_ta.checkers.one_iteration_checker import OneIterationChecker
+from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
@@ -434,6 +435,120 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
                 print('error')
         """
         mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+
+class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = OneIterationChecker
+    CONFIG = {"z3": True}
+
+    def test_z3_one_iteration_break_by_precondition(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            while x > 0:
+                if x > 3:
+                    break
+                print(x)
+            return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="one-iteration",
+                node=while_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(while_node)
+
+    def test_z3_multiple_iterations(self):
+        src = """
+        def func(x: int, y: bool) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            while x > 0:
+                if x > 3 and y:
+                    break
+                print(x)
+            return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+    def test_z3_one_iteration_for_loop(self):
+        src = """
+         def func(x: float) -> int:
+            '''
+            Preconditions:
+                - x in [1.0, 2.0, 3.0]
+            '''
+            for i in range(0, 3):
+                if x == 3.0:
+                    break
+            return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        for_node = next(mod.nodes_of_class(nodes.For))
+
+        with self.assertNoMessages():
+            self.checker.visit_while(for_node)
+
+    def test_z3_one_iteration_unfeasible_loop_body(self):
+        src = """
+        def func(x: int):
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            while x < 0:
+                print("unfeasible")
+                break
+            print("end")
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        while_node = next(mod.nodes_of_class(nodes.While))
+
+        with self.assertNoMessages():
+            self.checker.visit_while(while_node)
+
+    def test_z3_one_iteration_unfeasible_loop_statement(self):
+        src = """
+        def func(x: int):
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            if x < 0:
+                while x > 0:
+                    print("unfeasible")
+                    break
+            print("end")
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
         mod.accept(CFGVisitor())
         while_node = next(mod.nodes_of_class(nodes.While))
 

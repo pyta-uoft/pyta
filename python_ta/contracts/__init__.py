@@ -350,38 +350,36 @@ def _check_inner_type(argname: str, value: Any, expected_type: type):
     Recursively checks if `value` matches `expected_type` for strict type validation, specifically supports checking
     collections (list[int], dicts[float]) and Union types (bool | int).
     """
-    inner_type = get_args(expected_type)
+    inner_types = get_args(expected_type)
     outter_type = get_origin(expected_type)
-    # BASE CASE FOR SIMPLE TYPES!
     if outter_type is None:
-        if (type(value) is int and expected_type is float) or (
-            type(value) is bool and expected_type is int
+        if (
+            (type(value) is bool and expected_type in {int, float, complex})
+            or (type(value) is int and expected_type in {float, complex})
+            or (type(value) is float and expected_type is complex)
         ):
-            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+            raise TypeError(
+                f"type of {argname} must be {expected_type}; got {type(value).__name__} instead"
+            )
         check_type(
             value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
         )
-
-    # RECURSIVE CASE UNION TYPES, IF ANY INNER TYPE MATCHES, THEN IT IS VALID
     elif outter_type is typing.Union:
-        for inner_type in get_args(expected_type):
-            # Checking for no error
+        for inner_type in inner_types:
             try:
                 _check_inner_type(argname, value, inner_type)
                 return
             except (TypeError, TypeCheckError):
                 pass
         raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
-    # RECURSIVE CASE COLLECTIONS, CHECK EACH ITEM IN THE COLLECTION HAS THE INNER TYPE
     elif isinstance(value, Collection) and not isinstance(value, str):
         if outter_type in {list, set, tuple}:
             for item in value:
-                _check_inner_type(argname, item, inner_type[0])
-        # DICTS HAVE TWO INNER TYPES, KEY AND VALUE
+                _check_inner_type(argname, item, inner_types[0])
         elif isinstance(value, dict) and outter_type is dict:
             for key, item in value.items():
-                _check_inner_type(argname, key, inner_type[0])
-                _check_inner_type(argname, item, inner_type[1])
+                _check_inner_type(argname, key, inner_types[0])
+                _check_inner_type(argname, item, inner_types[1])
 
     else:
         check_type(

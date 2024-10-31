@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Union
 
 import pytest
 from nested_preconditions_example import Student, my_function
@@ -853,3 +853,163 @@ def test_return_bool_int_without_strict(disable_strict_numeric_types) -> None:
 
     with pytest.raises(AssertionError):
         return_bool()
+
+
+def test_parameter_list_float_int() -> None:
+    """Testing when the function expects list[float] and it receives list[int]."""
+
+    @check_contracts
+    def process_float_list(data: list[float]) -> float:
+        return sum(data)
+
+    with pytest.raises(AssertionError):
+        process_float_list([1, 2, 3])
+
+
+def test_parameter_dict_float_int_key() -> None:
+    """Testing when the function expects dict[float, int] and it receives dict[int, int] for keys."""
+
+    @check_contracts
+    def process_float_key_dict(data: dict[float, int]) -> int:
+        return sum(data.values())
+
+    with pytest.raises(AssertionError):
+        process_float_key_dict({1: 1, 2: 2})
+
+
+def test_parameter_dict_float_bool_value() -> None:
+    """Testing when the function expects dict[float, int] and it receives dict[float, bool] for values."""
+
+    @check_contracts
+    def process_float_key_dict(data: dict[float, int]) -> int:
+        return sum(data.values())
+
+    with pytest.raises(AssertionError):
+        process_float_key_dict({1.0: True, 2.5: False})
+
+
+def test_parameter_union_int_bool() -> None:
+    """Testing when the function expects Union[int, float] and it receives a bool."""
+
+    @check_contracts
+    def accept_union(value: Union[int, float]) -> None:
+        pass
+
+    with pytest.raises(AssertionError):
+        accept_union(True)
+
+
+def test_parameter_tuple_int_float_mismatch() -> None:
+    """Testing when the function expects tuple[int, float] and it receives tuple[float, int]."""
+
+    @check_contracts
+    def accept_tuple(data: tuple[int, float]) -> float:
+        return data[0] + data[1]
+
+    with pytest.raises(AssertionError):
+        accept_tuple((1.0, 2))
+
+
+def test_parameter_dict_str_list_float() -> None:
+    """Testing when the function expects dict[str, list[int]] and it receives dict[str, list[float]]."""
+
+    @check_contracts
+    def process_complex_structure(data: dict[str, list[int]]) -> int:
+        return sum(sum(lst) for lst in data.values())
+
+    with pytest.raises(AssertionError):
+        process_complex_structure({"a": [1.0, 2.5]})
+
+
+def test_parameter_dict_int_list_int_key_type() -> None:
+    """Testing when the function expects dict[str, list[int]] and it receives dict[int, list[int]] for keys."""
+
+    @check_contracts
+    def process_complex_structure(data: dict[str, list[int]]) -> int:
+        return sum(sum(lst) for lst in data.values())
+
+    with pytest.raises(AssertionError):
+        process_complex_structure({1: [1, 2]})
+
+
+def test_parameter_list_float_pass() -> None:
+    """Testing when the function expects list[float] and it receives list[float]."""
+
+    @check_contracts
+    def process_float_list(data: list[float]) -> float:
+        return sum(data)
+
+    process_float_list([1.0, 2.5, 3.3])
+
+
+def test_parameter_dict_float_int_pass() -> None:
+    """Testing when the function expects dict[float, int] and it receives dict[float, int]."""
+
+    @check_contracts
+    def process_float_key_dict(data: dict[float, int]) -> int:
+        return sum(data.values())
+
+    process_float_key_dict({1.0: 10, 2.5: 20})
+
+
+def test_parameter_union_int_float_pass() -> None:
+    """Testing when the function expects Union[int, float] and it receives an int."""
+
+    @check_contracts
+    def accept_union(value: Union[int, float]) -> None:
+        pass
+
+    accept_union(10)
+
+
+def test_parameter_list_float_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function expects list[float] but receives list[int],
+    while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def process_float_list(data: list[float]) -> float:
+        return sum(data)
+
+    process_float_list([1, 2, 3])
+
+
+def test_parameter_dict_float_int_key_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function expects dict[float, int] but receives dict[int, int],
+    while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def process_float_key_dict(data: dict[float, int]) -> int:
+        return sum(data.values())
+
+    process_float_key_dict({1: 10, 2: 20})
+
+
+def test_parameter_float_complex() -> None:
+    """
+    Testing when the function expects a float but receives a complex number.
+    This should raise an AssertionError with strict type checking enabled.
+    """
+
+    @check_contracts
+    def process_float(value: float) -> float:
+        return value.real
+
+    with pytest.raises(AssertionError):
+        process_float(3 + 4j)  # complex provided
+
+
+def test_parameter_float_complex_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function expects a float but receives a complex number,
+    while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def process_float(value: complex) -> float:
+        return value.real
+
+    process_float(3.0)

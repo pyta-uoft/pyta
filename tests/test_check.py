@@ -4,7 +4,6 @@ installed `python_ta` package.
 
 import os
 from os import path, remove
-from unittest.mock import Mock
 
 import python_ta
 
@@ -199,15 +198,8 @@ def test_check_saves_file() -> None:
         remove("pyta_output.html")
 
 
-def test_check_no_reporter_output() -> None:
+def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
     """Test whether not specifiying an output does not save a file"""
-    # To prevent any any browser/server code running when running Pytest to avoid CI timeouts
-    import webbrowser
-    from http.server import HTTPServer
-
-    webbrowser.open = Mock(return_value=None)
-    HTTPServer.handle_request = Mock(return_value=None)
-
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory

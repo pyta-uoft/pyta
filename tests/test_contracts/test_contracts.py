@@ -657,7 +657,6 @@ def test_get_quotient_with_pre_and_post_invalid_output() -> None:
     assert "$return_value % 10 == 0" in msg
 
 
-@pytest.mark.skipif(sys.version_info < (3, 9), reason="built-in generics not yet supported")
 def test_invalid_built_in_generic_argument() -> None:
     """Test that subclass checking on a type parameter that is a GenericAlias does not
     throw an error (as issubclass does not take in a GenericAlias as its second argument).
@@ -746,3 +745,111 @@ def test_precondition_violation_in_representation_invariant() -> None:
         Student("Bob", 1001001000, -19)
 
     assert 'my_condition2 precondition "x > 0" was violated' in str(exception_info.value)
+
+
+def test_parameter_int_float_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is raised when a function with an integer parameter is called
+    using a float argument, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_int(1.0)
+
+
+def test_parameter_float_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function with a float parameter is called
+    using an integer argument, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def parameter_float(num: float) -> None:
+        return None
+
+    parameter_float(1)
+
+
+def test_parameter_int_bool_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function with an integer parameter is called
+    using a boolean argument, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def parameter_int(num: int) -> None:
+        return None
+
+    parameter_int(True)
+
+
+def test_parameter_bool_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is raised when a function with a boolean parameter is called
+    using an integer argument, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def parameter_bool(result: bool) -> None:
+        return None
+
+    with pytest.raises(AssertionError):
+        parameter_bool(1)
+
+
+def test_return_int_float_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is raised when a function with an integer return-type,
+    returns a float, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_int() -> int:
+        return 1.0
+
+    with pytest.raises(AssertionError):
+        return_int()
+
+
+def test_return_float_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function with a float return-type,
+    returns an integer, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_float() -> float:
+        return 1
+
+    return_float()
+
+
+def test_return_int_bool_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is not raised when a function with an integer return-type,
+    returns a boolean, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_int() -> int:
+        return True
+
+    return_int()
+
+
+def test_return_bool_int_without_strict(disable_strict_numeric_types) -> None:
+    """
+    Test that an AssertionError is raised when a function with a boolean return-type,
+    returns an integer, while STRICT_NUMERIC_TYPES is disabled.
+    """
+
+    @check_contracts
+    def return_bool() -> bool:
+        return 1
+
+    with pytest.raises(AssertionError):
+        return_bool()

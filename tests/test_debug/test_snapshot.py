@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 import os
-import pathlib
 import re
 import subprocess
 import sys
@@ -78,9 +77,8 @@ def func_with_unserializable_objects() -> list[dict]:
     """
     Function for snapshot() testing with unserializable objects.
     """
-    path = pathlib.PosixPath("some path")
-    vars_in_curr_func = [snapshot()[0]]
-    processed_result = snapshot_to_json(vars_in_curr_func)
+    var = b"\x00\x10"
+    processed_result = snapshot_to_json([snapshot()[0]])
     json.dumps(processed_result)
     return processed_result
 
@@ -769,9 +767,9 @@ def test_snapshot_serializes_unserializable_value():
             "id": None,
             "name": "func_with_unserializable_objects",
             "type": ".frame",
-            "value": {"path": 1},
+            "value": {"var": 1},
         },
-        {"id": 1, "type": "PosixPath", "value": repr(pathlib.PosixPath("some path"))},
+        {"id": 1, "type": "bytes", "value": repr(b"\x00\x10")},
     ]
 
 

@@ -65,8 +65,16 @@ class OneIterationChecker(BaseChecker):
             return False
 
         if self.linter.config.z3:
+            # check whether the loop statement is feasible
             if not start.cfg_block.is_feasible:
                 return False
+            # check whether the loop body is feasible (the loop has at least one iteration)
+            if not any(
+                succ.is_feasible and node.parent_of(succ.target.statements[0])
+                for succ in start.cfg_block.successors
+            ):
+                return False
+            # filter out edges from unfeasible blocks
             preds = [pred for pred in preds if pred.source.is_feasible]
 
         for pred in preds:

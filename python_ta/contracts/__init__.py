@@ -17,7 +17,17 @@ import logging
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
-from typing import Any, Callable, Optional, TypeVar, Union, overload
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Optional,
+    TypeVar,
+    Union,
+    get_args,
+    get_origin,
+    overload,
+)
 
 import wrapt
 from typeguard import CollectionCheckStrategy, TypeCheckError, check_type
@@ -327,11 +337,51 @@ def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
         - float vs. int
         - bool vs. int
     """
-    if ENABLE_CONTRACT_CHECKING:
-        if (type(value) is int and expected_type is float) or (
-            type(value) is bool and expected_type is int
+    if not ENABLE_CONTRACT_CHECKING:
+        pass
+    try:
+        _check_inner_type(argname, value, expected_type)
+    except (TypeError, TypeCheckError):
+        raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+
+
+def _check_inner_type(argname: str, value: Any, expected_type: type):
+    """
+    Recursively checks if `value` matches `expected_type` for strict type validation, specifically supports checking
+    collections (list[int], dicts[float]) and Union types (bool | int).
+    """
+    inner_types = get_args(expected_type)
+    outter_type = get_origin(expected_type)
+    if outter_type is None:
+        if (
+            (type(value) is bool and expected_type in {int, float, complex})
+            or (type(value) is int and expected_type in {float, complex})
+            or (type(value) is float and expected_type is complex)
         ):
-            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+            raise TypeError(
+                f"type of {argname} must be {expected_type}; got {type(value).__name__} instead"
+            )
+        check_type(
+            value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
+        )
+    elif outter_type is typing.Union:
+        for inner_type in inner_types:
+            try:
+                _check_inner_type(argname, value, inner_type)
+                return
+            except (TypeError, TypeCheckError):
+                pass
+        raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+    elif isinstance(value, Collection) and not isinstance(value, str):
+        if outter_type in {list, set, tuple}:
+            for item in value:
+                _check_inner_type(argname, item, inner_types[0])
+        elif isinstance(value, dict) and outter_type is dict:
+            for key, item in value.items():
+                _check_inner_type(argname, key, inner_types[0])
+                _check_inner_type(argname, item, inner_types[1])
+
+    else:
         check_type(
             value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
         )

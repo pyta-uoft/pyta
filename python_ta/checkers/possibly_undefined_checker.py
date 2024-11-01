@@ -26,6 +26,17 @@ class PossiblyUndefinedChecker(BaseChecker):
             "Reported when a statement uses a variable that might not be assigned.",
         )
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Use Z3 to restrict control flow checks to paths that are logically feasible.",
+            },
+        ),
+    )
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
@@ -56,7 +67,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
-        blocks = list(cfg.get_blocks_postorder())
+        blocks = list(cfg.get_blocks_postorder(only_feasible=self.linter.config.z3))
         blocks.reverse()
 
         all_assigns = self._get_assigns(node)
@@ -66,7 +77,11 @@ class PossiblyUndefinedChecker(BaseChecker):
         worklist = blocks
         while len(worklist) != 0:
             b = worklist.pop()
-            outs = [out_facts[p.source] for p in b.predecessors if p.source in out_facts]
+            outs = [
+                out_facts[p.source]
+                for p in b.predecessors
+                if p.source in out_facts and (not self.linter.config.z3 or p.is_feasible)
+            ]
             if outs == []:
                 in_facts = set()
             else:
@@ -74,7 +89,13 @@ class PossiblyUndefinedChecker(BaseChecker):
             temp = self._transfer(b, in_facts, all_assigns)
             if temp != out_facts[b]:
                 out_facts[b] = temp
-                worklist.extend([succ.target for succ in b.successors])
+                worklist.extend(
+                    [
+                        succ.target
+                        for succ in b.successors
+                        if not self.linter.config.z3 or succ.is_feasible
+                    ]
+                )
 
     def _transfer(self, block: CFGBlock, in_facts: set[str], local_vars: set[str]) -> set[str]:
         gen = in_facts.copy()

@@ -166,11 +166,16 @@ class ControlFlowGraph:
             for target in targets:
                 self.link(source, target)
 
-    def get_blocks(self) -> Generator[CFGBlock, None, None]:
-        """Generate a sequence of all blocks in this graph."""
-        yield from self._get_blocks(self.start, set())
+    def get_blocks(self, only_feasible: bool = False) -> Generator[CFGBlock, None, None]:
+        """Generate a sequence of all blocks in this graph.
 
-    def _get_blocks(self, block: CFGBlock, visited: Set[int]) -> Generator[CFGBlock, None, None]:
+        When only_feasible is True, only generate blocks feasible from start based on edge z3 constraints.
+        """
+        yield from self._get_blocks(self.start, set(), only_feasible)
+
+    def _get_blocks(
+        self, block: CFGBlock, visited: Set[int], only_feasible: bool
+    ) -> Generator[CFGBlock, None, None]:
         if block.id in visited:
             return
 
@@ -178,20 +183,27 @@ class ControlFlowGraph:
         visited.add(block.id)
 
         for edge in block.successors:
-            yield from self._get_blocks(edge.target, visited)
+            if not only_feasible or edge.is_feasible:
+                yield from self._get_blocks(edge.target, visited, only_feasible)
 
-    def get_blocks_postorder(self) -> Generator[CFGBlock, None, None]:
+    def get_blocks_postorder(self, only_feasible: bool = False) -> Generator[CFGBlock, None, None]:
         """Return the sequence of all blocks in this graph in the order of
-        a post-order traversal."""
-        yield from self._get_blocks_postorder(self.start, set())
+        a post-order traversal.
 
-    def _get_blocks_postorder(self, block: CFGBlock, visited) -> Generator[CFGBlock, None, None]:
+        When only_feasible is True, only generate blocks feasible from start based on edge z3 constraints.
+        """
+        yield from self._get_blocks_postorder(self.start, set(), only_feasible)
+
+    def _get_blocks_postorder(
+        self, block: CFGBlock, visited: Set[int], only_feasible: bool
+    ) -> Generator[CFGBlock, None, None]:
         if block.id in visited:
             return
 
         visited.add(block.id)
         for succ in block.successors:
-            yield from self._get_blocks_postorder(succ.target, visited)
+            if not only_feasible or succ.is_feasible:
+                yield from self._get_blocks_postorder(succ.target, visited, only_feasible)
 
         yield block
 
@@ -352,6 +364,10 @@ class CFGBlock:
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]
+
+    @property
+    def is_feasible(self) -> bool:
+        return any(edge.is_feasible for edge in self.predecessors)
 
     def is_jump(self) -> bool:
         """Returns True if the block has a statement that branches

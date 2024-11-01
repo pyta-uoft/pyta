@@ -6,6 +6,7 @@ from python_ta.cfg.visitor import CFGVisitor
 from python_ta.checkers.inconsistent_or_missing_returns_checker import (
     InconsistentReturnChecker,
 )
+from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
@@ -144,6 +145,89 @@ class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):
         mod.accept(CFGVisitor())
         func_node = next(mod.nodes_of_class(nodes.FunctionDef))
         _, inconsistent_return_node = mod.nodes_of_class(nodes.Return)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="inconsistent-returns",
+                node=inconsistent_return_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+
+class TestInconsistentReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = InconsistentReturnChecker
+    CONFIG = {"z3": True}
+
+    def test_z3_unfeasible_inconsistent_return(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            if x < 0:
+                return
+            return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+        inconsistent_return_node, _ = mod.nodes_of_class(nodes.Return)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="inconsistent-returns",
+                node=inconsistent_return_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_z3_partially_feasible_inconsistent_return(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            if x < 0:
+                print(x)
+            return
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+        inconsistent_return_node = next(mod.nodes_of_class(nodes.Return))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="inconsistent-returns",
+                node=inconsistent_return_node,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_z3_feasible_inconsistent_return(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 5
+            '''
+            if x > 0:
+                return
+            return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+        inconsistent_return_node, _ = mod.nodes_of_class(nodes.Return)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(

@@ -331,28 +331,28 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
 
 def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
-    """Ensure that ``value`` matches ``expected_type``.
+    """
+    Ensure that `value` matches ``expected_type`` with strict type checking.
 
-    Differentiates between:
-        - float vs. int
-        - bool vs. int
+    This function enforces strict type distinctions within the numeric hierarchy (bool, int, float,
+    complex), ensuring that the type of value is exactly the same as expected_type, not merely a subtype.
     """
     if not ENABLE_CONTRACT_CHECKING:
-        pass
+        return
     try:
         _check_inner_type(argname, value, expected_type)
     except (TypeError, TypeCheckError):
         raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
 
 
-def _check_inner_type(argname: str, value: Any, expected_type: type):
+def _check_inner_type(argname: str, value: Any, expected_type: type) -> None:
     """
     Recursively checks if `value` matches `expected_type` for strict type validation, specifically supports checking
     collections (list[int], dicts[float]) and Union types (bool | int).
     """
     inner_types = get_args(expected_type)
-    outter_type = get_origin(expected_type)
-    if outter_type is None:
+    outer_type = get_origin(expected_type)
+    if outer_type is None:
         if (
             (type(value) is bool and expected_type in {int, float, complex})
             or (type(value) is int and expected_type in {float, complex})
@@ -361,10 +361,11 @@ def _check_inner_type(argname: str, value: Any, expected_type: type):
             raise TypeError(
                 f"type of {argname} must be {expected_type}; got {type(value).__name__} instead"
             )
-        check_type(
-            value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
-        )
-    elif outter_type is typing.Union:
+        else:
+            check_type(
+                value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
+            )
+    elif outer_type is typing.Union:
         for inner_type in inner_types:
             try:
                 _check_inner_type(argname, value, inner_type)
@@ -373,10 +374,10 @@ def _check_inner_type(argname: str, value: Any, expected_type: type):
                 pass
         raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
     elif isinstance(value, Collection) and not isinstance(value, str):
-        if outter_type in {list, set, tuple}:
+        if outer_type in {list, set, tuple}:
             for item in value:
                 _check_inner_type(argname, item, inner_types[0])
-        elif isinstance(value, dict) and outter_type is dict:
+        elif isinstance(value, dict) and outer_type is dict:
             for key, item in value.items():
                 _check_inner_type(argname, key, inner_types[0])
                 _check_inner_type(argname, item, inner_types[1])

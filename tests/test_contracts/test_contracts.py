@@ -1013,3 +1013,64 @@ def test_parameter_float_complex_without_strict(disable_strict_numeric_types) ->
         return value.real
 
     process_float(3.0)
+
+
+def test_parameter_tuple_fixed_length_types() -> None:
+    """Testing when the function expects a fixed-length tuple with specific types (tuple[int, str])."""
+
+    @check_contracts
+    def accept_fixed_tuple(value: tuple[int, str]) -> str:
+        return f"{value[0]}: {value[1]}"
+
+    accept_fixed_tuple((5, "test"))
+
+    with pytest.raises(AssertionError):
+        accept_fixed_tuple((5, "test", 3.5))
+
+    with pytest.raises(AssertionError):
+        accept_fixed_tuple((5, 10))
+
+
+def test_parameter_tuple_homogeneous_any_length() -> None:
+    """Testing when the function expects a homogeneous tuple of any length (tuple[int, ...])."""
+
+    @check_contracts
+    def accept_homogeneous_tuple(value: tuple[int, ...]) -> int:
+        return sum(value)
+
+    accept_homogeneous_tuple((1, 2, 3))
+    accept_homogeneous_tuple((4,))
+    accept_homogeneous_tuple(())
+
+    with pytest.raises(AssertionError):
+        accept_homogeneous_tuple((1, "two", 3))
+
+
+def test_parameter_tuple_empty() -> None:
+    """Testing when the function expects an empty tuple (tuple[()])."""
+
+    @check_contracts
+    def accept_empty_tuple(value: tuple[()]) -> str:
+        return "Empty tuple accepted"
+
+    accept_empty_tuple(())
+
+    with pytest.raises(AssertionError):
+        accept_empty_tuple((1,))
+
+
+def test_parameter_tuple_nested_fixed_length() -> None:
+    """Testing when the function expects a nested fixed-length tuple with specific
+    types (tuple[int, tuple[str, float]])."""
+
+    @check_contracts
+    def process_nested_tuple(value: tuple[int, tuple[str, float]]) -> str:
+        return f"Outer: {value[0]}, Inner: {value[1][0]}, {value[1][1]}"
+
+    process_nested_tuple((5, ("hello", 3.14)))
+
+    with pytest.raises(AssertionError):
+        process_nested_tuple((5, ("hello", "not a float")))
+
+    with pytest.raises(AssertionError):
+        process_nested_tuple((5, ("hello", 3.14, 42)))

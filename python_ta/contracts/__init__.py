@@ -373,15 +373,28 @@ def _check_inner_type(argname: str, value: Any, expected_type: type) -> None:
             except (TypeError, TypeCheckError):
                 pass
         raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
-    elif isinstance(value, Collection) and not isinstance(value, str):
-        if outer_type in {list, set, tuple}:
+    elif outer_type is {list, set}:
+        if isinstance(value, outer_type):
             for item in value:
                 _check_inner_type(argname, item, inner_types[0])
-        elif isinstance(value, dict) and outer_type is dict:
+        else:
+            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+    elif outer_type is dict:
+        if isinstance(value, dict):
             for key, item in value.items():
                 _check_inner_type(argname, key, inner_types[0])
                 _check_inner_type(argname, item, inner_types[1])
-
+        else:
+            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
+    elif outer_type is tuple:
+        if isinstance(value, tuple) and len(inner_types) == 2 and inner_types[1] is Ellipsis:
+            for item in value:
+                _check_inner_type(argname, item, inner_types[0])
+        elif isinstance(value, tuple) and len(value) == len(inner_types):
+            for i, item in enumerate(value):
+                _check_inner_type(argname, item, inner_types[i])
+        else:
+            raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
     else:
         check_type(
             value, expected_type, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS

@@ -999,7 +999,7 @@ def test_parameter_float_complex() -> None:
         return value.real
 
     with pytest.raises(AssertionError):
-        process_float(3 + 4j)  # complex provided
+        process_float(3 + 4j)
 
 
 def test_parameter_float_complex_without_strict(disable_strict_numeric_types) -> None:

@@ -373,7 +373,7 @@ def _check_inner_type(argname: str, value: Any, expected_type: type) -> None:
             except (TypeError, TypeCheckError):
                 pass
         raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
-    elif outer_type is {list, set}:
+    elif outer_type in {list, set}:
         if isinstance(value, outer_type):
             for item in value:
                 _check_inner_type(argname, item, inner_types[0])

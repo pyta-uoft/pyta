@@ -962,6 +962,27 @@ def test_parameter_union_int_float_pass() -> None:
     accept_union(10)
 
 
+def test_union_with_matching_collection_types() -> None:
+    """Test cases where the provided collection type matches one of the types specified in a union
+    (e.g., expecting dict[int, str] | list[int], and given list[int])."""
+
+    @check_contracts
+    def process_dict(value: dict[int, str] | list[int]) -> str:
+        return str(value)
+
+    @check_contracts
+    def process_tuple(value: tuple[int, str] | list[int]) -> str:
+        return f"{value[0]}, {value[1]}"
+
+    @check_contracts
+    def process_set(value: set[int] | list[int]) -> str:
+        return str(value)
+
+    process_dict([1, 2, 3])
+    process_tuple([1, 2, 3])
+    process_set([1, 2, 3])
+
+
 def test_parameter_list_float_int_without_strict(disable_strict_numeric_types) -> None:
     """
     Test that an AssertionError is not raised when a function expects list[float] but receives list[int],

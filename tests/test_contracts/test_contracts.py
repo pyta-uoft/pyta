@@ -967,15 +967,15 @@ def test_union_with_matching_collection_types() -> None:
     (e.g., expecting dict[int, str] | list[int], and given list[int])."""
 
     @check_contracts
-    def process_dict(value: dict[int, str] | list[int]) -> str:
+    def process_dict(value: Union[dict[int, str], list[int]]) -> str:
         return str(value)
 
     @check_contracts
-    def process_tuple(value: tuple[int, str] | list[int]) -> str:
+    def process_tuple(value: Union[tuple[int, str], list[int]]) -> str:
         return f"{value[0]}, {value[1]}"
 
     @check_contracts
-    def process_set(value: set[int] | list[int]) -> str:
+    def process_set(value: Union[set[int], list[int]]) -> str:
         return str(value)
 
     process_dict([1, 2, 3])

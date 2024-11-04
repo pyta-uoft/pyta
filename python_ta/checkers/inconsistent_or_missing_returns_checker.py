@@ -59,11 +59,7 @@ class InconsistentReturnChecker(BaseChecker):
 
         # get the blocks connected to the end of cfg
         end = node.cfg.end
-        end_blocks = [
-            edge.source
-            for edge in end.predecessors
-            if not self.linter.config.z3 or edge.is_feasible
-        ]
+        end_blocks = [edge.source for edge in end.predecessors]
 
         # gather the return statement of each code block
         return_statements = {}
@@ -87,7 +83,12 @@ class InconsistentReturnChecker(BaseChecker):
             for block, statement in return_statements.items():
                 if statement is None:
                     # ignore unfeasible edges for missing return if z3 option is on
-                    if self.linter.config.z3 and not block.is_feasible:
+                    if self.linter.config.z3 and (
+                        not block.is_feasible
+                        or not any(
+                            edge.is_feasible for edge in block.successors if edge.target is end
+                        )
+                    ):
                         continue
 
                     # For rendering purpose:

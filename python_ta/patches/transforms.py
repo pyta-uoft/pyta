@@ -4,6 +4,7 @@
 from pylint.lint import PyLinter
 
 from ..cfg.visitor import CFGVisitor
+from ..transforms.z3_visitor import Z3Visitor
 
 
 def patch_ast_transforms():
@@ -13,6 +14,7 @@ def patch_ast_transforms():
         ast = old_get_ast(self, filepath, modname, data)
         if ast is not None:
             try:
+                ast = Z3Visitor().visitor.visit(ast)
                 ast.accept(CFGVisitor())
             except:
                 pass

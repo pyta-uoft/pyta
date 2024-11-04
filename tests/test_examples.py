@@ -16,9 +16,11 @@ import python_ta
 _EXAMPLES_PATH = "examples/pylint/"
 _CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
 _PYCODESTYLE_PATH = "examples/custom_checkers/e9989_pycodestyle/"
+_CHECKER_Z3_OPTION_PATH = "examples/custom_checkers/z3_option/"
 
-_EXAMPLE_PREFIX_REGEX = r"[cerfw]\d{4}"
+_EXAMPLE_PREFIX_REGEX = r"^[cerfw]\d{4}"
 _PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
+_EXAMPLE_Z3_REGEX = r"^z3_[cerfw]\d{4}"
 
 
 # The following tests appear to always fail (further investigation needed).
@@ -65,7 +67,9 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     return test_files
 
 
-def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[str, set[str]]:
+def _symbols_by_file_pyta(
+    paths: list[str], include_msg: bool = False, z3_option: bool = False
+) -> dict[str, set[str]]:
     """
     Run python_ta.check_all() on files from specified directories and return the map of file name to the
     set of PythonTA messages it raises. If include_msg is set True, PythonTA message descriptions are
@@ -73,6 +77,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
 
     :param paths: The paths to retrieve the files from.
     :param include_msg: whether to include message descriptions in the symbol set
+    :param z3_option: whether the z3 option for certain checkers are turned on
     :return: A dictionary mapping each file name to a set of PythonTA message symbols
     (and descriptions if include_msg is True).
     """
@@ -82,6 +87,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
         config={
             "output-format": "python_ta.reporters.JSONReporter",
             "enable": ["C9960"],
+            "z3": z3_option,
         },
     )
 
@@ -128,6 +134,18 @@ def pyta_pycodestyle_symbols() -> dict[str, set[str]]:
     :return: A dictionary mapping file names to sets of PythonTA message symbols and descriptions.
     """
     return _symbols_by_file_pyta([_PYCODESTYLE_PATH], include_msg=True)
+
+
+@pytest.fixture(scope="session")
+def pyta_z3_option_symbols() -> dict[str, set[str]]:
+    """
+    A pytest fixture that runs once per test session.
+    This fixture analyzes checkers with z3 option using python_ta with z3 option set to True
+    and returns a dictionary mapping each file name to the set of PythonTA message symbols and descriptions.
+
+    :return: A dictionary mapping file names to sets of PythonTA message symbols and descriptions.
+    """
+    return _symbols_by_file_pyta([_CHECKER_Z3_OPTION_PATH], include_msg=True, z3_option=True)
 
 
 @pytest.mark.parametrize("test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]))
@@ -181,6 +199,30 @@ def test_pycodestyle_errors_pyta(
     assert any(
         error_code in msg for msg in file_symbols
     ), f"Failed {test_file}. The correct PEP8 error type is not in reported message."
+
+
+@pytest.mark.parametrize("test_file", get_file_paths(_CHECKER_Z3_OPTION_PATH))
+def test_examples_files_z3_option_pyta(
+    test_file: str, pyta_z3_option_symbols: dict[str, set[str]]
+) -> None:
+    """
+    Dynamically creates and runs unit tests for Python files in the examples and custom checker directories.
+    This test function deduces the error type from the file name and checks if the expected error message is present
+    in PythonTA's report.
+    """
+    base_name = os.path.basename(test_file)
+    if not re.match(_EXAMPLE_Z3_REGEX, base_name[:8]):
+        return
+    if not base_name.lower().endswith(".py"):
+        assert False
+    checker_name = base_name[9:-3].replace("_", "-")  # Take off prefix and file extension.
+
+    file_symbols = pyta_z3_option_symbols[base_name]
+
+    found_pylint_message = checker_name in file_symbols
+    assert (
+        found_pylint_message
+    ), f"Failed {test_file}. File does not add expected message  {file_symbols}."
 
 
 def test_c9104_module_name_violation() -> None:

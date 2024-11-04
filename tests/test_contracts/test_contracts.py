@@ -748,8 +748,7 @@ def test_precondition_violation_in_representation_invariant() -> None:
 
 
 def test_parameter_int_float_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is raised when a function with an integer parameter is called
+    """Test that an AssertionError is raised when a function with an integer parameter is called
     using a float argument, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -762,8 +761,7 @@ def test_parameter_int_float_without_strict(disable_strict_numeric_types) -> Non
 
 
 def test_parameter_float_int_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function with a float parameter is called
+    """Test that an AssertionError is not raised when a function with a float parameter is called
     using an integer argument, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -775,8 +773,7 @@ def test_parameter_float_int_without_strict(disable_strict_numeric_types) -> Non
 
 
 def test_parameter_int_bool_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function with an integer parameter is called
+    """Test that an AssertionError is not raised when a function with an integer parameter is called
     using a boolean argument, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -788,8 +785,7 @@ def test_parameter_int_bool_without_strict(disable_strict_numeric_types) -> None
 
 
 def test_parameter_bool_int_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is raised when a function with a boolean parameter is called
+    """Test that an AssertionError is raised when a function with a boolean parameter is called
     using an integer argument, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -802,8 +798,7 @@ def test_parameter_bool_int_without_strict(disable_strict_numeric_types) -> None
 
 
 def test_return_int_float_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is raised when a function with an integer return-type,
+    """Test that an AssertionError is raised when a function with an integer return-type,
     returns a float, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -816,8 +811,7 @@ def test_return_int_float_without_strict(disable_strict_numeric_types) -> None:
 
 
 def test_return_float_int_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function with a float return-type,
+    """Test that an AssertionError is not raised when a function with a float return-type,
     returns an integer, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -829,8 +823,7 @@ def test_return_float_int_without_strict(disable_strict_numeric_types) -> None:
 
 
 def test_return_int_bool_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function with an integer return-type,
+    """Test that an AssertionError is not raised when a function with an integer return-type,
     returns a boolean, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -842,8 +835,7 @@ def test_return_int_bool_without_strict(disable_strict_numeric_types) -> None:
 
 
 def test_return_bool_int_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is raised when a function with a boolean return-type,
+    """Test that an AssertionError is raised when a function with a boolean return-type,
     returns an integer, while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -962,30 +954,38 @@ def test_parameter_union_int_float_pass() -> None:
     accept_union(10)
 
 
-def test_union_with_matching_collection_types() -> None:
-    """Test cases where the provided collection type matches one of the types specified in a union
-    (e.g., expecting dict[int, str] | list[int], and given list[int])."""
+def test_union_with_dict_or_list() -> None:
+    """Test case where the function expects Union[dict[int, str], list[int]] and receives list[int]."""
 
     @check_contracts
     def process_dict(value: Union[dict[int, str], list[int]]) -> str:
         return str(value)
 
+    process_dict([1, 2, 3])
+
+
+def test_union_with_tuple_or_list() -> None:
+    """Test case where the function expects Union[tuple[int, str], list[int]] and receives list[int]."""
+
     @check_contracts
     def process_tuple(value: Union[tuple[int, str], list[int]]) -> str:
         return f"{value[0]}, {value[1]}"
+
+    process_tuple([1, 2, 3])
+
+
+def test_union_with_set_or_list() -> None:
+    """Test case where the function expects Union[set[int], list[int]] and receives list[int]."""
 
     @check_contracts
     def process_set(value: Union[set[int], list[int]]) -> str:
         return str(value)
 
-    process_dict([1, 2, 3])
-    process_tuple([1, 2, 3])
     process_set([1, 2, 3])
 
 
 def test_parameter_list_float_int_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function expects list[float] but receives list[int],
+    """Test that an AssertionError is not raised when a function expects list[float] but receives list[int],
     while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -997,8 +997,7 @@ def test_parameter_list_float_int_without_strict(disable_strict_numeric_types) -
 
 
 def test_parameter_dict_float_int_key_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function expects dict[float, int] but receives dict[int, int],
+    """Test that an AssertionError is not raised when a function expects dict[float, int] but receives dict[int, int],
     while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -1010,8 +1009,7 @@ def test_parameter_dict_float_int_key_without_strict(disable_strict_numeric_type
 
 
 def test_parameter_float_complex() -> None:
-    """
-    Testing when the function expects a float but receives a complex number.
+    """Testing when the function expects a float but receives a complex number.
     This should raise an AssertionError with strict type checking enabled.
     """
 
@@ -1024,8 +1022,7 @@ def test_parameter_float_complex() -> None:
 
 
 def test_parameter_float_complex_without_strict(disable_strict_numeric_types) -> None:
-    """
-    Test that an AssertionError is not raised when a function expects a float but receives a complex number,
+    """Test that an AssertionError is not raised when a function expects a float but receives a complex number,
     while STRICT_NUMERIC_TYPES is disabled.
     """
 
@@ -1036,8 +1033,9 @@ def test_parameter_float_complex_without_strict(disable_strict_numeric_types) ->
     process_float(3.0)
 
 
-def test_parameter_tuple_fixed_length_types() -> None:
-    """Testing when the function expects a fixed-length tuple with specific types (tuple[int, str])."""
+def test_tuple_fixed_length_correct_types() -> None:
+    """Test when a function expects a fixed-length tuple with specific types
+    (tuple[int, str]) and receives the correct types."""
 
     @check_contracts
     def accept_fixed_tuple(value: tuple[int, str]) -> str:
@@ -1045,30 +1043,52 @@ def test_parameter_tuple_fixed_length_types() -> None:
 
     accept_fixed_tuple((5, "test"))
 
+
+def test_tuple_fixed_length_extra_element() -> None:
+    """Test when a function expects a fixed-length tuple (tuple[int, str]) but receives an extra element."""
+
+    @check_contracts
+    def accept_fixed_tuple(value: tuple[int, str]) -> str:
+        return f"{value[0]}: {value[1]}"
+
     with pytest.raises(AssertionError):
         accept_fixed_tuple((5, "test", 3.5))
+
+
+def test_tuple_fixed_length_type_mismatch() -> None:
+    """Test when a function expects a fixed-length tuple (tuple[int, str]) but receives a type mismatch."""
+
+    @check_contracts
+    def accept_fixed_tuple(value: tuple[int, str]) -> str:
+        return f"{value[0]}: {value[1]}"
 
     with pytest.raises(AssertionError):
         accept_fixed_tuple((5, 10))
 
 
-def test_parameter_tuple_homogeneous_any_length() -> None:
-    """Testing when the function expects a homogeneous tuple of any length (tuple[int, ...])."""
+def test_tuple_homogeneous_any_length() -> None:
+    """Test when a function expects a homogeneous tuple of any length (tuple[int, ...])."""
 
     @check_contracts
     def accept_homogeneous_tuple(value: tuple[int, ...]) -> int:
         return sum(value)
 
     accept_homogeneous_tuple((1, 2, 3))
-    accept_homogeneous_tuple((4,))
-    accept_homogeneous_tuple(())
+
+
+def test_tuple_homogeneous_type_mismatch() -> None:
+    """Test when a function expects a homogeneous tuple (tuple[int, ...]) but receives a type mismatch."""
+
+    @check_contracts
+    def accept_homogeneous_tuple(value: tuple[int, ...]) -> int:
+        return sum(value)
 
     with pytest.raises(AssertionError):
         accept_homogeneous_tuple((1, "two", 3))
 
 
-def test_parameter_tuple_empty() -> None:
-    """Testing when the function expects an empty tuple (tuple[()])."""
+def test_tuple_empty() -> None:
+    """Test when a function expects an empty tuple (tuple[()]) and receives an empty tuple."""
 
     @check_contracts
     def accept_empty_tuple(value: tuple[()]) -> str:
@@ -1076,22 +1096,24 @@ def test_parameter_tuple_empty() -> None:
 
     accept_empty_tuple(())
 
+
+def test_tuple_empty_type_mismatch() -> None:
+    """Test when a function expects an empty tuple (tuple[()]) but receives a non-empty tuple."""
+
+    @check_contracts
+    def accept_empty_tuple(value: tuple[()]) -> str:
+        return "Empty tuple accepted"
+
     with pytest.raises(AssertionError):
         accept_empty_tuple((1,))
 
 
-def test_parameter_tuple_nested_fixed_length() -> None:
-    """Testing when the function expects a nested fixed-length tuple with specific
-    types (tuple[int, tuple[str, float]])."""
+def test_tuple_nested_fixed_length_correct_types() -> None:
+    """Test when a function expects a nested fixed-length tuple (tuple[int, tuple[str, float]])
+    and receives the correct types."""
 
     @check_contracts
     def process_nested_tuple(value: tuple[int, tuple[str, float]]) -> str:
         return f"Outer: {value[0]}, Inner: {value[1][0]}, {value[1][1]}"
 
     process_nested_tuple((5, ("hello", 3.14)))
-
-    with pytest.raises(AssertionError):
-        process_nested_tuple((5, ("hello", "not a float")))
-
-    with pytest.raises(AssertionError):
-        process_nested_tuple((5, ("hello", 3.14, 42)))

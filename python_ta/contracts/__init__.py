@@ -331,11 +331,10 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
 
 
 def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
-    """
-    Ensure that `value` matches ``expected_type`` with strict type checking.
+    """Ensure that `value` matches ``expected_type`` with strict type checking.
 
     This function enforces strict type distinctions within the numeric hierarchy (bool, int, float,
-    complex), ensuring that the type of value is exactly the same as expected_type, not merely a subtype.
+    complex), ensuring that the type of value is exactly the same as expected_type.
     """
     if not ENABLE_CONTRACT_CHECKING:
         return
@@ -346,8 +345,7 @@ def check_type_strict(argname: str, value: Any, expected_type: type) -> None:
 
 
 def _check_inner_type(argname: str, value: Any, expected_type: type) -> None:
-    """
-    Recursively checks if `value` matches `expected_type` for strict type validation, specifically supports checking
+    """Recursively checks if `value` matches `expected_type` for strict type validation, specifically supports checking
     collections (list[int], dicts[float]) and Union types (bool | int).
     """
     inner_types = get_args(expected_type)
@@ -391,8 +389,8 @@ def _check_inner_type(argname: str, value: Any, expected_type: type) -> None:
             for item in value:
                 _check_inner_type(argname, item, inner_types[0])
         elif isinstance(value, tuple) and len(value) == len(inner_types):
-            for i, item in enumerate(value):
-                _check_inner_type(argname, item, inner_types[i])
+            for item, inner_type in zip(value, inner_types):
+                _check_inner_type(argname, item, inner_type)
         else:
             raise TypeError(f"type of {argname} must be {expected_type}; got {value} instead")
     else:

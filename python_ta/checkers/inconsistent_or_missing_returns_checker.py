@@ -59,7 +59,11 @@ class InconsistentReturnChecker(BaseChecker):
 
         # get the blocks connected to the end of cfg
         end = node.cfg.end
-        end_blocks = [edge.source for edge in end.predecessors]
+        end_blocks = [
+            edge.source
+            for edge in end.predecessors
+            if not self.linter.config.z3 or edge.is_feasible
+        ]
 
         # gather the return statement of each code block
         return_statements = {}

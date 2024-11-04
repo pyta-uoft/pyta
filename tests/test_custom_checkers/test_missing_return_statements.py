@@ -429,3 +429,21 @@ class TestMissingReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_functiondef(func_node)
+
+    def test_z3_return_not_missing_by_precondition(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 0
+            '''
+            if x > 0:
+                return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)

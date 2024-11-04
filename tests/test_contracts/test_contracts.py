@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Dict, List, Set, Union
+from typing import Dict, Generic, List, Set, TypeVar, Union
 
 import pytest
 from nested_preconditions_example import Student, my_function
@@ -1117,3 +1117,21 @@ def test_tuple_nested_fixed_length_correct_types() -> None:
         return f"Outer: {value[0]}, Inner: {value[1][0]}, {value[1][1]}"
 
     process_nested_tuple((5, ("hello", 3.14)))
+
+
+T = TypeVar("T")
+
+
+class GenericClass(Generic[T]):
+    def __init__(self, item: T):
+        self.item = item
+
+
+def test_custom_generic_class_with_parameter() -> None:
+    """Test that a function expecting GenericClass[int] accepts a valid instance with an int"""
+
+    @check_contracts
+    def process_generic(value: GenericClass[int]) -> int:
+        return value.item
+
+    process_generic(GenericClass(10))

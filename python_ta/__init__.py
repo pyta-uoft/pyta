@@ -136,7 +136,9 @@ def _check(
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(messages_config, linter.config)  # Monkeypatch pylint (override certain methods)
+        patch_all(
+            messages_config, linter.config.z3
+        )  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.

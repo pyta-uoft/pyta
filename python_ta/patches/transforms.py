@@ -7,14 +7,14 @@ from ..cfg.visitor import CFGVisitor
 from ..transforms.z3_visitor import Z3Visitor
 
 
-def patch_ast_transforms(linter_config):
+def patch_ast_transforms(z3: bool):
     old_get_ast = PyLinter.get_ast
 
     def new_get_ast(self, filepath, modname, data):
         ast = old_get_ast(self, filepath, modname, data)
         if ast is not None:
             try:
-                if linter_config.z3:
+                if z3:
                     ast = Z3Visitor().visitor.visit(ast)
                 ast.accept(CFGVisitor())
             except:

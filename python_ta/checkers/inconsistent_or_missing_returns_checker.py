@@ -25,6 +25,17 @@ class InconsistentReturnChecker(BaseChecker):
             "Used when a function does not have a return statement and whose return type is not None",
         ),
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Use Z3 to restrict control flow checks to paths that are logically feasible.",
+            },
+        ),
+    )
 
     def __init__(self, linter: Optional[PyLinter] = None) -> None:
         super().__init__(linter=linter)
@@ -71,6 +82,15 @@ class InconsistentReturnChecker(BaseChecker):
         if has_return_annotation or has_return_value:
             for block, statement in return_statements.items():
                 if statement is None:
+                    # ignore unfeasible edges for missing return if z3 option is on
+                    if self.linter.config.z3 and (
+                        not block.is_feasible
+                        or not any(
+                            edge.is_feasible for edge in block.successors if edge.target is end
+                        )
+                    ):
+                        continue
+
                     # For rendering purpose:
                     # line: the line where the error occurs, used to calculate indentation
                     # end_line: the line to insert the error message

@@ -41,6 +41,17 @@ class RedundantAssignmentChecker(BaseChecker):
             " You can remove the assignment(s) without changing the behaviour of this code.",
         )
     }
+    options = (
+        (
+            "z3",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": "Use Z3 to restrict control flow checks to paths that are logically feasible.",
+            },
+        ),
+    )
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter=linter)
@@ -88,7 +99,7 @@ class RedundantAssignmentChecker(BaseChecker):
         out_facts = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
-        worklist = list(cfg.get_blocks_postorder())
+        worklist = list(cfg.get_blocks_postorder(only_feasible=self.linter.config.z3))
         worklist.reverse()
 
         all_assigns = self._get_assigns(node)
@@ -97,7 +108,11 @@ class RedundantAssignmentChecker(BaseChecker):
 
         while len(worklist) != 0:
             b = worklist.pop()
-            outs = [out_facts[p.target] for p in b.successors if p.target in out_facts]
+            outs = [
+                out_facts[p.target]
+                for p in b.successors
+                if p.target in out_facts and (not self.linter.config.z3 or p.is_feasible)
+            ]
             if outs == []:
                 in_facts = set()
             else:
@@ -105,7 +120,13 @@ class RedundantAssignmentChecker(BaseChecker):
             temp = self._transfer(b, in_facts)
             if b in out_facts and temp != out_facts[b]:
                 out_facts[b] = temp
-                worklist.extend([pred.source for pred in b.predecessors if pred.source.reachable])
+                worklist.extend(
+                    [
+                        pred.source
+                        for pred in b.predecessors
+                        if pred.source.reachable and (not self.linter.config.z3 or pred.is_feasible)
+                    ]
+                )
 
     def _transfer(self, block: CFGBlock, out_facts: set[str]) -> set[str]:
         gen = out_facts.copy()

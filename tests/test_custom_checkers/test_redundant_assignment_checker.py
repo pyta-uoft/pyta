@@ -4,6 +4,7 @@ from astroid import nodes
 
 from python_ta.cfg import CFGVisitor
 from python_ta.checkers.redundant_assignment_checker import RedundantAssignmentChecker
+from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
@@ -334,3 +335,57 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_assign(assign_node)
+
+
+class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = RedundantAssignmentChecker
+    CONFIG = {"z3": True}
+
+    def test_z3_unfeasible_variable_use(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            a = 10
+            if x < 5:
+                print(a)
+            a = 20
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        assign_1, *_ = mod.nodes_of_class(nodes.Assign)
+
+        self.checker.visit_functiondef(mod.body[0])
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1, args="a"),
+            ignore_position=True,
+        ):
+            self.checker.visit_assign(assign_1)
+
+    def test_z3_redundant_reassignment_by_precondition(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            a = 10
+            if x > 0:
+                a = 20
+            return a
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        assign_1, _ = mod.nodes_of_class(nodes.Assign)
+
+        self.checker.visit_functiondef(mod.body[0])
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-assignment", node=assign_1, args="a"),
+            ignore_position=True,
+        ):
+            self.checker.visit_assign(assign_1)

@@ -28,6 +28,7 @@ class SnapshotTracer:
     open_webstepper: bool
     _snapshot_to_line: dict[int, int]
     _snapshot_args: dict[str, Any]
+    _saved_files: list[str]
 
     def __init__(
         self, output_directory: Optional[str] = None, open_webstepper: bool = False, **kwargs
@@ -49,32 +50,30 @@ class SnapshotTracer:
         self._snapshot_args = kwargs
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
         self._snapshot_counts = 0
+        self._saved_file_names = []
         self.output_directory = output_directory if output_directory else "."
         self.open_webstepper = open_webstepper
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
         if event == "line" and frame.f_locals:
-            self._snapshot_args["memory_viz_args"].extend(
-                [
-                    "--output",
-                    os.path.join(
-                        os.path.abspath(self.output_directory),
-                        f"snapshot-{self._snapshot_counts}.svg",
-                    ),
-                ]
+            filename = os.path.join(
+                os.path.abspath(self.output_directory),
+                f"snapshot-{self._snapshot_counts}.svg",
             )
+            self._snapshot_args["memory_viz_args"].extend(["--output", filename])
+
             snapshot(
                 save=True,
                 **self._snapshot_args,
             )
+
+            self._saved_file_names.append(filename)
             self._snapshot_to_line[self._snapshot_counts] = {"lineNumber": frame.f_lineno}
             self._snapshot_counts += 1
 
     def _output_svg_to_js(self):
-        svg_directory = os.listdir(self.output_directory)
-
-        for filename in svg_directory:
+        for filename in self._saved_file_names:
             path = os.path.join(self.output_directory, filename)
             # TODO: maybe there is a better way to do this
             snapshot_number = int(re.search(r"snapshot-(\d+)\.svg", filename).group(1))

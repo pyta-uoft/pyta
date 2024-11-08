@@ -82,7 +82,8 @@ class SnapshotTracer:
                 svg = file.read()
                 self._snapshot_to_line[snapshot_number]["svg"] = svg
 
-        with open("lineToSnapshot.js", "w") as file:
+        jsPath = os.path.join(os.path.abspath(self.output_directory), "lineToSnapshot.js")
+        with open(jsPath, "w") as file:
             line = f"window.svgArray = {json.dumps(self._snapshot_to_line)}"
             file.write(line)
 

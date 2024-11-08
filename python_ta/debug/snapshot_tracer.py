@@ -57,9 +57,14 @@ class SnapshotTracer:
         self._saved_file_names = []
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
         self.open_webstepper = open_webstepper
+        self._correct_line_numbers = []
+        self._first_line = float("inf")
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
+        if self._first_line == float("inf"):
+            self._first_line = frame.f_lineno
+        self._correct_line_numbers.append(frame.f_lineno - self._first_line + 1)
         if event == "line" and frame.f_locals:
             filename = os.path.join(
                 self.output_directory,
@@ -73,7 +78,9 @@ class SnapshotTracer:
             )
 
             self._saved_file_names.append(filename)
-            self._snapshot_to_line[self._snapshot_counts] = {"lineNumber": frame.f_lineno}
+            self._snapshot_to_line[self._snapshot_counts] = {
+                "lineNumber": self._correct_line_numbers[self._snapshot_counts]
+            }
             self._snapshot_counts += 1
 
     def __enter__(self):

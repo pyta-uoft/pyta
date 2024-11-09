@@ -98,18 +98,11 @@ class SnapshotTracer:
             self._open_webstepper()
 
     def _open_webstepper(self):
-        self._copy_webstepper_bundle()
+        self._webstepper_folder = os.path.join(self.output_directory, "webstepper")
+        os.makedirs(self._webstepper_folder, exist_ok=True)
         self._generate_svg_array_js()
         self._insert_svg_array_js_to_index()
         self._open_html()
-
-    def _copy_webstepper_bundle(self):
-        # TODO: we shouldn't copy the whole thing, this is a temporary solution
-        # The other way is to only copy the html file, but we need to change the
-        # script imports to absolute paths. Browser blocks that
-        source_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "webstepper")
-        destination_dir = os.path.join(self.output_directory, "webstepper")
-        shutil.copytree(source_dir, destination_dir, dirs_exist_ok=True)
 
     def _generate_svg_array_js(self):
         for svg_filename in self._saved_file_names:
@@ -120,7 +113,7 @@ class SnapshotTracer:
                 svg_content = svg_file.read()
                 self._snapshot_to_line[snapshot_number]["svg"] = svg_content
 
-        svg_array_js_path = os.path.join(self.output_directory, "webstepper", "lineToSnapshot.js")
+        svg_array_js_path = os.path.join(self._webstepper_folder, "lineToSnapshot.js")
         with open(svg_array_js_path, "w") as svg_array_js_file:
             svg_array_js_content = f"window.svgArray = {json.dumps(self._snapshot_to_line)}"
             svg_array_js_file.write(svg_array_js_content)
@@ -140,8 +133,10 @@ class SnapshotTracer:
             BeautifulSoup(f'<script src="lineToSnapshot.js"></script>\n', "html.parser")
         )
 
-        destination_dir = os.path.join(self.output_directory, "webstepper")
-        modified_index_html = os.path.join(destination_dir, "index.html")
+        original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
+        script_tags[0]["src"] = os.path.relpath(original_js_bundle, self._webstepper_folder)
+
+        modified_index_html = os.path.join(self._webstepper_folder, "index.html")
         with open(modified_index_html, "w") as file:
             file.write(str(soup))
 

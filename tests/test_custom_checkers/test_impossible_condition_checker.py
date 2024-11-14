@@ -9,18 +9,18 @@ from python_ta.checkers.redundant_or_impossible_condition_checker import (
 from python_ta.transforms.z3_visitor import Z3Visitor
 
 
-class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
+class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = RedundantOrImpossibleConditionChecker
     CONFIG = {"z3": True}
 
-    def test_redundant_by_precondition(self):
+    def test_impossible_by_precondition(self):
         src = """
-        def func(x: int):
+        def func(x: float):
             '''
             Preconditions:
-                - x > 10
+                - x > 5.0
             '''
-            if x > 5:
+            if x < 0.0:
                 print(x)
         """
         z3v = Z3Visitor()
@@ -29,16 +29,16 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         condition_node, *_ = mod.nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
 
-    def test_redundant_by_if_condition(self):
+    def test_impossible_by_if_condition(self):
         src = """
         def func(x: int):
             if x > 5:
-                if x > 3:
+                if x < 3:
                     print(x)
         """
         z3v = Z3Visitor()
@@ -47,41 +47,36 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         *_, condition_node = mod.nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
 
-    def test_redundant_by_while_condition(self):
+    def test_impossible_conditional_statement(self):
         src = """
         def func(x: int):
-            '''
-            Preconditions:
-                - x > 10
-            '''
-            while x > 0:
-                if x != 0:
-                    print(x)
+            if x > 0 and x < 0:
+                print("impossible")
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
         mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        *_, condition_node = mod.nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
 
-    def test_redundant_if_else(self):
+    def test_impossible_if_else(self):
         src = """
         def func(x: int):
             '''
             Preconditions:
                 - x > 0
             '''
-            if x <= 0:
+            if x > 0:
                 return x
             else:
                 return 0
@@ -92,12 +87,34 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         *_, condition_node = mod.nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
 
-    def test_redundant_condition_multiple_if_else(self):
+    def test_impossible_by_while_condition(self):
+        src = """
+        def func(x: int):
+            '''
+            Preconditions:
+                - x > 10
+            '''
+            while x > 0:
+                if x < 0:
+                    print(x)
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        condition_node, *_ = mod.nodes_of_class(nodes.If)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
+    def test_impossible_condition_multiple_if_else(self):
         src = """
         def func(x: int):
             '''
@@ -108,7 +125,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
                 print(1)
             elif x == 2:
                 print(2)
-            elif x != 2:
+            elif x == 4:
                 print(2)
             elif x == 3:
                 print(3)
@@ -121,19 +138,48 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         _, _, condition_node, _ = mod.nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
 
-    def test_not_redundant_condition(self):
+    def test_impossible_condition_repeat_checking_if_else(self):
+        src = """
+        def func(x: int):
+            '''
+            Preconditions:
+                - x in {1, 2, 3}
+            '''
+            if x == 1:
+                print(1)
+            elif x == 2:
+                print(2)
+            elif x == 2:
+                print(2)
+            elif x == 3:
+                print(3)
+            else:
+                print(0)
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        _, _, condition_node, _ = mod.nodes_of_class(nodes.If)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
+    def test_possible_condition(self):
         src = """
         def func(x: str):
             '''
             Preconditions:
                 - x[0:2] == "ab"
             '''
-            if x != "abc":
+            if x == "abc":
                 print(x)
         """
         z3v = Z3Visitor()
@@ -144,14 +190,14 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
 
-    def test_partially_redundant_condition(self):
+    def test_partially_impossible_condition(self):
         src = """
         def func(x: int):
             '''
             Preconditions:
-                - x > 10
+                - x > 5
             '''
-            if x > 10 and x < 15:
+            if x > 10 or x < 5:
                 print(x)
         """
         z3v = Z3Visitor()
@@ -162,7 +208,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
 
-    def test_redundant_condition_variable_reassignment(self):
+    def test_impossible_condition_variable_reassignment(self):
         src = """
         def func(x: int, y: bool):
             '''
@@ -171,7 +217,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             '''
             if not y:
                 x = -1
-            if x > 0:
+            if x < 0:
                 print(x)
         """
         z3v = Z3Visitor()
@@ -182,14 +228,14 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
 
-    def test_redundant_condition_partial_path(self):
+    def test_impossible_condition_partial_path(self):
         src = """
         def func(x: int):
             if x > 5:
                 print(x)
             else:
                 print(x)
-            if x > 0:
+            if x < 0:
                 print(x)
         """
         z3v = Z3Visitor()
@@ -200,7 +246,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
 
-    def test_not_redundant_by_reassignment(self):
+    def test_not_impossible_by_reassignment(self):
         src = """
         def func(x: float):
             '''
@@ -208,7 +254,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
                 - x in [1.0, 2.0]
             '''
             x = None
-            if x == 1.0 or x == 2.0:
+            if x == 3.0:
                 print(x)
         """
         z3v = Z3Visitor()

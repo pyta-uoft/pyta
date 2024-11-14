@@ -20,6 +20,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 💫 New checkers
 
 - `unmentioned-parameter`: Provide error message when a function parameter is not mentioned by name in the function's docstring. By default, this checker is disabled.
+- `redundant-condition`: Provide error message when a conditional statement within a function is guaranteed true given the precedent statements. This checker is enabled only when `z3` option is turned on.
+- `impossible-condition`: Provide error message when a conditional statement within a function contradicts the precedent statements. This checker is enabled only when `z3` option is turned on.
 
 ### 🐛 Bug fixes
 

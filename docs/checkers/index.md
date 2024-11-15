@@ -2729,7 +2729,7 @@ condtional statement or program control flow leading to the conditional statemen
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/r9900_impossible_condition.py
+```{literalinclude} /../examples/custom_checkers/r9901_impossible_condition.py
 
 ```
 

@@ -64,7 +64,11 @@ class RedundantOrImpossibleConditionChecker(BaseChecker):
         """A condition statement is redundant if for every feasible execution path
         leading to the node, the condition must be True by precedent constraints.
         """
-        if not z3_dependency_available or not hasattr(node, "cfg_block"):
+        if (
+            not hasattr(node, "cfg_block")
+            or not z3_dependency_available
+            or not self.linter.config.z3
+        ):
             return
 
         node_block = node.cfg_block
@@ -110,5 +114,4 @@ def register(linter: PyLinter) -> None:
     """Required method to auto-register this checker to the linter,
     Register the linter only if `z3` option is turned on.
     """
-    if linter.config.z3:
-        linter.register_checker(RedundantOrImpossibleConditionChecker(linter))
+    linter.register_checker(RedundantOrImpossibleConditionChecker(linter))

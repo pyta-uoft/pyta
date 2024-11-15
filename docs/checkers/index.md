@@ -2699,6 +2699,50 @@ python_ta.check_all(config={
 })
 ```
 
+(R9900)=
+
+### Redundant Condition (R9900)
+
+This error occurs when an `if` or `while` condition is guaranteed to be true given the program control flow leading
+to the conditional statement.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/r9900_redundant_condition.py
+
+```
+
+This error will only be checked if `z3` dependency is install and `z3` option of PythonTA
+is turned on:
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "z3": True
+})
+```
+
+### Impossible Condition (R9901)
+
+This error occurs when an `if` or `while` condition is always false either due to either contradictions within the
+condtional statement or program control flow leading to the conditional statement.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/r9900_impossible_condition.py
+
+```
+
+This error will only be checked if `z3` dependency is install and `z3` option of PythonTA
+is turned on:
+
+```python
+import python_ta
+python_ta.check_all(config={
+    "z3": True
+})
+```
+
 ## Miscellaneous
 
 (E1305)=

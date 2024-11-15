@@ -5,8 +5,6 @@ def return_large_number(x: int) -> int:
     """
     if x > 1000:
         return x
-    else:   # the else branch is redundant given the function preconditions
-        return 1000
 
 
 def nested_condition(x: int) -> int:

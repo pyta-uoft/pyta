@@ -14,6 +14,8 @@ from typing import Any, Optional
 
 from bs4 import BeautifulSoup
 
+from python_ta.debug import accumulation_table
+
 from .snapshot import snapshot
 
 
@@ -59,6 +61,7 @@ class SnapshotTracer:
         self.open_webstepper = open_webstepper
         self._correct_line_numbers = []
         self._first_line = float("inf")
+        self._code_string = ""
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
@@ -100,9 +103,27 @@ class SnapshotTracer:
     def _open_webstepper(self):
         self._webstepper_folder = os.path.join(self.output_directory, "webstepper")
         os.makedirs(self._webstepper_folder, exist_ok=True)
+        self._get_code()
         self._generate_svg_array_js()
         self._insert_svg_array_js_to_index()
         self._open_html()
+
+    def _get_code(self):
+        frame = inspect.getouterframes(
+            inspect.getouterframes(inspect.getouterframes(inspect.currentframe())[1].frame)[1].frame
+        )[1].frame
+
+        code_string = inspect.cleandoc(inspect.getsource(frame))
+        i = self._first_line - frame.f_code.co_firstlineno
+        lst_str_lines = code_string.splitlines()
+        lst_from_with_stmt = lst_str_lines[i:]
+
+        # assumes that the first line will always be at the outermost level of indentation
+        # this may not be the best way to do this
+        num_whitespace = accumulation_table.num_whitespaces(lst_from_with_stmt[0])
+
+        for line in lst_from_with_stmt:
+            self._code_string += line[num_whitespace:] + "\n"
 
     def _generate_svg_array_js(self):
         for svg_filename in self._saved_file_names:
@@ -131,6 +152,12 @@ class SnapshotTracer:
         script_tags = soup.select("script")
         script_tags[0].insert_before(
             BeautifulSoup(f'<script src="lineToSnapshot.js"></script>\n', "html.parser")
+        )
+
+        script_tags[0].insert_before(
+            BeautifulSoup(
+                f"<script> window.codeText=`{self._code_string}` </script>\n", "html.parser"
+            )
         )
 
         original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")

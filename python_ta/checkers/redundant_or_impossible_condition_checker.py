@@ -2,7 +2,7 @@
 Check for redundant If or While conditions in functions based on z3 constraints
 """
 
-from typing import Any
+from typing import Any, Union
 
 try:
     import z3
@@ -60,7 +60,7 @@ class RedundantOrImpossibleConditionChecker(BaseChecker):
         """Visit while statement"""
         self._check_condition(node)
 
-    def _check_condition(self, node: nodes.If | nodes.While) -> None:
+    def _check_condition(self, node: Union[nodes.If, nodes.While]) -> None:
         """A condition statement is redundant if for every feasible execution path
         leading to the node, the condition must be True by precedent constraints.
         """

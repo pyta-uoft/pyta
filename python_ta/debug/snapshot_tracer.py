@@ -14,8 +14,6 @@ from typing import Any, Optional
 
 from bs4 import BeautifulSoup
 
-from python_ta.debug import accumulation_table
-
 from .snapshot import snapshot
 
 
@@ -118,12 +116,22 @@ class SnapshotTracer:
         lst_str_lines = code_string.splitlines()
         lst_from_with_stmt = lst_str_lines[i:]
 
-        # assumes that the first line will always be at the outermost level of indentation
-        # this may not be the best way to do this
-        num_whitespace = accumulation_table.num_whitespaces(lst_from_with_stmt[0])
+        num_whitespace = 0
+        for char in lst_from_with_stmt[0]:
+            if char.isspace():
+                num_whitespace += 1
+            else:
+                break
 
-        for line in lst_from_with_stmt:
-            self._code_string += line[num_whitespace:] + "\n"
+        endpoint = len(lst_from_with_stmt)
+        for i in range(len(lst_from_with_stmt)):
+            line = lst_from_with_stmt[i]
+            if line.strip() != "" and not line[:num_whitespace].isspace():
+                break
+            lst_from_with_stmt[i] = line[num_whitespace:]
+            endpoint = i
+
+        self._code_string = "\n".join(lst_from_with_stmt[:endpoint])
 
     def _generate_svg_array_js(self):
         for svg_filename in self._saved_file_names:

@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -e .[dev,cfg,z3,beautifulsoup4]
+          pip install -e .[dev,cfg,z3]
       - name: Run tests
         run: |
           pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --ignore=tests/test_type_constraints --ignore=tests/test_type_inference tests --ignore=tests/test_debug/test_accumulation_table.py --ignore=tests/test_debug/test_recursion_table.py --ignore=tests/test_debug/test_snapshot_tracer.py
@@ -83,6 +83,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -e .[dev,cfg,z3,beautifulsoup4]
+          pip install -e .[dev,cfg,z3]
       - name: Generate docs
         run: sphinx-build -b html -W docs docs/_build

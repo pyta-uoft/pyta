@@ -45805,14 +45805,12 @@
                   s = { type: "text", value: "".concat(t, "\n") }
                 if (0 === a) {
                   var l = _(
-                    d
-                      .slice(p + 1, m)
-                      .concat(
-                        Di({
-                          children: [s],
-                          className: e.properties.className,
-                        }),
-                      ),
+                    d.slice(p + 1, m).concat(
+                      Di({
+                        children: [s],
+                        className: e.properties.className,
+                      }),
+                    ),
                     i,
                   )
                   u.push(l)

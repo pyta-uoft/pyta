@@ -99,11 +99,12 @@ class SnapshotTracer:
             self._open_webstepper()
 
     def _open_webstepper(self):
+        """Open Webstepper with the results of the SnapshotTracer run"""
         self._webstepper_folder = os.path.join(self.output_directory, "webstepper")
         os.makedirs(self._webstepper_folder, exist_ok=True)
         self._get_code()
-        self._generate_svg_array_js()
-        self._insert_svg_array_js_to_index()
+        self._generate_svg_array()
+        self._insert_svg_array_to_index()
         self._open_html()
 
     def _get_code(self):
@@ -133,7 +134,8 @@ class SnapshotTracer:
 
         self._code_string = "\n".join(lst_from_with_stmt[:endpoint])
 
-    def _generate_svg_array_js(self):
+    def _generate_svg_array(self):
+        """Generate the JavaScript array for SVG snapshots."""
         for svg_filename in self._saved_file_names:
             svg_file_path = os.path.join(self.output_directory, svg_filename)
             snapshot_number = int(re.search(r"snapshot-(\d+)\.svg", svg_filename).group(1))
@@ -142,12 +144,8 @@ class SnapshotTracer:
                 svg_content = svg_file.read()
                 self._snapshot_to_line[snapshot_number]["svg"] = svg_content
 
-        svg_array_js_path = os.path.join(self._webstepper_folder, "lineToSnapshot.js")
-        with open(svg_array_js_path, "w") as svg_array_js_file:
-            svg_array_js_content = f"window.svgArray = {json.dumps(self._snapshot_to_line)}"
-            svg_array_js_file.write(svg_array_js_content)
-
-    def _insert_svg_array_js_to_index(self):
+    def _insert_svg_array_to_index(self):
+        """Insert the SVG array into the Webstepper index HTML."""
         current_dir = os.path.dirname(os.path.abspath(__file__))
         original_index_html = os.path.join(current_dir, "webstepper", "index.html")
 
@@ -159,7 +157,10 @@ class SnapshotTracer:
 
         script_tags = soup.select("script")
         script_tags[0].insert_before(
-            BeautifulSoup(f'<script src="lineToSnapshot.js"></script>\n', "html.parser")
+            BeautifulSoup(
+                f"<script>window.svgArray = {json.dumps(self._snapshot_to_line)}</script>\n",
+                "html.parser",
+            )
         )
 
         script_tags[0].insert_before(
@@ -176,5 +177,6 @@ class SnapshotTracer:
             file.write(str(soup))
 
     def _open_html(self):
+        """Open the generated HTML file in a web browser."""
         index_html = f"file://{os.path.join(self.output_directory, 'webstepper', 'index.html')}"
         webbrowser.open(index_html, new=2)

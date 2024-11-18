@@ -131,7 +131,7 @@ class SnapshotTracer:
             lst_from_with_stmt[i] = line[num_whitespace:]
             endpoint = i
 
-        self._code_string = "\n".join(lst_from_with_stmt[:endpoint])
+        self._code_string = "\n".join(lst_from_with_stmt[: endpoint + 1])
 
     def _generate_svg_array_js(self):
         for svg_filename in self._saved_file_names:

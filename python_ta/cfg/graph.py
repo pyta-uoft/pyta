@@ -358,6 +358,7 @@ class CFGBlock:
         self.predecessors = []
         self.successors = []
         self.reachable = False
+        self.z3_constraint = None
 
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():

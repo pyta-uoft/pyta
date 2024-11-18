@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import re
-import shutil
 import sys
 import types
 import webbrowser
@@ -66,7 +65,7 @@ class SnapshotTracer:
         if self._first_line == float("inf"):
             self._first_line = frame.f_lineno
         self._correct_line_numbers.append(frame.f_lineno - self._first_line + 1)
-        if event == "line" and frame.f_locals:
+        if event == "line":
             filename = os.path.join(
                 self.output_directory,
                 f"snapshot-{self._snapshot_counts}.svg",
@@ -132,7 +131,7 @@ class SnapshotTracer:
             lst_from_with_stmt[i] = line[num_whitespace:]
             endpoint = i
 
-        self._code_string = "\n".join(lst_from_with_stmt[:endpoint])
+        self._code_string = "\n".join(lst_from_with_stmt[: endpoint + 1])
 
     def _generate_svg_array(self):
         """Generate the JavaScript array for SVG snapshots."""

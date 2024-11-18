@@ -290,10 +290,10 @@ class ControlFlowGraph:
                         z3_environment.add_constraint(
                             Not(condition_z3_constraint) if edge.negate else condition_z3_constraint
                         )
-                    # add z3 constraint to the CFG block of condition node
-                    edge.source.z3_constraint = z3_environment.assign_constraint(
-                        condition_z3_constraint
-                    )
+                        # add z3 constraint to the CFG block of condition node
+                        edge.source.z3_constraint = z3_environment.assign_constraint(
+                            condition_z3_constraint
+                        )
 
                 # update edge z3 constraints
                 edge.z3_constraints[path_id] = z3_environment.assign_current_constraints()

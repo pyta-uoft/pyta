@@ -82,6 +82,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
         config={
             "output-format": "python_ta.reporters.JSONReporter",
             "enable": ["C9960"],
+            "z3": True,
         },
     )
 

@@ -25,6 +25,7 @@ class SnapshotTracer:
         open_webstepper: Opens the web-based visualizer.
         _snapshot_to_line: A list of dictionaries that maps the code line number and the snapshot number.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
+        _first_line: Line number of the first line in the `with` block.
     """
 
     output_directory: Optional[str]
@@ -54,14 +55,12 @@ class SnapshotTracer:
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
         self.open_webstepper = open_webstepper
-        self._correct_line_numbers = []
         self._first_line = float("inf")
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
         if self._first_line == float("inf"):
             self._first_line = frame.f_lineno
-        self._correct_line_numbers.append(frame.f_lineno - self._first_line + 1)
         if event == "line":
             filename = os.path.join(
                 self.output_directory,
@@ -74,14 +73,15 @@ class SnapshotTracer:
                 **self._snapshot_args,
             )
 
-            self._add_svg_to_map(filename)
+            line_number = frame.f_lineno - self._first_line + 1
+            self._add_svg_to_map(filename, line_number)
 
-    def _add_svg_to_map(self, filename: str) -> None:
+    def _add_svg_to_map(self, filename: str, line: int) -> None:
         """Add the SVG in filename to self._snapshot_to_line"""
         with open(filename) as svg_file:
             svg_content = svg_file.read()
             self._snapshot_to_line[len(self._snapshot_to_line)] = {
-                "lineNumber": self._correct_line_numbers[len(self._snapshot_to_line)],
+                "lineNumber": line,
                 "svg": svg_content,
             }
 

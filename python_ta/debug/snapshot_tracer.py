@@ -22,8 +22,8 @@ class SnapshotTracer:
 
     Instance attributes:
         output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
-        open_webstepper: Opens the web-based visualizer
-        _snapshot_to_line: A list of dictionaries that maps the code line number and the snapshot number
+        open_webstepper: Opens the web-based visualizer.
+        _snapshot_to_line: A list of dictionaries that maps the code line number and the snapshot number.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
     """
 
@@ -41,6 +41,7 @@ class SnapshotTracer:
         Args:
             output_directory: The directory to save the snapshots, defaulting to the current directory.
                 **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.
+            open_webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):

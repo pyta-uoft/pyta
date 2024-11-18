@@ -53,8 +53,6 @@ class SnapshotTracer:
         self._snapshot_to_line = {}
         self._snapshot_args = kwargs
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
-        self._snapshot_counts = 0
-        self._saved_file_names = []
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
         self.open_webstepper = open_webstepper
         self._correct_line_numbers = []
@@ -69,7 +67,7 @@ class SnapshotTracer:
         if event == "line":
             filename = os.path.join(
                 self.output_directory,
-                f"snapshot-{self._snapshot_counts}.svg",
+                f"snapshot-{len(self._snapshot_to_line)}.svg",
             )
             self._snapshot_args["memory_viz_args"].extend(["--output", filename])
 
@@ -78,41 +76,36 @@ class SnapshotTracer:
                 **self._snapshot_args,
             )
 
-            self._saved_file_names.append(filename)
-            self._snapshot_to_line[self._snapshot_counts] = {
-                "lineNumber": self._correct_line_numbers[self._snapshot_counts]
-            }
-            self._snapshot_counts += 1
+            self._add_svg_to_map(filename)
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
-        func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
-        func_frame.f_trace = self._trace_func
+        self._func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
+        self._func_frame.f_trace = self._trace_func
         sys.settrace(lambda *_args: None)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Remove the trace function."""
+        """Remove the trace function and run any post-tracing functions."""
         sys.settrace(None)
-        inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None
+        self._func_frame.f_trace = None
         if self.open_webstepper:
-            self._open_webstepper()
+            self._build_result_html()
+            self._open_html()
 
-    def _open_webstepper(self) -> None:
-        """Open Webstepper with the results of the SnapshotTracer run"""
-        self._get_code()
-        self._generate_svg_array()
-        self._insert_svg_array_to_index()
-        self._open_html()
+    def _add_svg_to_map(self, filename: str) -> None:
+        """Add the SVG in filename to self._snapshot_to_line"""
+        with open(filename) as svg_file:
+            svg_content = svg_file.read()
+            self._snapshot_to_line[len(self._snapshot_to_line)] = {
+                "lineNumber": self._correct_line_numbers[len(self._snapshot_to_line)],
+                "svg": svg_content,
+            }
 
-    def _get_code(self) -> None:
+    def _get_code(self) -> str:
         """Retrieve and save the code string to be displayed in Webstepper."""
-        frame = inspect.getouterframes(
-            inspect.getouterframes(inspect.getouterframes(inspect.currentframe())[1].frame)[1].frame
-        )[1].frame
-
-        code_string = inspect.cleandoc(inspect.getsource(frame))
-        i = self._first_line - frame.f_code.co_firstlineno
+        code_string = inspect.cleandoc(inspect.getsource(self._func_frame))
+        i = self._first_line - self._func_frame.f_code.co_firstlineno
         lst_str_lines = code_string.splitlines()
         lst_from_with_stmt = lst_str_lines[i:]
 
@@ -131,46 +124,40 @@ class SnapshotTracer:
             lst_from_with_stmt[i] = line[num_whitespace:]
             endpoint = i
 
-        self._code_string = "\n".join(lst_from_with_stmt[: endpoint + 1])
+        return "\n".join(lst_from_with_stmt[: endpoint + 1])
 
-    def _generate_svg_array(self) -> None:
-        """Generate the JavaScript array for SVG snapshots."""
-        for svg_filename in self._saved_file_names:
-            svg_file_path = os.path.join(self.output_directory, svg_filename)
-            snapshot_number = int(re.search(r"snapshot-(\d+)\.svg", svg_filename).group(1))
-
-            with open(svg_file_path) as svg_file:
-                svg_content = svg_file.read()
-                self._snapshot_to_line[snapshot_number]["svg"] = svg_content
-
-    def _insert_svg_array_to_index(self) -> None:
-        """Insert the SVG array into the Webstepper index HTML."""
+    def _build_result_html(self) -> None:
+        """Build and write the Webstepper html to the output directory"""
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        original_index_html = os.path.join(current_dir, "webstepper", "index.html")
 
-        with open(original_index_html, "r") as file:
-            lines = file.readlines()
-
-        html_content = "".join(lines)
+        html_content = self._read_original_html(current_dir)
         soup = BeautifulSoup(html_content, "html.parser")
 
-        script_tags = soup.select("script")
-        script_tags[0].insert_before(
-            BeautifulSoup(
-                f"<script>window.svgArray = {json.dumps(self._snapshot_to_line)}</script>\n",
-                "html.parser",
-            )
-        )
+        self._modify_bundle_import_path(current_dir, soup)
+        self._insert_data(soup)
+        self._write_generated_html(soup)
 
-        script_tags[0].insert_before(
-            BeautifulSoup(
-                f"<script> window.codeText=`{self._code_string}` </script>\n", "html.parser"
-            )
-        )
+    def _read_original_html(self, current_dir: str) -> None:
+        """Read the original Webstepper html"""
+        original_index_html = os.path.join(current_dir, "webstepper", "index.html")
+        with open(original_index_html, "r") as file:
+            html_content = file.read()
+        return html_content
 
+    def _modify_bundle_import_path(self, current_dir: str, soup: BeautifulSoup) -> None:
+        """Modify the bundle path to the absolute path to the bundle"""
         original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
-        script_tags[0]["src"] = os.path.relpath(original_js_bundle, self.output_directory)
+        soup.select("script")[0]["src"] = os.path.relpath(original_js_bundle, self.output_directory)
 
+    def _insert_data(self, soup: BeautifulSoup) -> None:
+        """Insert the SVG array and code string into the Webstepper index HTML."""
+        code_script = f"<script>window.codeText=`{self._get_code()}` </script>\n"
+        svg_script = f"<script>window.svgArray={json.dumps(self._snapshot_to_line)}</script>\n"
+        soup.select("script")[0].insert_before(BeautifulSoup(code_script, "html.parser"))
+        soup.select("script")[0].insert_before(BeautifulSoup(svg_script, "html.parser"))
+
+    def _write_generated_html(self, soup: BeautifulSoup) -> None:
+        """Write the generated Webstepper html to the output directory"""
         modified_index_html = os.path.join(self.output_directory, "index.html")
         with open(modified_index_html, "w") as file:
             file.write(str(soup))

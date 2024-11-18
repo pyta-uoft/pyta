@@ -21,6 +21,7 @@ dependencies = [
     "typeguard >= 4.1.0, < 5",
     "wrapt >= 1.15.0, < 2",
     "black",
+    "beautifulsoup4"
 ]
 dynamic = ["version"]
 requires-python = ">=3.9"

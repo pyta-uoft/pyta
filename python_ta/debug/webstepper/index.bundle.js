@@ -46290,7 +46290,6 @@
               lineProps: function (e) {
                 if (e == t.highlightLine)
                   return { className: "code-box__line--highlighted" }
-                console.log(e), console.log(t.highlightLine)
               },
             },
             t.text,
@@ -46302,7 +46301,26 @@
         for (var n = 0, r = Array(t); n < t; n++) r[n] = e[n]
         return r
       }
-      function Vi() {
+      function Vi(e) {
+        return (
+          (Vi =
+            "function" == typeof Symbol && "symbol" == typeof Symbol.iterator
+              ? function (e) {
+                  return typeof e
+                }
+              : function (e) {
+                  return e &&
+                    "function" == typeof Symbol &&
+                    e.constructor === Symbol &&
+                    e !== Symbol.prototype
+                    ? "symbol"
+                    : typeof e
+                }),
+          Vi(e)
+        )
+      }
+      function ji() {
+        "undefined" == typeof window || Vi(window)
         var t = (function (e, t) {
             return (
               (function (e) {
@@ -46374,9 +46392,10 @@
           })((0, e.useState)(0), 2),
           n = t[0],
           r = t[1],
-          a = Object.keys(window.svgArray).length,
-          o = function (e) {
-            r(Math.min(Math.max(e, 0), a - 1))
+          a = window.codeText,
+          o = Object.keys(window.svgArray).length,
+          i = function (e) {
+            r(Math.min(Math.max(e, 0), o - 1))
           }
         return e.createElement(
           "main",
@@ -46389,17 +46408,12 @@
               Fr,
               { sx: { width: "40%" } },
               e.createElement("h2", null, "Code"),
-              e.createElement(
-                Kr,
-                null,
-                "Line: ",
-                window.svgArray[n].lineNumber,
-              ),
+              e.createElement(Kr, null, "Step ", n + 1, "/", o),
               e.createElement(
                 Fr,
                 { className: "code-display" },
                 e.createElement(Hi, {
-                  text: "nums = [1, 2, 3]\n    for i in range(len(nums)):\n        if i == 0:\n            nums[i] = nums[i] + 1\n        else:\n            nums[i] = nums[i] * 2",
+                  text: a,
                   startingLineNumber: Number(window.svgArray[0].lineNumber),
                   highlightLine: Number(window.svgArray[n].lineNumber),
                 }),
@@ -46409,8 +46423,9 @@
                   e.createElement(
                     ja,
                     {
+                      disabled: 0 === n,
                       onClick: function () {
-                        return o(n - 1)
+                        return i(n - 1)
                       },
                     },
                     "Back",
@@ -46418,8 +46433,9 @@
                   e.createElement(
                     ja,
                     {
+                      disabled: n === o - 1,
                       onClick: function () {
-                        return o(n + 1)
+                        return i(n + 1)
                       },
                     },
                     "Next",
@@ -46436,26 +46452,26 @@
           ),
         )
       }
-      var ji = a(2265),
-        Wi = {}
-      ;(Wi.styleTagTransform = ci()),
-        (Wi.setAttributes = oi()),
-        (Wi.insert = ri().bind(null, "head")),
-        (Wi.domAPI = ti()),
-        (Wi.insertStyleElement = si()),
-        Jo()(ji.A, Wi),
-        ji.A && ji.A.locals && ji.A.locals
-      const Qi = e.createContext(null)
-      function Ki() {
-        return e.useContext(Qi)
+      var Wi = a(2265),
+        Qi = {}
+      ;(Qi.styleTagTransform = ci()),
+        (Qi.setAttributes = oi()),
+        (Qi.insert = ri().bind(null, "head")),
+        (Qi.domAPI = ti()),
+        (Qi.insertStyleElement = si()),
+        Jo()(Wi.A, Qi),
+        Wi.A && Wi.A.locals && Wi.A.locals
+      const Ki = e.createContext(null)
+      function Xi() {
+        return e.useContext(Ki)
       }
-      const Xi =
+      const Zi =
           "function" == typeof Symbol && Symbol.for
             ? Symbol.for("mui.nested")
             : "__THEME_NESTED__",
-        Zi = function (t) {
+        Ji = function (t) {
           const { children: n, theme: r } = t,
-            a = Ki(),
+            a = Xi(),
             o = e.useMemo(() => {
               const e =
                 null === a
@@ -46463,16 +46479,16 @@
                   : (function (e, t) {
                       return "function" == typeof t ? t(e) : { ...e, ...t }
                     })(a, r)
-              return null != e && (e[Xi] = null !== a), e
+              return null != e && (e[Zi] = null !== a), e
             }, [r, a])
-          return (0, An.jsx)(Qi.Provider, { value: o, children: n })
+          return (0, An.jsx)(Ki.Provider, { value: o, children: n })
         },
-        Ji = e.createContext(),
-        es = function ({ value: e, ...t }) {
-          return (0, An.jsx)(Ji.Provider, { value: e ?? !0, ...t })
+        es = e.createContext(),
+        ts = function ({ value: e, ...t }) {
+          return (0, An.jsx)(es.Provider, { value: e ?? !0, ...t })
         },
-        ts = {}
-      function ns(t, n, r, a = !1) {
+        ns = {}
+      function rs(t, n, r, a = !1) {
         return e.useMemo(() => {
           const e = (t && n[t]) || n
           if ("function" == typeof r) {
@@ -46483,33 +46499,33 @@
           return t ? { ...n, [t]: r } : { ...n, ...r }
         }, [t, n, r, a])
       }
-      const rs = function (e) {
+      const as = function (e) {
         const { children: t, theme: n, themeId: r } = e,
-          a = Ne(ts),
-          o = Ki() || ts,
-          i = ns(r, a, n),
-          s = ns(r, o, n, !0),
+          a = Ne(ns),
+          o = Xi() || ns,
+          i = rs(r, a, n),
+          s = rs(r, o, n, !0),
           l = "rtl" === i.direction
-        return (0, An.jsx)(Zi, {
+        return (0, An.jsx)(Ji, {
           theme: s,
           children: (0, An.jsx)(Te.Provider, {
             value: i,
-            children: (0, An.jsx)(es, {
+            children: (0, An.jsx)(ts, {
               value: l,
               children: (0, An.jsx)(Yr, { value: i?.components, children: t }),
             }),
           }),
         })
       }
-      function as({ theme: e, ...t }) {
+      function os({ theme: e, ...t }) {
         const n = Or in e ? e[Or] : void 0
-        return (0, An.jsx)(rs, {
+        return (0, An.jsx)(as, {
           ...t,
           themeId: n ? Or : void 0,
           theme: n || e,
         })
       }
-      function os(e) {
+      function is(e) {
         const { styles: t, defaultTheme: n = {} } = e,
           r =
             "function" == typeof t
@@ -46522,10 +46538,10 @@
               : t
         return (0, An.jsx)(ya, { styles: r })
       }
-      const is = "mode",
-        ss = "color-scheme",
-        ls = "data-color-scheme"
-      function cs(e) {
+      const ss = "mode",
+        ls = "color-scheme",
+        cs = "data-color-scheme"
+      function ds(e) {
         if (
           "undefined" != typeof window &&
           "function" == typeof window.matchMedia &&
@@ -46535,7 +46551,7 @@
             ? "dark"
             : "light"
       }
-      function ds(e, t) {
+      function us(e, t) {
         return "light" === e.mode ||
           ("system" === e.mode && "light" === e.systemMode)
           ? t("light")
@@ -46544,7 +46560,7 @@
             ? t("dark")
             : void 0
       }
-      function us(e, t) {
+      function ps(e, t) {
         if ("undefined" == typeof window) return
         let n
         try {
@@ -46553,20 +46569,20 @@
         } catch (e) {}
         return n || t
       }
-      const ps = "mui-color-scheme",
-        ms = "light",
-        _s = "dark",
-        gs = "mui-mode",
+      const ms = "mui-color-scheme",
+        _s = "light",
+        gs = "dark",
+        bs = "mui-mode",
         {
-          CssVarsProvider: bs,
-          useColorScheme: fs,
-          getInitColorSchemeScript: hs,
+          CssVarsProvider: fs,
+          useColorScheme: hs,
+          getInitColorSchemeScript: Es,
         } = (function (t) {
           const {
               themeId: n,
               theme: r = {},
-              modeStorageKey: a = is,
-              colorSchemeStorageKey: o = ss,
+              modeStorageKey: a = ss,
+              colorSchemeStorageKey: o = ls,
               disableTransitionOnChange: i = !1,
               defaultColorScheme: s,
               resolveTheme: l,
@@ -46605,7 +46621,7 @@
                   disableStyleSheetGeneration: E = !1,
                 } = t,
                 A = e.useRef(!1),
-                v = Ki(),
+                v = Xi(),
                 S = e.useContext(d),
                 C = !!S && !h,
                 y = e.useMemo(
@@ -46643,8 +46659,8 @@
                       defaultLightColorScheme: r,
                       defaultDarkColorScheme: a,
                       supportedColorSchemes: o = [],
-                      modeStorageKey: i = is,
-                      colorSchemeStorageKey: s = ss,
+                      modeStorageKey: i = ss,
+                      colorSchemeStorageKey: s = ls,
                       storageWindow: l = "undefined" == typeof window
                         ? void 0
                         : window,
@@ -46652,12 +46668,12 @@
                     c = o.join(","),
                     d = o.length > 1,
                     [u, p] = e.useState(() => {
-                      const e = us(i, n),
-                        t = us(`${s}-light`, r),
-                        o = us(`${s}-dark`, a)
+                      const e = ps(i, n),
+                        t = ps(`${s}-light`, r),
+                        o = ps(`${s}-dark`, a)
                       return {
                         mode: e,
-                        systemMode: cs(e),
+                        systemMode: ds(e),
                         lightColorScheme: t,
                         darkColorScheme: o,
                       }
@@ -46668,7 +46684,7 @@
                     d && m(!0), (_.current = !0)
                   }, [d])
                   const g = (function (e) {
-                      return ds(e, (t) =>
+                      return us(e, (t) =>
                         "light" === t
                           ? e.lightColorScheme
                           : "dark" === t
@@ -46684,7 +46700,7 @@
                           try {
                             localStorage.setItem(i, r)
                           } catch (e) {}
-                          return { ...t, mode: r, systemMode: cs(r) }
+                          return { ...t, mode: r, systemMode: ds(r) }
                         })
                       },
                       [i, n],
@@ -46700,7 +46716,7 @@
                               : p((t) => {
                                   const n = { ...t }
                                   return (
-                                    ds(t, (t) => {
+                                    us(t, (t) => {
                                       try {
                                         localStorage.setItem(`${s}-${t}`, e)
                                       } catch (e) {}
@@ -46921,10 +46937,10 @@
                   Q &&
                     (0, An.jsx)(e.Fragment, {
                       children: (V.generateStyleSheets?.() || []).map((e, t) =>
-                        (0, An.jsx)(os, { styles: e }, t),
+                        (0, An.jsx)(is, { styles: e }, t),
                       ),
                     }),
-                  (0, An.jsx)(rs, {
+                  (0, An.jsx)(as, {
                     themeId: T ? n : void 0,
                     theme: l ? l(V) : V,
                     children: c,
@@ -46939,9 +46955,9 @@
                 const {
                   defaultLightColorScheme: t = "light",
                   defaultDarkColorScheme: n = "dark",
-                  modeStorageKey: r = is,
-                  colorSchemeStorageKey: a = ss,
-                  attribute: o = ls,
+                  modeStorageKey: r = ss,
+                  colorSchemeStorageKey: a = ls,
+                  attribute: o = cs,
                   colorSchemeNode: i = "document.documentElement",
                   nonce: s,
                 } = e || {}
@@ -46984,9 +47000,9 @@
         })({
           themeId: Or,
           theme: () => wr({ cssVariables: !0 }),
-          colorSchemeStorageKey: ps,
-          modeStorageKey: gs,
-          defaultColorScheme: { light: ms, dark: _s },
+          colorSchemeStorageKey: ms,
+          modeStorageKey: bs,
+          defaultColorScheme: { light: _s, dark: gs },
           resolveTheme: (e) => {
             const t = { ...e, typography: ar(e.palette, e.typography) }
             return (
@@ -46997,15 +47013,15 @@
             )
           },
         }),
-        Es = bs
-      function As({ theme: e, ...t }) {
+        As = fs
+      function vs({ theme: e, ...t }) {
         return "function" == typeof e
-          ? (0, An.jsx)(as, { theme: e, ...t })
+          ? (0, An.jsx)(os, { theme: e, ...t })
           : "colorSchemes" in (Or in e ? e[Or] : e)
-            ? (0, An.jsx)(Es, { theme: e, ...t })
-            : (0, An.jsx)(as, { theme: e, ...t })
+            ? (0, An.jsx)(As, { theme: e, ...t })
+            : (0, An.jsx)(os, { theme: e, ...t })
       }
-      var vs = wr({
+      var Ss = wr({
           palette: {
             primary: {
               main: "#2a6b2c",
@@ -47015,22 +47031,22 @@
             },
           },
         }),
-        Ss = wr({
+        Cs = wr({
           palette: {
             mode: "dark",
             primary: { main: "#89c48c", paper: "#cacaca" },
           },
         })
-      function Cs() {
+      function ys() {
         var t = xe("(prefers-color-scheme: dark)")
         return e.createElement(
-          As,
-          { theme: t ? Ss : vs },
-          e.createElement(Vi, null),
+          vs,
+          { theme: t ? Cs : Ss },
+          e.createElement(ji, null),
         )
       }
       ;(0, n.H)(document.getElementById("root")).render(
-        e.createElement(e.StrictMode, null, e.createElement(Cs, null)),
+        e.createElement(e.StrictMode, null, e.createElement(ys, null)),
       )
     })()
 })()

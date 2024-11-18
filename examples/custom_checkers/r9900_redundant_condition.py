@@ -1,5 +1,7 @@
 def return_large_number(x: int) -> int:
     """
+    Return number x only if it's greater than 1000
+
     Preconditions
         - x > 1000
     """

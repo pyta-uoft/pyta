@@ -104,7 +104,8 @@ class SnapshotTracer:
         self._insert_svg_array_to_index()
         self._open_html()
 
-    def _get_code(self):
+    def _get_code(self) -> None:
+        """Retrieve and save the code string to be displayed in Webstepper."""
         frame = inspect.getouterframes(
             inspect.getouterframes(inspect.getouterframes(inspect.currentframe())[1].frame)[1].frame
         )[1].frame

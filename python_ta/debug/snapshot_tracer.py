@@ -99,8 +99,6 @@ class SnapshotTracer:
 
     def _open_webstepper(self):
         """Open Webstepper with the results of the SnapshotTracer run"""
-        self._webstepper_folder = os.path.join(self.output_directory, "webstepper")
-        os.makedirs(self._webstepper_folder, exist_ok=True)
         self._get_code()
         self._generate_svg_array()
         self._insert_svg_array_to_index()
@@ -169,13 +167,13 @@ class SnapshotTracer:
         )
 
         original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
-        script_tags[0]["src"] = os.path.relpath(original_js_bundle, self._webstepper_folder)
+        script_tags[0]["src"] = os.path.relpath(original_js_bundle, self.output_directory)
 
-        modified_index_html = os.path.join(self._webstepper_folder, "index.html")
+        modified_index_html = os.path.join(self.output_directory, "index.html")
         with open(modified_index_html, "w") as file:
             file.write(str(soup))
 
     def _open_html(self):
         """Open the generated HTML file in a web browser."""
-        index_html = f"file://{os.path.join(self.output_directory, 'webstepper', 'index.html')}"
+        index_html = f"file://{os.path.join(self.output_directory, 'index.html')}"
         webbrowser.open(index_html, new=2)

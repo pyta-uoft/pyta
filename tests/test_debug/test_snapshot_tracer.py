@@ -25,7 +25,7 @@ def func_one_line(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_one_line",),
+        include_frames=(r"^func_one_line$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -39,7 +39,7 @@ def func_multi_line(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_multi_line",),
+        include_frames=(r"^func_multi_line$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -56,7 +56,7 @@ def func_mutation(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_mutation",),
+        include_frames=(r"^func_mutation$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -71,7 +71,7 @@ def func_for_loop(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_for_loop",),
+        include_frames=(r"^func_for_loop$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -87,7 +87,7 @@ def func_if_else(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_if_else",),
+        include_frames=(r"^func_if_else$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -105,7 +105,7 @@ def func_while(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_while",),
+        include_frames=(r"^func_while$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -120,11 +120,28 @@ def func_no_output_dir() -> None:
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        include_frames=("func_no_output_dir",),
+        include_frames=(r"^func_no_output_dir$",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         s = "Hello"
+
+
+def func_open_webstepper(output_directory: str = None) -> None:
+    """
+    Function for testing SnapshotTracer works with Webstepper
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include_frames=(r"^func_open_webstepper$",),
+        exclude_vars=("output_directory",),
+        open_webstepper=True,
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ):
+        nums = [1, 2, 3]
+        for i in range(len(nums)):
+            nums[i] = nums[i] + 1
 
 
 # Helpers
@@ -181,6 +198,7 @@ class TestSnapshotTracer:
             func_for_loop,
             func_while,
             func_if_else,
+            func_open_webstepper,
         ],
     )
     @pytest.mark.skip(reason="Pending until MemoryViz is fixed")

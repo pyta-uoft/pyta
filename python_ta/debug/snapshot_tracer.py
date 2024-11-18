@@ -31,7 +31,6 @@ class SnapshotTracer:
     open_webstepper: bool
     _snapshot_to_line: dict[int, int]
     _snapshot_args: dict[str, Any]
-    _saved_files: list[str]
 
     def __init__(
         self, output_directory: Optional[str] = None, open_webstepper: bool = False, **kwargs
@@ -57,7 +56,6 @@ class SnapshotTracer:
         self.open_webstepper = open_webstepper
         self._correct_line_numbers = []
         self._first_line = float("inf")
-        self._code_string = ""
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
@@ -78,6 +76,15 @@ class SnapshotTracer:
 
             self._add_svg_to_map(filename)
 
+    def _add_svg_to_map(self, filename: str) -> None:
+        """Add the SVG in filename to self._snapshot_to_line"""
+        with open(filename) as svg_file:
+            svg_content = svg_file.read()
+            self._snapshot_to_line[len(self._snapshot_to_line)] = {
+                "lineNumber": self._correct_line_numbers[len(self._snapshot_to_line)],
+                "svg": svg_content,
+            }
+
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
         self._func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
@@ -93,14 +100,46 @@ class SnapshotTracer:
             self._build_result_html()
             self._open_html()
 
-    def _add_svg_to_map(self, filename: str) -> None:
-        """Add the SVG in filename to self._snapshot_to_line"""
-        with open(filename) as svg_file:
-            svg_content = svg_file.read()
-            self._snapshot_to_line[len(self._snapshot_to_line)] = {
-                "lineNumber": self._correct_line_numbers[len(self._snapshot_to_line)],
-                "svg": svg_content,
-            }
+    def _build_result_html(self) -> None:
+        """Build and write the Webstepper html to the output directory"""
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        html_content = self._read_original_html(current_dir)
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        self._modify_bundle_import_path(current_dir, soup)
+        self._insert_data(soup)
+        self._write_generated_html(soup)
+
+    def _open_html(self) -> None:
+        """Open the generated HTML file in a web browser."""
+        index_html = f"file://{os.path.join(self.output_directory, 'index.html')}"
+        webbrowser.open(index_html, new=2)
+
+    def _read_original_html(self, current_dir: str) -> None:
+        """Read the original Webstepper html"""
+        original_index_html = os.path.join(current_dir, "webstepper", "index.html")
+        with open(original_index_html, "r") as file:
+            html_content = file.read()
+        return html_content
+
+    def _modify_bundle_import_path(self, current_dir: str, soup: BeautifulSoup) -> None:
+        """Modify the bundle path to the absolute path to the bundle"""
+        original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
+        soup.select("script")[0]["src"] = f"file://{original_js_bundle}"
+
+    def _insert_data(self, soup: BeautifulSoup) -> None:
+        """Insert the SVG array and code string into the Webstepper index HTML."""
+        code_script = f"<script>window.codeText=`{self._get_code()}` </script>\n"
+        svg_script = f"<script>window.svgArray={json.dumps(self._snapshot_to_line)}</script>\n"
+        soup.select("script")[0].insert_before(BeautifulSoup(code_script, "html.parser"))
+        soup.select("script")[0].insert_before(BeautifulSoup(svg_script, "html.parser"))
+
+    def _write_generated_html(self, soup: BeautifulSoup) -> None:
+        """Write the generated Webstepper html to the output directory"""
+        modified_index_html = os.path.join(self.output_directory, "index.html")
+        with open(modified_index_html, "w") as file:
+            file.write(str(soup))
 
     def _get_code(self) -> str:
         """Retrieve and save the code string to be displayed in Webstepper."""
@@ -125,44 +164,3 @@ class SnapshotTracer:
             endpoint = i
 
         return "\n".join(lst_from_with_stmt[: endpoint + 1])
-
-    def _build_result_html(self) -> None:
-        """Build and write the Webstepper html to the output directory"""
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
-        html_content = self._read_original_html(current_dir)
-        soup = BeautifulSoup(html_content, "html.parser")
-
-        self._modify_bundle_import_path(current_dir, soup)
-        self._insert_data(soup)
-        self._write_generated_html(soup)
-
-    def _read_original_html(self, current_dir: str) -> None:
-        """Read the original Webstepper html"""
-        original_index_html = os.path.join(current_dir, "webstepper", "index.html")
-        with open(original_index_html, "r") as file:
-            html_content = file.read()
-        return html_content
-
-    def _modify_bundle_import_path(self, current_dir: str, soup: BeautifulSoup) -> None:
-        """Modify the bundle path to the absolute path to the bundle"""
-        original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
-        soup.select("script")[0]["src"] = os.path.relpath(original_js_bundle, self.output_directory)
-
-    def _insert_data(self, soup: BeautifulSoup) -> None:
-        """Insert the SVG array and code string into the Webstepper index HTML."""
-        code_script = f"<script>window.codeText=`{self._get_code()}` </script>\n"
-        svg_script = f"<script>window.svgArray={json.dumps(self._snapshot_to_line)}</script>\n"
-        soup.select("script")[0].insert_before(BeautifulSoup(code_script, "html.parser"))
-        soup.select("script")[0].insert_before(BeautifulSoup(svg_script, "html.parser"))
-
-    def _write_generated_html(self, soup: BeautifulSoup) -> None:
-        """Write the generated Webstepper html to the output directory"""
-        modified_index_html = os.path.join(self.output_directory, "index.html")
-        with open(modified_index_html, "w") as file:
-            file.write(str(soup))
-
-    def _open_html(self) -> None:
-        """Open the generated HTML file in a web browser."""
-        index_html = f"file://{os.path.join(self.output_directory, 'index.html')}"
-        webbrowser.open(index_html, new=2)

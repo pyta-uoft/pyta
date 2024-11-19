@@ -50,7 +50,7 @@ class SnapshotTracer:
             raise ValueError(
                 "Use the output_directory parameter to specify a different output path."
             )
-        self._snapshot_to_line = {}
+        self._snapshots = []
         self._snapshot_args = kwargs
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
@@ -64,7 +64,7 @@ class SnapshotTracer:
         if event == "line":
             filename = os.path.join(
                 self.output_directory,
-                f"snapshot-{len(self._snapshot_to_line)}.svg",
+                f"snapshot-{len(self._snapshots)}.svg",
             )
             self._snapshot_args["memory_viz_args"].extend(["--output", filename])
 
@@ -77,13 +77,15 @@ class SnapshotTracer:
             self._add_svg_to_map(filename, line_number)
 
     def _add_svg_to_map(self, filename: str, line: int) -> None:
-        """Add the SVG in filename to self._snapshot_to_line"""
+        """Add the SVG in filename to self._snapshots"""
         with open(filename) as svg_file:
             svg_content = svg_file.read()
-            self._snapshot_to_line[len(self._snapshot_to_line)] = {
-                "lineNumber": line,
-                "svg": svg_content,
-            }
+            self._snapshots.append(
+                {
+                    "lineNumber": line,
+                    "svg": svg_content,
+                }
+            )
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
@@ -131,7 +133,7 @@ class SnapshotTracer:
     def _insert_data(self, soup: BeautifulSoup) -> None:
         """Insert the SVG array and code string into the Webstepper index HTML."""
         code_script = f"<script>window.codeText=`{self._get_code()}` </script>\n"
-        svg_script = f"<script>window.svgArray={json.dumps(self._snapshot_to_line)}</script>\n"
+        svg_script = f"<script>window.svgArray={json.dumps(self._snapshots)}</script>\n"
         soup.select("script")[0].insert_before(BeautifulSoup(code_script, "html.parser"))
         soup.select("script")[0].insert_before(BeautifulSoup(svg_script, "html.parser"))
 

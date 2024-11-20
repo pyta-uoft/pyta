@@ -13,7 +13,7 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
 )
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
-MEMORY_VIZ_VERSION = "0.3.2"
+MEMORY_VIZ_VERSION = "0.4.0"
 
 
 # Function inputs for testing the SnapshotTracer
@@ -201,7 +201,6 @@ class TestSnapshotTracer:
             func_open_webstepper,
         ],
     )
-    @pytest.mark.skip(reason="Pending until MemoryViz is fixed")
     def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
         """
         Test SnapshotTracer with various simple functions.

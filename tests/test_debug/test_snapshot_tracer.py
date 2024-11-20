@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os.path
+import re
 import sys
 from typing import Iterator
 
@@ -136,6 +137,7 @@ def func_open_webstepper(output_directory: str = None) -> None:
         include_frames=(r"^func_open_webstepper$",),
         exclude_vars=("output_directory",),
         open_webstepper=True,
+        use_relative_webstepper_import=True,
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ):
@@ -188,7 +190,6 @@ class TestSnapshotTracer:
     Tests for SnapshotTracer. These tests are skipped if the Python version is less than 3.10.
     """
 
-    # TODO: remove skip when MemoryViz is fixed
     @pytest.mark.parametrize(
         "test_func",
         [

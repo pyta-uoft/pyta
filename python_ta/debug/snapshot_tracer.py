@@ -23,6 +23,7 @@ class SnapshotTracer:
     Instance attributes:
         output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
         open_webstepper: Opens the web-based visualizer.
+        use_relative_webstepper_import: A flag indicating wether the Webstepper index.bundle.js should be imported using absolute or relative path.
         _snapshot_to_line: A list of dictionaries that maps the code line number and the snapshot number.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _first_line: Line number of the first line in the `with` block.
@@ -30,11 +31,16 @@ class SnapshotTracer:
 
     output_directory: Optional[str]
     open_webstepper: bool
+    use_relative_webstepper_import: bool
     _snapshot_to_line: dict[int, int]
     _snapshot_args: dict[str, Any]
 
     def __init__(
-        self, output_directory: Optional[str] = None, open_webstepper: bool = False, **kwargs
+        self,
+        output_directory: Optional[str] = None,
+        open_webstepper: bool = False,
+        use_relative_webstepper_import: bool = False,
+        **kwargs,
     ) -> None:
         """Initialize a context manager for snapshot-based debugging.
 
@@ -42,6 +48,7 @@ class SnapshotTracer:
             output_directory: The directory to save the snapshots, defaulting to the current directory.
                 **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.
             open_webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
+            use_relative_webstepper_import: A flag indicating wether the Webstepper index.bundle.js should be imported using absolute or relative path.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):
@@ -56,6 +63,7 @@ class SnapshotTracer:
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
         self.open_webstepper = open_webstepper
         self._first_line = float("inf")
+        self.use_relative_webstepper_import = use_relative_webstepper_import
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Take a snapshot of the variables in the functions specified in `self.include`"""
@@ -128,7 +136,12 @@ class SnapshotTracer:
     def _modify_bundle_import_path(self, current_dir: str, soup: BeautifulSoup) -> None:
         """Modify the bundle path to the absolute path to the bundle"""
         original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
-        soup.select("script")[0]["src"] = f"file://{original_js_bundle}"
+        if self.use_relative_webstepper_import:
+            output_webstepper_dir = os.path.join(self.output_directory, "webstepper")
+            path_to_bundle = os.path.relpath(original_js_bundle, output_webstepper_dir)
+        else:
+            path_to_bundle = f"file://{original_js_bundle}"
+        soup.select("script")[0]["src"] = path_to_bundle
 
     def _insert_data(self, soup: BeautifulSoup) -> None:
         """Insert the SVG array and code string into the Webstepper index HTML."""

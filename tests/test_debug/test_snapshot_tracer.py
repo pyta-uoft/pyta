@@ -137,7 +137,6 @@ def func_open_webstepper(output_directory: str = None) -> None:
         include_frames=(r"^func_open_webstepper$",),
         exclude_vars=("output_directory",),
         open_webstepper=True,
-        use_relative_webstepper_import=True,
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ):
@@ -237,3 +236,27 @@ class TestSnapshotTracer:
             snapshot.assert_match_dir(
                 {"snapshot-0.svg": actual_file.read()}, func_no_output_dir.__name__
             )
+
+    def test_generated_webstepper_html(self, snapshot, tmp_path):
+        """
+        Test SnapshotTracer generates the correct Webstepper html for the given code
+        """
+        snapshot.snapshot_dir = SNAPSHOT_DIR
+        func_open_webstepper(str(tmp_path))
+
+        index_path = os.path.join(str(tmp_path), "index.html")
+        with open(index_path, "r+") as file:
+            html_content = file.read()
+
+            constant_js_src = "absolute/path/to/index.bundle.js"
+            html_content = re.sub(
+                r'(<script\s+defer="defer"\s+src=")[^"]*(")',
+                r"\1" + constant_js_src + r"\2",
+                html_content,
+            )
+
+            file.seek(0)
+            file.write(html_content)
+            file.truncate()
+
+        assert_output_files_match(str(tmp_path), snapshot, func_open_webstepper.__name__)

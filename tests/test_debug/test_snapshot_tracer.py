@@ -240,7 +240,15 @@ class TestSnapshotTracer:
 
     def test_generated_webstepper_html(self, snapshot, tmp_path):
         """
-        Test SnapshotTracer generates the correct Webstepper html for the given code
+        Test that SnapshotTracer generates the correct Webstepper HTML for the given code.
+
+        This test verifies that the generated `index.html` file is correct. However, the outputted
+        `index.html` cannot be opened directly because it contains a hardcoded absolute path to
+        `index.bundle.js`. This is done to ensure that the test passes on different machines,
+        regardless of their file system structure.
+
+        To view the test result, replace the hardcoded path "absolute/path/to/index.bundle.js"
+        with the actual path to the Webstepper `index.bundle.js` file on your machine.
         """
         snapshot.snapshot_dir = SNAPSHOT_DIR
         func_open_webstepper(str(tmp_path))

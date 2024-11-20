@@ -5,6 +5,7 @@ import astroid
 from astroid import nodes
 from mypy import api
 from pylint.checkers import BaseChecker
+from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
 
@@ -151,6 +152,7 @@ class StaticTypeChecker(BaseChecker):
                         )
                     )
 
+    @only_required_for_messages("dict-item-type-mismatch")
     def visit_dict(self, node: nodes.Dict) -> None:
         """Check for type mismatches in dictionary entries."""
         to_remove = []
@@ -182,6 +184,7 @@ class StaticTypeChecker(BaseChecker):
         for entry in to_remove:
             self._module_stack[-1]["dict-item"].remove(entry)
 
+    @only_required_for_messages("list-item-type-mismatch")
     def visit_list(self, node: nodes.List) -> None:
         """Check for type mismatches in list items."""
         to_remove = []
@@ -204,6 +207,7 @@ class StaticTypeChecker(BaseChecker):
         for entry in to_remove:
             self._module_stack[-1]["list-item"].remove(entry)
 
+    @only_required_for_messages("unsupported-operand-types")
     def visit_binop(self, node: nodes.BinOp) -> None:
         """Check for unsupported operand types in binary operations."""
         to_remove = []
@@ -232,6 +236,7 @@ class StaticTypeChecker(BaseChecker):
         for entry in to_remove:
             self._module_stack[-1]["operator"].remove(entry)
 
+    @only_required_for_messages("incompatible-argument-type")
     def visit_call(self, node: nodes.Call) -> None:
         """Check for type mismatches in function call arguments."""
         to_remove = []
@@ -257,6 +262,7 @@ class StaticTypeChecker(BaseChecker):
         for entry in to_remove:
             self._module_stack[-1]["arg-type"].remove(entry)
 
+    @only_required_for_messages("union-attr-error")
     def visit_attribute(self, node: nodes.Attribute) -> None:
         """Check for attribute access on incorrect union types."""
         to_remove = []
@@ -275,6 +281,7 @@ class StaticTypeChecker(BaseChecker):
         for entry in to_remove:
             self._module_stack[-1]["union-attr"].remove(entry)
 
+    @only_required_for_messages("incompatible-assignment")
     def visit_annassign(self, node: nodes.AnnAssign) -> None:
         """Check for type mismatches in annotated assignments."""
         to_remove = []

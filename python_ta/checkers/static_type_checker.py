@@ -1,6 +1,5 @@
-import builtins
 import re
-from typing import Optional, Union
+from typing import Optional
 
 import astroid
 from astroid import nodes
@@ -10,36 +9,36 @@ from pylint.lint import PyLinter
 
 
 class StaticTypeChecker(BaseChecker):
-    """A checker class to report Mypy type errors in the file."""
+    """Checker for static type checking using Mypy."""
 
     name = "static_type_checker"
     msgs = {
-        "E9951": (  # Incorrect argument type
+        "E9951": (
             "Argument %s to %s has incompatible type %s; expected %s",
             "incompatible-argument-type",
             "Used when a function argument has an incompatible type",
         ),
-        "E9952": (  # Incompatible assignment
+        "E9952": (
             "Incompatible types in assignment (expression has type %s, variable has type %s)",
             "incompatible-assignment",
             "Used when there is an incompatible assignment",
         ),
-        "E9953": (  # List item type mismatch
+        "E9953": (
             "List item %s has incompatible type %s; expected %s",
             "list-item-type-mismatch",
             "Used when a list item has an incompatible type",
         ),
-        "E9954": (  # Unsupported operand types
+        "E9954": (
             "Unsupported operand types for %s (%s and %s)",
             "unsupported-operand-types",
             "Used when an operation is attempted between incompatible types",
         ),
-        "E9955": (  # Union attribute error
+        "E9955": (
             "Item of type %s in Union has no attribute %s",
             "union-attr-error",
             "Used when accessing an attribute that may not exist on a Union type",
         ),
-        "E9956": (  # Dictionary item type mismatch
+        "E9956": (
             "Dict entry %s has incompatible type %s: %s; expected %s: %s",
             "dict-item-type-mismatch",
             "Used when a dictionary entry has an incompatible key or value type",
@@ -59,10 +58,12 @@ class StaticTypeChecker(BaseChecker):
     )
 
     def __init__(self, linter: Optional["PyLinter"] = None) -> None:
+        """Initialize the StaticTypeChecker."""
         super().__init__(linter=linter)
         self._module_stack = []
 
     def visit_module(self, node: nodes.Module) -> None:
+        """Run Mypy on the current module and collect type errors."""
         print("Visiting module")
         filename = node.file
         print(f"Filename: {filename}")
@@ -151,6 +152,7 @@ class StaticTypeChecker(BaseChecker):
                     )
 
     def visit_dict(self, node: nodes.Dict) -> None:
+        """Check for type mismatches in dictionary entries."""
         to_remove = []
         for entry in self._module_stack[-1]["dict-item"]:
             (
@@ -181,6 +183,7 @@ class StaticTypeChecker(BaseChecker):
             self._module_stack[-1]["dict-item"].remove(entry)
 
     def visit_list(self, node: nodes.List) -> None:
+        """Check for type mismatches in list items."""
         to_remove = []
         for entry in self._module_stack[-1]["list-item"]:
             line_number, item_index, item_type, expected_type = entry
@@ -202,6 +205,7 @@ class StaticTypeChecker(BaseChecker):
             self._module_stack[-1]["list-item"].remove(entry)
 
     def visit_binop(self, node: nodes.BinOp) -> None:
+        """Check for unsupported operand types in binary operations."""
         to_remove = []
         for entry in self._module_stack[-1]["operator"]:
             line_number, operator, left_type, right_type = entry
@@ -229,6 +233,7 @@ class StaticTypeChecker(BaseChecker):
             self._module_stack[-1]["operator"].remove(entry)
 
     def visit_call(self, node: nodes.Call) -> None:
+        """Check for type mismatches in function call arguments."""
         to_remove = []
         for entry in self._module_stack[-1]["arg-type"]:
             line_number, argument_number, function_name, incompatible_type, expected_type = entry
@@ -253,6 +258,7 @@ class StaticTypeChecker(BaseChecker):
             self._module_stack[-1]["arg-type"].remove(entry)
 
     def visit_attribute(self, node: nodes.Attribute) -> None:
+        """Check for attribute access on incorrect union types."""
         to_remove = []
         for entry in self._module_stack[-1]["union-attr"]:
             line_number, item_type, attribute = entry
@@ -270,15 +276,13 @@ class StaticTypeChecker(BaseChecker):
             self._module_stack[-1]["union-attr"].remove(entry)
 
     def visit_annassign(self, node: nodes.AnnAssign) -> None:
-        """Visit an annotated assignment node and check for type mismatches."""
+        """Check for type mismatches in annotated assignments."""
         to_remove = []
         for entry in self._module_stack[-1]["assignment"]:
             line_number, expression_type, variable_type = entry
 
             if not (line_number == node.lineno and node.annotation.name == variable_type):
                 continue
-
-            print("Adding incompatible-assignment message")
 
             self.add_message(
                 "incompatible-assignment",
@@ -292,9 +296,11 @@ class StaticTypeChecker(BaseChecker):
             self._module_stack[-1]["assignment"].remove(entry)
 
     def leave_module(self, node: nodes.Module) -> None:
+        """Clean up the module stack when leaving a module."""
         self._module_stack.pop()
 
     def _parse_assignment_information(self, message: str) -> Optional[tuple[int, str, str]]:
+        """Parse Mypy assignment error messages into structured data."""
         pattern = r"^\S+:(\d+): error: Incompatible types in assignment \(expression has type \"([^\"]+)\", variable has type \"([^\"]+)\"\)"
         match = re.search(pattern, message)
         if match:
@@ -305,6 +311,7 @@ class StaticTypeChecker(BaseChecker):
         return None
 
     def _parse_arg_type_information(self, message: str) -> Optional[tuple[int, int, str, str, str]]:
+        """Parse Mypy argument type error messages into structured data."""
         pattern = r"^\S+:(\d+): error: Argument (\d+) to \"([^\"]+)\" has incompatible type \"([^\"]+)\"; expected \"([^\"]+)\""
         match = re.search(pattern, message)
         if match:
@@ -317,6 +324,7 @@ class StaticTypeChecker(BaseChecker):
         return None
 
     def _parse_list_item_information(self, message: str) -> Optional[tuple[int, int, str, str]]:
+        """Parse Mypy list item error messages into structured data."""
         pattern = r"^\S+:(\d+): error: List item (\d+) has incompatible type \"([^\"]+)\"; expected \"([^\"]+)\""
         match = re.search(pattern, message)
         if match:
@@ -328,6 +336,7 @@ class StaticTypeChecker(BaseChecker):
         return None
 
     def _parse_operator_information(self, message: str) -> Optional[tuple[int, str, str, str]]:
+        """Parse Mypy operator error messages into structured data."""
         pattern = r"^\S+:(\d+): error: Unsupported operand types for (\S+) \(\"([^\"]+)\" and \"([^\"]+)\"\)"
         match = re.search(pattern, message)
         if match:
@@ -339,6 +348,7 @@ class StaticTypeChecker(BaseChecker):
         return None
 
     def _parse_union_attr_information(self, message: str) -> Optional[tuple[int, str, str]]:
+        """Parse Mypy union attribute error messages into structured data."""
         pattern = (
             r"^\S+:(\d+): error: Item \"([^\"]+)\" of \"[^\"]+\" has no attribute \"([^\"]+)\""
         )
@@ -353,6 +363,7 @@ class StaticTypeChecker(BaseChecker):
     def _parse_dict_item_information(
         self, message: str
     ) -> Optional[tuple[int, int, str, str, str, str]]:
+        """Parse Mypy dictionary item error messages into structured data."""
         pattern = r"^\S+:(\d+): error: Dict entry (\d+) has incompatible type \"([^\"]+)\": \"([^\"]+)\"; expected \"([^\"]+)\": \"([^\"]+)\""
         match = re.search(pattern, message)
         if match:
@@ -373,6 +384,7 @@ class StaticTypeChecker(BaseChecker):
         return None
 
     def _normalize_pytype(self, pytype: str) -> str:
+        """Normalize a Python type string for consistent comparison."""
         if pytype.startswith("builtins."):
             return pytype[len("builtins.") :]
         return pytype

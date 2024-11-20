@@ -63,6 +63,14 @@ class StaticTypeChecker(BaseChecker):
         super().__init__(linter=linter)
         self._module_stack = []
 
+    @only_required_for_messages(
+        "incompatible-argument-type",
+        "incompatible-assignment",
+        "list-item-type-mismatch",
+        "unsupported-operand-types",
+        "union-attr-error",
+        "dict-item-type-mismatch",
+    )
     def visit_module(self, node: nodes.Module) -> None:
         """Run Mypy on the current module and collect type errors."""
         print("Visiting module")

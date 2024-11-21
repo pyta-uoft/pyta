@@ -190,27 +190,26 @@ class TestSnapshotTracer:
     Tests for SnapshotTracer. These tests are skipped if the Python version is less than 3.10.
     """
 
-    # @pytest.mark.parametrize(
-    #     "test_func",
-    #     [
-    #         func_one_line,
-    #         func_multi_line,
-    #         func_mutation,
-    #         func_for_loop,
-    #         func_while,
-    #         func_if_else,
-    #         func_open_webstepper,
-    #     ],
-    # )
-    # def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
-    #     """
-    #     Test SnapshotTracer with various simple functions.
-    #     """
-    #     snapshot.snapshot_dir = SNAPSHOT_DIR
+    @pytest.mark.parametrize(
+        "test_func",
+        [
+            func_one_line,
+            func_multi_line,
+            func_mutation,
+            func_for_loop,
+            func_while,
+            func_if_else,
+        ],
+    )
+    def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
+        """
+        Test SnapshotTracer with various simple functions.
+        """
+        snapshot.snapshot_dir = SNAPSHOT_DIR
 
-    #     test_func(str(tmp_path))
+        test_func(str(tmp_path))
 
-    #     assert_output_files_match(str(tmp_path), snapshot, test_func.__name__)
+        assert_output_files_match(str(tmp_path), snapshot, test_func.__name__)
 
     def test_using_output_flag(self):
         """

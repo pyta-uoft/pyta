@@ -137,7 +137,7 @@ def func_open_webstepper(output_directory: str = None) -> None:
         output_directory=output_directory,
         include_frames=(r"^func_open_webstepper$",),
         exclude_vars=("output_directory",),
-        open_webstepper=True,
+        webstepper=True,
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ):

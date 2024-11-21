@@ -99,7 +99,7 @@ class SnapshotTracer:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Remove the trace function and run any post-tracing functions."""
+        """Remove the trace function. If webstepper=True, open a Webstepper webpage."""
         sys.settrace(None)
         self._func_frame.f_trace = None
         if self.webstepper:
@@ -108,12 +108,12 @@ class SnapshotTracer:
 
     def _build_result_html(self) -> None:
         """Build and write the Webstepper html to the output directory"""
-        current_dir = os.path.dirname(os.path.abspath(__file__))
+        snapshot_tracer_dir = os.path.dirname(os.path.abspath(__file__))
 
-        html_content = self._read_original_html(current_dir)
+        html_content = self._read_original_html(snapshot_tracer_dir)
         soup = BeautifulSoup(html_content, "html.parser")
 
-        self._modify_bundle_import_path(current_dir, soup)
+        self._modify_bundle_import_path(snapshot_tracer_dir, soup)
         self._insert_data(soup)
         self._write_generated_html(soup)
 
@@ -122,24 +122,25 @@ class SnapshotTracer:
         index_html = f"file://{os.path.join(self.output_directory, 'index.html')}"
         webbrowser.open(index_html, new=2)
 
-    def _read_original_html(self, current_dir: str) -> None:
+    def _read_original_html(self, snapshot_tracer_dir: str) -> None:
         """Read the original Webstepper html"""
-        original_index_html = os.path.join(current_dir, "webstepper", "index.html")
+        original_index_html = os.path.join(snapshot_tracer_dir, "webstepper", "index.html")
         with open(original_index_html, "r") as file:
             html_content = file.read()
         return html_content
 
-    def _modify_bundle_import_path(self, current_dir: str, soup: BeautifulSoup) -> None:
+    def _modify_bundle_import_path(self, snapshot_tracer_dir: str, soup: BeautifulSoup) -> None:
         """Modify the bundle path to the absolute path to the bundle"""
-        original_js_bundle = os.path.join(current_dir, "webstepper", "index.bundle.js")
+        original_js_bundle = os.path.join(snapshot_tracer_dir, "webstepper", "index.bundle.js")
         soup.select("script")[0]["src"] = f"file://{original_js_bundle}"
 
     def _insert_data(self, soup: BeautifulSoup) -> None:
         """Insert the SVG array and code string into the Webstepper index HTML."""
-        code_script = f"<script>window.codeText=`{self._get_code()}` </script>\n"
-        svg_script = f"<script>window.svgArray={json.dumps(self._snapshots)}</script>\n"
-        soup.select("script")[0].insert_before(BeautifulSoup(code_script, "html.parser"))
-        soup.select("script")[0].insert_before(BeautifulSoup(svg_script, "html.parser"))
+        insert_script = (
+            f"<script>window.codeText=`{self._get_code()}` </script>\n"
+            + f"<script>window.svgArray={json.dumps(self._snapshots)}</script>\n"
+        )
+        soup.select("script")[0].insert_before(BeautifulSoup(insert_script, "html.parser"))
 
     def _write_generated_html(self, soup: BeautifulSoup) -> None:
         """Write the generated Webstepper html to the output directory"""
@@ -154,19 +155,19 @@ class SnapshotTracer:
         lst_str_lines = code_string.splitlines()
         lst_from_with_stmt = lst_str_lines[i:]
 
-        num_whitespace = 0
-        for char in lst_from_with_stmt[0]:
-            if char.isspace():
-                num_whitespace += 1
-            else:
-                break
+        num_whitespace = len(lst_from_with_stmt[0]) - len(lst_from_with_stmt[0].lstrip())
 
         endpoint = len(lst_from_with_stmt)
         for i in range(len(lst_from_with_stmt)):
             line = lst_from_with_stmt[i]
-            if line.strip() != "" and not line[:num_whitespace].isspace():
+            if (
+                line.strip() != ""
+                and not line.lstrip()[0] == "#"
+                and not line[:num_whitespace].isspace()
+            ):
                 break
-            lst_from_with_stmt[i] = line[num_whitespace:]
+            if line.lstrip() != "" and line.lstrip()[0] != "#":
+                lst_from_with_stmt[i] = line[num_whitespace:]
             endpoint = i
 
         return "\n".join(lst_from_with_stmt[: endpoint + 1])

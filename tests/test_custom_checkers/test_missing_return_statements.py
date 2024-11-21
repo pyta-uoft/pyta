@@ -6,6 +6,7 @@ from python_ta.cfg.visitor import CFGVisitor
 from python_ta.checkers.inconsistent_or_missing_returns_checker import (
     InconsistentReturnChecker,
 )
+from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
@@ -347,4 +348,102 @@ class TestMissingReturnChecker(pylint.testutils.CheckerTestCase):
                 end_col_offset=27,
             ),
         ):
+            self.checker.visit_functiondef(func_node)
+
+
+class TestMissingReturnCheckerZ3Option(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = InconsistentReturnChecker
+    CONFIG = {"z3": True}
+
+    def test_z3_unfeasible_missing_return(self):
+        src = """
+        def unfeasible_missing_return(x: str) -> str:
+            '''
+            Preconditions:
+                - x[0:2] == "ab"
+            '''
+            if x in "cd":
+                print("empty string")
+            else:
+                return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+
+    def test_z3_partially_feasible_missing_return(self):
+        src = """
+        def feasible_missing_return(x: int) -> int:
+            '''
+            Preconditions:
+                - x in [1, 2, 3, 4, 5]
+            '''
+            if x > 5:
+                print(x)
+            print(x)
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statement",
+                node=func_node,
+                args="feasible_missing_return",
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_z3_feasible_missing_return(self):
+        src = """
+        def feasible_missing_return(x: bool, y: int) -> int:
+            '''
+            Preconditions:
+                - x
+                - y > 5
+            '''
+            while not x:
+                print(1)
+                y += 1
+                if y > 10:
+                    return y
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="missing-return-statement",
+                node=func_node,
+                args="feasible_missing_return",
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_z3_return_not_missing_by_precondition(self):
+        src = """
+        def func(x: int) -> int:
+            '''
+            Preconditions:
+                - x > 0
+            '''
+            if x > 0:
+                return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        func_node = next(mod.nodes_of_class(nodes.FunctionDef))
+
+        with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)

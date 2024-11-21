@@ -12,6 +12,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
+- Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
+- Included the name of redundant variable in `E9959 redundant-assignment` message
 - Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
 - Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
 - Added `z3` option to `one-iteration-checker` to only check for feasible code blocks based on edge z3 constraints
@@ -24,7 +26,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed issue where `snapshot` errors on unserializable values
 - Fixed issue within `Snapshot.py` where the `memory_viz_version` parameter was not respected
+- Fixed issue where parallel assignment statements and assignment to multiple targets were not checked by `redundant_assignment_checker`
 - Fixed issue where annotated assignment statements were not checked by `redundant_assignment_checker`
+- Fixed issue where empty preconditions were preventing CFGs from being generated
+- Added strict numeric type checking to enforce type distinctions across the entire numeric hierarchy, including complex numbers.
+- Added strict type checking support for nested and union types (e.g., `list[int]`, `dict[float, int]`, `Union[int, float]`)
 
 ### 🔧 Internal changes
 

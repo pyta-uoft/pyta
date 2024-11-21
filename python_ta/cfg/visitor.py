@@ -491,5 +491,5 @@ def _is_python_precondition(precondition: str) -> bool:
     try:
         _ = extract_node(precondition)
         return True
-    except AstroidSyntaxError:
+    except (AstroidSyntaxError, ValueError):  # ValueError raised when precondition is blank
         return False

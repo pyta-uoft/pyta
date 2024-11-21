@@ -166,8 +166,10 @@ class SnapshotTracer:
                 and not line[:num_whitespace].isspace()
             ):
                 break
-            if line.lstrip() != "" and line.lstrip()[0] != "#":
+            if line.lstrip() != "" and len(line) - len(line.lstrip()) >= num_whitespace:
                 lst_str_lines[i] = line[num_whitespace:]
+            else:
+                lst_str_lines[i] = line.lstrip()
             endpoint = i
             i += 1
 

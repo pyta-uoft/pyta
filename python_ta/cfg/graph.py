@@ -269,29 +269,31 @@ class ControlFlowGraph:
                 # traverse through edge
                 if edge.condition is not None:
                     condition_z3_constraint = z3_environment.parse_constraint(edge.condition)
-                    if condition_z3_constraint is not None:
-                        if edge.negate is not None:
-                            z3_environment.add_constraint(
-                                Not(condition_z3_constraint)
-                                if edge.negate
-                                else condition_z3_constraint
-                            )
+                    if condition_z3_constraint is not None and edge.negate is not None:
+                        z3_environment.add_constraint(
+                            Not(condition_z3_constraint) if edge.negate else condition_z3_constraint
+                        )
+                        # add z3 constraint to the CFG block of condition node
+                        edge.source.z3_constraint = z3_environment.assign_constraint(
+                            condition_z3_constraint
+                        )
 
-                edge.z3_constraints[path_id] = z3_environment.update_constraints()
+                # update edge z3 constraints
+                edge.z3_constraints[path_id] = z3_environment.assign_current_constraints()
 
                 # traverse into target node
-                for node in edge.target.statements:
-                    if isinstance(node, (Assign, AugAssign, AnnAssign)):
-                        self._handle_variable_reassignment(node, z3_environment)
+                for stmt in edge.target.statements:
+                    if isinstance(stmt, (Assign, AugAssign, AnnAssign)):
+                        self._handle_variable_reassignment(stmt, z3_environment)
 
     def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
         """Check for reassignment statements and invoke Z3 environment"""
         if isinstance(node, Assign):
             for target in node.targets:
                 if isinstance(target, AssignName):
-                    env.assign(target.name)
+                    env.handle_variable_assignment(target.name)
         elif isinstance(node, (AugAssign, AnnAssign)):
-            env.assign(node.target.name)
+            env.handle_variable_assignment(node.target.name)
 
     def update_edge_feasibility(self) -> None:
         """Traverse through edges in DFS order and update is_feasible
@@ -329,6 +331,8 @@ class CFGBlock:
     successors: List[CFGEdge]
     # Whether there exists a path from the start block to this block.
     reachable: bool
+    # the z3 constraint associated with a conditional statement
+    z3_constraint: Optional[ExprRef]
 
     def __init__(self, id_: int) -> None:
         """Initialize a new CFGBlock."""
@@ -337,6 +341,7 @@ class CFGBlock:
         self.predecessors = []
         self.successors = []
         self.reachable = False
+        self.z3_constraint = None
 
     def add_statement(self, statement: NodeNG) -> None:
         if not self.is_jump():
@@ -430,23 +435,27 @@ class Z3Environment:
         self.variables = variables
         self.constraints = constraints.copy()
 
-    def assign(self, name: str) -> None:
+    def handle_variable_assignment(self, name: str) -> None:
         """Handle a variable assignment statement"""
         if name in self.variable_unassigned:
             self.variable_unassigned[name] = False
 
-    def update_constraints(self) -> List[ExprRef]:
-        """Returns all z3 constraints in the environments
+    def assign_constraint(self, constraint: ExprRef) -> Optional[ExprRef]:
+        """Returns the given z3 constraints if it
+        does not contain reassigned variables
+        """
+        if self._check_variables_unassigned(constraint):
+            return constraint
+        return None
+
+    def assign_current_constraints(self) -> List[ExprRef]:
+        """Returns all z3 constraints in the current environment
         Removes constraints with reassigned variables
         """
         updated_constraints = []
         for constraint in self.constraints:
             # discard expressions with reassigned variables
-            variables = _get_vars(constraint)
-            reassigned = any(
-                not self.variable_unassigned.get(variable, False) for variable in variables
-            )
-            if not reassigned:
+            if self._check_variables_unassigned(constraint):
                 updated_constraints.append(constraint)
 
         self.constraints = updated_constraints
@@ -457,14 +466,18 @@ class Z3Environment:
         self.constraints.append(constraint)
 
     def parse_constraint(self, node: NodeNG) -> Optional[ExprRef]:
-        """Parse an Astroid node to a Z3 constraint
-        Return the resulting expression
-        """
+        """Parse an Astroid node to a Z3 constraint. Return the resulting expression"""
         parser = Z3Parser(self.variables)
         try:
             return parser.parse(node)
         except (Z3Exception, Z3ParseException):
             return None
+
+    def _check_variables_unassigned(self, constraint: ExprRef) -> bool:
+        """Return True if all variables in the z3 constraint have not been reassigned"""
+        return all(
+            self.variable_unassigned.get(variable, True) for variable in _get_vars(constraint)
+        )
 
 
 def _get_vars(expr: ExprRef) -> Set[str]:

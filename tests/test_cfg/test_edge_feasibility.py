@@ -80,12 +80,37 @@ def test_unfeasible_while_condition() -> None:
         '''
         while x + y < 15:
             print("unreachable")
+        print("end")
+    """
+    cfg = _create_cfg(src, "func")
+    expected_while_path = [True, False, False]
+    expected_other_path = [True, True, True]
+
+    paths = cfg.get_paths()
+    assert all(
+        edge.is_feasible == expected for edge, expected in zip(paths[0], expected_while_path)
+    )
+    assert all(
+        edge.is_feasible == expected for edge, expected in zip(paths[1], expected_other_path)
+    )
+
+
+def test_unfeasible_while_condition_with_reassignment() -> None:
+    src = """
+    def func(x: int, y: int) -> None:
+        '''
+        Preconditions:
+            - x > 10
+            - y > 10
+        '''
+        while x + y < 15:
+            print("unreachable")
             x -= 1
             y -= 1
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    expected_while_path = [True, False, False]
+    expected_while_path = [True, False, True]
     expected_other_path = [True, True, True]
 
     paths = cfg.get_paths()

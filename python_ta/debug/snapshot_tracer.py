@@ -153,13 +153,12 @@ class SnapshotTracer:
         code_string = inspect.cleandoc(inspect.getsource(self._func_frame))
         i = self._first_line - self._func_frame.f_code.co_firstlineno
         lst_str_lines = code_string.splitlines()
-        lst_from_with_stmt = lst_str_lines[i:]
+        num_whitespace = len(lst_str_lines[i]) - len(lst_str_lines[i].lstrip())
 
-        num_whitespace = len(lst_from_with_stmt[0]) - len(lst_from_with_stmt[0].lstrip())
-
-        endpoint = len(lst_from_with_stmt)
-        for i in range(len(lst_from_with_stmt)):
-            line = lst_from_with_stmt[i]
+        endpoint = len(lst_str_lines)
+        startpoint = i
+        while i < len(lst_str_lines):
+            line = lst_str_lines[i]
             if (
                 line.strip() != ""
                 and not line.lstrip()[0] == "#"
@@ -167,7 +166,8 @@ class SnapshotTracer:
             ):
                 break
             if line.lstrip() != "" and line.lstrip()[0] != "#":
-                lst_from_with_stmt[i] = line[num_whitespace:]
+                lst_str_lines[i] = line[num_whitespace:]
             endpoint = i
+            i += 1
 
-        return "\n".join(lst_from_with_stmt[: endpoint + 1])
+        return "\n".join(lst_str_lines[startpoint : endpoint + 1])

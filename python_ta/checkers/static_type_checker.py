@@ -61,9 +61,7 @@ class StaticTypeChecker(BaseChecker):
     )
     def visit_module(self, node: nodes.Module) -> None:
         """Run Mypy on the current module and collect type errors."""
-        print("Visiting module")
         filename = node.file
-        print(f"Filename: {filename}")
         mypy_options = [
             "--ignore-missing-imports",
             "--disable-error-code=call-arg",

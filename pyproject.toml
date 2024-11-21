@@ -29,6 +29,7 @@ requires-python = ">=3.9"
 dev = [
     "hypothesis",
     "inflection",
+    "mypy",
     "myst-parser",
     "pre-commit",
     "pytest",

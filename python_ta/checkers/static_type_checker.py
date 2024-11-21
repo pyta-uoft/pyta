@@ -46,18 +46,6 @@ class StaticTypeChecker(BaseChecker):
         ),
     }
 
-    options = (
-        (
-            "mypy-ignore-errors",
-            {
-                "default": (),
-                "type": "csv",
-                "metavar": "<mypy-ignore-errors>",
-                "help": "List of Mypy error codes to ignore",
-            },
-        ),
-    )
-
     def __init__(self, linter: Optional["PyLinter"] = None) -> None:
         """Initialize the StaticTypeChecker."""
         super().__init__(linter=linter)
@@ -79,7 +67,7 @@ class StaticTypeChecker(BaseChecker):
         mypy_options = [
             "--ignore-missing-imports",
             "--disable-error-code=call-arg",
-        ] + list(self.linter.config.mypy_ignore_errors)
+        ]
         result, _, _ = api.run([filename] + mypy_options)
         self._module_stack.append(
             {

@@ -93,20 +93,21 @@ class SnapshotTracer:
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
-        self._func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
-        self._func_frame.f_trace = self._trace_func
+        func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
+        func_frame.f_trace = self._trace_func
         sys.settrace(lambda *_args: None)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Remove the trace function. If webstepper=True, open a Webstepper webpage."""
         sys.settrace(None)
-        self._func_frame.f_trace = None
+        func_frame = inspect.getouterframes(inspect.currentframe())[1]
+        func_frame.frame.f_trace = None
         if self.webstepper:
-            self._build_result_html()
+            self._build_result_html(func_frame.frame)
             self._open_html()
 
-    def _build_result_html(self) -> None:
+    def _build_result_html(self, func_frame: types.FrameType) -> None:
         """Build and write the Webstepper html to the output directory"""
         snapshot_tracer_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -114,7 +115,7 @@ class SnapshotTracer:
         soup = BeautifulSoup(html_content, "html.parser")
 
         self._modify_bundle_import_path(snapshot_tracer_dir, soup)
-        self._insert_data(soup)
+        self._insert_data(soup, func_frame)
         self._write_generated_html(soup)
 
     def _open_html(self) -> None:
@@ -134,10 +135,10 @@ class SnapshotTracer:
         original_js_bundle = os.path.join(snapshot_tracer_dir, "webstepper", "index.bundle.js")
         soup.select("script")[0]["src"] = f"file://{original_js_bundle}"
 
-    def _insert_data(self, soup: BeautifulSoup) -> None:
+    def _insert_data(self, soup: BeautifulSoup, func_frame: types.FrameType) -> None:
         """Insert the SVG array and code string into the Webstepper index HTML."""
         insert_script = (
-            f"<script>window.codeText=`{self._get_code()}` </script>\n"
+            f"<script>window.codeText=`{self._get_code(func_frame)}` </script>\n"
             + f"<script>window.svgArray={json.dumps(self._snapshots)}</script>\n"
         )
         soup.select("script")[0].insert_before(BeautifulSoup(insert_script, "html.parser"))
@@ -148,11 +149,11 @@ class SnapshotTracer:
         with open(modified_index_html, "w") as file:
             file.write(str(soup))
 
-    def _get_code(self) -> str:
+    def _get_code(self, func_frame: types.FrameType) -> str:
         """Retrieve and save the code string to be displayed in Webstepper."""
-        code_string = inspect.cleandoc(inspect.getsource(self._func_frame))
-        i = self._first_line - self._func_frame.f_code.co_firstlineno
-        lst_str_lines = code_string.splitlines()
+        code_lines = inspect.cleandoc(inspect.getsource(func_frame))
+        i = self._first_line - func_frame.f_code.co_firstlineno
+        lst_str_lines = code_lines.splitlines()
         num_whitespace = len(lst_str_lines[i]) - len(lst_str_lines[i].lstrip())
 
         endpoint = len(lst_str_lines)

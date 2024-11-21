@@ -31,6 +31,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue where empty preconditions were preventing CFGs from being generated
 - Added strict numeric type checking to enforce type distinctions across the entire numeric hierarchy, including complex numbers.
 - Added strict type checking support for nested and union types (e.g., `list[int]`, `dict[float, int]`, `Union[int, float]`)
+- Fixed issue where CFG edges from loop body to loop condition block was ignored during augmenting edge z3 constraints
+- Fixed issue in `one-iteration-checker` where the message was not correctly reported for `while` loops when `z3` option is on
 
 ### 🔧 Internal changes
 

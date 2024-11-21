@@ -16,7 +16,6 @@ def test_check_on_dir():
             "output-format": "python_ta.reporters.JSONReporter",
             "pyta-error-permission": "no",
             "pyta-file-permission": "no",
-            "z3": True,
         },
     )
 
@@ -48,7 +47,6 @@ def test_check_on_file():
                 "output-format": "python_ta.reporters.PlainReporter",
                 "pyta-error-permission": "no",
                 "pyta-file-permission": "no",
-                "z3": True,
             },
         )
 
@@ -71,7 +69,6 @@ def test_check_on_bad_input():
                 "output-format": "python_ta.reporters.PlainReporter",
                 "pyta-error-permission": "no",
                 "pyta-file-permission": "no",
-                "z3": True,
             },
         )
 
@@ -180,7 +177,6 @@ def test_check_with_config():
         "output-format": "python_ta.reporters.PlainReporter",
         "pyta-error-permission": "no",
         "pyta-file-permission": "no",
-        "z3": True,
     }
     for item in _inputs:
         python_ta.check_all(item, config=CONFIG)
@@ -191,7 +187,7 @@ def test_check_saves_file() -> None:
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output will be created in the main directory
-        python_ta.check_all(item, output="pyta_output.html", config={"z3": True})
+        python_ta.check_all(item, output="pyta_output.html")
 
     file_exists = path.exists("pyta_output.html")
 
@@ -207,7 +203,7 @@ def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory
-        python_ta.check_all(item, config={"z3": True})
+        python_ta.check_all(item)
 
     file_exists = path.exists("pyta_output.html")
 

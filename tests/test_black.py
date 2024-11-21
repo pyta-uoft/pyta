@@ -15,19 +15,19 @@ from python_ta import check_all
 error_params = [
     (
         """def foo():print("Hello, world!")\n""",
-        {"output-format": "python_ta.reporters.JSONReporter", "z3": True},
+        {"output-format": "python_ta.reporters.JSONReporter"},
         True,
         """def foo():\n    print("Hello, world!")\n""",
     ),
     (
         """def foo():print("Hello, world!" + "This line is too long and should be split by black.")""",
-        {"output-format": "python_ta.reporters.JSONReporter", "max-line-length": 50, "z3": True},
+        {"output-format": "python_ta.reporters.JSONReporter", "max-line-length": 50},
         True,
         """def foo():\n    print(\n        "Hello, world!"\n        + "This line is too long and should be split by black."\n    )\n""",
     ),
     (
         """def foo():print("Hello, world!")\n""",
-        {"output-format": "python_ta.reporters.JSONReporter", "z3": True},
+        {"output-format": "python_ta.reporters.JSONReporter"},
         False,
         """def foo():print("Hello, world!")\n""",
     ),

@@ -14,8 +14,7 @@ def patch_ast_transforms(z3: bool):
         ast = old_get_ast(self, filepath, modname, data)
         if ast is not None:
             try:
-                if z3:
-                    ast = Z3Visitor().visitor.visit(ast)
+                ast = Z3Visitor().visitor.visit(ast)
                 ast.accept(CFGVisitor())
             except:
                 pass

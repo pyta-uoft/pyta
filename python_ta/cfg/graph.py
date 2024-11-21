@@ -213,28 +213,23 @@ class ControlFlowGraph:
         """Get edges that represent paths from start to end node in depth-first order."""
         paths = []
 
-        def _visited(
-            edge: CFGEdge, visited_edges: Set[CFGEdge], visited_nodes: Set[CFGBlock]
-        ) -> bool:
-            return edge in visited_edges or edge.target in visited_nodes
-
         def _dfs(
             current_edge: CFGEdge,
             current_path: List[CFGEdge],
             visited_edges: Set[CFGEdge],
             visited_nodes: Set[CFGBlock],
         ):
-            # note: both visited edges and visited nodes need to be tracked to correctly handle cycles
-            if _visited(current_edge, visited_edges, visited_nodes):
+            if current_edge in visited_edges:
                 return
 
             visited_edges.add(current_edge)
-            visited_nodes.add(current_edge.source)
             current_path.append(current_edge)
+            visited_nodes.add(current_edge.source)
 
-            if current_edge.target == self.end or all(
-                _visited(edge, visited_edges, visited_nodes)
-                for edge in current_edge.target.successors
+            if (
+                current_edge.target == self.end
+                or current_edge.target in visited_nodes
+                or all(edge in visited_edges for edge in current_edge.target.successors)
             ):
                 paths.append(current_path.copy())
             else:

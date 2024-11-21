@@ -147,7 +147,7 @@
             mappings:
               "AAAA;IACI,aAAa;IACb,sBAAsB;IACtB,WAAW;AACf;;AAEA;IACI,WAAW;IACX,YAAY;IACZ,uBAAuB;AAC3B;;AAEA;IACI,wBAAwB;AAC5B;;AAEA;IACI,aAAa;IACb,8BAA8B;AAClC;;AAEA;IACI,aAAa;IACb,gBAAgB;IAChB,aAAa;IACb,uBAAuB;IACvB,mBAAmB;AACvB;;AAEA;IACI,YAAY;AAChB",
             sourcesContent: [
-              ".code-display {\n    display: flex;\n    flex-direction: column;\n    height: 80%;\n}\n\n.code-display__code-box {\n    width: 100%;\n    height: 100%;\n    background-color: white;\n}\n\n.code-box__line--highlighted {\n    background-color: yellow;\n}\n\n.button-container {\n    display: flex;\n    justify-content: space-between;\n}\n\n.svg-display {\n    height: 500px;\n    overflow: hidden;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n}\n\n.react-transform-wrapper {\n    height: 100%;\n}\n",
+              ".code-display {\r\n    display: flex;\r\n    flex-direction: column;\r\n    height: 80%;\r\n}\r\n\r\n.code-display__code-box {\r\n    width: 100%;\r\n    height: 100%;\r\n    background-color: white;\r\n}\r\n\r\n.code-box__line--highlighted {\r\n    background-color: yellow;\r\n}\r\n\r\n.button-container {\r\n    display: flex;\r\n    justify-content: space-between;\r\n}\r\n\r\n.svg-display {\r\n    height: 500px;\r\n    overflow: hidden;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n}\r\n\r\n.react-transform-wrapper {\r\n    height: 100%;\r\n}\r\n",
             ],
             sourceRoot: "",
           },
@@ -45129,7 +45129,7 @@
                                   (a = new Image()),
                                   (o =
                                     "data:image/svg+xml;base64," +
-                                    window.btoa(r.toString())),
+                                    window.btoa(r)),
                                   (a.src = o),
                                   (a.onload = function () {
                                     var e = n.current,
@@ -45805,12 +45805,14 @@
                   s = { type: "text", value: "".concat(t, "\n") }
                 if (0 === a) {
                   var l = _(
-                    d.slice(p + 1, m).concat(
-                      Di({
-                        children: [s],
-                        className: e.properties.className,
-                      }),
-                    ),
+                    d
+                      .slice(p + 1, m)
+                      .concat(
+                        Di({
+                          children: [s],
+                          className: e.properties.className,
+                        }),
+                      ),
                     i,
                   )
                   u.push(l)
@@ -46320,7 +46322,6 @@
         )
       }
       function ji() {
-        "undefined" == typeof window || Vi(window)
         var t = (function (e, t) {
             return (
               (function (e) {
@@ -46393,7 +46394,7 @@
           n = t[0],
           r = t[1],
           a = window.codeText,
-          o = Object.keys(window.svgArray).length,
+          o = window.svgArray.length,
           i = function (e) {
             r(Math.min(Math.max(e, 0), o - 1))
           }
@@ -46414,8 +46415,8 @@
                 { className: "code-display" },
                 e.createElement(Hi, {
                   text: a,
-                  startingLineNumber: Number(window.svgArray[0].lineNumber),
-                  highlightLine: Number(window.svgArray[n].lineNumber),
+                  startingLineNumber: window.svgArray[0].lineNumber,
+                  highlightLine: window.svgArray[n].lineNumber,
                 }),
                 e.createElement(
                   Fr,
@@ -46452,6 +46453,7 @@
           ),
         )
       }
+      "undefined" == typeof window || Vi(window)
       var Wi = a(2265),
         Qi = {}
       ;(Qi.styleTagTransform = ci()),

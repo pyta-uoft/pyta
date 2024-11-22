@@ -13,6 +13,10 @@ from typing import Iterable, Optional
 
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
+SNAPSHOT_DIR = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), "snapshot_testing_snapshots"
+)
+
 
 # The functions below are for snapshot() testing purposes ONLY
 def func1() -> list:
@@ -633,10 +637,12 @@ def test_snapshot_no_save_stdout(capsys):
     assert captured.out == ""
 
 
-def test_snapshot_save_create_svg(tmp_path):
+def test_snapshot_save_create_svg(tmp_path, snapshot):
     """
     Test that snapshot's save feature creates a MemoryViz svg of the stack frame as a file to the specified path.
     """
+
+    snapshot.snapshot_dir = SNAPSHOT_DIR
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -657,25 +663,15 @@ def test_snapshot_save_create_svg(tmp_path):
     ) as gen_svg:
         generated_svg = gen_svg.read()
 
-    # Read expected file
-    with open(
-        os.path.join(
-            current_directory,
-            "snapshot_testing_snapshots",
-            "snapshot_testing_snapshots_expected.svg",
-        ),
-        mode="r",
-        encoding="utf-8",
-    ) as expected_svg_file:
-        expected_svg = expected_svg_file.read()
-
-    assert generated_svg == expected_svg
+    snapshot.assert_match(generated_svg, f"snapshot_testing_snapshots_expected.svg")
 
 
-def test_snapshot_save_stdout():
+def test_snapshot_save_stdout(snapshot):
     """
     Test that snapshot's save feature successfully returns a MemoryViz svg of the stack frame to stdout.
     """
+
+    snapshot.snapshot_dir = SNAPSHOT_DIR
 
     # Calls snapshot in separate file
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -688,19 +684,7 @@ def test_snapshot_save_stdout():
         check=True,
     )
 
-    # Read expected svg file
-    with open(
-        os.path.join(
-            current_directory,
-            "snapshot_testing_snapshots",
-            "snapshot_testing_snapshots_expected_stdout.svg",
-        ),
-        mode="r",
-        encoding="utf-8",
-    ) as expected_svg_file:
-        expected_svg = expected_svg_file.read()
-
-    assert result.stdout == expected_svg
+    snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_stdout.svg")
 
 
 def test_snapshot_only_includes_function_self():

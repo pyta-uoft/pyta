@@ -1,18 +1,18 @@
-def print_natural_number(x: int):
-    """
-    Print number x only if it's a natural number.
-    In CS natural number starts with 0.
+def print_non_negative_number(x: int):
+    """Print number x only if it's greater or equal to 0
 
     Preconditions:
         - x >= 0
     """
-    if x < 0:
-        raise Exception("x is not a natural number")
+    # the if condition is impossible given the function precondition
+    if x < 0:   # Error on this line
+        raise Exception("x is smaller than zero")
     print(x)
 
 
-def invalid_condition(x: bool):
-    if x and not x:
+def impossible_condition(x: bool):
+    # the if condition is self-contradictory
+    if x and not x:     # Error on this line
         print("impossible")
 
 

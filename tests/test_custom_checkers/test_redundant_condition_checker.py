@@ -97,6 +97,23 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_if(condition_node)
 
+    def test_redundant_condition_within_statement(self):
+        src = """
+        def func(x: bool):
+            if x or not x:
+                return x
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        *_, condition_node = mod.nodes_of_class(nodes.If)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
     def test_redundant_condition_multiple_if_else(self):
         src = """
         def func(x: int):

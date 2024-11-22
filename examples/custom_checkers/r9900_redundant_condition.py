@@ -1,16 +1,17 @@
 def return_large_number(x: int) -> int:
-    """
-    Return number x only if it's greater than 1000
+    """Return number x only if it's greater than 1000
 
     Preconditions:
         - x > 1000
     """
-    if x > 1000:
+    # the if condition is already checked by function precondition
+    if x > 1000:   # Error on this line
         return x
 
 
 def nested_condition(x: int) -> int:
     if x > 10:
-        if x > 5:
+        # the condition `x > 5` is already guaranteed by `x > 10`
+        if x > 5:   # Error on this line
             return x
     return 0

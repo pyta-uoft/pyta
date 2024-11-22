@@ -4,13 +4,13 @@ from astroid import nodes
 
 from python_ta.cfg import CFGVisitor
 from python_ta.checkers.redundant_or_impossible_condition_checker import (
-    RedundantOrImpossibleConditionChecker,
+    ConditionLogicChecker,
 )
 from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
-    CHECKER_CLASS = RedundantOrImpossibleConditionChecker
+    CHECKER_CLASS = ConditionLogicChecker
     CONFIG = {"z3": True}
 
     def test_redundant_by_precondition(self):

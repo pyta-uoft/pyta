@@ -18,7 +18,7 @@ from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
 
-class RedundantOrImpossibleConditionChecker(BaseChecker):
+class ConditionLogicChecker(BaseChecker):
     name = "redundant-condition"
     msgs = {
         "R9900": (
@@ -114,4 +114,4 @@ def register(linter: PyLinter) -> None:
     """Required method to auto-register this checker to the linter,
     Register the linter only if `z3` option is turned on.
     """
-    linter.register_checker(RedundantOrImpossibleConditionChecker(linter))
+    linter.register_checker(ConditionLogicChecker(linter))

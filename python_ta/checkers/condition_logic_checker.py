@@ -22,16 +22,15 @@ class ConditionLogicChecker(BaseChecker):
     name = "redundant-condition"
     msgs = {
         "R9900": (
-            """This conditional statement is already true given the preceding code;
+            """This condition will always evaluate to True;
              consider removing redundant check.""",
             "redundant-condition",
-            "Used when an If or While statement is tautologically true based on preceding Z3 constraints."
-            " Enabled when Z3 option is on.",
+            "Used when an If or While statement is always True. Requires the z3 configuration option to be True.",
         ),
         "R9901": (
-            """This conditional statement is never true given the preceding code.""",
+            """This condition will always evaluate to False""",
             "impossible-condition",
-            "Used when an If or While statement contradicts preceding Z3 constraints. Enable when Z3 option is on.",
+            "Used when an If or While statement is always False. Requires the z3 configuration option to be True.",
         ),
     }
     options = (
@@ -46,14 +45,10 @@ class ConditionLogicChecker(BaseChecker):
         ),
     )
 
-    def __init__(self, linter=None) -> None:
-        super().__init__(linter=linter)
-
     @only_required_for_messages("redundant-condition", "impossible-condition")
     def visit_if(self, node: nodes.If) -> None:
         """Visit if statement"""
         self._check_condition(node)
-        # handle else branch
 
     @only_required_for_messages("redundant-condition", "impossible-condition")
     def visit_while(self, node: nodes.While) -> None:
@@ -111,7 +106,5 @@ class ConditionLogicChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
-    """Required method to auto-register this checker to the linter,
-    Register the linter only if `z3` option is turned on.
-    """
+    """Required method to auto-register this checker to the linter."""
     linter.register_checker(ConditionLogicChecker(linter))

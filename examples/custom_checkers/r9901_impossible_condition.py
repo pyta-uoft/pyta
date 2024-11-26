@@ -1,4 +1,4 @@
-def print_non_negative_number(x: int):
+def print_none_negative_number(x: int):
     """Print number x only if it's greater or equal to 0
 
     Preconditions:
@@ -11,18 +11,18 @@ def print_non_negative_number(x: int):
 
 
 def impossible_condition(x: bool):
-    # the if condition is self-contradictory
+    # the if condition is always false
     if x and not x:     # Error on this line
         print("impossible")
 
 
-def spell_number(x: int) -> str:
-    """ Spell numbers 0 to 2"""
+def Display_number(x: int) -> str:
+    """Display numbers 0 to 2 in word"""
     if x == 0:
-        return "zero"
+        "zero"
     elif x == 1:
         return "one"
     elif x == 2:
         return "two"
-    elif x == 2:    # this condition is impossible
+    elif x == 2:    # Error on this line
         return "two again"

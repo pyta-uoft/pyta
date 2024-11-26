@@ -73,35 +73,20 @@ class ConditionLogicChecker(BaseChecker):
 
         for pred in node_block.predecessors:
             if all(
-                self._check_redundant_condition(
-                    z3.And(*[c for c in constraints]), node_block.z3_constraint
-                )
+                self._check_unsat(z3.Not(z3.And(c for c in constraints)), node_block.z3_constraint)
                 for constraints in pred.z3_constraints.values()
             ):
                 self.add_message("redundant-condition", node=node)
             if all(
-                self._check_impossible_condition(
-                    z3.And(*[c for c in constraints]), node_block.z3_constraint
-                )
+                self._check_unsat(z3.And(c for c in constraints), node_block.z3_constraint)
                 for constraints in pred.z3_constraints.values()
             ):
                 self.add_message("impossible-condition", node=node)
 
-    def _check_redundant_condition(
-        self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef
-    ) -> bool:
+    def _check_unsat(self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef) -> bool:
         """Check if the condition is redundant."""
         solver = z3.Solver()
         solver.add(z3.And(prev_constraints, node_constraint) != prev_constraints)
-        return solver.check() == z3.unsat
-
-    def _check_impossible_condition(
-        self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef
-    ) -> bool:
-        """Check if the condition is impossible."""
-        solver = z3.Solver()
-        solver.add(prev_constraints)
-        solver.add(node_constraint)
         return solver.check() == z3.unsat
 
 

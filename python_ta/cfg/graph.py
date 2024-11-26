@@ -241,7 +241,7 @@ class ControlFlowGraph:
             if (
                 current_edge.target == self.end
                 or current_edge.target in visited_nodes
-                or all(edge in visited_edges for edge in current_edge.target.successors)
+                or set(current_edge.target.successors).issubset(visited_edges)
             ):
                 paths.append(current_path.copy())
             else:

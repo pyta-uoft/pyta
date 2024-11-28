@@ -13,9 +13,9 @@ from pylint import lint
 
 import python_ta
 
-_EXAMPLES_PATH = "../examples/pylint/"
-_CUSTOM_CHECKER_PATH = "../examples/custom_checkers/"
-_PYCODESTYLE_PATH = "../examples/custom_checkers/e9989_pycodestyle/"
+_EXAMPLES_PATH = "examples/pylint/"
+_CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
+_PYCODESTYLE_PATH = "examples/custom_checkers/e9989_pycodestyle/"
 
 _EXAMPLE_PREFIX_REGEX = r"[cerfw]\d{4}"
 _PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
@@ -77,7 +77,6 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
     (and descriptions if include_msg is True).
     """
     sys.stdout = StringIO()
-    python_ta.PYLINT_PATCHED = False
     python_ta.check_all(
         module_name=get_file_paths(paths),
         config={

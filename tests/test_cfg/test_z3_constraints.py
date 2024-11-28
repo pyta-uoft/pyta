@@ -157,7 +157,7 @@ def test_while_loop() -> None:
     expected_while_true_path = [
         {x > 5, y > 10},
         {x > 5, y > 10, x + y > 15},
-        {},
+        set(),
     ]
     expected_while_false_path = [
         {x > 5, y > 10},
@@ -346,7 +346,7 @@ def test_nested_while() -> None:
         {x > 10, y > 10},
         {x > 10, y > 10, x > 0},
         {x > 10, y > 10, x > 0, y > 5},
-        {},
+        set(),
     ]
     expected_outer_while_path = [
         {x > 10, y > 10},
@@ -484,7 +484,7 @@ def test_continue_in_while() -> None:
         {x > 10, y > 0},
         {x > 10, y > 0, x > 0},
         {x > 10, y > 0, x > 0, z3.Not(x < y)},
-        {},
+        set(),
     ]
     expected_other_path = [
         {x > 10, y > 0},
@@ -591,8 +591,8 @@ def test_variable_reassignment_in_branch() -> None:
     expected_if_path = [
         {z3.Or(x == 1.0, x == 2.0, x == 3.0)},
         {z3.Or(x == 1.0, x == 2.0, x == 3.0), x < 5},
-        {},
-        {},
+        set(),
+        set(),
     ]
     expected_else_path = [
         {z3.Or(x == 1.0, x == 2.0, x == 3.0)},

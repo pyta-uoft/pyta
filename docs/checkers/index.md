@@ -2703,8 +2703,7 @@ python_ta.check_all(config={
 
 ### Redundant Condition (R9900)
 
-This error occurs when an `if` or `while` condition is guaranteed to be true given the program control flow leading
-to the conditional statement.
+This error occurs when an `if` or `while` condition is guaranteed to be true.
 
 Example:
 
@@ -2724,8 +2723,7 @@ python_ta.check_all(config={
 
 ### Impossible Condition (R9901)
 
-This error occurs when an `if` or `while` condition is always false either due to either contradictions within the
-condtional statement or program control flow leading to the conditional statement.
+This error occurs when an `if` or `while` condition is guaranteed to be false.
 
 Example:
 

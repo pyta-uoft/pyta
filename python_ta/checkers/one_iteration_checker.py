@@ -74,8 +74,8 @@ class OneIterationChecker(BaseChecker):
                 for succ in start.cfg_block.successors
             ):
                 return False
-            # filter out edges from unfeasible blocks
-            preds = [pred for pred in preds if pred.source.is_feasible]
+            # filter out unfeasible edges
+            preds = [pred for pred in preds if pred.is_feasible]
 
         for pred in preds:
             stmt = pred.source.statements[0]

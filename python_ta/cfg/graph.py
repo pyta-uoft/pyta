@@ -56,7 +56,7 @@ class ControlFlowGraph:
     # z3 constraints of preconditions
     precondition_constraints: List[ExprRef]
     # map from variable names to z3 variables
-    _z3_vars: Dict[str, ExprRef]
+    z3_vars: Dict[str, ExprRef]
 
     def __init__(self, cfg_id: int = 0) -> None:
         self.block_count = 0
@@ -64,7 +64,7 @@ class ControlFlowGraph:
         self.unreachable_blocks = set()
         self.start = self.create_block()
         self.end = self.create_block()
-        self._z3_vars = {}
+        self.z3_vars = {}
         self.precondition_constraints = []
 
     def add_arguments(self, args: Arguments) -> None:
@@ -76,7 +76,7 @@ class ControlFlowGraph:
             # Parse types
             parser = Z3Parser()
             z3_vars = parser.parse_arguments(args)
-            self._z3_vars.update(z3_vars)
+            self.z3_vars.update(z3_vars)
 
     def create_block(
         self,
@@ -276,7 +276,7 @@ class ControlFlowGraph:
 
         for path_id, path in enumerate(self.get_paths()):
             # starting a new path
-            z3_environment = Z3Environment(self._z3_vars, self.precondition_constraints)
+            z3_environment = Z3Environment(self.z3_vars, self.precondition_constraints)
             for edge in path:
                 # traverse through edge
                 if edge.condition is not None:

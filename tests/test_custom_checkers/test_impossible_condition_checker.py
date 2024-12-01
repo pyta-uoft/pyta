@@ -262,3 +262,23 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
+
+    def test_not_impossible_by_reassignment_one_path(self):
+        src = """
+        def func(x: str, y: int):
+            '''
+            Preconditions:
+                - x in {"a", "b"}
+            '''
+            if y > 0:
+                x = "c"
+            if x == "c":
+                print(x)
+        """
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor())
+        *_, condition_node = mod.nodes_of_class(nodes.If)
+
+        with self.assertNoMessages():
+            self.checker.visit_if(condition_node)

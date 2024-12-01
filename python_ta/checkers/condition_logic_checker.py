@@ -76,17 +76,19 @@ class ConditionLogicChecker(BaseChecker):
         env = Z3Environment(node.frame().cfg.z3_vars, [])
         z3_condition = env.parse_constraint(condition_node)
 
-        for edge in (pred for pred in node_block.predecessors if pred.is_feasible):
-            if all(
-                self._check_unsat(z3.And(*constraints), z3.Not(z3_condition))
-                for constraints in edge.z3_constraints.values()
-            ):
-                self.add_message("redundant-condition", node=node)
-            if all(
-                self._check_unsat(z3.And(*constraints), z3_condition)
-                for constraints in edge.z3_constraints.values()
-            ):
-                self.add_message("impossible-condition", node=node)
+        if all(
+            self._check_unsat(z3.And(*constraints), z3.Not(z3_condition))
+            for edge in (pred for pred in node_block.predecessors if pred.is_feasible)
+            for constraints in edge.z3_constraints.values()
+        ):
+            self.add_message("redundant-condition", node=node)
+
+        if all(
+            self._check_unsat(z3.And(*constraints), z3_condition)
+            for edge in (pred for pred in node_block.predecessors if pred.is_feasible)
+            for constraints in edge.z3_constraints.values()
+        ):
+            self.add_message("impossible-condition", node=node)
 
     def _check_unsat(self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef) -> bool:
         """Check if the condition is redundant."""

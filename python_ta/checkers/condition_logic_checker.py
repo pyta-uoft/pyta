@@ -7,9 +7,12 @@ from typing import Any, Union
 try:
     import z3
 
+    from ..cfg.graph import Z3Environment
+
     z3_dependency_available = True
 except ImportError:
     z3 = Any
+    Z3Environment = Any
     z3_dependency_available = False
 
 from astroid import nodes
@@ -68,25 +71,27 @@ class ConditionLogicChecker(BaseChecker):
 
         node_block = node.cfg_block
 
-        if not node_block.is_feasible or node_block.z3_constraint is None:
-            return
+        # create node condition z3 constraint
+        condition_node = node.test
+        env = Z3Environment(node.frame().cfg.z3_vars, [])
+        z3_condition = env.parse_constraint(condition_node)
 
-        for pred in node_block.predecessors:
+        for edge in (pred for pred in node_block.predecessors if pred.is_feasible):
             if all(
-                self._check_unsat(z3.Not(z3.And(c for c in constraints)), node_block.z3_constraint)
-                for constraints in pred.z3_constraints.values()
+                self._check_unsat(z3.And(*constraints), z3.Not(z3_condition))
+                for constraints in edge.z3_constraints.values()
             ):
                 self.add_message("redundant-condition", node=node)
             if all(
-                self._check_unsat(z3.And(c for c in constraints), node_block.z3_constraint)
-                for constraints in pred.z3_constraints.values()
+                self._check_unsat(z3.And(*constraints), z3_condition)
+                for constraints in edge.z3_constraints.values()
             ):
                 self.add_message("impossible-condition", node=node)
 
     def _check_unsat(self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef) -> bool:
         """Check if the condition is redundant."""
         solver = z3.Solver()
-        solver.add(z3.And(prev_constraints, node_constraint) != prev_constraints)
+        solver.add(z3.And(prev_constraints, node_constraint))
         return solver.check() == z3.unsat
 
 

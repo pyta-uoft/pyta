@@ -18,6 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
 - Added integration with MemoryViz Webstepper
 - Added `z3` option to `one-iteration-checker` to only check for feasible code blocks based on edge z3 constraints
+- Added reporting for errors raised by custom transforms (`Z3Visitor`, `CFGVisitor`)
 
 ### 💫 New checkers
 
@@ -34,6 +35,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added strict type checking support for nested and union types (e.g., `list[int]`, `dict[float, int]`, `Union[int, float]`)
 - Fixed issue where CFG edges from loop body to loop condition block was ignored during augmenting edge z3 constraints
 - Fixed issue in `one-iteration-checker` where the message was not correctly reported for `while` loops when `z3` option is on
+- Fixed crash when z3-solver is not installed
 
 ### 🔧 Internal changes
 

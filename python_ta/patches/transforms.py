@@ -1,10 +1,11 @@
 """Patch to add transforms for setting type constraints and creating control flow graphs.
 """
 
+import logging
+
 from pylint.lint import PyLinter
 
 from ..cfg.visitor import CFGVisitor
-from ..transforms.z3_visitor import Z3Visitor
 
 
 def patch_ast_transforms(z3: bool):
@@ -12,13 +13,24 @@ def patch_ast_transforms(z3: bool):
 
     def new_get_ast(self, filepath, modname, data):
         ast = old_get_ast(self, filepath, modname, data)
-        if ast is not None:
+        if ast is None:
+            return None
+
+        # Run the Z3Visitor
+        if z3:
             try:
-                if z3:
-                    ast = Z3Visitor().visitor.visit(ast)
-                ast.accept(CFGVisitor())
-            except:
-                pass
+                from ..transforms.z3_visitor import Z3Visitor
+
+                ast = Z3Visitor().visitor.visit(ast)
+            except Exception as e:
+                logging.warning(f"Could not run Z3Visitor: {e}")
+
+        # Run the CFGVisitor
+        try:
+            ast.accept(CFGVisitor())
+        except Exception as e:
+            logging.warning(f"Could not run Z3Visitor: {e}")
+
         return ast
 
     PyLinter.get_ast = new_get_ast

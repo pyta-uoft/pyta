@@ -12,27 +12,33 @@ DIR_PATH = os.path.normpath(
 
 # Define parameter sets for different error and no-error tests
 error_params = [
-    ("E115", 2, 0, "expected an indented block (comment)"),
-    ("E122", 2, 0, "continuation line missing indentation or outdented"),
-    ("E123", 3, 4, "closing bracket does not match indentation of opening bracket's line"),
-    ("E125", 2, 4, "continuation line with same indent as next logical line"),
-    ("E127", 2, 19, "continuation line over-indented for visual indent"),
-    ("E129", 4, 4, "visually indented line with same indent as next logical line"),
-    ("E131", 4, 8, "continuation line unaligned for hanging indent"),
-    ("E203", 1, 30, "whitespace before ':'"),
-    ("E222", 1, 3, "multiple spaces after operator"),
-    ("E223", 1, 1, "tab before operator"),
-    ("E224", 1, 3, "tab after operator"),
-    ("E226", 1, 5, "missing whitespace around arithmetic operator"),
-    ("E227", 1, 5, "missing whitespace around bitwise or shift operator"),
-    ("E228", 1, 5, "missing whitespace around modulo operator"),
-    ("E262", 1, 7, "inline comment should start with '# '"),
-    ("E265", 1, 0, "block comment should start with '# '"),
-    ("E266", 1, 0, "too many leading '#' for block comment"),
-    ("E275", 1, 16, "missing whitespace after keyword"),
-    ("E301", 5, 4, "expected 1 blank line, found 0"),
-    ("E303", 6, 0, "too many blank lines (3)"),
-    ("E304", 12, 0, "blank lines found after function decorator"),
+    ("E115", [(2, 0, "expected an indented block (comment)")]),
+    ("E122", [(2, 0, "continuation line missing indentation or outdented")]),
+    ("E123", [(3, 4, "closing bracket does not match indentation of opening bracket's line")]),
+    ("E125", [(2, 4, "continuation line with same indent as next logical line")]),
+    ("E127", [(2, 19, "continuation line over-indented for visual indent")]),
+    ("E129", [(4, 4, "visually indented line with same indent as next logical line")]),
+    ("E131", [(4, 8, "continuation line unaligned for hanging indent")]),
+    ("E203", [(1, 30, "whitespace before ':'")]),
+    ("E222", [(1, 3, "multiple spaces after operator")]),
+    ("E223", [(1, 1, "tab before operator")]),
+    ("E224", [(1, 3, "tab after operator")]),
+    ("E226", [(1, 5, "missing whitespace around arithmetic operator")]),
+    ("E227", [(1, 5, "missing whitespace around bitwise or shift operator")]),
+    ("E228", [(1, 5, "missing whitespace around modulo operator")]),
+    (
+        "E262",
+        [
+            (1, 7, "inline comment should start with '# '"),
+            (2, 7, "inline comment should start with '# '"),
+        ],
+    ),
+    ("E265", [(1, 0, "block comment should start with '# '")]),
+    ("E266", [(1, 0, "too many leading '#' for block comment")]),
+    ("E275", [(1, 16, "missing whitespace after keyword")]),
+    ("E301", [(5, 4, "expected 1 blank line, found 0")]),
+    ("E303", [(6, 0, "too many blank lines (3)")]),
+    ("E304", [(12, 0, "blank lines found after function decorator")]),
 ]
 
 
@@ -40,16 +46,19 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = PycodestyleChecker
     CONFIG = {"pycodestyle_ignore": ["E24"]}
 
-    @pytest.mark.parametrize("msg_id, line, col, desc", error_params)
-    def test_error_cases(self, msg_id, line, col, desc):
+    @pytest.mark.parametrize("msg_id, args", error_params)
+    def test_error_cases(self, msg_id, args):
         """Parameterized test that confirms various PEP8 errors are triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, msg_id.lower() + "_error.py"))
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="pep8-errors",
-                line=line,
-                args=(msg_id, f"line {line}, column {col}: {desc}"),
-            ),
+            *[
+                pylint.testutils.MessageTest(
+                    msg_id="pep8-errors",
+                    line=line,
+                    args=(msg_id, f"line {line}, column {col}: {desc}"),
+                )
+                for line, col, desc in args
+            ],
             ignore_position=True,
         ):
             self.checker.process_module(mod)

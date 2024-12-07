@@ -440,11 +440,11 @@ def render_pep8_errors_e262(msg, _node, source_lines=None):
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
 
-    keyword = source_lines[line - 1][col:].split()[1]
-    keyword_idx = source_lines[line - 1][col:].index(keyword) + col
+    source_line = source_lines[line - 1]
+    keyword_idx = len(source_line) - len(source_line[col:].lstrip("# \t"))
 
     yield from render_context(line - 2, line, source_lines)
-    yield (line, slice(col, keyword_idx), LineType.ERROR, source_lines[line - 1])
+    yield (line, slice(col, keyword_idx), LineType.ERROR, source_line)
     yield from render_context(line + 1, line + 3, source_lines)
 
 

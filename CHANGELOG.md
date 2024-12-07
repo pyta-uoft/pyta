@@ -36,6 +36,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue where CFG edges from loop body to loop condition block was ignored during augmenting edge z3 constraints
 - Fixed issue in `one-iteration-checker` where the message was not correctly reported for `while` loops when `z3` option is on
 - Fixed crash when z3-solver is not installed
+- Fixed crash when an inline comment had no spaces after the `#`
 
 ### 🔧 Internal changes
 

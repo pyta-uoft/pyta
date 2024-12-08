@@ -9,6 +9,7 @@ import re
 import sys
 import types
 import webbrowser
+from pathlib import Path
 from typing import Any, Optional
 
 from bs4 import BeautifulSoup
@@ -45,6 +46,7 @@ class SnapshotTracer:
         Args:
             output_directory: The directory to save the snapshots, defaulting to the current directory.
                 **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.
+                The directory will be created if it does not exist.
             webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
@@ -60,6 +62,8 @@ class SnapshotTracer:
         self._snapshot_args["exclude_frames"] = copy.deepcopy(kwargs.get("exclude_frames", []))
         self._snapshot_args["exclude_frames"].append("_trace_func")
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
+        Path(self.output_directory).mkdir(parents=True, exist_ok=True)
+
         self.webstepper = webstepper
         self._first_line = float("inf")
 

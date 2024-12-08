@@ -22,6 +22,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added reporting for errors raised by custom transforms (`Z3Visitor`, `CFGVisitor`)
 - Ensured `SnapshotTracer` does not include the `_trace_func` stack frame
 - Enabled `SnapshotTracer` to create its `output_directory` argument if it doesn't already exist
+- Changed `SnapshotTracer`'s Webstepper code line number to align with the source code line number
 
 ### 💫 New checkers
 

@@ -54,6 +54,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added mock `webbrowser.open` in tests to prevent browser tabs and HTTP requests during `python_ta.check_all()` executions.
 - Added `pytest-mock` as a development dependency
 - Make `test_snapshot.py::test_snapshot_serializes_unserializable_value` able to run on Windows.
+- Added GitHub Action workflow for automatically publishing releases to PyPI
 
 ## [2.8.1] - 2024-08-19
 

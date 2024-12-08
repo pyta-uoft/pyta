@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Added `include_frames` filter to `snapshot`
+- Added `exclude_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 - Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
@@ -19,6 +20,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added integration with MemoryViz Webstepper
 - Added `z3` option to `one-iteration-checker` to only check for feasible code blocks based on edge z3 constraints
 - Added reporting for errors raised by custom transforms (`Z3Visitor`, `CFGVisitor`)
+- Ensured `SnapshotTracer` does not include the `_trace_func` stack frame
 
 ### 💫 New checkers
 

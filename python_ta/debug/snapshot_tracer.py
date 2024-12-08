@@ -57,6 +57,8 @@ class SnapshotTracer:
         self._snapshots = []
         self._snapshot_args = kwargs
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
+        self._snapshot_args["exclude_frames"] = copy.deepcopy(kwargs.get("exclude_frames", []))
+        self._snapshot_args["exclude_frames"].append("_trace_func")
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
         self.webstepper = webstepper
         self._first_line = float("inf")

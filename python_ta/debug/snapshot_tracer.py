@@ -83,8 +83,7 @@ class SnapshotTracer:
                 **self._snapshot_args,
             )
 
-            line_number = frame.f_lineno - self._first_line + 1
-            self._add_svg_to_map(filename, line_number)
+            self._add_svg_to_map(filename, frame.f_lineno)
 
     def _add_svg_to_map(self, filename: str, line: int) -> None:
         """Add the SVG in filename to self._snapshots"""

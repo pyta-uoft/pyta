@@ -60,6 +60,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Make `test_snapshot.py::test_snapshot_serializes_unserializable_value` able to run on Windows.
 - Added GitHub Action workflow for automatically publishing releases to PyPI
 - Update `SnapshotTracer` tests to use `memory-viz@0.5.0` and prevent browser from opening
+- Updated bundled webstepper version and removed source map, and excluded the bundle from prettier pre-commit check
 
 ## [2.8.1] - 2024-08-19
 

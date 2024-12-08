@@ -15,7 +15,7 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
 )
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
-MEMORY_VIZ_VERSION = "0.4.0"
+MEMORY_VIZ_VERSION = "0.5.0"
 
 
 # Function inputs for testing the SnapshotTracer
@@ -237,7 +237,7 @@ class TestSnapshotTracer:
                 {"snapshot-0.svg": actual_file.read()}, func_no_output_dir.__name__
             )
 
-    def test_generated_webstepper_html(self, snapshot, tmp_path):
+    def test_generated_webstepper_html(self, snapshot, tmp_path, prevent_webbrowser_and_httpserver):
         """
         Test that SnapshotTracer generates the correct Webstepper HTML for the given code.
 

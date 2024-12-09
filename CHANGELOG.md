@@ -15,7 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 - Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
 - Included the name of redundant variable in `E9959 redundant-assignment` message
-- Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
+- Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8. (No new checkers are enabled by default.)
 - Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
 - Added integration with MemoryViz Webstepper
 - Added `z3` option to `one-iteration-checker` to only check for feasible code blocks based on edge z3 constraints

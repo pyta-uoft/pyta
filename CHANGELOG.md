@@ -9,6 +9,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+### 💫 New checkers
+
+### 🐛 Bug fixes
+
+### 🔧 Internal changes
+
+## [2.9.0] - 2024-12-09
+
+### ✨ Enhancements
+
 - Added `include_frames` filter to `snapshot`
 - Added `exclude_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`

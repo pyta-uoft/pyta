@@ -13,9 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Added `python_ta/debug/webstepper` to project `MANIFEST.in`
-
 ### 🔧 Internal changes
+
+## [2.9.1] - 2024-12-09
+
+### 🐛 Bug fixes
+
+- Added `python_ta/debug/webstepper` to project `MANIFEST.in`
 
 ## [2.9.0] - 2024-12-09
 

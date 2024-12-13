@@ -154,7 +154,59 @@ def test_while_loop() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     y = z3.Int("y")
-    expected_while_true_path = [{x > 5, y > 10}, {x > 5, y > 10, x + y > 15}]
+    expected_while_true_path = [
+        {x > 5, y > 10},
+        {x > 5, y > 10, x + y > 15},
+        set(),
+    ]
+    expected_while_false_path = [
+        {x > 5, y > 10},
+        {x > 5, y > 10, z3.Not(x + y > 15)},
+        {x > 5, y > 10, z3.Not(x + y > 15)},
+    ]
+
+    actual_path_first = []
+    actual_path_second = []
+    for edge in cfg.get_edges():
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
+
+    assert len(actual_path_first) == len(expected_while_true_path)
+    assert len(actual_path_second) == len(expected_while_false_path)
+    assert (
+        set(actual) == expected
+        for actual, expected in zip(actual_path_first, expected_while_true_path)
+    )
+    assert (
+        set(actual) == expected
+        for actual, expected in zip(actual_path_second, expected_while_false_path)
+    )
+
+
+def test_while_loop_infinite() -> None:
+    src = """
+    def func(x: int, y: int) -> None:
+        '''
+        Preconditions:
+            - x > 5
+            - y > 10
+        '''
+        while x + y > 15:
+            print(x + y)
+        print(x + y)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.Int("x")
+    y = z3.Int("y")
+    expected_while_true_path = [
+        {x > 5, y > 10},
+        {x > 5, y > 10, x + y > 15},
+        {x > 5, y > 10, x + y > 15},
+    ]
     expected_while_false_path = [
         {x > 5, y > 10},
         {x > 5, y > 10, z3.Not(x + y > 15)},
@@ -294,10 +346,12 @@ def test_nested_while() -> None:
         {x > 10, y > 10},
         {x > 10, y > 10, x > 0},
         {x > 10, y > 10, x > 0, y > 5},
+        set(),
     ]
     expected_outer_while_path = [
         {x > 10, y > 10},
         {x > 10, y > 10, x > 0},
+        {x > 10, y > 10, x > 0, z3.Not(y > 5)},
         {x > 10, y > 10, x > 0, z3.Not(y > 5)},
     ]
     expected_other_path = [
@@ -365,6 +419,7 @@ def test_break_in_while() -> None:
         {x > y, condition},
         {x > y, condition, condition},
         {x > y, condition, condition, z3.Not(x < y)},
+        {x > y, condition, condition, z3.Not(x < y)},
     ]
     expected_other_path = [
         {x > y, condition},
@@ -423,11 +478,13 @@ def test_continue_in_while() -> None:
         {x > 10, y > 0},
         {x > 10, y > 0, x > 0},
         {x > 10, y > 0, x > 0, x < y},
+        {x > 10, y > 0, x > 0, x < y},
     ]
     expected_not_continue_path = [
         {x > 10, y > 0},
         {x > 10, y > 0, x > 0},
         {x > 10, y > 0, x > 0, z3.Not(x < y)},
+        set(),
     ]
     expected_other_path = [
         {x > 10, y > 0},
@@ -534,8 +591,8 @@ def test_variable_reassignment_in_branch() -> None:
     expected_if_path = [
         {z3.Or(x == 1.0, x == 2.0, x == 3.0)},
         {z3.Or(x == 1.0, x == 2.0, x == 3.0), x < 5},
-        {},
-        {},
+        set(),
+        set(),
     ]
     expected_else_path = [
         {z3.Or(x == 1.0, x == 2.0, x == 3.0)},

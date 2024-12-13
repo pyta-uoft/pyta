@@ -57,6 +57,7 @@ def snapshot(
     memory_viz_args: Optional[list[str]] = None,
     memory_viz_version: str = "latest",
     include_frames: Optional[Iterable[str | re.Pattern]] = None,
+    exclude_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
 ):
     """Capture a snapshot of local variables from the current and outer stack frames
@@ -72,6 +73,8 @@ def snapshot(
     include_frames can be used to specify a collection of function names, either as strings or regular expressions,
     whose variables will be captured. By default, all variables in all functions will be captured if no `include_frames`
     argument is provided.
+    exclude_frames can be used to specify a collection of function names, either as strings or regular expressions,
+    whose variables should be excluded.
     exclude_vars can be used to specify a collection of variable names, either as strings or regular expressions,
     that will be excluded from the snapshot. By default, all variables will be captured if no `exclude_vars` is provided.
     """
@@ -79,16 +82,28 @@ def snapshot(
     frame = inspect.currentframe().f_back
 
     while frame:
-        if include_frames is None or any(
-            re.search(regex, frame.f_code.co_name) for regex in include_frames
-        ):
-            if frame.f_code.co_name != "<module>":
-                local_vars = get_filtered_local_variables(frame, exclude_vars)
-                variables.append({frame.f_code.co_name: local_vars})
-            else:
-                global_vars = get_filtered_global_variables(frame)
-                variables.append(global_vars)
+        frame_name = frame.f_code.co_name
 
+        # Check whether frame_name is included
+        if include_frames is not None and all(
+            not re.search(regex, frame_name) for regex in include_frames
+        ):
+            frame = frame.f_back
+            continue
+
+        # Check whether frame_name is excluded
+        if exclude_frames is not None and any(
+            re.search(regex, frame_name) for regex in exclude_frames
+        ):
+            frame = frame.f_back
+            continue
+
+        if frame_name != "<module>":
+            local_vars = get_filtered_local_variables(frame, exclude_vars)
+            variables.append({frame_name: local_vars})
+        else:
+            global_vars = get_filtered_global_variables(frame)
+            variables.append(global_vars)
         frame = frame.f_back
 
     if save:

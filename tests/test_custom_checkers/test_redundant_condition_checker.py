@@ -21,10 +21,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x > 5:
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
@@ -39,10 +36,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
                 if x > 3:
                     print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        *_, condition_node = mod.nodes_of_class(nodes.If)
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
@@ -61,10 +55,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
                 if x != 0:
                     print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
@@ -84,10 +75,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             else:
                 return 0
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        *_, condition_node = mod.nodes_of_class(nodes.If)
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
@@ -101,10 +89,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x or not x:
                 return x
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        *_, condition_node = mod.nodes_of_class(nodes.If)
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
@@ -130,10 +115,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             else:
                 print(0)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        _, _, condition_node, _ = mod.nodes_of_class(nodes.If)
+        _, _, condition_node, _ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node),
@@ -151,10 +133,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x != "abc":
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
@@ -169,10 +148,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x > 10 and x < 15:
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
@@ -189,10 +165,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x > 0:
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
@@ -207,10 +180,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x > 0:
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
@@ -226,10 +196,7 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x == 1.0 or x == 2.0:
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        condition_node, *_ = mod.nodes_of_class(nodes.If)
+        condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
@@ -246,10 +213,14 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
             if x == "a" or x == "b":
                 print(x)
         """
-        z3v = Z3Visitor()
-        mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
-        *_, condition_node = mod.nodes_of_class(nodes.If)
+
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
+
+    def _apply_cfg_visitor(self, src: str) -> nodes.NodeNG:
+        z3v = Z3Visitor()
+        mod = z3v.visitor.visit(astroid.parse(src))
+        mod.accept(CFGVisitor(options={"separate-condition-blocks": True}))
+        return mod

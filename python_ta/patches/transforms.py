@@ -16,7 +16,9 @@ def patch_ast_transforms(z3: bool):
             try:
                 if z3:
                     ast = Z3Visitor().visitor.visit(ast)
-                ast.accept(CFGVisitor())
+                    ast.accept(CFGVisitor(options={"separate-condition-blocks": True}))
+                else:
+                    ast.accept(CFGVisitor())
             except:
                 pass
         return ast

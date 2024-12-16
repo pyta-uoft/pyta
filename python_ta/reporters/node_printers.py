@@ -646,6 +646,33 @@ def render_missing_return_statement(msg, node, source_lines=None):
     yield from render_context(msg.end_line + 1, msg.end_line + 3, source_lines)
 
 
+def render_static_type_checker_errors(msg, _node=None, source_lines=None):
+    """Render a message for incompatible argument types."""
+    start_line = msg.line
+    start_col = msg.column
+    end_line = msg.end_line
+    end_col = msg.end_column
+    yield from render_context(start_line - 2, start_line, source_lines)
+
+    if start_line == end_line:
+        # Single-line error
+        yield (
+            start_line,
+            slice(start_col - 1, end_col),
+            LineType.ERROR,
+            source_lines[start_line - 1],
+        )
+    else:
+        # Multi-line error
+        yield (start_line, slice(start_col, None), LineType.ERROR, source_lines[start_line - 1])
+        yield from (
+            (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
+            for line in range(start_line + 1, end_line)
+        )
+        yield (end_line, slice(None, end_col), LineType.ERROR, source_lines[end_line - 1])
+    yield from render_context(end_line + 1, end_line + 3, source_lines)
+
+
 CUSTOM_MESSAGES = {
     "missing-module-docstring": render_missing_docstring,
     "missing-class-docstring": render_missing_docstring,
@@ -657,6 +684,12 @@ CUSTOM_MESSAGES = {
     "missing-space-in-doctest": render_missing_space_in_doctest,
     "pep8-errors": render_pep8_errors,
     "missing-return-statement": render_missing_return_statement,
+    "incompatible-argument-type": render_static_type_checker_errors,
+    "incompatible-assignment": render_static_type_checker_errors,
+    "list-item-type-mismatch": render_static_type_checker_errors,
+    "unsupported-operand-types": render_static_type_checker_errors,
+    "union-attr-error": render_static_type_checker_errors,
+    "dict-item-type-mismatch": render_static_type_checker_errors,
 }
 
 

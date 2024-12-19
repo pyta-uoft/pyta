@@ -11,6 +11,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+- `redundant-condition`: Provide error message when a conditional statement within a function is guaranteed true. This checker requires `z3` option to be turned on.
+- `impossible-condition`: Provide error message when a conditional statement within a function is guaranteed false. This checker requires `z3` option to be turned on.
+
 ### 🐛 Bug fixes
 
 ### 🔧 Internal changes
@@ -43,8 +46,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 💫 New checkers
 
 - `unmentioned-parameter`: Provide error message when a function parameter is not mentioned by name in the function's docstring. By default, this checker is disabled.
-- `redundant-condition`: Provide error message when a conditional statement within a function is guaranteed true. This checker requires `z3` option to be turned on.
-- `impossible-condition`: Provide error message when a conditional statement within a function is guaranteed false. This checker requires `z3` option to be turned on.
 
 ### 🐛 Bug fixes
 

@@ -1,4 +1,4 @@
-def print_none_negative_number(x: int):
+def print_none_negative_number(x: int) -> None:
     """Print number x only if it's greater or equal to 0
 
     Preconditions:
@@ -10,13 +10,13 @@ def print_none_negative_number(x: int):
     print(x)
 
 
-def impossible_condition(x: bool):
+def impossible_condition(x: bool) -> None:
     # the if condition is always false
     if x and not x:     # Error on this line
         print("impossible")
 
 
-def Display_number(x: int) -> str:
+def display_number(x: int) -> str:
     """Display numbers 0 to 2 in word"""
     if x == 0:
         "zero"

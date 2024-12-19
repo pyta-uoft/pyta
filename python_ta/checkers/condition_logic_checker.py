@@ -1,6 +1,8 @@
 """
-Check for redundant If or While conditions in functions based on z3 constraints
+Check for redundant/impossible If or While conditions in functions based on z3 constraints
 """
+
+from __future__ import annotations
 
 from typing import Any, Union
 
@@ -25,13 +27,12 @@ class ConditionLogicChecker(BaseChecker):
     name = "redundant-condition"
     msgs = {
         "R9900": (
-            """This condition will always evaluate to True;
-             consider removing redundant check.""",
+            """This condition will always evaluate to True.""",
             "redundant-condition",
             "Used when an If or While statement is always True. Requires the z3 configuration option to be True.",
         ),
         "R9901": (
-            """This condition will always evaluate to False""",
+            """This condition will always evaluate to False.""",
             "impossible-condition",
             "Used when an If or While statement is always False. Requires the z3 configuration option to be True.",
         ),
@@ -59,8 +60,13 @@ class ConditionLogicChecker(BaseChecker):
         self._check_condition(node)
 
     def _check_condition(self, node: Union[nodes.If, nodes.While]) -> None:
-        """A condition statement is redundant if for every feasible execution path
-        leading to the node, the condition must be True by precedent constraints.
+        """Check whether a condition in an `if` or `while` statement is redundant
+        or impossible based on the feasible execution paths.
+
+        - A condition is redundant if for every feasible execution path
+        leading to the node, the condition must be True due to precedent constraints.
+        - A condition is impossible if for every feasible execution path
+        leading to the node, the condition must be False due to precedent constraints.
         """
         if (
             not hasattr(node, "cfg_block")
@@ -81,17 +87,21 @@ class ConditionLogicChecker(BaseChecker):
             for edge in (pred for pred in node_block.predecessors if pred.is_feasible)
             for constraints in edge.z3_constraints.values()
         ):
-            self.add_message("redundant-condition", node=node)
+            self.add_message("redundant-condition", node=node.test)
 
         if all(
             self._check_unsat(z3.And(*constraints), z3_condition)
             for edge in (pred for pred in node_block.predecessors if pred.is_feasible)
             for constraints in edge.z3_constraints.values()
         ):
-            self.add_message("impossible-condition", node=node)
+            self.add_message("impossible-condition", node=node.test)
 
     def _check_unsat(self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef) -> bool:
-        """Check if the condition is redundant."""
+        """Check if the conjunction of the given constraints is unsatisfiable.
+
+        - prev_constraints (z3.ExprRef): Constraints from previous nodes.
+        - node_constraint (z3.ExprRef): The condition to check at the current node.
+        """
         solver = z3.Solver()
         solver.add(z3.And(prev_constraints, node_constraint))
         return solver.check() == z3.unsat

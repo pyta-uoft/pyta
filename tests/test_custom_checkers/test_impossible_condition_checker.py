@@ -24,7 +24,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
@@ -39,7 +39,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
@@ -53,7 +53,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
@@ -73,7 +73,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
@@ -92,7 +92,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         condition_node, *_ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
@@ -118,7 +118,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         _, _, condition_node, _ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)
@@ -144,7 +144,7 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
         _, _, condition_node, _ = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
 
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node),
+            pylint.testutils.MessageTest(msg_id="impossible-condition", node=condition_node.test),
             ignore_position=True,
         ):
             self.checker.visit_if(condition_node)

@@ -2711,8 +2711,8 @@ Example:
 
 ```
 
-This error will only be checked if `z3` dependency is install and `z3` option of PythonTA
-is turned on:
+This error will only be checked if the `z3-solver` library is installed and `z3` option of PythonTA
+is enabled:
 
 ```python
 import python_ta
@@ -2731,8 +2731,8 @@ Example:
 
 ```
 
-This error will only be checked if `z3` dependency is install and `z3` option of PythonTA
-is turned on:
+This error will only be checked if the `z3-solver` library is installed and `z3` option of PythonTA
+is enabled:
 
 ```python
 import python_ta

@@ -17,7 +17,7 @@ def nested_condition(x: int) -> int:
     return 0
 
 
-def redundant_condition(x: bool):
+def redundant_condition(x: bool) -> None:
     # the if condition is always true
     if x or not x:     # Error on this line
         print("redundant")

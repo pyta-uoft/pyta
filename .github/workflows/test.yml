@@ -37,7 +37,7 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
       - name: Install dependencies
-      - run: |
+        run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -e .[dev,cfg]
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then

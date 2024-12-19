@@ -82,6 +82,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
         config={
             "output-format": "python_ta.reporters.JSONReporter",
             "enable": ["C9960"],
+            "z3": True,
         },
     )
 
@@ -149,7 +150,7 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, se
     found_pylint_message = checker_name in file_symbols
     assert (
         found_pylint_message
-    ), f"Failed {test_file}. File does not add expected message  {file_symbols}."
+    ), f"Failed {test_file}. File does not add expected message {checker_name}: {file_symbols}."
 
 
 @pytest.mark.parametrize("test_file", get_file_paths(_PYCODESTYLE_PATH))

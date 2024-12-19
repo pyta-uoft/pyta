@@ -82,6 +82,9 @@ class ConditionLogicChecker(BaseChecker):
         env = Z3Environment(node.frame().cfg.z3_vars, [])
         z3_condition = env.parse_constraint(condition_node)
 
+        if z3_condition is None:
+            return
+
         if all(
             self._check_unsat(z3.And(*constraints), z3.Not(z3_condition))
             for edge in (pred for pred in node_block.predecessors if pred.is_feasible)

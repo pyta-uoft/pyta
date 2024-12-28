@@ -53,10 +53,31 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_ignore_collect(path, config):
+    """Return True to prevent collecting a test file or directory."""
+    if not config.getoption("--exclude-z3"):
+        return False
+
+    # Convert path to string for pattern matching
+    path_str = str(path)
+    return any(re.search(pattern, path_str) for pattern in Z3_RELATED_TESTS)
+
+
 def pytest_collection_modifyitems(config, items):
     """Modify collected test items to exclude certain tests based on configuration."""
-    if config.getoption("--exclude-z3"):
-        skip_z3 = pytest.mark.skip(reason="Test requires z3-solver")
-        for item in items:
-            if any(re.search(pattern, item.nodeid) for pattern in Z3_RELATED_TESTS):
-                item.add_marker(skip_z3)
+    if not config.getoption("--exclude-z3"):
+        return
+
+    selected = []
+    deselected = []
+
+    for item in items:
+        # Check if the test's nodeid matches any Z3-related patterns
+        if any(re.search(pattern, item.nodeid) for pattern in Z3_RELATED_TESTS):
+            deselected.append(item)
+        else:
+            selected.append(item)
+
+    if deselected:
+        config.hook.pytest_deselected(items=deselected)
+        items[:] = selected

@@ -5,17 +5,17 @@ import pytest
 import python_ta.contracts
 
 Z3_RELATED_TESTS = [
-    "tests/test_z3_constraints.py",
-    "tests/test_edge_feasibility.py",
-    "tests/test_custom_checkers/test_impossible_condition_checker.py",
-    "tests/test_custom_checkers/test_redundant_condition_checker.py",
-    "tests/test_custom_checkers/test_inconsistent_returns.py::TestInconsistentReturnCheckerZ3Option",
-    "tests/test_custom_checkers/test_missing_return_statements.py::TestMissingReturnCheckerZ3Option",
-    "tests/test_custom_checkers/test_one_iteration_checker.py::TestOneIterationCheckerZ3Option",
-    "tests/test_custom_checkers/test_possibly_undefined_checker.py::TestPossiblyUndefinedCheckerZ3Option",
-    "tests/test_custom_checkers/test_redundant_assignment_checker.py::TestRedundantAssignmentCheckerZ3Option",
-    "tests/test_z3/test_z3_parser.py",
-    "tests/test_z3_visitor.py",
+    "test_z3_constraints.py",
+    "test_edge_feasibility.py",
+    "test_custom_checkers/test_impossible_condition_checker.py",
+    "test_custom_checkers/test_redundant_condition_checker.py",
+    "test_custom_checkers/test_inconsistent_returns.py::TestInconsistentReturnCheckerZ3Option",
+    "test_custom_checkers/test_missing_return_statements.py::TestMissingReturnCheckerZ3Option",
+    "test_custom_checkers/test_one_iteration_checker.py::TestOneIterationCheckerZ3Option",
+    "test_custom_checkers/test_possibly_undefined_checker.py::TestPossiblyUndefinedCheckerZ3Option",
+    "test_custom_checkers/test_redundant_assignment_checker.py::TestRedundantAssignmentCheckerZ3Option",
+    "test_z3/test_z3_parser.py",
+    "test_z3_visitor.py",
 ]
 
 

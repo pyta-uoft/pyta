@@ -4,6 +4,20 @@ import pytest
 
 import python_ta.contracts
 
+Z3_RELATED_TESTS = [
+    "tests/test_z3_constraints.py",
+    "tests/test_edge_feasibility.py",
+    "tests/test_custom_checkers/test_impossible_condition_checker.py",
+    "tests/test_custom_checkers/test_redundant_condition_checker.py",
+    "tests/test_custom_checkers/test_inconsistent_returns.py::TestInconsistentReturnCheckerZ3Option",
+    "tests/test_custom_checkers/test_missing_return_statements.py::TestMissingReturnCheckerZ3Option",
+    "tests/test_custom_checkers/test_one_iteration_checker.py::TestOneIterationCheckerZ3Option",
+    "tests/test_custom_checkers/test_possibly_undefined_checker.py::TestPossiblyUndefinedCheckerZ3Option",
+    "tests/test_custom_checkers/test_redundant_assignment_checker.py::TestRedundantAssignmentCheckerZ3Option",
+    "tests/test_z3/test_z3_parser.py",
+    "tests/test_z3_visitor.py",
+]
+
 
 @pytest.fixture()
 def disable_contract_checking():
@@ -27,3 +41,24 @@ def prevent_webbrowser_and_httpserver(mocker):
     code running when running Pytest to avoid CI timeouts, and unexpected browser popups."""
     mocker.patch("webbrowser.open", return_value=None)
     mocker.patch.object(HTTPServer, "handle_request", return_value=None)
+
+
+def pytest_addoption(parser):
+    """Custom command-line options to enable/disable exclusion of certain tests"""
+    parser.addoption(
+        "--exclude-z3",
+        action="store_true",
+        default=False,
+        help="Exclude test cases the require z3 dependency.",
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify collected test items to exclude certain tests based on configuration."""
+    excluded_tests = []
+
+    if config.getoption("--exclude-z3"):
+        excluded_tests.extend(Z3_RELATED_TESTS)
+
+    # filter out excluded tests
+    items[:] = [item for item in items if item.nodeid not in excluded_tests]

@@ -46,7 +46,7 @@ jobs:
       - name: Run tests
         run: |
           if [[ "${{ matrix.value }}" == "z3-solver" ]]; then
-            pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --exclude_z3  \
+            pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --exclude_z3=True  \
               --ignore=tests/test_type_constraints --ignore=tests/test_type_inference \
               --ignore=tests/test_debug/test_accumulation_table.py \
               --ignore=tests/test_debug/test_recursion_table.py \

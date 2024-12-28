@@ -1,22 +1,22 @@
+import re
 from http.server import HTTPServer
 
 import pytest
 
 import python_ta.contracts
 
-Z3_RELATED_TESTS = [
-    "test_z3_constraints.py",
-    "test_edge_feasibility.py",
-    "test_custom_checkers/test_impossible_condition_checker.py",
-    "test_custom_checkers/test_redundant_condition_checker.py",
-    "test_custom_checkers/test_inconsistent_returns.py::TestInconsistentReturnCheckerZ3Option",
-    "test_custom_checkers/test_missing_return_statements.py::TestMissingReturnCheckerZ3Option",
-    "test_custom_checkers/test_one_iteration_checker.py::TestOneIterationCheckerZ3Option",
-    "test_custom_checkers/test_possibly_undefined_checker.py::TestPossiblyUndefinedCheckerZ3Option",
-    "test_custom_checkers/test_redundant_assignment_checker.py::TestRedundantAssignmentCheckerZ3Option",
-    "test_z3/test_z3_parser.py",
-    "test_z3_visitor.py",
-]
+Z3_RELATED_TESTS = {
+    r"test_z3_constraints.py",
+    r"test_edge_feasibility.py",
+    r"test_impossible_condition_checker.py",
+    r"test_redundant_condition_checker.py",
+    r"TestInconsistentReturnCheckerZ3Option",
+    r"TestMissingReturnCheckerZ3Option",
+    r"TestOneIterationCheckerZ3Option",
+    r"TestPossiblyUndefinedCheckerZ3Option",
+    r"TestRedundantAssignmentCheckerZ3Option",
+    r"test_z3_parser.py",
+}
 
 
 @pytest.fixture()
@@ -61,4 +61,8 @@ def pytest_collection_modifyitems(config, items):
         excluded_tests.extend(Z3_RELATED_TESTS)
 
     # filter out excluded tests
-    items[:] = [item for item in items if item.nodeid not in excluded_tests]
+    items[:] = [
+        item
+        for item in items
+        if not any(re.search(pattern, item.nodeid) for pattern in excluded_tests)
+    ]

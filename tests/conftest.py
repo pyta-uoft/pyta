@@ -6,16 +6,16 @@ import pytest
 import python_ta.contracts
 
 Z3_RELATED_TESTS = {
-    r"test_z3_constraints.py",
-    r"test_edge_feasibility.py",
-    r"test_impossible_condition_checker.py",
-    r"test_redundant_condition_checker.py",
-    r"TestInconsistentReturnCheckerZ3Option",
-    r"TestMissingReturnCheckerZ3Option",
-    r"TestOneIterationCheckerZ3Option",
-    r"TestPossiblyUndefinedCheckerZ3Option",
-    r"TestRedundantAssignmentCheckerZ3Option",
-    r"test_z3_parser.py",
+    r"tests/test_z3_constraints\.py",
+    r"tests/test_edge_feasibility\.py",
+    r"tests/test_impossible_condition_checker\.py",
+    r"tests/test_redundant_condition_checker\.py",
+    r"tests/test_z3_parser\.py",
+    r".*TestInconsistentReturnCheckerZ3Option.*",
+    r".*TestMissingReturnCheckerZ3Option.*",
+    r".*TestOneIterationCheckerZ3Option.*",
+    r".*TestPossiblyUndefinedCheckerZ3Option.*",
+    r".*TestRedundantAssignmentCheckerZ3Option.*",
 }
 
 
@@ -55,14 +55,8 @@ def pytest_addoption(parser):
 
 def pytest_collection_modifyitems(config, items):
     """Modify collected test items to exclude certain tests based on configuration."""
-    excluded_tests = []
-
     if config.getoption("--exclude-z3"):
-        excluded_tests.extend(Z3_RELATED_TESTS)
-
-    # filter out excluded tests
-    items[:] = [
-        item
-        for item in items
-        if not any(re.search(pattern, item.nodeid) for pattern in excluded_tests)
-    ]
+        skip_z3 = pytest.mark.skip(reason="Test requires z3-solver")
+        for item in items:
+            if any(re.search(pattern, item.nodeid) for pattern in Z3_RELATED_TESTS):
+                item.add_marker(skip_z3)

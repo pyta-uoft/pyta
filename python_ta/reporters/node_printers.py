@@ -655,7 +655,6 @@ def render_static_type_checker_errors(msg, _node=None, source_lines=None):
     yield from render_context(start_line - 2, start_line, source_lines)
 
     if start_line == end_line:
-        # Single-line error
         yield (
             start_line,
             slice(start_col - 1, end_col),
@@ -663,7 +662,6 @@ def render_static_type_checker_errors(msg, _node=None, source_lines=None):
             source_lines[start_line - 1],
         )
     else:
-        # Multi-line error
         yield (start_line, slice(start_col, None), LineType.ERROR, source_lines[start_line - 1])
         yield from (
             (line, slice(None, None), LineType.ERROR, source_lines[line - 1])

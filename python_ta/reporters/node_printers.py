@@ -662,7 +662,7 @@ def render_static_type_checker_errors(msg, _node=None, source_lines=None):
             source_lines[start_line - 1],
         )
     else:
-        yield (start_line, slice(start_col, None), LineType.ERROR, source_lines[start_line - 1])
+        yield (start_line, slice(start_col - 1, None), LineType.ERROR, source_lines[start_line - 1])
         yield from (
             (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
             for line in range(start_line + 1, end_line)

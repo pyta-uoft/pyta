@@ -4,6 +4,7 @@ from typing import Optional
 from astroid import nodes
 from mypy import api
 from pylint.checkers import BaseRawFileChecker
+from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
 
@@ -44,6 +45,14 @@ class StaticTypeChecker(BaseRawFileChecker):
         ),
     }
 
+    @only_required_for_messages(
+        "incompatible-argument-type",
+        "incompatible-assignment",
+        "list-item-type-mismatch",
+        "unsupported-operand-types",
+        "union-attr-error",
+        "dict-item-type-mismatch",
+    )
     def process_module(self, node: nodes.NodeNG) -> None:
         """Run Mypy on the current file and print type errors."""
         filename = node.stream().name

@@ -68,16 +68,8 @@ def pytest_collection_modifyitems(config, items):
     if not config.getoption("--exclude-z3"):
         return
 
-    selected = []
-    deselected = []
-
+    skip_marker = pytest.mark.skip(reason="Only run when z3-solver is installed")
     for item in items:
         # Check if the test's nodeid matches any Z3-related patterns
         if any(re.search(pattern, item.nodeid) for pattern in Z3_RELATED_TESTS):
-            deselected.append(item)
-        else:
-            selected.append(item)
-
-    if deselected:
-        config.hook.pytest_deselected(items=deselected)
-        items[:] = selected
+            item.add_marker(skip_marker)

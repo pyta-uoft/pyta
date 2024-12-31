@@ -1,3 +1,8 @@
+"""
+A checker that performs static type checking using Mypy.
+This module integrates Mypy to detect issues related to type annotations in Python code
+"""
+
 import re
 from typing import Optional
 
@@ -54,7 +59,7 @@ class StaticTypeChecker(BaseRawFileChecker):
         "dict-item-type-mismatch",
     )
     def process_module(self, node: nodes.NodeNG) -> None:
-        """Run Mypy on the current file and print type errors."""
+        """Run Mypy on the current file and handle type errors."""
         filename = node.stream().name
         mypy_options = [
             "--ignore-missing-imports",
@@ -149,7 +154,8 @@ class StaticTypeChecker(BaseRawFileChecker):
                         ),
                     )
 
-    def _parse_assignment_information(self, message: str):
+    def _parse_assignment_information(self, message: str) -> Optional[dict]:
+        """Parse type error message related to incompatible assignment."""
         pattern = (
             r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
             r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
@@ -168,7 +174,8 @@ class StaticTypeChecker(BaseRawFileChecker):
             }
         return None
 
-    def _parse_arg_type_information(self, message: str):
+    def _parse_arg_type_information(self, message: str) -> Optional[dict]:
+        """Parse type error message related to incompatible argument types."""
         pattern = (
             r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
             r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
@@ -189,7 +196,8 @@ class StaticTypeChecker(BaseRawFileChecker):
             }
         return None
 
-    def _parse_list_item_information(self, message: str):
+    def _parse_list_item_information(self, message: str) -> Optional[dict]:
+        """Parse type error message related to list item mismatches."""
         pattern = (
             r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
             r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
@@ -209,7 +217,8 @@ class StaticTypeChecker(BaseRawFileChecker):
             }
         return None
 
-    def _parse_operator_information(self, message: str):
+    def _parse_operator_information(self, message: str) -> Optional[dict]:
+        """Parse type error message related to unsupported operand types."""
         pattern = (
             r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
             r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
@@ -229,7 +238,8 @@ class StaticTypeChecker(BaseRawFileChecker):
             }
         return None
 
-    def _parse_union_attr_information(self, message: str):
+    def _parse_union_attr_information(self, message: str) -> Optional[dict]:
+        """Parse type error message related to Union attribute access."""
         pattern = (
             r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
             r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
@@ -248,7 +258,8 @@ class StaticTypeChecker(BaseRawFileChecker):
             }
         return None
 
-    def _parse_dict_item_information(self, message: str):
+    def _parse_dict_item_information(self, message: str) -> Optional[dict]:
+        """Parse type error message related to dictionary item mismatches."""
         pattern = (
             r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
             r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
@@ -272,5 +283,5 @@ class StaticTypeChecker(BaseRawFileChecker):
 
 
 def register(linter: PyLinter) -> None:
-    """Required method to auto-register this checker to the linter"""
+    """Register the static type checker with the PyLinter."""
     linter.register_checker(StaticTypeChecker(linter))

@@ -6,16 +6,17 @@ import pytest
 import python_ta.contracts
 
 Z3_RELATED_TESTS = {
-    r"tests/test_z3_constraints\.py",
-    r"tests/test_edge_feasibility\.py",
-    r"tests/test_impossible_condition_checker\.py",
-    r"tests/test_redundant_condition_checker\.py",
-    r"tests/test_z3_parser\.py",
-    r".*TestInconsistentReturnCheckerZ3Option.*",
-    r".*TestMissingReturnCheckerZ3Option.*",
-    r".*TestOneIterationCheckerZ3Option.*",
-    r".*TestPossiblyUndefinedCheckerZ3Option.*",
-    r".*TestRedundantAssignmentCheckerZ3Option.*",
+    r".*test_z3_constraints.*",
+    r".*test_edge_feasibility.*",
+    r".*test_impossible_condition_checker.*",
+    r".*test_redundant_condition_checker.*",
+    r".*test_z3_parser.*",
+    r".*test_z3_visitor.*",
+    r".*test_inconsistent_returns.*",
+    r".*test_missing_return_statements.*",
+    r".*test_one_iteration_checker.*",
+    r".*test_possibly_undefined_checker.*",
+    r".*test_redundant_assignment_checker.*",
 }
 
 
@@ -60,16 +61,5 @@ def pytest_ignore_collect(path, config):
 
     # Convert path to string for pattern matching
     path_str = str(path)
+    print(path_str)
     return any(re.search(pattern, path_str) for pattern in Z3_RELATED_TESTS)
-
-
-def pytest_collection_modifyitems(config, items):
-    """Modify collected test items to exclude certain tests based on configuration."""
-    if not config.getoption("--exclude-z3"):
-        return
-
-    skip_marker = pytest.mark.skip(reason="Only run when z3-solver is installed")
-    for item in items:
-        # Check if the test's nodeid matches any Z3-related patterns
-        if any(re.search(pattern, item.nodeid) for pattern in Z3_RELATED_TESTS):
-            item.add_marker(skip_marker)

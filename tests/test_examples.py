@@ -58,11 +58,11 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
         paths = [paths]
 
     # check if z3 dependency is available
-    # z3_dependency_available = True
-    # try:
-    #     import z3
-    # except ImportError:
-    #     z3_dependency_available = False
+    z3_dependency_available = True
+    try:
+        import z3
+    except ImportError:
+        z3_dependency_available = False
 
     for path in paths:
         for root, _, files in os.walk(path, topdown=True):
@@ -70,7 +70,7 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
                 if (
                     filename not in IGNORED_TESTS
                     and filename.endswith(".py")
-                    # and (z3_dependency_available or filename not in Z3_RELATED_TESTS)
+                    and (z3_dependency_available or filename not in Z3_RELATED_TESTS)
                 ):
                     full_path = os.path.join(root, filename)
                     rel_path = os.path.relpath(full_path, path)

@@ -17,6 +17,7 @@ Z3_RELATED_TESTS = {
     r".*test_one_iteration_checker.*",
     r".*test_possibly_undefined_checker.*",
     r".*test_redundant_assignment_checker.*",
+    r".*test_examples.*",
 }
 
 
@@ -61,5 +62,4 @@ def pytest_ignore_collect(path, config):
 
     # Convert path to string for pattern matching
     path_str = str(path)
-    print(path_str)
     return any(re.search(pattern, path_str) for pattern in Z3_RELATED_TESTS)

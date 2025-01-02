@@ -38,6 +38,9 @@ IGNORED_TESTS = [
     "e9950_forbidden_python_syntax.py",
 ]
 
+# The following tests require z3-solver as dependency
+Z3_RELATED_TESTS = ["r9900_redundant_condition.py", "r9901_impossible_condition.py"]
+
 
 def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     """
@@ -54,10 +57,21 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     if isinstance(paths, str):
         paths = [paths]
 
+    # check if z3 dependency is available
+    z3_dependency_available = True
+    try:
+        import z3
+    except ImportError:
+        z3_dependency_available = False
+
     for path in paths:
         for root, _, files in os.walk(path, topdown=True):
             for filename in files:
-                if filename not in IGNORED_TESTS and filename.endswith(".py"):
+                if (
+                    filename not in IGNORED_TESTS
+                    and filename.endswith(".py")
+                    and (z3_dependency_available or filename not in Z3_RELATED_TESTS)
+                ):
                     full_path = os.path.join(root, filename)
                     rel_path = os.path.relpath(full_path, path)
                     test_files.append(os.path.join(path, rel_path))

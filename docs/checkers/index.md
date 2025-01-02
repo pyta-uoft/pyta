@@ -2655,6 +2655,72 @@ import python_ta
 python_ta.check_all(config={"pycodestyle-ignore": ["E302", "E305"]})
 ```
 
+(E9951)=
+
+### Incompatible Argument Type (E9951)
+
+This error is identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+This error occurs when a function is called with an argument that does not match the expected type for that parameter.
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9951_incompatible_argument_type.py
+
+```
+
+(E9952)=
+
+### Incompatible Assignment (E9952)
+
+This error is identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+This error occurs when an expression is assigned to a variable, but the types are incompatible.
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9952_incompatible_assignment.py
+
+```
+
+(E9953)=
+
+### List Item Type Mismatch (E9953)
+
+This error is identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+This error occurs when a list item has a type that does not match the expected type for that position in the list.
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9953_list_item_type_mismatch.py
+
+```
+
+(E9954)=
+
+### Unsupported Operand Types (E9954)
+
+This error is identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+This error occurs when an operation is attempted between incompatible types, such as adding a string to an integer.
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9954_unsupported_operand_types.py
+
+```
+
+(E9955)=
+
+### Union Attribute Error (E9955)
+
+This error is identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+This error occurs when attempting to access an attribute on a `Union` type that may not exist on all possible types in the union.
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9955_union_attr_error.py
+
+```
+
+(E9956)=
+
+### Dictionary Item Type Mismatch (E9956)
+
+This error is identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+This error occurs when a dictionary entry contains a key or value type that does not match the expected type.
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9956_dict_item_type_mismatch.py
+
+```
+
 (R0133)=
 
 ### Comparison of constants (R0133)

@@ -55,10 +55,26 @@ def pytest_addoption(parser):
 
 
 def pytest_ignore_collect(path, config):
-    """Return True to prevent collecting a test file or directory."""
-    if not config.getoption("--exclude-z3"):
-        return False
+    """Return True to prevent collecting a test file or directory.
+    Note: this function must return None for test cases not intended to exclude. Otherwise, it will interfere
+    with other configurations such as --exclude flag.
 
-    # Convert path to string for pattern matching
-    path_str = str(path)
-    return any(re.search(pattern, path_str) for pattern in Z3_RELATED_TESTS)
+    Refer to the following docstring in Pytest source code:
+
+    Return ``True`` to ignore this path for collection.
+
+    Return ``None`` to let other plugins ignore the path for collection.
+
+    Returning ``False`` will forcefully *not* ignore this path for collection,
+    without giving a chance for other plugins to ignore this path.
+    https://github.com/pytest-dev/pytest/blob/main/src/_pytest/hookspec.py
+    """
+    if config.getoption("--exclude-z3"):
+        # Convert path to string for pattern matching
+        path_str = str(path)
+        if any(re.search(pattern, path_str) for pattern in Z3_RELATED_TESTS):
+            return True
+        else:
+            return None
+
+    return None

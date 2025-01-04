@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import os.path
-import shutil
+import re
 import sys
 from typing import Iterator
 
 import pytest
+from bs4 import BeautifulSoup
 from pytest_snapshot.plugin import Snapshot
 
 from python_ta.debug import SnapshotTracer
@@ -14,7 +15,7 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_tracer_testing_snapshots"
 )
 MEMORY_VIZ_ARGS = ["--roughjs-config", "seed=12345"]
-MEMORY_VIZ_VERSION = "0.3.2"
+MEMORY_VIZ_VERSION = "0.5.0"
 
 
 # Function inputs for testing the SnapshotTracer
@@ -26,7 +27,7 @@ def func_one_line(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_one_line",),
+        include_frames=(r"^func_one_line$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -40,7 +41,7 @@ def func_multi_line(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_multi_line",),
+        include_frames=(r"^func_multi_line$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -57,7 +58,7 @@ def func_mutation(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_mutation",),
+        include_frames=(r"^func_mutation$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -72,7 +73,7 @@ def func_for_loop(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_for_loop",),
+        include_frames=(r"^func_for_loop$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -88,7 +89,7 @@ def func_if_else(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_if_else",),
+        include_frames=(r"^func_if_else$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -106,7 +107,7 @@ def func_while(output_directory: str = None) -> None:
     """
     with SnapshotTracer(
         output_directory=output_directory,
-        include_frames=("func_while",),
+        include_frames=(r"^func_while$",),
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -121,11 +122,28 @@ def func_no_output_dir() -> None:
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        include_frames=("func_no_output_dir",),
+        include_frames=(r"^func_no_output_dir$",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ):
         s = "Hello"
+
+
+def func_open_webstepper(output_directory: str = None) -> None:
+    """
+    Function for testing SnapshotTracer works with Webstepper
+    """
+    with SnapshotTracer(
+        output_directory=output_directory,
+        include_frames=(r"^func_open_webstepper$",),
+        exclude_vars=("output_directory",),
+        webstepper=True,
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ):
+        nums = [1, 2, 3]
+        for i in range(len(nums)):
+            nums[i] = nums[i] + 1
 
 
 # Helpers
@@ -172,7 +190,6 @@ class TestSnapshotTracer:
     Tests for SnapshotTracer. These tests are skipped if the Python version is less than 3.10.
     """
 
-    # TODO: remove skip when MemoryViz is fixed
     @pytest.mark.parametrize(
         "test_func",
         [
@@ -184,7 +201,6 @@ class TestSnapshotTracer:
             func_if_else,
         ],
     )
-    @pytest.mark.skip(reason="Pending until MemoryViz is fixed")
     def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
         """
         Test SnapshotTracer with various simple functions.
@@ -220,3 +236,35 @@ class TestSnapshotTracer:
             snapshot.assert_match_dir(
                 {"snapshot-0.svg": actual_file.read()}, func_no_output_dir.__name__
             )
+
+    def test_generated_webstepper_html(self, snapshot, tmp_path, prevent_webbrowser_and_httpserver):
+        """
+        Test that SnapshotTracer generates the correct Webstepper HTML for the given code.
+
+        This test verifies that the generated `index.html` file is correct. However, the outputted
+        `index.html` cannot be opened directly because it contains a hardcoded absolute path to
+        `index.bundle.js`. This is done to ensure that the test passes on different machines,
+        regardless of their file system structure.
+
+        To view the test result, replace the hardcoded path "absolute/path/to/index.bundle.js"
+        with the actual path to the Webstepper `index.bundle.js` file on your machine.
+        """
+        snapshot.snapshot_dir = SNAPSHOT_DIR
+        func_open_webstepper(str(tmp_path))
+
+        index_path = os.path.join(str(tmp_path), "index.html")
+        with open(index_path, "r+") as file:
+            html_content = file.read()
+
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            script_tag = soup.find("script", src=lambda x: x and "index.bundle.js" in x)
+
+            if script_tag:
+                script_tag["src"] = "absolute/path/to/index.bundle.js"
+
+            file.seek(0)
+            file.write(str(soup))
+            file.truncate()
+
+        assert_output_files_match(str(tmp_path), snapshot, func_open_webstepper.__name__)

@@ -9,13 +9,39 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+### 💫 New checkers
+
+- `redundant-condition`: Provide error message when a conditional statement within a function is guaranteed true. This checker requires `z3` option to be turned on.
+- `impossible-condition`: Provide error message when a conditional statement within a function is guaranteed false. This checker requires `z3` option to be turned on.
+
+### 🐛 Bug fixes
+
+### 🔧 Internal changes
+
+## [2.9.1] - 2024-12-09
+
+### 🐛 Bug fixes
+
+- Added `python_ta/debug/webstepper` to project `MANIFEST.in`
+
+## [2.9.0] - 2024-12-09
+
+### ✨ Enhancements
+
 - Added `include_frames` filter to `snapshot`
+- Added `exclude_frames` filter to `snapshot`
 - Added `exclude_vars` filter to `snapshot`
 - Added new `python_ta.debug` module with an `SnapshotTracer` context manager for generating memory models
 - Added `z3` option to `inconsistent-or-missing-returns`, `redundant-assignment`, and `possibly-undefined` checkers to only check for feasible code blocks based on edge z3 constraints
 - Included the name of redundant variable in `E9959 redundant-assignment` message
-- Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8.
+- Update to pylint v3.3 and and astroid v3.3. This added support for Python 3.13 and dropped support for Python 3.8. (No new checkers are enabled by default.)
 - Added a STRICT_NUMERIC_TYPES configuration to `python_ta.contracts` allowing to enable/disable stricter type checking of numeric types
+- Added integration with MemoryViz Webstepper
+- Added `z3` option to `one-iteration-checker` to only check for feasible code blocks based on edge z3 constraints
+- Added reporting for errors raised by custom transforms (`Z3Visitor`, `CFGVisitor`)
+- Ensured `SnapshotTracer` does not include the `_trace_func` stack frame
+- Enabled `SnapshotTracer` to create its `output_directory` argument if it doesn't already exist
+- Changed `SnapshotTracer`'s Webstepper code line number to align with the source code line number
 
 ### 💫 New checkers
 
@@ -36,6 +62,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue where empty preconditions were preventing CFGs from being generated
 - Added strict numeric type checking to enforce type distinctions across the entire numeric hierarchy, including complex numbers.
 - Added strict type checking support for nested and union types (e.g., `list[int]`, `dict[float, int]`, `Union[int, float]`)
+- Fixed issue where CFG edges from loop body to loop condition block was ignored during augmenting edge z3 constraints
+- Fixed issue in `one-iteration-checker` where the message was not correctly reported for `while` loops when `z3` option is on
+- Fixed crash when z3-solver is not installed
+- Fixed crash when an inline comment had no spaces after the `#`
 
 ### 🔧 Internal changes
 
@@ -53,6 +83,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added mock `webbrowser.open` in tests to prevent browser tabs and HTTP requests during `python_ta.check_all()` executions.
 - Added `pytest-mock` as a development dependency
 - Make `test_snapshot.py::test_snapshot_serializes_unserializable_value` able to run on Windows.
+- Added GitHub Action workflow for automatically publishing releases to PyPI
+- Update `SnapshotTracer` tests to use `memory-viz@0.5.0` and prevent browser from opening
+- Updated bundled webstepper version and removed source map, and excluded the bundle from prettier pre-commit check
 
 ## [2.8.1] - 2024-08-19
 

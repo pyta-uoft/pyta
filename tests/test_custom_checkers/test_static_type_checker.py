@@ -152,25 +152,25 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=4,
-                col_offset=13,  # Adjusted to match "Got"
-                end_line=5,  # Adjusted to match "Got"
-                end_col_offset=18,  # Adjusted to match "Got"
+                col_offset=13,
+                end_line=5,
+                end_col_offset=18,
                 args=("int", "upper"),
             ),
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
                 line=4,
-                col_offset=13,  # Adjusted to match "Got"
-                end_line=5,  # Adjusted to match "Got"
-                end_col_offset=18,  # Adjusted to match "Got"
+                col_offset=13,
+                end_line=5,
+                end_col_offset=18,
                 args=("float", "upper"),
             ),
             pylint.testutils.MessageTest(
                 msg_id="union-attr-error",
-                line=9,  # Adjusted to match "Got"
-                col_offset=12,  # Matches "Got"
-                end_line=9,  # Matches "Got"
-                end_col_offset=20,  # Matches "Got"
+                line=9,
+                col_offset=12,
+                end_line=9,
+                end_col_offset=20,
                 args=("list[Any]", "keys"),
             ),
         ):

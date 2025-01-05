@@ -96,6 +96,7 @@ class StaticTypeChecker(BaseRawFileChecker):
 
     def _add_message(self, common_data: dict, specific_data: dict) -> None:
         """Add a message using the common and specific data."""
+        args = ()
         code = common_data["code"]
         code_to_msgid = {
             "arg-type": "incompatible-argument-type",
@@ -146,8 +147,6 @@ class StaticTypeChecker(BaseRawFileChecker):
                 specific_data["exp_key_type"],
                 specific_data["exp_value_type"],
             )
-        else:
-            args = ()
 
         self.add_message(
             msgid,

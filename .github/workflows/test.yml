@@ -41,7 +41,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -e .[dev,cfg]
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
-            pip install z3-solver
+            pip install .[z3]
           fi
       - name: Run tests
         run: |

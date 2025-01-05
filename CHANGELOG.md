@@ -18,7 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
-- Configued CI tests to run on environments with and without `z3` dependency.
+- Configured CI tests to run on environments with and without `z3` dependency.
 
 ## [2.9.1] - 2024-12-09
 

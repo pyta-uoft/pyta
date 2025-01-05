@@ -1,15 +1,9 @@
-"""
-A checker that performs static type checking using Mypy.
-This module integrates Mypy to detect issues related to type annotations in Python code
-"""
-
 import re
 from typing import Optional
 
 from astroid import nodes
 from mypy import api
 from pylint.checkers import BaseRawFileChecker
-from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
 
@@ -50,14 +44,32 @@ class StaticTypeChecker(BaseRawFileChecker):
         ),
     }
 
-    @only_required_for_messages(
-        "incompatible-argument-type",
-        "incompatible-assignment",
-        "list-item-type-mismatch",
-        "unsupported-operand-types",
-        "union-attr-error",
-        "dict-item-type-mismatch",
+    COMMON_PATTERN = (
+        r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
+        r"(?P<end_line>\d+):(?P<end_col>\d+): error: (?P<message>.+) \[(?P<code>[\w-]+)\]"
     )
+
+    SPECIFIC_PATTERNS = {
+        "arg-type": re.compile(
+            r"Argument (?P<arg_num>\d+) to \"(?P<func_name>[^\"]+)\" has incompatible type \"(?P<incomp_type>[^\"]+)\"; expected \"(?P<exp_type>[^\"]+)\""
+        ),
+        "assignment": re.compile(
+            r"Incompatible types in assignment \(expression has type \"(?P<expr_type>[^\"]+)\", variable has type \"(?P<var_type>[^\"]+)\"\)"
+        ),
+        "list-item": re.compile(
+            r"List item (?P<item_index>\d+) has incompatible type \"(?P<item_type>[^\"]+)\"; expected \"(?P<exp_type>[^\"]+)\""
+        ),
+        "operator": re.compile(
+            r"Unsupported operand types for (?P<operator>\S+) \(\"(?P<left_type>[^\"]+)\" and \"(?P<right_type>[^\"]+)\"\)"
+        ),
+        "union-attr": re.compile(
+            r"Item \"(?P<item_type>[^\"]+)\" of \"[^\"]+\" has no attribute \"(?P<attribute>[^\"]+)\""
+        ),
+        "dict-item": re.compile(
+            r"Dict entry (?P<entry_index>\d+) has incompatible type \"(?P<key_type>[^\"]+)\": \"(?P<value_type>[^\"]+)\"; expected \"(?P<exp_key_type>[^\"]+)\": \"(?P<exp_value_type>[^\"]+)\""
+        ),
+    }
+
     def process_module(self, node: nodes.NodeNG) -> None:
         """Run Mypy on the current file and handle type errors."""
         filename = node.stream().name
@@ -67,219 +79,84 @@ class StaticTypeChecker(BaseRawFileChecker):
             "--show-error-end",
         ]
         result, _, _ = api.run([filename] + mypy_options)
+
         for line in result.splitlines():
-            if line.endswith("[arg-type]"):
-                parsed = self._parse_arg_type_information(line.strip())
-                if parsed:
-                    self.add_message(
-                        "incompatible-argument-type",
-                        line=parsed["start_line"],
-                        col_offset=parsed["start_col"],
-                        end_lineno=parsed["end_line"],
-                        end_col_offset=parsed["end_col"],
-                        args=(
-                            parsed["arg_num"],
-                            parsed["func_name"],
-                            parsed["incomp_type"],
-                            parsed["exp_type"],
-                        ),
-                    )
-            elif line.endswith("[assignment]"):
-                parsed = self._parse_assignment_information(line.strip())
-                if parsed:
-                    self.add_message(
-                        "incompatible-assignment",
-                        line=parsed["start_line"],
-                        col_offset=parsed["start_col"],
-                        end_lineno=parsed["end_line"],
-                        end_col_offset=parsed["end_col"],
-                        args=(parsed["expr_type"], parsed["var_type"]),
-                    )
-            elif line.endswith("[list-item]"):
-                parsed = self._parse_list_item_information(line.strip())
-                if parsed:
-                    self.add_message(
-                        "list-item-type-mismatch",
-                        line=parsed["start_line"],
-                        col_offset=parsed["start_col"],
-                        end_lineno=parsed["end_line"],
-                        end_col_offset=parsed["end_col"],
-                        args=(
-                            parsed["item_index"],
-                            parsed["item_type"],
-                            parsed["exp_type"],
-                        ),
-                    )
-            elif line.endswith("[operator]"):
-                parsed = self._parse_operator_information(line.strip())
-                if parsed:
-                    self.add_message(
-                        "unsupported-operand-types",
-                        line=parsed["start_line"],
-                        col_offset=parsed["start_col"],
-                        end_lineno=parsed["end_line"],
-                        end_col_offset=parsed["end_col"],
-                        args=(
-                            parsed["operator"],
-                            parsed["left_type"],
-                            parsed["right_type"],
-                        ),
-                    )
-            elif line.endswith("[union-attr]"):
-                parsed = self._parse_union_attr_information(line.strip())
-                if parsed:
-                    self.add_message(
-                        "union-attr-error",
-                        line=parsed["start_line"],
-                        col_offset=parsed["start_col"],
-                        end_lineno=parsed["end_line"],
-                        end_col_offset=parsed["end_col"],
-                        args=(parsed["item_type"], parsed["attribute"]),
-                    )
-            elif line.endswith("[dict-item]"):
-                parsed = self._parse_dict_item_information(line.strip())
-                if parsed:
-                    self.add_message(
-                        "dict-item-type-mismatch",
-                        line=parsed["start_line"],
-                        col_offset=parsed["start_col"],
-                        end_lineno=parsed["end_line"],
-                        end_col_offset=parsed["end_col"],
-                        args=(
-                            parsed["entry_index"],
-                            parsed["key_type"],
-                            parsed["value_type"],
-                            parsed["exp_key_type"],
-                            parsed["exp_value_type"],
-                        ),
-                    )
+            common_match = re.match(self.COMMON_PATTERN, line)
+            if not common_match:
+                continue
 
-    def _parse_assignment_information(self, message: str) -> Optional[dict]:
-        """Parse type error message related to incompatible assignment."""
-        pattern = (
-            r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
-            r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
-            r"Incompatible types in assignment \(expression has type \"(?P<expr_type>[^\"]+)\", variable has type \"(?P<var_type>[^\"]+)\"\)"
-        )
-        match = re.search(pattern, message)
-        if match:
-            return {
-                "file": match.group("file"),
-                "start_line": int(match.group("start_line")),
-                "start_col": int(match.group("start_col")),
-                "end_line": int(match.group("end_line")),
-                "end_col": int(match.group("end_col")),
-                "expr_type": match.group("expr_type"),
-                "var_type": match.group("var_type"),
-            }
-        return None
+            common_data = common_match.groupdict()
 
-    def _parse_arg_type_information(self, message: str) -> Optional[dict]:
-        """Parse type error message related to incompatible argument types."""
-        pattern = (
-            r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
-            r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
-            r"Argument (?P<arg_num>\d+) to \"(?P<func_name>[^\"]+)\" has incompatible type \"(?P<incomp_type>[^\"]+)\"; expected \"(?P<exp_type>[^\"]+)\""
-        )
-        match = re.search(pattern, message)
-        if match:
-            return {
-                "file": match.group("file"),
-                "start_line": int(match.group("start_line")),
-                "start_col": int(match.group("start_col")),
-                "end_line": int(match.group("end_line")),
-                "end_col": int(match.group("end_col")),
-                "arg_num": int(match.group("arg_num")),
-                "func_name": match.group("func_name"),
-                "incomp_type": match.group("incomp_type"),
-                "exp_type": match.group("exp_type"),
-            }
-        return None
+            specific_pattern = self.SPECIFIC_PATTERNS.get(common_data["code"])
+            if specific_pattern:
+                specific_match = specific_pattern.search(common_data["message"])
+                if specific_match:
+                    specific_data = specific_match.groupdict()
+                    self._add_message(common_data, specific_data)
 
-    def _parse_list_item_information(self, message: str) -> Optional[dict]:
-        """Parse type error message related to list item mismatches."""
-        pattern = (
-            r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
-            r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
-            r"List item (?P<item_index>\d+) has incompatible type \"(?P<item_type>[^\"]+)\"; expected \"(?P<exp_type>[^\"]+)\""
-        )
-        match = re.search(pattern, message)
-        if match:
-            return {
-                "file": match.group("file"),
-                "start_line": int(match.group("start_line")),
-                "start_col": int(match.group("start_col")),
-                "end_line": int(match.group("end_line")),
-                "end_col": int(match.group("end_col")),
-                "item_index": int(match.group("item_index")),
-                "item_type": match.group("item_type"),
-                "exp_type": match.group("exp_type"),
-            }
-        return None
+    def _add_message(self, common_data: dict, specific_data: dict) -> None:
+        """Add a message using the common and specific data."""
+        code = common_data["code"]
+        code_to_msgid = {
+            "arg-type": "incompatible-argument-type",
+            "assignment": "incompatible-assignment",
+            "list-item": "list-item-type-mismatch",
+            "operator": "unsupported-operand-types",
+            "union-attr": "union-attr-error",
+            "dict-item": "dict-item-type-mismatch",
+        }
+        msgid = code_to_msgid.get(code)
+        if not msgid:
+            return
 
-    def _parse_operator_information(self, message: str) -> Optional[dict]:
-        """Parse type error message related to unsupported operand types."""
-        pattern = (
-            r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
-            r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
-            r"Unsupported operand types for (?P<operator>\S+) \(\"(?P<left_type>[^\"]+)\" and \"(?P<right_type>[^\"]+)\"\)"
-        )
-        match = re.search(pattern, message)
-        if match:
-            return {
-                "file": match.group("file"),
-                "start_line": int(match.group("start_line")),
-                "start_col": int(match.group("start_col")),
-                "end_line": int(match.group("end_line")),
-                "end_col": int(match.group("end_col")),
-                "operator": match.group("operator"),
-                "left_type": match.group("left_type"),
-                "right_type": match.group("right_type"),
-            }
-        return None
+        if code == "arg-type":
+            args = (
+                specific_data["arg_num"],
+                specific_data["func_name"],
+                specific_data["incomp_type"],
+                specific_data["exp_type"],
+            )
+        elif code == "assignment":
+            args = (
+                specific_data["expr_type"],
+                specific_data["var_type"],
+            )
+        elif code == "list-item":
+            args = (
+                specific_data["item_index"],
+                specific_data["item_type"],
+                specific_data["exp_type"],
+            )
+        elif code == "operator":
+            args = (
+                specific_data["operator"],
+                specific_data["left_type"],
+                specific_data["right_type"],
+            )
+        elif code == "union-attr":
+            args = (
+                specific_data["item_type"],
+                specific_data["attribute"],
+            )
+        elif code == "dict-item":
+            args = (
+                specific_data["entry_index"],
+                specific_data["key_type"],
+                specific_data["value_type"],
+                specific_data["exp_key_type"],
+                specific_data["exp_value_type"],
+            )
+        else:
+            args = ()
 
-    def _parse_union_attr_information(self, message: str) -> Optional[dict]:
-        """Parse type error message related to Union attribute access."""
-        pattern = (
-            r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
-            r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
-            r"Item \"(?P<item_type>[^\"]+)\" of \"[^\"]+\" has no attribute \"(?P<attribute>[^\"]+)\""
+        self.add_message(
+            msgid,
+            line=int(common_data["start_line"]),
+            col_offset=int(common_data["start_col"]),
+            end_lineno=int(common_data["end_line"]),
+            end_col_offset=int(common_data["end_col"]),
+            args=args,
         )
-        match = re.search(pattern, message)
-        if match:
-            return {
-                "file": match.group("file"),
-                "start_line": int(match.group("start_line")),
-                "start_col": int(match.group("start_col")),
-                "end_line": int(match.group("end_line")),
-                "end_col": int(match.group("end_col")),
-                "item_type": match.group("item_type"),
-                "attribute": match.group("attribute"),
-            }
-        return None
-
-    def _parse_dict_item_information(self, message: str) -> Optional[dict]:
-        """Parse type error message related to dictionary item mismatches."""
-        pattern = (
-            r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
-            r"(?P<end_line>\d+):(?P<end_col>\d+): error: "
-            r"Dict entry (?P<entry_index>\d+) has incompatible type \"(?P<key_type>[^\"]+)\": \"(?P<value_type>[^\"]+)\"; expected \"(?P<exp_key_type>[^\"]+)\": \"(?P<exp_value_type>[^\"]+)\""
-        )
-        match = re.search(pattern, message)
-        if match:
-            return {
-                "file": match.group("file"),
-                "start_line": int(match.group("start_line")),
-                "start_col": int(match.group("start_col")),
-                "end_line": int(match.group("end_line")),
-                "end_col": int(match.group("end_col")),
-                "entry_index": int(match.group("entry_index")),
-                "key_type": match.group("key_type"),
-                "value_type": match.group("value_type"),
-                "exp_key_type": match.group("exp_key_type"),
-                "exp_value_type": match.group("exp_value_type"),
-            }
-        return None
 
 
 def register(linter: PyLinter) -> None:

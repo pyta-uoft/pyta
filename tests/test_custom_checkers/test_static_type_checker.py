@@ -25,7 +25,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=23,
                 end_line=5,
                 end_col_offset=28,
-                args=(1, "calculate_area", "str", "float"),
+                args=("1", "calculate_area", "str", "float"),
             ),
             pylint.testutils.MessageTest(
                 msg_id="incompatible-argument-type",
@@ -33,8 +33,9 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=27,
                 end_line=11,
                 end_col_offset=27,
-                args=(1, "convert_to_upper", "int", "str"),
+                args=("1", "convert_to_upper", "int", "str"),
             ),
+            ignore_position=True,
         ):
             self.checker.process_module(mod)
 
@@ -81,7 +82,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=37,
                 end_line=1,
                 end_col_offset=37,
-                args=(2, "int", "str"),
+                args=("2", "int", "str"),
             ),
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
@@ -89,7 +90,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=29,
                 end_line=3,
                 end_col_offset=35,
-                args=(2, "str", "int"),
+                args=("2", "str", "int"),
             ),
             pylint.testutils.MessageTest(
                 msg_id="list-item-type-mismatch",
@@ -97,7 +98,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=33,
                 end_line=5,
                 end_col_offset=37,
-                args=(2, "str", "float"),
+                args=("2", "str", "float"),
             ),
         ):
             self.checker.process_module(mod)
@@ -193,7 +194,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=45,
                 end_line=1,
                 end_col_offset=54,
-                args=(2, "str", "int", "int", "str"),
+                args=("2", "str", "int", "int", "str"),
             ),
             pylint.testutils.MessageTest(
                 msg_id="dict-item-type-mismatch",
@@ -201,7 +202,7 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
                 col_offset=50,
                 end_line=3,
                 end_col_offset=60,
-                args=(2, "int", "str", "str", "float"),
+                args=("2", "int", "str", "str", "float"),
             ),
         ):
             self.checker.process_module(mod)

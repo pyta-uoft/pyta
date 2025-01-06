@@ -75,7 +75,6 @@ class StaticTypeChecker(BaseRawFileChecker):
         filename = node.stream().name
         mypy_options = [
             "--ignore-missing-imports",
-            "--disable-error-code=call-arg",
             "--show-error-end",
         ]
         result, _, _ = api.run([filename] + mypy_options)

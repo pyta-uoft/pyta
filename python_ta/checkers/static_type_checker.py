@@ -96,7 +96,6 @@ class StaticTypeChecker(BaseRawFileChecker):
 
     def _add_message(self, common_data: dict, specific_data: dict) -> None:
         """Add a message using the common and specific data."""
-        args = ()
         code = common_data["code"]
         code_to_msgid = {
             "arg-type": "incompatible-argument-type",
@@ -109,52 +108,13 @@ class StaticTypeChecker(BaseRawFileChecker):
         msgid = code_to_msgid.get(code)
         if not msgid:
             return
-
-        if code == "arg-type":
-            args = (
-                specific_data["arg_num"],
-                specific_data["func_name"],
-                specific_data["incomp_type"],
-                specific_data["exp_type"],
-            )
-        elif code == "assignment":
-            args = (
-                specific_data["expr_type"],
-                specific_data["var_type"],
-            )
-        elif code == "list-item":
-            args = (
-                specific_data["item_index"],
-                specific_data["item_type"],
-                specific_data["exp_type"],
-            )
-        elif code == "operator":
-            args = (
-                specific_data["operator"],
-                specific_data["left_type"],
-                specific_data["right_type"],
-            )
-        elif code == "union-attr":
-            args = (
-                specific_data["item_type"],
-                specific_data["attribute"],
-            )
-        elif code == "dict-item":
-            args = (
-                specific_data["entry_index"],
-                specific_data["key_type"],
-                specific_data["value_type"],
-                specific_data["exp_key_type"],
-                specific_data["exp_value_type"],
-            )
-
         self.add_message(
             msgid,
             line=int(common_data["start_line"]),
             col_offset=int(common_data["start_col"]),
             end_lineno=int(common_data["end_line"]),
             end_col_offset=int(common_data["end_col"]),
-            args=args,
+            args=tuple(specific_data.values()),
         )
 
 

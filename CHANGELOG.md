@@ -13,6 +13,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `redundant-condition`: Provide error message when a conditional statement within a function is guaranteed true. This checker requires `z3` option to be turned on.
 - `impossible-condition`: Provide error message when a conditional statement within a function is guaranteed false. This checker requires `z3` option to be turned on.
+- `incompatible-argument-type`: Provide an error message when a function argument has an incompatible type.
+- `incompatible-assignment`: Provide an error message when there is an incompatible assignment.
+- `list-item-type-mismatch`: Provide an error message when a list item has an incompatible type.
+- `unsupported-operand-types`: Provide an error message when an operation is attempted between incompatible types.
+- `union-attr-error`: Provide an error message when accessing an attribute that may not exist on a Union type.
+- `dict-item-type-mismatch`: Provide an error message when a dictionary entry has an incompatible key or value type.
 
 ### 🐛 Bug fixes
 

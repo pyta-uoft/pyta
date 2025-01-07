@@ -3194,6 +3194,71 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
+## Mypy-based checks
+
+The following errors are identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.
+Further information on Mypy can be found in its [official documentation](https://mypy.readthedocs.io/en/stable/).
+
+(E9951)=
+
+### Incompatible Argument Type (E9951)
+
+This error occurs when a function is called with an argument that does not match the expected type for that parameter. See the [Mypy documentation](https://mypy.readthedocs.io/en/stable/error_code_list.html#check-argument-types-arg-type).
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9951_incompatible_argument_type.py
+
+```
+
+(E9952)=
+
+### Incompatible Assignment (E9952)
+
+This error occurs when an expression is assigned to a variable, but the types are incompatible. See the [Mypy documentation](https://mypy.readthedocs.io/en/stable/error_code_list.html#check-types-in-assignment-statement-assignment).
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9952_incompatible_assignment.py
+
+```
+
+(E9953)=
+
+### List Item Type Mismatch (E9953)
+
+This error occurs when a list item has a type that does not match the expected type for that position in the list. See the [Mypy documentation](https://mypy.readthedocs.io/en/stable/error_code_list.html#check-list-items-list-item).
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9953_list_item_type_mismatch.py
+
+```
+
+(E9954)=
+
+### Unsupported Operand Types (E9954)
+
+This error occurs when an operation is attempted between incompatible types, such as adding a string to an integer. See the [Mypy documentation](https://mypy.readthedocs.io/en/stable/error_code_list.html#check-uses-of-various-operators-operator).
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9954_unsupported_operand_types.py
+
+```
+
+(E9955)=
+
+### Union Attribute Error (E9955)
+
+This error occurs when attempting to access an attribute on a `Union` type that may not exist on all possible types in the union. See the [Mypy documentation](https://mypy.readthedocs.io/en/stable/error_code_list.html#check-that-attribute-exists-in-each-union-item-union-attr).
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9955_union_attr_error.py
+
+```
+
+(E9956)=
+
+### Dictionary Item Type Mismatch (E9956)
+
+This error occurs when a dictionary entry contains a key or value type that does not match the expected type. See the [Mypy documentation](https://mypy.readthedocs.io/en/stable/error_code_list.html#check-dict-items-dict-item).
+
+```{literalinclude} /../examples/custom_checkers/static_type_checker_examples/e9956_dict_item_type_mismatch.py
+
+```
+
 ## Modified iterators in for loops
 
 (W4701)=

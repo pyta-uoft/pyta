@@ -1,97 +1,92 @@
 # Quick Start
 
-This webpage is a brief introduction to PyTA, mainly intended for students in first-year computer
-science students at the University of Toronto.
+This tutorial is a brief introduction to the different features of PythonTA.
 
 ## Installation
 
 In PyCharm:
 
-1. Open up the Settings dialog (Windows: File -> Settings..., Mac: PyCharm -> Preferences).
-2. Go to Project <your project name>, and select Project Interpreter.
-3. Make sure you have the right version of Python selected in the "Project Interpreter" dropdown.
-4. Click on the green **+** icon on the right side.
-5. Search for `python-ta`, and press "Install Package".
+1. Open the Settings dialog (Windows: File -> Settings..., macOS: PyCharm -> Preferences).
+2. Go to **Project <your project name>**, and select **Project Interpreter**.
+3. Click on the **+** icon next to the table of installed packages.
+4. Search for "`python-ta`", and click **Install Package**.
 
-In the command-line:
+In the command line:
 
 1. On Windows, run `python -m pip install python-ta`. On macOS or Linux,
-   run `python3 -m pip install python-ta` (as running just `python` will likely refer to an older
-   version of Python).
+   run `python3 -m pip install python-ta`.
 
-## Starting out
+## Running PythonTA
 
-The easiest way to run PyTA on a file is very similar to `doctest`. Include the following lines in
-the `if __name__ == '__main__'` block of your file:
+PythonTA's code analyzer can be run either through Python code or on the command line.
+
+### Running PythonTA via Python code
+
+**Option 1.**
+If you have a Python file you'd like to analyze, you can analyze it by adding the following lines of code:
 
 ```python
-if __name__ == '__main__':
+import python_ta
+python_ta.check_all()
+```
+
+Here is an [example file called `sample.py`](../demos/sample.py):
+
+```python
+"""This file illustrates basic usage of PythonTA's code analysis.
+"""
+
+
+def add_two(x: int, y: int) -> int:
+    """Return the sum of x and y.
+
+    PythonTA's analysis of this code will report three issues:
+
+    1. A missing return statement (a logical error)
+    2. Missing whitespace around the + (a formatting issue)
+    3. The presence of a print call (a code style issue)
+    """
+    result = x+y
+    print(result)
+
+
+if __name__ == "__main__":
     import python_ta
     python_ta.check_all()
 ```
 
-Then when you run the file, PyTA will check your code in that file. By default, a page will open in
-your web browser showing a PyTA report.
+When you run this file, PythonTA will analyse this file and open a webpage showing a report of any issues it found.
 
-### Running PyTA in the Python interpreter
+![An example report produced by PythonTA.](../images/sample_report.png)
 
-You can also run PyTA in the Python interpreter (in PyCharm, this is called the Python Console) and
-run the following command:
+Try fixing the above code by adding spaces around the `+`, and replacing `print(result)` with `return result`.
+After making these changes, re-run the file: PythonTA's analysis should not find any more issues!
+
+**Option 2.**
+If you don't want to add code to the file being analysed, you can instead call `python_ta.check_all` from outside the file (e.g., in the Python shell, or a separate Python file) and pass in a filename or path:
 
 ```python
->>> import python_ta
+import python_ta
+python_ta.check_all("sample.py")
 ```
 
-Then you can begin checking Python modules. You can check any Python file in the current directory.
-For example, if you have a file called 'hello.py', you can check it as follows:
+### Running PythonTA via the command line
 
-```python
->>> python_ta.check_all('hello.py')
+You can run PythonTA directly from the command line by passing in a filename or path:
+
+```console
+$ python_ta sample.py
 ```
 
-If you want to check a file which is in a subdirectory of your current location, simply write the (
-relative) path to the file.
+## Learning about the checks
 
-On Windows, use double backslashes to separate folders:
+Our {doc}`PythonTA Checks <../checkers/index>` webpage describes all checks that are performed by PythonTA.
+Many of these checks originate from Pylint, and more information can be found on the [Pylint documentation website].
 
-```python
->>> python_ta.check_all('subfolder1\\sub2\\a\\my_file.py')
-```
-
-On macOS/Linux, use a forward slash instead:
+You can also look up the documentation for a specific error by its five-character error code (e.g., `E0401`) by calling the `python_ta.doc` function:
 
 ```python
->>> python_ta.check_all('subfolder1/sub2/a/my_file.py')
-```
-
-## Errors vs. warnings
-
-PyTA distinguishes between two types of checks:
-
-- logical errors and use of forbidden language features
-- style errors or violating chosen conventions
-
-The output of `python_ta.check_all` divides the messages into two sections. Note that the headings
-will always appear, even if you don't have any errors. If there aren't any errors listed, the
-sections will simply be empty.
-
-If you want to only see the logical errors and forbidden features
-(useful for debugging purposes), use `python_ta.check_errors` instead of `python_ta.check_all`:
-
-```python
->>> python_ta.check_errors('hello.py')
-```
-
-## Accessing the documentation
-
-We have a [separate PyTA webpage](https://www.cs.toronto.edu/~david/pyta/)
-describing the errors that PyTA checks for. If you find yourself wondering what an error message
-means, you can look up the error by its five-character error code (which is always of the
-form `E0401`) and look it up on our website. Or, in the Python interpreter you can call
-the `python_ta.doc` function on the code:
-
-```python
->>> python_ta.doc('E0401')
+python_ta.doc("E0401")
 ```
 
 This will open up your web browser to the corresponding entry in our documentation page.
@@ -120,3 +115,5 @@ assertions to only a subset of the functions/classes, import and use the decorat
 
 If you wish to check contracts for your imported modules, pass the module names as arguments
 to `check_all_contracts`.
+
+[Pylint documentation website]: https://pylint.readthedocs.io/en/stable/user_guide/checkers/features.html

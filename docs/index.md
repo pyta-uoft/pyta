@@ -39,6 +39,7 @@ This project has received funding from the Faculty of Arts and Science at the Un
 
 usage/quick_start
 checkers/index
+usage/api
 usage/configuration
 contracts/index
 debug/index

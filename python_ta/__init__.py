@@ -37,7 +37,7 @@ import tokenize
 import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
-from typing import AnyStr, Generator, Optional, TextIO, Union
+from typing import Any, AnyStr, Generator, Optional, TextIO, Union
 
 import pylint.config
 import pylint.lint
@@ -66,7 +66,7 @@ PYLINT_PATCHED = False
 
 def check_errors(
     module_name: Union[list[str], str] = "",
-    config: Union[dict, str] = "",
+    config: Union[dict[str, Any], str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
@@ -84,12 +84,37 @@ def check_errors(
 
 def check_all(
     module_name: Union[list[str], str] = "",
-    config: Union[dict, str] = "",
+    config: Union[dict[str, Any], str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
-    """Check a module for errors and style warnings, printing a report."""
+    """Analyse one or more Python modules for code issues and display the results.
+
+    Args:
+        module_name:
+            If an empty string (default), the module where this function is called is checked.
+            If a non-empty string, it is interpreted as a path to a single Python module or a
+            directory containing Python modules. If the latter, all Python modules in the directory
+            are checked.
+            If a list of strings, each string is interpreted as a path to a module or directory,
+            and all modules across all paths are checked.
+        config:
+            If a string, a path to a configuration file to use.
+            If a dictionary, a map of configuration options (each key is the name of an option).
+        output:
+            If provided, the PythonTA report is written to this output stream instead of
+            standard out (the default).
+        load_default_config:
+            If True (default), additional configuration passed with the ``config`` option is
+            merged with the default PythonTA configuration file.
+            If False, the default PythonTA configuration is not used.
+        autoformat:
+            If True, autoformat all modules using the black formatting tool before analyzing code.
+
+    Returns:
+        The ``PythonTaReporter`` object that generated the report.
+    """
     return _check(
         module_name=module_name,
         level="all",
@@ -103,7 +128,7 @@ def check_all(
 def _check(
     module_name: Union[list[str], str] = "",
     level: str = "all",
-    local_config: Union[dict, str] = "",
+    local_config: Union[dict[str, Any], str] = "",
     output: Optional[TextIO] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
@@ -482,7 +507,11 @@ def _get_valid_files_to_check(module_name: Union[list[str], str]) -> Generator[A
 
 
 def doc(msg_id: str) -> None:
-    """Open a webpage explaining the error for the given message."""
+    """Open the PythonTA documentation page for the given error message id.
+
+    Args:
+        msg_id: The five-character error code, e.g. ``"E0401"``.
+    """
     msg_url = HELP_URL + "#" + msg_id.lower()
     print("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)

@@ -8,7 +8,7 @@ pyta-number-of-messages = 0
 # (DEPRECATED: Use output-format option below.) Set the [REPORTS] output-format option instead.
 # pyta-reporter = HTMLReporter
 
-# Set the location of the template for HTMLreporter.
+# Set the location of the template for HTMLReporter.
 pyta-template-file = template.html.jinja
 
 #Set whether you wish to opt-in to anonymous data collection of errors reported when you run PyTA.
@@ -60,6 +60,14 @@ allow-local-imports = no
 
 # Comma-separated names of functions that are allowed to contain IO actions
 allowed-io =
+
+[INVALID NAME]
+
+# Regular expression matching variable/function/class names to ignore when checking naming conventions
+ignore-names =
+
+# Regular expression matching module names to ignore when checking naming conventions
+ignore-module-names =
 
 [MESSAGES CONTROL]
 

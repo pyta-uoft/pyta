@@ -1,0 +1,6 @@
+.wy-side-nav-search .wy-dropdown > a.icon img.logo,
+.wy-side-nav-search > a.icon img.logo {
+  display: inline;
+  margin-top: 0;
+  width: 3em;
+}

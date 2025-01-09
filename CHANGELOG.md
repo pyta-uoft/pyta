@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🔧 Internal changes
 
 - Configured CI tests to run on environments with and without `z3` dependency.
+- Refactored `script.js` to avoid using jQuery, and instead use vanilla Javascript functionality.
 
 ## [2.9.1] - 2024-12-09
 

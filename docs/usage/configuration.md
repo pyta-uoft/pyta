@@ -1,172 +1,191 @@
 # Configuration
 
-```{note}
-This page is currently under construction!
-```
+PythonTA supports configuration through an "rc file" in the [INI format](https://docs.python.org/3/library/configparser.html).
+A custom configuration file can be passed in the command-line using the `--config <path>` option,
+and to `python_ta.check_all` with the `config=<path>` argument.
+Additionally, a dictionary containing key-value pairs corresponding to configuration options may be passed as the `config` argument to `python_ta.check_all`.
+In all cases, custom configuration options are merged with PythonTA's default configuration.
 
-## Providing Your Own Configuration Settings
+## Example
 
-While PythonTA comes with its own default configuration settings, you can provide either a `dict` or the file name of the config file containing the configuration options you want to override. PythonTA will use its default options for all other options.
-
-When providing your own configuration settings as a file, you just need to provide a minimal configuration file that contains only the configuration options you wish to override. The configuration file must be in the [TOML](https://toml.io/en/v1.0.0) file format.
-
-### Sample Usage
-
-```python
-import python_ta
-
-options = {
-    'pyta-number-of-messages': 10,
-    'max-line-length': 100,
-    ...,
-}
-
-# Using config dict
-python_ta.check_all(..., config=options)
-
-# Using config file
-# Assume there is a config file `config/.pylintrc`
-python_ta.check_all(..., config='config/.pylintrc')
-```
+The following configuration file can be used to configure PythonTA to set a maximum line length of 120 and to print its report as plain text, rather than on a webpage.
 
 ```ini
-# config/.pylintrc
-[CUSTOM PYTA OPTIONS]
-pyta-number-of-messages = 10
+# config.ini
+[REPORTS]
+output-format = python_ta.reporters.PlainReporter
 
 [FORMAT]
-max-line-length = 100
-
-...
+max-line-length = 120
 ```
 
-### Autoloading PythonTA default config
+This configuration file can be used when checking a Python module `my_file.py` as follows:
 
-The `load_default_config` option of `check_errors` and `check_all` can be used to specify whether to automatically load the PythonTA default config. By default, PythonTA will automatically load the default config.
+- In the command-line: `python_ta --config config.ini my_file.py`
+- Using the Python API: `python_ta.check_all("my_file.py", config="config.ini")`
 
-When disabled, it will still load PythonTA's custom options, but will no longer override pylint's default options. As such, it will use pylint's default options.
+The same configuration options may be passed directly to `python_ta.check_all` as key-value pairs in a dictionary:
 
 ```python
 import python_ta
-
-python_ta.check_all(..., load_default_config=False)
-```
-
-## Allowing 'pylint:' Comments
-
-PythonTA allows you to choose whether you want to locally disable checks by using 'pylint:' in a comment, i.e. it
-lets you choose whether or not you want to allow comments that begin with 'pylint:'. The default value for this option is False, i.e. PythonTA by default would not allow you to use 'pylint:' in a comment.
-
-```python
-import python_ta
-
-python_ta.check_all(..., config={"allow-pylint-comments": True})
-```
-
-## Custom Error Messages
-
-By default, PythonTA overwrites some of pylint's error messages with its own to make them more beginner-friendly.
-These messages are specified in `config/messages_config.toml` in the source code. You can prevent this by setting the
-`use-pyta-error-messages` option to `False`.
-
-```python
-import python_ta
-python_ta.check_all(config={
-    "use-pyta-error-messages": False
+python_ta.check_all("my_file.py", config={
+    "output-format": "python_ta.reporters.PlainReporter",
+    "max-line-length": 120
 })
 ```
 
-PythonTA also allows for pylint error messages to be overridden with custom user messages.
-The user can provide their own messages configuration file by specifying `messages-config-path` in their `.pylintrc` file.
-These messages have priority over both pylint's and PythonTA's messages and aren't affected by `use-pyta-error-messages`.
+## Pylint configuration options
 
-## Reporters
+PythonTA supports all [Pylint configuration options](https://pylint.readthedocs.io/en/stable/user_guide/configuration/index.html).
+By default, PythonTA sets the following default values for Pylint's configuration options.
 
-PythonTA offers four different types of _reporters_ used to display the results of its checks to the user.
+| Pylint option     | Pylint default               | PythonTA default                        |
+| ----------------- | ---------------------------- | --------------------------------------- |
+| max-nested-blocks | 5                            | 3                                       |
+| max-line-length   | 100                          | 80                                      |
+| ignore-long-lines | `^\s*(# )?<?https?://\S+>?$` | `^\s*((# )?<?https?://\S+>?)\|(>>>.*)$` |
+| disable           | `()`                         | See below                               |
+| output-format     | text                         | `"python_ta.reporters.HTMLReporter"`    |
 
-- `python_ta.reporters.PlainReporter`: outputs report in plain text.
+You can disable this behaviour by passing `load_default_config=False` to `python_ta.check_all`.
+In this case, Pylint's default configuration will be used instead, though all custom PythonTA options described below will still retain their default values.
+
+### PythonTA reporters
+
+PythonTA offers four different types of reporters used to display the results of its analysis.
+These may be set using the `output-format` configuration option.
+
+- `python_ta.reporters.PlainReporter`: outputs report in plain text
 - `python_ta.reporters.ColorReporter`: outputs a colourized report (can only be used in the terminal/Python shell)
-- `python_ta.reporters.HTMLReporter`: outputs report in HTML format.
 - `python_ta.reporters.JSONReporter`: outputs a JSON representation of the messages reported
+- `python_ta.reporters.HTMLReporter`: outputs report in a webpage
 
-The default reporter is HTMLReporter.
-This is controlled by the `output-format` configuration option, which you can set in a call to `python_ta.check_all` or in your `.pylintrc` file.
+### Disabled Pylint checks
 
-```python
-import python_ta
-python_ta.check_all(..., config={'output-format': 'python_ta.reporters.PlainReporter'})
+The following Pylint checks are disabled by default.
+You can re-enable them by using the `enable` option.
+
+```text
+E0100, E0105, E0106, E0110, E0112, E0113, E0114, E0115, E0116, E0117, E0118,
+E0236, E0237, E0238, E0240, E0242, E0243, E0244, E0305, E0308, E0309, E0310, E0311, E0312, E0313,
+E0402,
+E0603, E0604, E0605, E0606,
+E0703, W0707,
+E1124, E1125, E1132, E1139, E1142,
+E1200, E1201, E1205, E1206,
+E1300, E1301, E1302, E1303, E1304,
+W1406,
+E1507, E1519,
+E1700, E1701,
+W0120, W0131, W0135, W0150, W0177,
+W0213, W0235, W0236, W0238, W0244, W0246,
+W0601, W0602, W0614, W0640,
+W1113, W1115,
+W1300, W1301, W1302, W1306, W1307,
+W1502, W1503, W1505, W1506, W1507, W1508, W1509, W1510, W1511, W1512, W1513, W1514, W1518,
+C0103, C0105, C0131, C0132,
+C0200, C0202, C0203, C0204, C0205, C0206, C0207, C0208,
+C0327, C0328,
+R0202, R0203, R0206,
+R0901, R0903, R0904, R0911, R0917,
+R1703, R1705, R1706, R1708, R1709, R1710, R1711, R1717, R1718, R1719, R1720, R1722, R1723, R1724,
+R1728, R1729, R1730, R1731,
+C1803,
+F0202,
+W0402, W0407,
+W0603,
+W1201, W1202,
+I0023,
+I1101,
+C9960,
+lambda-expressions,
+similarities,
+spelling,
+threading,
+unnecessary-dunder-call,
+unsupported_version,
+E2502, E2510, E2511, E2512, E2513, E2514, E2515,
+missing-timeout, positional-only-arguments-expected
 ```
 
-```ini
-[REPORTS]
-output-format = python_ta.reporters.PlainReporter
-```
+## PythonTA general configuration options
 
-### Report output location
+The following options are used to configure the general behaviour of PythonTA.
 
-By default, the PlainReporter, ColorReporter, and JSONReporter print their reports to the screen,
-and the HTMLReporter opens a web browser to display the report.
-You can instead configure PythonTA to save the reports to a file using the `output` argument to `check_all`:
+### `pyta-number-of-messages` (default: `0`)
 
-```python
-import python_ta
-python_ta.check_all(..., output='pyta_output.txt')
-```
+The maximum number of occurrences of each check to report.
+This option can be used to limit the size of the output report.
+If set to 0 (the default), all occurrences are shown.
 
-This options is compatible with all of PythonTA's reporter types, but we do not recommend its use with ColorReporter,
-as this reporter uses terminal-specific characters to colourize text displayed on your screen.
+### `pyta-template-file` (default: `"template.html.jinja"`)
 
-## Forbidden Imports
+HTML template file for the HTMLReporter.
 
-By default, PythonTA has a list of modules that are allowed to be imported. You can specify any additional modules using the `extra-imports` configuration option, which you can set in a call to `python_ta.check_all` or in a configuration file.
+### `allow-pylint-comments` (default: `false`)
 
-```python
-import python_ta
-python_ta.check_all(..., config={'extra-imports': ["math", "tkinter"]})
-```
+When `false` (the default), raise an error when analysing code with comments that contain [`pylint:` directives](https://pylint.readthedocs.io/en/stable/user_guide/messages/message_control.html#block-disables).
+When `true`, allows these comments, which can be used to disable error checks in specific blocks of code.
 
-```ini
-[FORBIDDEN IMPORT]
-extra-imports = math, tkinter
-```
+### `z3` (default: `false`)
 
-In addition, you can specify `allow-local-imports` to allow local imports.
+When `true`, uses the [Z3 theorem prover](https://github.com/Z3Prover/z3) to enhance code analysis.
+Requires the `python-ta[z3]` group to be installed.
 
-```python
-import python_ta
-python_ta.check_all(..., config={'allow-local-imports': True})
-```
+### `use-pyta-error-messages` (default: `true`)
 
-```ini
-[FORBIDDEN IMPORT]
-allow-local-imports = yes
-```
+When `true`, replace some of Pylint's error messages with custom PythonTA versions.
+PythonTA's error messages can be seen in the source file [messages_config.toml](https://github.com/pyta-uoft/pyta/blob/master/python_ta/config/messages_config.toml).
 
-## Naming convention checker configuration
+### `messages-config-path` (default: PythonTA's `messages_config.toml`)
 
-By default, PythonTA checks errors C9103 and C9104 (naming convention and module name violations) for all names, including all function, class, variable and module names.
-You can specify names to ignore when checking naming conventions by setting the following configurations in the `config` parameter in a call to `python_ta.check_all`:
+The path to a TOML file to use to replace Pylint's and PythonTA's default error messages.
+This allows users to provide their own messages for specific checks.
+This option is not affected by the `use-pyta-error-messages` option.
 
-- Specify a regular expression that matches any function, class, variable names you would like to ignore using `ignore-names` configuration option.
-- Specify a regular expression that matches any module name you would like to ignore using the `ignore-module-names` configuration option.
+## PythonTA checker configuration options
 
-For example, the following configuration option allows to ignore naming convention violations for unit test names and test module names.
+The following options are used to configure the behaviour of specific checks.
 
-```python
-import python_ta
-options = {
-    "ignore-module-names": "(test_[a-z0-9_]*)$",
-    "ignore-names": "(test_[a-z0-9_]*)$"
-}
-python_ta.check_all(..., config=options)
-```
+### `pycodestyle-ignore`
 
-## Enabling the black formatting tool
+A list of [pycodestyle error codes](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes) to disable when running the **pep8-errors** check.
+By default, the following pycodestyle error codes are ignored, largely due to overlap with existing pylint checks.
 
-PythonTA allows you to choose whether you want to enable the black code formatting tool to run on your code. The default value for this option is False, i.e. PythonTA by default will not run the black formatting tool. The autoformat feature is compatible with any versions of black installed.
+- E111, E112, E113, E114, E117, E401, E402, E501, E701, E702, E703, E711, E712, E722, E741, E742,
+  E743, E901, W291, W292, W293, W391, W503, W605
 
-```python
-import python_ta
+### `allowed-io`
 
-python_ta.check_all(..., autoformat=True)
-```
+A list of function names and [qualified method names](https://docs.python.org/3/glossary.html#term-qualified-name) to ignore when performing the **forbidden-io** check.
+By default, this is `()`.
+
+### `ignore-names`
+
+A regular expression that matches function, class, and variable names to ignore when performing the **naming-convention-violation** check.
+By default, this is an empty string, meaning no names are ignored.
+
+### `ignore-module-names`
+
+A regular expression that matches module names to ignore when performing the **module-name-violation** check.
+By default, this is an empty string, meaning no names are ignored.
+
+### `allowed-import-modules`
+
+A list of module names that are permitted by the **forbidden-import** check.
+It is recommended to not modify this option, and instead modify the `extra_imports` option.
+
+By default, the following modules are allowed:
+
+- `dataclasses`, `doctest`, `unittest`, `hypothesis`, `pytest`, `python_ta`, `python_ta.contracts`, `timeit`, `typing`, `__future__`
+
+### `extra-imports`
+
+A list of additional module names that are permitted by the **forbidden-import** check.
+By default, this list is empty.
+Modules added to this list are permitted in addition to the ones listed in `allowed-import-modules`.
+
+### `allow-local-imports`
+
+When `true`, allow all local modules to be imported, without being reported by the **forbidden-import** check.
+By default this option is `false`.

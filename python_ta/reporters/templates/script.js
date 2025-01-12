@@ -1,12 +1,37 @@
-$("body").on("click", ".slider", function () {
-  let elem = $(this).parent().next()[0]
-  toggleElement(elem)
-  $(this).children().toggleClass("collapsed")
+document.body.addEventListener("click", (event) => {
+  const slider = event.target.closest(".slider")
+  if (slider) {
+    const parent = slider.parentElement
+    const elem = parent?.nextElementSibling
+
+    if (elem) {
+      toggleElement(elem)
+    }
+
+    Array.from(slider.children).forEach((child) => {
+      if (child.nodeType === 1) {
+        child.classList.toggle("collapsed")
+      }
+    })
+  }
 })
 
-$(".sidebar button").click(function () {
-  $(this).closest(".collapsible").children("ul").toggle()
-  $(this).children("svg").toggleClass("collapsed")
+document.querySelectorAll(".sidebar button").forEach((button) => {
+  button.addEventListener("click", () => {
+    let collapsible = button.closest(".collapsible")
+
+    if (collapsible) {
+      const ul = collapsible.querySelector("ul")
+      if (ul) {
+        ul.style.display = ul.style.display === "none" ? "block" : "none"
+      }
+    }
+
+    const svg = button.querySelector("svg")
+    if (svg) {
+      svg.classList.toggle("collapsed")
+    }
+  })
 })
 
 /* Function for animating a collapsible element, adapted from

@@ -13,7 +13,7 @@ W0199 = "Calling assert on a tuple will only evaluate to False if it is empty. I
 
 ["pylint.checkers.base".ComparisonChecker]
 C0123 = "You should use 'isinstance(x, my_type)' instead of 'type(x) == my_type' to check the type of a value."
-W0143 = "This expression includes a comparison against a callable. It's likely you meant to call a function but omitted the parenthesis."
+W0143 = "This expression includes a comparison against a function. It's likely you meant to call a function but omitted the parenthesis, ()."
 
 ["pylint.checkers.base".NameChecker]
 C0104 = "Disallowed name \"%s\". You should give your variables meaningful rather than generic names."

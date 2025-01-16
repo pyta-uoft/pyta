@@ -13,9 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Ignore annotation-only assignment statements in `redundant-assignment` check
-
 ### 🔧 Internal changes
+
+## [2.9.2] - 2025-01-16
+
+### 🐛 Bug fixes
+
+- Ignore annotation-only assignment statements in `redundant-assignment` check
 
 ## [2.9.1] - 2024-12-09
 

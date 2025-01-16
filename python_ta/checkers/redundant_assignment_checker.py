@@ -76,7 +76,7 @@ class RedundantAssignmentChecker(BaseChecker):
     @only_required_for_messages("redundant-assignment")
     def visit_annassign(self, node: nodes.AnnAssign) -> None:
         """Visit the annotated assign node"""
-        if node in self._redundant_assignment:
+        if node.value is not None and node in self._redundant_assignment:
             self.add_message("redundant-assignment", node=node, args=node.target.name)
 
     def visit_module(self, node: nodes.Module) -> None:
@@ -151,7 +151,9 @@ class RedundantAssignmentChecker(BaseChecker):
                     parent = (
                         node.parent.parent if isinstance(node.parent, nodes.Tuple) else node.parent
                     )
-                    if node.name in gen.difference(kill):
+                    if isinstance(parent, nodes.AnnAssign) and parent.value is None:
+                        continue
+                    elif node.name in gen.difference(kill):
                         # add redundant assignment
                         if parent not in self._redundant_assignment:
                             self._redundant_assignment[parent] = []

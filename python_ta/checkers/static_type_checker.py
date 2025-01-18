@@ -73,10 +73,7 @@ class StaticTypeChecker(BaseRawFileChecker):
     def process_module(self, node: nodes.NodeNG) -> None:
         """Run Mypy on the current file and handle type errors."""
         filename = node.stream().name
-        mypy_options = [
-            "--ignore-missing-imports",
-            "--show-error-end",
-        ]
+        mypy_options = ["--ignore-missing-imports", "--show-error-end", "--follow-imports=skip"]
         result, _, _ = api.run([filename] + mypy_options)
 
         for line in result.splitlines():

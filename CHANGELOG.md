@@ -24,6 +24,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
+
 ### 🔧 Internal changes
 
 - Configured CI tests to run on environments with and without `z3` dependency.

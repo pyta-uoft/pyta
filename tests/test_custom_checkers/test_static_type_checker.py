@@ -217,3 +217,15 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
         mod = MANAGER.ast_from_file(file_path)
         with self.assertNoMessages():
             self.checker.process_module(mod)
+
+    def test_imports_no_error(self) -> None:
+        """Imports a module with mypy errors, no errors raised."""
+        file_path = os.path.normpath(
+            os.path.join(
+                __file__,
+                "../../../examples/custom_checkers/static_type_checker_examples/imports_no_error.py",
+            )
+        )
+        mod = MANAGER.ast_from_file(file_path)
+        with self.assertNoMessages():
+            self.checker.process_module(mod)

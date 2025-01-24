@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Added custom error message for `comparison-with-callable`
+- Added a watch configuration option to the HTML reporter for persistent server mode.
 
 ### 💫 New checkers
 

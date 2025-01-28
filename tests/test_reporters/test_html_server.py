@@ -51,11 +51,12 @@ def test_open_html_in_browser_watch():
     Ensure the server handles multiple requests and can be stopped gracefully.
     """
     script_path = os.path.expanduser("~/pyta/tests/test_reporters/watch_integration.py")
+    print(f"GITHUBS CURR DIR IS {os.getcwd()}")
     process = subprocess.Popen(
         [sys.executable, script_path],
         cwd=os.getcwd(),
     )
-    time.sleep(60)
+    time.sleep(1)
     try:
         for _ in range(3):
             conn = HTTPConnection("127.0.0.1", 5008)

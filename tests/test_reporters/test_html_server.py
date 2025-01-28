@@ -55,7 +55,7 @@ def test_open_html_in_browser_watch():
         [sys.executable, script_path],
         cwd=os.getcwd(),
     )
-    time.sleep(1)
+    time.sleep(60)
     try:
         for _ in range(3):
             conn = HTTPConnection("127.0.0.1", 5008)

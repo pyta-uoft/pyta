@@ -54,7 +54,7 @@ def test_open_html_in_browser_watch():
         stderr=subprocess.PIPE,
         text=True,
     )
-
+    port = 0
     for _ in range(13):
         line = process.stderr.readline().strip()
         if "Server running at" in line:

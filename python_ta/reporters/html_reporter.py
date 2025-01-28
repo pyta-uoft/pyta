@@ -85,7 +85,9 @@ class HTMLReporter(PythonTaReporter):
             self.writeln(rendered_template)
         else:
             rendered_template = rendered_template.encode("utf8")
-            open_html_in_browser(rendered_template, self.linter.config.watch)
+            open_html_in_browser(
+                rendered_template, self.linter.config.watch, self.linter.config.pyta_port
+            )
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

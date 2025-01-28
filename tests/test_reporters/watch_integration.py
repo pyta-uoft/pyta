@@ -1,13 +1,14 @@
 from unittest.mock import patch
 
-import python_ta
+from python_ta.__init__ import check_all
 
 
 @patch("webbrowser.open", return_value=None)
 def open_server(mock_webbrowser_open):
-    python_ta.check_all(
+    check_all(
         config={
             "watch": True,
+            "pyta_port": 5008,
         }
     )
 

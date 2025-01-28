@@ -4,7 +4,7 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-def open_html_in_browser(html: bytes, watch: bool) -> None:
+def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
     """
     Display html in a web browser without creating a temp file.
     Instantiates a trivial http server and uses the webbrowser module to
@@ -39,17 +39,15 @@ def open_html_in_browser(html: bytes, watch: bool) -> None:
             "       that you can open manually in a web browser.",
             file=sys.stderr,
         )
-        server = HTTPServer(("127.0.0.1", 0), RequestHandler)
-        print(f"       Server running at http://127.0.0.1:{server.server_port}", file=sys.stderr)
+        server = HTTPServer(("127.0.0.1", port), RequestHandler)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
-
         try:
             server.serve_forever()
         except KeyboardInterrupt:
             print("\nShutting down the PythonTA server.")
             server.shutdown()
     else:
-        server = HTTPServer(("127.0.0.1", 0), RequestHandler)
+        server = HTTPServer(("127.0.0.1", port), RequestHandler)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
         server.handle_request()
         server.server_close()

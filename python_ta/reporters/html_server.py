@@ -9,10 +9,8 @@ def open_html_in_browser(html: bytes, watch: bool) -> None:
     Display html in a web browser without creating a temp file.
     Instantiates a trivial http server and uses the webbrowser module to
     open a URL to retrieve html from that server.
-
     If watch is False, the server responds to exactly one request and then shuts down.
     If watch is True, the server runs indefinitely, allowing multiple requests.
-
     Adapted from: https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/plotly/io/_base_renderers.py#L655
     """
 
@@ -42,13 +40,14 @@ def open_html_in_browser(html: bytes, watch: bool) -> None:
             file=sys.stderr,
         )
         server = HTTPServer(("127.0.0.1", 0), RequestHandler)
+        print(f"       Server running at http://127.0.0.1:{server.server_port}", file=sys.stderr)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
 
         try:
             server.serve_forever()
         except KeyboardInterrupt:
             print("\nShutting down the PythonTA server.")
-            server.server_close()
+            server.shutdown()
     else:
         server = HTTPServer(("127.0.0.1", 0), RequestHandler)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)

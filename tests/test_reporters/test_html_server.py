@@ -61,7 +61,6 @@ def test_open_html_in_browser_watch():
             conn = HTTPConnection("127.0.0.1", 5008)
             conn.request("GET", "/")
             response = conn.getresponse()
-            # assert response.status == 200
-            assert 0 == 0
+            assert response.status == 200
     finally:
         process.send_signal(signal.SIGINT)

@@ -51,7 +51,6 @@ def test_open_html_in_browser_watch():
     Ensure the server handles multiple requests and can be stopped gracefully.
     """
     script_path = os.path.expanduser("~/pyta/tests/test_reporters/watch_integration.py")
-    print(sys.executable)
     process = subprocess.Popen(
         [sys.executable, script_path],
         cwd=os.getcwd(),

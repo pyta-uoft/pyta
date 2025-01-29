@@ -15,6 +15,23 @@ import requests
 from python_ta.reporters.html_server import open_html_in_browser
 
 
+def wait_for_server(port: int, timeout: int = 30, interval: int = 1):
+    """
+    Wait for the server to be available before sending requests.
+
+    """
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            conn = HTTPConnection("127.0.0.1", port, timeout=1)
+            conn.request("HEAD", "/")
+            conn.getresponse()
+            return True
+        except (ConnectionRefusedError, OSError):
+            time.sleep(interval)
+    return False
+
+
 @patch("webbrowser.open")
 def test_open_html_in_browser_no_watch(mock_webbrowser_open):
     """
@@ -50,18 +67,18 @@ def test_open_html_in_browser_watch():
     Test the open_html_in_browser function with watch=True using a fixed port.
     Ensure the server handles multiple requests and can be stopped gracefully.
     """
-    script_path = os.path.expanduser("~/pyta/tests/test_reporters/watch_integration.py")
-    print(f"SCRIPT PATH IS OG is {script_path}")
     script_path = os.path.abspath(
         os.path.join(os.getcwd(), "tests", "test_reporters", "watch_integration.py")
     )
-    print(f"SCRIPT PATH IS {script_path}")
     process = subprocess.Popen(
         [sys.executable, script_path],
         cwd=os.getcwd(),
     )
 
-    time.sleep(60)
+    if not wait_for_server(5008):
+        process.send_signal(signal.SIGINT)
+        return
+
     try:
         for _ in range(3):
             conn = HTTPConnection("127.0.0.1", 5008)

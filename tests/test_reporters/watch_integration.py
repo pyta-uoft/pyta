@@ -5,6 +5,7 @@ from python_ta.__init__ import check_all
 
 @patch("webbrowser.open", return_value=None)
 def open_server(mock_webbrowser_open):
+    print("GITHUB ACTIONS HAS FOUND THE PATH")
     check_all(
         config={
             "watch": True,

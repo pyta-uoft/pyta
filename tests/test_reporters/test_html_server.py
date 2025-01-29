@@ -77,7 +77,7 @@ def test_open_html_in_browser_watch():
 
     if not wait_for_server(5008):
         process.send_signal(signal.SIGINT)
-        return
+        assert False
 
     try:
         for _ in range(3):

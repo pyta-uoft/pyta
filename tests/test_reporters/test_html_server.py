@@ -50,13 +50,17 @@ def test_open_html_in_browser_watch():
     Test the open_html_in_browser function with watch=True using a fixed port.
     Ensure the server handles multiple requests and can be stopped gracefully.
     """
-    script_path = os.path.expanduser("~/pyta/pyta/tests/test_reporters/watch_integration.py")
-    print(f"GITHUBS CURR DIR IS {os.getcwd()}")
+    script_path = os.path.expanduser("~/pyta/tests/test_reporters/watch_integration.py")
+    print(f"SCRIPT PATH IS OG is {script_path}")
+    script_path = os.path.abspath(
+        os.path.join(os.getcwd(), "tests", "test_reporters", "watch_integration.py")
+    )
     print(f"SCRIPT PATH IS {script_path}")
     process = subprocess.Popen(
-        [sys.executable, "tests/test_reporters/watch_integration.py"],
+        [sys.executable, script_path],
         cwd=os.getcwd(),
     )
+
     time.sleep(1)
     try:
         for _ in range(3):

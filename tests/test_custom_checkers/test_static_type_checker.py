@@ -1,9 +1,7 @@
 import os
 
-import astroid
 import pylint.testutils
-import pytest
-from astroid import MANAGER, nodes
+from astroid import MANAGER
 
 from python_ta.checkers.static_type_checker import StaticTypeChecker
 

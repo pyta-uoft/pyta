@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Added custom error message for `comparison-with-callable`
+- Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 
 ### 💫 New checkers
 

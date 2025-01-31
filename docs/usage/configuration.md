@@ -189,3 +189,14 @@ Modules added to this list are permitted in addition to the ones listed in `allo
 
 When `true`, allow all local modules to be imported, without being reported by the **forbidden-import** check.
 By default this option is `false`.
+
+### `mypy-options`
+
+A list of [configuration flags](https://mypy.readthedocs.io/en/stable/command_line.html) to be passed into mypy when performing the **static-type** check.
+
+By default, this list includes the following flags:
+
+- `ignore-missing-imports`, `follow-imports=skip`
+
+Modifying this option will override all default flags.
+Note that the `show-error-end` flag is always passed into mypy, so it does not need to be specified within this option.

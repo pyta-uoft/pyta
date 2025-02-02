@@ -775,7 +775,6 @@ footer p {
                 
                 <section id=0>
                     <div class="section-header">
-                        <h2> [FILE_PATH]tests/fixtures/reporters/watch_integration.py </h2>
                     </div>
                     <article class="error-output code-errors">
                         <h3 class="category-heading">

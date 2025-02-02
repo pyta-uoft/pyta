@@ -88,6 +88,11 @@ def test_open_html_in_browser_no_watch():
 
         cleaned_body = clean_response_body(response_body)
         snapshot = load_snapshot(snapshot_file)
+
+        print("CLEANED BODY::: \n\n\n\n\n\n")
+        print(cleaned_body)
+        print("END OF CLEANED BODY::: \n\n\n\n\n\n")
+
         assert cleaned_body == snapshot
 
         with pytest.raises((ConnectionRefusedError, RemoteDisconnected)):
@@ -127,10 +132,6 @@ def test_open_html_in_browser_watch():
 
             response_body = response.read().decode("utf-8")
             cleaned_body = clean_response_body(response_body)
-
-            print("CLEANED BODY::: \n\n\n\n\n\n")
-            print(cleaned_body)
-            print("END OF CLEANED BODY::: \n\n\n\n\n\n")
 
             assert cleaned_body == snapshot
 

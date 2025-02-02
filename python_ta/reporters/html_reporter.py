@@ -83,7 +83,7 @@ class HTMLReporter(PythonTaReporter):
         else:
             rendered_template = rendered_template.encode("utf8")
             open_html_in_browser(
-                rendered_template, self.linter.config.watch, self.linter.config.pyta_port
+                rendered_template, self.linter.config.watch, self.linter.config.server_port
             )
 
     @classmethod

@@ -12,7 +12,7 @@ def open_server(mock_webbrowser_open):
     check_all(
         config={
             "watch": False,
-            "pyta_port": 5008,
+            "server_port": 5008,
         }
     )
 

@@ -285,7 +285,7 @@ def reset_linter(
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
         (
-            "pyta-port",
+            "server-port",
             {
                 "default": 0,
                 "type": "int",

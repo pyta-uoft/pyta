@@ -117,6 +117,10 @@ def test_open_html_in_browser_watch():
 
     try:
         snapshot = load_snapshot(snapshot_file)
+
+        print("ORIGINAL SNAPSHOT FILE:: \n\n\n\n")
+        print(snapshot)
+
         for i in range(3):
             conn = HTTPConnection("127.0.0.1", 5008)
             conn.request("GET", "/")
@@ -125,6 +129,10 @@ def test_open_html_in_browser_watch():
 
             response_body = response.read().decode("utf-8")
             cleaned_body = clean_response_body(response_body)
+
+            print("CLEANED BODY:: \n\n\n\n")
+            print(cleaned_body)
+
             assert cleaned_body == snapshot
 
     finally:

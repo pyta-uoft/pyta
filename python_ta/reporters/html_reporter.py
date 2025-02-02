@@ -1,8 +1,5 @@
 import os
 import sys
-import webbrowser
-from datetime import datetime
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from jinja2 import Environment, FileSystemLoader
 from pygments import highlight

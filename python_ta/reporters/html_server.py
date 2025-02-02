@@ -31,12 +31,7 @@ def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
     if watch:
         print(
             "[INFO] Your PythonTA report is being opened in your web browser.\n"
-            "       Press Ctrl + C, or the stop console button on your IDE, to exit the server.\n\n"
-            "       If it doesn't open, please add an output argument to python_ta.check_all\n"
-            "       as follows:\n\n"
-            "         check_all(..., output='pyta_report.html')\n\n"
-            "       This will cause PythonTA to save the report to a file, pyta_report.html,\n"
-            "       that you can open manually in a web browser.",
+            "       Press Ctrl + C, or stop this program to exit.\n\n",
             file=sys.stderr,
         )
         server = HTTPServer(("127.0.0.1", port), RequestHandler)

@@ -145,15 +145,16 @@ This option is not affected by the `use-pyta-error-messages` option.
 
 ### `watch` (default: `false`)
 
-When `true`, the HTMLReporter spawns a persistent server that continuously serves the PyTA report.
+When `true`, the HTMLReporter runs as a persistent server that continuously serves the PyTA report.
 This allows users to refresh the report page in their browser without restarting the server.
-When `false` (the default), the server responds to a single request and then shuts down.
+When `false` (the default), the server responds to a single request and then shuts down. Modification
+to this configuration option has no effect for the other reporters.
 
-### `pyta-port` (default: `0`)
+### `server-port` (default: `0`)
 
-The pyta-port option specifies the port number to use when serving the PyTA HTML report. When set to 0 (the default),
+The server-port option specifies the port number to use when serving the PyTA HTML report. When set to 0 (the default),
 the server automatically selects an available port. If set to a specific port (e.g., 5008), the server attempts
-to bind to that port.
+to bind to that port. This configuration option only applies to the HTMLReporter and does not affect other reporters.
 
 ## PythonTA checker configuration options
 

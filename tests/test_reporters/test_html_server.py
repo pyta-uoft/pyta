@@ -67,13 +67,10 @@ def test_open_html_in_browser_watch():
     Test the open_html_in_browser function with watch=True using a fixed port.
     Ensure the server handles multiple requests and can be stopped gracefully.
     """
-    script_path = os.path.abspath(
-        os.path.join(os.getcwd(), "tests", "test_reporters", "watch_integration.py")
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../../fixtures/reporters/watch_integration.py")
     )
-    process = subprocess.Popen(
-        [sys.executable, script_path],
-        cwd=os.getcwd(),
-    )
+    process = subprocess.Popen([sys.executable, script_path])
 
     if not wait_for_server(5008):
         process.send_signal(signal.SIGINT)

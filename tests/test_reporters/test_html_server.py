@@ -28,7 +28,9 @@ def clean_response_body(body):
     Remove dynamic portions (such as timestamps) from the response body
     before snapshot testing.
     """
-    return re.sub(r"\d{2}:\d{2}:\d{2}", "[TIME]", body)
+    body = re.sub(r"\d{2}:\d{2}:\d{2}", "[TIME]", body)
+    body = re.sub(r"/(?:home|Users)/[\w.-]+/pyta/.*?", "[FILE_PATH]", body)
+    return body.strip()
 
 
 def wait_for_server(port: int, timeout: int = 30, interval: int = 1):
@@ -117,10 +119,6 @@ def test_open_html_in_browser_watch():
 
     try:
         snapshot = load_snapshot(snapshot_file)
-
-        print("ORIGINAL SNAPSHOT FILE:: \n\n\n\n")
-        print(snapshot)
-
         for i in range(3):
             conn = HTTPConnection("127.0.0.1", 5008)
             conn.request("GET", "/")
@@ -129,9 +127,6 @@ def test_open_html_in_browser_watch():
 
             response_body = response.read().decode("utf-8")
             cleaned_body = clean_response_body(response_body)
-
-            print("CLEANED BODY:: \n\n\n\n")
-            print(cleaned_body)
 
             assert cleaned_body == snapshot
 

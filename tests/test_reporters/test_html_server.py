@@ -84,6 +84,7 @@ def test_open_html_in_browser_no_watch():
                 time.sleep(0.5)
 
         if response_body is None:
+            process.send_signal(signal.SIGINT)
             pytest.fail("Server did not start within the expected timeout")
 
         cleaned_body = clean_response_body(response_body)

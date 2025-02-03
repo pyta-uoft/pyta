@@ -11,7 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added custom error message for `comparison-with-callable`
 - Added a watch configuration option to the HTML reporter for persistent server mode.
-- Added `pyta-port` configuration option to specify the port number to use when serving the PyTA HTML report.
+- Added `server-port` configuration option to specify the port number to use when serving the PyTA HTML report.
 
 ### 💫 New checkers
 

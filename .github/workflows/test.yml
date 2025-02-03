@@ -67,7 +67,7 @@ jobs:
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
-          flag-name: run-${{ matrix.python-version }}
+          flag-name: run-${{ matrix.python-version }}-${{ matrix.dependency }}
           parallel: true
 
   finish:
@@ -81,7 +81,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           parallel-finished: true
-          carryforward: "run-3.9,run-3.10,run-3.11,run-3.12,run-3.13"
+          carryforward: "run-3.9-base,run-3.9-z3-solver,run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver"
 
   docs:
     runs-on: ubuntu-latest

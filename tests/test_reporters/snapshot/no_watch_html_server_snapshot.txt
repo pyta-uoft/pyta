@@ -659,7 +659,6 @@ footer p {
         <div class="main-grid">
             <header>
                 <h1 class="title">PythonTA Report</h1>
-                <time>Sun. Feb. 02 2025, [TIME] PM</time>
             </header>
             <section class="sidebar">
                 <div class="section-header">

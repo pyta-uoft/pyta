@@ -28,7 +28,7 @@ def clean_response_body(body):
     Remove dynamic portions (such as timestamps) from the response body
     before snapshot testing.
     """
-    body = re.sub(r"\d{2}:\d{2}:\d{2}", "[TIME]", body)
+    body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests/fixtures/reporters/(?:no_)?watch_integration\.py.*\n?", "", body)
     return body.strip()
 
@@ -89,11 +89,6 @@ def test_open_html_in_browser_no_watch():
 
         cleaned_body = clean_response_body(response_body)
         snapshot = load_snapshot(snapshot_file)
-
-        print("CLEANED BODY \n\n\n\n\n\n\n\n")
-        print(cleaned_body)
-        print("END OF CLEAN BODY \n\n\n\n\n\n\n\n")
-
         assert cleaned_body == snapshot
 
         with pytest.raises((ConnectionRefusedError, RemoteDisconnected)):

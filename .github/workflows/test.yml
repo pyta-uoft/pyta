@@ -63,7 +63,7 @@ jobs:
             pytest -vv tests/test_debug/test_accumulation_table.py tests/test_debug/test_recursion_table.py tests/test_debug/test_snapshot_tracer.py
           fi
       - name: Upload test coverage to coveralls.io
-        uses: coverallsapp/github-action@v2.3.4
+        uses: coverallsapp/github-action@v2.3.6
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2.3.4
+        uses: coverallsapp/github-action@v2.3.6
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:

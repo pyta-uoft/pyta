@@ -63,11 +63,11 @@ jobs:
             pytest -vv tests/test_debug/test_accumulation_table.py tests/test_debug/test_recursion_table.py tests/test_debug/test_snapshot_tracer.py
           fi
       - name: Upload test coverage to coveralls.io
-        uses: coverallsapp/github-action@v2.3.4
+        uses: coverallsapp/github-action@v2.3.6
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
-          flag-name: run-${{ matrix.python-version }}
+          flag-name: run-${{ matrix.python-version }}-${{ matrix.dependency }}
           parallel: true
 
   finish:
@@ -76,12 +76,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2.3.4
+        uses: coverallsapp/github-action@v2.3.6
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           parallel-finished: true
-          carryforward: "run-3.9,run-3.10,run-3.11,run-3.12,run-3.13"
+          carryforward: "run-3.9-base,run-3.9-z3-solver,run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver"
 
   docs:
     runs-on: ubuntu-latest

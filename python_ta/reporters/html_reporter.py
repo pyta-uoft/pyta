@@ -12,8 +12,6 @@ from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
 
-TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
-
 
 class HTMLReporter(PythonTaReporter):
     """Reporter that displays results in HTML form.
@@ -62,9 +60,15 @@ class HTMLReporter(PythonTaReporter):
         grouped_messages = {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
 
         template_f = self.linter.config.pyta_template_file
-        template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(template_f)
+        path = os.path.abspath(template_f)
+        filename, file_parent_directory = os.path.basename(path), os.path.dirname(path)
+
+        template = Environment(loader=FileSystemLoader(file_parent_directory)).get_template(
+            filename
+        )
 
         # Embed resources so the output html can go anywhere, independent of assets.
+        # TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
         #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
         #     pyta_logo_base64_encoded = b64encode(image_file.read()).decode()

@@ -63,6 +63,8 @@ HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
 
+TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reporters/templates")
+
 
 def check_errors(
     module_name: Union[list[str], str] = "",
@@ -282,6 +284,7 @@ def reset_linter(
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
+
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
         (
@@ -296,7 +299,7 @@ def reset_linter(
         (
             "pyta-template-file",
             {
-                "default": "template.html.jinja",
+                "default": os.path.join(TEMPLATES_DIR, "template.html.jinja"),
                 "type": "string",
                 "metavar": "<pyta_reporter>",
                 "help": "HTML template file for the HTMLReporter.",

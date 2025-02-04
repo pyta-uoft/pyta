@@ -13,7 +13,7 @@ dependencies = [
     "jinja2 ~= 3.1.2",
     "mypy ~= 1.13",
     "pycodestyle ~= 2.11",
-    "pygments >= 2.14,< 2.19",
+    "pygments >= 2.14,< 2.20",
     "pylint ~= 3.3.1",
     "requests >= 2.28,< 2.33",
     "six",

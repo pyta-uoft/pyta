@@ -192,7 +192,7 @@ By default this option is `false`.
 
 ### `mypy-options`
 
-A list of [configuration flags](https://mypy.readthedocs.io/en/stable/command_line.html) to be passed into mypy when performing the **static-type** check.
+A list of [command-line arguments](https://mypy.readthedocs.io/en/stable/command_line.html) to be passed into mypy when performing the [**static type** checks](#mypy-based-checks).
 
 By default, this list includes the following flags:
 

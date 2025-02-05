@@ -3194,6 +3194,8 @@ and `pdb.set_trace()`) are found. These breakpoints should be removed in product
 
 ```
 
+(mypy-based-checks)=
+
 ## Mypy-based checks
 
 The following errors are identified by the StaticTypeChecker, which uses Mypy to detect issues related to type annotations in Python code.

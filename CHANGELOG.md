@@ -11,6 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added custom error message for `comparison-with-callable`
 - Changed `pyta-template-file` argument to now resolve the file path relative to the CWD.
+- Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 
 ### 💫 New checkers
 

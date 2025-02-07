@@ -12,6 +12,8 @@ from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
 
+TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+
 
 class HTMLReporter(PythonTaReporter):
     """Reporter that displays results in HTML form.
@@ -60,6 +62,9 @@ class HTMLReporter(PythonTaReporter):
         grouped_messages = {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
 
         template_f = self.linter.config.pyta_template_file
+        template_f = (
+            template_f if template_f != "" else os.path.join(TEMPLATES_DIR, "template.html.jinja")
+        )
         path = os.path.abspath(template_f)
         filename, file_parent_directory = os.path.basename(path), os.path.dirname(path)
 

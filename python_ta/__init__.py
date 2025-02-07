@@ -63,8 +63,6 @@ HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
 
-TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reporters/templates")
-
 
 def check_errors(
     module_name: Union[list[str], str] = "",
@@ -299,7 +297,7 @@ def reset_linter(
         (
             "pyta-template-file",
             {
-                "default": os.path.join(TEMPLATES_DIR, "template.html.jinja"),
+                "default": "",
                 "type": "string",
                 "metavar": "<pyta_reporter>",
                 "help": "HTML template file for the HTMLReporter.",

@@ -15,7 +15,7 @@ def clean_response_body(body):
     before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests/fixtures/reporters/(?:no_)?watch_integration\.py.*\n?", "", body)
-    body = re.sub(r'.* class="pygments-w"> </span><span".*\n?', "", body)
+    body = re.sub(r'\s*class="pygments-w">\s*</span>\s*<span', "<span", body)  # Fixed regex
 
     return body.strip()
 
@@ -85,9 +85,6 @@ def test_open_html_in_browser_watch(snapshot):
 
             response_body = response.read().decode("utf-8")
             cleaned_body = clean_response_body(response_body)
-            print("CLEANED BODY \n\n\n\n\n\n")
-            print(cleaned_body)
-            print("END OF CLEANED BODY \n\n\n\n\n\n")
             snapshot.assert_match(cleaned_body, "watch_html_server_snapshot.html")
 
     finally:

@@ -10,7 +10,7 @@ from typing import Optional
 import pytest
 
 
-def clean_response_body(body):
+def clean_response_body(body) -> str:
     """Remove dynamic portions (such as timestamps) from the response body
     before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)

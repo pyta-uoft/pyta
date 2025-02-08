@@ -73,7 +73,6 @@ class HTMLReporter(PythonTaReporter):
         )
 
         # Embed resources so the output html can go anywhere, independent of assets.
-        # TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
         #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
         #     pyta_logo_base64_encoded = b64encode(image_file.read()).decode()

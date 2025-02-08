@@ -85,6 +85,9 @@ def test_open_html_in_browser_watch(snapshot):
 
             response_body = response.read().decode("utf-8")
             cleaned_body = clean_response_body(response_body)
+            print("CLEANED BODY \n\n\n\n\n")
+            print(cleaned_body)
+            print("\n\n\n\n\n END OF CLEANED BODY")
             snapshot.assert_match(cleaned_body, "watch_html_server_snapshot.html")
 
     finally:

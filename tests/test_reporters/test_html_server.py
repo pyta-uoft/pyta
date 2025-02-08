@@ -15,7 +15,7 @@ def clean_response_body(body):
     before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests/fixtures/reporters/(?:no_)?watch_integration\.py.*\n?", "", body)
-    body = re.sub(r'\s*class="pygments-w">\s*</span>\s*<span', "<span", body)  # Fixed regex
+    body = re.sub(r'\s*<span class="pygments-w">\s*</span>\s*<span', "<span", body)  # Fixed regex
 
     return body.strip()
 

@@ -5,6 +5,7 @@ import subprocess
 import sys
 import time
 from http.client import HTTPConnection, RemoteDisconnected
+from typing import Optional
 
 import pytest
 
@@ -33,21 +34,18 @@ def clean_response_body(body):
     return body.strip()
 
 
-def wait_for_server(port: int, timeout: int = 30, interval: int = 1):
-    """
-    Wait for the server to be available before sending requests.
-
-    """
+def wait_for_server(port: int, timeout: int = 30, interval: int = 1) -> Optional[str]:
+    """Wait for the server to be available before sending requests."""
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
             conn = HTTPConnection("127.0.0.1", port, timeout=1)
-            conn.request("HEAD", "/")
-            conn.getresponse()
-            return True
+            conn.request("GET", "/")
+            response = conn.getresponse()
+            return response.read().decode("utf-8")
         except (ConnectionRefusedError, OSError):
             time.sleep(interval)
-    return False
+    return None
 
 
 def test_open_html_in_browser_no_watch():
@@ -66,31 +64,16 @@ def test_open_html_in_browser_no_watch():
 
     process = subprocess.Popen([sys.executable, script_path])
 
-    start_time = time.time()
-    timeout = 15
-    response_body = None
-
     try:
-        # Wait for the server to start
-        while time.time() - start_time < timeout:
-            try:
-                conn = HTTPConnection("127.0.0.1", 5008, timeout=1)
-                conn.request("GET", "/")
-                response = conn.getresponse()
-                assert response.status == 200
-                response_body = response.read().decode("utf-8")
-                break
-            except (ConnectionRefusedError, OSError):
-                time.sleep(0.5)
+        response_body = wait_for_server(5008)
 
-        if response_body is None:
+        if not response_body:
             process.send_signal(signal.SIGINT)
             pytest.fail("Server did not start within the expected timeout")
 
         cleaned_body = clean_response_body(response_body)
         snapshot = load_snapshot(snapshot_file)
         assert cleaned_body == snapshot
-
         with pytest.raises((ConnectionRefusedError, RemoteDisconnected)):
             new_conn = HTTPConnection("127.0.0.1", 5008)
             new_conn.request("GET", "/")
@@ -113,11 +96,9 @@ def test_open_html_in_browser_watch():
     )
 
     process = subprocess.Popen([sys.executable, script_path])
-
     if not wait_for_server(5008):
         process.send_signal(signal.SIGINT)
         pytest.fail("Server did not start within the expected timeout")
-
     try:
         snapshot = load_snapshot(snapshot_file)
         for i in range(3):

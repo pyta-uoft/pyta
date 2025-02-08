@@ -799,9 +799,9 @@ footer p {
                                     </span>
                                     
                                     <span class="occurrences">
-                                    2
+                                    1
                                     
-                                     occurrences.
+                                     occurrence.
                                     
                                     </span>
                                     <span class="shown">
@@ -839,34 +839,7 @@ footer p {
 <span class="grey line-num">  4</span>  <span class="grey"></span>
 <span class="gbold line-num">  5</span>  <span class="highlight-pyta"><span class="pygments-kn">from</span> <span class="pygments-nn">unittest.mock</span> <span class="pygments-kn">import</span> <span class="pygments-n">patch</span></span>
 <span class="grey line-num">  6</span>  <span class="grey"></span>
-<span class="grey line-num">  7</span>  <span class="grey"><span class="pygments-kn">from</span> <span class="pygments-nn">python_ta.__init__</span> <span class="pygments-kn">import</span> <span class="pygments-n">check_all</span></span>
-</pre>
-                                                </div>
-                                                
-                                            </div>
-                                       
-                                    
-                                        
-                                            <div class="message">
-                                                <p class="message-name">
-                                                    [Line 7] You may not import check_all from module python_ta.__init__.
-                                                    <span class="slider">
-                                                        <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
-                                                        </button>
-                                                    </span>
-                                                </p>
-                                                
-                                                <div class="collapsible expanded message-snippet-container">
-                                                  <pre class="message-snippet"><span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-kn">from</span> <span class="pygments-nn">unittest.mock</span> <span class="pygments-kn">import</span> <span class="pygments-n">patch</span></span>
-<span class="grey line-num">  6</span>  <span class="grey"></span>
-<span class="gbold line-num">  7</span>  <span class="highlight-pyta"><span class="pygments-kn">from</span> <span class="pygments-nn">python_ta.__init__</span> <span class="pygments-kn">import</span> <span class="pygments-n">check_all</span></span>
-<span class="grey line-num">  8</span>  <span class="grey"></span>
-<span class="grey line-num">  9</span>  <span class="grey"></span>
+<span class="grey line-num">  7</span>  <span class="grey"><span class="pygments-kn">from</span> <span class="pygments-nn">python_ta</span> <span class="pygments-kn">import</span> <span class="pygments-n">check_all</span></span>
 </pre>
                                                 </div>
                                                 

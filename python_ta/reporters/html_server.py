@@ -7,8 +7,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
     """
     Display html in a web browser without creating a temp file.
-    Instantiates a trivial http server and uses the webbrowser module to
-    open a URL to retrieve html from that server.
+    Instantiates a trivial HTTP server on the specified port (or an available port if 0 is provided)
+    and uses the webbrowser module to open a URL to retrieve the HTML from that server.
+
     If watch is False, the server responds to exactly one request and then shuts down.
     If watch is True, the server runs indefinitely, allowing multiple requests.
     Adapted from: https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/plotly/io/_base_renderers.py#L655
@@ -31,7 +32,7 @@ def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
     if watch:
         print(
             "[INFO] Your PythonTA report is being opened in your web browser.\n"
-            "       Press Ctrl + C, or stop this program to exit.\n\n",
+            "       Press Ctrl + C or stop this program to exit.",
             file=sys.stderr,
         )
         server = HTTPServer(("127.0.0.1", port), RequestHandler)

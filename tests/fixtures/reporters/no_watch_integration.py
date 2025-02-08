@@ -4,7 +4,7 @@ to verify that the HTML report server can handle multiple requests when `watch=T
 
 from unittest.mock import patch
 
-from python_ta.__init__ import check_all
+from python_ta import check_all
 
 
 @patch("webbrowser.open", return_value=None)

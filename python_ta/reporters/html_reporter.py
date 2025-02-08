@@ -7,9 +7,8 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 from pylint.reporters.ureports.nodes import BaseLayout
 
-from python_ta.reporters.html_server import open_html_in_browser
-
 from .core import PythonTaReporter
+from .html_server import open_html_in_browser
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 

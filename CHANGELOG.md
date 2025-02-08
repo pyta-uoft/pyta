@@ -12,6 +12,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added custom error message for `comparison-with-callable`
 - Added a watch configuration option to the HTML reporter for persistent server mode.
 - Added `server-port` configuration option to specify the port number to use when serving the PyTA HTML report.
+- Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 
 ### 💫 New checkers
 
@@ -26,10 +27,19 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
+
 ### 🔧 Internal changes
 
 - Configured CI tests to run on environments with and without `z3` dependency.
 - Refactored `script.js` to avoid using jQuery, and instead use vanilla Javascript functionality.
+- Configured CI to upload coverage report for both base and `z3` test environments
+
+## [2.9.2] - 2025-01-16
+
+### 🐛 Bug fixes
+
+- Ignore annotation-only assignment statements in `redundant-assignment` check
 
 ## [2.9.1] - 2024-12-09
 

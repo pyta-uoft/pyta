@@ -152,3 +152,7 @@ pycodestyle-ignore =
     W391,  # pylint C0305
     W503,  # this one just conflicts with pycodestyle W504
     W605,  # pylint W1401
+
+[MYPY]
+# List of configuration flags for mypy
+mypy-options = ignore-missing-imports, follow-imports=skip

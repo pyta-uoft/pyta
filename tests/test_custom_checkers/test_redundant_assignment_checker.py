@@ -336,6 +336,21 @@ class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_assign(assign_node)
 
+    def test_ignore_annotation_only_annassigns(self):
+        src = """
+        x: int
+        x = 10
+        """
+        mod = astroid.parse(src)
+        mod.accept(CFGVisitor())
+
+        self.checker.visit_module(mod)
+        with self.assertNoMessages():
+            for node in mod.nodes_of_class(nodes.Assign):
+                self.checker.visit_assign(node)
+            for node in mod.nodes_of_class(nodes.AnnAssign):
+                self.checker.visit_augassign(node)
+
 
 class TestRedundantAssignmentCheckerZ3Option(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = RedundantAssignmentChecker

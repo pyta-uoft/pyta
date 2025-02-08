@@ -43,6 +43,17 @@ class StaticTypeChecker(BaseRawFileChecker):
             "Used when a dictionary entry has an incompatible key or value type",
         ),
     }
+    options = (
+        (
+            "mypy-options",
+            {
+                "default": ["ignore-missing-imports", "follow-imports=skip"],
+                "type": "csv",
+                "metavar": "<mypy options>",
+                "help": "List of configuration flags for mypy",
+            },
+        ),
+    )
 
     COMMON_PATTERN = (
         r"^(?P<file>[^:]+):(?P<start_line>\d+):(?P<start_col>\d+):"
@@ -73,10 +84,11 @@ class StaticTypeChecker(BaseRawFileChecker):
     def process_module(self, node: nodes.NodeNG) -> None:
         """Run Mypy on the current file and handle type errors."""
         filename = node.stream().name
-        mypy_options = [
-            "--ignore-missing-imports",
-            "--show-error-end",
-        ]
+
+        mypy_options = ["--show-error-end"]
+        for arg in self.linter.config.mypy_options:
+            mypy_options.append("--" + arg)
+
         result, _, _ = api.run([filename] + mypy_options)
 
         for line in result.splitlines():

@@ -10,25 +10,9 @@ from typing import Optional
 import pytest
 
 
-def save_snapshot(data, snapshot_file):
-    """Save the response snapshot for comparison."""
-    with open(snapshot_file, "w") as f:
-        f.write(data)
-
-
-def load_snapshot(snapshot_file):
-    """Load the saved response snapshot."""
-    if not os.path.exists(snapshot_file):
-        return None
-    with open(snapshot_file, "r") as f:
-        return f.read()
-
-
 def clean_response_body(body):
-    """
-    Remove dynamic portions (such as timestamps) from the response body
-    before snapshot testing.
-    """
+    """Remove dynamic portions (such as timestamps) from the response body
+    before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests/fixtures/reporters/(?:no_)?watch_integration\.py.*\n?", "", body)
     return body.strip()
@@ -48,18 +32,12 @@ def wait_for_server(port: int, timeout: int = 30, interval: int = 1) -> Optional
     return None
 
 
-def test_open_html_in_browser_no_watch():
-    """
-    Test the open_html_in_browser function with watch=False.
-    Ensure the server handles a single request and shuts down properly.
-    """
+def test_open_html_in_browser_no_watch(snapshot):
+    """Test the open_html_in_browser function with watch=False.
+    Ensure the server handles a single request and shuts down properly."""
 
     script_path = os.path.normpath(
         os.path.join(__file__, "../../fixtures/reporters/no_watch_integration.py")
-    )
-
-    snapshot_file = os.path.normpath(
-        os.path.join(__file__, "../snapshot/no_watch_html_server_snapshot.txt")
     )
 
     process = subprocess.Popen([sys.executable, script_path])
@@ -72,8 +50,9 @@ def test_open_html_in_browser_no_watch():
             pytest.fail("Server did not start within the expected timeout")
 
         cleaned_body = clean_response_body(response_body)
-        snapshot = load_snapshot(snapshot_file)
-        assert cleaned_body == snapshot
+
+        snapshot.assert_match(cleaned_body, "no_watch_html_server_snapshot.html")
+
         with pytest.raises((ConnectionRefusedError, RemoteDisconnected)):
             new_conn = HTTPConnection("127.0.0.1", 5008)
             new_conn.request("GET", "/")
@@ -82,25 +61,20 @@ def test_open_html_in_browser_no_watch():
         process.send_signal(signal.SIGINT)
 
 
-def test_open_html_in_browser_watch():
-    """
-    Test the open_html_in_browser function with watch=True using a fixed port.
-    Ensure the server handles multiple requests and can be stopped gracefully.
-    """
+def test_open_html_in_browser_watch(snapshot):
+    """Test the open_html_in_browser function with watch=True using a fixed port.
+    Ensure the server handles multiple requests and can be stopped gracefully."""
     script_path = os.path.normpath(
         os.path.join(__file__, "../../fixtures/reporters/watch_integration.py")
     )
 
-    snapshot_file = os.path.normpath(
-        os.path.join(__file__, "../snapshot/watch_html_server_snapshot.txt")
-    )
-
     process = subprocess.Popen([sys.executable, script_path])
+
     if not wait_for_server(5008):
         process.send_signal(signal.SIGINT)
         pytest.fail("Server did not start within the expected timeout")
+
     try:
-        snapshot = load_snapshot(snapshot_file)
         for i in range(3):
             conn = HTTPConnection("127.0.0.1", 5008)
             conn.request("GET", "/")
@@ -109,7 +83,7 @@ def test_open_html_in_browser_watch():
 
             response_body = response.read().decode("utf-8")
             cleaned_body = clean_response_body(response_body)
-            assert cleaned_body == snapshot
+            snapshot.assert_match(cleaned_body, "watch_html_server_snapshot.html")
 
     finally:
         process.send_signal(signal.SIGINT)

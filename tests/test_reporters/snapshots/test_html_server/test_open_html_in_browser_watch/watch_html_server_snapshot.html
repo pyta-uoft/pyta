@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>PythonTA Report</title>
+        <style rel="stylesheet">
+            body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Helvetica Neue,
+    Helvetica,
+    Ubuntu,
+    Arial,
+    sans-serif;
+  background: rgba(71, 118, 230, 0.77);
+  background: -webkit-linear-gradient(
+    0deg,
+    rgba(49, 48, 178, 0.62),
+    rgba(71, 128, 230, 0.77)
+  );
+  background: linear-gradient(
+    90deg,
+    rgba(49, 48, 178, 0.62),
+    rgba(71, 128, 230, 0.77)
+  );
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  font-weight: normal;
+  -webkit-font-smoothing: antialiased;
+  color: #fff;
+  margin-top: 15px;
+  margin-left: 20px;
+  margin-bottom: 15px;
+  white-space: nowrap;
+}
+
+.main-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: min-content 1fr;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  header {
+    display: none;
+  }
+}
+
+.sidebar {
+  margin: 0 20px auto;
+  position: sticky;
+  top: 15px;
+  height: fit-content;
+  max-height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.sidebar ul {
+  font-size: 14px;
+  list-style-type: none;
+  padding: 0px 20px;
+  white-space: nowrap;
+}
+
+.file-name {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.sidebar ul li {
+  margin: 5px 0px;
+}
+
+.sidebar button {
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  padding: 0;
+}
+
+.sidebar svg.collapsed {
+  transform: rotate(-90deg);
+}
+
+.sidebar a:link,
+a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+
+.title {
+  font-size: 2.4em;
+  margin: 0;
+}
+
+time {
+  display: block;
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+.wrap {
+  padding: 10px;
+}
+
+main {
+  overflow: auto;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 20px;
+}
+
+section {
+  margin: auto;
+  display: inline-block;
+  min-width: 50%;
+  background: rgba(234, 233, 233, 0.25);
+  box-shadow: -1px 9px 15px -5px rgba(77, 77, 77, 0.6);
+  border-radius: 15px;
+}
+
+.section-header {
+  display: flex;
+  padding: 0 15px;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0px 1px 2px black;
+  background: #141e30;
+  background: linear-gradient(
+    to left,
+    rgba(36, 59, 85, 0.67),
+    rgba(20, 30, 48, 0.77)
+  );
+  background: -webkit-linear-gradient(
+    right,
+    rgba(36, 59, 85, 0.67),
+    rgba(20, 30, 48, 0.77)
+  );
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.error-output {
+  padding: 0 15px;
+}
+
+.code-errors {
+}
+
+.style-errors {
+  border-top: 3px solid rgba(255, 255, 255, 0.25);
+}
+
+.category-heading {
+  display: flex; /*Narrow width viewports*/
+  -webkit-font-smoothing: antialiased;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.error-instance {
+  display: grid;
+  background: #fff;
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.1),
+    0 4px 7px rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+}
+
+.error-link {
+  line-height: 35px;
+}
+
+.error-link a {
+  font-weight: bold;
+  text-decoration: none;
+  color: inherit;
+}
+.error-link a:hover {
+  text-decoration: underline;
+}
+
+.error-link a:visited {
+  color: inherit;
+}
+
+.code-error-id {
+  color: rgba(219, 0, 57, 0.9);
+}
+
+.code-error-id a:link {
+}
+
+.style-error-id {
+  color: rgb(0, 111, 255);
+}
+
+.style-error-id a:link {
+}
+
+.line-num {
+  color: #2d3441;
+  font-size: 90%;
+}
+
+.grey {
+  color: rgb(87, 87, 87);
+}
+
+.gbold {
+  color: rgb(90, 91, 92);
+  font-weight: bold;
+}
+
+.highlight-pyta {
+  font-weight: bold;
+  background: rgba(228, 255, 0, 0.4) !important;
+}
+
+.black {
+  color: rgb(0, 0, 0);
+}
+
+.occurrences,
+.shown {
+  line-height: 35px;
+  padding-left: 20px;
+  vertical-align: middle;
+}
+
+.more-info {
+  color: #000000;
+  font-weight: normal;
+}
+
+.info {
+  font-size: 110%;
+  display: flex; /*Narrow width viewports*/
+}
+
+.slider {
+  margin-left: auto;
+}
+.slider button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.slider button:hover {
+  filter: brightness(120%);
+}
+
+button.collapsed {
+  transform: scaleY(-1);
+}
+
+.collapsible {
+  width: 100%;
+  overflow-y: hidden;
+}
+
+.hide-and-maintain-width {
+  height: 0;
+  transition: height 0.15s ease-out;
+}
+
+.expanded {
+  height: auto;
+  transition: height 0.15s ease-out;
+}
+
+.content.hide-and-maintain-width,
+.message-container.hide-and-maintain-width {
+  margin-bottom: 0;
+  transition: height 0.3s ease-out;
+}
+
+.content.expanded,
+.message-container.expanded {
+  transition: height 0.3s ease-out;
+}
+
+.content {
+  margin-bottom: 15px;
+}
+
+.message-container.expanded {
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  margin: 8px 0;
+}
+
+.message-snippet-container {
+  background-color: #f4f8f8;
+}
+
+.message-snippet {
+  font-size: 1.2em;
+  line-height: 1.4em;
+  margin: 0;
+  padding: 0.25em 0;
+}
+
+.message-snippet.hide-and-maintain-width {
+  padding: 0;
+}
+
+.empty-placeholder {
+  font-style: italic;
+  padding-left: 20px;
+}
+
+/* Footer styling */
+
+footer {
+  background: #2d3441;
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  padding: 15px;
+}
+
+footer a {
+  color: #ffffff;
+}
+
+footer a:hover {
+  color: #86d1ef;
+}
+
+footer p {
+  margin-top: 0;
+}
+
+.footer-text {
+  flex: 1;
+}
+
+.logos {
+  width: 110px;
+}
+
+.logo {
+  padding: 0 5px;
+  text-decoration: none;
+}
+
+/*  Pygments css. Edited and reformatted from original output.
+    Unfortunately the class names cannot be improved to semantic names.
+*/
+.pygments-hll {
+  background-color: #ffffcc;
+} /* ? */
+
+.pygments-c {
+  color: #999;
+} /* Comment */
+
+.pygments-err {
+  /*border: 1px solid #FF0000;*/
+} /* Error */
+
+.pygments-k {
+  color: #aa22ff;
+  font-weight: bold;
+} /* Keyword */
+
+.pygments-o {
+  color: #666666;
+} /* Operator */
+
+.pygments-ch {
+  color: #408080;
+} /* Comment.Hashbang */
+
+.pygments-cm {
+  color: #999;
+} /* Comment.Multiline */
+
+.pygments-cp {
+  color: #bc7a00;
+} /* Comment.Preproc */
+
+.pygments-cpf {
+  color: #408080;
+} /* Comment.PreprocFile */
+
+.pygments-c1 {
+  color: #999;
+} /* Comment.Single */
+
+.pygments-cs {
+  color: #999;
+} /* Comment.Special */
+
+.pygments-gd {
+  color: #a00000;
+} /* Generic.Deleted */
+
+.pygments-ge {
+  font-style: italic;
+} /* Generic.Emph */
+
+.pygments-gr {
+  color: #ff0000;
+} /* Generic.Error */
+
+.pygments-gh {
+  color: #000080;
+  font-weight: bold;
+} /* Generic.Heading */
+
+.pygments-gi {
+  color: #00a000;
+} /* Generic.Inserted */
+
+.pygments-go {
+  color: #888888;
+} /* Generic.Output */
+
+.pygments-gp {
+  color: #000080;
+  font-weight: bold;
+} /* Generic.Prompt */
+
+.pygments-gs {
+  font-weight: bold;
+} /* Generic.Strong */
+
+.pygments-gu {
+  color: #800080;
+  font-weight: bold;
+} /* Generic.Subheading */
+
+.pygments-gt {
+  color: #0044dd;
+} /* Generic.Traceback */
+
+.pygments-kc {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Constant */
+
+.pygments-kd {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Declaration */
+
+.pygments-kn {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Namespace */
+
+.pygments-kp {
+  color: #008000;
+} /* Keyword.Pseudo */
+
+.pygments-kr {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Reserved */
+
+.pygments-kt {
+  color: #b00040;
+} /* Keyword.Type */
+
+.pygments-m {
+  color: #666666;
+} /* Literal.Number */
+
+.pygments-s {
+  color: #ba2121;
+} /* Literal.String */
+
+.pygments-na {
+  color: #7d9029;
+} /* Name.Attribute */
+
+.pygments-nb {
+  color: #008000;
+} /* Name.Builtin */
+
+.pygments-nc {
+  color: #0000ff;
+  font-weight: bold;
+} /* Name.Class */
+
+.pygments-no {
+  color: #880000;
+} /* Name.Constant */
+
+.pygments-nd {
+  color: #aa22ff;
+} /* Name.Decorator */
+
+.pygments-ni {
+  color: #999999;
+  font-weight: bold;
+} /* Name.Entity */
+
+.pygments-ne {
+  color: #d2413a;
+  font-weight: bold;
+} /* Name.Exception */
+
+.pygments-nf {
+  color: #0000ff;
+} /* Name.Function */
+
+.pygments-nl {
+  color: #a0a000;
+} /* Name.Label */
+
+.pygments-nn {
+  color: #0000ff;
+  font-weight: bold;
+} /* Name.Namespace */
+
+.pygments-nt {
+  color: #008000;
+  font-weight: bold;
+} /* Name.Tag */
+
+.pygments-nv {
+  color: #19177c;
+} /* Name.Variable */
+
+.pygments-ow {
+  color: #aa22ff;
+  font-weight: bold;
+} /* Operator.Word */
+
+.pygments-w {
+  color: #bbbbbb;
+} /* Text.Whitespace */
+
+.pygments-mb {
+  color: #075cc6;
+} /* Literal.Number.Bin */
+
+.pygments-mf {
+  color: #075cc6;
+} /* Literal.Number.Float */
+
+.pygments-mh {
+  color: #075cc6;
+} /* Literal.Number.Hex */
+
+.pygments-mi {
+  color: #075cc6;
+} /* Literal.Number.Integer */
+
+.pygments-mo {
+  color: #075cc6;
+} /* Literal.Number.Oct */
+
+.pygments-sa {
+  color: #059911;
+} /* Literal.String.Affix */
+
+.pygments-sb {
+  color: #059911;
+} /* Literal.String.Backtick */
+
+.pygments-sc {
+  color: #059911;
+} /* Literal.String.Char */
+
+.pygments-dl {
+  color: #059911;
+} /* Literal.String.Delimiter */
+
+.pygments-sd {
+  color: #059911;
+} /* Literal.String.Doc */
+
+.pygments-s2 {
+  color: #059911;
+} /* Literal.String.Double */
+
+.pygments-se {
+  color: #bb6622;
+  font-weight: bold;
+} /* Literal.String.Escape */
+
+.pygments-sh {
+  color: #059911;
+} /* Literal.String.Heredoc */
+
+.pygments-si {
+  color: #bb6688;
+  font-weight: bold;
+} /* Literal.String.Interpol */
+
+.pygments-sx {
+  color: #008000;
+} /* Literal.String.Other */
+
+.pygments-sr {
+  color: #bb6688;
+} /* Literal.String.Regex */
+
+.pygments-s1 {
+  color: #059911;
+} /* Literal.String.Single */
+
+.pygments-ss {
+  color: #19177c;
+} /* Literal.String.Symbol */
+
+.pygments-bp {
+  color: #008000;
+} /* Name.Builtin.Pseudo */
+
+.pygments-fm {
+  color: #0000ff;
+} /* Name.Function.Magic */
+
+.pygments-vc {
+  color: #19177c;
+} /* Name.Variable.Class */
+
+.pygments-vg {
+  color: #19177c;
+} /* Name.Variable.Global */
+
+.pygments-vi {
+  color: #19177c;
+} /* Name.Variable.Instance */
+
+.pygments-vm {
+  color: #19177c;
+} /* Name.Variable.Magic */
+
+.pygments-il {
+  color: #666666;
+} /* Literal.Number.Integer.Long */
+        </style>
+    </head>
+    <body>
+        <div class="main-grid">
+            <header>
+                <h1 class="title">PythonTA Report</h1>
+            </header>
+            <section class="sidebar">
+                <div class="section-header">
+                    <h2>Table of Contents</h2>
+                </div>
+                <ul>
+                    
+                    <li class="collapsible expanded">
+                        <button>
+                            <svg width="10" height="10">
+                                <g transform="scale(0.10 0.10)">
+                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                          stroke-width="15px"
+                                          fill="transparent"/>
+                                </g>
+                            </svg>
+                        </button>
+                        <span class="file-name">
+                            <a href=#0>
+                                watch_integration.py
+                            </a>
+                        </span>
+                        <ul>
+                            <li class="collapsible expanded">
+                                <button>
+                                    <svg width="10" height="10">
+                                        <g transform="scale(0.10 0.10)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                                  stroke-width="15px"
+                                                  fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
+                                <span>
+                                    <strong>Code Errors or Forbidden Usage</strong>
+                                </span>
+                                <ul>
+                                    
+                                    <li>
+                                        <a href=#0-E9999>
+                                            E9999 (forbidden-import)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-E1120>
+                                            E1120 (no-value-for-parameter)
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            </li>
+                            <li class="collapsible expanded">
+                                <button>
+                                    <svg width="10" height="10">
+                                        <g transform="scale(0.10 0.10)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="black"
+                                                  stroke-width="15px"
+                                                  fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
+                                <span>
+                                    <strong>Style and Convention</strong>
+                                </span>
+                                <ul>
+                                    
+                                    <li>
+                                        <a href=#0-C0301>
+                                            C0301 (line-too-long)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-E9992>
+                                            E9992 (forbidden-top-level-code)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-C0116>
+                                            C0116 (missing-function-docstring)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-E9970>
+                                            E9970 (missing-param-type)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-E9971>
+                                            E9971 (missing-return-type)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-W0613>
+                                            W0613 (unused-argument)
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </section>
+            <main>
+                
+                
+                <section id=0>
+                    <div class="section-header">
+                    </div>
+                    <article class="error-output code-errors">
+                        <h3 class="category-heading">
+                            <span>Code Errors or Forbidden Usage (fix: high priority)</span>
+                            <span class="slider">
+                                <button>
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible expanded">
+                            
+                                
+                            <div class="error-instance" id=0-E9999>
+                                <div class="info">
+                                    
+                                    <span class="error-link code-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9999" target="_blank">&#10064; E9999 (forbidden-import)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                    
+                                     occurrence.
+                                    
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 5] You may not import patch from module unittest.mock.
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  <pre class="message-snippet"><span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">verify</span> <span class="pygments-n">that</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span> <span class="pygments-n">server</span> <span class="pygments-n">can</span> <span class="pygments-n">handle</span> <span class="pygments-n">multiple</span> <span class="pygments-n">requests</span> <span class="pygments-n">when</span> <span class="pygments-err">`</span><span class="pygments-n">watch</span><span class="pygments-o">=</span><span class="pygments-kc">True</span><span class="pygments-err">`</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
+<span class="grey line-num">  4</span>  <span class="grey"></span>
+<span class="gbold line-num">  5</span>  <span class="highlight-pyta"><span class="pygments-kn">from</span> <span class="pygments-nn">unittest.mock</span> <span class="pygments-kn">import</span> <span class="pygments-n">patch</span></span>
+<span class="grey line-num">  6</span>  <span class="grey"></span>
+<span class="grey line-num">  7</span>  <span class="grey"><span class="pygments-kn">from</span> <span class="pygments-nn">python_ta</span> <span class="pygments-kn">import</span> <span class="pygments-n">check_all</span></span>
+</pre>
+                                                </div>
+                                                
+                                            </div>
+                                       
+                                    
+                                </div>
+                            </div>
+                            
+                                
+                            <div class="error-instance" id=0-E1120>
+                                <div class="info">
+                                    
+                                    <span class="error-link code-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e1120" target="_blank">&#10064; E1120 (no-value-for-parameter)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                    
+                                     occurrence.
+                                    
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 20] No value for argument 'mock_webbrowser_open' in function call
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  <pre class="message-snippet"><span class="grey line-num"> 18</span>  <span class="grey"></span>
+<span class="grey line-num"> 19</span>  <span class="grey"></span>
+<span class="gbold line-num"> 20</span>  <span class="highlight-pyta"><span class="pygments-n">open_server</span><span class="pygments-p">()</span></span>
+</pre>
+                                                </div>
+                                                
+                                            </div>
+                                       
+                                    
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </article>
+                    <article class="error-output style-errors">
+                        <h3 class="category-heading">
+                            <span>Style or Convention Errors (fix: before submission)</span>
+                            <span class="slider">
+                                <button>
+                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                        <g transform="scale(0.13 0.13)">
+                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                        </g>
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible expanded">
+                            
+                            <div class="error-instance" id=0-C0301>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0301" target="_blank">&#10064; C0301 (line-too-long)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    4
+                                        
+                                            occurrences.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 1] This line is 96 characters long, exceeding the limit of 80 characters.
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="gbold line-num">  1</span>  <span class="highlight-pyta"><span class="pygments-s2">&quot;&quot;&quot;This script serves as the entry point for an integration test of the PyTA HTML report server.</span></span>
+<span class="grey line-num">  2</span>  <span class="grey"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_server</span><span class="pygments-p">::</span><span class="pygments-n">test_open_html_in_browser_watch</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
+<span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">verify</span> <span class="pygments-n">that</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span> <span class="pygments-n">server</span> <span class="pygments-n">can</span> <span class="pygments-n">handle</span> <span class="pygments-n">multiple</span> <span class="pygments-n">requests</span> <span class="pygments-n">when</span> <span class="pygments-err">`</span><span class="pygments-n">watch</span><span class="pygments-o">=</span><span class="pygments-kc">True</span><span class="pygments-err">`</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 2] This line is 100 characters long, exceeding the limit of 80 characters.
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  1</span>  <span class="grey"><span class="pygments-s2">&quot;&quot;&quot;This script serves as the entry point for an integration test of the PyTA HTML report server.</span></span>
+<span class="gbold line-num">  2</span>  <span class="highlight-pyta"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_server</span><span class="pygments-p">::</span><span class="pygments-n">test_open_html_in_browser_watch</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
+<span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">verify</span> <span class="pygments-n">that</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span> <span class="pygments-n">server</span> <span class="pygments-n">can</span> <span class="pygments-n">handle</span> <span class="pygments-n">multiple</span> <span class="pygments-n">requests</span> <span class="pygments-n">when</span> <span class="pygments-err">`</span><span class="pygments-n">watch</span><span class="pygments-o">=</span><span class="pygments-kc">True</span><span class="pygments-err">`</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
+<span class="grey line-num">  4</span>  <span class="grey"></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 3] This line is 88 characters long, exceeding the limit of 80 characters.
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  1</span>  <span class="grey"><span class="pygments-s2">&quot;&quot;&quot;This script serves as the entry point for an integration test of the PyTA HTML report server.</span></span>
+<span class="grey line-num">  2</span>  <span class="grey"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_server</span><span class="pygments-p">::</span><span class="pygments-n">test_open_html_in_browser_watch</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
+<span class="gbold line-num">  3</span>  <span class="highlight-pyta"><span class="pygments-n">to</span> <span class="pygments-n">verify</span> <span class="pygments-n">that</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span> <span class="pygments-n">server</span> <span class="pygments-n">can</span> <span class="pygments-n">handle</span> <span class="pygments-n">multiple</span> <span class="pygments-n">requests</span> <span class="pygments-n">when</span> <span class="pygments-err">`</span><span class="pygments-n">watch</span><span class="pygments-o">=</span><span class="pygments-kc">True</span><span class="pygments-err">`</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
+<span class="grey line-num">  4</span>  <span class="grey"></span>
+<span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-kn">from</span> <span class="pygments-nn">unittest.mock</span> <span class="pygments-kn">import</span> <span class="pygments-n">patch</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 3] This line is 88 characters long, exceeding the limit of 80 characters.
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  1</span>  <span class="grey"><span class="pygments-s2">&quot;&quot;&quot;This script serves as the entry point for an integration test of the PyTA HTML report server.</span></span>
+<span class="grey line-num">  2</span>  <span class="grey"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_server</span><span class="pygments-p">::</span><span class="pygments-n">test_open_html_in_browser_watch</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
+<span class="gbold line-num">  3</span>  <span class="highlight-pyta"><span class="pygments-n">to</span> <span class="pygments-n">verify</span> <span class="pygments-n">that</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span> <span class="pygments-n">server</span> <span class="pygments-n">can</span> <span class="pygments-n">handle</span> <span class="pygments-n">multiple</span> <span class="pygments-n">requests</span> <span class="pygments-n">when</span> <span class="pygments-err">`</span><span class="pygments-n">watch</span><span class="pygments-o">=</span><span class="pygments-kc">True</span><span class="pygments-err">`</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
+<span class="grey line-num">  4</span>  <span class="grey"></span>
+<span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-kn">from</span> <span class="pygments-nn">unittest.mock</span> <span class="pygments-kn">import</span> <span class="pygments-n">patch</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                            <div class="error-instance" id=0-E9992>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9992" target="_blank">&#10064; E9992 (forbidden-top-level-code)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 20] Forbidden top-level code found on line 20
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num"> 18</span>  <span class="grey"></span>
+<span class="grey line-num"> 19</span>  <span class="grey"></span>
+<span class="gbold line-num"> 20</span>  <span class="highlight-pyta"><span class="pygments-n">open_server</span><span class="pygments-p">()</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                            <div class="error-instance" id=0-C0116>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0116" target="_blank">&#10064; C0116 (missing-function-docstring)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 11] Missing function or method docstring
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num"> 10</span>  <span class="grey"><span class="pygments-nd">@patch</span><span class="pygments-p">(</span><span class="pygments-s2">&quot;webbrowser.open&quot;</span><span class="pygments-p">,</span> <span class="pygments-n">return_value</span><span class="pygments-o">=</span><span class="pygments-kc">None</span><span class="pygments-p">)</span></span>
+<span class="grey line-num"> 11</span>  <span class="grey"><span class="pygments-k">def</span> <span class="pygments-nf">open_server</span><span class="pygments-p">(</span><span class="pygments-n">mock_webbrowser_open</span><span class="pygments-p">):</span></span>
+<span class="black line-num">   </span>      <span class="highlight-pyta"><span class="pygments-sd">&quot;&quot;&quot;YOUR DOCSTRING HERE&quot;&quot;&quot;</span></span>
+<span class="grey line-num"> 12</span>  <span class="grey">    <span class="pygments-n">check_all</span><span class="pygments-p">(</span></span>
+<span class="grey line-num"> 13</span>  <span class="grey">        <span class="pygments-n">config</span><span class="pygments-o">=</span><span class="pygments-p">{</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                            <div class="error-instance" id=0-E9970>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9970" target="_blank">&#10064; E9970 (missing-param-type)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 11] Function parameter is missing type annotation
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  9</span>  <span class="grey"></span>
+<span class="grey line-num"> 10</span>  <span class="grey"><span class="pygments-nd">@patch</span><span class="pygments-p">(</span><span class="pygments-s2">&quot;webbrowser.open&quot;</span><span class="pygments-p">,</span> <span class="pygments-n">return_value</span><span class="pygments-o">=</span><span class="pygments-kc">None</span><span class="pygments-p">)</span></span>
+<span class="gbold line-num"> 11</span>  <span class="black"><span class="pygments-k">def</span> <span class="pygments-nf">open_server</span><span class="pygments-p">(</span></span><span class="highlight-pyta"><span class="pygments-n">mock_webbrowser_open</span></span><span class="black"><span class="pygments-p">):</span></span>
+<span class="grey line-num"> 12</span>  <span class="grey">    <span class="pygments-n">check_all</span><span class="pygments-p">(</span></span>
+<span class="grey line-num"> 13</span>  <span class="grey">        <span class="pygments-n">config</span><span class="pygments-o">=</span><span class="pygments-p">{</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                            <div class="error-instance" id=0-E9971>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9971" target="_blank">&#10064; E9971 (missing-return-type)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 11] Function is missing return type annotation
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  9</span>  <span class="grey"></span>
+<span class="grey line-num"> 10</span>  <span class="grey"><span class="pygments-nd">@patch</span><span class="pygments-p">(</span><span class="pygments-s2">&quot;webbrowser.open&quot;</span><span class="pygments-p">,</span> <span class="pygments-n">return_value</span><span class="pygments-o">=</span><span class="pygments-kc">None</span><span class="pygments-p">)</span></span>
+<span class="gbold line-num"> 11</span>  <span class="highlight-pyta"><span class="pygments-k">def</span> <span class="pygments-nf">open_server</span><span class="pygments-p">(</span><span class="pygments-n">mock_webbrowser_open</span><span class="pygments-p">)</span></span><span class="black"><span class="pygments-p">:</span></span>
+<span class="grey line-num"> 12</span>  <span class="grey">    <span class="pygments-n">check_all</span><span class="pygments-p">(</span></span>
+<span class="grey line-num"> 13</span>  <span class="grey">        <span class="pygments-n">config</span><span class="pygments-o">=</span><span class="pygments-p">{</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                            <div class="error-instance" id=0-W0613>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;w0613" target="_blank">&#10064; W0613 (unused-argument)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
+                                                <g transform="scale(0.13 0.13)">
+                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    [Line 11] The parameter 'mock_webbrowser_open' is unused. This may indicate you misspelled a parameter name in the function body. Otherwise, the parameter can be removed from the function without altering the program.
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
+                                                                <g transform="scale(0.13 0.13)">
+                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
+                                                                </g>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  9</span>  <span class="grey"></span>
+<span class="grey line-num"> 10</span>  <span class="grey"><span class="pygments-nd">@patch</span><span class="pygments-p">(</span><span class="pygments-s2">&quot;webbrowser.open&quot;</span><span class="pygments-p">,</span> <span class="pygments-n">return_value</span><span class="pygments-o">=</span><span class="pygments-kc">None</span><span class="pygments-p">)</span></span>
+<span class="gbold line-num"> 11</span>  <span class="black"><span class="pygments-k">def</span> <span class="pygments-nf">open_server</span><span class="pygments-p">(</span></span><span class="highlight-pyta"><span class="pygments-n">mock_webbrowser_open</span></span><span class="black"><span class="pygments-p">):</span></span>
+<span class="grey line-num"> 12</span>  <span class="grey">    <span class="pygments-n">check_all</span><span class="pygments-p">(</span></span>
+<span class="grey line-num"> 13</span>  <span class="grey">        <span class="pygments-n">config</span><span class="pygments-o">=</span><span class="pygments-p">{</span></span>
+</pre>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                        </div>
+                    </article>
+                </section>
+                
+            </main>
+        </div>
+        <footer>
+            <div class="footer-text">
+            <p>
+                PythonTA is maintained by Professor David Liu and students at the University of Toronto.
+            </p>
+            <p>
+                Found a bug? Report it to <a href="mailto:david@cs.toronto.edu">Prof. Liu</a>!
+            </p>
+            <p>
+                <a href="https://www.cs.toronto.edu/~david/pyta/">PyTA Help Documentation</a>
+            </p>
+            </div>
+            <div class="logos">
+                <a class="logo" href="https://www.cs.toronto.edu/~david/pyta/" target="_blank">
+                <img src="https://www.cs.toronto.edu/~david/pyta/images/pyta_logo.svg" alt="PyTA logo" height="40"/>
+                </a>
+                <a class="logo" href="https://github.com/pyta-uoft/pyta" target="_blank">
+                    <!-- From https://icons.getbootstrap.com/icons/github/ -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </a>
+            </div>
+        </footer>
+        <script type="text/javascript">
+            document.body.addEventListener("click", (event) => {
+  const slider = event.target.closest(".slider")
+  if (slider) {
+    const parent = slider.parentElement
+    const elem = parent?.nextElementSibling
+
+    if (elem) {
+      toggleElement(elem)
+    }
+
+    Array.from(slider.children).forEach((child) => {
+      if (child.nodeType === 1) {
+        child.classList.toggle("collapsed")
+      }
+    })
+  }
+})
+
+document.querySelectorAll(".sidebar button").forEach((button) => {
+  button.addEventListener("click", () => {
+    let collapsible = button.closest(".collapsible")
+
+    if (collapsible) {
+      const ul = collapsible.querySelector("ul")
+      if (ul) {
+        ul.style.display = ul.style.display === "none" ? "block" : "none"
+      }
+    }
+
+    const svg = button.querySelector("svg")
+    if (svg) {
+      svg.classList.toggle("collapsed")
+    }
+  })
+})
+
+/* Function for animating a collapsible element, adapted from
+ * https://carlanderson.xyz/how-to-animate-on-height-auto/
+ */
+function toggleElement(elem) {
+  const expanded = elem.classList.contains("expanded")
+  elem.style.height = ""
+  elem.style.transition = "none"
+
+  // Set the start height to begin the transition
+  const startHeight = window.getComputedStyle(elem).height
+
+  if (expanded) {
+    elem.style.height = startHeight
+  }
+
+  elem.classList.toggle("hide-and-maintain-width")
+  elem.classList.toggle("expanded")
+
+  let height
+  if (expanded) {
+    height = 0
+  } else {
+    height = window.getComputedStyle(elem).height
+    elem.style.height = startHeight
+  }
+
+  // wait until the next frame so that everything has time to update before starting the transition
+  requestAnimationFrame(() => {
+    elem.style.transition = ""
+
+    requestAnimationFrame(() => {
+      elem.style.height = height
+    })
+  })
+
+  // Clear the saved height values after the transition
+  elem.addEventListener("transitionend", () => {
+    elem.style.height = ""
+    elem.removeEventListener("transitionend", arguments.callee)
+  })
+}
+        </script>
+    </body>
+</html>

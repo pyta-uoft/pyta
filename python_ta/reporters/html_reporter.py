@@ -1,8 +1,5 @@
 import os
 import sys
-import webbrowser
-from datetime import datetime
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from jinja2 import Environment, FileSystemLoader
 from pygments import highlight
@@ -11,6 +8,7 @@ from pygments.lexers import PythonLexer
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
+from .html_server import open_html_in_browser
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
@@ -83,44 +81,9 @@ class HTMLReporter(PythonTaReporter):
             self.writeln(rendered_template)
         else:
             rendered_template = rendered_template.encode("utf8")
-            self._open_html_in_browser(rendered_template)
-
-    def _open_html_in_browser(self, html: bytes) -> None:
-        """
-        Display html in a web browser without creating a temp file.
-        Instantiates a trivial http server and uses the webbrowser module to
-        open a URL to retrieve html from that server.
-
-        Adapted from: https://github.com/plotly/plotly.py/blob/master/packages/python/plotly/plotly/io/_base_renderers.py#L655
-        """
-
-        class OneShotRequestHandler(BaseHTTPRequestHandler):
-            def do_GET(self):
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
-
-                buffer_size = 1024 * 1024
-                for i in range(0, len(html), buffer_size):
-                    self.wfile.write(html[i : i + buffer_size])
-
-            def log_message(self, format, *args):
-                """Overridden so that no server logging is printed."""
-                pass
-
-        server = HTTPServer(("127.0.0.1", 0), OneShotRequestHandler)
-        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
-        server.handle_request()
-        server.server_close()
-        print(
-            "[INFO] Your PythonTA report is being opened in your web browser.\n"
-            "       If it doesn't open, please add an output argument to python_ta.check_all\n"
-            "       as follows:\n\n"
-            "         check_all(..., output='pyta_report.html')\n\n"
-            "       This will cause PythonTA to save the report to a file, pyta_report.html,\n"
-            "       that you can open manually in a web browser.",
-            file=sys.stderr,
-        )
+            open_html_in_browser(
+                rendered_template, self.linter.config.watch, self.linter.config.server_port
+            )
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

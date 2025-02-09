@@ -118,9 +118,9 @@ The maximum number of occurrences of each check to report.
 This option can be used to limit the size of the output report.
 If set to 0 (the default), all occurrences are shown.
 
-### `pyta-template-file` (default: `"template.html.jinja"`)
+### `pyta-template-file` (default: Path to PythonTA's `template.html.jinja`)
 
-HTML template file for the HTMLReporter.
+Path to HTML template file for the HTMLReporter.
 
 ### `allow-pylint-comments` (default: `false`)
 

@@ -60,7 +60,15 @@ class HTMLReporter(PythonTaReporter):
         grouped_messages = {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
 
         template_f = self.linter.config.pyta_template_file
-        template = Environment(loader=FileSystemLoader(TEMPLATES_DIR)).get_template(template_f)
+        template_f = (
+            template_f if template_f != "" else os.path.join(TEMPLATES_DIR, "template.html.jinja")
+        )
+        path = os.path.abspath(template_f)
+        filename, file_parent_directory = os.path.basename(path), os.path.dirname(path)
+
+        template = Environment(loader=FileSystemLoader(file_parent_directory)).get_template(
+            filename
+        )
 
         # Embed resources so the output html can go anywhere, independent of assets.
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:

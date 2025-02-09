@@ -282,6 +282,7 @@ def reset_linter(
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
+
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
         (
@@ -314,7 +315,7 @@ def reset_linter(
         (
             "pyta-template-file",
             {
-                "default": "template.html.jinja",
+                "default": "",
                 "type": "string",
                 "metavar": "<pyta_reporter>",
                 "help": "HTML template file for the HTMLReporter.",

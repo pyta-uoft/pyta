@@ -286,6 +286,24 @@ def reset_linter(
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
         (
+            "server-port",
+            {
+                "default": 0,
+                "type": "int",
+                "metavar": "<port>",
+                "help": "Port number for the HTML report server",
+            },
+        ),
+        (
+            "watch",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "Run the HTML report server in persistent mode",
+            },
+        ),
+        (
             "pyta-number-of-messages",
             {
                 "default": 0,  # If the value is 0, all messages are displayed.

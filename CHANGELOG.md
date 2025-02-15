@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a watch configuration option to the HTML reporter for persistent server mode.
 - Added `server-port` configuration option to specify the port number to use when serving the PyTA HTML report.
 - Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
+- Added documentation for overriding messages
 
 ### 💫 New checkers
 

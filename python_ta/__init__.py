@@ -56,6 +56,7 @@ from .patches import patch_all
 from .reporters import REPORTERS
 from .reporters.core import PythonTaReporter
 from .upload import upload_to_server
+from .util.autoformat import Autoformatter
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
@@ -190,23 +191,11 @@ def _check(
                 )
 
                 if autoformat:
-                    linelen = (
+                    linelen = int(
                         local_config["max-line-length"] if "max-line-length" in local_config else 88
                     )
-                    subprocess.run(
-                        [
-                            sys.executable,
-                            "-m",
-                            "black",
-                            "--skip-string-normalization",
-                            "--line-length=" + str(linelen),
-                            file_py,
-                        ],
-                        encoding="utf-8",
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                    )
+                    autoformatter = Autoformatter(linter.config.autoformat_options, linelen)
+                    autoformatter.run(file_py)
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out
@@ -356,6 +345,15 @@ def reset_linter(
                 "type": "yn",
                 "metavar": "<yn>",
                 "help": "Overwrite the default pylint error messages with PythonTA's messages",
+            },
+        ),
+        (
+            "autoformat-options",
+            {
+                "default": ["skip-string-normalization"],
+                "type": "csv",
+                "metavar": "<autoformatter options>",
+                "help": "List of command-line arguments for black",
             },
         ),
     )

@@ -28,9 +28,9 @@ class PycodestyleChecker(BaseRawFileChecker):
         ),
     )
 
-    def process_module(self, node: nodes.NodeNG) -> None:
+    def process_module(self, node: nodes.Module) -> None:
         style_guide = pycodestyle.StyleGuide(
-            paths=[node.stream().name],
+            paths=[node.file],
             reporter=JSONReport,
             ignore=self.linter.config.pycodestyle_ignore,
         )

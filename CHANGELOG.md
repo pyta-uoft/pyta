@@ -37,6 +37,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Configured CI tests to run on environments with and without `z3` dependency.
 - Refactored `script.js` to avoid using jQuery, and instead use vanilla Javascript functionality.
 - Configured CI to upload coverage report for both base and `z3` test environments
+- Remove unnecessary calls to `node.stream()` in raw file checkers (pycodestyle and static type checkers)
 
 ## [2.9.2] - 2025-01-16
 

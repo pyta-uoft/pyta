@@ -200,3 +200,14 @@ By default, this list includes the following flags:
 
 Modifying this option will override all default flags.
 Note that the `show-error-end` flag is always passed into mypy, so it does not need to be specified within this option.
+
+### `autoformat-options`
+
+A list of [command-line arguments](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#command-line-options)
+to be passed into the Black formatting tool if `python_ta.check_all` is called with `autoformat=True`.
+
+By default, this list includes the following flag:
+
+- `skip-string-normalization`
+
+Modifying this option will override all default flags.

@@ -81,9 +81,9 @@ class StaticTypeChecker(BaseRawFileChecker):
         ),
     }
 
-    def process_module(self, node: nodes.NodeNG) -> None:
+    def process_module(self, node: nodes.Module) -> None:
         """Run Mypy on the current file and handle type errors."""
-        filename = node.stream().name
+        filename = node.file
 
         mypy_options = ["--show-error-end"]
         for arg in self.linter.config.mypy_options:

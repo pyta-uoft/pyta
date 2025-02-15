@@ -156,3 +156,7 @@ pycodestyle-ignore =
 [MYPY]
 # List of configuration flags for mypy
 mypy-options = ignore-missing-imports, follow-imports=skip
+
+[AUTOFORMAT]
+# List of configuration flags for the Black formatting tool
+autoformat-options = skip-string-normalization

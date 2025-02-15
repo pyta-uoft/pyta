@@ -190,16 +190,13 @@ def _check(
                 )
 
                 if autoformat:
-                    linelen = (
-                        local_config["max-line-length"] if "max-line-length" in local_config else 88
-                    )
                     subprocess.run(
                         [
                             sys.executable,
                             "-m",
                             "black",
                             "--skip-string-normalization",
-                            "--line-length=" + str(linelen),
+                            f"--line-length={linter.config.max_line_length}",
                             file_py,
                         ],
                         encoding="utf-8",

@@ -31,6 +31,15 @@ error_params = [
         False,
         """def foo():print("Hello, world!")\n""",
     ),
+    (
+        # This line is between 80-88 characters; it should be reformatted because the default
+        # max-line-len is 80.
+        """CONST = ['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'b']""",
+        {"output-format": "python_ta.reporters.JSONReporter"},
+        True,
+        "CONST = [\n    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',\n"
+        "    'b',\n]\n",
+    ),
 ]
 
 

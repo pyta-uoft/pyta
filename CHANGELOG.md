@@ -30,6 +30,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🐛 Bug fixes
 
 - Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
+- Fixed issue in `autoformat` where the default `max-line-length` value was not used
 
 ### 🔧 Internal changes
 

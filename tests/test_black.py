@@ -31,6 +31,22 @@ error_params = [
         False,
         """def foo():print("Hello, world!")\n""",
     ),
+    (
+        """def foo():print("Hello, world!")\n""",
+        {"output-format": "python_ta.reporters.JSONReporter", "autoformat-options": []},
+        False,
+        """def foo():print("Hello, world!")\n""",
+    ),
+    (
+        """def foo():print("Hello, world!" + "Although this line is too long, it is not split by black as it is outside of the line range.")\n""",
+        {
+            "output-format": "python_ta.reporters.JSONReporter",
+            "max-line-length": 50,
+            "autoformat-options": ["line-ranges=2-3"],
+        },
+        False,
+        """def foo():print("Hello, world!" + "Although this line is too long, it is not split by black as it is outside of the line range.")\n""",
+    ),
 ]
 
 

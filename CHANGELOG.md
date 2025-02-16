@@ -30,12 +30,14 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🐛 Bug fixes
 
 - Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
+- Fixed issue in `autoformat` where the default `max-line-length` value was not used
 
 ### 🔧 Internal changes
 
 - Configured CI tests to run on environments with and without `z3` dependency.
 - Refactored `script.js` to avoid using jQuery, and instead use vanilla Javascript functionality.
 - Configured CI to upload coverage report for both base and `z3` test environments
+- Remove unnecessary calls to `node.stream()` in raw file checkers (pycodestyle and static type checkers)
 
 ## [2.9.2] - 2025-01-16
 

@@ -191,10 +191,9 @@ def _check(
                 )
 
                 if autoformat:
-                    linelen = int(
-                        local_config["max-line-length"] if "max-line-length" in local_config else 88
+                    autoformatter = Autoformatter(
+                        linter.config.autoformat_options, linter.config.max_line_length
                     )
-                    autoformatter = Autoformatter(linter.config.autoformat_options, linelen)
                     autoformatter.run(file_py)
 
                 if not is_any_file_checked:

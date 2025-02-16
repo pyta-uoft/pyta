@@ -717,7 +717,7 @@ def test_nested_preconditions_contract_checking() -> None:
 
     assert (
         str(exception_info.value)
-        == 'my_condition2 precondition "x > 0" was violated for arguments {x: -1} '
+        == 'my_condition2 precondition "x > 0" was violated for arguments {x: -1}'
     )
 
 

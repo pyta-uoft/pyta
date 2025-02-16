@@ -200,12 +200,12 @@ def add_class_invariants(klass: type) -> None:
                 )
             except TypeCheckError:
                 raise AssertionError(
-                    f"Value {_display_value(value)} did not match type annotation for attribute "
-                    f"{name}: {_display_annotation(cls_annotations[name])}"
+                    f"Value {_display_value(value)} for attribute {name} did not match expected type "
+                    f"{_display_annotation(cls_annotations[name])}"
                 ) from None
         original_attr_value_exists = False
         original_attr_value = None
-        if hasattr(super(klass, self), name):
+        if hasattr(self, name):
             original_attr_value_exists = True
             original_attr_value = super(klass, self).__getattribute__(name)
         super(klass, self).__setattr__(name, value)
@@ -255,8 +255,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
                 raise PyTAContractError(
-                    f"{wrapped.__name__} argument {_display_value(arg)} did not match type "
-                    f"annotation for parameter {param}: {_display_annotation(annotations[param])}"
+                    f"Argument value {_display_value(arg)} for {wrapped.__name__} parameter {param} "
+                    f"did not match expected type {_display_annotation(annotations[param])}"
                     + (f"\n{additional_suggestions}" if additional_suggestions else "")
                 )
 
@@ -297,8 +297,8 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 check_type(r, return_type)
         except (TypeError, TypeCheckError):
             raise PyTAContractError(
-                f"{wrapped.__name__}'s return value {_display_value(r)} did not match "
-                f"return type annotation {_display_annotation(return_type)}"
+                f"Return value {_display_value(r)} for {wrapped.__name__} did not match "
+                f"expected type {_display_annotation(return_type)}"
             )
 
     # Check function postconditions
@@ -468,7 +468,7 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
             )
         except TypeCheckError:
             raise AssertionError(
-                f"{_display_value(value)} did not match type annotation for attribute {attr}: "
+                f"Value {_display_value(value)} for attribute {attr} did not match expected type "
                 f"{_display_annotation(annotation)}"
             )
 
@@ -506,7 +506,7 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                     curr_attributes = "{" + curr_attributes + "}"
 
                     raise PyTAContractError(
-                        f'"{instance.__class__.__name__}" representation invariant "{invariant}" was violated for'
+                        f'{instance.__class__.__name__} representation invariant "{invariant}" was violated for'
                         f" instance attributes {curr_attributes}"
                     )
 
@@ -579,10 +579,10 @@ def _check_assertions(
                 return_val_string = ""
 
                 if condition_type == "postcondition":
-                    return_val_string = f"and return value {function_return_val}"
+                    return_val_string = f" and return value {function_return_val}"
                 raise PyTAContractError(
                     f'{wrapped.__name__} {condition_type} "{assertion_str}" was '
-                    f"violated for arguments {arg_string} {return_val_string}"
+                    f"violated for arguments {arg_string}{return_val_string}"
                 )
 
 

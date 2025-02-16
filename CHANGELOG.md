@@ -15,6 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `server-port` configuration option to specify the port number to use when serving the PyTA HTML report.
 - Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 - Added documentation for overriding messages
+- Improved `check_contracts` error messages by ensuring a consistent format and phrasing
 - Added `autoformat-options` configuration option to let users specify command-line arguments to the Black formatting tool
 
 ### 💫 New checkers
@@ -32,6 +33,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
 - Fixed issue in `autoformat` where the default `max-line-length` value was not used
+- Fixed issue in contract-checking `new_setattr` where an instance attribute was not always reset when reassigning it to an invalid value
 
 ### 🔧 Internal changes
 

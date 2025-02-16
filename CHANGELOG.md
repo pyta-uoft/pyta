@@ -33,6 +33,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
 - Fixed issue in `autoformat` where the default `max-line-length` value was not used
 - Fixed issue in contract-checking `new_setattr` where an instance attribute was not always reset when reassigning it to an invalid value
+- Fixed issue in `AccumulationTable` where accumulation expressions could not refer to loop variables
 
 ### 🔧 Internal changes
 

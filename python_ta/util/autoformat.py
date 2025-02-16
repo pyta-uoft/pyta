@@ -23,7 +23,7 @@ class Autoformatter:
         """
         self.subprocess_args = [sys.executable, "-m", "black"]
         if max_linelen:
-            self.subprocess_args.append("--line-length=" + str(max_linelen))
+            self.subprocess_args.append(f"--line-length={max_linelen}")
         for arg in autoformat_options:
             self.subprocess_args.append("--" + arg)
 

@@ -237,7 +237,7 @@ def test_pizza_invalid() -> None:
         Pizza(radius=10, ingredients=[])
     msg = str(excinfo.value)
     assert (
-        '"Pizza" representation invariant "len(self.ingredients) > 0" was violated for instance attributes {'
+        'Pizza representation invariant "len(self.ingredients) > 0" was violated for instance attributes {'
         "radius: 10, "
         "ingredients: []}" == msg
     )
@@ -268,7 +268,7 @@ def test_set_wrapper_invalid() -> None:
         SetWrapper(set={1, 2, -3})
     msg = str(excinfo.value)
     assert (
-        '"SetWrapper" representation invariant "all(x in self.set for x in {1, 2, 3})" was violated for instance '
+        'SetWrapper representation invariant "all(x in self.set for x in {1, 2, 3})" was violated for instance '
         "attributes {"
         "set: {1, 2, -3}}" == msg
     )
@@ -436,7 +436,7 @@ def test_invariant_with_function_defined_in_module() -> None:
         Student("Bob", 0, 19)
 
     assert (
-        str(exception_info.value) == '"Student" representation invariant '
+        str(exception_info.value) == "Student representation invariant "
         '"validate_student_number(self.student_number)" '
         "was violated for instance attributes "
         "{name: " + "'Bob'" + ", student_number: 0, age: 19}"
@@ -483,7 +483,7 @@ def test_method_invariant_violation() -> None:
         Course("", 100)
 
     assert (
-        str(exception_info.value) == '"Course" representation invariant '
+        str(exception_info.value) == "Course representation invariant "
         '"self.validate_code(self.code)" was violated for instance attributes'
         " {code: '', num_students: 100}"
     )
@@ -512,7 +512,7 @@ def test_method_invariant_set_invalid() -> None:
         course.code = ""
 
     assert (
-        str(exception_info.value) == '"Course" representation invariant '
+        str(exception_info.value) == "Course representation invariant "
         '"self.validate_code(self.code)" was violated for instance attributes'
         " {code: '', num_students: 100}"
     )

@@ -118,9 +118,9 @@ The maximum number of occurrences of each check to report.
 This option can be used to limit the size of the output report.
 If set to 0 (the default), all occurrences are shown.
 
-### `pyta-template-file` (default: `"template.html.jinja"`)
+### `pyta-template-file` (default: Path to PythonTA's `template.html.jinja`)
 
-HTML template file for the HTMLReporter.
+Path to HTML template file for the HTMLReporter.
 
 ### `allow-pylint-comments` (default: `false`)
 
@@ -142,6 +142,27 @@ PythonTA's error messages can be seen in the source file [messages_config.toml](
 The path to a TOML file to use to replace Pylint's and PythonTA's default error messages.
 This allows users to provide their own messages for specific checks.
 This option is not affected by the `use-pyta-error-messages` option.
+
+For more information on overriding error messages, see _[Overriding error messages](#overriding-error-messages)_.
+
+### `watch` (default: `false`)
+
+When `true`, the HTMLReporter runs as a persistent server that continuously serves the PyTA report.
+This allows users to refresh the report page in their browser without restarting the server.
+When `false` (the default), the server responds to a single request and then shuts down. Modification
+to this configuration option has no effect for the other reporters.
+
+### `server-port` (default: `0`)
+
+The server-port option specifies the port number to use when serving the PyTA HTML report. When set to 0 (the default),
+the server automatically selects an available port. If set to a specific port (e.g., 5008), the server attempts
+to bind to that port. This configuration option only applies to the HTMLReporter and does not affect other reporters.
+
+### `autoformat-options` (default: `skip-string-normalization`)
+
+A list of [command-line arguments](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#command-line-options)
+to be passed into the Black formatting tool if `python_ta.check_all` is called with `autoformat=True`.
+Modifying this option will override the default flag.
 
 ## PythonTA checker configuration options
 
@@ -201,13 +222,34 @@ By default, this list includes the following flags:
 Modifying this option will override all default flags.
 Note that the `show-error-end` flag is always passed into mypy, so it does not need to be specified within this option.
 
-### `autoformat-options`
+(overriding-error-messages)=
 
-A list of [command-line arguments](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#command-line-options)
-to be passed into the Black formatting tool if `python_ta.check_all` is called with `autoformat=True`.
+## Overriding error messages
 
-By default, this list includes the following flag:
+All error messages from either pylint or PythonTA checkers can be overridden.
+To override the message for a specific check, you need to know the _checker class_ that checks for the message and the _module_ in which the class is defined.
+For example, to customize `E0111` (`bad-reversed-sequence`), we require knowing that this check is made in the `BasicChecker` in the `pylint.checkers.base` module.
 
-- `skip-string-normalization`
+Given this information, custom messages are saved in a [TOML file](https://toml.io/en/).
+Custom messages must be nested in the sequence _module_ -> _checker class_ -> _error code_.
+For example, we can override the error message for `E0111` in any of the following ways (taking advantage of TOML's flexibility with [nested keys](https://toml.io/en/v1.0.0#table)):
 
-Modifying this option will override all default flags.
+```toml
+# Version 1
+["pylint.checkers.base".BasicChecker]
+E0111 = "reversed() can only be called on instances of sequence types like str, list, or tuple."
+
+# Version 2
+["pylint.checkers.base"]
+BasicChecker.E0111 = "reversed() can only be called on instances of sequence types like str, list, or tuple."
+
+# Version 3
+"pylint.checkers.base".BasicChecker.E0111 = "reversed() can only be called on instances of sequence types like str, list, or tuple."
+```
+
+_Notes_:
+
+1. The module name (e.g., `pylint.checkers.base`) must be enclosed in quotes.
+2. For pylint messages, the [pylint documentation](https://pylint.readthedocs.io/en/latest/user_guide/messages/messages_overview.html) is helpful for determining where each check is defined.
+3. View the [default PythonTA message configuration](https://github.com/pyta-uoft/pyta/blob/master/python_ta/config/messages_config.toml) for examples of overriding messages.
+4. Custom message must use the same string conversion specifiers (e.g., `%s`) as the original message. See the pylint documentation for the original message format.

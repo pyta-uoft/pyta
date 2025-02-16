@@ -271,8 +271,27 @@ def reset_linter(
         - If the config argument is a dictionary, apply those options afterward.
     Do not re-use a linter object. Returns a new linter.
     """
+
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
     new_checker_options = (
+        (
+            "server-port",
+            {
+                "default": 0,
+                "type": "int",
+                "metavar": "<port>",
+                "help": "Port number for the HTML report server",
+            },
+        ),
+        (
+            "watch",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<yn>",
+                "help": "Run the HTML report server in persistent mode",
+            },
+        ),
         (
             "pyta-number-of-messages",
             {
@@ -285,7 +304,7 @@ def reset_linter(
         (
             "pyta-template-file",
             {
-                "default": "template.html.jinja",
+                "default": "",
                 "type": "string",
                 "metavar": "<pyta_reporter>",
                 "help": "HTML template file for the HTMLReporter.",

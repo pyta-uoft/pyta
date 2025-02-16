@@ -15,6 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `server-port` configuration option to specify the port number to use when serving the PyTA HTML report.
 - Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 - Added documentation for overriding messages
+- Added `autoformat-options` configuration option to let users specify command-line arguments to the Black formatting tool
 
 ### 💫 New checkers
 

@@ -18,6 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved `check_contracts` error messages by ensuring a consistent format and phrasing
 - Improved rendering of if/while/for syntax blocks in control flow graphs
 - Ensured GraphViz-generated files have `.gv` extension
+- Export `generate_cfg` from `python_ta.cfg`
 
 ### 💫 New checkers
 

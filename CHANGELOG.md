@@ -16,6 +16,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 - Added documentation for overriding messages
 - Improved `check_contracts` error messages by ensuring a consistent format and phrasing
+- Improved rendering of if/while/for syntax blocks in control flow graphs
+- Ensured GraphViz-generated files have `.gv` extension
 
 ### 💫 New checkers
 

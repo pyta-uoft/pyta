@@ -21,8 +21,8 @@ def create_cfg():
     """Create the CFG for each test that uses the code in a file fixture."""
     # Setup: store the paths of the files being used/created
     script_name = "file_fixtures/my_file.py"
-    dot_file_path = os.path.splitext(os.path.basename(script_name))[0]
-    svg_file_path = dot_file_path + ".svg"
+    dot_file_path = os.path.splitext(os.path.basename(script_name))[0] + ".gv"
+    svg_file_path = dot_file_path[:-3] + ".svg"
 
     # Create the graphviz files using my_file.py
     cfg_generator.generate_cfg(mod=script_name, auto_open=False)
@@ -46,8 +46,8 @@ def create_cfg_funcs_only():
     """
     # Setup: store the paths of the files being used/created
     script_name = "file_fixtures/funcs_only.py"
-    dot_file_path = os.path.splitext(os.path.basename(script_name))[0]
-    svg_file_path = dot_file_path + ".svg"
+    dot_file_path = os.path.splitext(os.path.basename(script_name))[0] + ".gv"
+    svg_file_path = dot_file_path[:-3] + ".svg"
 
     # Create the graphviz files using my_file.py
     options = {
@@ -152,3 +152,9 @@ def test_z3_dependency_uninstalled(snapshot, create_cfg) -> None:
     # Check that the contents match with the snapshot
     snapshot.snapshot_dir = "snapshots"
     snapshot.assert_match(gv_file_io.read(), "my_file.gv")
+
+
+if __name__ == "__main__":
+    import pytest
+
+    pytest.main(["test_cfg_generator.py"])

@@ -4,6 +4,7 @@ Provides a function to generate and display the control flow graph of a given mo
 
 from __future__ import annotations
 
+import html
 import importlib.util
 import os.path
 import sys
@@ -110,7 +111,7 @@ def _get_valid_file_path(mod: str = "") -> Optional[str]:
 def _display(
     cfgs: dict[nodes.NodeNG, ControlFlowGraph], filename: str, auto_open: bool = False
 ) -> None:
-    graph = graphviz.Digraph(name=filename, **GRAPH_OPTIONS)
+    graph = graphviz.Digraph(name=filename + ".gv", **GRAPH_OPTIONS)
     for node, cfg in cfgs.items():
         if isinstance(node, nodes.Module):
             subgraph_label = "__main__"
@@ -129,7 +130,7 @@ def _display(
                 _visit(block, c, visited, cfg.end)
             c.attr(label=subgraph_label, **SUBGRAPH_OPTIONS)
 
-    graph.render(filename, view=auto_open)
+    graph.render(outfile=filename + ".svg", view=auto_open)
 
 
 def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFGBlock) -> None:
@@ -140,15 +141,37 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFG
     if node_id in visited:
         return
 
-    label = "\n".join([s.as_string() for s in block.statements]) + "\n"
+    label = ""
+    fill_color = "white"
+
+    # Identify special cases
+    if len(block.statements) == 1:
+        stmt = block.statements[0]
+        if isinstance(stmt, nodes.Arguments):
+            label = f"{stmt.as_string()}\n"
+            fill_color = "palegreen"
+        elif isinstance(stmt.parent, nodes.If) and stmt is stmt.parent.test:
+            label = f"< if<U><B>{html.escape(stmt.as_string())}</B></U><BR/> >"
+        elif isinstance(stmt.parent, nodes.While) and stmt is stmt.parent.test:
+            label = f"< while<U><B>{html.escape(stmt.as_string())}</B></U><BR/> >"
+        elif isinstance(stmt.parent, nodes.For) and stmt is stmt.parent.iter:
+            label = f"< for {html.escape(stmt.parent.target.as_string())} in<U><B>{html.escape(stmt.as_string())}</B></U><BR/> >"
+        elif isinstance(stmt.parent, nodes.For) and stmt is stmt.parent.target:
+            label = f"< for<U><B>{html.escape(stmt.as_string())} </B></U> in {html.escape(stmt.parent.iter.as_string())}<BR/> >"
+
+    if not label:  # Default
+        label = "\n".join([s.as_string() for s in block.statements]) + "\n"
+
     # Need to escape backslashes explicitly.
     label = label.replace("\\", "\\\\")
     # \l is used for left alignment.
     label = label.replace("\n", "\\l")
 
-    fill_color = "grey93" if not block.reachable else "white"
-    # Change the fill colour if block is the end of the cfg
-    fill_color = "black" if block == end else fill_color
+    # Change the fill colour if block is the end of the cfg or unreachable
+    if block == end:
+        fill_color = "black"
+    elif not block.reachable:
+        fill_color = "grey93"
 
     graph.node(node_id, label=label, fillcolor=fill_color, style="filled")
     visited.add(node_id)

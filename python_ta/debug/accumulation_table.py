@@ -104,8 +104,15 @@ class AccumulationTable:
                 value = NO_VALUE
             else:
                 # name error wil be raised if accumulator cannot be found
-                value = eval(accumulator, frame.f_globals, frame.f_locals)
-                value = copy.deepcopy(value)
+                try:
+                    value = eval(accumulator, frame.f_globals, frame.f_locals)
+                except NameError as e:
+                    if sys.version_info >= (3, 10) and e.name in self.loop_variables:
+                        value = NO_VALUE
+                    else:
+                        raise
+                else:
+                    value = copy.deepcopy(value)
 
             self.loop_accumulators[accumulator].append(value)
 

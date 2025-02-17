@@ -25,7 +25,7 @@ def func1() -> list:
     """
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
-    return snapshot()
+    return snapshot(include_frames=[r"^func.*"])
 
 
 def func2() -> list:
@@ -54,7 +54,17 @@ def func_cyclic() -> list:
     """
     test_var = [1, 2, 3]
     test_var.append(test_var)
-    return snapshot()
+    return snapshot(include_frames=[r"^func.*"])
+
+
+def func_with_mutation() -> list:
+    """
+    Function that mutates an object after calling snapshot.
+    """
+    test_var = [1, 2, 3]
+    result = snapshot(include_frames=[r"^func.*"])
+    test_var.append(4)
+    return result
 
 
 def func_with_include(include_frames: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
@@ -159,6 +169,33 @@ def test_snapshot_three_levels() -> None:
         }
     } == local_vars[1]
     assert {"func3": {"i": 4, "test_var1c": [0, 1, 2, 3, 4]}} == local_vars[2]
+
+
+def test_snapshot_cyclic() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing
+    local variables with a circular reference.
+    """
+    local_vars = func_cyclic()
+    new_cyclic_list = [1, 2, 3]
+    new_cyclic_list.append(new_cyclic_list)
+
+    # Do string equality here because of the circular reference
+    assert str(
+        {
+            "func_cyclic": {"test_var": new_cyclic_list},
+        }
+    ) == str(local_vars[0])
+
+
+def test_snapshot_mutation() -> None:
+    """
+    Evaluates the precision of the snapshot() function in capturing a copy of
+    local variables and not having the result be modified subsequent mutation.
+    """
+    local_vars = func_with_mutation()
+
+    assert {"func_with_mutation": {"test_var": [1, 2, 3]}} == local_vars[0]
 
 
 def test_snapshot_main_stackframe() -> None:
@@ -841,3 +878,9 @@ def test_snapshot_excludes_variables_with_regex():
             }
         },
     ]
+
+
+if __name__ == "__main__":
+    import pytest
+
+    pytest.main(["test_snapshot.py"])

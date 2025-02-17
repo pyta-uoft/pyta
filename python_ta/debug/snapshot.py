@@ -5,6 +5,7 @@ Use the 'inspect' module to extract local variables from
 
 from __future__ import annotations
 
+import copy
 import inspect
 import json
 import logging
@@ -20,22 +21,29 @@ from packaging.version import Version, parse
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
     """
-    Helper function for retriving global variables
+    Helper function for retrieving global variables
     (i.e. top level variables in "__main__" frame's scope)
     excluding, certain types (types of data that is
     irrelevant in an intro level to Python programming language).
     """
-    global_vars = frame.f_globals
-    true_global_vars = {
-        var: global_vars[var]
-        for var in global_vars
-        if not var.startswith("__")
-        and not inspect.ismodule(global_vars[var])
-        and not inspect.isfunction(global_vars[var])
-        and not inspect.isclass(global_vars[var])
-        and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__") == "__main__"
-    }
-    return {"__main__": true_global_vars}
+    result = {}
+    for var, obj in frame.f_globals.items():
+        if (
+            var.startswith("__")
+            or (getattr(inspect.getmodule(obj), "__name__", "__main__") != "__main__")
+            or inspect.ismodule(obj)
+            or inspect.isfunction(obj)
+            or inspect.isclass(obj)
+        ):
+            continue
+
+        try:
+            result[var] = copy.deepcopy(obj)
+        except Exception as e:
+            logging.warning(f"Could not copy global variable {var} with value {obj}: {e}")
+            result[var] = obj
+
+    return {"__main__": result}
 
 
 def get_filtered_local_variables(
@@ -44,13 +52,24 @@ def get_filtered_local_variables(
     """
     Helper function for filtering local variables in a frame.
     """
-    if exclude_vars:
-        return {
-            var: frame.f_locals[var]
-            for var in frame.f_locals
-            if not any(re.search(regex, var) for regex in exclude_vars)
-        }
-    return frame.f_locals
+    result = {}
+    for var, obj in frame.f_locals.items():
+        if (
+            var.startswith("__")
+            or (exclude_vars is not None and any(re.search(regex, var) for regex in exclude_vars))
+            or inspect.ismodule(obj)
+            or inspect.isfunction(obj)
+            or inspect.isclass(obj)
+        ):
+            continue
+
+        try:
+            result[var] = copy.deepcopy(obj)
+        except Exception as e:
+            logging.warning(f"Could not copy local variable {var} with value {obj}: {e}")
+            result[var] = obj
+
+    return result
 
 
 def snapshot(

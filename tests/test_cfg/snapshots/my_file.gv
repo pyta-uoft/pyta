@@ -1,19 +1,19 @@
-digraph my_file {
+digraph "my_file.gv" {
 	node [fontname="Courier New" shape=box]
 	subgraph cluster_0 {
-		cluster_0_0 [label="\ldef foo() -> None:\l    for i in range(1, 10):\l        if i < 5:\l            print('hi')\l" fillcolor=white style=filled]
+		cluster_0_0 [label="\ldef foo() -> None:\l    for i in range(1, 10):\l        if i < 5:\l            print('hi')\l\ldef func_with_while() -> None:\l    \"\"\"A function with a while loop\"\"\"\l    a = 1\l    while a < 100:\l        print(a)\l        a += 1\l\ldef func_with_unreachable() -> int:\l    \"\"\"A function with unreachable code\"\"\"\l    a = 1\l    return a * 10\l    a = 2\l" fillcolor=white style=filled]
 		cluster_0_0 -> cluster_0_1 [color=black]
 		cluster_0_1 [label="\l" fillcolor=black style=filled]
 		fontname="Courier New" label=__main__
 	}
 	subgraph cluster_1 {
-		cluster_1_0 [label="\l" fillcolor=white style=filled]
+		cluster_1_0 [label="\l" fillcolor=palegreen style=filled]
 		cluster_1_0 -> cluster_1_2 [color=black]
-		cluster_1_2 [label="range(1, 10)\l" fillcolor=white style=filled]
+		cluster_1_2 [label=< for i in<U><B>range(1, 10)</B></U><BR/> > fillcolor=white style=filled]
 		cluster_1_2 -> cluster_1_3 [color=black]
-		cluster_1_3 [label="i\l" fillcolor=white style=filled]
+		cluster_1_3 [label=< for<U><B>i </B></U> in range(1, 10)<BR/> > fillcolor=white style=filled]
 		cluster_1_3 -> cluster_1_5 [color=black]
-		cluster_1_5 [label="i < 5\l" fillcolor=white style=filled]
+		cluster_1_5 [label=< if<U><B>i &lt; 5</B></U><BR/> > fillcolor=white style=filled]
 		cluster_1_5 -> cluster_1_6 [label=True color=black]
 		cluster_1_6 [label="print('hi')\l" fillcolor=white style=filled]
 		cluster_1_6 -> cluster_1_3 [color=black]
@@ -21,5 +21,28 @@ digraph my_file {
 		cluster_1_3 -> cluster_1_1 [color=black]
 		cluster_1_1 [label="\l" fillcolor=black style=filled]
 		fontname="Courier New" label=foo
+	}
+	subgraph cluster_2 {
+		cluster_2_0 [label="\l" fillcolor=palegreen style=filled]
+		cluster_2_0 -> cluster_2_2 [color=black]
+		cluster_2_2 [label="a = 1\l" fillcolor=white style=filled]
+		cluster_2_2 -> cluster_2_3 [color=black]
+		cluster_2_3 [label=< while<U><B>a &lt; 100</B></U><BR/> > fillcolor=white style=filled]
+		cluster_2_3 -> cluster_2_5 [label=True color=black]
+		cluster_2_5 [label="print(a)\la += 1\l" fillcolor=white style=filled]
+		cluster_2_5 -> cluster_2_3 [color=black]
+		cluster_2_3 -> cluster_2_1 [label=False color=black]
+		cluster_2_1 [label="\l" fillcolor=black style=filled]
+		fontname="Courier New" label=func_with_while
+	}
+	subgraph cluster_3 {
+		cluster_3_0 [label="\l" fillcolor=palegreen style=filled]
+		cluster_3_0 -> cluster_3_2 [color=black]
+		cluster_3_2 [label="a = 1\lreturn a * 10\l" fillcolor=white style=filled]
+		cluster_3_2 -> cluster_3_1 [color=black]
+		cluster_3_1 [label="\l" fillcolor=black style=filled]
+		cluster_3_3 [label="a = 2\l" fillcolor=grey93 style=filled]
+		cluster_3_3 -> cluster_3_1 [color=black]
+		fontname="Courier New" label=func_with_unreachable
 	}
 }

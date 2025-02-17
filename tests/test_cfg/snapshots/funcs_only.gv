@@ -1,7 +1,7 @@
-digraph funcs_only {
+digraph "funcs_only.gv" {
 	node [fontname="Courier New" shape=box]
 	subgraph cluster_0 {
-		cluster_0_0 [label="self\l" fillcolor=white style=filled]
+		cluster_0_0 [label="self\l" fillcolor=palegreen style=filled]
 		cluster_0_0 -> cluster_0_2 [color=black]
 		cluster_0_2 [label="print('method')\l" fillcolor=white style=filled]
 		cluster_0_2 -> cluster_0_1 [color=black]
@@ -9,7 +9,7 @@ digraph funcs_only {
 		fontname="Courier New" label="MyClass.foo"
 	}
 	subgraph cluster_1 {
-		cluster_1_0 [label="\l" fillcolor=white style=filled]
+		cluster_1_0 [label="\l" fillcolor=palegreen style=filled]
 		cluster_1_0 -> cluster_1_2 [color=black]
 		cluster_1_2 [label="a = 5\l" fillcolor=white style=filled]
 		cluster_1_2 -> cluster_1_1 [color=black]
@@ -17,9 +17,9 @@ digraph funcs_only {
 		fontname="Courier New" label=foo
 	}
 	subgraph cluster_2 {
-		cluster_2_0 [label="\l" fillcolor=white style=filled]
+		cluster_2_0 [label="\l" fillcolor=palegreen style=filled]
 		cluster_2_0 -> cluster_2_2 [color=black]
-		cluster_2_2 [label="a > 0\l" fillcolor=white style=filled]
+		cluster_2_2 [label=< if<U><B>a &gt; 0</B></U><BR/> > fillcolor=white style=filled]
 		cluster_2_2 -> cluster_2_3 [label=True color=black]
 		cluster_2_3 [label="owl = 'hoo'\l" fillcolor=white style=filled]
 		cluster_2_3 -> cluster_2_1 [color=black]

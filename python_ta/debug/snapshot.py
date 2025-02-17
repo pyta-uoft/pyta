@@ -33,6 +33,7 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
         and not inspect.ismodule(global_vars[var])
         and not inspect.isfunction(global_vars[var])
         and not inspect.isclass(global_vars[var])
+        and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__") == "__main__"
     }
     return {"__main__": true_global_vars}
 

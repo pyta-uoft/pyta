@@ -56,7 +56,7 @@ from .patches import patch_all
 from .reporters import REPORTERS
 from .reporters.core import PythonTaReporter
 from .upload import upload_to_server
-from .util.autoformat import Autoformatter
+from .util.autoformat import run_autoformat
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
@@ -191,10 +191,9 @@ def _check(
                 )
 
                 if autoformat:
-                    autoformatter = Autoformatter(
-                        linter.config.autoformat_options, linter.config.max_line_length
+                    run_autoformat(
+                        file_py, linter.config.autoformat_options, linter.config.max_line_length
                     )
-                    autoformatter.run(file_py)
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out

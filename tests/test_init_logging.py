@@ -17,13 +17,13 @@ def test_check_log(caplog) -> None:
         "was checked using the messages-config file:",
     ]
 
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
     python_ta._check(
         module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py"),
         local_config={"output-format": "python_ta.reporters.PlainReporter"},
     )
     for i in range(2):
-        assert caplog.records[i].levelname == "INFO"
+        assert caplog.records[i].levelname == "DEBUG"
         assert expected_messages[i] in caplog.records[i].msg
 
 

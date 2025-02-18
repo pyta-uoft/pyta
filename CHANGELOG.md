@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved rendering of if/while/for syntax blocks in control flow graphs
 - Ensured GraphViz-generated files have `.gv` extension
 - Export `generate_cfg` from `python_ta.cfg`
+- Move `check_all` configuration info to logging DEBUG level (was INFO)
 
 ### 💫 New checkers
 

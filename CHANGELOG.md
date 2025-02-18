@@ -20,6 +20,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Ensured GraphViz-generated files have `.gv` extension
 - Export `generate_cfg` from `python_ta.cfg`
 - Move `check_all` configuration info to logging DEBUG level (was INFO)
+- Update list of "error" checks
 
 ### 💫 New checkers
 

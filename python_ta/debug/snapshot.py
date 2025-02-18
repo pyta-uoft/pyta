@@ -215,6 +215,12 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     "id": value_id_diagram,
                     "value": attr_ids,
                 }
+            elif val is None:
+                value_entry = {
+                    "type": "NoneType",
+                    "id": value_id_diagram,
+                    "value": "None",
+                }
             else:  # Handle primitives and other types
                 try:
                     json.dumps(val)

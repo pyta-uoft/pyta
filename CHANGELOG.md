@@ -40,6 +40,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue in `AccumulationTable` where accumulation expressions could not refer to loop variables
 - Fixed issue in `snapshot` where some imported objects were being included in the output
 - Fixed issue in `snapshot` where aliases were being returned rather than object copies
+- Fixed issue in `snapshot` where `None` was not being rendered in SVG correctly
 
 ### 🔧 Internal changes
 

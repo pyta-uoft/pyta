@@ -33,6 +33,7 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
         and not inspect.ismodule(global_vars[var])
         and not inspect.isfunction(global_vars[var])
         and not inspect.isclass(global_vars[var])
+        and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__") == "__main__"
     }
     return {"__main__": true_global_vars}
 
@@ -194,6 +195,12 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     "name": type(val).__name__,
                     "id": value_id_diagram,
                     "value": attr_ids,
+                }
+            elif val is None:
+                value_entry = {
+                    "type": "NoneType",
+                    "id": value_id_diagram,
+                    "value": "None",
                 }
             else:  # Handle primitives and other types
                 try:

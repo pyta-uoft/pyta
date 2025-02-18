@@ -149,7 +149,7 @@ def _check(
     `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
     """
     # Configuring logger
-    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.NOTSET)
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
 
     linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter
@@ -217,12 +217,12 @@ def _check(
                 current_reporter.print_messages(level)
                 if linter.config.pyta_file_permission:
                     f_paths.append(file_py)  # Appending paths for upload
-                logging.info(
+                logging.debug(
                     "File: {} was checked using the configuration file: {}".format(
                         file_py, linter.config_file
                     )
                 )
-                logging.info(
+                logging.debug(
                     "File: {} was checked using the messages-config file: {}".format(
                         file_py, messages_config_path
                     )

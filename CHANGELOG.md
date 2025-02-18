@@ -17,6 +17,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added documentation for overriding messages
 - Improved `check_contracts` error messages by ensuring a consistent format and phrasing
 - Added `autoformat-options` configuration option to let users specify command-line arguments to the Black formatting tool
+- Improved rendering of if/while/for syntax blocks in control flow graphs
+- Ensured GraphViz-generated files have `.gv` extension
+- Export `generate_cfg` from `python_ta.cfg`
+- Move `check_all` configuration info to logging DEBUG level (was INFO)
 
 ### 💫 New checkers
 
@@ -34,6 +38,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
 - Fixed issue in `autoformat` where the default `max-line-length` value was not used
 - Fixed issue in contract-checking `new_setattr` where an instance attribute was not always reset when reassigning it to an invalid value
+- Fixed issue in `AccumulationTable` where accumulation expressions could not refer to loop variables
+- Fixed issue in `snapshot` where some imported objects were being included in the output
+- Fixed issue in `snapshot` where `None` was not being rendered in SVG correctly
 
 ### 🔧 Internal changes
 

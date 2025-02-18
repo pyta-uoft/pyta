@@ -216,6 +216,23 @@ def test_snapshot_to_json_primitive():
     ]
 
 
+def test_snapshot_to_json_none():
+    """
+    Test snapshot_to_json with snapshot data with None.
+    """
+    snapshot_data = [{"func1": {"test_var": None}}]
+    json_data = snapshot_to_json(snapshot_data)
+    assert json_data == [
+        {
+            "type": ".frame",
+            "id": None,
+            "name": "func1",
+            "value": {"test_var": 1},
+        },
+        {"type": "NoneType", "id": 1, "value": "None"},
+    ]
+
+
 def test_snapshot_to_json_lists_primitive_only():
     """
     Test snapshot_to_json data with lists including primitive data types.

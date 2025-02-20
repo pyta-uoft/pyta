@@ -13,9 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Fix import error when `graphviz` is not installed
-
 ### 🔧 Internal changes
+
+## [2.10.1] - 2025-02-19
+
+### 🐛 Bug fixes
+
+- Fix import error when `graphviz` is not installed
 
 ## [2.10.0] - 2025-02-18
 

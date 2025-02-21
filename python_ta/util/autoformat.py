@@ -7,10 +7,8 @@ import sys
 from typing import Optional
 
 
-def run_autoformat(file_path: str, autoformat_options: list[str], max_linelen: Optional[int]):
-    """
-    Run the Black formatting tool on the Python file with the given autoformat options and maximum line length.
-    """
+def run_autoformat(file_path: str, autoformat_options: list[str], max_linelen: int) -> None:
+    """Run the Black formatting tool on the Python file with the given autoformat options and maximum line length."""
     subprocess_args = [sys.executable, "-m", "black"]
     if max_linelen:
         subprocess_args.append(f"--line-length={max_linelen}")

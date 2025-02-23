@@ -277,11 +277,11 @@ def _check(
     try:
         # Flag indicating whether at least one file has been checked
         is_any_file_checked = False
-        linted_files = []
+        linted_files = set()
         for locations in _get_valid_files_to_check(module_name):
             f_paths = []  # Paths to files for data submission
             for file_py in get_file_paths(locations):
-                linted_files.append(file_py)
+                linted_files.add(file_py)
                 is_any_file_checked, current_reporter, linter = _check_file(
                     linter,
                     file_py,
@@ -588,7 +588,7 @@ def doc(msg_id: str) -> None:
 
 
 def watch_files(
-    file_paths,
+    file_paths: set,
     level: str,
     local_config: Union[dict[str, Any], str],
     load_default_config: bool,

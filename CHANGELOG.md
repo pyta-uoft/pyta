@@ -9,11 +9,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Integrated Watchdog to enable automatic re-checking of Python files when changes are detected.
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes
 
 ### 🔧 Internal changes
+
+- Refactored `_check` function into helper functions.
 
 ## [2.10.1] - 2025-02-19
 

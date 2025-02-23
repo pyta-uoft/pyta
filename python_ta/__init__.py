@@ -18,26 +18,29 @@ if __name__ == '__main__':
 from __future__ import annotations
 
 __version__ = "2.9.3.dev"  # Version number
+
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.
 import builtins
 import subprocess
+
+from pylint.reporters import BaseReporter, MultiReporter
 
 try:
     del builtins._
 except AttributeError:
     pass
 
-
 import importlib.util
 import logging
 import os
 import sys
+import time
 import tokenize
 import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
-from typing import Any, AnyStr, Generator, Optional, TextIO, Union
+from typing import Any, AnyStr, Generator, Optional, TextIO, Tuple, Union
 
 import pylint.config
 import pylint.lint
@@ -45,6 +48,8 @@ import pylint.utils
 from astroid import MANAGER, modutils
 from pylint.lint import PyLinter
 from pylint.utils.pragma_parser import OPTION_PO
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from .config import (
     find_local_config,
@@ -58,7 +63,6 @@ from .reporters.core import PythonTaReporter
 from .upload import upload_to_server
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
-
 
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
@@ -126,6 +130,127 @@ def check_all(
     )
 
 
+def _setup_linter(
+    local_config: Union[dict[str, Any], str],
+    load_default_config: bool,
+    output: Optional[str],
+) -> tuple[PyLinter, BaseReporter | MultiReporter]:
+    """Set up the linter and reporter for the check."""
+    linter = reset_linter(config=local_config, load_default_config=load_default_config)
+    current_reporter = linter.reporter
+    current_reporter.set_output(output)
+    messages_config_path = linter.config.messages_config_path
+    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
+    use_pyta_error_messages = linter.config.use_pyta_error_messages
+    messages_config = load_messages_config(
+        messages_config_path, messages_config_default_path, use_pyta_error_messages
+    )
+
+    global PYLINT_PATCHED
+    if not PYLINT_PATCHED:
+        patch_all(
+            messages_config, linter.config.z3
+        )  # Monkeypatch pylint (override certain methods)
+        PYLINT_PATCHED = True
+    return linter, current_reporter
+
+
+def _check_file(
+    linter: PyLinter,
+    file_py: AnyStr,
+    local_config: Union[dict[str, Any], str],
+    load_default_config: bool,
+    autoformat: Optional[bool],
+    is_any_file_checked: bool,
+    current_reporter: BaseReporter | MultiReporter,
+    level: str,
+    f_paths: list,
+) -> tuple[bool, BaseReporter | MultiReporter, PyLinter]:
+    """Check the file that called this function."""
+    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
+    allowed_pylint = linter.config.allow_pylint_comments
+    if not _verify_pre_check(file_py, allowed_pylint):
+        return is_any_file_checked, current_reporter, linter
+    # Load config file in user location. Construct new linter each
+    # time, so config options don't bleed to unintended files.
+    # Reuse the same reporter each time to accumulate the results across different files.
+    linter = reset_linter(
+        config=local_config,
+        file_linted=file_py,
+        load_default_config=load_default_config,
+    )
+
+    if autoformat:
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "black",
+                "--skip-string-normalization",
+                f"--line-length={linter.config.max_line_length}",
+                file_py,
+            ],
+            encoding="utf-8",
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+    if not is_any_file_checked:
+        prev_output = current_reporter.out
+        current_reporter = linter.reporter
+        current_reporter.out = prev_output
+
+        # At this point, the only possible errors are those from parsing the config file
+        # so print them, if there are any.
+        if current_reporter.messages:
+            current_reporter.print_messages()
+    else:
+        linter.set_reporter(current_reporter)
+
+    # The current file was checked so update the flag
+    is_any_file_checked = True
+
+    module_name = os.path.splitext(os.path.basename(file_py))[0]
+    if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
+        del MANAGER.astroid_cache[module_name]
+    linter.check([file_py])  # Lint !
+    if linter.config.pyta_file_permission:
+        f_paths.append(file_py)  # Appending paths for upload
+    logging.debug(
+        "File: {} was checked using the configuration file: {}".format(file_py, linter.config_file)
+    )
+    logging.debug(
+        "File: {} was checked using the messages-config file: {}".format(
+            file_py, linter.config.messages_config_path
+        )
+    )
+    return is_any_file_checked, current_reporter, linter
+
+
+def _upload_to_server(
+    linter: PyLinter,
+    current_reporter: BaseReporter | MultiReporter,
+    f_paths: list,
+    local_config: Union[dict[str, Any], str],
+):
+    config = {}  # Configuration settings for data submission
+    errs = []  # Errors caught in files for data submission
+    if linter.config.pyta_error_permission:
+        errs = list(current_reporter.messages.values())
+    if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
+        # Checks if default configuration was used without changing options through the local_config argument
+        if linter.config_file[-19:-10] != "python_ta" or local_config != "":
+            config = linter.config.__dict__
+        upload_to_server(
+            errors=errs,
+            paths=f_paths,
+            config=config,
+            url=linter.config.pyta_server_address,
+            version=__version__,
+        )
+
+
 def _check(
     module_name: Union[list[str], str] = "",
     level: str = "all",
@@ -149,112 +274,41 @@ def _check(
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
-
-    linter = reset_linter(config=local_config, load_default_config=load_default_config)
-    current_reporter = linter.reporter
-    current_reporter.set_output(output)
-    messages_config_path = linter.config.messages_config_path
-    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-    use_pyta_error_messages = linter.config.use_pyta_error_messages
-    messages_config = load_messages_config(
-        messages_config_path, messages_config_default_path, use_pyta_error_messages
-    )
-
-    global PYLINT_PATCHED
-    if not PYLINT_PATCHED:
-        patch_all(
-            messages_config, linter.config.z3
-        )  # Monkeypatch pylint (override certain methods)
-        PYLINT_PATCHED = True
-
-    # Try to check file, issue error message for invalid files.
+    linter, current_reporter = _setup_linter(local_config, load_default_config, output)
     try:
         # Flag indicating whether at least one file has been checked
         is_any_file_checked = False
-
+        linted_files = []
         for locations in _get_valid_files_to_check(module_name):
             f_paths = []  # Paths to files for data submission
-            errs = []  # Errors caught in files for data submission
-            config = {}  # Configuration settings for data submission
             for file_py in get_file_paths(locations):
-                allowed_pylint = linter.config.allow_pylint_comments
-                if not _verify_pre_check(file_py, allowed_pylint):
-                    continue  # Check the other files
-                # Load config file in user location. Construct new linter each
-                # time, so config options don't bleed to unintended files.
-                # Reuse the same reporter each time to accumulate the results across different files.
-                linter = reset_linter(
-                    config=local_config,
-                    file_linted=file_py,
-                    load_default_config=load_default_config,
+                linted_files.append(file_py)
+                is_any_file_checked, current_reporter, linter = _check_file(
+                    linter,
+                    file_py,
+                    local_config,
+                    load_default_config,
+                    autoformat,
+                    is_any_file_checked,
+                    current_reporter,
+                    level,
+                    f_paths,
                 )
-
-                if autoformat:
-                    subprocess.run(
-                        [
-                            sys.executable,
-                            "-m",
-                            "black",
-                            "--skip-string-normalization",
-                            f"--line-length={linter.config.max_line_length}",
-                            file_py,
-                        ],
-                        encoding="utf-8",
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                    )
-
-                if not is_any_file_checked:
-                    prev_output = current_reporter.out
-                    current_reporter = linter.reporter
-                    current_reporter.out = prev_output
-
-                    # At this point, the only possible errors are those from parsing the config file
-                    # so print them, if there are any.
-                    if current_reporter.messages:
-                        current_reporter.print_messages()
-                else:
-                    linter.set_reporter(current_reporter)
-
-                # The current file was checked so update the flag
-                is_any_file_checked = True
-
-                module_name = os.path.splitext(os.path.basename(file_py))[0]
-                if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
-                    del MANAGER.astroid_cache[module_name]
-                linter.check([file_py])  # Lint !
                 current_reporter.print_messages(level)
-                if linter.config.pyta_file_permission:
-                    f_paths.append(file_py)  # Appending paths for upload
-                logging.debug(
-                    "File: {} was checked using the configuration file: {}".format(
-                        file_py, linter.config_file
-                    )
-                )
-                logging.debug(
-                    "File: {} was checked using the messages-config file: {}".format(
-                        file_py, messages_config_path
-                    )
-                )
-            if linter.config.pyta_error_permission:
-                errs = list(current_reporter.messages.values())
-            if (
-                f_paths != [] or errs != []
-            ):  # Only call upload_to_server() if there's something to upload
-                # Checks if default configuration was used without changing options through the local_config argument
-                if linter.config_file[-19:-10] != "python_ta" or local_config != "":
-                    config = linter.config.__dict__
-                upload_to_server(
-                    errors=errs,
-                    paths=f_paths,
-                    config=config,
-                    url=linter.config.pyta_server_address,
-                    version=__version__,
-                )
+            _upload_to_server(linter, current_reporter, f_paths, local_config)
         # Only generate reports (display the webpage) if there were valid files to check
         if is_any_file_checked:
             linter.generate_reports()
+            if linter.config.watch:
+                watch_files(
+                    linted_files,
+                    level,
+                    local_config,
+                    load_default_config,
+                    autoformat,
+                    linter,
+                    current_reporter,
+                )
         return current_reporter
     except Exception as e:
         logging.error(
@@ -532,3 +586,76 @@ def doc(msg_id: str) -> None:
     msg_url = HELP_URL + "#" + msg_id.lower()
     print("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)
+
+
+def watch_files(
+    file_paths,
+    level: str,
+    local_config: Union[dict[str, Any], str],
+    load_default_config: bool,
+    autoformat: Optional[bool],
+    linter: PyLinter,
+    current_reporter: BaseReporter | MultiReporter,
+):
+    """Watch a list of files for modifications and trigger a callback when changes occur."""
+
+    class FileChangeHandler(FileSystemEventHandler):
+        """Internal class to handle file modifications."""
+
+        def __init__(self, files_to_watch):
+            self.files_to_watch = set(files_to_watch)
+            self.linter = linter
+            self.current_reporter = current_reporter
+
+        def on_modified(self, event):
+            """Trigger the callback when a watched file is modified."""
+            if event.src_path in self.files_to_watch:
+                print(f"File modified: {event.src_path}, re-running checks...")
+                prev_report = {
+                    (msg.msg_id, msg.line, msg.column, msg.end_line, msg.end_column)
+                    for msg in self.current_reporter.messages.get(event.src_path, [])
+                }
+
+                if event.src_path in self.current_reporter.messages:
+                    del self.current_reporter.messages[event.src_path]
+
+                # if event.src_path in current_reporter.messages:
+                #     prev_report = {
+                #         (msg.msg_id, msg.line, msg.column, msg.end_line, msg.end_column)
+                #         for msg in self.current_reporter.messages[event.src_path]
+                #     }
+                #     del current_reporter.messages[event.src_path]
+
+                _, self.current_reporter, self.linter = _check_file(
+                    self.linter,
+                    event.src_path,
+                    local_config,
+                    load_default_config,
+                    autoformat,
+                    True,
+                    self.current_reporter,
+                    level,
+                    [],
+                )
+                new_report = {
+                    (msg.msg_id, msg.line, msg.column, msg.end_line, msg.end_column)
+                    for msg in self.current_reporter.messages.get(event.src_path, [])
+                }
+                if new_report != prev_report:
+                    self.current_reporter.print_messages(level)
+                    self.linter.generate_reports()
+
+    directories_to_watch = {os.path.dirname(file) for file in file_paths}
+    event_handler = FileChangeHandler(file_paths)
+    observer = Observer()
+    for directory in directories_to_watch:
+        observer.schedule(event_handler, path=directory, recursive=False)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+
+    observer.join()

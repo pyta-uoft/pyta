@@ -618,13 +618,6 @@ def watch_files(
                 if event.src_path in self.current_reporter.messages:
                     del self.current_reporter.messages[event.src_path]
 
-                # if event.src_path in current_reporter.messages:
-                #     prev_report = {
-                #         (msg.msg_id, msg.line, msg.column, msg.end_line, msg.end_column)
-                #         for msg in self.current_reporter.messages[event.src_path]
-                #     }
-                #     del current_reporter.messages[event.src_path]
-
                 _, self.current_reporter, self.linter = _check_file(
                     self.linter,
                     event.src_path,

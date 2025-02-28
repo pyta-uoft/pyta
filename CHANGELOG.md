@@ -9,6 +9,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Added `autoformat-options` configuration option to let users specify command-line arguments to the Black formatting tool
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes

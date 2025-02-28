@@ -37,7 +37,7 @@ import tokenize
 import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
-from typing import Any, AnyStr, Generator, Optional, TextIO, Union
+from typing import IO, Any, AnyStr, Generator, Optional, TextIO, Union
 
 import pylint.config
 import pylint.lint
@@ -67,7 +67,7 @@ PYLINT_PATCHED = False
 def check_errors(
     module_name: Union[list[str], str] = "",
     config: Union[dict[str, Any], str] = "",
-    output: Optional[str] = None,
+    output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
@@ -85,7 +85,7 @@ def check_errors(
 def check_all(
     module_name: Union[list[str], str] = "",
     config: Union[dict[str, Any], str] = "",
-    output: Optional[str] = None,
+    output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
@@ -130,7 +130,7 @@ def _check(
     module_name: Union[list[str], str] = "",
     level: str = "all",
     local_config: Union[dict[str, Any], str] = "",
-    output: Optional[str] = None,
+    output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
@@ -207,8 +207,10 @@ def _check(
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out
+                    prev_filepath_io = current_reporter.filepath_io
                     current_reporter = linter.reporter
                     current_reporter.out = prev_output
+                    current_reporter.filepath_io = prev_filepath_io
 
                     # At this point, the only possible errors are those from parsing the config file
                     # so print them, if there are any.

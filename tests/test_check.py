@@ -220,7 +220,7 @@ def test_check_all_output_typing_io() -> None:
     output = io.StringIO()
 
     python_ta.check_all(
-        "../examples/custom_checkers/e9989_pep8_errors.py",
+        "examples/custom_checkers/e9989_pep8_errors.py",
         config={"output-format": "python_ta.reporters.PlainReporter"},
         output=output,
     )
@@ -234,7 +234,7 @@ def test_check_error_output_typing_io() -> None:
     output = io.StringIO()
 
     python_ta.check_errors(
-        "../examples/syntax_errors/missing_colon.py",
+        "examples/syntax_errors/missing_colon.py",
         config={"output-format": "python_ta.reporters.PlainReporter"},
         output=output,
     )

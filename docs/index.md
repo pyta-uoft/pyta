@@ -44,6 +44,7 @@ usage/configuration
 contracts/index
 debug/index
 cfg/index
+publications/index
 ```
 
 [pylint]: https://pylint.readthedocs.io/en/latest/

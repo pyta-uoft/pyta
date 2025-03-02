@@ -4,13 +4,10 @@ installed `python_ta` package.
 
 import os
 import select
-import signal
 import subprocess
 import sys
 import time
 from os import path, remove
-
-import pytest
 
 import python_ta
 

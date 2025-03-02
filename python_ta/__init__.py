@@ -610,10 +610,6 @@ def watch_files(
             """Trigger the callback when a watched file is modified."""
             if event.src_path in self.files_to_watch:
                 print(f"File modified: {event.src_path}, re-running checks...")
-                prev_report = {
-                    (msg.msg_id, msg.line, msg.column, msg.end_line, msg.end_column)
-                    for msg in self.current_reporter.messages.get(event.src_path, [])
-                }
 
                 if event.src_path in self.current_reporter.messages:
                     del self.current_reporter.messages[event.src_path]
@@ -629,13 +625,9 @@ def watch_files(
                     level,
                     [],
                 )
-                new_report = {
-                    (msg.msg_id, msg.line, msg.column, msg.end_line, msg.end_column)
-                    for msg in self.current_reporter.messages.get(event.src_path, [])
-                }
-                if new_report != prev_report:
-                    self.current_reporter.print_messages(level)
-                    self.linter.generate_reports()
+
+                self.current_reporter.print_messages(level)
+                self.linter.generate_reports()
 
     directories_to_watch = {os.path.dirname(file) for file in file_paths}
     event_handler = FileChangeHandler(file_paths)

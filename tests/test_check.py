@@ -3,6 +3,10 @@ installed `python_ta` package.
 """
 
 import os
+import select
+import subprocess
+import sys
+import time
 from os import path, remove
 
 import python_ta
@@ -212,3 +216,113 @@ def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
     # If the file exists, the assertion failed and the file gets removed from main directory
     if file_exists:
         remove("pyta_output.html")
+
+
+def test_check_watch_enabled() -> None:
+    """Test PythonTA's watch mode to ensure it detects changes correctly."""
+    reset_watch_fixture()
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+
+    process = subprocess.Popen(
+        [sys.executable, "-u", script_path],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+
+    try:
+        lines = read_nonblocking(process, 5, 5)
+        assert any(
+            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            in line
+            for line in lines
+        )
+
+        modify_watch_fixture()
+        lines = read_nonblocking(process, 5, 5)
+
+        assert not any(
+            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            in line
+            for line in lines
+        )
+
+    finally:
+        process.terminate()
+        process.wait()
+        reset_watch_fixture()
+
+
+def reset_watch_fixture():
+    """Reset the contents of watch_enabled_configuration.py to its original state."""
+    original_content = '''"""This script serves as the entry point for an integration test of the _check watch mode.
+It is invoked by the test `tests/test_reporters/test_html_server::test_open_html_in_browser_watch()`
+to verify that the correct report is generated through multiple file changes."""
+
+import python_ta
+
+
+def blank_function() -> int:
+    """blank"""
+    count: int = "ten"
+    return count
+
+
+if __name__ == "__main__":
+    python_ta.check_all(config={
+        "output-format": "python_ta.reporters.PlainReporter",
+        "watch": True,
+    })'''
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+    with open(script_path, "w") as file:
+        file.write(original_content)
+
+
+def modify_watch_fixture():
+    """Modify the contents of watch_enabled_configuration.py to fix the type error."""
+    modified_content = '''"""This script serves as the entry point for an integration test of the _check watch mode.
+It is invoked by the test `tests/test_reporters/test_html_server::test_open_html_in_browser_watch()`
+to verify that the correct report is generated through multiple file changes."""
+
+import python_ta
+
+
+def blank_function() -> int:
+    """blank"""
+    count: int = 10  # Fixed type issue
+    return count
+
+
+if __name__ == "__main__":
+    python_ta.check_all(config={
+        "output-format": "python_ta.reporters.PlainReporter",
+        "watch": True,
+    })'''
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+    with open(script_path, "w") as file:
+        file.write(modified_content)
+
+
+def read_nonblocking(process, timeout=5, max_lines=5):
+    """Reads up to `max_lines` lines from process output without blocking."""
+    lines = []
+    start_time = time.time()
+
+    while time.time() - start_time < timeout and len(lines) < max_lines:
+        ready, _, _ = select.select([process.stdout], [], [], timeout)
+        if ready:
+            for _ in range(max_lines):
+                output = process.stdout.readline().strip()
+                if output:
+                    lines.append(output)
+                else:
+                    break
+        else:
+            break
+
+    return lines

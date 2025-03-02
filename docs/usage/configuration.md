@@ -147,10 +147,10 @@ For more information on overriding error messages, see _[Overriding error messag
 
 ### `watch` (default: `false`)
 
-When `true`, the HTMLReporter runs as a persistent server that continuously serves the PyTA report.
-This allows users to refresh the report page in their browser without restarting the server.
-When `false` (the default), the server responds to a single request and then shuts down. Modification
-to this configuration option has no effect for the other reporters.
+When `true`, PythonTA continuously monitors the specified files for changes and automatically re-runs the checks whenever a modification is detected.
+For the **HTMLReporter**, this enables a persistent server that serves the PyTA report, allowing users to refresh the report page in their browser without restarting the server.
+
+When `false` (default), PythonTA performs a one-time analysis and exits after generating the report.
 
 ### `server-port` (default: `0`)
 

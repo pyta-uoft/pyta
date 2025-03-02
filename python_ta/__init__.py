@@ -181,9 +181,7 @@ def _check_file(
     )
 
     if autoformat:
-        run_autoformat(
-                        file_py, linter.config.autoformat_options, linter.config.max_line_length
-                    )
+        run_autoformat(file_py, linter.config.autoformat_options, linter.config.max_line_length)
 
     if not is_any_file_checked:
         prev_output = current_reporter.out

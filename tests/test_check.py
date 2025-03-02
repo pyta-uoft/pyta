@@ -3,11 +3,14 @@ installed `python_ta` package.
 """
 
 import os
+import select
 import signal
 import subprocess
 import sys
 import time
 from os import path, remove
+
+import pytest
 
 import python_ta
 
@@ -226,13 +229,13 @@ def test_check_watch_enabled() -> None:
     )
 
     process = subprocess.Popen(
-        [sys.executable, script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        [sys.executable, "-u", script_path],
+        stdout=subprocess.PIPE,
+        text=True,
     )
 
     try:
-        lines = []
-        for i in range(5):
-            lines.append(process.stdout.readline().strip())
+        lines = read_nonblocking(process, 3, 5)
         assert any(
             "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
@@ -240,17 +243,16 @@ def test_check_watch_enabled() -> None:
         )
 
         modify_watch_fixture()
-        lines = []
-        for i in range(5):
-            lines.append(process.stdout.readline().strip())
+        lines = read_nonblocking(process, 3, 5)
+
         assert not any(
-            "  [Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
 
     finally:
-        process.send_signal(signal.SIGINT)
+        process.terminate()
         process.wait()
         reset_watch_fixture()
 
@@ -307,3 +309,23 @@ if __name__ == "__main__":
     )
     with open(script_path, "w") as file:
         file.write(modified_content)
+
+
+def read_nonblocking(process, timeout=2, max_lines=5):
+    """Reads up to `max_lines` lines from process output without blocking."""
+    lines = []
+    start_time = time.time()
+
+    while time.time() - start_time < timeout and len(lines) < max_lines:
+        ready, _, _ = select.select([process.stdout], [], [], timeout)
+        if ready:
+            for _ in range(max_lines - len(lines)):
+                output = process.stdout.readline().strip()
+                if output:
+                    lines.append(output)
+                else:
+                    break
+        else:
+            break
+
+    return lines

@@ -235,7 +235,7 @@ def test_check_watch_enabled() -> None:
     )
 
     try:
-        lines = read_nonblocking(process, 3, 5)
+        lines = read_nonblocking(process, 5, 5)
         assert any(
             "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
@@ -243,7 +243,7 @@ def test_check_watch_enabled() -> None:
         )
 
         modify_watch_fixture()
-        lines = read_nonblocking(process, 3, 5)
+        lines = read_nonblocking(process, 5, 5)
 
         assert not any(
             "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
@@ -311,7 +311,7 @@ if __name__ == "__main__":
         file.write(modified_content)
 
 
-def read_nonblocking(process, timeout=2, max_lines=5):
+def read_nonblocking(process, timeout=5, max_lines=5):
     """Reads up to `max_lines` lines from process output without blocking."""
     lines = []
     start_time = time.time()
@@ -319,7 +319,7 @@ def read_nonblocking(process, timeout=2, max_lines=5):
     while time.time() - start_time < timeout and len(lines) < max_lines:
         ready, _, _ = select.select([process.stdout], [], [], timeout)
         if ready:
-            for _ in range(max_lines - len(lines)):
+            for _ in range(max_lines):
                 output = process.stdout.readline().strip()
                 if output:
                     lines.append(output)

@@ -71,7 +71,8 @@ class PythonTaReporter(BaseReporter):
 
     # The error messages to report, mapping filename to a list of messages.
     messages: dict[str, list[Message]]
-    filepath_io: bool
+    # Whether the reporter's output stream should be closed out.
+    should_close_out: bool
 
     def __init__(self) -> None:
         """Initialize this reporter."""
@@ -80,7 +81,7 @@ class PythonTaReporter(BaseReporter):
         self.source_lines = []
         self.module_name = ""
         self.current_file = ""
-        self.filepath_io = False
+        self.should_close_out = False
 
     def print_messages(self, level: str = "all") -> None:
         """Print messages for the current file.
@@ -111,10 +112,10 @@ class PythonTaReporter(BaseReporter):
                 filepath = os.path.join(filepath, self.OUTPUT_FILENAME)
 
             self.out = open(filepath, "w", encoding="utf-8")
+            self.should_close_out = True
         else:
             # filepath is a typing.IO object
             self.out = filepath
-            self.filepath_io = True
 
     def handle_message(self, msg: Message) -> None:
         """Handle a new message triggered on the current file."""
@@ -270,7 +271,7 @@ class PythonTaReporter(BaseReporter):
 
         Close the reporter's output stream (if not sys.stdout).
         """
-        if self.out is not sys.stdout and not self.filepath_io:
+        if self.should_close_out:
             self.out.close()
 
 

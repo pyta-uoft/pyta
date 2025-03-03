@@ -104,9 +104,9 @@ def check_all(
             If a string, a path to a configuration file to use.
             If a dictionary, a map of configuration options (each key is the name of an option).
         output:
-            If a string, a path to a file to which the PythonTA report is written to.
+            If a string, a path to a file to which the PythonTA report is written.
             If a typing.IO object, the report is written to this stream.
-            Otherwise, the report is written to standard out or automatically displayed in a
+            If None, the report is written to standard out or automatically displayed in a
             web browser, depending on which reporter is used.
         load_default_config:
             If True (default), additional configuration passed with the ``config`` option is
@@ -199,10 +199,10 @@ def _check(
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out
-                    prev_filepath_io = current_reporter.filepath_io
+                    prev_should_close_out = current_reporter.should_close_out
                     current_reporter = linter.reporter
                     current_reporter.out = prev_output
-                    current_reporter.filepath_io = prev_filepath_io
+                    current_reporter.should_close_out = prev_should_close_out
 
                     # At this point, the only possible errors are those from parsing the config file
                     # so print them, if there are any.

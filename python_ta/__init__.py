@@ -21,7 +21,6 @@ __version__ = "2.10.2.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.
 import builtins
-import subprocess
 
 from pylint.reporters import BaseReporter, MultiReporter
 
@@ -287,7 +286,7 @@ def _check(
         if is_any_file_checked:
             linter.generate_reports()
             if linter.config.watch:
-                watch_files(
+                _watch_files(
                     linted_files,
                     level,
                     local_config,
@@ -584,7 +583,7 @@ def doc(msg_id: str) -> None:
     webbrowser.open(msg_url)
 
 
-def watch_files(
+def _watch_files(
     file_paths: set,
     level: str,
     local_config: Union[dict[str, Any], str],
@@ -622,9 +621,9 @@ def watch_files(
                     level,
                     [],
                 )
-
                 self.current_reporter.print_messages(level)
                 self.linter.generate_reports()
+                _upload_to_server(linter, current_reporter, [event.src_path], local_config)
 
     directories_to_watch = {os.path.dirname(file) for file in file_paths}
     event_handler = FileChangeHandler(file_paths)

@@ -232,7 +232,7 @@ def test_check_watch_enabled() -> None:
     )
 
     try:
-        lines = read_nonblocking(process, 5, 5)
+        lines = read_nonblocking(process, 6)
         assert any(
             "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
@@ -240,7 +240,7 @@ def test_check_watch_enabled() -> None:
         )
 
         modify_watch_fixture()
-        lines = read_nonblocking(process, 5, 5)
+        lines = read_nonblocking(process, 6)
 
         assert not any(
             "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
@@ -308,21 +308,14 @@ if __name__ == "__main__":
         file.write(modified_content)
 
 
-def read_nonblocking(process, timeout=5, max_lines=5):
-    """Reads up to `max_lines` lines from process output without blocking."""
+def read_nonblocking(process, timeout):
+    """Reads output from process without blocking until timeout or termination condition."""
     lines = []
     start_time = time.time()
 
-    while time.time() - start_time < timeout and len(lines) < max_lines:
-        ready, _, _ = select.select([process.stdout], [], [], timeout)
-        if ready:
-            for _ in range(max_lines):
-                output = process.stdout.readline().strip()
-                if output:
-                    lines.append(output)
-                else:
-                    break
-        else:
+    while time.time() - start_time < timeout:
+        line = process.stdout.readline().strip()
+        lines.append(line)
+        if "18      })" in line:  # This message will appear at the end of each report
             break
-
     return lines

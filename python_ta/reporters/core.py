@@ -94,28 +94,28 @@ class PythonTaReporter(BaseReporter):
         """Return whether there are any messages registered."""
         return any(messages for messages in self.messages.values())
 
-    def set_output(self, filepath: Optional[Union[str, IO]] = None) -> None:
-        """Set output stream based on filepath.
+    def set_output(self, out: Optional[Union[str, IO]] = None) -> None:
+        """Set output stream based on out.
 
-        If filepath is None or '-', sys.stdout is used.
-        If filepath is the path to a file, that file is used (overwriting any existing contents).
-        If filepath is the path to a directory, a new file is created in that directory
+        If out is None or '-', sys.stdout is used.
+        If out is the path to a file, that file is used (overwriting any existing contents).
+        If out is the path to a directory, a new file is created in that directory
         (with default filename self.OUTPUT_FILENAME).
-        If filepath is a typing.IO object, that object is used.
+        If out is a typing.IO object, that object is used.
         """
-        if filepath is None or filepath == "-":
+        if out is None or out == "-":
             self.out = sys.stdout
-        elif isinstance(filepath, str):
+        elif isinstance(out, str):
             # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
-            filepath = os.path.expanduser(filepath)
-            if os.path.isdir(filepath):
-                filepath = os.path.join(filepath, self.OUTPUT_FILENAME)
+            out = os.path.expanduser(out)
+            if os.path.isdir(out):
+                out = os.path.join(out, self.OUTPUT_FILENAME)
 
-            self.out = open(filepath, "w", encoding="utf-8")
+            self.out = open(out, "w", encoding="utf-8")
             self.should_close_out = True
         else:
-            # filepath is a typing.IO object
-            self.out = filepath
+            # out is a typing.IO object
+            self.out = out
 
     def handle_message(self, msg: Message) -> None:
         """Handle a new message triggered on the current file."""
@@ -269,7 +269,7 @@ class PythonTaReporter(BaseReporter):
     def on_close(self, stats, previous_stats):
         """Hook called when a module finished analyzing.
 
-        Close the reporter's output stream (if not sys.stdout).
+        Close the reporter's output stream if should_close_out is True.
         """
         if self.should_close_out:
             self.out.close()

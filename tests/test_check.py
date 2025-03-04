@@ -313,9 +313,11 @@ def read_nonblocking(process, timeout):
     lines = []
     start_time = time.time()
 
-    while time.time() - start_time < timeout:
-        line = process.stdout.readline().strip()
-        lines.append(line)
-        if "18      })" in line:  # This message will appear at the end of each report
-            break
+    ready, _, _ = select.select([process.stdout], [], [], timeout)
+    if ready:
+        while True:
+            line = process.stdout.readline().strip()
+            lines.append(line)
+            if "18      })" in line or time.time() - start_time > timeout:
+                break
     return lines

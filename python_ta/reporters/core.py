@@ -8,7 +8,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import IO, Optional, Union
 
 from astroid import NodeNG
 from pylint.message import Message
@@ -71,6 +71,8 @@ class PythonTaReporter(BaseReporter):
 
     # The error messages to report, mapping filename to a list of messages.
     messages: dict[str, list[Message]]
+    # Whether the reporter's output stream should be closed out.
+    should_close_out: bool
 
     def __init__(self) -> None:
         """Initialize this reporter."""
@@ -79,6 +81,7 @@ class PythonTaReporter(BaseReporter):
         self.source_lines = []
         self.module_name = ""
         self.current_file = ""
+        self.should_close_out = False
 
     def print_messages(self, level: str = "all") -> None:
         """Print messages for the current file.
@@ -91,23 +94,28 @@ class PythonTaReporter(BaseReporter):
         """Return whether there are any messages registered."""
         return any(messages for messages in self.messages.values())
 
-    def set_output(self, filepath: Optional[str] = None) -> None:
-        """Set output stream based on filepath.
+    def set_output(self, out: Optional[Union[str, IO]] = None) -> None:
+        """Set output stream based on out.
 
-        If filepath is None or '-', sys.stdout is used.
-        If filepath is the path to a file, that file is used (overwriting any existing contents).
-        If filepath is the path to a directory, a new file is created in that directory
+        If out is None or '-', sys.stdout is used.
+        If out is the path to a file, that file is used (overwriting any existing contents).
+        If out is the path to a directory, a new file is created in that directory
         (with default filename self.OUTPUT_FILENAME).
+        If out is a typing.IO object, that object is used.
         """
-        if filepath is None or filepath == "-":
+        if out is None or out == "-":
             self.out = sys.stdout
-        else:
+        elif isinstance(out, str):
             # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
-            filepath = os.path.expanduser(filepath)
-            if os.path.isdir(filepath):
-                filepath = os.path.join(filepath, self.OUTPUT_FILENAME)
+            out = os.path.expanduser(out)
+            if os.path.isdir(out):
+                out = os.path.join(out, self.OUTPUT_FILENAME)
 
-            self.out = open(filepath, "w", encoding="utf-8")
+            self.out = open(out, "w", encoding="utf-8")
+            self.should_close_out = True
+        else:
+            # out is a typing.IO object
+            self.out = out
 
     def handle_message(self, msg: Message) -> None:
         """Handle a new message triggered on the current file."""
@@ -261,9 +269,9 @@ class PythonTaReporter(BaseReporter):
     def on_close(self, stats, previous_stats):
         """Hook called when a module finished analyzing.
 
-        Close the reporter's output stream (if not sys.stdout).
+        Close the reporter's output stream if should_close_out is True.
         """
-        if self.out is not sys.stdout:
+        if self.should_close_out:
             self.out.close()
 
 

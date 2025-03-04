@@ -37,7 +37,7 @@ import tokenize
 import webbrowser
 from builtins import FileNotFoundError
 from os import listdir
-from typing import Any, AnyStr, Generator, Optional, TextIO, Union
+from typing import IO, Any, AnyStr, Generator, Optional, TextIO, Union
 
 import pylint.config
 import pylint.lint
@@ -68,7 +68,7 @@ PYLINT_PATCHED = False
 def check_errors(
     module_name: Union[list[str], str] = "",
     config: Union[dict[str, Any], str] = "",
-    output: Optional[str] = None,
+    output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
@@ -86,7 +86,7 @@ def check_errors(
 def check_all(
     module_name: Union[list[str], str] = "",
     config: Union[dict[str, Any], str] = "",
-    output: Optional[str] = None,
+    output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
@@ -104,9 +104,10 @@ def check_all(
             If a string, a path to a configuration file to use.
             If a dictionary, a map of configuration options (each key is the name of an option).
         output:
-            If provided, the PythonTA report is written to this path. Otherwise, the report
-            is written to standard out or automatically displayed in a web browser, depending
-            on which reporter is used.
+            If a string, a path to a file to which the PythonTA report is written.
+            If a typing.IO object, the report is written to this stream.
+            If None, the report is written to standard out or automatically displayed in a
+            web browser, depending on which reporter is used.
         load_default_config:
             If True (default), additional configuration passed with the ``config`` option is
             merged with the default PythonTA configuration file.
@@ -131,7 +132,7 @@ def _check(
     module_name: Union[list[str], str] = "",
     level: str = "all",
     local_config: Union[dict[str, Any], str] = "",
-    output: Optional[str] = None,
+    output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
 ) -> PythonTaReporter:
@@ -143,7 +144,8 @@ def _check(
       - no argument -- checks the python file containing the function call.
     `level` is used to specify which checks should be made.
     `local_config` is a dict of config options or string (config file name).
-    `output` is an absolute or relative path to capture pyta data output. If None, stdout is used.
+    `output` is an absolute or relative path to a file, or a typing.IO object to capture pyta data
+    output. If None, stdout is used.
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
     `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
@@ -197,8 +199,10 @@ def _check(
 
                 if not is_any_file_checked:
                     prev_output = current_reporter.out
+                    prev_should_close_out = current_reporter.should_close_out
                     current_reporter = linter.reporter
                     current_reporter.out = prev_output
+                    current_reporter.should_close_out = prev_should_close_out
 
                     # At this point, the only possible errors are those from parsing the config file
                     # so print them, if there are any.

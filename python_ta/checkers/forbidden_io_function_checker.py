@@ -2,6 +2,7 @@
 """
 
 from re import sub
+from typing import Union
 
 from astroid import BoundMethod, FunctionDef, nodes
 from pylint.checkers import BaseChecker
@@ -72,7 +73,7 @@ class IOFunctionChecker(BaseChecker):
                 self.add_message("forbidden-IO-function", node=node, args=name)
 
     @staticmethod
-    def _resolve_qualname(node: nodes.Call) -> str | None:
+    def _resolve_qualname(node: nodes.Call) -> Union[str, None]:
         """Resolves the qualified name for function and method calls"""
         if (inferred_definition := safe_infer(node.func)) is not None:
             if isinstance(inferred_definition, (BoundMethod, FunctionDef)):

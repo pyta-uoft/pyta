@@ -23,8 +23,8 @@ class IOFunctionChecker(BaseChecker):
         "E9998": (
             "Used input/output function %s",
             "forbidden-IO-function",
-            'Used when you use the I/O functions "print", "open" or "input". These '
-            "functions should not be used except where specified by your instructor.",
+            'Used when you use the I/O functions "print", "open" or "input" or other config specified forbidden '
+            "functions/methods. These functions should not be used except where specified by your instructor.",
         )
     }
     options = (
@@ -34,7 +34,7 @@ class IOFunctionChecker(BaseChecker):
                 "default": FORBIDDEN_BUILTIN,
                 "type": "csv",
                 "metavar": "<builtin function names>",
-                "help": "List of built-in function names that should not be used.",
+                "help": "List of io function names and method qualified names that should not be used.",
             },
         ),
         (

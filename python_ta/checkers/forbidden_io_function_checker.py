@@ -1,9 +1,11 @@
 """Checker for use of I/O functions.
 """
 
-from astroid import nodes
+from re import sub
+
+from astroid import BoundMethod, FunctionDef, nodes
 from pylint.checkers import BaseChecker
-from pylint.checkers.utils import only_required_for_messages
+from pylint.checkers.utils import only_required_for_messages, safe_infer
 from pylint.lint import PyLinter
 
 from python_ta.utils import _is_in_main
@@ -48,31 +50,36 @@ class IOFunctionChecker(BaseChecker):
 
     @only_required_for_messages("forbidden-IO-function")
     def visit_call(self, node: nodes.Call) -> None:
-        if isinstance(node.func, nodes.Name):
-            name = node.func.name
-            # ignore the name if it's not a builtin (i.e. not defined in the
-            # locals nor globals scope)
-            if not (name in node.frame() or name in node.root()):
-                scope = node.scope()
-                scope_parent = scope.parent
+        if (
+            name := self._resolve_qualname(node)
+        ) is not None and name in self.linter.config.forbidden_io_functions:
+            scope = node.scope()
+            scope_parent = scope.parent
 
-                if (
-                    isinstance(scope_parent, nodes.ClassDef)
-                    and isinstance(scope, nodes.FunctionDef)
-                    and (scope_parent.name + "." + scope.name) not in self.linter.config.allowed_io
-                ):
-                    if name in self.linter.config.forbidden_io_functions:
-                        self.add_message("forbidden-IO-function", node=node, args=name)
-                elif (
-                    isinstance(scope_parent, nodes.Module)
-                    and isinstance(scope, nodes.FunctionDef)
-                    and scope.name not in self.linter.config.allowed_io
-                ):
-                    if name in self.linter.config.forbidden_io_functions:
-                        self.add_message("forbidden-IO-function", node=node, args=name)
-                elif isinstance(scope, nodes.Module) and not _is_in_main(node):
-                    if name in self.linter.config.forbidden_io_functions:
-                        self.add_message("forbidden-IO-function", node=node, args=name)
+            if (
+                isinstance(scope_parent, nodes.ClassDef)
+                and isinstance(scope, nodes.FunctionDef)
+                and (scope_parent.name + "." + scope.name) not in self.linter.config.allowed_io
+            ):
+                self.add_message("forbidden-IO-function", node=node, args=name)
+            elif (
+                isinstance(scope_parent, nodes.Module)
+                and isinstance(scope, nodes.FunctionDef)
+                and scope.name not in self.linter.config.allowed_io
+            ):
+                self.add_message("forbidden-IO-function", node=node, args=name)
+            elif isinstance(scope, nodes.Module) and not _is_in_main(node):
+                self.add_message("forbidden-IO-function", node=node, args=name)
+
+    @staticmethod
+    def _resolve_qualname(node: nodes.Call) -> str | None:
+        """Resolves the qualified name for function and method calls"""
+        if (inferred_definition := safe_infer(node.func)) is not None:
+            if isinstance(inferred_definition, (BoundMethod, FunctionDef)):
+                return sub(r"^[^.]*\.", "", inferred_definition.qname())
+        if isinstance(node.func, nodes.Name):
+            return node.func.name
+        return None
 
 
 def register(linter: PyLinter) -> None:

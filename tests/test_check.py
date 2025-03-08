@@ -2,8 +2,11 @@
 installed `python_ta` package.
 """
 
+import io
 import os
 from os import path, remove
+
+import pytest
 
 import python_ta
 
@@ -212,3 +215,31 @@ def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
     # If the file exists, the assertion failed and the file gets removed from main directory
     if file_exists:
         remove("pyta_output.html")
+
+
+@pytest.fixture
+def output() -> None:
+    """Create a StringIO object to be passed into the output argument of the check functions."""
+    output = io.StringIO()
+    yield output
+    output.close()
+
+
+def test_check_all_output_typing_io(output: io.StringIO) -> None:
+    """Test that specifying output as a typing.IO stream captures the output report when check_all is called."""
+    python_ta.check_all(
+        "examples/custom_checkers/e9989_pep8_errors.py",
+        config={"output-format": "python_ta.reporters.PlainReporter"},
+        output=output,
+    )
+    assert "E9989 (pep8-errors)" in output.getvalue()
+
+
+def test_check_error_output_typing_io(output: io.StringIO) -> None:
+    """Test that specifying output as a typing.IO stream captures the output report when check_error is called."""
+    python_ta.check_errors(
+        "examples/syntax_errors/missing_colon.py",
+        config={"output-format": "python_ta.reporters.PlainReporter"},
+        output=output,
+    )
+    assert "E0001 (syntax-error)" in output.getvalue()

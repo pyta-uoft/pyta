@@ -9,12 +9,37 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Added `autoformat-options` configuration option to let users specify command-line arguments to the Black formatting tool
+- Update `check_all` and `check_error` functions to let users pass in `typing.IO` objects to the `output` argument
+
+### 💫 New checkers
+
+### 🐛 Bug fixes
+
+### 🔧 Internal changes
+
+## [2.10.1] - 2025-02-19
+
+### 🐛 Bug fixes
+
+- Fix import error when `graphviz` is not installed
+
+## [2.10.0] - 2025-02-18
+
+### ✨ Enhancements
+
 - Added custom error message for `comparison-with-callable`
 - Changed `pyta-template-file` argument to now resolve the file path relative to the CWD.
 - Added a watch configuration option to the HTML reporter for persistent server mode.
 - Added `server-port` configuration option to specify the port number to use when serving the PyTA HTML report.
 - Added new checker option `mypy-options` in `static-type-checker` to let users override default mypy command-line arguments
 - Added documentation for overriding messages
+- Improved `check_contracts` error messages by ensuring a consistent format and phrasing
+- Improved rendering of if/while/for syntax blocks in control flow graphs
+- Ensured GraphViz-generated files have `.gv` extension
+- Export `generate_cfg` from `python_ta.cfg`
+- Move `check_all` configuration info to logging DEBUG level (was INFO)
+- Update list of "error" checks
 
 ### 💫 New checkers
 
@@ -31,12 +56,17 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed issue in `static-type-checker` such that mypy no longer checks imported modules in the file being checked
 - Fixed issue in `autoformat` where the default `max-line-length` value was not used
+- Fixed issue in contract-checking `new_setattr` where an instance attribute was not always reset when reassigning it to an invalid value
+- Fixed issue in `AccumulationTable` where accumulation expressions could not refer to loop variables
+- Fixed issue in `snapshot` where some imported objects were being included in the output
+- Fixed issue in `snapshot` where `None` was not being rendered in SVG correctly
 
 ### 🔧 Internal changes
 
 - Configured CI tests to run on environments with and without `z3` dependency.
 - Refactored `script.js` to avoid using jQuery, and instead use vanilla Javascript functionality.
 - Configured CI to upload coverage report for both base and `z3` test environments
+- Remove unnecessary calls to `node.stream()` in raw file checkers (pycodestyle and static type checkers)
 
 ## [2.9.2] - 2025-01-16
 

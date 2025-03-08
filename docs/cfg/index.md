@@ -22,7 +22,7 @@ The corresponding control flow graph for the code example above is included belo
 To use PythonTA's control flow graph visualizer, you'll need to install some additional software:
 
 1. Install [Graphviz](https://www.graphviz.org/download/). (This isn't Python software.)
-2. Install some additional Python libaries.
+2. Install some additional Python libraries.
    Run the following command in the terminal:
 
    ```console
@@ -31,7 +31,7 @@ To use PythonTA's control flow graph visualizer, you'll need to install some add
 
 ## Sample Usage
 
-This feature uses `python_ta.cfg.cfg_generator.generate_cfg` to produce these control flow graphs.
+This feature uses `python_ta.cfg.generate_cfg` to produce these control flow graphs.
 
 The first argument specifies which Python file to create a control flow graph for. By default, it generates a control flow graph of the current file in which it is called from.
 
@@ -41,9 +41,9 @@ The first argument specifies which Python file to create a control flow graph fo
 ... # code here
 
 if __name__ == "__main__":
-    import python_ta.cfg.cfg_generator as cfg_generator
+    import python_ta.cfg as cfg
 
-    cfg_generator.generate_cfg()
+    cfg.generate_cfg()
 ```
 
 After running this file, a new svg file is created called `my_file.svg`.
@@ -51,9 +51,9 @@ After running this file, a new svg file is created called `my_file.svg`.
 This feature is not limited to just the Python file from which the function is called. It can also be used to generate a control flow graph of a different Python file. The set-up is the exact same as before, except we can pass an argument to the function call which is the path to the target Python file.
 
 ```python
-import python_ta.cfg.cfg_generator as cfg_generator
+import python_ta.cfg as cfg
 
-cfg_generator.generate_cfg("my_file.py")
+cfg.generate_cfg("my_file.py")
 ```
 
 There is also an additional optional argument that allows you to configure how the control flow graphs are generated. For example, you can separate the `if` condition from the preceding statements, or you can specify function and method names to restrict the creation of control flow graphs to just those functions.
@@ -80,7 +80,7 @@ which produces the following control flow graph:
 ## API
 
 ```{eval-rst}
-.. autofunction:: python_ta.cfg.cfg_generator.generate_cfg
+.. autofunction:: python_ta.cfg.generate_cfg
 ```
 
 **Note:** the specified functions must be top-level functions or methods. That is, function definitions that are nested inside other types of syntax aside from `class` definitions (e.g. `if` and `for` statements) will not be detected. For specifying methods, use their qualified names. For example, if you have a class named `MyClass` with the method `foo`, use `MyClass.foo`.

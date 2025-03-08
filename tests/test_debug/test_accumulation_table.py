@@ -5,6 +5,7 @@ types of accumulator loops
 
 import copy
 import shutil
+import sys
 
 import pytest
 import tabulate
@@ -334,6 +335,18 @@ def test_expression_accumulator() -> None:
 
     assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
     assert table.loop_accumulators == {"sum_so_far * 2": [0, 20, 60, 120]}
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
+def test_expression_with_loop_var_accumulator() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    with AccumulationTable(["item * 2"]) as table:
+        for item in test_list:
+            sum_so_far = sum_so_far + item
+
+    assert table.loop_variables == {"item": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"item * 2": ["N/A", 20, 40, 60]}
 
 
 def test_invalid_accumulator() -> None:

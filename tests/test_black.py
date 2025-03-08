@@ -32,6 +32,25 @@ error_params = [
         """def foo():print("Hello, world!")\n""",
     ),
     (
+        """def foo():print("Hello, world!")\n""",
+        {"output-format": "python_ta.reporters.JSONReporter", "autoformat-options": []},
+        True,
+        """def foo():\n    print("Hello, world!")\n""",
+    ),
+    (
+        # Specify that Black skip reformatting the first line in autoformat-options
+        """def foo():print("Although this line is too long, it is not split by black as it is skipped.")\n""",
+        {
+            "output-format": "python_ta.reporters.JSONReporter",
+            "max-line-length": 50,
+            # pep8_errors remain as the line is not reformatted
+            "pycodestyle-ignore": ["E231", "E501", "E704"],
+            "autoformat-options": ["skip-source-first-line"],
+        },
+        True,
+        """def foo():print("Although this line is too long, it is not split by black as it is skipped.")\n""",
+    ),
+    (
         # This line is between 80-88 characters; it should be reformatted because the default
         # max-line-len is 80.
         """CONST = ['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'b']""",

@@ -158,6 +158,12 @@ The server-port option specifies the port number to use when serving the PyTA HT
 the server automatically selects an available port. If set to a specific port (e.g., 5008), the server attempts
 to bind to that port. This configuration option only applies to the HTMLReporter and does not affect other reporters.
 
+### `autoformat-options` (default: `skip-string-normalization`)
+
+A list of [command-line arguments](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#command-line-options)
+to be passed into the Black formatting tool if `python_ta.check_all` is called with `autoformat=True`.
+Modifying this option will override the default flag.
+
 ## PythonTA checker configuration options
 
 The following options are used to configure the behaviour of specific checks.

@@ -22,12 +22,11 @@ __version__ = "2.10.2.dev"  # Version number
 # Must appear before other imports from pylint/python_ta.
 import builtins
 
-from pylint.reporters import BaseReporter, MultiReporter
-
 try:
     del builtins._
 except AttributeError:
     pass
+
 
 import importlib.util
 import logging
@@ -45,6 +44,7 @@ import pylint.lint
 import pylint.utils
 from astroid import MANAGER, modutils
 from pylint.lint import PyLinter
+from pylint.reporters import BaseReporter, MultiReporter
 from pylint.utils.pragma_parser import OPTION_PO
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer

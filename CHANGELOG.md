@@ -18,8 +18,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
-- Refactored `_check` function into helper functions.
-
 ## [2.10.1] - 2025-02-19
 
 ### 🐛 Bug fixes

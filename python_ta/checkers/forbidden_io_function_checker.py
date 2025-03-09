@@ -24,8 +24,8 @@ class IOFunctionChecker(BaseChecker):
         "E9998": (
             "Used input/output function %s",
             "forbidden-IO-function",
-            'Used when you use the I/O functions "print", "open" or "input" or other config specified forbidden '
-            "functions/methods. These functions should not be used except where specified by your instructor.",
+            'Used when you use the I/O functions "print", "open" or "input" or other config-specified forbidden '
+            "functions. These functions should not be used except where specified by your instructor.",
         )
     }
     options = (
@@ -35,7 +35,7 @@ class IOFunctionChecker(BaseChecker):
                 "default": FORBIDDEN_BUILTIN,
                 "type": "csv",
                 "metavar": "<builtin function names>",
-                "help": "List of io function names and method qualified names that should not be used.",
+                "help": "List of I/O function names and method qualified names that should not be used.",
             },
         ),
         (
@@ -51,9 +51,7 @@ class IOFunctionChecker(BaseChecker):
 
     @only_required_for_messages("forbidden-IO-function")
     def visit_call(self, node: nodes.Call) -> None:
-        if (
-            name := self._resolve_qualname(node)
-        ) is not None and name in self.linter.config.forbidden_io_functions:
+        if (name := self._resolve_qualname(node)) in self.linter.config.forbidden_io_functions:
             scope = node.scope()
             scope_parent = scope.parent
 

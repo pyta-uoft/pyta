@@ -2281,12 +2281,12 @@ if __name__ == "__main__":
 By default, [`input`], [`open`] and [`print`] are not allowed. However, you can choose which I/O functions/methods
 specifically to disallow using the `forbidden-io-functions` option. This takes a list of function names and method
 [qualified names](https://peps.python.org/pep-3155/#proposal) that should not be used. For example, use the
-following configuration to forbid the use of [`print`] and `ClassName.method` but allow [`input`] and [`open`]:
+following configuration to forbid the use of [`print`] and `MyClass.method` but allow [`input`] and [`open`]:
 
 ```python
 import python_ta
 python_ta.check_all(config={
-    "forbidden-io-functions": ["print", "ClassName.method"]
+    "forbidden-io-functions": ["print", "MyClass.method"]
 })
 ```
 

@@ -71,9 +71,6 @@ from .util.autoformat import run_autoformat
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
-# Flag to determine if we've previously patched pylint
-PYLINT_PATCHED = False
-
 
 def check_errors(
     module_name: Union[list[str], str] = "",

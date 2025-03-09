@@ -31,7 +31,7 @@ def setup_linter(
     local_config: Union[dict[str, Any], str],
     load_default_config: bool,
     output: Optional[Union[str, IO]],
-) -> tuple[PyLinter, BaseReporter | MultiReporter]:
+) -> tuple[PyLinter, Union[BaseReporter, MultiReporter]]:
     """Set up the linter and reporter for the check."""
     linter = reset_linter(config=local_config, load_default_config=load_default_config)
     current_reporter = linter.reporter

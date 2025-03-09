@@ -202,11 +202,9 @@ def _check_file(
     if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
         del MANAGER.astroid_cache[module_name]
     linter.check([file_py])  # Lint !
-    
+
     if autoformat:
-        run_autoformat(
-            file_py, linter.config.autoformat_options, linter.config.max_line_length
-        )
+        run_autoformat(file_py, linter.config.autoformat_options, linter.config.max_line_length)
 
     if not is_any_file_checked:
         prev_output = current_reporter.out
@@ -229,7 +227,7 @@ def _check_file(
     if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
         del MANAGER.astroid_cache[module_name]
     linter.check([file_py])  # Lint !
-    
+
     if linter.config.pyta_file_permission:
         f_paths.append(file_py)  # Appending paths for upload
     logging.debug(

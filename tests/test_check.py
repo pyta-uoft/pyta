@@ -325,6 +325,7 @@ def read_nonblocking(process, timeout):
                 break
     return lines
 
+
 @pytest.fixture
 def output() -> None:
     """Create a StringIO object to be passed into the output argument of the check functions."""

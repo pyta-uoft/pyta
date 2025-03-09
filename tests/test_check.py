@@ -2,12 +2,15 @@
 installed `python_ta` package.
 """
 
+import io
 import os
 import select
 import subprocess
 import sys
 import time
 from os import path, remove
+
+import pytest
 
 import python_ta
 
@@ -321,3 +324,31 @@ def read_nonblocking(process, timeout):
             if "18      })" in line or time.time() - start_time > timeout:
                 break
     return lines
+
+
+@pytest.fixture
+def output() -> None:
+    """Create a StringIO object to be passed into the output argument of the check functions."""
+    output = io.StringIO()
+    yield output
+    output.close()
+
+
+def test_check_all_output_typing_io(output: io.StringIO) -> None:
+    """Test that specifying output as a typing.IO stream captures the output report when check_all is called."""
+    python_ta.check_all(
+        "examples/custom_checkers/e9989_pep8_errors.py",
+        config={"output-format": "python_ta.reporters.PlainReporter"},
+        output=output,
+    )
+    assert "E9989 (pep8-errors)" in output.getvalue()
+
+
+def test_check_error_output_typing_io(output: io.StringIO) -> None:
+    """Test that specifying output as a typing.IO stream captures the output report when check_error is called."""
+    python_ta.check_errors(
+        "examples/syntax_errors/missing_colon.py",
+        config={"output-format": "python_ta.reporters.PlainReporter"},
+        output=output,
+    )
+    assert "E0001 (syntax-error)" in output.getvalue()

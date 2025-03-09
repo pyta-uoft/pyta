@@ -11,6 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Integrated Watchdog to enable automatic re-checking of Python files when changes are detected.
 - Added `autoformat-options` configuration option to let users specify command-line arguments to the Black formatting tool
+- Update `check_all` and `check_error` functions to let users pass in `typing.IO` objects to the `output` argument
 
 ### 💫 New checkers
 

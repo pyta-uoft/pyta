@@ -101,32 +101,6 @@ def check_file(
     if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
         del MANAGER.astroid_cache[module_name]
     linter.check([file_py])  # Lint !
-
-    if autoformat:
-        run_autoformat(file_py, linter.config.autoformat_options, linter.config.max_line_length)
-
-    if not is_any_file_checked:
-        prev_output = current_reporter.out
-        prev_should_close_out = current_reporter.should_close_out
-        current_reporter = linter.reporter
-        current_reporter.out = prev_output
-        current_reporter.should_close_out = prev_should_close_out
-
-        # At this point, the only possible errors are those from parsing the config file
-        # so print them, if there are any.
-        if current_reporter.messages:
-            current_reporter.print_messages()
-    else:
-        linter.set_reporter(current_reporter)
-
-    # The current file was checked so update the flag
-    is_any_file_checked = True
-
-    module_name = os.path.splitext(os.path.basename(file_py))[0]
-    if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
-        del MANAGER.astroid_cache[module_name]
-    linter.check([file_py])  # Lint !
-
     if linter.config.pyta_file_permission:
         f_paths.append(file_py)  # Appending paths for upload
     logging.debug(
@@ -248,7 +222,7 @@ def reset_linter(
             "messages-config-path",
             {
                 "default": os.path.join(
-                    os.path.dirname(__file__), "config", "messages_config.toml"
+                    os.path.dirname(os.path.dirname(__file__)), "config", "messages_config.toml"
                 ),
                 "type": "string",
                 "metavar": "<messages_config>",
@@ -284,10 +258,10 @@ def reset_linter(
         ),
     )
 
-    parent_dir_path = os.path.dirname(__file__)
+    parent_dir_path = os.path.dirname(os.path.dirname(__file__))
     custom_checkers = [
         ("python_ta.checkers." + os.path.splitext(f)[0])
-        for f in os.listdir(parent_dir_path + "/checkers")
+        for f in os.listdir(os.path.join(parent_dir_path, "checkers"))
         if f != "__init__.py" and os.path.splitext(f)[1] == ".py"
     ]
 
@@ -299,7 +273,7 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
-    default_config_path = find_local_config(os.path.dirname(__file__))
+    default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
     set_config = load_config
 
     if load_default_config:

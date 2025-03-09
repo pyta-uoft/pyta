@@ -59,10 +59,10 @@ def check_file(
     load_default_config: bool,
     autoformat: Optional[bool],
     is_any_file_checked: bool,
-    current_reporter: BaseReporter | MultiReporter,
+    current_reporter: Union[BaseReporter, MultiReporter],
     level: str,
     f_paths: list,
-) -> tuple[bool, BaseReporter | MultiReporter, PyLinter]:
+) -> tuple[bool, Union[BaseReporter, MultiReporter], PyLinter]:
     """Check the file that called this function."""
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
     allowed_pylint = linter.config.allow_pylint_comments
@@ -116,7 +116,7 @@ def check_file(
 
 def upload_linter_results(  # upload_linter_results
     linter: PyLinter,
-    current_reporter: BaseReporter | MultiReporter,
+    current_reporter: Union[BaseReporter, MultiReporter],
     f_paths: list,
     local_config: Union[dict[str, Any], str],
 ):

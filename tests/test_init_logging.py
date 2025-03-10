@@ -27,7 +27,7 @@ def test_check_log(caplog) -> None:
         assert expected_messages[i] in caplog.records[i].msg
 
 
-@patch("python_ta._get_valid_files_to_check", side_effect=Exception("Testing"))
+@patch("python_ta.check.helpers.get_valid_files_to_check", side_effect=Exception("Testing"))
 def test_check_exception_log(_, caplog) -> None:
     """Testing logging in _check function when exception is thrown"""
     try:

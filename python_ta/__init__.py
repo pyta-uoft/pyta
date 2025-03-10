@@ -149,8 +149,9 @@ def _check(
         # Flag indicating whether at least one file has been checked
         is_any_file_checked = False
         linted_files = set()
+        f_paths = []  # Paths to files for data submission
         for locations in get_valid_files_to_check(module_name):
-            f_paths = []  # Paths to files for data submission
+            f_paths = []
             for file_py in get_file_paths(locations):
                 linted_files.add(file_py)
                 if verify_pre_check(file_py, linter.config.allow_pylint_comments):
@@ -178,6 +179,7 @@ def _check(
                     autoformat=autoformat,
                     linter=linter,
                     current_reporter=current_reporter,
+                    f_paths=f_paths,
                 )
 
         return current_reporter

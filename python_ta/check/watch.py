@@ -26,6 +26,7 @@ class FileChangeHandler(FileSystemEventHandler):
         load_default_config: bool,
         autoformat: Optional[bool],
         level: str,
+        f_paths: list[str],
     ) -> None:
         self.files_to_watch = set(files_to_watch)
         self.linter = linter
@@ -34,6 +35,7 @@ class FileChangeHandler(FileSystemEventHandler):
         self.load_default_config = load_default_config
         self.autoformat = autoformat
         self.level = level
+        self.f_paths = f_paths
 
     def on_modified(self, event) -> None:
         """Trigger the callback when a watched file is modified."""
@@ -56,9 +58,7 @@ class FileChangeHandler(FileSystemEventHandler):
         self.current_reporter = self.linter.reporter
         self.current_reporter.print_messages(self.level)
         self.linter.generate_reports()
-        upload_linter_results(
-            self.linter, self.current_reporter, [event.src_path], self.local_config
-        )
+        upload_linter_results(self.linter, self.current_reporter, self.f_paths, self.local_config)
 
 
 def watch_files(
@@ -69,6 +69,7 @@ def watch_files(
     autoformat: Optional[bool],
     linter: PyLinter,
     current_reporter: Union[BaseReporter, MultiReporter],
+    f_paths: list[str],
 ) -> None:
     """Watch a list of files for modifications and trigger a callback when changes occur."""
     logging.info("PythonTA is monitoring your files for changes and will re-check after every save")
@@ -81,6 +82,7 @@ def watch_files(
         load_default_config=load_default_config,
         autoformat=autoformat,
         level=level,
+        f_paths=f_paths,
     )
     observer = Observer()
     for directory in directories_to_watch:

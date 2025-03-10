@@ -17,7 +17,8 @@ from astroid import MANAGER, modutils
 from pylint.lint import PyLinter
 from pylint.reporters import BaseReporter, MultiReporter
 from pylint.utils.pragma_parser import OPTION_PO
-from requests import __version__
+
+from python_ta import __version__
 
 from ..config import (
     find_local_config,

@@ -58,16 +58,14 @@ def setup_linter(
 
 
 def check_file(
-    linter: PyLinter,
     file_py: AnyStr,
     local_config: Union[dict[str, Any], str],
     load_default_config: bool,
     autoformat: Optional[bool],
     is_any_file_checked: bool,
     current_reporter: Union[BaseReporter, MultiReporter],
-    level: str,
     f_paths: list,
-) -> tuple[bool, Union[BaseReporter, MultiReporter], PyLinter]:
+) -> tuple[bool, PyLinter]:
     """Perform linting on a single Python file using the provided linter and configuration"""
     # Load config file in user location. Construct new linter each
     # time, so config options don't bleed to unintended files.
@@ -112,7 +110,7 @@ def check_file(
             file_py, linter.config.messages_config_path
         )
     )
-    return is_any_file_checked, current_reporter, linter
+    return is_any_file_checked, linter
 
 
 def upload_linter_results(

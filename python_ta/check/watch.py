@@ -44,17 +44,16 @@ class FileChangeHandler(FileSystemEventHandler):
         if event.src_path in self.current_reporter.messages:
             del self.current_reporter.messages[event.src_path]
 
-        _, self.current_reporter, self.linter = check_file(
-            self.linter,
+        _, self.linter = check_file(
             event.src_path,
             self.local_config,
             self.load_default_config,
             self.autoformat,
             True,
             self.current_reporter,
-            self.level,
             [],
         )
+        self.current_reporter = self.linter.reporter
         self.current_reporter.print_messages(self.level)
         self.linter.generate_reports()
         upload_linter_results(

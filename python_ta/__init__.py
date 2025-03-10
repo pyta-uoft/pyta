@@ -160,19 +160,17 @@ def _check(
             f_paths = []  # Paths to files for data submission
             for file_py in get_file_paths(locations):
                 linted_files.add(file_py)
-                if not verify_pre_check(file_py, linter.config.allow_pylint_comments):
-                    pass
-                is_any_file_checked, current_reporter, linter = check_file(
-                    linter,
-                    file_py,
-                    local_config,
-                    load_default_config,
-                    autoformat,
-                    is_any_file_checked,
-                    current_reporter,
-                    level,
-                    f_paths,
-                )
+                if verify_pre_check(file_py, linter.config.allow_pylint_comments):
+                    is_any_file_checked, linter = check_file(
+                        file_py,
+                        local_config,
+                        load_default_config,
+                        autoformat,
+                        is_any_file_checked,
+                        current_reporter,
+                        f_paths,
+                    )
+                    current_reporter = linter.reporter
                 current_reporter.print_messages(level)
             upload_linter_results(linter, current_reporter, f_paths, local_config)
         # Only generate reports (display the webpage) if there were valid files to check

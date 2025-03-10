@@ -1,6 +1,7 @@
 """Module to watch files for modifications and trigger PythonTA checks automatically.
 """
 
+import logging
 import os
 import time
 from typing import Any, Optional, Union
@@ -36,28 +37,29 @@ class FileChangeHandler(FileSystemEventHandler):
 
     def on_modified(self, event) -> None:
         """Trigger the callback when a watched file is modified."""
-        if event.src_path in self.files_to_watch:
-            print(f"File modified: {event.src_path}, re-running checks...")
+        if event.src_path not in self.files_to_watch:
+            return
 
-            if event.src_path in self.current_reporter.messages:
-                del self.current_reporter.messages[event.src_path]
+        logging.info(f"File modified: {event.src_path}, re-running checks...")
+        if event.src_path in self.current_reporter.messages:
+            del self.current_reporter.messages[event.src_path]
 
-            _, self.current_reporter, self.linter = check_file(
-                self.linter,
-                event.src_path,
-                self.local_config,
-                self.load_default_config,
-                self.autoformat,
-                True,
-                self.current_reporter,
-                self.level,
-                [],
-            )
-            self.current_reporter.print_messages(self.level)
-            self.linter.generate_reports()
-            upload_linter_results(
-                self.linter, self.current_reporter, [event.src_path], self.local_config
-            )
+        _, self.current_reporter, self.linter = check_file(
+            self.linter,
+            event.src_path,
+            self.local_config,
+            self.load_default_config,
+            self.autoformat,
+            True,
+            self.current_reporter,
+            self.level,
+            [],
+        )
+        self.current_reporter.print_messages(self.level)
+        self.linter.generate_reports()
+        upload_linter_results(
+            self.linter, self.current_reporter, [event.src_path], self.local_config
+        )
 
 
 def watch_files(
@@ -70,7 +72,7 @@ def watch_files(
     current_reporter: Union[BaseReporter, MultiReporter],
 ) -> None:
     """Watch a list of files for modifications and trigger a callback when changes occur."""
-
+    logging.info("PythonTA is monitoring your files for changes and will re-check after every save")
     directories_to_watch = {os.path.dirname(file) for file in file_paths}
     event_handler = FileChangeHandler(
         files_to_watch=file_paths,

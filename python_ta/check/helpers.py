@@ -69,9 +69,6 @@ def check_file(
     f_paths: list,
 ) -> tuple[bool, Union[BaseReporter, MultiReporter], PyLinter]:
     """Perform linting on a single Python file using the provided linter and configuration"""
-    allowed_pylint = linter.config.allow_pylint_comments
-    if not verify_pre_check(file_py, allowed_pylint):
-        return is_any_file_checked, current_reporter, linter
     # Load config file in user location. Construct new linter each
     # time, so config options don't bleed to unintended files.
     # Reuse the same reporter each time to accumulate the results across different files.

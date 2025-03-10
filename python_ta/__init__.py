@@ -160,6 +160,8 @@ def _check(
             f_paths = []  # Paths to files for data submission
             for file_py in get_file_paths(locations):
                 linted_files.add(file_py)
+                if not verify_pre_check(file_py, linter.config.allow_pylint_comments):
+                    pass
                 is_any_file_checked, current_reporter, linter = check_file(
                     linter,
                     file_py,

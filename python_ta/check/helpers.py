@@ -1,9 +1,14 @@
+"""Helper functions for PythonTA's checking and reporting processes.
+These functions are designed to support the main checking workflow by
+modularizing core operations like file validation, linting, and result uploads.
+"""
+
 import importlib.util
 import logging
 import os
 import sys
 import tokenize
-from typing import IO, Any, AnyStr, Generator, Optional, TextIO, Tuple, Union
+from typing import IO, Any, AnyStr, Generator, Optional, Union
 
 import pylint.config
 import pylint.lint
@@ -63,8 +68,7 @@ def check_file(
     level: str,
     f_paths: list,
 ) -> tuple[bool, Union[BaseReporter, MultiReporter], PyLinter]:
-    """Check the file that called this function."""
-    logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
+    """Perform linting on a single Python file using the provided linter and configuration"""
     allowed_pylint = linter.config.allow_pylint_comments
     if not verify_pre_check(file_py, allowed_pylint):
         return is_any_file_checked, current_reporter, linter
@@ -114,12 +118,13 @@ def check_file(
     return is_any_file_checked, current_reporter, linter
 
 
-def upload_linter_results(  # upload_linter_results
+def upload_linter_results(
     linter: PyLinter,
     current_reporter: Union[BaseReporter, MultiReporter],
     f_paths: list,
     local_config: Union[dict[str, Any], str],
-):
+) -> None:
+    """Upload linter results and configuration data to the specified server if permissions allow."""
     config = {}  # Configuration settings for data submission
     errs = []  # Errors caught in files for data submission
     if linter.config.pyta_error_permission:

@@ -28,24 +28,15 @@ except AttributeError:
     pass
 
 
-import importlib.util
 import logging
 import os
-import sys
 import time
 import tokenize
 import webbrowser
-from builtins import FileNotFoundError
-from os import listdir
-from typing import IO, Any, AnyStr, Generator, Optional, TextIO, Tuple, Union
+from typing import IO, Any, Optional, Union
 
-import pylint.config
-import pylint.lint
-import pylint.utils
-from astroid import MANAGER, modutils
 from pylint.lint import PyLinter
 from pylint.reporters import BaseReporter, MultiReporter
-from pylint.utils.pragma_parser import OPTION_PO
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -57,6 +48,7 @@ from .check.helpers import (
     upload_linter_results,
     verify_pre_check,
 )
+from .check.watch import watch_files
 from .config import (
     find_local_config,
     load_config,
@@ -185,7 +177,7 @@ def _check(
         if is_any_file_checked:
             linter.generate_reports()
             if linter.config.watch:
-                _watch_files(
+                watch_files(
                     linted_files,
                     level,
                     local_config,
@@ -212,61 +204,3 @@ def doc(msg_id: str) -> None:
     msg_url = HELP_URL + "#" + msg_id.lower()
     print("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)
-
-
-def _watch_files(
-    file_paths: set,
-    level: str,
-    local_config: Union[dict[str, Any], str],
-    load_default_config: bool,
-    autoformat: Optional[bool],
-    linter: PyLinter,
-    current_reporter: BaseReporter | MultiReporter,
-):
-    """Watch a list of files for modifications and trigger a callback when changes occur."""
-
-    class FileChangeHandler(FileSystemEventHandler):
-        """Internal class to handle file modifications."""
-
-        def __init__(self, files_to_watch):
-            self.files_to_watch = set(files_to_watch)
-            self.linter = linter
-            self.current_reporter = current_reporter
-
-        def on_modified(self, event):
-            """Trigger the callback when a watched file is modified."""
-            if event.src_path in self.files_to_watch:
-                print(f"File modified: {event.src_path}, re-running checks...")
-
-                if event.src_path in self.current_reporter.messages:
-                    del self.current_reporter.messages[event.src_path]
-
-                _, self.current_reporter, self.linter = check_file(
-                    self.linter,
-                    event.src_path,
-                    local_config,
-                    load_default_config,
-                    autoformat,
-                    True,
-                    self.current_reporter,
-                    level,
-                    [],
-                )
-                self.current_reporter.print_messages(level)
-                self.linter.generate_reports()
-                upload_linter_results(linter, current_reporter, [event.src_path], local_config)
-
-    directories_to_watch = {os.path.dirname(file) for file in file_paths}
-    event_handler = FileChangeHandler(file_paths)
-    observer = Observer()
-    for directory in directories_to_watch:
-        observer.schedule(event_handler, path=directory, recursive=False)
-    observer.start()
-
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-
-    observer.join()

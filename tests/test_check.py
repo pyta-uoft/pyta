@@ -257,7 +257,7 @@ def test_check_watch_enabled() -> None:
         reset_watch_fixture()
 
 
-def reset_watch_fixture():
+def reset_watch_fixture() -> None:
     """Reset the contents of watch_enabled_configuration.py to its original state."""
     original_content = '''"""This script serves as the entry point for an integration test of the _check watch mode.
 It is invoked by the test `tests/test_reporters/test_html_server::test_open_html_in_browser_watch()`
@@ -282,9 +282,10 @@ if __name__ == "__main__":
     )
     with open(script_path, "w") as file:
         file.write(original_content)
+        file.write("\n")
 
 
-def modify_watch_fixture():
+def modify_watch_fixture() -> None:
     """Modify the contents of watch_enabled_configuration.py to fix the type error."""
     modified_content = '''"""This script serves as the entry point for an integration test of the _check watch mode.
 It is invoked by the test `tests/test_reporters/test_html_server::test_open_html_in_browser_watch()`
@@ -309,9 +310,10 @@ if __name__ == "__main__":
     )
     with open(script_path, "w") as file:
         file.write(modified_content)
+        file.write("\n")
 
 
-def read_nonblocking(process, timeout):
+def read_nonblocking(process, timeout) -> list[str]:
     """Reads output from process without blocking until timeout or termination condition."""
     lines = []
     start_time = time.time()
@@ -321,7 +323,10 @@ def read_nonblocking(process, timeout):
         while True:
             line = process.stdout.readline().strip()
             lines.append(line)
-            if "18      })" in line or time.time() - start_time > timeout:
+            if (
+                "=== Style/convention errors (fix: before submission) ===" in line
+                or time.time() - start_time > timeout
+            ):
                 break
     return lines
 

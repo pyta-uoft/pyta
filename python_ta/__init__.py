@@ -29,16 +29,9 @@ except AttributeError:
 
 
 import logging
-import os
-import time
 import tokenize
 import webbrowser
 from typing import IO, Any, Optional, Union
-
-from pylint.lint import PyLinter
-from pylint.reporters import BaseReporter, MultiReporter
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
 
 from .check.helpers import (
     check_file,

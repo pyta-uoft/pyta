@@ -45,13 +45,13 @@ class FileChangeHandler(FileSystemEventHandler):
             del self.current_reporter.messages[event.src_path]
 
         _, self.linter = check_file(
-            event.src_path,
-            self.local_config,
-            self.load_default_config,
-            self.autoformat,
-            True,
-            self.current_reporter,
-            [],
+            file_py=event.src_path,
+            local_config=self.local_config,
+            load_default_config=self.load_default_config,
+            autoformat=self.autoformat,
+            is_any_file_checked=True,
+            current_reporter=self.current_reporter,
+            f_paths=[],
         )
         self.current_reporter = self.linter.reporter
         self.current_reporter.print_messages(self.level)

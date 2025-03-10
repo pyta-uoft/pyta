@@ -162,13 +162,13 @@ def _check(
                 linted_files.add(file_py)
                 if verify_pre_check(file_py, linter.config.allow_pylint_comments):
                     is_any_file_checked, linter = check_file(
-                        file_py,
-                        local_config,
-                        load_default_config,
-                        autoformat,
-                        is_any_file_checked,
-                        current_reporter,
-                        f_paths,
+                        file_py=file_py,
+                        local_config=local_config,
+                        load_default_config=load_default_config,
+                        autoformat=autoformat,
+                        is_any_file_checked=is_any_file_checked,
+                        current_reporter=current_reporter,
+                        f_paths=f_paths,
                     )
                     current_reporter = linter.reporter
                 current_reporter.print_messages(level)
@@ -178,14 +178,15 @@ def _check(
             linter.generate_reports()
             if linter.config.watch:
                 watch_files(
-                    linted_files,
-                    level,
-                    local_config,
-                    load_default_config,
-                    autoformat,
-                    linter,
-                    current_reporter,
+                    file_paths=linted_files,
+                    level=level,
+                    local_config=local_config,
+                    load_default_config=load_default_config,
+                    autoformat=autoformat,
+                    linter=linter,
+                    current_reporter=current_reporter,
                 )
+
         return current_reporter
     except Exception as e:
         logging.error(

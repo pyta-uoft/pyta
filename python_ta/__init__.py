@@ -165,9 +165,7 @@ def _check(
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(
-            messages_config, linter.config.z3
-        )  # Monkeypatch pylint (override certain methods)
+        patch_all(linter.config.z3)  # Monkeypatch pylint (override certain methods)
         PYLINT_PATCHED = True
 
     # Try to check file, issue error message for invalid files.
@@ -191,6 +189,15 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
+
+                # Override error messages
+                for error_id, new_msg in messages_config.items():
+                    # Create new message definition object according to configured error messages
+                    message = linter.msgs_store.get_message_definitions(error_id)
+                    for message_definition in message:
+                        message_definition.msg = new_msg
+                        # Mutate the message definitions of the linter object
+                        linter.msgs_store.register_message(message_definition)
 
                 if autoformat:
                     run_autoformat(

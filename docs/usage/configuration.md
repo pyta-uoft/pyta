@@ -227,14 +227,19 @@ Note that the `show-error-end` flag is always passed into mypy, so it does not n
 ## Overriding error messages
 
 All error messages from either pylint or PythonTA checkers can be overridden.
-To override the message for a specific check, you need to know the _checker class_ that checks for the message and the _module_ in which the class is defined.
-For example, to customize `E0111` (`bad-reversed-sequence`), we require knowing that this check is made in the `BasicChecker` in the `pylint.checkers.base` module.
+Section headers are optional, but must follow a specific format.
+If you wish to specify a section header, you need to know the _checker class_ that checks for the message and the _module_ in which the class is defined.
+For example, to specify the section header for `E0111` (`bad-reversed-sequence`), we require knowing that this check is made in the `BasicChecker` in the `pylint.checkers.base` module.
 
 Given this information, custom messages are saved in a [TOML file](https://toml.io/en/).
-Custom messages must be nested in the sequence _module_ -> _checker class_ -> _error code_.
+If section headers are included, custom messages must be nested in the sequence _module_ -> _checker class_ -> _error code_.
 For example, we can override the error message for `E0111` in any of the following ways (taking advantage of TOML's flexibility with [nested keys](https://toml.io/en/v1.0.0#table)):
 
 ```toml
+# Option 1: No section header
+E0111 = "reversed() can only be called on instances of sequence types like str, list, or tuple."
+
+# Option 2: Section header specified
 # Version 1
 ["pylint.checkers.base".BasicChecker]
 E0111 = "reversed() can only be called on instances of sequence types like str, list, or tuple."
@@ -249,7 +254,7 @@ BasicChecker.E0111 = "reversed() can only be called on instances of sequence typ
 
 _Notes_:
 
-1. The module name (e.g., `pylint.checkers.base`) must be enclosed in quotes.
+1. If specified, the module name (e.g., `pylint.checkers.base`) must be enclosed in quotes.
 2. For pylint messages, the [pylint documentation](https://pylint.readthedocs.io/en/latest/user_guide/messages/messages_overview.html) is helpful for determining where each check is defined.
 3. View the [default PythonTA message configuration](https://github.com/pyta-uoft/pyta/blob/master/python_ta/config/messages_config.toml) for examples of overriding messages.
 4. Custom message must use the same string conversion specifiers (e.g., `%s`) as the original message. See the pylint documentation for the original message format.

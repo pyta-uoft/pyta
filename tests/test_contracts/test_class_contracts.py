@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 import pytest
 from nested_preconditions_example import Student
@@ -28,9 +28,9 @@ class Person:
     age: int
     name: str
     fav_foods: List[str]
-    _other: Person | None
+    _other: Optional[Person]
 
-    def __init__(self, name, age, fav_food, other: Person | None = None):
+    def __init__(self, name, age, fav_food, other: Optional[Person] = None):
         self.name = name
         self.age = age
         self.fav_foods = fav_food

@@ -209,7 +209,6 @@ def add_class_invariants(klass: type) -> None:
             original_attr_value_exists = True
             original_attr_value = super(klass, self).__getattribute__(name)
         super(klass, self).__setattr__(name, value)
-
         frame_locals = inspect.currentframe().f_back.f_locals
         caller_self = frame_locals.get("self")
         if not isinstance(caller_self, type(self)):
@@ -428,14 +427,13 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         # Store and restore existing mutated instance lists in case the instance method
         # executes another instance method.
         instance_klass = type(instance)
-        old_instances = []
-        if '__mutated_instances__' in instance_klass.__dict__:
-            old_instances = instance_klass.__dict__['__mutated_instances__']
+        mutated_instances_to_restore = []
+        if hasattr(instance_klass, '__mutated_instances__'):
+            mutated_instances_to_restore = getattr(instance_klass, '__mutated_instances__')
         setattr(instance_klass, '__mutated_instances__', [])
 
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
-
             if _instance_init_in_callstack(instance):
                 return r
             _check_class_type_annotations(klass, instance)
@@ -455,7 +453,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         else:
             return r
         finally:
-            setattr(instance_klass, '__mutated_instances__', old_instances)
+            setattr(instance_klass, '__mutated_instances__', mutated_instances_to_restore)
 
     return wrapper(wrapped)
 

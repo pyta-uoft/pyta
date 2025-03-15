@@ -210,22 +210,13 @@ def add_class_invariants(klass: type) -> None:
             original_attr_value = super(klass, self).__getattribute__(name)
         super(klass, self).__setattr__(name, value)
 
-        if isinstance(self, type(value)):
-            # Add all attributes whose type matches self to __sibling__attributes__ for later
-            # checking contract violations
-            if "__sibling_attributes__" not in self.__dict__:
-                setattr(self, "__sibling_attributes__", {})
-            self.__dict__["__sibling_attributes__"][name] = value
-
         frame_locals = inspect.currentframe().f_back.f_locals
-        if not isinstance(self, type(frame_locals.get("self"))):
+        caller_self = frame_locals.get("self")
+        if not isinstance(caller_self, type(self)):
             # Only validating if the attribute is not being set in a instance/class method
-            # AND self is an instance of frame_self's type -- aka frame_self is equal to
-            # self, frame_self is another instance of the same class as self,
-            # or frame_self is an instance of self's parent class.
-            # We only additionally check the RI violations of direct instance attributes and
-            # function arguments hence may miss checking RI violations on 2+ chained attribute
-            # mutations or global variable mutations (see :func:`_get_same_typed_instances`).
+            # AND self is an instance of caller_self's type -- aka caller_self is equal to
+            # self, caller_self is another instance of the same class as self,
+            # or self is an instance of caller_self's parent class.
             if klass_mod is not None:
                 try:
                     _check_invariants(self, klass, klass_mod.__dict__)
@@ -235,6 +226,12 @@ def add_class_invariants(klass: type) -> None:
                     else:
                         super(klass, self).__delattr__(name)
                     raise AssertionError(str(e)) from None
+        else:
+            caller_klass = type(caller_self)
+            if '__mutated_instances__' in caller_klass.__dict__:
+                mutable_instances = caller_klass.__dict__['__mutated_instances__']
+                if self not in mutable_instances:
+                    mutable_instances.append(self)
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):
@@ -427,8 +424,18 @@ def _get_argument_suggestions(arg: Any, annotation: type) -> str:
 def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs):
+        # Create an accumulator to store the instances mutated across this function call.
+        # Store and restore existing mutated instance lists in case the instance method
+        # executes another instance method.
+        instance_klass = type(instance)
+        old_instances = []
+        if '__mutated_instances__' in instance_klass.__dict__:
+            old_instances = instance_klass.__dict__['__mutated_instances__']
+        setattr(instance_klass, '__mutated_instances__', [])
+
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
+
             if _instance_init_in_callstack(instance):
                 return r
             _check_class_type_annotations(klass, instance)
@@ -436,13 +443,10 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
                 _check_invariants(instance, klass, klass_mod.__dict__)
 
-                # Also check if other instances in a reasonable scope (immediate instance
-                # attributes and function arguments) had RIs violated after function return.
-                # This does not check mutations in globals--as the set may potentially be large
-                # and likely has mostly unaffiliated values--or the mutation of the attributes of
-                # attributes/args (arg1.attribute.attribute) which may be infinitely recursive.
-                mutable_instances = _get_same_typed_instances(instance, args, kwargs)
-                for mutable_instance in mutable_instances:
+                # Additionally check RI violations on PyTA-decorated instances that were mutated
+                # across the function call.
+                mutated_instances = getattr(instance_klass, '__mutated_instances__', [])
+                for mutable_instance in mutated_instances:
                     instances_klass = type(mutable_instance)
                     instance_klass_module_dict = _get_module(instances_klass).__dict__
                     _check_invariants(mutable_instance, instances_klass, instance_klass_module_dict)
@@ -450,22 +454,10 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             raise AssertionError(str(e)) from None
         else:
             return r
+        finally:
+            setattr(instance_klass, '__mutated_instances__', old_instances)
 
     return wrapper(wrapped)
-
-
-def _get_same_typed_instances(instance: Any, args: list, kwargs: dict) -> list:
-    """Return the instances in instance's attributes, args, and kwargs, whose type
-    matches the type of instance hence may have been mutated during a method call.
-    """
-    attributes = set(instance.__dict__.get('__sibling_attributes__', {}).values())
-    for arg in args:
-        if isinstance(instance, type(arg)) and arg not in attributes:
-            attributes.add(arg)
-    for _name, arg in kwargs.items():
-        if isinstance(instance, type(arg)) and arg not in attributes:
-            attributes.add(arg)
-    return list(attributes)
 
 
 def _instance_init_in_callstack(instance: Any) -> bool:

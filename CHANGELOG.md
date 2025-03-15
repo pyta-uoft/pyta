@@ -13,14 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update `check_all` and `check_error` functions to let users pass in `typing.IO` objects to the `output` argument
 - Update the `forbidden-io-function-checker` to check functions from imported modules as well as methods (according to their qualified name)
 - Update the `forbidden-io-function-checker` to flag aliases of forbidden functions
+- Update how error messages are overridden such that section headers are no longer required within the config file
 
 ### 💫 New checkers
 
 ### 🐛 Bug fixes
 
 ### 🔧 Internal changes
-
-- Update how error messages are overridden such that section headers are no longer required within the config file
 
 ## [2.10.1] - 2025-02-19
 

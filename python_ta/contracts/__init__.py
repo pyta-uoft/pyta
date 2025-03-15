@@ -227,8 +227,8 @@ def add_class_invariants(klass: type) -> None:
                     raise AssertionError(str(e)) from None
         else:
             caller_klass = type(caller_self)
-            if '__mutated_instances__' in caller_klass.__dict__:
-                mutable_instances = caller_klass.__dict__['__mutated_instances__']
+            if "__mutated_instances__" in caller_klass.__dict__:
+                mutable_instances = caller_klass.__dict__["__mutated_instances__"]
                 if self not in mutable_instances:
                     mutable_instances.append(self)
 
@@ -428,9 +428,9 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         # executes another instance method.
         instance_klass = type(instance)
         mutated_instances_to_restore = []
-        if hasattr(instance_klass, '__mutated_instances__'):
-            mutated_instances_to_restore = getattr(instance_klass, '__mutated_instances__')
-        setattr(instance_klass, '__mutated_instances__', [])
+        if hasattr(instance_klass, "__mutated_instances__"):
+            mutated_instances_to_restore = getattr(instance_klass, "__mutated_instances__")
+        setattr(instance_klass, "__mutated_instances__", [])
 
         try:
             r = _check_function_contracts(wrapped, instance, args, kwargs)
@@ -443,7 +443,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
 
                 # Additionally check RI violations on PyTA-decorated instances that were mutated
                 # across the function call.
-                mutated_instances = getattr(instance_klass, '__mutated_instances__', [])
+                mutated_instances = getattr(instance_klass, "__mutated_instances__", [])
                 for mutable_instance in mutated_instances:
                     instances_klass = type(mutable_instance)
                     instance_klass_module_dict = _get_module(instances_klass).__dict__
@@ -453,7 +453,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         else:
             return r
         finally:
-            setattr(instance_klass, '__mutated_instances__', mutated_instances_to_restore)
+            setattr(instance_klass, "__mutated_instances__", mutated_instances_to_restore)
 
     return wrapper(wrapped)
 

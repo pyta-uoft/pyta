@@ -28,11 +28,13 @@ class Person:
     age: int
     name: str
     fav_foods: List[str]
+    _other: Person | None
 
-    def __init__(self, name, age, fav_food):
+    def __init__(self, name, age, fav_food, other: Person | None = None):
         self.name = name
         self.age = age
         self.fav_foods = fav_food
+        self._other = other
 
     def change_name(self, name: str) -> str:
         self.name = name
@@ -49,6 +51,20 @@ class Person:
         self.age = -10
         self.age = age
         return age
+
+    def decrease_and_increase_others_age(self, other: Person, age: int) -> int:
+        """Temporary violates RI for another instance of the same class."""
+        other.age = -10
+        other.age = age
+        return age
+
+    def decrease_others_age(self, other: Person) -> None:
+        """Violate the RI of an argument"""
+        other.age = -10
+
+    def decrease_attr_others_age(self) -> None:
+        """Violate the RI of an instance attribute"""
+        self._other.age = -10
 
     def add_fav_food(self, food):
         self.fav_foods.append(food)
@@ -110,6 +126,11 @@ def person():
     return Person("David", 31, ["Sushi"])
 
 
+@pytest.fixture
+def person_2(person):
+    return Person("Liu", 31, ["Sushi"], person)
+
+
 def test_change_age_invalid_over(person) -> None:
     """
     Change the age to larger than 150. Expect an exception.
@@ -145,6 +166,38 @@ def test_change_age_invalid_in_method(person) -> None:
     """
     age = person.decrease_and_increase_age(10)
     assert age == 10
+
+
+def test_change_age_of_other_invalid_in_method(person, person_2) -> None:
+    """
+    Call a method that changes age of another instance of the same class to something invalid but
+    back to something valid.
+    Expects normal behavior.
+    """
+    age = person.decrease_and_increase_others_age(person_2, 10)
+    assert age == 10
+
+
+def test_violate_ri_in_other_instance(person, person_2) -> None:
+    """
+    Call a method that changes age of another instance of the same class to something invalid
+    Excepts the RI to be violated hence an AssertionError to be thrown.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        person.decrease_others_age(person_2)
+    msg = str(excinfo.value)
+    assert "self.age > 0" in msg
+
+
+def test_violate_ri_in_attribute_instance(person_2) -> None:
+    """
+    Call a method that changes age of an instance attribute of the same class to something invalid
+    Excepts the RI to be violated hence an AssertionError to be thrown.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        person_2.decrease_attr_others_age()
+    msg = str(excinfo.value)
+    assert "self.age > 0" in msg
 
 
 def test_same_method_names(person) -> None:

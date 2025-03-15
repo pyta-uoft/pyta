@@ -209,9 +209,23 @@ def add_class_invariants(klass: type) -> None:
             original_attr_value_exists = True
             original_attr_value = super(klass, self).__getattribute__(name)
         super(klass, self).__setattr__(name, value)
+
+        if isinstance(self, type(value)):
+            # Add all attributes whose type matches self to __sibling__attributes__ for later
+            # checking contract violations
+            if "__sibling_attributes__" not in self.__dict__:
+                setattr(self, "__sibling_attributes__", {})
+            self.__dict__["__sibling_attributes__"][name] = value
+
         frame_locals = inspect.currentframe().f_back.f_locals
-        if self is not frame_locals.get("self"):
+        if not isinstance(self, type(frame_locals.get("self"))):
             # Only validating if the attribute is not being set in a instance/class method
+            # AND self is an instance of frame_self's type -- aka frame_self is equal to
+            # self, frame_self is another instance of the same class as self,
+            # or frame_self is an instance of self's parent class.
+            # We only additionally check the RI violations of direct instance attributes and
+            # function arguments hence may miss checking RI violations on 2+ chained attribute
+            # mutations or global variable mutations (see :func:`_get_same_typed_instances`).
             if klass_mod is not None:
                 try:
                     _check_invariants(self, klass, klass_mod.__dict__)
@@ -421,12 +435,37 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
             klass_mod = _get_module(klass)
             if klass_mod is not None and ENABLE_CONTRACT_CHECKING:
                 _check_invariants(instance, klass, klass_mod.__dict__)
+
+                # Also check if other instances in a reasonable scope (immediate instance
+                # attributes and function arguments) had RIs violated after function return.
+                # This does not check mutations in globals--as the set may potentially be large
+                # and likely has mostly unaffiliated values--or the mutation of the attributes of
+                # attributes/args (arg1.attribute.attribute) which may be infinitely recursive.
+                mutable_instances = _get_same_typed_instances(instance, args, kwargs)
+                for mutable_instance in mutable_instances:
+                    instances_klass = type(mutable_instance)
+                    instance_klass_module_dict = _get_module(instances_klass).__dict__
+                    _check_invariants(mutable_instance, instances_klass, instance_klass_module_dict)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
             return r
 
     return wrapper(wrapped)
+
+
+def _get_same_typed_instances(instance: Any, args: list, kwargs: dict) -> list:
+    """Return the instances in instance's attributes, args, and kwargs, whose type
+    matches the type of instance hence may have been mutated during a method call.
+    """
+    attributes = set(instance.__dict__.get('__sibling_attributes__', {}).values())
+    for arg in args:
+        if isinstance(instance, type(arg)) and arg not in attributes:
+            attributes.add(arg)
+    for _name, arg in kwargs.items():
+        if isinstance(instance, type(arg)) and arg not in attributes:
+            attributes.add(arg)
+    return list(attributes)
 
 
 def _instance_init_in_callstack(instance: Any) -> bool:

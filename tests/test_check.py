@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 from os import path, remove
+from subprocess import Popen
 
 import pytest
 
@@ -313,7 +314,7 @@ if __name__ == "__main__":
         file.write("\n")
 
 
-def read_nonblocking(process, timeout) -> list[str]:
+def read_nonblocking(process: Popen[str], timeout: int) -> list[str]:
     """Reads output from process without blocking until timeout or termination condition."""
     lines = []
     start_time = time.time()

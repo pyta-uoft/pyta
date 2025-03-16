@@ -60,6 +60,10 @@ class FileChangeHandler(FileSystemEventHandler):
         self.linter.generate_reports()
         upload_linter_results(self.linter, self.current_reporter, self.f_paths, self.local_config)
 
+    def on_close(self) -> None:
+        """Closes the current reporter's output stream"""
+        self.current_reporter.on_close(self.linter.stats, None)
+
 
 def watch_files(
     file_paths: set,
@@ -93,6 +97,7 @@ def watch_files(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
+        event_handler.on_close()
         observer.stop()
 
     observer.join()

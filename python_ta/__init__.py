@@ -182,7 +182,6 @@ def _check(
                     current_reporter=current_reporter,
                     f_paths=f_paths,
                 )
-
         return current_reporter
     except Exception as e:
         logging.error(

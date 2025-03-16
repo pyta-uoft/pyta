@@ -86,7 +86,7 @@ def check_file(
         prev_should_close_out = current_reporter.should_close_out
         current_reporter = linter.reporter
         current_reporter.out = prev_output
-        current_reporter.should_close_out = prev_should_close_out
+        current_reporter.should_close_out = not linter.config.watch and prev_should_close_out
 
         # At this point, the only possible errors are those from parsing the config file
         # so print them, if there are any.

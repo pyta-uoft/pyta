@@ -82,26 +82,24 @@ def load_messages_config(path: str, default_path: str, use_pyta_error_messages: 
             logging.warning(f"Could not find messages config file at {str(Path(path).resolve())}.")
             merge_from = {}
 
-    # The TOML file has section headers, parse it to get rid of section headers
-    if merge_from != {} and "pylint" in list(merge_from.keys())[0]:
-        merge_from = _parse_config_with_section_headers(merge_from)
+    # Flatten the config dictionary to get rid of section headers (if any)
+    merge_from = flatten(merge_from)
 
     if not use_pyta_error_messages:
         return merge_from
 
     # Merge default pyta error messages into custom error messages
-    merge_into = _parse_config_with_section_headers(toml.load(default_path))
+    merge_into = flatten(toml.load(default_path))
     merge_into.update(merge_from)
     return merge_into
 
 
-def _parse_config_with_section_headers(config_dict: dict) -> dict:
-    """Given the dictionary representation of a message configuration file with section headers,
-    parse it such that all section headers are ignored.
-    """
-    final_dict = {}
-    for category in config_dict:
-        for checker in config_dict[category]:
-            for error_code in config_dict[category][checker]:
-                final_dict[error_code] = config_dict[category][checker][error_code]
-    return final_dict
+def flatten(config_dict: dict) -> dict:
+    """Given a nested dictionary, flatten it such that no values are themselves dictionaries."""
+    flat_dict = {}
+    for key, value in config_dict.items():
+        if isinstance(value, dict):
+            flat_dict.update(flatten(value))
+        else:
+            flat_dict[key] = value
+    return flat_dict

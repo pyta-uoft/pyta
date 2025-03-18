@@ -43,6 +43,7 @@ import pylint.config
 import pylint.lint
 import pylint.utils
 from astroid import MANAGER, modutils
+from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.utils.pragma_parser import OPTION_PO
 
@@ -157,11 +158,6 @@ def _check(
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
-    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-    use_pyta_error_messages = linter.config.use_pyta_error_messages
-    messages_config = load_messages_config(
-        messages_config_path, messages_config_default_path, use_pyta_error_messages
-    )
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -189,15 +185,6 @@ def _check(
                     file_linted=file_py,
                     load_default_config=load_default_config,
                 )
-
-                # Override error messages
-                for error_id, new_msg in messages_config.items():
-                    # Create new message definition object according to configured error messages
-                    message = linter.msgs_store.get_message_definitions(error_id)
-                    for message_definition in message:
-                        message_definition.msg = new_msg
-                        # Mutate the message definitions of the linter object
-                        linter.msgs_store.register_message(message_definition)
 
                 if autoformat:
                     run_autoformat(
@@ -427,6 +414,26 @@ def reset_linter(
         if isinstance(config, dict):
             for key in config:
                 linter.set_option(key, config[key])
+
+    # Override error messages
+    messages_config_path = linter.config.messages_config_path
+    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
+    use_pyta_error_messages = linter.config.use_pyta_error_messages
+    messages_config = load_messages_config(
+        messages_config_path, messages_config_default_path, use_pyta_error_messages
+    )
+    for error_id, new_msg in messages_config.items():
+        # Create new message definition object according to configured error messages
+        try:
+            message = linter.msgs_store.get_message_definitions(error_id)
+        except UnknownMessageError:
+            logging.warning(f"{error_id} is not a valid error id.")
+            continue
+
+        for message_definition in message:
+            message_definition.msg = new_msg
+            # Mutate the message definitions of the linter object
+            linter.msgs_store.register_message(message_definition)
 
     return linter
 

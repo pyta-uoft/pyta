@@ -227,7 +227,7 @@ Note that the `show-error-end` flag is always passed into mypy, so it does not n
 ## Overriding error messages
 
 All error messages from either pylint or PythonTA checkers can be overridden.
-Custom messages are saved in a [TOML file](https://toml.io/en/), and any section headers within the TOML file will be ignored.
+Custom messages are saved in a [TOML file](https://toml.io/en/).
 
 For example, we can override the error message for `E0111` as follows:
 
@@ -238,4 +238,5 @@ E0111 = "reversed() can only be called on instances of sequence types like str, 
 _Notes_:
 
 1. View the [default PythonTA message configuration](https://github.com/pyta-uoft/pyta/blob/master/python_ta/config/messages_config.toml) for examples of overriding messages.
-2. Custom message must use the same string conversion specifiers (e.g., `%s`) as the original message. See the [pylint documentation](https://pylint.readthedocs.io/en/latest/user_guide/messages/messages_overview.html) for the original message format.
+2. Each custom message must use the same string conversion specifiers (e.g., `%s`) as the original message. See the [pylint documentation](https://pylint.readthedocs.io/en/latest/user_guide/messages/messages_overview.html) for the original message format.
+3. Any section headers within the TOML file will be ignored.

@@ -82,18 +82,24 @@ def load_messages_config(path: str, default_path: str, use_pyta_error_messages: 
             logging.warning(f"Could not find messages config file at {str(Path(path).resolve())}.")
             merge_from = {}
 
+    # Flatten the config dictionary to get rid of section headers (if any)
+    merge_from = flatten(merge_from)
+
     if not use_pyta_error_messages:
         return merge_from
 
-    merge_into = toml.load(default_path)
-    for category in merge_from:
-        if category not in merge_into:
-            merge_into[category] = {}
-        for checker in merge_from[category]:
-            if checker not in merge_into[category]:
-                merge_into[category][checker] = {}
-            for error_code in merge_from[category][checker]:
-                merge_into[category][checker][error_code] = merge_from[category][checker][
-                    error_code
-                ]
+    # Merge default pyta error messages into custom error messages
+    merge_into = flatten(toml.load(default_path))
+    merge_into.update(merge_from)
     return merge_into
+
+
+def flatten(config_dict: dict) -> dict:
+    """Given a nested dictionary, flatten it such that no values are themselves dictionaries."""
+    flat_dict = {}
+    for key, value in config_dict.items():
+        if isinstance(value, dict):
+            flat_dict.update(flatten(value))
+        else:
+            flat_dict[key] = value
+    return flat_dict

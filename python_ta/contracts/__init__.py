@@ -445,7 +445,11 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
                 # across the function call.
                 mutated_instances = getattr(instance_klass, "__mutated_instances__", [])
                 for mutated_instance in mutated_instances:
-                    _check_invariants(mutated_instance, klass, klass_mod.__dict__)
+                    # Mutated instances may be of parent class types so the invariants to check should also be
+                    # for the parent class and not the child class.
+                    mutated_instance_klass = type(mutated_instance)
+                    mutated_instance_klass_mod = _get_module(mutated_instance_klass)
+                    _check_invariants(mutated_instance, mutated_instance_klass, mutated_instance_klass_mod.__dict__)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:

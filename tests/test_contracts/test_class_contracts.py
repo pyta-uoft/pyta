@@ -209,6 +209,7 @@ def test_change_name_of_parent_invalid_in_method(person, child) -> None:
     Call a method that changes name of an instance of a parent class to something invalid but
     back to something valid.
     Expects normal behavior.
+    This will also check that the child type's RIs are not being enforced on the mutated parent instance.
     """
     child.change_someones_name(person, "Davi")
     assert person.name == "Davi"

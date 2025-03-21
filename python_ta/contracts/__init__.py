@@ -213,9 +213,7 @@ def add_class_invariants(klass: type) -> None:
         caller_self = frame_locals.get("self")
         if not isinstance(caller_self, type(self)):
             # Only validating if the attribute is not being set in a instance/class method
-            # AND self is an instance of caller_self's type -- aka caller_self is equal to
-            # self, caller_self is another instance of the same class as self,
-            # or self is an instance of caller_self's parent class.
+            # AND caller_self is an instance of self's type
             if klass_mod is not None:
                 try:
                     _check_invariants(self, klass, klass_mod.__dict__)
@@ -225,12 +223,14 @@ def add_class_invariants(klass: type) -> None:
                     else:
                         super(klass, self).__delattr__(name)
                     raise AssertionError(str(e)) from None
-        else:
+        elif caller_self is not self:
+            # Keep track of mutations to instances that are of the same type as caller_self (and are also not `self`)
+            # to enforce RIs on them only after the caller function returns.
             caller_klass = type(caller_self)
-            if "__mutated_instances__" in caller_klass.__dict__:
-                mutable_instances = caller_klass.__dict__["__mutated_instances__"]
-                if self not in mutable_instances:
-                    mutable_instances.append(self)
+            if hasattr(caller_klass, "__mutated_instances__"):
+                mutated_instances = getattr(caller_klass, "__mutated_instances__")
+                if self not in mutated_instances:
+                    mutated_instances.append(self)
 
     for attr, value in klass.__dict__.items():
         if inspect.isroutine(value):
@@ -427,7 +427,7 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
         # Store and restore existing mutated instance lists in case the instance method
         # executes another instance method.
         instance_klass = type(instance)
-        mutated_instances_to_restore = []
+        mutated_instances_to_restore = None
         if hasattr(instance_klass, "__mutated_instances__"):
             mutated_instances_to_restore = getattr(instance_klass, "__mutated_instances__")
         setattr(instance_klass, "__mutated_instances__", [])
@@ -444,14 +444,17 @@ def _instance_method_wrapper(wrapped: Callable, klass: type) -> Callable:
                 # Additionally check RI violations on PyTA-decorated instances that were mutated
                 # across the function call.
                 mutated_instances = getattr(instance_klass, "__mutated_instances__", [])
-                for mutable_instance in mutated_instances:
-                    _check_invariants(mutable_instance, klass, klass_mod.__dict__)
+                for mutated_instance in mutated_instances:
+                    _check_invariants(mutated_instance, klass, klass_mod.__dict__)
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None
         else:
             return r
         finally:
-            setattr(instance_klass, "__mutated_instances__", mutated_instances_to_restore)
+            if mutated_instances_to_restore is None:
+                delattr(instance_klass, "__mutated_instances__")
+            else:
+                setattr(instance_klass, "__mutated_instances__", mutated_instances_to_restore)
 
     return wrapper(wrapped)
 

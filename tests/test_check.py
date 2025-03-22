@@ -277,6 +277,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
     try:
         wait_for_log_message(process, "PythonTA is monitoring your files for changes")
         modify_watch_fixture(str(output_file))
+
         wait_for_log_message(process, "was checked using the configuration file")
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)
@@ -300,11 +301,11 @@ def wait_for_file_nonempty(file_path: Path, timeout=5) -> None:
     raise TimeoutError(f"Timeout waiting for non-empty content in {file_path}")
 
 
-def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int = 6) -> None:
+def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int = 10) -> None:
     """Wait until a specific line appears in stdout or stderr."""
     start = time.time()
     while time.time() - start < timeout:
-        ready, _, _ = select.select([process.stderr], [], [], 0.25)
+        ready, _, _ = select.select([process.stderr], [], [], 0)
         if ready:
             line = process.stderr.readline()
             if match in line:

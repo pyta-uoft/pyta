@@ -308,6 +308,7 @@ def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int = 1
         ready, _, _ = select.select([process.stderr], [], [], 0)
         if ready:
             line = process.stderr.readline()
+            print(f"[LOGLINE] {line.strip()}")
             if match in line:
                 return
     raise TimeoutError(f"Timeout waiting for log line containing: '{match}'")

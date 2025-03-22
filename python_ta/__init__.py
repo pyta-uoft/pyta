@@ -29,6 +29,7 @@ except AttributeError:
 
 
 import logging
+import tokenize
 import webbrowser
 from typing import IO, Any, Optional, Union
 

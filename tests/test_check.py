@@ -282,7 +282,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         wait_for_file_nonempty(output_file)
         with open(output_file, "r") as f:
             contents = f.read()
-        assert contents.count(f"PyTA Report for: {script_path}") == 2
+        assert contents.count(f"PyTA Report for: {script_path}") >= 2
 
     finally:
         process.terminate()

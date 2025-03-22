@@ -275,9 +275,9 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         text=True,
     )
     try:
-        time.sleep(1)
+        time.sleep(2)
         modify_watch_fixture(str(output_file))
-        time.sleep(1)
+        time.sleep(2)
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)
         with open(output_file, "r") as f:

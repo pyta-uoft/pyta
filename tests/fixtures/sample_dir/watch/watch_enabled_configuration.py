@@ -11,3 +11,4 @@ if __name__ == "__main__":
         "output-format": "python_ta.reporters.PlainReporter",
         "watch": True
     })
+

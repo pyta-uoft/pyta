@@ -62,6 +62,7 @@ class FileChangeHandler(FileSystemEventHandler):
 
     def on_close(self) -> None:
         """Closes the current reporter's output stream"""
+        self.current_reporter.should_close_out = True
         self.current_reporter.on_close(self.linter.stats, None)
 
 

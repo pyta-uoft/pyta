@@ -14,6 +14,7 @@ import pylint.config
 import pylint.lint
 import pylint.utils
 from astroid import MANAGER, modutils
+from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.reporters import BaseReporter, MultiReporter
 from pylint.utils.pragma_parser import OPTION_PO
@@ -44,17 +45,10 @@ def setup_linter(
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
-    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
-    use_pyta_error_messages = linter.config.use_pyta_error_messages
-    messages_config = load_messages_config(
-        messages_config_path, messages_config_default_path, use_pyta_error_messages
-    )
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(
-            messages_config, linter.config.z3
-        )  # Monkeypatch pylint (override certain methods)
+        patch_all(linter.config.z3)
         PYLINT_PATCHED = True
     return linter, current_reporter
 
@@ -301,6 +295,26 @@ def reset_linter(
         if isinstance(config, dict):
             for key in config:
                 linter.set_option(key, config[key])
+
+        # Override error messages
+    messages_config_path = linter.config.messages_config_path
+    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
+    use_pyta_error_messages = linter.config.use_pyta_error_messages
+    messages_config = load_messages_config(
+        messages_config_path, messages_config_default_path, use_pyta_error_messages
+    )
+    for error_id, new_msg in messages_config.items():
+        # Create new message definition object according to configured error messages
+        try:
+            message = linter.msgs_store.get_message_definitions(error_id)
+        except UnknownMessageError:
+            logging.warning(f"{error_id} is not a valid error id.")
+            continue
+
+        for message_definition in message:
+            message_definition.msg = new_msg
+            # Mutate the message definitions of the linter object
+            linter.msgs_store.register_message(message_definition)
 
     return linter
 

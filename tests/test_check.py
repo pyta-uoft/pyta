@@ -5,10 +5,12 @@ installed `python_ta` package.
 import io
 import os
 import select
+import signal
 import subprocess
 import sys
 import time
 from os import path, remove
+from pathlib import Path
 from subprocess import Popen
 
 import pytest
@@ -238,7 +240,7 @@ def test_check_watch_enabled() -> None:
     try:
         lines = read_nonblocking(process, 6)
         assert any(
-            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
@@ -247,7 +249,7 @@ def test_check_watch_enabled() -> None:
         lines = read_nonblocking(process, 6)
 
         assert not any(
-            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
@@ -258,60 +260,86 @@ def test_check_watch_enabled() -> None:
         reset_watch_fixture()
 
 
-def reset_watch_fixture() -> None:
+def test_watch_output_file_appends(tmp_path: Path) -> None:
+    """Test that using output=<file> with watch=True appends reports instead of overwriting."""
+    output_file = tmp_path / "report_output.txt"
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+
+    reset_watch_fixture(str(output_file))
+    process = subprocess.Popen(
+        [sys.executable, "-u", script_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        time.sleep(1)
+        modify_watch_fixture(str(output_file))
+        time.sleep(1)
+        os.kill(process.pid, signal.SIGINT)
+        wait_for_file_nonempty(output_file)
+        with open(output_file, "r") as f:
+            contents = f.read()
+        assert contents.count(f"PyTA Report for: {script_path}") == 2
+
+    finally:
+        process.terminate()
+        process.wait()
+        reset_watch_fixture()
+
+
+def wait_for_file_nonempty(file_path: Path, timeout=5) -> None:
+    """Wait until the file exists and contains any content (non-empty)."""
+    start = time.time()
+    while time.time() - start < timeout:
+        if file_path.exists() and file_path.stat().st_size > 0:
+            return
+        time.sleep(0.25)
+    raise TimeoutError(f"Timeout waiting for non-empty content in {file_path}")
+
+
+def reset_watch_fixture(output_path: str = None) -> None:
     """Reset the contents of watch_enabled_configuration.py to its original state."""
-    original_content = '''"""This script serves as the entry point for an integration test of the _check watch mode.
-It is invoked by the test `tests/test_reporters/test_html_server::test_open_html_in_browser_watch()`
-to verify that the correct report is generated through multiple file changes."""
-
-import python_ta
-
-
+    output_arg = f', output=r"{output_path}"' if output_path else ""
+    original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
+import python_ta\n
 def blank_function() -> int:
-    """blank"""
     count: int = "ten"
-    return count
-
-
+    return count\n
 if __name__ == "__main__":
-    python_ta.check_all(config={
+    python_ta.check_all(config={{
         "output-format": "python_ta.reporters.PlainReporter",
-        "watch": True,
-    })'''
+        "watch": True
+    }}{output_arg})
+'''
     script_path = os.path.normpath(
         os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
     )
     with open(script_path, "w") as file:
         file.write(original_content)
-        file.write("\n")
 
 
-def modify_watch_fixture() -> None:
+def modify_watch_fixture(output_path: str = None) -> None:
     """Modify the contents of watch_enabled_configuration.py to fix the type error."""
-    modified_content = '''"""This script serves as the entry point for an integration test of the _check watch mode.
-It is invoked by the test `tests/test_reporters/test_html_server::test_open_html_in_browser_watch()`
-to verify that the correct report is generated through multiple file changes."""
-
-import python_ta
-
-
+    output_arg = f', output=r"{output_path}"' if output_path else ""
+    modified_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
+import python_ta\n
 def blank_function() -> int:
-    """blank"""
-    count: int = 10  # Fixed type issue
-    return count
-
-
+    count: int = 10
+    return count\n
 if __name__ == "__main__":
-    python_ta.check_all(config={
+    python_ta.check_all(config={{
         "output-format": "python_ta.reporters.PlainReporter",
-        "watch": True,
-    })'''
+        "watch": True
+    }}{output_arg})
+'''
     script_path = os.path.normpath(
         os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
     )
     with open(script_path, "w") as file:
         file.write(modified_content)
-        file.write("\n")
 
 
 def read_nonblocking(process: Popen[str], timeout: int) -> list[str]:

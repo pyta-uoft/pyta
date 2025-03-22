@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 import pytest
 from nested_preconditions_example import Student
@@ -28,11 +28,13 @@ class Person:
     age: int
     name: str
     fav_foods: List[str]
+    _other: Optional[Person]
 
-    def __init__(self, name, age, fav_food):
+    def __init__(self, name, age, fav_food, other: Optional[Person] = None):
         self.name = name
         self.age = age
         self.fav_foods = fav_food
+        self._other = other
 
     def change_name(self, name: str) -> str:
         self.name = name
@@ -50,6 +52,20 @@ class Person:
         self.age = age
         return age
 
+    def decrease_and_increase_others_age(self, other: Person, age: int) -> int:
+        """Temporary violates RI for another instance of the same class."""
+        other.age = -10
+        other.age = age
+        return age
+
+    def decrease_others_age(self, other: Person) -> None:
+        """Violate the RI of an argument"""
+        other.age = -10
+
+    def decrease_attr_others_age(self) -> None:
+        """Violate the RI of an instance attribute"""
+        self._other.age = -10
+
     def add_fav_food(self, food):
         self.fav_foods.append(food)
 
@@ -60,6 +76,27 @@ class Person:
         Postcondition: len($return_value) > 20
         """
         return f"{greeting} {self.name}!"
+
+
+class Child(Person):
+    """Represent a child.
+
+    Representation Invariants:
+    - self.age < 10
+    """
+
+    def change_someones_name(self, other: Person, name: str) -> None:
+        """Temporarily violate an RI of an instance of a parent class
+
+        Precondition:
+        - len(name) > 0
+        """
+        other.name = ""  # Violates the length RI of Person.name
+        other.name = name  # Resolves the RI violation
+
+    def remove_someones_name(self, other: Person) -> None:
+        """Violate an RI of an instance of a parent class"""
+        other.name = ""
 
 
 def change_age(person, new_age):
@@ -110,6 +147,16 @@ def person():
     return Person("David", 31, ["Sushi"])
 
 
+@pytest.fixture
+def person_2(person):
+    return Person("Liu", 31, ["Sushi"], person)
+
+
+@pytest.fixture
+def child():
+    return Child("JackJack", 1, ["Cookies"])
+
+
 def test_change_age_invalid_over(person) -> None:
     """
     Change the age to larger than 150. Expect an exception.
@@ -145,6 +192,60 @@ def test_change_age_invalid_in_method(person) -> None:
     """
     age = person.decrease_and_increase_age(10)
     assert age == 10
+
+
+def test_change_age_of_other_invalid_in_method(person, person_2) -> None:
+    """
+    Call a method that changes age of another instance of the same class to something invalid but
+    back to something valid.
+    Expects normal behavior.
+    """
+    age = person.decrease_and_increase_others_age(person_2, 10)
+    assert age == 10
+
+
+def test_change_name_of_parent_invalid_in_method(person, child) -> None:
+    """
+    Call a method that changes name of an instance of a parent class to something invalid but
+    back to something valid.
+    Expects normal behavior.
+    This will also check that the child type's RIs are not being enforced on the mutated parent instance.
+    """
+    child.change_someones_name(person, "Davi")
+    assert person.name == "Davi"
+
+
+def test_violate_ri_in_other_instance(person, person_2) -> None:
+    """
+    Call a method that changes age of another instance of the same class to something invalid.
+    Expects the RI to be violated hence an AssertionError to be raised.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        person.decrease_others_age(person_2)
+    msg = str(excinfo.value)
+    assert "self.age > 0" in msg
+
+
+def test_violate_ri_in_attribute_instance(person_2) -> None:
+    """
+    Call a method that changes age of an instance attribute of the same class to something invalid.
+    Expects the RI to be violated hence an AssertionError to be raised.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        person_2.decrease_attr_others_age()
+    msg = str(excinfo.value)
+    assert "self.age > 0" in msg
+
+
+def test_violate_ri_in_parent_instance(person, child) -> None:
+    """
+    Call a method that changes name of an instance of a parent class to something invalid.
+    Expects the RI to be violated hence an AssertionError to be raised.
+    """
+    with pytest.raises(AssertionError) as excinfo:
+        child.remove_someones_name(person)
+    msg = str(excinfo.value)
+    assert "len(self.name) > 0" in msg
 
 
 def test_same_method_names(person) -> None:

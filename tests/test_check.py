@@ -240,7 +240,7 @@ def test_check_watch_enabled() -> None:
     try:
         lines = read_nonblocking(process, 6)
         assert any(
-            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
@@ -249,7 +249,7 @@ def test_check_watch_enabled() -> None:
         lines = read_nonblocking(process, 6)
 
         assert not any(
-            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
@@ -277,7 +277,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
     try:
         wait_for_log_message(process, "PythonTA is monitoring your files for changes")
         modify_watch_fixture(str(output_file))
-        wait_for_log_message(process, "File modified:")
+        wait_for_log_message(process, "was checked using the configuration file")
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)
         with open(output_file, "r") as f:
@@ -304,12 +304,11 @@ def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int = 6
     """Wait until a specific line appears in stdout or stderr."""
     start = time.time()
     while time.time() - start < timeout:
-        for stream in (process.stdout, process.stderr):
-            ready, _, _ = select.select([stream], [], [], 0.25)
-            if ready:
-                line = stream.readline()
-                if match in line:
-                    return
+        ready, _, _ = select.select([process.stderr], [], [], 0.25)
+        if ready:
+            line = process.stderr.readline()
+            if match in line:
+                return
     raise TimeoutError(f"Timeout waiting for log line containing: '{match}'")
 
 
@@ -317,7 +316,11 @@ def reset_watch_fixture(output_path: str = None) -> None:
     """Reset the contents of watch_enabled_configuration.py to its original state."""
     output_arg = f', output="{output_path}"' if output_path else ""
     original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
+import logging
 import python_ta
+
+# Ensure INFO logs are shown in stderr
+logging.basicConfig(level=logging.DEBUG)
 
 def blank_function() -> int:
     count: int = "ten"
@@ -334,14 +337,17 @@ if __name__ == "__main__":
     )
     with open(script_path, "w") as file:
         file.write(original_content)
-        file.write("\n")
 
 
 def modify_watch_fixture(output_path: str = None) -> None:
     """Modify the contents of watch_enabled_configuration.py to fix the type error."""
     output_arg = f', output="{output_path}"' if output_path else ""
     original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
+import logging
 import python_ta
+
+# Ensure INFO logs are shown in stderr
+logging.basicConfig(level=logging.DEBUG)
 
 def blank_function() -> int:
     count: int = 10

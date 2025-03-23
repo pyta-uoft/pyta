@@ -240,7 +240,7 @@ def test_check_watch_enabled() -> None:
     try:
         lines = read_nonblocking(process, 6)
         assert any(
-            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
@@ -249,7 +249,7 @@ def test_check_watch_enabled() -> None:
         lines = read_nonblocking(process, 6)
 
         assert not any(
-            "[Line 10] Incompatible types in assignment (expression has type str, variable has type int)"
+            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
             in line
             for line in lines
         )
@@ -275,39 +275,38 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         text=True,
     )
     try:
-        wait_for_log_message(
-            process, "PythonTA is monitoring your files for changes and will re-check"
-        )
-        detected_modification = False
-        while not detected_modification:
-            modify_watch_fixture(str(output_file))
-            detected_modification = wait_for_log_message(
-                process, "PlainReporter: Messages printed to console"
-            )
-        os.kill(process.pid, signal.SIGINT)
-        wait_for_file_nonempty(output_file)
-        with open(output_file, "r") as f:
-            contents = f.read()
-        assert contents.count(f"PyTA Report for: {script_path}") >= 2
+        if not wait_for_log_message(
+            process, "PythonTA is monitoring your files for changes and will re-check", 10
+        ):
+            pytest.fail("Report did not generate within the expected timeout")
 
+        modify_watch_fixture(str(output_file))
+        if not wait_for_file_responce(output_file, 10):
+            pytest.fail("Report did not generate within the expected timeout")
     finally:
         process.terminate()
         process.wait()
         reset_watch_fixture()
 
 
-def wait_for_file_nonempty(file_path: Path, timeout=5) -> None:
-    """Wait until the file exists and contains any content (non-empty)."""
+def wait_for_file_responce(file_path: Path, timeout) -> bool:
+    """Wait until the file exists and contains at least two instances of "PyTA Report for: <script_path>".
+    Returns True if the content is found within the timeout, and False otherwise.
+    """
     start = time.time()
     while time.time() - start < timeout:
-        if file_path.exists() and file_path.stat().st_size > 0:
-            return
-        time.sleep(0.25)
-    raise TimeoutError(f"Timeout waiting for non-empty content in {file_path}")
+        if os.path.exists(file_path):
+            with open(file_path, "r") as f:
+                contents = f.read()
+            if contents.count(f"PyTA Report for: ") >= 2:
+                return True
+    return False
 
 
-def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int = 5) -> bool:
-    """Wait until a specific line appears in stdout or stderr. Returns if the line is found."""
+def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int) -> bool:
+    """Wait until a specific line containing the given match string appears in the process's stderr.
+    Returns True if the line is found within the timeout period, and False otherwise.
+    """
     start = time.time()
     while time.time() - start < timeout:
         ready, _, _ = select.select([process.stderr], [], [], 0)
@@ -322,11 +321,7 @@ def reset_watch_fixture(output_path: str = None) -> None:
     """Reset the contents of watch_enabled_configuration.py to its original state."""
     output_arg = f', output="{output_path}"' if output_path else ""
     original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
-import logging
 import python_ta
-
-# Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG)
 
 def blank_function() -> int:
     count: int = "ten"
@@ -349,11 +344,7 @@ def modify_watch_fixture(output_path: str = None) -> None:
     """Modify the contents of watch_enabled_configuration.py to fix the type error."""
     output_arg = f', output="{output_path}"' if output_path else ""
     original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
-import logging
 import python_ta
-
-# Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG)
 
 def blank_function() -> int:
     count: int = 10

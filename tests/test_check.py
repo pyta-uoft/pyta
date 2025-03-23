@@ -275,9 +275,8 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         text=True,
     )
     try:
-
-        match = "PythonTA is monitoring your files for changes"
         start = time.time()
+        match = "PythonTA is monitoring your files for changes"
         while time.time() - start < 6:
             ready, _, _ = select.select([process.stderr], [], [], 0)
             if ready:
@@ -286,10 +285,12 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
                 if match in line:
                     break
 
+        modify_watch_fixture(str(output_file))
+
         print("MODIFIED FILE!!!")
 
-        match = "was checked using the configuration file"
         start = time.time()
+        match = "was checked using the configuration file"
         while time.time() - start < 6:
             ready, _, _ = select.select([process.stderr], [], [], 0)
             if ready:

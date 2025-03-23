@@ -285,7 +285,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
                 if match in line:
                     break
 
-        modify_watch_fixture(str(output_file))
+        modify_watch_fixture()
 
         print("MODIFIED FILE!!!")
 

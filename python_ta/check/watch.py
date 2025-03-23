@@ -77,7 +77,6 @@ def watch_files(
     f_paths: list[str],
 ) -> None:
     """Watch a list of files for modifications and trigger a callback when changes occur."""
-    logging.info("PythonTA is monitoring your files for changes and will re-check after every save")
     directories_to_watch = {os.path.dirname(file) for file in file_paths}
     event_handler = FileChangeHandler(
         files_to_watch=file_paths,
@@ -92,6 +91,7 @@ def watch_files(
     observer = Observer()
     for directory in directories_to_watch:
         observer.schedule(event_handler, path=directory, recursive=False)
+    logging.info("PythonTA is monitoring your files for changes and will re-check after every save")
     observer.start()
 
     try:

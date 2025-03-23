@@ -275,30 +275,13 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         text=True,
     )
     try:
-        start = time.time()
-        match = "PythonTA is monitoring your files for changes"
-        while time.time() - start < 6:
-            ready, _, _ = select.select([process.stderr], [], [], 0)
-            if ready:
-                line = process.stderr.readline()
-                print(f"[LOGMESSAGE] {line}")
-                if match in line:
-                    break
+        wait_for_log_message(process, "PythonTA is monitoring your files for changes")
 
-        modify_watch_fixture()
+        modify_watch_fixture(str(output_file))
 
         print("MODIFIED FILE!!!")
 
-        start = time.time()
-        match = "was checked using the configuration file"
-        while time.time() - start < 6:
-            ready, _, _ = select.select([process.stderr], [], [], 0)
-            if ready:
-                line = process.stderr.readline()
-                print(f"[LOGMESSAGE] {line}")
-                if match in line:
-                    break
-
+        wait_for_log_message(process, "was checked using the configuration file")
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)
         with open(output_file, "r") as f:
@@ -342,7 +325,7 @@ import logging
 import python_ta
 
 # Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG, force=True)
+logging.basicConfig(level=logging.DEBUG)
 
 def blank_function() -> int:
     count: int = "ten"
@@ -369,7 +352,7 @@ import logging
 import python_ta
 
 # Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG, force=True)
+logging.basicConfig(level=logging.DEBUG)
 
 def blank_function() -> int:
     count: int = 10

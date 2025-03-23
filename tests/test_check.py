@@ -284,7 +284,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
                 line = process.stderr.readline()
                 print(f"[LOGMESSAGE] {line}")
                 if match in line:
-                    return
+                    break
 
         print("MODIFIED FILE!!!")
 
@@ -296,7 +296,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
                 line = process.stderr.readline()
                 print(f"[LOGMESSAGE] {line}")
                 if match in line:
-                    return
+                    break
 
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)

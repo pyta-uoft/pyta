@@ -268,14 +268,17 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
     )
 
     reset_watch_fixture(str(output_file))
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
     process = subprocess.Popen(
         [sys.executable, "-u", script_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        env=env,
     )
     try:
-        time.sleep(3)
+        wait_for_log_message(process, "PythonTA is monitoring your files for changes")
         modify_watch_fixture(str(output_file))
         print("MODIFIED FILE!!!")
         wait_for_log_message(process, "was checked using the configuration file")
@@ -322,7 +325,7 @@ import logging
 import python_ta
 
 # Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, force=True)
 
 def blank_function() -> int:
     count: int = "ten"
@@ -349,7 +352,7 @@ import logging
 import python_ta
 
 # Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, force=True)
 
 def blank_function() -> int:
     count: int = 10

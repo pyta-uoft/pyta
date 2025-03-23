@@ -4,7 +4,7 @@ import logging
 import python_ta
 
 # Ensure INFO logs are shown in stderr
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, force=True)
 
 def blank_function() -> int:
     count: int = "ten"

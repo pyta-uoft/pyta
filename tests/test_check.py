@@ -280,9 +280,13 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         ):
             pytest.fail("Report did not generate within the expected timeout")
 
-        modify_watch_fixture(str(output_file))
-        if not wait_for_file_responce(output_file, 10):
-            pytest.fail("Report did not generate within the expected timeout")
+        detectedModification = False
+        start = time.time()
+        while not detectedModification and time.time() - start < 10:
+            modify_watch_fixture(str(output_file))
+            detectedModification = wait_for_file_responce(output_file, 2)
+
+        assert detectedModification, "Report did not generate within the expected timeout"
     finally:
         process.terminate()
         process.wait()

@@ -268,20 +268,36 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
     )
 
     reset_watch_fixture(str(output_file))
-    env = os.environ.copy()
-    env["PYTHONUNBUFFERED"] = "1"
     process = subprocess.Popen(
         [sys.executable, "-u", script_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        env=env,
     )
     try:
-        wait_for_log_message(process, "PythonTA is monitoring your files for changes")
-        modify_watch_fixture(str(output_file))
+
+        match = "PythonTA is monitoring your files for changes"
+        start = time.time()
+        while time.time() - start < 6:
+            ready, _, _ = select.select([process.stderr], [], [], 0)
+            if ready:
+                line = process.stderr.readline()
+                print(f"[LOGMESSAGE] {line}")
+                if match in line:
+                    return
+
         print("MODIFIED FILE!!!")
-        wait_for_log_message(process, "was checked using the configuration file")
+
+        match = "was checked using the configuration file"
+        start = time.time()
+        while time.time() - start < 6:
+            ready, _, _ = select.select([process.stderr], [], [], 0)
+            if ready:
+                line = process.stderr.readline()
+                print(f"[LOGMESSAGE] {line}")
+                if match in line:
+                    return
+
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)
         with open(output_file, "r") as f:

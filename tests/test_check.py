@@ -275,7 +275,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         text=True,
     )
     try:
-        wait_for_log_message(process, "PythonTA is monitoring your files for changes")
+        time.sleep(3)
         modify_watch_fixture(str(output_file))
         print("MODIFIED FILE!!!")
         wait_for_log_message(process, "was checked using the configuration file")

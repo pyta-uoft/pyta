@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from .core import NewMessage, PythonTaReporter
 from .node_printers import LineType
 
@@ -46,6 +48,7 @@ class PlainReporter(PythonTaReporter):
                 result += self.no_err_message
 
         self.writeln(result)
+        logging.debug("PlainReporter: Messages printed to console")
 
     def _colour_messages_by_type(self, messages: dict[str, list[NewMessage]]) -> str:
         """

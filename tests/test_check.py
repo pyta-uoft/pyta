@@ -280,7 +280,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         while not detected_modification:
             modify_watch_fixture(str(output_file))
             detected_modification = wait_for_log_message(
-                process, "was checked using the messages-config file:"
+                process, "PlainReporter: Messages printed to console"
             )
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)

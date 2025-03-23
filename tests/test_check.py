@@ -276,12 +276,10 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
     )
     try:
         wait_for_log_message(process, "PythonTA is monitoring your files for changes")
-
+        time.sleep(3)
         modify_watch_fixture(str(output_file))
-
-        print("MODIFIED FILE!!!")
-
         wait_for_log_message(process, "was checked using the configuration file")
+        time.sleep(3)
         os.kill(process.pid, signal.SIGINT)
         wait_for_file_nonempty(output_file)
         with open(output_file, "r") as f:
@@ -311,7 +309,6 @@ def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int = 6
         ready, _, _ = select.select([process.stderr], [], [], 0)
         if ready:
             line = process.stderr.readline()
-            print(f"[LOGMESSAGE] {line}")
             if match in line:
                 return
     raise TimeoutError(f"Timeout waiting for log line containing: '{match}'")

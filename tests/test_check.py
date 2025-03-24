@@ -284,7 +284,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         start = time.time()
         while not detectedModification and time.time() - start < 10:
             modify_watch_fixture(str(output_file))
-            detectedModification = wait_for_file_responce(output_file, 2)
+            detectedModification = wait_for_file_response(output_file, 2)
 
         assert detectedModification, "Report did not generate within the expected timeout"
     finally:
@@ -293,7 +293,7 @@ def test_watch_output_file_appends(tmp_path: Path) -> None:
         reset_watch_fixture()
 
 
-def wait_for_file_responce(file_path: Path, timeout) -> bool:
+def wait_for_file_response(file_path: Path, timeout) -> bool:
     """Wait until the file exists and contains at least two instances of "PyTA Report for: <script_path>".
     Returns True if the content is found within the timeout, and False otherwise.
     """

@@ -22,7 +22,6 @@ def test_watch_on_modified(mock_check_file: MagicMock, mock_upload: MagicMock) -
     handler = FileChangeHandler(
         files_to_watch={"/mock/path/to/file.py"},
         linter=mock_linter,
-        current_reporter=mock_reporter,
         local_config={},
         load_default_config=True,
         autoformat=None,
@@ -60,7 +59,6 @@ def test_on_modified_with_unwatched_file(
     handler = FileChangeHandler(
         files_to_watch={"/mock/path/to/file.py"},
         linter=mock_linter,
-        current_reporter=mock_reporter,
         local_config={},
         load_default_config=True,
         autoformat=None,

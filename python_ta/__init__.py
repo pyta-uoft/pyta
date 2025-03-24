@@ -179,7 +179,6 @@ def _check(
                     load_default_config=load_default_config,
                     autoformat=autoformat,
                     linter=linter,
-                    current_reporter=current_reporter,
                     f_paths=f_paths,
                 )
 

@@ -21,7 +21,6 @@ class FileChangeHandler(FileSystemEventHandler):
         self,
         files_to_watch: set,
         linter: PyLinter,
-        current_reporter: Union[BaseReporter, MultiReporter],
         local_config: Union[dict[str, Any], str],
         load_default_config: bool,
         autoformat: Optional[bool],
@@ -30,7 +29,6 @@ class FileChangeHandler(FileSystemEventHandler):
     ) -> None:
         self.files_to_watch = set(files_to_watch)
         self.linter = linter
-        self.current_reporter = current_reporter
         self.local_config = local_config
         self.load_default_config = load_default_config
         self.autoformat = autoformat
@@ -43,8 +41,10 @@ class FileChangeHandler(FileSystemEventHandler):
             return
 
         logging.info(f"File modified: {event.src_path}, re-running checks...")
-        if event.src_path in self.current_reporter.messages:
-            del self.current_reporter.messages[event.src_path]
+
+        current_reporter = self.linter.reporter
+        if event.src_path in current_reporter.messages:
+            del current_reporter.messages[event.src_path]
 
         _, self.linter = check_file(
             file_py=event.src_path,
@@ -52,18 +52,13 @@ class FileChangeHandler(FileSystemEventHandler):
             load_default_config=self.load_default_config,
             autoformat=self.autoformat,
             is_any_file_checked=True,
-            current_reporter=self.current_reporter,
+            current_reporter=current_reporter,
             f_paths=[],
         )
-        self.current_reporter = self.linter.reporter
-        self.current_reporter.print_messages(self.level)
+        current_reporter = self.linter.reporter
+        current_reporter.print_messages(self.level)
         self.linter.generate_reports()
-        upload_linter_results(self.linter, self.current_reporter, self.f_paths, self.local_config)
-
-    def on_close(self) -> None:
-        """Closes the current reporter's output stream"""
-        self.current_reporter.should_close_out = True
-        self.current_reporter.on_close(self.linter.stats, None)
+        upload_linter_results(self.linter, current_reporter, self.f_paths, self.local_config)
 
 
 def watch_files(
@@ -73,7 +68,6 @@ def watch_files(
     load_default_config: bool,
     autoformat: Optional[bool],
     linter: PyLinter,
-    current_reporter: Union[BaseReporter, MultiReporter],
     f_paths: list[str],
 ) -> None:
     """Watch a list of files for modifications and trigger a callback when changes occur."""
@@ -81,7 +75,6 @@ def watch_files(
     event_handler = FileChangeHandler(
         files_to_watch=file_paths,
         linter=linter,
-        current_reporter=current_reporter,
         local_config=local_config,
         load_default_config=load_default_config,
         autoformat=autoformat,
@@ -98,7 +91,8 @@ def watch_files(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        event_handler.on_close()
+        event_handler.linter.reporter.should_close_out = True
+        event_handler.linter.reporter.on_close(event_handler.linter.stats, None)
         observer.stop()
 
     observer.join()

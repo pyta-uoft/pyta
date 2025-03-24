@@ -9,4 +9,4 @@ use-pyta-error-messages = no
 # The type of reporter to use to display results. Available PyTA classes are
 # PlainReporter, ColorReporter, HTMLReporter, JSONReporter.
 # Replaces the pyta-reporter option.
-output-format = python_ta.reporters.PlainReporter
+output-format = pyta-plain

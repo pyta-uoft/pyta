@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 from io import StringIO
 from typing import Union
 
@@ -94,7 +95,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
     python_ta.check_all(
         module_name=get_file_paths(paths),
         config={
-            "output-format": "python_ta.reporters.JSONReporter",
+            "output-format": "pyta-json",
             "enable": ["C9960"],
             "z3": True,
         },
@@ -208,7 +209,7 @@ def test_c9104_module_name_violation() -> None:
     python_ta.check_all(
         module_name=module_name_violation,
         config={
-            "output-format": "python_ta.reporters.JSONReporter",
+            "output-format": "pyta-json",
         },
     )
 
@@ -227,6 +228,20 @@ def test_c9104_module_name_violation() -> None:
     ), f"Failed {module_name_violation}. File does not add expected message."
 
 
+def _strip_output_format(input_filename: str) -> str:
+    with open(input_filename, "r") as file:
+        lines = file.readlines()
+
+    lines = [line for line in lines if not re.match(r".*output-format.*", line)]
+
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", newline="") as temp_file:
+        temp_filename = temp_file.name
+
+        temp_file.writelines(lines)
+
+    return temp_filename
+
+
 def test_cyclic_import() -> None:
     """Test that examples/pylint/R0401_cyclic_import adds R0401 cyclic-import.
 
@@ -241,11 +256,13 @@ def test_cyclic_import() -> None:
     cyclic_import_helper = "examples/pylint/cyclic_import_helper.py"
     cyclic_import_file = "examples/pylint/r0401_cyclic_import.py"
 
+    rc_file = _strip_output_format("python_ta/config/.pylintrc")
+
     sys.stdout = StringIO()
     lint.Run(
         [
             "--reports=n",
-            "--rcfile=python_ta/config/.pylintrc",
+            f"--rcfile={rc_file}",
             "--output-format=json",
             cyclic_import_helper,
             cyclic_import_file,
@@ -254,6 +271,7 @@ def test_cyclic_import() -> None:
     )
     jsons_output = sys.stdout.getvalue()
     sys.stdout = sys.__stdout__
+    os.remove(rc_file)
 
     pylint_list_output = json.loads(jsons_output)
 

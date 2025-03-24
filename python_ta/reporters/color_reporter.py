@@ -8,7 +8,7 @@ from .plain_reporter import PlainReporter
 class ColorReporter(PlainReporter):
     """Colorized text reporter. Should only be used to print to stdout."""
 
-    name = "ColorReporter"
+    name = "pyta-color"
 
     _COLOURING = {
         "black": Fore.BLACK,
@@ -50,3 +50,10 @@ class ColorReporter(PlainReporter):
         space_count = len(text) - len(new_text)
         new_text = new_text.replace(" ", cls._SPACE)
         return (space_count * cls._SPACE) + colour + new_text + cls._COLOURING["reset"]
+
+
+from pylint.lint import PyLinter
+
+
+def register(linter: PyLinter):
+    linter.register_reporter(ColorReporter)

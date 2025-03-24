@@ -20,7 +20,7 @@ def test_check_log(caplog) -> None:
     caplog.set_level(logging.DEBUG)
     python_ta._check(
         module_name=os.path.join(os.path.dirname(__file__), "fixtures", "no_errors.py"),
-        local_config={"output-format": "python_ta.reporters.PlainReporter"},
+        local_config={"output-format": "pyta-plain"},
     )
     for i in range(2):
         assert caplog.records[i].levelname == "DEBUG"
@@ -31,7 +31,7 @@ def test_check_log(caplog) -> None:
 def test_check_exception_log(_, caplog) -> None:
     """Testing logging in _check function when exception is thrown"""
     try:
-        python_ta._check(local_config={"output-format": "python_ta.reporters.PlainReporter"})
+        python_ta._check(local_config={"output-format": "pyta-plain"})
     except Exception:
         expected_logs = [
             "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error).",

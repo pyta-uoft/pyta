@@ -13,7 +13,7 @@ The following configuration file can be used to configure PythonTA to set a maxi
 ```ini
 # config.ini
 [REPORTS]
-output-format = python_ta.reporters.PlainReporter
+output-format = pyta-plain
 
 [FORMAT]
 max-line-length = 120
@@ -29,7 +29,7 @@ The same configuration options may be passed directly to `python_ta.check_all` a
 ```python
 import python_ta
 python_ta.check_all("my_file.py", config={
-    "output-format": "python_ta.reporters.PlainReporter",
+    "output-format": "pyta-plain",
     "max-line-length": 120
 })
 ```
@@ -45,7 +45,7 @@ By default, PythonTA sets the following default values for Pylint's configuratio
 | max-line-length   | 100                          | 80                                      |
 | ignore-long-lines | `^\s*(# )?<?https?://\S+>?$` | `^\s*((# )?<?https?://\S+>?)\|(>>>.*)$` |
 | disable           | `()`                         | See below                               |
-| output-format     | text                         | `"python_ta.reporters.HTMLReporter"`    |
+| output-format     | text                         | `"pyta-html"`                           |
 
 You can disable this behaviour by passing `load_default_config=False` to `python_ta.check_all`.
 In this case, Pylint's default configuration will be used instead, though all custom PythonTA options described below will still retain their default values.
@@ -55,10 +55,10 @@ In this case, Pylint's default configuration will be used instead, though all cu
 PythonTA offers four different types of reporters used to display the results of its analysis.
 These may be set using the `output-format` configuration option.
 
-- `python_ta.reporters.PlainReporter`: outputs report in plain text
-- `python_ta.reporters.ColorReporter`: outputs a colourized report (can only be used in the terminal/Python shell)
-- `python_ta.reporters.JSONReporter`: outputs a JSON representation of the messages reported
-- `python_ta.reporters.HTMLReporter`: outputs report in a webpage
+- `pyta-plain`: outputs report in plain text
+- `pyta-color`: outputs a colourized report (can only be used in the terminal/Python shell)
+- `pyta-json`: outputs a JSON representation of the messages reported
+- `pyta-html`: outputs report in a webpage
 
 ### Disabled Pylint checks
 

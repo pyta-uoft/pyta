@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
+from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
@@ -19,7 +20,7 @@ class HTMLReporter(PythonTaReporter):
     By default, automatically opens the report in a web browser.
     """
 
-    name = "HTMLReporter"
+    name = "pyta-html"
 
     _COLOURING = {
         "black": '<span class="black">',
@@ -106,3 +107,7 @@ class HTMLReporter(PythonTaReporter):
             )
 
         return colour + new_text + cls._COLOURING["reset"]
+
+
+def register(linter: PyLinter):
+    linter.register_reporter(HTMLReporter)

@@ -13,7 +13,7 @@ class JSONReporter(PythonTaReporter):
     Based on Pylint's JSONReporter.
     """
 
-    name = "JSONReporter"
+    name = "pyta-json"
 
     OUTPUT_FILENAME = "pyta_report.json"
 
@@ -55,3 +55,10 @@ class JSONReporter(PythonTaReporter):
             msg_dict["number_of_occurrences"] = num_occurrences[msg_dict["msg_id"]]
 
         return output_lst
+
+
+from pylint.lint import PyLinter
+
+
+def register(linter: PyLinter):
+    linter.register_reporter(JSONReporter)

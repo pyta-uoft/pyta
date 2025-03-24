@@ -25,7 +25,7 @@ pyta-server-address = http://127.0.0.1:5000
 # The type of reporter to use to display results. Available PyTA classes are
 # PlainReporter, ColorReporter, HTMLReporter, JSONReporter.
 # Replaces the pyta-reporter option.
-output-format = python_ta.reporters.PlainReporter
+output-format = pyta-plain
 
 [ELIF]
 

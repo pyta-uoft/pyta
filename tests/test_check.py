@@ -16,7 +16,7 @@ def test_check_on_dir():
     reporter = python_ta.check_all(
         "tests/fixtures/sample_dir",
         config={
-            "output-format": "python_ta.reporters.JSONReporter",
+            "output-format": "pyta-json",
             "pyta-error-permission": "no",
             "pyta-file-permission": "no",
         },
@@ -47,7 +47,7 @@ def test_check_on_file():
         python_ta.check_all(
             item,
             config={
-                "output-format": "python_ta.reporters.PlainReporter",
+                "output-format": "pyta-plain",
                 "pyta-error-permission": "no",
                 "pyta-file-permission": "no",
             },
@@ -69,7 +69,7 @@ def test_check_on_bad_input():
         python_ta.check_all(
             item,
             config={
-                "output-format": "python_ta.reporters.PlainReporter",
+                "output-format": "pyta-plain",
                 "pyta-error-permission": "no",
                 "pyta-file-permission": "no",
             },
@@ -177,7 +177,7 @@ def test_check_with_config():
             "W0231",
         ],
         # [CUSTOM PYTA OPTIONS]
-        "output-format": "python_ta.reporters.PlainReporter",
+        "output-format": "pyta-plain",
         "pyta-error-permission": "no",
         "pyta-file-permission": "no",
     }
@@ -229,7 +229,7 @@ def test_check_all_output_typing_io(output: io.StringIO) -> None:
     """Test that specifying output as a typing.IO stream captures the output report when check_all is called."""
     python_ta.check_all(
         "examples/custom_checkers/e9989_pep8_errors.py",
-        config={"output-format": "python_ta.reporters.PlainReporter"},
+        config={"output-format": "pyta-plain"},
         output=output,
     )
     assert "E9989 (pep8-errors)" in output.getvalue()
@@ -239,7 +239,7 @@ def test_check_error_output_typing_io(output: io.StringIO) -> None:
     """Test that specifying output as a typing.IO stream captures the output report when check_error is called."""
     python_ta.check_errors(
         "examples/syntax_errors/missing_colon.py",
-        config={"output-format": "python_ta.reporters.PlainReporter"},
+        config={"output-format": "pyta-plain"},
         output=output,
     )
     assert "E0001 (syntax-error)" in output.getvalue()

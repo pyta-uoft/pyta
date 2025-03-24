@@ -271,7 +271,6 @@ class PythonTaReporter(BaseReporter):
 
         Close the reporter's output stream if should_close_out is True.
         """
-        self.out.flush()
         if self.should_close_out:
             self.out.close()
 

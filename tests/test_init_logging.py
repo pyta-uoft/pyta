@@ -7,7 +7,7 @@ import tokenize
 from unittest.mock import patch
 
 import python_ta
-from python_ta import _get_valid_files_to_check, _verify_pre_check
+from python_ta.check.helpers import get_valid_files_to_check, verify_pre_check
 
 
 def test_check_log(caplog) -> None:
@@ -27,7 +27,7 @@ def test_check_log(caplog) -> None:
         assert expected_messages[i] in caplog.records[i].msg
 
 
-@patch("python_ta._get_valid_files_to_check", side_effect=Exception("Testing"))
+@patch("python_ta.get_valid_files_to_check", side_effect=Exception("Testing"))
 def test_check_exception_log(_, caplog) -> None:
     """Testing logging in _check function when exception is thrown"""
     try:
@@ -46,7 +46,7 @@ def test_check_exception_log(_, caplog) -> None:
 def test_pre_check_log_pylint_comment(caplog) -> None:
     """Testing logging in _verify_pre_check function when checking for pyling comment"""
     path = os.path.join(os.path.dirname(__file__), "fixtures", "pylint_comment.py")
-    _verify_pre_check(path, False)
+    verify_pre_check(path, False)
     assert f'String "pylint:" found in comment. No check run on file `{path}' in caplog.text
     assert "ERROR" == caplog.records[0].levelname
 
@@ -55,7 +55,7 @@ def test_pre_check_log_pylint_comment(caplog) -> None:
 def test_pre_check_log_indentation_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function IndentationError catch block"""
     # Don't need a valid file path since patching error into open function
-    _verify_pre_check("", False)
+    verify_pre_check("", False)
     assert "python_ta could not check your code due to an indentation error at line" in caplog.text
     assert "ERROR" == caplog.records[0].levelname
 
@@ -64,7 +64,7 @@ def test_pre_check_log_indentation_error(_, caplog) -> None:
 def test_pre_check_log_token_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function TokenError catch block"""
     # Don't need a valid file path since patching error into open function
-    _verify_pre_check("", False)
+    verify_pre_check("", False)
     assert "python_ta could not check your code due to a syntax error in your file." in caplog.text
     assert "ERROR" == caplog.records[0].levelname
 
@@ -80,7 +80,7 @@ def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
     ]
 
     path = os.path.join(os.path.dirname(__file__), "fixtures", "unicode_decode_error.py")
-    _verify_pre_check(path, False)
+    verify_pre_check(path, False)
 
     for i in range(len(expected_logs)):
         assert expected_logs[i] == caplog.records[i].msg
@@ -96,9 +96,9 @@ def test_get_valid_files_to_check(caplog) -> None:
     ]
 
     # Iterating through generators to produce errors
-    tuple(_get_valid_files_to_check(module_name={"examples/nodes/assign"}))
-    tuple(_get_valid_files_to_check(module_name=[0]))
-    tuple(_get_valid_files_to_check(module_name="foo"))
+    tuple(get_valid_files_to_check(module_name={"examples/nodes/assign"}))
+    tuple(get_valid_files_to_check(module_name=[0]))
+    tuple(get_valid_files_to_check(module_name="foo"))
 
     for i in range(len(expected_logs)):
         assert caplog.records[i].levelname == "ERROR"

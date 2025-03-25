@@ -300,7 +300,7 @@ def wait_for_file_response(file_path: Path, timeout) -> bool:
     start = time.time()
     while time.time() - start < timeout:
         if os.path.exists(file_path):
-            with open(file_path, "r") as f:
+            with open(file_path, "r", errors="ignore") as f:
                 contents = f.read()
             if contents.count(f"PyTA Report for: ") >= 2:
                 return True

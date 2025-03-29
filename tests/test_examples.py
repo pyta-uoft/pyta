@@ -228,21 +228,21 @@ def test_c9104_module_name_violation() -> None:
     ), f"Failed {module_name_violation}. File does not add expected message."
 
 
-def _strip_output_format(input_filename: str) -> str:
-    with open(input_filename, "r") as file:
+@pytest.fixture(scope="function")
+def temp_rc_file_path(tmp_path) -> str:
+    with open("python_ta/config/.pylintrc", "r") as file:
         lines = file.readlines()
 
     lines = [line for line in lines if not re.match(r".*output-format.*", line)]
 
-    with tempfile.NamedTemporaryFile(delete=False, mode="w", newline="") as temp_file:
-        temp_filename = temp_file.name
-
+    file_path = os.path.join(tmp_path, ".pylintrc")
+    with open(file_path, "w") as temp_file:
         temp_file.writelines(lines)
 
-    return temp_filename
+    return file_path
 
 
-def test_cyclic_import() -> None:
+def test_cyclic_import(temp_rc_file_path) -> None:
     """Test that examples/pylint/R0401_cyclic_import adds R0401 cyclic-import.
 
     Reason for creating a separate test:
@@ -256,13 +256,11 @@ def test_cyclic_import() -> None:
     cyclic_import_helper = "examples/pylint/cyclic_import_helper.py"
     cyclic_import_file = "examples/pylint/r0401_cyclic_import.py"
 
-    rc_file = _strip_output_format("python_ta/config/.pylintrc")
-
     sys.stdout = StringIO()
     lint.Run(
         [
             "--reports=n",
-            f"--rcfile={rc_file}",
+            f"--rcfile={temp_rc_file_path}",
             "--output-format=json",
             cyclic_import_helper,
             cyclic_import_file,
@@ -271,7 +269,6 @@ def test_cyclic_import() -> None:
     )
     jsons_output = sys.stdout.getvalue()
     sys.stdout = sys.__stdout__
-    os.remove(rc_file)
 
     pylint_list_output = json.loads(jsons_output)
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pylint.lint import PyLinter
+
 from .core import NewMessage, PythonTaReporter
 from .node_printers import LineType
 
@@ -111,9 +113,6 @@ class PlainReporter(PythonTaReporter):
         """
         overline = "‾" * len(text)
         return prespace + overline + self._BREAK
-
-
-from pylint.lint import PyLinter
 
 
 def register(linter: PyLinter):

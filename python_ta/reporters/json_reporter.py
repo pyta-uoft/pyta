@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import NewMessage, PythonTaReporter
@@ -55,9 +56,6 @@ class JSONReporter(PythonTaReporter):
             msg_dict["number_of_occurrences"] = num_occurrences[msg_dict["msg_id"]]
 
         return output_lst
-
-
-from pylint.lint import PyLinter
 
 
 def register(linter: PyLinter):

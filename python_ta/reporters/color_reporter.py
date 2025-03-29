@@ -1,6 +1,7 @@
 import sys
 
 from colorama import Back, Fore, Style, colorama_text
+from pylint.lint import PyLinter
 
 from .plain_reporter import PlainReporter
 
@@ -50,9 +51,6 @@ class ColorReporter(PlainReporter):
         space_count = len(text) - len(new_text)
         new_text = new_text.replace(" ", cls._SPACE)
         return (space_count * cls._SPACE) + colour + new_text + cls._COLOURING["reset"]
-
-
-from pylint.lint import PyLinter
 
 
 def register(linter: PyLinter):

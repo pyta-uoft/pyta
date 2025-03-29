@@ -10,6 +10,7 @@ import pytest
 from pylint import lint
 
 import python_ta
+from python_ta.check.helpers import reset_linter, verify_pre_check
 from python_ta.config import load_messages_config, override_config
 
 TEST_CONFIG = {
@@ -30,7 +31,7 @@ CONFIG_ERRORS_TO_CHECK = {
 def configure_linter_load_default():
     """Create a linter using the default PythonTA config settings and override using the expected
     final config options in the test.pylintrc file."""
-    linter = python_ta.reset_linter()
+    linter = reset_linter()
 
     for key in TEST_CONFIG:
         linter.set_option(key, TEST_CONFIG[key])
@@ -42,7 +43,7 @@ def configure_linter_load_default():
 def configure_linter_no_default():
     """Create a linter without loading the default PythonTA config settings and override using the
     expected final config options in the test.pylintrc file."""
-    linter = python_ta.reset_linter(load_default_config=False)
+    linter = reset_linter(load_default_config=False)
 
     for key in TEST_CONFIG:
         linter.set_option(key, TEST_CONFIG[key])
@@ -54,7 +55,7 @@ def test_user_config_dict(configure_linter_load_default) -> None:
     """Test that reset_linter correctly overrides the default options when the user provides a
     config of type dict."""
     expected = configure_linter_load_default.config.__dict__
-    actual = python_ta.reset_linter(config=TEST_CONFIG).config.__dict__
+    actual = reset_linter(config=TEST_CONFIG).config.__dict__
 
     assert actual == expected
 
@@ -65,7 +66,7 @@ def test_user_config_file(configure_linter_load_default) -> None:
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test.pylintrc")
     expected = configure_linter_load_default.config.__dict__
-    actual = python_ta.reset_linter(config=config).config.__dict__
+    actual = reset_linter(config=config).config.__dict__
 
     assert actual == expected
 
@@ -76,7 +77,7 @@ def test_user_config_dict_no_default(configure_linter_no_default) -> None:
 
     The default options are not loaded from the PythonTA default config."""
     expected = configure_linter_no_default.config.__dict__
-    actual = python_ta.reset_linter(config=TEST_CONFIG, load_default_config=False).config.__dict__
+    actual = reset_linter(config=TEST_CONFIG, load_default_config=False).config.__dict__
 
     assert actual == expected
 
@@ -89,7 +90,7 @@ def test_user_config_file_no_default(configure_linter_no_default) -> None:
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test.pylintrc")
     expected = configure_linter_no_default.config.__dict__
-    actual = python_ta.reset_linter(config=config, load_default_config=False).config.__dict__
+    actual = reset_linter(config=config, load_default_config=False).config.__dict__
 
     assert actual == expected
 
@@ -141,7 +142,7 @@ def test_config_parsing_errors() -> None:
     This checks the non-fatal errors from parsing the config file."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
-    reporter = python_ta.reset_linter(config=config).reporter
+    reporter = reset_linter(config=config).reporter
 
     # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
     message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
@@ -158,7 +159,7 @@ def test_config_parsing_errors_no_default() -> None:
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
-    reporter = python_ta.reset_linter(config=config, load_default_config=False).reporter
+    reporter = reset_linter(config=config, load_default_config=False).reporter
 
     # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
     message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
@@ -257,7 +258,7 @@ def test_allow_pylint_comments() -> None:
     """
 
     with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
-        result = python_ta._verify_pre_check("", allow_pylint_comments=True)
+        result = verify_pre_check("", allow_pylint_comments=True)
 
     assert result is True
 
@@ -268,6 +269,6 @@ def test_disallows_pylint_comments() -> None:
     """
 
     with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
-        result = python_ta._verify_pre_check("", allow_pylint_comments=False)
+        result = verify_pre_check("", allow_pylint_comments=False)
 
     assert result is False

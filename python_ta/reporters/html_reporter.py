@@ -88,6 +88,7 @@ class HTMLReporter(PythonTaReporter):
         # If a filepath was specified, write to the file
         if self.out is not sys.stdout:
             self.writeln(rendered_template)
+            self.out.flush()
         else:
             rendered_template = rendered_template.encode("utf8")
             open_html_in_browser(

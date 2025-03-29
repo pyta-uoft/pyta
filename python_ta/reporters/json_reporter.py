@@ -40,6 +40,7 @@ class JSONReporter(PythonTaReporter):
             )
 
         self.writeln(json.dumps(output, indent=4))
+        self.out.flush()
 
     def _output_messages(self, msgs: list[NewMessage]) -> list[dict]:
         """Returns a list of dictionaries containing formatted error messages."""

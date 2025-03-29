@@ -28,10 +28,7 @@ except AttributeError:
     pass
 
 
-import importlib.util
 import logging
-import os
-import sys
 import tokenize
 import webbrowser
 from typing import IO, Any, Optional, Union

@@ -5,7 +5,6 @@ import json
 import os
 import re
 import sys
-import tempfile
 from io import StringIO
 from typing import Union
 

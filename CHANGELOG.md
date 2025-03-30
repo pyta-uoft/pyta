@@ -19,6 +19,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fixed error in `contracts` where comments in docstring assertions are not removed while parsing
+
 ### 🔧 Internal changes
 
 ## [2.10.1] - 2025-02-19

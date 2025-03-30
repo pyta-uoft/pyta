@@ -32,7 +32,7 @@ def patch_ast_transforms(z3: bool):
             else:
                 ast.accept(CFGVisitor())
         except Exception as e:
-            logging.warning(f"Could not run Z3Visitor: {e}")
+            logging.warning(f"Could not run CFGVisitor: {e}")
 
         return ast
 

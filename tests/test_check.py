@@ -4,7 +4,14 @@ installed `python_ta` package.
 
 import io
 import os
+import select
+import signal
+import subprocess
+import sys
+import time
 from os import path, remove
+from pathlib import Path
+from subprocess import Popen
 
 import pytest
 
@@ -215,6 +222,167 @@ def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
     # If the file exists, the assertion failed and the file gets removed from main directory
     if file_exists:
         remove("pyta_output.html")
+
+
+def test_check_watch_enabled() -> None:
+    """Test PythonTA's watch mode to ensure it detects changes correctly."""
+    reset_watch_fixture()
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+
+    process = subprocess.Popen(
+        [sys.executable, "-u", script_path],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+
+    try:
+        lines = read_nonblocking(process, 6)
+        assert any(
+            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
+            in line
+            for line in lines
+        )
+
+        modify_watch_fixture()
+        lines = read_nonblocking(process, 6)
+
+        assert not any(
+            "[Line 6] Incompatible types in assignment (expression has type str, variable has type int)"
+            in line
+            for line in lines
+        )
+
+    finally:
+        process.terminate()
+        process.wait()
+        reset_watch_fixture()
+
+
+def test_watch_output_file_appends(tmp_path: Path) -> None:
+    """Test that using output=<file> with watch=True appends reports instead of overwriting."""
+    output_file = tmp_path / "report_output.txt"
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+
+    reset_watch_fixture(str(output_file))
+    process = subprocess.Popen(
+        [sys.executable, "-u", script_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        if not wait_for_log_message(
+            process, "PythonTA is monitoring your files for changes and will re-check", 10
+        ):
+            pytest.fail("Report did not generate within the expected timeout")
+
+        detectedModification = False
+        start = time.time()
+        while not detectedModification and time.time() - start < 10:
+            modify_watch_fixture(str(output_file))
+            detectedModification = wait_for_file_response(output_file, 2)
+
+        assert detectedModification, "Report did not generate within the expected timeout"
+    finally:
+        process.terminate()
+        process.wait()
+        reset_watch_fixture()
+
+
+def wait_for_file_response(file_path: Path, timeout) -> bool:
+    """Wait until the file exists and contains at least two instances of "PyTA Report for: <script_path>".
+    Returns True if the content is found within the timeout, and False otherwise.
+    """
+    start = time.time()
+    while time.time() - start < timeout:
+        if os.path.exists(file_path):
+            with open(file_path, "r", errors="ignore") as f:
+                contents = f.read()
+            if contents.count(f"PyTA Report for: ") >= 2:
+                return True
+    return False
+
+
+def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int) -> bool:
+    """Wait until a specific line containing the given match string appears in the process's stderr.
+    Returns True if the line is found within the timeout period, and False otherwise.
+    """
+    start = time.time()
+    while time.time() - start < timeout:
+        ready, _, _ = select.select([process.stderr], [], [], 0)
+        if ready:
+            line = process.stderr.readline()
+            if match in line:
+                return True
+    return False
+
+
+def reset_watch_fixture(output_path: str = None) -> None:
+    """Reset the contents of watch_enabled_configuration.py to its original state."""
+    output_arg = f', output="{output_path}"' if output_path else ""
+    original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
+import python_ta
+
+def blank_function() -> int:
+    count: int = "ten"
+    return count
+
+if __name__ == "__main__":
+    python_ta.check_all(config={{
+        "output-format": "python_ta.reporters.PlainReporter",
+        "watch": True
+    }}{output_arg})
+'''
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+    with open(script_path, "w") as file:
+        file.write(original_content)
+
+
+def modify_watch_fixture(output_path: str = None) -> None:
+    """Modify the contents of watch_enabled_configuration.py to fix the type error."""
+    output_arg = f', output="{output_path}"' if output_path else ""
+    original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
+import python_ta
+
+def blank_function() -> int:
+    count: int = 10
+    return count
+
+if __name__ == "__main__":
+    python_ta.check_all(config={{
+        "output-format": "python_ta.reporters.PlainReporter",
+        "watch": True
+    }}{output_arg})
+'''
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../fixtures/sample_dir/watch/watch_enabled_configuration.py")
+    )
+    with open(script_path, "w") as file:
+        file.write(original_content)
+
+
+def read_nonblocking(process: Popen[str], timeout: int) -> list[str]:
+    """Reads output from process without blocking until timeout or termination condition."""
+    lines = []
+    start_time = time.time()
+
+    ready, _, _ = select.select([process.stdout], [], [], timeout)
+    if ready:
+        while True:
+            line = process.stdout.readline().strip()
+            lines.append(line)
+            if (
+                "=== Style/convention errors (fix: before submission) ===" in line
+                or time.time() - start_time > timeout
+            ):
+                break
+    return lines
 
 
 @pytest.fixture

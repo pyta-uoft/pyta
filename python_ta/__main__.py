@@ -37,7 +37,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option(
     "--output-format",
     help="Specify the format of output report. This option is ignored if a --config argument is specified.",
-    default="python_ta.reporters.HTMLReporter",
+    default="pyta-html",
 )
 def main(
     version: bool,

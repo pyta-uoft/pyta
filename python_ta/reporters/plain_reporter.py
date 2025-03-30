@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pylint.lint import PyLinter
+
 from .core import NewMessage, PythonTaReporter
 from .node_printers import LineType
 
@@ -7,7 +9,7 @@ from .node_printers import LineType
 class PlainReporter(PythonTaReporter):
     """Plain text reporter."""
 
-    name = "PlainReporter"
+    name = "pyta-plain"
 
     OUTPUT_FILENAME = "pyta_report.txt"
 
@@ -112,3 +114,7 @@ class PlainReporter(PythonTaReporter):
         """
         overline = "‾" * len(text)
         return prespace + overline + self._BREAK
+
+
+def register(linter: PyLinter):
+    linter.register_reporter(PlainReporter)

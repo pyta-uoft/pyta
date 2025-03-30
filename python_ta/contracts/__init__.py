@@ -620,6 +620,8 @@ def parse_assertions(obj: Any, parse_token: str = "Precondition") -> list[str]:
         for line in lines[first + 1 :]:
             if line.startswith("-"):
                 assertion = line[1:].strip()
+                # Strip comments from line
+                assertion = assertion.split("#")[0]
                 if hasattr(obj, "__qualname__"):
                     _debug(f"Adding assertion to {obj.__qualname__}: {assertion}")
                 assertions.append(assertion)

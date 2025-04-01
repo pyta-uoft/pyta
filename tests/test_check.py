@@ -419,7 +419,7 @@ def test_precondition_inline_comment_no_error(caplog) -> None:
     of a function docstring.
     """
     python_ta.check_all(
-        "examples/sample_usage/precondition_inline_comment.py",
+        "tests/fixtures/precondition_inline_comment.py",
         config={"output-format": "python_ta.reporters.PlainReporter"},
     )
 

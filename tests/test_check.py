@@ -3,7 +3,6 @@ installed `python_ta` package.
 """
 
 import io
-import logging
 import os
 import select
 import signal

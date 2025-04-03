@@ -411,3 +411,15 @@ def test_check_error_output_typing_io(output: io.StringIO) -> None:
         output=output,
     )
     assert "E0001 (syntax-error)" in output.getvalue()
+
+
+def test_precondition_inline_comment_no_error(caplog) -> None:
+    """Test that no warnings are raised when inline comments are included in the preconditions
+    of a function docstring.
+    """
+    python_ta.check_all(
+        "tests/fixtures/precondition_inline_comment.py",
+        config={"output-format": "python_ta.reporters.PlainReporter"},
+    )
+
+    assert "WARNING" not in [record.levelname for record in caplog.records]

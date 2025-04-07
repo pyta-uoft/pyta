@@ -1,5 +1,4 @@
-"""Checker to check that every function parameter is mentioned by name in the docstring text.
-"""
+"""Checker to check that every function parameter is mentioned by name in the docstring text."""
 
 from __future__ import annotations
 

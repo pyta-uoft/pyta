@@ -1,5 +1,4 @@
-"""Checker for target of for loop or comprehension in subscript form.
-"""
+"""Checker for target of for loop or comprehension in subscript form."""
 
 from astroid import nodes
 from pylint.checkers import BaseChecker

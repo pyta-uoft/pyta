@@ -1,5 +1,4 @@
-"""Checker for variables that might not be defined in the program.
-"""
+"""Checker for variables that might not be defined in the program."""
 
 from __future__ import annotations
 

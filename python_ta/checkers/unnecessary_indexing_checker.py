@@ -1,5 +1,4 @@
-"""Checker for unnecessary indexing in a loop.
-"""
+"""Checker for unnecessary indexing in a loop."""
 
 from __future__ import annotations
 

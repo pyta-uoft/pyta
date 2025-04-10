@@ -1,5 +1,4 @@
-"""Checker for use of I/O functions.
-"""
+"""Checker for use of I/O functions."""
 
 from re import sub
 from typing import Union

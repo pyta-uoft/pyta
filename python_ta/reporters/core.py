@@ -1,5 +1,4 @@
-"""This module provides the core functionality for all PythonTA reporters.
-"""
+"""This module provides the core functionality for all PythonTA reporters."""
 
 from __future__ import annotations
 

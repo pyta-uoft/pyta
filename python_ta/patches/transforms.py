@@ -1,5 +1,4 @@
-"""Patch to add transforms for setting type constraints and creating control flow graphs.
-"""
+"""Patch to add transforms for setting type constraints and creating control flow graphs."""
 
 import logging
 

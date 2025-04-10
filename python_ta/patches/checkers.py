@@ -1,5 +1,4 @@
-"""Patch pylint checker behaviour.
-"""
+"""Patch pylint checker behaviour."""
 
 from pylint.checkers.base import NameChecker
 from pylint.checkers.classes import ClassChecker

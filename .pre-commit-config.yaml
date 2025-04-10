@@ -21,7 +21,7 @@ repos:
 exclude: |
   (?x)^(
       examples|
-      tests/fixtures/sample_dir|
+      tests/fixtures/|
       tests/test_debug/snapshot_testing_snapshots|
       tests/test_debug/snapshot_tracer_testing_snapshots|
       tests/test_reporters/snapshots/test_html_server/test_open_html_in_browser_no_watch/no_watch_html_server_snapshot.html|

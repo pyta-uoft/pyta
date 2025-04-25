@@ -1,5 +1,4 @@
-"""This module defines a HTML server using aiohttp that supports reloading via WebSockets.
-"""
+"""This module defines a HTML server using aiohttp that supports reloading via WebSockets."""
 
 import asyncio
 import logging

@@ -124,6 +124,6 @@ def find_free_port():
         s.bind(("127.0.0.1", 0))
         return s.getsockname()[1]
 
-      
+
 def register(linter: PyLinter):
     linter.register_reporter(HTMLReporter)

@@ -1,6 +1,6 @@
 [REPORTS]
 
-output-format = python_ta.reporters.HTMLReporter
+output-format = pyta-html
 
 [FORMAT]
 

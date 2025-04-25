@@ -1,5 +1,4 @@
-"""Checker for global variables
-"""
+"""Checker for global variables"""
 
 from __future__ import annotations
 

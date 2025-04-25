@@ -1,5 +1,4 @@
-"""Module to watch files for modifications and trigger PythonTA checks automatically.
-"""
+"""Module to watch files for modifications and trigger PythonTA checks automatically."""
 
 import logging
 import os

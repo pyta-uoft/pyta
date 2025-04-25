@@ -1,5 +1,4 @@
-"""Checker for reporting on the disallowed use of various Python syntax.
-"""
+"""Checker for reporting on the disallowed use of various Python syntax."""
 
 from astroid import nodes
 from pylint.checkers import BaseChecker

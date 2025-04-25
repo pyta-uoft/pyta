@@ -1,5 +1,4 @@
-"""Checker for type annotation.
-"""
+"""Checker for type annotation."""
 
 from astroid import Uninferable, nodes
 from astroid.exceptions import NoDefault

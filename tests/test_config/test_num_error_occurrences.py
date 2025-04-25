@@ -21,7 +21,7 @@ def pyta_output(num_msgs: int) -> str:
             module_name=test_file,
             config={
                 "pyta-number-of-messages": num_msgs,
-                "output-format": "python_ta.reporters.JSONReporter",
+                "output-format": "pyta-json",
             },
         )
 

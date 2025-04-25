@@ -1,5 +1,4 @@
-"""This file illustrates basic usage of PythonTA's code analysis.
-"""
+"""This file illustrates basic usage of PythonTA's code analysis."""
 
 
 def add_two(x: int, y: int) -> int:

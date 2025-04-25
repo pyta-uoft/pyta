@@ -15,25 +15,25 @@ from python_ta import check_all
 error_params = [
     (
         """def foo():print("Hello, world!")\n""",
-        {"output-format": "python_ta.reporters.JSONReporter"},
+        {"output-format": "pyta-json"},
         True,
         """def foo():\n    print("Hello, world!")\n""",
     ),
     (
         """def foo():print("Hello, world!" + "This line is too long and should be split by black.")""",
-        {"output-format": "python_ta.reporters.JSONReporter", "max-line-length": 50},
+        {"output-format": "pyta-json", "max-line-length": 50},
         True,
         """def foo():\n    print(\n        "Hello, world!"\n        + "This line is too long and should be split by black."\n    )\n""",
     ),
     (
         """def foo():print("Hello, world!")\n""",
-        {"output-format": "python_ta.reporters.JSONReporter"},
+        {"output-format": "pyta-json"},
         False,
         """def foo():print("Hello, world!")\n""",
     ),
     (
         """def foo():print("Hello, world!")\n""",
-        {"output-format": "python_ta.reporters.JSONReporter", "autoformat-options": []},
+        {"output-format": "pyta-json", "autoformat-options": []},
         True,
         """def foo():\n    print("Hello, world!")\n""",
     ),
@@ -41,7 +41,7 @@ error_params = [
         # Specify that Black skip reformatting the first line in autoformat-options
         """def foo():print("Although this line is too long, it is not split by black as it is skipped.")\n""",
         {
-            "output-format": "python_ta.reporters.JSONReporter",
+            "output-format": "pyta-json",
             "max-line-length": 50,
             # pep8_errors remain as the line is not reformatted
             "pycodestyle-ignore": ["E231", "E501", "E704"],
@@ -54,7 +54,7 @@ error_params = [
         # This line is between 80-88 characters; it should be reformatted because the default
         # max-line-len is 80.
         """CONST = ['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'b']""",
-        {"output-format": "python_ta.reporters.JSONReporter"},
+        {"output-format": "pyta-json"},
         True,
         "CONST = [\n    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',\n"
         "    'b',\n]\n",

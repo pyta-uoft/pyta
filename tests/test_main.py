@@ -117,7 +117,7 @@ def test_no_config() -> None:
             "-m",
             "python_ta",
             "--output-format",
-            "python_ta.reporters.PlainReporter",
+            "pyta-plain",
             path.join(SOURCE_ROOT, "tests", "fixtures", "no_errors.py"),
         ],
     )

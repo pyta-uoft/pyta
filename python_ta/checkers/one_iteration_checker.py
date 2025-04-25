@@ -1,5 +1,4 @@
-"""Checker for a loop that can only ever run for one iteration.
-"""
+"""Checker for a loop that can only ever run for one iteration."""
 
 from typing import Union
 

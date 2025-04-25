@@ -1,6 +1,6 @@
 [REPORTS]
 
-output-format = python_ta.reporters.JSONReporter
+output-format = pyta-json
 
 [FORMAT]
 

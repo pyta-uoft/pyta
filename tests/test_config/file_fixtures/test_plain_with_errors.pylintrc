@@ -1,6 +1,6 @@
 [REPORTS]
 
-output-format = python_ta.reporters.PlainReporter
+output-format = pyta-plain
 
 [FORMAT]
 

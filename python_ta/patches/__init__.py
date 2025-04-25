@@ -1,5 +1,4 @@
-"""Monkeypatch pylint behaviour.
-"""
+"""Monkeypatch pylint behaviour."""
 
 from .checkers import patch_checkers
 from .messages import patch_messages

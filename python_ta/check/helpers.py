@@ -6,6 +6,7 @@ modularizing core operations like file validation, linting, and result uploads.
 import importlib.util
 import logging
 import os
+import re
 import sys
 import tokenize
 from typing import IO, Any, AnyStr, Generator, Optional, Union
@@ -261,12 +262,19 @@ def reset_linter(
         if f != "__init__.py" and os.path.splitext(f)[1] == ".py"
     ]
 
+    custom_reporters = [
+        ("python_ta.reporters." + os.path.splitext(f)[0])
+        for f in os.listdir(parent_dir_path + "/reporters")
+        if f not in ["__init__.py", "stat_reporter.py"] and re.match(r".*_reporter\.py$", f)
+    ]
+
     # Register new options to a checker here to allow references to
     # options in `.pylintrc` config file.
     # Options stored in linter: `linter._all_options`, `linter._external_opts`
     linter = pylint.lint.PyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
+    linter.load_plugin_modules(custom_reporters)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))

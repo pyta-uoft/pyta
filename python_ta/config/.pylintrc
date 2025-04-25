@@ -31,10 +31,10 @@ allow-pylint-comments = no
 use-pyta-error-messages = yes
 
 [REPORTS]
-# The type of reporter to use to display results. Available PyTA classes are
-# PlainReporter, ColorReporter, HTMLReporter, JSONReporter.
+# The type of reporter to use to display results. Available PyTA options are
+# pyta-plain, pyta-color, pyta-html, pyta-json.
 # Replaces the pyta-reporter option.
-output-format = python_ta.reporters.HTMLReporter
+output-format = pyta-html
 
 [ELIF]
 

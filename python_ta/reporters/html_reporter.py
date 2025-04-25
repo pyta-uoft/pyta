@@ -6,6 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
+from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
@@ -21,7 +22,7 @@ class HTMLReporter(PythonTaReporter):
     By default, automatically opens the report in a web browser.
     """
 
-    name = "HTMLReporter"
+    name = "pyta-html"
 
     _COLOURING = {
         "black": '<span class="black">',
@@ -122,3 +123,7 @@ def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
         return s.getsockname()[1]
+
+
+def register(linter: PyLinter):
+    linter.register_reporter(HTMLReporter)

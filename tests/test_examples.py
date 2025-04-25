@@ -94,7 +94,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
     python_ta.check_all(
         module_name=get_file_paths(paths),
         config={
-            "output-format": "python_ta.reporters.JSONReporter",
+            "output-format": "pyta-json",
             "enable": ["C9960"],
             "z3": True,
         },
@@ -208,7 +208,7 @@ def test_c9104_module_name_violation() -> None:
     python_ta.check_all(
         module_name=module_name_violation,
         config={
-            "output-format": "python_ta.reporters.JSONReporter",
+            "output-format": "pyta-json",
         },
     )
 
@@ -227,7 +227,21 @@ def test_c9104_module_name_violation() -> None:
     ), f"Failed {module_name_violation}. File does not add expected message."
 
 
-def test_cyclic_import() -> None:
+@pytest.fixture(scope="function")
+def temp_rc_file_path(tmp_path) -> str:
+    with open("python_ta/config/.pylintrc", "r") as file:
+        lines = file.readlines()
+
+    lines = [line for line in lines if not re.match(r".*output-format.*", line)]
+
+    file_path = os.path.join(tmp_path, ".pylintrc")
+    with open(file_path, "w") as temp_file:
+        temp_file.writelines(lines)
+
+    return file_path
+
+
+def test_cyclic_import(temp_rc_file_path) -> None:
     """Test that examples/pylint/R0401_cyclic_import adds R0401 cyclic-import.
 
     Reason for creating a separate test:
@@ -245,7 +259,7 @@ def test_cyclic_import() -> None:
     lint.Run(
         [
             "--reports=n",
-            "--rcfile=python_ta/config/.pylintrc",
+            f"--rcfile={temp_rc_file_path}",
             "--output-format=json",
             cyclic_import_helper,
             cyclic_import_file,

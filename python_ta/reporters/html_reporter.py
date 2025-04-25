@@ -1,4 +1,5 @@
 import os
+import socket
 import sys
 
 from jinja2 import Environment, FileSystemLoader
@@ -8,7 +9,8 @@ from pygments.lexers import PythonLexer
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
-from .html_server import open_html_in_browser
+from .one_shot_server import open_html_in_browser
+from .persistent_server import start_server_once
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
@@ -69,7 +71,11 @@ class HTMLReporter(PythonTaReporter):
         template = Environment(loader=FileSystemLoader(file_parent_directory)).get_template(
             filename
         )
-
+        port = (
+            find_free_port()
+            if self.linter.config.server_port == 0
+            else self.linter.config.server_port
+        )
         # Embed resources so the output html can go anywhere, independent of assets.
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
         #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
@@ -78,6 +84,7 @@ class HTMLReporter(PythonTaReporter):
         # Render the jinja template
         rendered_template = template.render(
             date_time=self._generate_report_date_time(),
+            port=port,
             reporter=self,
             grouped_messages=grouped_messages,
             os=os,
@@ -90,9 +97,10 @@ class HTMLReporter(PythonTaReporter):
             self.out.flush()
         else:
             rendered_template = rendered_template.encode("utf8")
-            open_html_in_browser(
-                rendered_template, self.linter.config.watch, self.linter.config.server_port
-            )
+            if self.linter.config.watch:
+                start_server_once(rendered_template, port)
+            else:
+                open_html_in_browser(rendered_template, self.linter.config.watch, port)
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:
@@ -107,3 +115,10 @@ class HTMLReporter(PythonTaReporter):
             )
 
         return colour + new_text + cls._COLOURING["reset"]
+
+
+def find_free_port():
+    """Find and return an available TCP port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]

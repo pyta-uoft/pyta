@@ -35,13 +35,7 @@ def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
             "       Press Ctrl + C or stop this program to exit.",
             file=sys.stderr,
         )
-        server = HTTPServer(("127.0.0.1", port), RequestHandler)
-        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            print("\nShutting down the PythonTA server.")
-            server.shutdown()
+
     else:
         server = HTTPServer(("127.0.0.1", port), RequestHandler)
         webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)

@@ -34,7 +34,7 @@ def wait_for_server(port: int, timeout: int = 30, interval: int = 1) -> Optional
     return None
 
 
-def test_open_html_in_browser_no_watch(snapshot):
+def test_no_watch_server_is_non_persistent(snapshot):
     """Test the open_html_in_browser function with watch=False.
     Ensure the server handles a single request and shuts down properly."""
 
@@ -63,7 +63,7 @@ def test_open_html_in_browser_no_watch(snapshot):
         process.send_signal(signal.SIGINT)
 
 
-def test_open_html_in_browser_watch(snapshot):
+def test_watch_persistence(snapshot):
     """Test the open_html_in_browser function with watch=True using a fixed port.
     Ensure the server handles multiple requests and can be stopped gracefully."""
     script_path = os.path.normpath(

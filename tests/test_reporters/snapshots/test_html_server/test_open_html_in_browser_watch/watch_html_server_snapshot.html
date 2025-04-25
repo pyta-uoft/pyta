@@ -1462,5 +1462,17 @@ function toggleElement(elem) {
   })
 }
         </script>
+
+        <script>
+          const socket = new WebSocket("ws://localhost:{port}/ws");
+
+          socket.onmessage = (event) => {
+            if (event.data === "reload") {
+              window.location.reload();
+            }
+          };
+
+        </script>
+
     </body>
 </html>

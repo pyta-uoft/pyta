@@ -52,7 +52,9 @@ def test_no_watch_server_is_non_persistent(snapshot):
             pytest.fail("Server did not start within the expected timeout")
 
         cleaned_body = clean_response_body(response_body)
-
+        print("\n\n\n\n\n\n")
+        print(cleaned_body)
+        print("\n\n\n\n\n\n")
         snapshot.assert_match(cleaned_body, "no_watch_html_server_snapshot.html")
 
         with pytest.raises((ConnectionRefusedError, RemoteDisconnected)):

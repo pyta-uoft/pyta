@@ -284,7 +284,7 @@
         </script>
 
         <script>
-          const socket = new WebSocket("ws://localhost:{port}/ws");
+          const socket = new WebSocket("ws://localhost:{{ port }}/ws");
 
           socket.onmessage = (event) => {
             if (event.data === "reload") {

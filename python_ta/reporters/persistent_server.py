@@ -41,7 +41,6 @@ async def update_report(new_html: bytes, port: int):
     latest_html = new_html
 
     active = [ws for ws in websockets if not ws.closed]
-
     if active:
         for ws in active:
             await ws.send_str("reload")

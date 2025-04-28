@@ -14,6 +14,7 @@ from .one_shot_server import open_html_in_browser
 from .persistent_server import start_server_once
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+PORT = None
 
 
 class HTMLReporter(PythonTaReporter):
@@ -60,6 +61,7 @@ class HTMLReporter(PythonTaReporter):
         This method can be implemented to display them after they've
         been aggregated.
         """
+        global PORT
         grouped_messages = {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
 
         template_f = self.linter.config.pyta_template_file
@@ -72,11 +74,12 @@ class HTMLReporter(PythonTaReporter):
         template = Environment(loader=FileSystemLoader(file_parent_directory)).get_template(
             filename
         )
-        port = (
-            find_free_port()
-            if self.linter.config.server_port == 0
-            else self.linter.config.server_port
-        )
+        if not PORT:
+            PORT = (
+                find_free_port()
+                if self.linter.config.server_port == 0
+                else self.linter.config.server_port
+            )
         # Embed resources so the output html can go anywhere, independent of assets.
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
         #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
@@ -85,7 +88,7 @@ class HTMLReporter(PythonTaReporter):
         # Render the jinja template
         rendered_template = template.render(
             date_time=self._generate_report_date_time(),
-            port=port,
+            port=PORT,
             reporter=self,
             grouped_messages=grouped_messages,
             os=os,
@@ -99,9 +102,9 @@ class HTMLReporter(PythonTaReporter):
         else:
             rendered_template = rendered_template.encode("utf8")
             if self.linter.config.watch:
-                start_server_once(rendered_template, port)
+                start_server_once(rendered_template, PORT)
             else:
-                open_html_in_browser(rendered_template, self.linter.config.watch, port)
+                open_html_in_browser(rendered_template, self.linter.config.watch, PORT)
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

@@ -1,5 +1,6 @@
 import os
 import re
+import select
 import signal
 import subprocess
 import sys
@@ -8,6 +9,7 @@ from http.client import HTTPConnection, RemoteDisconnected
 from typing import Optional
 
 import pytest
+import websocket
 
 
 def clean_response_body(body) -> str:
@@ -16,6 +18,7 @@ def clean_response_body(body) -> str:
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests/fixtures/reporters/(?:no_)?watch_integration\.py.*\n?", "", body)
     body = re.sub(r'\s*<span class="pygments-w">\s*</span>\s*<span', " <span", body)
+    body = re.sub(r"^.*/watch_integration.py.*$", "", body, flags=re.MULTILINE)
 
     return body.strip()
 
@@ -87,4 +90,86 @@ def test_watch_persistence(snapshot):
             snapshot.assert_match(cleaned_body, "watch_html_server_snapshot.html")
 
     finally:
+        process.send_signal(signal.SIGINT)
+
+
+@pytest.fixture(scope="function")
+def temp_script_file_path(tmp_path) -> str:
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../../fixtures/reporters/watch_integration.py")
+    )
+    with open(script_path, "r") as file:
+        lines = file.readlines()
+
+    file_path = os.path.join(tmp_path, "watch_integration.py")
+    with open(file_path, "w") as temp_file:
+        temp_file.writelines(lines)
+
+    return file_path
+
+
+def test_watch_update(temp_script_file_path, snapshot):
+    """Test the start_server_once function with watch=True using a fixed port.
+    Ensure the server changes the report contents after making code changes"""
+
+    process = subprocess.Popen([sys.executable, temp_script_file_path])
+
+    if not wait_for_server(5008):
+        process.send_signal(signal.SIGINT)
+        pytest.fail("Server did not start within the expected timeout")
+
+    try:
+        conn = HTTPConnection("127.0.0.1", 5008)
+        conn.request("GET", "/")
+        response = conn.getresponse()
+        assert response.status == 200
+
+        response_body = response.read().decode("utf-8")
+        cleaned_body_before = clean_response_body(response_body)
+        snapshot.assert_match(cleaned_body_before, "watch_html_server_snapshot.html")
+
+        with open(temp_script_file_path, "a") as py_file:
+            py_file.write("This doesn't belong here!")
+
+        time.sleep(0.5)  # wait for the server to update the html template
+
+        conn.request("GET", "/")
+        response = conn.getresponse()
+        assert response.status == 200
+
+        response_body = response.read().decode("utf-8")
+        cleaned_body_after = clean_response_body(response_body)
+        snapshot.assert_match(cleaned_body_after, "watch_html_server_snapshot_updated.html")
+
+        assert cleaned_body_after != cleaned_body_before
+
+    finally:
+        process.send_signal(signal.SIGINT)
+
+
+def test_websocket_message(temp_script_file_path):
+    """Test that the "reload" message is sent to any open websocket connections
+    upon update to the files being watched
+    """
+    process = subprocess.Popen([sys.executable, temp_script_file_path])
+
+    try:
+        if not wait_for_server(5008):
+            pytest.fail("Server did not start within the expected timeout")
+
+        ws = websocket.create_connection("ws://localhost:5008/ws")
+        ws.settimeout(1)
+
+        with open(temp_script_file_path, "a") as py_file:
+            py_file.write("# trigger reload\n")
+
+        time.sleep(0.5)  # give the server time to send the websocket message
+
+        message = ws.recv()
+        assert message == "reload"
+    finally:
+        try:
+            ws.close()
+        except Exception:
+            pass
         process.send_signal(signal.SIGINT)

@@ -39,6 +39,7 @@ dev = [
     "pytest-cov >= 4.0,< 6.1",
     "pytest-mock",
     "pytest-snapshot",
+    "websocket-client",
     "sphinx",
     "sphinx-rtd-theme",
 ]

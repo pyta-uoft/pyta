@@ -129,7 +129,7 @@ def test_watch_update(temp_script_file_path, snapshot):
         snapshot.assert_match(cleaned_body_before, "watch_html_server_snapshot.html")
 
         with open(temp_script_file_path, "a") as py_file:
-            py_file.write("This doesn't belong here!")
+            py_file.write("# This doesn't belong here!")
 
         time.sleep(2)  # wait for the server to update the html template
 

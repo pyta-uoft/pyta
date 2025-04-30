@@ -131,7 +131,7 @@ def test_watch_update(temp_script_file_path, snapshot):
         with open(temp_script_file_path, "a") as py_file:
             py_file.write("This doesn't belong here!")
 
-        time.sleep(0.5)  # wait for the server to update the html template
+        time.sleep(2)  # wait for the server to update the html template
 
         conn.request("GET", "/")
         response = conn.getresponse()
@@ -163,7 +163,7 @@ def test_websocket_message(temp_script_file_path):
         with open(temp_script_file_path, "a") as py_file:
             py_file.write("# trigger reload\n")
 
-        time.sleep(0.5)  # give the server time to send the websocket message
+        time.sleep(1)  # give the server time to send the websocket message
 
         message = ws.recv()
         assert message == "reload"

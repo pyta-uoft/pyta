@@ -53,9 +53,11 @@ def start_server_once(initial_html: bytes, port: int = 8000):
     global server_started
     if not server_started:
         server_started = True
-        loop.create_task(run_server(port))
-        loop.create_task(update_report(initial_html, port))
+
         threading.Thread(target=loop.run_forever, daemon=True).start()
+
+        asyncio.run_coroutine_threadsafe(run_server(port), loop)
+        asyncio.run_coroutine_threadsafe(update_report(initial_html, port), loop)
     else:
         asyncio.run_coroutine_threadsafe(update_report(initial_html, port), loop)
 

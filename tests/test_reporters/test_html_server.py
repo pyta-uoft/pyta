@@ -63,6 +63,7 @@ def test_no_watch_server_is_non_persistent(snapshot):
 
         if not response_body:
             process.send_signal(signal.SIGINT)
+            process.wait()
             pytest.fail("Server did not start within the expected timeout")
 
         cleaned_body = clean_response_body(response_body)
@@ -74,6 +75,7 @@ def test_no_watch_server_is_non_persistent(snapshot):
             new_conn.getresponse()
     finally:
         process.send_signal(signal.SIGINT)
+        process.wait()
 
 
 def test_watch_persistence(snapshot):
@@ -87,6 +89,7 @@ def test_watch_persistence(snapshot):
 
     if not wait_for_server(5008):
         process.send_signal(signal.SIGINT)
+        process.wait()
         pytest.fail("Server did not start within the expected timeout")
 
     try:
@@ -102,6 +105,7 @@ def test_watch_persistence(snapshot):
 
     finally:
         process.send_signal(signal.SIGINT)
+        process.wait()
 
 
 @pytest.fixture(scope="function")
@@ -128,6 +132,7 @@ def test_watch_update(temp_script_file_path, snapshot):
 
     if not wait_for_server(5008):
         process.send_signal(signal.SIGINT)
+        process.wait()
         pytest.fail("Server did not start within the expected timeout")
 
     try:
@@ -148,4 +153,5 @@ def test_watch_update(temp_script_file_path, snapshot):
 
     finally:
         process.send_signal(signal.SIGINT)
+        process.wait()
 

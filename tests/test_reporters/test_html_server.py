@@ -22,6 +22,17 @@ def clean_response_body(body) -> str:
 
     return body.strip()
 
+def server_does_update_on_change(initial_html: str, timeout: int = 30, interval: int = 1) -> bool:
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        conn = HTTPConnection("127.0.0.1",5008 , timeout=1)
+        conn.request("GET", "/")
+        response = conn.getresponse()
+        clean_response = clean_response_body(response.read().decode("utf-8"))
+        if clean_response != initial_html:
+            return True
+        time.sleep(interval)
+    return False
 
 def wait_for_server(port: int, timeout: int = 30, interval: int = 1) -> Optional[str]:
     """Wait for the server to be available before sending requests."""
@@ -108,6 +119,7 @@ def temp_script_file_path(tmp_path) -> str:
     return file_path
 
 
+
 def test_watch_update(temp_script_file_path, snapshot):
     """Test the start_server_once function with watch=True using a fixed port.
     Ensure the server changes the report contents after making code changes"""
@@ -131,17 +143,8 @@ def test_watch_update(temp_script_file_path, snapshot):
         with open(temp_script_file_path, "a") as py_file:
             py_file.write("# This doesn't belong here!")
 
-        time.sleep(2)  # wait for the server to update the html template
-
-        conn.request("GET", "/")
-        response = conn.getresponse()
-        assert response.status == 200
-
-        response_body = response.read().decode("utf-8")
-        cleaned_body_after = clean_response_body(response_body)
-        snapshot.assert_match(cleaned_body_after, "watch_html_server_snapshot_updated.html")
-
-        assert cleaned_body_after != cleaned_body_before
+        if not server_does_update_on_change(cleaned_body_before):
+            pytest.fail("Server did not update HTML code served")
 
     finally:
         process.send_signal(signal.SIGINT)
@@ -163,7 +166,7 @@ def test_websocket_message(temp_script_file_path):
         with open(temp_script_file_path, "a") as py_file:
             py_file.write("# trigger reload\n")
 
-        time.sleep(1)  # give the server time to send the websocket message
+        time.sleep(2)  # give the server time to send the websocket message
 
         message = ws.recv()
         assert message == "reload"

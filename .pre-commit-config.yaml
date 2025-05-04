@@ -26,9 +26,7 @@ exclude: |
       tests/test_debug/snapshot_tracer_testing_snapshots|
       tests/test_reporters/snapshots/test_html_server/test_no_watch_server_is_non_persistent/no_watch_html_server_snapshot.html|
       tests/test_reporters/snapshots/test_html_server/test_watch_persistence/watch_html_server_snapshot.html|
-      tests/test_reporters/snapshots/test_html_server/test_watch_update/|
-  
-
+      tests/test_reporters/snapshots/test_html_server/test_watch_update/
   )
 
 ci:

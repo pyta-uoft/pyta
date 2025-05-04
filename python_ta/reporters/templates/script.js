@@ -75,3 +75,11 @@ function toggleElement(elem) {
     elem.removeEventListener("transitionend", arguments.callee)
   })
 }
+
+const socket = new WebSocket("ws://localhost:{{ port }}/ws")
+
+socket.onmessage = (event) => {
+  if (event.data === "reload") {
+    window.location.reload()
+  }
+}

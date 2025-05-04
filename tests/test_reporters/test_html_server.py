@@ -21,13 +21,16 @@ def clean_response_body(body) -> str:
 
     return body.strip()
 
-def updated_html_from_server(initial_html: str, timeout: int = 30, interval: int = 1) -> Optional[str]:
+
+def updated_html_from_server(
+    initial_html: str, timeout: int = 30, interval: int = 1
+) -> Optional[str]:
     """Waits for the server to update its html contents before returning the new html string. Polls the server
     every interval seconds until timeout seconds have passed at which point the function returns None.
     """
     start_time = time.time()
     while time.time() - start_time < timeout:
-        conn = HTTPConnection("127.0.0.1",5008 , timeout=1)
+        conn = HTTPConnection("127.0.0.1", 5008, timeout=1)
         conn.request("GET", "/")
         response = conn.getresponse()
         clean_response = clean_response_body(response.read().decode("utf-8"))
@@ -35,6 +38,7 @@ def updated_html_from_server(initial_html: str, timeout: int = 30, interval: int
             return clean_response
         time.sleep(interval)
     return None
+
 
 def wait_for_server(port: int, timeout: int = 30, interval: int = 1) -> Optional[str]:
     """Wait for the server to be available before sending requests."""
@@ -125,7 +129,6 @@ def temp_script_file_path(tmp_path) -> str:
     return file_path
 
 
-
 def test_watch_update(temp_script_file_path, snapshot):
     """Test the start_server_once function with watch=True using a fixed port.
     Ensure the server changes the report contents after making code changes"""
@@ -159,6 +162,7 @@ def test_watch_update(temp_script_file_path, snapshot):
     finally:
         process.send_signal(signal.SIGINT)
         process.wait()
+
 
 def test_websocket_message(temp_script_file_path):
     """Test that the "reload" message is sent to any open websocket connections

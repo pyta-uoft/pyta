@@ -47,6 +47,7 @@ class HTMLReporter(PythonTaReporter):
     code_err_title = "Code Errors or Forbidden Usage (fix: high priority)"
     style_err_title = "Style or Convention Errors (fix: before submission)"
     OUTPUT_FILENAME = "pyta_report.html"
+    port = None
 
     def print_messages(self, level="all"):
         """Do nothing to print messages, since all are displayed in a single HTML file."""
@@ -61,7 +62,6 @@ class HTMLReporter(PythonTaReporter):
         This method can be implemented to display them after they've
         been aggregated.
         """
-        global PORT
         grouped_messages = {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
 
         template_f = self.linter.config.pyta_template_file
@@ -74,9 +74,9 @@ class HTMLReporter(PythonTaReporter):
         template = Environment(loader=FileSystemLoader(file_parent_directory)).get_template(
             filename
         )
-        if not PORT:
-            PORT = (
-                find_free_port()
+        if not self.port:
+            self.port = (
+                _find_free_port()
                 if self.linter.config.server_port == 0
                 else self.linter.config.server_port
             )
@@ -88,7 +88,7 @@ class HTMLReporter(PythonTaReporter):
         # Render the jinja template
         rendered_template = template.render(
             date_time=self._generate_report_date_time(),
-            port=PORT,
+            port=self.port,
             reporter=self,
             grouped_messages=grouped_messages,
             os=os,
@@ -102,9 +102,9 @@ class HTMLReporter(PythonTaReporter):
         else:
             rendered_template = rendered_template.encode("utf8")
             if self.linter.config.watch:
-                start_server_once(rendered_template, PORT)
+                start_server_once(rendered_template, self.port)
             else:
-                open_html_in_browser(rendered_template, self.linter.config.watch, PORT)
+                open_html_in_browser(rendered_template, self.linter.config.watch, self.port)
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:
@@ -121,7 +121,7 @@ class HTMLReporter(PythonTaReporter):
         return colour + new_text + cls._COLOURING["reset"]
 
 
-def find_free_port():
+def _find_free_port() -> int:
     """Find and return an available TCP port on localhost."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))

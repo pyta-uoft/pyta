@@ -11,10 +11,9 @@ from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
 from .one_shot_server import open_html_in_browser
-from .persistent_server import start_server_once
+from .persistent_server import PersistentHTMLServer
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
-PORT = None
 
 
 class HTMLReporter(PythonTaReporter):
@@ -48,6 +47,7 @@ class HTMLReporter(PythonTaReporter):
     style_err_title = "Style or Convention Errors (fix: before submission)"
     OUTPUT_FILENAME = "pyta_report.html"
     port = None
+    persistent_server = None
 
     def print_messages(self, level="all"):
         """Do nothing to print messages, since all are displayed in a single HTML file."""
@@ -80,6 +80,9 @@ class HTMLReporter(PythonTaReporter):
                 if self.linter.config.server_port == 0
                 else self.linter.config.server_port
             )
+        if not self.persistent_server:
+            self.persistent_server = PersistentHTMLServer(self.port)
+
         # Embed resources so the output html can go anywhere, independent of assets.
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
         #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
@@ -102,7 +105,7 @@ class HTMLReporter(PythonTaReporter):
         else:
             rendered_template = rendered_template.encode("utf8")
             if self.linter.config.watch:
-                start_server_once(rendered_template, self.port)
+                self.persistent_server.start_server_once(rendered_template)
             else:
                 open_html_in_browser(rendered_template, self.linter.config.watch, self.port)
 

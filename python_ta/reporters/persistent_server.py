@@ -7,66 +7,66 @@ import webbrowser
 
 from aiohttp import WSMsgType, web
 
-logging.getLogger("aiohttp.access").disabled = True
-latest_html: bytes = b"<h1>Loading report...</h1>"
-websockets = set()
-server_started = False
-loop = asyncio.get_event_loop()
+LOADING_HTML = b"<h1>Loading report...</h1>"
 
 
-async def handle_report(request):
-    """Serve the current HTML content at the root endpoint ('/')."""
-    return web.Response(body=latest_html, content_type="text/html")
+class PersistentHTMLServer:
+    """A persistent HTML server that serves HTML content and supports WebSocket connections."""
 
+    def __init__(self, port: int):
+        self.port = port
+        self.latest_html = LOADING_HTML
+        self.websockets = set()
+        self.server_started = False
+        self.loop = asyncio.get_event_loop()
 
-async def websocket_handler(request):
-    """Handle WebSocket connections, tracking clients and listening for errors."""
-    ws = web.WebSocketResponse()
-    await ws.prepare(request)
+    async def handle_report(self, request: web.Request) -> web.Response:
+        """Serve the current HTML content at the root endpoint ('/')."""
+        return web.Response(body=self.latest_html, content_type="text/html")
 
-    websockets.add(ws)
+    async def handle_websocket(self, request: web.Request) -> web.WebSocketResponse:
+        """Handle WebSocket connections, tracking clients and listening for errors."""
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
 
-    try:
-        async for msg in ws:
-            if msg.type == WSMsgType.ERROR:
-                print(f"WebSocket error: {ws.exception()}")
-    finally:
-        websockets.remove(ws)
-    return ws
+        self.websockets.add(ws)
+        try:
+            async for msg in ws:
+                if msg.type == WSMsgType.ERROR:
+                    print(f"WebSocket error: {ws.exception()}")
+        finally:
+            self.websockets.remove(ws)
+        return ws
 
+    async def update_report(self, new_html: bytes) -> None:
+        """Update the served HTML content and notify connected WebSocket clients to reload."""
+        self.latest_html = new_html
 
-async def update_report(new_html: bytes, port: int):
-    """Update the served HTML content and notify connected WebSocket clients to reload."""
-    global latest_html
-    latest_html = new_html
+        active = [ws for ws in self.websockets if not ws.closed]
+        if active:
+            for ws in active:
+                await ws.send_str("reload")
+        else:
+            webbrowser.open(f"http://localhost:{self.port}", new=2)
 
-    active = [ws for ws in websockets if not ws.closed]
-    if active:
-        for ws in active:
-            await ws.send_str("reload")
-    else:
-        webbrowser.open(f"http://localhost:{port}", new=2)
+    def start_server_once(self, initial_html: bytes) -> None:
+        """Start the HTML and WebSocket server if not already running, or update content if running."""
+        logging.getLogger("aiohttp.access").disabled = True
+        if not self.server_started:
+            self.server_started = True
+            self.loop.create_task(self.run_server())
+            self.loop.create_task(self.update_report(initial_html))
+            threading.Thread(target=self.loop.run_forever, daemon=True).start()
+        else:
+            asyncio.run_coroutine_threadsafe(self.update_report(initial_html), self.loop)
 
+    async def run_server(self) -> None:
+        """Launch the aiohttp web server on the specified port with routes for HTML and WebSocket."""
+        app = web.Application()
+        app.router.add_get("/", self.handle_report)
+        app.router.add_get("/ws", self.handle_websocket)
 
-def start_server_once(initial_html: bytes, port: int = 8000):
-    """Start the HTML and WebSocket server if not already running, or update content if running."""
-    global server_started
-    if not server_started:
-        server_started = True
-        loop.create_task(run_server(port))
-        loop.create_task(update_report(initial_html, port))
-        threading.Thread(target=loop.run_forever, daemon=True).start()
-    else:
-        asyncio.run_coroutine_threadsafe(update_report(initial_html, port), loop)
-
-
-async def run_server(port: int):
-    """Launch the aiohttp web server on the specified port with routes for HTML and WebSocket."""
-    app = web.Application()
-    app.router.add_get("/", handle_report)
-    app.router.add_get("/ws", websocket_handler)
-
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, "localhost", port)
-    await site.start()
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "localhost", self.port)
+        await site.start()

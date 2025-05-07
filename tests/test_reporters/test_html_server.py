@@ -174,13 +174,10 @@ def test_websocket_message(temp_script_file_path):
         if not wait_for_server(5008):
             pytest.fail("Server did not start within the expected timeout")
 
-        ws = websocket.create_connection("ws://localhost:5008/ws")
-        ws.settimeout(1)
+        ws = websocket.create_connection("ws://localhost:5008/ws", timeout=10)
 
         with open(temp_script_file_path, "a") as py_file:
             py_file.write("# trigger reload\n")
-
-        time.sleep(2)  # give the server time to send the websocket message
 
         message = ws.recv()
         assert message == "reload"

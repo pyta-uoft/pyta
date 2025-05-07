@@ -24,8 +24,9 @@ exclude: |
       tests/fixtures/|
       tests/test_debug/snapshot_testing_snapshots|
       tests/test_debug/snapshot_tracer_testing_snapshots|
-      tests/test_reporters/snapshots/test_html_server/test_open_html_in_browser_no_watch/no_watch_html_server_snapshot.html|
-      tests/test_reporters/snapshots/test_html_server/test_open_html_in_browser_watch/watch_html_server_snapshot.html
+      tests/test_reporters/snapshots/test_html_server/test_no_watch_server_is_non_persistent/no_watch_html_server_snapshot.html|
+      tests/test_reporters/snapshots/test_html_server/test_watch_persistence/watch_html_server_snapshot.html|
+      tests/test_reporters/snapshots/test_html_server/test_watch_update/
   )
 
 ci:

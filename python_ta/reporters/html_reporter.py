@@ -107,7 +107,7 @@ class HTMLReporter(PythonTaReporter):
             if self.linter.config.watch:
                 self.persistent_server.start_server_once(rendered_template)
             else:
-                open_html_in_browser(rendered_template, self.linter.config.watch, self.port)
+                open_html_in_browser(rendered_template, self.port)
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

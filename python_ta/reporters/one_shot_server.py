@@ -1,10 +1,9 @@
-import os
 import sys
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
+def open_html_in_browser(html: bytes, port: int) -> None:
     """
     Display html in a web browser without creating a temp file.
     Instantiates a trivial HTTP server on the specified port (or an available port if 0 is provided)
@@ -29,24 +28,16 @@ def open_html_in_browser(html: bytes, watch: bool, port: int) -> None:
             """Overridden so that no server logging is printed."""
             pass
 
-    if watch:
-        print(
-            "[INFO] Your PythonTA report is being opened in your web browser.\n"
-            "       Press Ctrl + C or stop this program to exit.",
-            file=sys.stderr,
-        )
-
-    else:
-        server = HTTPServer(("127.0.0.1", port), RequestHandler)
-        webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
-        server.handle_request()
-        server.server_close()
-        print(
-            "[INFO] Your PythonTA report is being opened in your web browser.\n"
-            "       If it doesn't open, please add an output argument to python_ta.check_all\n"
-            "       as follows:\n\n"
-            "         check_all(..., output='pyta_report.html')\n\n"
-            "       This will cause PythonTA to save the report to a file, pyta_report.html,\n"
-            "       that you can open manually in a web browser.",
-            file=sys.stderr,
-        )
+    server = HTTPServer(("127.0.0.1", port), RequestHandler)
+    webbrowser.open(f"http://127.0.0.1:{server.server_port}", new=2)
+    server.handle_request()
+    server.server_close()
+    print(
+        "[INFO] Your PythonTA report is being opened in your web browser.\n"
+        "       If it doesn't open, please add an output argument to python_ta.check_all\n"
+        "       as follows:\n\n"
+        "         check_all(..., output='pyta_report.html')\n\n"
+        "       This will cause PythonTA to save the report to a file, pyta_report.html,\n"
+        "       that you can open manually in a web browser.",
+        file=sys.stderr,
+    )

@@ -357,11 +357,7 @@ def get_valid_files_to_check(module_name: Union[list[str], str]) -> Generator[An
         elif not os.path.exists(os.path.expanduser(item)):
             try:
                 # For files with dot notation, e.g., `examples.<filename>`
-                filepath = modutils.file_from_modpath(item.split("."))
-                if os.path.exists(filepath):
-                    yield filepath
-                else:
-                    logging.error("Could not find the file called, `{}`\n".format(item))
+                yield modutils.file_from_modpath(item.split("."))
             except ImportError:
                 logging.error("Could not find the file called, `{}`\n".format(item))
         else:

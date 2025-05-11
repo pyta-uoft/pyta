@@ -223,7 +223,7 @@ def test_check_with_config():
 
 
 def test_check_saves_file() -> None:
-    """Test whether or not specifiying an output properly saves a file"""
+    """Test whether or not specifying an output properly saves a file"""
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output will be created in the main directory
@@ -239,7 +239,7 @@ def test_check_saves_file() -> None:
 
 
 def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
-    """Test whether not specifiying an output does not save a file"""
+    """Test whether not specifying an output does not save a file"""
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory

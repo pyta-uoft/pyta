@@ -62,11 +62,7 @@ def test_check_on_file():
 
 
 def test_check_on_package():
-    """
-    Test verifies if `check_all()` works with package notation (dots) and also mixed with raw file paths.
-
-    Input mixes both package and package files covering all cases
-    """
+    """Test inputs written in package notation."""
     _inputs = [
         ["examples.sample_usage.draw_cfg"],
         ["examples.sample_usage", "examples/nodes/const.py"],
@@ -223,7 +219,7 @@ def test_check_with_config():
 
 
 def test_check_saves_file() -> None:
-    """Test whether or not specifying an output properly saves a file"""
+    """Test whether or not specifiying an output properly saves a file"""
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output will be created in the main directory
@@ -239,7 +235,7 @@ def test_check_saves_file() -> None:
 
 
 def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
-    """Test whether not specifying an output does not save a file"""
+    """Test whether not specifiying an output does not save a file"""
     _inputs = [["examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory

@@ -28,6 +28,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Added test case for `check_all` function ensuring proper behaviour when handling inputs in package notation.
+- Improved `get_valid_files_to_check` function by removing unreachable code.
+
 ## [2.10.1] - 2025-02-19
 
 ### 🐛 Bug fixes

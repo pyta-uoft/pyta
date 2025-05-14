@@ -425,24 +425,26 @@ def test_precondition_inline_comment_no_error(caplog) -> None:
     assert "WARNING" not in [record.levelname for record in caplog.records]
 
 
-def test_check_all_truncates_messages_when_max_exceeded(capsys):
-    """
-    Test that check_all outputs only the max number of messages set when the max is exceeded.
-    """
-    import python_ta
+def test_check_all_returns_max_messages_when_max_exceeded(capsys):
+    """Test that check_all outputs only the max number of messages set when the max is exceeded."""
 
     python_ta.check_all(
         # tests/fixtures/unused_imports.py contains 3 unused import errors
         "tests/fixtures/unused_imports.py",
         config={
             "output-format": "pyta-plain",
-            "pyta-error-permission": "no",
-            "pyta-file-permission": "no",
             "pyta-number-of-messages": 2,  # Max messages is set to two, so the last error of the same type is not outputed
         },
     )
 
     output = capsys.readouterr().out
 
-    # Check that only two messages are outputted
+    # Check that the first two outputs should appear
+    assert "[Line 1]" in output
+    assert "[Line 2]" in output
+
+    # Verify that the third import should NOT be present
+    assert "[Line 3]" not in output
+
+    # Trucation message indicating max messages should be present
     assert "First 2 shown" in output

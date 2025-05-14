@@ -17,7 +17,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update the `forbidden-io-function-checker` to flag aliases of forbidden functions
 - Update how error messages are overridden such that section headers are no longer required within the config file
 - Added `presistent_server` which recives the watch property changes through websockets and updates the HTML report
-- Added test case to `test_check.py` for better coverage of `colour_messages_by_type`
 
 ### 💫 New checkers
 
@@ -28,6 +27,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved error message in `patches/transforms.py` where CFGVisitor is run
 
 ### 🔧 Internal changes
+
+- Added test case to `test_check.py` for better coverage of `colour_messages_by_type`
 
 ## [2.10.1] - 2025-02-19
 

@@ -18,20 +18,35 @@ import pytest
 
 import python_ta
 
+# _TEST_FILE_INPUTS = [
+#     ["examples/nodes/name.py"],
+#     ["examples/nodes/dict.py", "examples/nodes/const.py"],
+#     ["examples.sample_usage.draw_cfg"],
+#     ["examples.sample_usage", "examples/nodes/const.py"],
+#     ["examples/nodes"],
+#     222,
+#     [
+#         222,
+#         "examples/inline_config_comment.py",
+#         "examples/nodes/dict.py",
+#         "file_does_not_exist",
+#         "module_dne.file_dne",
+#     ],
+# ]
 _TEST_FILE_INPUTS = [
     ["examples/nodes/name.py"],
     ["examples/nodes/dict.py", "examples/nodes/const.py"],
     ["examples.sample_usage.draw_cfg"],
     ["examples.sample_usage", "examples/nodes/const.py"],
-    ["examples/nodes"],
+    [222],
     222,
-    [
-        222,
-        "examples/inline_config_comment.py",
-        "examples/nodes/dict.py",
-        "file_does_not_exist",
-        "module_dne.file_dne",
-    ],
+    ["examples/nodes/dict.py examples/nodes/const.py"],
+    [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
+    ["file_does_not_exist"],
+    ["module_dne.file_dne"],
+    ["examples/nodes/const.py"],
+    ["examples/nodes"],
+    ["examples/nodes/name.py"],
 ]
 
 _DEFAULT_CONFIG = {

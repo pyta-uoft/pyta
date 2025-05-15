@@ -23,7 +23,7 @@ _TEST_FILE_INPUTS = [
     ["examples/nodes/dict.py", "examples/nodes/const.py"],
     ["examples.sample_usage.draw_cfg"],
     ["examples.sample_usage", "examples/nodes/const.py"],
-    ["examples/nodes/const.py"],
+    ["examples/nodes"],
     222,
     [
         222,

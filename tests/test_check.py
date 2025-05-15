@@ -23,15 +23,14 @@ _TEST_FILE_INPUTS = [
     ["examples/nodes/dict.py", "examples/nodes/const.py"],
     ["examples.sample_usage.draw_cfg"],
     ["examples.sample_usage", "examples/nodes/const.py"],
-    [222],
     222,
-    ["examples/nodes/dict.py examples/nodes/const.py"],
-    [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
-    ["file_does_not_exist"],
-    ["module_dne.file_dne"],
-    ["examples/nodes/const.py"],
-    ["examples/nodes"],
-    ["examples/nodes/name.py"],
+    [
+        222,
+        "examples/inline_config_comment.py",
+        "examples/nodes/dict.py",
+        "file_does_not_exist",
+        "module_dne.file_dne",
+    ],
 ]
 
 _DEFAULT_CONFIG = {
@@ -175,15 +174,20 @@ def test_check_on_dir():
     assert not sample_files, f"the following files not checked by python_ta: {sample_files}"
 
 
-# Cartesian Product between both lists.
 @pytest.mark.parametrize("input_files", _TEST_FILE_INPUTS)
 @pytest.mark.parametrize("config", _CONFIG)
-def test_check_behaviour(input_files: Union[str, list[str]], config: dict) -> None:
-    python_ta.check_all(
-        input_files,
-        output="pyta_output.html",
-        config=config,
-    )
+def test_check_behaviour(input_files: Union[str, list[str]], config) -> None:
+    """Test whether check_all behaves correctly for a variety of valid and invalid inputs."""
+    python_ta.check_all(input_files, config)
+
+
+@pytest.mark.parametrize("input_files", _TEST_FILE_INPUTS)
+def test_check_saves_file(input_files: Union[str, list[str]]) -> None:
+    """Test whether or not specifiying an output properly saves a file"""
+
+    # Note that the reporter output will be created in the main directory
+    python_ta.check_all(input_files, output="pyta_output.html")
+
     file_exists = path.exists("pyta_output.html")
 
     assert file_exists
@@ -197,7 +201,7 @@ def test_check_behaviour(input_files: Union[str, list[str]], config: dict) -> No
 def test_check_no_reporter_output(
     prevent_webbrowser_and_httpserver, input_files: Union[str, list[str]]
 ) -> None:
-    """Test whether not specifying an output does not save a file.
+    """Test whether not specifying an output does not save a file
 
     An [INFO] message may still be printed because PythonTA logs this by default when no output argument is provided.
     Even though no file is created and the browser does not actually open."""

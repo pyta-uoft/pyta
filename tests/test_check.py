@@ -33,13 +33,6 @@ _TEST_FILE_INPUTS = [
         "examples.sample_usage",
         "examples/nodes/const.py",
     ],
-    [
-        "examples/nodes/for.py",
-        "examples/nodes/while.py",
-        "examples/nodes/continue.py",
-        "example/nodes/if.py",
-        "example/nodes/deleted.py",
-    ],
     222,
     [
         222,
@@ -49,21 +42,6 @@ _TEST_FILE_INPUTS = [
         "module_dne.file_dne",
     ],
 ]
-# _TEST_FILE_INPUTS = [
-#     ["examples/nodes/name.py"],
-#     ["examples/nodes/dict.py", "examples/nodes/const.py"],
-#     ["examples.sample_usage.draw_cfg"],
-#     ["examples.sample_usage", "examples/nodes/const.py"],
-#     [222],
-#     222,
-#     ["examples/nodes/dict.py examples/nodes/const.py"],
-#     [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
-#     ["file_does_not_exist"],
-#     ["module_dne.file_dne"],
-#     ["examples/nodes/const.py"],
-#     ["examples/nodes"],
-#     ["examples/nodes/name.py"],
-# ]
 
 _DEFAULT_CONFIG = {
     "output-format": "pyta-plain",
@@ -206,7 +184,13 @@ def test_check_on_dir():
     assert not sample_files, f"the following files not checked by python_ta: {sample_files}"
 
 
-@pytest.mark.parametrize("input_files", _TEST_FILE_INPUTS)
+@pytest.mark.parametrize(
+    "input_files",
+    _TEST_FILE_INPUTS
+    + [
+        "examples/nodes",
+    ],
+)
 @pytest.mark.parametrize("config", _CONFIG)
 def test_check_behaviour(input_files: Union[str, list[str]], config) -> None:
     """Test whether check_all behaves correctly for a variety of valid and invalid inputs."""

@@ -37,6 +37,7 @@ _TEST_FILE_INPUTS = [
         "examples/nodes/for.py",
         "examples/nodes/while.py",
         "examples/nodes/continue.py",
+        "example/nodes/if.py",
     ],
     222,
     [

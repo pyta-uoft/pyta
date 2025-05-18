@@ -148,7 +148,7 @@ For more information on overriding error messages, see _[Overriding error messag
 ### `watch` (default: `false`)
 
 When `true`, PythonTA continuously monitors the specified files for changes and automatically re-runs the checks whenever a modification is detected.
-For the **HTMLReporter**, this enables a persistent server that serves the PyTA report, allowing users to refresh the report page in their browser without restarting the server.
+For the **HTMLReporter**, this enables a persistent server that serves the PyTA report, allowing users to view the report in real-time as they make changes to their code.
 
 When `false` (default), PythonTA performs a one-time analysis and exits after generating the report.
 

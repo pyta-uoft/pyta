@@ -1,4 +1,5 @@
 import os
+import socket
 import sys
 
 from jinja2 import Environment, FileSystemLoader
@@ -9,7 +10,8 @@ from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import PythonTaReporter
-from .html_server import open_html_in_browser
+from .one_shot_server import open_html_in_browser
+from .persistent_server import PersistentHTMLServer
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
@@ -44,6 +46,8 @@ class HTMLReporter(PythonTaReporter):
     code_err_title = "Code Errors or Forbidden Usage (fix: high priority)"
     style_err_title = "Style or Convention Errors (fix: before submission)"
     OUTPUT_FILENAME = "pyta_report.html"
+    port = None
+    persistent_server = None
 
     def print_messages(self, level="all"):
         """Do nothing to print messages, since all are displayed in a single HTML file."""
@@ -70,6 +74,14 @@ class HTMLReporter(PythonTaReporter):
         template = Environment(loader=FileSystemLoader(file_parent_directory)).get_template(
             filename
         )
+        if not self.port:
+            self.port = (
+                _find_free_port()
+                if self.linter.config.server_port == 0
+                else self.linter.config.server_port
+            )
+        if not self.persistent_server:
+            self.persistent_server = PersistentHTMLServer(self.port)
 
         # Embed resources so the output html can go anywhere, independent of assets.
         # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
@@ -79,6 +91,7 @@ class HTMLReporter(PythonTaReporter):
         # Render the jinja template
         rendered_template = template.render(
             date_time=self._generate_report_date_time(),
+            port=self.port,
             reporter=self,
             grouped_messages=grouped_messages,
             os=os,
@@ -91,9 +104,10 @@ class HTMLReporter(PythonTaReporter):
             self.out.flush()
         else:
             rendered_template = rendered_template.encode("utf8")
-            open_html_in_browser(
-                rendered_template, self.linter.config.watch, self.linter.config.server_port
-            )
+            if self.linter.config.watch:
+                self.persistent_server.start_server_once(rendered_template)
+            else:
+                open_html_in_browser(rendered_template, self.port)
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:
@@ -108,6 +122,13 @@ class HTMLReporter(PythonTaReporter):
             )
 
         return colour + new_text + cls._COLOURING["reset"]
+
+
+def _find_free_port() -> int:
+    """Find and return an available TCP port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
 
 
 def register(linter: PyLinter):

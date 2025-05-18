@@ -7,6 +7,7 @@ authors = [
 license = {text = "MIT"}
 readme = "README.md"
 dependencies = [
+    "aiohttp ~= 3.11.18",
     "astroid ~= 3.3.5",
     "beautifulsoup4",
     "black",
@@ -38,6 +39,7 @@ dev = [
     "pytest-cov >= 4.0,< 6.2",
     "pytest-mock",
     "pytest-snapshot",
+    "websocket-client",
     "sphinx",
     "sphinx-rtd-theme",
 ]

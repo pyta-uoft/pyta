@@ -61,6 +61,31 @@ def test_check_on_file():
         )
 
 
+def test_check_on_package():
+    """Test inputs written in package notation."""
+    _inputs = [
+        ["examples.sample_usage.draw_cfg"],
+        ["examples.sample_usage", "examples/nodes/const.py"],
+    ]
+    for item in _inputs:
+        python_ta.check_all(
+            item,
+            output="pyta_output.html",
+            config={
+                "output-format": "pyta-plain",
+                "pyta-error-permission": "no",
+                "pyta-file-permission": "no",
+            },
+        )
+    file_exists = path.exists("pyta_output.html")
+
+    assert file_exists
+
+    # If the file exists, the assertion passes and the file gets removed from the main directory
+    if file_exists:
+        remove("pyta_output.html")
+
+
 def test_check_on_bad_input():
     """Test bad inputs. In all cases, pyta should recover.
     Any valid files, if any, should be checked.
@@ -71,6 +96,7 @@ def test_check_on_bad_input():
         ["examples/nodes/dict.py examples/nodes/const.py"],
         [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
         ["file_does_not_exist"],
+        ["module_dne.file_dne"],
     ]
     for item in _inputs:
         python_ta.check_all(

@@ -2,6 +2,8 @@
 installed `python_ta` package.
 """
 
+from __future__ import annotations
+
 import io
 import os
 import select
@@ -12,7 +14,6 @@ import time
 from os import path, remove
 from pathlib import Path
 from subprocess import Popen
-from typing import Union
 
 import pytest
 
@@ -71,7 +72,7 @@ def test_check_on_dir():
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_on_file"])
-def test_check_on_file(input_file: Union[str, list[str]]) -> None:
+def test_check_on_file(input_file: str | list[str]) -> None:
     """Test files"""
     python_ta.check_all(
         input_file,
@@ -84,7 +85,7 @@ def test_check_on_file(input_file: Union[str, list[str]]) -> None:
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_on_package"])
-def test_check_on_package(input_file: Union[str, list[str]]) -> None:
+def test_check_on_package(input_file: str | list[str]) -> None:
     """Test inputs written in package notation."""
     python_ta.check_all(
         input_file,
@@ -105,7 +106,7 @@ def test_check_on_package(input_file: Union[str, list[str]]) -> None:
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_on_bad_input"])
-def test_check_on_bad_input(input_file: Union[str, list[str]]):
+def test_check_on_bad_input(input_file: str | list[str]) -> None:
     """Test bad inputs. In all cases, pyta should recover.
     Any valid files, if any, should be checked.
     """
@@ -120,7 +121,7 @@ def test_check_on_bad_input(input_file: Union[str, list[str]]):
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_with_config"])
-def test_check_with_config(input_file: Union[str, list[str]]) -> None:
+def test_check_with_config(input_file: str | list[str]) -> None:
     """Test inputs along with a config arg."""
     CONFIG = {
         # [ELIF]
@@ -222,7 +223,7 @@ def test_check_with_config(input_file: Union[str, list[str]]) -> None:
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_saves_file"])
-def test_check_saves_file(input_file: Union[str, list[str]]) -> None:
+def test_check_saves_file(input_file: str | list[str]) -> None:
     """Test whether or not specifiying an output properly saves a file"""
 
     # Note that the reporter output will be created in the main directory
@@ -239,13 +240,9 @@ def test_check_saves_file(input_file: Union[str, list[str]]) -> None:
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_saves_file"])
 def test_check_no_reporter_output(
-    prevent_webbrowser_and_httpserver, input_file: Union[str, list[str]]
+    prevent_webbrowser_and_httpserver, input_file: str | list[str]
 ) -> None:
-    """Test whether not specifying an output does not save a file.
-
-    Note: An [INFO] message may still be printed because PythonTA logs this by default when no output argument is provided.
-    Even though no file is created and the browser does not actually open.
-    """
+    """Test whether not specifying an output does not save a file."""
 
     python_ta.check_all(input_file)
 

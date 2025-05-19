@@ -225,7 +225,6 @@ def test_check_with_config(input_file: str | list[str]) -> None:
 @pytest.mark.parametrize("input_file", INPUTS["test_check_saves_file"])
 def test_check_saves_file(input_file: str | list[str]) -> None:
     """Test whether or not specifiying an output properly saves a file"""
-
     # Note that the reporter output will be created in the main directory
     python_ta.check_all(input_file, output="pyta_output.html")
 
@@ -242,8 +241,10 @@ def test_check_saves_file(input_file: str | list[str]) -> None:
 def test_check_no_reporter_output(
     prevent_webbrowser_and_httpserver, input_file: str | list[str]
 ) -> None:
-    """Test whether not specifying an output does not save a file."""
+    """Test whether not specifying an output does not save a file.
 
+    Note: An [INFO] message may still be printed because PythonTA logs this by default when no output argument is provided.
+    Even though no file is created and the browser does not actually open."""
     python_ta.check_all(input_file)
 
     file_exists = path.exists("pyta_output.html")

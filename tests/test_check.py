@@ -21,24 +21,24 @@ import python_ta
 
 INPUTS = {
     "test_check_on_file": [
-        ["examples/nodes/name.py"],
-        ["examples/nodes/dict.py", "examples/nodes/const.py"],
+        ["../examples/nodes/name.py"],
+        ["../examples/nodes/dict.py", "../examples/nodes/const.py"],
     ],
     "test_check_on_package": [
         ["examples.sample_usage.draw_cfg"],
-        ["examples.sample_usage", "examples/nodes/const.py"],
+        ["examples.sample_usage", "../examples/nodes/const.py"],
     ],
     "test_check_on_bad_input": [
         [222],
         222,
         ["examples/nodes/dict.py examples/nodes/const.py"],
-        [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
+        [222, "../examples/inline_config_comment.py", "../examples/nodes/dict.py"],
         ["file_does_not_exist"],
         ["module_dne.file_dne"],
     ],
-    "test_check_with_config": [["examples/nodes/const.py"], ["examples/nodes"]],
-    "test_check_saves_file": [["examples/nodes/name.py"]],
-    "test_check_no_reporter_output": [["examples/nodes/name.py"]],
+    "test_check_with_config": [["../examples/nodes/const.py"], ["../examples/nodes"]],
+    "test_check_saves_file": [["../examples/nodes/name.py"]],
+    "test_check_no_reporter_output": [["../examples/nodes/name.py"]],
 }
 
 

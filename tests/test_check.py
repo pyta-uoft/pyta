@@ -2,6 +2,8 @@
 installed `python_ta` package.
 """
 
+from __future__ import annotations
+
 import io
 import os
 import select
@@ -16,6 +18,28 @@ from subprocess import Popen
 import pytest
 
 import python_ta
+
+INPUTS = {
+    "test_check_on_file": [
+        ["examples/nodes/name.py"],
+        ["examples/nodes/dict.py", "examples/nodes/const.py"],
+    ],
+    "test_check_on_package": [
+        ["examples.sample_usage.draw_cfg"],
+        ["examples.sample_usage", "examples/nodes/const.py"],
+    ],
+    "test_check_on_bad_input": [
+        [222],
+        222,
+        ["examples/nodes/dict.py examples/nodes/const.py"],
+        [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
+        ["file_does_not_exist"],
+        ["module_dne.file_dne"],
+    ],
+    "test_check_with_config": [["examples/nodes/const.py"], ["examples/nodes"]],
+    "test_check_saves_file": [["examples/nodes/name.py"]],
+    "test_check_no_reporter_output": [["examples/nodes/name.py"]],
+}
 
 
 def test_check_on_dir():
@@ -47,36 +71,31 @@ def test_check_on_dir():
     assert not sample_files, f"the following files not checked by python_ta: {sample_files}"
 
 
-def test_check_on_file():
+@pytest.mark.parametrize("input_file", INPUTS["test_check_on_file"])
+def test_check_on_file(input_file: str | list[str]) -> None:
     """Test files"""
-    _inputs = [["examples/nodes/name.py"], ["examples/nodes/dict.py", "examples/nodes/const.py"]]
-    for item in _inputs:
-        python_ta.check_all(
-            item,
-            config={
-                "output-format": "pyta-plain",
-                "pyta-error-permission": "no",
-                "pyta-file-permission": "no",
-            },
-        )
+    python_ta.check_all(
+        input_file,
+        config={
+            "output-format": "pyta-plain",
+            "pyta-error-permission": "no",
+            "pyta-file-permission": "no",
+        },
+    )
 
 
-def test_check_on_package():
+@pytest.mark.parametrize("input_file", INPUTS["test_check_on_package"])
+def test_check_on_package(input_file: str | list[str]) -> None:
     """Test inputs written in package notation."""
-    _inputs = [
-        ["examples.sample_usage.draw_cfg"],
-        ["examples.sample_usage", "examples/nodes/const.py"],
-    ]
-    for item in _inputs:
-        python_ta.check_all(
-            item,
-            output="pyta_output.html",
-            config={
-                "output-format": "pyta-plain",
-                "pyta-error-permission": "no",
-                "pyta-file-permission": "no",
-            },
-        )
+    python_ta.check_all(
+        input_file,
+        output="pyta_output.html",
+        config={
+            "output-format": "pyta-plain",
+            "pyta-error-permission": "no",
+            "pyta-file-permission": "no",
+        },
+    )
     file_exists = path.exists("pyta_output.html")
 
     assert file_exists
@@ -86,32 +105,24 @@ def test_check_on_package():
         remove("pyta_output.html")
 
 
-def test_check_on_bad_input():
+@pytest.mark.parametrize("input_file", INPUTS["test_check_on_bad_input"])
+def test_check_on_bad_input(input_file: str | list[str]) -> None:
     """Test bad inputs. In all cases, pyta should recover.
     Any valid files, if any, should be checked.
     """
-    _inputs = [
-        [222],
-        222,
-        ["examples/nodes/dict.py examples/nodes/const.py"],
-        [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
-        ["file_does_not_exist"],
-        ["module_dne.file_dne"],
-    ]
-    for item in _inputs:
-        python_ta.check_all(
-            item,
-            config={
-                "output-format": "pyta-plain",
-                "pyta-error-permission": "no",
-                "pyta-file-permission": "no",
-            },
-        )
+    python_ta.check_all(
+        input_file,
+        config={
+            "output-format": "pyta-plain",
+            "pyta-error-permission": "no",
+            "pyta-file-permission": "no",
+        },
+    )
 
 
-def test_check_with_config():
+@pytest.mark.parametrize("input_file", INPUTS["test_check_with_config"])
+def test_check_with_config(input_file: str | list[str]) -> None:
     """Test inputs along with a config arg."""
-    _inputs = [["examples/nodes/const.py"], ["examples/nodes"]]
     CONFIG = {
         # [ELIF]
         "max-nested-blocks": 4,
@@ -184,12 +195,6 @@ def test_check_with_config():
             "E1200",
             "E1201",
             "E1202",
-            "W1201",
-            "E1205",
-            "E1206",
-            "similarities",
-            "newstyle",
-            "python3",
             "W0512",
             "C0403",
             "C0401",
@@ -214,16 +219,14 @@ def test_check_with_config():
         "pyta-error-permission": "no",
         "pyta-file-permission": "no",
     }
-    for item in _inputs:
-        python_ta.check_all(item, config=CONFIG)
+    python_ta.check_all(input_file, config=CONFIG)
 
 
-def test_check_saves_file() -> None:
+@pytest.mark.parametrize("input_file", INPUTS["test_check_saves_file"])
+def test_check_saves_file(input_file: str | list[str]) -> None:
     """Test whether or not specifiying an output properly saves a file"""
-    _inputs = [["examples/nodes/name.py"]]
-    for item in _inputs:
-        # Note that the reporter output will be created in the main directory
-        python_ta.check_all(item, output="pyta_output.html")
+    # Note that the reporter output will be created in the main directory
+    python_ta.check_all(input_file, output="pyta_output.html")
 
     file_exists = path.exists("pyta_output.html")
 
@@ -234,12 +237,15 @@ def test_check_saves_file() -> None:
         remove("pyta_output.html")
 
 
-def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
-    """Test whether not specifiying an output does not save a file"""
-    _inputs = [["examples/nodes/name.py"]]
-    for item in _inputs:
-        # Note that the reporter output *would have been* created in the main directory
-        python_ta.check_all(item)
+@pytest.mark.parametrize("input_file", INPUTS["test_check_saves_file"])
+def test_check_no_reporter_output(
+    prevent_webbrowser_and_httpserver, input_file: str | list[str]
+) -> None:
+    """Test whether not specifying an output does not save a file.
+
+    Note: An [INFO] message may still be printed because PythonTA logs this by default when no output argument is provided.
+    Even though no file is created and the browser does not actually open."""
+    python_ta.check_all(input_file)
 
     file_exists = path.exists("pyta_output.html")
 

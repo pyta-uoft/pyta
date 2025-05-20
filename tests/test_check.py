@@ -18,6 +18,10 @@ import pytest
 import python_ta
 
 
+def test_test1():
+    python_ta.check_all("../examples/sample_usage/draw_cfg.py", output="pyta_output.html")
+
+
 def test_check_on_dir():
     """The function, check_all() should handle a top-level dir as input."""
     reporter = python_ta.check_all(
@@ -49,7 +53,10 @@ def test_check_on_dir():
 
 def test_check_on_file():
     """Test files"""
-    _inputs = [["examples/nodes/name.py"], ["examples/nodes/dict.py", "examples/nodes/const.py"]]
+    _inputs = [
+        ["../examples/nodes/name.py"],
+        ["../examples/nodes/dict.py", "../examples/nodes/const.py"],
+    ]
     for item in _inputs:
         python_ta.check_all(
             item,
@@ -65,7 +72,7 @@ def test_check_on_package():
     """Test inputs written in package notation."""
     _inputs = [
         ["examples.sample_usage.draw_cfg"],
-        ["examples.sample_usage", "examples/nodes/const.py"],
+        ["examples.sample_usage", "../examples/nodes/const.py"],
     ]
     for item in _inputs:
         python_ta.check_all(
@@ -94,7 +101,7 @@ def test_check_on_bad_input():
         [222],
         222,
         ["examples/nodes/dict.py examples/nodes/const.py"],
-        [222, "examples/inline_config_comment.py", "examples/nodes/dict.py"],
+        [222, "../examples/inline_config_comment.py", "../examples/nodes/dict.py"],
         ["file_does_not_exist"],
         ["module_dne.file_dne"],
     ]
@@ -111,7 +118,7 @@ def test_check_on_bad_input():
 
 def test_check_with_config():
     """Test inputs along with a config arg."""
-    _inputs = [["examples/nodes/const.py"], ["examples/nodes"]]
+    _inputs = [["../examples/nodes/const.py"], ["../examples/nodes"]]
     CONFIG = {
         # [ELIF]
         "max-nested-blocks": 4,
@@ -220,7 +227,7 @@ def test_check_with_config():
 
 def test_check_saves_file() -> None:
     """Test whether or not specifiying an output properly saves a file"""
-    _inputs = [["examples/nodes/name.py"]]
+    _inputs = [["../examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output will be created in the main directory
         python_ta.check_all(item, output="pyta_output.html")
@@ -236,7 +243,7 @@ def test_check_saves_file() -> None:
 
 def test_check_no_reporter_output(prevent_webbrowser_and_httpserver) -> None:
     """Test whether not specifiying an output does not save a file"""
-    _inputs = [["examples/nodes/name.py"]]
+    _inputs = [["../examples/nodes/name.py"]]
     for item in _inputs:
         # Note that the reporter output *would have been* created in the main directory
         python_ta.check_all(item)

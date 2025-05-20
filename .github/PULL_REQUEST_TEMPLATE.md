@@ -38,7 +38,7 @@ Before opening your pull request:
 - [ ] I have updated the project documentation, if applicable.
   - This is **required** for new features.
 - [ ] I have updated the project Changelog (this is required for all changes).
-- [ ] If this is my first contribution, I have added myself to the list of contributors.
+- [ ] If this is my first contribution, I have added myself to the [list of contributors](https://github.com/pyta-uoft/pyta/blob/master/README.md).
 
 After opening your pull request:
 

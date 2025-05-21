@@ -6,7 +6,6 @@ import time
 from typing import Any, Optional, Union
 
 from pylint.lint import PyLinter
-from pylint.reporters import BaseReporter, MultiReporter
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 

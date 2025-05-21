@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from astroid import nodes
 from astroid.const import Context
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class UnnecessaryIndexingChecker(BaseChecker):

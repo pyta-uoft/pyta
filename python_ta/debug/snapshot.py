@@ -12,10 +12,12 @@ import re
 import shutil
 import subprocess
 import sys
-from types import FrameType
-from typing import Any, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from packaging.version import Version, parse
+
+if TYPE_CHECKING:
+    from types import FrameType
 
 
 def get_filtered_global_variables(frame: FrameType) -> dict:

@@ -30,7 +30,7 @@ except AttributeError:
 
 import logging
 import webbrowser
-from typing import IO, Any, Optional, Union
+from typing import IO, TYPE_CHECKING, Any, Optional, Union
 
 from .check.helpers import (
     check_file,
@@ -41,7 +41,9 @@ from .check.helpers import (
     verify_pre_check,
 )
 from .check.watch import watch_files
-from .reporters.core import PythonTaReporter
+
+if TYPE_CHECKING:
+    from .reporters.core import PythonTaReporter
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 

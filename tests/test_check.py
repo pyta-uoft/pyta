@@ -39,6 +39,9 @@ INPUTS = {
     "test_check_with_config": [["examples/nodes/const.py"], ["examples/nodes"]],
     "test_check_saves_file": [["examples/nodes/name.py"]],
     "test_check_no_reporter_output": [["examples/nodes/name.py"]],
+    "test_check_on_verify_fail_raise": [
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
+    ],
 }
 
 
@@ -254,6 +257,21 @@ def test_check_no_reporter_output(
     # If the file exists, the assertion failed and the file gets removed from main directory
     if file_exists:
         remove("pyta_output.html")
+
+
+@pytest.mark.parametrize("input_file", INPUTS["test_check_on_verify_fail_raise"])
+def test_check_on_verify_fail_raise(input_file: str | list[str]) -> None:
+    """Test that setting on_verify_fail='raise' causes check_all to raise an error for invalid input files."""
+    with pytest.raises(ValueError, match="File cannot be checked"):
+        python_ta.check_all(
+            input_file,
+            config={
+                "output-format": "pyta-plain",
+                "pyta-error-permission": "no",
+                "pyta-file-permission": "no",
+            },
+            on_verify_fail="raise",
+        )
 
 
 def test_check_watch_enabled() -> None:

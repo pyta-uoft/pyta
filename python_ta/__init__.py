@@ -173,6 +173,10 @@ def _check(
                     # else statement not necessary, but reinforces that "log" keeps default behaviour
                     elif on_verify_fail == "log":
                         continue
+                    # Invalid flag
+                    else:
+                        raise ValueError(f"on_verify_fail cannot take value: {on_verify_fail}")
+
                 is_any_file_checked, linter = check_file(
                     file_py=file_py,
                     local_config=local_config,

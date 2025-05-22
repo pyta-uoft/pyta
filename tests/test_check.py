@@ -42,6 +42,12 @@ INPUTS = {
     "test_check_error_raise": [
         "examples/syntax_errors/unindent_does_not_match_indentation.py",
     ],
+    "test_check_error_log": [
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
+    ],
+    "test_check_error_invalid": [
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
+    ],
 }
 
 
@@ -271,6 +277,35 @@ def test_check_error_raise(input_file: str | list[str]) -> None:
                 "pyta-file-permission": "no",
             },
             on_verify_fail="raise",
+        )
+
+
+@pytest.mark.parametrize("input_file", INPUTS["test_check_error_log"])
+def test_check_error_log(input_file: str | list[str]) -> None:
+    """Test that setting on_verify_fail='log' preserves default behaviour when inputting an invalid file."""
+    python_ta.check_all(
+        input_file,
+        config={
+            "output-format": "pyta-plain",
+            "pyta-error-permission": "no",
+            "pyta-file-permission": "no",
+        },
+        on_verify_fail="log",
+    )
+
+
+@pytest.mark.parametrize("input_file", INPUTS["test_check_error_invalid"])
+def test_check_error_invalid(input_file: str | list[str]) -> None:
+    """Test that setting on_verify_fail to invalid value raises ValueError when inputting an invalid file."""
+    with pytest.raises(ValueError, match="on_verify_fail cannot take value"):
+        python_ta.check_all(
+            input_file,
+            config={
+                "output-format": "pyta-plain",
+                "pyta-error-permission": "no",
+                "pyta-file-permission": "no",
+            },
+            on_verify_fail="invalid_value",
         )
 
 

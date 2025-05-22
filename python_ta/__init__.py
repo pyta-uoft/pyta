@@ -63,6 +63,7 @@ def check_errors(
     output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
+    on_verify_fail: str = "log",
 ) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(
@@ -72,6 +73,7 @@ def check_errors(
         output=output,
         load_default_config=load_default_config,
         autoformat=autoformat,
+        on_verify_fail=on_verify_fail,
     )
 
 
@@ -81,6 +83,7 @@ def check_all(
     output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
+    on_verify_fail: str = "log",
 ) -> PythonTaReporter:
     """Analyse one or more Python modules for code issues and display the results.
 
@@ -106,6 +109,10 @@ def check_all(
             If False, the default PythonTA configuration is not used.
         autoformat:
             If True, autoformat all modules using the black formatting tool before analyzing code.
+        on_verify_fail:
+            determines how to handle files that cannot be checked. If set to "log" (default), an error
+            message is logged and execution continues. If set to "raise", a ValueError is raised immediately to stop
+            execution.
 
     Returns:
         The ``PythonTaReporter`` object that generated the report.
@@ -117,6 +124,7 @@ def check_all(
         output=output,
         load_default_config=load_default_config,
         autoformat=autoformat,
+        on_verify_fail=on_verify_fail,
     )
 
 
@@ -127,6 +135,7 @@ def _check(
     output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
+    on_verify_fail: str = "log",
 ) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
@@ -141,6 +150,8 @@ def _check(
     `load_default_config` is used to specify whether to load the default .pylintrc file that comes
     with PythonTA. It will load it by default.
     `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
+    `on_verify_fail` determines how to handle files that cannot be checked. If set to "log" (default), an error
+     message is logged and execution continues. If set to "raise", a ValueError is raised immediately to stop execution.
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
@@ -155,7 +166,13 @@ def _check(
             for file_py in get_file_paths(locations):
                 linted_files.add(file_py)
                 if not verify_pre_check(file_py, linter.config.allow_pylint_comments):
-                    continue
+                    # File cannot be checked
+                    if on_verify_fail == "raise":
+                        # Flag to raise error has been chosen
+                        raise ValueError(f"File cannot be checked: {file_py}")
+                    # else statement not necessary, but reinforces that "log" keeps default behaviour
+                    elif on_verify_fail == "log":
+                        continue
                 is_any_file_checked, linter = check_file(
                     file_py=file_py,
                     local_config=local_config,

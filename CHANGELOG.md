@@ -26,6 +26,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed error in `contracts` where comments in docstring assertions are not removed while parsing
 - Improved error message in `patches/transforms.py` where CFGVisitor is run
 
+### 📚 Documentation Updates
+
+- Linked the contributions list (README.md) in the pull request template
+
 ### 🔧 Internal changes
 
 - Added test case for `check_all` function ensuring proper behaviour when handling inputs in package notation.

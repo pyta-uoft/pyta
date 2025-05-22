@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
-
-from pylint.lint import PyLinter
-from pylint.reporters.ureports.nodes import BaseLayout
+from typing import TYPE_CHECKING
 
 from .core import NewMessage, PythonTaReporter
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
+    from pylint.reporters.ureports.nodes import BaseLayout
 
 
 class JSONReporter(PythonTaReporter):

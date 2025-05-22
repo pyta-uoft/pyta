@@ -7,15 +7,17 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import IO, Optional, Union
+from typing import IO, TYPE_CHECKING, Optional, Union
 
-from astroid import NodeNG
-from pylint.message import Message
-from pylint.message.message_definition import MessageDefinition
 from pylint.reporters import BaseReporter
-from pylint.reporters.ureports.nodes import BaseLayout
 
 from .node_printers import LineType, render_message
+
+if TYPE_CHECKING:
+    from astroid import NodeNG
+    from pylint.message import Message
+    from pylint.message.message_definition import MessageDefinition
+    from pylint.reporters.ureports.nodes import BaseLayout
 
 
 class NewMessage:

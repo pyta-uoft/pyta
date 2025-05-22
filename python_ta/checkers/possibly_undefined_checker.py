@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import Generator, Union
+from typing import TYPE_CHECKING, Generator, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class PossiblyUndefinedChecker(BaseChecker):

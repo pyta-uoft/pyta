@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker, utils
 from pylint.checkers.base.name_checker.checker import _redefines_import
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
 
 from python_ta.utils import _is_in_main
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 # Bad variable names.
 BAD_NAMES = {"l", "I", "O"}

@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import doctest
 import string
+from typing import TYPE_CHECKING
 
-from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
+
+if TYPE_CHECKING:
+    from astroid import nodes
+    from pylint.lint import PyLinter
 
 
 class UnmentionedParameterChecker(BaseChecker):

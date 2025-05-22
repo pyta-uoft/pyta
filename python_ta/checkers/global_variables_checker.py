@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
 from pylint.checkers.base.name_checker.checker import DEFAULT_PATTERNS
 from pylint.checkers.utils import is_builtin
-from pylint.lint import PyLinter
 
 from python_ta.utils import _is_in_main
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class GlobalVariablesChecker(BaseChecker):

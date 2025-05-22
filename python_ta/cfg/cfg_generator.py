@@ -8,7 +8,7 @@ import html
 import importlib.util
 import os.path
 import sys
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 import graphviz
 from astroid import nodes
@@ -21,9 +21,10 @@ try:
 except ImportError:
     Z3Visitor = Any
     z3_dependency_available = False
-
-from .graph import CFGBlock, ControlFlowGraph
 from .visitor import CFGVisitor
+
+if TYPE_CHECKING:
+    from .graph import CFGBlock, ControlFlowGraph
 
 GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
 SUBGRAPH_OPTIONS = {"fontname": "Courier New"}

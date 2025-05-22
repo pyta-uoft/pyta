@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from pylint.lint import PyLinter
+from typing import TYPE_CHECKING
 
 from .core import NewMessage, PythonTaReporter
 from .node_printers import LineType
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class PlainReporter(PythonTaReporter):

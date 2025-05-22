@@ -5,16 +5,17 @@ import inspect
 import json
 import logging
 import os
-import re
 import sys
-import types
 import webbrowser
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from bs4 import BeautifulSoup
 
 from .snapshot import snapshot
+
+if TYPE_CHECKING:
+    import types
 
 
 class SnapshotTracer:

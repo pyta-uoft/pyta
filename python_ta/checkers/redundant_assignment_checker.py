@@ -11,14 +11,16 @@ An assignment statement is redundant if it satisfies the following two propertie
 
 from __future__ import annotations
 
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
 
 from python_ta.cfg.graph import CFGBlock, ControlFlowGraph
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class RedundantAssignmentChecker(BaseChecker):

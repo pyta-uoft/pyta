@@ -257,7 +257,7 @@ def test_allow_pylint_comments() -> None:
     set to True
     """
 
-    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
+    with patch("python_ta.check.helpers.tokenize.open", mock_open(read_data="# pylint: disable")):
         result = verify_pre_check("", allow_pylint_comments=True)
 
     assert result is True
@@ -268,7 +268,7 @@ def test_disallows_pylint_comments() -> None:
     is set to False
     """
 
-    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
+    with patch("python_ta.check.helpers.tokenize.open", mock_open(read_data="# pylint: disable")):
         result = verify_pre_check("", allow_pylint_comments=False)
 
     assert result is False

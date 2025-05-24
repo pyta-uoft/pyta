@@ -31,7 +31,7 @@ except AttributeError:
 import logging
 import tokenize
 import webbrowser
-from typing import IO, Any, Optional, Union
+from typing import IO, Any, Literal, Optional, Union
 
 from .check.helpers import (
     check_file,
@@ -63,7 +63,7 @@ def check_errors(
     output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
-    on_verify_fail: str = "log",
+    on_verify_fail: Literal["log", "raise"] = "log",
 ) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(
@@ -83,7 +83,7 @@ def check_all(
     output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
-    on_verify_fail: str = "log",
+    on_verify_fail: Literal["log", "raise"] = "log",
 ) -> PythonTaReporter:
     """Analyse one or more Python modules for code issues and display the results.
 
@@ -110,8 +110,8 @@ def check_all(
         autoformat:
             If True, autoformat all modules using the black formatting tool before analyzing code.
         on_verify_fail:
-            determines how to handle files that cannot be checked. If set to "log" (default), an error
-            message is logged and execution continues. If set to "raise", a ValueError is raised immediately to stop
+            Determines how to handle files that cannot be checked. If set to "log" (default), an error
+            message is logged and execution continues. If set to "raise", an error is raised immediately to stop
             execution.
 
     Returns:
@@ -135,7 +135,7 @@ def _check(
     output: Optional[Union[str, IO]] = None,
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
-    on_verify_fail: str = "log",
+    on_verify_fail: Literal["log", "raise"] = "log",
 ) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
@@ -151,7 +151,7 @@ def _check(
     with PythonTA. It will load it by default.
     `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
     `on_verify_fail` determines how to handle files that cannot be checked. If set to "log" (default), an error
-     message is logged and execution continues. If set to "raise", a ValueError is raised immediately to stop execution.
+     message is logged and execution continues. If set to "raise", an error is raised immediately to stop execution.
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
@@ -165,17 +165,12 @@ def _check(
             f_paths = []
             for file_py in get_file_paths(locations):
                 linted_files.add(file_py)
-                if not verify_pre_check(file_py, linter.config.allow_pylint_comments):
-                    # File cannot be checked
-                    if on_verify_fail == "raise":
-                        # Flag to raise error has been chosen
-                        raise ValueError(f"File cannot be checked: {file_py}")
-                    # else statement not necessary, but reinforces that "log" keeps default behaviour
-                    elif on_verify_fail == "log":
-                        continue
-                    # Invalid flag
-                    else:
-                        raise ValueError(f"on_verify_fail cannot take value: {on_verify_fail}")
+                if not verify_pre_check(
+                    file_py, linter.config.allow_pylint_comments, on_verify_fail=on_verify_fail
+                ):
+                    # The only Way to reach this is if verify_pre_check returns False, and `on_verify_fail="log"`.
+                    # Hence, this preserves the default behaviour of the function.
+                    continue
 
                 is_any_file_checked, linter = check_file(
                     file_py=file_py,

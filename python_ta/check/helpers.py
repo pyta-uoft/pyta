@@ -9,7 +9,7 @@ import os
 import re
 import sys
 import tokenize
-from typing import IO, Any, AnyStr, Generator, Optional, Union
+from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
 
 import pylint.config
 import pylint.lint
@@ -377,10 +377,20 @@ def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
                 yield os.path.join(root, filename)  # Format path, from root.
 
 
-def verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
+def verify_pre_check(
+    filepath: AnyStr,
+    allow_pylint_comments: bool,
+    on_verify_fail: Literal["log", "raise"] = "log",
+) -> bool:
     """Check student code for certain issues.
-    The additional allow_pylint_comments parameter indicates whether we want the user to be able to add comments
-    beginning with pylint which can be used to locally disable checks.
+
+    Precondition: `filepath` variable must be a valid file path.
+
+    - `filepath` corresponds to the file path of the file that need to be checked.
+    - `allow_pylint_comments` parameter indicates whether we want the user to be able to add comments
+       beginning with pylint which can be used to locally disable checks.
+    - `on_verify_fail` determines how to handle files that cannot be checked. If set to "log" (default), an error
+       message is logged and execution continues. If set to "raise", an error is raised immediately to stop execution.
     """
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.
@@ -405,11 +415,15 @@ def verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
             "python_ta could not check your code due to an "
             + "indentation error at line {}.".format(e.lineno)
         )
+        if on_verify_fail == "raise":
+            raise IndentationError(f"File cannot be checked: {filepath}")
         return False
     except tokenize.TokenError as e:
         logging.error(
             "python_ta could not check your code due to a " + "syntax error in your file."
         )
+        if on_verify_fail == "raise":
+            raise SyntaxError(f"File cannot be checked: {filepath}")
         return False
     except UnicodeDecodeError:
         logging.error(
@@ -421,5 +435,7 @@ def verify_pre_check(filepath: AnyStr, allow_pylint_comments: bool) -> bool:
             for i, line in enumerate(f):
                 if "�" in line:
                     logging.error(f"  Line {i + 1}: {line}")
+        if on_verify_fail == "raise":
+            raise UnicodeDecodeError(f"File cannot be checked: {filepath}")
         return False
     return True

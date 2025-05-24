@@ -41,10 +41,10 @@ INPUTS = {
     "test_check_saves_file": [["examples/nodes/name.py"]],
     "test_check_no_reporter_output": [["examples/nodes/name.py"]],
     "test_check_error_raise": [
-        "../examples/syntax_errors/unindent_does_not_match_indentation.py",
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
     ],
     "test_check_error_log": [
-        "../examples/syntax_errors/unindent_does_not_match_indentation.py",
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
     ],
 }
 

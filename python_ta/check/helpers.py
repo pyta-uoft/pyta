@@ -386,11 +386,12 @@ def verify_pre_check(
 
     Precondition: `filepath` variable must be a valid file path.
 
-    - `filepath` corresponds to the file path of the file that need to be checked.
+    - `filepath` corresponds to the file path of the file that needs to be checked.
     - `allow_pylint_comments` parameter indicates whether we want the user to be able to add comments
        beginning with pylint which can be used to locally disable checks.
-    - `on_verify_fail` determines how to handle files that cannot be checked. If set to "log" (default), an error
-       message is logged and execution continues. If set to "raise", an error is raised immediately to stop execution.
+    - `on_verify_fail` determines how to handle files that cannot be checked. In the event that a file cannot be
+       checked, if `on_verify_fail="raise"`, then an error is raised. However, if 'on_verify_fail="log"' (default), then
+       False is returned.
     """
     # Make sure the program doesn't crash for students.
     # Could use some improvement for better logging and error reporting.

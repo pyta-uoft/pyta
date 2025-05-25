@@ -14,7 +14,7 @@ from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
 import pylint.config
 import pylint.lint
 import pylint.utils
-from astroid import MANAGER, modutils
+from astroid import MANAGER, exceptions, modutils, parse
 from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.reporters import BaseReporter, MultiReporter
@@ -411,11 +411,17 @@ def verify_pre_check(
                         + "No check run on file `{}.`\n".format(filepath)
                     )
                     return False
+
     except IndentationError as e:
         logging.error(
             "python_ta could not check your code due to an "
             + "indentation error at line {}.".format(e.lineno)
         )
+        if on_verify_fail == "raise":
+            raise e
+        return False
+    except exceptions.AstroidSyntaxError as e:
+        logging.error(f"python_ta could not check your code due to a syntax error: {e}")
         if on_verify_fail == "raise":
             raise e
         return False

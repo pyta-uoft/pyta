@@ -6,6 +6,8 @@ import sys
 import tokenize
 from unittest.mock import patch
 
+import pytest
+
 import python_ta
 from python_ta.check.helpers import get_valid_files_to_check, verify_pre_check
 
@@ -60,6 +62,14 @@ def test_pre_check_log_indentation_error(_, caplog) -> None:
     assert "ERROR" == caplog.records[0].levelname
 
 
+@patch("python_ta.tokenize.open", side_effect=IndentationError)
+def test_pre_check_raise_indentation_error(_, caplog) -> None:
+    """Testing error raising in _verify_pre_check function IndentationError catch block"""
+    with pytest.raises(IndentationError):
+        # Don't need a valid file path since patching error into open function
+        verify_pre_check("", False, "raise")
+
+
 @patch("python_ta.tokenize.open", side_effect=tokenize.TokenError)
 def test_pre_check_log_token_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function TokenError catch block"""
@@ -67,6 +77,14 @@ def test_pre_check_log_token_error(_, caplog) -> None:
     verify_pre_check("", False)
     assert "python_ta could not check your code due to a syntax error in your file." in caplog.text
     assert "ERROR" == caplog.records[0].levelname
+
+
+@patch("python_ta.tokenize.open", side_effect=tokenize.TokenError)
+def test_pre_check_raise_token_error(_, caplog) -> None:
+    """Testing error raising in _verify_pre_check function TokenError catch block"""
+    with pytest.raises(tokenize.TokenError):
+        # Don't need a valid file path since patching error into open function
+        verify_pre_check("", False, "raise")
 
 
 @patch("python_ta.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
@@ -85,6 +103,15 @@ def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
     for i in range(len(expected_logs)):
         assert expected_logs[i] == caplog.records[i].msg
         assert "ERROR" == caplog.records[i].levelname
+
+
+@patch("python_ta.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
+def test_pre_check_raise_pylint_unicode_error(_, caplog) -> None:
+    """Testing error raising in _verify_pre_check function UnicodeDecodeError catch block"""
+
+    path = os.path.join(os.path.dirname(__file__), "fixtures", "unicode_decode_error.py")
+    with pytest.raises(UnicodeDecodeError):
+        verify_pre_check(path, False, "raise")
 
 
 def test_get_valid_files_to_check(caplog) -> None:

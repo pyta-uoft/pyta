@@ -136,10 +136,12 @@ def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
 
     # Check if any error codes from the ERROR_TO_ERROR_FUNCTION_MAPPING dict are present in the message
-    for error in ERROR_TO_ERROR_FUNCTION_MAPPING:
+    for error in RENDERERS:
+
+        print("msg.msg =", msg.msg)
         # If an error code is present, yield and return
         if error in msg.msg:
-            yield from ERROR_TO_ERROR_FUNCTION_MAPPING[error](msg, _node, source_lines)
+            yield RENDERERS[error](msg, _node, source_lines)
             return
 
     # If none of the error codes were present, render a generic message
@@ -642,7 +644,7 @@ CUSTOM_MESSAGES = {
     "dict-item-type-mismatch": render_static_type_checker_errors,
 }
 
-ERROR_TO_ERROR_FUNCTION_MAPPING = {
+RENDERERS = {
     "E101": render_pep8_errors_e101_and_e123,
     "E123": render_pep8_errors_e101_and_e123,
     "E115": render_pep8_errors_e115,

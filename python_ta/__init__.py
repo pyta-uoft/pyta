@@ -168,10 +168,8 @@ def _check(
                 if not verify_pre_check(
                     file_py, linter.config.allow_pylint_comments, on_verify_fail=on_verify_fail
                 ):
-                    # The only Way to reach this is if verify_pre_check returns False, and `on_verify_fail="log"`.
-                    # Hence, this preserves the default behaviour of the function.
+                    # The only way to reach this is if verify_pre_check returns False, and `on_verify_fail="log"`.
                     continue
-
                 is_any_file_checked, linter = check_file(
                     file_py=file_py,
                     local_config=local_config,

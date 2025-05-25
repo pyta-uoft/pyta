@@ -417,14 +417,14 @@ def verify_pre_check(
             + "indentation error at line {}.".format(e.lineno)
         )
         if on_verify_fail == "raise":
-            raise e
+            raise
         return False
     except tokenize.TokenError as e:
         logging.error(
             "python_ta could not check your code due to a " + "syntax error in your file."
         )
         if on_verify_fail == "raise":
-            raise e
+            raise
         return False
     except UnicodeDecodeError as e:
         logging.error(
@@ -437,6 +437,6 @@ def verify_pre_check(
                 if "�" in line:
                     logging.error(f"  Line {i + 1}: {line}")
         if on_verify_fail == "raise":
-            raise e
+            raise
         return False
     return True

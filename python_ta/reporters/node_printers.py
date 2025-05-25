@@ -135,14 +135,13 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
 
-    # Check if any error codes from the ERROR_TO_ERROR_FUNCTION_MAPPING dict are present in the message
-    for error in RENDERERS:
-
-        print("msg.msg =", msg.msg)
-        # If an error code is present, yield and return
-        if error in msg.msg:
-            yield RENDERERS[error](msg, _node, source_lines)
-            return
+    # Search for the first error code in msg.msg
+    error = re.search(r"(E\d{3})", msg.msg)
+    if error:
+        error_code = error.group(1)
+        # Render the appropriate Error using the RENDERERS dict
+        yield RENDERERS[error_code](msg, _node, source_lines)
+        return
 
     # If none of the error codes were present, render a generic message
     yield from render_generic(msg, _node, source_lines)

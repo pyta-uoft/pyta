@@ -14,7 +14,7 @@ from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
 import pylint.config
 import pylint.lint
 import pylint.utils
-from astroid import MANAGER, modutils
+from astroid import MANAGER, exceptions, modutils, parse
 from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.reporters import BaseReporter, MultiReporter
@@ -400,6 +400,10 @@ def verify_pre_check(
         # trying to disable a check.
         if allow_pylint_comments:
             return True
+        with open(os.path.expanduser(filepath)) as f:
+            contents = f.read()
+        # Note: astroid.parse will parse the code for any syntax errors. If found, it will raise an AstroidSyntaxError
+        parse(contents)
         with tokenize.open(os.path.expanduser(filepath)) as f:
             for tok_type, content, _, _, _ in tokenize.generate_tokens(f.readline):
                 if tok_type != tokenize.COMMENT:
@@ -418,6 +422,13 @@ def verify_pre_check(
         )
         if on_verify_fail == "raise":
             raise
+        return False
+    except exceptions.AstroidSyntaxError as e:
+        logging.error(
+            f"python_ta could not check your code due to a syntax error in your file: {e}"
+        )
+        if on_verify_fail == "raise":
+            raise e
         return False
     except tokenize.TokenError as e:
         logging.error(

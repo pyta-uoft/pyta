@@ -11,6 +11,7 @@ import signal
 import subprocess
 import sys
 import time
+import tokenize
 from os import path, remove
 from pathlib import Path
 from subprocess import Popen
@@ -39,6 +40,12 @@ INPUTS = {
     "test_check_with_config": [["examples/nodes/const.py"], ["examples/nodes"]],
     "test_check_saves_file": [["examples/nodes/name.py"]],
     "test_check_no_reporter_output": [["examples/nodes/name.py"]],
+    "test_check_error_raise": [
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
+    ],
+    "test_check_error_log": [
+        "examples/syntax_errors/unindent_does_not_match_indentation.py",
+    ],
 }
 
 
@@ -254,6 +261,31 @@ def test_check_no_reporter_output(
     # If the file exists, the assertion failed and the file gets removed from main directory
     if file_exists:
         remove("pyta_output.html")
+
+
+@pytest.mark.parametrize("input_file", INPUTS["test_check_error_raise"])
+def test_check_error_raise(input_file: str | list[str]) -> None:
+    """Test that setting on_verify_fail='raise' causes check_all to raise an error for syntax errors."""
+    with pytest.raises((IndentationError, tokenize.TokenError)):
+        python_ta.check_all(
+            input_file,
+            config={
+                "output-format": "pyta-plain",
+            },
+            on_verify_fail="raise",
+        )
+
+
+@pytest.mark.parametrize("input_file", INPUTS["test_check_error_log"])
+def test_check_error_log(input_file: str | list[str]) -> None:
+    """Test that setting on_verify_fail='log' preserves default behaviour when inputting an invalid file."""
+    python_ta.check_all(
+        input_file,
+        config={
+            "output-format": "pyta-plain",
+        },
+        on_verify_fail="log",
+    )
 
 
 def test_check_watch_enabled() -> None:

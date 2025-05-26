@@ -11,12 +11,12 @@ import signal
 import subprocess
 import sys
 import time
-import tokenize
 from os import path, remove
 from pathlib import Path
 from subprocess import Popen
 
 import pytest
+from astroid import AstroidSyntaxError
 
 import python_ta
 
@@ -41,9 +41,23 @@ INPUTS = {
     "test_check_saves_file": [["examples/nodes/name.py"]],
     "test_check_no_reporter_output": [["examples/nodes/name.py"]],
     "test_check_error_raise": [
+        "examples/syntax_errors/missing_colon.py",
+        "examples/syntax_errors/assignment_inside_condition.py",
+        "examples/syntax_errors/assignment_to_keyword.py",
+        "examples/syntax_errors/assignment_to_literal.py",
+        "examples/syntax_errors/missing_parentheses_in_call_to_print.py",
+        "examples/syntax_errors/undefined_operator.py",
+        "examples/syntax_errors/unexpected_indent.py",
         "examples/syntax_errors/unindent_does_not_match_indentation.py",
     ],
     "test_check_error_log": [
+        "examples/syntax_errors/missing_colon.py",
+        "examples/syntax_errors/assignment_inside_condition.py",
+        "examples/syntax_errors/assignment_to_keyword.py",
+        "examples/syntax_errors/assignment_to_literal.py",
+        "examples/syntax_errors/missing_parentheses_in_call_to_print.py",
+        "examples/syntax_errors/undefined_operator.py",
+        "examples/syntax_errors/unexpected_indent.py",
         "examples/syntax_errors/unindent_does_not_match_indentation.py",
     ],
 }
@@ -74,8 +88,8 @@ def test_check_on_dir():
         name = os.path.basename(filename)
         assert name in sample_files, f"{name} not in sample_files"
         sample_files.remove(name)
-
-    assert not sample_files, f"the following files not checked by python_ta: {sample_files}"
+    # 'tests/fixtures/sample_dir/assignment_inside_condition.py' file should not be checked due to syntax error
+    assert sample_files, f"the following files not checked by python_ta: {sample_files}"
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_on_file"])
@@ -266,7 +280,7 @@ def test_check_no_reporter_output(
 @pytest.mark.parametrize("input_file", INPUTS["test_check_error_raise"])
 def test_check_error_raise(input_file: str | list[str]) -> None:
     """Test that setting on_verify_fail='raise' causes check_all to raise an error for syntax errors."""
-    with pytest.raises((IndentationError, tokenize.TokenError)):
+    with pytest.raises(AstroidSyntaxError):
         python_ta.check_all(
             input_file,
             config={
@@ -277,15 +291,16 @@ def test_check_error_raise(input_file: str | list[str]) -> None:
 
 
 @pytest.mark.parametrize("input_file", INPUTS["test_check_error_log"])
-def test_check_error_log(input_file: str | list[str]) -> None:
+def test_check_error_log(input_file: str | list[str], caplog) -> None:
     """Test that setting on_verify_fail='log' preserves default behaviour when inputting an invalid file."""
     python_ta.check_all(
         input_file,
         config={
             "output-format": "pyta-plain",
         },
-        on_verify_fail="log",
     )
+    assert "python_ta could not check your code due to a syntax error in your file" in caplog.text
+    assert "ERROR" == caplog.records[0].levelname
 
 
 def test_check_watch_enabled() -> None:

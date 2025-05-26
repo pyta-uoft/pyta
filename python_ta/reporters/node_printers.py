@@ -137,7 +137,7 @@ def render_pep8_errors(msg, _node, source_lines=None):
     # Extract the error text from msg (called in tests as msg.message and msg.msg)
     raw_msg = getattr(msg, "msg", None) or getattr(msg, "message", None)
 
-    # If the error text is not present, yeild from
+    # If the error text is not present, yield from
     if not raw_msg:
         yield from render_generic(msg, _node, source_lines)
         return

@@ -415,20 +415,12 @@ def verify_pre_check(
                         + "No check run on file `{}.`\n".format(filepath)
                     )
                     return False
-    except IndentationError as e:
-        logging.error(
-            "python_ta could not check your code due to an "
-            + "indentation error at line {}.".format(e.lineno)
-        )
-        if on_verify_fail == "raise":
-            raise
-        return False
     except exceptions.AstroidSyntaxError as e:
         logging.error(
             f"python_ta could not check your code due to a syntax error in your file: {e}"
         )
         if on_verify_fail == "raise":
-            raise e
+            raise
         return False
     except tokenize.TokenError as e:
         logging.error(

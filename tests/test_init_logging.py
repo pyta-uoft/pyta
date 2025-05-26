@@ -71,15 +71,12 @@ def test_pre_check_raise_indentation_error(_, caplog) -> None:
 
 
 @patch("python_ta.tokenize.open", side_effect=tokenize.TokenError)
-
-
 def test_pre_check_log_token_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function TokenError catch block"""
     # Don't need a valid file path since patching error into open function
     verify_pre_check("", False)
     assert "python_ta could not check your code due to a syntax error in your file." in caplog.text
     assert "ERROR" == caplog.records[0].levelname
-
 
 
 @patch("python_ta.check.helpers.tokenize.open", side_effect=tokenize.TokenError)

@@ -589,6 +589,7 @@ PythonTA's adopting semantic versioning as of this release, so we've bumped the 
 - Fixed bug where PythonTA would crash on files that used encodings other than UTF-8.
   PythonTA now reports an error and displays the invalid characters to the user.
 - Empty `set()` preconditions (`x in set()` and `x not in set()`) are now correctly parsed (previously skipped).
+
 ### 🚧 Deprecations
 
 - Deprecated `pyta-reporter` option; use `output-format` instead.

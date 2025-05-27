@@ -19,8 +19,7 @@ class Z3Visitor:
 
     def __init__(self):
         visitor = TransformVisitor()
-        visitor.register_transform(nodes.FunctionDef,
-                                   self.set_function_def_z3_constraints)
+        visitor.register_transform(nodes.FunctionDef, self.set_function_def_z3_constraints)
         self.visitor = visitor
 
     def set_function_def_z3_constraints(self, node: nodes.FunctionDef):

@@ -141,7 +141,6 @@ container_list = [
         '''
         pass
     """,
-
 ]
 
 # test cases for strings expressions

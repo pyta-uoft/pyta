@@ -10,6 +10,7 @@ from pylint.checkers.utils import safe_infer
 
 class Z3ParseException(Exception):
     """Raised when an AST node case is not handled by this parser."""
+
     pass
 
 
@@ -19,16 +20,17 @@ class Z3Parser:
     `types` maps argument names to their annotated type (e.g. "int", "str").
     """
 
-    def __init__(self,
-                 types: Optional[dict[str, Union[str, z3.ExprRef]]] = None):
+    def __init__(self, types: Optional[dict[str, Union[str, z3.ExprRef]]] = None):
         self.types = types or {}
 
     def parse(self, node: astroid.NodeNG) -> Union[z3.ExprRef, list[z3.ExprRef]]:
         # ── Special-case empty set() calls ──
-        if isinstance(node, nodes.Call) \
-           and isinstance(node.func, nodes.Name) \
-           and node.func.name == "set" \
-           and not node.args:
+        if (
+            isinstance(node, nodes.Call)
+            and isinstance(node.func, nodes.Name)
+            and node.func.name == "set"
+            and not node.args
+        ):
             return []
 
         # ── Standard dispatch ──
@@ -93,13 +95,14 @@ class Z3Parser:
         r = self.parse(node.right)
         return self.apply_bin_op(l, node.op, r)
 
-    def parse_container_op(self,
-                           node: Union[nodes.List, astroid.Set,
-                                       astroid.Tuple]) -> list[z3.ExprRef]:
+    def parse_container_op(
+        self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
+    ) -> list[z3.ExprRef]:
         return [self.parse(el) for el in node.elts]
 
-    def apply_bin_op(self, left: z3.ExprRef, op: str,
-                     right: Union[z3.ExprRef, list[z3.ExprRef]]) -> z3.ExprRef:
+    def apply_bin_op(
+        self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, list[z3.ExprRef]]
+    ) -> z3.ExprRef:
         try:
             if op == "+":
                 return left + right
@@ -131,10 +134,12 @@ class Z3Parser:
             raise Z3ParseException(f"Incompatible op {op} for {left}, {right}.")
         raise Z3ParseException(f"Unhandled binary op {op}.")
 
-    def apply_in_op(self,
-                    left: Union[z3.ExprRef, str],
-                    right: Union[list[z3.ExprRef], str],
-                    negate: bool = False) -> z3.ExprRef:
+    def apply_in_op(
+        self,
+        left: Union[z3.ExprRef, str],
+        right: Union[list[z3.ExprRef], str],
+        negate: bool = False,
+    ) -> z3.ExprRef:
         # Empty container → False for `in`, True for `not in`
         if isinstance(right, list):
             if not right:
@@ -144,23 +149,21 @@ class Z3Parser:
             return z3.Or(*[left == elt for elt in right])
 
         # String containment
-        if isinstance(left, (str, z3.SeqRef)) and isinstance(
-                right, (str, z3.SeqRef)):
-            return z3.Not(z3.Contains(right,
-                                      left)) if negate else z3.Contains(
-                                          right, left)
+        if isinstance(left, (str, z3.SeqRef)) and isinstance(right, (str, z3.SeqRef)):
+            return z3.Not(z3.Contains(right, left)) if negate else z3.Contains(right, left)
 
         op = "not in" if negate else "in"
         raise Z3ParseException(f"Unhandled op {op} for types {left}, {right}.")
 
-    def _parse_number_literal(self, node: astroid.NodeNG
-                              ) -> Optional[Union[int, float]]:
-        if isinstance(node, nodes.Const) and isinstance(node.value,
-                                                        (int, float)):
+    def _parse_number_literal(self, node: astroid.NodeNG) -> Optional[Union[int, float]]:
+        if isinstance(node, nodes.Const) and isinstance(node.value, (int, float)):
             return node.value
-        if (isinstance(node, nodes.UnaryOp) and node.op == "-"
-                and isinstance(node.operand, nodes.Const)
-                and isinstance(node.operand.value, (int, float))):
+        if (
+            isinstance(node, nodes.UnaryOp)
+            and node.op == "-"
+            and isinstance(node.operand, nodes.Const)
+            and isinstance(node.operand.value, (int, float))
+        ):
             return -node.operand.value
         return None
 
@@ -174,29 +177,26 @@ class Z3Parser:
             return z3.SubString(seq, idx, 1)
 
         if isinstance(node.slice, nodes.Slice):
-            low = 0 if node.slice.lower is None else self._parse_number_literal(
-                node.slice.lower)
-            up = (z3.Length(seq)
-                  if node.slice.upper is None else self._parse_number_literal(
-                      node.slice.upper))
-            st = 1 if node.slice.step is None else self._parse_number_literal(
-                node.slice.step)
+            low = 0 if node.slice.lower is None else self._parse_number_literal(node.slice.lower)
+            up = (
+                z3.Length(seq)
+                if node.slice.upper is None
+                else self._parse_number_literal(node.slice.upper)
+            )
+            st = 1 if node.slice.step is None else self._parse_number_literal(node.slice.step)
 
-            if not (isinstance(low, int) and isinstance(up, (int,
-                                                             z3.ArithRef))
-                    and isinstance(st, int)):
-                raise Z3ParseException(
-                    f"Invalid slice indexes {low},{up},{st}")
+            if not (
+                isinstance(low, int) and isinstance(up, (int, z3.ArithRef)) and isinstance(st, int)
+            ):
+                raise Z3ParseException(f"Invalid slice indexes {low},{up},{st}")
 
             if st == 1:
                 return z3.SubString(seq, low, up - low)
 
             if st != 1 and up == z3.Length(seq):
-                raise Z3ParseException(
-                    "Cannot convert slice with non-unit step and unknown upper")
+                raise Z3ParseException("Cannot convert slice with non-unit step and unknown upper")
 
-            return z3.Concat(
-                *(z3.SubString(seq, i, 1) for i in range(low, up, st)))
+            return z3.Concat(*(z3.SubString(seq, i, 1) for i in range(low, up, st)))
 
         raise Z3ParseException(f"Unhandled slice type {node.slice}")
 
@@ -209,8 +209,6 @@ class Z3Parser:
             if not isinstance(inferred, astroid.ClassDef):
                 continue
             self.types[arg.name] = inferred.name
-            if arg.name in self.types and self.types[arg.name] in {
-                    "int", "float", "bool", "str"
-            }:
+            if arg.name in self.types and self.types[arg.name] in {"int", "float", "bool", "str"}:
                 z3_vars[arg.name] = self.parse(arg)
         return z3_vars

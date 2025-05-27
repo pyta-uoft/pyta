@@ -561,6 +561,7 @@ PythonTA's adopting semantic versioning as of this release, so we've bumped the 
 - Added support for relative paths in `output` argument to `check_all`.
 - Added new configuration option `pycodestyle-ignore` to customize the pycodestyle errors
   checked by `pep8-errors`.
+- Support `x in set()` and `x not in set()` preconditions by special-casing `set()` calls in the Z3 parser.
 
 ### ✨ Changes
 
@@ -587,7 +588,7 @@ PythonTA's adopting semantic versioning as of this release, so we've bumped the 
   ([#699](https://github.com/pyta-uoft/pyta/issues/699))
 - Fixed bug where PythonTA would crash on files that used encodings other than UTF-8.
   PythonTA now reports an error and displays the invalid characters to the user.
-
+- Empty `set()` preconditions (`x in set()` and `x not in set()`) are now correctly parsed (previously skipped).
 ### 🚧 Deprecations
 
 - Deprecated `pyta-reporter` option; use `output-format` instead.

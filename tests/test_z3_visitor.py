@@ -125,6 +125,23 @@ container_list = [
         '''
         pass
     """,
+    """
+    def in_empty_set(x: int):
+        '''
+        Preconditions:
+            - x in set()
+        '''
+        pass
+    """,
+    """
+    def not_in_empty_set(x: int):
+        '''
+        Preconditions:
+            - x not in set()
+        '''
+        pass
+    """,
+
 ]
 
 # test cases for strings expressions
@@ -235,6 +252,8 @@ container_expected = [
     [z3.BoolVal(False)],
     [z3.BoolVal(False)],
     [z3.BoolVal(True)],
+    [z3.BoolVal(True)],
+    [z3.BoolVal(False)],
     [z3.BoolVal(True)],
 ]
 

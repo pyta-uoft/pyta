@@ -8,6 +8,6 @@ def blank_function() -> int:
 
 if __name__ == "__main__":
     python_ta.check_all(config={
-        "output-format": "python_ta.reporters.PlainReporter",
+        "output-format": "pyta-plain",
         "watch": True
     })

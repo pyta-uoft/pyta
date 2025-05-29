@@ -257,18 +257,15 @@ def test_allow_pylint_comments() -> None:
     set to True
     """
 
-    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
-        result = verify_pre_check("", allow_pylint_comments=True)
-
-    assert result is True
+    # Precondition for verify_pre_check is that the file exists (have a valid file path).
+    path = "tests/fixtures/pylint_comment.py"
+    assert verify_pre_check(path, allow_pylint_comments=True) is True
 
 
 def test_disallows_pylint_comments() -> None:
     """Test that checks whether the allow-pylint-comments configuration option works as expected when it is
     is set to False
     """
-
-    with patch("python_ta.tokenize.open", mock_open(read_data="# pylint: disable")):
-        result = verify_pre_check("", allow_pylint_comments=False)
-
-    assert result is False
+    # Precondition for verify_pre_check is that the file exists (have a valid file path).
+    path = "tests/fixtures/pylint_comment.py"
+    assert verify_pre_check(path, allow_pylint_comments=False) is False

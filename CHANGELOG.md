@@ -37,6 +37,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved `get_valid_files_to_check` function by removing unreachable code.
 - Refactored `test_check.py` to use `pytest.mark.parametrize` annotation, improving test isolation and extracting inputs from test functions
 - Added test case to `test_check.py` for better coverage of `colour_messages_by_type`
+- Refactored `render_pep8_errors` to use a dict that maps error codes to error functions instead of repeated conditional statements
 
 ## [2.10.1] - 2025-02-19
 

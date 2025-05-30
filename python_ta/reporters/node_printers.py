@@ -135,7 +135,7 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
     # Extract the raw error message
-    raw_msg = getattr(msg, "msg", None)
+    raw_msg = getattr(msg, "msg", "")
 
     # Search for the first appearance of the error code in the extracted error text
     matched_error = re.search(r"(E\d{3})", raw_msg)

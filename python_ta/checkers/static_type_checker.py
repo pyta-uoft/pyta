@@ -1,9 +1,12 @@
 import re
+from typing import TYPE_CHECKING
 
 from astroid import nodes
 from mypy import api
 from pylint.checkers import BaseRawFileChecker
-from pylint.lint import PyLinter
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class StaticTypeChecker(BaseRawFileChecker):

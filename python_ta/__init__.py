@@ -30,7 +30,7 @@ except AttributeError:
 
 import logging
 import webbrowser
-from typing import IO, TYPE_CHECKING, Any, Optional, Union
+from typing import IO, TYPE_CHECKING, Any, Literal, Optional, Union
 
 from .check.helpers import (
     check_file,

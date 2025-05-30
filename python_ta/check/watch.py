@@ -3,13 +3,15 @@
 import logging
 import os
 import time
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
-from pylint.lint import PyLinter
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from .helpers import check_file, upload_linter_results
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class FileChangeHandler(FileSystemEventHandler):

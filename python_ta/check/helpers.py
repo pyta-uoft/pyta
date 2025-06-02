@@ -50,7 +50,7 @@ class PytaPyLinter(PyLinter):
         name = self.external_output_format if self.external_output_format else reporter_name.lower()
 
         if "pyta-" in name:
-            self.load_plugin_modules([self._get_reporter_module_path(name)])
+            self.load_plugin_modules([_get_reporter_module_path(name)])
 
         if name in self._reporters:
             return self._reporters[name]()
@@ -61,17 +61,6 @@ class PytaPyLinter(PyLinter):
             raise InvalidReporterError(name) from e
 
         return reporter_class()
-
-    def _get_reporter_module_path(self, reporter_name: str) -> str:
-        """Return the module path for a given PyTA reporter name."""
-        reporter_map = {
-            "pyta-html": "python_ta.reporters.html_reporter",
-            "pyta-plain": "python_ta.reporters.plain_reporter",
-            "pyta-color": "python_ta.reporters.color_reporter",
-            "pyta-json": "python_ta.reporters.json_reporter",
-        }
-
-        return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter")
 
 
 def setup_linter(
@@ -474,3 +463,15 @@ def verify_pre_check(
             raise
         return False
     return True
+
+
+def _get_reporter_module_path(reporter_name: str) -> str:
+    """Return the module path for a given PyTA reporter name."""
+    reporter_map = {
+        "pyta-html": "python_ta.reporters.html_reporter",
+        "pyta-plain": "python_ta.reporters.plain_reporter",
+        "pyta-color": "python_ta.reporters.color_reporter",
+        "pyta-json": "python_ta.reporters.json_reporter",
+    }
+
+    return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter")

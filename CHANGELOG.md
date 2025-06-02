@@ -39,6 +39,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added test case to `test_check.py` for better coverage of `colour_messages_by_type`
 - Removed unused imports from `python_ta` module
 - Wrapped type-only imports in if `TYPE_CHECKING` guards
+- Refactored `render_pep8_errors` to use a dict that maps error codes to error functions instead of repeated conditional statements
 
 ## [2.10.1] - 2025-02-19
 

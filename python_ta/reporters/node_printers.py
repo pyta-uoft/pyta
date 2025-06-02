@@ -134,64 +134,20 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
 
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
-    if "E101" in msg.msg or "E123" in msg.msg:
-        yield from render_pep8_errors_e101_and_e123(msg, _node, source_lines)
-    elif "E115" in msg.msg:
-        yield from render_pep8_errors_e115(msg, _node, source_lines)
-    elif "E116" in msg.msg:
-        yield from render_pep8_errors_e116(msg, _node, source_lines)
-    elif "E122" in msg.msg or "E127" in msg.msg or "E131" in msg.msg:
-        yield from render_pep8_errors_e122_and_e127_and_e131(msg, _node, source_lines)
-    elif "E124" in msg.msg:
-        yield from render_pep8_errors_e124(msg, _node, source_lines)
-    elif "E125" in msg.msg or "E129" in msg.msg:
-        yield from render_pep8_errors_e125_and_e129(msg, _node, source_lines)
-    elif "E128" in msg.msg:
-        yield from render_pep8_errors_e128(msg, _node, source_lines)
-    elif "E201" in msg.msg or "E202" in msg.msg or "E203" in msg.msg:
-        yield from render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines)
-    elif "E221" in msg.msg:
-        yield from render_pep8_errors_e221(msg, _node, source_lines)
-    elif "E222" in msg.msg:
-        yield from render_pep8_errors_e222(msg, _node, source_lines)
-    elif "E223" in msg.msg:
-        yield from render_pep8_errors_e223(msg, _node, source_lines)
-    elif "E224" in msg.msg or "E273" in msg.msg:
-        yield from render_pep8_errors_e224_and_e273(msg, _node, source_lines)
-    elif "E226" in msg.msg:
-        yield from render_pep8_errors_e226(msg, _node, source_lines)
-    elif "E227" in msg.msg:
-        yield from render_pep8_errors_e227(msg, _node, source_lines)
-    elif "E228" in msg.msg:
-        yield from render_pep8_errors_e228(msg, _node, source_lines)
-    elif "E251" in msg.msg:
-        yield from render_pep8_errors_e251(msg, _node, source_lines)
-    elif "E261" in msg.msg:
-        yield from render_pep8_errors_e261(msg, _node, source_lines)
-    elif "E262" in msg.msg:
-        yield from render_pep8_errors_e262(msg, _node, source_lines)
-    elif "E265" in msg.msg:
-        yield from render_pep8_errors_e265(msg, _node, source_lines)
-    elif "E266" in msg.msg:
-        yield from render_pep8_errors_e266(msg, _node, source_lines)
-    elif "E272" in msg.msg:
-        yield from render_pep8_errors_e272(msg, _node, source_lines)
-    elif "E275" in msg.msg:
-        yield from render_pep8_errors_e275(msg, _node, source_lines)
-    elif "E301" in msg.msg:
-        yield from render_pep8_errors_e301(msg, _node, source_lines)
-    elif "E302" in msg.msg:
-        yield from render_pep8_errors_e302(msg, _node, source_lines)
-    elif "E303" in msg.msg:
-        yield from render_pep8_errors_e303(msg, _node, source_lines)
-    elif "E304" in msg.msg:
-        yield from render_pep8_errors_e304(msg, _node, source_lines)
-    elif "E305" in msg.msg:
-        yield from render_pep8_errors_e305(msg, _node, source_lines)
-    elif "E306" in msg.msg:
-        yield from render_pep8_errors_e306(msg, _node, source_lines)
-    else:
-        yield from render_generic(msg, _node, source_lines)
+    # Extract the raw error message
+    raw_msg = getattr(msg, "msg", "")
+
+    # Search for the first appearance of the error code in the extracted error text
+    matched_error = re.search(r"(E\d{3})", raw_msg)
+    if matched_error:
+        error_code = matched_error.group(1)
+        # Render the appropriate error through the RENDERERS dict
+        if error_code in RENDERERS:
+            yield from RENDERERS[error_code](msg, _node, source_lines)
+            return
+
+    # If none of the error codes were present, render the error using the generic error renderer
+    yield from render_generic(msg, _node, source_lines)
 
 
 def render_blank_line(line):
@@ -688,6 +644,44 @@ CUSTOM_MESSAGES = {
     "unsupported-operand-types": render_static_type_checker_errors,
     "union-attr-error": render_static_type_checker_errors,
     "dict-item-type-mismatch": render_static_type_checker_errors,
+}
+
+RENDERERS = {
+    "E101": render_pep8_errors_e101_and_e123,
+    "E123": render_pep8_errors_e101_and_e123,
+    "E115": render_pep8_errors_e115,
+    "E116": render_pep8_errors_e116,
+    "E122": render_pep8_errors_e122_and_e127_and_e131,
+    "E127": render_pep8_errors_e122_and_e127_and_e131,
+    "E131": render_pep8_errors_e122_and_e127_and_e131,
+    "E124": render_pep8_errors_e124,
+    "E125": render_pep8_errors_e125_and_e129,
+    "E129": render_pep8_errors_e125_and_e129,
+    "E128": render_pep8_errors_e128,
+    "E201": render_pep8_errors_e201_e202_e203_e211,
+    "E202": render_pep8_errors_e201_e202_e203_e211,
+    "E203": render_pep8_errors_e201_e202_e203_e211,
+    "E221": render_pep8_errors_e221,
+    "E222": render_pep8_errors_e222,
+    "E223": render_pep8_errors_e223,
+    "E224": render_pep8_errors_e224_and_e273,
+    "E273": render_pep8_errors_e224_and_e273,
+    "E226": render_pep8_errors_e226,
+    "E227": render_pep8_errors_e227,
+    "E228": render_pep8_errors_e228,
+    "E251": render_pep8_errors_e251,
+    "E261": render_pep8_errors_e261,
+    "E262": render_pep8_errors_e262,
+    "E265": render_pep8_errors_e265,
+    "E266": render_pep8_errors_e266,
+    "E272": render_pep8_errors_e272,
+    "E275": render_pep8_errors_e275,
+    "E301": render_pep8_errors_e301,
+    "E302": render_pep8_errors_e302,
+    "E303": render_pep8_errors_e303,
+    "E304": render_pep8_errors_e304,
+    "E305": render_pep8_errors_e305,
+    "E306": render_pep8_errors_e306,
 }
 
 

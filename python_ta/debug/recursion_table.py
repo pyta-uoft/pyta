@@ -8,12 +8,14 @@ from __future__ import annotations
 import copy
 import inspect
 import sys
-import types
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import tabulate
 
 from python_ta.util.tree import Tree
+
+if TYPE_CHECKING:
+    import types
 
 DEFAULT_FUNCTION_STRING = "N/A"
 

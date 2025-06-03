@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 from astroid import nodes
 from mypy import api

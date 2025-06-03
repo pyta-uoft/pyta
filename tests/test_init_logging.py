@@ -53,7 +53,7 @@ def test_pre_check_log_pylint_comment(caplog) -> None:
     assert "ERROR" == caplog.records[0].levelname
 
 
-@patch("python_ta.tokenize.open", side_effect=IndentationError)
+@patch("python_ta.check.helpers.tokenize.open", side_effect=IndentationError)
 def test_pre_check_log_indentation_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function IndentationError catch block"""
     # Don't need a valid file path since patching error into open function
@@ -62,7 +62,7 @@ def test_pre_check_log_indentation_error(_, caplog) -> None:
     assert "ERROR" == caplog.records[0].levelname
 
 
-@patch("python_ta.tokenize.open", side_effect=IndentationError)
+@patch("python_ta.check.helpers.tokenize.open", side_effect=IndentationError)
 def test_pre_check_raise_indentation_error(_, caplog) -> None:
     """Testing error raising in _verify_pre_check function IndentationError catch block"""
     with pytest.raises(IndentationError):
@@ -70,7 +70,7 @@ def test_pre_check_raise_indentation_error(_, caplog) -> None:
         verify_pre_check("", False, "raise")
 
 
-@patch("python_ta.tokenize.open", side_effect=tokenize.TokenError)
+@patch("python_ta.check.helpers.tokenize.open", side_effect=tokenize.TokenError)
 def test_pre_check_log_token_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function TokenError catch block"""
     # Don't need a valid file path since patching error into open function
@@ -79,7 +79,7 @@ def test_pre_check_log_token_error(_, caplog) -> None:
     assert "ERROR" == caplog.records[0].levelname
 
 
-@patch("python_ta.tokenize.open", side_effect=tokenize.TokenError)
+@patch("python_ta.check.helpers.tokenize.open", side_effect=tokenize.TokenError)
 def test_pre_check_raise_token_error(_, caplog) -> None:
     """Testing error raising in _verify_pre_check function TokenError catch block"""
     with pytest.raises(tokenize.TokenError):
@@ -87,7 +87,7 @@ def test_pre_check_raise_token_error(_, caplog) -> None:
         verify_pre_check("", False, "raise")
 
 
-@patch("python_ta.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
+@patch("python_ta.check.helpers.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
 def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
     """Testing logging in _verify_pre_check function UnicodeDecodeError catch block"""
     expected_logs = [
@@ -105,7 +105,7 @@ def test_pre_check_log_pylint_unicode_error(_, caplog) -> None:
         assert "ERROR" == caplog.records[i].levelname
 
 
-@patch("python_ta.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
+@patch("python_ta.check.helpers.tokenize.open", side_effect=UnicodeDecodeError("", b"", 0, 0, ""))
 def test_pre_check_raise_pylint_unicode_error(_, caplog) -> None:
     """Testing error raising in _verify_pre_check function UnicodeDecodeError catch block"""
 

@@ -20,7 +20,6 @@ from types import CodeType, FunctionType, ModuleType
 from typing import (
     Any,
     Callable,
-    Collection,
     Optional,
     TypeVar,
     Union,

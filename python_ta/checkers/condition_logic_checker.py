@@ -4,7 +4,7 @@ Check for redundant/impossible If or While conditions in functions based on z3 c
 
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
 
 try:
     import z3
@@ -17,10 +17,12 @@ except ImportError:
     Z3Environment = Any
     z3_dependency_available = False
 
-from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
+
+if TYPE_CHECKING:
+    from astroid import nodes
+    from pylint.lint import PyLinter
 
 
 class ConditionLogicChecker(BaseChecker):

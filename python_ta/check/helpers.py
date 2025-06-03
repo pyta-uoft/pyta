@@ -41,15 +41,14 @@ PYLINT_PATCHED = False
 class PytaPyLinter(PyLinter):
     """Extenstion PyLinter that supports dynamic loading of pyta-* reporters."""
 
-    def __init__(self, options: Options = ()):
-        super().__init__(options=options)
-        self.external_output_format = None
-
     def _load_reporter_by_name(self, reporter_name: str) -> BaseReporter:
         """Override the default to only load 'pyta-*' reporters"""
-        name = self.external_output_format if self.external_output_format else reporter_name.lower()
+        if self.reporter.name.startswith("pyta"):
+            return self.reporter
 
-        if "pyta-" in name:
+        name = reporter_name.lower()
+
+        if name.startswith("pyta"):
             self.load_plugin_modules([_get_reporter_module_path(name)])
 
         if name in self._reporters:
@@ -297,7 +296,10 @@ def reset_linter(
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
-    if isinstance(config, dict):
+    if isinstance(config, dict) and config.get("output-format"):
+        reporter_class_path = _get_reporter_class_path(config.get("output-format"))
+        reporter_class = _load_reporter_by_class(reporter_class_path)
+        linter.set_reporter(reporter_class())
         linter.external_output_format = config.get("output-format", None)
 
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
@@ -475,3 +477,14 @@ def _get_reporter_module_path(reporter_name: str) -> str:
     }
 
     return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter")
+
+
+def _get_reporter_class_path(reporter_name: str) -> str:
+    """Return the fully qualified class path for a given PyTA reporter name."""
+    reporter_map = {
+        "pyta-html": "python_ta.reporters.html_reporter.HTMLReporter",
+        "pyta-plain": "python_ta.reporters.plain_reporter.PlainReporter",
+        "pyta-color": "python_ta.reporters.color_reporter.ColorReporter",
+        "pyta-json": "python_ta.reporters.json_reporter.JSONReporter",
+    }
+    return reporter_map.get(reporter_name, reporter_name)  # fallback if full path already given

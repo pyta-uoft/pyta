@@ -8,11 +8,13 @@ from __future__ import annotations
 import copy
 import inspect
 import sys
-import types
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import astroid
 import tabulate
+
+if TYPE_CHECKING:
+    import types
 
 NO_VALUE = "N/A"
 

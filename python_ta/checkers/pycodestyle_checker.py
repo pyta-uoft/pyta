@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pycodestyle
-from astroid import nodes
 from pylint.checkers import BaseRawFileChecker
-from pylint.lint import PyLinter
+
+if TYPE_CHECKING:
+    from astroid import nodes
+    from pylint.lint import PyLinter
 
 
 class PycodestyleChecker(BaseRawFileChecker):

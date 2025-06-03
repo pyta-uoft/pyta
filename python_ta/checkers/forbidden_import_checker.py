@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
-from pylint.lint import PyLinter
+
+if TYPE_CHECKING:
+    from pylint.lint import PyLinter
 
 
 class ForbiddenImportChecker(BaseChecker):

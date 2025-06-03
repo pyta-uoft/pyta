@@ -29,9 +29,8 @@ except AttributeError:
 
 
 import logging
-import tokenize
 import webbrowser
-from typing import IO, Any, Literal, Optional, Union
+from typing import IO, TYPE_CHECKING, Any, Literal, Optional, Union
 
 from .check.helpers import (
     check_file,
@@ -42,17 +41,9 @@ from .check.helpers import (
     verify_pre_check,
 )
 from .check.watch import watch_files
-from .config import (
-    find_local_config,
-    load_config,
-    load_messages_config,
-    override_config,
-)
-from .patches import patch_all
-from .reporters import REPORTERS
-from .reporters.core import PythonTaReporter
-from .upload import upload_to_server
-from .util.autoformat import run_autoformat
+
+if TYPE_CHECKING:
+    from .reporters.core import PythonTaReporter
 
 HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 

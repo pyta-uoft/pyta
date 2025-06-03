@@ -4,7 +4,6 @@ This file contains a function for running the Black formatting tool.
 
 import subprocess
 import sys
-from typing import Optional
 
 
 def run_autoformat(file_path: str, autoformat_options: list[str], max_linelen: int) -> None:

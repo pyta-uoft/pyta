@@ -161,6 +161,25 @@ class AccumulationTable:
         if event == "line" and frame.f_lineno == self._loop_lineno:
             self._record_iteration(frame)
 
+    def extract_loop_variables(self, target: Any) -> dict:
+        # if isinstance(target, astroid.Name):
+        #     return {target.name: []}
+        # elif isinstance(target, (astroid.Tuple, astroid.List)):
+        #     loop_variables = {}
+        #     for element in target.elts:
+        #         loop_variables.update(self.extract_loop_variables(element))
+        #     return loop_variables
+        # else:
+        #     # loop variable just either be a Name node, or a tuple
+        #     # if this branch returns, _setup_table will catch the error
+        #     print(f"[WARNING] Unexpected loop target node: {target!r}")
+        #     return {}
+        print(
+            "[DEBUG] loop variable names:",
+            [node.AssignName for node in target.nodes_of_class(astroid.AssignName)],
+        )
+        return
+
     def _setup_table(self) -> None:
         """
         Get the frame of the code containing the with statement, cut down the source code
@@ -175,10 +194,15 @@ class AccumulationTable:
 
         self._loop_lineno = inspect.getlineno(func_frame) + node.lineno
 
+        # Case 1: nested structure found in node.target (e.g. for a, (b, c) in ...)
         if isinstance(node, astroid.For) and isinstance(node.target, astroid.Tuple):
-            self.loop_variables = {loop_var.name: [] for loop_var in node.target.elts}
+            self.loop_variables = {
+                nested_node.name: []
+                for nested_node in node.target.nodes_of_class(astroid.AssignName)
+            }
+        # Case 2: single loop variable found in node.target (e.g. for x in ...)
         elif isinstance(node, astroid.For):
-            self.loop_variables[node.target.name] = []
+            self.loop_variables = {node.target.name: []}
 
         assert (
             self.loop_accumulators != {} or self.loop_variables != {}

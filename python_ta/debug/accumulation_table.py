@@ -161,25 +161,6 @@ class AccumulationTable:
         if event == "line" and frame.f_lineno == self._loop_lineno:
             self._record_iteration(frame)
 
-    def extract_loop_variables(self, target: Any) -> dict:
-        # if isinstance(target, astroid.Name):
-        #     return {target.name: []}
-        # elif isinstance(target, (astroid.Tuple, astroid.List)):
-        #     loop_variables = {}
-        #     for element in target.elts:
-        #         loop_variables.update(self.extract_loop_variables(element))
-        #     return loop_variables
-        # else:
-        #     # loop variable just either be a Name node, or a tuple
-        #     # if this branch returns, _setup_table will catch the error
-        #     print(f"[WARNING] Unexpected loop target node: {target!r}")
-        #     return {}
-        print(
-            "[DEBUG] loop variable names:",
-            [node.AssignName for node in target.nodes_of_class(astroid.AssignName)],
-        )
-        return
-
     def _setup_table(self) -> None:
         """
         Get the frame of the code containing the with statement, cut down the source code

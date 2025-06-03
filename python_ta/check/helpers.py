@@ -19,7 +19,6 @@ from pylint.exceptions import InvalidReporterError, UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.lint.pylinter import _load_reporter_by_class
 from pylint.reporters import BaseReporter, MultiReporter
-from pylint.typing import Options
 from pylint.utils.pragma_parser import OPTION_PO
 
 from python_ta import __version__

@@ -3,6 +3,7 @@ These functions are designed to support the main checking workflow by
 modularizing core operations like file validation, linting, and result uploads.
 """
 
+import contextlib
 import importlib.util
 import logging
 import os
@@ -15,8 +16,9 @@ import pylint.config
 import pylint.lint
 import pylint.utils
 from astroid import MANAGER, modutils
-from pylint.exceptions import UnknownMessageError
+from pylint.exceptions import InvalidReporterError, UnknownMessageError
 from pylint.lint import PyLinter
+from pylint.lint.pylinter import _load_reporter_by_class
 from pylint.reporters import BaseReporter, MultiReporter
 from pylint.utils.pragma_parser import OPTION_PO
 
@@ -34,6 +36,23 @@ from ..util.autoformat import run_autoformat
 
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
+
+
+class PytaPyLinter(PyLinter):
+    """Extenstion PyLinter that supports dynamic loading of pyta-* reporters."""
+
+    def _load_reporters(self, reporter_names: str) -> None:
+        """Override the default behaviour to return if a pyta-* reporter is already set"""
+        if self.reporter.name.startswith("pyta"):
+            return
+        super()._load_reporters(reporter_names)
+
+    def _load_reporter_by_name(self, reporter_name: str) -> BaseReporter:
+        """Override the default to only load 'pyta-*' reporters"""
+        name = reporter_name.lower()
+        if name.startswith("pyta"):
+            self.load_plugin_modules([_get_reporter_module_path(name)])
+        return super()._load_reporter_by_name(reporter_name)
 
 
 def setup_linter(
@@ -262,26 +281,25 @@ def reset_linter(
         if f != "__init__.py" and os.path.splitext(f)[1] == ".py"
     ]
 
-    custom_reporters = [
-        ("python_ta.reporters." + os.path.splitext(f)[0])
-        for f in os.listdir(parent_dir_path + "/reporters")
-        if f not in ["__init__.py", "stat_reporter.py"] and re.match(r".*_reporter\.py$", f)
-    ]
-
     # Register new options to a checker here to allow references to
     # options in `.pylintrc` config file.
     # Options stored in linter: `linter._all_options`, `linter._external_opts`
-    linter = pylint.lint.PyLinter(options=new_checker_options)
+    linter = PytaPyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
-    linter.load_plugin_modules(custom_reporters)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
+
+    if isinstance(config, dict) and config.get("output-format"):
+        reporter_class_path = _get_reporter_class_path(config.get("output-format"))
+        reporter_class = _load_reporter_by_class(reporter_class_path)
+        linter.set_reporter(reporter_class())
 
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
     set_config = load_config
 
     if load_default_config:
         load_config(linter, default_config_path)
+        linter.reporter.messages.clear()
         # If we do specify to load the default config, we just need to override the options later.
         set_config = override_config
 
@@ -323,7 +341,6 @@ def reset_linter(
             message_definition.msg = new_msg
             # Mutate the message definitions of the linter object
             linter.msgs_store.register_message(message_definition)
-
     return linter
 
 
@@ -440,3 +457,26 @@ def verify_pre_check(
             raise
         return False
     return True
+
+
+def _get_reporter_module_path(reporter_name: str) -> str:
+    """Return the module path for a given PyTA reporter name."""
+    reporter_map = {
+        "pyta-html": "python_ta.reporters.html_reporter",
+        "pyta-plain": "python_ta.reporters.plain_reporter",
+        "pyta-color": "python_ta.reporters.color_reporter",
+        "pyta-json": "python_ta.reporters.json_reporter",
+    }
+
+    return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter")
+
+
+def _get_reporter_class_path(reporter_name: str) -> str:
+    """Return the fully qualified class path for a given PyTA reporter name."""
+    reporter_map = {
+        "pyta-html": "python_ta.reporters.html_reporter.HTMLReporter",
+        "pyta-plain": "python_ta.reporters.plain_reporter.PlainReporter",
+        "pyta-color": "python_ta.reporters.color_reporter.ColorReporter",
+        "pyta-json": "python_ta.reporters.json_reporter.JSONReporter",
+    }
+    return reporter_map.get(reporter_name, reporter_name)  # fallback if full path already given

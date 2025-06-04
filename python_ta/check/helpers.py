@@ -3,6 +3,7 @@ These functions are designed to support the main checking workflow by
 modularizing core operations like file validation, linting, and result uploads.
 """
 
+import contextlib
 import importlib.util
 import logging
 import os
@@ -40,25 +41,18 @@ PYLINT_PATCHED = False
 class PytaPyLinter(PyLinter):
     """Extenstion PyLinter that supports dynamic loading of pyta-* reporters."""
 
+    def _load_reporters(self, reporter_names: str) -> None:
+        """Override the default behaviour to return if a pyta-* reporter is already set"""
+        if self.reporter.name.startswith("pyta"):
+            return
+        super()._load_reporters(reporter_names)
+
     def _load_reporter_by_name(self, reporter_name: str) -> BaseReporter:
         """Override the default to only load 'pyta-*' reporters"""
-        if self.reporter.name.startswith("pyta"):
-            return self.reporter
-
         name = reporter_name.lower()
-
         if name.startswith("pyta"):
             self.load_plugin_modules([_get_reporter_module_path(name)])
-
-        if name in self._reporters:
-            return self._reporters[name]()
-
-        try:
-            reporter_class = _load_reporter_by_class(reporter_name)
-        except (ImportError, AttributeError, AssertionError) as e:
-            raise InvalidReporterError(name) from e
-
-        return reporter_class()
+        return super()._load_reporter_by_name(reporter_name)
 
 
 def setup_linter(
@@ -299,13 +293,13 @@ def reset_linter(
         reporter_class_path = _get_reporter_class_path(config.get("output-format"))
         reporter_class = _load_reporter_by_class(reporter_class_path)
         linter.set_reporter(reporter_class())
-        linter.external_output_format = config.get("output-format", None)
 
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
     set_config = load_config
 
     if load_default_config:
         load_config(linter, default_config_path)
+        linter.reporter.messages.clear()
         # If we do specify to load the default config, we just need to override the options later.
         set_config = override_config
 
@@ -347,7 +341,6 @@ def reset_linter(
             message_definition.msg = new_msg
             # Mutate the message definitions of the linter object
             linter.msgs_store.register_message(message_definition)
-
     return linter
 
 

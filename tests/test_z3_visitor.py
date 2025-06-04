@@ -141,6 +141,30 @@ container_list = [
         '''
         pass
     """,
+    """
+    def in_set_call_with_args(x: int):
+        '''
+        Preconditions:
+            - x in set([1, 2])
+        '''
+        pass
+    """,
+    """
+    def in_list_call_with_args(x: int):
+        '''
+        Preconditions:
+            - x in list((3, 4))
+        '''
+        pass
+    """,
+    """
+    def not_in_tuple_call_with_args(x: int):
+        '''
+        Preconditions:
+            - x not in tuple([5, 6])
+        '''
+        pass
+    """,
 ]
 
 # test cases for strings expressions
@@ -254,6 +278,9 @@ container_expected = [
     [z3.BoolVal(True)],
     [z3.BoolVal(False)],
     [z3.BoolVal(True)],
+    [z3.Or(x == 1, x == 2)],
+    [z3.Or(x == 3, x == 4)],
+    [z3.And(x != 5, x != 6)],
 ]
 
 # expected string expressions

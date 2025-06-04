@@ -38,14 +38,8 @@ class Z3Parser:
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
         """
-        # Special case: treat set() with no args as empty set
-        if (
-            isinstance(node, nodes.Call)
-            and isinstance(node.func, nodes.Name)
-            and node.func.name == "set"
-            and not node.args
-        ):
-            return []
+        if isinstance(node, nodes.Call):
+            return self.parse_call(node)
 
         if isinstance(node, nodes.BoolOp):
             node = self.parse_bool_op(node)
@@ -305,3 +299,22 @@ class Z3Parser:
                 z3_vars[arg.name] = self.parse(arg)
 
         return z3_vars
+
+    def parse_call(self, node: nodes.Call) -> Union[z3.ExprRef, list[z3.ExprRef]]:
+        if not isinstance(node.func, nodes.Name):
+            raise Z3ParseException(f"Unsupported call target {node.func}")
+
+        func_name = node.func.name
+        if func_name not in {"set", "list", "tuple"}:
+            raise Z3ParseException(f"Unsupported call to {func_name}")
+
+        # Recursively parse each argument
+        if not node.args:
+            return []
+
+        # Handle cases like set([1, 2]) or list((1, 2))
+        if len(node.args) == 1 and isinstance(node.args[0], (nodes.List, nodes.Tuple, nodes.Set)):
+            return self.parse_container_op(node.args[0])
+
+        # Otherwise parse normally
+        return [self.parse(arg) for arg in node.args]

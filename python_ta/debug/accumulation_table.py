@@ -175,15 +175,11 @@ class AccumulationTable:
 
         self._loop_lineno = inspect.getlineno(func_frame) + node.lineno
 
-        # Case 1: nested structure found in node.target (e.g. for a, (b, c) in ...)
-        if isinstance(node, astroid.For) and isinstance(node.target, astroid.Tuple):
+        if isinstance(node, astroid.For):
             self.loop_variables = {
                 nested_node.name: []
                 for nested_node in node.target.nodes_of_class(astroid.AssignName)
             }
-        # Case 2: single loop variable found in node.target (e.g. for x in ...)
-        elif isinstance(node, astroid.For):
-            self.loop_variables = {node.target.name: []}
 
         assert (
             self.loop_accumulators != {} or self.loop_variables != {}

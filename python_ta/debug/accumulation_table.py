@@ -175,10 +175,11 @@ class AccumulationTable:
 
         self._loop_lineno = inspect.getlineno(func_frame) + node.lineno
 
-        if isinstance(node, astroid.For) and isinstance(node.target, astroid.Tuple):
-            self.loop_variables = {loop_var.name: [] for loop_var in node.target.elts}
-        elif isinstance(node, astroid.For):
-            self.loop_variables[node.target.name] = []
+        if isinstance(node, astroid.For):
+            self.loop_variables = {
+                nested_node.name: []
+                for nested_node in node.target.nodes_of_class(astroid.AssignName)
+            }
 
         assert (
             self.loop_accumulators != {} or self.loop_variables != {}

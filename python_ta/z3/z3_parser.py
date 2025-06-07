@@ -300,6 +300,10 @@ class Z3Parser:
         return z3_vars
 
     def parse_call(self, node: nodes.Call) -> Union[z3.ExprRef, list[z3.ExprRef]]:
+        """
+        Convert a set(), list(), or tuple() call node into a list of z3 expressions.
+        This handles both empty and non-empty calls, including nested container expressions
+        """
         if not isinstance(node.func, nodes.Name):
             raise Z3ParseException(f"Unsupported call target {node.func}")
 

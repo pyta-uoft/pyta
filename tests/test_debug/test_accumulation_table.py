@@ -4,6 +4,8 @@ types of accumulator loops
 """
 
 import copy
+import csv
+import io
 import shutil
 import sys
 
@@ -448,7 +450,7 @@ def test_uninitialized_loop_accumulators() -> None:
                 _ = number
 
 
-def test_output_to_existing_file(tmp_path) -> None:
+def test_tabular_output_to_existing_file(tmp_path) -> None:
     test_list = [10, 20, 30]
     sum_so_far = 0
     output_file = tmp_path / "output.txt"
@@ -478,7 +480,41 @@ def test_output_to_existing_file(tmp_path) -> None:
     shutil.rmtree(tmp_path)
 
 
-def test_output_to_new_file(tmp_path) -> None:
+def test_csv_output_to_existing_file(tmp_path) -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    output_file = tmp_path / "output.txt"
+
+    with open(output_file, "a") as file:
+        file.write("Existing Content")
+        file.write("\n")
+
+    with AccumulationTable(["sum_so_far"], output=str(output_file), format="csv") as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+        iteration_dict = table._create_iteration_dict()
+
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+
+    # Generate the expected csv content in the table
+    output = io.StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=iteration_dict.keys())
+    writer.writeheader()
+    csv_preformat = [dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())]
+    writer.writerows(csv_preformat)
+    expected_csv = output.getvalue().replace("\r\n", "\n")
+
+    # Compare the expected content with the read content
+    with open(output_file, "r") as file:
+        content = file.read()
+
+    assert content == "Existing Content\n" + expected_csv
+
+    shutil.rmtree(tmp_path)
+
+
+def test_tabular_output_to_new_file(tmp_path) -> None:
     test_list = [10, 20, 30]
     sum_so_far = 0
     with AccumulationTable(["sum_so_far"], output=str(tmp_path / "output.txt")) as table:
@@ -501,5 +537,35 @@ def test_output_to_new_file(tmp_path) -> None:
             missingval="None",
         )
     assert expected_values in content
+
+    shutil.rmtree(tmp_path)
+
+
+def test_csv_output_to_new_file(tmp_path) -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    output_file = tmp_path / "output.txt"
+
+    with AccumulationTable(["sum_so_far"], output=str(output_file), format="csv") as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+        iteration_dict = table._create_iteration_dict()
+
+    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+
+    # Generate the expected csv content in the table
+    output = io.StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=iteration_dict.keys())
+    writer.writeheader()
+    csv_preformat = [dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())]
+    writer.writerows(csv_preformat)
+    expected_csv = output.getvalue().replace("\r\n", "\n")
+
+    # Compare the expected content with the read content
+    with open(output_file, "r") as file:
+        content = file.read()
+
+    assert content == expected_csv
 
     shutil.rmtree(tmp_path)

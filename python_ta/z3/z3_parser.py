@@ -38,9 +38,6 @@ class Z3Parser:
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
         """
-        if isinstance(node, nodes.Call):
-            return self.parse_call(node)
-
         if isinstance(node, nodes.BoolOp):
             node = self.parse_bool_op(node)
         elif isinstance(node, nodes.UnaryOp):
@@ -61,6 +58,8 @@ class Z3Parser:
             node = self.parse_container_op(node)
         elif isinstance(node, nodes.Subscript):
             node = self.parse_subscript_op(node)
+        elif isinstance(node, nodes.Call):
+            return self.parse_call(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 

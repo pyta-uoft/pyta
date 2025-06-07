@@ -310,7 +310,12 @@ class Z3Parser:
             raise Z3ParseException(f"Unsupported call to {node.func.name}")
         elif not node.args:
             return []
-        elif len(node.args) == 1 and isinstance(node.args[0], (nodes.List, nodes.Tuple, nodes.Set)):
-            return self.parse_container_op(node.args[0])
+        elif len(node.args) == 1:
+            parsed = self.parse(node.args[0])
+            if not isinstance(parsed, list):
+                raise Z3ParseException(
+                    f"Expected a list from parse(arg), got {type(parsed)} instead"
+                )
+            return parsed
         else:
             return [self.parse(arg) for arg in node.args]

@@ -164,13 +164,6 @@ class AccumulationTable:
                 except OSError as e:
                     print(f"Error writing table formatted data to file: {e}")
         else:
-
-            # builds a list of dicts for each row of data in iteration_dict, required for the csv formatting library
-            # [
-            #   {"iteration": 0, "x": 5, "total": 5},
-            #   {"iteration": 1, "x": 6, "total": 11},
-            #   {"iteration": 2, "x": 7, "total": 18}
-            # ]
             csv_preformat = [
                 dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())
             ]

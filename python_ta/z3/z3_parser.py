@@ -58,6 +58,8 @@ class Z3Parser:
             node = self.parse_container_op(node)
         elif isinstance(node, nodes.Subscript):
             node = self.parse_subscript_op(node)
+        elif isinstance(node, nodes.Call):
+            return self.parse_call(node)
         else:
             raise Z3ParseException(f"Unhandled node type {type(node)}.")
 
@@ -296,3 +298,24 @@ class Z3Parser:
                 z3_vars[arg.name] = self.parse(arg)
 
         return z3_vars
+
+    def parse_call(self, node: nodes.Call) -> Union[z3.ExprRef, list[z3.ExprRef]]:
+        """
+        Convert a set(), list(), or tuple() call node into a list of z3 expressions.
+        This handles both empty and non-empty calls, including nested container expressions
+        """
+        if not isinstance(node.func, nodes.Name):
+            raise Z3ParseException(f"Unsupported call target {node.func}")
+        elif node.func.name not in {"set", "list", "tuple"}:
+            raise Z3ParseException(f"Unsupported call to {node.func.name}")
+        elif not node.args:
+            return []
+        elif len(node.args) == 1:
+            parsed = self.parse(node.args[0])
+            if not isinstance(parsed, list):
+                raise Z3ParseException(
+                    f"Expected a list from parse(arg), got {type(parsed)} instead"
+                )
+            return parsed
+        else:
+            return [self.parse(arg) for arg in node.args]

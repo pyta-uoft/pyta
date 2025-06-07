@@ -306,17 +306,11 @@ class Z3Parser:
         """
         if not isinstance(node.func, nodes.Name):
             raise Z3ParseException(f"Unsupported call target {node.func}")
-
-        func_name = node.func.name
-        if func_name not in {"set", "list", "tuple"}:
-            raise Z3ParseException(f"Unsupported call to {func_name}")
-
-        if not node.args:
+        elif node.func.name not in {"set", "list", "tuple"}:
+            raise Z3ParseException(f"Unsupported call to {node.func.name}")
+        elif not node.args:
             return []
-
-        # Handle cases like set([1, 2]) or list((1, 2))
-        if len(node.args) == 1 and isinstance(node.args[0], (nodes.List, nodes.Tuple, nodes.Set)):
+        elif len(node.args) == 1 and isinstance(node.args[0], (nodes.List, nodes.Tuple, nodes.Set)):
             return self.parse_container_op(node.args[0])
-
-        # Otherwise parse normally
-        return [self.parse(arg) for arg in node.args]
+        else:
+            return [self.parse(arg) for arg in node.args]

@@ -311,7 +311,6 @@ class Z3Parser:
         if func_name not in {"set", "list", "tuple"}:
             raise Z3ParseException(f"Unsupported call to {func_name}")
 
-        # Recursively parse each argument
         if not node.args:
             return []
 

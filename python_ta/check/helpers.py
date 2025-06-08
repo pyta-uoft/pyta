@@ -464,18 +464,6 @@ def verify_pre_check(
     return True
 
 
-def _get_reporter_module_path(reporter_name: str) -> str:
-    """Return the module path for a given PyTA reporter name."""
-    reporter_map = {
-        "pyta-html": "python_ta.reporters.html_reporter",
-        "pyta-plain": "python_ta.reporters.plain_reporter",
-        "pyta-color": "python_ta.reporters.color_reporter",
-        "pyta-json": "python_ta.reporters.json_reporter",
-    }
-
-    return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter")
-
-
 def _get_reporter_class_path(reporter_name: str) -> str:
     """Return the fully qualified class path for a given PyTA reporter name. Defaults to pyta-html"""
     reporter_map = {

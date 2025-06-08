@@ -11,9 +11,6 @@ import sys
 import tokenize
 from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
 
-import pylint.config
-import pylint.lint
-import pylint.utils
 from astroid import MANAGER, modutils
 from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter

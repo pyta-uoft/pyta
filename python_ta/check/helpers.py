@@ -38,8 +38,6 @@ PYLINT_PATCHED = False
 class PytaPyLinter(PyLinter):
     """Extension PyLinter that supports dynamic loading of pyta-* reporters."""
 
-    output_format = None
-
     def _load_reporters(self, reporter_names: str) -> None:
         """Override the default behaviour to return if a pyta-* reporter is already set"""
         return

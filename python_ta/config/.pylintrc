@@ -34,7 +34,7 @@ use-pyta-error-messages = yes
 # The type of reporter to use to display results. Available PyTA options are
 # pyta-plain, pyta-color, pyta-html, pyta-json.
 # Replaces the pyta-reporter option.
-output-format = pyta-html
+# output-format = pyta-html
 
 [ELIF]
 

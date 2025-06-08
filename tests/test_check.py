@@ -397,7 +397,7 @@ def blank_function() -> int:
 
 if __name__ == "__main__":
     python_ta.check_all(config={{
-        "output-format": "pyta-plain",
+        "output-format": "python_ta.reporters.PlainReporter",
         "watch": True
     }}{output_arg})
 '''
@@ -420,7 +420,7 @@ def blank_function() -> int:
 
 if __name__ == "__main__":
     python_ta.check_all(config={{
-        "output-format": "pyta-plain",
+        "output-format": "python_ta.reporters.PlainReporter",
         "watch": True
     }}{output_arg})
 '''
@@ -483,7 +483,7 @@ def test_precondition_inline_comment_no_error(caplog) -> None:
     """
     python_ta.check_all(
         "tests/fixtures/precondition_inline_comment.py",
-        config={"output-format": "pyta-plain"},
+        config={"output-format": "python_ta.reporters.PlainReporter"},
     )
 
     assert "WARNING" not in [record.levelname for record in caplog.records]

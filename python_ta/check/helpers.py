@@ -16,7 +16,6 @@ from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.lint.pylinter import _load_reporter_by_class
 from pylint.reporters import BaseReporter, MultiReporter
-from pylint.reporters.json_reporter import JSONReporter
 from pylint.utils.pragma_parser import OPTION_PO
 
 from python_ta import __version__
@@ -272,7 +271,7 @@ def reset_linter(
     # Register new options to a checker here to allow references to
     # options in `.pylintrc` config file.
     # Options stored in linter: `linter._all_options`, `linter._external_opts`
-    linter = PytaPyLinter(options=new_checker_options, reporter=JSONReporter())
+    linter = PytaPyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])

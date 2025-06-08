@@ -153,6 +153,40 @@ def test_five_nested_while_loop() -> None:
     }
 
 
+def test_accumulation_table_nested_tuple():
+    data = [
+        ("a", ([1, 2], 3)),
+        ("b", ([4, 5], 6)),
+        ("c", ([7, 8], 9)),
+    ]
+
+    with AccumulationTable(["data"]) as table:
+        for letter, (lst, num) in data:
+            lst[0] *= 2
+
+    assert table.loop_variables == {
+        "letter": ["N/A", "a", "b", "c"],
+        "lst": ["N/A", [2, 2], [8, 5], [14, 8]],
+        "num": ["N/A", 3, 6, 9],
+    }
+
+
+def test_accumulation_table_deeply_nested_tuple():
+    data = [
+        ("x", ([1], (2, 3))),
+        ("y", ([4], (5, 6))),
+    ]
+
+    with AccumulationTable(["data"]) as table:
+        for a, (b, (c, d)) in data:
+            b[0] += 1
+
+    assert table.loop_variables["a"] == ["N/A", "x", "y"]
+    assert table.loop_variables["b"] == ["N/A", [2], [5]]
+    assert table.loop_variables["c"] == ["N/A", 2, 5]
+    assert table.loop_variables["d"] == ["N/A", 3, 6]
+
+
 def test_accumulation_table_list_deepcopy():
     data = [[1], [2], [3]]
     with AccumulationTable(["data"]) as table:

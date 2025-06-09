@@ -113,7 +113,7 @@ class AccumulationTable:
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
                 value = NO_VALUE
             else:
-                # name error will be raised if accumulator cannot be found
+                # name error wil be raised if accumulator cannot be found
                 try:
                     value = eval(accumulator, frame.f_globals, frame.f_locals)
                 except NameError as e:

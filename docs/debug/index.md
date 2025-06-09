@@ -136,7 +136,7 @@ def calculate_sum_and_averages(numbers: list) -> list:
 
 You also have the option to pass in a file path as an attribute to the AccumulationTable object. In this case, the table will be appended to the file instead of being written the console.
 
-Finally, you can also specify the output as a third attribute using the format argument. By default, the format is "table", which produces the same nicely formatted tabular output shown above. If you want to write the output as a .csv file, pass "csv" as the format.
+Finally, you can also specify the output format as a third attribute using the `format` argument. By default, the format is "table", which produces the same nicely formatted tabular output shown above. If you want to write the output as a .csv file, pass "csv" as the format.
 
 For example, the following code writes a csv formattted output to `output.txt`.
 

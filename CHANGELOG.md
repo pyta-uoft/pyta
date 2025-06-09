@@ -15,7 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update `check_all` and `check_error` functions to let users pass in `typing.IO` objects to the `output` argument
 - Update the `forbidden-io-function-checker` to check functions from imported modules as well as methods (according to their qualified name)
 - Update the `forbidden-io-function-checker` to flag aliases of forbidden functions
-- Update how error messages are overridden such that section headers are no longer required within the config file
+- Update how error messages are /voverridden such that section headers are no longer required within the config file
 - Added `presistent_server` which recives the watch property changes through websockets and updates the HTML report
 - Added optional `on_verify_fail` argument to `check_all` and `check_error`, allowing users to raise a `ValueError` and immediately stop execution when a file cannot be checked.
 - Added optional `format` and `output` arguments to the `AccumulationTable` class, allowing users to select between csv or table formatted outputs, and whether the output is written to the console or a file.
@@ -32,7 +32,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 📚 Documentation Updates
 
 - Linked the contributions list (README.md) in the pull request template
-- Updated documentation to reflect the new output and format parameters in the `AccumulationTable` class.
 
 ### 🔧 Internal changes
 

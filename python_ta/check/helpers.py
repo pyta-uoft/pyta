@@ -37,10 +37,10 @@ PYLINT_PATCHED = False
 
 
 class PytaPyLinter(PyLinter):
-    """Extension PyLinter that supports dynamic loading of pyta-* reporters."""
+    """Extension to PyLinter that blocks the default behavior of loading the output format"""
 
     def _load_reporters(self, reporter_names: str) -> None:
-        """Override the default behaviour to return if a pyta-* reporter is already set"""
+        """Override to skip the default behaviour"""
         return
 
 
@@ -456,12 +456,15 @@ def _get_output_format_override(config: Optional[Union[str, dict]]) -> Optional[
     output_format_override = None
     if isinstance(config, str) and config != "":
         config_path = os.path.abspath(config)
-        if os.path.exists(config_path):
-            try:
-                config_data, _ = _RawConfParser.parse_config_file(config_path, verbose=False)
-                output_format_override = config_data.get("output-format")
-            except ConfigParserError as e:
-                print(f"Failed to parse config file {config}")
+        if not os.path.exists(config_path):
+            logging.warn(f"The following config file was not found: {config}")
+            return
+
+        try:
+            config_data, _ = _RawConfParser.parse_config_file(config_path, verbose=False)
+            output_format_override = config_data.get("output-format")
+        except ConfigParserError:
+            logging.warn(f"Failed to parse config file {config}")
     elif isinstance(config, dict) and config.get("output-format"):
         output_format_override = config.get("output-format")
     return output_format_override

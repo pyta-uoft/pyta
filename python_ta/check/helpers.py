@@ -9,9 +9,11 @@ import os
 import re
 import sys
 import tokenize
+from configparser import Error as ConfigParserError
 from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
 
 from astroid import MANAGER, modutils
+from pylint.config.config_file_parser import _RawConfParser
 from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.lint.pylinter import _load_reporter_by_class
@@ -279,17 +281,7 @@ def reset_linter(
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
     set_config = load_config
 
-    output_format_override = None
-    if isinstance(config, str) and config != "":
-        with open(config) as f:
-            for line in f:
-                if "output-format" in line and not line.strip().startswith("#"):
-                    match = re.search(r"output-format\s*=\s*(\S+)", line)
-                    if match:
-                        output_format_override = match.group(1).strip()
-                        break
-    elif isinstance(config, dict) and config.get("output-format"):
-        output_format_override = config.get("output-format")
+    output_format_override = _get_output_format_override(config)
 
     reporter_class_path = _get_reporter_class_path(output_format_override)
     reporter_class = _load_reporter_by_class(reporter_class_path)
@@ -340,6 +332,7 @@ def reset_linter(
             message_definition.msg = new_msg
             # Mutate the message definitions of the linter object
             linter.msgs_store.register_message(message_definition)
+
     return linter
 
 
@@ -458,7 +451,23 @@ def verify_pre_check(
     return True
 
 
-def _get_reporter_class_path(reporter_name: str) -> str:
+def _get_output_format_override(config: Optional[Union[str, dict]]) -> Optional[str]:
+    """Retrieve the output format override from the parsed configuration prematurally"""
+    output_format_override = None
+    if isinstance(config, str) and config != "":
+        config_path = os.path.abspath(config)
+        if os.path.exists(config_path):
+            try:
+                config_data, _ = _RawConfParser.parse_config_file(config_path, verbose=False)
+                output_format_override = config_data.get("output-format")
+            except ConfigParserError as e:
+                print(f"Failed to parse config file {config}")
+    elif isinstance(config, dict) and config.get("output-format"):
+        output_format_override = config.get("output-format")
+    return output_format_override
+
+
+def _get_reporter_class_path(reporter_name: Optional[str]) -> str:
     """Return the fully qualified class path for a given PyTA reporter name. Defaults to pyta-html"""
     reporter_map = {
         "pyta-html": "python_ta.reporters.html_reporter.HTMLReporter",

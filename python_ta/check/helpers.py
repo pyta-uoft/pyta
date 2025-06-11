@@ -452,7 +452,7 @@ def verify_pre_check(
 
 
 def _get_output_format_override(config: Optional[Union[str, dict]]) -> Optional[str]:
-    """Retrieve the output format override from the parsed configuration prematurally"""
+    """Retrieve the output format override from the parsed configuration prematurely"""
     output_format_override = None
     if isinstance(config, str) and config != "":
         config_path = os.path.abspath(config)

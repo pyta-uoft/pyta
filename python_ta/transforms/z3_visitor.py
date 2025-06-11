@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import astroid
+import z3
 from astroid import AstroidError, nodes
 from astroid.transforms import TransformVisitor
 from astroid.util import safe_infer
@@ -32,7 +33,6 @@ class Z3Visitor:
         for ann, arg in zip(annotations, arguments):
             if ann is None:
                 continue
-            # TODO: what to do about subscripts ex. set[int], list[set[int]], ...
             inferred = safe_infer(ann)
             if isinstance(inferred, nodes.ClassDef):
                 types[arg.name] = inferred.name
@@ -49,6 +49,12 @@ class Z3Visitor:
                 transformed = None
             if transformed is not None:
                 z3_constraints.append(transformed)
+
+        # Combine and simplify constraints
+        if z3_constraints:
+            simplified = z3.simplify(z3.And(*z3_constraints))
+            z3_constraints = [simplified]
+
         # Set z3 constraints
         node.z3_constraints = z3_constraints
         return node

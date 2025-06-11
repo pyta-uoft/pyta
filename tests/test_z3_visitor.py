@@ -255,32 +255,34 @@ string_list = [
 x = z3.Int("x")
 y = z3.Int("y")
 z = z3.Real("z")
-arithmetic_expected = [[x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0]), x + y != z]]
+arithmetic_expected = [
+    [z3.simplify(z3.And(x**2 + y**2 == z**2, z3.And(x > 0, y > 0, z == 0), x + y != z))]
+]
 
 # expected boolean expressions
 x = z3.Bool("x")
 y = z3.Bool("y")
 z = z3.Bool("z")
-boolean_expected = [[z3.And([x, y, z]), z3.Not(z3.Or([x, y, z]))]]
+boolean_expected = [[z3.simplify(z3.And(z3.And(x, y, z), z3.Not(z3.Or(x, y, z))))]]
 
 # expected container expressions
 x = z3.Int("x")
 container_expected = [
-    [z3.Or(x == 1, x == 2, x == 3)],
-    [z3.Or(x == 1, x == 2, x == 3)],
-    [z3.Or(x == 1, x == 2, x == 3)],
-    [z3.And(x != 1, x != 2, x != 3)],
-    [z3.And(x != 1, x != 2, x != 3)],
-    [z3.And(x != 1, x != 2, x != 3)],
-    [z3.BoolVal(False)],
-    [z3.BoolVal(False)],
-    [z3.BoolVal(True)],
-    [z3.BoolVal(True)],
-    [z3.BoolVal(False)],
-    [z3.BoolVal(True)],
-    [z3.Or(x == 1, x == 2)],
-    [z3.Or(x == 3, x == 4)],
-    [z3.And(x != 5, x != 6)],
+    [z3.simplify(z3.And(z3.Or(x == 1, x == 2, x == 3)))],
+    [z3.simplify(z3.And(z3.Or(x == 1, x == 2, x == 3)))],
+    [z3.simplify(z3.And(z3.Or(x == 1, x == 2, x == 3)))],
+    [z3.simplify(z3.And(z3.And(x != 1, x != 2, x != 3)))],
+    [z3.simplify(z3.And(z3.And(x != 1, x != 2, x != 3)))],
+    [z3.simplify(z3.And(z3.And(x != 1, x != 2, x != 3)))],
+    [z3.simplify(z3.And(z3.BoolVal(False)))],
+    [z3.simplify(z3.And(z3.BoolVal(False)))],
+    [z3.simplify(z3.And(z3.BoolVal(True)))],
+    [z3.simplify(z3.And(z3.BoolVal(True)))],
+    [z3.simplify(z3.And(z3.BoolVal(False)))],
+    [z3.simplify(z3.And(z3.BoolVal(True)))],
+    [z3.simplify(z3.And(z3.Or(x == 1, x == 2)))],
+    [z3.simplify(z3.And(z3.Or(x == 3, x == 4)))],
+    [z3.simplify(z3.And(z3.And(x != 5, x != 6)))],
 ]
 
 # expected string expressions
@@ -288,36 +290,57 @@ x = z3.String("x")
 y = z3.String("y")
 z = z3.String("z")
 string_expected = [
-    [x == y, z == x + y, x != z],
-    [z3.Contains("abc", x), z3.Contains(y, x)],
-    [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
+    [z3.simplify(z3.And(x == y, z == x + y, x != z))],
+    [z3.simplify(z3.And(z3.Contains("abc", x), z3.Contains(y, x)))],
+    [z3.simplify(z3.And(z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))))],
     [
-        z3.SubString(x, 0, 1) == y,
-        z3.SubString(x, 1, 1) == "a",
+        z3.simplify(
+            z3.And(
+                z3.SubString(x, 0, 1) == y,
+                z3.SubString(x, 1, 1) == "a",
+            )
+        )
     ],
     [
-        z3.SubString(x, z3.Length(x) - 1, 1) == "b",
-        z3.SubString(x, z3.Length(x) - 2, 1) == y,
+        z3.simplify(
+            z3.And(
+                z3.SubString(x, z3.Length(x) - 1, 1) == "b",
+                z3.SubString(x, z3.Length(x) - 2, 1) == y,
+            )
+        )
     ],
     [
-        z3.SubString(x, 1, 3) == y,
-        z3.SubString(x, 4, 1) == "a",
-        z3.SubString(x, 4, z3.Length(x) - 4) == "abc",
-        z3.SubString(x, 0, 3) == "def",
-        x == z,
+        z3.simplify(
+            z3.And(
+                z3.SubString(x, 1, 3) == y,
+                z3.SubString(x, 4, 1) == "a",
+                z3.SubString(x, 4, z3.Length(x) - 4) == "abc",
+                z3.SubString(x, 0, 3) == "def",
+                x == z,
+            )
+        )
     ],
     [
-        z3.SubString(x, z3.Length(x) - 4, 3) == y,
-        z3.SubString(x, z3.Length(x) - 4, 1) == "a",
-        z3.SubString(x, z3.Length(x) - 4, 4) == "abc",
-        z3.SubString(x, 0, z3.Length(x) - 3) == "def",
+        z3.simplify(
+            z3.And(
+                z3.SubString(x, z3.Length(x) - 4, 3) == y,
+                z3.SubString(x, z3.Length(x) - 4, 1) == "a",
+                z3.SubString(x, z3.Length(x) - 4, 4) == "abc",
+                z3.SubString(x, 0, z3.Length(x) - 3) == "def",
+            )
+        )
     ],
     [
-        z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 1)) == y,
-        z3.Concat(z3.SubString(x, 0, 1), z3.SubString(x, 4, 1)) == "ab",
-        z3.Concat(z3.SubString(x, 6, 1), z3.SubString(x, 4, 1)) == "cd",
+        z3.simplify(
+            z3.And(
+                z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 1)) == y,
+                z3.Concat(z3.SubString(x, 0, 1), z3.SubString(x, 4, 1)) == "ab",
+                z3.Concat(z3.SubString(x, 6, 1), z3.SubString(x, 4, 1)) == "cd",
+            )
+        )
     ],
 ]
+
 
 # lists of all test cases
 code_list = [arithmetic_list, boolean_list, container_list, string_list]
@@ -399,6 +422,30 @@ invalid_input_list = [
 @pytest.mark.parametrize("invalid_code", invalid_input_list)
 def test_invalid_input(invalid_code):
     assert _get_constraints_from_code(invalid_code) == []
+
+
+def test_z3_simplification_applied():
+    """
+    Test that redundant constraints are simplified correctly into a single expression.
+    """
+    code = '''
+    def test_func(x: int):
+        """
+        Preconditions:
+            - x > 0
+            - x > 1
+        """
+        pass
+    '''
+    constraints = _get_constraints_from_code(code)
+
+    x = z3.Int("x")
+    expected = z3.simplify(z3.And(x > 0, x > 1))
+
+    assert len(constraints) == 1
+    solver = z3.Solver()
+    solver.add(constraints[0] != expected)
+    assert solver.check() == z3.unsat
 
 
 def test_cfg_z3_vars_initialization():

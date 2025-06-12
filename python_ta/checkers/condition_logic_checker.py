@@ -6,16 +6,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Union
 
-try:
-    import z3
+if TYPE_CHECKING:
+    try:
+        from z3 import ExprRef
 
-    from ..cfg.graph import Z3Environment
-
-    z3_dependency_available = True
-except ImportError:
-    z3 = Any
-    Z3Environment = Any
-    z3_dependency_available = False
+    except ImportError:
+        ExprRef = Any
 
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
@@ -70,11 +66,15 @@ class ConditionLogicChecker(BaseChecker):
         - A condition is impossible if for every feasible execution path
         leading to the node, the condition must be False due to precedent constraints.
         """
-        if (
-            not hasattr(node, "cfg_block")
-            or not z3_dependency_available
-            or not self.linter.config.z3
-        ):
+        if not hasattr(node, "cfg_block") or not self.linter.config.z3:
+            return
+
+        # Then z3 option is enabled
+        try:
+            import z3
+
+            from ..cfg.graph import Z3Environment
+        except ImportError:
             return
 
         node_block = node.cfg_block
@@ -101,12 +101,15 @@ class ConditionLogicChecker(BaseChecker):
         ):
             self.add_message("impossible-condition", node=node.test)
 
-    def _check_unsat(self, prev_constraints: z3.ExprRef, node_constraint: z3.ExprRef) -> bool:
+    def _check_unsat(self, prev_constraints: ExprRef, node_constraint: ExprRef) -> bool:
         """Check if the conjunction of the given constraints is unsatisfiable.
 
         - prev_constraints (z3.ExprRef): Constraints from previous nodes.
         - node_constraint (z3.ExprRef): The condition to check at the current node.
         """
+        # z3 is already imported by caller (cached), no need to check for importError again
+        import z3
+
         solver = z3.Solver()
         solver.add(z3.And(prev_constraints, node_constraint))
         return solver.check() == z3.unsat

@@ -1,32 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Generator, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set
 
-try:
-    from z3 import (
-        Z3_OP_UNINTERPRETED,
-        ExprRef,
-        Not,
-        Solver,
-        Z3Exception,
-        is_const,
-        unsat,
-    )
-
-    from ..z3.z3_parser import Z3ParseException, Z3Parser
-
-    z3_dependency_available = True
-except ImportError:
-    ExprRef = Any
-    Z3Parser = Any
-    Not = Any
-    Z3Exception = Any
-    is_const = Any
-    Z3_OP_UNINTERPRETED = Any
-    Z3ParseException = Any
-    Solver = Any
-    unsat = Any
-    z3_dependency_available = False
+if TYPE_CHECKING:
+    try:
+        from z3 import ExprRef
+    except ImportError:
+        ExprRef = Any
 
 from astroid import (
     AnnAssign,
@@ -72,11 +52,15 @@ class ControlFlowGraph:
         args.parent.cfg = self
         args.parent.cfg_block = self.start
 
-        if ExprRef is not Any:
+        try:
+            from ..z3.z3_parser import Z3ParseException, Z3Parser
+
             # Parse types
             parser = Z3Parser()
             z3_vars = parser.parse_arguments(args)
             self.z3_vars.update(z3_vars)
+        except (Z3ParseException, ImportError):
+            return
 
     def create_block(
         self,
@@ -271,7 +255,10 @@ class ControlFlowGraph:
 
         Constraints with reassigned variables are not included in subsequent edges.
         """
-        if not z3_dependency_available:
+        try:
+            from z3 import Not
+
+        except ImportError:
             return
 
         for path_id, path in enumerate(self.get_paths()):
@@ -310,7 +297,10 @@ class ControlFlowGraph:
         attribute of each edge. Edges that are unreachable with the given
         set of Z3 constraints will have is_feasible set to False
         """
-        if not z3_dependency_available:
+        try:
+            from z3 import Solver, unsat
+
+        except ImportError:
             return
 
         def _check_unsat(constraints: List[ExprRef]) -> bool:
@@ -472,6 +462,14 @@ class Z3Environment:
         """Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
+        try:
+            from z3 import Z3Exception
+
+            from ..z3.z3_parser import Z3ParseException, Z3Parser
+
+        except ImportError:
+            return None
+
         parser = Z3Parser(self.variables)
         try:
             return parser.parse(node)
@@ -484,6 +482,12 @@ def _get_vars(expr: ExprRef) -> Set[str]:
     variables = set()
 
     def traverse(e: ExprRef) -> None:
+        try:
+            from z3 import Z3_OP_UNINTERPRETED, is_const
+
+        except ImportError:
+            return
+
         if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
             variables.add(e.decl().name())
         elif hasattr(e, "children"):

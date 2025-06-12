@@ -59,7 +59,7 @@ class ControlFlowGraph:
             parser = Z3Parser()
             z3_vars = parser.parse_arguments(args)
             self.z3_vars.update(z3_vars)
-        except (Z3ParseException, ImportError):
+        except ImportError:
             return
 
     def create_block(

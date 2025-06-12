@@ -45,7 +45,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored `render_pep8_errors` to use a dict that maps error codes to error functions instead of repeated conditional statements
 - Added two test cases to `test_accumulation_table.py` to verify that `AccumulationTable` correctly extracts loop variables from nested tuple structures.
 - Refactored `condition_logic_checker.py` and `graph.py` by removing top-level `z3` imports and moving them inside of functions where needed.
-- Wrapped type-only `z3` imports in a `TYPE_CHECKING` guard in `condition_logic_checker.py` and `graph.py` to avoid runtime dependency issues.
+- Wrapped type-only `z3` imports in a `TYPE_CHECKING` guard in `condition_logic_checker.py` and `graph.py`.
 
 ## [2.10.1] - 2025-02-19
 

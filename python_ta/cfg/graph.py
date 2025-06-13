@@ -53,7 +53,7 @@ class ControlFlowGraph:
         args.parent.cfg_block = self.start
 
         try:
-            from ..z3.z3_parser import Z3ParseException, Z3Parser
+            from ..z3.z3_parser import Z3Parser
 
             # Parse types
             parser = Z3Parser()

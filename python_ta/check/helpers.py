@@ -9,14 +9,14 @@ import os
 import re
 import sys
 import tokenize
+from configparser import Error as ConfigParserError
 from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
 
-import pylint.config
-import pylint.lint
-import pylint.utils
 from astroid import MANAGER, modutils
+from pylint.config.config_file_parser import _RawConfParser
 from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
+from pylint.lint.pylinter import _load_reporter_by_class
 from pylint.reporters import BaseReporter, MultiReporter
 from pylint.utils.pragma_parser import OPTION_PO
 
@@ -34,6 +34,14 @@ from ..util.autoformat import run_autoformat
 
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
+
+
+class PytaPyLinter(PyLinter):
+    """Extension to PyLinter that blocks the default behavior of loading the output format"""
+
+    def _load_reporters(self, reporter_names: str) -> None:
+        """Override to skip the default behaviour"""
+        return
 
 
 def setup_linter(
@@ -262,28 +270,29 @@ def reset_linter(
         if f != "__init__.py" and os.path.splitext(f)[1] == ".py"
     ]
 
-    custom_reporters = [
-        ("python_ta.reporters." + os.path.splitext(f)[0])
-        for f in os.listdir(parent_dir_path + "/reporters")
-        if f not in ["__init__.py", "stat_reporter.py"] and re.match(r".*_reporter\.py$", f)
-    ]
-
     # Register new options to a checker here to allow references to
     # options in `.pylintrc` config file.
     # Options stored in linter: `linter._all_options`, `linter._external_opts`
-    linter = pylint.lint.PyLinter(options=new_checker_options)
+    linter = PytaPyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
-    linter.load_plugin_modules(custom_reporters)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
     set_config = load_config
 
+    output_format_override = _get_output_format_override(config)
+
+    reporter_class_path = _get_reporter_class_path(output_format_override)
+    reporter_class = _load_reporter_by_class(reporter_class_path)
+    linter.set_reporter(reporter_class())
+
     if load_default_config:
         load_config(linter, default_config_path)
         # If we do specify to load the default config, we just need to override the options later.
         set_config = override_config
+        if default_config_path in linter.reporter.messages:
+            del linter.reporter.messages[default_config_path]
 
     if isinstance(config, str) and config != "":
         set_config(linter, config)
@@ -304,7 +313,7 @@ def reset_linter(
             for key in config:
                 linter.set_option(key, config[key])
 
-        # Override error messages
+    # Override error messages
     messages_config_path = linter.config.messages_config_path
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
     use_pyta_error_messages = linter.config.use_pyta_error_messages
@@ -440,3 +449,33 @@ def verify_pre_check(
             raise
         return False
     return True
+
+
+def _get_output_format_override(config: Optional[Union[str, dict]]) -> Optional[str]:
+    """Retrieve the output format override from the parsed configuration prematurely"""
+    output_format_override = None
+    if isinstance(config, str) and config != "":
+        config_path = os.path.abspath(config)
+        if not os.path.exists(config_path):
+            logging.warn(f"The following config file was not found: {config}")
+            return
+
+        try:
+            config_data, _ = _RawConfParser.parse_config_file(config_path, verbose=False)
+            output_format_override = config_data.get("output-format")
+        except ConfigParserError:
+            logging.warn(f"Failed to parse config file {config}")
+    elif isinstance(config, dict) and config.get("output-format"):
+        output_format_override = config.get("output-format")
+    return output_format_override
+
+
+def _get_reporter_class_path(reporter_name: Optional[str]) -> str:
+    """Return the fully qualified class path for a given PyTA reporter name. Defaults to pyta-html"""
+    reporter_map = {
+        "pyta-html": "python_ta.reporters.html_reporter.HTMLReporter",
+        "pyta-plain": "python_ta.reporters.plain_reporter.PlainReporter",
+        "pyta-color": "python_ta.reporters.color_reporter.ColorReporter",
+        "pyta-json": "python_ta.reporters.json_reporter.JSONReporter",
+    }
+    return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter.HTMLReporter")

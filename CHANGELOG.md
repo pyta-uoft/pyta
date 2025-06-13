@@ -35,6 +35,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Dynamically loaded only the reporter specified in the configuration
 - Added test case for `check_all` function ensuring proper behaviour when handling inputs in package notation.
 - Improved `get_valid_files_to_check` function by removing unreachable code.
 - Refactored `test_check.py` to use `pytest.mark.parametrize` annotation, improving test isolation and extracting inputs from test functions

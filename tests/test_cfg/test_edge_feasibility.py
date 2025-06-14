@@ -1,8 +1,9 @@
 from unittest.mock import patch
 
 import astroid
+import z3
 
-from python_ta.cfg import CFGVisitor, ControlFlowGraph
+from python_ta.cfg import CFGVisitor, ControlFlowGraph, Z3Environment
 from python_ta.transforms.z3_visitor import Z3Visitor
 
 
@@ -377,3 +378,26 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
 
     assert func_node is not None
     return visitor.cfgs[func_node]
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_update_edge_z3_import_fail() -> None:
+    """Test verifies if `update_edge_z3_constraints` handles import errors as expected."""
+    cfg = ControlFlowGraph()
+    assert cfg.update_edge_z3_constraints() is None
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_update_edge_feasibility_import_fail() -> None:
+    """Test verifies if `update_edge_feasibility` handles import errors as expected."""
+    cfg = ControlFlowGraph()
+    assert cfg.update_edge_feasibility() is None
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_update_constraints_import_fail() -> None:
+    """Test verifies if `update_constraints` handles import errors as expected when calling helper `_get_vars`."""
+    # Note: Don't need a valid constraints list since patching error into open function
+    env = Z3Environment({}, [z3.ExprRef(None)])
+
+    assert env.update_constraints()

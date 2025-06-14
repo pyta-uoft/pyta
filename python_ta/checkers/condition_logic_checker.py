@@ -6,19 +6,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Union
 
-if TYPE_CHECKING:
-    try:
-        from z3 import ExprRef
-
-    except ImportError:
-        ExprRef = Any
-
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
 
 if TYPE_CHECKING:
     from astroid import nodes
     from pylint.lint import PyLinter
+
+    try:
+        from z3 import ExprRef
+
+    except ImportError:
+        ExprRef = Any
 
 
 class ConditionLogicChecker(BaseChecker):

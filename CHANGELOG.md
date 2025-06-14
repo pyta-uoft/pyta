@@ -46,6 +46,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added two test cases to `test_accumulation_table.py` to verify that `AccumulationTable` correctly extracts loop variables from nested tuple structures.
 - Refactored `condition_logic_checker.py` and `graph.py` by removing top-level `z3` imports and moving them inside of functions where needed.
 - Wrapped type-only `z3` imports in a `TYPE_CHECKING` guard in `condition_logic_checker.py` and `graph.py`.
+- Added tests to improve coverage in `condition_logic_checker.py` and `graph.py`, verifying behaviour in case of failed `z3` import via import patching
 
 ## [2.10.1] - 2025-02-19
 

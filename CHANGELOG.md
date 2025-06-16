@@ -249,6 +249,7 @@ Custom checkers:
 - Added support for the `!=` operator and replaced dictionary indexing with `.get` in `ExprWrapper`.
 - Refactored `Z3Visitor` to use `safe_infer()` instead of `inferred()` and added handling of `AstroidError`.
 - Add `negate` attribute to `CFGEdge`
+- Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
 
 ## [2.7.0] - 2023-12-14
 

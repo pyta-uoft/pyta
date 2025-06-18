@@ -35,6 +35,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Split `inconsistent_or_missing_returns_checker.py` into two separate checkers:
+  - `missing_return_checker.py` (R9711)
+  - `inconsistent_returns_checker.py` (R9710)
+- Removed the original `inconsistent_or_missing_returns_checker.py` and its associated test file.
 - Dynamically loaded only the reporter specified in the configuration
 - Added test case for `check_all` function ensuring proper behaviour when handling inputs in package notation.
 - Improved `get_valid_files_to_check` function by removing unreachable code.

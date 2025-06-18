@@ -450,122 +450,98 @@ def test_uninitialized_loop_accumulators() -> None:
                 _ = number
 
 
-def test_tabular_output_to_existing_file(tmp_path) -> None:
-    test_list = [10, 20, 30]
-    sum_so_far = 0
+@pytest.fixture(params=["table", "csv"])
+def output_format(request):
+    """Parametrized fixture for output format."""
+    return request.param
+
+
+@pytest.fixture
+def existing_file_content(tmp_path):
+    """Fixture that creates a file with existing content."""
     output_file = tmp_path / "output.txt"
     with open(output_file, "a") as file:
         file.write("Existing Content")
         file.write("\n")
-    with AccumulationTable(["sum_so_far"], output=str(output_file)) as table:
-        for number in test_list:
-            sum_so_far = sum_so_far + number
-        iteration_dict = table._create_iteration_dict()
-
-    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
-    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
-
-    with open(output_file, "r") as file:
-        content = file.read()
-        expected_values = tabulate.tabulate(
-            iteration_dict,
-            headers="keys",
-            colalign=(*["left"] * len(iteration_dict),),
-            disable_numparse=True,
-            missingval="None",
-        )
-    assert "Existing Content" in content
-    assert expected_values in content
-
-    shutil.rmtree(tmp_path)
+    return output_file
 
 
-def test_csv_output_to_existing_file(tmp_path) -> None:
-    test_list = [10, 20, 30]
+def get_expected_content(format_type):
+    """Return the exact expected file content as literal strings."""
+    if format_type == "csv":
+        return """iteration,number,sum_so_far,avg_so_far,list_so_far
+0,N/A,0,,[]
+1,10,10,10.0,"[(10, 10.0)]"
+2,20,30,15.0,"[(10, 10.0), (30, 15.0)]"
+3,30,60,20.0,"[(10, 10.0), (30, 15.0), (60, 20.0)]"
+4,40,100,25.0,"[(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0)]"
+5,50,150,30.0,"[(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0)]"
+6,60,210,35.0,"[(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0), (210, 35.0)]"
+"""
+    else:
+        return """iteration    number    sum_so_far    avg_so_far    list_so_far
+-----------  --------  ------------  ------------  ---------------------------------------------------------------------------
+0            N/A       0             None          []
+1            10        10            10.0          [(10, 10.0)]
+2            20        30            15.0          [(10, 10.0), (30, 15.0)]
+3            30        60            20.0          [(10, 10.0), (30, 15.0), (60, 20.0)]
+4            40        100           25.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0)]
+5            50        150           30.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0)]
+6            60        210           35.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0), (210, 35.0)]"""
+
+
+def test_output_to_existing_file(existing_file_content, output_format):
+    """Test output to existing file with parametrized format."""
+    numbers = [10, 20, 30, 40, 50, 60]
     sum_so_far = 0
-    output_file = tmp_path / "output.txt"
+    list_so_far = []
+    avg_so_far = None
 
-    with open(output_file, "a") as file:
-        file.write("Existing Content")
-        file.write("\n")
+    table_kwargs = {"output": str(existing_file_content)}
+    if output_format == "csv":
+        table_kwargs["format"] = "csv"
 
-    with AccumulationTable(["sum_so_far"], output=str(output_file), format="csv") as table:
-        for number in test_list:
+    with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], **table_kwargs):
+        for number in numbers:
             sum_so_far = sum_so_far + number
-        iteration_dict = table._create_iteration_dict()
+            avg_so_far = sum_so_far / (len(list_so_far) + 1)
+            list_so_far.append((sum_so_far, avg_so_far))
 
-    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
-    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
-
-    # Generate the expected csv content in the table
-    output = io.StringIO(newline="")
-    writer = csv.DictWriter(output, fieldnames=iteration_dict.keys())
-    writer.writeheader()
-    csv_preformat = [dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())]
-    writer.writerows(csv_preformat)
-    expected_csv = output.getvalue().replace("\r\n", "\n")
-
-    # Compare the expected content with the read content
-    with open(output_file, "r") as file:
+    with open(existing_file_content, "r") as file:
         content = file.read()
 
-    assert content == "Existing Content\n" + expected_csv
+    expected_table_content = get_expected_content(output_format)
+    if output_format == "table":
+        expected_file_content = "Existing Content\n" + expected_table_content + "\n"
+    else:
+        expected_file_content = "Existing Content\n" + expected_table_content
 
-    shutil.rmtree(tmp_path)
+    assert content == expected_file_content
 
 
-def test_tabular_output_to_new_file(tmp_path) -> None:
-    test_list = [10, 20, 30]
+def test_output_to_new_file(tmp_path, output_format):
+    """Test output to new file with parametrized format."""
+    output_file = tmp_path / "output.txt"
+    numbers = [10, 20, 30, 40, 50, 60]
     sum_so_far = 0
-    with AccumulationTable(["sum_so_far"], output=str(tmp_path / "output.txt")) as table:
-        for number in test_list:
-            sum_so_far = sum_so_far + number
-        iteration_dict = table._create_iteration_dict()
+    list_so_far = []
+    avg_so_far = None
 
-    output_file = tmp_path / "output.txt"
-    assert output_file.exists()
-    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
-    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+    table_kwargs = {"output": str(output_file)}
+    if output_format == "csv":
+        table_kwargs["format"] = "csv"
+
+    with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], **table_kwargs):
+        for number in numbers:
+            sum_so_far = sum_so_far + number
+            avg_so_far = sum_so_far / (len(list_so_far) + 1)
+            list_so_far.append((sum_so_far, avg_so_far))
 
     with open(output_file, "r") as file:
         content = file.read()
-        expected_values = tabulate.tabulate(
-            iteration_dict,
-            headers="keys",
-            colalign=(*["left"] * len(iteration_dict),),
-            disable_numparse=True,
-            missingval="None",
-        )
-    assert expected_values in content
 
-    shutil.rmtree(tmp_path)
+    expected_content = get_expected_content(output_format)
+    if output_format == "table":
+        expected_content = expected_content + "\n"
 
-
-def test_csv_output_to_new_file(tmp_path) -> None:
-    test_list = [10, 20, 30]
-    sum_so_far = 0
-    output_file = tmp_path / "output.txt"
-
-    with AccumulationTable(["sum_so_far"], output=str(output_file), format="csv") as table:
-        for number in test_list:
-            sum_so_far = sum_so_far + number
-        iteration_dict = table._create_iteration_dict()
-
-    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
-    assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
-
-    # Generate the expected csv content in the table
-    output = io.StringIO(newline="")
-    writer = csv.DictWriter(output, fieldnames=iteration_dict.keys())
-    writer.writeheader()
-    csv_preformat = [dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())]
-    writer.writerows(csv_preformat)
-    expected_csv = output.getvalue().replace("\r\n", "\n")
-
-    # Compare the expected content with the read content
-    with open(output_file, "r") as file:
-        content = file.read()
-
-    assert content == expected_csv
-
-    shutil.rmtree(tmp_path)
+    assert content == expected_content

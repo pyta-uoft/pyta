@@ -78,7 +78,7 @@ class AccumulationTable:
     """A dictionary mapping loop variable variable name to its values across all loop iterations."""
     _loop_lineno: int
     output_filepath: Optional[str]
-    output_format: bool
+    output_format: str
 
     def __init__(
         self,
@@ -145,40 +145,39 @@ class AccumulationTable:
     def _tabulate_data(self) -> None:
         """Print the values of the accumulator and loop variables into a table"""
         iteration_dict = self._create_iteration_dict()
-        table = tabulate.tabulate(
-            iteration_dict,
-            headers="keys",
-            colalign=(*["left"] * len(iteration_dict),),
-            disable_numparse=True,
-            missingval="None",
-        )
 
-        if self.output_format == "table":
-            if self.output_filepath is None:
-                print(table)
-            else:
-                try:
-                    with open(self.output_filepath, "a") as file:
-                        file.write(table)
-                        file.write("\n")
-                except OSError as e:
-                    print(f"Error writing table formatted data to file: {e}")
+        if self.output_filepath is None:
+            file_io = sys.stdout
         else:
-            csv_preformat = [
-                dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())
-            ]
-            if self.output_filepath is None:
-                writer = csv.DictWriter(sys.stdout, fieldnames=iteration_dict.keys())
+            try:
+                file_io = open(self.output_filepath, "a", newline="")
+            except OSError as e:
+                print(f"Error opening file: {e}")
+                return
+
+        try:
+            if self.output_format == "table":
+                table = tabulate.tabulate(
+                    iteration_dict,
+                    headers="keys",
+                    colalign=(*["left"] * len(iteration_dict),),
+                    disable_numparse=True,
+                    missingval="None",
+                )
+                file_io.write(table)
+                file_io.write("\n")
+            else:
+                csv_preformat = [
+                    dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())
+                ]
+                writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
                 writer.writeheader()
                 writer.writerows(csv_preformat)
-            else:
-                try:
-                    with open(self.output_filepath, "a", newline="") as file:
-                        writer = csv.DictWriter(file, fieldnames=iteration_dict.keys())
-                        writer.writeheader()
-                        writer.writerows(csv_preformat)
-                except OSError as e:
-                    print(f"Error writing csv formatted data to file: {e}")
+        except OSError as e:
+            print(f"Error writing data: {e}")
+        finally:
+            if self.output_filepath is not None:
+                file_io.close()
 
     def _trace_loop(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Trace through the loop and store the values of the

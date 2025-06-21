@@ -4,6 +4,7 @@ import astroid
 from astroid import AstroidError, nodes
 from astroid.transforms import TransformVisitor
 from astroid.util import safe_infer
+from z3 import And, simplify
 from z3.z3types import Z3Exception
 
 from ..contracts import parse_assertions
@@ -50,5 +51,9 @@ class Z3Visitor:
             if transformed is not None:
                 z3_constraints.append(transformed)
         # Set z3 constraints
-        node.z3_constraints = z3_constraints
+        if z3_constraints:
+            node.z3_constraints = [simplify(And(*z3_constraints))]
+        else:
+            node.z3_constraints = []
+
         return node

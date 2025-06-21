@@ -44,6 +44,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Wrapped type-only imports in if `TYPE_CHECKING` guards
 - Refactored `render_pep8_errors` to use a dict that maps error codes to error functions instead of repeated conditional statements
 - Added two test cases to `test_accumulation_table.py` to verify that `AccumulationTable` correctly extracts loop variables from nested tuple structures.
+- Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
 
 ## [2.10.1] - 2025-02-19
 

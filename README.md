@@ -73,7 +73,7 @@ included as a library). In the Python interpreter, try running:
 
 ## Contributors
 
-Ibrahim Bilal
+Ibrahim Bilal,
 Lorena Buciu,
 Simon Chen,
 Freeman Cheng,

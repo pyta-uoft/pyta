@@ -73,6 +73,7 @@ included as a library). In the Python interpreter, try running:
 
 ## Contributors
 
+Ibrahim Bilal
 Lorena Buciu,
 Simon Chen,
 Freeman Cheng,
@@ -120,4 +121,3 @@ Jasmine Wu,
 Raine Yang,
 Philippe Yu,
 Yi Cheng (Michael) Zhao
-Ibrahim Bilal

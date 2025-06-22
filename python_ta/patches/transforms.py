@@ -27,7 +27,7 @@ def patch_ast_transforms(z3: bool):
         # Run the CFGVisitor
         try:
             if z3:
-                ast.accept(CFGVisitor(options={"separate-condition-blocks": True}))
+                ast.accept(CFGVisitor(options={"separate-condition-blocks": True}, z3_enabled=True))
             else:
                 ast.accept(CFGVisitor())
         except Exception as e:

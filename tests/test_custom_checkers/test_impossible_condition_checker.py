@@ -261,20 +261,5 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
     def _apply_cfg_visitor(self, src: str) -> nodes.NodeNG:
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor(options={"separate-condition-blocks": True}))
+        mod.accept(CFGVisitor(options={"separate-condition-blocks": True}, z3_enabled=True))
         return mod
-
-    @patch.dict("sys.modules", {"python_ta.z3.z3_parser": None})
-    def test_parse_constraint_import_fail(self) -> None:
-        """Test"""
-        src = """
-                def func(a: int):
-                    if a > 5:
-                        print(a)
-                """
-
-        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
-
-        # No message should be produced since the module "failed" to import
-        with self.assertNoMessages():
-            self.checker.visit_if(condition_node)

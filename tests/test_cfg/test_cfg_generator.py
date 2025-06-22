@@ -154,6 +154,13 @@ def test_z3_dependency_uninstalled(snapshot, create_cfg) -> None:
     snapshot.assert_match(gv_file_io.read(), "my_file.gv")
 
 
+@patch.dict("sys.modules", {"python_ta.transforms.z3_visitor": None})
+def test_cfg_generator_failed_import() -> None:
+    """Test verifies if `generate_cfg` has expected behaviour when Z3Visitor fails to import."""
+    with pytest.raises(ImportError):
+        cfg_generator.generate_cfg(z3_enabled=True)
+
+
 if __name__ == "__main__":
     import pytest
 

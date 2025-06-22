@@ -491,7 +491,7 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
@@ -514,7 +514,7 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
@@ -539,7 +539,7 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
@@ -562,7 +562,7 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
@@ -583,7 +583,7 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 
@@ -606,7 +606,7 @@ class TestPossiblyUndefinedCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         func_node = mod.body[0]
         *_, name_node = mod.nodes_of_class(nodes.Name)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set
 
 if TYPE_CHECKING:
@@ -21,6 +22,9 @@ from astroid import (
     Return,
 )
 
+# Global z3
+z3 = Any
+
 
 class ControlFlowGraph:
     """A graph representing the control flow of a Python program."""
@@ -37,8 +41,10 @@ class ControlFlowGraph:
     precondition_constraints: List[ExprRef]
     # map from variable names to z3 variables
     z3_vars: Dict[str, ExprRef]
+    # z3 enabled option
+    z3_enabled: bool
 
-    def __init__(self, cfg_id: int = 0) -> None:
+    def __init__(self, cfg_id: int = 0, z3_enabled: bool = False) -> None:
         self.block_count = 0
         self.cfg_id = cfg_id
         self.unreachable_blocks = set()
@@ -46,21 +52,34 @@ class ControlFlowGraph:
         self.end = self.create_block()
         self.z3_vars = {}
         self.precondition_constraints = []
+        self.z3_enabled = z3_enabled
+        global z3
+        if self.z3_enabled:
+            try:
+                import z3 as z3_module
+
+                z3 = z3_module
+            except ImportError:
+                # Reset z3_enabled to prevent further use of z3 module
+                logging.error("Failed to import z3 module. Disabling z3 features.")
+                self.z3_enabled = False
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
         args.parent.cfg = self
         args.parent.cfg_block = self.start
 
-        try:
-            from ..z3.z3_parser import Z3Parser
+        if self.z3_enabled:
+            try:
+                from ..z3.z3_parser import Z3Parser
 
+            except ImportError:
+                logging.error("Failed to import Z3Parser despite Z3 being enabled.")
+                return
             # Parse types
             parser = Z3Parser()
             z3_vars = parser.parse_arguments(args)
             self.z3_vars.update(z3_vars)
-        except ImportError:
-            return
 
     def create_block(
         self,
@@ -255,15 +274,14 @@ class ControlFlowGraph:
 
         Constraints with reassigned variables are not included in subsequent edges.
         """
-        try:
-            from z3 import Not
-
-        except ImportError:
+        if not self.z3_enabled:
             return
-
         for path_id, path in enumerate(self.get_paths()):
             # starting a new path
-            z3_environment = Z3Environment(self.z3_vars, self.precondition_constraints)
+            # Note: z3_enabled is False by default. It will only be set to True if self.z3_enabled was enabled earlier
+            z3_environment = Z3Environment(
+                self.z3_vars, self.precondition_constraints, z3_enabled=self.z3_enabled
+            )
             for edge in path:
                 # traverse through edge
                 if edge.condition is not None:
@@ -271,7 +289,7 @@ class ControlFlowGraph:
                     if condition_z3_constraint is not None:
                         if edge.negate is not None:
                             z3_environment.add_constraint(
-                                Not(condition_z3_constraint)
+                                z3.Not(condition_z3_constraint)
                                 if edge.negate
                                 else condition_z3_constraint
                             )
@@ -297,16 +315,13 @@ class ControlFlowGraph:
         attribute of each edge. Edges that are unreachable with the given
         set of Z3 constraints will have is_feasible set to False
         """
-        try:
-            from z3 import Solver, unsat
-
-        except ImportError:
+        if not self.z3_enabled:
             return
 
         def _check_unsat(constraints: List[ExprRef]) -> bool:
-            solver = Solver()
+            solver = z3.Solver()
             solver.add(constraints)
-            return solver.check() == unsat
+            return solver.check() == z3.unsat
 
         for edge in self.get_edges():
             if len(edge.z3_constraints) > 0:
@@ -444,7 +459,7 @@ class Z3Environment:
         updated_constraints = []
         for constraint in self.constraints:
             # discard expressions with reassigned variables
-            variables = _get_vars(constraint)
+            variables = self._get_vars(constraint)
             reassigned = any(
                 not self.variable_unassigned.get(variable, False) for variable in variables
             )
@@ -462,13 +477,9 @@ class Z3Environment:
         """Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
-        try:
-            from z3 import Z3Exception
+        from z3 import Z3Exception
 
-            from ..z3.z3_parser import Z3ParseException, Z3Parser
-
-        except ImportError:
-            return None
+        from ..z3.z3_parser import Z3ParseException, Z3Parser
 
         parser = Z3Parser(self.variables)
         try:
@@ -476,23 +487,18 @@ class Z3Environment:
         except (Z3Exception, Z3ParseException):
             return None
 
+    def _get_vars(self, expr: ExprRef) -> Set[str]:
+        """Retrieve all z3 variables from a z3 expression"""
+        from z3 import Z3_OP_UNINTERPRETED, is_const
 
-def _get_vars(expr: ExprRef) -> Set[str]:
-    """Retrieve all z3 variables from a z3 expression"""
-    variables = set()
+        variables = set()
 
-    def traverse(e: ExprRef) -> None:
-        try:
-            from z3 import Z3_OP_UNINTERPRETED, is_const
+        def traverse(e: ExprRef) -> None:
+            if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
+                variables.add(e.decl().name())
+            elif hasattr(e, "children"):
+                for child in e.children():
+                    traverse(child)
 
-        except ImportError:
-            return
-
-        if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
-            variables.add(e.decl().name())
-        elif hasattr(e, "children"):
-            for child in e.children():
-                traverse(child)
-
-    traverse(expr)
-    return variables
+        traverse(expr)
+        return variables

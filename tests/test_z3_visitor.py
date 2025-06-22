@@ -407,7 +407,7 @@ def test_cfg_z3_vars_initialization():
     """
     node = astroid.extract_node(z3_vars_example)
 
-    cfg = ControlFlowGraph()
+    cfg = ControlFlowGraph(z3_enabled=True)
     cfg.add_arguments(node.args)
 
     assert len(cfg.z3_vars) == 4

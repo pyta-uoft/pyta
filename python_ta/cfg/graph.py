@@ -279,9 +279,7 @@ class ControlFlowGraph:
         for path_id, path in enumerate(self.get_paths()):
             # starting a new path
             # Note: z3_enabled is False by default. It will only be set to True if self.z3_enabled was enabled earlier
-            z3_environment = Z3Environment(
-                self.z3_vars, self.precondition_constraints, z3_enabled=self.z3_enabled
-            )
+            z3_environment = Z3Environment(self.z3_vars, self.precondition_constraints)
             for edge in path:
                 # traverse through edge
                 if edge.condition is not None:

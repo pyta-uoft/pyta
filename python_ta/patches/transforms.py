@@ -7,7 +7,7 @@ from pylint.lint import PyLinter
 from ..cfg.visitor import CFGVisitor
 
 
-def patch_ast_transforms(z3: bool):
+def patch_ast_transforms():
     old_get_ast = PyLinter.get_ast
 
     def new_get_ast(self, filepath, modname, data):

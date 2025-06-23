@@ -16,7 +16,8 @@ def patch_ast_transforms(z3: bool):
             return None
 
         # Run the Z3Visitor
-        if z3:
+        runtime_z3 = getattr(self.config, "z3", False)
+        if runtime_z3:
             try:
                 from ..transforms.z3_visitor import Z3Visitor
 
@@ -26,7 +27,7 @@ def patch_ast_transforms(z3: bool):
 
         # Run the CFGVisitor
         try:
-            if z3:
+            if runtime_z3:
                 ast.accept(CFGVisitor(options={"separate-condition-blocks": True}, z3_enabled=True))
             else:
                 ast.accept(CFGVisitor())

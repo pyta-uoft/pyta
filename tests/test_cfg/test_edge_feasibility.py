@@ -1,9 +1,8 @@
 from unittest.mock import patch
 
 import astroid
-import z3
 
-from python_ta.cfg import CFGVisitor, ControlFlowGraph, Z3Environment
+from python_ta.cfg import CFGVisitor, ControlFlowGraph
 from python_ta.transforms.z3_visitor import Z3Visitor
 
 

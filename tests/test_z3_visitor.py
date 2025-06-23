@@ -1,4 +1,5 @@
 from typing import List
+from unittest.mock import patch
 
 import astroid
 import pytest
@@ -415,3 +416,13 @@ def test_cfg_z3_vars_initialization():
     assert cfg.z3_vars["y"] == z3.Real("y")
     assert cfg.z3_vars["z"] == z3.Bool("z")
     assert cfg.z3_vars["a"] == z3.String("a")
+
+
+@patch.dict("sys.modules", {"python_ta.z3.z3_parser": None})
+def test_cfg_z3_initialization_failed_import(caplog) -> None:
+    """Test verifies if `add_argument` handles import error as expected."""
+    node = astroid.extract_node(z3_vars_example)
+    cfg = ControlFlowGraph(z3_enabled=True)
+    cfg.add_arguments(node.args)
+
+    assert "Failed to import Z3Parser" in caplog.text

@@ -55,6 +55,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🐛 Bug fixes
 
 - Fix import error when `graphviz` is not installed
+- Fixed CI test failure in `test_examples.py` caused by `patch_ast_transforms` function that captured the `z3` option value from the first linter instance (default False on CI). Now, it dynamically reads `z3` option from linter config to reflect correct runtime setting.
 
 ## [2.10.0] - 2025-02-18
 

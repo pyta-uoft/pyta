@@ -20,7 +20,7 @@ def test_cfg_z3_enabled() -> None:
     # Create the graphviz files using my_file.py
     cfg_generator.generate_cfg(mod=file_path, z3_enabled=True)
 
-    # # Open the actual graphviz file for reading
+    # Open the actual graphviz file for reading
     gv_file_io = open(gv_file_path)
 
     assert gv_file_path in gv_file_io.read()
@@ -29,3 +29,10 @@ def test_cfg_z3_enabled() -> None:
     gv_file_io.close()
     os.remove(gv_file_path)
     os.remove(svg_file_path)
+
+
+@patch.dict("sys.modules", {"python_ta.transforms.z3_visitor": None})
+def test_cfg_z3_failed_import() -> None:
+    """Test verifies that `generate_cfg` correctly handles import failure"""
+    with pytest.raises(ImportError):
+        cfg_generator.generate_cfg(z3_enabled=True)

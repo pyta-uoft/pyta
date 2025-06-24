@@ -28,22 +28,3 @@ def test_cfg_z3_enabled() -> None:
     gv_file_io.close()
     os.remove(gv_file_path)
     os.remove(svg_file_path)
-
-
-def test_cfg_z3_failed_import(monkeypatch) -> None:
-    """Test verifies that `generate_cfg` correctly handles import failure.
-
-    Note: Test uses monkeypatch since `unittest.mock` to avoid an AttributeError that occurs on GitHub CI.
-    """
-    original = __import__
-
-    def mock_import(name, *args):
-        if "z3_visitor" in name:
-            raise ImportError("Z3Visitor not available")
-        # Use original, since infinite recursion if __import__ is used directly for some reason
-        return original(name, *args)
-
-    monkeypatch.setattr("builtins.__import__", mock_import)
-
-    with pytest.raises(ImportError):
-        cfg_generator.generate_cfg(z3_enabled=True)

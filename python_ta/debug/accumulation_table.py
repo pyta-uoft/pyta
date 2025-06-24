@@ -152,7 +152,7 @@ class AccumulationTable:
             try:
                 file_io = open(self.output_filepath, "a", newline="")
             except OSError as e:
-                print(f"Error opening file: {e}")
+                print(f"Error opening output file: {e}")
                 return
 
         try:

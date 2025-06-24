@@ -160,8 +160,6 @@ def calculate_sum_and_averages(numbers: list) -> list:
     return list_so_far
 ```
 
-The file is opened in append mode, so if a file already exists, the new table will be added at the end. If the file does not currently exist, then a new file will be created.
-
 ## Current limitations
 
 The `AccumulationTable` is a new PythonTA feature and currently has the following known limitations:

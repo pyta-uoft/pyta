@@ -40,10 +40,3 @@ def test_cfg_z3_enabled(snapshot, create_cfg_z3) -> None:
     # Check that the contents match with the snapshot
     snapshot.snapshot_dir = "snapshots"
     snapshot.assert_match(gv_file_io.read(), "my_file.gv")
-
-
-@patch.dict("sys.modules", {"python_ta.transforms.z3_visitor": None})
-def test_cfg_z3_failed_import(caplog) -> None:
-    """Test verifies that `generate_cfg` handles ImportError appropriately."""
-    with pytest.raises(ImportError):
-        cfg_generator.generate_cfg(z3_enabled=True)

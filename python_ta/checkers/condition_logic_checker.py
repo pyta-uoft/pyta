@@ -106,7 +106,7 @@ class ConditionLogicChecker(BaseChecker):
         - prev_constraints (z3.ExprRef): Constraints from previous nodes.
         - node_constraint (z3.ExprRef): The condition to check at the current node.
         """
-        # z3 is already imported by caller (cached), no need to check for importError again
+        # z3 is already imported by caller (cached), no need to check for ImportError again
         import z3
 
         solver = z3.Solver()

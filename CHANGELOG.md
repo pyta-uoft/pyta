@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update how error messages are overridden such that section headers are no longer required within the config file
 - Added `presistent_server` which recives the watch property changes through websockets and updates the HTML report
 - Added optional `on_verify_fail` argument to `check_all` and `check_error`, allowing users to raise a `ValueError` and immediately stop execution when a file cannot be checked.
+- Added optional `z3_enabled` argument (default False) to `generate_cfg`, allowing users to enable `z3` functionalities and providing extra safeguard to prevent z3 (and z3 related) imports from being executed when z3 is not enabled.
 
 ### 💫 New checkers
 
@@ -48,14 +49,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Wrapped type-only `z3` (and z3 related) imports in a `TYPE_CHECKING` guard in `condition_logic_checker.py`, `graph.py` and `cfg_generator.py`.
 - Added tests to improve coverage in `condition_logic_checker.py`, `graph.py` and `cfg_generator.py`, verifying behaviour in case of failed `z3` (and z3 related) import via import patching.
 - Added `z3_enabled` optional initializer argument (default False) to `ControlFlowGraph` class in `graph.py` and `CFGVisitor` class in `visitor.py`.
-- Added `z3_enabled` optional function argument (default False) to `generate_cfg` (and by extension `_generate` helper) in `cfg_generator.py` providing extra safeguard to prevent z3 (and z3 related) imports from being executed when z3 is not enabled.
+- Updated `transforms.py` to ensure the patched version of `patch_ast_transforms` dynamically reads the `z3` option from linter config to reflect correct runtime setting.
 
 ## [2.10.1] - 2025-02-19
 
 ### 🐛 Bug fixes
 
 - Fix import error when `graphviz` is not installed
-- Fixed CI test failure in `test_examples.py` caused by `patch_ast_transforms` function that captured the `z3` option value from the first linter instance (default False on CI). Now, it dynamically reads `z3` option from linter config to reflect correct runtime setting.
 
 ## [2.10.0] - 2025-02-18
 

@@ -52,9 +52,8 @@ class ControlFlowGraph:
         self.end = self.create_block()
         self.z3_vars = {}
         self.precondition_constraints = []
-        self.z3_enabled = z3_enabled
         global z3
-        if self.z3_enabled:
+        if z3_enabled:
             try:
                 import z3 as z3_module
 
@@ -63,6 +62,10 @@ class ControlFlowGraph:
                 # Reset z3_enabled to prevent further use of z3 module
                 logging.error("Failed to import z3 module. Disabling z3 features.")
                 self.z3_enabled = False
+            else:
+                self.z3_enabled = True
+        else:
+            self.z3_enabled = False
 
     def add_arguments(self, args: Arguments) -> None:
         self.start.add_statement(args)
@@ -276,6 +279,7 @@ class ControlFlowGraph:
         """
         if not self.z3_enabled:
             return
+
         for path_id, path in enumerate(self.get_paths()):
             # starting a new path
             z3_environment = Z3Environment(self.z3_vars, self.precondition_constraints)
@@ -456,7 +460,7 @@ class Z3Environment:
         updated_constraints = []
         for constraint in self.constraints:
             # discard expressions with reassigned variables
-            variables = self._get_vars(constraint)
+            variables = _get_vars(constraint)
             reassigned = any(
                 not self.variable_unassigned.get(variable, False) for variable in variables
             )
@@ -484,18 +488,19 @@ class Z3Environment:
         except (Z3Exception, Z3ParseException):
             return None
 
-    def _get_vars(self, expr: ExprRef) -> Set[str]:
-        """Retrieve all z3 variables from a z3 expression"""
-        from z3 import Z3_OP_UNINTERPRETED, is_const
 
-        variables = set()
+def _get_vars(expr: ExprRef) -> Set[str]:
+    """Retrieve all z3 variables from a z3 expression"""
+    from z3 import Z3_OP_UNINTERPRETED, is_const
 
-        def traverse(e: ExprRef) -> None:
-            if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
-                variables.add(e.decl().name())
-            elif hasattr(e, "children"):
-                for child in e.children():
-                    traverse(child)
+    variables = set()
 
-        traverse(expr)
-        return variables
+    def traverse(e: ExprRef) -> None:
+        if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:
+            variables.add(e.decl().name())
+        elif hasattr(e, "children"):
+            for child in e.children():
+                traverse(child)
+
+    traverse(expr)
+    return variables

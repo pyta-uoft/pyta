@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import astroid
 import pylint.testutils
 from astroid import nodes

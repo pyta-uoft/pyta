@@ -10,7 +10,7 @@ import python_ta.cfg.cfg_generator as cfg_generator
 def test_cfg_z3_enabled() -> None:
     """Test verifies that `generate_cfg` correctly creates a graphviz dot file with the expected content when z3
     enabled."""
-    file_path = "../../examples/pylint/r0912_too_many_branches.py"
+    file_path = "examples/pylint/r0912_too_many_branches.py"
     gv_file_path = "r0912_too_many_branches.gv"
     svg_file_path = "r0912_too_many_branches.svg"
 

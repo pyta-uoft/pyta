@@ -52,8 +52,6 @@ class Z3Visitor:
                 z3_constraints.append(transformed)
         # Set z3 constraints
         if z3_constraints:
-            node.z3_constraints = [simplify(And(*z3_constraints))]
+            node.z3_constraints = [simplify(expr) for expr in z3_constraints]
         else:
             node.z3_constraints = []
-
-        return node

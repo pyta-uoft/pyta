@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update how error messages are overridden such that section headers are no longer required within the config file
 - Added `presistent_server` which recives the watch property changes through websockets and updates the HTML report
 - Added optional `on_verify_fail` argument to `check_all` and `check_error`, allowing users to raise a `ValueError` and immediately stop execution when a file cannot be checked.
+- Added the optional `format` argument to the `AccumulationTable` class, allowing users to select between csv or table formatted outputs.
 - Added optional `z3_enabled` argument (default False) to `generate_cfg`, allowing users to enable `z3` functionalities and providing extra safeguard to prevent z3 (and z3 related) imports from being executed when z3 is not enabled.
 
 ### 💫 New checkers

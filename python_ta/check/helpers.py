@@ -57,7 +57,7 @@ def setup_linter(
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
-        patch_all(linter.config.z3)
+        patch_all()
         PYLINT_PATCHED = True
     return linter, current_reporter
 

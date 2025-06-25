@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import html
 import importlib.util
+import logging
 import os.path
 import sys
 from typing import TYPE_CHECKING, Any, Optional
@@ -14,16 +15,10 @@ import graphviz
 from astroid import nodes
 from astroid.builder import AstroidBuilder
 
-try:
-    from ..transforms.z3_visitor import Z3Visitor
-
-    z3_dependency_available = True
-except ImportError:
-    Z3Visitor = Any
-    z3_dependency_available = False
 from .visitor import CFGVisitor
 
 if TYPE_CHECKING:
+    from ..transforms.z3_visitor import Z3Visitor
     from .graph import CFGBlock, ControlFlowGraph
 
 GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
@@ -31,7 +26,10 @@ SUBGRAPH_OPTIONS = {"fontname": "Courier New"}
 
 
 def generate_cfg(
-    mod: str = "", auto_open: bool = False, visitor_options: Optional[dict[str, Any]] = None
+    mod: str = "",
+    auto_open: bool = False,
+    visitor_options: Optional[dict[str, Any]] = None,
+    z3_enabled: bool = False,
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -50,12 +48,16 @@ def generate_cfg(
             function is called).
         auto_open (bool): Automatically open the graph in your browser.
         visitor_options (dict): An options dict to configure how the cfgs are generated.
+        z3_enabled (bool): An option that enables z3 when True (by default False).
     """
-    _generate(mod=mod, auto_open=auto_open, visitor_options=visitor_options)
+    _generate(mod=mod, auto_open=auto_open, visitor_options=visitor_options, z3_enabled=z3_enabled)
 
 
 def _generate(
-    mod: str = "", auto_open: bool = False, visitor_options: Optional[dict[str, Any]] = None
+    mod: str = "",
+    auto_open: bool = False,
+    visitor_options: Optional[dict[str, Any]] = None,
+    z3_enabled: bool = False,
 ) -> None:
     """Generate a control flow graph for the given module.
 
@@ -72,12 +74,18 @@ def _generate(
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
     module = AstroidBuilder().file_build(abs_path)
 
-    # invoke Z3Visitor if z3 dependency is available
-    if z3_dependency_available:
+    # invoke Z3Visitor if z3 dependency is enabled
+    if z3_enabled:
+        try:
+            from ..transforms.z3_visitor import Z3Visitor
+
+        except ImportError:
+            logging.error("Failed to import Z3Visitor. Aborting.")
+            raise
         z3v = Z3Visitor()
         module = z3v.visitor.visit(module)
 
-    visitor = CFGVisitor(options=visitor_options)
+    visitor = CFGVisitor(options=visitor_options, z3_enabled=z3_enabled)
     module.accept(visitor)
 
     _display(visitor.cfgs, file_name, auto_open=auto_open)

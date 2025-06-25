@@ -259,5 +259,5 @@ class TestImpossibleConditionChecker(pylint.testutils.CheckerTestCase):
     def _apply_cfg_visitor(self, src: str) -> nodes.NodeNG:
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor(options={"separate-condition-blocks": True}))
+        mod.accept(CFGVisitor(options={"separate-condition-blocks": True}, z3_enabled=True))
         return mod

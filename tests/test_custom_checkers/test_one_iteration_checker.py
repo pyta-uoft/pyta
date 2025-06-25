@@ -461,7 +461,7 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertAddsMessages(
@@ -487,7 +487,7 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertAddsMessages(
@@ -514,7 +514,7 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertNoMessages():
@@ -534,7 +534,7 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         for_node = next(mod.nodes_of_class(nodes.For))
 
         with self.assertNoMessages():
@@ -554,7 +554,7 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertNoMessages():
@@ -575,7 +575,7 @@ class TestOneIterationCheckerZ3Option(pylint.testutils.CheckerTestCase):
         """
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))
-        mod.accept(CFGVisitor())
+        mod.accept(CFGVisitor(z3_enabled=True))
         while_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertNoMessages():

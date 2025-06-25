@@ -701,7 +701,7 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     """
     z3v = Z3Visitor()
     mod = z3v.visitor.visit(astroid.parse(src))
-    visitor = CFGVisitor()
+    visitor = CFGVisitor(z3_enabled=True)
     mod.accept(visitor)
 
     # find the function definition node

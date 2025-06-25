@@ -19,6 +19,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update how error messages are overridden such that section headers are no longer required within the config file
 - Added `presistent_server` which recives the watch property changes through websockets and updates the HTML report
 - Added optional `on_verify_fail` argument to `check_all` and `check_error`, allowing users to raise a `ValueError` and immediately stop execution when a file cannot be checked.
+- Added the optional `format` argument to the `AccumulationTable` class, allowing users to select between csv or table formatted outputs.
+- Added optional `z3_enabled` argument (default False) to `generate_cfg`, allowing users to enable `z3` functionalities and providing extra safeguard to prevent z3 (and z3 related) imports from being executed when z3 is not enabled.
 
 ### 💫 New checkers
 
@@ -44,6 +46,11 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Wrapped type-only imports in if `TYPE_CHECKING` guards
 - Refactored `render_pep8_errors` to use a dict that maps error codes to error functions instead of repeated conditional statements
 - Added two test cases to `test_accumulation_table.py` to verify that `AccumulationTable` correctly extracts loop variables from nested tuple structures.
+- Refactored `condition_logic_checker.py`, `cfg_generator.py` and `graph.py` by removing top-level `z3` (and z3 related) imports and moving them inside of functions where needed.
+- Wrapped type-only `z3` (and z3 related) imports in a `TYPE_CHECKING` guard in `condition_logic_checker.py`, `graph.py` and `cfg_generator.py`.
+- Added tests to improve coverage in `condition_logic_checker.py`, `graph.py` and `cfg_generator.py`, verifying behaviour in case of failed `z3` (and z3 related) import via import patching.
+- Added `z3_enabled` optional initializer argument (default False) to `ControlFlowGraph` class in `graph.py` and `CFGVisitor` class in `visitor.py`.
+- Updated `transforms.py` to ensure the patched version of `patch_ast_transforms` dynamically reads the `z3` option from linter config to reflect correct runtime setting.
 - Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
 
 ## [2.10.1] - 2025-02-19

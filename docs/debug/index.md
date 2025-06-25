@@ -135,7 +135,10 @@ def calculate_sum_and_averages(numbers: list) -> list:
 ```
 
 You also have the option to pass in a file path as an attribute to the AccumulationTable object. In this case, the table will be appended to the file instead of being written the console.
-For example:
+
+Finally, you can also specify the output format as a third attribute using the `format` argument. By default, the format is "table", which produces the same nicely formatted tabular output shown above. If you want to write the output as a .csv file, pass "csv" as the format.
+
+For example, the following code writes a csv formattted output to `output.txt`.
 
 ```python
 from python_ta.debug import AccumulationTable
@@ -148,7 +151,7 @@ def calculate_sum_and_averages(numbers: list) -> list:
     list_so_far = []
     avg_so_far = None
     output_file = 'output.txt'
-    with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], output_file) as table:
+    with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], output=output_file, format='csv') as table:
         for number in numbers:
             sum_so_far = sum_so_far + number
             avg_so_far = sum_so_far / (len(list_so_far) + 1)

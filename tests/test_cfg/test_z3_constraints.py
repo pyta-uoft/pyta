@@ -18,7 +18,7 @@ def test_simple_function() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     y = z3.Int("y")
-    expected = {0: [z3.And(x > 0, y > 0), x >= y]}
+    expected = {0: [z3.simplify(z3.And(x > 0, y > 0)), z3.simplify(x >= y)]}
     assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
@@ -251,7 +251,7 @@ def test_for_loop() -> None:
     x = z3.String("x")
     y = z3.Int("y")
     assert all(
-        set(constraints) == {z3.SubString(x, 0, 1) == "a", y > 0}
+        set(constraints) == {z3.simplify(z3.SubString(x, 0, 1) == "a"), z3.simplify(y > 0)}
         for edge in cfg.get_edges()
         for constraints in edge.z3_constraints.values()
     )
@@ -552,7 +552,7 @@ def test_variable_augumented_reassign() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
-    assert cfg.start.successors[0].z3_constraints == {0: [x > 10]}
+    assert cfg.start.successors[0].z3_constraints == {0: [z3.simplify(x > 10)]}
     assert cfg.end.predecessors[0].z3_constraints == {0: []}
 
 
@@ -632,7 +632,8 @@ def test_ignored_precondition() -> None:
     """
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
-    assert all(edge.z3_constraints == {0: [x > 5]} for edge in cfg.get_edges())
+    expected = {0: [z3.simplify(x > 5)]}
+    assert all(edge.z3_constraints == expected for edge in cfg.get_edges())
 
 
 def test_ignored_if_condition() -> None:
@@ -651,7 +652,8 @@ def test_ignored_if_condition() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
-    assert all(value == [x > 5] for value in edge_values)
+    expected = [z3.simplify(x > 5)]
+    assert all(value == expected for value in edge_values)
 
 
 def test_ignored_while_condition() -> None:
@@ -669,7 +671,8 @@ def test_ignored_while_condition() -> None:
     cfg = _create_cfg(src, "func")
     x = z3.Int("x")
     edge_values = [value for edge in cfg.get_edges() for value in edge.z3_constraints.values()]
-    assert all(value == [x > 5] for value in edge_values)
+    expected = [z3.simplify(x > 5)]
+    assert all(value == expected for value in edge_values)
 
 
 def _create_cfg(src: str, name: str) -> ControlFlowGraph:

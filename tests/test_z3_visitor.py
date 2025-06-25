@@ -256,13 +256,13 @@ string_list = [
 x = z3.Int("x")
 y = z3.Int("y")
 z = z3.Real("z")
-arithmetic_expected = [[z3.simplify(z3.And(x**2 + y**2 == z**2, x > 0, y > 0, z == 0, x + y != z))]]
+arithmetic_expected = [[x**2 + y**2 == z**2, z3.And([x > 0, y > 0, z == 0]), x + y != z]]
 
 # expected boolean expressions
 x = z3.Bool("x")
 y = z3.Bool("y")
 z = z3.Bool("z")
-boolean_expected = [[z3.simplify(z3.And(x, y, z, z3.Not(z3.Or(x, y, z))))]]
+boolean_expected = [[z3.And([x, y, z]), z3.Not(z3.Or([x, y, z]))]]
 
 # expected container expressions
 x = z3.Int("x")
@@ -289,50 +289,36 @@ x = z3.String("x")
 y = z3.String("y")
 z = z3.String("z")
 string_expected = [
-    [z3.simplify(z3.And(x == y, z == x + y, x != z))],
-    [z3.simplify(z3.And(z3.Contains("abc", x), z3.Contains(y, x)))],
-    [z3.simplify(z3.And(z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))))],
-    [z3.simplify(z3.And(z3.SubString(x, 0, 1) == y, z3.SubString(x, 1, 1) == "a"))],
+    [x == y, z == x + y, x != z],
+    [z3.Contains("abc", x), z3.Contains(y, x)],
+    [z3.Not(z3.Contains("abc", x)), z3.Not(z3.Contains(y, x))],
     [
-        z3.simplify(
-            z3.And(
-                z3.SubString(x, z3.Length(x) - 1, 1) == "b",
-                z3.SubString(x, z3.Length(x) - 2, 1) == y,
-            )
-        )
+        z3.SubString(x, 0, 1) == y,
+        z3.SubString(x, 1, 1) == "a",
     ],
     [
-        z3.simplify(
-            z3.And(
-                z3.SubString(x, 1, 3) == y,
-                z3.SubString(x, 4, 1) == "a",
-                z3.SubString(x, 4, z3.Length(x) - 4) == "abc",
-                z3.SubString(x, 0, 3) == "def",
-                x == z,
-            )
-        )
+        z3.SubString(x, z3.Length(x) - 1, 1) == "b",
+        z3.SubString(x, z3.Length(x) - 2, 1) == y,
     ],
     [
-        z3.simplify(
-            z3.And(
-                z3.SubString(x, z3.Length(x) - 4, 3) == y,
-                z3.SubString(x, z3.Length(x) - 4, 1) == "a",
-                z3.SubString(x, z3.Length(x) - 4, 4) == "abc",
-                z3.SubString(x, 0, z3.Length(x) - 3) == "def",
-            )
-        )
+        z3.SubString(x, 1, 3) == y,
+        z3.SubString(x, 4, 1) == "a",
+        z3.SubString(x, 4, z3.Length(x) - 4) == "abc",
+        z3.SubString(x, 0, 3) == "def",
+        x == z,
     ],
     [
-        z3.simplify(
-            z3.And(
-                z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 1)) == y,
-                z3.Concat(z3.SubString(x, 0, 1), z3.SubString(x, 4, 1)) == "ab",
-                z3.Concat(z3.SubString(x, 6, 1), z3.SubString(x, 4, 1)) == "cd",
-            )
-        )
+        z3.SubString(x, z3.Length(x) - 4, 3) == y,
+        z3.SubString(x, z3.Length(x) - 4, 1) == "a",
+        z3.SubString(x, z3.Length(x) - 4, 4) == "abc",
+        z3.SubString(x, 0, z3.Length(x) - 3) == "def",
+    ],
+    [
+        z3.Concat(z3.SubString(x, 1, 1), z3.SubString(x, 3, 1)) == y,
+        z3.Concat(z3.SubString(x, 0, 1), z3.SubString(x, 4, 1)) == "ab",
+        z3.Concat(z3.SubString(x, 6, 1), z3.SubString(x, 4, 1)) == "cd",
     ],
 ]
-
 
 # lists of all test cases
 code_list = [arithmetic_list, boolean_list, container_list, string_list]

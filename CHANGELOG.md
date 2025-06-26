@@ -51,6 +51,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests to improve coverage in `condition_logic_checker.py`, `graph.py` and `cfg_generator.py`, verifying behaviour in case of failed `z3` (and z3 related) import via import patching.
 - Added `z3_enabled` optional initializer argument (default False) to `ControlFlowGraph` class in `graph.py` and `CFGVisitor` class in `visitor.py`.
 - Updated `transforms.py` to ensure the patched version of `patch_ast_transforms` dynamically reads the `z3` option from linter config to reflect correct runtime setting.
+- Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
 
 ## [2.10.1] - 2025-02-19
 

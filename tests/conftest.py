@@ -17,6 +17,7 @@ Z3_RELATED_TESTS = {
     r".*test_one_iteration_checker.*",
     r".*test_possibly_undefined_checker.*",
     r".*test_redundant_assignment_checker.*",
+    r".*test_cfg_generator_z3.*",
 }
 
 

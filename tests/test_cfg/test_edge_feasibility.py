@@ -345,7 +345,7 @@ def test_z3_dependency_uninstalled() -> None:
         '''
         print(x)
     """
-    visitor = CFGVisitor()
+    visitor = CFGVisitor(z3_enabled=True)
     mod = astroid.parse(src)
     mod.accept(visitor)
     func_node = None
@@ -365,7 +365,7 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     """
     z3v = Z3Visitor()
     mod = z3v.visitor.visit(astroid.parse(src))
-    visitor = CFGVisitor()
+    visitor = CFGVisitor(z3_enabled=True)
     mod.accept(visitor)
 
     # find the function definition node
@@ -377,3 +377,17 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
 
     assert func_node is not None
     return visitor.cfgs[func_node]
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_update_edge_z3_import_fail() -> None:
+    """Test verifies if `update_edge_z3_constraints` handles import errors as expected."""
+    cfg = ControlFlowGraph(z3_enabled=True)
+    assert cfg.update_edge_z3_constraints() is None
+
+
+@patch.dict("sys.modules", {"z3": None})
+def test_update_edge_feasibility_import_fail() -> None:
+    """Test verifies if `update_edge_feasibility` handles import errors as expected."""
+    cfg = ControlFlowGraph(z3_enabled=True)
+    assert cfg.update_edge_feasibility() is None

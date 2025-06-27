@@ -37,8 +37,9 @@ class CFGVisitor:
     _current_cfg: Optional[ControlFlowGraph]
     _current_block: Optional[CFGBlock]
     _control_boundaries: List[Tuple[nodes.NodeNG, Dict[str, CFGBlock]]]
+    z3_enabled: bool
 
-    def __init__(self, options: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, options: Optional[Dict[str, Any]] = None, z3_enabled: bool = False) -> None:
         super().__init__()
         self.cfgs = {}
         self.options = {
@@ -51,6 +52,7 @@ class CFGVisitor:
         self._current_cfg = None
         self._current_block = None
         self._control_boundaries = []
+        self.z3_enabled = z3_enabled
 
     def __getattr__(self, attr: str):
         if attr.startswith("visit_"):
@@ -73,7 +75,7 @@ class CFGVisitor:
                     child.accept(self)
             return
 
-        self.cfgs[module] = ControlFlowGraph(self.cfg_count)
+        self.cfgs[module] = ControlFlowGraph(self.cfg_count, z3_enabled=self.z3_enabled)
         self.cfg_count += 1
         self._current_cfg = self.cfgs[module]
         self._current_block = self._current_cfg.start
@@ -113,7 +115,7 @@ class CFGVisitor:
         previous_cfg = self._current_cfg
         previous_block = self._current_block
 
-        self.cfgs[func] = ControlFlowGraph(self.cfg_count)
+        self.cfgs[func] = ControlFlowGraph(self.cfg_count, z3_enabled=self.z3_enabled)
         self.cfg_count += 1
         self._current_cfg = self.cfgs[func]
 

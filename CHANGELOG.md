@@ -9,6 +9,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Refactored tests in test_forbidden_python_syntax_checker.py to use pytest.mark.parametrize for cleaner and less repetitive coverage.
 - Support `x in` and `x not in` preconditions involving `set()`, `list()`, and `tuple()` function calls in the Z3 parser.
 - Update the `output-format` configuration option to take reporter aliases rather than the plugin path.
 - Integrated Watchdog to enable automatic re-checking of Python files when changes are detected.

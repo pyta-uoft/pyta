@@ -8,7 +8,7 @@ import pytest
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 
 if sys.version_info < (3, 10):
-    pytest.skip("match statements are not supported in Python < 3.10")
+    pytest.skip("match statements are not supported in Python < 3.10", allow_module_level=True)
 
 
 def build_cfg(src: str) -> ControlFlowGraph:

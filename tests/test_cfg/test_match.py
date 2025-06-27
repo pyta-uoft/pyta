@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import sys
+
 import astroid
+import pytest
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
+
+if sys.version_info < (3, 10):
+    pytest.skip("match statements are not supported in Python < 3.10")
 
 
 def build_cfg(src: str) -> ControlFlowGraph:

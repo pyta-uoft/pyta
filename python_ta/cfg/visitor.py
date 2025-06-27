@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import astroid
 from astroid import extract_node, nodes
 from astroid.exceptions import AstroidSyntaxError
 
@@ -434,6 +435,39 @@ class CFGVisitor:
 
         for child in node.body:
             child.accept(self)
+
+    def visit_match(self, node: nodes.Match) -> None:
+        """Visit a match statement and create appropriate control flow."""
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            return
+
+        self._current_block.add_statement(node.subject)
+        node.cfg_block = self._current_block
+        old_curr = self._current_block
+        after_match_block = self._current_cfg.create_block()
+
+        case_end_blocks = []
+
+        # Process each match case
+        for case in node.cases:
+            case_block = self._current_cfg.create_block(
+                old_curr, edge_label=case.pattern.as_string()
+            )
+            self._current_block = case_block
+
+            if hasattr(case, "guard") and case.guard is not None:
+                self._current_block.add_statement(case.guard)
+
+            for child in case.body:
+                child.accept(self)
+
+            case_end_blocks.append(self._current_block)
+
+        for end_block in case_end_blocks:
+            self._current_cfg.link_or_merge(end_block, after_match_block)
+
+        self._current_block = after_match_block
 
 
 def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:

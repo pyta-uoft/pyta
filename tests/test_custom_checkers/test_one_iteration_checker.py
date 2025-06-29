@@ -10,47 +10,65 @@ from python_ta.transforms.z3_visitor import Z3Visitor
 class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = OneIterationChecker
 
-    def test_while_with_return(self):
-        src = """
-        def func(x: int) -> int:
-            while x > 5:
-                x -= 1
-                return x
-            return 0
-        """
+    import pytest  # make sure pytest is imported if not already
+
+    @pytest.mark.parametrize(
+        "src,node_type",
+        [
+            (
+                """
+                def func(x: int) -> int:
+                    while x > 5:
+                        x -= 1
+                        return x
+                    return 0
+                """,
+                nodes.While,
+            ),
+            (
+                """
+                x = 1
+                while x < 5:
+                    x += 1
+                    break
+                print(x)
+                """,
+                nodes.While,
+            ),
+            (
+                """
+                def func(x: list[int]) -> int:
+                    for i in x:
+                        return i
+                """,
+                nodes.For,
+            ),
+            (
+                """
+                for i in range(10):
+                    break
+                print(i)
+                """,
+                nodes.For,
+            ),
+        ],
+    )
+    def test_one_iteration_simple(self, src, node_type):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        while_node = next(mod.nodes_of_class(nodes.While))
+        loop_node = next(mod.nodes_of_class(node_type))
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="one-iteration",
-                node=while_node,
+                node=loop_node,
             ),
             ignore_position=True,
         ):
-            self.checker.visit_while(while_node)
-
-    def test_while_with_break(self):
-        src = """
-        x = 1
-        while x < 5: #@
-            x += 1
-            break
-        print(x)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        while_node = next(mod.nodes_of_class(nodes.While))
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="one-iteration",
-                node=while_node,
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_while(while_node)
+            if isinstance(loop_node, nodes.While):
+                self.checker.visit_while(loop_node)
+            else:
+                self.checker.visit_for(loop_node)
 
     def test_while_with_return_all_branches(self):
         src = """
@@ -143,44 +161,6 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
         for_node = next(mod.nodes_of_class(nodes.While))
 
         with self.assertNoMessages():
-            self.checker.visit_for(for_node)
-
-    def test_for_loop_with_return(self):
-        src = """
-        def func(x: list[int]) -> int:
-            for i in x:
-                return i
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = next(mod.nodes_of_class(nodes.For))
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="one-iteration",
-                node=for_node,
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_for(for_node)
-
-    def test_for_loop_with_break(self):
-        src = """
-        for i in range(10):
-            break
-        print(i)
-        """
-        mod = astroid.parse(src)
-        mod.accept(CFGVisitor())
-        for_node = next(mod.nodes_of_class(nodes.For))
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="one-iteration",
-                node=for_node,
-            ),
-            ignore_position=True,
-        ):
             self.checker.visit_for(for_node)
 
     def test_for_loop_with_return_all_branches(self):

@@ -1,6 +1,8 @@
 import logging
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import astroid
 from astroid import extract_node, nodes
 from astroid.exceptions import AstroidSyntaxError
 
@@ -436,6 +438,64 @@ class CFGVisitor:
 
         for child in node.body:
             child.accept(self)
+
+    def visit_match(self, node: nodes.Match) -> None:
+        """Visit a match statement and create appropriate control flow."""
+        # When only creating cfgs for functions, _current_cfg will only be None outside of functions
+        if self._current_cfg is None:
+            return
+
+        self._current_block.add_statement(node.subject)
+        node.cfg_block = self._current_block
+        after_match_block = self._current_cfg.create_block()
+
+        case_end_blocks = []
+
+        prev_case = self._current_block
+        # Process each match case
+        for case in node.cases:
+
+            edge_label = "No Match" if case_end_blocks else ""
+
+            new_case = astroid.nodes.Name(
+                name=f"Case {case.pattern.as_string()}",
+                lineno=case.lineno,
+                col_offset=case.col_offset,
+                parent=case.parent,
+                end_col_offset=case.end_col_offset,
+                end_lineno=case.end_lineno,
+            )
+
+            separate_conditions = self.options.get("separate-condition-blocks", False)
+            if separate_conditions and hasattr(case, "guard") and case.guard is not None:
+                # If the option is set to separate condition blocks, create a new block for the guard
+                pattern_block = self._current_cfg.create_block(prev_case)
+                pattern_block.add_statement(case.guard)
+                pattern_block = self._current_cfg.create_block(pattern_block, edge_label=edge_label)
+            else:
+                pattern_block = self._current_cfg.create_block(prev_case, edge_label=edge_label)
+
+            pattern_block.add_statement(new_case)
+            pattern_body = self._current_cfg.create_block(pattern_block, edge_label="Match")
+
+            self._current_block = pattern_body
+
+            if not separate_conditions and hasattr(case, "guard") and case.guard is not None:
+                self._current_block.add_statement(case.guard)
+
+            for child in case.body:
+                child.accept(self)
+
+            case_end_blocks.append(self._current_block)
+            prev_case = pattern_block
+
+        # For the final block, create a new block that links to the end of the match
+        self._current_cfg.link_or_merge(pattern_block, after_match_block, edge_label="No Match")
+
+        for end_block in case_end_blocks:
+            self._current_cfg.link_or_merge(end_block, after_match_block)
+
+        self._current_block = after_match_block
 
 
 def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:

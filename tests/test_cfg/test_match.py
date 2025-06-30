@@ -19,6 +19,15 @@ def build_cfg(src: str) -> ControlFlowGraph:
     return t.cfgs[mod]
 
 
+def build_cfg_separate_conditions(src: str) -> ControlFlowGraph:
+    """Build a CFG but configure the visitor to separate the test condition blocks."""
+    mod = astroid.parse(src)
+    t = CFGVisitor({"separate-condition-blocks": True})
+    mod.accept(t)
+
+    return t.cfgs[mod]
+
+
 def _extract_blocks(cfg: ControlFlowGraph) -> list[list[str]]:
     return [[s.as_string() for s in block.statements] for block in cfg.get_blocks()]
 
@@ -32,7 +41,7 @@ def test_simple_match() -> None:
         case 2:
             print('two')
     """
-    expected_blocks = [["x"], ["print('one')"], [], ["print('two')"]]
+    expected_blocks = [["x"], ["Case 1"], ["print('one')"], [], ["Case 2"], ["print('two')"]]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
 
@@ -49,8 +58,10 @@ def test_match_with_multiple_statements() -> None:
     """
     expected_blocks = [
         ["x"],
+        ["Case 1"],
         ["print('one')", "print('still one')"],
         [],
+        ["Case 2"],
         ["print('two')", "print('still two')"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
@@ -65,7 +76,14 @@ def test_match_with_gaurds() -> None:
         case 2 if x < 0:
             print('two')
     """
-    expected_blocks = [["x"], ["x > 0", "print('one')"], [], ["x < 0", "print('two')"]]
+    expected_blocks = [
+        ["x"],
+        ["Case 1"],
+        ["x > 0", "print('one')"],
+        [],
+        ["Case 2"],
+        ["x < 0", "print('two')"],
+    ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
 
 
@@ -82,9 +100,11 @@ def test_match_surrounding_statements() -> None:
     """
     expected_blocks = [
         ["print('before match')", "x"],
+        ["Case 1"],
         ["print('one')"],
         ["print('after match')"],
         [],
+        ["Case 2"],
         ["print('two')"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
@@ -106,10 +126,36 @@ def test_nested_match() -> None:
     """
     expected_blocks = [
         ["x"],
+        ["Case 1"],
         ["print('one')", "y"],
+        ["Case 2"],
         ["print('nested two')"],
         [],
+        ["Case _"],
         ["print('nested default')"],
+        ["Case 3"],
         ["print('three')"],
     ]
     assert _extract_blocks(build_cfg(src)) == expected_blocks
+
+
+def test_match_with_separate_conditions() -> None:
+    """Assert that a match statement with separate condition blocks is parsed correctly"""
+    src = """
+    match x:
+        case 1 if x > 0:
+            print('one')
+        case 2 if x < 0:
+            print('two')
+    """
+    expected_blocks = [
+        ["x"],
+        ["x > 0"],
+        ["Case 1"],
+        ["print('one')"],
+        [],
+        ["x < 0"],
+        ["Case 2"],
+        ["print('two')"],
+    ]
+    assert _extract_blocks(build_cfg_separate_conditions(src)) == expected_blocks

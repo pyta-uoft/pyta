@@ -752,73 +752,210 @@ footer p {
 } /* Literal.Number.Integer.Long */
 
 /* VS Code Dark Theme for syntax highlighting in dark mode */
-[data-theme="dark"] .pygments-c { color: #6A9955; } /* Comment */
-[data-theme="dark"] .pygments-err { color: #f44747; } /* Error */
-[data-theme="dark"] .pygments-k { color: #569cd6; } /* Keyword */
-[data-theme="dark"] .pygments-o { color: #d4d4d4; } /* Operator */
-[data-theme="dark"] .pygments-ch { color: #6A9955; } /* Comment.Hashbang */
-[data-theme="dark"] .pygments-cm { color: #6A9955; } /* Comment.Multiline */
-[data-theme="dark"] .pygments-cp { color: #569cd6; } /* Comment.Preproc */
-[data-theme="dark"] .pygments-cpf { color: #6A9955; } /* Comment.PreprocFile */
-[data-theme="dark"] .pygments-c1 { color: #6A9955; } /* Comment.Single */
-[data-theme="dark"] .pygments-cs { color: #6A9955; } /* Comment.Special */
-[data-theme="dark"] .pygments-gd { color: #f44747; } /* Generic.Deleted */
-[data-theme="dark"] .pygments-ge { font-style: italic; } /* Generic.Emph */
-[data-theme="dark"] .pygments-gr { color: #f44747; } /* Generic.Error */
-[data-theme="dark"] .pygments-gh { color: #d4d4d4; font-weight: bold; } /* Generic.Heading */
-[data-theme="dark"] .pygments-gi { color: #b5cea8; } /* Generic.Inserted */
-[data-theme="dark"] .pygments-go { color: #d4d4d4; } /* Generic.Output */
-[data-theme="dark"] .pygments-gp { color: #d4d4d4; font-weight: bold; } /* Generic.Prompt */
-[data-theme="dark"] .pygments-gs { font-weight: bold; } /* Generic.Strong */
-[data-theme="dark"] .pygments-gu { color: #d4d4d4; font-weight: bold; } /* Generic.Subheading */
-[data-theme="dark"] .pygments-gt { color: #f44747; } /* Generic.Traceback */
-[data-theme="dark"] .pygments-kc { color: #569cd6; } /* Keyword.Constant */
-[data-theme="dark"] .pygments-kd { color: #569cd6; } /* Keyword.Declaration */
-[data-theme="dark"] .pygments-kn { color: #569cd6; } /* Keyword.Namespace */
-[data-theme="dark"] .pygments-kp { color: #569cd6; } /* Keyword.Pseudo */
-[data-theme="dark"] .pygments-kr { color: #569cd6; } /* Keyword.Reserved */
-[data-theme="dark"] .pygments-kt { color: #4ec9b0; } /* Keyword.Type */
-[data-theme="dark"] .pygments-m { color: #b5cea8; } /* Literal.Number */
-[data-theme="dark"] .pygments-s { color: #ce9178; } /* Literal.String */
-[data-theme="dark"] .pygments-na { color: #9cdcfe; } /* Name.Attribute */
-[data-theme="dark"] .pygments-nb { color: #dcdcaa; } /* Name.Builtin */
-[data-theme="dark"] .pygments-nc { color: #4ec9b0; } /* Name.Class */
-[data-theme="dark"] .pygments-no { color: #9cdcfe; } /* Name.Constant */
-[data-theme="dark"] .pygments-nd { color: #dcdcaa; } /* Name.Decorator */
-[data-theme="dark"] .pygments-ni { color: #d4d4d4; } /* Name.Entity */
-[data-theme="dark"] .pygments-ne { color: #4ec9b0; } /* Name.Exception */
-[data-theme="dark"] .pygments-nf { color: #dcdcaa; } /* Name.Function */
-[data-theme="dark"] .pygments-nl { color: #d4d4d4; } /* Name.Label */
-[data-theme="dark"] .pygments-nn { color: #d4d4d4; } /* Name.Namespace */
-[data-theme="dark"] .pygments-nt { color: #569cd6; } /* Name.Tag */
-[data-theme="dark"] .pygments-nv { color: #9cdcfe; } /* Name.Variable */
-[data-theme="dark"] .pygments-ow { color: #569cd6; } /* Operator.Word */
-[data-theme="dark"] .pygments-w { color: #d4d4d4; } /* Text.Whitespace */
-[data-theme="dark"] .pygments-mb { color: #b5cea8; } /* Literal.Number.Bin */
-[data-theme="dark"] .pygments-mf { color: #b5cea8; } /* Literal.Number.Float */
-[data-theme="dark"] .pygments-mh { color: #b5cea8; } /* Literal.Number.Hex */
-[data-theme="dark"] .pygments-mi { color: #b5cea8; } /* Literal.Number.Integer */
-[data-theme="dark"] .pygments-mo { color: #b5cea8; } /* Literal.Number.Oct */
-[data-theme="dark"] .pygments-sa { color: #ce9178; } /* Literal.String.Affix */
-[data-theme="dark"] .pygments-sb { color: #ce9178; } /* Literal.String.Backtick */
-[data-theme="dark"] .pygments-sc { color: #ce9178; } /* Literal.String.Char */
-[data-theme="dark"] .pygments-dl { color: #ce9178; } /* Literal.String.Delimiter */
-[data-theme="dark"] .pygments-sd { color: #ce9178; } /* Literal.String.Doc */
-[data-theme="dark"] .pygments-s2 { color: #ce9178; } /* Literal.String.Double */
-[data-theme="dark"] .pygments-se { color: #d7ba7d; } /* Literal.String.Escape */
-[data-theme="dark"] .pygments-sh { color: #ce9178; } /* Literal.String.Heredoc */
-[data-theme="dark"] .pygments-si { color: #d7ba7d; } /* Literal.String.Interpol */
-[data-theme="dark"] .pygments-sx { color: #ce9178; } /* Literal.String.Other */
-[data-theme="dark"] .pygments-sr { color: #d16969; } /* Literal.String.Regex */
-[data-theme="dark"] .pygments-s1 { color: #ce9178; } /* Literal.String.Single */
-[data-theme="dark"] .pygments-ss { color: #ce9178; } /* Literal.String.Symbol */
-[data-theme="dark"] .pygments-bp { color: #dcdcaa; } /* Name.Builtin.Pseudo */
-[data-theme="dark"] .pygments-fm { color: #dcdcaa; } /* Name.Function.Magic */
-[data-theme="dark"] .pygments-vc { color: #9cdcfe; } /* Name.Variable.Class */
-[data-theme="dark"] .pygments-vg { color: #9cdcfe; } /* Name.Variable.Global */
-[data-theme="dark"] .pygments-vi { color: #9cdcfe; } /* Name.Variable.Instance */
-[data-theme="dark"] .pygments-vm { color: #9cdcfe; } /* Name.Variable.Magic */
-[data-theme="dark"] .pygments-il { color: #b5cea8; } /* Literal.Number.Integer.Long */
+[data-theme="dark"] .pygments-c {
+  color: #6a9955;
+} /* Comment */
+[data-theme="dark"] .pygments-err {
+  color: #f44747;
+} /* Error */
+[data-theme="dark"] .pygments-k {
+  color: #569cd6;
+} /* Keyword */
+[data-theme="dark"] .pygments-o {
+  color: #d4d4d4;
+} /* Operator */
+[data-theme="dark"] .pygments-ch {
+  color: #6a9955;
+} /* Comment.Hashbang */
+[data-theme="dark"] .pygments-cm {
+  color: #6a9955;
+} /* Comment.Multiline */
+[data-theme="dark"] .pygments-cp {
+  color: #569cd6;
+} /* Comment.Preproc */
+[data-theme="dark"] .pygments-cpf {
+  color: #6a9955;
+} /* Comment.PreprocFile */
+[data-theme="dark"] .pygments-c1 {
+  color: #6a9955;
+} /* Comment.Single */
+[data-theme="dark"] .pygments-cs {
+  color: #6a9955;
+} /* Comment.Special */
+[data-theme="dark"] .pygments-gd {
+  color: #f44747;
+} /* Generic.Deleted */
+[data-theme="dark"] .pygments-ge {
+  font-style: italic;
+} /* Generic.Emph */
+[data-theme="dark"] .pygments-gr {
+  color: #f44747;
+} /* Generic.Error */
+[data-theme="dark"] .pygments-gh {
+  color: #d4d4d4;
+  font-weight: bold;
+} /* Generic.Heading */
+[data-theme="dark"] .pygments-gi {
+  color: #b5cea8;
+} /* Generic.Inserted */
+[data-theme="dark"] .pygments-go {
+  color: #d4d4d4;
+} /* Generic.Output */
+[data-theme="dark"] .pygments-gp {
+  color: #d4d4d4;
+  font-weight: bold;
+} /* Generic.Prompt */
+[data-theme="dark"] .pygments-gs {
+  font-weight: bold;
+} /* Generic.Strong */
+[data-theme="dark"] .pygments-gu {
+  color: #d4d4d4;
+  font-weight: bold;
+} /* Generic.Subheading */
+[data-theme="dark"] .pygments-gt {
+  color: #f44747;
+} /* Generic.Traceback */
+[data-theme="dark"] .pygments-kc {
+  color: #569cd6;
+} /* Keyword.Constant */
+[data-theme="dark"] .pygments-kd {
+  color: #569cd6;
+} /* Keyword.Declaration */
+[data-theme="dark"] .pygments-kn {
+  color: #569cd6;
+} /* Keyword.Namespace */
+[data-theme="dark"] .pygments-kp {
+  color: #569cd6;
+} /* Keyword.Pseudo */
+[data-theme="dark"] .pygments-kr {
+  color: #569cd6;
+} /* Keyword.Reserved */
+[data-theme="dark"] .pygments-kt {
+  color: #4ec9b0;
+} /* Keyword.Type */
+[data-theme="dark"] .pygments-m {
+  color: #b5cea8;
+} /* Literal.Number */
+[data-theme="dark"] .pygments-s {
+  color: #ce9178;
+} /* Literal.String */
+[data-theme="dark"] .pygments-na {
+  color: #9cdcfe;
+} /* Name.Attribute */
+[data-theme="dark"] .pygments-nb {
+  color: #dcdcaa;
+} /* Name.Builtin */
+[data-theme="dark"] .pygments-nc {
+  color: #4ec9b0;
+} /* Name.Class */
+[data-theme="dark"] .pygments-no {
+  color: #9cdcfe;
+} /* Name.Constant */
+[data-theme="dark"] .pygments-nd {
+  color: #dcdcaa;
+} /* Name.Decorator */
+[data-theme="dark"] .pygments-ni {
+  color: #d4d4d4;
+} /* Name.Entity */
+[data-theme="dark"] .pygments-ne {
+  color: #4ec9b0;
+} /* Name.Exception */
+[data-theme="dark"] .pygments-nf {
+  color: #dcdcaa;
+} /* Name.Function */
+[data-theme="dark"] .pygments-nl {
+  color: #d4d4d4;
+} /* Name.Label */
+[data-theme="dark"] .pygments-nn {
+  color: #d4d4d4;
+} /* Name.Namespace */
+[data-theme="dark"] .pygments-nt {
+  color: #569cd6;
+} /* Name.Tag */
+[data-theme="dark"] .pygments-nv {
+  color: #9cdcfe;
+} /* Name.Variable */
+[data-theme="dark"] .pygments-ow {
+  color: #569cd6;
+} /* Operator.Word */
+[data-theme="dark"] .pygments-w {
+  color: #d4d4d4;
+} /* Text.Whitespace */
+[data-theme="dark"] .pygments-mb {
+  color: #b5cea8;
+} /* Literal.Number.Bin */
+[data-theme="dark"] .pygments-mf {
+  color: #b5cea8;
+} /* Literal.Number.Float */
+[data-theme="dark"] .pygments-mh {
+  color: #b5cea8;
+} /* Literal.Number.Hex */
+[data-theme="dark"] .pygments-mi {
+  color: #b5cea8;
+} /* Literal.Number.Integer */
+[data-theme="dark"] .pygments-mo {
+  color: #b5cea8;
+} /* Literal.Number.Oct */
+[data-theme="dark"] .pygments-sa {
+  color: #ce9178;
+} /* Literal.String.Affix */
+[data-theme="dark"] .pygments-sb {
+  color: #ce9178;
+} /* Literal.String.Backtick */
+[data-theme="dark"] .pygments-sc {
+  color: #ce9178;
+} /* Literal.String.Char */
+[data-theme="dark"] .pygments-dl {
+  color: #ce9178;
+} /* Literal.String.Delimiter */
+[data-theme="dark"] .pygments-sd {
+  color: #ce9178;
+} /* Literal.String.Doc */
+[data-theme="dark"] .pygments-s2 {
+  color: #ce9178;
+} /* Literal.String.Double */
+[data-theme="dark"] .pygments-se {
+  color: #d7ba7d;
+} /* Literal.String.Escape */
+[data-theme="dark"] .pygments-sh {
+  color: #ce9178;
+} /* Literal.String.Heredoc */
+[data-theme="dark"] .pygments-si {
+  color: #d7ba7d;
+} /* Literal.String.Interpol */
+[data-theme="dark"] .pygments-sx {
+  color: #ce9178;
+} /* Literal.String.Other */
+[data-theme="dark"] .pygments-sr {
+  color: #d16969;
+} /* Literal.String.Regex */
+[data-theme="dark"] .pygments-s1 {
+  color: #ce9178;
+} /* Literal.String.Single */
+[data-theme="dark"] .pygments-ss {
+  color: #ce9178;
+} /* Literal.String.Symbol */
+[data-theme="dark"] .pygments-bp {
+  color: #dcdcaa;
+} /* Name.Builtin.Pseudo */
+[data-theme="dark"] .pygments-fm {
+  color: #dcdcaa;
+} /* Name.Function.Magic */
+[data-theme="dark"] .pygments-vc {
+  color: #9cdcfe;
+} /* Name.Variable.Class */
+[data-theme="dark"] .pygments-vg {
+  color: #9cdcfe;
+} /* Name.Variable.Global */
+[data-theme="dark"] .pygments-vi {
+  color: #9cdcfe;
+} /* Name.Variable.Instance */
+[data-theme="dark"] .pygments-vm {
+  color: #9cdcfe;
+} /* Name.Variable.Magic */
+[data-theme="dark"] .pygments-il {
+  color: #b5cea8;
+} /* Literal.Number.Integer.Long */
         </style>
     </head>
     <body>
@@ -1559,41 +1696,41 @@ footer p {
             </div>
         </footer>
         <script type="text/javascript">
-            // Theme management
-function initializeTheme() {
-  const savedTheme = localStorage.getItem('pyta-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const theme = savedTheme || (prefersDark ? 'dark' : 'light');
-  
-  document.documentElement.setAttribute('data-theme', theme);
+            function initializeTheme() {
+  const savedTheme = localStorage.getItem("pyta-theme")
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+  const theme = savedTheme || (prefersDark ? "dark" : "light")
+
+  document.documentElement.setAttribute("data-theme", theme)
 }
 
 function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('pyta-theme', newTheme);
+  const currentTheme = document.documentElement.getAttribute("data-theme")
+  const newTheme = currentTheme === "dark" ? "light" : "dark"
+
+  document.documentElement.setAttribute("data-theme", newTheme)
+  localStorage.setItem("pyta-theme", newTheme)
 }
 
-// Initialize theme on page load
-document.addEventListener('DOMContentLoaded', () => {
-  initializeTheme();
-  
-  // Add theme toggle event listener
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
-});
+// Initialize the user's theme when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  initializeTheme()
 
-// Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-  if (!localStorage.getItem('pyta-theme')) {
-    const theme = e.matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+  // Theme toggle event listener
+  const themeToggle = document.getElementById("theme-toggle")
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme)
   }
-});
+})
+
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", (e) => {
+    if (!localStorage.getItem("pyta-theme")) {
+      const theme = e.matches ? "dark" : "light"
+      document.documentElement.setAttribute("data-theme", theme)
+    }
+  })
 
 // Existing collapsible functionality
 document.body.addEventListener("click", (event) => {

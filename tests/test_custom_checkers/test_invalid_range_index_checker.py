@@ -16,22 +16,38 @@ class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):
             "range(2, 8)",
             "range(2, 8, 2)",
             "range(-10, -20, -2)",
-            "range(0, [][1])",
             "range(start, stop)",
-            "start = 1\nstop = 10\nrange(start, -stop)",
         ],
         ids=[
             "test_valid_range_one_arg",
             "test_valid_range_two_arg",
             "test_valid_range_three_arg",
             "test_valid_range_three_arg_negative",
-            "test_uninferable",
             "test_variables_undefined",
-            "test_variables_defined",
         ],
     )
     def test_valid_ranges(self, src):
         range_node = astroid.extract_node(src)
+        with self.assertNoMessages():
+            self.checker.visit_call(range_node)
+
+    def test_uninferable(self):
+        src = """
+        range(0, [][1])
+        """
+        range_node = astroid.extract_node(src)
+        with self.assertNoMessages():
+            self.checker.visit_call(range_node)
+
+    def test_variables_defined(self):
+        src = """
+        start = 1
+        stop = 10
+        range(start, -stop)
+        """
+        range_node = astroid.extract_node(src)
+        # Even though these variables can have their values inferred,
+        # we are conservative and do not attempt inference (see test_variables_ambiguous below).
         with self.assertNoMessages():
             self.checker.visit_call(range_node)
 

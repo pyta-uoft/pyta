@@ -35,10 +35,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
-- Refactored `test_one_iteration_checker.py` by combining separate basic `while` and `for` one-iteration tests into one via `pytest.mark.parametrize`.
-- Refactor tests in `tests/checkers/test_top_level_code_checker.py` to use pytest.mark.parametrize
-- Refactored test_invalid_range_index_checker.py: grouped repeated range test cases using pytest.mark.parametrize.
-- Refactored tests in test_forbidden_python_syntax_checker.py to use pytest.mark.parametrize for cleaner and less repetitive coverage.
+- Refactored custom checker tests to group repeated tests using pytest.mark.parametrize.
 - Dynamically loaded only the reporter specified in the configuration
 - Added test case for `check_all` function ensuring proper behaviour when handling inputs in package notation.
 - Improved `get_valid_files_to_check` function by removing unreachable code.

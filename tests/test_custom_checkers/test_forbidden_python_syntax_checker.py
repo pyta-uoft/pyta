@@ -23,37 +23,37 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
         [
             (
                 """
-            for i in range(0, 10):
-                break
-            """,
+                for i in range(0, 10):
+                    break
+                """,
                 nodes.Break,
             ),
             (
                 """
-            for i in range(0, 10):
-                continue
-            """,
+                for i in range(0, 10):
+                    continue
+                """,
                 nodes.Continue,
             ),
             (
                 """
-            comp = [i ** 2 for i in range(1, 11)]
-            """,
+                comp = [i ** 2 for i in range(1, 11)]
+                """,
                 nodes.Comprehension,
             ),
             (
                 """
-            for i in range(0, 10):
-                print(i)
-            """,
+                for i in range(0, 10):
+                    print(i)
+                """,
                 nodes.For,
             ),
             (
                 """
-            count = 10
-            while count > -1:
-                count -= 1
-            """,
+                count = 10
+                while count > -1:
+                    count -= 1
+                """,
                 nodes.While,
             ),
         ],

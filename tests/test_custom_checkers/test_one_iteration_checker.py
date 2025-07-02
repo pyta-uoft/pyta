@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+import pytest
 from astroid import nodes
 
 from python_ta.cfg.visitor import CFGVisitor
@@ -9,8 +10,6 @@ from python_ta.transforms.z3_visitor import Z3Visitor
 
 class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = OneIterationChecker
-
-    import pytest  # make sure pytest is imported if not already
 
     @pytest.mark.parametrize(
         "src,node_type",

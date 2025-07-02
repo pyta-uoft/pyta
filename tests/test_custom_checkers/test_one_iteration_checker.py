@@ -52,6 +52,12 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
                 nodes.For,
             ),
         ],
+        ids=[
+            "test_while_with_return",
+            "test_while_with_break",
+            "test_for_loop_with_return",
+            "test_for_loop_with_break",
+        ],
     )
     def test_one_iteration_simple(self, src, node_type):
         mod = astroid.parse(src)

@@ -66,6 +66,16 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
                 5,
             ),
         ],
+        ids=[
+            "test_message_simple",
+            "test_message_complex",
+            "test_message_annotated_assignment",
+            "test_message_regular_assignment",
+            "test_message_type_alias_assignment",
+            "test_message_regular_assignment_unpacking",
+            "test_message_regular_assignment_starred",
+            "test_message_attribute_assignment",
+        ],
     )
     def test_forbidden_top_level_code(self, src, lineno):
         """Cases that must raise forbidden-top-level-code"""
@@ -112,6 +122,16 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
             if __name__ == "__main__":
                 print("I'm in main")
             """,
+        ],
+        ids=[
+            "test_no_message_import",
+            "test_no_message_import_from",
+            "test_no_message_function_def",
+            "test_no_message_class_def",
+            "test_no_message_constant_assignment",
+            "test_no_message_annotated_constant_assignment",
+            "test_no_message_type_alias_assignment",
+            "test_no_message_is_main",
         ],
     )
     def test_allowed_top_level_code(self, src):

@@ -80,13 +80,10 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
     def test_forbidden_top_level_code(self, src, lineno):
         """
         Cases that must raise forbidden-top-level-code.
-        Assumes that the last statement in the body is the node associated with the error, unless the code contains `Y.a`
+        Assumes that the last statement in the body is the node associated with the error.
         """
         mod = astroid.parse(src)
-        if "Y.a" in src:
-            node = mod.body[2]
-        else:
-            node = mod.body[-1]
+        node = mod.body[-1]
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=node, args=lineno),

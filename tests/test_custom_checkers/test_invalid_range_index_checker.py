@@ -51,15 +51,19 @@ class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_call(range_node)
 
-    def test_valid_range_inside_function(self):
+    def test_variables_ambiguous(self):
         src = """
         def f(numbers):
             result = []
             for _ in numbers:
                 result.append(1)
+
             range(len(result))  #@
         """
         range_node = astroid.extract_node(src)
+        # In this case, result is currently being inferred as an empty list [],
+        # but may not be empty. So to be conservative we do not attempt to infer
+        # its result, and instead skip checking this range expression.
         with self.assertNoMessages():
             self.checker.visit_call(range_node)
 

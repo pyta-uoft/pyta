@@ -58,11 +58,11 @@ class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerT
             ),
         ],
         ids=[
-            "test_disallow_break_in_code",
-            "test_disallow_continue_in_code",
-            "test_disallow_comprehension_in_code",
-            "test_disallow_for_loop_in_code",
-            "test_disallow_while_loop_in_code",
+            "break",
+            "continue",
+            "comprehension",
+            "for_loop",
+            "while_loop",
         ],
     )
     def test_disallowed_syntax(self, src: str, expected_node_type: type) -> None:

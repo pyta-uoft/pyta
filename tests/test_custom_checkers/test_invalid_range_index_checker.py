@@ -19,11 +19,11 @@ class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):
             "range(start, stop)",
         ],
         ids=[
-            "test_valid_range_one_arg",
-            "test_valid_range_two_arg",
-            "test_valid_range_three_arg",
-            "test_valid_range_three_arg_negative",
-            "test_variables_undefined",
+            "valid_range_one_arg",
+            "valid_range_two_arg",
+            "valid_range_three_arg",
+            "valid_range_three_arg_negative",
+            "variables_undefined",
         ],
     )
     def test_valid_ranges(self, src):
@@ -78,12 +78,12 @@ class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):
             ('range("hello", "bye")', "1"),
         ],
         ids=[
-            "test_invalid_range_empty",
-            "test_invalid_range_one_arg",
-            "test_invalid_range_two_arg",
-            "test_invalid_range_three_arg",
-            "test_invalid_range_zero_step",
-            "test_wrong_type",
+            "invalid_range_empty",
+            "invalid_range_one_arg",
+            "invalid_range_two_arg",
+            "invalid_range_three_arg",
+            "invalid_range_zero_step",
+            "wrong_type",
         ],
     )
     def test_invalid_ranges(self, src, expected_arg):

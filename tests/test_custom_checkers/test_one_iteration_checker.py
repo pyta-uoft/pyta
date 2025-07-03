@@ -150,8 +150,7 @@ class TestOneIterationChecker(pylint.testutils.CheckerTestCase):
     def test_one_iteration_message(self, src, node_type):
         mod = astroid.parse(src)
         mod.accept(CFGVisitor())
-        loop_nodes = list(mod.nodes_of_class(node_type))
-        loop_node = loop_nodes[0]
+        loop_node = next(mod.nodes_of_class(node_type))
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="one-iteration",

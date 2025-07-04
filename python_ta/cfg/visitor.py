@@ -453,8 +453,8 @@ class CFGVisitor:
 
         prev_case = self._current_block
         connect_guard_block = False
-        for case in node.cases:
 
+        for case in node.cases:
             edge_label = "No Match" if case_end_blocks else ""
 
             separate_conditions = self.options.get("separate-condition-blocks", False)

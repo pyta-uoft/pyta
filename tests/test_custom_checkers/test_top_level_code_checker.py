@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+import pytest
 
 from python_ta.checkers.top_level_code_checker import TopLevelCodeChecker
 
@@ -8,195 +9,133 @@ class TestTopLevelCodeChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = TopLevelCodeChecker
     CONFIG = {}
 
-    def test_message_simple(self):
-        """Top level code not allowed, raises a message."""
-        src = """
-        print("testing code")
+    @pytest.mark.parametrize(
+        "src, lineno",
+        [
+            (
+                """
+                print("testing code")
+                """,
+                2,
+            ),
+            (
+                """
+                if __name__ == "__main__":
+                    print("I'm in main")
+                print("testing code")
+                """,
+                4,
+            ),
+            (
+                """
+                max_num: int = 30
+                """,
+                2,
+            ),
+            (
+                """
+                name = "George"
+                """,
+                2,
+            ),
+            (
+                """
+                TypeName = list[int]
+                """,
+                2,
+            ),
+            (
+                """
+                name, CONST = "George", 3
+                """,
+                2,
+            ),
+            (
+                """
+                NAME, *nums = ["George", 3, 4]
+                """,
+                2,
+            ),
+            (
+                """
+                class X:
+                    a = 5
+                Y = X()
+                Y.a = 6
+                """,
+                5,
+            ),
+        ],
+        ids=[
+            "message_simple",
+            "message_complex",
+            "message_annotated_assignment",
+            "message_regular_assignment",
+            "message_type_alias_assignment",
+            "message_regular_assignment_unpacking",
+            "message_regular_assignment_starred",
+            "message_attribute_assignment",
+        ],
+    )
+    def test_forbidden_top_level_code(self, src, lineno):
+        """
+        Cases that must raise forbidden-top-level-code.
+        Assumes that the last statement in the body is the node associated with the error.
         """
         mod = astroid.parse(src)
+        node = mod.body[-1]
+
         with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
-            ),
+            pylint.testutils.MessageTest(msg_id="forbidden-top-level-code", node=node, args=lineno),
             ignore_position=True,
         ):
             self.checker.visit_module(mod)
 
-    def test_message_complex(self):
-        """Top level code not allowed, raises a message."""
-        src = """
-        if __name__ == "__main__":
-            print("I'm in main")
-        print("testing code")
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[1], args=4
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_module(mod)
-
-    def test_no_message_import(self):
-        """Top level import allowed, no message."""
-        src = """
-        import test
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_no_message_import_from(self):
-        """Top level import from allowed, no message."""
-        src = """
-        from test import unittest
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_no_message_function_def(self):
-        """Top level function allowed, no message."""
-        src = """
-        def print_hello():
-            print("hello")
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_no_message_class_def(self):
-        """Top level class allowed, no message."""
-        src = """
-        class Printer:
+    @pytest.mark.parametrize(
+        "src",
+        [
+            """
+            import test
+            """,
+            """
+            from test import unittest
+            """,
+            """
             def print_hello():
                 print("hello")
-        """
+            """,
+            """
+            class Printer:
+                def print_hello():
+                    print("hello")
+            """,
+            """
+            MAX_DURATION = 30
+            """,
+            """
+            MAX_DURATION: int = 30
+            """,
+            """
+            MyType = list[list[list[int]]]
+            """,
+            """
+            if __name__ == "__main__":
+                print("I'm in main")
+            """,
+        ],
+        ids=[
+            "no_message_import",
+            "no_message_import_from",
+            "no_message_function_def",
+            "no_message_class_def",
+            "no_message_constant_assignment",
+            "no_message_annotated_constant_assignment",
+            "no_message_type_alias_assignment",
+            "no_message_is_main",
+        ],
+    )
+    def test_allowed_top_level_code(self, src):
+        """Cases that must NOT raise forbidden-top-level-code"""
         mod = astroid.parse(src)
         with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_no_message_constant_assignment(self):
-        """Top level constant assignment allowed, no message."""
-        src = """
-        MAX_DURATION = 30
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_message_annotated_assignment(self):
-        """Top level regular assignment with annotation not allowed, raises a message."""
-        src = """
-        max_num: int = 30
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_module(mod)
-
-    def test_no_message_annotated_constant_assignment(self):
-        """Top level constant assignment with annotation allowed, no message."""
-        src = """
-        MAX_DURATION: int = 30
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_message_regular_assignment(self):
-        """Top level regular assignment not allowed, raises a message."""
-        src = """
-        name = "George"
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_module(mod)
-
-    def test_no_message_type_alias_assignment(self):
-        """Top level type alias assignment allowed, no message."""
-        src = """
-        MyType = list[list[list[int]]]
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_message_type_alias_assignment(self):
-        """Top level type alias assignment not allowed, raises a message."""
-        src = """
-        TypeName = list[int]
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_module(mod)
-
-    def test_message_regular_assignment_unpacking(self):
-        """Top level regular unpacking assignment not allowed, raises a message."""
-        src = """
-        name, CONST = "George", 3
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_module(mod)
-
-    def test_message_regular_assignment_starred(self):
-        """Top level regular assignment with a starred target not allowed, raises a message."""
-        src = """
-        NAME, *nums = ["George", 3, 4]
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[0], args=2
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_module(mod)
-
-    def test_no_message_is_main(self):
-        """Top level code in main block is allowed, no message."""
-        src = """
-        if __name__ == "__main__":
-            print("I'm in main")
-        """
-        mod = astroid.parse(src)
-        with self.assertNoMessages():
-            self.checker.visit_module(mod)
-
-    def test_message_attribute_assignment(self):
-        """Top level code to assign attributes not allowed, raises a message."""
-        src = """
-        class X:
-            a = 5
-        Y = X()
-        Y.a = 6
-        """
-        mod = astroid.parse(src)
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="forbidden-top-level-code", node=mod.body[2], args=5
-            ),
-            ignore_position=True,
-        ):
             self.checker.visit_module(mod)

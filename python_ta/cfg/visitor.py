@@ -452,36 +452,31 @@ class CFGVisitor:
         case_end_blocks = []
 
         prev_case = self._current_block
-        # Process each match case
+        connect_guard_block = False
         for case in node.cases:
 
             edge_label = "No Match" if case_end_blocks else ""
 
-            new_case = astroid.nodes.Name(
-                name=f"Case {case.pattern.as_string()}",
-                lineno=case.lineno,
-                col_offset=case.col_offset,
-                parent=case.parent,
-                end_col_offset=case.end_col_offset,
-                end_lineno=case.end_lineno,
-            )
-
             separate_conditions = self.options.get("separate-condition-blocks", False)
-            if separate_conditions and hasattr(case, "guard") and case.guard is not None:
-                # If the option is set to separate condition blocks, create a new block for the guard
-                pattern_block = self._current_cfg.create_block(prev_case)
-                pattern_block.add_statement(case.guard)
-                pattern_block = self._current_cfg.create_block(pattern_block, edge_label=edge_label)
-            else:
-                pattern_block = self._current_cfg.create_block(prev_case, edge_label=edge_label)
 
-            pattern_block.add_statement(new_case)
-            pattern_body = self._current_cfg.create_block(pattern_block, edge_label="Match")
+            pattern_block = self._current_cfg.create_block(prev_case, edge_label=edge_label)
+            pattern_block.add_statement(case.pattern)
+
+            if connect_guard_block:
+                self._current_cfg.link_or_merge(guard_block, pattern_block, edge_label="False")
+                connect_guard_block = False
+
+            if separate_conditions and case.guard is not None:
+                guard_block = self._current_cfg.create_block(pattern_block, edge_label="Match")
+                guard_block.add_statement(case.guard)
+                pattern_body = self._current_cfg.create_block(guard_block, edge_label="True")
+                connect_guard_block = True
+            else:
+                if not separate_conditions and case.guard is not None:
+                    pattern_block.add_statement(case.guard)
+                pattern_body = self._current_cfg.create_block(pattern_block, edge_label="Match")
 
             self._current_block = pattern_body
-
-            if not separate_conditions and hasattr(case, "guard") and case.guard is not None:
-                self._current_block.add_statement(case.guard)
 
             for child in case.body:
                 child.accept(self)
@@ -491,6 +486,8 @@ class CFGVisitor:
 
         # For the final block, create a new block that links to the end of the match
         self._current_cfg.link_or_merge(pattern_block, after_match_block, edge_label="No Match")
+        if connect_guard_block:
+            self._current_cfg.link_or_merge(guard_block, after_match_block, edge_label="False")
 
         for end_block in case_end_blocks:
             self._current_cfg.link_or_merge(end_block, after_match_block)

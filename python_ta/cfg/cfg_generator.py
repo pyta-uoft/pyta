@@ -167,6 +167,12 @@ def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFG
             label = f"< for {html.escape(stmt.parent.target.as_string())} in<U><B>{html.escape(stmt.as_string())}</B></U><BR/> >"
         elif isinstance(stmt.parent, nodes.For) and stmt is stmt.parent.target:
             label = f"< for<U><B>{html.escape(stmt.as_string())} </B></U> in {html.escape(stmt.parent.iter.as_string())}<BR/> >"
+        elif isinstance(stmt, nodes.Pattern):
+            label = f"< Case {html.escape(stmt.as_string())} >"
+
+    if block.statements and isinstance(block.statements[0], nodes.Pattern):
+        label = f"case {html.escape(block.statements[0].as_string())} \n"
+        label += "\n".join([s.as_string() for s in block.statements[1:]])
 
     if not label:  # Default
         label = "\n".join([s.as_string() for s in block.statements]) + "\n"

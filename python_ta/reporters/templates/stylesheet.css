@@ -39,7 +39,8 @@
   --error-instance-bg: #1a1a1a;
   --code-error: rgba(255, 80, 100, 0.9);
   --style-error: rgb(100, 150, 255);
-  --highlight-bg: rgba(255, 220, 0, 0.6);
+  --highlight-bg: #264f78;
+  --footer-bg: #1a1a1a;
 }
 
 body {
@@ -314,7 +315,7 @@ section {
 }
 
 .gbold {
-  color: var(--text-muted);
+  color: rgb(90, 91, 92);
   font-weight: bold;
 }
 
@@ -422,7 +423,7 @@ button.collapsed {
 /* Footer styling */
 
 footer {
-  background: var(--text-secondary);
+  background: var(--footer-bg);
   color: var(--text-white);
   display: flex;
   flex-direction: row;
@@ -745,7 +746,7 @@ footer p {
   color: #666666;
 } /* Literal.Number.Integer.Long */
 
-/* VS Code Dark Theme for syntax highlighting in dark mode */
+/* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source"
 [data-theme="dark"] .pygments-c {
   color: #6a9955;
 } /* Comment */

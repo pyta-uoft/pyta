@@ -1,3 +1,40 @@
+function initializeTheme() {
+  const savedTheme = localStorage.getItem("pyta-theme")
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+  const theme = savedTheme || (prefersDark ? "dark" : "light")
+
+  document.documentElement.setAttribute("data-theme", theme)
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute("data-theme")
+  const newTheme = currentTheme === "dark" ? "light" : "dark"
+
+  document.documentElement.setAttribute("data-theme", newTheme)
+  localStorage.setItem("pyta-theme", newTheme)
+}
+
+// Initialize the user's theme when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  initializeTheme()
+
+  // Theme toggle event listener
+  const themeToggle = document.getElementById("theme-toggle")
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme)
+  }
+})
+
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", (e) => {
+    if (!localStorage.getItem("pyta-theme")) {
+      const theme = e.matches ? "dark" : "light"
+      document.documentElement.setAttribute("data-theme", theme)
+    }
+  })
+
+// Existing collapsible functionality
 document.body.addEventListener("click", (event) => {
   const slider = event.target.closest(".slider")
   if (slider) {

@@ -1,8 +1,6 @@
 import logging
-from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import astroid
 from astroid import extract_node, nodes
 from astroid.exceptions import AstroidSyntaxError
 

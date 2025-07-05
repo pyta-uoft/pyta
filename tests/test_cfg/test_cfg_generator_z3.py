@@ -31,7 +31,7 @@ def test_cfg_z3_enabled() -> None:
 
 
 @patch.dict("sys.modules", {"python_ta.transforms.z3_visitor": None})
-def test_cfg_z3_failed_import_attempt1() -> None:
+def test_cfg_z3_failed_import() -> None:
     """Test verifies that `generate_cfg` handles ImportError appropriately."""
     file_path = "examples/pylint/r0912_too_many_branches.py"
     with pytest.raises(ImportError):

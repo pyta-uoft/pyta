@@ -13,7 +13,7 @@
   --bg-gradient-end: rgba(49, 48, 178, 0.62);
   --text-primary: #000000;
   --text-secondary: #2d3441;
-  --text-muted: #666666;
+  --text-muted: rgb(244, 244, 244);
   --text-white: #ffffff;
   --border-color: rgba(0, 0, 0, 0.15);
   --shadow-color: rgba(77, 77, 77, 0.6);
@@ -25,6 +25,7 @@
   --style-error: rgb(0, 111, 255);
   --highlight-bg: rgba(228, 255, 0, 0.4);
   --footer-bg: #2d3441;
+  --text-empty-placeholder: rgb(244, 244, 244);
 }
 
 [data-theme="dark"] {
@@ -41,12 +42,13 @@
   --shadow-color: rgba(0, 0, 0, 0.8);
   --section-bg: rgba(40, 40, 40, 0.5);
   --header-gradient-start: rgba(20, 30, 48, 0.9);
-  --header-gradient-end: rgba(36, 59, 85, 0.8);
+  --header-gradient-end: rgba(36, 59, 85, 0.8); 
   --error-instance-bg: #1a1a1a;
   --code-error: rgba(255, 80, 100, 0.9);
   --style-error: rgb(100, 150, 255);
   --highlight-bg: #264f78;
   --footer-bg: #1a1a1a;
+  --text-empty-placeholder: #a0a0a0;
 }
 
 body {
@@ -423,7 +425,7 @@ button.collapsed {
 .empty-placeholder {
   font-style: italic;
   padding-left: 20px;
-  color: var(--text-muted);
+  color: var(--text-empty-placeholder);
 }
 
 /* Footer styling */
@@ -752,7 +754,7 @@ footer p {
   color: #666666;
 } /* Literal.Number.Integer.Long */
 
-/* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source"
+/* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source" */
 [data-theme="dark"] .pygments-c {
   color: #6a9955;
 } /* Comment */
@@ -968,6 +970,7 @@ footer p {
                 <div class="section-header">
                     <h2>Table of Contents</h2>
                     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                        <!-- Sun and moon icons sourced from heroicons at https://heroicons.com/--!>
                         <svg class="sun-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                         </svg>

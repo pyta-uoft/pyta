@@ -7,7 +7,7 @@
   --bg-gradient-end: rgba(49, 48, 178, 0.62);
   --text-primary: #000000;
   --text-secondary: #2d3441;
-  --text-muted: #666666;
+  --text-muted: rgb(244, 244, 244);
   --text-white: #ffffff;
   --border-color: rgba(0, 0, 0, 0.15);
   --shadow-color: rgba(77, 77, 77, 0.6);
@@ -19,6 +19,7 @@
   --style-error: rgb(0, 111, 255);
   --highlight-bg: rgba(228, 255, 0, 0.4);
   --footer-bg: #2d3441;
+  --text-empty-placeholder: rgb(244, 244, 244);
 }
 
 [data-theme="dark"] {
@@ -41,6 +42,7 @@
   --style-error: rgb(100, 150, 255);
   --highlight-bg: #264f78;
   --footer-bg: #1a1a1a;
+  --text-empty-placeholder: #a0a0a0;
 }
 
 body {
@@ -417,7 +419,7 @@ button.collapsed {
 .empty-placeholder {
   font-style: italic;
   padding-left: 20px;
-  color: var(--text-muted);
+  color: var(--text-empty-placeholder);
 }
 
 /* Footer styling */
@@ -746,7 +748,7 @@ footer p {
   color: #666666;
 } /* Literal.Number.Integer.Long */
 
-/* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source"
+/* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source" */
 [data-theme="dark"] .pygments-c {
   color: #6a9955;
 } /* Comment */

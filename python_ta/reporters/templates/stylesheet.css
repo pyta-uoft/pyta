@@ -256,6 +256,9 @@ section {
   padding: 0 15px;
 }
 
+.code-errors {
+}
+
 .style-errors {
   border-top: 3px solid rgba(255, 255, 255, 0.25);
 }

@@ -274,6 +274,7 @@ class TestSnapshotTracer:
         """Test that gc is disabled on __enter__ and re-enabled on __exit__."""
         with mock.patch("gc.disable") as mock_disable, mock.patch("gc.enable") as mock_enable:
             with SnapshotTracer(
+                include_frames=(r"^test_gc_disabled_and_enabled$",),
                 memory_viz_args=MEMORY_VIZ_ARGS,
                 memory_viz_version=MEMORY_VIZ_VERSION,
             ):

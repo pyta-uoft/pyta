@@ -4,6 +4,7 @@ import os.path
 import re
 import sys
 from typing import Iterator
+from unittest import mock
 
 import pytest
 from bs4 import BeautifulSoup
@@ -268,3 +269,15 @@ class TestSnapshotTracer:
             file.truncate()
 
         assert_output_files_match(str(tmp_path), snapshot, func_open_webstepper.__name__)
+
+    def test_snapshot_tracer_disables_gc(self):
+        """Test that gc is disabled on __enter__ and re-enabled on __exit__."""
+        with mock.patch("gc.disable") as mock_disable, mock.patch("gc.enable") as mock_enable:
+            with SnapshotTracer(
+                memory_viz_args=MEMORY_VIZ_ARGS,
+                memory_viz_version=MEMORY_VIZ_VERSION,
+            ):
+                pass
+
+        mock_disable.assert_called_once()
+        mock_enable.assert_called_once()

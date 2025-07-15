@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import gc
 import inspect
 import json
 import logging
@@ -99,6 +100,7 @@ class SnapshotTracer:
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
+        gc.disable()
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_frame.f_trace = self._trace_func
         sys.settrace(lambda *_args: None)
@@ -106,6 +108,8 @@ class SnapshotTracer:
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Remove the trace function. If webstepper=True, open a Webstepper webpage."""
+        gc.enable()
+        gc.collect()
         sys.settrace(None)
         func_frame = inspect.getouterframes(inspect.currentframe())[1]
         func_frame.frame.f_trace = None

@@ -2,7 +2,7 @@
 
 Note: Only checks if loop variable is reassigned for now."""
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -57,8 +57,6 @@ class InfiniteLoopChecker(BaseChecker):
 
         # Visit loop body
         for child in node.body:
-            # if isinstance(child, nodes.AugAssign) or isinstance(child, nodes.Assign) or \
-            #         isinstance(child, nodes.AssignAttr):
             child.accept(self)
 
     def leave_while(self, node: nodes.While) -> None:

@@ -3,6 +3,7 @@ import os
 import astroid
 import pylint.testutils
 
+import python_ta
 from python_ta.checkers.infinite_loop_checker import InfiniteLoopChecker
 
 
@@ -64,3 +65,22 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         for node in mod.nodes_of_class(astroid.nodes.While):
             self.checker.visit_while(node)
             self.checker.leave_while(node)
+
+    def test_while_inside_func(self) -> None:
+        src = """
+        def foo():
+            i = 10
+            while i < 21:
+                i += 1
+                j = 19
+        """
+        mod = astroid.parse(src)
+
+        for node in mod.nodes_of_class(astroid.nodes.While):
+            self.checker.visit_while(node)
+            self.checker.leave_while(node)
+
+    def test_works(self) -> None:
+        import python_ta
+
+        python_ta.check_all("../../dummy.py", config={"z3": True})

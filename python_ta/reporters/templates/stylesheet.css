@@ -150,7 +150,6 @@ header {
   max-height: 100vh;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  color: var(--text-white);
 }
 
 .sidebar ul {
@@ -174,6 +173,7 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
+  color: var(--text-primary);
 }
 
 .sidebar svg.collapsed {
@@ -210,6 +210,10 @@ main {
   grid-column: 2;
   grid-row: 1 / span 2;
   padding: 20px;
+}
+
+main svg {
+  color: var(--text-primary);
 }
 
 section {

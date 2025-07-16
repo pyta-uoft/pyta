@@ -2,7 +2,7 @@
 
 Note: Only checks if loop variable is reassigned for now."""
 
-from typing import Optional
+from typing import Generator, Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -13,9 +13,16 @@ class InfiniteLoopChecker(BaseChecker):
     name = "infinite-loop"
     msgs = {
         "W9501": (
-            "Loop variable in while condition is never updated inside the loop body",
-            "loop-variable-not-updated",
-            "Used when a loop variable in a while loop is never updated, which could lead to an infinite loop.",
+            "No condition variable in the while loop is used inside the loop body",
+            "loop-condition-variable-unused",
+            """Used when none of the variables inside a while loop's condition appear in the body. This
+            suggests the condition will never change and may result in an unintended infinite loop.""",
+        ),
+        "W9502": (
+            "Usage of loops of the form 'while True' is discouraged",
+            "while-true-loop",
+            """Used when a 'while True' loop is detected and the configuration disallows it. This could lead to
+            unintentionally infinite loops.""",
         ),
     }
     options = (
@@ -30,76 +37,63 @@ class InfiniteLoopChecker(BaseChecker):
         ),
     )
 
-    def visit_generic(self, node: nodes.NodeNG):
-        for child in node.get_children():
-            child.accept(self)
-
-    def __getattr__(self, attr):
-        if attr.startswith("visit_"):
-            return self.visit_generic
-        raise AttributeError(f"No attribute {attr}")
-
     def __init__(self, linter: Optional[PyLinter] = None) -> None:
-        super().__init__(linter)
-        self._inside_cond = False
-        self._loop_cond_vars = []
-        self._loop_body_vars = []
-
-    def visit_module(self, module: nodes.Module) -> None:
-        for child in module.body:
-            # Check any classes or function definitions for the target function/method
-            if isinstance(child, nodes.While):
-                child.accept(self)
+        super().__init__(linter=linter)
 
     def visit_while(self, node: nodes.While) -> None:
-        # Visit loop condition nodes
-        node.test.accept(self)
-
-        # Visit loop body
-        for child in node.body:
-            child.accept(self)
+        self._check_condition_var_used(node)
 
     def leave_while(self, node: nodes.While) -> None:
-        print(self._loop_cond_vars)
-        print(self._loop_body_vars)
-        self._loop_cond_vars = []
-        self._loop_body_vars = []
-
-    def visit_compare(self, node: nodes.Compare) -> None:
-        self._inside_cond = True
-        # Visit left hand side
-        node.left.accept(self)
-        # Visit rest of expression
-        for operator, operand in node.ops:
-            operand.accept(self)
-
-    def leave_compare(self, node: nodes.Compare) -> None:
-        self._inside_cond = False
-
-    def visit_name(self, node: nodes.Name) -> None:
-        if self._inside_cond and node.name not in self._loop_cond_vars:
-            self._loop_cond_vars.append(node.name)
         return
 
-    def visit_attribute(self, node: nodes.Attribute) -> None:
-        if self._inside_cond and node.attrname not in self._loop_cond_vars:
-            self._loop_cond_vars.append(node.attrname)
-        return
+    def _check_condition_var_used(self, node: nodes.While) -> None:
+        """Helper function that checks whether variables used in a while loop's condition
+        are also used anywhere inside the loop body.
 
-    def visit_assign(self, node: nodes.Assign) -> None:
-        for name in node.targets:
-            name.accept(self)
+        Note: This is a basic check. It only flags loops where none of the condition variables
+        appear in the body, which indicates an infinite loop.
+        """
+        # Get variable(s) used inside condition
+        cond_vars = {}
+        for child in node.test.nodes_of_class((nodes.Name, nodes.Attribute, nodes.Subscript)):
+            if isinstance(child, nodes.Name) and child.name != "self":
+                if cond_vars.get(child.name) is None:
+                    cond_vars[child.name] = child
+            elif isinstance(child, nodes.Attribute):
+                if cond_vars.get(child.attrname) is None:
+                    cond_vars[child.attrname] = child
+            elif isinstance(child, nodes.Subscript):
+                if cond_vars.get(child.value.name) is None:
+                    cond_vars[child.value.name] = child
+        if not cond_vars:
+            if not self.linter.config.allow_while_true:
+                self.add_message(
+                    "while-true-loop",
+                    node=node.test,
+                    line=node.test.lineno,
+                    end_lineno=node.test.end_lineno,
+                )
+            return
 
-    def visit_augassign(self, node: nodes.AugAssign) -> None:
-        node.target.accept(self)
-
-    def visit_assignattr(self, node: nodes.AssignAttr) -> None:
-        if node.attrname not in self._loop_body_vars:
-            self._loop_body_vars.append(node.attrname)
-
-    def visit_assignname(self, node: nodes.AssignName) -> None:
-        if node.name not in self._loop_body_vars:
-            self._loop_body_vars.append(node.name)
+        # Check to see if condition variable(s) used inside body
+        for child in node.body:
+            for name_node in child.nodes_of_class((nodes.AssignName, nodes.AssignAttr)):
+                if (
+                    isinstance(name_node, nodes.AssignName)
+                    and cond_vars.get(name_node.name) is not None
+                ) or (
+                    isinstance(name_node, nodes.AssignAttr)
+                    and cond_vars.get(name_node.attrname) is not None
+                ):
+                    return
+        else:
+            self.add_message(
+                "loop-condition-variable-unused",
+                node=node,
+                line=node.lineno,
+                end_lineno=node.end_lineno,
+            )
+            return
 
 
 def register(linter: PyLinter) -> None:

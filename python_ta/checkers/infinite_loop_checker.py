@@ -41,12 +41,12 @@ class InfiniteLoopChecker(BaseChecker):
         super().__init__(linter=linter)
 
     def visit_while(self, node: nodes.While) -> None:
-        self._check_condition_var_used(node)
+        self._check_condition_all_var_used(node)
 
     def leave_while(self, node: nodes.While) -> None:
         return
 
-    def _check_condition_var_used(self, node: nodes.While) -> None:
+    def _check_condition_all_var_used(self, node: nodes.While) -> None:
         """Helper function that checks whether variables used in a while loop's condition
         are also used anywhere inside the loop body.
 

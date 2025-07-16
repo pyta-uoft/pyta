@@ -109,7 +109,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         node = list(mod.nodes_of_class(astroid.nodes.While))
 
-        with self.assertNoMessages(
+        with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="loop-condition-variable-unused",
                 node=node[0],

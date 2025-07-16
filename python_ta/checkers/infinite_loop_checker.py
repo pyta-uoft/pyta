@@ -81,11 +81,14 @@ class InfiniteLoopChecker(BaseChecker):
                 if (
                     isinstance(name_node, nodes.AssignName)
                     and cond_vars.get(name_node.name) is not None
+                    and isinstance(cond_vars[name_node.name], nodes.Name)
                 ) or (
                     isinstance(name_node, nodes.AssignAttr)
                     and cond_vars.get(name_node.attrname) is not None
+                    and isinstance(cond_vars[name_node.name], nodes.Attribute)
                 ):
                     return
+
         else:
             self.add_message(
                 "loop-condition-variable-unused",

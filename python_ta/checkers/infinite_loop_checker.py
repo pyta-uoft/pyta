@@ -77,15 +77,25 @@ class InfiniteLoopChecker(BaseChecker):
 
         # Check to see if condition variable(s) used inside body
         for child in node.body:
-            for name_node in child.nodes_of_class((nodes.AssignName, nodes.AssignAttr)):
+            for name_node in child.nodes_of_class(
+                (nodes.AssignName, nodes.AssignAttr, nodes.Subscript)
+            ):
                 if (
-                    isinstance(name_node, nodes.AssignName)
-                    and cond_vars.get(name_node.name) is not None
-                    and isinstance(cond_vars[name_node.name], nodes.Name)
-                ) or (
-                    isinstance(name_node, nodes.AssignAttr)
-                    and cond_vars.get(name_node.attrname) is not None
-                    and isinstance(cond_vars[name_node.name], nodes.Attribute)
+                    (
+                        isinstance(name_node, nodes.AssignName)
+                        and cond_vars.get(name_node.name) is not None
+                        and isinstance(cond_vars[name_node.name], nodes.Name)
+                    )
+                    or (
+                        isinstance(name_node, nodes.AssignAttr)
+                        and cond_vars.get(name_node.attrname) is not None
+                        and isinstance(cond_vars[name_node.name], nodes.Attribute)
+                    )
+                    or (
+                        isinstance(name_node, nodes.Subscript)
+                        and cond_vars.get(name_node.value.name) is not None
+                        and isinstance(cond_vars[name_node.value.name], nodes.Subscript)
+                    )
                 ):
                     return
 

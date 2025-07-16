@@ -120,6 +120,22 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
                 self.checker.visit_while(node)
                 self.checker.leave_while(node)
 
+    def test_subscript_notation(self) -> None:
+        """Test that the checker does not flag a while loop that uses a subscript annotated variable."""
+        src = """
+        lst = [1, 2, 3]
+        while lst[0] < 100:
+            lst[0] += 1
+        """
+
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.While)
+
+        with self.assertNoMessages():
+            self.checker.visit_while(node)
+            self.checker.leave_while(node)
+
     def test_multiple_while_pass(self) -> None:
         """Test that the checker does not flag non-infinite while loops."""
         src = """

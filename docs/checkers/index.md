@@ -2751,7 +2751,7 @@ This often indicates a logical error that may lead to an infinite loop or a loop
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/w9501_unused_loop_condition_variables.py
+```{literalinclude} /../examples/custom_checkers/w9501_loop_condition_variable_unused.py
 
 ```
 

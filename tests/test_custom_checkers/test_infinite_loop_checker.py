@@ -1,36 +1,18 @@
 import astroid
 import pylint.testutils
-import pytest
 
 from python_ta.checkers.infinite_loop_checker import InfiniteLoopChecker
 
 
 class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InfiniteLoopChecker
-    WHILE_TRUE = [
-        """
-        var = 0
-        while True:
-            var += 1
-        """,
-        """
-        var = 0
-        while 1:
-            var += 1
-        """,
-        """
-        var = 0
-        while 1 < 2:
-            var += 1
-        """,
-    ]
 
     def test_var_not_updated(self) -> None:
         """Test that the checker correctly flags a while loop when no condition variables are used in the loop body."""
         src = """
-            i = 0
+            i, k, l = 0, 20, 40
             j = 10
-            while i < 100:
+            while i < 100 and k < 21 or l < 40:
                 j += 1
                 j = j - 1
         """
@@ -41,7 +23,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="loop-condition-variable-unused",
-                node=node,
+                node=node.test,
             ),
             ignore_position=True,
         ):
@@ -63,7 +45,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="loop-condition-variable-unused",
-                node=node,
+                node=node.test,
             ),
             ignore_position=True,
         ):
@@ -89,7 +71,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="loop-condition-variable-unused",
-                node=nodes[1],
+                node=nodes[1].test,
             ),
             ignore_position=True,
         ):
@@ -112,7 +94,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
                 msg_id="loop-condition-variable-unused",
-                node=node[0],
+                node=node[0].test,
             ),
             ignore_position=True,
         ):
@@ -121,18 +103,26 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
                 self.checker.leave_while(node)
 
     def test_subscript_notation(self) -> None:
-        """Test that the checker does not flag a while loop that uses a subscript annotated variable."""
+        """Test that the checker flags a while loop that uses a subscript annotated variable."""
         src = """
         lst = [1, 2, 3]
-        while lst[0] < 100:
+        while self.lst[1] > 1:
             lst[0] += 1
+        while lst[0] > 1:
+            self.lst[1] += 1
         """
 
         mod = astroid.parse(src)
 
         node, *_ = mod.nodes_of_class(astroid.nodes.While)
 
-        with self.assertNoMessages():
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="loop-condition-variable-unused",
+                node=node.test,
+            ),
+            ignore_position=True,
+        ):
             self.checker.visit_while(node)
             self.checker.leave_while(node)
 
@@ -170,32 +160,18 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
                 self.checker.visit_while(node)
                 self.checker.leave_while(node)
 
-    @pytest.mark.parametrize("src", WHILE_TRUE)
-    def test_while_true_enabled(self, src: str) -> None:
-        """Test that loops of the form 'while True' are not flagged when the 'allow-while-true' option is enabled."""
-        self.linter.set_option("allow-while-true", True)
+    def test_while_true_enabled(self) -> None:
+        """Test that loops with no condition variables is not flagged."""
+        src = """
+        x = 0
+        while True:
+            x += 1
+        """
 
         mod = astroid.parse(src)
 
         node, *_ = mod.nodes_of_class(astroid.nodes.While)
 
         with self.assertNoMessages():
-            self.checker.visit_while(node)
-            self.checker.leave_while(node)
-
-    @pytest.mark.parametrize("src", WHILE_TRUE)
-    def test_while_true_disabled(self, src: str) -> None:
-        """Test that loops of the form 'while True' are flagged when the 'allow-while-true' option is disabled."""
-        mod = astroid.parse(src)
-
-        node, *_ = mod.nodes_of_class(astroid.nodes.While)
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="while-true-loop",
-                node=node.test,
-            ),
-            ignore_position=True,
-        ):
             self.checker.visit_while(node)
             self.checker.leave_while(node)

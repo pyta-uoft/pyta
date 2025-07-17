@@ -25,6 +25,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+- `loop-condition-variable-unused`: Provide an error message when none of the variables used in a while loop’s condition are used or updated in the loop body.
+
 ### 🐛 Bug fixes
 
 - `check_contracts` no longer makes methods immediately enforce Representation Invariant checks when setting attributes of instances with the same type (one `Node` modifies another `Node` instance) and only checks RIs for these instances after the method returns.

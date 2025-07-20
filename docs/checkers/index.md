@@ -2744,18 +2744,20 @@ python_ta.check_all(config={
 
 (W9501)=
 
-### Unused Loop Condition Variable (W9501)
+### Infinite While Loop (W9501)
 
-This error occurs when none of the variables used in the condition of a `while` loop are updated within the body of the loop.
-This often indicates a logical error that may lead to an infinite loop or a loop that doesn't behave as intended.
+This error is raised when a `while` loop never terminates, indicating an infinite loop.
 
 Example:
 
-```{literalinclude} /../examples/custom_checkers/w9501_loop_condition_variable_unused.py
+```{literalinclude} /../examples/custom_checkers/w9501_infinite_loop.py
 
 ```
 
 This checker is enabled by default and requires no special configuration.
+
+**Note**: Currently, this error occurs when none of the variables used in the condition of a `while` loop are updated within the body of the loop.
+This often indicates a logical error that may lead to an infinite loop or a loop that doesn't behave as intended.
 
 ## Miscellaneous
 

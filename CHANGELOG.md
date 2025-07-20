@@ -25,7 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
-- `loop-condition-variable-unused`: Provide an error message when none of the variables used in a while loop’s condition are used or updated in the loop body.
+- `infinite-loop`: Provide an error message when a `while` loop never terminates, indicating an infinite loop.
 
 ### 🐛 Bug fixes
 

@@ -114,13 +114,13 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """Test that the checker does not flag while loops when the condition variable is passed to a function
         or method."""
         src = """
-         i = 0
-         while i < 20: #@
+        i = 0
+        while i < 20: #@
             self.update(i)
 
-         while i < 20: #@
+        while i < 20: #@
             increment(i)
-         """
+        """
 
         node1, node2 = astroid.extract_node(src)
 

@@ -1,7 +1,5 @@
 """Check for infinite while loops."""
 
-from typing import Optional
-
 from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.lint import PyLinter
@@ -17,9 +15,6 @@ class InfiniteLoopChecker(BaseChecker):
             indicates a logical error leading to an unintended infinite loop.""",
         ),
     }
-
-    def __init__(self, linter: Optional[PyLinter] = None) -> None:
-        super().__init__(linter=linter)
 
     def visit_while(self, node: nodes.While) -> None:
         self._check_condition_all_var_used(node)
@@ -46,7 +41,6 @@ class InfiniteLoopChecker(BaseChecker):
                 "infinite-loop",
                 node=node.test,
             )
-            return
 
 
 def register(linter: PyLinter) -> None:

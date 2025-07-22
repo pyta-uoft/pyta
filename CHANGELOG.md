@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a dark mode toggle with system detection for the html reporter
 - Replaced icons on the html reporter using the heroicons library, adding hover effects
 - Modernized cards on the HTML reporter to use subtle shadows and borders
+- Updated the color scheme of the HTML reporter to use clean black, white, and grey colors, inspired by the Notion color theme
 
 ### 💫 New checkers
 

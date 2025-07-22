@@ -1,5 +1,6 @@
 import astroid
 import pylint.testutils
+import pytest
 
 from python_ta.checkers.infinite_loop_checker import InfiniteLoopChecker
 
@@ -171,3 +172,18 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_while(node)
+
+    def test_while_func_call(self) -> None:
+        """Test verifies that function calls in while-loop conditions do not incorrectly trigger infinite-loop
+        warnings."""
+        src = """
+        while foo(10): #@
+            x += 1
+        while foo(10) < 21 and faa(13): #@
+            x += 1
+        """
+        node1, node2 = astroid.extract_node(src)
+
+        with self.assertNoMessages():
+            self.checker.visit_while(node1)
+            self.checker.visit_while(node2)

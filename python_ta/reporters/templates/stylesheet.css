@@ -150,7 +150,6 @@ header {
   max-height: 100vh;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  color: var(--text-white);
 }
 
 .sidebar ul {
@@ -174,6 +173,11 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 .sidebar svg.collapsed {
@@ -210,6 +214,10 @@ main {
   grid-column: 2;
   grid-row: 1 / span 2;
   padding: 20px;
+}
+
+main svg {
+  color: var(--text-primary);
 }
 
 section {
@@ -352,18 +360,30 @@ section {
 
 .slider {
   margin-left: auto;
+  align-items: center;
 }
+
 .slider button {
   background: none;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
 }
 
 .slider button:hover {
-  filter: brightness(120%);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-button.collapsed {
+.slider button.collapsed {
   transform: scaleY(-1);
 }
 

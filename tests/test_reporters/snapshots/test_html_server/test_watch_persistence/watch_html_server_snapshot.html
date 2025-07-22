@@ -156,7 +156,6 @@ header {
   max-height: 100vh;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  color: var(--text-white);
 }
 
 .sidebar ul {
@@ -180,6 +179,11 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 .sidebar svg.collapsed {
@@ -216,6 +220,10 @@ main {
   grid-column: 2;
   grid-row: 1 / span 2;
   padding: 20px;
+}
+
+main svg {
+  color: var(--text-primary);
 }
 
 section {
@@ -358,18 +366,30 @@ section {
 
 .slider {
   margin-left: auto;
+  align-items: center;
 }
+
 .slider button {
   background: none;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
 }
 
 .slider button:hover {
-  filter: brightness(120%);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-button.collapsed {
+.slider button.collapsed {
   transform: scaleY(-1);
 }
 
@@ -972,7 +992,7 @@ footer p {
                 <div class="section-header">
                     <h2>Table of Contents</h2>
                     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
-                        <!-- Sun and moon icons sourced from heroicons at https://heroicons.com/ --!>
+                        <!-- Sun and moon icons sourced from heroicons at https://heroicons.com/ -->
                         <svg class="sun-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                         </svg>
@@ -985,12 +1005,9 @@ footer p {
                     
                     <li class="collapsible expanded">
                         <button>
-                            <svg width="10" height="10">
-                                <g transform="scale(0.10 0.10)">
-                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="white"
-                                          stroke-width="15px"
-                                          fill="transparent"/>
-                                </g>
+                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                             </svg>
                         </button>
                         <span class="file-name">
@@ -1001,12 +1018,9 @@ footer p {
                         <ul>
                             <li class="collapsible expanded">
                                 <button>
-                                    <svg width="10" height="10">
-                                        <g transform="scale(0.10 0.10)">
-                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="white"
-                                                  stroke-width="15px"
-                                                  fill="transparent"/>
-                                        </g>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                                 <span>
@@ -1036,12 +1050,9 @@ footer p {
                             </li>
                             <li class="collapsible expanded">
                                 <button>
-                                    <svg width="10" height="10">
-                                        <g transform="scale(0.10 0.10)">
-                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="white"
-                                                  stroke-width="15px"
-                                                  fill="transparent"/>
-                                        </g>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                                 <span>
@@ -1097,10 +1108,9 @@ footer p {
                             <span>Code Errors or Forbidden Usage (fix: high priority)</span>
                             <span class="slider">
                                 <button>
-                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                        <g transform="scale(0.13 0.13)">
-                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                        </g>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                             </span>
@@ -1126,10 +1136,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1142,11 +1151,10 @@ footer p {
                                                     [Line 20] Forbidden top-level code found on line 20
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1183,10 +1191,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1199,11 +1206,10 @@ footer p {
                                                     [Line 5] You may not import patch from module unittest.mock.
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1242,10 +1248,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1258,11 +1263,10 @@ footer p {
                                                     [Line 20] No value for argument 'mock_webbrowser_open' in function call
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1287,10 +1291,9 @@ footer p {
                             <span>Style or Convention Errors (fix: before submission)</span>
                             <span class="slider">
                                 <button>
-                                    <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                        <g transform="scale(0.13 0.13)">
-                                            <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                        </g>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>
                                 </button>
                             </span>
@@ -1315,10 +1318,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1331,11 +1333,10 @@ footer p {
                                                     [Line 1] This line is 96 characters long, exceeding the limit of 80 characters.
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1356,11 +1357,10 @@ footer p {
                                                     [Line 2] This line is 100 characters long, exceeding the limit of 80 characters.
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1382,11 +1382,10 @@ footer p {
                                                     [Line 3] This line is 88 characters long, exceeding the limit of 80 characters.
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1409,11 +1408,10 @@ footer p {
                                                     [Line 3] This line is 88 characters long, exceeding the limit of 80 characters.
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1452,10 +1450,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1468,11 +1465,10 @@ footer p {
                                                     [Line 11] Missing function or method docstring
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1511,10 +1507,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1527,11 +1522,10 @@ footer p {
                                                     [Line 11] Function parameter is missing type annotation
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1570,10 +1564,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1586,11 +1579,10 @@ footer p {
                                                     [Line 11] Function is missing return type annotation
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1629,10 +1621,9 @@ footer p {
                                     </span>
                                     <span class="slider">
                                         <button>
-                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="30">
-                                                <g transform="scale(0.13 0.13)">
-                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#3669c7" stroke-width="15px" fill="transparent"/>
-                                                </g>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                             </svg>
                                         </button>
                                     </span>
@@ -1645,11 +1636,10 @@ footer p {
                                                     [Line 11] The parameter 'mock_webbrowser_open' is unused. This may indicate you misspelled a parameter name in the function body. Otherwise, the parameter can be removed from the function without altering the program.
                                                     <span class="slider">
                                                         <button style="float: right;">
-                                                            <svg class="collapse-trigger" viewBox="0 1 10 10" width="60" height="20">
-                                                                <g transform="scale(0.13 0.13)">
-                                                                    <path d="M 10 30 l 40 40 l 40 -40" stroke="#777777" stroke-width="15px" fill="transparent"/>
-                                                                </g>
-                                                            </svg>
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
                                                         </button>
                                                     </span>
                                                 </p>

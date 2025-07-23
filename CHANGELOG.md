@@ -24,6 +24,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added optional `z3_enabled` argument (default False) to `generate_cfg`, allowing users to enable `z3` functionalities and providing extra safeguard to prevent z3 (and z3 related) imports from being executed when z3 is not enabled.
 - Added a dark mode toggle with system detection for the html reporter
 - Replaced icons on the html reporter using the heroicons library, adding hover effects
+- Improved HTML reporter styling with subtle card shadows and border effects
 
 ### 💫 New checkers
 

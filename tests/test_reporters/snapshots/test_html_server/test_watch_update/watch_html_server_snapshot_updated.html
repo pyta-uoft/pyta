@@ -11,8 +11,8 @@
   --bg-secondary: #f6f8fa;
   --bg-gradient-start: #ffffff;
   --bg-gradient-end: #f6f8fa;
-  --text-primary: #2e3440;
-  --text-secondary: #6c757d;
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
   --text-muted: #9ca3af;
   --text-grey: #6c757d;
   --text-white: #ffffff;
@@ -45,7 +45,7 @@
   --section-bg: rgba(37, 37, 37, 0.6);
   --header-gradient-start: #252525;
   --header-gradient-end: #2d2d2d;
-  --error-instance-bg: #2d2d2d;
+  --error-instance-bg: #1e1e1e;
   --code-error: #ff6b6b;
   --style-error: #4ecdc4;
   --highlight-bg: rgba(255, 235, 59, 0.25);
@@ -168,6 +168,7 @@ header {
 .file-name {
   font-weight: bold;
   font-size: 1.1em;
+  color: var(--text-primary);
 }
 
 .sidebar ul li {
@@ -179,7 +180,7 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -192,11 +193,12 @@ header {
 
 .sidebar a:link,
 a:visited {
-  color: inherit;
+  color: var(--text-secondary);
   text-decoration: none;
 }
 
 .sidebar a:hover {
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
@@ -240,9 +242,7 @@ section {
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0px 1px 2px black;
-  background: #141e30;
+  color: var(--text-primary);
   background: linear-gradient(
     to left,
     var(--header-gradient-end),

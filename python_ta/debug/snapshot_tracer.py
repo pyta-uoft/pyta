@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import gc
 import inspect
 import json
 import logging
@@ -13,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from bs4 import BeautifulSoup
 
+from .id_tracker import IDTracker
 from .snapshot import snapshot
 
 if TYPE_CHECKING:
@@ -64,6 +64,7 @@ class SnapshotTracer:
         self._snapshot_args["exclude_frames"] = copy.deepcopy(kwargs.get("exclude_frames", []))
         self._snapshot_args["exclude_frames"].append("_trace_func")
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
+        self.id_tracker = IDTracker()
         Path(self.output_directory).mkdir(parents=True, exist_ok=True)
 
         self.webstepper = webstepper
@@ -81,6 +82,7 @@ class SnapshotTracer:
             self._snapshot_args["memory_viz_args"].extend(["--output", filename])
 
             snapshot(
+                id_tracker=self.id_tracker,
                 save=True,
                 **self._snapshot_args,
             )
@@ -100,7 +102,6 @@ class SnapshotTracer:
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
-        gc.disable()
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_frame.f_trace = self._trace_func
         sys.settrace(lambda *_args: None)
@@ -108,8 +109,6 @@ class SnapshotTracer:
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Remove the trace function. If webstepper=True, open a Webstepper webpage."""
-        gc.enable()
-        gc.collect()
         sys.settrace(None)
         func_frame = inspect.getouterframes(inspect.currentframe())[1]
         func_frame.frame.f_trace = None

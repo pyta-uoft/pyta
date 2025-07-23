@@ -231,11 +231,8 @@ section {
   display: inline-block;
   min-width: 50%;
   background: var(--section-bg);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
+  box-shadow: -1px 9px 15px -5px var(--shadow-color);
+  border-radius: 15px;
 }
 
 .section-header {
@@ -243,15 +240,21 @@ section {
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
-  color: var(--text-primary);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0px 1px 2px black;
+  background: #141e30;
   background: linear-gradient(
-    135deg,
-    var(--header-gradient-start),
-    var(--header-gradient-end)
+    to left,
+    var(--header-gradient-end),
+    var(--header-gradient-start)
   );
-  border-top-left-radius: 11px;
-  border-top-right-radius: 11px;
-  border-bottom: 1px solid var(--border-color);
+  background: -webkit-linear-gradient(
+    right,
+    var(--header-gradient-end),
+    var(--header-gradient-start)
+  );
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
 .sidebar .section-header h2 {
@@ -281,11 +284,12 @@ section {
 .error-instance {
   display: grid;
   background: var(--error-instance-bg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  padding: 12px 20px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.1),
+    0 4px 7px rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  margin-bottom: 5px;
+  border-radius: 3px;
 }
 
 .error-instance .collapsible {
@@ -459,7 +463,6 @@ footer {
   display: flex;
   flex-direction: row;
   padding: 15px;
-  border-top: 1px solid var(--border-color);
 }
 
 footer a {

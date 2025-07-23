@@ -26,12 +26,13 @@ class InfiniteLoopChecker(BaseChecker):
         Note: This is a basic check. It only flags loops where NONE of the condition variables
         appear in the body, which indicates an infinite loop.
         """
-        if isinstance(node.test, nodes.Call) and isinstance(node.test.func, nodes.Name):
+        if isinstance(node.test, nodes.Call):
             return
         # Get variable(s) used inside condition
         cond_vars = set(
             child.name for child in node.test.nodes_of_class(nodes.Name, skip_klass=nodes.Call)
         )
+        print(cond_vars)
         if not cond_vars:
             return
         # Check to see if condition variable(s) used inside body

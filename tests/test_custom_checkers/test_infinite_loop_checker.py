@@ -1,6 +1,5 @@
 import astroid
 import pylint.testutils
-import pytest
 
 from python_ta.checkers.infinite_loop_checker import InfiniteLoopChecker
 
@@ -179,8 +178,8 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         src = """
         while foo(10): #@
             x += 1
-        while foo(10) < 21 and faa(13): #@
-            x += 1
+        while foo(10) < 21 and faa(x): #@
+            x += 1 # Note: x is not considered a condition variable since it is used inside a function call
         """
         node1, node2 = astroid.extract_node(src)
 

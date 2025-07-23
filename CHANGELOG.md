@@ -35,6 +35,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed error in `contracts` where comments in docstring assertions are not removed while parsing
 - Improved error message in `patches/transforms.py` where CFGVisitor is run
 - Fixed a bug in AccumulationTable where loop variable names weren't being captured for all nested targets.
+- Fixed a bug in the `infinite-loop` checker where function and method names were incorrectly included in the set of condition variables.
 
 ### 📚 Documentation Updates
 

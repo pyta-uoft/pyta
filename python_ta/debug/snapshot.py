@@ -19,6 +19,8 @@ from packaging.version import Version, parse
 if TYPE_CHECKING:
     from types import FrameType
 
+    from .id_tracker import IDTracker
+
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
     """
@@ -56,6 +58,7 @@ def get_filtered_local_variables(
 
 
 def snapshot(
+    id_tracker: IDTracker,
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
     memory_viz_version: str = "latest",
@@ -110,7 +113,7 @@ def snapshot(
         frame = frame.f_back
 
     if save:
-        json_compatible_vars = snapshot_to_json(variables)
+        json_compatible_vars = snapshot_to_json(id_tracker, variables)
 
         # Set up command
         command = ["npx", f"memory-viz@{memory_viz_version}", "--width", "800"]
@@ -137,7 +140,7 @@ def snapshot(
     return variables
 
 
-def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
+def snapshot_to_json(id_tracker: IDTracker, snapshot_data: list[dict]) -> list[dict]:
     """
     Convert the snapshot data into a simplified JSON format, where each value
     has its own entry with a matching ID. This includes nesting the process_value
@@ -146,8 +149,6 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
 
     json_data = []  # This will store the converted frames and their variables
     value_entries = []  # Stores additional processed value entries
-    global_ids = {}  # Maps values to their unique IDs
-    id_counter = 1  # Using an int for a mutable reference
 
     def process_value(val: Any) -> int:
         """
@@ -159,66 +160,69 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
         the original data structure with its elements uniquely identified.
 
         """
-        nonlocal id_counter  # This allows us to modify id_counter directly
-        nonlocal global_ids, value_entries
-        value_id = id(val)
-        if value_id not in global_ids:
-            global_ids[value_id] = id_counter
-            value_id_diagram = id_counter
-            id_counter += 1  # Increment the unique ID
+        nonlocal value_entries
 
-            # Handle compound built-in data types
-            if isinstance(val, (list, set, tuple)):
-                element_ids = [process_value(element) for element in val]
-                value_entry = {
-                    "type": type(val).__name__,
-                    "id": value_id_diagram,
-                    "value": element_ids,
-                }
-            elif isinstance(val, dict):
-                dict_ids = {}
-                for key, v in val.items():
-                    key_id = process_value(key)
-                    val_id = process_value(v)
-                    dict_ids[key_id] = val_id
-                value_entry = {
-                    "type": "dict",
-                    "id": value_id_diagram,
-                    "value": dict_ids,
-                }
-            # Handle user-defined classes
-            elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance
-                attr_ids = {}
-                for attr_name, attr_val in vars(val).items():
-                    attr_id = process_value(attr_val)
-                    attr_ids[attr_name] = attr_id
-                value_entry = {
-                    "type": ".class",
-                    "name": type(val).__name__,
-                    "id": value_id_diagram,
-                    "value": attr_ids,
-                }
-            elif val is None:
-                value_entry = {
-                    "type": "NoneType",
-                    "id": value_id_diagram,
-                    "value": "None",
-                }
-            else:  # Handle primitives and other types
-                try:
-                    json.dumps(val)
-                    jsonable_val = val
-                except TypeError:
-                    jsonable_val = repr(val)
-                value_entry = {
-                    "type": type(val).__name__,
-                    "id": value_id_diagram,
-                    "value": jsonable_val,
-                }
+        if id_tracker.is_snapshot_object(val):
+            return id_tracker.get_id(val)
+        elif id_tracker.is_tracked(val):
+            id_tracker.add_snapshot_object(val)
+            value_entries.append(id_tracker.get_value_entry(val))
+            return id_tracker.get_id(val)
 
-            value_entries.append(value_entry)
-        else:
-            value_id_diagram = global_ids[value_id]
+        id_tracker.set_id(val)
+        value_id_diagram = id_tracker.get_id(val)
+        id_tracker.add_snapshot_object(val)
+
+        # Handle compound built-in data types
+        if isinstance(val, (list, set, tuple)):
+            element_ids = [process_value(element) for element in val]
+            value_entry = {
+                "type": type(val).__name__,
+                "id": value_id_diagram,
+                "value": element_ids,
+            }
+        elif isinstance(val, dict):
+            dict_ids = {}
+            for key, v in val.items():
+                key_id = process_value(key)
+                val_id = process_value(v)
+                dict_ids[key_id] = val_id
+            value_entry = {
+                "type": "dict",
+                "id": value_id_diagram,
+                "value": dict_ids,
+            }
+        # Handle user-defined classes
+        elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance
+            attr_ids = {}
+            for attr_name, attr_val in vars(val).items():
+                attr_id = process_value(attr_val)
+                attr_ids[attr_name] = attr_id
+            value_entry = {
+                "type": ".class",
+                "name": type(val).__name__,
+                "id": value_id_diagram,
+                "value": attr_ids,
+            }
+        elif val is None:
+            value_entry = {
+                "type": "NoneType",
+                "id": value_id_diagram,
+                "value": "None",
+            }
+        else:  # Handle primitives and other types
+            try:
+                json.dumps(val)
+                jsonable_val = val
+            except TypeError:
+                jsonable_val = repr(val)
+            value_entry = {
+                "type": type(val).__name__,
+                "id": value_id_diagram,
+                "value": jsonable_val,
+            }
+        id_tracker.set_value_entry(val, value_entry)
+        value_entries.append(value_entry)
 
         return value_id_diagram
 
@@ -238,4 +242,5 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
             json_data.append(json_object_frame)
 
     json_data.extend(value_entries)
+    id_tracker.clear_snapshot_objects()
     return json_data

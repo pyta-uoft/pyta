@@ -11,6 +11,7 @@ from __future__ import (
 
 import json
 
+from python_ta.debug.id_tracker import IDTracker
 from python_ta.debug.snapshot import snapshot
 
 # globally defined variables
@@ -18,4 +19,4 @@ team_lead = "David Liu"
 SDS_projects = ["PyTA", "MarkUs", "Memory Models"]
 team_num = 9
 
-print(json.dumps(snapshot()[0]))
+print(json.dumps(snapshot(IDTracker())[0]))

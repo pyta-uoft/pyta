@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from bs4 import BeautifulSoup
 
+from .id_tracker import IDTracker
 from .snapshot import snapshot
 
 if TYPE_CHECKING:
@@ -63,6 +64,7 @@ class SnapshotTracer:
         self._snapshot_args["exclude_frames"] = copy.deepcopy(kwargs.get("exclude_frames", []))
         self._snapshot_args["exclude_frames"].append("_trace_func")
         self.output_directory = os.path.abspath(output_directory if output_directory else ".")
+        self.id_tracker = IDTracker()
         Path(self.output_directory).mkdir(parents=True, exist_ok=True)
 
         self.webstepper = webstepper
@@ -80,6 +82,7 @@ class SnapshotTracer:
             self._snapshot_args["memory_viz_args"].extend(["--output", filename])
 
             snapshot(
+                id_tracker=self.id_tracker,
                 save=True,
                 **self._snapshot_args,
             )

@@ -11,6 +11,7 @@ import subprocess
 import sys
 from typing import Iterable, Optional
 
+from python_ta.debug.id_tracker import IDTracker
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
 SNAPSHOT_DIR = os.path.join(
@@ -25,7 +26,7 @@ def func1() -> list:
     """
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
-    return snapshot()
+    return snapshot(IDTracker())
 
 
 def func2() -> list:
@@ -54,7 +55,7 @@ def func_cyclic() -> list:
     """
     test_var = [1, 2, 3]
     test_var.append(test_var)
-    return snapshot()
+    return snapshot(IDTracker())
 
 
 def func_with_include(include_frames: Optional[Iterable[str | re.Pattern]] = None) -> list[dict]:
@@ -63,7 +64,7 @@ def func_with_include(include_frames: Optional[Iterable[str | re.Pattern]] = Non
     """
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
-    return snapshot(include_frames=include_frames)
+    return snapshot(IDTracker(), include_frames=include_frames)
 
 
 def func_with_include_nested(
@@ -82,7 +83,7 @@ def func_with_unserializable_objects() -> list[dict]:
     Function for snapshot() testing with unserializable objects.
     """
     var = b"\x00\x10"
-    processed_result = snapshot_to_json([snapshot()[0]])
+    processed_result = snapshot_to_json(IDTracker(), [snapshot(IDTracker())[0]])
     json.dumps(processed_result)
     return processed_result
 
@@ -96,7 +97,7 @@ def func_with_exclude(
     """
     test_var1a = "David is cool!"
     test_var2a = "Students Developing Software"
-    return snapshot(exclude_vars=exclude_vars, include_frames=include_frames)
+    return snapshot(IDTracker(), exclude_vars=exclude_vars, include_frames=include_frames)
 
 
 def func_with_exclude_nested(
@@ -195,7 +196,7 @@ def test_snapshot_to_json_primitive():
         {"func1": {"test_var1a": "David is cool!", "test_var2a": "DCS"}},
         {"__main__": {"num": 9, "is_david_cool": True, "num_alias": 9}},
     ]
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     assert json_data == [
         {
             "type": ".frame",
@@ -221,7 +222,7 @@ def test_snapshot_to_json_none():
     Test snapshot_to_json with snapshot data with None.
     """
     snapshot_data = [{"func1": {"test_var": None}}]
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     assert json_data == [
         {
             "type": ".frame",
@@ -242,7 +243,7 @@ def test_snapshot_to_json_lists_primitive_only():
         {"__main__": {"projects": ["PyTA", "MarkUs", "Memory Models"]}},
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
@@ -285,7 +286,7 @@ def test_snapshot_to_json_tuples_primitive():
         {"__main__": {"projects": ("PyTA", "MarkUs", "Memory Models")}},
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
@@ -329,7 +330,7 @@ def test_snapshot_to_json_sets_primitive():
         {"__main__": {"projects": {"PyTA", "MarkUs", "Memory Models"}}},
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
@@ -378,7 +379,7 @@ def test_snapshot_to_json_dicts_primitive():
         {"__main__": {"var2": {"c": 3, "d": 4}}},
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
@@ -426,7 +427,7 @@ def test_snapshot_to_json_lists_of_dicts():
         },
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
@@ -480,7 +481,7 @@ def test_snapshot_to_json_dicts_of_lists():
         {"__main__": {"config": ["debug", "verbose", "production"], "values": [100, 200, 300]}},
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
     assert json_data_frames == [
@@ -533,7 +534,7 @@ def test_snapshot_to_json_dicts_of_dicts():
         },
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
     json_data_frames = json_data[0:2]
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
     assert json_data_frames == [
@@ -601,7 +602,7 @@ def test_snapshot_to_json_one_class():
         {"__main__": {"one_class_instance": one_class_instance}},
     ]
 
-    json_data = snapshot_to_json(snapshot_data)
+    json_data = snapshot_to_json(IDTracker(), snapshot_data)
 
     expected_output = [
         {
@@ -634,6 +635,7 @@ def test_snapshot_no_save_file():
     )
 
     snapshot(
+        IDTracker(),
         False,
         [
             "--output=" + file_path,
@@ -649,7 +651,7 @@ def test_snapshot_no_save_stdout(capsys):
     """
     Tests that snapshot's save feature is not triggered when save = False
     """
-    snapshot(False)
+    snapshot(IDTracker(), False)
     captured = capsys.readouterr()
     assert captured.out == ""
 

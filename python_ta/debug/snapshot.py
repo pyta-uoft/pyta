@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from packaging.version import Version, parse
 
+from .id_tracker import IDTracker
+
 if TYPE_CHECKING:
     from types import FrameType
 
@@ -62,6 +64,7 @@ def snapshot(
     include_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
+    id_tracker: Optional[IDTracker] = None,
 ):
     """Capture a snapshot of local variables from the current and outer stack frames
     where the 'snapshot' function is called. Returns a list of dictionaries,
@@ -80,7 +83,11 @@ def snapshot(
     whose variables should be excluded.
     exclude_vars can be used to specify a collection of variable names, either as strings or regular expressions,
     that will be excluded from the snapshot. By default, all variables will be captured if no `exclude_vars` is provided.
+    id_tracker can be used to allow long-term tracking of IDs across multiple snapshots.
     """
+    if id_tracker is None:
+        id_tracker = IDTracker()
+
     variables = []
     frame = inspect.currentframe().f_back
 
@@ -110,7 +117,7 @@ def snapshot(
         frame = frame.f_back
 
     if save:
-        json_compatible_vars = snapshot_to_json(variables)
+        json_compatible_vars = snapshot_to_json(variables, id_tracker=id_tracker)
 
         # Set up command
         command = ["npx", f"memory-viz@{memory_viz_version}", "--width", "800"]
@@ -137,17 +144,21 @@ def snapshot(
     return variables
 
 
-def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
+def snapshot_to_json(
+    snapshot_data: list[dict], id_tracker: Optional[IDTracker] = None
+) -> list[dict]:
     """
     Convert the snapshot data into a simplified JSON format, where each value
     has its own entry with a matching ID. This includes nesting the process_value
     function to handle recursive processing of data types.
+
+    id_tracker can be used to ensure that each value is assigned a unique ID, accorss multiple snapshots.
     """
+    if id_tracker is None:
+        id_tracker = IDTracker()
 
     json_data = []  # This will store the converted frames and their variables
     value_entries = []  # Stores additional processed value entries
-    global_ids = {}  # Maps values to their unique IDs
-    id_counter = 1  # Using an int for a mutable reference
 
     def process_value(val: Any) -> int:
         """
@@ -159,13 +170,12 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
         the original data structure with its elements uniquely identified.
 
         """
-        nonlocal id_counter  # This allows us to modify id_counter directly
-        nonlocal global_ids, value_entries
-        value_id = id(val)
-        if value_id not in global_ids:
-            global_ids[value_id] = id_counter
-            value_id_diagram = id_counter
-            id_counter += 1  # Increment the unique ID
+        nonlocal value_entries
+
+        if id_tracker.is_snapshot_object(val):
+            return id_tracker[val]
+        else:
+            value_id_diagram = id_tracker.add(val)
 
             # Handle compound built-in data types
             if isinstance(val, (list, set, tuple)):
@@ -215,10 +225,7 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
                     "id": value_id_diagram,
                     "value": jsonable_val,
                 }
-
             value_entries.append(value_entry)
-        else:
-            value_id_diagram = global_ids[value_id]
 
         return value_id_diagram
 
@@ -238,4 +245,5 @@ def snapshot_to_json(snapshot_data: list[dict]) -> list[dict]:
             json_data.append(json_object_frame)
 
     json_data.extend(value_entries)
+    id_tracker.clear_snapshot_objects()
     return json_data

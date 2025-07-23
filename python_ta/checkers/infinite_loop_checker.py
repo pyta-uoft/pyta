@@ -32,7 +32,6 @@ class InfiniteLoopChecker(BaseChecker):
         cond_vars = set(
             child.name for child in node.test.nodes_of_class(nodes.Name, skip_klass=nodes.Call)
         )
-        print(cond_vars)
         if not cond_vars:
             return
         # Check to see if condition variable(s) used inside body

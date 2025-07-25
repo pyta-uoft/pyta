@@ -27,11 +27,10 @@ class InfiniteLoopChecker(BaseChecker):
         appear in the body, which indicates an infinite loop.
         """
         # Get variable(s) used inside condition
-        cond_vars = set(child.name for child in node.test.nodes_of_class(nodes.Name))
-        # Remove function names
-        for call in node.test.nodes_of_class(nodes.Call):
-            if isinstance(call.func, nodes.Name) and call.func.name in cond_vars:
-                cond_vars.remove(call.func.name)
+        cond_vars = set()
+        for child in node.test.nodes_of_class(nodes.Name):
+            if not isinstance(child.parent, nodes.Call) or child.parent.func is not child:
+                cond_vars.add(child.name)
         if not cond_vars:
             return
         # Check to see if condition variable(s) used inside body

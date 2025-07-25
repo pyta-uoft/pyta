@@ -191,8 +191,8 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """Test verifies that function calls in while-loop conditions correctly triggers infinite-loop
         warnings."""
         src = """
-        while faa(all(x)) and lst[1][2]["yellow"].get_address(): #@
-            y += 1 # Should trigger an infinite loop since x and lst are not used inside body
+        while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
+            y += 1 # Should trigger an infinite loop since condition variables set: {'lst', 'var', 'z', 'x'}
         """
         node = astroid.extract_node(src)
 

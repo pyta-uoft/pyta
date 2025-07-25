@@ -171,3 +171,36 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_while(node)
+
+    def test_while_func_call(self) -> None:
+        """Test verifies that function calls in while-loop conditions do not incorrectly trigger infinite-loop
+        warnings."""
+        src = """
+        while foo(10): #@
+            x += 1
+        while foo(10) < 21 and faa(x): #@
+            x += 1
+        """
+        node1, node2 = astroid.extract_node(src)
+
+        with self.assertNoMessages():
+            self.checker.visit_while(node1)
+            self.checker.visit_while(node2)
+
+    def test_while_fund_call_var(self) -> None:
+        """Test verifies that function calls in while-loop conditions correctly triggers infinite-loop
+        warnings."""
+        src = """
+        while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
+            y += 1 # Should trigger an infinite loop since condition variables set: {'lst', 'var', 'z', 'x'}
+        """
+        node = astroid.extract_node(src)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)

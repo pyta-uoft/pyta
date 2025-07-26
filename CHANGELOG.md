@@ -32,7 +32,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- `check_contracts` no longer makes methods immediately enforce Representation Iånvariant checks when setting attributes of instances with the same type (one `Node` modifies another `Node` instance) and only checks RIs for these instances after the method returns.
+- `check_contracts` no longer makes methods immediately enforce Representation Invariant checks when setting attributes of instances with the same type (one `Node` modifies another `Node` instance) and only checks RIs for these instances after the method returns.
 - Fixed error in `contracts` where comments in docstring assertions are not removed while parsing
 - Improved error message in `patches/transforms.py` where CFGVisitor is run
 - Fixed a bug in AccumulationTable where loop variable names weren't being captured for all nested targets.

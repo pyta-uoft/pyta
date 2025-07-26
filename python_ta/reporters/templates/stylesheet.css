@@ -173,6 +173,9 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-primary);
 }
 

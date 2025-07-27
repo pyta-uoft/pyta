@@ -33,7 +33,7 @@
   --text-primary: #e8e8e8;
   --text-secondary: #9b9a97;
   --text-muted: #6e6d6a;
-  --text-grey: #787774;
+  --text-grey: #a0a0a0;
   --text-white: #ffffff;
   --border-color: rgba(255, 255, 255, 0.06);
   --shadow-color: rgba(0, 0, 0, 0.2);
@@ -383,7 +383,7 @@ section {
 
 .slider button {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 40px;

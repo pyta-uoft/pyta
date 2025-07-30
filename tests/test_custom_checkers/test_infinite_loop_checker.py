@@ -250,11 +250,11 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         src = """
         while 1: #@
             return
-        while 1: #@
+        while 2: #@
             break
-        while 1: #@
+        while 3: #@
             yield
-        while 1: #@
+        while 4: #@
             raise
         """
         nodes = list(astroid.extract_node(src))
@@ -275,15 +275,15 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             x += 1
         """,
             """
-        while []: #@
+        while not []: #@
             x += 1
         """,
             """
-        while {}: #@
+        while not {}: #@
             x += 1
         """,
             """
-        while (): #@
+        while not (): #@
             x += 1
         """,
             """
@@ -305,6 +305,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="infinite-loop",
                 node=node.test,
+                confidence=INFERENCE,
             ),
             ignore_position=True,
         ):

@@ -59,8 +59,18 @@ class InfiniteLoopChecker(BaseChecker):
         """
         if not self._check_constant_loop_cond(node, node.test):
             return
+
+        inferred = utils.safe_infer(node.test)
+        if (
+            isinstance(inferred, util.UninferableBase)
+            or inferred is None
+            or not isinstance(inferred, nodes.Const)
+        ):
+            return
+        if bool(inferred.value) is False:
+            return
+
         check_nodes = (nodes.Break, nodes.Return, nodes.Raise, nodes.Yield)
-        inference_used = False
         for child in node.body:
             for exit_node in child.nodes_of_class(klass=(nodes.Call, *check_nodes)):
                 if isinstance(exit_node, check_nodes):
@@ -71,28 +81,16 @@ class InfiniteLoopChecker(BaseChecker):
                     and isinstance(exit_node.func, nodes.Attribute)
                     and exit_node.func.attrname == "exit"
                 ):
+                    inferred = utils.safe_infer(exit_node.func.expr)
                     if (
-                        isinstance(exit_node.func.expr, nodes.Name)
-                        and exit_node.func.expr.name == "sys"
+                        not isinstance(inferred, util.UninferableBase)
+                        and inferred is not None
+                        and isinstance(inferred, nodes.Module)
+                        and inferred.name == "sys"
                     ):
                         return
-                    else:
-                        inference_used = True
-                        inferred = utils.safe_infer(exit_node.func.expr)
-                        if (
-                            not isinstance(inferred, util.UninferableBase)
-                            and inferred is not None
-                            and inferred.name == "sys"
-                        ):
-                            return
         else:
-            if not inference_used:
-                self.add_message(
-                    "infinite-loop",
-                    node=node.test,
-                )
-            else:
-                self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
+            self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
 
     def _check_constant_loop_cond(
         self, node: nodes.While, test_node: Optional[nodes.NodeNG]
@@ -116,7 +114,7 @@ class InfiniteLoopChecker(BaseChecker):
             nodes.Call,
             nodes.BinOp,
             # nodes.BoolOp,
-            nodes.UnaryOp,
+            # nodes.UnaryOp,
             nodes.Subscript,
         )
         inferred = None

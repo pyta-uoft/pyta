@@ -1,6 +1,7 @@
 """Check for infinite while loops."""
 
 import itertools
+from typing import Optional
 
 from astroid import BoundMethod, InferenceError, UnboundMethod, bases, nodes, util
 from pylint.checkers import BaseChecker, utils
@@ -93,7 +94,7 @@ class InfiniteLoopChecker(BaseChecker):
             else:
                 self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
 
-    def _check_constant_loop_cond(self, node: nodes.While, test: nodes.NodeNG | None) -> bool:
+    def _check_constant_loop_cond(self, node: nodes.While, test: Optional[nodes.NodeNG]) -> bool:
         """Helper function that checks if while loop condition is constant.
 
         See `https://github.com/pylint-dev/pylint/blob/main/pylint/checkers/base/basic_checker.py#L303` for further

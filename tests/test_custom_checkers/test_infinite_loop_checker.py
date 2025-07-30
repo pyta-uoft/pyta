@@ -161,19 +161,6 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_while(node)
 
-    def test_while_true_enabled(self) -> None:
-        """Test that loops with no condition variables is not flagged."""
-        src = """
-        x = 0
-        while True: #@
-            x += 1
-        """
-
-        node = astroid.extract_node(src)
-
-        with self.assertNoMessages():
-            self.checker.visit_while(node)
-
     def test_while_func_call(self) -> None:
         """Test verifies that function calls in while-loop conditions do not incorrectly trigger infinite-loop
         warnings."""
@@ -288,6 +275,18 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             x += 1
         """,
             """
+        while []: #@
+            x += 1
+        """,
+            """
+        while {}: #@
+            x += 1
+        """,
+            """
+        while (): #@
+            x += 1
+        """,
+            """
         while 1 < 2: #@
             x += 1
         """,
@@ -310,3 +309,96 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_while(node)
+
+
+class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = InfiniteLoopChecker
+
+    NOT_CONSTANT_CASES = [
+        """
+    def func():
+        return
+
+    while func: #@
+        x += 1  # Results in infinite loop, though condition is not constant
+    """,
+        """
+    while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
+        y += 1
+    """,
+        """
+    def foo():
+        i = 10
+        while i < 21: #@
+            i += 1
+            j = 19
+    """,
+        """
+    while 0 < self.attribute < 100: #@
+            attribute += 1
+    """,
+        """
+    i, k, l = 0, 20, 40
+    j = 10
+    while i < 100 and k < 21 or l < 40: #@
+        j += 1
+        j = j - 1
+    """,
+        """
+    while foo(10): #@
+        x += 1
+    """,
+        """
+    while foo(10) < 21 and faa(x): #@
+        x += 1
+    """,
+    ]
+
+    CONSTANT_CASES = [
+        """
+    while 1: #@
+        x += 1
+    """,
+        """
+    while True: #@
+        x += 1
+    """,
+        """
+    while []: #@
+        x += 1
+    """,
+        """
+    while {}: #@
+        x += 1
+    """,
+        """
+    while (): #@
+        x += 1
+    """,
+        """
+    while 1 < 2: #@
+        x += 1
+    """,
+        """
+    while True and 1 < 2 or 0: #@
+        x += 1
+    """,
+    ]
+
+    @pytest.mark.parametrize("src", CONSTANT_CASES)
+    def test_constant_condition_correctness(self, src: str) -> None:
+        """Test verifies that `_check_constant_loop_cond` helper properly flags constant loop conditions."""
+        node = astroid.extract_node(src)
+
+        expected = True
+        actual = self.checker._check_constant_loop_cond(node, node.test)
+        assert actual == expected
+
+    @pytest.mark.parametrize("src", NOT_CONSTANT_CASES)
+    def test_constant_condition_correctness(self, src: str) -> None:
+        """Test verifies that `_check_constant_loop_cond` helper does not flag non-constant loop conditions."""
+        node = astroid.extract_node(src)
+
+        expected = False
+        actual = self.checker._check_constant_loop_cond(node, node.test)
+        assert actual == expected

@@ -131,7 +131,9 @@ class InfiniteLoopChecker(BaseChecker):
                     and isinstance(inferred, nodes.Const)
                     and bool(inferred.value) is True
                 ):
-                    emit = True
+                    cond_vars = set(child for child in node.test.nodes_of_class(nodes.Name))
+                    if not cond_vars:
+                        emit = True
 
         # Emit if calling a function that only returns GeneratorExp (always tests True)
         elif isinstance(test, nodes.Call):
@@ -166,6 +168,8 @@ class InfiniteLoopChecker(BaseChecker):
             except InferenceError:
                 call_inferred = None
             if call_inferred:
+                # Function pointer is not considered constant in our case (e.g.: `while func_pointer`) even
+                # if it results in the loop condition always being true.
                 return False
             return True
         return False

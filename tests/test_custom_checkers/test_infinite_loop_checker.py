@@ -1,5 +1,7 @@
 import astroid
 import pylint.testutils
+import pytest
+from pylint.interfaces import INFERENCE
 
 from python_ta.checkers.infinite_loop_checker import InfiniteLoopChecker
 
@@ -194,6 +196,110 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
             y += 1 # Should trigger an infinite loop since condition variables set: {'lst', 'var', 'z', 'x'}
         """
+        node = astroid.extract_node(src)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)
+
+    def test_while_inferred_exit(self) -> None:
+        """Test verifies that infinite-loop warning is not triggered when loop condition is constant but 'sys.exit' is
+        called using alias."""
+        src = """
+        import sys as x
+
+        second_alias = x
+
+        while 1 < 2 and True: #@
+            second_alias.exit()
+        """
+        node = astroid.extract_node(src)
+
+        with self.assertNoMessages():
+            self.checker.visit_while(node)
+
+    def test_while_normal_exit(self) -> None:
+        """Test verifies that infinite-loop warning is not triggered when loop condition is constant but 'sys.exit' is
+        called."""
+        src = """
+        import sys
+
+        while 1 < 2 and True: #@
+            sys.exit()
+        """
+        node = astroid.extract_node(src)
+
+        with self.assertNoMessages():
+            self.checker.visit_while(node)
+
+    def test_while_false_exit(self) -> None:
+        """Test verifies that infinite-loop warning is triggered when loop condition is constant and a "false" exit
+        is used."""
+        src = """
+        while 1 < 2: #@
+            attr.exit() # Should raise a warning since `sys` was never aliased to `attr` and condition constant
+        """
+
+        node = astroid.extract_node(src)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)
+
+    def test_while_different_loop_exiting_statements(self) -> None:
+        """Test verifies that infinite-loop warning is not triggered when loop condition is constant but different
+        loop exiting statements are called."""
+        src = """
+        while 1: #@
+            return
+        while 1: #@
+            break
+        while 1: #@
+            yield
+        while 1: #@
+            raise
+        """
+        nodes = list(astroid.extract_node(src))
+
+        with self.assertNoMessages():
+            for node in nodes:
+                self.checker.visit_while(node)
+
+    @pytest.mark.parametrize(
+        "src",
+        [
+            """
+        while 1: #@
+            x += 1
+        """,
+            """
+        while True: #@
+            x += 1
+        """,
+            """
+        while 1 < 2: #@
+            x += 1
+        """,
+            """
+        while True and 1 < 2 or 0: #@
+            x += 1
+        """,
+        ],
+    )
+    def test_while_constant_loop_condition(self, src: str) -> None:
+        """Test verifies that infinite-loop warning is triggered when loop condition is constant and no loop exiting
+        statement is called"""
         node = astroid.extract_node(src)
 
         with self.assertAddsMessages(

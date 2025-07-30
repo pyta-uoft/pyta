@@ -94,7 +94,9 @@ class InfiniteLoopChecker(BaseChecker):
             else:
                 self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
 
-    def _check_constant_loop_cond(self, node: nodes.While, test: Optional[nodes.NodeNG]) -> bool:
+    def _check_constant_loop_cond(
+        self, node: nodes.While, test_node: Optional[nodes.NodeNG]
+    ) -> bool:
         """Helper function that checks if while loop condition is constant.
 
         See `https://github.com/pylint-dev/pylint/blob/main/pylint/checkers/base/basic_checker.py#L303` for further
@@ -119,13 +121,15 @@ class InfiniteLoopChecker(BaseChecker):
         )
         inferred = None
         maybe_generator_call = None
-        emit = isinstance(test, (nodes.Const, *structs, *const_nodes))
-        if not isinstance(test, except_nodes):
-            inferred = utils.safe_infer(test)
+        emit = isinstance(test_node, (nodes.Const, *structs, *const_nodes))
+        if not isinstance(test_node, except_nodes):
+            inferred = utils.safe_infer(test_node)
             # If we can't infer what the value is but the test is just a variable name
             if isinstance(inferred, util.UninferableBase):
-                if isinstance(test, nodes.Name):
-                    emit, maybe_generator_call = InfiniteLoopChecker._name_holds_generator(test)
+                if isinstance(test_node, nodes.Name):
+                    emit, maybe_generator_call = InfiniteLoopChecker._name_holds_generator(
+                        test_node
+                    )
             else:
                 if (
                     inferred is not None
@@ -137,8 +141,8 @@ class InfiniteLoopChecker(BaseChecker):
                         emit = True
 
         # Emit if calling a function that only returns GeneratorExp (always tests True)
-        elif isinstance(test, nodes.Call):
-            maybe_generator_call = test
+        elif isinstance(test_node, nodes.Call):
+            maybe_generator_call = test_node
 
         if maybe_generator_call:
             inferred_call = utils.safe_infer(maybe_generator_call.func)
@@ -176,14 +180,14 @@ class InfiniteLoopChecker(BaseChecker):
         return False
 
     @staticmethod
-    def _name_holds_generator(test: nodes.Name) -> tuple[bool, nodes.Call | None]:
+    def _name_holds_generator(test_node: nodes.Name) -> tuple[bool, Optional[nodes.Call]]:
         """Return whether `test` tests a name certain to hold a generator, or optionally
         a call that should be then tested to see if *it* returns only generators.
         """
-        assert isinstance(test, nodes.Name)
+        assert isinstance(test_node, nodes.Name)
         emit = False
         maybe_generator_call = None
-        lookup_result = test.frame().lookup(test.name)
+        lookup_result = test_node.frame().lookup(test_node.name)
         if not lookup_result:
             return emit, maybe_generator_call
         maybe_generator_assigned = (

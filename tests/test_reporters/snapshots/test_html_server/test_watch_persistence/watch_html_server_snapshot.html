@@ -163,6 +163,11 @@ header {
   list-style-type: none;
   padding: 0px 20px;
   white-space: nowrap;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 .file-name {
@@ -375,18 +380,31 @@ section {
 
 .slider {
   margin-left: auto;
+  align-items: center;
 }
+
 .slider button {
   background: none;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
 }
 
 .slider button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
   filter: brightness(120%);
 }
 
-button.collapsed {
+.slider button.collapsed {
   transform: scaleY(-1);
 }
 

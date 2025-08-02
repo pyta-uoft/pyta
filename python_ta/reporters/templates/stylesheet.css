@@ -159,6 +159,11 @@ header {
   list-style-type: none;
   padding: 0px 20px;
   white-space: nowrap;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 .file-name {

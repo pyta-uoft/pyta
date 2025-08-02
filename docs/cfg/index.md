@@ -92,9 +92,9 @@ This generates `my_file.svg` in the current directory containing the control flo
 The command-line interface accepts the following options:
 
 - `--auto-open`: Automatically open the generated graph in your default SVG viewer
-- `--visitor-options`: A JSON string containing configuration options for graph generation. This accepts the same options as the `visitor_options` parameter in the programmatic API:
-  - `"separate-condition-blocks"`: Separate if conditions into their own blocks
-  - `"functions"`: List of specific functions/methods to generate CFGs for
+- `--visitor-options`: Comma-separated key=value pairs for configuration options. This accepts the same options as the `visitor_options` parameter in the programmatic API:
+  - `separate-condition-blocks`: Separate if conditions into their own blocks (true/false)
+  - `functions`: List of specific functions/methods to generate CFGs for
 
 ### Examples
 
@@ -107,19 +107,19 @@ $ python -m python_ta.cfg my_file.py --auto-open
 Generate CFG only for specific functions:
 
 ```console
-$ python -m python_ta.cfg my_file.py --visitor-options '{"functions": ["MyClass.foo", "main"]}'
+$ python -m python_ta.cfg my_file.py --visitor-options "functions='MyClass.foo,main'"
 ```
 
 Separate condition blocks in the graph:
 
 ```console
-$ python -m python_ta.cfg my_file.py --visitor-options '{"separate-condition-blocks": true}'
+$ python -m python_ta.cfg my_file.py --visitor-options "separate-condition-blocks=true"
 ```
 
 Combine multiple options:
 
 ```console
-$ python -m python_ta.cfg my_file.py --auto-open --visitor-options '{"separate-condition-blocks": true, "functions": ["analyze_data"]}'
+$ python -m python_ta.cfg my_file.py --auto-open --visitor-options "separate-condition-blocks=true,functions='analyze_data'"
 ```
 
 For help and available options:

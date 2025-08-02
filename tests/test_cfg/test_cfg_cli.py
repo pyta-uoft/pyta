@@ -2,7 +2,6 @@
 Test suite for the CFG CLI interface.
 """
 
-import json
 from unittest.mock import patch
 
 from click.testing import CliRunner
@@ -42,7 +41,7 @@ class TestCFGCLI:
         """Test CLI with visitor options for separate-condition-blocks."""
         options = {"separate-condition-blocks": True}
         result = self.runner.invoke(
-            main, ["mock_file.py", "--visitor-options", json.dumps(options)]
+            main, ["mock_file.py", "--visitor-options", "separate-condition-blocks=true"]
         )
 
         assert result.exit_code == 0
@@ -55,7 +54,7 @@ class TestCFGCLI:
         """Test CLI with visitor options for specific functions."""
         options = {"functions": ["MyClass.method", "top_level_func"]}
         result = self.runner.invoke(
-            main, ["mock_file.py", "--visitor-options", json.dumps(options)]
+            main, ["mock_file.py", "--visitor-options", "functions='MyClass.method,top_level_func'"]
         )
 
         assert result.exit_code == 0
@@ -71,7 +70,13 @@ class TestCFGCLI:
             "functions": ["analyze_data", "MyClass.process"],
         }
         result = self.runner.invoke(
-            main, ["mock_file.py", "--auto-open", "--visitor-options", json.dumps(options)]
+            main,
+            [
+                "mock_file.py",
+                "--auto-open",
+                "--visitor-options",
+                "separate-condition-blocks=true,functions='analyze_data,MyClass.process'",
+            ],
         )
 
         assert result.exit_code == 0
@@ -79,12 +84,21 @@ class TestCFGCLI:
             mod="mock_file.py", auto_open=True, visitor_options=options
         )
 
-    def test_invalid_json_visitor_options(self):
-        """Test CLI with invalid JSON for visitor options."""
-        result = self.runner.invoke(main, ["mock_file.py", "--visitor-options", "not valid json"])
+    def test_invalid_visitor_options_format(self):
+        """Test CLI with invalid format for visitor options."""
+        result = self.runner.invoke(
+            main, ["mock_file.py", "--visitor-options", "separate-condition-blocks=invalid"]
+        )
 
         assert result.exit_code == 1
-        assert "Error: Invalid JSON for visitor-options" in result.output
+        assert "Error: separate-condition-blocks must be 'true' or 'false'" in result.output
+
+    def test_empty_functions_visitor_options(self):
+        """Test CLI with empty functions list."""
+        result = self.runner.invoke(main, ["mock_file.py", "--visitor-options", "functions="])
+
+        assert result.exit_code == 1
+        assert "Error: functions cannot be empty" in result.output
 
     def test_missing_filepath_argument(self):
         """Test CLI without required filepath argument."""
@@ -101,4 +115,4 @@ class TestCFGCLI:
         assert "Generate a Control Flow Graph" in result.output
         assert "--auto-open" in result.output
         assert "--visitor-options" in result.output
-        assert "JSON string of visitor options" in result.output
+        assert "Comma-separated key=value pairs" in result.output

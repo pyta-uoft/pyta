@@ -24,7 +24,7 @@
   --header-text: #1a1a1a;
   --error-instance-bg: #ffffff;
   --code-error: #e03e3e;
-  --style-error: #0f7b6c;
+  --style-error: #4686e0;
   --highlight-bg: rgba(255, 235, 59, 0.5);
   --footer-bg: #e9ecef;
   --text-empty-placeholder: #9ca3af;
@@ -32,27 +32,27 @@
 
 [data-theme="dark"] {
   /* Dark theme */
-  --bg-primary: #050505;
-  --bg-secondary: #1a1a1a;
-  --bg-gradient-start: #050505;
-  --bg-gradient-end: #050505;
-  --text-primary: #e8e8e8;
-  --text-secondary: #9b9a97;
-  --text-muted: #6e6d6a;
-  --text-grey: #a0a0a0;
+  --bg-primary: #242424;
+  --bg-secondary: #1a1a1c;
+  --bg-gradient-start: #131313;
+  --bg-gradient-end: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #8e8e93;
+  --text-muted: #636366;
+  --text-grey: #8e8e93;
   --text-white: #ffffff;
-  --border-color: rgba(255, 255, 255, 0.06);
-  --shadow-color: rgba(0, 0, 0, 0.2);
-  --section-bg: rgba(26, 26, 26, 0.9);
-  --header-gradient-start: #2e2e2e;
-  --header-gradient-end: #2e2e2e;
-  --header-text: #e8e8e8;
-  --error-instance-bg: #202020;
-  --code-error: #ff6b6b;
-  --style-error: #4ecdc4;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --section-bg: #1a1a1c;
+  --header-gradient-start: #28282c;
+  --header-gradient-end: #28282c;
+  --header-text: #ffffff;
+  --error-instance-bg: #28282c;
+  --code-error: #df5252;
+  --style-error: #5694e6;
   --highlight-bg: rgba(255, 235, 59, 0.3);
-  --footer-bg: #1a1a1a;
-  --text-empty-placeholder: #6e6d6a;
+  --footer-bg: #1a1a1c;
+  --text-empty-placeholder: #636366;
 }
 
 body {
@@ -268,6 +268,10 @@ section {
   border-top-right-radius: 15px;
 }
 
+[data-theme="dark"] .section-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .sidebar .section-header h2 {
   margin: 0;
   padding: 15px 0;
@@ -281,7 +285,7 @@ section {
 }
 
 .style-errors {
-  border-top: 3px solid rgba(255, 255, 255, 0.25);
+  border-top: 3px solid var(--border-color);
 }
 
 .category-heading {
@@ -406,7 +410,6 @@ section {
 .slider button:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
-  filter: brightness(120%);
 }
 
 .slider button.collapsed {

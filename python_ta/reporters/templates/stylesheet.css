@@ -2,51 +2,49 @@
 :root {
   /* Light theme (default) */
   --bg-primary: #ffffff;
-  --bg-secondary: #f0f3f5;
-  --bg-gradient-start: #ffffff;
-  --bg-gradient-end: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #4a4a4a;
-  --text-muted: #9ca3af;
-  --text-grey: #6c757d;
+  --bg-secondary: #f4f8f8;
+  --bg-gradient-start: rgba(71, 118, 230, 0.77);
+  --bg-gradient-end: rgba(49, 48, 178, 0.62);
+  --text-primary: #000000;
+  --text-secondary: #2d3441;
+  --text-muted: rgb(244, 244, 244);
+  --text-grey: rgb(90, 91, 92);
   --text-white: #ffffff;
-  --border-color: rgba(46, 52, 64, 0.08);
-  --shadow-color: rgba(46, 52, 64, 0.04);
-  --section-bg: rgba(246, 248, 250, 0.9);
-  --header-gradient-start: #e8edf2;
-  --header-gradient-end: #e8edf2;
-  --header-text: #1a1a1a;
+  --border-color: rgba(0, 0, 0, 0.15);
+  --shadow-color: rgba(77, 77, 77, 0.6);
+  --section-bg: rgba(234, 233, 233, 0.25);
+  --header-gradient-start: rgba(20, 30, 48, 0.77);
+  --header-gradient-end: rgba(36, 59, 85, 0.67);
   --error-instance-bg: #ffffff;
-  --code-error: #e03e3e;
-  --style-error: #4686e0;
-  --highlight-bg: rgba(255, 235, 59, 0.5);
-  --footer-bg: #e9ecef;
-  --text-empty-placeholder: #9ca3af;
+  --code-error: rgba(219, 0, 57, 0.9);
+  --style-error: rgb(0, 111, 255);
+  --highlight-bg: rgba(228, 255, 0, 0.4);
+  --footer-bg: #2d3441;
+  --text-empty-placeholder: rgb(244, 244, 244);
 }
 
 [data-theme="dark"] {
   /* Dark theme */
-  --bg-primary: #242424;
-  --bg-secondary: #1a1a1c;
-  --bg-gradient-start: #131313;
-  --bg-gradient-end: #111111;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-gradient-start: rgba(20, 30, 48, 0.9);
+  --bg-gradient-end: rgba(10, 15, 25, 0.9);
   --text-primary: #ffffff;
-  --text-secondary: #8e8e93;
-  --text-muted: #636366;
-  --text-grey: #8e8e93;
+  --text-secondary: #b0b0b0;
+  --text-muted: #a0a0a0;
+  --text-grey: #a0a0a0;
   --text-white: #ffffff;
   --border-color: rgba(255, 255, 255, 0.15);
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --section-bg: #1a1a1c;
-  --header-gradient-start: #28282c;
-  --header-gradient-end: #28282c;
-  --header-text: #ffffff;
-  --error-instance-bg: #28282c;
-  --code-error: #df5252;
-  --style-error: #5694e6;
-  --highlight-bg: rgba(255, 235, 59, 0.3);
-  --footer-bg: #1a1a1c;
-  --text-empty-placeholder: #636366;
+  --shadow-color: rgba(0, 0, 0, 0.8);
+  --section-bg: rgba(40, 40, 40, 0.5);
+  --header-gradient-start: rgba(20, 30, 48, 0.9);
+  --header-gradient-end: rgba(36, 59, 85, 0.8);
+  --error-instance-bg: #1a1a1a;
+  --code-error: rgba(255, 80, 100, 0.9);
+  --style-error: rgb(100, 150, 255);
+  --highlight-bg: #264f78;
+  --footer-bg: #1a1a1a;
+  --text-empty-placeholder: #a0a0a0;
 }
 
 body {
@@ -72,7 +70,7 @@ body {
     var(--bg-gradient-end),
     var(--bg-gradient-start)
   );
-  color: var(--header-text);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -81,7 +79,7 @@ body {
 header {
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
-  color: var(--text-primary);
+  color: var(--text-white);
   margin-top: 15px;
   margin-left: 20px;
   margin-bottom: 15px;
@@ -95,7 +93,7 @@ header {
   border-radius: 6px;
   padding: 6px;
   cursor: pointer;
-  color: var(--text-primary);
+  color: var(--text-white);
   transition: all 0.3s ease;
   width: 32px;
   height: 32px;
@@ -165,7 +163,6 @@ header {
 .file-name {
   font-weight: bold;
   font-size: 1.1em;
-  color: var(--text-primary);
 }
 
 .sidebar ul li {
@@ -177,15 +174,11 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   vertical-align: middle;
-}
-
-[data-theme="dark"] .sidebar button {
-  color: #d0d0d0;
 }
 
 .sidebar svg.collapsed {
@@ -194,16 +187,11 @@ header {
 
 .sidebar a:link,
 a:visited {
-  color: var(--text-secondary);
+  color: inherit;
   text-decoration: none;
 }
 
-[data-theme="dark"] .sidebar a {
-  color: #d0d0d0;
-}
-
 .sidebar a:hover {
-  color: var(--text-primary);
   text-decoration: underline;
 }
 
@@ -238,8 +226,11 @@ section {
   display: inline-block;
   min-width: 50%;
   background: var(--section-bg);
-  box-shadow: -1px 9px 15px -5px var(--shadow-color);
-  border-radius: 15px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
 }
 
 .section-header {
@@ -247,7 +238,9 @@ section {
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
-  color: var(--header-text);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0px 1px 2px black;
+  background: #141e30;
   background: linear-gradient(
     to left,
     var(--header-gradient-end),
@@ -258,12 +251,8 @@ section {
     var(--header-gradient-end),
     var(--header-gradient-start)
   );
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-}
-
-[data-theme="dark"] .section-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
 }
 
 .sidebar .section-header h2 {
@@ -279,7 +268,7 @@ section {
 }
 
 .style-errors {
-  border-top: 3px solid var(--border-color);
+  border-top: 3px solid rgba(255, 255, 255, 0.25);
 }
 
 .category-heading {
@@ -293,12 +282,11 @@ section {
 .error-instance {
   display: grid;
   background: var(--error-instance-bg);
-  box-shadow:
-    0 0 4px rgba(0, 0, 0, 0.1),
-    0 4px 7px rgba(0, 0, 0, 0.1);
-  padding: 8px 16px;
-  margin-bottom: 5px;
-  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
 .error-instance .collapsible {
@@ -398,12 +386,13 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  color: var(--text-white);
 }
 
 .slider button:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
+  filter: brightness(120%);
 }
 
 .slider button.collapsed {
@@ -471,19 +460,18 @@ section {
 
 footer {
   background: var(--footer-bg);
-  color: var(--text-primary);
+  color: var(--text-white);
   display: flex;
   flex-direction: row;
   padding: 15px;
 }
 
 footer a {
-  color: var(--text-primary);
-  transition: color 0.2s ease;
+  color: var(--text-white);
 }
 
 footer a:hover {
-  color: var(--style-error);
+  color: #86d1ef;
 }
 
 footer p {

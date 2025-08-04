@@ -311,18 +311,37 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_while(node)
 
+    def test_while_func_obj_condition(self) -> None:
+        """Test verifies that infinite-loop warning is triggered when a function object is used inside loop
+        condition."""
+        src = """
+        def foo():
+            return
+
+        while foo: #@
+            x += 1
+        """
+        node = astroid.extract_node(src)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)
+
 
 class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InfiniteLoopChecker
 
     NOT_CONSTANT_CASES = [
-        """
-    def func():
-        return
-
-    while func: #@
-        x += 1  # Results in infinite loop, though condition is not constant
-    """,
         """
     while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
         y += 1
@@ -376,6 +395,9 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
     while (): #@
         x += 1
     """,
+    ]
+
+    CONSTANT_COMP_CASES = [
         """
     while 1 < 2: #@
         x += 1
@@ -384,7 +406,39 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
     while True and 1 < 2 or 0: #@
         x += 1
     """,
+        """
+    while not (): #@
+        x += 1
+    """,
+        """
+    while not []: #@
+        x += 1
+    """,
+        """
+    while not {}: #@
+        x += 1
+    """,
     ]
+
+    @pytest.mark.parametrize("src", CONSTANT_COMP_CASES)
+    def test_constant_comp_condition_correctness(self, src: str) -> None:
+        """Test verifies that `_check_constant_loop_cond` helper properly flags constant BoolOp or BinOp loop
+        conditions."""
+        node = astroid.extract_node(src)
+
+        expected = True
+        actual = self.checker._check_constant_comp_test(node)
+        assert actual == expected
+
+    @pytest.mark.parametrize("src", NOT_CONSTANT_CASES)
+    def test_constant_comp_condition_correctness(self, src: str) -> None:
+        """Test verifies that `_check_constant_loop_cond` helper properly flags constant BoolOp or BinOp loop
+        conditions."""
+        node = astroid.extract_node(src)
+
+        expected = False
+        actual = self.checker._check_constant_comp_test(node)
+        assert actual == expected
 
     @pytest.mark.parametrize("src", CONSTANT_CASES)
     def test_constant_condition_correctness(self, src: str) -> None:

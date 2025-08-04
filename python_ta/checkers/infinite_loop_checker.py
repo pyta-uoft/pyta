@@ -57,17 +57,15 @@ class InfiniteLoopChecker(BaseChecker):
             - The `while` condition is constant (e.g., `while 1 < 2`)
             - The loop body contains no `return`, `break`, `raise`, `yield`, or `sys.exit()` calls
         """
-        if not self._check_constant_loop_cond(node, node.test):
+        if not self._check_constant_loop_cond(
+            node, node.test
+        ) and not self._check_constant_comp_test(node):
             return
 
         inferred = utils.safe_infer(node.test)
-        if (
-            isinstance(inferred, util.UninferableBase)
-            or inferred is None
-            or not isinstance(inferred, nodes.Const)
-        ):
+        if isinstance(inferred, util.UninferableBase) or inferred is None:
             return
-        if bool(inferred.value) is False:
+        if isinstance(inferred, nodes.Const) and bool(inferred.value) is False:
             return
 
         check_nodes = (nodes.Break, nodes.Return, nodes.Raise, nodes.Yield)
@@ -92,6 +90,18 @@ class InfiniteLoopChecker(BaseChecker):
         else:
             self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
 
+    def _check_constant_comp_test(self, node: nodes.While) -> bool:
+        """Helper function that checks if while loop condition is a comparison of constant nodes."""
+        cond_vars = set(child for child in node.test.nodes_of_class(nodes.Name))
+        if cond_vars:
+            return False
+        inferred = utils.safe_infer(node.test)
+        if isinstance(inferred, util.UninferableBase) or inferred is None:
+            return False
+        if isinstance(inferred, nodes.Const) and inferred.value is True:
+            return True
+        return False
+
     def _check_constant_loop_cond(
         self, node: nodes.While, test_node: Optional[nodes.NodeNG]
     ) -> bool:
@@ -113,8 +123,8 @@ class InfiniteLoopChecker(BaseChecker):
         except_nodes = (
             nodes.Call,
             nodes.BinOp,
-            # nodes.BoolOp,
-            # nodes.UnaryOp,
+            nodes.BoolOp,
+            nodes.UnaryOp,
             nodes.Subscript,
         )
         inferred = None
@@ -123,20 +133,8 @@ class InfiniteLoopChecker(BaseChecker):
         if not isinstance(test_node, except_nodes):
             inferred = utils.safe_infer(test_node)
             # If we can't infer what the value is but the test is just a variable name
-            if isinstance(inferred, util.UninferableBase):
-                if isinstance(test_node, nodes.Name):
-                    emit, maybe_generator_call = InfiniteLoopChecker._name_holds_generator(
-                        test_node
-                    )
-            else:
-                if (
-                    inferred is not None
-                    and isinstance(inferred, nodes.Const)
-                    and bool(inferred.value) is True
-                ):
-                    cond_vars = set(child for child in node.test.nodes_of_class(nodes.Name))
-                    if not cond_vars:
-                        emit = True
+            if isinstance(inferred, util.UninferableBase) and isinstance(test_node, nodes.Name):
+                emit, maybe_generator_call = InfiniteLoopChecker._name_holds_generator(test_node)
 
         # Emit if calling a function that only returns GeneratorExp (always tests True)
         elif isinstance(test_node, nodes.Call):
@@ -171,8 +169,7 @@ class InfiniteLoopChecker(BaseChecker):
             except InferenceError:
                 call_inferred = None
             if call_inferred:
-                # Function pointer is not considered constant in our case (e.g.: `while func_pointer`) even
-                # if it results in the loop condition always being true.
+                self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
                 return False
             return True
         return False

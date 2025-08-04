@@ -174,10 +174,11 @@ header {
   background: transparent;
   border-color: transparent;
   padding: 0;
+  color: var(--text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  vertical-align: middle;
 }
 
 .sidebar svg.collapsed {

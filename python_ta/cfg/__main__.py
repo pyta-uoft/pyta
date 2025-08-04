@@ -1,29 +1,64 @@
+from typing import Any, Dict, List, Optional, Union
+
 import click
 
 from .cfg_generator import generate_cfg
 
 
-def parse_visitor_options(options_str):
+def split_by_comma_if_outside_quotes(options_str: str) -> List[str]:
+    """Split string by commas, but not commas inside quotes."""
+    parts: List[str] = []
+    current_part: List[str] = []
+    in_quotes: bool = False
+    quote_char: Optional[str] = None
+
+    for char in options_str:
+        if char in ('"', "'") and not in_quotes:
+            in_quotes = True
+            quote_char = char
+            current_part.append(char)
+        elif char == quote_char and in_quotes:
+            in_quotes = False
+            quote_char = None
+            current_part.append(char)
+        elif char == "," and not in_quotes:
+            parts.append("".join(current_part).strip())
+            current_part = []
+        else:
+            current_part.append(char)
+
+    if current_part:
+        parts.append("".join(current_part).strip())
+
+    return parts
+
+
+def parse_visitor_options(options_str: str) -> Dict[str, Union[bool, List[str], str]]:
     """Parse comma-separated key=value pairs."""
     if not options_str:
         return {}
 
-    options = {}
+    parts = split_by_comma_if_outside_quotes(options_str)
 
-    if "separate-condition-blocks=" in options_str:
-        if "separate-condition-blocks=true" in options_str:
-            options["separate-condition-blocks"] = True
-        elif "separate-condition-blocks=false" in options_str:
-            options["separate-condition-blocks"] = False
+    options: Dict[str, Union[bool, List[str], str]] = {}
+    for part in parts:
+        if "=" not in part:
+            continue
+
+        key, value = part.split("=", 1)
+        value = value.strip()
+
+        # Strip any quotes if present
+        if value.startswith(("'", '"')) and value.endswith(("'", '"')):
+            value = value[1:-1]
+
+        # Type conversions
+        if value.lower() in ("true", "false"):
+            options[key] = value.lower() == "true"
+        elif "," in value:
+            options[key] = [v.strip() for v in value.split(",")]
         else:
-            raise ValueError("separate-condition-blocks must be 'true' or 'false'")
-
-    if "functions=" in options_str:
-        start = options_str.find("functions=") + len("functions=")
-        value = options_str[start:].strip().strip("'\"")
-        if not value:
-            raise ValueError("functions cannot be empty")
-        options["functions"] = [f.strip() for f in value.split(",")]
+            options[key] = value
 
     return options
 
@@ -39,16 +74,18 @@ def parse_visitor_options(options_str):
     help="Comma-separated key=value pairs for visitor options, e.g., "
     "\"separate-condition-blocks=true,functions='foo,bar,baz'\"",
 )
-def main(mod, auto_open, visitor_options):
+def main(mod: str, auto_open: bool, visitor_options: Optional[str]) -> None:
     """Generate a Control Flow Graph for a Python file."""
+    parsed_options: Optional[Dict[str, Any]] = None
+
     if visitor_options:
         try:
-            visitor_options = parse_visitor_options(visitor_options)
+            parsed_options = parse_visitor_options(visitor_options)
         except ValueError as error:
             click.echo(f"Error: {error}", err=True)
             raise click.Abort()
 
-    generate_cfg(mod=mod, auto_open=auto_open, visitor_options=visitor_options)
+    generate_cfg(mod=mod, auto_open=auto_open, visitor_options=parsed_options)
 
 
 if __name__ == "__main__":

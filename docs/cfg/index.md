@@ -29,7 +29,7 @@ To use PythonTA's control flow graph visualizer, you'll need to install some add
    $ python3 -m pip install python-ta[cfg]
    ```
 
-## Python Usage
+## Python API Usage
 
 This feature uses `python_ta.cfg.generate_cfg` to produce these control flow graphs.
 

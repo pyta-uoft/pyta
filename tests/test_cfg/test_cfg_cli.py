@@ -84,22 +84,6 @@ class TestCFGCLI:
             mod="mock_file.py", auto_open=True, visitor_options=options
         )
 
-    def test_invalid_visitor_options_format(self):
-        """Test CLI with invalid format for visitor options."""
-        result = self.runner.invoke(
-            main, ["mock_file.py", "--visitor-options", "separate-condition-blocks=invalid"]
-        )
-
-        assert result.exit_code == 1
-        assert "Error: separate-condition-blocks must be 'true' or 'false'" in result.output
-
-    def test_empty_functions_visitor_options(self):
-        """Test CLI with empty functions list."""
-        result = self.runner.invoke(main, ["mock_file.py", "--visitor-options", "functions="])
-
-        assert result.exit_code == 1
-        assert "Error: functions cannot be empty" in result.output
-
     def test_missing_filepath_argument(self):
         """Test CLI without required filepath argument."""
         result = self.runner.invoke(main, [])

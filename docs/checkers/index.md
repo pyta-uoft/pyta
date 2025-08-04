@@ -2754,7 +2754,11 @@ Example:
 
 ```
 
-**Note**: Currently, this error occurs when none of the variables used in the condition of a `while` loop are updated within the body of the loop.
+**Note**: Currently, this error occurs when...
+
+1. None of the variables used in the condition of a `while` loop are updated within the loop body
+2. The loop condition is constant (i.e., always True), and there are no exit statements (`return`, `break`, `raise`, `yield`, `sys.exit()`)
+
 This often indicates a logical error that may lead to an infinite loop or a loop that doesn't behave as intended.
 
 ## Miscellaneous
@@ -3460,6 +3464,7 @@ The different types of comparison operators can be classified in the following c
 3. _SyntaxError: invalid syntax_
 
    Some of the common causes of this error include:
+
    1. Missing colon at the end of an `if`, `elif`, `else`, `for`, `while`, `class`, or `def`
       statement.
 

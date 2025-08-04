@@ -169,8 +169,7 @@ class InfiniteLoopChecker(BaseChecker):
             except InferenceError:
                 call_inferred = None
             if call_inferred:
-                self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
-                return False
+                return True
             return True
         return False
 

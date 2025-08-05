@@ -431,9 +431,8 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         assert actual == expected
 
     @pytest.mark.parametrize("src", NOT_CONSTANT_CASES)
-    def test_constant_comp_condition_correctness(self, src: str) -> None:
-        """Test verifies that `_check_constant_loop_cond` helper properly flags constant BoolOp or BinOp loop
-        conditions."""
+    def test_not_constant_comp_condition_correctness(self, src: str) -> None:
+        """Test verifies that `_check_constant_loop_cond` helper does not flag non-constant loop conditions."""
         node = astroid.extract_node(src)
 
         expected = False
@@ -450,7 +449,7 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         assert actual == expected
 
     @pytest.mark.parametrize("src", NOT_CONSTANT_CASES)
-    def test_constant_condition_correctness(self, src: str) -> None:
+    def test_not_constant_condition_correctness(self, src: str) -> None:
         """Test verifies that `_check_constant_loop_cond` helper does not flag non-constant loop conditions."""
         node = astroid.extract_node(src)
 

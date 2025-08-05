@@ -29,7 +29,7 @@ To use PythonTA's control flow graph visualizer, you'll need to install some add
    $ python3 -m pip install python-ta[cfg]
    ```
 
-## Sample Usage
+## Python API Usage
 
 This feature uses `python_ta.cfg.generate_cfg` to produce these control flow graphs.
 
@@ -76,6 +76,57 @@ which produces the following control flow graph:
 ![method_only.svg](images/method_only.svg)
 
 **Note:** only one control flow graph can be generated per function call (i.e. you can't pass in a list of files to generate control flow graphs for).
+
+## Command-Line Usage
+
+PythonTA also provides a command-line interface for generating control flow graphs:
+
+```console
+$ python -m python_ta.cfg my_file.py
+```
+
+This generates `my_file.svg` in the current directory containing the control flow graph for `my_file.py`.
+
+### Command-Line Options
+
+The command-line interface accepts the following options:
+
+- `--auto-open`: Automatically open the generated graph in your default SVG viewer
+- `--visitor-options`: Comma-separated key=value pairs for configuration options. This accepts the same options as the `visitor_options` parameter in the programmatic API:
+  - `separate-condition-blocks`: Separate if conditions into their own blocks (true/false)
+  - `functions`: List of specific functions/methods to generate CFGs for
+
+### Examples
+
+Generate a CFG and automatically open it:
+
+```console
+$ python -m python_ta.cfg my_file.py --auto-open
+```
+
+Generate CFG only for specific functions:
+
+```console
+$ python -m python_ta.cfg my_file.py --visitor-options "functions='MyClass.foo,main'"
+```
+
+Separate condition blocks in the graph:
+
+```console
+$ python -m python_ta.cfg my_file.py --visitor-options "separate-condition-blocks=true"
+```
+
+Combine multiple options:
+
+```console
+$ python -m python_ta.cfg my_file.py --auto-open --visitor-options "separate-condition-blocks=true,functions='analyze_data'"
+```
+
+For help and available options:
+
+```console
+$ python -m python_ta.cfg --help
+```
 
 ## API
 

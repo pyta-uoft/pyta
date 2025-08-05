@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a dark mode toggle with system detection for the html reporter
 - Replaced icons on the html reporter using the heroicons library, adding hover effects
 - Extended `infinite-loop` check to flag while loops with constant conditions and no exit statements (e.g.: `return`, `break`, `raise`, `yield`, `sys.exit()`)
+- Added command-line interface for CFG generation, allowing users to run `python -m python_ta.cfg <file>` with options for auto-open and visitor configuration
 
 ### 💫 New checkers
 

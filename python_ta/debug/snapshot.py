@@ -152,7 +152,7 @@ def snapshot_to_json(
     has its own entry with a matching ID. This includes nesting the process_value
     function to handle recursive processing of data types.
 
-    id_tracker can be used to ensure that each value is assigned a unique ID, accorss multiple snapshots.
+    id_tracker can be used to ensure that each value is assigned a unique ID, across multiple snapshots.
     """
     if id_tracker is None:
         id_tracker = IDTracker()

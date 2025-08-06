@@ -10,8 +10,9 @@
   --text-muted: rgb(244, 244, 244);
   --text-grey: rgb(90, 91, 92);
   --text-white: #ffffff;
-  --border-color: rgba(0, 0, 0, 0.15);
-  --shadow-color: rgba(77, 77, 77, 0.6);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.06);
+  --shadow-hover: rgba(0, 0, 0, 0.1);
   --section-bg: rgba(234, 233, 233, 0.25);
   --header-gradient-start: rgba(20, 30, 48, 0.77);
   --header-gradient-end: rgba(36, 59, 85, 0.67);
@@ -34,8 +35,9 @@
   --text-muted: #a0a0a0;
   --text-grey: #a0a0a0;
   --text-white: #ffffff;
-  --border-color: rgba(255, 255, 255, 0.15);
-  --shadow-color: rgba(0, 0, 0, 0.8);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-hover: rgba(0, 0, 0, 0.5);
   --section-bg: rgba(40, 40, 40, 0.5);
   --header-gradient-start: rgba(20, 30, 48, 0.9);
   --header-gradient-end: rgba(36, 59, 85, 0.8);
@@ -157,6 +159,7 @@ header {
   list-style-type: none;
   padding: 0px 20px;
   white-space: nowrap;
+  color: var(--text-primary);
 }
 
 .file-name {
@@ -225,8 +228,11 @@ section {
   display: inline-block;
   min-width: 50%;
   background: var(--section-bg);
-  box-shadow: -1px 9px 15px -5px var(--shadow-color);
-  border-radius: 15px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
 }
 
 .section-header {
@@ -247,8 +253,8 @@ section {
     var(--header-gradient-end),
     var(--header-gradient-start)
   );
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
 }
 
 .sidebar .section-header h2 {
@@ -278,12 +284,27 @@ section {
 .error-instance {
   display: grid;
   background: var(--error-instance-bg);
-  box-shadow:
-    0 0 4px rgba(0, 0, 0, 0.1),
-    0 4px 7px rgba(0, 0, 0, 0.1);
-  padding: 8px 16px;
-  margin-bottom: 5px;
-  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.error-instance:hover {
+  box-shadow: 0 2px 8px var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.error-instance .collapsible {
+  width: 100%;
+}
+
+.error-instance > div {
+  width: 100%;
 }
 
 .error-link {
@@ -381,6 +402,7 @@ section {
 .slider button:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
+  filter: brightness(120%);
 }
 
 .slider button.collapsed {

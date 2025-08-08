@@ -61,6 +61,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `z3_enabled` optional initializer argument (default False) to `ControlFlowGraph` class in `graph.py` and `CFGVisitor` class in `visitor.py`.
 - Updated `transforms.py` to ensure the patched version of `patch_ast_transforms` dynamically reads the `z3` option from linter config to reflect correct runtime setting.
 - Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
+- Refactored `one_shot_server` and `persistent_server` to allow for reuseablity.
 
 ## [2.10.1] - 2025-02-19
 

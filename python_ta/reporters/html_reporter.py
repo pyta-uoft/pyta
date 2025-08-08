@@ -9,9 +9,9 @@ from pygments.lexers import PythonLexer
 from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
+from ..util.servers.one_shot_server import open_html_in_browser
+from ..util.servers.persistent_server import PersistentHTMLServer
 from .core import PythonTaReporter
-from .one_shot_server import open_html_in_browser
-from .persistent_server import PersistentHTMLServer
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
@@ -108,6 +108,15 @@ class HTMLReporter(PythonTaReporter):
                 self.persistent_server.start_server_once(rendered_template)
             else:
                 open_html_in_browser(rendered_template, self.port)
+                print(
+                    "[INFO] Your PythonTA report is being opened in your web browser.\n"
+                    "       If it doesn't open, please add an output argument to python_ta.check_all\n"
+                    "       as follows:\n\n"
+                    "         check_all(..., output='pyta_report.html')\n\n"
+                    "       This will cause PythonTA to save the report to a file, pyta_report.html,\n"
+                    "       that you can open manually in a web browser.",
+                    file=sys.stderr,
+                )
 
     @classmethod
     def _colourify(cls, colour_class: str, text: str) -> str:

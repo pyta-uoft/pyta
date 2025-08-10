@@ -19,7 +19,7 @@
   --code-error: #dc3545;
   --style-error: #0052cc;
   --highlight-bg: rgba(255, 193, 7, 0.4);
-  --footer-bg: rgba(30, 101, 207, 0.95);
+  --footer-bg: rgba(29, 97, 198, 0.95);
   --text-empty-placeholder: #f8f9fa;
   --header-text: #000000;
   --footer-text: #ffffff;
@@ -268,7 +268,7 @@ section {
 }
 
 .style-errors {
-  border-top: 3px solid rgba(255, 255, 255, 0.25);
+  border-top: 3px solid rgba(192, 192, 192, 0.25);
 }
 
 .category-heading {

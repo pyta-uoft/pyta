@@ -25,7 +25,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a dark mode toggle with system detection for the html reporter
 - Replaced icons on the html reporter using the heroicons library, adding hover effects
 - Added command-line interface for CFG generation, allowing users to run `python -m python_ta.cfg <file>` with options for auto-open and visitor configuration
-- Reduced shadow intensity, refined border opacity, and added subtle hover effects on interactive elements to improve user experience.
+  <<<<<<< HEAD
+- # Reduced shadow intensity, refined border opacity, and added subtle hover effects on interactive elements to improve user experience.
+- Updated the color palette for the PythonTA web reporter to improve readability and visual hierarchy.
+  > > > > > > > upstream/master
 
 ### 💫 New checkers
 
@@ -62,6 +65,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `z3_enabled` optional initializer argument (default False) to `ControlFlowGraph` class in `graph.py` and `CFGVisitor` class in `visitor.py`.
 - Updated `transforms.py` to ensure the patched version of `patch_ast_transforms` dynamically reads the `z3` option from linter config to reflect correct runtime setting.
 - Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
+- Refactored `one_shot_server` and `persistent_server` to allow for reuseablity.
 
 ## [2.10.1] - 2025-02-19
 

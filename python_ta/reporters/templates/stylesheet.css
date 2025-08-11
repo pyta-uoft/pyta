@@ -460,6 +460,15 @@ section {
   padding: 0;
 }
 
+.message-name {
+  display: flex;
+  align-items: center;
+}
+
+.message-name .slider {
+  margin-left: auto;
+}
+
 .empty-placeholder {
   font-style: italic;
   padding-left: 20px;

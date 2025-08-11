@@ -26,6 +26,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Replaced icons on the html reporter using the heroicons library, adding hover effects
 - Added command-line interface for CFG generation, allowing users to run `python -m python_ta.cfg <file>` with options for auto-open and visitor configuration
 - Updated the color palette for the PythonTA web reporter to improve readability and visual hierarchy.
+- Reduced shadow intensity, refined border opacity, and added subtle hover effects on interactive elements for the PythonTA web reporter to improve user experience.
 
 ### 💫 New checkers
 

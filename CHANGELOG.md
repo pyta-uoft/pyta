@@ -28,6 +28,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Updated the color palette for the PythonTA web reporter to improve readability and visual hierarchy.
 - Reduced shadow intensity, refined border opacity, and added subtle hover effects on interactive elements for the PythonTA web reporter to improve user experience.
 - Aligned slider dropdown icons with the title text of errors in the web reporter to improve user experience
+- Updated `SnapshotTracer` bundled webstepper version to v0.7.0
 
 ### 💫 New checkers
 

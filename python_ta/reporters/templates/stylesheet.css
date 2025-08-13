@@ -32,7 +32,7 @@
   --bg-gradient-start: rgba(0, 0, 0, 0.8);
   --bg-gradient-end: rgba(0, 0, 0, 0.8);
   --text-primary: #ffffff;
-  --text-secondary: #9cdcfe;
+  --text-secondary: #e8e8e8;
   --text-muted: #3c3c3c;
   --text-grey: #808080;
   --text-white: #ffffff;
@@ -42,8 +42,8 @@
   --header-gradient-start: rgba(56, 112, 196, 0.95);
   --header-gradient-end: rgba(30, 93, 202, 0.85);
   --error-instance-bg: #2d2d30;
-  --code-error: #f48771;
-  --style-error: #4fc1ff;
+  --code-error: #ea5c6a;
+  --style-error: #5089df;
   --highlight-bg: rgba(255, 235, 59, 0.3);
   --footer-bg: #1e1e1e;
   --header-text: #ffffff;

@@ -308,6 +308,10 @@ section {
   width: 100%;
 }
 
+.error-instance:first-child {
+  margin-top: 1px;
+}
+
 .error-link {
   line-height: 35px;
 }

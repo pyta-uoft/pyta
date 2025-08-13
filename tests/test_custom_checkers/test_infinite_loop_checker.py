@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import astroid
 import pylint.testutils
 import pytest
@@ -294,6 +296,10 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         while True and 1 < 2 or 0: #@
             x += 1
         """,
+            """
+        while {1, 2}: #@
+            x += 1
+        """,
         ],
     )
     def test_while_constant_loop_condition(self, src: str) -> None:
@@ -311,16 +317,27 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_while(node)
 
-    def test_while_func_obj_condition(self) -> None:
-        """Test verifies that infinite-loop warning is triggered when a function object is used inside loop
-        condition."""
-        src = """
+    @pytest.mark.parametrize(
+        "src",
+        [
+            """
         def foo():
             return
 
         while foo: #@
             x += 1
-        """
+        """,
+            """
+        faa = lambda: True
+
+        while faa: #@
+            x += 1
+        """,
+        ],
+    )
+    def test_while_func_obj_condition(self, src: str) -> None:
+        """Test verifies that infinite-loop warning is triggered when a function object is used inside loop
+        condition."""
         node = astroid.extract_node(src)
 
         with self.assertAddsMessages(
@@ -336,6 +353,59 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             ignore_position=True,
         ):
             self.checker.visit_while(node)
+
+    def test_constant_infer_fail(self) -> None:
+        """Test verifies that `_check_condition_constant` helper handles failed inference correctly."""
+        """"""
+        src = """
+        while 1: #@
+            pass
+        """
+        node = astroid.extract_node(src)
+
+        with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
+            result = self.checker._check_condition_constant(node)
+            assert result is None
+
+    @pytest.mark.parametrize(
+        "src",
+        [
+            """
+        while []: #@
+            x += 1
+        """,
+            """
+        while {}: #@
+            x += 1
+        """,
+            """
+        while (): #@
+            x += 1
+        """,
+            """
+        while not {1, 2}: #@
+            x += 1
+        """,
+            """
+        while 0: #@
+            x += 1
+        """,
+            """
+        while not 101: #@
+            x += 1
+        """,
+            """
+        while 2 < 1: #@
+            x += 1
+        """,
+        ],
+    )
+    def test_constant_fail(self, src: str) -> None:
+        """Test verifies that `_check_condition_constant` helper handles case where inferred value is False."""
+        node = astroid.extract_node(src)
+
+        with self.assertNoMessages():
+            self.checker._check_condition_constant(node)
 
 
 class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
@@ -422,21 +492,21 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
 
     @pytest.mark.parametrize("src", CONSTANT_COMP_CASES)
     def test_constant_comp_condition_correctness(self, src: str) -> None:
-        """Test verifies that `_check_constant_loop_cond` helper properly flags constant BoolOp or BinOp loop
+        """Test verifies that `_check_constant_form_condition` helper properly flags constant BoolOp or BinOp loop
         conditions."""
         node = astroid.extract_node(src)
 
         expected = True
-        actual = self.checker._check_constant_comp_test(node)
+        actual = self.checker._check_constant_form_condition(node)
         assert actual == expected
 
     @pytest.mark.parametrize("src", NOT_CONSTANT_CASES)
     def test_not_constant_comp_condition_correctness(self, src: str) -> None:
-        """Test verifies that `_check_constant_loop_cond` helper does not flag non-constant loop conditions."""
+        """Test verifies that `_check_constant_form_condition` helper does not flag non-constant loop conditions."""
         node = astroid.extract_node(src)
 
         expected = False
-        actual = self.checker._check_constant_comp_test(node)
+        actual = self.checker._check_constant_form_condition(node)
         assert actual == expected
 
     @pytest.mark.parametrize("src", CONSTANT_CASES)
@@ -456,3 +526,16 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         expected = False
         actual = self.checker._check_constant_loop_cond(node, node.test)
         assert actual == expected
+
+    def test_constant_condition_infer_fail(self) -> None:
+        """Test verifies that `_check_constant_loop_cond` helper handles failed inference correctly."""
+        """"""
+        src = """
+        while x: #@
+            pass
+        """
+        node = astroid.extract_node(src)
+
+        with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
+            result = self.checker._check_constant_loop_cond(node, node.test)
+            assert result is False

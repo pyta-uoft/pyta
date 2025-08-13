@@ -59,13 +59,20 @@ class InfiniteLoopChecker(BaseChecker):
         """
         if not self._check_constant_loop_cond(
             node, node.test
-        ) and not self._check_constant_comp_test(node):
+        ) and not self._check_constant_form_condition(node):
             return
-
         inferred = utils.safe_infer(node.test)
+        print(inferred)
         if isinstance(inferred, util.UninferableBase) or inferred is None:
             return
-        if isinstance(inferred, nodes.Const) and bool(inferred.value) is False:
+        if (
+            isinstance(inferred, nodes.Const)
+            and bool(inferred.value) is False
+            or isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set))
+            and not inferred.elts
+            or isinstance(inferred, nodes.Dict)
+            and not inferred.items
+        ):
             return
 
         check_nodes = (nodes.Break, nodes.Return, nodes.Raise, nodes.Yield)
@@ -90,17 +97,12 @@ class InfiniteLoopChecker(BaseChecker):
         else:
             self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
 
-    def _check_constant_comp_test(self, node: nodes.While) -> bool:
-        """Helper function that checks if while loop condition is a comparison of constant nodes."""
+    def _check_constant_form_condition(self, node: nodes.While) -> bool:
+        """Helper function that checks if while loop condition is of constant form (e.g.: `1 < 2`, `5 - 1 >= 2 + 2`)"""
         cond_vars = set(child for child in node.test.nodes_of_class(nodes.Name))
         if cond_vars:
             return False
-        inferred = utils.safe_infer(node.test)
-        if isinstance(inferred, util.UninferableBase) or inferred is None:
-            return False
-        if isinstance(inferred, nodes.Const) and inferred.value is True:
-            return True
-        return False
+        return True
 
     def _check_constant_loop_cond(
         self, node: nodes.While, test_node: Optional[nodes.NodeNG]
@@ -177,7 +179,9 @@ class InfiniteLoopChecker(BaseChecker):
     def _name_holds_generator(test_node: nodes.Name) -> tuple[bool, Optional[nodes.Call]]:
         """Return whether `test` tests a name certain to hold a generator, or optionally
         a call that should be then tested to see if *it* returns only generators.
-        """
+
+        See `https://github.com/pylint-dev/pylint/blob/main/pylint/checkers/base/basic_checker.py#L303` for further
+        detail."""
         assert isinstance(test_node, nodes.Name)
         emit = False
         maybe_generator_call = None

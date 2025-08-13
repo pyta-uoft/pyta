@@ -62,7 +62,6 @@ class InfiniteLoopChecker(BaseChecker):
         ) and not self._check_constant_form_condition(node):
             return
         inferred = utils.safe_infer(node.test)
-        print(inferred)
         if isinstance(inferred, util.UninferableBase) or inferred is None:
             return
         if (

@@ -1,6 +1,3 @@
-#!/bin/bash
-# generate-example-report.sh
-
 SNAPSHOT_PATH="/Users/lxyhan/pyta/tests/test_reporters/test_html_server.py"
 
 echo "Generating example web reporter..."

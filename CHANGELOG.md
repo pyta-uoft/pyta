@@ -29,6 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Reduced shadow intensity, refined border opacity, and added subtle hover effects on interactive elements for the PythonTA web reporter to improve user experience.
 - Aligned slider dropdown icons with the title text of errors in the web reporter to improve user experience
 - Updated `SnapshotTracer` bundled webstepper version to v0.7.0
+- Added a small margin to the topmost error instance card in the web reporter to prevent the top border from being cut off when the hover effect is activated
 - Updated the error type text colors on the dark theme to be more consistent with that on the light theme
 
 ### 💫 New checkers

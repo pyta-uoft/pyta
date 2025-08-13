@@ -1,7 +1,8 @@
 SNAPSHOT_PATH="/Users/lxyhan/pyta/tests/test_reporters/test_html_server.py"
+MODULE=${1:-"examples.custom_checkers.e9999_forbidden_import"}
 
 echo "Generating example web reporter..."
-python -c "import python_ta; python_ta.check_all('examples.custom_checkers.e9999_forbidden_import')"
+python -c "import python_ta; python_ta.check_all('$MODULE')"
 
 echo "Example report generated!"
 echo ""

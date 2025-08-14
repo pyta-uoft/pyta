@@ -65,12 +65,9 @@ class InfiniteLoopChecker(BaseChecker):
         if isinstance(inferred, util.UninferableBase) or inferred is None:
             return
         if (
-            isinstance(inferred, nodes.Const)
-            and bool(inferred.value) is False
-            or isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set))
-            and not inferred.elts
-            or isinstance(inferred, nodes.Dict)
-            and not inferred.items
+            (isinstance(inferred, nodes.Const) and bool(inferred.value) is False)
+            or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and not inferred.elts)
+            or (isinstance(inferred, nodes.Dict) and not inferred.items)
         ):
             return
 
@@ -98,10 +95,7 @@ class InfiniteLoopChecker(BaseChecker):
 
     def _check_constant_form_condition(self, node: nodes.While) -> bool:
         """Helper function that checks if while loop condition is of constant form (e.g.: `1 < 2`, `5 - 1 >= 2 + 2`)"""
-        cond_vars = set(child for child in node.test.nodes_of_class(nodes.Name))
-        if cond_vars:
-            return False
-        return True
+        return not any(node.test.nodes_of_class(nodes.Name))
 
     def _check_constant_loop_cond(
         self, node: nodes.While, test_node: Optional[nodes.NodeNG]

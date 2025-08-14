@@ -151,20 +151,6 @@ class InfiniteLoopChecker(BaseChecker):
         if emit:
             return True
         elif isinstance(inferred, const_nodes):
-            # If the constant node is a FunctionDef or Lambda then
-            # it may be an illicit function call due to missing parentheses
-            call_inferred = None
-            try:
-                # Just forcing the generator to infer all elements.
-                # astroid.exceptions.InferenceError are false positives
-                if isinstance(inferred, nodes.FunctionDef):
-                    call_inferred = list(inferred.infer_call_result(node))
-                elif isinstance(inferred, nodes.Lambda):
-                    call_inferred = list(inferred.infer_call_result(node))
-            except InferenceError:
-                call_inferred = None
-            if call_inferred:
-                return True
             return True
         return False
 

@@ -341,10 +341,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
     )
     def test_while_func_obj_condition(self, src: str) -> None:
         """Test verifies that infinite-loop warning is triggered when a function object is used inside loop
-        condition.
-
-        Note: Due to the current implementation, some cases emit two warning messages.
-        """
+        condition."""
         node = astroid.extract_node(src)
 
         with self.assertAddsMessages(

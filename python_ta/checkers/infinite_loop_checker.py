@@ -21,10 +21,10 @@ class InfiniteLoopChecker(BaseChecker):
     }
 
     def visit_while(self, node: nodes.While) -> None:
-        self._check_condition_constant(node)
-        self._check_condition_all_var_used(node)
+        checks = [self._check_condition_constant, self._check_condition_all_var_used]
+        any(check(node) for check in checks)
 
-    def _check_condition_all_var_used(self, node: nodes.While) -> None:
+    def _check_condition_all_var_used(self, node: nodes.While) -> bool:
         """Helper function that checks whether variables used in a while loop's condition
         are also used anywhere inside the loop body.
 
@@ -37,20 +37,21 @@ class InfiniteLoopChecker(BaseChecker):
             if not isinstance(child.parent, nodes.Call) or child.parent.func is not child:
                 cond_vars.add(child.name)
         if not cond_vars:
-            return
+            return False
         # Check to see if condition variable(s) used inside body
         for child in node.body:
             for name_node in child.nodes_of_class((nodes.Name, nodes.AssignName)):
                 if name_node.name in cond_vars:
                     # At least one condition variable is used in the loop body
-                    return
+                    return False
         else:
             self.add_message(
                 "infinite-loop",
                 node=node.test,
             )
+            return True
 
-    def _check_condition_constant(self, node: nodes.While) -> None:
+    def _check_condition_constant(self, node: nodes.While) -> bool:
         """Helper function that checks if a constant while-loop condition may lead to an infinite loop.
 
         This helper flags loops that meet **both** of the following criteria:
@@ -58,24 +59,24 @@ class InfiniteLoopChecker(BaseChecker):
             - The loop body contains no `return`, `break`, `raise`, `yield`, or `sys.exit()` calls
         """
         if not self._check_constant_loop_cond(
-            node, node.test
+            node.test
         ) and not self._check_constant_form_condition(node):
-            return
+            return False
         inferred = utils.safe_infer(node.test)
         if isinstance(inferred, util.UninferableBase) or inferred is None:
-            return
+            return False
         if (
             (isinstance(inferred, nodes.Const) and bool(inferred.value) is False)
             or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and not inferred.elts)
             or (isinstance(inferred, nodes.Dict) and not inferred.items)
         ):
-            return
+            return False
 
         check_nodes = (nodes.Break, nodes.Return, nodes.Raise, nodes.Yield)
         for child in node.body:
             for exit_node in child.nodes_of_class(klass=(nodes.Call, *check_nodes)):
                 if isinstance(exit_node, check_nodes):
-                    return
+                    return False
                 # Check Call node to see if `sys.exit()` is called
                 elif (
                     isinstance(exit_node, nodes.Call)
@@ -89,17 +90,16 @@ class InfiniteLoopChecker(BaseChecker):
                         and isinstance(inferred, nodes.Module)
                         and inferred.name == "sys"
                     ):
-                        return
+                        return False
         else:
             self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
+            return True
 
     def _check_constant_form_condition(self, node: nodes.While) -> bool:
         """Helper function that checks if while loop condition is of constant form (e.g.: `1 < 2`, `5 - 1 >= 2 + 2`)"""
         return not any(node.test.nodes_of_class(nodes.Name))
 
-    def _check_constant_loop_cond(
-        self, node: nodes.While, test_node: Optional[nodes.NodeNG]
-    ) -> bool:
+    def _check_constant_loop_cond(self, test_node: Optional[nodes.NodeNG]) -> bool:
         """Helper function that checks if while loop condition is constant.
 
         See `https://github.com/pylint-dev/pylint/blob/main/pylint/checkers/base/basic_checker.py#L303` for further

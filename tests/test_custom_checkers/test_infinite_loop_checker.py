@@ -347,11 +347,15 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """
         node = astroid.extract_node(src)
 
-        self.checker.visit_while(node)
-
-        messages = self.linter.release_messages()
-
-        assert any(msg.msg_id == "infinite-loop" for msg in messages)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)
 
     def test_constant_infer_fail(self) -> None:
         """Test verifies that `_check_condition_constant` helper handles failed inference correctly."""
@@ -364,7 +368,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
             result = self.checker._check_condition_constant(node)
-            assert result is None
+            assert result is False
 
     @pytest.mark.parametrize(
         "src",
@@ -514,7 +518,7 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         node = astroid.extract_node(src)
 
         expected = True
-        actual = self.checker._check_constant_loop_cond(node, node.test)
+        actual = self.checker._check_constant_loop_cond(node.test)
         assert actual == expected
 
     @pytest.mark.parametrize("src", NOT_CONSTANT_CASES)
@@ -523,7 +527,7 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         node = astroid.extract_node(src)
 
         expected = False
-        actual = self.checker._check_constant_loop_cond(node, node.test)
+        actual = self.checker._check_constant_loop_cond(node.test)
         assert actual == expected
 
     def test_constant_condition_infer_fail(self) -> None:
@@ -536,5 +540,5 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         node = astroid.extract_node(src)
 
         with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
-            result = self.checker._check_constant_loop_cond(node, node.test)
+            result = self.checker._check_constant_loop_cond(node.test)
             assert result is False

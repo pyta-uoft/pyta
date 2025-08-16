@@ -9,6 +9,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+### 💫 New checkers
+
+### 🐛 Bug fixes
+
+### 🔧 Internal changes
+
+## [2.11.0] - 2025-08-16
+
+### ✨ Enhancements
+
 - Support `x in` and `x not in` preconditions involving `set()`, `list()`, and `tuple()` function calls in the Z3 parser.
 - Update the `output-format` configuration option to take reporter aliases rather than the plugin path.
 - Integrated Watchdog to enable automatic re-checking of Python files when changes are detected.
@@ -49,10 +59,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed "No Problems Detected" message colour in HTML report
 - Fixed bug in `SnapshotTracer` output when using MemoryViz v0.7.0
 
-### 📚 Documentation Updates
-
-- Linked the contributions list (README.md) in the pull request template
-
 ### 🔧 Internal changes
 
 - Refactored custom checker tests to group repeated tests using pytest.mark.parametrize.
@@ -73,6 +79,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Simplified combined Z3 preconditions in `set_function_def_z3_constraints` using `z3.simplify`
 - Refactored `one_shot_server` and `persistent_server` to allow for reuseablity.
 - Removed old unused files
+- Linked the contributions list (README.md) in the pull request template
 
 ## [2.10.1] - 2025-02-19
 

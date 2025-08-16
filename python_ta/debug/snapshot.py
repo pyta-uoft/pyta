@@ -60,7 +60,7 @@ def get_filtered_local_variables(
 def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
-    memory_viz_version: str = "latest",
+    memory_viz_version: str = "0.7.0",
     include_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
@@ -121,12 +121,22 @@ def snapshot(
 
         # Set up command
         command = ["npx", f"memory-viz@{memory_viz_version}", "--width", "800"]
-        if memory_viz_args:
-            command.extend(memory_viz_args)
+
+        if memory_viz_version == "latest":
+            memory_viz_version_parsed = None
+        else:
+            memory_viz_version_parsed = parse(memory_viz_version)
 
         # Ensure valid memory_viz version
-        if memory_viz_version != "latest" and parse(memory_viz_version) < Version("0.3.1"):
+        if memory_viz_version_parsed and memory_viz_version_parsed < Version("0.3.1"):
             logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
+
+        # Update CLI flags for MemoryViz >= 0.7.0
+        if memory_viz_version == "latest" or memory_viz_version_parsed >= Version("0.7.0"):
+            command.extend(["--no-interactive"])
+
+        if memory_viz_args:
+            command.extend(memory_viz_args)
 
         # Create a child to call the MemoryViz CLI
         npx_path = shutil.which("npx")

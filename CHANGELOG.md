@@ -32,6 +32,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Updated `SnapshotTracer` bundled webstepper version to v0.7.0
 - Added a small margin to the topmost error instance card in the web reporter to prevent the top border from being cut off when the hover effect is activated
 - Updated the error type text colors on the dark theme to be more consistent with that on the light theme
+- Changed default MemoryViz version used by `snapshot` from "latest" to "0.7.0"
 
 ### 💫 New checkers
 
@@ -46,6 +47,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed a bug in AccumulationTable where loop variable names weren't being captured for all nested targets.
 - Fixed a bug in the `infinite-loop` checker where function and method names were incorrectly included in the set of condition variables.
 - Fixed "No Problems Detected" message colour in HTML report
+- Fixed bug in `SnapshotTracer` output when using MemoryViz v0.7.0
 
 ### 📚 Documentation Updates
 

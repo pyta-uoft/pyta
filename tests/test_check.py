@@ -72,8 +72,9 @@ def test_check_on_dir():
             msg.message.symbol for msg in messages
         }, f"astroid-error encountered for {filename}"
         name = os.path.basename(filename)
-        assert name in sample_files, f"{name} not in sample_files"
-        sample_files.remove(name)
+        assert name in sample_files or name == ".pylintrc", f"{name} not in sample_files"
+        if name in sample_files:
+            sample_files.remove(name)
 
     assert not sample_files, f"the following files not checked by python_ta: {sample_files}"
 

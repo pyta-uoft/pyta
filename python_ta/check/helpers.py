@@ -93,7 +93,7 @@ def check_file(
 
         # At this point, the only possible errors are those from parsing the config file
         # so print them, if there are any.
-        if current_reporter.messages:
+        if current_reporter.has_messages():
             current_reporter.print_messages()
     else:
         linter.set_reporter(current_reporter)
@@ -291,8 +291,6 @@ def reset_linter(
         load_config(linter, default_config_path)
         # If we do specify to load the default config, we just need to override the options later.
         set_config = override_config
-        if default_config_path in linter.reporter.messages:
-            del linter.reporter.messages[default_config_path]
 
     if isinstance(config, str) and config != "":
         set_config(linter, config)

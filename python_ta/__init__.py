@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
 from __future__ import annotations
 
-__version__ = "2.11.1"  # Version number
+__version__ = "2.11.2.dev"  # Version number
 # First, remove underscore from builtins if it has been bound in the REPL.
 # Must appear before other imports from pylint/python_ta.
 import builtins

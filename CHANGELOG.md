@@ -13,9 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Fixed reports to only include config files when they have errors
-
 ### 🔧 Internal changes
+
+## [2.11.1] - 2025-08-17
+
+### 🐛 Bug fixes
+
+- Fixed reports to only include config files when they have errors
 
 ## [2.11.0] - 2025-08-16
 

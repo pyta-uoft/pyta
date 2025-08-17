@@ -139,6 +139,13 @@ class PythonTaReporter(BaseReporter):
 
             curr_messages[-1] = NewMessage(msg, node, snippet)
 
+    def gather_messages(self) -> dict[str, list[Message]]:
+        """Return a filtered version of self.messages for reporting.
+
+        This filters out configuration files (i.e., non-".py" files) that do not have any errors.
+        """
+        return {path: msgs for path, msgs in self.messages.items() if path.endswith(".py") or msgs}
+
     def group_messages(
         self, messages: list[Message]
     ) -> tuple[dict[str, list[Message]], dict[str, list[Message]]]:

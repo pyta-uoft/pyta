@@ -2,6 +2,7 @@
 Test suite for checking whether configuration worked correctly with user-inputted configurations.
 """
 
+import io
 import json
 import os
 from unittest.mock import mock_open, patch
@@ -191,6 +192,52 @@ def test_print_messages_config_parsing_error(capsys) -> None:
     out = capsys.readouterr().out
 
     assert "W0012" in out
+
+
+@pytest.mark.parametrize(
+    argnames=["config_filename"],
+    argvalues=[
+        ("test_plain_no_errors.pylintrc",),
+        ("test_color_no_errors.pylintrc",),
+        ("test_html_no_errors.pylintrc",),
+        ("test_json_no_errors.pylintrc",),
+    ],
+)
+def test_no_config_reported_when_no_error(config_filename: str) -> None:
+    """Test that check_all does not display output for a custom config file
+    when the file has no errors.
+    """
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", config_filename)
+    output = io.StringIO()
+
+    python_ta.check_all(module_name="examples/nodes/name.py", config=config, output=output)
+
+    output_contents = output.getvalue()
+    assert config_filename not in output_contents
+
+
+@pytest.mark.parametrize(
+    argnames=["config_filename"],
+    argvalues=[
+        ("test_plain_unknown_key.pylintrc",),
+        ("test_color_unknown_key.pylintrc",),
+        ("test_html_unknown_key.pylintrc",),
+        ("test_json_unknown_key.pylintrc",),
+    ],
+)
+def test_config_reported_when_logical_error(config_filename: str) -> None:
+    """Test that check_all displays output for a custom config file
+    when the file has a semantic error (invalid key name).
+    """
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", config_filename)
+    output = io.StringIO()
+
+    python_ta.check_all(module_name="examples/nodes/name.py", config=config, output=output)
+
+    output_contents = output.getvalue()
+    assert config_filename in output_contents
 
 
 def test_no_snippet_for_config_parsing_errors(prevent_webbrowser_and_httpserver) -> None:

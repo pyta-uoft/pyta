@@ -33,7 +33,7 @@ class JSONReporter(PythonTaReporter):
         been aggregated.
         """
         output = []
-        for k, msgs in self.messages.items():
+        for k, msgs in self.gather_messages().items():
             output.append(
                 {
                     "filename": k,

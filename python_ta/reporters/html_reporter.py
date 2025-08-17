@@ -62,7 +62,9 @@ class HTMLReporter(PythonTaReporter):
         This method can be implemented to display them after they've
         been aggregated.
         """
-        grouped_messages = {path: self.group_messages(msgs) for path, msgs in self.messages.items()}
+        grouped_messages = {
+            path: self.group_messages(msgs) for path, msgs in self.gather_messages().items()
+        }
 
         template_f = self.linter.config.pyta_template_file
         template_f = (

@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import base64
 import copy
 import inspect
 import json
 import logging
 import os
+import socket
 import sys
-import webbrowser
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
-from bs4 import BeautifulSoup
+from jinja2 import Environment, FileSystemLoader
 
+from ..util.servers.one_shot_server import open_html_in_browser
 from .id_tracker import IDTracker
 from .snapshot import snapshot
 
@@ -113,50 +115,53 @@ class SnapshotTracer:
         func_frame = inspect.getouterframes(inspect.currentframe())[1]
         func_frame.frame.f_trace = None
         if self.webstepper:
-            self._build_result_html(func_frame.frame)
-            self._open_html()
+            html_content = self._build_self_contained_html(func_frame.frame)
+            self._serve_html(html_content)
 
-    def _build_result_html(self, func_frame: types.FrameType) -> None:
-        """Build and write the Webstepper html to the output directory"""
-        snapshot_tracer_dir = os.path.dirname(os.path.abspath(__file__))
+    def _build_self_contained_html(self, func_frame: types.FrameType) -> bytes:
+        """Build a self-contained HTML string with all assets inlined."""
+        webstepper_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "webstepper")
 
-        html_content = self._read_original_html(snapshot_tracer_dir)
-        soup = BeautifulSoup(html_content, "html.parser")
+        bundle_path = os.path.join(webstepper_dir, "index.bundle.js")
+        with open(bundle_path, "r", encoding="utf-8") as f:
+            bundle_content = f.read()
 
-        self._modify_bundle_import_path(snapshot_tracer_dir, soup)
-        self._insert_data(soup, func_frame)
-        self._write_generated_html(soup)
-
-    def _open_html(self) -> None:
-        """Open the generated HTML file in a web browser."""
-        index_html = f"file://{os.path.join(self.output_directory, 'index.html')}"
-        webbrowser.open(index_html, new=2)
-
-    def _read_original_html(self, snapshot_tracer_dir: str) -> None:
-        """Read the original Webstepper html"""
-        original_index_html = os.path.join(snapshot_tracer_dir, "webstepper", "index.html")
-        with open(original_index_html, "r") as file:
-            html_content = file.read()
-        return html_content
-
-    def _modify_bundle_import_path(self, snapshot_tracer_dir: str, soup: BeautifulSoup) -> None:
-        """Modify the bundle path to the absolute path to the bundle"""
-        original_js_bundle = os.path.join(snapshot_tracer_dir, "webstepper", "index.bundle.js")
-        soup.select("script")[0]["src"] = f"file://{original_js_bundle}"
-
-    def _insert_data(self, soup: BeautifulSoup, func_frame: types.FrameType) -> None:
-        """Insert the SVG array and code string into the Webstepper index HTML."""
-        insert_script = (
-            f"<script>window.codeText=`{self._get_code(func_frame)}` </script>\n"
-            + f"<script>window.svgArray={json.dumps(self._snapshots)}</script>\n"
+        bundle_content = bundle_content.replace(
+            'throw new Error("Automatic publicPath is not supported in this browser")',
+            'e = ""',
         )
-        soup.select("script")[0].insert_before(BeautifulSoup(insert_script, "html.parser"))
 
-    def _write_generated_html(self, soup: BeautifulSoup) -> None:
-        """Write the generated Webstepper html to the output directory"""
-        modified_index_html = os.path.join(self.output_directory, "index.html")
-        with open(modified_index_html, "w") as file:
-            file.write(str(soup))
+        image_replacements = {}
+        for image_filename in ["99ee5c67fd0c522b4b6a.png", "fd6133fe40f4f90440d6.png"]:
+            image_path = os.path.join(webstepper_dir, image_filename)
+            with open(image_path, "rb") as f:
+                image_data = f.read()
+                base64_data = base64.b64encode(image_data).decode("utf-8")
+                data_uri = f"data:image/png;base64,{base64_data}"
+                image_replacements[image_filename] = data_uri
+
+        for filename, data_uri in image_replacements.items():
+            bundle_content = bundle_content.replace(filename, data_uri)
+
+        template_loader = FileSystemLoader(webstepper_dir)
+        template_env = Environment(loader=template_loader)
+        template = template_env.get_template("webstepper_template.html.jinja")
+
+        rendered_html = template.render(
+            code_text=self._get_code(func_frame),
+            svg_array=self._snapshots,
+            bundle_content=bundle_content,
+        )
+
+        return rendered_html.encode("utf-8")
+
+    def _serve_html(self, html_content: bytes) -> None:
+        """Serve the HTML content using a one-shot server."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(("127.0.0.1", 0))
+            port = s.getsockname()[1]
+
+        open_html_in_browser(html_content, port)
 
     def _get_code(self, func_frame: types.FrameType) -> str:
         """Retrieve and save the code string to be displayed in Webstepper."""

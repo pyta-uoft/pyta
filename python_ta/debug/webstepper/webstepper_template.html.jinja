@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>MemoryViz Webstepper</title>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script>
+      window.codeText = `{{ code_text }}`;
+      window.svgArray = {{ svg_array | tojson }};
+    </script>
+    <script>
+      (function() {
+        {{ bundle_content | safe }}
+      })();
+    </script>
+  </body>
+</html>

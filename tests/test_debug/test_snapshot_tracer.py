@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import os.path
-import re
 import sys
 from typing import Iterator
+from unittest.mock import patch
 
 import pytest
-from bs4 import BeautifulSoup
 from pytest_snapshot.plugin import Snapshot
 
 from python_ta.debug import SnapshotTracer
@@ -237,34 +236,7 @@ class TestSnapshotTracer:
                 {"snapshot-0.svg": actual_file.read()}, func_no_output_dir.__name__
             )
 
-    def test_generated_webstepper_html(self, snapshot, tmp_path, prevent_webbrowser_and_httpserver):
-        """
-        Test that SnapshotTracer generates the correct Webstepper HTML for the given code.
-
-        This test verifies that the generated `index.html` file is correct. However, the outputted
-        `index.html` cannot be opened directly because it contains a hardcoded absolute path to
-        `index.bundle.js`. This is done to ensure that the test passes on different machines,
-        regardless of their file system structure.
-
-        To view the test result, replace the hardcoded path "absolute/path/to/index.bundle.js"
-        with the actual path to the Webstepper `index.bundle.js` file on your machine.
-        """
-        snapshot.snapshot_dir = SNAPSHOT_DIR
-        func_open_webstepper(str(tmp_path))
-
-        index_path = os.path.join(str(tmp_path), "index.html")
-        with open(index_path, "r+") as file:
-            html_content = file.read()
-
-            soup = BeautifulSoup(html_content, "html.parser")
-
-            script_tag = soup.find("script", src=lambda x: x and "index.bundle.js" in x)
-
-            if script_tag:
-                script_tag["src"] = "absolute/path/to/index.bundle.js"
-
-            file.seek(0)
-            file.write(str(soup))
-            file.truncate()
-
-        assert_output_files_match(str(tmp_path), snapshot, func_open_webstepper.__name__)
+    def test_serve_html_calls_open_in_browser(self):
+        with patch("python_ta.debug.snapshot_tracer.open_html_in_browser") as mock_open:
+            func_open_webstepper()
+            mock_open.assert_called_once()

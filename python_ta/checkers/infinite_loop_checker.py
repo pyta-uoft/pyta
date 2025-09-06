@@ -21,7 +21,11 @@ class InfiniteLoopChecker(BaseChecker):
     }
 
     def visit_while(self, node: nodes.While) -> None:
-        checks = [self._check_condition_constant, self._check_condition_all_var_used]
+        checks = [
+            self._check_condition_constant,
+            self._check_condition_all_var_used,
+            self._check_immutable_cond_var_reassigned,
+        ]
         any(check(node) for check in checks)
 
     def _check_condition_all_var_used(self, node: nodes.While) -> bool:
@@ -185,6 +189,55 @@ class InfiniteLoopChecker(BaseChecker):
             ):
                 maybe_generator_call = lookup_result[1][0].parent.value
         return emit, maybe_generator_call
+
+    def _check_immutable_cond_var_reassigned(self, node: nodes.While) -> bool:
+        """Helper function that checks if a while-loop condition uses only immutable variables
+        and none of them are reassigned inside the loop body.
+
+        Flags loops that meet **both** of the following criteria:
+        - All variables in the `while` condition are immutable (int, float, complex, bool,
+          str, bytes, tuple, frozenset, or NoneType)
+        - None of these variables are reassigned in the loop body"""
+        immutable_types = (
+            int,
+            float,
+            complex,
+            bool,
+            str,
+            bytes,
+            tuple,
+            frozenset,
+            type(None),
+        )
+        immutable_vars, cond_vars = set(), set()
+        for child in node.test.nodes_of_class(nodes.Name):
+            if not isinstance(child.parent, nodes.Call) or child.parent.func is not child:
+                cond_vars.add(child.name)
+                inferred = utils.safe_infer(child)
+                if isinstance(inferred, util.UninferableBase) or inferred is None:
+                    continue
+                # Check if type of inferred value is immutable
+                if (
+                    (isinstance(inferred, nodes.Const) and type(inferred.value) in immutable_types)
+                    or isinstance(inferred, nodes.Tuple)
+                    or isinstance(inferred, nodes.Const.FrozenSet)
+                ):
+                    immutable_vars.add(child.name)
+        if not immutable_vars or immutable_vars != cond_vars:
+            # There are no vars with immutables values OR there are vars with mutable values
+            return False
+
+        for child in node.body:
+            for assign_node in child.nodes_of_class(nodes.AssignName):
+                if assign_node.name in immutable_vars:
+                    return False
+        else:
+            self.add_message(
+                "infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            )
+            return True
 
 
 def register(linter: PyLinter) -> None:

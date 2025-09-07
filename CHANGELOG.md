@@ -9,6 +9,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Extended infinite-loop check to flag while loops whose conditions depend only on immutable variables and are not reassigned in the loop body.
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes

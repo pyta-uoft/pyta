@@ -201,12 +201,11 @@ class InfiniteLoopChecker(BaseChecker):
         immutable_types = (
             int,
             float,
-            complex,
             bool,
+            complex,
             str,
             bytes,
             tuple,
-            frozenset,
             type(None),
         )
         immutable_vars, cond_vars = set(), set()
@@ -218,13 +217,19 @@ class InfiniteLoopChecker(BaseChecker):
                     continue
                 # Check if type of inferred value is immutable
                 if (
-                    (isinstance(inferred, nodes.Const) and type(inferred.value) in immutable_types)
-                    or isinstance(inferred, nodes.Tuple)
-                    or isinstance(inferred, nodes.Const.FrozenSet)
-                ):
+                    isinstance(inferred, nodes.Const) and type(inferred.value) in immutable_types
+                ) or isinstance(inferred, nodes.Tuple):
                     immutable_vars.add(child.name)
         if not immutable_vars or immutable_vars != cond_vars:
             # There are no vars with immutables values OR there are vars with mutable values
+            return False
+
+        # Infer the loop condition
+        inferred_test = utils.safe_infer(node.test)
+        if isinstance(inferred_test, util.UninferableBase) or inferred_test is None:
+            return False
+        if isinstance(inferred_test, nodes.Const) and inferred_test.value is False:
+            # Condition is always false, loop won't run. No need to check for infinite loop.
             return False
 
         for child in node.body:

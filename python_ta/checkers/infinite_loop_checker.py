@@ -208,10 +208,9 @@ class InfiniteLoopChecker(BaseChecker):
             tuple,
             type(None),
         )
-        immutable_vars, cond_vars = set(), set()
+        immutable_vars = set()
         for child in node.test.nodes_of_class(nodes.Name):
             if not isinstance(child.parent, nodes.Call) or child.parent.func is not child:
-                cond_vars.add(child.name)
                 inferred = utils.safe_infer(child)
                 if isinstance(inferred, util.UninferableBase) or inferred is None:
                     continue
@@ -220,8 +219,10 @@ class InfiniteLoopChecker(BaseChecker):
                     isinstance(inferred, nodes.Const) and type(inferred.value) in immutable_types
                 ) or isinstance(inferred, nodes.Tuple):
                     immutable_vars.add(child.name)
-        if not immutable_vars or immutable_vars != cond_vars:
-            # There are no vars with immutables values OR there are vars with mutable values
+                else:
+                    return False
+        if not immutable_vars:
+            # There are no vars with immutables values
             return False
 
         # Infer the loop condition

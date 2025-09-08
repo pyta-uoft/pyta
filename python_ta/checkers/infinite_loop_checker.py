@@ -196,7 +196,7 @@ class InfiniteLoopChecker(BaseChecker):
 
         Flags loops that meet **both** of the following criteria:
         - All variables in the `while` condition are immutable (int, float, complex, bool,
-          str, bytes, tuple, frozenset, or NoneType)
+          str, bytes, tuple, or NoneType)
         - None of these variables are reassigned in the loop body"""
         immutable_types = (
             int,

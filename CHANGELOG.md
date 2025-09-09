@@ -9,6 +9,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Updated `SnapshotTracer` to open the generated HTML report in a one-shot server, instead of opening the HTML file directly.
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes

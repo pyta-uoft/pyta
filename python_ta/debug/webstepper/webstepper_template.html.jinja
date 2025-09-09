@@ -12,9 +12,24 @@
       window.svgArray = {{ svg_array | tojson }};
     </script>
     <script>
-      (function() {
-        {{ bundle_content | safe }}
-      })();
+      // Two hacks here:
+      // 1. Set window.importScripts = true so that the webpack-bundled webstepper JS file
+      //    doesn't attempt to detect an automatic publicPath (doesn't work when the contents are copied
+      //    into a <script> tag).
+      // 2. Fix logo image loading by stripping the window.location.origin part from the src attribute.
+      window.importScripts = true;
+
+      {{ bundle_content | safe }}
+
+      document.addEventListener("DOMContentLoaded", () => {
+        Array.from(document.getElementsByClassName("logo")).forEach(element => {
+          element.addEventListener("error", () => {
+            if (element.src.startsWith(window.location.origin)) {
+              element.src = element.src.slice(window.location.origin.length + 1);
+            }
+          })
+        })
+      })
     </script>
   </body>
 </html>

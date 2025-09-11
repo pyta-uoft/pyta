@@ -8,6 +8,17 @@ from pylint.checkers import BaseChecker, utils
 from pylint.interfaces import INFERENCE
 from pylint.lint import PyLinter
 
+immutable_types = (
+    int,
+    float,
+    bool,
+    complex,
+    str,
+    bytes,
+    tuple,
+    type(None),
+)
+
 
 class InfiniteLoopChecker(BaseChecker):
     name = "infinite-loop"
@@ -198,31 +209,22 @@ class InfiniteLoopChecker(BaseChecker):
         - All variables in the `while` condition are immutable (int, float, complex, bool,
           str, bytes, tuple, or NoneType)
         - None of these variables are reassigned in the loop body"""
-        immutable_types = (
-            int,
-            float,
-            bool,
-            complex,
-            str,
-            bytes,
-            tuple,
-            type(None),
-        )
         immutable_vars = set()
         for child in node.test.nodes_of_class(nodes.Name):
-            if not isinstance(child.parent, nodes.Call) or child.parent.func is not child:
-                inferred = utils.safe_infer(child)
-                if isinstance(inferred, util.UninferableBase) or inferred is None:
-                    continue
-                # Check if type of inferred value is immutable
-                if (
-                    isinstance(inferred, nodes.Const) and type(inferred.value) in immutable_types
-                ) or isinstance(inferred, nodes.Tuple):
-                    immutable_vars.add(child.name)
-                else:
+            if isinstance(child.parent, nodes.Call) and child.parent.func is child:
+                continue
+            try:
+                # Get all possible values
+                inferred_values = list(child.infer())
+            except InferenceError:
+                return False
+            for inferred in inferred_values:
+                if not self._is_immutable_node(inferred):
+                    # Return False when the node may evaluate to a mutable object
                     return False
+            immutable_vars.add(child.name)
         if not immutable_vars:
-            # There are no vars with immutables values
+            # There are no vars with immutable values
             return False
 
         # Infer the loop condition
@@ -244,6 +246,15 @@ class InfiniteLoopChecker(BaseChecker):
                 confidence=INFERENCE,
             )
             return True
+
+    def _is_immutable_node(self, node: nodes.NodeNG) -> bool:
+        """Helper used to check if node is immutable."""
+        if (isinstance(node, nodes.Const) and type(node.value) in immutable_types) or isinstance(
+            node, nodes.Tuple
+        ):
+            return True
+        else:
+            return False
 
 
 def register(linter: PyLinter) -> None:

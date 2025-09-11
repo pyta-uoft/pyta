@@ -403,6 +403,11 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
                 print(i)
             """,
             """
+            i = 1 + 3j
+            while i:
+                print(i)
+            """,
+            """
             i = True
             while i: #@
                 print(i)
@@ -420,6 +425,11 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             """
             i = (1, 2)
             while i: #@
+                print(i)
+            """,
+            """
+            i = None
+            while not i: #@
                 print(i)
             """,
             """

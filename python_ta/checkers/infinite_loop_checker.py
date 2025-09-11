@@ -1,7 +1,7 @@
 """Check for infinite while loops."""
 
 import itertools
-from typing import Optional
+from typing import Optional, Union
 
 from astroid import BoundMethod, InferenceError, UnboundMethod, bases, nodes, util
 from pylint.checkers import BaseChecker, utils
@@ -219,7 +219,7 @@ class InfiniteLoopChecker(BaseChecker):
             except InferenceError:
                 return False
             for inferred in inferred_values:
-                if not self._is_immutable_node(inferred):
+                if not _is_immutable_node(inferred):
                     # Return False when the node may evaluate to a mutable object
                     return False
             immutable_vars.add(child.name)
@@ -247,14 +247,23 @@ class InfiniteLoopChecker(BaseChecker):
             )
             return True
 
-    def _is_immutable_node(self, node: nodes.NodeNG) -> bool:
-        """Helper used to check if node is immutable."""
-        if (isinstance(node, nodes.Const) and type(node.value) in immutable_types) or isinstance(
-            node, nodes.Tuple
-        ):
-            return True
-        else:
-            return False
+
+def _is_immutable_node(node: nodes.NodeNG) -> bool:
+    """Helper used to check whether node represents an immutable type."""
+    if (isinstance(node, nodes.Const) and type(node.value) in immutable_types) or isinstance(
+        node, nodes.Tuple
+    ):
+        return True
+    else:
+        return False
+
+
+def get_safely_inferred(node: nodes.NodeNG) -> Union[nodes.NodeNG, None]:
+    """Helper used to safely infer a node with `astroid.safe_infer`. Return None if inference failed."""
+    inferred = utils.safe_infer(node)
+    if isinstance(inferred, util.UninferableBase) or inferred is None:
+        return None
+    return inferred
 
 
 def register(linter: PyLinter) -> None:

@@ -77,8 +77,8 @@ class InfiniteLoopChecker(BaseChecker):
             node.test
         ) and not self._check_constant_form_condition(node):
             return False
-        inferred = utils.safe_infer(node.test)
-        if isinstance(inferred, util.UninferableBase) or inferred is None:
+        inferred = get_safely_inferred(node.test)
+        if inferred is None:
             return False
         if (
             (isinstance(inferred, nodes.Const) and bool(inferred.value) is False)
@@ -98,10 +98,9 @@ class InfiniteLoopChecker(BaseChecker):
                     and isinstance(exit_node.func, nodes.Attribute)
                     and exit_node.func.attrname == "exit"
                 ):
-                    inferred = utils.safe_infer(exit_node.func.expr)
+                    inferred = get_safely_inferred(exit_node.func.expr)
                     if (
-                        not isinstance(inferred, util.UninferableBase)
-                        and inferred is not None
+                        inferred is not None
                         and isinstance(inferred, nodes.Module)
                         and inferred.name == "sys"
                     ):
@@ -228,8 +227,8 @@ class InfiniteLoopChecker(BaseChecker):
             return False
 
         # Infer the loop condition
-        inferred_test = utils.safe_infer(node.test)
-        if isinstance(inferred_test, util.UninferableBase) or inferred_test is None:
+        inferred_test = get_safely_inferred(node.test)
+        if inferred_test is None:
             return False
         if isinstance(inferred_test, nodes.Const) and inferred_test.value is False:
             # Condition is always false, loop won't run. No need to check for infinite loop.

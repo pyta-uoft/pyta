@@ -1,12 +1,23 @@
 """Check for infinite while loops."""
 
 import itertools
-from typing import Optional
+from typing import Optional, Union
 
 from astroid import BoundMethod, InferenceError, UnboundMethod, bases, nodes, util
 from pylint.checkers import BaseChecker, utils
 from pylint.interfaces import INFERENCE
 from pylint.lint import PyLinter
+
+immutable_types = (
+    int,
+    float,
+    bool,
+    complex,
+    str,
+    bytes,
+    tuple,
+    type(None),
+)
 
 
 class InfiniteLoopChecker(BaseChecker):
@@ -21,7 +32,11 @@ class InfiniteLoopChecker(BaseChecker):
     }
 
     def visit_while(self, node: nodes.While) -> None:
-        checks = [self._check_condition_constant, self._check_condition_all_var_used]
+        checks = [
+            self._check_condition_constant,
+            self._check_condition_all_var_used,
+            self._check_immutable_cond_var_reassigned,
+        ]
         any(check(node) for check in checks)
 
     def _check_condition_all_var_used(self, node: nodes.While) -> bool:
@@ -62,8 +77,8 @@ class InfiniteLoopChecker(BaseChecker):
             node.test
         ) and not self._check_constant_form_condition(node):
             return False
-        inferred = utils.safe_infer(node.test)
-        if isinstance(inferred, util.UninferableBase) or inferred is None:
+        inferred = get_safely_inferred(node.test)
+        if inferred is None:
             return False
         if (
             (isinstance(inferred, nodes.Const) and bool(inferred.value) is False)
@@ -83,10 +98,9 @@ class InfiniteLoopChecker(BaseChecker):
                     and isinstance(exit_node.func, nodes.Attribute)
                     and exit_node.func.attrname == "exit"
                 ):
-                    inferred = utils.safe_infer(exit_node.func.expr)
+                    inferred = get_safely_inferred(exit_node.func.expr)
                     if (
-                        not isinstance(inferred, util.UninferableBase)
-                        and inferred is not None
+                        inferred is not None
                         and isinstance(inferred, nodes.Module)
                         and inferred.name == "sys"
                     ):
@@ -185,6 +199,70 @@ class InfiniteLoopChecker(BaseChecker):
             ):
                 maybe_generator_call = lookup_result[1][0].parent.value
         return emit, maybe_generator_call
+
+    def _check_immutable_cond_var_reassigned(self, node: nodes.While) -> bool:
+        """Helper function that checks if a while-loop condition uses only immutable variables
+        and none of them are reassigned inside the loop body.
+
+        Flags loops that meet **both** of the following criteria:
+        - All variables in the `while` condition are immutable (int, float, complex, bool,
+          str, bytes, tuple, or NoneType)
+        - None of these variables are reassigned in the loop body"""
+        immutable_vars = set()
+        for child in node.test.nodes_of_class(nodes.Name):
+            if isinstance(child.parent, nodes.Call) and child.parent.func is child:
+                continue
+            try:
+                # Get all possible values
+                inferred_values = list(child.infer())
+            except InferenceError:
+                return False
+            for inferred in inferred_values:
+                if not _is_immutable_node(inferred):
+                    # Return False when the node may evaluate to a mutable object
+                    return False
+            immutable_vars.add(child.name)
+        if not immutable_vars:
+            # There are no vars with immutable values
+            return False
+
+        # Infer the loop condition
+        inferred_test = get_safely_inferred(node.test)
+        if inferred_test is None:
+            return False
+        if isinstance(inferred_test, nodes.Const) and inferred_test.value is False:
+            # Condition is always false, loop won't run. No need to check for infinite loop.
+            return False
+
+        for child in node.body:
+            for assign_node in child.nodes_of_class(nodes.AssignName):
+                if assign_node.name in immutable_vars:
+                    return False
+        else:
+            self.add_message(
+                "infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            )
+            return True
+
+
+def _is_immutable_node(node: nodes.NodeNG) -> bool:
+    """Helper used to check whether node represents an immutable type."""
+    if (isinstance(node, nodes.Const) and type(node.value) in immutable_types) or isinstance(
+        node, nodes.Tuple
+    ):
+        return True
+    else:
+        return False
+
+
+def get_safely_inferred(node: nodes.NodeNG) -> Union[nodes.NodeNG, None]:
+    """Helper used to safely infer a node with `astroid.safe_infer`. Return None if inference failed."""
+    inferred = utils.safe_infer(node)
+    if isinstance(inferred, util.UninferableBase) or inferred is None:
+        return None
+    return inferred
 
 
 def register(linter: PyLinter) -> None:

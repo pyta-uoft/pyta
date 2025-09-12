@@ -19,7 +19,6 @@ error_params = [
     ("E127", [(2, 19, "continuation line over-indented for visual indent")]),
     ("E129", [(4, 4, "visually indented line with same indent as next logical line")]),
     ("E131", [(4, 8, "continuation line unaligned for hanging indent")]),
-    ("E202", [(1, 19, "whitespace before ')'")]),
     ("E203", [(1, 30, "whitespace before ':'")]),
     ("E221", [(1, 5, "multiple spaces before operator")]),
     ("E222", [(1, 3, "multiple spaces after operator")]),

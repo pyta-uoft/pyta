@@ -52,6 +52,7 @@ error_params = [
             (9, 0, "expected 2 blank lines after class or function definition, found 0"),
         ],
     ),
+    ("E306", [(3, 4, "expected 1 blank line before a nested definition, found 0")]),
 ]
 
 

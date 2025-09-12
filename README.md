@@ -120,4 +120,5 @@ Lana Wehbeh,
 Jasmine Wu,
 Raine Yang,
 Philippe Yu,
+Shirley Zhang
 Yi Cheng (Michael) Zhao

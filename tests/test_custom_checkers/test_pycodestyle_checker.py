@@ -12,13 +12,19 @@ DIR_PATH = os.path.normpath(
 
 # Define parameter sets for different error and no-error tests
 error_params = [
+    ("E101", [(2, 0, "indentation contains mixed spaces and tabs")]),
     ("E115", [(2, 0, "expected an indented block (comment)")]),
+    ("E116", [(1, 8, "unexpected indentation (comment)")]),
     ("E122", [(2, 0, "continuation line missing indentation or outdented")]),
     ("E123", [(3, 4, "closing bracket does not match indentation of opening bracket's line")]),
+    ("E124", [(3, 8, "closing bracket does not match visual indentation")]),
     ("E125", [(2, 4, "continuation line with same indent as next logical line")]),
     ("E127", [(2, 19, "continuation line over-indented for visual indent")]),
+    ("E128", [(2, 8, "continuation line under-indented for visual indent")]),
     ("E129", [(4, 4, "visually indented line with same indent as next logical line")]),
     ("E131", [(4, 8, "continuation line unaligned for hanging indent")]),
+    ("E201", [(1, 6, "whitespace after '('")]),
+    ("E202", [(1, 19, "whitespace before ')'")]),
     ("E203", [(1, 30, "whitespace before ':'")]),
     ("E222", [(1, 3, "multiple spaces after operator")]),
     ("E223", [(1, 1, "tab before operator")]),
@@ -39,6 +45,7 @@ error_params = [
     ("E301", [(5, 4, "expected 1 blank line, found 0")]),
     ("E303", [(6, 0, "too many blank lines (3)")]),
     ("E304", [(12, 0, "blank lines found after function decorator")]),
+    ("E306", [(3, 4, "expected 1 blank line before a nested definition, found 0")]),
 ]
 
 

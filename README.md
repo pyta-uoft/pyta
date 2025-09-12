@@ -99,6 +99,7 @@ Merrick Liu,
 Wendy Liu,
 Yibing (Amy) Lu,
 Maria Shurui Ma,
+Zain Mahmoud
 Aina Fatema Asim Merchant,
 Karl-Alexandre Michaud,
 Shweta Mogalapalli,

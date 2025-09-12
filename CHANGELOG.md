@@ -21,7 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
-- Added test cases for node_printers.py that cover the functions which render the following PEP8 error messages: E221, E251, E261, E272, E273 and E305.
+- Added test cases for node_printers.py that cover the functions which render the following PEP8 error messages: E221, E251, E261, E272, E273, E305 and E306.
 
 ## [2.11.1] - 2025-08-17
 

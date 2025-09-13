@@ -1,1 +1,1 @@
-print("hello world") # this is an comment with less than 2 whitespace before it
+print("hello world") # this is a comment with fewer than 2 whitespaces before it

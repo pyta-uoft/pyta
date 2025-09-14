@@ -17,15 +17,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Added tests for node_printers.py functions rendering the following PEP8 error codes: E221, E251, E261, E272, E273, E302, E305, E306
+
 ## [2.11.1] - 2025-08-17
 
 ### 🐛 Bug fixes
 
 - Fixed reports to only include config files when they have errors
-
-### 🔧 Internal changes
-
-- Added tests for node_printers.py functions rendering the following PEP8 error codes: E221, E251, E261, E272, E273, E302, E305, E306
 
 ## [2.11.0] - 2025-08-16
 

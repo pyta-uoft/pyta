@@ -26,12 +26,15 @@ error_params = [
     ("E201", [(1, 6, "whitespace after '('")]),
     ("E202", [(1, 19, "whitespace before ')'")]),
     ("E203", [(1, 30, "whitespace before ':'")]),
+    ("E221", [(1, 5, "multiple spaces before operator")]),
     ("E222", [(1, 3, "multiple spaces after operator")]),
     ("E223", [(1, 1, "tab before operator")]),
     ("E224", [(1, 3, "tab after operator")]),
     ("E226", [(1, 5, "missing whitespace around arithmetic operator")]),
     ("E227", [(1, 5, "missing whitespace around bitwise or shift operator")]),
     ("E228", [(1, 5, "missing whitespace around modulo operator")]),
+    ("E251", [(1, 7, "unexpected spaces around keyword / parameter equals")]),
+    ("E261", [(1, 20, "at least two spaces before inline comment")]),
     (
         "E262",
         [
@@ -41,10 +44,21 @@ error_params = [
     ),
     ("E265", [(1, 0, "block comment should start with '# '")]),
     ("E266", [(1, 0, "too many leading '#' for block comment")]),
+    ("E272", [(3, 8, "multiple spaces before keyword")]),
+    ("E273", [(1, 3, "tab after keyword")]),
     ("E275", [(1, 16, "missing whitespace after keyword")]),
     ("E301", [(5, 4, "expected 1 blank line, found 0")]),
+    ("E302", [(3, 0, "expected 2 blank lines, found 0")]),
     ("E303", [(6, 0, "too many blank lines (3)")]),
     ("E304", [(12, 0, "blank lines found after function decorator")]),
+    (
+        "E305",
+        [
+            (4, 0, "expected 2 blank lines after class or function definition, found 0"),
+            (9, 0, "expected 2 blank lines after class or function definition, found 0"),
+        ],
+    ),
+    ("E306", [(3, 4, "expected 1 blank line before a nested definition, found 0")]),
 ]
 
 

@@ -9,7 +9,6 @@ readme = "README.md"
 dependencies = [
     "aiohttp >= 3.11.18,< 3.13.0",
     "astroid ~= 3.3.5",
-    "beautifulsoup4",
     "black",
     "click >= 8.0.1, < 9",
     "colorama ~= 0.4.6",

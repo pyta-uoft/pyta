@@ -15,10 +15,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
-## [2.11.2] - 2025-09-12
-
-### 🔧 Internal changes
-
 - Added tests for node_printers.py functions rendering the PEP8 error messages: E101, E116, E124, E128, E201, E202
 
 ## [2.11.1] - 2025-08-17

@@ -8,7 +8,7 @@ from pylint.checkers import BaseChecker, utils
 from pylint.interfaces import INFERENCE
 from pylint.lint import PyLinter
 
-immutable_types = (
+IMMUTABLE_TYPES = (
     int,
     float,
     bool,
@@ -212,15 +212,9 @@ class InfiniteLoopChecker(BaseChecker):
         for child in node.test.nodes_of_class(nodes.Name):
             if isinstance(child.parent, nodes.Call) and child.parent.func is child:
                 continue
-            try:
-                # Get all possible values
-                inferred_values = list(child.infer())
-            except InferenceError:
+            inferred = get_safely_inferred(child)
+            if inferred is None or not _is_immutable_node(inferred):
                 return False
-            for inferred in inferred_values:
-                if not _is_immutable_node(inferred):
-                    # Return False when the node may evaluate to a mutable object
-                    return False
             immutable_vars.add(child.name)
         if not immutable_vars:
             # There are no vars with immutable values
@@ -249,12 +243,9 @@ class InfiniteLoopChecker(BaseChecker):
 
 def _is_immutable_node(node: nodes.NodeNG) -> bool:
     """Helper used to check whether node represents an immutable type."""
-    if (isinstance(node, nodes.Const) and type(node.value) in immutable_types) or isinstance(
+    return (isinstance(node, nodes.Const) and type(node.value) in IMMUTABLE_TYPES) or isinstance(
         node, nodes.Tuple
-    ):
-        return True
-    else:
-        return False
+    )
 
 
 def get_safely_inferred(node: nodes.NodeNG) -> Union[nodes.NodeNG, None]:
@@ -262,7 +253,8 @@ def get_safely_inferred(node: nodes.NodeNG) -> Union[nodes.NodeNG, None]:
     inferred = utils.safe_infer(node)
     if isinstance(inferred, util.UninferableBase) or inferred is None:
         return None
-    return inferred
+    else:
+        return inferred
 
 
 def register(linter: PyLinter) -> None:

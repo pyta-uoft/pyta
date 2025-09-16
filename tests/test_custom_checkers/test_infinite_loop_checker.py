@@ -404,7 +404,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             """,
             """
             i = 1 + 3j
-            while i:
+            while i: #@
                 print(i)
             """,
             """
@@ -474,12 +474,12 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             """,
             """
             i, j, k, l = 1, 0.9, True, "Goodbye"
-            while i + j > 10 or not k or l == "cool":
+            while i + j > 10 or not k or l == "cool": #@
                 print(i, j, k, l)
             """,
             """
             i, j, k, l = 1, 0.9, True, "Goodbye"
-            while i + j < 10 and not k or l != "cool":
+            while i + j < 10 and not k or l != "cool": #@
                 print(i, j, k, l)
                 i += 1
             """,

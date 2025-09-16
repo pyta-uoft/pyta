@@ -12,13 +12,19 @@ DIR_PATH = os.path.normpath(
 
 # Define parameter sets for different error and no-error tests
 error_params = [
+    # ("E101", [(3, 0, "indentation contains mixed spaces and tabs")]),
     ("E115", [(2, 0, "expected an indented block (comment)")]),
+    ("E116", [(1, 8, "unexpected indentation (comment)")]),
     ("E122", [(2, 0, "continuation line missing indentation or outdented")]),
     ("E123", [(3, 4, "closing bracket does not match indentation of opening bracket's line")]),
+    ("E124", [(3, 8, "closing bracket does not match visual indentation")]),
     ("E125", [(2, 4, "continuation line with same indent as next logical line")]),
     ("E127", [(2, 19, "continuation line over-indented for visual indent")]),
+    ("E128", [(2, 8, "continuation line under-indented for visual indent")]),
     ("E129", [(4, 4, "visually indented line with same indent as next logical line")]),
     ("E131", [(4, 8, "continuation line unaligned for hanging indent")]),
+    ("E201", [(1, 6, "whitespace after '('")]),
+    ("E202", [(1, 19, "whitespace before ')'")]),
     ("E203", [(1, 30, "whitespace before ':'")]),
     ("E221", [(1, 5, "multiple spaces before operator")]),
     ("E222", [(1, 3, "multiple spaces after operator")]),
@@ -81,5 +87,39 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
     def test_no_error_cases(self, msg_id):
         """Parameterized test that various PEP8 errors are not triggered"""
         mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, msg_id[0].lower() + "_no_error.py"))
+        with self.assertNoMessages():
+            self.checker.process_module(mod)
+
+    def test_e101_error(self):
+        """
+        Test case for PEP8 error E101 indentation contains mixed spaces and tabs
+
+        This test is separate from test_error_cases() to handle the W191 message that is
+        always emitted alongside E101.
+        """
+        expected = [
+            ("E101", 3, 0, "indentation contains mixed spaces and tabs"),
+            ("W191", 3, 0, "indentation contains tabs"),
+        ]
+        mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e101_error.py"))
+        with self.assertAddsMessages(
+            *[
+                pylint.testutils.MessageTest(
+                    msg_id="pep8-errors",
+                    line=line,
+                    args=(msg_id, f"line {line}, column {col}: {desc}"),
+                )
+                for msg_id, line, col, desc in expected
+            ],
+            ignore_position=True,
+        ):
+            self.checker.process_module(mod)
+
+    def test_e101_no_error(self):
+        """
+        Tests that PEP8 error E101 is not triggered.
+        This test is separate due to the same issue as noted in test_e101_error().
+        """
+        mod = MANAGER.ast_from_file(os.path.join(DIR_PATH, "e101_no_error.py"))
         with self.assertNoMessages():
             self.checker.process_module(mod)

@@ -32,11 +32,12 @@ error_params = [
     ("E222", [(1, 3, "multiple spaces after operator")]),
     ("E223", [(1, 1, "tab before operator")]),
     ("E224", [(1, 3, "tab after operator")]),
-    (   "E225", 
-            [
-                (2, 4, "missing whitespace around operator"),
-                (5, 4, "missing whitespace around operator")
-            ]
+    (
+        "E225",
+        [
+            (2, 4, "missing whitespace around operator"),
+            (5, 4, "missing whitespace around operator"),
+        ],
     ),
     ("E226", [(1, 5, "missing whitespace around arithmetic operator")]),
     ("E227", [(1, 5, "missing whitespace around bitwise or shift operator")]),

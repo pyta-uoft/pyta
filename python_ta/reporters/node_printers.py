@@ -330,7 +330,7 @@ def render_pep8_errors_e225(msg, _node, source_lines):
         col = int(res.group().split()[-1])
         curr_idx = col + 1
 
-        multi_char_operators = {'=='}
+        multi_char_operators = {'==', '>=', '<=', '!='}
         # highlight multiple characters for operators that are longer than one character
         if source_lines[line - 1][col: col+2] in multi_char_operators:
             curr_idx += 1

@@ -262,6 +262,15 @@ def render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines=None):
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 3, source_lines)
 
+def render_pep8_errors_e204(msg, _node, source_lines=None):
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+    curr_idx = col + 1
+
+    yield from render_context(line-2, line, source_lines)
+    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line-1])
+    yield from render_context(line+1, line+3, source_lines)
 
 def render_pep8_errors_e221(msg, _node, source_lines=None):
     """Render a PEP8 multiple spaces before operator message."""
@@ -314,6 +323,22 @@ def render_pep8_errors_e224_and_e273(msg, _node, source_lines):
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 3, source_lines)
 
+def render_pep8_errors_e225(msg, _node, source_lines):
+        """Render a PEP8 missing whitespace around operator message"""
+        line = msg.line
+        res = re.search(r"column (\d+)", msg.msg)
+        col = int(res.group().split()[-1])
+        curr_idx = col + 1
+
+        multi_char_operators = {'=='}
+        # highlight multiple characters for operators that are longer than one character
+        if source_lines[line - 1][col: col+2] in multi_char_operators:
+            curr_idx += 1
+
+        yield from render_context(line - 2, line, source_lines)
+        yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line-1])
+        yield from render_context(line + 1, line + 3, source_lines)
+
 
 def render_pep8_errors_e226(msg, _node, source_lines):
     """Render a PEP8 missing whitespace around arithmetic operator message"""
@@ -359,6 +384,15 @@ def render_pep8_errors_e228(msg, _node, source_lines=None):
     )
     yield from render_context(line + 1, line + 3, source_lines)
 
+def render_pep8_errors_e231(msg, _node, source_lines=None):
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+    curr_idx = col + 1
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line-1])
+    yield from render_context(line + 1, line + 3, source_lines)
 
 def render_pep8_errors_e251(msg, _node, source_lines=None):
     """Render a PEP8 unexpected spaces around keyword / parameter equals message."""
@@ -661,10 +695,14 @@ RENDERERS = {
     "E201": render_pep8_errors_e201_e202_e203_e211,
     "E202": render_pep8_errors_e201_e202_e203_e211,
     "E203": render_pep8_errors_e201_e202_e203_e211,
+    "E204": render_pep8_errors_e204,
+    "E211": render_pep8_errors_e201_e202_e203_e211,
     "E221": render_pep8_errors_e221,
     "E222": render_pep8_errors_e222,
     "E223": render_pep8_errors_e223,
     "E224": render_pep8_errors_e224_and_e273,
+    "E225": render_pep8_errors_e225,
+    "E231": render_pep8_errors_e231,
     "E273": render_pep8_errors_e224_and_e273,
     "E226": render_pep8_errors_e226,
     "E227": render_pep8_errors_e227,

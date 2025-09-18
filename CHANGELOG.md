@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Updated `SnapshotTracer` to open the generated HTML report in a one-shot server, instead of opening the HTML file directly.
+- Added custom renderers for the following PEP8 error codes: E204, E225, E231
 
 ### 💫 New checkers
 
@@ -19,6 +20,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added tests for node_printers.py functions rendering the PEP8 error messages: E101, E116, E124, E128, E201, E202
 - Added tests for node_printers.py functions rendering the following PEP8 error codes: E221, E251, E261, E272, E273, E302, E305, E306
+- Added tests for node_printers.py functions rendering the following PEP8 error codes: E204, E211, E225, E231
 
 ## [2.11.1] - 2025-08-17
 

@@ -26,13 +26,22 @@ error_params = [
     ("E201", [(1, 6, "whitespace after '('")]),
     ("E202", [(1, 19, "whitespace before ')'")]),
     ("E203", [(1, 30, "whitespace before ':'")]),
+    ("E204", [(1, 1, "whitespace after decorator '@'")]),
+    ("E211", [(1, 14, "whitespace before '('")]),
     ("E221", [(1, 5, "multiple spaces before operator")]),
     ("E222", [(1, 3, "multiple spaces after operator")]),
     ("E223", [(1, 1, "tab before operator")]),
     ("E224", [(1, 3, "tab after operator")]),
+    (   "E225", 
+            [
+                (2, 4, "missing whitespace around operator"),
+                (5, 4, "missing whitespace around operator")
+            ]
+    ),
     ("E226", [(1, 5, "missing whitespace around arithmetic operator")]),
     ("E227", [(1, 5, "missing whitespace around bitwise or shift operator")]),
     ("E228", [(1, 5, "missing whitespace around modulo operator")]),
+    ("E231", [(2, 13, "missing whitespace after ','")]),
     ("E251", [(1, 7, "unexpected spaces around keyword / parameter equals")]),
     ("E261", [(1, 20, "at least two spaces before inline comment")]),
     (

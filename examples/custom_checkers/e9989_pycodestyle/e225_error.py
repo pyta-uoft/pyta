@@ -4,3 +4,6 @@ if x>5:  # missing whitespace around single character operator
 
 if x==5:  # missing whitespace around multiple character operator
     print("x == 5")
+
+if x>=5 or x<=5 or x!=5:  # missing whitespace around multicharacter operators
+    print("x >= 5 or x <= 5 or x != 5")

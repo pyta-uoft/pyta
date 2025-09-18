@@ -37,6 +37,9 @@ error_params = [
         [
             (2, 4, "missing whitespace around operator"),
             (5, 4, "missing whitespace around operator"),
+            (8, 4, "missing whitespace around operator"),
+            (8, 12, "missing whitespace around operator"),
+            (8, 20, "missing whitespace around operator")
         ],
     ),
     ("E226", [(1, 5, "missing whitespace around arithmetic operator")]),

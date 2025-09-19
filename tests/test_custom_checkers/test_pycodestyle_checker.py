@@ -26,7 +26,7 @@ error_params = [
     ("E201", [(1, 6, "whitespace after '('")]),
     ("E202", [(1, 19, "whitespace before ')'")]),
     ("E203", [(1, 30, "whitespace before ':'")]),
-    ("E204", [(1, 1, "whitespace after decorator '@'")]),
+    ("E204", [(1, 1, "whitespace after decorator '@'"), (6, 1, "whitespace after decorator '@'")]),
     ("E211", [(1, 14, "whitespace before '('")]),
     ("E221", [(1, 5, "multiple spaces before operator")]),
     ("E222", [(1, 3, "multiple spaces after operator")]),

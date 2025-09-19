@@ -12,7 +12,6 @@ DIR_PATH = os.path.normpath(
 
 # Define parameter sets for different error and no-error tests
 error_params = [
-    # ("E101", [(3, 0, "indentation contains mixed spaces and tabs")]),
     ("E115", [(2, 0, "expected an indented block (comment)")]),
     ("E116", [(1, 8, "unexpected indentation (comment)")]),
     ("E122", [(2, 0, "continuation line missing indentation or outdented")]),
@@ -44,8 +43,10 @@ error_params = [
     ),
     ("E265", [(1, 0, "block comment should start with '# '")]),
     ("E266", [(1, 0, "too many leading '#' for block comment")]),
+    ("E271", [(3, 11, "multiple spaces after keyword")]),
     ("E272", [(3, 8, "multiple spaces before keyword")]),
     ("E273", [(1, 3, "tab after keyword")]),
+    ("E274", [(1, 6, "tab before keyword")]),
     ("E275", [(1, 16, "missing whitespace after keyword")]),
     ("E301", [(5, 4, "expected 1 blank line, found 0")]),
     ("E302", [(3, 0, "expected 2 blank lines, found 0")]),
@@ -59,6 +60,7 @@ error_params = [
         ],
     ),
     ("E306", [(3, 4, "expected 1 blank line before a nested definition, found 0")]),
+    ("E502", [(2, 14, "the backslash is redundant between brackets")]),
 ]
 
 

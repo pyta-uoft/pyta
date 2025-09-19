@@ -287,8 +287,8 @@ def render_pep8_errors_e222(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e223(msg, _node, source_lines=None):
-    """Render a PEP8 tab before operator message."""
+def render_pep8_errors_e223_and_e274(msg, _node, source_lines=None):
+    """Render a PEP8 tab before operator message and a PEP8 tab before keyword message."""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
@@ -436,6 +436,18 @@ def render_pep8_errors_e266(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
+def render_pep8_errors_e271(msg, _node, source_lines=None):
+    """Render a PEP8 multiple spaces after keyword message."""
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+    curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
 def render_pep8_errors_e272(msg, _node, source_lines=None):
     """Render a PEP8 multiple spaces before keyword message."""
     line = msg.line
@@ -570,6 +582,17 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
+def render_pep8_errors_e502(msg, _node, source_lines=None):
+    """Render a PEP8 the backslash is redundant between brackets."""
+    line = msg.line
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(col, col + 1), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 3, source_lines)
+
+
 def render_missing_return_statement(msg, node, source_lines=None):
     """
     Render a missing return statements message
@@ -663,7 +686,7 @@ RENDERERS = {
     "E203": render_pep8_errors_e201_e202_e203_e211,
     "E221": render_pep8_errors_e221,
     "E222": render_pep8_errors_e222,
-    "E223": render_pep8_errors_e223,
+    "E223": render_pep8_errors_e223_and_e274,
     "E224": render_pep8_errors_e224_and_e273,
     "E273": render_pep8_errors_e224_and_e273,
     "E226": render_pep8_errors_e226,
@@ -674,6 +697,7 @@ RENDERERS = {
     "E262": render_pep8_errors_e262,
     "E265": render_pep8_errors_e265,
     "E266": render_pep8_errors_e266,
+    "E271": render_pep8_errors_e271,
     "E272": render_pep8_errors_e272,
     "E275": render_pep8_errors_e275,
     "E301": render_pep8_errors_e301,
@@ -682,6 +706,7 @@ RENDERERS = {
     "E304": render_pep8_errors_e304,
     "E305": render_pep8_errors_e305,
     "E306": render_pep8_errors_e306,
+    "E502": render_pep8_errors_e502,
 }
 
 

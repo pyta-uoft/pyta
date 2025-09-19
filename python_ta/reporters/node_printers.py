@@ -264,10 +264,14 @@ def render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines=None):
 
 
 def render_pep8_errors_e204(msg, _node, source_lines=None):
+    """Render a PEP8 whitespace after decorator '@' message"""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
-    curr_idx = col + 1
+    # calculates the length of the leading whitespaces by subtracting the length of everything after the first character after stripping all leading whitespaces from the total line length
+    curr_idx = (
+        col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col + 1 :].lstrip())
+    )
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
@@ -333,7 +337,7 @@ def render_pep8_errors_e225(msg, _node, source_lines):
     col = int(res.group().split()[-1])
     curr_idx = col + 1
 
-    multi_char_operators = {"==, >=, <=, !="}
+    multi_char_operators = {"==", ">=", "<=", "!="}
     # highlight multiple characters for operators that are longer than one character
     if source_lines[line - 1][col : col + 2] in multi_char_operators:
         curr_idx += 1

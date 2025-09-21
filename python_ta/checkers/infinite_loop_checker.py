@@ -1,7 +1,7 @@
 """Check for infinite while loops."""
 
 import itertools
-from typing import Optional, Union
+from typing import Optional
 
 from astroid import BoundMethod, InferenceError, UnboundMethod, bases, nodes, util
 from pylint.checkers import BaseChecker, utils
@@ -53,6 +53,9 @@ class InfiniteLoopChecker(BaseChecker):
                 cond_vars.add(child.name)
         if not cond_vars:
             return False
+        inferred_test = infer_condition(node)
+        if not inferred_test:
+            return False
         # Check to see if condition variable(s) used inside body
         for child in node.body:
             for name_node in child.nodes_of_class((nodes.Name, nodes.AssignName)):
@@ -60,10 +63,7 @@ class InfiniteLoopChecker(BaseChecker):
                     # At least one condition variable is used in the loop body
                     return False
         else:
-            self.add_message(
-                "infinite-loop",
-                node=node.test,
-            )
+            self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
             return True
 
     def _check_condition_constant(self, node: nodes.While) -> bool:
@@ -212,20 +212,20 @@ class InfiniteLoopChecker(BaseChecker):
         for child in node.test.nodes_of_class(nodes.Name):
             if isinstance(child.parent, nodes.Call) and child.parent.func is child:
                 continue
-            inferred = get_safely_inferred(child)
-            if inferred is None or not _is_immutable_node(inferred):
+            try:
+                inferred_values = list(child.infer())
+            except InferenceError:
                 return False
+            for inferred in inferred_values:
+                if not _is_immutable_node(inferred):
+                    # Return False when the node may evaluate to a mutable object
+                    return False
             immutable_vars.add(child.name)
         if not immutable_vars:
-            # There are no vars with immutable values
             return False
 
-        # Infer the loop condition
-        inferred_test = get_safely_inferred(node.test)
-        if inferred_test is None:
-            return False
-        if isinstance(inferred_test, nodes.Const) and inferred_test.value is False:
-            # Condition is always false, loop won't run. No need to check for infinite loop.
+        inferred_test = infer_condition(node)
+        if not inferred_test:
             return False
 
         for child in node.body:
@@ -248,13 +248,22 @@ def _is_immutable_node(node: nodes.NodeNG) -> bool:
     )
 
 
-def get_safely_inferred(node: nodes.NodeNG) -> Union[nodes.NodeNG, None]:
+def get_safely_inferred(node: nodes.NodeNG) -> Optional[nodes.NodeNG]:
     """Helper used to safely infer a node with `astroid.safe_infer`. Return None if inference failed."""
     inferred = utils.safe_infer(node)
     if isinstance(inferred, util.UninferableBase) or inferred is None:
         return None
     else:
         return inferred
+
+
+def infer_condition(node: nodes.While) -> bool:
+    """Helper used to safely infer the value of a loop condition. Return False if inference failed or condition
+    evaluated to be false."""
+    inferred_test = get_safely_inferred(node.test)
+    if inferred_test is None:
+        return False
+    return not (isinstance(inferred_test, nodes.Const) and inferred_test.value is False)
 
 
 def register(linter: PyLinter) -> None:

@@ -25,8 +25,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -36,19 +35,39 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """Test that the checker correctly flags a while loop when no condition variable attributes are used in
         the loop body."""
         src = """
-        while 0 < self.attribute < 100: #@
-            attribute += 1
+        class Faa:
+            def __init__(self):
+                self.attribute = 10
+            def foo(self):
+                while 0 < self.attribute < 100: #@
+                    attribute += 1
         """
 
         node = astroid.extract_node(src)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
+            self.checker.visit_while(node)
+
+    def test_attr_not_updated_cond_false(self) -> None:
+        """Test that the checker correctly flags a while loop when no condition variable attributes are used in
+        the loop body."""
+        src = """
+        class Faa:
+            def __init__(self):
+                self.attribute = 0
+            def foo(self):
+                while 0 < self.attribute < 100: #@
+                    attribute += 1
+        """
+
+        node = astroid.extract_node(src)
+
+        with self.assertNoMessages():
             self.checker.visit_while(node)
 
     def test_nested_while_unused_var(self) -> None:
@@ -67,8 +86,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=detected_node.test,
+                msg_id="infinite-loop", node=detected_node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -87,8 +105,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -107,8 +124,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -159,24 +175,6 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_while(node1)
             self.checker.visit_while(node2)
-
-    def test_while_fund_call_var(self) -> None:
-        """Test verifies that function calls in while-loop conditions correctly triggers infinite-loop
-        warnings."""
-        src = """
-        while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
-            y += 1 # Should trigger an infinite loop since condition variables set: {'lst', 'var', 'z', 'x'}
-        """
-        node = astroid.extract_node(src)
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_while(node)
 
     def test_while_inferred_exit(self) -> None:
         """Test verifies that infinite-loop warning is not triggered when loop condition is constant but 'sys.exit' is

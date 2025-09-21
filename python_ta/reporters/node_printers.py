@@ -337,10 +337,29 @@ def render_pep8_errors_e225(msg, _node, source_lines):
     col = int(res.group().split()[-1])
     curr_idx = col + 1
 
-    multi_char_operators = {"==", ">=", "<=", "!="}
+    two_char_operators = {
+        "==",
+        ">=",
+        "<=",
+        "!=",
+        ":=",
+        "&=",
+        "->",
+        "%=",
+        "/=",
+        "+=",
+        "-=",
+        "*=",
+        "|=",
+        "^=",
+        "@=",
+    }
+    three_char_operators = {"//=", ">>=", "<<=", "**="}
     # highlight multiple characters for operators that are longer than one character
-    if source_lines[line - 1][col : col + 2] in multi_char_operators:
+    if source_lines[line - 1][col : col + 2] in two_char_operators:
         curr_idx += 1
+    elif source_lines[line - 1][col : col + 3] in three_char_operators:
+        curr_idx += 2
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
@@ -353,6 +372,11 @@ def render_pep8_errors_e226(msg, _node, source_lines):
     res = re.search(r"column (\d+)", msg.msg)
     col = int(res.group().split()[-1])
     end_idx = col + 1
+
+    multi_char_operators = {"//"}
+    # highlight multiple characters for arithmetic operators that are longer than one character
+    if source_lines[line - 1][col : col + 2] in multi_char_operators:
+        end_idx += 1
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, end_idx), LineType.ERROR, source_lines[line - 1])

@@ -509,7 +509,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """
         node = astroid.extract_node(src)
 
-        with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
+        with patch("astroid.nodes.NodeNG.infer", return_value=[astroid.util.Uninferable()]):
             result = self.checker._check_immutable_cond_var_reassigned(node)
             assert result is False
 
@@ -524,11 +524,11 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         def fake_infer(node):
             if isinstance(node, astroid.nodes.Compare):
-                return astroid.util.UninferableBase()
+                yield astroid.util.Uninferable()
             elif isinstance(node, astroid.nodes.Name):
-                return astroid.nodes.Const(value=0)
+                yield astroid.nodes.Const(value=0)
 
-        with patch("pylint.checkers.utils.safe_infer", side_effect=fake_infer):
+        with patch.object(astroid.nodes.NodeNG, "infer", fake_infer):
             result = self.checker._check_immutable_cond_var_reassigned(node)
             assert result is False
 

@@ -217,13 +217,12 @@ class InfiniteLoopChecker(BaseChecker):
             except InferenceError:
                 return False
             for inferred in inferred_values:
-                if not _is_immutable_node(inferred):
+                if inferred is util.Uninferable or not _is_immutable_node(inferred):
                     # Return False when the node may evaluate to a mutable object
                     return False
             immutable_vars.add(child.name)
         if not immutable_vars:
             return False
-
         inferred_test = infer_condition(node)
         if not inferred_test:
             return False
@@ -260,10 +259,20 @@ def get_safely_inferred(node: nodes.NodeNG) -> Optional[nodes.NodeNG]:
 def infer_condition(node: nodes.While) -> bool:
     """Helper used to safely infer the value of a loop condition. Return False if inference failed or condition
     evaluated to be false."""
-    inferred_test = get_safely_inferred(node.test)
-    if inferred_test is None:
+    try:
+        inferred_values = list(node.test.infer())
+    except InferenceError:
         return False
-    return not (isinstance(inferred_test, nodes.Const) and inferred_test.value is False)
+    for inferred in inferred_values:
+        if inferred is util.UninferableBase:
+            return False
+        if (
+            (isinstance(inferred, nodes.Const) and bool(inferred.value))
+            or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and bool(inferred.elts))
+            or (isinstance(inferred, nodes.Dict) and bool(inferred.items))
+        ):
+            return True
+    return False
 
 
 def register(linter: PyLinter) -> None:

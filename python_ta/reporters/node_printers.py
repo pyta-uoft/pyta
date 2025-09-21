@@ -689,6 +689,7 @@ RENDERERS = {
     "E223": render_pep8_errors_e223_and_e274,
     "E224": render_pep8_errors_e224_and_e273,
     "E273": render_pep8_errors_e224_and_e273,
+    "E274": render_pep8_errors_e223_and_e274,
     "E226": render_pep8_errors_e226,
     "E227": render_pep8_errors_e227,
     "E228": render_pep8_errors_e228,

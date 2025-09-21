@@ -12,6 +12,7 @@ DIR_PATH = os.path.normpath(
 
 # Define parameter sets for different error and no-error tests
 error_params = [
+    # ("E101", [(3, 0, "indentation contains mixed spaces and tabs")]),
     ("E115", [(2, 0, "expected an indented block (comment)")]),
     ("E116", [(1, 8, "unexpected indentation (comment)")]),
     ("E122", [(2, 0, "continuation line missing indentation or outdented")]),

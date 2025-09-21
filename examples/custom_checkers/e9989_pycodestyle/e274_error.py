@@ -1,2 +1,2 @@
-if "a"		in "abc":    # tab before 'in' keyword
+if "a"	in "abc":    # tab before 'in' keyword
     pass

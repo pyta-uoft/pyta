@@ -260,6 +260,8 @@ def infer_condition(node: nodes.While) -> bool:
     except InferenceError:
         return True
     for inferred in inferred_values:
+        if inferred is util.Uninferable:
+            return False
         if (
             (isinstance(inferred, nodes.Const) and bool(inferred.value))
             or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and bool(inferred.elts))

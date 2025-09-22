@@ -176,6 +176,25 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_while(node1)
             self.checker.visit_while(node2)
 
+    def test_while_fund_call_var(self) -> None:
+        """Test verifies that function calls in while-loop conditions correctly triggers infinite-loop
+        warnings."""
+        src = """
+        while faa(all(x)) and lst[1][2]["yellow"].get_address() or func(var, foo(all(z, 10))): #@
+            y += 1 # Should trigger an infinite loop since condition variables set: {'lst', 'var', 'z', 'x'}
+        """
+        node = astroid.extract_node(src)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)
+
     def test_while_inferred_exit(self) -> None:
         """Test verifies that infinite-loop warning is not triggered when loop condition is constant but 'sys.exit' is
         called using alias."""
@@ -338,12 +357,18 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """Test verifies that `_check_condition_constant` helper handles failed inference correctly."""
         """"""
         src = """
-        while 1: #@
+        while x: #@
             pass
         """
         node = astroid.extract_node(src)
 
-        with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
+        def fake_infer(node, *args, **kwargs):
+            if isinstance(node, astroid.nodes.Name):
+                yield astroid.util.Uninferable()
+            else:
+                yield from astroid.nodes.NodeNG.infer(node, *args, **kwargs)
+
+        with patch.object(astroid.nodes.NodeNG, "infer", fake_infer):
             result = self.checker._check_condition_constant(node)
             assert result is False
 

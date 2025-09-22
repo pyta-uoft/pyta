@@ -19,6 +19,17 @@ IMMUTABLE_TYPES = (
     type(None),
 )
 
+CONST_NODES = (
+    nodes.Module,
+    nodes.GeneratorExp,
+    nodes.Lambda,
+    nodes.FunctionDef,
+    nodes.ClassDef,
+    bases.Generator,
+    UnboundMethod,
+    BoundMethod,
+)
+
 
 class InfiniteLoopChecker(BaseChecker):
     name = "infinite-loop"
@@ -77,14 +88,9 @@ class InfiniteLoopChecker(BaseChecker):
             node.test
         ) and not self._check_constant_form_condition(node):
             return False
-        inferred = get_safely_inferred(node.test)
-        if inferred is None:
-            return False
-        if (
-            (isinstance(inferred, nodes.Const) and bool(inferred.value) is False)
-            or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and not inferred.elts)
-            or (isinstance(inferred, nodes.Dict) and not inferred.items)
-        ):
+
+        inferred = infer_condition(node)
+        if not inferred:
             return False
 
         check_nodes = (nodes.Break, nodes.Return, nodes.Raise, nodes.Yield)
@@ -118,16 +124,6 @@ class InfiniteLoopChecker(BaseChecker):
 
         See `https://github.com/pylint-dev/pylint/blob/main/pylint/checkers/base/basic_checker.py#L303` for further
         detail."""
-        const_nodes = (
-            nodes.Module,
-            nodes.GeneratorExp,
-            nodes.Lambda,
-            nodes.FunctionDef,
-            nodes.ClassDef,
-            bases.Generator,
-            UnboundMethod,
-            BoundMethod,
-        )
         structs = (nodes.Dict, nodes.Tuple, nodes.Set, nodes.List)
         except_nodes = (
             nodes.Call,
@@ -138,7 +134,7 @@ class InfiniteLoopChecker(BaseChecker):
         )
         inferred = None
         maybe_generator_call = None
-        emit = isinstance(test_node, (nodes.Const, *structs, *const_nodes))
+        emit = isinstance(test_node, (nodes.Const, *structs, *CONST_NODES))
         if not isinstance(test_node, except_nodes):
             inferred = utils.safe_infer(test_node)
             # If we can't infer what the value is but the test is just a variable name
@@ -164,7 +160,7 @@ class InfiniteLoopChecker(BaseChecker):
                     return True
         if emit:
             return True
-        elif isinstance(inferred, const_nodes):
+        elif isinstance(inferred, CONST_NODES):
             return True
         return False
 
@@ -262,14 +258,13 @@ def infer_condition(node: nodes.While) -> bool:
     try:
         inferred_values = list(node.test.infer())
     except InferenceError:
-        return False
+        return True
     for inferred in inferred_values:
-        if inferred is util.UninferableBase:
-            return False
         if (
             (isinstance(inferred, nodes.Const) and bool(inferred.value))
             or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and bool(inferred.elts))
             or (isinstance(inferred, nodes.Dict) and bool(inferred.items))
+            or (isinstance(inferred, CONST_NODES))
         ):
             return True
     return False

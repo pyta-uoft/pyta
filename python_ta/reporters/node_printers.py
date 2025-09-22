@@ -143,11 +143,21 @@ def render_pep8_errors(msg, _node, source_lines=None):
         error_code = matched_error.group(1)
         # Render the appropriate error through the RENDERERS dict
         if error_code in RENDERERS:
-            yield from RENDERERS[error_code](msg, _node, source_lines)
+            line = msg.line
+            yield from render_context(line - 3, line, source_lines)
+            yield from RENDERERS[error_code](msg, _node, line, source_lines)
+            yield from render_context(line + 1, line + 3, source_lines)
             return
 
     # If none of the error codes were present, render the error using the generic error renderer
     yield from render_generic(msg, _node, source_lines)
+
+
+def get_col(msg):
+    """Returns the column number of the character containing the error"""
+    res = re.search(r"column (\d+)", msg.msg)
+    col = int(res.group().split()[-1])
+    return col
 
 
 def render_blank_line(line):
@@ -155,89 +165,70 @@ def render_blank_line(line):
     yield (line + 1, slice(None, None), LineType.ERROR, " " * 28)
 
 
-def render_pep8_errors_e101_and_e123(msg, _node, source_lines=None):
+def render_pep8_errors_e101_and_e123(msg, _node, line, source_lines=None):
     """Render a PEP8 indentation contains mixed spaces and tabs message
     AND a PEP8 closing bracket does not match indentation of opening bracket's line message."""
-    line = msg.line
     curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
-    yield from render_context(line - 2, line, source_lines)
     yield (line, slice(0, curr_idx), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e115(msg, _node, source_lines=None):
+def render_pep8_errors_e115(msg, _node, line, source_lines=None):
     """Render a PEP8 expected an indented block (comment) message."""
-    line = msg.line
-
-    yield from render_context(line - 2, line, source_lines)
     yield (
         line,
         slice(0, len(source_lines[line - 1])),
         LineType.ERROR,
         source_lines[line - 1] + "  # INDENT THIS LINE",
     )
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e116(msg, _node, source_lines=None):
+def render_pep8_errors_e116(msg, _node, line, source_lines=None):
     """Render a PEP8 unexpected indentation (comment) message"""
-    line = msg.line
     curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
-    yield from render_context(line - 2, line, source_lines)
     yield (
         line,
         slice(0, curr_idx),
         LineType.ERROR,
         source_lines[line - 1],
     )
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e122_and_e127_and_e131(msg, _node, source_lines=None):
+def render_pep8_errors_e122_and_e127_and_e131(msg, _node, line, source_lines=None):
     """
     Render a PEP8 continuation line missing indentation or outdented message, a line over-indented for visual indent
     message, and a continuation line unaligned for hanging indent message.
     """
-    line = msg.line
+
     curr_line_start_index = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
     end_index = curr_line_start_index if curr_line_start_index > 0 else len(source_lines[line - 1])
-    yield from render_context(line - 2, line, source_lines)
     yield (
         line,
         slice(0, end_index),
         LineType.ERROR,
         source_lines[line - 1],
     )
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e124(msg, _node, source_lines=None):
+def render_pep8_errors_e124(msg, _node, line, source_lines=None):
     """Render a PEP8 closing bracket does not match visual indentation message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    yield from render_context(line - 2, line, source_lines)
+
+    col = get_col(msg)
     yield (line, slice(col, col + 1), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e125_and_e129(msg, _node, source_lines=None):
+def render_pep8_errors_e125_and_e129(msg, _node, line, source_lines=None):
     """Render a PEP8 continuation line with same indent as next logical line message
     AND a PEP8 visually indented line with same indent as next logical line messsage"""
-    line = msg.line
     curr_idx = len(source_lines[line - 1]) - len(source_lines[line - 1].lstrip())
-
-    yield from render_context(line - 2, line, source_lines)
     yield (
         line,
         slice(curr_idx, len(source_lines[line - 1])),
         LineType.ERROR,
         source_lines[line - 1] + " " * 2 + "# INDENT THIS LINE",
     )
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e128(msg, _node, source_lines):
+def render_pep8_errors_e128(msg, _node, line, source_lines):
     """Render a PEP8 continuation line under-indented for visual indent message."""
     line = msg.line
     res = re.search(r"column (\d+)", msg.msg)
@@ -248,19 +239,15 @@ def render_pep8_errors_e128(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e201_e202_e203_e211(msg, _node, source_lines=None):
+def render_pep8_errors_e201_e202_e203_e211(msg, _node, line, source_lines=None):
     """Render a PEP8 whitespace after '(' message,
     a PEP8 whitespace before ')' message,
     a PEP8 whitespace before ‘,’, ‘;’, or ‘:’ message,
     AND a PEP8 whitespace before '(' message.."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+    col = get_col(msg)
     curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
 
-    yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
-    yield from render_context(line + 1, line + 3, source_lines)
 
 
 def render_pep8_errors_e204(msg, _node, source_lines=None):

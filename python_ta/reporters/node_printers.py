@@ -230,9 +230,8 @@ def render_pep8_errors_e125_and_e129(msg, _node, line, source_lines=None):
 
 def render_pep8_errors_e128(msg, _node, line, source_lines):
     """Render a PEP8 continuation line under-indented for visual indent message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(0, col if col != 0 else None), LineType.ERROR, source_lines[line - 1])
@@ -250,11 +249,10 @@ def render_pep8_errors_e201_e202_e203_e211(msg, _node, line, source_lines=None):
     yield (line, slice(col, curr_idx), LineType.ERROR, source_lines[line - 1])
 
 
-def render_pep8_errors_e204(msg, _node, source_lines=None):
+def render_pep8_errors_e204(msg, _node, line, source_lines=None):
     """Render a PEP8 whitespace after decorator '@' message"""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     # calculates the length of the leading whitespaces by subtracting the length of everything after the first character after stripping all leading whitespaces from the total line length
     curr_idx = (
         col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col + 1 :].lstrip())
@@ -265,11 +263,10 @@ def render_pep8_errors_e204(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e221(msg, _node, source_lines=None):
+def render_pep8_errors_e221(msg, _node, line, source_lines=None):
     """Render a PEP8 multiple spaces before operator message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
 
     yield from render_context(line - 2, line, source_lines)
@@ -277,11 +274,10 @@ def render_pep8_errors_e221(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e222(msg, _node, source_lines=None):
+def render_pep8_errors_e222(msg, _node, line, source_lines=None):
     """Render a PEP8 multiple spaces after operator message"""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
     yield from render_context(line - 2, line, source_lines)
@@ -289,11 +285,10 @@ def render_pep8_errors_e222(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e223_and_e274(msg, _node, source_lines=None):
+def render_pep8_errors_e223_and_e274(msg, _node, line, source_lines=None):
     """Render a PEP8 tab before operator message and a PEP8 tab before keyword message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = (
         col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip("\t"))
     )
@@ -303,11 +298,10 @@ def render_pep8_errors_e223_and_e274(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e224_and_e273(msg, _node, source_lines):
+def render_pep8_errors_e224_and_e273(msg, _node, line, source_lines):
     """Render a PEP8 tab after operator message and a PEP8 tab after keyword message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = (
         col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip("\t"))
     )
@@ -317,11 +311,10 @@ def render_pep8_errors_e224_and_e273(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e225(msg, _node, source_lines):
+def render_pep8_errors_e225(msg, _node, line, source_lines):
     """Render a PEP8 missing whitespace around operator message"""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = col + 1
 
     two_char_operators = {
@@ -353,11 +346,10 @@ def render_pep8_errors_e225(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e226(msg, _node, source_lines):
+def render_pep8_errors_e226(msg, _node, line, source_lines):
     """Render a PEP8 missing whitespace around arithmetic operator message"""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     end_idx = col + 1
 
     multi_char_operators = {"//"}
@@ -370,11 +362,10 @@ def render_pep8_errors_e226(msg, _node, source_lines):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e227(msg, _node, source_lines=None):
+def render_pep8_errors_e227(msg, _node, line, source_lines=None):
     """Render a PEP8 missing whitespace around bitwise or shift operator message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     # Check which operator to get the correct range of the line to highlight.
     # Default highlight is one character, but may be updated to two.
     # Note that only binary bitwise operators that are more than one character are included.
@@ -387,11 +378,10 @@ def render_pep8_errors_e227(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e228(msg, _node, source_lines=None):
+def render_pep8_errors_e228(msg, _node, line, source_lines=None):
     """Render a PEP8 missing whitespace around modulo operator message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     yield from render_context(line - 2, line, source_lines)
     yield (
@@ -403,10 +393,9 @@ def render_pep8_errors_e228(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e231(msg, _node, source_lines=None):
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+def render_pep8_errors_e231(msg, _node, line, source_lines=None):
+
+    col = get_col(msg)
     curr_idx = col + 1
 
     yield from render_context(line - 2, line, source_lines)
@@ -414,11 +403,10 @@ def render_pep8_errors_e231(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e251(msg, _node, source_lines=None):
+def render_pep8_errors_e251(msg, _node, line, source_lines=None):
     """Render a PEP8 unexpected spaces around keyword / parameter equals message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     equals_sign_idx = source_lines[line - 1][col:].find("=")
     code = source_lines[line - 1][col : col + equals_sign_idx if equals_sign_idx != -1 else None]
     end_idx = col + len(code) - len(code.lstrip())
@@ -428,11 +416,10 @@ def render_pep8_errors_e251(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e261(msg, _node, source_lines=None):
+def render_pep8_errors_e261(msg, _node, line, source_lines=None):
     """Render a PEP8 at least two spaces before inline comment message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     yield from render_context(line - 2, line, source_lines)
     yield (
@@ -444,11 +431,10 @@ def render_pep8_errors_e261(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e262(msg, _node, source_lines=None):
+def render_pep8_errors_e262(msg, _node, line, source_lines=None):
     """Render a PEP8 inline comment should start with '# ' message"""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     source_line = source_lines[line - 1]
     keyword_idx = len(source_line) - len(source_line[col:].lstrip("# \t"))
@@ -458,9 +444,9 @@ def render_pep8_errors_e262(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e265(msg, _node, source_lines=None):
+def render_pep8_errors_e265(msg, _node, line, source_lines=None):
     """Render a PEP8 block comment should start with '# ' message."""
-    line = msg.line
+
     yield from render_context(line - 2, line, source_lines)
     yield (
         line,
@@ -471,11 +457,10 @@ def render_pep8_errors_e265(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e266(msg, _node, source_lines=None):
+def render_pep8_errors_e266(msg, _node, line, source_lines=None):
     """Render a PEP8 too many leading ‘#’ for block comment message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = (
         col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip("#"))
     )
@@ -490,11 +475,10 @@ def render_pep8_errors_e266(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e271(msg, _node, source_lines=None):
+def render_pep8_errors_e271(msg, _node, line, source_lines=None):
     """Render a PEP8 multiple spaces after keyword message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
 
     yield from render_context(line - 2, line, source_lines)
@@ -502,11 +486,10 @@ def render_pep8_errors_e271(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e272(msg, _node, source_lines=None):
+def render_pep8_errors_e272(msg, _node, line, source_lines=None):
     """Render a PEP8 multiple spaces before keyword message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
     curr_idx = col + len(source_lines[line - 1][col:]) - len(source_lines[line - 1][col:].lstrip())
 
     yield from render_context(line - 2, line, source_lines)
@@ -514,11 +497,10 @@ def render_pep8_errors_e272(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e275(msg, _node, source_lines=None):
+def render_pep8_errors_e275(msg, _node, line, source_lines=None):
     """Render a PEP8 missing whitespace after keyword message."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     # Get the range for highlighting the corresponding keyword.
     keyword = source_lines[line - 1][:col].split()[-1]
@@ -534,9 +516,9 @@ def render_pep8_errors_e275(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors_e301(msg, _node, source_lines=None):
+def render_pep8_errors_e301(msg, _node, line, source_lines=None):
     """Render a PEP8 expected 1 blank line message."""
-    line = msg.line - 1
+    line -= 1
     yield from render_context(line - 1, line + 1, source_lines)
     body = source_lines[line]
     indentation = len(body) - len(body.lstrip())
@@ -549,9 +531,9 @@ def render_pep8_errors_e301(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e302(msg, _node, source_lines=None):
+def render_pep8_errors_e302(msg, _node, line, source_lines=None):
     """Render a PEP8 expected 2 blank lines message."""
-    line = msg.line - 1
+    line -= 1
     if "found 0" in msg.msg:
         yield from render_context(line - 1, line + 1, source_lines)
         yield from (
@@ -571,9 +553,9 @@ def render_pep8_errors_e302(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e303(msg, _node, source_lines=None):
+def render_pep8_errors_e303(msg, _node, line, source_lines=None):
     """Render a PEP8 too many blank lines message."""
-    line = msg.line - 1
+    line -= 1
     while source_lines[line - 1].strip() == "":
         line -= 1
     yield from render_context(line - 1, line + 1, source_lines)
@@ -586,9 +568,9 @@ def render_pep8_errors_e303(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e304(msg, _node, source_lines=None):
+def render_pep8_errors_e304(msg, _node, line, source_lines=None):
     """Render a PEP8 blank lines found after function decorator message."""
-    line = msg.line - 1
+    line -= 1
     while source_lines[line - 1].strip() == "":
         line -= 1
     yield from render_context(line - 1, line + 1, source_lines)
@@ -599,9 +581,9 @@ def render_pep8_errors_e304(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e305(msg, _node, source_lines=None):
+def render_pep8_errors_e305(msg, _node, line, source_lines=None):
     """Render a PEP8 expected 2 blank lines after class or function definition message."""
-    line = msg.line - 1
+    line -= 1
     if "found 0" in msg.msg:
         yield from render_context(line - 1, line + 1, source_lines)
         yield from (
@@ -621,9 +603,9 @@ def render_pep8_errors_e305(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e306(msg, _node, source_lines=None):
+def render_pep8_errors_e306(msg, _node, line, source_lines=None):
     """Render a PEP8 expected 1 blank line before a nested definition message."""
-    line = msg.line - 1
+    line -= 1
     yield from render_context(line - 1, line + 1, source_lines)
     body = source_lines[line]
     indentation = len(body) - len(body.lstrip())
@@ -636,11 +618,10 @@ def render_pep8_errors_e306(msg, _node, source_lines=None):
     yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e502(msg, _node, source_lines=None):
+def render_pep8_errors_e502(msg, _node, line, source_lines=None):
     """Render a PEP8 the backslash is redundant between brackets."""
-    line = msg.line
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
+
+    col = get_col(msg)
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(col, col + 1), LineType.ERROR, source_lines[line - 1])

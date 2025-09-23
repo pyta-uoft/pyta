@@ -25,8 +25,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -36,19 +35,39 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """Test that the checker correctly flags a while loop when no condition variable attributes are used in
         the loop body."""
         src = """
-        while 0 < self.attribute < 100: #@
-            attribute += 1
+        class Faa:
+            def __init__(self):
+                self.attribute = 10
+            def foo(self):
+                while 0 < self.attribute < 100: #@
+                    attribute += 1
         """
 
         node = astroid.extract_node(src)
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
+            self.checker.visit_while(node)
+
+    def test_attr_not_updated_cond_false(self) -> None:
+        """Test that the checker correctly flags a while loop when no condition variable attributes are used in
+        the loop body."""
+        src = """
+        class Faa:
+            def __init__(self):
+                self.attribute = 0
+            def foo(self):
+                while 0 < self.attribute < 100: #@
+                    attribute += 1
+        """
+
+        node = astroid.extract_node(src)
+
+        with self.assertNoMessages():
             self.checker.visit_while(node)
 
     def test_nested_while_unused_var(self) -> None:
@@ -67,8 +86,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=detected_node.test,
+                msg_id="infinite-loop", node=detected_node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -87,8 +105,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
@@ -107,30 +124,11 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="infinite-loop",
-                node=node.test,
+                msg_id="infinite-loop", node=node.test, confidence=INFERENCE
             ),
             ignore_position=True,
         ):
             self.checker.visit_while(node)
-
-    def test_condition_variable_used_only_as_argument(self):
-        """Test that the checker does not flag while loops when the condition variable is passed to a function
-        or method."""
-        src = """
-        i = 0
-        while i < 20: #@
-            self.update(i)
-
-        while i < 20: #@
-            increment(i)
-        """
-
-        node1, node2 = astroid.extract_node(src)
-
-        with self.assertNoMessages():
-            self.checker.visit_while(node1)
-            self.checker.visit_while(node2)
 
     def test_multiple_while_pass(self) -> None:
         """Test that the checker does not flag non-infinite while loops."""
@@ -191,6 +189,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             pylint.testutils.MessageTest(
                 msg_id="infinite-loop",
                 node=node.test,
+                confidence=INFERENCE,
             ),
             ignore_position=True,
         ):
@@ -358,12 +357,18 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
         """Test verifies that `_check_condition_constant` helper handles failed inference correctly."""
         """"""
         src = """
-        while 1: #@
+        while x: #@
             pass
         """
         node = astroid.extract_node(src)
 
-        with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
+        def fake_infer(node, *args, **kwargs):
+            if isinstance(node, astroid.nodes.Name):
+                yield astroid.util.Uninferable()
+            else:
+                yield from astroid.nodes.NodeNG.infer(node, *args, **kwargs)
+
+        with patch.object(astroid.nodes.NodeNG, "infer", fake_infer):
             result = self.checker._check_condition_constant(node)
             assert result is False
 
@@ -406,6 +411,151 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker._check_condition_constant(node)
+
+    @pytest.mark.parametrize(
+        "src",
+        [
+            """
+            i = 0
+            while i < 1: #@
+                print(i)
+            """,
+            """
+            i = 0.1
+            while i < 1: #@
+                print(i)
+            """,
+            """
+            i = 1 + 3j
+            while i: #@
+                print(i)
+            """,
+            """
+            i = True
+            while i: #@
+                print(i)
+            """,
+            """
+            i =  "hello"
+            while i != "hi": #@
+                print(i)
+            """,
+            """
+            i =  b"hello"
+            while i != "hi": #@
+                print(i)
+            """,
+            """
+            i = (1, 2)
+            while i: #@
+                print(i)
+            """,
+            """
+            i = None
+            while not i: #@
+                print(i)
+            """,
+            """
+            i, j, k, l = 1, 0.9, True, "Goodbye"
+            while i + j < 10 and not k or l != "cool": #@
+                print(i, j, k, l)
+            """,
+        ],
+    )
+    def test_immutable_cond_vars(self, src: str) -> None:
+        """Test verifies that `_check_immutable_cond_var_reassigned` flags infinite loops with immutable condition
+        variables and no re-assignment in the body."""
+        node = astroid.extract_node(src)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_while(node)
+
+    @pytest.mark.parametrize(
+        "src",
+        [
+            """
+            i = 0
+            while i > 1: #@
+                print(i)
+            """,
+            """
+            i = True
+            while not i: #@
+                print(i)
+            """,
+            """
+            i = ""
+            while i != "ooooooo": #@
+                i = i + "o"
+            """,
+            """
+            i, j, k, l = 1, 0.9, True, "Goodbye"
+            while i + j > 10 or not k or l == "cool": #@
+                print(i, j, k, l)
+            """,
+            """
+            i, j, k, l = 1, 0.9, True, "Goodbye"
+            while i + j < 10 and not k or l != "cool": #@
+                print(i, j, k, l)
+                i += 1
+            """,
+            """
+            lst = [1, 2]
+            i = 0
+            while lst != [10] and i < 10: #@
+                print(lst)
+                foo(i)
+                lst[0] = i
+            """,
+        ],
+    )
+    def test_immutable_cond_vars_fail(self, src: str) -> None:
+        """Test verifies that `_check_immutable_cond_var_reassigned` does not flag loops that do satisfy the conditions
+        of the check."""
+        node = astroid.extract_node(src)
+
+        with self.assertNoMessages():
+            self.checker.visit_while(node)
+
+    def test_immutable_fail_infer_var(self) -> None:
+        """Test verifies that `_check_immutable_cond_var_reassigned` handles failed infer properly for condition
+        var."""
+        src = """
+        i = 0
+        while i < 100: #@
+            print(i)
+        """
+        node = astroid.extract_node(src)
+
+        with patch("astroid.nodes.NodeNG.infer", return_value=[astroid.util.Uninferable()]):
+            result = self.checker._check_immutable_cond_var_reassigned(node)
+            assert result is False
+
+    def test_immutable_fail_infer_cond(self) -> None:
+        """Test verifies that `_check_immutable_cond_var_reassigned` handles failed infer properly for condition."""
+        src = """
+        i = 0
+        while i < 100: #@
+            print(i)
+        """
+        node = astroid.extract_node(src)
+
+        def fake_infer(node):
+            if isinstance(node, astroid.nodes.Compare):
+                yield astroid.util.Uninferable()
+            elif isinstance(node, astroid.nodes.Name):
+                yield astroid.nodes.Const(value=0)
+
+        with patch.object(astroid.nodes.NodeNG, "infer", fake_infer):
+            result = self.checker._check_immutable_cond_var_reassigned(node)
+            assert result is False
 
 
 class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):

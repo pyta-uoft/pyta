@@ -8,6 +8,28 @@ from pylint.checkers import BaseChecker, utils
 from pylint.interfaces import INFERENCE
 from pylint.lint import PyLinter
 
+IMMUTABLE_TYPES = (
+    int,
+    float,
+    bool,
+    complex,
+    str,
+    bytes,
+    tuple,
+    type(None),
+)
+
+CONST_NODES = (
+    nodes.Module,
+    nodes.GeneratorExp,
+    nodes.Lambda,
+    nodes.FunctionDef,
+    nodes.ClassDef,
+    bases.Generator,
+    UnboundMethod,
+    BoundMethod,
+)
+
 
 class InfiniteLoopChecker(BaseChecker):
     name = "infinite-loop"
@@ -21,7 +43,11 @@ class InfiniteLoopChecker(BaseChecker):
     }
 
     def visit_while(self, node: nodes.While) -> None:
-        checks = [self._check_condition_constant, self._check_condition_all_var_used]
+        checks = [
+            self._check_condition_constant,
+            self._check_condition_all_var_used,
+            self._check_immutable_cond_var_reassigned,
+        ]
         any(check(node) for check in checks)
 
     def _check_condition_all_var_used(self, node: nodes.While) -> bool:
@@ -38,6 +64,9 @@ class InfiniteLoopChecker(BaseChecker):
                 cond_vars.add(child.name)
         if not cond_vars:
             return False
+        inferred_test = infer_condition(node)
+        if not inferred_test:
+            return False
         # Check to see if condition variable(s) used inside body
         for child in node.body:
             for name_node in child.nodes_of_class((nodes.Name, nodes.AssignName)):
@@ -45,10 +74,7 @@ class InfiniteLoopChecker(BaseChecker):
                     # At least one condition variable is used in the loop body
                     return False
         else:
-            self.add_message(
-                "infinite-loop",
-                node=node.test,
-            )
+            self.add_message("infinite-loop", node=node.test, confidence=INFERENCE)
             return True
 
     def _check_condition_constant(self, node: nodes.While) -> bool:
@@ -62,14 +88,9 @@ class InfiniteLoopChecker(BaseChecker):
             node.test
         ) and not self._check_constant_form_condition(node):
             return False
-        inferred = utils.safe_infer(node.test)
-        if isinstance(inferred, util.UninferableBase) or inferred is None:
-            return False
-        if (
-            (isinstance(inferred, nodes.Const) and bool(inferred.value) is False)
-            or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and not inferred.elts)
-            or (isinstance(inferred, nodes.Dict) and not inferred.items)
-        ):
+
+        inferred = infer_condition(node)
+        if not inferred:
             return False
 
         check_nodes = (nodes.Break, nodes.Return, nodes.Raise, nodes.Yield)
@@ -83,10 +104,9 @@ class InfiniteLoopChecker(BaseChecker):
                     and isinstance(exit_node.func, nodes.Attribute)
                     and exit_node.func.attrname == "exit"
                 ):
-                    inferred = utils.safe_infer(exit_node.func.expr)
+                    inferred = get_safely_inferred(exit_node.func.expr)
                     if (
-                        not isinstance(inferred, util.UninferableBase)
-                        and inferred is not None
+                        inferred is not None
                         and isinstance(inferred, nodes.Module)
                         and inferred.name == "sys"
                     ):
@@ -104,16 +124,6 @@ class InfiniteLoopChecker(BaseChecker):
 
         See `https://github.com/pylint-dev/pylint/blob/main/pylint/checkers/base/basic_checker.py#L303` for further
         detail."""
-        const_nodes = (
-            nodes.Module,
-            nodes.GeneratorExp,
-            nodes.Lambda,
-            nodes.FunctionDef,
-            nodes.ClassDef,
-            bases.Generator,
-            UnboundMethod,
-            BoundMethod,
-        )
         structs = (nodes.Dict, nodes.Tuple, nodes.Set, nodes.List)
         except_nodes = (
             nodes.Call,
@@ -124,7 +134,7 @@ class InfiniteLoopChecker(BaseChecker):
         )
         inferred = None
         maybe_generator_call = None
-        emit = isinstance(test_node, (nodes.Const, *structs, *const_nodes))
+        emit = isinstance(test_node, (nodes.Const, *structs, *CONST_NODES))
         if not isinstance(test_node, except_nodes):
             inferred = utils.safe_infer(test_node)
             # If we can't infer what the value is but the test is just a variable name
@@ -150,7 +160,7 @@ class InfiniteLoopChecker(BaseChecker):
                     return True
         if emit:
             return True
-        elif isinstance(inferred, const_nodes):
+        elif isinstance(inferred, CONST_NODES):
             return True
         return False
 
@@ -185,6 +195,81 @@ class InfiniteLoopChecker(BaseChecker):
             ):
                 maybe_generator_call = lookup_result[1][0].parent.value
         return emit, maybe_generator_call
+
+    def _check_immutable_cond_var_reassigned(self, node: nodes.While) -> bool:
+        """Helper function that checks if a while-loop condition uses only immutable variables
+        and none of them are reassigned inside the loop body.
+
+        Flags loops that meet **both** of the following criteria:
+        - All variables in the `while` condition are immutable (int, float, complex, bool,
+          str, bytes, tuple, or NoneType)
+        - None of these variables are reassigned in the loop body"""
+        immutable_vars = set()
+        for child in node.test.nodes_of_class(nodes.Name):
+            if isinstance(child.parent, nodes.Call) and child.parent.func is child:
+                continue
+            try:
+                inferred_values = list(child.infer())
+            except InferenceError:
+                return False
+            for inferred in inferred_values:
+                if inferred is util.Uninferable or not _is_immutable_node(inferred):
+                    # Return False when the node may evaluate to a mutable object
+                    return False
+            immutable_vars.add(child.name)
+        if not immutable_vars:
+            return False
+        inferred_test = infer_condition(node)
+        if not inferred_test:
+            return False
+
+        for child in node.body:
+            for assign_node in child.nodes_of_class(nodes.AssignName):
+                if assign_node.name in immutable_vars:
+                    return False
+        else:
+            self.add_message(
+                "infinite-loop",
+                node=node.test,
+                confidence=INFERENCE,
+            )
+            return True
+
+
+def _is_immutable_node(node: nodes.NodeNG) -> bool:
+    """Helper used to check whether node represents an immutable type."""
+    return (isinstance(node, nodes.Const) and type(node.value) in IMMUTABLE_TYPES) or isinstance(
+        node, nodes.Tuple
+    )
+
+
+def get_safely_inferred(node: nodes.NodeNG) -> Optional[nodes.NodeNG]:
+    """Helper used to safely infer a node with `astroid.safe_infer`. Return None if inference failed."""
+    inferred = utils.safe_infer(node)
+    if isinstance(inferred, util.UninferableBase) or inferred is None:
+        return None
+    else:
+        return inferred
+
+
+def infer_condition(node: nodes.While) -> bool:
+    """Helper used to safely infer the value of a loop condition. Return False if inference failed or condition
+    evaluated to be false."""
+    try:
+        inferred_values = list(node.test.infer())
+    except InferenceError:
+        return True
+    for inferred in inferred_values:
+        if inferred is util.Uninferable:
+            continue
+        if (
+            (isinstance(inferred, nodes.Const) and bool(inferred.value))
+            or (isinstance(inferred, (nodes.List, nodes.Tuple, nodes.Set)) and bool(inferred.elts))
+            or (isinstance(inferred, nodes.Dict) and bool(inferred.items))
+            or (isinstance(inferred, CONST_NODES))
+        ):
+            return True
+    return False
 
 
 def register(linter: PyLinter) -> None:

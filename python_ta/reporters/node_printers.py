@@ -234,11 +234,17 @@ def render_pep8_errors_e128(msg, _node, line, col, source_line):
     yield (line, slice(0, col if col != 0 else None), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e201_e202_e203_e211(msg, _node, line, col, source_line=None):
+def render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272(
+    msg, _node, line, col, source_line=None
+):
     """Render a PEP8 whitespace after '(' message,
     a PEP8 whitespace before ')' message,
     a PEP8 whitespace before ‘,’, ‘;’, or ‘:’ message,
-    AND a PEP8 whitespace before '(' message.."""
+    a PEP8 whitespace before '(' message,
+    a PEP8 multiple spaces before operator message,
+    a PEP8 multiple spaces after keyword message,
+    a PEP8 multiple spaces before keyword message
+    and a PEP8 multiple spaces after operator message."""
 
     curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip())
 
@@ -250,22 +256,6 @@ def render_pep8_errors_e204(msg, _node, line, col, source_line=None):
 
     # calculates the length of the leading whitespaces by subtracting the length of everything after the first character after stripping all leading whitespaces from the total line length
     curr_idx = col + len(source_line[col:]) - len(source_line[col + 1 :].lstrip())
-
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
-
-
-def render_pep8_errors_e221(msg, _node, line, col, source_line=None):
-    """Render a PEP8 multiple spaces before operator message."""
-
-    curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip())
-
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
-
-
-def render_pep8_errors_e222(msg, _node, line, col, source_line=None):
-    """Render a PEP8 multiple spaces after operator message"""
-
-    curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip())
 
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
@@ -386,7 +376,6 @@ def render_pep8_errors_e261(msg, _node, line, col, source_line=None):
 def render_pep8_errors_e262(msg, _node, line, col, source_line=None):
     """Render a PEP8 inline comment should start with '# ' message"""
 
-    source_line = source_line
     keyword_idx = len(source_line) - len(source_line[col:].lstrip("# \t"))
 
     yield (line, slice(col, keyword_idx), LineType.ERROR, source_line)
@@ -414,22 +403,6 @@ def render_pep8_errors_e266(msg, _node, line, col, source_line=None):
         LineType.ERROR,
         source_line + "  # THERE SHOULD ONLY BE ONE '#'",
     )
-
-
-def render_pep8_errors_e271(msg, _node, line, col, source_line=None):
-    """Render a PEP8 multiple spaces after keyword message."""
-
-    curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip())
-
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
-
-
-def render_pep8_errors_e272(msg, _node, line, col, source_line=None):
-    """Render a PEP8 multiple spaces before keyword message."""
-
-    curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip())
-
-    yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
 def render_pep8_errors_e275(msg, _node, line, col, source_line=None):
@@ -631,13 +604,13 @@ RENDERERS = {
     "E125": render_pep8_errors_e125_and_e129,
     "E129": render_pep8_errors_e125_and_e129,
     "E128": render_pep8_errors_e128,
-    "E201": render_pep8_errors_e201_e202_e203_e211,
-    "E202": render_pep8_errors_e201_e202_e203_e211,
-    "E203": render_pep8_errors_e201_e202_e203_e211,
+    "E201": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
+    "E202": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
+    "E203": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
     "E204": render_pep8_errors_e204,
-    "E211": render_pep8_errors_e201_e202_e203_e211,
-    "E221": render_pep8_errors_e221,
-    "E222": render_pep8_errors_e222,
+    "E211": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
+    "E221": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
+    "E222": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
     "E223": render_pep8_errors_e223_and_e274,
     "E224": render_pep8_errors_e224_and_e273,
     "E225": render_pep8_errors_e225,
@@ -652,8 +625,8 @@ RENDERERS = {
     "E262": render_pep8_errors_e262,
     "E265": render_pep8_errors_e265,
     "E266": render_pep8_errors_e266,
-    "E271": render_pep8_errors_e271,
-    "E272": render_pep8_errors_e272,
+    "E271": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
+    "E272": render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272,
     "E275": render_pep8_errors_e275,
     "E301": render_pep8_errors_e301,
     "E302": render_pep8_errors_e302,

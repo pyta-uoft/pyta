@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended infinite-loop check to flag while loops whose conditions depend only on immutable variables and are not reassigned in the loop body.
 - Added custom renderers for the PEP8 error codes: E204, E225, E231
 - Added custom renderers for the PEP8 error codes: E271, E274, E502
+- Updated the message format for Pycodestyle error messages to be more concise
 
 ### 💫 New checkers
 

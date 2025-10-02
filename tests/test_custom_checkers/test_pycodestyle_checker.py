@@ -102,7 +102,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
                 pylint.testutils.MessageTest(
                     msg_id="pep8-errors",
                     line=line,
-                    args=(msg_id, f"line {line}, column {col}: {desc}"),
+                    args=(f"{desc}", msg_id),
                 )
                 for line, col, desc in args
             ],
@@ -134,7 +134,7 @@ class TestPycodestyleChecker(pylint.testutils.CheckerTestCase):
                 pylint.testutils.MessageTest(
                     msg_id="pep8-errors",
                     line=line,
-                    args=(msg_id, f"line {line}, column {col}: {desc}"),
+                    args=(desc, msg_id),
                 )
                 for msg_id, line, col, desc in expected
             ],

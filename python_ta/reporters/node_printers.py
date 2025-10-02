@@ -132,13 +132,6 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def get_col(msg):
-    """Return the column number of the character causing the error"""
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    return col
-
-
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
     # Extract the raw error message
@@ -151,7 +144,7 @@ def render_pep8_errors(msg, _node, source_lines=None):
         # Render the appropriate error through the RENDERERS dict
         if error_code in RENDERERS:
             line = msg.line
-            col = get_col(msg)
+            col = msg.column
             yield from render_context(line - 3, line, source_lines)
             yield from RENDERERS[error_code](msg, line, col, source_lines[line - 1])
             yield from render_context(line + 1, line + 3, source_lines)

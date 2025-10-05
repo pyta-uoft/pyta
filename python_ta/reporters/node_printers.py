@@ -78,7 +78,7 @@ def render_trailing_newlines(msg, _node, source_lines=None):
     start_line = msg.line - 1
     yield from render_context(start_line - 2, start_line, source_lines)
     yield from (
-        (line, slice(None, None), LineType.OTHER, source_lines[line - 1])
+        (line, slice(None, None), LineType.OTHER, source_lines[line - 1] + "# DELETE THIS LINE")
         for line in range(start_line, len(source_lines) + 1)
     )
 

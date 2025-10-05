@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added custom renderers for the PEP8 error codes: E204, E225, E231
 - Added custom renderers for the PEP8 error codes: E271, E274, E502
 - Updated the message format for Pycodestyle error messages to be more concise
+- Improved error message for error C0305 `trailing-newlines` and inserted a "DELETE" comment for each trailing newline.
 
 ### 💫 New checkers
 

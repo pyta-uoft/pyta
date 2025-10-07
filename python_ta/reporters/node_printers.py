@@ -78,13 +78,13 @@ def render_trailing_newlines(msg, _node, source_lines=None):
     start_line = len(source_lines)
     while start_line > 0 and source_lines[start_line - 1].strip() == "":
         start_line -= 1
-    start_line += 1
+    start_line += 1  # Offset to start from the first extraneous newline
 
-    yield from render_context(start_line - 2, start_line, source_lines)
-    for line in range(start_line, len(source_lines) + 1):
-        yield (
-            (line, slice(None, None), LineType.ERROR, source_lines[line - 1] + "# DELETE THIS LINE")
-        )
+    yield from render_context(start_line - 2, start_line + 1, source_lines)
+    for line in range(start_line, len(source_lines)):
+        yield ((line, slice(None, None), LineType.ERROR, source_lines[line] + "# DELETE THIS LINE"))
+    # Render the last newline
+    yield (len(source_lines) + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
 
 
 def render_trailing_whitespace(msg, _node, source_lines=None):

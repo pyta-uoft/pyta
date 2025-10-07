@@ -86,12 +86,13 @@ def _get_max_line_length(config, default=80):
 
 def render_line_too_long(msg, node, source_lines=None, config=None):
     """Render a line too long message."""
-    line = msg.line - 1
+    line = msg.line
 
     # Get configured max-line-length
     max_len = _get_max_line_length(config, 80)
 
-    start_index, end_index = max_len, len(source_lines[line - 1]) - 1
+    start_index, end_index = max_len, len(source_lines[line - 1])
+
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(start_index, end_index), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 2, source_lines)

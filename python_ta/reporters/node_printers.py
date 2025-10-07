@@ -75,12 +75,16 @@ def render_missing_docstring(_msg, node, source_lines=None):
 
 def render_trailing_newlines(msg, _node, source_lines=None):
     """Render a trailing newlines message."""
-    start_line = msg.line - 1
+    start_line = len(source_lines)
+    while start_line > 0 and source_lines[start_line - 1].strip() == "":
+        start_line -= 1
+    start_line += 1
+
     yield from render_context(start_line - 2, start_line, source_lines)
-    yield from (
-        (line, slice(None, None), LineType.OTHER, source_lines[line - 1] + "# DELETE THIS LINE")
-        for line in range(start_line, len(source_lines) + 1)
-    )
+    for line in range(start_line, len(source_lines) + 1):
+        yield (
+            (line, slice(None, None), LineType.ERROR, source_lines[line - 1] + "# DELETE THIS LINE")
+        )
 
 
 def render_trailing_whitespace(msg, _node, source_lines=None):

@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended infinite-loop check to flag while loops whose conditions depend only on immutable variables and are not reassigned in the loop body.
 - Added custom renderers for the PEP8 error codes: E204, E225, E231
 - Added custom renderers for the PEP8 error codes: E271, E274, E502
+- Updated the message format for Pycodestyle error messages to be more concise
 
 ### 💫 New checkers
 
@@ -25,6 +26,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests for node_printers.py functions rendering the PEP8 error messages: E101, E116, E124, E128, E201, E202
 - Added tests for node_printers.py functions rendering the following PEP8 error codes: E221, E251, E261, E272, E273, E302, E305, E306
 - Refactored node_printers.py by grouping repeated code in helper functions and grouping identical functions into a single functions to reduce code duplication
+- Updated GitHub Actions workflow to Node 24
 
 ## [2.11.1] - 2025-08-17
 

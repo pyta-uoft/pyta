@@ -18,7 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Fixed issue that caused some error messages to not render properly
+- Fixed issue that caused PEP8 errors E301, E302, E303, E304, E305 and E306 to not render properly
 
 ### 🔧 Internal changes
 

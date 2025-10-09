@@ -132,13 +132,6 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def get_col(msg):
-    """Return the column number of the character causing the error"""
-    res = re.search(r"column (\d+)", msg.msg)
-    col = int(res.group().split()[-1])
-    return col
-
-
 def render_pep8_errors(msg, _node, source_lines=None):
     """Render a PEP8 error message."""
     # Extract the raw error message
@@ -150,11 +143,12 @@ def render_pep8_errors(msg, _node, source_lines=None):
         error_code = matched_error.group(1)
         # Render the appropriate error through the RENDERERS dict
         if error_code in RENDERERS:
-            if error_code in {"E301", "E302", "E303", "E304", "E305", "E306"}:
-                yield from RENDERERS[error_code](msg, source_lines)
+            line = msg.line
+            require_source_lines_renderers = {"E302", "E303", "E304", "E305"}
+            if error_code in require_source_lines_renderers:
+                yield from RENDERERS[error_code](msg, line, source_lines)
             else:
-                line = msg.line
-                col = get_col(msg)
+                col = msg.column
                 yield from render_context(line - 3, line, source_lines)
                 yield from RENDERERS[error_code](line, col, source_lines[line - 1])
                 yield from render_context(line + 1, line + 3, source_lines)
@@ -392,26 +386,21 @@ def render_pep8_errors_e275(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e301(msg, source_lines=None):
+def render_pep8_errors_e301(line, col, source_line=None):
     """Render a PEP8 expected 1 blank line message."""
-    line = msg.line - 1
-    yield from render_context(line - 1, line + 1, source_lines)
-    body = source_lines[line]
-    indentation = len(body) - len(body.lstrip())
+    indentation = len(source_line) - len(source_line.lstrip())
     yield (
         None,
         slice(None, None),
         LineType.ERROR,
-        body[:indentation] + NEW_BLANK_LINE_MESSAGE,
+        source_line[:indentation] + NEW_BLANK_LINE_MESSAGE,
     )
-    yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
-def render_pep8_errors_e302(msg, source_lines=None):
+def render_pep8_errors_e302(msg, line, source_lines=None):
     """Render a PEP8 expected 2 blank lines message."""
-    line = msg.line - 1
     if "found 0" in msg.msg:
-        yield from render_context(line - 1, line + 1, source_lines)
+        yield from render_context(line - 3, line, source_lines)
         yield from (
             (
                 None,
@@ -422,46 +411,31 @@ def render_pep8_errors_e302(msg, source_lines=None):
             for _ in range(0, 2)
         )
     else:
-        line -= 1
-        yield from render_context(line - 1, line + 1, source_lines)
+        yield from render_context(line - 3, line - 1, source_lines)
         yield from render_blank_line(line)
         yield (None, slice(None, None), LineType.ERROR, NEW_BLANK_LINE_MESSAGE)
-    yield from render_context(msg.line, msg.line + 2, source_lines)
+    yield from render_context(line, line + 3, source_lines)
 
 
-def render_pep8_errors_e303(msg, source_lines=None):
+def render_pep8_errors_e303_and_e304(msg, line, source_lines=None):
     """Render a PEP8 too many blank lines message."""
-    line = msg.line - 1
-    while source_lines[line - 1].strip() == "":
-        line -= 1
-    yield from render_context(line - 1, line + 1, source_lines)
-    body = source_lines[msg.line - 1]
+    dline = line
+    while source_lines[dline - 2].strip() == "":
+        dline -= 1
+    body = source_lines[line - 1]
     indentation = len(body) - len(body.lstrip())
+    yield from render_context(dline - 3, dline, source_lines)
     yield from (
         (curr_line, slice(None, None), LineType.ERROR, " " * (indentation + 28))
-        for curr_line in range(line + 1, msg.line)
+        for curr_line in range(dline, line)
     )
-    yield from render_context(msg.line, msg.line + 2, source_lines)
+    yield from render_context(line, line + 3, source_lines)
 
 
-def render_pep8_errors_e304(msg, source_lines=None):
-    """Render a PEP8 blank lines found after function decorator message."""
-    line = msg.line - 1
-    while source_lines[line - 1].strip() == "":
-        line -= 1
-    yield from render_context(line - 1, line + 1, source_lines)
-    yield from (
-        (curr_line, slice(None, None), LineType.ERROR, " " * 28)
-        for curr_line in range(line + 1, msg.line)
-    )
-    yield from render_context(msg.line, msg.line + 2, source_lines)
-
-
-def render_pep8_errors_e305(msg, source_lines=None):
+def render_pep8_errors_e305(msg, line, source_lines=None):
     """Render a PEP8 expected 2 blank lines after class or function definition message."""
-    line = msg.line - 1
     if "found 0" in msg.msg:
-        yield from render_context(line - 1, line + 1, source_lines)
+        yield from render_context(line - 3, line, source_lines)
         yield from (
             (
                 None,
@@ -472,26 +446,21 @@ def render_pep8_errors_e305(msg, source_lines=None):
             for _ in range(0, 2)
         )
     else:
-        line -= 1
-        yield from render_context(line - 1, line + 1, source_lines)
+        yield from render_context(line - 3, line - 1, source_lines)
         yield from render_blank_line(line)
         yield (None, slice(None, None), LineType.ERROR, NEW_BLANK_LINE_MESSAGE)
-    yield from render_context(msg.line, msg.line + 2, source_lines)
+    yield from render_context(line, line + 3, source_lines)
 
 
-def render_pep8_errors_e306(msg, source_lines=None):
+def render_pep8_errors_e306(line, col, source_line=None):
     """Render a PEP8 expected 1 blank line before a nested definition message."""
-    line = msg.line - 1
-    yield from render_context(line - 1, line + 1, source_lines)
-    body = source_lines[line]
-    indentation = len(body) - len(body.lstrip())
+    indentation = len(source_line) - len(source_line.lstrip())
     yield (
         None,
         slice(None, None),
         LineType.ERROR,
-        body[:indentation] + NEW_BLANK_LINE_MESSAGE,
+        source_line[:indentation] + NEW_BLANK_LINE_MESSAGE,
     )
-    yield from render_context(msg.line, msg.line + 2, source_lines)
 
 
 def render_pep8_errors_e502(line, col, source_line=None):
@@ -613,8 +582,8 @@ RENDERERS = {
     "E275": render_pep8_errors_e275,
     "E301": render_pep8_errors_e301,
     "E302": render_pep8_errors_e302,
-    "E303": render_pep8_errors_e303,
-    "E304": render_pep8_errors_e304,
+    "E303": render_pep8_errors_e303_and_e304,
+    "E304": render_pep8_errors_e303_and_e304,
     "E305": render_pep8_errors_e305,
     "E306": render_pep8_errors_e306,
     "E502": render_pep8_errors_e502,

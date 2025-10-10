@@ -144,7 +144,7 @@ def render_missing_return_type(_msg, node, source_lines=None, config=None):
 def render_too_many_arguments(msg, node, source_lines=None, config=None):
     """Render a too many arguments message."""
     # node is a FunctionDef node so replace it with its Arguments child
-    yield from render_generic(msg, node.args, source_lines)
+    yield from render_generic(msg, node.args, source_lines, config)
 
 
 def render_missing_space_in_doctest(msg, _node, source_lines=None, config=None):

@@ -377,10 +377,27 @@ All test still pass! Note, the reason behind this change has been briefly talked
 
 Sadly, this function NEEDS to mutate the end-location (as well as the start-location) attributes to ensure that the location attributes are correct.
 
+## Execution time difference
+
+Performance analysis (via `cProfile`) shows a slight improvement after refactoring:
+
+| Metric | Master   | Curr. Branch |
+|--------|----------|--------------|
+| **Average time** | 3.1734 s | 3.0243 s     |
+| **Min time** | 2.8704 s | 2.8436 s     |
+| **Max time** | 4.1178 s | 4.1256 s     |
+| **Std deviation** | 0.4436 s | 0.3706 s     |
+| **Average function calls** | 2,453,884 | 2,453,506    |
+
+
+While `cProfile` results can vary slightly due to system conditions, these numbers suggest that the refactoring reduced overall function calls and slightly improved runtime performance.
+
 ## Conclusion
 
-- all tests passed
-- minimal amount of custom code PythonTA needs to set endings properly reached (I think)
-- changes implemented and pushed
-- new tests
+> **Note:** In my previous investigation, I raised concerns about nodes spanning multiple lines. This is no longer an issue in the current implementation, as `add_parens` and `end_setter_from_source` now correctly handle the cases that could previously cause problems.
+
+- all 58 tests passed
+- minimal amount of custom code PythonTA needs to set endings properly reached (I believe...)
+- Refactored `setendings.py` and pushed changes
+- Reduced overall function calls and slightly improved runtime performance
 - task completed?

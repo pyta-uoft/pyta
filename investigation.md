@@ -5,6 +5,7 @@
 - [Investigation into New Astroid Attributes](#investigation-into-new-astroid-attributes)
 - [Examples on Primitive Type Nodes](#examples-on-primitive-type-nodes)
 - [Removal of redundant custom logic](#removal-of-redundant-custom-logic)
+- [Execution time difference](#execution-time-difference)
 - [Conclusion](#conclusion)
 
 ## Investigation into New Astroid Attributes

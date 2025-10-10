@@ -382,14 +382,13 @@ Sadly, this function NEEDS to mutate the end-location (as well as the start-loca
 
 Performance analysis (via `cProfile`) shows a slight improvement after refactoring:
 
-| Metric | Master   | Curr. Branch |
-|--------|----------|--------------|
-| **Average time** | 3.1734 s | 3.0243 s     |
-| **Min time** | 2.8704 s | 2.8436 s     |
-| **Max time** | 4.1178 s | 4.1256 s     |
-| **Std deviation** | 0.4436 s | 0.3706 s     |
+| Metric                     | Master    | Curr. Branch |
+| -------------------------- | --------- | ------------ |
+| **Average time**           | 3.1734 s  | 3.0243 s     |
+| **Min time**               | 2.8704 s  | 2.8436 s     |
+| **Max time**               | 4.1178 s  | 4.1256 s     |
+| **Std deviation**          | 0.4436 s  | 0.3706 s     |
 | **Average function calls** | 2,453,884 | 2,453,506    |
-
 
 While `cProfile` results can vary slightly due to system conditions, these numbers suggest that the refactoring reduced overall function calls and slightly improved runtime performance.
 

@@ -4,7 +4,7 @@
 
 - [Investigation into New Astroid Attributes](#investigation-into-new-astroid-attributes)
 - [Examples on Primitive Type Nodes](#examples-on-primitive-type-nodes)
-- [Comparison with Current PyTA Implementation](#comparison-with-current-pyta-implementation)
+- [Removal of redundant custom logic](#removal-of-redundant-custom-logic)
 - [Conclusion](#conclusion)
 
 ## Investigation into New Astroid Attributes
@@ -238,113 +238,149 @@ if __name__ == "__main__":
 
 As we can see, Astroid correctly identifies the fact that the `Pass` node end location is line 3 / offset 8
 
-## Comparison with Current PyTA Implementation
+## Removal of redundant custom logic
 
-My first intuition was to compare the default end location attributes with those produced by the transformer.
-Specifically, I modified `set_endings_from_source` in the factory function `end_setter_from_source` to simply return the
-same node without mutation.
+With the previous part in mind, it is clear that we can remove at least the `set_without_children` transformation.
+In fact, I verified that after removing all instances of `set_without_children` in `setendings.py`, all 58 tests still hold! That's a promising result.
 
-**Note**: These changes were temporary and only intended to test the end location attributes.
+Next, let's take a look at the `NODES_REQUIRING_SOURCE` list in `setendings.py`. In short, the nodes in this list have their end
+locations set by the helper `end_setter_from_source`. However, looking more closely, we notice a lot of nodes within this list do not
+need their end locations modified or set (due to it already being correctly set by Python's AST traversal logic). Specifically, all 58 tests will still pass if we remove the following nodes:
 
 ```python
-def end_setter_from_source(source_code, pred, only_consumables=False):
-    """Returns a *function* that sets ending locations for a node from source.
+NODES_REQUIRING_SOURCE = [
+    # (nodes.AsyncFor, _keyword_search("async"), None),
+    # (nodes.AsyncFunctionDef, _keyword_search("async"), None),
+    # (nodes.AsyncWith, _keyword_search("async"), None),
+    (nodes.Call, None, _token_search(")")),
+    (nodes.DelAttr, _keyword_search("del"), None),
+    (nodes.DelName, _keyword_search("del"), None),
+    # (nodes.Dict, None, _token_search("}")),
+    # (nodes.DictComp, None, _token_search("}")),
+    # (nodes.Expr, _token_search("("), _token_search(")")),
+    (nodes.GeneratorExp, _token_search("("), _token_search(")")),
+    # (nodes.If, _keyword_search("elif"), None),
+    # (nodes.Keyword, _is_arg_name, None),
+    (nodes.List, _token_search("["), _token_search("]")),
+    # (nodes.ListComp, _token_search("["), _token_search("]")),
+    # (nodes.Set, None, _token_search("}")),
+    # (nodes.SetComp, None, _token_search("}")),
+    (nodes.Slice, _token_search("["), None),
+    (nodes.Tuple, None, _token_search(",")),
+]
+```
 
-    The basic technique is to do the following:
-      1. Find the ending locations for the node based on its last child.
-      2. Starting at that point, iterate through characters in the source code
-         up to and including the first index that satisfies pred.
+Furthermore, the same can be done with `NODES_WITH_CHILDREN`. By removing the following nodes from the list, all 58 tests still pass. This means
+that the end location attributes are already correctly set by Python's AST traversal logic.
 
-    pred is a function that takes a string and index and returns a bool,
-    e.g. _is_close_paren
+```python
+NODES_WITH_CHILDREN = [
+    # nodes.Assert,
+    # nodes.Assign,
+    # nodes.AsyncFor,
+    # nodes.AsyncFunctionDef,
+    # nodes.AsyncWith,
+    # nodes.AugAssign,
+    # nodes.Await,
+    # nodes.BinOp,
+    # nodes.BoolOp,
+    nodes.Call,
+    # nodes.ClassDef,
+    # nodes.Compare,
+    nodes.Comprehension,
+    # nodes.Decorators,
+    # nodes.Delete,
+    # nodes.ExceptHandler,
+    # nodes.For,
+    # nodes.FormattedValue,
+    # nodes.FunctionDef,
+    # nodes.GeneratorExp,
+    # nodes.If,
+    # nodes.IfExp,
+    # nodes.Keyword,
+    # nodes.Lambda,
+    # nodes.List,
+    nodes.Module,
+    # nodes.Raise,
+    # nodes.Return,
+    # nodes.Starred,
+    # nodes.Subscript,
+    # nodes.Try,
+    # nodes.UnaryOp,
+    # nodes.While,
+    # nodes.With,
+    # nodes.YieldFrom,
+]
+```
 
-    If only_consumables is True, the search halts when it reaches a non-consumable
-    character that fails pred *on the first line*.
-    TODO: really the behaviour should be the same for all lines searched for.
-    """
+Additionally, after some more investigation, we notice that we can remove the `fix_subscript` transformer.
+All tests still pass! However, the same cannot be said about:
 
-    def set_endings_from_source(node):
+1. `fix_slice`, due to edge cases where the slice node doesn't have children (E.g "[:]", "[::]", "[:][:]", "[::][::]")
+2. `fix_argument`, due to python / astroid not setting end location attributes by default
+
+Finally, let's tackle `end_setter_from_source` and `_add_parens`.
+
+### Looking deeper into `end_setter_from_source`
+
+This helper sets the end location of a node from source using the location of its child. I noticed that the
+following code can be simplified from this:
+
+```python
+if not hasattr(node, "end_col_offset") or isinstance(node, nodes.Tuple):
+    set_from_last_child(node)
+```
+
+To this:
+
+```python
+if isinstance(node, nodes.Tuple):
+    set_from_last_child(node)
+```
+
+This is due to the fact that the argument node (node with no end location attributes set by Astroid / Python) has already
+been modified by `fix_argument`. Hence, this check is not necessary and all tests still pass!
+
+For the next change, we can notice that the following code can be simplified from this:
+
+```python
+# Search each character
+for j in range(len(source_code[i])):
+    if source_code[i][j] == "#":
+        break  # skip over comment lines
+    if pred(source_code[i], j, node):
+        node.end_col_offset, node.end_lineno = j + 1, i + 1
         return node
-    return set_endings_from_source
+    # only consume inert characters.
+    elif source_code[i][j] not in CONSUMABLES:
+        return node
 ```
 
-This resulted in 49 out of 58 tests passing.
-
-**Reminder**: each tuple in the lists correspond to `(node.fromlineno, node.end_lineno, node.col_offset, node.end_col_offset)`.
-
-Skip to [observations](###-observations) of failed tests.
-
-### 1) Fail: test_await (Await node)
-
-Expected :[(5, 5, 4, 27)] \
-Actual :[(5, 5, 4, 25)]
-
-### 2) Fail: test_call (Call node)
-
-Expected :[(1, 2, 0, 9)] \
-Actual :[(1, 2, 0, 6)]
-
-### 3) Fail: test_comprehension (Comprehension node)
-
-Expected :[(1, 1, 7, 20), (2, 2, 7, 16), (2, 2, 21, 36), (3, 3, 9, 18), (3, 3, 23, 40)] \
-Actual :[(1, 1, 7, 19), (2, 2, 7, 16), (2, 2, 21, 35), (3, 3, 9, 18), (3, 3, 23, 39)]
-
-### 4) Fail: test_decorators (decorators node)
-
-Expected :[(1, 2, 0, 27), (6, 6, 0, 9)] \
-Actual :[(1, 2, 0, 24), (6, 6, 0, 9)]
-
-### 5) Fail: test_generatorexp (GeneratorExp node)
-
-Expected :[(1, 1, 0, 37), (2, 2, 0, 43)] \
-Actual :[(1, 1, 0, 35), (2, 2, 0, 39)]
-
-### 6) Fail: test_list (List node)
-
-Expected :[(1, 1, 0, 2), (2, 2, 0, 9), (3, 3, 0, 6), (4, 9, 0, 1)] \
-Actual :[(1, 1, 0, 2), (2, 2, 0, 8), (3, 3, 0, 5), (4, 8, 0, 5)]
-
-### 7) Fail: test_raise (Raise node)
-
-Expected :[(3, 3, 8, 24), (5, 5, 8, 36)] \
-Actual :[(3, 3, 8, 24), (5, 5, 8, 35)]
-
-### 8) Fail: test_tuple (Tuple node)
-
-Out of all Tuple nodes in the example file, the 18-th node's end location was wrong:
-
-Expected: (21, 21, 0, 2) \
-Actual: (1, 1, 0, 6)
-
-### 9) Fail: test_yieldfrom (YieldFrom node)
-
-Expected :[(2, 2, 4, 23)] \
-Actual :[(2, 2, 4, 22)]
-
-### Observations
-
-From the failed tests, we can make a key observation: both `end_lineno` and `end_col_offset` are not always accurate.
-The `end_lineno` attribute was inaccurate only in `test_list`, while `end_col_offset` was inaccurate in every failed test.
-
-It is clear that the current astroid logic for computing end locations is not fully reliable. In particular, it often fails
-in cases involving whitespace. For example, in test_call:
+To this:
 
 ```python
-print(1, 2, 3,
-     4  )
+# Search each character
+for j in range(len(source_code[i])):
+    if source_code[i][j] == "#":
+        break  # skip over comment lines
+    if pred(source_code[i], j, node):
+        node.end_col_offset = j + 1
+        return node
+    # only consume inert characters.
+    elif source_code[i][j] not in CONSUMABLES:
+        return node
 ```
 
-Astroid computed `end_col_offset` as 6, when in reality it should be 9. This issue is frequent enough to matter,
-especially considering the fact that the current PyTA implementation passes all tests.
+All test still pass! Note, the reason behind this change has been briefly talked about in the previous iteration of this report.
 
-> This gets a bit complicated because we implemented some interesting string parsing to capture the full extent (start and end locations) of some nodes, because we didn't think astroid did it correctly.
+### Looking deeper into `_add_parens`
 
-Your intuition was correct: astroid does not consistently evaluate node end locations accurately.
+Sadly, this function NEEDS to mutate the end-location (as well as the start-location) attributes to ensure that the location attributes are correct.
 
 ## Conclusion
 
-From this investigation, we can conclude that while astroid is usually correct for simpler nodes (such as primitive types),
-it struggles to accurately determine the end locations of more complex nodes. This inaccuracy is significant because
-PyTA’s current logic already works and passes all tests.
-
-Therefore, it would be best to continue using PyTA’s custom logic rather than relying on astroid’s defaults.
+- all tests passed
+- minimal amount of custom code PythonTA needs to set endings properly reached (I think)
+- changes implemented and pushed
+- new tests
+- task completed?

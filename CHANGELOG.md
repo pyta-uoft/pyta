@@ -19,6 +19,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fixed issue that caused PEP8 errors E301, E302, E303, E304, E305 and E306 to not render properly
+
 ### 🔧 Internal changes
 
 - Added tests for node_printers.py functions rendering the PEP8 error messages: E101, E116, E124, E128, E201, E202

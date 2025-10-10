@@ -418,7 +418,9 @@ def render_pep8_errors_e302(msg, line, source_lines=None):
 
 
 def render_pep8_errors_e303_and_e304(msg, line, source_lines=None):
-    """Render a PEP8 too many blank lines message."""
+    """Render a PEP8 too many blank lines message
+    and a PEP8 blank lines found after function decorator message
+    """
     dline = line
     while source_lines[dline - 2].strip() == "":
         dline -= 1

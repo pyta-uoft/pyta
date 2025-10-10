@@ -124,7 +124,7 @@ def init_register_ending_setters(source_code):
         )
 
     # Ad hoc transformations
-    # ending_transformer.register_transform(nodes.BinOp, _set_start_from_first_child)
+    ending_transformer.register_transform(nodes.BinOp, _set_start_from_first_child)
     ending_transformer.register_transform(nodes.ClassDef, _set_start_from_first_decorator)
     ending_transformer.register_transform(nodes.FunctionDef, _set_start_from_first_decorator)
     ending_transformer.register_transform(nodes.Tuple, _set_start_from_first_child)

@@ -72,6 +72,7 @@ W0301 = "You should remove this semicolon. In Python, statements are separated b
 C0301 = "This line is %s characters long, exceeding the limit of %s characters."
 C0303 = "Trailing whitespace is poor formatting, and should be removed."
 C0304 = "By convention, each Python file should end with a blank line. To fix this, go down to the bottom of your file and press Enter/Return to add an empty line."
+C0305 = "By convention, each Python file should end with exactly one blank line. To fix this, go down to the bottom of your file and delete the extra blank lines so that there is only one left."
 C0321 = "Avoid writing multiple statements on a single line. This makes your code harder to understand."
 E0401 = "Unable to import %s. Check the spelling of the module name, or whether the module is installed (if it is a module you did not write), or whether the module is in the same directory as this file (if it is a module you did write)."
 W0401 = "Wildcard (*) imports add all objects from the imported module as global variables, which may result in name collisions. You should only import from %s what you need, or import the whole module (\"import module\") and use dot notation to access the module's functions/classes."

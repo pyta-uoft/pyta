@@ -15,10 +15,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added custom renderers for the PEP8 error codes: E271, E274, E502
 - Updated the message format for Pycodestyle error messages to be more concise
 - Added custom renderer for `line-too-long` to improve its error snippet to highlight the overflow segment instead of the entire line.
+- Improved error message for error C0305 `trailing-newlines` and inserted a "DELETE" comment for each trailing newline.
 
 ### 💫 New checkers
 
 ### 🐛 Bug fixes
+
+- Fixed issue that caused PEP8 errors E301, E302, E303, E304, E305 and E306 to not render properly
 
 ### 🔧 Internal changes
 
@@ -27,6 +30,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored node_printers.py by grouping repeated code in helper functions and grouping identical functions into a single functions to reduce code duplication
 - Updated GitHub Actions workflow to Node 24
 - Refactored custom renderers to accept `config` parameter to stay consistent with the added parameter for `render-message`
+- Fixed `test_html_server.py` tests to be compatible with Windows
 
 ## [2.11.1] - 2025-08-17
 

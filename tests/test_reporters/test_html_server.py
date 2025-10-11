@@ -15,9 +15,11 @@ def clean_response_body(body) -> str:
     """Remove dynamic portions (such as timestamps) from the response body
     before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
-    body = re.sub(r".*tests/fixtures/reporters/(?:no_)?watch_integration\.py.*\n?", "", body)
+    body = re.sub(
+        r".*tests[/\\]fixtures[/\\]reporters[/\\](?:no_)?watch_integration\.py.*\n?", "", body
+    )
     body = re.sub(r'\s*<span class="pygments-w">\s*</span>\s*<span', " <span", body)
-    body = re.sub(r"^.*/watch_integration.py.*$", "", body, flags=re.MULTILINE)
+    body = re.sub(r"^.*[/\\]watch_integration.py.*$", "", body, flags=re.MULTILINE)
 
     return body.strip()
 
@@ -68,7 +70,7 @@ def test_no_watch_server_is_non_persistent(snapshot):
         response_body = wait_for_server(5008)
 
         if not response_body:
-            process.send_signal(signal.SIGINT)
+            process.send_signal(signal.SIGTERM)
             process.wait()
             pytest.fail("Server did not start within the expected timeout")
 
@@ -80,7 +82,7 @@ def test_no_watch_server_is_non_persistent(snapshot):
             new_conn.request("GET", "/")
             new_conn.getresponse()
     finally:
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGTERM)
         process.wait()
 
 
@@ -94,7 +96,7 @@ def test_watch_persistence(snapshot):
     process = subprocess.Popen([sys.executable, script_path])
 
     if not wait_for_server(5008):
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGTERM)
         process.wait()
         pytest.fail("Server did not start within the expected timeout")
 
@@ -110,7 +112,7 @@ def test_watch_persistence(snapshot):
             snapshot.assert_match(cleaned_body, "watch_html_server_snapshot.html")
 
     finally:
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGTERM)
         process.wait()
 
 
@@ -136,7 +138,7 @@ def test_watch_update(temp_script_file_path, snapshot):
     process = subprocess.Popen([sys.executable, temp_script_file_path])
 
     if not wait_for_server(5008):
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGTERM)
         process.wait()
         pytest.fail("Server did not start within the expected timeout")
 
@@ -160,7 +162,7 @@ def test_watch_update(temp_script_file_path, snapshot):
             snapshot.assert_match(cleaned_body_after, "watch_html_server_snapshot_updated.html")
 
     finally:
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGTERM)
         process.wait()
 
 
@@ -186,5 +188,5 @@ def test_websocket_message(temp_script_file_path):
             ws.close()
         except Exception:
             pass
-        process.send_signal(signal.SIGINT)
+        process.send_signal(signal.SIGTERM)
         process.wait()

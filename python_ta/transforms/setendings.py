@@ -379,7 +379,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
                 if source_code[i][j] == "#":
                     break  # skip over comment lines
                 if pred(source_code[i], j, node):
-                    node.end_col_offset = j + 1
+                    node.end_col_offset, node.end_lineno = j + 1, i + 1
                     return node
                 # only consume inert characters.
                 elif source_code[i][j] not in CONSUMABLES:

@@ -28,6 +28,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests for node_printers.py functions rendering the following PEP8 error codes: E221, E251, E261, E272, E273, E302, E305, E306
 - Refactored node_printers.py by grouping repeated code in helper functions and grouping identical functions into a single functions to reduce code duplication
 - Updated GitHub Actions workflow to Node 24
+- Fixed `test_html_server.py` tests to be compatible with Windows
 
 ## [2.11.1] - 2025-08-17
 

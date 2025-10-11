@@ -3,7 +3,6 @@
 ## `ColorReporter`
 
 - Come up with a better solution than highlighting the whole error line for messages without `node` attributes:
-  - `line-too-long`
   - `bad-whitespace`
   - `trailing-newlines`
 

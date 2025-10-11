@@ -6,6 +6,7 @@ from enum import Enum
 from astroid import nodes
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
+DEFAULT_LINE_LENGTH = 80
 
 
 def render_message(msg, node, source_lines, config=None):
@@ -73,23 +74,15 @@ def render_missing_docstring(_msg, node, source_lines=None, config=None):
         yield from render_context(end, end + 2, source_lines)
 
 
-def _get_max_line_length(config, default=80):
-    """Helper function to get the configured max line length.
-    Called by render_line_too_long."""
-    try:
-        if config is not None and hasattr(config, "max_line_length"):
-            return int(config.max_line_length)
-    except Exception:
-        pass
-    return default
-
-
 def render_line_too_long(msg, node, source_lines=None, config=None):
     """Render a line too long message."""
     line = msg.line
 
+    max_len = DEFAULT_LINE_LENGTH
+
     # Get configured max-line-length
-    max_len = _get_max_line_length(config, 80)
+    if config is not None and hasattr(config, "max_line_length"):
+        max_len = int(config.max_line_length)
 
     start_index, end_index = max_len, len(source_lines[line - 1])
 

@@ -29,6 +29,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored node_printers.py by grouping repeated code in helper functions and grouping identical functions into a single functions to reduce code duplication
 - Updated GitHub Actions workflow to Node 24
 - Refactored `setendings.py` to rely primarily on Astroid/Python’s built-in end-location attributes, reducing the amount of custom parsing logic
+- Fixed `test_html_server.py` tests to be compatible with Windows
 
 ## [2.11.1] - 2025-08-17
 

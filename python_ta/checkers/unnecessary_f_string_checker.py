@@ -12,11 +12,11 @@ class FormattedStringChecker(BaseChecker):
     """A checker class that reports unnecessary uses of f-strings when they can be replaced
     with the variable directly"""
 
-    name = "f-string-checker"
+    name = "unnecessary-f-string"
     msgs = {
         "E9920": (
             'Unnecessary use of f-strings in the expression "f{%s}". Use "str(%s)" instead.',
-            "f-string-checker",
+            "unnecessary-f-string",
             "Used when the use of an f-string is unnecessary and can be replaced with the variable directly",
         )
     }
@@ -27,7 +27,7 @@ class FormattedStringChecker(BaseChecker):
             if node.values[0].conversion == -1 and node.values[0].format_spec is None:
                 expression = node.values[0].value.as_string()
                 self.add_message(
-                    "f-string-checker",
+                    "unnecessary-f-string",
                     node=node,
                     args=(expression, expression),
                     line=node.lineno,

@@ -20,7 +20,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="f-string-checker",
+                msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
                 args=("var", "var"),
@@ -52,7 +52,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="f-string-checker",
+                msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
                 args=("var + 1", "var + 1"),

@@ -25,15 +25,14 @@ class FormattedStringChecker(BaseChecker):
         "Visits joined string"
         if len(node.values) == 1 and isinstance(node.values[0], nodes.FormattedValue):
             if node.values[0].conversion == -1 and node.values[0].format_spec is None:
-                if isinstance(node.values[0].value, nodes.Name):
-                    varname = node.values[0].value.name
-                    self.add_message(
-                        "f-string-checker",
-                        node=node,
-                        args=(varname, varname),
-                        line=node.lineno,
-                        col_offset=node.col_offset,
-                    )
+                expression = node.values[0].value.as_string()
+                self.add_message(
+                    "f-string-checker",
+                    node=node,
+                    args=(expression, expression),
+                    line=node.lineno,
+                    col_offset=node.col_offset,
+                )
 
 
 def register(linter: PyLinter) -> None:

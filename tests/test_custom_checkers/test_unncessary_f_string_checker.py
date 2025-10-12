@@ -64,3 +64,16 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertNoMessages():
             self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_multiple(self) -> None:
+        """Tests for when f-string contains multiple variables"""
+        src = """
+        var1 = hello
+        var2 = world
+        x = f"{var1} {var2}"
+        """
+
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertNoMessages():
+            self.checker.visit_joinedstr(fstring_node)

@@ -6,7 +6,6 @@ from enum import Enum
 from astroid import nodes
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
-DEFAULT_LINE_LENGTH = 80
 
 
 def render_message(msg, node, source_lines, config=None):
@@ -78,13 +77,8 @@ def render_line_too_long(msg, node, source_lines=None, config=None):
     """Render a line too long message."""
     line = msg.line
 
-    max_len = DEFAULT_LINE_LENGTH
-
-    # Get configured max-line-length
-    if config is not None and hasattr(config, "max_line_length"):
-        max_len = int(config.max_line_length)
-
-    start_index, end_index = max_len, len(source_lines[line - 1])
+    # Set start_index to configured max-line-length and end_index to length of line
+    start_index, end_index = config.max_line_length, len(source_lines[line - 1])
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(start_index, end_index), LineType.ERROR, source_lines[line - 1])

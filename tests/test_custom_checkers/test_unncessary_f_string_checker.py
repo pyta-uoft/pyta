@@ -30,7 +30,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_joinedstr(fstring_node)
 
     def test_f_string_with_formatting(self) -> None:
-        """Tests for when f-string expression being formatted"""
+        """Tests for when f-string expression is being formatted"""
         src = """
         var = 5
         x = f"{var=  }"

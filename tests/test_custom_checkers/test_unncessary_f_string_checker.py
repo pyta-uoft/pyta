@@ -50,7 +50,15 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
 
         mod = parse(src)
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
-        with self.assertNoMessages():
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="f-string-checker",
+                node=fstring_node,
+                line=2,
+                args=("var + 1", "var + 1"),
+            ),
+            ignore_position=True,
+        ):
             self.checker.visit_joinedstr(fstring_node)
 
     def test_f_string_joined(self) -> None:

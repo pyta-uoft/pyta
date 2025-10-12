@@ -14,7 +14,7 @@ class FormattedStringChecker(BaseChecker):
 
     name = "f-string-checker"
     msgs = {
-        "E9120": (
+        "E9920": (
             'Unnecessary use of f-strings in the expression "f{%s}". Use "str(%s)" instead.',
             "f-string-checker",
             "Used when the use of an f-string is unnecessary and can be replaced with the variable directly",

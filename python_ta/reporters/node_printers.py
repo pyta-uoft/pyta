@@ -8,13 +8,13 @@ from astroid import nodes
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
 
 
-def render_message(msg, node, source_lines):
+def render_message(msg, node, source_lines, config=None):
     """Render a message based on type."""
     renderer = CUSTOM_MESSAGES.get(msg.symbol, render_generic)
-    yield from renderer(msg, node, source_lines)
+    yield from renderer(msg, node, source_lines, config)
 
 
-def render_generic(msg, node=None, source_lines=None):
+def render_generic(msg, node=None, source_lines=None, config=None):
     """Default rendering for a message."""
     if node is not None:
         start_line, start_col = node.fromlineno, node.col_offset
@@ -52,7 +52,7 @@ def render_generic(msg, node=None, source_lines=None):
         yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_missing_docstring(_msg, node, source_lines=None):
+def render_missing_docstring(_msg, node, source_lines=None, config=None):
     """Render a missing docstring message."""
     if isinstance(node, nodes.Module):
         yield (None, slice(None, None), LineType.DOCSTRING, '"""YOUR DOCSTRING HERE"""')
@@ -73,7 +73,19 @@ def render_missing_docstring(_msg, node, source_lines=None):
         yield from render_context(end, end + 2, source_lines)
 
 
-def render_trailing_newlines(msg, _node, source_lines=None):
+def render_line_too_long(msg, node, source_lines=None, config=None):
+    """Render a line too long message."""
+    line = msg.line
+
+    # Set start_index to configured max-line-length and end_index to length of line
+    start_index, end_index = config.max_line_length, len(source_lines[line - 1])
+
+    yield from render_context(line - 2, line, source_lines)
+    yield (line, slice(start_index, end_index), LineType.ERROR, source_lines[line - 1])
+    yield from render_context(line + 1, line + 2, source_lines)
+
+
+def render_trailing_newlines(msg, _node, source_lines=None, config=None):
     """Render a trailing newlines message."""
     start_line = len(source_lines)
     while start_line > 0 and source_lines[start_line - 1].strip() == "":
@@ -87,7 +99,7 @@ def render_trailing_newlines(msg, _node, source_lines=None):
     yield (len(source_lines) + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
 
 
-def render_trailing_whitespace(msg, _node, source_lines=None):
+def render_trailing_whitespace(msg, _node, source_lines=None, config=None):
     """Render a trailing whitespace message."""
     line = msg.line
     start_index, end_index = len(source_lines[line - 1].rstrip()), len(source_lines[line - 1])
@@ -105,7 +117,7 @@ def render_context(start, stop, source_lines):
     )
 
 
-def render_missing_return_type(_msg, node, source_lines=None):
+def render_missing_return_type(_msg, node, source_lines=None, config=None):
     """Render a type annotation return message."""
     start_line, start_col = node.fromlineno, node.parent.col_offset
     end_line, end_col = node.end_lineno, node.end_col_offset
@@ -120,13 +132,13 @@ def render_missing_return_type(_msg, node, source_lines=None):
     yield from render_context(end_line + 1, end_line + 3, source_lines)
 
 
-def render_too_many_arguments(msg, node, source_lines=None):
+def render_too_many_arguments(msg, node, source_lines=None, config=None):
     """Render a too many arguments message."""
     # node is a FunctionDef node so replace it with its Arguments child
-    yield from render_generic(msg, node.args, source_lines)
+    yield from render_generic(msg, node.args, source_lines, config)
 
 
-def render_missing_space_in_doctest(msg, _node, source_lines=None):
+def render_missing_space_in_doctest(msg, _node, source_lines=None, config=None):
     """Render a missing space in doctest message"""
     line = msg.line
 
@@ -136,7 +148,7 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors(msg, _node, source_lines=None):
+def render_pep8_errors(msg, _node, source_lines=None, config=None):
     """Render a PEP8 error message."""
     # Extract the raw error message
     raw_msg = getattr(msg, "msg", "")
@@ -474,7 +486,7 @@ def render_pep8_errors_e502(line, col, source_line=None):
     yield (line, slice(col, col + 1), LineType.ERROR, source_line)
 
 
-def render_missing_return_statement(msg, node, source_lines=None):
+def render_missing_return_statement(msg, node, source_lines=None, config=None):
     """
     Render a missing return statements message
     """
@@ -506,7 +518,7 @@ def render_missing_return_statement(msg, node, source_lines=None):
     yield from render_context(msg.end_line + 1, msg.end_line + 3, source_lines)
 
 
-def render_static_type_checker_errors(msg, _node=None, source_lines=None):
+def render_static_type_checker_errors(msg, _node=None, source_lines=None, config=None):
     """Render a message for incompatible argument types."""
     start_line = msg.line
     start_col = msg.column
@@ -535,6 +547,7 @@ CUSTOM_MESSAGES = {
     "missing-module-docstring": render_missing_docstring,
     "missing-class-docstring": render_missing_docstring,
     "missing-function-docstring": render_missing_docstring,
+    "line-too-long": render_line_too_long,
     "trailing-newlines": render_trailing_newlines,
     "trailing-whitespace": render_trailing_whitespace,
     "missing-return-type": render_missing_return_type,

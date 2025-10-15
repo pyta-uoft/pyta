@@ -178,7 +178,9 @@ class PythonTaReporter(BaseReporter):
         """
         code_snippet = ""
 
-        for lineno, slice_, line_type, text in render_message(msg, node, self.source_lines):
+        for lineno, slice_, line_type, text in render_message(
+            msg, node, self.source_lines, self.linter.config
+        ):
             code_snippet += self._add_line(lineno, line_type, slice_, text)
 
         return code_snippet

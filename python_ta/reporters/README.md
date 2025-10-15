@@ -59,7 +59,6 @@ subject to change in later versions of the ColorReporter.
 Messages that always highlight the whole error line<sup>2</sup> (sorted by message symbol):
 
 - `bad-whitespace`
-- `line-too-long`
 - `trailing-newlines`
 
 Messages that treat code snippets differently than just printing/highlighting:

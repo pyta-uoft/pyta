@@ -33,65 +33,12 @@ from astroid.transforms import TransformVisitor
 
 CONSUMABLES = " \n\t\\"
 
-
-# These nodes have no children, and their end_lineno and end_col_offset
-# attributes are set based on their string representation (according to astroid).
-# Goal: eventually replace the transforms for all the nodes in this list with the
-# predicate technique that uses more robust approach using searching, rather than
-# simple length of string.
-NODES_WITHOUT_CHILDREN = [
-    nodes.AssignName,
-    nodes.Break,
-    nodes.Const,
-    nodes.Continue,
-    nodes.DelName,
-    nodes.Global,
-    nodes.Import,
-    nodes.ImportFrom,
-    nodes.Name,
-    nodes.Nonlocal,
-    nodes.Pass,
-    nodes.Yield,
-]
-
 # These nodes have a child, and their end_lineno and end_col_offset
 # attributes are set equal to those of their last child.
 NODES_WITH_CHILDREN = [
-    nodes.Assert,
-    nodes.Assign,
-    nodes.AsyncFor,
-    nodes.AsyncFunctionDef,
-    nodes.AsyncWith,
-    nodes.AugAssign,
-    nodes.Await,
-    nodes.BinOp,
-    nodes.BoolOp,
     nodes.Call,
-    nodes.ClassDef,
-    nodes.Compare,
     nodes.Comprehension,
-    nodes.Decorators,
-    nodes.Delete,
-    nodes.ExceptHandler,
-    nodes.For,
-    nodes.FormattedValue,
-    nodes.FunctionDef,
-    nodes.GeneratorExp,
-    nodes.If,
-    nodes.IfExp,
-    nodes.Keyword,
-    nodes.Lambda,
-    nodes.List,
     nodes.Module,
-    nodes.Raise,
-    nodes.Return,
-    nodes.Starred,
-    nodes.Subscript,
-    nodes.Try,
-    nodes.UnaryOp,
-    nodes.While,
-    nodes.With,
-    nodes.YieldFrom,
 ]
 
 
@@ -146,22 +93,11 @@ def _is_arg_name(s, index, node):
 # Elements here are in the form
 # (node class, predicate for start | None, predicate for end | None)
 NODES_REQUIRING_SOURCE = [
-    (nodes.AsyncFor, _keyword_search("async"), None),
-    (nodes.AsyncFunctionDef, _keyword_search("async"), None),
-    (nodes.AsyncWith, _keyword_search("async"), None),
     (nodes.Call, None, _token_search(")")),
     (nodes.DelAttr, _keyword_search("del"), None),
     (nodes.DelName, _keyword_search("del"), None),
-    (nodes.Dict, None, _token_search("}")),
-    (nodes.DictComp, None, _token_search("}")),
-    (nodes.Expr, _token_search("("), _token_search(")")),
     (nodes.GeneratorExp, _token_search("("), _token_search(")")),
-    (nodes.If, _keyword_search("elif"), None),
-    (nodes.Keyword, _is_arg_name, None),
     (nodes.List, _token_search("["), _token_search("]")),
-    (nodes.ListComp, _token_search("["), _token_search("]")),
-    (nodes.Set, None, _token_search("}")),
-    (nodes.SetComp, None, _token_search("}")),
     (nodes.Slice, _token_search("["), None),
     (nodes.Tuple, None, _token_search(",")),
 ]
@@ -195,12 +131,8 @@ def init_register_ending_setters(source_code):
     ending_transformer.register_transform(nodes.Arguments, fix_arguments(source_code))
     ending_transformer.register_transform(nodes.Slice, fix_slice(source_code))
 
-    for node_class in NODES_WITHOUT_CHILDREN:
-        ending_transformer.register_transform(node_class, set_without_children)
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
-
-    ending_transformer.register_transform(nodes.Subscript, fix_subscript(source_code))
 
     # Nodes where the source code must also be provided.
     # source_code and the predicate functions get stored in the TransformVisitor
@@ -271,40 +203,6 @@ def fix_slice(source_code):
         return node
 
     return _find_square_brackets
-
-
-def fix_subscript(source_code):
-    """For a Subscript node.
-
-    Need to include this because the index/extended slice is a value rather than
-    a separate Index/ExtSlice in Python 3.9.
-    """
-
-    def _fix_end(node: nodes.Subscript) -> nodes.Subscript:
-        if isinstance(node.slice, (nodes.Slice, nodes.Tuple)):
-            # In this case, the subscript node already contains the final ].
-            return node
-
-        # Search the remaining source code for the "]" char.
-        if _get_last_child(node):
-            set_from_last_child(node)
-            line_i = node.end_lineno - 1  # convert 1 to 0 index.
-            char_i = node.end_col_offset
-        else:
-            line_i = node.value.end_lineno - 1  # convert 1 to 0 index.
-            char_i = node.value.end_col_offset
-
-        while char_i < len(source_code[line_i]) and source_code[line_i][char_i] != "]":
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
-                char_i = 0
-                line_i += 1
-            else:
-                char_i += 1
-
-        node.end_lineno, node.end_col_offset = line_i + 1, char_i + 1
-        return node
-
-    return _fix_end
 
 
 def fix_arguments(source_code):
@@ -414,34 +312,12 @@ def set_from_last_child(node):
     """
     last_child = _get_last_child(node)
     if not last_child:
-        set_without_children(node)
         return node
-    elif not hasattr(last_child, "end_lineno"):  # Newly added for Slice() node.
-        set_without_children(last_child)
 
     if last_child.end_lineno is not None:
         node.end_lineno = last_child.end_lineno
     if last_child.end_col_offset is not None:
         node.end_col_offset = last_child.end_col_offset
-    return node
-
-
-def set_without_children(node):
-    """Populate ending locations for nodes that are guaranteed to never have
-    children. E.g. Const.
-
-    These node's end_col_offset are currently assigned based on their
-    computed string representation. This may differ from their actual
-    source code representation, however (mainly whitespace).
-
-    Precondition: `node` must not have a `last_child` (node).
-    """
-    if not hasattr(node, "end_lineno"):
-        node.end_lineno = node.fromlineno
-    # FIXME: using the as_string() is a bad technique because many different
-    # whitespace possibilities that may not be reflected in it!
-    if not hasattr(node, "end_col_offset"):
-        node.end_col_offset = node.col_offset + len(node.as_string())
     return node
 
 
@@ -479,7 +355,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
         # Tuple nodes have an end_col_offset that includes the end paren,
         # but their col_offset does not include the start paren.
         # To address this, we override the Tuple node's end_col_offset.
-        if not hasattr(node, "end_col_offset") or isinstance(node, nodes.Tuple):
+        if isinstance(node, nodes.Tuple):
             set_from_last_child(node)
 
         # Initialize counters. Note: we need to offset lineno,

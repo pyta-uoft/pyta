@@ -8,8 +8,8 @@ def demo_function() -> str:
     x = "hello"
     a = f"{x}"  # error on this line
 
-    b = f"{x =}"  # no error
+    # b = f"{x =}"  no error on this line when uncommented
 
     c = f"{x + " world"}"  # error on this line
 
-    return x + a + b + c
+    return x + a + c

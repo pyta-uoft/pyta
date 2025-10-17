@@ -12,4 +12,4 @@ def demo_function() -> str:
 
     c = f"{x + ' world'}"  # no error on this line
 
-    return x + a + c
+    return x + a + b + c

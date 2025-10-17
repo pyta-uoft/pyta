@@ -18,7 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
-- Added new checker that checks f-string to see if it only consists of a single bare format expression that can be replaced with the string representation of that expression
+- `unnecessary-f-string`: Added new checker that checks f-string to see if it only consists of a single bare format expression that can be replaced with the string representation of that expression
 
 ### 🐛 Bug fixes
 

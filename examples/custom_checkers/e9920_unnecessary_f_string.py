@@ -10,6 +10,6 @@ def demo_function() -> str:
 
     b = f"{x =}"  # no error on this line
 
-    c = f"{x + ' world'}"  # no error on this line
+    c = f"{x + ' world'}"  # error on this line
 
     return x + a + b + c

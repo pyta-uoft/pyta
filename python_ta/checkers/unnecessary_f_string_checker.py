@@ -23,7 +23,6 @@ class FormattedStringChecker(BaseChecker):
 
     @only_required_for_messages("unnecessary-f-string")
     def visit_joinedstr(self, node: nodes.JoinedStr) -> None:
-        "Visits joined string"
         if (
             len(node.values) == 1
             and isinstance(node.values[0], nodes.FormattedValue)

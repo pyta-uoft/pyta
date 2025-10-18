@@ -64,7 +64,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
     def test_f_string_joined(self) -> None:
         """Tests for when inner f-string expression modifies variable"""
         src = """
-        var = world
+        var = "world"
         x = f"hello, {var}"
         """
 
@@ -76,8 +76,8 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
     def test_f_string_multiple(self) -> None:
         """Tests for when f-string contains multiple variables"""
         src = """
-        var1 = hello
-        var2 = world
+        var1 = "hello"
+        var2 = "world"
         x = f"{var1} {var2}"
         """
 

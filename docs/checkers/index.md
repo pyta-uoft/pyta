@@ -2580,6 +2580,32 @@ lines: 2-4
 ---
 ```
 
+(E9920)=
+
+### Unnecessary f-string (E9920)
+
+This error occurs when we use an f-string to represent a single, unjoined expression without specifying
+any formatting.
+
+Example:
+
+```{literalinclude} /../examples/custom_checkers/e9920_unnecessary_f_string.py
+---
+lines: 8-14
+---
+```
+
+These f-strings can be directly replaced with the expression or after casting the expression to a string first.
+For example:
+
+```python
+x = "hello"
+
+a = x  # or a = str(x)
+
+c = x + ' world'  # or c = str(x + ' world')
+```
+
 (E9972)=
 
 ### Missing attribute type (E9972)

@@ -6,6 +6,7 @@ from enum import Enum
 from astroid import nodes
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
+MAX_SNIPPET_LINES = 10
 
 
 def render_message(msg, node, source_lines, config=None):
@@ -87,16 +88,38 @@ def render_line_too_long(msg, node, source_lines=None, config=None):
 
 def render_trailing_newlines(msg, _node, source_lines=None, config=None):
     """Render a trailing newlines message."""
+    # Get start of trailing newlines
     start_line = len(source_lines)
-    while start_line > 0 and source_lines[start_line - 1].strip() == "":
+    while start_line > 0 and source_lines[start_line - 2].strip() == "":
         start_line -= 1
-    start_line += 1  # Offset to start from the first extraneous newline
+    source_lines.append("")  # Accomodate for last newline in source file
+
+    num_trailing_newlines = len(source_lines) - start_line
 
     yield from render_context(start_line - 2, start_line + 1, source_lines)
-    for line in range(start_line, len(source_lines)):
-        yield ((line, slice(None, None), LineType.ERROR, source_lines[line] + "# DELETE THIS LINE"))
-    # Render the last newline
-    yield (len(source_lines) + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
+
+    for line in range(start_line, start_line + min(MAX_SNIPPET_LINES // 2, num_trailing_newlines)):
+        yield (
+            (line + 1, slice(None, None), LineType.ERROR, source_lines[line] + "# DELETE THIS LINE")
+        )
+
+    if num_trailing_newlines > MAX_SNIPPET_LINES:
+        yield ("", slice(None, None), LineType.OTHER, "...")
+
+    if num_trailing_newlines > MAX_SNIPPET_LINES // 2:
+        for line in range(
+            len(source_lines)
+            - min(MAX_SNIPPET_LINES // 2, num_trailing_newlines - MAX_SNIPPET_LINES // 2),
+            len(source_lines),
+        ):
+            yield (
+                (
+                    line + 1,
+                    slice(None, None),
+                    LineType.ERROR,
+                    source_lines[line] + "# DELETE THIS LINE",
+                )
+            )
 
 
 def render_trailing_whitespace(msg, _node, source_lines=None, config=None):

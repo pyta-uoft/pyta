@@ -121,11 +121,15 @@ def _symbols_by_file_pyta(
         enable_checks = _Z3_CODES + ["C9960"]
         disable_checks = ["all"]
     else:
-        enable_checks = [
-            os.path.basename(file).split("_")[0].upper() for file in files_to_check
-        ] + ["C9960"]
-        # enable_checks = ["C9960"]
-        disable_checks = ["all"]
+        # Version 1: Slowest version
+        # enable_checks = [
+        #     os.path.basename(file).split("_")[0].upper() for file in files_to_check
+        # ] + ["C9960"]
+        # disable_checks = ["all"]
+
+        # Version 2: Faster version
+        enable_checks = ["C9960"]
+        disable_checks = []
 
     python_ta.check_all(
         module_name=files_to_check,

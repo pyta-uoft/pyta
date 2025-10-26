@@ -75,8 +75,8 @@ error_params = [
     ("E275", [(1, 16, "missing whitespace after keyword")]),
     ("E301", [(5, 4, "expected 1 blank line, found 0")]),
     ("E302", [(3, 0, "expected 2 blank lines, found 0")]),
-    ("E303", [(6, 0, "too many blank lines (3)")]),
-    ("E304", [(12, 0, "blank lines found after function decorator")]),
+    ("E303", [(18, 0, "too many blank lines (15)")]),
+    ("E304", [(22, 0, "blank lines found after function decorator")]),
     (
         "E305",
         [

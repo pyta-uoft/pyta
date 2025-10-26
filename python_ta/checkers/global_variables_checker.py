@@ -9,7 +9,7 @@ from astroid import nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.base import UpperCaseStyle
 from pylint.checkers.base.name_checker.checker import DEFAULT_PATTERNS
-from pylint.checkers.utils import is_builtin
+from pylint.checkers.utils import is_builtin, only_required_for_messages
 
 from python_ta.utils import _is_in_main
 
@@ -33,16 +33,19 @@ class GlobalVariablesChecker(BaseChecker):
         super().__init__(linter)
         self.import_names = []
 
+    @only_required_for_messages("forbidden-global-variables")
     def visit_global(self, node: nodes.Global) -> None:
         args = "the keyword 'global' is used on line {}".format(node.lineno)
         self.add_message("forbidden-global-variables", node=node, args=args)
 
+    @only_required_for_messages("forbidden-global-variables")
     def visit_assignname(self, node: nodes.AssignName) -> None:
         """Allow global constant variables (uppercase) and type aliases (type alias pattern), but issue messages for
         all other globals.
         """
         self._inspect_vars(node)
 
+    @only_required_for_messages("forbidden-global-variables")
     def visit_name(self, node: nodes.Name) -> None:
         """Allow global constant variables (uppercase) and type aliases (type alias pattern), but issue messages for
         all other globals.

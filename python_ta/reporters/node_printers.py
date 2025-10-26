@@ -463,13 +463,30 @@ def render_pep8_errors_e303_and_e304(msg, line, source_lines=None):
     dline = line
     while source_lines[dline - 2].strip() == "":
         dline -= 1
-    body = source_lines[line - 1]
-    indentation = len(body) - len(body.lstrip())
-    yield from render_context(dline - 3, dline, source_lines)
-    yield from (
-        (curr_line, slice(None, None), LineType.ERROR, " " * (indentation + 28))
-        for curr_line in range(dline, line)
-    )
+
+    end_line = line - 1
+    if "@" in source_lines[dline - 2]:
+        num_blank_lines = end_line - dline + 1
+        end_context = dline
+    else:
+        num_blank_lines = end_line - dline
+        end_context = dline + 1
+
+    yield from render_context(dline - 3, end_context, source_lines)
+
+    for curr_line in range(dline, dline + min(MAX_SNIPPET_LINES // 2, num_blank_lines)):
+        yield (curr_line + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
+
+    if num_blank_lines > MAX_SNIPPET_LINES:
+        yield ("", slice(None, None), LineType.OTHER, "...")
+
+    if num_blank_lines > MAX_SNIPPET_LINES // 2:
+        for curr_line in range(
+            end_line - min(MAX_SNIPPET_LINES // 2, num_blank_lines - MAX_SNIPPET_LINES // 2),
+            end_line,
+        ):
+            yield (curr_line + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
+
     yield from render_context(line, line + 3, source_lines)
 
 

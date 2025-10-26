@@ -30,12 +30,13 @@ requires-python = ">=3.9"
 
 [project.optional-dependencies]
 dev = [
+    "coverage >= 7.10.6",
     "hypothesis",
     "inflection",
     "myst-parser",
     "pre-commit",
     "pytest",
-    "pytest-cov >= 4.0,< 6.3",
+    "pytest-cov >= 4.0,< 7.1",
     "pytest-mock",
     "pytest-snapshot",
     "websocket-client",

@@ -20,6 +20,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+- `unnecessary-f-string`: Added new checker that checks f-string to see if it only consists of a single bare format expression that can be replaced with the string representation of that expression
+
 ### 🐛 Bug fixes
 
 - Fixed issue that caused PEP8 errors E301, E302, E303, E304, E305 and E306 to not render properly

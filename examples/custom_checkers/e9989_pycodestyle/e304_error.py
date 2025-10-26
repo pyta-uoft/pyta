@@ -9,5 +9,15 @@ def decor(func):
 
 @decor
 
+
+
+
+
+
+
+
+
+
+
 def num():
     return 10

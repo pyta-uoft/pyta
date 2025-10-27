@@ -21,6 +21,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `unnecessary-f-string`: Added new checker that checks f-string to see if it only consists of a single bare format expression that can be replaced with the string representation of that expression
 
+- `simplifiable-if`: Added a new checker that checks if an `if` or `elif` branch only contains a single nested `if` statement with a single branch which can be simplified by appending the test condition of the nested if statement to the `if`/`elif` branch immediately above it.
+
 ### 🐛 Bug fixes
 
 - Fixed issue that caused PEP8 errors E301, E302, E303, E304, E305 and E306 to not render properly

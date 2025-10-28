@@ -3423,14 +3423,8 @@ print("Hello World!")  # This file ends with a single newline character! :)
 This error occurs when there is an encoding declaration at the top of the Python file or if any
 identifier uses non-ASCII characters.
 
-```{literalinclude} /../examples/pylint/c2503_non_ascii_name.py
+```{literalinclude} /../examples/pylint/c2503_bad_file_encoding.py
 
-```
-
-Corrected version:
-
-```python
-my_int = 3
 ```
 
 (C0301)=

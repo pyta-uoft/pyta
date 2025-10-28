@@ -95,7 +95,7 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
         module_name=get_file_paths(paths),
         config={
             "output-format": "pyta-json",
-            "enable": ["C9960"],
+            "enable": ["C9960", "C0103"],
             "z3": True,
         },
     )

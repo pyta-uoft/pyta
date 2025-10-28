@@ -113,37 +113,26 @@ def _symbols_by_file_pyta(
     """
     sys.stdout = StringIO()
     files_to_check = get_file_paths(paths, z3_enabled=z3_enabled)
-    # Determine which checks to enable
-    if pycodestyle_enabled:
-        enable_checks = _PYCODESTYLE_CODES + ["C9960"]
-        disable_checks = ["all"]
-    elif z3_enabled:
-        enable_checks = _Z3_CODES + ["C9960"]
-        disable_checks = ["all"]
-    else:
-        # Version 1: Slowest version
-        # enable_checks = [
-        #     os.path.basename(file).split("_")[0].upper() for file in files_to_check
-        # ] + ["C9960"]
-        # disable_checks = ["all"]
-
-        # Version 2: Faster version
-        enable_checks = ["C9960"]
-        disable_checks = []
-
-    python_ta.check_all(
-        module_name=files_to_check,
-        config={
-            "output-format": "pyta-json",
-            "disable": disable_checks,
-            "enable": enable_checks,
-            "z3": z3_enabled,
-        },
-    )
-
-    jsons_output = sys.stdout.getvalue()
-    sys.stdout = sys.__stdout__
-    pyta_list_output = json.loads(jsons_output)
+    pyta_list_output = []
+    for file in files_to_check:
+        if pycodestyle_enabled:
+            enable_checks = _PYCODESTYLE_CODES + ["C9960"]
+        elif z3_enabled:
+            enable_checks = _Z3_CODES + ["C9960"]
+        else:
+            enable_checks = [os.path.basename(file).split("_")[0].upper()] + ["C9960"]
+        buf = StringIO()
+        python_ta.check_all(
+            module_name=file,
+            config={
+                "output-format": "pyta-json",
+                "disable": ["all"],
+                "enable": enable_checks,
+                "z3": z3_enabled,
+            },
+            output=buf,
+        )
+        pyta_list_output.extend(json.loads(buf.getvalue()))
 
     file_to_symbol = {}
     for path, group in itertools.groupby(

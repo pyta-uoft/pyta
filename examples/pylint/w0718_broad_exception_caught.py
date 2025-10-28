@@ -1,8 +1,6 @@
-from typing import Optional
-
-def divide(numerator: float, denominator: float) -> Optional[float]:
-    """Divide the numerator by the denominator."""
-    try:
-        return numerator / denominator
-    except Exception:
-        print("Some exception occurd! But we don't know which one?!")
+"""Broad Exception Caught Example"""
+# The caught exception below is too broad and vague.
+try:
+    1 / 0
+except Exception:  # Error on this line
+    print('An error occurred')

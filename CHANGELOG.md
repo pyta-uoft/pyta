@@ -40,6 +40,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🐛 Bug fixes
 
 - Fixed reports to only include config files when they have errors
+- Renamed the example `c2503_non_ascii_name.py` to `c2503_bad_file_encoding.py` to align with Pylint’s actual C2503 error identifier ("bad-file-encoding").
 
 ## [2.11.0] - 2025-08-16
 

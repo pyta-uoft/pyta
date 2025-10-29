@@ -69,27 +69,17 @@ def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> li
     for path in paths:
         for root, _, files in os.walk(path, topdown=True):
             for filename in files:
-                if z3_enabled:
-                    if (
-                        filename in IGNORED_TESTS
-                        or not filename.endswith(".py")
-                        or filename not in Z3_RELATED_TESTS
-                    ):
-                        continue
-                    else:
-                        full_path = os.path.join(root, filename)
-                        rel_path = os.path.relpath(full_path, path)
-                        test_files.append(os.path.join(path, rel_path))
+                if filename in IGNORED_TESTS or not filename.endswith(".py"):
+                    continue
+                # Filters based on z3_enabled flag
+                if z3_enabled and filename not in Z3_RELATED_TESTS:
+                    continue
+                if not z3_enabled and filename in Z3_RELATED_TESTS:
+                    continue
 
-                else:
-                    if (
-                        filename not in IGNORED_TESTS
-                        and filename.endswith(".py")
-                        and (filename not in Z3_RELATED_TESTS)
-                    ):
-                        full_path = os.path.join(root, filename)
-                        rel_path = os.path.relpath(full_path, path)
-                        test_files.append(os.path.join(path, rel_path))
+                full_path = os.path.join(root, filename)
+                rel_path = os.path.relpath(full_path, path)
+                test_files.append(os.path.join(path, rel_path))
 
     return test_files
 

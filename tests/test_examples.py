@@ -53,6 +53,7 @@ def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> li
     A list of all the file paths will be returned.
 
     :param paths: The path or list of paths to retrieve the Python files from.
+    :param z3_enabled: Option to enable z3 dependency.
     :return: A list of full file paths to the Python files.
     """
     test_files = []
@@ -98,6 +99,7 @@ def _symbols_by_file_pyta(
     :param paths: The paths to retrieve the files from.
     :param include_msg: whether to include message descriptions in the symbol set
     :param z3_enabled: Option to enable z3 dependency.
+    :param pycodestyle_enabled: Option to enable pycodestyle-specific checks (E9989).
     :return: A dictionary mapping each file name to a set of PythonTA message symbols
     (and descriptions if include_msg is True).
     """

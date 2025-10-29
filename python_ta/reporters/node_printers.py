@@ -89,16 +89,18 @@ def render_line_too_long(msg, node, source_lines=None, config=None):
 def render_trailing_newlines(msg, _node, source_lines=None, config=None):
     """Render a trailing newlines message."""
     # Get start of trailing newlines
+    half_threshold = MAX_SNIPPET_LINES // 2
+    total_lines = len(source_lines) + 1  # Accommodating for last blank line
+
     start_line = len(source_lines)
     while start_line > 0 and source_lines[start_line - 2].strip() == "":
         start_line -= 1
-    source_lines.append("")  # Accomodate for last newline in source file
 
-    num_trailing_newlines = len(source_lines) - start_line
+    num_trailing_newlines = total_lines - start_line
 
     yield from render_context(start_line - 2, start_line + 1, source_lines)
 
-    for line in range(start_line, start_line + min(MAX_SNIPPET_LINES // 2, num_trailing_newlines)):
+    for line in range(start_line, start_line + min(half_threshold, num_trailing_newlines - 1)):
         yield (
             (line + 1, slice(None, None), LineType.ERROR, source_lines[line] + "# DELETE THIS LINE")
         )
@@ -106,20 +108,21 @@ def render_trailing_newlines(msg, _node, source_lines=None, config=None):
     if num_trailing_newlines > MAX_SNIPPET_LINES:
         yield ("", slice(None, None), LineType.OTHER, "...")
 
-    if num_trailing_newlines > MAX_SNIPPET_LINES // 2:
-        for line in range(
-            len(source_lines)
-            - min(MAX_SNIPPET_LINES // 2, num_trailing_newlines - MAX_SNIPPET_LINES // 2),
-            len(source_lines),
-        ):
-            yield (
-                (
-                    line + 1,
-                    slice(None, None),
-                    LineType.ERROR,
-                    source_lines[line] + "# DELETE THIS LINE",
-                )
+    for line in range(
+        total_lines - min(half_threshold, num_trailing_newlines - half_threshold),
+        len(source_lines),
+    ):
+        yield (
+            (
+                line + 1,
+                slice(None, None),
+                LineType.ERROR,
+                source_lines[line] + "# DELETE THIS LINE",
             )
+        )
+
+    # Accommodate for last blank line
+    yield ((total_lines, slice(None, None), LineType.ERROR, "# DELETE THIS LINE"))
 
 
 def render_trailing_whitespace(msg, _node, source_lines=None, config=None):
@@ -460,32 +463,36 @@ def render_pep8_errors_e303_and_e304(msg, line, source_lines=None):
     """Render a PEP8 too many blank lines message
     and a PEP8 blank lines found after function decorator message
     """
+    half_threshold = MAX_SNIPPET_LINES // 2
+
     dline = line
     while source_lines[dline - 2].strip() == "":
         dline -= 1
 
     end_line = line - 1
+    # Determine which PEP8 error we are rendering; adjust first offending blank line and last context line indices accordingly
     if "@" in source_lines[dline - 2]:
+        # E304 Case: First blank line should be included in ERROR lines, and excluded from Context lines
         num_blank_lines = end_line - dline + 1
         end_context = dline
     else:
+        # E304 Case: First blank line should be excluded from ERROR lines, and included as a Context line
         num_blank_lines = end_line - dline
         end_context = dline + 1
 
     yield from render_context(dline - 3, end_context, source_lines)
 
-    for curr_line in range(dline, dline + min(MAX_SNIPPET_LINES // 2, num_blank_lines)):
+    for curr_line in range(dline, dline + min(half_threshold, num_blank_lines)):
         yield (curr_line + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
 
     if num_blank_lines > MAX_SNIPPET_LINES:
         yield ("", slice(None, None), LineType.OTHER, "...")
 
-    if num_blank_lines > MAX_SNIPPET_LINES // 2:
-        for curr_line in range(
-            end_line - min(MAX_SNIPPET_LINES // 2, num_blank_lines - MAX_SNIPPET_LINES // 2),
-            end_line,
-        ):
-            yield (curr_line + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
+    for curr_line in range(
+        end_line - min(half_threshold, num_blank_lines - half_threshold),
+        end_line,
+    ):
+        yield (curr_line + 1, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
 
     yield from render_context(line, line + 3, source_lines)
 

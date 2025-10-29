@@ -22,7 +22,13 @@ class SimplifiableIfChecker(BaseChecker):
 
     @only_required_for_messages("simplifiable-if")
     def visit_if(self, node: nodes.If) -> None:
-        if len(node.body) == 1 and isinstance(node.body[0], nodes.If) and not node.body[0].orelse:
+        if (
+            len(node.body) == 1
+            and not node.has_elif_block()
+            and not node.orelse
+            and isinstance(node.body[0], nodes.If)
+            and not node.body[0].orelse
+        ):
             inner_node = node.body[0]
             self.add_message(
                 "simplifiable-if",

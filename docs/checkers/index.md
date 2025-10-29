@@ -2623,7 +2623,7 @@ elif x < -5:
         x -= 1
 ```
 
-These nested `if` statements can be removed and their test condition can be added to the `if`/`elif` branch immediately above it while adjusting indentation as needed.
+The nested `if` statement can be removed and its test condition can be added to the `elif` branch immediately above it.
 
 For example:
 

@@ -2610,15 +2610,14 @@ c = x + ' world'  # or c = str(x + ' world')
 
 ### Simplifiable if (E9930)
 
-This error occurs when an `if` or `elif` branch only contains a single nested `if` statement with a single branch.
+This error occurs when an `if` or `elif` branch (with no other branches below it) only contains a single nested `if` statement with a single branch.
 
 Example:
 
 ```python
 x = 5
 if x > 5:
-    if x < 10:
-        x += 1
+    x += 1
 elif x < -5:
     if x > -10:
         x -= 1
@@ -2630,7 +2629,7 @@ For example:
 
 ```python
 x = 5
-if x > 5 and x < 10:
+if x > 5:
     x += 1
 elif x < -5 and x > -10:
     x -= 1

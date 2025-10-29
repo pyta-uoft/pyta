@@ -1049,7 +1049,7 @@ variable, etc.).
 A special character accepted in all types of names is `_`. Numbers are allowed in all names, but
 names must not begin with a number.
 
-```{literalinclude} /../examples/pylint/c0103_naming_convention_violation.py
+```{literalinclude} /../examples/pylint/c0103_invalid_name.py
 
 ```
 

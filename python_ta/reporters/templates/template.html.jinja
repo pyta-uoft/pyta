@@ -142,7 +142,7 @@
                                         {% if limit == 0 or loop.index0 < limit %}
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line {{ indiv.line }}] {{ indiv.msg }}
+                                                    [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }}
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -217,7 +217,7 @@
                                         {% if limit == 0 or loop.index0 < limit %}
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line {{ indiv.line }}] {{ indiv.msg }}
+                                                    [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) }}
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->

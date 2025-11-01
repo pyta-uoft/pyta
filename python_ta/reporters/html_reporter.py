@@ -67,11 +67,6 @@ class HTMLReporter(PythonTaReporter):
         grouped_messages = {
             path: self.group_messages(msgs) for path, msgs in self.gather_messages().items()
         }
-        grouped_messages = {}
-        for path, msgs in self.gather_messages().items():
-            for msg in msgs:
-                msg.msg = md.renderInline(msg.msg)
-            grouped_messages[path] = self.group_messages(msgs)
 
         template_f = self.linter.config.pyta_template_file
         template_f = (
@@ -105,6 +100,7 @@ class HTMLReporter(PythonTaReporter):
             grouped_messages=grouped_messages,
             os=os,
             enumerate=enumerate,
+            md=md,
         )
 
         # If a filepath was specified, write to the file

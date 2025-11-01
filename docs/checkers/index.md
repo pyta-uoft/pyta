@@ -2606,6 +2606,35 @@ a = x  # or a = str(x)
 c = x + ' world'  # or c = str(x + ' world')
 ```
 
+(E9930)=
+
+### Simplifiable if (E9930)
+
+This error occurs when an `if` or `elif` branch (with no other branches below it) only contains a single nested `if` statement with a single branch.
+
+Example:
+
+```python
+x = 5
+if x > 5:
+    x += 1
+elif x < -5:
+    if x % 2 == 0:
+        x -= 1
+```
+
+The nested `if` statement can be removed and its test condition can be added to the `elif` branch immediately above it.
+
+For example:
+
+```python
+x = 5
+if x > 5:
+    x += 1
+elif x < -5 and x % 2 == 0:
+    x -= 1
+```
+
 (E9972)=
 
 ### Missing attribute type (E9972)

@@ -14,7 +14,7 @@ class SimplifiableIfChecker(BaseChecker):
     name = "simplifiable-if"
     msgs = {
         "E9930": (
-            "This nested `if` statement can be simplified. Add this test condition to the branch above and remove the nested `if` statement.",
+            "This nested `if` statement can be simplified. Combine the inner condition with the outer condition using the `and` operator and remove the nested `if` statement.",
             "simplifiable-if",
             "Used when an `if` or `elif` branch only contains a single nested `if` statement with a single branch.",
         )

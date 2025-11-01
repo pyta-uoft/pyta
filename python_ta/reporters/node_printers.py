@@ -102,7 +102,10 @@ def render_trailing_newlines(msg, _node, source_lines=None, config=None):
 
     for line in range(start_line, start_line + min(half_threshold, num_trailing_newlines - 1)):
         yield (
-            (line + 1, slice(None, None), LineType.ERROR, source_lines[line] + "# DELETE THIS LINE")
+            line + 1,
+            slice(None, None),
+            LineType.ERROR,
+            source_lines[line] + "# DELETE THIS LINE",
         )
 
     if num_trailing_newlines > MAX_SNIPPET_LINES:
@@ -113,16 +116,14 @@ def render_trailing_newlines(msg, _node, source_lines=None, config=None):
         len(source_lines),
     ):
         yield (
-            (
-                line + 1,
-                slice(None, None),
-                LineType.ERROR,
-                source_lines[line] + "# DELETE THIS LINE",
-            )
+            line + 1,
+            slice(None, None),
+            LineType.ERROR,
+            source_lines[line] + "# DELETE THIS LINE",
         )
 
     # Accommodate for last blank line
-    yield ((total_lines, slice(None, None), LineType.ERROR, "# DELETE THIS LINE"))
+    yield (total_lines, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
 
 
 def render_trailing_whitespace(msg, _node, source_lines=None, config=None):

@@ -16,7 +16,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Updated the message format for Pycodestyle error messages to be more concise
 - Added custom renderer for `line-too-long` to improve its error snippet to highlight the overflow segment instead of the entire line.
 - Improved error message for error C0305 `trailing-newlines` and inserted a "DELETE" comment for each trailing newline.
-- Added a solution to prevent possible large snippets created by the following errors: C0305, E303, E304
+- Added a solution to prevent possible large snippets created by the following errors: pylint error C0305, and pycodestyle errors E303, E304
 
 ### 💫 New checkers
 

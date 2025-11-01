@@ -2619,7 +2619,7 @@ x = 5
 if x > 5:
     x += 1
 elif x < -5:
-    if x > -10:
+    if x % 2 == 0:
         x -= 1
 ```
 
@@ -2631,7 +2631,7 @@ For example:
 x = 5
 if x > 5:
     x += 1
-elif x < -5 and x > -10:
+elif x < -5 and x % 2 == 0:
     x -= 1
 ```
 

@@ -23,7 +23,7 @@ dependencies = [
     "toml ~= 0.10.2",
     "typeguard >= 4.1.0, < 5",
     "watchdog ~= 6.0.0",
-    "wrapt >= 1.15.0, < 2"
+    "wrapt >= 1.15.0, < 3"
 ]
 dynamic = ["version"]
 requires-python = ">=3.9"

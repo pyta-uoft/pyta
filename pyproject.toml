@@ -7,7 +7,7 @@ authors = [
 license = {text = "MIT"}
 readme = "README.md"
 dependencies = [
-    "aiohttp >= 3.11.18,< 3.13.0",
+    "aiohttp >= 3.11.18,< 3.14.0",
     "astroid ~= 3.3.5",
     "black",
     "click >= 8.0.1, < 9",
@@ -23,7 +23,7 @@ dependencies = [
     "toml ~= 0.10.2",
     "typeguard >= 4.1.0, < 5",
     "watchdog ~= 6.0.0",
-    "wrapt >= 1.15.0, < 2"
+    "wrapt >= 1.15.0, < 3"
 ]
 dynamic = ["version"]
 requires-python = ">=3.9"

@@ -1,6 +1,3 @@
-import io
-import sys
-
 from python_ta.contracts import check_contracts
 
 

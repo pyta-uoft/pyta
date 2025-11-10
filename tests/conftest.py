@@ -1,5 +1,6 @@
 import re
 from http.server import HTTPServer
+from pathlib import Path
 
 import pytest
 
@@ -55,7 +56,7 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_ignore_collect(path, config):
+def pytest_ignore_collect(collection_path: Path, config):
     """Return True to prevent collecting a test file or directory.
     Note: this function must return None for test cases not intended to exclude. Otherwise, it will interfere
     with other configurations such as --exclude flag.
@@ -72,7 +73,7 @@ def pytest_ignore_collect(path, config):
     """
     if config.getoption("--exclude-z3"):
         # Convert path to string for pattern matching
-        path_str = str(path)
+        path_str = str(collection_path)
         if any(re.search(pattern, path_str) for pattern in Z3_RELATED_TESTS):
             return True
         else:

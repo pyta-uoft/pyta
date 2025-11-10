@@ -63,7 +63,6 @@ error_params = [
 
 
 @pytest.fixture
-@pytest.mark.parametrize("source", error_params)
 def unformatted_file(tmp_path, source):
     # Create a temporary file with unformatted Python code
     file_path = tmp_path / "sample_code.py"

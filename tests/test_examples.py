@@ -169,12 +169,18 @@ def pyta_pycodestyle_symbols() -> dict[str, set[str]]:
     return _symbols_by_file_pyta([_PYCODESTYLE_PATH], include_msg=True, pycodestyle_enabled=True)
 
 
+@pytest.mark.skipif(
+    "not config.getoption('--exclude-z3')",
+    reason="Skipping test_examples_files_pyta since z3 is enabled",
+)
 @pytest.mark.parametrize("test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]))
 def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, set[str]]) -> None:
     """
     Dynamically creates and runs unit tests for Python files in the examples and custom checker directories.
     This test function deduces the error type from the file name and checks if the expected error message is present
     in PythonTA's report.
+
+    This test is skipped when z3 enabled.
     """
     base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
@@ -191,12 +197,20 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, se
     ), f"Failed {test_file}. File does not add expected message {checker_name}: {file_symbols}."
 
 
+@pytest.mark.skipif(
+    "config.getoption('--exclude-z3')", reason="Skipping test_z3_files_pyta since z3 is disabled"
+)
 @pytest.mark.parametrize(
     "test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH], z3_enabled=True)
 )
 def test_z3_files_pyta(test_file: str, pyta_z3_symbols: dict[str, set[str]]) -> None:
-    """Test z3-dependent files separately"""
+    """
+    Dynamically creates and runs unit tests with z3 solver enabled for Python files in the examples and custom checker
+    directories. This test function deduces the error type from the file name and checks if the expected error message
+    is present in PythonTA's report.
 
+    This test is skipped when z3 is disabled.
+    """
     base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
         return

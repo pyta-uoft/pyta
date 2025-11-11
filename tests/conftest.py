@@ -18,7 +18,7 @@ Z3_RELATED_TESTS = {
     r".*test_possibly_undefined_checker.*",
     r".*test_redundant_assignment_checker.*",
     r".*test_cfg_generator_z3.*",
-    r".*test_z3_files_pyta.*",
+    r".*test_examples.*",
 }
 
 

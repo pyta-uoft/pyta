@@ -18,7 +18,6 @@ _CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
 _PYCODESTYLE_PATH = "examples/custom_checkers/e9989_pycodestyle/"
 
 _PYCODESTYLE_CODES = ["E9989"]
-_Z3_CODES = ["R9900", "R9901"]
 
 _EXAMPLE_PREFIX_REGEX = r"[cerfw]\d{4}"
 _PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
@@ -62,25 +61,19 @@ def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> li
         paths = [paths]
 
     if z3_enabled:
-        try:
-            import z3
-        except ImportError:
-            z3_enabled = False
+        import z3
 
     for path in paths:
         for root, _, files in os.walk(path, topdown=True):
             for filename in files:
-                if filename in IGNORED_TESTS or not filename.endswith(".py"):
-                    continue
-                # Filters based on z3_enabled flag
-                if z3_enabled and filename not in Z3_RELATED_TESTS:
-                    continue
-                if not z3_enabled and filename in Z3_RELATED_TESTS:
-                    continue
-
-                full_path = os.path.join(root, filename)
-                rel_path = os.path.relpath(full_path, path)
-                test_files.append(os.path.join(path, rel_path))
+                if (
+                    filename not in IGNORED_TESTS
+                    and filename.endswith(".py")
+                    and (z3_enabled or filename not in Z3_RELATED_TESTS)
+                ):
+                    full_path = os.path.join(root, filename)
+                    rel_path = os.path.relpath(full_path, path)
+                    test_files.append(os.path.join(path, rel_path))
 
     return test_files
 
@@ -103,16 +96,13 @@ def _symbols_by_file_pyta(
     :return: A dictionary mapping each file name to a set of PythonTA message symbols
     (and descriptions if include_msg is True).
     """
-    sys.stdout = StringIO()
     files_to_check = get_file_paths(paths, z3_enabled=z3_enabled)
     pyta_list_output = []
     for file in files_to_check:
         if pycodestyle_enabled:
-            enable_checks = _PYCODESTYLE_CODES + ["C9960"]
-        elif z3_enabled:
-            enable_checks = _Z3_CODES + ["C9960"]
+            enable_checks = _PYCODESTYLE_CODES
         else:
-            enable_checks = [os.path.basename(file).split("_")[0].upper()] + ["C9960"]
+            enable_checks = [os.path.basename(file).split("_")[0].upper()]
         buf = StringIO()
         python_ta.check_all(
             module_name=file,
@@ -164,7 +154,7 @@ def pyta_z3_symbols() -> dict[str, set[str]]:
 
     :return: A dictionary mapping file names to sets of PythonTA message symbols.
     """
-    return _symbols_by_file_pyta([_CUSTOM_CHECKER_PATH], z3_enabled=True)
+    return _symbols_by_file_pyta([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH], z3_enabled=True)
 
 
 @pytest.fixture(scope="session")
@@ -201,7 +191,9 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, se
     ), f"Failed {test_file}. File does not add expected message {checker_name}: {file_symbols}."
 
 
-@pytest.mark.parametrize("test_file", get_file_paths([_CUSTOM_CHECKER_PATH], z3_enabled=True))
+@pytest.mark.parametrize(
+    "test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH], z3_enabled=True)
+)
 def test_z3_files_pyta(test_file: str, pyta_z3_symbols: dict[str, set[str]]) -> None:
     """Test z3-dependent files separately"""
 

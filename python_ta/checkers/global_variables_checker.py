@@ -52,10 +52,12 @@ class GlobalVariablesChecker(BaseChecker):
         """
         self._inspect_vars(node)
 
+    @only_required_for_messages("forbidden-global-variables")
     def visit_import(self, node: nodes.Import) -> None:
         """Save the names of imports, to prevent mistaking for global vars."""
         self._store_name_or_alias(node)
 
+    @only_required_for_messages("forbidden-global-variables")
     def visit_importfrom(self, node: nodes.ImportFrom) -> None:
         """Save the names of imports, to prevent mistaking for global vars."""
         self._store_name_or_alias(node)

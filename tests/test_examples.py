@@ -17,6 +17,8 @@ _EXAMPLES_PATH = "examples/pylint/"
 _CUSTOM_CHECKER_PATH = "examples/custom_checkers/"
 _PYCODESTYLE_PATH = "examples/custom_checkers/e9989_pycodestyle/"
 
+_PYCODESTYLE_CODES = ["E9989"]
+
 _EXAMPLE_PREFIX_REGEX = r"[cerfw]\d{4}"
 _PYCODESTYLE_PREFIX_REGEX = r"^e\d{3}_(error|no_error)\.py$"
 
@@ -42,7 +44,7 @@ IGNORED_TESTS = [
 Z3_RELATED_TESTS = ["r9900_redundant_condition.py", "r9901_impossible_condition.py"]
 
 
-def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
+def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> list[str]:
     """
     Get all the Python files from the specified directories for testing. This will
     return the full file paths for each Python file, excluding those listed in IGNORED_TESTS.
@@ -50,6 +52,7 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     A list of all the file paths will be returned.
 
     :param paths: The path or list of paths to retrieve the Python files from.
+    :param z3_enabled: Option to enable z3 dependency.
     :return: A list of full file paths to the Python files.
     """
     test_files = []
@@ -57,20 +60,13 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     if isinstance(paths, str):
         paths = [paths]
 
-    # check if z3 dependency is available
-    z3_dependency_available = True
-    try:
-        import z3
-    except ImportError:
-        z3_dependency_available = False
-
     for path in paths:
         for root, _, files in os.walk(path, topdown=True):
             for filename in files:
                 if (
                     filename not in IGNORED_TESTS
                     and filename.endswith(".py")
-                    and (z3_dependency_available or filename not in Z3_RELATED_TESTS)
+                    and (z3_enabled or filename not in Z3_RELATED_TESTS)
                 ):
                     full_path = os.path.join(root, filename)
                     rel_path = os.path.relpath(full_path, path)
@@ -79,7 +75,12 @@ def get_file_paths(paths: Union[str, list[str]]) -> list[str]:
     return test_files
 
 
-def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[str, set[str]]:
+def _symbols_by_file_pyta(
+    paths: list[str],
+    include_msg: bool = False,
+    z3_enabled: bool = False,
+    pycodestyle_enabled: bool = False,
+) -> dict[str, set[str]]:
     """
     Run python_ta.check_all() on files from specified directories and return the map of file name to the
     set of PythonTA messages it raises. If include_msg is set True, PythonTA message descriptions are
@@ -87,22 +88,30 @@ def _symbols_by_file_pyta(paths: list[str], include_msg: bool = False) -> dict[s
 
     :param paths: The paths to retrieve the files from.
     :param include_msg: whether to include message descriptions in the symbol set
+    :param z3_enabled: Option to enable z3 dependency.
+    :param pycodestyle_enabled: Option to enable pycodestyle-specific checks (E9989).
     :return: A dictionary mapping each file name to a set of PythonTA message symbols
     (and descriptions if include_msg is True).
     """
-    sys.stdout = StringIO()
-    python_ta.check_all(
-        module_name=get_file_paths(paths),
-        config={
-            "output-format": "pyta-json",
-            "enable": ["C9960", "C0103"],
-            "z3": True,
-        },
-    )
-
-    jsons_output = sys.stdout.getvalue()
-    sys.stdout = sys.__stdout__
-    pyta_list_output = json.loads(jsons_output)
+    files_to_check = get_file_paths(paths, z3_enabled=z3_enabled)
+    pyta_list_output = []
+    for file in files_to_check:
+        if pycodestyle_enabled:
+            enable_checks = _PYCODESTYLE_CODES
+        else:
+            enable_checks = [os.path.basename(file).split("_")[0].upper()]
+        buf = StringIO()
+        python_ta.check_all(
+            module_name=file,
+            config={
+                "output-format": "pyta-json",
+                "disable": ["all"],
+                "enable": enable_checks,
+                "z3": z3_enabled,
+            },
+            output=buf,
+        )
+        pyta_list_output.extend(json.loads(buf.getvalue()))
 
     file_to_symbol = {}
     for path, group in itertools.groupby(
@@ -134,6 +143,18 @@ def pyta_examples_symbols() -> dict[str, set[str]]:
 
 
 @pytest.fixture(scope="session")
+def pyta_z3_symbols() -> dict[str, set[str]]:
+    """
+    A pytest fixture that runs once per test session.
+    This fixture analyzes example files needing z3 solver using python_ta and returns a dictionary mapping each file name
+    to the set of PythonTA message symbols raised.
+
+    :return: A dictionary mapping file names to sets of PythonTA message symbols.
+    """
+    return _symbols_by_file_pyta([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH], z3_enabled=True)
+
+
+@pytest.fixture(scope="session")
 def pyta_pycodestyle_symbols() -> dict[str, set[str]]:
     """
     A pytest fixture that runs once per test session.
@@ -142,15 +163,21 @@ def pyta_pycodestyle_symbols() -> dict[str, set[str]]:
 
     :return: A dictionary mapping file names to sets of PythonTA message symbols and descriptions.
     """
-    return _symbols_by_file_pyta([_PYCODESTYLE_PATH], include_msg=True)
+    return _symbols_by_file_pyta([_PYCODESTYLE_PATH], include_msg=True, pycodestyle_enabled=True)
 
 
+@pytest.mark.skipif(
+    "not config.getoption('--exclude-z3')",
+    reason="Skipping test_examples_files_pyta since z3 is enabled",
+)
 @pytest.mark.parametrize("test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH]))
 def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, set[str]]) -> None:
     """
     Dynamically creates and runs unit tests for Python files in the examples and custom checker directories.
     This test function deduces the error type from the file name and checks if the expected error message is present
     in PythonTA's report.
+
+    This test is skipped when z3 enabled.
     """
     base_name = os.path.basename(test_file)
     if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
@@ -160,6 +187,35 @@ def test_examples_files_pyta(test_file: str, pyta_examples_symbols: dict[str, se
     checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
 
     file_symbols = pyta_examples_symbols[base_name]
+
+    found_pylint_message = checker_name in file_symbols
+    assert (
+        found_pylint_message
+    ), f"Failed {test_file}. File does not add expected message {checker_name}: {file_symbols}."
+
+
+@pytest.mark.skipif(
+    "config.getoption('--exclude-z3')", reason="Skipping test_z3_files_pyta since z3 is disabled"
+)
+@pytest.mark.parametrize(
+    "test_file", get_file_paths([_EXAMPLES_PATH, _CUSTOM_CHECKER_PATH], z3_enabled=True)
+)
+def test_z3_files_pyta(test_file: str, pyta_z3_symbols: dict[str, set[str]]) -> None:
+    """
+    Dynamically creates and runs unit tests with z3 solver enabled for Python files in the examples and custom checker
+    directories. This test function deduces the error type from the file name and checks if the expected error message
+    is present in PythonTA's report.
+
+    This test is skipped when z3 is disabled.
+    """
+    base_name = os.path.basename(test_file)
+    if not re.match(_EXAMPLE_PREFIX_REGEX, base_name[:5]):
+        return
+    if not base_name.lower().endswith(".py"):
+        assert False
+    checker_name = base_name[6:-3].replace("_", "-")  # Take off prefix and file extension.
+
+    file_symbols = pyta_z3_symbols[base_name]
 
     found_pylint_message = checker_name in file_symbols
     assert (

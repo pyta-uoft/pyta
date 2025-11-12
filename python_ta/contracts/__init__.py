@@ -530,6 +530,18 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 check = eval(compiled, {**global_scope, "self": instance})
             except AssertionError as e:
                 raise AssertionError(str(e)) from None
+            except NameError as e:
+                # Get the missing name
+                missing = getattr(e, "name", None)
+
+                # Check if missing name is an attribute
+                if missing is not None and hasattr(instance, missing):
+                    print(
+                        f"Could not find `{missing}` when evaluating representation invariant. Did you mean `self.{missing}`?"
+                    )
+                else:
+                    _debug(f"Warning: could not evaluate representation invariant: {invariant}")
+                continue
             except:
                 _debug(f"Warning: could not evaluate representation invariant: {invariant}")
             else:

@@ -60,9 +60,6 @@ def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> li
     if isinstance(paths, str):
         paths = [paths]
 
-    if z3_enabled:
-        import z3
-
     for path in paths:
         for root, _, files in os.walk(path, topdown=True):
             for filename in files:

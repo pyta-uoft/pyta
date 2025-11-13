@@ -288,7 +288,6 @@ code {
   color: var(--pico-code-color);
   font-weight: var(--pico-font-weight);
   font-size: 15px;
-  line-height: initial;
   margin: 0 3px;
 }
 

@@ -5,9 +5,8 @@ import pylint.testutils
 import pytest
 from astroid import nodes
 
-from python_ta.checkers.forbidden_python_syntax_checker import (
-    ForbiddenPythonSyntaxChecker,
-)
+from python_ta.checkers.forbidden_python_syntax_checker import \
+    ForbiddenPythonSyntaxChecker
 
 
 class TestForbiddenPythonSyntaxCheckerDisallowedsyntax(pylint.testutils.CheckerTestCase):

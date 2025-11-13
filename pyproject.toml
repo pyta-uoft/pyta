@@ -13,7 +13,7 @@ dependencies = [
     "click >= 8.0.1, < 9",
     "colorama ~= 0.4.6",
     "jinja2 ~= 3.1.2",
-    "markdown-it-py,
+    "markdown-it-py",
     "mypy ~= 1.13",
     "pycodestyle ~= 2.11",
     "pygments >= 2.14,< 2.20",

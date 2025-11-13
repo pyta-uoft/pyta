@@ -150,8 +150,8 @@ class AccumulationTable:
         for i, loop in enumerate(self._loops):
             if loop["loop_variables"] != {}:
                 iteration = list(range(len(list(loop["loop_variables"].values())[0])))
-            elif self.loop_accumulators != {}:
-                iteration = list(range(len(list(self.loop_accumulators.values())[0])))
+            elif loop["loop_accumulators"] != {}:
+                iteration = list(range(len(list(loop["loop_accumulators"].values())[0])))
 
             yield {
                 "current loop": i + 1,

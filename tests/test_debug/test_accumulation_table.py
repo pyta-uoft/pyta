@@ -22,7 +22,7 @@ def test_one_accumulator_two_loops() -> None:
     with AccumulationTable(["sum_so_far", "i"]) as table:
         for number in test_list:
             sum_so_far = sum_so_far + number
-        for i, _ in enumerate(test_list):
+        for j in range(len(test_list)):
             sum_so_far += 1
         while i < 10:
             i += 1

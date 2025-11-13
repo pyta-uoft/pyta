@@ -5,6 +5,7 @@ from typing import Optional
 
 from astroid import BoundMethod, InferenceError, UnboundMethod, bases, nodes, util
 from pylint.checkers import BaseChecker, utils
+from pylint.checkers.utils import only_required_for_messages
 from pylint.interfaces import INFERENCE
 from pylint.lint import PyLinter
 
@@ -42,6 +43,7 @@ class InfiniteLoopChecker(BaseChecker):
         ),
     }
 
+    @only_required_for_messages("infinite-loop")
     def visit_while(self, node: nodes.While) -> None:
         checks = [
             self._check_condition_constant,

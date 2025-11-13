@@ -37,6 +37,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored custom renderers to accept `config` parameter to stay consistent with the added parameter for `render-message`
 - Refactored `setendings.py` to rely primarily on Astroid/Python’s built-in end-location attributes, reducing the amount of custom parsing logic
 - Fixed `test_html_server.py` tests to be compatible with Windows
+- Updated `conftest.py` and `test_black.py` to be compatible with pytest v9, removing usage of some deprecated features.
 
 ## [2.11.1] - 2025-08-17
 

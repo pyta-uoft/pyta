@@ -99,6 +99,7 @@ class AccumulationTable:
         # {
         #   "loop_variables": loop_variables,
         #   "loop_lineno": loop_lineno,
+        #   "loop_accumulators": loop_accumulators,
         # }
         self._loops = []
         self.output_filepath = output
@@ -139,7 +140,7 @@ class AccumulationTable:
                 else:
                     value = copy.deepcopy(value)
 
-            self.loop_accumulators[accumulator].append(value)
+            self._loops[loop_index]["loop_accumulators"][accumulator].append(value)
 
     def _create_iteration_dict(self) -> Generator[dict]:
         """Function generates dictionaries that maps (for every loop) each accumulator
@@ -156,7 +157,7 @@ class AccumulationTable:
                 "current loop": i,
                 "iteration": iteration,
                 **loop["loop_variables"],
-                **self.loop_accumulators,
+                **loop["loop_accumulators"],
             }
 
     def _tabulate_data(self) -> None:
@@ -241,6 +242,7 @@ class AccumulationTable:
                 {
                     "loop_variables": loop_variables,
                     "loop_lineno": loop_lineno,
+                    "loop_accumulators": {acc: [] for acc in self.loop_accumulators.keys()},
                 }
             )
 
@@ -256,5 +258,4 @@ class AccumulationTable:
         """Exit the accumulator loop, set the frame to none and print the table"""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None
-        print(self._loops)
         self._tabulate_data()

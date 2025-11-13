@@ -15,6 +15,23 @@ import tabulate
 from python_ta.debug import AccumulationTable
 
 
+def test_one_accumulator_two_loops() -> None:
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    i = 0
+    with AccumulationTable(["sum_so_far", "i"]) as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+        for i, _ in enumerate(test_list):
+            sum_so_far += 1
+        while i < 10:
+            i += 1
+            sum_so_far -= i
+
+    # assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
+    # assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
+
+
 def test_one_accumulator() -> None:
     test_list = [10, 20, 30]
     sum_so_far = 0

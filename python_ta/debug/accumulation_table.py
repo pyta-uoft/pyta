@@ -154,7 +154,7 @@ class AccumulationTable:
                 iteration = list(range(len(list(self.loop_accumulators.values())[0])))
 
             yield {
-                "current loop": i,
+                "current loop": i + 1,
                 "iteration": iteration,
                 **loop["loop_variables"],
                 **loop["loop_accumulators"],

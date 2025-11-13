@@ -17,16 +17,8 @@ import logging
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
-from typing import (
-    Any,
-    Callable,
-    Optional,
-    TypeVar,
-    Union,
-    get_args,
-    get_origin,
-    overload,
-)
+from typing import (Any, Callable, Optional, TypeVar, Union, get_args,
+                    get_origin, overload)
 
 import wrapt
 from typeguard import CollectionCheckStrategy, TypeCheckError, check_type

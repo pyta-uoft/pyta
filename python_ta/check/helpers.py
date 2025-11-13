@@ -22,12 +22,8 @@ from pylint.utils.pragma_parser import OPTION_PO
 
 from python_ta import __version__
 
-from ..config import (
-    find_local_config,
-    load_config,
-    load_messages_config,
-    override_config,
-)
+from ..config import (find_local_config, load_config, load_messages_config,
+                      override_config)
 from ..patches import patch_all
 from ..upload import upload_to_server
 from ..util.autoformat import run_autoformat

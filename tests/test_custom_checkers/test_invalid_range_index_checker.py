@@ -3,7 +3,8 @@ import astroid.nodes as nodes
 import pylint.testutils
 import pytest
 
-from python_ta.checkers.invalid_range_index_checker import InvalidRangeIndexChecker
+from python_ta.checkers.invalid_range_index_checker import \
+    InvalidRangeIndexChecker
 
 
 class TestInvalidRangeIndexChecker(pylint.testutils.CheckerTestCase):

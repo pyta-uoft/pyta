@@ -2,8 +2,9 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
-from python_ta.checkers.missing_space_in_doctest_checker import \
-    MissingSpaceInDoctestChecker
+from python_ta.checkers.missing_space_in_doctest_checker import (
+    MissingSpaceInDoctestChecker,
+)
 
 
 class TestMissingSpaceInDoctestChecker(pylint.testutils.CheckerTestCase):

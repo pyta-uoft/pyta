@@ -32,9 +32,14 @@ import logging
 import webbrowser
 from typing import IO, TYPE_CHECKING, Any, Literal, Optional, Union
 
-from .check.helpers import (check_file, get_file_paths,
-                            get_valid_files_to_check, setup_linter,
-                            upload_linter_results, verify_pre_check)
+from .check.helpers import (
+    check_file,
+    get_file_paths,
+    get_valid_files_to_check,
+    setup_linter,
+    upload_linter_results,
+    verify_pre_check,
+)
 from .check.watch import watch_files
 
 if TYPE_CHECKING:

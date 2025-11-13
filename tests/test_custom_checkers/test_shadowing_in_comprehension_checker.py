@@ -2,8 +2,9 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
-from python_ta.checkers.shadowing_in_comprehension_checker import \
-    ShadowingInComprehensionChecker
+from python_ta.checkers.shadowing_in_comprehension_checker import (
+    ShadowingInComprehensionChecker,
+)
 
 
 class TestShadowingInComprehensionChecker(pylint.testutils.CheckerTestCase):

@@ -2,8 +2,7 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
-from python_ta.checkers.unmentioned_parameter_checker import \
-    UnmentionedParameterChecker
+from python_ta.checkers.unmentioned_parameter_checker import UnmentionedParameterChecker
 
 
 class TestUnmentionedParameterChecker(pylint.testutils.CheckerTestCase):

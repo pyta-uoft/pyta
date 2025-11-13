@@ -3,8 +3,7 @@ import os
 import pylint.testutils
 from astroid import nodes, parse
 
-from python_ta.checkers.unnecessary_f_string_checker import \
-    FormattedStringChecker
+from python_ta.checkers.unnecessary_f_string_checker import FormattedStringChecker
 
 
 class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):

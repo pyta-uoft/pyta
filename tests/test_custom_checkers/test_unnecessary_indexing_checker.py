@@ -2,8 +2,7 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
-from python_ta.checkers.unnecessary_indexing_checker import \
-    UnnecessaryIndexingChecker
+from python_ta.checkers.unnecessary_indexing_checker import UnnecessaryIndexingChecker
 
 
 class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):

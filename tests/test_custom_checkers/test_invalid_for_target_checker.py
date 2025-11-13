@@ -4,8 +4,7 @@ import astroid
 import pylint.testutils
 from astroid import nodes
 
-from python_ta.checkers.invalid_for_target_checker import \
-    InvalidForTargetChecker
+from python_ta.checkers.invalid_for_target_checker import InvalidForTargetChecker
 
 
 class TestInvalidForTargetChecker(pylint.testutils.CheckerTestCase):

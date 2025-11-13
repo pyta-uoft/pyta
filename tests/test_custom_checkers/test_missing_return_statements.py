@@ -3,8 +3,9 @@ import pylint.testutils
 from astroid import nodes
 
 from python_ta.cfg.visitor import CFGVisitor
-from python_ta.checkers.inconsistent_or_missing_returns_checker import \
-    InconsistentReturnChecker
+from python_ta.checkers.inconsistent_or_missing_returns_checker import (
+    InconsistentReturnChecker,
+)
 from python_ta.transforms.z3_visitor import Z3Visitor
 
 

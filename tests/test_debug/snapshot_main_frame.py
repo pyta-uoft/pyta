@@ -5,8 +5,9 @@ variables from the __main__ stack frame, particularly globally defined variables
 This module is intended exclusively for testing purposes and should not be used for any other purpose.
 """
 
-from __future__ import \
-    annotations  # "annotations" should not be included in the snapshot
+from __future__ import (
+    annotations,  # "annotations" should not be included in the snapshot
+)
 
 import json
 

@@ -9,8 +9,18 @@ if TYPE_CHECKING:
     except ImportError:
         ExprRef = Any
 
-from astroid import (AnnAssign, Arguments, Assign, AssignName, AugAssign,
-                     Break, Continue, NodeNG, Raise, Return)
+from astroid import (
+    AnnAssign,
+    Arguments,
+    Assign,
+    AssignName,
+    AugAssign,
+    Break,
+    Continue,
+    NodeNG,
+    Raise,
+    Return,
+)
 
 # Global z3
 z3 = Any

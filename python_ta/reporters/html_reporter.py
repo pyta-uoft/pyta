@@ -3,6 +3,7 @@ import socket
 import sys
 
 from jinja2 import Environment, FileSystemLoader
+from markdown_it import MarkdownIt
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
@@ -62,6 +63,7 @@ class HTMLReporter(PythonTaReporter):
         This method can be implemented to display them after they've
         been aggregated.
         """
+        md = MarkdownIt()
         grouped_messages = {
             path: self.group_messages(msgs) for path, msgs in self.gather_messages().items()
         }
@@ -98,6 +100,7 @@ class HTMLReporter(PythonTaReporter):
             grouped_messages=grouped_messages,
             os=os,
             enumerate=enumerate,
+            md=md,
         )
 
         # If a filepath was specified, write to the file

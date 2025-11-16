@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import re
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
@@ -533,6 +534,11 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
             except NameError as e:
                 # Get the missing name
                 missing = getattr(e, "name", None)
+                if missing == None:
+                    # Failsafe for version 3.9
+                    message = re.search(r"name '(.+?)' is not defined", str(e))
+                    if message:
+                        missing = message.group(1)
 
                 # Check if missing name is an attribute
                 if missing is not None and hasattr(instance, missing):

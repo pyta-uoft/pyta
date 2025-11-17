@@ -534,7 +534,7 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
             except NameError as e:
                 # Get the missing name
                 missing = getattr(e, "name", None)
-                if missing == None:
+                if missing is None:
                     # Failsafe for version 3.9
                     message = re.search(r"name '(.+?)' is not defined", str(e))
                     if message:
@@ -543,11 +543,11 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 # Check if missing name is an attribute
                 if missing is not None and hasattr(instance, missing):
                     print(
-                        f"Could not find `{missing}` when evaluating representation invariant. Did you mean `self.{missing}`?"
+                        f"[WARNING] Could not find variable `{missing}` when evaluating representation invariant. Did you mean `self.{missing}`?",
+                        file=sys.stderr,
                     )
                 else:
                     _debug(f"Warning: could not evaluate representation invariant: {invariant}")
-                continue
             except:
                 _debug(f"Warning: could not evaluate representation invariant: {invariant}")
             else:

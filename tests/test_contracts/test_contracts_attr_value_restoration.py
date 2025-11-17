@@ -61,8 +61,8 @@ def test_rep_inv_missing_self_raises_suggestion(capsys) -> None:
 
     output = capsys.readouterr()
     assert (
-        "Could not find `age` when evaluating representation invariant. Did you mean `self.age`?"
-        in output.out
+        "[WARNING] Could not find variable `age` when evaluating representation invariant. Did you mean `self.age`?"
+        in output.err
     )
 
 
@@ -83,4 +83,4 @@ def test_rep_inv_missing_name_no_suggestion(capsys) -> None:
     my_person.age = 10
 
     output = capsys.readouterr()
-    assert "Did you mean `self.weight`?" not in output.out
+    assert "Did you mean `self.weight`?" not in output.err

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import re
 import sys
 import typing
 from types import CodeType, FunctionType, ModuleType
@@ -530,6 +531,23 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
                 check = eval(compiled, {**global_scope, "self": instance})
             except AssertionError as e:
                 raise AssertionError(str(e)) from None
+            except NameError as e:
+                # Get the missing name
+                missing = getattr(e, "name", None)
+                if missing is None:
+                    # Failsafe for version 3.9
+                    message = re.search(r"name '(.+?)' is not defined", str(e))
+                    if message:
+                        missing = message.group(1)
+
+                # Check if missing name is an attribute
+                if missing is not None and hasattr(instance, missing):
+                    print(
+                        f"[WARNING] Could not find variable `{missing}` when evaluating representation invariant. Did you mean `self.{missing}`?",
+                        file=sys.stderr,
+                    )
+                else:
+                    _debug(f"Warning: could not evaluate representation invariant: {invariant}")
             except:
                 _debug(f"Warning: could not evaluate representation invariant: {invariant}")
             else:

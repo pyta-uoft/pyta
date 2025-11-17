@@ -17,6 +17,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added custom renderer for `line-too-long` to improve its error snippet to highlight the overflow segment instead of the entire line.
 - Improved error message for error C0305 `trailing-newlines` and inserted a "DELETE" comment for each trailing newline.
 - Added a solution to prevent possible large snippets created by the following errors: pylint error C0305, and pycodestyle errors E303, E304
+- Extended accumulation tables to support multiple loops in sequence within the same context manager
 
 ### 💫 New checkers
 
@@ -37,6 +38,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored `setendings.py` to rely primarily on Astroid/Python’s built-in end-location attributes, reducing the amount of custom parsing logic
 - Fixed `test_html_server.py` tests to be compatible with Windows
 - Updated `conftest.py` and `test_black.py` to be compatible with pytest v9, removing usage of some deprecated features.
+- Updated tests in test_accumulation_table.py to cover multi-loop behavior and added new cases for sequential loop handling in accumulation tables
 
 ## [2.11.1] - 2025-08-17
 

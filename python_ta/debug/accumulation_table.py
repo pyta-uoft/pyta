@@ -64,19 +64,19 @@ class AccumulationTable:
     accumulation variables during each iteration in a for or while loop
 
     Instance attributes:
-        loop_accumulators: a mapping between the accumulation variables
-            and their values during each iteration
-        loop_variables: a mapping between the loop variables and their
-            values during each iteration
-        _loop_lineno: the line number of the loop
-        output_filepath: the filepath  where the table will be written if it is passed in, defaults to None
+        _accumulator_names: a set of accumulation variable names to track
+        _loops: a list of dictionaries, one per loop, each containing:
+            - "loop_variables": dict mapping loop variable names to their values per iteration
+            - "loop_lineno": the line number of the loop
+            - "loop_accumulators": dict mapping accumulator names to their values per iteration
+        output_filepath: the filepath where the table will be written if it is passed in, defaults to None
+        output_format: the format of the output ("table" or "csv")
     """
 
-    loop_accumulators: dict[str, list]
-    """A dictionary mapping loop accumulator variable name to its values across all loop iterations."""
-    loop_variables: dict[str, list]
-    """A dictionary mapping loop variable variable name to its values across all loop iterations."""
-    _loop_lineno: int
+    _accumulator_names: set[str]
+    """A set of accumulator variable names to track across loop iterations."""
+    _loops: list[dict[str, Any]]
+    """A list of dictionaries containing loop-specific data for each loop in the with block."""
     output_filepath: Optional[str]
     output_format: str
 
@@ -90,37 +90,32 @@ class AccumulationTable:
 
         Args:
             accumulation_names: a list of the loop accumulator variable names to display.
-
+            output: optional filepath where the table will be written. If None, prints to stdout.
+            format: output format, either "table" (formatted table) or "csv" (CSV format).
         """
-        # Can be shared, persists across loops
-        self.loop_accumulators = {accumulator: [] for accumulator in accumulation_names}
-
-        # self._loops is a list of dictionaries or the form:
-        # {
-        #   "loop_variables": loop_variables,
-        #   "loop_lineno": loop_lineno,
-        #   "loop_accumulators": loop_accumulators,
-        # }
+        self._accumulator_names = set(
+            accumulation_names
+        )  # Removes duplicates from accumulation_names
         self._loops = []
         self.output_filepath = output
         self.output_format = format
 
-    def _record_iteration(self, frame: types.FrameType, loop_index: int) -> None:
-        """Record the values of the accumulator variables and loop variables of an iteration"""
-        loop_variables = self._loops[loop_index]["loop_variables"]
+    def _record_iteration(self, frame: types.FrameType, lst_index: int) -> None:
+        """Record the values of the accumulator variables and loop variables of an iteration for a given loop at index
+        lst_index."""
         if (
-            self._loops[loop_index]["loop_variables"] != {}
-            and len(list(self._loops[loop_index]["loop_variables"].values())[0]) > 0
+            self._loops[lst_index]["loop_variables"] != {}
+            and len(list(self._loops[lst_index]["loop_variables"].values())[0]) > 0
         ):
-            for loop_var in self._loops[loop_index]["loop_variables"]:
-                self._loops[loop_index]["loop_variables"][loop_var].append(
+            for loop_var in self._loops[lst_index]["loop_variables"]:
+                self._loops[lst_index]["loop_variables"][loop_var].append(
                     copy.deepcopy(frame.f_locals[loop_var])
                 )
         else:
-            for loop_var in self._loops[loop_index]["loop_variables"]:
-                self._loops[loop_index]["loop_variables"][loop_var].append(NO_VALUE)
+            for loop_var in self._loops[lst_index]["loop_variables"]:
+                self._loops[lst_index]["loop_variables"][loop_var].append(NO_VALUE)
 
-        for accumulator in self.loop_accumulators:
+        for accumulator in self._accumulator_names:
             if accumulator in frame.f_locals:
                 value = copy.deepcopy(frame.f_locals[accumulator])
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
@@ -132,7 +127,7 @@ class AccumulationTable:
                 except NameError as e:
                     if (
                         sys.version_info >= (3, 10)
-                        and e.name in self._loops[loop_index]["loop_variables"]
+                        and e.name in self._loops[lst_index]["loop_variables"]
                     ):
                         value = NO_VALUE
                     else:
@@ -140,16 +135,16 @@ class AccumulationTable:
                 else:
                     value = copy.deepcopy(value)
 
-            self._loops[loop_index]["loop_accumulators"][accumulator].append(value)
+            self._loops[lst_index]["loop_accumulators"][accumulator].append(value)
 
     def _create_iteration_dict(self, lst_index: int) -> dict:
-        """Function generates dictionaries that maps (for every loop) each accumulator
+        """Function generates dictionaries that maps, for a given loop at index `lst_index`, each accumulator
         and loop variable to its respective value during each iteration
         """
         iteration = None
         if self._loops[lst_index]["loop_variables"] != {}:
             iteration = list(range(len(list(self._loops[lst_index]["loop_variables"].values())[0])))
-        elif self.loop_accumulators != {}:
+        elif self._accumulator_names:
             iteration = list(
                 range(len(list(self._loops[lst_index]["loop_accumulators"].values())[0]))
             )
@@ -159,22 +154,10 @@ class AccumulationTable:
             **self._loops[lst_index]["loop_variables"],
             **self._loops[lst_index]["loop_accumulators"],
         }
-        # iteration = None
-        # for i, loop in enumerate(self._loops):
-        #     if loop["loop_variables"] != {}:
-        #         iteration = list(range(len(list(loop["loop_variables"].values())[0])))
-        #     elif loop["loop_accumulators"] != {}:
-        #         iteration = list(range(len(list(loop["loop_accumulators"].values())[0])))
-        #
-        #     yield {
-        #         "current loop": i + 1,
-        #         "iteration": iteration,
-        #         **loop["loop_variables"],
-        #         **loop["loop_accumulators"],
-        #     }
 
     def _tabulate_data(self, lst_index: int) -> None:
-        """Print the values of the accumulator and loop variables into a table"""
+        """Print the values of the accumulator and loop variables, for a given loop at index `lst_index`,
+        into a table"""
         iteration_dict = self._create_iteration_dict(lst_index)
 
         if self.output_filepath is None:
@@ -223,19 +206,15 @@ class AccumulationTable:
     def _setup_table(self) -> None:
         """
         Get the frame of the code containing the with statement, cut down the source code
-        such that it only contains the with statement and the accumulator loop and set up
-        the trace function to track the values of the accumulator variables during each iteration
+        such that it only contains the with statement and the accumulator loop(s) and set up
+        the trace function to track the values of the accumulator variables for the loop(s) during each iteration.
         """
-        # Could be simplified to: func_frame = inspect.getouterframes(inspect.currentframe())[2].frame
         func_frame = inspect.getouterframes(
             inspect.getouterframes(inspect.currentframe())[1].frame
         )[1].frame
 
-        # Instead of getting 1, we should get all loops!!!
         nodes = list(get_loop_nodes(func_frame))
-        # node = get_loop_node(func_frame)
 
-        # Repeat process for all every node in nodes
         for node in nodes:
             loop_lineno = inspect.getlineno(func_frame) + node.lineno
             loop_variables = {}
@@ -247,14 +226,14 @@ class AccumulationTable:
                 }
 
             assert (
-                self.loop_accumulators != {} or loop_variables != {}
+                self._accumulator_names or loop_variables != {}
             ), "The loop accumulator and loop variables cannot be both empty"
 
             self._loops.append(
                 {
                     "loop_variables": loop_variables,
                     "loop_lineno": loop_lineno,
-                    "loop_accumulators": {acc: [] for acc in self.loop_accumulators.keys()},
+                    "loop_accumulators": {acc: [] for acc in self._accumulator_names},
                 }
             )
 
@@ -267,7 +246,7 @@ class AccumulationTable:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Exit the accumulator loop, set the frame to none and print the table"""
+        """Exit the with block, disable tracing, and print the table(s) for all tracked loops"""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None
         for i in range(len(self._loops)):

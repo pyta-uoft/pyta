@@ -281,6 +281,15 @@ section {
 .code-errors {
 }
 
+code {
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-code-background-color);
+  color: var(--pico-code-color);
+  font-weight: var(--pico-font-weight);
+  font-size: 15px;
+  padding: 0.1em 0.35em;
+}
+
 .style-errors {
   border-top: 3px solid rgba(192, 192, 192, 0.25);
 }
@@ -452,15 +461,6 @@ section {
 
 .content {
   margin-bottom: 15px;
-}
-
-code {
-  padding: 0.1em 0.35em;
-  border-radius: var(--pico-border-radius);
-  background: var(--pico-code-background-color);
-  color: var(--pico-code-color);
-  font-weight: var(--pico-font-weight);
-  font-size: 15px;
 }
 
 .message-container.expanded {

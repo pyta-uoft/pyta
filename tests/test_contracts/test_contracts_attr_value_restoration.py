@@ -41,3 +41,46 @@ def test_class_attr_value_does_not_exist_if_violates_rep_inv() -> None:
         my_person.age = -1
     except AssertionError:
         assert not hasattr(my_person, "age")
+
+
+def test_rep_inv_missing_self_raises_suggestion(capsys) -> None:
+    """Test that a representation invariant referring to an attribute missing the `self.`
+    prefix will print a suggestion on NameError."""
+
+    @check_contracts
+    class Person:
+        """
+        Representation Invariants:
+        - age >= 0
+        """
+
+        age: int
+
+    my_person = Person()
+    my_person.age = 10
+
+    output = capsys.readouterr()
+    assert (
+        "[WARNING] Could not find variable `age` when evaluating representation invariant. Did you mean `self.age`?"
+        in output.err
+    )
+
+
+def test_rep_inv_missing_name_no_suggestion(capsys) -> None:
+    """Test that a representation invariant with a missing name that is not an instance attribute does
+    not result in a suggestion on NameError."""
+
+    @check_contracts
+    class Person:
+        """
+        Representation Invariants:
+        - weight >= 0
+        """
+
+        age: int
+
+    my_person = Person()
+    my_person.age = 10
+
+    output = capsys.readouterr()
+    assert "Did you mean `self.weight`?" not in output.err

@@ -140,10 +140,9 @@
                                 <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
                                         {% if limit == 0 or loop.index0 < limit %}
-                                        <span>
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }}
+                                                    <span> [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }} </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -161,7 +160,6 @@
                                                 <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                                 {% endif %}
                                             </div>
-                                        </span>
                                        {% endif %}
                                     {% endfor %}
                                 </div>
@@ -219,7 +217,7 @@
                                         {% if limit == 0 or loop.index0 < limit %}
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }}
+                                                    <span> [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }} </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->

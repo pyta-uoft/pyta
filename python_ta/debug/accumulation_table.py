@@ -64,7 +64,7 @@ class AccumulationTable:
     accumulation variables during each iteration in a for or while loop
 
     Instance attributes:
-        _accumulator_names: a set of accumulation variable names to track
+        _accumulator_names: a list of accumulation variable names to track (order is preserved)
         _loops: a list of dictionaries, one per loop, each containing:
             - "loop_variables": dict mapping loop variable names to their values per iteration
             - "loop_lineno": the line number of the loop
@@ -73,8 +73,8 @@ class AccumulationTable:
         output_format: the format of the output ("table" or "csv")
     """
 
-    _accumulator_names: set[str]
-    """A set of accumulator variable names to track across loop iterations."""
+    _accumulator_names: list[str]
+    """A list of accumulator variable names to track across loop iterations."""
     _loops: list[dict[str, Any]]
     """A list of dictionaries containing loop-specific data for each loop in the with block."""
     output_filepath: Optional[str]
@@ -93,9 +93,7 @@ class AccumulationTable:
             output: optional filepath where the table will be written. If None, prints to stdout.
             format: output format, either "table" (formatted table) or "csv" (CSV format).
         """
-        self._accumulator_names = set(
-            accumulation_names
-        )  # Removes duplicates from accumulation_names
+        self._accumulator_names = accumulation_names
         self._loops = []
         self.output_filepath = output
         self.output_format = format

@@ -140,6 +140,7 @@
                                 <div class="message-container collapsible expanded">
                                     {% for indiv in occurrences %}
                                         {% if limit == 0 or loop.index0 < limit %}
+                                        <span>
                                             <div class="message">
                                                 <p class="message-name">
                                                     [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }}
@@ -148,7 +149,7 @@
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
                                                             <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                            </svg>
+                                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -160,6 +161,7 @@
                                                 <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
                                                 {% endif %}
                                             </div>
+                                        </span>
                                        {% endif %}
                                     {% endfor %}
                                 </div>

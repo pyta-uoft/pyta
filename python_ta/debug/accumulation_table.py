@@ -142,27 +142,40 @@ class AccumulationTable:
 
             self._loops[loop_index]["loop_accumulators"][accumulator].append(value)
 
-    def _create_iteration_dict(self) -> Generator[dict]:
+    def _create_iteration_dict(self, lst_index: int) -> dict:
         """Function generates dictionaries that maps (for every loop) each accumulator
         and loop variable to its respective value during each iteration
         """
         iteration = None
-        for i, loop in enumerate(self._loops):
-            if loop["loop_variables"] != {}:
-                iteration = list(range(len(list(loop["loop_variables"].values())[0])))
-            elif loop["loop_accumulators"] != {}:
-                iteration = list(range(len(list(loop["loop_accumulators"].values())[0])))
+        if self._loops[lst_index]["loop_variables"] != {}:
+            iteration = list(range(len(list(self._loops[lst_index]["loop_variables"].values())[0])))
+        elif self.loop_accumulators != {}:
+            iteration = list(
+                range(len(list(self._loops[lst_index]["loop_accumulators"].values())[0]))
+            )
 
-            yield {
-                "current loop": i + 1,
-                "iteration": iteration,
-                **loop["loop_variables"],
-                **loop["loop_accumulators"],
-            }
+        return {
+            "iteration": iteration,
+            **self._loops[lst_index]["loop_variables"],
+            **self._loops[lst_index]["loop_accumulators"],
+        }
+        # iteration = None
+        # for i, loop in enumerate(self._loops):
+        #     if loop["loop_variables"] != {}:
+        #         iteration = list(range(len(list(loop["loop_variables"].values())[0])))
+        #     elif loop["loop_accumulators"] != {}:
+        #         iteration = list(range(len(list(loop["loop_accumulators"].values())[0])))
+        #
+        #     yield {
+        #         "current loop": i + 1,
+        #         "iteration": iteration,
+        #         **loop["loop_variables"],
+        #         **loop["loop_accumulators"],
+        #     }
 
-    def _tabulate_data(self) -> None:
+    def _tabulate_data(self, lst_index: int) -> None:
         """Print the values of the accumulator and loop variables into a table"""
-        iteration_dict_lst = list(self._create_iteration_dict())
+        iteration_dict = self._create_iteration_dict(lst_index)
 
         if self.output_filepath is None:
             file_io = sys.stdout
@@ -176,9 +189,9 @@ class AccumulationTable:
         try:
             if self.output_format == "table":
                 table = tabulate.tabulate(
-                    iteration_dict_lst,
+                    iteration_dict,
                     headers="keys",
-                    colalign=(*["left"] * len(iteration_dict_lst[0]),),
+                    colalign=(*["left"] * len(iteration_dict),),
                     disable_numparse=True,
                     missingval="None",
                 )
@@ -186,10 +199,9 @@ class AccumulationTable:
                 file_io.write("\n")
             else:
                 csv_preformat = [
-                    dict(zip(iteration_dict_lst[0].keys(), row))
-                    for row in zip(*iteration_dict_lst[0].values())
+                    dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())
                 ]
-                writer = csv.DictWriter(file_io, fieldnames=iteration_dict_lst[0].keys())
+                writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
                 writer.writeheader()
                 writer.writerows(csv_preformat)
         except OSError as e:
@@ -258,4 +270,6 @@ class AccumulationTable:
         """Exit the accumulator loop, set the frame to none and print the table"""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None
-        self._tabulate_data()
+        for i in range(len(self._loops)):
+            print("\n")
+            self._tabulate_data(i)

@@ -125,7 +125,6 @@ def process_with_multiple_loops(numbers: list) -> int:
 
 if __name__ == '__main__':
     result = process_with_multiple_loops([10, 20, 30])
-    print(f"Final result: {result}")
 ```
 
 When this file is run, we get the following output showing three separate tables (one for each loop):
@@ -157,8 +156,6 @@ iteration    sum_so_far    i
 3            57            3
 4            53            4
 5            48            5
-
-Final result: 48
 ```
 
 ### API
@@ -167,10 +164,11 @@ Final result: 48
 .. automethod:: python_ta.debug.AccumulationTable.__init__
 ```
 
-After the `with` statement, you can access the loop data programmatically using the `loops` attribute. This is a list of dictionaries, where each dictionary contains data for one loop:
+After the `with` statement, you can access the loop data using the `loops` attribute. This is a list of dictionaries, where each dictionary contains data for one loop:
 
 - `table.loops[i]["loop_variables"]`: A dictionary mapping loop variable names to their values during each iteration
 - `table.loops[i]["loop_accumulators"]`: A dictionary mapping accumulator names to their values during each iteration
+- `table.loops[i]["loop_lineno"]`: The line number of the loop in the source code
 
 For example, to access data from a single loop:
 

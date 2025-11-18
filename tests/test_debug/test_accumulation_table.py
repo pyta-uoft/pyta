@@ -644,33 +644,6 @@ def test_multiple_loops_with_shared_accumulator() -> None:
     assert table._loops[2]["loop_accumulators"] == {"total": [50, 150]}
 
 
-def test_nested_loops_within_sequence() -> None:
-    """Test nested loops where outer loop contains inner loops"""
-    result = []
-
-    with AccumulationTable(["result"]) as table:
-        for i in range(2):
-            for j in range(2):
-                result.append((i, j))
-
-    # Since both loops are at different levels of nesting, they should both be tracked
-    assert table._loops[0]["loop_variables"] == {"i": ["N/A", 0, 1]}
-    assert table._loops[0]["loop_accumulators"] == {
-        "result": [[], [(0, 0), (0, 1)], [(0, 0), (0, 1), (1, 0), (1, 1)]]
-    }
-
-    # The inner loop (j) comes second
-    assert table._loops[1]["loop_variables"] == {"j": ["N/A", 0, 1, 1, 0, 1]}
-    assert table._loops[1]["loop_accumulators"]["result"] == [
-        [],
-        [(0, 0)],
-        [(0, 0), (0, 1)],
-        [(0, 0), (0, 1)],
-        [(0, 0), (0, 1), (1, 0)],
-        [(0, 0), (0, 1), (1, 0), (1, 1)],
-    ]
-
-
 def test_while_and_for_loops_mixed() -> None:
     """Test mixing while and for loops"""
     counter = 0

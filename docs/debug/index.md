@@ -165,6 +165,11 @@ iteration    sum_so_far    i
 ```
 
 The `AccumulationTable` class provides a `loops` instance attribute that becomes available after the `with` statement.
+
+```{eval-rst}
+.. autoattribute:: python_ta.debug.AccumulationTable.loops
+```
+
 This is a list of dictionaries, where each dictionary contains data for one loop:
 
 - `table.loops[i]["loop_variables"]`: A dictionary mapping loop variable names to their values during each iteration

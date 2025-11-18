@@ -7,6 +7,11 @@
             /* Theme variables */
 :root {
   /* Light theme (default) */
+  --pico-code-background-color: rgb(206, 208, 209);
+  --pico-code-color: rgb(36, 41, 47);
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-border-radius: 0.25rem;
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
   --bg-gradient-start: rgba(0, 82, 204, 0.08);
@@ -33,6 +38,11 @@
 
 [data-theme="dark"] {
   /* Dark theme */
+  --pico-code-background-color: rgb(79, 79, 83);
+  --pico-code-color: rgb(178, 186, 194);
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-border-radius: 0.25rem;
   --bg-primary: #1e1e1e;
   --bg-secondary: #252526;
   --bg-gradient-start: rgba(0, 0, 0, 0.8);
@@ -275,6 +285,15 @@ section {
 }
 
 .code-errors {
+}
+
+code {
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-code-background-color);
+  color: var(--pico-code-color);
+  font-weight: var(--pico-font-weight);
+  font-size: 15px;
+  padding: 0.1em 0.35em;
 }
 
 .style-errors {
@@ -1184,13 +1203,13 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 20] Forbidden top-level code found on line 20
+                                                    <span> [Line 20] Forbidden top-level code found on line 20 </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
                                                             <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                            </svg>
+                                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1239,13 +1258,13 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 5] You may not import patch from module unittest.mock.
+                                                    <span> [Line 5] You may not import patch from module unittest.mock. </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
                                                             <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                            </svg>
+                                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1296,13 +1315,13 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 20] No value for argument 'mock_webbrowser_open' in function call
+                                                    <span> [Line 20] No value for argument 'mock_webbrowser_open' in function call </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
                                                             <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                            </svg>
+                                                            </svg>
                                                         </button>
                                                     </span>
                                                 </p>
@@ -1366,7 +1385,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 1] This line is 96 characters long, exceeding the limit of 80 characters.
+                                                    <span> [Line 1] This line is 96 characters long, exceeding the limit of 80 characters. </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1389,7 +1408,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 2] This line is 100 characters long, exceeding the limit of 80 characters.
+                                                    <span> [Line 2] This line is 100 characters long, exceeding the limit of 80 characters. </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1413,7 +1432,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 3] This line is 88 characters long, exceeding the limit of 80 characters.
+                                                    <span> [Line 3] This line is 88 characters long, exceeding the limit of 80 characters. </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1438,7 +1457,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 3] This line is 88 characters long, exceeding the limit of 80 characters.
+                                                    <span> [Line 3] This line is 88 characters long, exceeding the limit of 80 characters. </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1494,7 +1513,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 11] Missing function or method docstring
+                                                    <span> [Line 11] Missing function or method docstring </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1551,7 +1570,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 11] Function parameter is missing type annotation
+                                                    <span> [Line 11] Function parameter is missing type annotation </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1608,7 +1627,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 11] Function is missing return type annotation
+                                                    <span> [Line 11] Function is missing return type annotation </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -1665,7 +1684,7 @@ footer p {
                                         
                                             <div class="message">
                                                 <p class="message-name">
-                                                    [Line 11] The parameter 'mock_webbrowser_open' is unused. This may indicate you misspelled a parameter name in the function body. Otherwise, the parameter can be removed from the function without altering the program.
+                                                    <span> [Line 11] The parameter 'mock_webbrowser_open' is unused. This may indicate you misspelled a parameter name in the function body. Otherwise, the parameter can be removed from the function without altering the program. </span>
                                                     <span class="slider">
                                                         <button style="float: right;">
                                                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->

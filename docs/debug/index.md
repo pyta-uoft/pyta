@@ -97,21 +97,82 @@ iteration    number    sum_so_far    list_so_far
 6            6         15            [0, 1, 2, 3, 4, 5]
 ```
 
+### Example 3: Multiple sequential loops
+
+The `AccumulationTable` context manager can track multiple sequential loops within the same `with` block. Each loop will generate its own separate table in the output.
+
+```python
+# demo.py
+from python_ta.debug import AccumulationTable
+
+
+def process_with_multiple_loops(numbers: list) -> int:
+    """Process numbers through multiple sequential loops.
+    """
+    sum_so_far = 0
+    i = 0
+    with AccumulationTable(["sum_so_far", "i"]):
+        for number in numbers:
+            sum_so_far = sum_so_far + number
+        for j in range(len(numbers)):
+            sum_so_far += 1
+        while i < 5:
+            i += 1
+            sum_so_far -= i
+
+    return sum_so_far
+
+
+if __name__ == '__main__':
+    result = process_with_multiple_loops([10, 20, 30])
+    print(f"Final result: {result}")
+```
+
+When this file is run, we get the following output showing three separate tables (one for each loop):
+
+```console
+$ python demo.py
+
+iteration    number    sum_so_far    i
+-----------  --------  ------------  ---
+0            N/A       0             0
+1            10        10            0
+2            20        30            0
+3            30        60            0
+
+
+iteration    j    sum_so_far    i
+-----------  ---  ------------  ---
+0            N/A  60            0
+1            0    61            0
+2            1    62            0
+3            2    63            0
+
+
+iteration    sum_so_far    i
+-----------  ------------  ---
+0            63            0
+1            62            1
+2            60            2
+3            57            3
+4            53            4
+5            48            5
+
+Final result: 48
+```
+
 ### API
 
 ```{eval-rst}
 .. automethod:: python_ta.debug.AccumulationTable.__init__
 ```
 
-The `AccumulationTable` class has the following instance attributes you can access after the `with` statement.
+After the `with` statement, you can access the loop data programmatically using the `loops` attribute. This is a list of dictionaries, where each dictionary contains data for one loop:
 
-```{eval-rst}
-.. autoattribute:: python_ta.debug.AccumulationTable.loop_variables
+- `table.loops[i]["loop_variables"]`: A dictionary mapping loop variable names to their values during each iteration
+- `table.loops[i]["loop_accumulators"]`: A dictionary mapping accumulator names to their values during each iteration
 
-.. autoattribute:: python_ta.debug.AccumulationTable.loop_accumulators
-```
-
-For example:
+For example, to access data from a single loop:
 
 ```python
 from python_ta.debug import AccumulationTable
@@ -129,8 +190,39 @@ def calculate_sum_and_averages(numbers: list) -> list:
             avg_so_far = sum_so_far / (len(list_so_far) + 1)
             list_so_far.append((sum_so_far, avg_so_far))
 
-    print(table.loop_accumulators)
+    # Access the first (and only) loop's data
+    print(table.loops[0]["loop_accumulators"])
+    print(table.loops[0]["loop_variables"])
     return list_so_far
+
+```
+
+For multiple sequential loops, you can access each loop's data separately:
+
+```python
+from python_ta.debug import AccumulationTable
+
+
+def process_with_multiple_loops(numbers: list) -> int:
+    """Process numbers through multiple sequential loops.
+    """
+    sum_so_far = 0
+    i = 0
+    with AccumulationTable(["sum_so_far", "i"]) as table:
+        for number in numbers:
+            sum_so_far = sum_so_far + number
+        for j in range(len(numbers)):
+            sum_so_far += 1
+        while i < 5:
+            i += 1
+            sum_so_far -= i
+
+    # Access data from each loop
+    print("First loop:", table.loops[0]["loop_accumulators"])
+    print("Second loop:", table.loops[1]["loop_accumulators"])
+    print("Third loop:", table.loops[2]["loop_accumulators"])
+
+    return sum_so_far
 
 ```
 
@@ -166,8 +258,7 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 
 1. `AccumulationTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
 
-2. The `AccumulationTable` context manager can only log the execution of one for loop.
-   To log the state of multiple for loops, each must be wrapped in a separate `with` statement and fresh `AccumulationTable` instance.
+2. Nested loops may not be tracked accurately. The `AccumulationTable` is designed to work best with multiple sequential loops (loops that run one after another), not with loops nested inside other loops.
 
 ## Recursion tracing with `RecursionTable`
 

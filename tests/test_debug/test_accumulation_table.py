@@ -22,8 +22,8 @@ def test_one_accumulator() -> None:
         for number in test_list:
             sum_so_far = sum_so_far + number
 
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {"sum_so_far": [0, 10, 30, 60]}
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {"sum_so_far": [0, 10, 30, 60]}
 
 
 def test_one_accumulator_while_loop() -> None:
@@ -35,7 +35,7 @@ def test_one_accumulator_while_loop() -> None:
             sum_so_far = sum_so_far + number
             number += 10
 
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_accumulators"] == {
         "number": [10, 20, 30, 40],
         "sum_so_far": [0, 10, 30, 60],
     }
@@ -52,7 +52,7 @@ def test_two_accumulator_while_loop() -> None:
             list_so_far = list_so_far + [number]
             number += 10
 
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_accumulators"] == {
         "number": [10, 20, 30, 40],
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
@@ -68,8 +68,8 @@ def test_two_accumulators() -> None:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
 
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
     }
@@ -94,8 +94,8 @@ def test_three_different_loop_lineno() -> None:
         for number in test_list:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
     }
@@ -110,8 +110,8 @@ def test_four_different_loop_lineno() -> None:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
         b = ""
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
     }
@@ -129,8 +129,8 @@ def test_five_nested_for_loop() -> None:
                 list_so_far = list_so_far + [number]
         while i < 5:
             i += 1
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
     }
@@ -151,7 +151,7 @@ def test_five_nested_while_loop() -> None:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
 
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_accumulators"] == {
         "number": [10, 20, 30, 40],
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
@@ -169,7 +169,7 @@ def test_accumulation_table_nested_tuple():
         for letter, (lst, num) in data:
             lst[0] *= 2
 
-    assert table._loops[0]["loop_variables"] == {
+    assert table.loops[0]["loop_variables"] == {
         "letter": ["N/A", "a", "b", "c"],
         "lst": ["N/A", [2, 2], [8, 5], [14, 8]],
         "num": ["N/A", 3, 6, 9],
@@ -186,10 +186,10 @@ def test_accumulation_table_deeply_nested_tuple():
         for a, (b, (c, d)) in data:
             b[0] += 1
 
-    assert table._loops[0]["loop_variables"]["a"] == ["N/A", "x", "y"]
-    assert table._loops[0]["loop_variables"]["b"] == ["N/A", [2], [5]]
-    assert table._loops[0]["loop_variables"]["c"] == ["N/A", 2, 5]
-    assert table._loops[0]["loop_variables"]["d"] == ["N/A", 3, 6]
+    assert table.loops[0]["loop_variables"]["a"] == ["N/A", "x", "y"]
+    assert table.loops[0]["loop_variables"]["b"] == ["N/A", [2], [5]]
+    assert table.loops[0]["loop_variables"]["c"] == ["N/A", 2, 5]
+    assert table.loops[0]["loop_variables"]["d"] == ["N/A", 3, 6]
 
 
 def test_accumulation_table_list_deepcopy():
@@ -197,13 +197,13 @@ def test_accumulation_table_list_deepcopy():
     with AccumulationTable(["data"]) as table:
         for sublist in data:
             sublist[0] *= 2
-    recorded_value_0 = table._loops[0]["loop_accumulators"]["data"][0]
+    recorded_value_0 = table.loops[0]["loop_accumulators"]["data"][0]
     expected_value_0 = [[1], [2], [3]]
-    recorded_value_1 = table._loops[0]["loop_accumulators"]["data"][1]
+    recorded_value_1 = table.loops[0]["loop_accumulators"]["data"][1]
     expected_value_1 = [[2], [2], [3]]
-    recorded_value_2 = table._loops[0]["loop_accumulators"]["data"][2]
+    recorded_value_2 = table.loops[0]["loop_accumulators"]["data"][2]
     expected_value_2 = [[2], [4], [3]]
-    recorded_value_3 = table._loops[0]["loop_accumulators"]["data"][3]
+    recorded_value_3 = table.loops[0]["loop_accumulators"]["data"][3]
     expected_value_3 = [[2], [4], [6]]
     assert recorded_value_0 == expected_value_0
     assert recorded_value_1 == expected_value_1
@@ -218,7 +218,7 @@ def test_loop_variables_with_deepcopy():
         for nested_list in data:
             nested_list[0][0] += 100
 
-    recorded_values = table._loops[0]["loop_variables"]["nested_list"]
+    recorded_values = table.loops[0]["loop_variables"]["nested_list"]
     expected_values = ["N/A", [[101, 2], [3, 4]], [[105, 6], [7, 8]], [[109, 10], [11, 12]]]
 
     assert recorded_values == expected_values
@@ -231,11 +231,11 @@ def test_accumulation_table_dict_deepcopy():
         for item in data["variable"]:
             item["nested"] *= 2
 
-    recorded_value_0 = table._loops[0]["loop_accumulators"]["data"][0]
+    recorded_value_0 = table.loops[0]["loop_accumulators"]["data"][0]
     expected_value_0 = {"variable": [{"nested": 1}, {"nested": 2}]}
-    recorded_value_1 = table._loops[0]["loop_accumulators"]["data"][1]
+    recorded_value_1 = table.loops[0]["loop_accumulators"]["data"][1]
     expected_value_1 = {"variable": [{"nested": 2}, {"nested": 2}]}
-    recorded_value_2 = table._loops[0]["loop_accumulators"]["data"][2]
+    recorded_value_2 = table.loops[0]["loop_accumulators"]["data"][2]
     expected_value_2 = {"variable": [{"nested": 2}, {"nested": 4}]}
     assert recorded_value_0 == expected_value_0
     assert recorded_value_1 == expected_value_1
@@ -257,24 +257,24 @@ class MyClass:
             for item in self.items:
                 sum_so_far = sum_so_far + item
 
-        assert table._loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
-        assert table._loops[0]["loop_accumulators"] == {"sum_so_far": [0, 10, 30, 60]}
+        assert table.loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
+        assert table.loops[0]["loop_accumulators"] == {"sum_so_far": [0, 10, 30, 60]}
 
     def accumulate_instance_var(self) -> None:
         with AccumulationTable(["self.sum_so_far"]) as table:
             for item in self.items:
                 self.sum_so_far = self.sum_so_far + item
 
-        assert table._loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
-        assert table._loops[0]["loop_accumulators"] == {"self.sum_so_far": [0, 10, 30, 60]}
+        assert table.loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
+        assert table.loops[0]["loop_accumulators"] == {"self.sum_so_far": [0, 10, 30, 60]}
 
     def accumulate_class_var(self) -> None:
         with AccumulationTable(["MyClass.difference_so_far"]) as table:
             for item in self.items:
                 MyClass.difference_so_far = MyClass.difference_so_far - item
 
-        assert table._loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
-        assert table._loops[0]["loop_accumulators"] == {
+        assert table.loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
+        assert table.loops[0]["loop_accumulators"] == {
             "MyClass.difference_so_far": [0, -10, -30, -60]
         }
 
@@ -295,8 +295,8 @@ class MyClass:
             for sublist in self.items:
                 if isinstance(sublist, list):
                     sublist[0] *= 2
-        for i in range(0, len(table._loops[0]["loop_accumulators"]["self.items"])):
-            recorded_value = table._loops[0]["loop_accumulators"]["self.items"][i]
+        for i in range(0, len(table.loops[0]["loop_accumulators"]["self.items"])):
+            recorded_value = table.loops[0]["loop_accumulators"]["self.items"][i]
             expected_value = []
             if i != 0:
                 if isinstance(self.items[i - 1], list):
@@ -329,7 +329,7 @@ class MyClass:
             for nested_list in self.items:
                 if isinstance(nested_list, list):
                     nested_list[0] += 10
-        recorded_values = table._loops[0]["loop_variables"]["nested_list"]
+        recorded_values = table.loops[0]["loop_variables"]["nested_list"]
         expected_values = []
         for i in range(0, len(original_items) + 1):
             if i == 0:
@@ -374,8 +374,8 @@ def test_expression_accumulator() -> None:
         for item in test_list:
             sum_so_far = sum_so_far + item
 
-    assert table._loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {"sum_so_far * 2": [0, 20, 60, 120]}
+    assert table.loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {"sum_so_far * 2": [0, 20, 60, 120]}
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="requires Python 3.10 or higher")
@@ -386,8 +386,8 @@ def test_expression_with_loop_var_accumulator() -> None:
         for item in test_list:
             sum_so_far = sum_so_far + item
 
-    assert table._loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {"item * 2": ["N/A", 20, 40, 60]}
+    assert table.loops[0]["loop_variables"] == {"item": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {"item * 2": ["N/A", 20, 40, 60]}
 
 
 def test_invalid_accumulator() -> None:
@@ -406,11 +406,11 @@ def test_two_loop_vars_one_accumulator() -> None:
         for index, item in enumerate(test_list):
             sum_so_far = sum_so_far + item
 
-    assert table._loops[0]["loop_variables"] == {
+    assert table.loops[0]["loop_variables"] == {
         "index": ["N/A", 0, 1, 2],
         "item": ["N/A", 10, 20, 30],
     }
-    assert table._loops[0]["loop_accumulators"] == {"sum_so_far": [0, 10, 30, 60]}
+    assert table.loops[0]["loop_accumulators"] == {"sum_so_far": [0, 10, 30, 60]}
 
 
 def test_two_loop_vars_two_accumulators() -> None:
@@ -422,11 +422,11 @@ def test_two_loop_vars_two_accumulators() -> None:
             keys_so_far = keys_so_far + key
             values_so_far = values_so_far + value
 
-    assert table._loops[0]["loop_variables"] == {
+    assert table.loops[0]["loop_variables"] == {
         "key": ["N/A", 1, 2, 3],
         "value": ["N/A", "I lo", "ve CS", "C110"],
     }
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_accumulators"] == {
         "keys_so_far": [0, 1, 3, 6],
         "values_so_far": ["", "I lo", "I love CS", "I love CSC110"],
     }
@@ -437,8 +437,8 @@ def test_loop_variable_initialized_in_loop() -> None:
         for number in [10, 20, 30, 40, 50, 60]:
             i = number
 
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
-    assert table._loops[0]["loop_accumulators"] == {"i": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loops[0]["loop_accumulators"] == {"i": ["N/A", 10, 20, 30, 40, 50, 60]}
 
 
 def test_loop_variable_conditionally_initialized_in_loop() -> None:
@@ -447,8 +447,8 @@ def test_loop_variable_conditionally_initialized_in_loop() -> None:
             if number == 30:
                 i = number
 
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
-    assert table._loops[0]["loop_accumulators"] == {"i": ["N/A", "N/A", "N/A", 30, 30, 30, 30]}
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30, 40, 50, 60]}
+    assert table.loops[0]["loop_accumulators"] == {"i": ["N/A", "N/A", "N/A", 30, 30, 30, 30]}
 
 
 def test_uninitialized_loop_accumulators() -> None:
@@ -570,22 +570,22 @@ def test_three_sequential_loops() -> None:
             sum_so_far -= i
 
     # First loop
-    assert table._loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_so_far": [0, 10, 30, 60],
         "i": [0, 0, 0, 0],
     }
 
     # Second loop
-    assert table._loops[1]["loop_variables"] == {"j": ["N/A", 0, 1, 2]}
-    assert table._loops[1]["loop_accumulators"] == {
+    assert table.loops[1]["loop_variables"] == {"j": ["N/A", 0, 1, 2]}
+    assert table.loops[1]["loop_accumulators"] == {
         "sum_so_far": [60, 61, 62, 63],
         "i": [0, 0, 0, 0],
     }
 
     # Third loop
-    assert table._loops[2]["loop_variables"] == {}
-    assert table._loops[2]["loop_accumulators"] == {
+    assert table.loops[2]["loop_variables"] == {}
+    assert table.loops[2]["loop_accumulators"] == {
         "sum_so_far": [63, 62, 60, 57, 53, 48, 42, 35, 27, 18, 8],
         "i": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     }
@@ -605,15 +605,15 @@ def test_two_for_loops_different_accumulators() -> None:
             concat_letters += letter
 
     # First loop
-    assert table._loops[0]["loop_variables"] == {"num": ["N/A", 1, 2, 3]}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {"num": ["N/A", 1, 2, 3]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_nums": [0, 1, 3, 6],
         "concat_letters": ["", "", "", ""],
     }
 
     # Second loop
-    assert table._loops[1]["loop_variables"] == {"letter": ["N/A", "a", "b", "c"]}
-    assert table._loops[1]["loop_accumulators"] == {
+    assert table.loops[1]["loop_variables"] == {"letter": ["N/A", "a", "b", "c"]}
+    assert table.loops[1]["loop_accumulators"] == {
         "sum_nums": [6, 6, 6, 6],
         "concat_letters": ["", "a", "ab", "abc"],
     }
@@ -632,16 +632,16 @@ def test_multiple_loops_with_shared_accumulator() -> None:
             total += z
 
     # First loop
-    assert table._loops[0]["loop_variables"] == {"x": ["N/A", 10, 20]}
-    assert table._loops[0]["loop_accumulators"] == {"total": [0, 10, 30]}
+    assert table.loops[0]["loop_variables"] == {"x": ["N/A", 10, 20]}
+    assert table.loops[0]["loop_accumulators"] == {"total": [0, 10, 30]}
 
     # Second loop
-    assert table._loops[1]["loop_variables"] == {"y": ["N/A", 5, 15]}
-    assert table._loops[1]["loop_accumulators"] == {"total": [30, 35, 50]}
+    assert table.loops[1]["loop_variables"] == {"y": ["N/A", 5, 15]}
+    assert table.loops[1]["loop_accumulators"] == {"total": [30, 35, 50]}
 
     # Third loop
-    assert table._loops[2]["loop_variables"] == {"z": ["N/A", 100]}
-    assert table._loops[2]["loop_accumulators"] == {"total": [50, 150]}
+    assert table.loops[2]["loop_variables"] == {"z": ["N/A", 100]}
+    assert table.loops[2]["loop_accumulators"] == {"total": [50, 150]}
 
 
 def test_while_and_for_loops_mixed() -> None:
@@ -656,15 +656,15 @@ def test_while_and_for_loops_mixed() -> None:
             items.append(item)
 
     # First loop
-    assert table._loops[0]["loop_variables"] == {}
-    assert table._loops[0]["loop_accumulators"] == {
+    assert table.loops[0]["loop_variables"] == {}
+    assert table.loops[0]["loop_accumulators"] == {
         "counter": [0, 1, 2, 3],
         "items": [[], [], [], []],
     }
 
     # Second loop
-    assert table._loops[1]["loop_variables"] == {"item": ["N/A", "x", "y"]}
-    assert table._loops[1]["loop_accumulators"] == {
+    assert table.loops[1]["loop_variables"] == {"item": ["N/A", "x", "y"]}
+    assert table.loops[1]["loop_accumulators"] == {
         "counter": [3, 3, 3],
         "items": [[], ["x"], ["x", "y"]],
     }
@@ -681,12 +681,12 @@ def test_two_loops_with_list_accumulator() -> None:
             combined.append(letter)
 
     # First loop
-    assert table._loops[0]["loop_variables"] == {"num": ["N/A", 1, 2]}
-    assert table._loops[0]["loop_accumulators"] == {"combined": [[], [1], [1, 2]]}
+    assert table.loops[0]["loop_variables"] == {"num": ["N/A", 1, 2]}
+    assert table.loops[0]["loop_accumulators"] == {"combined": [[], [1], [1, 2]]}
 
     # Second loop
-    assert table._loops[1]["loop_variables"] == {"letter": ["N/A", "a", "b"]}
-    assert table._loops[1]["loop_accumulators"] == {
+    assert table.loops[1]["loop_variables"] == {"letter": ["N/A", "a", "b"]}
+    assert table.loops[1]["loop_accumulators"] == {
         "combined": [[1, 2], [1, 2, "a"], [1, 2, "a", "b"]]
     }
 
@@ -700,8 +700,8 @@ def test_multiple_loops_no_accumulators() -> None:
             pass
 
     # Should track loop variables even without accumulators
-    assert table._loops[0]["loop_variables"] == {"x": ["N/A", 1, 2]}
-    assert table._loops[0]["loop_accumulators"] == {}
+    assert table.loops[0]["loop_variables"] == {"x": ["N/A", 1, 2]}
+    assert table.loops[0]["loop_accumulators"] == {}
 
-    assert table._loops[1]["loop_variables"] == {"y": ["N/A", 3, 4]}
-    assert table._loops[1]["loop_accumulators"] == {}
+    assert table.loops[1]["loop_variables"] == {"y": ["N/A", 3, 4]}
+    assert table.loops[1]["loop_accumulators"] == {}

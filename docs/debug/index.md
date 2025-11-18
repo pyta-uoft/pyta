@@ -164,7 +164,8 @@ iteration    sum_so_far    i
 .. automethod:: python_ta.debug.AccumulationTable.__init__
 ```
 
-After the `with` statement, you can access the loop data using the `loops` attribute. This is a list of dictionaries, where each dictionary contains data for one loop:
+The `AccumulationTable` class provides a `loops` instance attribute that becomes available after the `with` statement.
+This is a list of dictionaries, where each dictionary contains data for one loop:
 
 - `table.loops[i]["loop_variables"]`: A dictionary mapping loop variable names to their values during each iteration
 - `table.loops[i]["loop_accumulators"]`: A dictionary mapping accumulator names to their values during each iteration

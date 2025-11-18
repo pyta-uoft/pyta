@@ -1,6 +1,11 @@
 /* Theme variables */
 :root {
   /* Light theme (default) */
+  --pico-code-background-color: rgb(206, 208, 209);
+  --pico-code-color: rgb(36, 41, 47);
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-border-radius: 0.25rem;
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
   --bg-gradient-start: rgba(0, 82, 204, 0.08);
@@ -27,6 +32,11 @@
 
 [data-theme="dark"] {
   /* Dark theme */
+  --pico-code-background-color: rgb(79, 79, 83);
+  --pico-code-color: rgb(178, 186, 194);
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-border-radius: 0.25rem;
   --bg-primary: #1e1e1e;
   --bg-secondary: #252526;
   --bg-gradient-start: rgba(0, 0, 0, 0.8);
@@ -269,6 +279,15 @@ section {
 }
 
 .code-errors {
+}
+
+code {
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-code-background-color);
+  color: var(--pico-code-color);
+  font-weight: var(--pico-font-weight);
+  font-size: 15px;
+  padding: 0.1em 0.35em;
 }
 
 .style-errors {

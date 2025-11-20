@@ -1135,3 +1135,80 @@ def test_custom_generic_class_with_parameter() -> None:
         return value.item
 
     process_generic(GenericClass(10))
+
+
+def test_disable_argument_type_checking_only() -> None:
+    """Test that setting argument_types=False disables parameter type checking only."""
+
+    @check_contracts(argument_types=False)
+    def f(x: int) -> int:
+        return 10.5  # Wrong return type, but should be ignored
+
+    with pytest.raises(AssertionError):
+        # Return type mismatch should be raised only
+        f("not-an-int")
+
+
+def test_disable_return_type_checking_only() -> None:
+    """Test that setting return_type=False disables return-type checking only."""
+
+    @check_contracts(return_type=False)
+    def f(x: int) -> int:
+        return "not an int"  # Wrong type, but should be ignored
+
+    # Call should succeed
+    f(1)
+
+    with pytest.raises(AssertionError):
+        # Parameter type mismatch should still be raised only
+        f(1.5)  # type: ignore[arg-type]
+
+
+def test_disable_preconditions_only() -> None:
+    """Test that setting preconditions=False disables precondition checking only."""
+
+    @check_contracts(preconditions=False)
+    def f(x: int) -> int:
+        """
+        Return x.
+
+        Precondition: x > 0
+        """
+        return x
+
+    # No error should be raised.
+    assert f(-1) == -1
+
+
+def test_disable_postconditions_only() -> None:
+    """Test that setting postconditions=False disables postcondition checking only."""
+
+    @check_contracts(postconditions=False)
+    def f(x: int) -> int:
+        """
+        Postcondition: $return_value == x
+        """
+        return x + 1
+
+    # No error should be raised.
+    assert f(5) == 6
+
+
+def test_multiple_flags_disable_all_contracts_but_keep_decorator() -> None:
+    """Test when all four options are disabled."""
+
+    @check_contracts(
+        argument_types=False,
+        return_type=False,
+        preconditions=False,
+        postconditions=False,
+    )
+    def f(x: int) -> int:
+        """
+        Precondition: x > 0
+        Postcondition: $return_value == x * 2
+        """
+        return "hello"
+
+    # No error should be raised.
+    f("anything")

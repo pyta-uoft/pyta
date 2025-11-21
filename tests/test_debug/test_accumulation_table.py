@@ -35,7 +35,10 @@ def test_one_accumulator_while_loop() -> None:
             sum_so_far = sum_so_far + number
             number += 10
 
-    assert table.loop_accumulators == {"number": [10, 20, 30, 40], "sum_so_far": [0, 10, 30, 60]}
+    assert table.loop_accumulators == {
+        "number": [10, 20, 30, 40],
+        "sum_so_far": [0, 10, 30, 60],
+    }
 
 
 def test_two_accumulator_while_loop() -> None:
@@ -126,8 +129,8 @@ def test_five_nested_for_loop() -> None:
                 list_so_far = list_so_far + [number]
         while i < 5:
             i += 1
-    assert table.loop_variables == {"number": ["N/A", 10, 20, 30]}
-    assert table.loop_accumulators == {
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
     }
@@ -148,7 +151,7 @@ def test_five_nested_while_loop() -> None:
             sum_so_far = sum_so_far + number
             list_so_far = list_so_far + [number]
 
-    assert table.loop_accumulators == {
+    assert table.loops[0]["loop_accumulators"] == {
         "number": [10, 20, 30, 40],
         "sum_so_far": [0, 10, 30, 60],
         "list_so_far": [[], [10], [10, 20], [10, 20, 30]],
@@ -401,7 +404,10 @@ def test_two_loop_vars_one_accumulator() -> None:
         for index, item in enumerate(test_list):
             sum_so_far = sum_so_far + item
 
-    assert table.loop_variables == {"index": ["N/A", 0, 1, 2], "item": ["N/A", 10, 20, 30]}
+    assert table.loop_variables == {
+        "index": ["N/A", 0, 1, 2],
+        "item": ["N/A", 10, 20, 30],
+    }
     assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
 
 
@@ -545,3 +551,155 @@ def test_output_to_new_file(tmp_path, output_format):
         expected_content = expected_content + "\n"
 
     assert content == expected_content
+
+
+def test_three_sequential_loops() -> None:
+    """Test tracking accumulators across three sequential loops (for, for, while)"""
+    test_list = [10, 20, 30]
+    sum_so_far = 0
+    i = 0
+    with AccumulationTable(["sum_so_far", "i"]) as table:
+        for number in test_list:
+            sum_so_far = sum_so_far + number
+        for j in range(len(test_list)):
+            sum_so_far += 1
+        while i < 10:
+            i += 1
+            sum_so_far -= i
+
+    # First loop
+    assert table.loops[0]["loop_variables"] == {"number": ["N/A", 10, 20, 30]}
+    assert table.loops[0]["loop_accumulators"] == {
+        "sum_so_far": [0, 10, 30, 60],
+        "i": [0, 0, 0, 0],
+    }
+
+    # Second loop
+    assert table.loops[1]["loop_variables"] == {"j": ["N/A", 0, 1, 2]}
+    assert table.loops[1]["loop_accumulators"] == {
+        "sum_so_far": [60, 61, 62, 63],
+        "i": [0, 0, 0, 0],
+    }
+
+    # Third loop
+    assert table.loops[2]["loop_variables"] == {}
+    assert table.loops[2]["loop_accumulators"] == {
+        "sum_so_far": [63, 62, 60, 57, 53, 48, 42, 35, 27, 18, 8],
+        "i": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    }
+
+
+def test_two_for_loops_different_accumulators() -> None:
+    """Test two for loops tracking different accumulators"""
+    numbers = [1, 2, 3]
+    letters = ["a", "b", "c"]
+    sum_nums = 0
+    concat_letters = ""
+
+    with AccumulationTable(["sum_nums", "concat_letters"]) as table:
+        for num in numbers:
+            sum_nums += num
+        for letter in letters:
+            concat_letters += letter
+
+    # First loop
+    assert table.loops[0]["loop_variables"] == {"num": ["N/A", 1, 2, 3]}
+    assert table.loops[0]["loop_accumulators"] == {
+        "sum_nums": [0, 1, 3, 6],
+        "concat_letters": ["", "", "", ""],
+    }
+
+    # Second loop
+    assert table.loops[1]["loop_variables"] == {"letter": ["N/A", "a", "b", "c"]}
+    assert table.loops[1]["loop_accumulators"] == {
+        "sum_nums": [6, 6, 6, 6],
+        "concat_letters": ["", "a", "ab", "abc"],
+    }
+
+
+def test_multiple_loops_with_shared_accumulator() -> None:
+    """Test multiple loops all modifying the same accumulator"""
+    total = 0
+
+    with AccumulationTable(["total"]) as table:
+        for x in [10, 20]:
+            total += x
+        for y in [5, 15]:
+            total += y
+        for z in [100]:
+            total += z
+
+    # First loop
+    assert table.loops[0]["loop_variables"] == {"x": ["N/A", 10, 20]}
+    assert table.loops[0]["loop_accumulators"] == {"total": [0, 10, 30]}
+
+    # Second loop
+    assert table.loops[1]["loop_variables"] == {"y": ["N/A", 5, 15]}
+    assert table.loops[1]["loop_accumulators"] == {"total": [30, 35, 50]}
+
+    # Third loop
+    assert table.loops[2]["loop_variables"] == {"z": ["N/A", 100]}
+    assert table.loops[2]["loop_accumulators"] == {"total": [50, 150]}
+
+
+def test_while_and_for_loops_mixed() -> None:
+    """Test mixing while and for loops"""
+    counter = 0
+    items = []
+
+    with AccumulationTable(["counter", "items"]) as table:
+        while counter < 3:
+            counter += 1
+        for item in ["x", "y"]:
+            items.append(item)
+
+    # First loop
+    assert table.loops[0]["loop_variables"] == {}
+    assert table.loops[0]["loop_accumulators"] == {
+        "counter": [0, 1, 2, 3],
+        "items": [[], [], [], []],
+    }
+
+    # Second loop
+    assert table.loops[1]["loop_variables"] == {"item": ["N/A", "x", "y"]}
+    assert table.loops[1]["loop_accumulators"] == {
+        "counter": [3, 3, 3],
+        "items": [[], ["x"], ["x", "y"]],
+    }
+
+
+def test_two_loops_with_list_accumulator() -> None:
+    """Test two loops both appending to same list accumulator"""
+    combined = []
+
+    with AccumulationTable(["combined"]) as table:
+        for num in [1, 2]:
+            combined.append(num)
+        for letter in ["a", "b"]:
+            combined.append(letter)
+
+    # First loop
+    assert table.loops[0]["loop_variables"] == {"num": ["N/A", 1, 2]}
+    assert table.loops[0]["loop_accumulators"] == {"combined": [[], [1], [1, 2]]}
+
+    # Second loop
+    assert table.loops[1]["loop_variables"] == {"letter": ["N/A", "a", "b"]}
+    assert table.loops[1]["loop_accumulators"] == {
+        "combined": [[1, 2], [1, 2, "a"], [1, 2, "a", "b"]]
+    }
+
+
+def test_multiple_loops_no_accumulators() -> None:
+    """Test multiple loops with only loop variables tracked (no accumulators specified)"""
+    with AccumulationTable([]) as table:
+        for x in [1, 2]:
+            pass
+        for y in [3, 4]:
+            pass
+
+    # Should track loop variables even without accumulators
+    assert table.loops[0]["loop_variables"] == {"x": ["N/A", 1, 2]}
+    assert table.loops[0]["loop_accumulators"] == {}
+
+    assert table.loops[1]["loop_variables"] == {"y": ["N/A", 3, 4]}
+    assert table.loops[1]["loop_accumulators"] == {}

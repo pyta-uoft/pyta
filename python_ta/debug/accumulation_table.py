@@ -168,11 +168,9 @@ class AccumulationTable:
             **self.loops[lst_index]["loop_accumulators"],
         }
 
-    def _tabulate_data(self, lst_index: int) -> None:
+    def _tabulate_data(self) -> None:
         """Print the values of the accumulator and loop variables, for a given loop at index `lst_index`,
         into a table"""
-        iteration_dict = self._create_iteration_dict(lst_index)
-
         if self.output_filepath is None:
             file_io = sys.stdout
         else:
@@ -183,23 +181,27 @@ class AccumulationTable:
                 return
 
         try:
-            if self.output_format == "table":
-                table = tabulate.tabulate(
-                    iteration_dict,
-                    headers="keys",
-                    colalign=(*["left"] * len(iteration_dict),),
-                    disable_numparse=True,
-                    missingval="None",
-                )
-                file_io.write(table)
-                file_io.write("\n")
-            else:
-                csv_preformat = [
-                    dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())
-                ]
-                writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
-                writer.writeheader()
-                writer.writerows(csv_preformat)
+            for lst_index in range(len(self.loops)):
+                iteration_dict = self._create_iteration_dict(lst_index)
+                if self.output_format == "table":
+                    table = tabulate.tabulate(
+                        iteration_dict,
+                        headers="keys",
+                        colalign=(*["left"] * len(iteration_dict),),
+                        disable_numparse=True,
+                        missingval="None",
+                    )
+                    file_io.write("\n")
+                    file_io.write(table)
+                    file_io.write("\n")
+                else:
+                    csv_preformat = [
+                        dict(zip(iteration_dict.keys(), row))
+                        for row in zip(*iteration_dict.values())
+                    ]
+                    writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
+                    writer.writeheader()
+                    writer.writerows(csv_preformat)
         except OSError as e:
             print(f"Error writing data: {e}")
         finally:
@@ -262,6 +264,4 @@ class AccumulationTable:
         """Exit the with block, disable tracing, and print the table(s) for all tracked loops"""
         sys.settrace(None)
         inspect.getouterframes(inspect.currentframe())[1].frame.f_trace = None
-        for i in range(len(self.loops)):
-            print("\n")
-            self._tabulate_data(i)
+        self._tabulate_data()

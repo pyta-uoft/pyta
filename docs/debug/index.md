@@ -164,7 +164,7 @@ iteration    sum_so_far    i
 .. automethod:: python_ta.debug.AccumulationTable.__init__
 ```
 
-The `AccumulationTable` class provides a `loops` instance attribute that becomes available after the `with` statement.
+The `AccumulationTable` class provides a `loops` instance attribute you can access after the `with` statement:
 
 ```{eval-rst}
 .. autoattribute:: python_ta.debug.AccumulationTable.loops
@@ -175,6 +175,13 @@ This is a list of dictionaries, where each dictionary contains data for one loop
 - `table.loops[i]["loop_variables"]`: A dictionary mapping loop variable names to their values during each iteration
 - `table.loops[i]["loop_accumulators"]`: A dictionary mapping accumulator names to their values during each iteration
 - `table.loops[i]["loop_lineno"]`: The line number of the loop in the source code
+
+For convenience, when tracking a single loop, you can use these read-only properties instead:
+
+```{eval-rst}
+.. autoattribute:: python_ta.debug.AccumulationTable.loop_variables
+.. autoattribute:: python_ta.debug.AccumulationTable.loop_accumulators
+```
 
 For example, to access data from a single loop:
 
@@ -195,8 +202,8 @@ def calculate_sum_and_averages(numbers: list) -> list:
             list_so_far.append((sum_so_far, avg_so_far))
 
     # Access the first (and only) loop's data
-    print(table.loops[0]["loop_accumulators"])
-    print(table.loops[0]["loop_variables"])
+    print(table.loop_variables)
+    print(table.loop_accumulators)
     return list_so_far
 
 ```
@@ -224,10 +231,9 @@ def process_with_multiple_loops(numbers: list) -> int:
     # Access data from each loop
     print("First loop:", table.loops[0]["loop_accumulators"])
     print("Second loop:", table.loops[1]["loop_accumulators"])
-    print("Third loop:", table.loops[2]["loop_accumulators"])
+    print("Third loop:", table.loops[2]["loop_variables"])
 
     return sum_so_far
-
 ```
 
 You also have the option to pass in a file path as an attribute to the AccumulationTable object. In this case, the table will be appended to the file instead of being written the console.
@@ -261,8 +267,7 @@ def calculate_sum_and_averages(numbers: list) -> list:
 The `AccumulationTable` is a new PythonTA feature and currently has the following known limitations:
 
 1. `AccumulationTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
-
-2. Nested loops may not be tracked accurately. The `AccumulationTable` is designed to work best with multiple sequential loops (loops that run one after another), not with loops nested inside other loops.
+2. Nested loops are not tracked. The `AccumulationTable` is designed to work with sequential loops (loops that run one after another).
 
 ## Recursion tracing with `RecursionTable`
 

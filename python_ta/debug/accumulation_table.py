@@ -44,7 +44,7 @@ def get_with_lines(lines: list[str], num_whitespace: int) -> str:
 
 
 def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astroid.While]]:
-    """Generator function returns the For or While node(s) from the frame containing the accumulator loop(s)"""
+    """Yield the For or While node(s) from the frame containing the accumulator loop(s)"""
     func_string = inspect.cleandoc(inspect.getsource(frame))
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
     lst_str_lines = func_string.splitlines()
@@ -53,7 +53,8 @@ def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astro
     with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
 
     with_module = astroid.parse(with_lines)
-    for statement in with_module.nodes_of_class((astroid.For, astroid.While)):
+    # Iterate over module to properly ignore nested loops
+    for statement in with_module.body:
         if isinstance(statement, (astroid.For, astroid.While)):
             yield statement
 
@@ -97,6 +98,20 @@ class AccumulationTable:
         self.loops = []
         self.output_filepath = output
         self.output_format = format
+
+    @property
+    def loop_accumulators(self) -> dict[str, list]:
+        """Read-only access to accumulator values. Only works with a single loop in context manager."""
+        if len(self.loops) == 1:
+            return self.loops[0]["loop_accumulators"]
+        raise ValueError("Only available when tracking a single loop")
+
+    @property
+    def loop_variables(self) -> dict[str, list]:
+        """Read-only access to loop variable values. Only works with a single loop in context manager."""
+        if len(self.loops) == 1:
+            return self.loops[0]["loop_variables"]
+        raise ValueError("Only available when tracking a single loop")
 
     def _record_iteration(self, frame: types.FrameType, lst_index: int) -> None:
         """Record the values of the accumulator variables and loop variables of an iteration for a given loop at index

@@ -36,12 +36,29 @@ def render_generic(msg, node=None, source_lines=None, config=None):
                 source_lines[start_line - 1],
             )
         else:
-            yield (start_line, slice(start_col, None), LineType.ERROR, source_lines[start_line - 1])
-            yield from (
-                (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
-                for line in range(start_line + 1, end_line)
-            )
-            yield (end_line, slice(None, end_col), LineType.ERROR, source_lines[end_line - 1])
+            if end_line - start_line <= MAX_SNIPPET_LINES:
+                yield (
+                    start_line,
+                    slice(start_col, None),
+                    LineType.ERROR,
+                    source_lines[start_line - 1],
+                )
+                yield from (
+                    (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
+                    for line in range(start_line + 1, end_line)
+                )
+                yield (end_line, slice(None, end_col), LineType.ERROR, source_lines[end_line - 1])
+            else:
+                half_threshold = MAX_SNIPPET_LINES // 2
+
+                for line in range(start_line, start_line + half_threshold):
+                    yield (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
+
+                if end_line - start_line > MAX_SNIPPET_LINES:
+                    yield ("", slice(None, None), LineType.OTHER, "...")
+
+                for line in range(end_line - half_threshold + 1, end_line + 1):
+                    yield (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
 
         # Display up to 2 lines after node for context:
         yield from render_context(end_line + 1, end_line + 3, source_lines)

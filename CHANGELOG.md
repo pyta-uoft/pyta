@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a solution to prevent possible large snippets created by the following errors: pylint error C0305, and pycodestyle errors E303, E304
 - Added markdown rendering to display code in error messages
 - Improved RI checking to raise a warning when a `NameError` is raised and the missing name matches an instance attribute, and is due to an omitted `self.` in the RI.
+- Added a solution to prevent possible large snippets created by the `render_generic` function
 
 ### 💫 New checkers
 

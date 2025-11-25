@@ -518,7 +518,7 @@ def test_output_to_existing_file(existing_file_content, output_format):
 
     expected_table_content = get_expected_content(output_format)
     if output_format == "table":
-        expected_file_content = "Existing Content\n" + expected_table_content + "\n"
+        expected_file_content = "Existing Content\n\n" + expected_table_content + "\n"
     else:
         expected_file_content = "Existing Content\n" + expected_table_content
 
@@ -548,7 +548,7 @@ def test_output_to_new_file(tmp_path, output_format):
 
     expected_content = get_expected_content(output_format)
     if output_format == "table":
-        expected_content = expected_content + "\n"
+        expected_content = "\n" + expected_content + "\n"
 
     assert content == expected_content
 
@@ -703,3 +703,67 @@ def test_multiple_loops_no_accumulators() -> None:
 
     assert table.loops[1]["loop_variables"] == {"y": ["N/A", 3, 4]}
     assert table.loops[1]["loop_accumulators"] == {}
+
+
+def test_nested_not_tracked_for_loops() -> None:
+    """Test nested for loops to see if only outermost loop is tracked"""
+    with AccumulationTable([]) as table:
+        for x in [1, 2]:
+            for y in [3, 4]:
+                pass
+
+    # Following attributes shouldn't be None since there is only one tracked loop
+    assert table.loop_accumulators is not None and table.loop_variables is not None
+
+
+def test_nested_not_tracked_while_loops() -> None:
+    """Test nested while loops to see if only outermost loop is tracked"""
+    x = 0
+    y = 0
+    with AccumulationTable(["x", "y"]) as table:
+        while x < 10:
+            while y < 20:
+                y += 1
+            y -= x
+            x += 2
+
+    # Following attributes shouldn't be None since there is only one tracked loop
+    assert table.loop_accumulators is not None and table.loop_variables is not None
+
+
+def test_nested_not_tracked_mixed_loops() -> None:
+    """Test nested mixed loops to see if only outermost loop is tracked"""
+    x = 0
+    with AccumulationTable(["x"]) as table:
+        while x < 10:
+            for y in range(20):
+                pass
+            x += 2
+
+    # Following attributes shouldn't be None since there is only one tracked loop
+    assert table.loop_accumulators is not None and table.loop_variables is not None
+    assert "y" not in table.loop_accumulators
+
+    y = 0
+    with AccumulationTable([]) as table:
+        for x in range(10):
+            while y < 10:
+                y += 1
+            x += 2
+
+    # Following attributes shouldn't be None since there is only one tracked loop
+    assert table.loop_accumulators is not None and table.loop_variables is not None
+    assert "y" not in table.loop_accumulators
+
+
+def test_nested_not_tracked_multiple_loops() -> None:
+    """Test multiple nested mixed loops to see if only outermost loop is tracked"""
+    with AccumulationTable([]) as table:
+        for x in range(10):
+            for y in range(10):
+                for z in range(10):
+                    pass
+
+    # Following attributes shouldn't be None since there is only one tracked loop
+    assert table.loop_accumulators is not None and table.loop_variables is not None
+    assert all(elem not in ["y", "z"] for elem in table.loop_variables)

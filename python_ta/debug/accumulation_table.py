@@ -43,6 +43,16 @@ def get_with_lines(lines: list[str], num_whitespace: int) -> str:
     return "\n".join(lines[:endpoint])
 
 
+def _check_ancestor_chain(node: astroid.NodeNG, with_module: astroid.Module) -> bool:
+    """Helper checks the ancestor chain of a given loop node (For or While) to check if it is nested within the context
+    manager."""
+    if node.parent is None or node.parent is with_module:
+        return True
+    if isinstance(node.parent, (astroid.For, astroid.While)):
+        return False
+    return _check_ancestor_chain(node.parent, with_module)
+
+
 def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astroid.While]]:
     """Yield the For or While node(s) from the frame containing the accumulator loop(s)"""
     func_string = inspect.cleandoc(inspect.getsource(frame))
@@ -54,8 +64,10 @@ def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astro
 
     with_module = astroid.parse(with_lines)
     # Iterate over module to properly ignore nested loops
-    for statement in with_module.body:
-        if isinstance(statement, (astroid.For, astroid.While)):
+    for statement in with_module.nodes_of_class((astroid.For, astroid.While)):
+        if isinstance(statement, (astroid.For, astroid.While)) and _check_ancestor_chain(
+            statement, with_module
+        ):
             yield statement
 
 

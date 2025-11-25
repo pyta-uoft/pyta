@@ -63,7 +63,6 @@ def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astro
     with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
 
     with_module = astroid.parse(with_lines)
-    # Iterate over module to properly ignore nested loops
     for statement in with_module.nodes_of_class((astroid.For, astroid.While)):
         if isinstance(statement, (astroid.For, astroid.While)) and _check_ancestor_chain(
             statement, with_module

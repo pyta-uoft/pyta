@@ -77,7 +77,8 @@ class AccumulationTable:
     accumulation variables during each iteration in a for or while loop
 
     Instance attributes:
-        _accumulator_names: a list of accumulation variable names to track (order is preserved)
+        _accumulator_names: either a list of accumulator variable names to track across all loops,
+            or a list of lists where each inner list contains the accumulator names for the corresponding loop
         loops: a list of dictionaries, one per loop, each containing:
             - "loop_variables": dict mapping loop variable names to their values per iteration
             - "loop_lineno": the line number of the loop
@@ -87,7 +88,8 @@ class AccumulationTable:
     """
 
     _accumulator_names: Union[list[str], list[list[str]]]
-    """A list of accumulator variable names to track across loop iterations."""
+    """Either a list of accumulator variable names to track across all loops,
+    or a list of lists where each inner list contains the accumulator names for the corresponding loop."""
     loops: list[dict[str, Any]]
     """A list of dictionaries containing loop-specific data for each loop in the with block."""
     output_filepath: Optional[str]

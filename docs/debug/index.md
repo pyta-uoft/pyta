@@ -171,12 +171,14 @@ from python_ta.debug import AccumulationTable
 def process_different_accumulators(numbers: list) -> tuple:
     """Process numbers with different accumulators per loop."""
     sum_so_far = 0
+    count_so_far = 0
     product_so_far = 1
     unused_var = 10
 
-    with AccumulationTable([["sum_so_far"], ["product_so_far"]]):
+    with AccumulationTable([["sum_so_far", "count_so_far"], ["product_so_far"]]):
         for x in numbers:
             sum_so_far += x
+            count_so_far += 1
             unused_var += 1
         for y in numbers:
             product_so_far *= y
@@ -189,17 +191,17 @@ if __name__ == '__main__':
     result = process_different_accumulators([2, 3, 4])
 ```
 
-When this file is run, the first loop tracks only `sum_so_far`, and the second loop tracks only `product_so_far`:
+When this file is run, the first loop tracks `sum_so_far` and `count_so_far`, and the second loop tracks only `product_so_far`:
 
 ```console
 $ python demo.py
 
-iteration    x    sum_so_far
------------  ---  ------------
-0            N/A  0
-1            2    2
-2            3    5
-3            4    9
+iteration    x    sum_so_far    count_so_far
+-----------  ---  ------------  --------------
+0            N/A  0             0
+1            2    2             1
+2            3    5             2
+3            4    9             3
 
 
 iteration    y    product_so_far

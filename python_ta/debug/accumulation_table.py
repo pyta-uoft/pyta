@@ -86,7 +86,7 @@ class AccumulationTable:
         output_format: the format of the output ("table" or "csv")
     """
 
-    _accumulator_names: list[str]
+    _accumulator_names: Union[list[str], list[list[str]]]
     """A list of accumulator variable names to track across loop iterations."""
     loops: list[dict[str, Any]]
     """A list of dictionaries containing loop-specific data for each loop in the with block."""
@@ -95,14 +95,15 @@ class AccumulationTable:
 
     def __init__(
         self,
-        accumulation_names: list[str],
+        accumulation_names: Union[list[str], list[list[str]]],
         output: Union[None, str] = None,
         format: Literal["table", "csv"] = "table",
     ) -> None:
         """Initialize an AccumulationTable context manager for print-based loop debugging.
 
         Args:
-            accumulation_names: a list of the loop accumulator variable names to display.
+            accumulation_names: either a list of accumulator variable names to track across all loops,
+                or a list of lists where each inner list contains the accumulator names for the corresponding loop.
             output: optional filepath where the table will be written. If None, prints to stdout.
             format: output format, either "table" (formatted table) or "csv" (CSV format).
         """
@@ -140,7 +141,7 @@ class AccumulationTable:
             for loop_var in self.loops[lst_index]["loop_variables"]:
                 self.loops[lst_index]["loop_variables"][loop_var].append(NO_VALUE)
 
-        for accumulator in self._accumulator_names:
+        for accumulator in self.loops[lst_index]["loop_accumulators"].keys():
             if accumulator in frame.f_locals:
                 value = copy.deepcopy(frame.f_locals[accumulator])
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
@@ -169,7 +170,7 @@ class AccumulationTable:
         iteration = None
         if self.loops[lst_index]["loop_variables"] != {}:
             iteration = list(range(len(list(self.loops[lst_index]["loop_variables"].values())[0])))
-        elif self._accumulator_names:
+        elif self.loops[lst_index]["loop_accumulators"]:
             iteration = list(
                 range(len(list(self.loops[lst_index]["loop_accumulators"].values())[0]))
             )
@@ -242,7 +243,13 @@ class AccumulationTable:
 
         nodes = list(get_loop_nodes(func_frame))
 
-        for node in nodes:
+        if self._accumulator_names and isinstance(self._accumulator_names[0], list):
+            assert len(self._accumulator_names) == len(nodes), (
+                f"Number of accumulator lists ({len(self._accumulator_names)}) "
+                f"must match number of loops ({len(nodes)})"
+            )
+
+        for i, node in enumerate(nodes):
             loop_lineno = inspect.getlineno(func_frame) + node.lineno
             loop_variables = {}
 
@@ -252,15 +259,21 @@ class AccumulationTable:
                     for nested_node in node.target.nodes_of_class(astroid.AssignName)
                 }
 
+            # Determine accumulators for this specific loop
+            if self._accumulator_names and isinstance(self._accumulator_names[0], list):
+                accumulators_for_this_loop = self._accumulator_names[i]
+            else:
+                accumulators_for_this_loop = self._accumulator_names
+
             assert (
-                self._accumulator_names or loop_variables != {}
+                accumulators_for_this_loop or loop_variables != {}
             ), "The loop accumulator and loop variables cannot be both empty"
 
             self.loops.append(
                 {
                     "loop_variables": loop_variables,
                     "loop_lineno": loop_lineno,
-                    "loop_accumulators": {acc: [] for acc in self._accumulator_names},
+                    "loop_accumulators": {acc: [] for acc in accumulators_for_this_loop},
                 }
             )
 

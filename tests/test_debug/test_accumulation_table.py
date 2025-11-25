@@ -767,3 +767,116 @@ def test_nested_not_tracked_multiple_loops() -> None:
     # Following attributes shouldn't be None since there is only one tracked loop
     assert table.loop_accumulators is not None and table.loop_variables is not None
     assert all(elem not in ["y", "z"] for elem in table.loop_variables)
+
+
+def test_per_loop_accumulators_basic() -> None:
+    """Test different accumulators for each loop using list[list[str]]"""
+    sum_so_far = 0
+    product_so_far = 1
+    list_so_far = []
+
+    with AccumulationTable([["sum_so_far"], ["product_so_far"], ["list_so_far"]]) as table:
+        for x in [1, 2, 3]:
+            sum_so_far += x
+        for y in [2, 3]:
+            product_so_far *= y
+        for z in [10, 20]:
+            list_so_far.append(z)
+
+    # First loop
+    assert table.loops[0]["loop_variables"] == {"x": ["N/A", 1, 2, 3]}
+    assert table.loops[0]["loop_accumulators"] == {"sum_so_far": [0, 1, 3, 6]}
+    assert "product_so_far" not in table.loops[0]["loop_accumulators"]
+    assert "list_so_far" not in table.loops[0]["loop_accumulators"]
+
+    # Second loop
+    assert table.loops[1]["loop_variables"] == {"y": ["N/A", 2, 3]}
+    assert table.loops[1]["loop_accumulators"] == {"product_so_far": [1, 2, 6]}
+    assert "sum_so_far" not in table.loops[1]["loop_accumulators"]
+    assert "list_so_far" not in table.loops[1]["loop_accumulators"]
+
+    # Third loop
+    assert table.loops[2]["loop_variables"] == {"z": ["N/A", 10, 20]}
+    assert table.loops[2]["loop_accumulators"] == {"list_so_far": [[], [10], [10, 20]]}
+    assert "sum_so_far" not in table.loops[2]["loop_accumulators"]
+    assert "product_so_far" not in table.loops[2]["loop_accumulators"]
+
+
+def test_per_loop_accumulators_empty_list() -> None:
+    """Test that a loop can have an empty accumulator list"""
+    sum_so_far = 0
+
+    with AccumulationTable([["sum_so_far"], []]) as table:
+        for x in [1, 2]:
+            sum_so_far += x
+        for y in [3, 4]:
+            pass
+
+    # First loop
+    assert table.loops[0]["loop_accumulators"] == {"sum_so_far": [0, 1, 3]}
+
+    # Second loop
+    assert table.loops[1]["loop_accumulators"] == {}
+    assert table.loops[1]["loop_variables"] == {"y": ["N/A", 3, 4]}
+
+
+def test_per_loop_accumulators_multiple_per_loop() -> None:
+    """Test multiple accumulators for different loops"""
+    sum1 = 0
+    count1 = 0
+    sum2 = 0
+    count2 = 0
+
+    with AccumulationTable([["sum1", "count1"], ["sum2", "count2"]]) as table:
+        for x in [5, 10]:
+            sum1 += x
+            count1 += 1
+        for y in [20, 30]:
+            sum2 += y
+            count2 += 1
+
+    # First loop
+    assert table.loops[0]["loop_accumulators"] == {
+        "sum1": [0, 5, 15],
+        "count1": [0, 1, 2],
+    }
+
+    # Second loop
+    assert table.loops[1]["loop_accumulators"] == {
+        "sum2": [0, 20, 50],
+        "count2": [0, 1, 2],
+    }
+
+
+def test_per_loop_accumulators_mismatched_length() -> None:
+    """Test assertion when number of accumulator lists doesn't match number of loops"""
+    with pytest.raises(
+        AssertionError, match="Number of accumulator lists.*must match number of loops"
+    ):
+        with AccumulationTable([["sum"], ["count"]]) as table:
+            for x in [1, 2]:
+                pass
+            for y in [3, 4]:
+                pass
+            for z in [5, 6]:  # 3 loops but only 2 accumulator lists
+                pass
+
+
+def test_per_loop_accumulators_with_while_loop() -> None:
+    """Test per-loop accumulators with while loops"""
+    counter = 0
+    total = 0
+
+    with AccumulationTable([["counter"], ["total"]]) as table:
+        while counter < 3:
+            counter += 1
+        for x in [10, 20, 30]:
+            total += x
+
+    # First loop
+    assert table.loops[0]["loop_accumulators"] == {"counter": [0, 1, 2, 3]}
+    assert "total" not in table.loops[0]["loop_accumulators"]
+
+    # Second loop
+    assert table.loops[1]["loop_accumulators"] == {"total": [0, 10, 30, 60]}
+    assert "counter" not in table.loops[1]["loop_accumulators"]

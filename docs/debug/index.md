@@ -158,6 +158,58 @@ iteration    sum_so_far    i
 5            48            5
 ```
 
+### Example 4: Different accumulators per loop
+
+You can specify different accumulators for each loop by passing a list of lists, where each inner list corresponds to
+the accumulators for that loop (in order):
+
+```python
+# demo.py
+from python_ta.debug import AccumulationTable
+
+
+def process_different_accumulators(numbers: list) -> tuple:
+    """Process numbers with different accumulators per loop."""
+    sum_so_far = 0
+    product_so_far = 1
+    unused_var = 10
+
+    with AccumulationTable([["sum_so_far"], ["product_so_far"]]):
+        for x in numbers:
+            sum_so_far += x
+            unused_var += 1
+        for y in numbers:
+            product_so_far *= y
+            unused_var -= 1
+
+    return sum_so_far, product_so_far
+
+
+if __name__ == '__main__':
+    result = process_different_accumulators([2, 3, 4])
+```
+
+When this file is run, the first loop tracks only `sum_so_far`, and the second loop tracks only `product_so_far`:
+
+```console
+$ python demo.py
+
+iteration    x    sum_so_far
+-----------  ---  ------------
+0            N/A  0
+1            2    2
+2            3    5
+3            4    9
+
+
+iteration    y    product_so_far
+-----------  ---  ----------------
+0            N/A  1
+1            2    2
+2            3    6
+3            4    24
+```
+
 ### API
 
 ```{eval-rst}

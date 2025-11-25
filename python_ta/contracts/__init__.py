@@ -144,11 +144,8 @@ def check_contracts(
     When used with functions, `check_contracts` accepts four optional boolean keyword arguments to selectively disable checks when set to `False`:
 
     - `argument_types`: check parameter type annotations
-
     - `return_type`: check the return type annotation
-
     - `preconditions`: check preconditions
-
     - `postconditions`: check postconditions
 
     By default, all four checks are enabled. These arguments only affect functions, and are ignored when `check_contracts` is applied to a class.
@@ -176,10 +173,10 @@ def check_contracts(
                     None,
                     args,
                     kwargs,
-                    argument_types,
-                    return_type,
-                    preconditions,
-                    postconditions,
+                    argument_types=argument_types,
+                    return_type=return_type,
+                    preconditions=preconditions,
+                    postconditions=postconditions,
                 )
             else:
                 return _check_function_contracts(
@@ -187,10 +184,10 @@ def check_contracts(
                     instance,
                     args,
                     kwargs,
-                    argument_types,
-                    return_type,
-                    preconditions,
-                    postconditions,
+                    argument_types=argument_types,
+                    return_type=return_type,
+                    preconditions=preconditions,
+                    postconditions=postconditions,
                 )
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None

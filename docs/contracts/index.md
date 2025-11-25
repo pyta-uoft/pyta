@@ -60,43 +60,6 @@ The second, `check_contracts`, is a decorator allowing more fine-grained control
 .. autofunction:: python_ta.contracts.check_contracts(func_or_class)
 ```
 
-**Example: Disabling a single check**
-
-```python
-from python_ta.contracts import check_contracts
-
-@check_contracts(preconditions=False)
-def safe_divide(x: int, y: int) -> float:
-    """Return x / y.
-
-    Preconditions:
-        - y != 0
-    """
-    return x / y
-```
-
-**Example 2: Disable all contract checks**
-
-```python
-from python_ta.contracts import check_contracts
-
-@check_contracts(argument_types=False,
-                 return_type=False,
-                 preconditions=False,
-                 postconditions=False)
-def add(x: int, y: int) -> int:
-    """Return x + y.
-
-    Preconditions:
-        - isinstance(x, int)
-        - isinstance(y, int)
-    Postconditions:
-        - $return_value >= x
-    """
-    # None of the above checks will be enforced
-    return x + y
-```
-
 You can pass an object into the function `validate_invariants` to manually check the representation invariants of the object.
 
 ```{eval-rst}
@@ -385,6 +348,49 @@ if __name__ == '__main__':
 
     # Representation invariants are checked when attribute is reassigned; AssertionError is raised
     p.name = '123'
+```
+
+## Disabling checks
+
+When used on functions, the four optional boolean arguments (`arguent_types`, `return_type`, `preconditions`, `postconditions`) can be used to selectively disable contract checking.
+By default, all checks are enabled; assigning `False` to any of these parameters suppresses its related check. When used on classes, the parameters have no effect.
+
+**Example: Disabling a single check**
+
+```python
+from python_ta.contracts import check_contracts
+
+@check_contracts(preconditions=False)
+def safe_divide(x: int, y: int) -> float:
+    """Return x / y.
+
+    Preconditions:
+        - y != 0
+    """
+    # Preconditions check will not be enforced
+    return x / y
+```
+
+**Example 2: Disable all contract checks**
+
+```python
+from python_ta.contracts import check_contracts
+
+@check_contracts(argument_types=False,
+                 return_type=False,
+                 preconditions=False,
+                 postconditions=False)
+def add(x: int, y: int) -> int:
+    """Return x + y.
+
+    Preconditions:
+        - isinstance(x, int)
+        - isinstance(y, int)
+    Postconditions:
+        - $return_value >= x
+    """
+    # None of the above checks will be enforced
+    return x + y
 ```
 
 ## Technical notes

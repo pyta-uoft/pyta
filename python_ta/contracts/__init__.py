@@ -173,10 +173,10 @@ def check_contracts(
                     None,
                     args,
                     kwargs,
-                    argument_types=argument_types,
-                    return_type=return_type,
-                    preconditions=preconditions,
-                    postconditions=postconditions,
+                    argument_types_enabled=argument_types,
+                    return_type_enabled=return_type,
+                    preconditions_enabled=preconditions,
+                    postconditions_enabled=postconditions,
                 )
             else:
                 return _check_function_contracts(
@@ -184,10 +184,10 @@ def check_contracts(
                     instance,
                     args,
                     kwargs,
-                    argument_types=argument_types,
-                    return_type=return_type,
-                    preconditions=preconditions,
-                    postconditions=postconditions,
+                    argument_types_enabled=argument_types,
+                    return_type_enabled=return_type,
+                    preconditions_enabled=preconditions,
+                    postconditions_enabled=postconditions,
                 )
         except PyTAContractError as e:
             raise AssertionError(str(e)) from None

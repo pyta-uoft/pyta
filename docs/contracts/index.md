@@ -60,10 +60,6 @@ The second, `check_contracts`, is a decorator allowing more fine-grained control
 .. autofunction:: python_ta.contracts.check_contracts(func_or_class)
 ```
 
-```{eval-rst}
-.. autofunction:: python_ta.contracts.check_contracts(func_or_class, argument_types=True, return_type=True, preconditions=True, postconditions=True)
-```
-
 **Example: Disabling a single check**
 
 ```python

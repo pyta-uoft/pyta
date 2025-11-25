@@ -1135,3 +1135,75 @@ def test_custom_generic_class_with_parameter() -> None:
         return value.item
 
     process_generic(GenericClass(10))
+
+
+def test_disable_argument_type_checking_only() -> None:
+    """Test that setting argument_types=False disables parameter type checking."""
+
+    @check_contracts(argument_types=False)
+    def f(x: int) -> int:
+        return 10
+
+    # No error should be raised
+    f("not-an-int")
+
+
+def test_disable_return_type_checking_only() -> None:
+    """Test that setting return_type=False disables return-type checking."""
+
+    @check_contracts(return_type=False)
+    def f(x: int) -> int:
+        return "not an int"
+
+    # No error should be raised
+    f(1)
+
+
+def test_disable_preconditions_only() -> None:
+    """Test that setting preconditions=False disables precondition checking."""
+
+    @check_contracts(preconditions=False)
+    def f(x: int) -> int:
+        """
+        Return x.
+
+        Precondition: x > 0
+        """
+        return x
+
+    # No error should be raised.
+    f(-1)
+
+
+def test_disable_postconditions_only() -> None:
+    """Test that setting postconditions=False disables postcondition checking."""
+
+    @check_contracts(postconditions=False)
+    def f(x: int) -> int:
+        """
+        Postcondition: $return_value == x
+        """
+        return x + 1
+
+    # No error should be raised.
+    f(5)
+
+
+def test_multiple_flags_disable_all_contracts_but_keep_decorator() -> None:
+    """Test that no errors are raised when all four options are disabled."""
+
+    @check_contracts(
+        argument_types=False,
+        return_type=False,
+        preconditions=False,
+        postconditions=False,
+    )
+    def f(x: int) -> int:
+        """
+        Precondition: x > 0
+        Postcondition: $return_value == x * 2
+        """
+        return "hello"
+
+    # No error should be raised.
+    f("anything")

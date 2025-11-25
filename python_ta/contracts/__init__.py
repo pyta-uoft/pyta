@@ -141,8 +141,19 @@ def check_contracts(
     When used with a class, all methods defined within the class have contract checking enabled.
     If module_names is not None, only functions or classes defined in a module whose name is in module_names are checked.
 
-    Example:
+    When used with functions, `check_contracts` accepts four optional boolean keyword arguments to selectively disable checks when set to `False`:
 
+    - `argument_types`: check parameter type annotations
+
+    - `return_type`: check the return type annotation
+
+    - `preconditions`: check preconditions
+
+    - `postconditions`: check postconditions
+
+    By default, all four checks are enabled. These arguments only affect functions, and are ignored when `check_contracts` is applied to a class.
+
+    Example:
         >>> from python_ta.contracts import check_contracts
         >>> @check_contracts
         ... def divide(x: int, y: int) -> int:

@@ -60,6 +60,47 @@ The second, `check_contracts`, is a decorator allowing more fine-grained control
 .. autofunction:: python_ta.contracts.check_contracts(func_or_class)
 ```
 
+```{eval-rst}
+.. autofunction:: python_ta.contracts.check_contracts(func_or_class, argument_types=True, return_type=True, preconditions=True, postconditions=True)
+```
+
+**Example: Disabling a single check**
+
+```python
+from python_ta.contracts import check_contracts
+
+@check_contracts(preconditions=False)
+def safe_divide(x: int, y: int) -> float:
+    """Return x / y.
+
+    Preconditions:
+        - y != 0
+    """
+    return x / y
+```
+
+**Example 2: Disable all contract checks**
+
+```python
+from python_ta.contracts import check_contracts
+
+@check_contracts(argument_types=False,
+                 return_type=False,
+                 preconditions=False,
+                 postconditions=False)
+def add(x: int, y: int) -> int:
+    """Return x + y.
+
+    Preconditions:
+        - isinstance(x, int)
+        - isinstance(y, int)
+    Postconditions:
+        - $return_value >= x
+    """
+    # None of the above checks will be enforced
+    return x + y
+```
+
 You can pass an object into the function `validate_invariants` to manually check the representation invariants of the object.
 
 ```{eval-rst}

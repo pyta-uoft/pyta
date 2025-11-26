@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a solution to prevent possible large snippets created by the following errors: pylint error C0305, and pycodestyle errors E303, E304
 - Added markdown rendering to display code in error messages
 - Improved RI checking to raise a warning when a `NameError` is raised and the missing name matches an instance attribute, and is due to an omitted `self.` in the RI.
+- Extended `AccumulationTable` class to support multiple loops in sequence within the same context manager
 
 ### 💫 New checkers
 
@@ -39,6 +40,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored `setendings.py` to rely primarily on Astroid/Python’s built-in end-location attributes, reducing the amount of custom parsing logic
 - Fixed `test_html_server.py` tests to be compatible with Windows
 - Updated `conftest.py` and `test_black.py` to be compatible with pytest v9, removing usage of some deprecated features.
+- Updated tests in `test_accumulation_table.py` to cover multi-loop behavior and added new cases
 
 ## [2.11.1] - 2025-08-17
 

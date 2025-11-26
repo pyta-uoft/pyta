@@ -35,10 +35,7 @@ def test_one_accumulator_while_loop() -> None:
             sum_so_far = sum_so_far + number
             number += 10
 
-    assert table.loop_accumulators == {
-        "number": [10, 20, 30, 40],
-        "sum_so_far": [0, 10, 30, 60],
-    }
+    assert table.loop_accumulators == {"number": [10, 20, 30, 40], "sum_so_far": [0, 10, 30, 60]}
 
 
 def test_two_accumulator_while_loop() -> None:

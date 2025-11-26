@@ -95,7 +95,6 @@ iteration    number    sum_so_far    list_so_far
 4            4         6             [0, 1, 2, 3]
 5            5         10            [0, 1, 2, 3, 4]
 6            6         15            [0, 1, 2, 3, 4, 5]
-
 ```
 
 ### Example 3: Multiple sequential loops

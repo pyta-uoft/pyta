@@ -164,9 +164,8 @@ class AccumulationTable:
             loop_accumulators[accumulator].append(value)
 
     def _create_iteration_dict(self, lst_index: int) -> dict:
-        """Function generates dictionaries that maps, for a given loop at index `lst_index`, each accumulator
-        and loop variable to its respective value during each iteration
-        """
+        """Return a dictionary that maps each accumulator and loop variable to its respective value during each
+        iteration for a given loop at index `lst_index`."""
         loop_variables = self.loops[lst_index]["loop_variables"]
         loop_accumulators = self.loops[lst_index]["loop_accumulators"]
         iteration = None
@@ -267,7 +266,7 @@ class AccumulationTable:
                 accumulators_for_this_loop = self._accumulator_names
 
             assert (
-                accumulators_for_this_loop or loop_variables != {}
+                accumulators_for_this_loop or loop_variables
             ), "The loop accumulator and loop variables cannot be both empty"
 
             self.loops.append(

@@ -20,7 +20,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added markdown rendering to display code in error messages
 - Improved RI checking to raise a warning when a `NameError` is raised and the missing name matches an instance attribute, and is due to an omitted `self.` in the RI.
 - Extended `AccumulationTable` class to support multiple loops in sequence within the same context manager
-- Updated documentation to reflect support for multiple sequential loops in accumulation table context managers
 
 ### 💫 New checkers
 

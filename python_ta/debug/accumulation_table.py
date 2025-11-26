@@ -43,14 +43,15 @@ def get_with_lines(lines: list[str], num_whitespace: int) -> str:
     return "\n".join(lines[:endpoint])
 
 
-def _check_ancestor_chain(node: astroid.NodeNG, with_module: astroid.Module) -> bool:
+def _is_nested_loop(node: astroid.NodeNG, with_module: astroid.Module) -> bool:
     """Helper checks the ancestor chain of a given loop node (For or While) to check if it is nested within the context
     manager."""
-    if node.parent is None or node.parent is with_module:
-        return True
-    if isinstance(node.parent, (astroid.For, astroid.While)):
-        return False
-    return _check_ancestor_chain(node.parent, with_module)
+    curr_node = node
+    while curr_node.parent is not None and curr_node.parent is not with_module:
+        if isinstance(curr_node.parent, (astroid.For, astroid.While)):
+            return True
+        curr_node = node.parent
+    return False
 
 
 def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astroid.While]]:
@@ -64,7 +65,7 @@ def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astro
 
     with_module = astroid.parse(with_lines)
     for statement in with_module.nodes_of_class((astroid.For, astroid.While)):
-        if isinstance(statement, (astroid.For, astroid.While)) and _check_ancestor_chain(
+        if isinstance(statement, (astroid.For, astroid.While)) and not _is_nested_loop(
             statement, with_module
         ):
             yield statement
@@ -76,6 +77,10 @@ class AccumulationTable:
     accumulation variables during each iteration in a for or while loop
 
     Instance attributes:
+        loop_accumulators: a mapping between the accumulation variables. Read-only access and only works with a single
+            loop in context manager.
+        loop_variables: a mapping between the loop variables and their values during each iteration. Read-only access
+            and only works with a single loop in context manager.
         _accumulator_names: either a list of accumulator variable names to track across all loops,
             or a list of lists where each inner list contains the accumulator names for the corresponding loop
         loops: a list of dictionaries, one per loop, each containing:
@@ -183,8 +188,7 @@ class AccumulationTable:
         }
 
     def _tabulate_data(self) -> None:
-        """Print the values of the accumulator and loop variables, for a given loop at index `lst_index`,
-        into a table"""
+        """Print the values of the accumulator and loop variables into a table"""
         if self.output_filepath is None:
             file_io = sys.stdout
         else:
@@ -205,7 +209,8 @@ class AccumulationTable:
                         disable_numparse=True,
                         missingval="None",
                     )
-                    file_io.write("\n")
+                    if lst_index > 0:
+                        file_io.write("\n")
                     file_io.write(table)
                     file_io.write("\n")
                 else:

@@ -404,10 +404,7 @@ def test_two_loop_vars_one_accumulator() -> None:
         for index, item in enumerate(test_list):
             sum_so_far = sum_so_far + item
 
-    assert table.loop_variables == {
-        "index": ["N/A", 0, 1, 2],
-        "item": ["N/A", 10, 20, 30],
-    }
+    assert table.loop_variables == {"index": ["N/A", 0, 1, 2], "item": ["N/A", 10, 20, 30]}
     assert table.loop_accumulators == {"sum_so_far": [0, 10, 30, 60]}
 
 
@@ -518,7 +515,7 @@ def test_output_to_existing_file(existing_file_content, output_format):
 
     expected_table_content = get_expected_content(output_format)
     if output_format == "table":
-        expected_file_content = "Existing Content\n\n" + expected_table_content + "\n"
+        expected_file_content = "Existing Content\n" + expected_table_content + "\n"
     else:
         expected_file_content = "Existing Content\n" + expected_table_content
 
@@ -548,7 +545,7 @@ def test_output_to_new_file(tmp_path, output_format):
 
     expected_content = get_expected_content(output_format)
     if output_format == "table":
-        expected_content = "\n" + expected_content + "\n"
+        expected_content = expected_content + "\n"
 
     assert content == expected_content
 

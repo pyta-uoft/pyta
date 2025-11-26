@@ -95,6 +95,7 @@ iteration    number    sum_so_far    list_so_far
 4            4         6             [0, 1, 2, 3]
 5            5         10            [0, 1, 2, 3, 4]
 6            6         15            [0, 1, 2, 3, 4, 5]
+
 ```
 
 ### Example 3: Multiple sequential loops
@@ -131,7 +132,6 @@ When this file is run, we get the following output showing three separate tables
 
 ```console
 $ python demo.py
-
 iteration    number    sum_so_far    i
 -----------  --------  ------------  ---
 0            N/A       0             0
@@ -139,14 +139,12 @@ iteration    number    sum_so_far    i
 2            20        30            0
 3            30        60            0
 
-
 iteration    j    sum_so_far    i
 -----------  ---  ------------  ---
 0            N/A  60            0
 1            0    61            0
 2            1    62            0
 3            2    63            0
-
 
 iteration    sum_so_far    i
 -----------  ------------  ---
@@ -195,14 +193,12 @@ When this file is run, the first loop tracks `sum_so_far` and `count_so_far`, an
 
 ```console
 $ python demo.py
-
 iteration    x    sum_so_far    count_so_far
 -----------  ---  ------------  --------------
 0            N/A  0             0
 1            2    2             1
 2            3    5             2
 3            4    9             3
-
 
 iteration    y    product_so_far
 -----------  ---  ----------------

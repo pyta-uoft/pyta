@@ -135,19 +135,16 @@ class AccumulationTable:
     def _record_iteration(self, frame: types.FrameType, lst_index: int) -> None:
         """Record the values of the accumulator variables and loop variables of an iteration for a given loop at index
         lst_index."""
-        if (
-            self.loops[lst_index]["loop_variables"] != {}
-            and len(list(self.loops[lst_index]["loop_variables"].values())[0]) > 0
-        ):
-            for loop_var in self.loops[lst_index]["loop_variables"]:
-                self.loops[lst_index]["loop_variables"][loop_var].append(
-                    copy.deepcopy(frame.f_locals[loop_var])
-                )
+        loop_variables = self.loops[lst_index]["loop_variables"]
+        loop_accumulators = self.loops[lst_index]["loop_accumulators"]
+        if loop_variables and len(list(loop_variables.values())[0]) > 0:
+            for loop_var in loop_variables:
+                loop_variables[loop_var].append(copy.deepcopy(frame.f_locals[loop_var]))
         else:
-            for loop_var in self.loops[lst_index]["loop_variables"]:
-                self.loops[lst_index]["loop_variables"][loop_var].append(NO_VALUE)
+            for loop_var in loop_variables:
+                loop_variables[loop_var].append(NO_VALUE)
 
-        for accumulator in self.loops[lst_index]["loop_accumulators"].keys():
+        for accumulator in loop_accumulators.keys():
             if accumulator in frame.f_locals:
                 value = copy.deepcopy(frame.f_locals[accumulator])
             elif accumulator in frame.f_code.co_varnames or accumulator in frame.f_code.co_names:
@@ -157,34 +154,32 @@ class AccumulationTable:
                 try:
                     value = eval(accumulator, frame.f_globals, frame.f_locals)
                 except NameError as e:
-                    if (
-                        sys.version_info >= (3, 10)
-                        and e.name in self.loops[lst_index]["loop_variables"]
-                    ):
+                    if sys.version_info >= (3, 10) and e.name in loop_variables:
                         value = NO_VALUE
                     else:
                         raise
                 else:
                     value = copy.deepcopy(value)
 
-            self.loops[lst_index]["loop_accumulators"][accumulator].append(value)
+            loop_accumulators[accumulator].append(value)
 
     def _create_iteration_dict(self, lst_index: int) -> dict:
         """Function generates dictionaries that maps, for a given loop at index `lst_index`, each accumulator
         and loop variable to its respective value during each iteration
         """
+        loop_variables = self.loops[lst_index]["loop_variables"]
+        loop_accumulators = self.loops[lst_index]["loop_accumulators"]
         iteration = None
-        if self.loops[lst_index]["loop_variables"] != {}:
-            iteration = list(range(len(list(self.loops[lst_index]["loop_variables"].values())[0])))
-        elif self.loops[lst_index]["loop_accumulators"]:
-            iteration = list(
-                range(len(list(self.loops[lst_index]["loop_accumulators"].values())[0]))
-            )
+
+        if loop_variables:
+            iteration = list(range(len(list(loop_variables.values())[0])))
+        elif loop_accumulators:
+            iteration = list(range(len(list(loop_accumulators.values())[0])))
 
         return {
             "iteration": iteration,
-            **self.loops[lst_index]["loop_variables"],
-            **self.loops[lst_index]["loop_accumulators"],
+            **loop_variables,
+            **loop_accumulators,
         }
 
     def _tabulate_data(self) -> None:

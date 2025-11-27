@@ -101,43 +101,56 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
                 module.__dict__[name] = check_contracts(value, module_names=set(mod_names))
 
 
-@wrapt.decorator
-def _enable_function_contracts(wrapped, instance, args, kwargs):
-    """A decorator that enables checking contracts for a function."""
-    try:
-        if instance is not None and inspect.isclass(instance):
-            # This is a class method, so there is no instance.
-            return _check_function_contracts(wrapped, None, args, kwargs)
-        else:
-            return _check_function_contracts(wrapped, instance, args, kwargs)
-    except PyTAContractError as e:
-        raise AssertionError(str(e)) from None
-
-
 # Wildcard Type Variable
 Class = TypeVar("Class", bound=type)
 
 
 @overload
 def check_contracts(
-    func: FunctionType, module_names: Optional[set[str]] = None
+    func: FunctionType,
+    module_names: Optional[set[str]] = None,
+    argument_types: bool = True,
+    return_type: bool = True,
+    preconditions: bool = True,
+    postconditions: bool = True,
 ) -> FunctionType: ...
 
 
 @overload
-def check_contracts(func: Class, module_names: Optional[set[str]] = None) -> Class: ...
+def check_contracts(
+    func: Class,
+    module_names: Optional[set[str]] = None,
+    argument_types: bool = True,
+    return_type: bool = True,
+    preconditions: bool = True,
+    postconditions: bool = True,
+) -> Class: ...
 
 
 def check_contracts(
-    func_or_class: Union[Class, FunctionType], module_names: Optional[set[str]] = None
+    func_or_class: Union[Class, FunctionType] = None,
+    *,
+    module_names: Optional[set[str]] = None,
+    argument_types: bool = True,
+    return_type: bool = True,
+    preconditions: bool = True,
+    postconditions: bool = True,
 ) -> Union[Class, FunctionType]:
     """A decorator to enable contract checking for a function or class.
 
     When used with a class, all methods defined within the class have contract checking enabled.
     If module_names is not None, only functions or classes defined in a module whose name is in module_names are checked.
 
-    Example:
+    When used with functions, `check_contracts` accepts four optional boolean keyword arguments to selectively disable checks when set to `False`:
 
+    - `argument_types`: check parameter type annotations
+    - `return_type`: check the return type annotation
+    - `preconditions`: check preconditions
+    - `postconditions`: check postconditions
+
+    By default, all four checks are enabled. These arguments only affect functions, and are ignored when `check_contracts` is applied to a class.
+
+    Example:
         >>> from python_ta.contracts import check_contracts
         >>> @check_contracts
         ... def divide(x: int, y: int) -> int:
@@ -148,6 +161,48 @@ def check_contracts(
         ...     \"\"\"
         ...     return x // y
     """
+
+    @wrapt.decorator
+    def _enable_function_contracts(wrapped, instance, args, kwargs):
+        """A decorator that enables checking contracts for a function."""
+        try:
+            if instance is not None and inspect.isclass(instance):
+                # This is a class method, so there is no instance.
+                return _check_function_contracts(
+                    wrapped,
+                    None,
+                    args,
+                    kwargs,
+                    argument_types_enabled=argument_types,
+                    return_type_enabled=return_type,
+                    preconditions_enabled=preconditions,
+                    postconditions_enabled=postconditions,
+                )
+            else:
+                return _check_function_contracts(
+                    wrapped,
+                    instance,
+                    args,
+                    kwargs,
+                    argument_types_enabled=argument_types,
+                    return_type_enabled=return_type,
+                    preconditions_enabled=preconditions,
+                    postconditions_enabled=postconditions,
+                )
+        except PyTAContractError as e:
+            raise AssertionError(str(e)) from None
+
+    # Optional Arguments passed to the decorator
+    if func_or_class is None:
+        return wrapt.PartialCallableObjectProxy(
+            check_contracts,
+            module_names=module_names,
+            argument_types=argument_types,
+            return_type=return_type,
+            preconditions=preconditions,
+            postconditions=postconditions,
+        )
+
     if not ENABLE_CONTRACT_CHECKING:
         return func_or_class
 
@@ -243,7 +298,16 @@ def add_class_invariants(klass: type) -> None:
     klass.__setattr__ = new_setattr
 
 
-def _check_function_contracts(wrapped, instance, args, kwargs):
+def _check_function_contracts(
+    wrapped,
+    instance,
+    args,
+    kwargs,
+    argument_types_enabled: bool = True,
+    return_type_enabled: bool = True,
+    preconditions_enabled: bool = True,
+    postconditions_enabled: bool = True,
+):
     params = wrapped.__code__.co_varnames[: wrapped.__code__.co_argcount]
     if instance is not None:
         klass_mod = _get_module(type(instance))
@@ -252,23 +316,24 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         annotations = typing.get_type_hints(wrapped)
     args_with_self = args if instance is None else (instance,) + args
 
-    # Check function parameter types
-    for arg, param in zip(args_with_self, params):
-        if param in annotations:
-            try:
-                _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
-                if STRICT_NUMERIC_TYPES:
-                    check_type_strict(param, arg, annotations[param])
-                else:
-                    check_type(arg, annotations[param])
-            except (TypeError, TypeCheckError):
-                additional_suggestions = _get_argument_suggestions(arg, annotations[param])
+    if argument_types_enabled:
+        # Check function parameter types
+        for arg, param in zip(args_with_self, params):
+            if param in annotations:
+                try:
+                    _debug(f"Checking type of parameter {param} in call to {wrapped.__qualname__}")
+                    if STRICT_NUMERIC_TYPES:
+                        check_type_strict(param, arg, annotations[param])
+                    else:
+                        check_type(arg, annotations[param])
+                except (TypeError, TypeCheckError):
+                    additional_suggestions = _get_argument_suggestions(arg, annotations[param])
 
-                raise PyTAContractError(
-                    f"Argument value {_display_value(arg)} for {wrapped.__name__} parameter {param} "
-                    f"did not match expected type {_display_annotation(annotations[param])}"
-                    + (f"\n{additional_suggestions}" if additional_suggestions else "")
-                )
+                    raise PyTAContractError(
+                        f"Argument value {_display_value(arg)} for {wrapped.__name__} parameter {param} "
+                        f"did not match expected type {_display_annotation(annotations[param])}"
+                        + (f"\n{additional_suggestions}" if additional_suggestions else "")
+                    )
 
     function_locals = dict(zip(params, args_with_self))
 
@@ -279,7 +344,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
         target = wrapped
 
     # Check function preconditions
-    if not hasattr(target, "__preconditions__"):
+    if not hasattr(target, "__preconditions__") and preconditions_enabled:
         target.__preconditions__: list[tuple[str, CodeType]] = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
@@ -292,12 +357,12 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 continue
             target.__preconditions__.append((precondition, compiled))
 
-    if ENABLE_CONTRACT_CHECKING:
+    if ENABLE_CONTRACT_CHECKING and preconditions_enabled:
         _check_assertions(wrapped, function_locals)
 
     # Check return type
     r = wrapped(*args, **kwargs)
-    if "return" in annotations:
+    if return_type_enabled and "return" in annotations:
         return_type = annotations["return"]
         try:
             _debug(f"Checking return type from call to {wrapped.__qualname__}")
@@ -312,7 +377,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
             )
 
     # Check function postconditions
-    if not hasattr(target, "__postconditions__"):
+    if postconditions_enabled and not hasattr(target, "__postconditions__"):
         target.__postconditions__: list[tuple[str, CodeType, str]] = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
@@ -329,7 +394,7 @@ def _check_function_contracts(wrapped, instance, args, kwargs):
                 continue
             target.__postconditions__.append((postcondition, compiled, return_val_var_name))
 
-    if ENABLE_CONTRACT_CHECKING:
+    if ENABLE_CONTRACT_CHECKING and postconditions_enabled:
         _check_assertions(
             wrapped,
             function_locals,

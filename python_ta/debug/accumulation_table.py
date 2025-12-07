@@ -13,6 +13,12 @@ from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, Union
 
 import astroid
 import tabulate
+from astroid.nodes import (
+    For,
+    Module,
+    NodeNG,
+    While,
+)
 
 if TYPE_CHECKING:
     import types
@@ -43,18 +49,18 @@ def get_with_lines(lines: list[str], num_whitespace: int) -> str:
     return "\n".join(lines[:endpoint])
 
 
-def _is_nested_loop(node: astroid.NodeNG, with_module: astroid.Module) -> bool:
+def _is_nested_loop(node: NodeNG, with_module: Module) -> bool:
     """Helper checks the ancestor chain of a given loop node (For or While) to check if it is nested within the context
     manager."""
     curr_node = node
     while curr_node.parent is not None and curr_node.parent is not with_module:
-        if isinstance(curr_node.parent, (astroid.For, astroid.While)):
+        if isinstance(curr_node.parent, (For, While)):
             return True
         curr_node = node.parent
     return False
 
 
-def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astroid.While]]:
+def get_loop_nodes(frame: types.FrameType) -> Generator[Union[For, While]]:
     """Yield the For or While node(s) from the frame containing the accumulator loop(s)"""
     func_string = inspect.cleandoc(inspect.getsource(frame))
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
@@ -64,10 +70,8 @@ def get_loop_nodes(frame: types.FrameType) -> Generator[Union[astroid.For, astro
     with_lines = get_with_lines(lst_from_with_stmt, num_whitespace)
 
     with_module = astroid.parse(with_lines)
-    for statement in with_module.nodes_of_class((astroid.For, astroid.While)):
-        if isinstance(statement, (astroid.For, astroid.While)) and not _is_nested_loop(
-            statement, with_module
-        ):
+    for statement in with_module.nodes_of_class((For, While)):
+        if isinstance(statement, (For, While)) and not _is_nested_loop(statement, with_module):
             yield statement
 
 
@@ -253,10 +257,9 @@ class AccumulationTable:
             loop_lineno = inspect.getlineno(func_frame) + node.lineno
             loop_variables = {}
 
-            if isinstance(node, astroid.For):
+            if isinstance(node, For):
                 loop_variables = {
-                    nested_node.name: []
-                    for nested_node in node.target.nodes_of_class(astroid.AssignName)
+                    nested_node.name: [] for nested_node in node.target.nodes_of_class(AssignName)
                 }
 
             # Determine accumulators for this specific loop

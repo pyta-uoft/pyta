@@ -25,7 +25,7 @@ class Z3Parser:
         - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
     """
 
-    node: astroid.NodeNG
+    node: nodes.NodeNG
     types: dict[str, Union[str, z3.ExprRef]]
 
     def __init__(self, types: Optional[dict[str, Union[str, z3.ExprRef]]] = None):
@@ -33,7 +33,7 @@ class Z3Parser:
             types = {}
         self.types = types
 
-    def parse(self, node: astroid.NodeNG) -> z3.ExprRef:
+    def parse(self, node: nodes.NodeNG) -> z3.ExprRef:
         """
         Convert astroid node to z3 expression and return it.
         If an error is encountered or a case is not considered, return None.
@@ -86,7 +86,7 @@ class Z3Parser:
 
         return x
 
-    def parse_compare(self, node: astroid.Compare) -> z3.ExprRef:
+    def parse_compare(self, node: nodes.Compare) -> z3.ExprRef:
         """Convert an astroid Compare node to z3 expression."""
         left, ops = node.left, node.ops
         left = self.parse(left)
@@ -160,13 +160,13 @@ class Z3Parser:
 
         return value
 
-    def parse_unary_op(self, node: astroid.UnaryOp) -> z3.ExprRef:
+    def parse_unary_op(self, node: nodes.UnaryOp) -> z3.ExprRef:
         """Convert an astroid UnaryOp node to a z3 expression."""
         left, op = node.operand, node.op
         left = self.parse(left)
         return self.apply_unary_op(left, op)
 
-    def parse_bin_op(self, node: astroid.BinOp) -> z3.ExprRef:
+    def parse_bin_op(self, node: nodes.BinOp) -> z3.ExprRef:
         """Convert an astroid BinOp node to a z3 expression."""
         left, op, right = node.left, node.op, node.right
         left = self.parse(left)
@@ -174,7 +174,7 @@ class Z3Parser:
 
         return self.apply_bin_op(left, op, right)
 
-    def parse_bool_op(self, node: astroid.BoolOp) -> z3.ExprRef:
+    def parse_bool_op(self, node: nodes.BoolOp) -> z3.ExprRef:
         """Convert an astroid BoolOp node to a z3 expression."""
         op, values = node.op, node.values
         values = [self.parse(x) for x in values]
@@ -182,7 +182,7 @@ class Z3Parser:
         return self.apply_bool_op(op, values)
 
     def parse_container_op(
-        self, node: Union[nodes.List, astroid.Set, astroid.Tuple]
+        self, node: Union[nodes.List, nodes.Set, nodes.Tuple]
     ) -> list[z3.ExprRef]:
         """Convert an astroid List, Set, Tuple node to a list of z3 expressions."""
         return [self.parse(element) for element in node.elts]
@@ -214,7 +214,7 @@ class Z3Parser:
                 f"Unhandled binary operation {op} with operator types {left} and {right}."
             )
 
-    def _parse_number_literal(self, node: astroid.NodeNG) -> Optional[Union[int, float]]:
+    def _parse_number_literal(self, node: nodes.NodeNG) -> Optional[Union[int, float]]:
         """
         If the subtree from `node` represent a number literal, return the value
         Otherwise, return None
@@ -233,7 +233,7 @@ class Z3Parser:
         else:
             return None
 
-    def parse_subscript_op(self, node: astroid.Subscript) -> z3.ExprRef:
+    def parse_subscript_op(self, node: nodes.Subscript) -> z3.ExprRef:
         """
         Convert an astroid Subscript node to z3 expression.
         This method only supports string values and integer literal (both positive and negative) indexes
@@ -278,7 +278,7 @@ class Z3Parser:
 
         raise Z3ParseException(f"Unhandled subscript operator type {slice}")
 
-    def parse_arguments(self, node: astroid.Arguments) -> dict[str, z3.ExprRef]:
+    def parse_arguments(self, node: nodes.Arguments) -> dict[str, z3.ExprRef]:
         """Convert an astroid Arguments node's parameters to z3 variables."""
         z3_vars = {}
 
@@ -289,7 +289,7 @@ class Z3Parser:
                 continue
 
             inferred = safe_infer(ann)
-            if inferred is None or not isinstance(inferred, astroid.ClassDef):
+            if inferred is None or not isinstance(inferred, nodes.ClassDef):
                 continue
 
             self.types[arg.name] = inferred.name

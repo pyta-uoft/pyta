@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import astroid
+from astroid import nodes
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 from python_ta.transforms.z3_visitor import Z3Visitor
@@ -350,7 +351,7 @@ def test_z3_dependency_uninstalled() -> None:
     mod.accept(visitor)
     func_node = None
     for node in mod.body:
-        if isinstance(node, astroid.FunctionDef) and node.name == "func":
+        if isinstance(node, nodes.FunctionDef) and node.name == "func":
             func_node = node
             break
     cfg = visitor.cfgs[func_node]
@@ -371,7 +372,7 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     # find the function definition node
     func_node = None
     for node in mod.body:
-        if isinstance(node, astroid.FunctionDef) and node.name == name:
+        if isinstance(node, nodes.FunctionDef) and node.name == name:
             func_node = node
             break
 

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     except ImportError:
         ExprRef = Any
 
-from astroid import (
+from astroid.nodes import (
     AnnAssign,
     Arguments,
     Assign,

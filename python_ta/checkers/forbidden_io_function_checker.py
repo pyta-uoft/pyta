@@ -3,7 +3,7 @@
 from re import sub
 from typing import Union
 
-from astroid import BoundMethod, FunctionDef, nodes
+from astroid import BoundMethod, nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages, safe_infer
 from pylint.lint import PyLinter
@@ -73,7 +73,7 @@ class IOFunctionChecker(BaseChecker):
     def _resolve_qualname(node: nodes.Call) -> Union[str, None]:
         """Resolves the qualified name for function and method calls"""
         if (inferred_definition := safe_infer(node.func)) is not None:
-            if isinstance(inferred_definition, (BoundMethod, FunctionDef)):
+            if isinstance(inferred_definition, (BoundMethod, nodes.FunctionDef)):
                 return sub(r"^[^.]*\.", "", inferred_definition.qname())
         if isinstance(node.func, nodes.Name):
             return node.func.name

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 # The following imports are used solely to trigger errors.
-import packaging
-import pip
-import pygments
-import pylint
+import abc
+import math
+import os
+import sys
 
 
 def sum_items(lst: list[int]) -> int:

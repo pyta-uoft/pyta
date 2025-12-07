@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, Union
 import astroid
 import tabulate
 from astroid.nodes import (
+    AssignName,
     For,
     Module,
     NodeNG,

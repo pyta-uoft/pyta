@@ -26,7 +26,6 @@ INPUTS = {
         ["examples/nodes/dict.py", "examples/nodes/const.py"],
     ],
     "test_check_on_package": [
-        ["examples.sample_usage.draw_cfg"],
         ["examples.sample_usage", "examples/nodes/const.py"],
     ],
     "test_check_on_bad_input": [
@@ -171,7 +170,6 @@ def test_check_with_config(input_file: str | list[str]) -> None:
             "E1303",
             "W1306",
             "W1307",
-            "E0116",
             "E0114",
             "E0112",
             "E0115",

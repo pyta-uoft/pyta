@@ -25,6 +25,17 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+Pylint checkers v4.0:
+
+- `break-in-finally`
+- `deprecated-attribute`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
+
+Custom checkers:
+
 - `unnecessary-f-string`: Added new checker that checks f-string to see if it only consists of a single bare format expression that can be replaced with the string representation of that expression
 - `simplifiable-if`: Added a new checker that checks if an `if` or `elif` branch only contains a single nested `if` statement with a single branch.
 

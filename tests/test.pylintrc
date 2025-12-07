@@ -65,7 +65,7 @@ ignore-module-names =
 
 # Disable the message, report, category or checker with the given id(s).
 disable=
-    E0100, E0105, E0106, E0110, E0112, E0113, E0114, E0115, E0116, E0117, E0118,
+    E0100, E0105, E0106, E0110, E0112, E0113, E0114, E0115, E0117, E0118,
     E0236, E0237, E0238, E0240, E0242, E0243, E0244, E0305, E0308, E0309, E0310, E0311, E0312, E0313,
     E0402,
     E0603, E0604, E0605, E0606,

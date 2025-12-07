@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import graphviz
 from astroid import nodes
-from astroid.builder import AstroidBuilder
+from astroid.manager import AstroidManager
 
 from .visitor import CFGVisitor
 
@@ -72,7 +72,7 @@ def _generate(
         return
 
     file_name = os.path.splitext(os.path.basename(abs_path))[0]
-    module = AstroidBuilder().file_build(abs_path)
+    module = AstroidManager().ast_from_file(abs_path)
 
     # invoke Z3Visitor if z3 dependency is enabled
     if z3_enabled:

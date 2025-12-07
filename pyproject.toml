@@ -7,7 +7,7 @@ authors = [
 license = {text = "MIT"}
 readme = "README.md"
 dependencies = [
-    "aiohttp >= 3.11.18,< 3.14.0",
+    "aiohttp >= 3.13.0,< 3.14.0",
     "astroid ~= 4.0.2",
     "black",
     "click >= 8.0.1, < 9",

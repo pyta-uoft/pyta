@@ -288,6 +288,9 @@ def add_class_invariants(klass: type) -> None:
                     mutated_instances.append(self)
 
     for attr, value in klass.__dict__.items():
+        # Skip built-in __annotate_func__, which was introduced in Python 3.14
+        if attr == "__annotate_func__":
+            continue
         if inspect.isroutine(value):
             if isinstance(value, (staticmethod, classmethod)):
                 # Don't check rep invariants for staticmethod and classmethod

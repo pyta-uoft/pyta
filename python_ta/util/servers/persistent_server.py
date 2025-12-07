@@ -18,7 +18,8 @@ class PersistentHTMLServer:
         self.latest_html = LOADING_HTML
         self.websockets = set()
         self.server_started = False
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
 
     async def handle_report(self, request: web.Request) -> web.Response:
         """Serve the current HTML content at the root endpoint ('/')."""

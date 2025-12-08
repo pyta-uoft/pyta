@@ -9,6 +9,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+### 💫 New checkers
+
+### 🐛 Bug fixes
+
+### 🔧 Internal changes
+
+## [2.12.0] - 2025-12-08
+
+### ✨ Enhancements
+
 - Updated `SnapshotTracer` to open the generated HTML report in a one-shot server, instead of opening the HTML file directly.
 - Extended infinite-loop check to flag while loops whose conditions depend only on immutable variables and are not reassigned in the loop body.
 - Added custom renderers for the PEP8 error codes: E204, E225, E231

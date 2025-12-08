@@ -28,7 +28,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Pylint checkers v4.0:
 
 - `break-in-finally`
-- `deprecated-attribute`
 
 For more information on these checkers, please see the
 [Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above

@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         dependency: ["base", "z3-solver"]
 
     steps:
@@ -81,16 +81,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           parallel-finished: true
-          carryforward: "run-3.9-base,run-3.9-z3-solver,run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver"
+          carryforward: "run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver,run-3.14-base,run-3.14-z3-solver"
 
   docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python 3.11
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: 3.11
+          python-version: 3.14
       - name: Cache pip
         uses: actions/cache@v4.3.0
         with:

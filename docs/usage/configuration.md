@@ -66,12 +66,12 @@ The following Pylint checks are disabled by default.
 You can re-enable them by using the `enable` option.
 
 ```text
-E0100, E0105, E0106, E0110, E0112, E0113, E0114, E0115, E0116, E0117, E0118,
+E0100, E0105, E0106, E0110, E0112, E0113, E0114, E0115, E0117, E0118,
 E0236, E0237, E0238, E0240, E0242, E0243, E0244, E0305, E0308, E0309, E0310, E0311, E0312, E0313,
 E0402,
 E0603, E0604, E0605, E0606,
 E0703, W0707,
-E1124, E1125, E1132, E1139, E1142,
+E1124, E1125, E1132, E1139, E1142, E1145,
 E1200, E1201, E1205, E1206,
 E1300, E1301, E1302, E1303, E1304,
 W1406,
@@ -105,7 +105,8 @@ threading,
 unnecessary-dunder-call,
 unsupported_version,
 E2502, E2510, E2511, E2512, E2513, E2514, E2515,
-missing-timeout, positional-only-arguments-expected
+missing-timeout, positional-only-arguments-expected,
+match_statements,
 ```
 
 ## PythonTA general configuration options

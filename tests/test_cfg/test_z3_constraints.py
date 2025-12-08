@@ -1,5 +1,6 @@
 import astroid
 import z3
+from astroid import nodes
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
 from python_ta.transforms.z3_visitor import Z3Visitor
@@ -688,7 +689,7 @@ def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     # find the function definition node
     func_node = None
     for node in mod.body:
-        if isinstance(node, astroid.FunctionDef) and node.name == name:
+        if isinstance(node, nodes.FunctionDef) and node.name == name:
             func_node = node
             break
 

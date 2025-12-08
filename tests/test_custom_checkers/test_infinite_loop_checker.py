@@ -90,7 +90,7 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
-            for node in node.nodes_of_class(astroid.While):
+            for node in node.nodes_of_class(astroid.nodes.While):
                 self.checker.visit_while(node)
 
     def test_while_inside_func_unused_var(self) -> None:

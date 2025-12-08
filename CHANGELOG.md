@@ -21,8 +21,20 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improved RI checking to raise a warning when a `NameError` is raised and the missing name matches an instance attribute, and is due to an omitted `self.` in the RI.
 - Extended `AccumulationTable` class to support multiple loops in sequence within the same context manager
 - Added a solution to prevent possible large snippets created by the `render_generic` function
+- Support Python 3.14
 
 ### 💫 New checkers
+
+Pylint checkers v4.0:
+
+- `break-in-finally`
+- `deprecated-attribute`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
+
+Custom checkers:
 
 - `unnecessary-f-string`: Added new checker that checks f-string to see if it only consists of a single bare format expression that can be replaced with the string representation of that expression
 - `simplifiable-if`: Added a new checker that checks if an `if` or `elif` branch only contains a single nested `if` statement with a single branch.
@@ -42,6 +54,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed `test_html_server.py` tests to be compatible with Windows
 - Updated `conftest.py` and `test_black.py` to be compatible with pytest v9, removing usage of some deprecated features.
 - Updated tests in `test_accumulation_table.py` to cover multi-loop behavior and added new cases
+- Updated to pylint v4.0 and astroid v4.0
 
 ## [2.11.1] - 2025-08-17
 

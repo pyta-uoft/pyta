@@ -285,7 +285,9 @@ def test_c9104_module_name_violation() -> None:
 
 @pytest.fixture(scope="function")
 def temp_rc_file_path(tmp_path) -> str:
-    with open("python_ta/config/.pylintrc", "r") as file:
+    with open(
+        os.path.join(os.path.dirname(__file__), "../src/python_ta/config/.pylintrc"), "r"
+    ) as file:
         lines = file.readlines()
 
     lines = [line for line in lines if not re.match(r".*output-format.*", line)]
@@ -308,8 +310,12 @@ def test_cyclic_import(temp_rc_file_path) -> None:
     and this additional test is created on the side.
     """
 
-    cyclic_import_helper = "examples/pylint/cyclic_import_helper.py"
-    cyclic_import_file = "examples/pylint/r0401_cyclic_import.py"
+    cyclic_import_helper = os.path.join(
+        os.path.dirname(__file__), "../../../examples/pylint/cyclic_import_helper.py"
+    )
+    cyclic_import_file = os.path.join(
+        os.path.dirname(__file__), "../../../examples/pylint/r0401_cyclic_import.py"
+    )
 
     sys.stdout = StringIO()
     lint.Run(

@@ -4,9 +4,8 @@ import sys
 from typing import Dict, Generic, List, Set, TypeVar, Union
 
 import pytest
-from nested_preconditions_example import Student, my_function
 
-import python_ta.contracts
+from .nested_preconditions_example import Student, my_function
 from python_ta.contracts import check_contracts
 
 

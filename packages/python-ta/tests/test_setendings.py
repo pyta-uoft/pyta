@@ -12,7 +12,7 @@ import astroid
 from python_ta.transforms.setendings import *
 
 # Gives absolute path to root directory
-PATH = path.normpath(path.join(path.abspath(__file__), "..", "..", "examples", "ending_locations"))
+PATH = path.normpath(path.join(path.dirname(__file__), "../../../examples/ending_locations"))
 
 
 class TestEndingLocations(unittest.TestCase):

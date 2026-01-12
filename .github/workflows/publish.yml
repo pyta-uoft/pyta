@@ -22,8 +22,8 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Build
         run: uv build --package=python-ta
-      - Publish Python 🐍 distribution 📦 to PyPI
-      - run: uv publish
+      - name: Publish Python 🐍 distribution 📦 to PyPI
+        run: uv publish
       - name: Store the distribution packages
         uses: actions/upload-artifact@v6
         with:

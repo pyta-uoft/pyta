@@ -3512,7 +3512,6 @@ The different types of comparison operators can be classified in the following c
 3. _SyntaxError: invalid syntax_
 
    Some of the common causes of this error include:
-
    1. Missing colon at the end of an `if`, `elif`, `else`, `for`, `while`, `class`, or `def`
       statement.
 

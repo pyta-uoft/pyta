@@ -1,0 +1,9 @@
+[run]
+omit =
+    packages/python-ta/src/python_ta/debug/*
+    packages/python-ta/src/python_ta/reporters/templates/*
+    packages/python-ta/src/python_ta/util/*
+    packages/python-ta/src/python_ta/upload.py
+    packages/python-ta/src/python_ta/utils.py
+
+patch = subprocess

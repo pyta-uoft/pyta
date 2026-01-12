@@ -32,35 +32,35 @@ jobs:
         uses: actions/cache@v5.0.1
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('packages/python-ta/pyproject.yml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -e .[dev,cfg]
+          pip install -e ./packages/python-ta[dev,cfg]
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
-            pip install .[z3]
+            pip install ./packages/python-ta[z3]
           fi
       - name: Run tests
         run: |
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
-            pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov \
-            --ignore=tests/test_type_constraints \
-            --ignore=tests/test_type_inference \
-            --ignore=tests/test_debug/test_accumulation_table.py \
-            --ignore=tests/test_debug/test_recursion_table.py \
-            --ignore=tests/test_debug/test_snapshot_tracer.py
-            pytest -vv tests/test_debug/test_accumulation_table.py tests/test_debug/test_recursion_table.py tests/test_debug/test_snapshot_tracer.py
+            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov ./packages/python-ta/tests \
+            --ignore=./packages/python-ta/tests/test_type_constraints \
+            --ignore=./packages/python-ta/tests/test_type_inference \
+            --ignore=./packages/python-ta/tests/test_debug/test_accumulation_table.py \
+            --ignore=./packages/python-ta/tests/test_debug/test_recursion_table.py \
+            --ignore=./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
+            pytest -vv ./packages/python-ta/tests/test_debug/test_accumulation_table.py ./packages/python-ta/tests/test_debug/test_recursion_table.py ./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
           else
-            pytest -vv --cov python_ta --cov-config=.coveragerc --cov-report lcov --exclude-z3 \
-            --ignore=tests/test_type_constraints \
-            --ignore=tests/test_type_inference \
-            --ignore=tests/test_debug/test_accumulation_table.py \
-            --ignore=tests/test_debug/test_recursion_table.py \
-            --ignore=tests/test_debug/test_snapshot_tracer.py
-            pytest -vv tests/test_debug/test_accumulation_table.py tests/test_debug/test_recursion_table.py tests/test_debug/test_snapshot_tracer.py
+            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov --exclude-z3 ./packages/python-ta/tests \
+            --ignore=./packages/python-ta/tests/test_type_constraints \
+            --ignore=./packages/python-ta/tests/test_type_inference \
+            --ignore=./packages/python-ta/tests/test_debug/test_accumulation_table.py \
+            --ignore=./packages/python-ta/tests/test_debug/test_recursion_table.py \
+            --ignore=./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
+            pytest -vv ./packages/python-ta/tests/test_debug/test_accumulation_table.py ./packages/python-ta/tests/test_debug/test_recursion_table.py ./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
           fi
       - name: Upload test coverage to coveralls.io
         uses: coverallsapp/github-action@v2.3.7
@@ -102,6 +102,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -e .[dev,cfg,z3]
+          pip install -e ./packages/python-ta[dev,cfg,z3]
       - name: Generate docs
         run: sphinx-build -b html -W docs docs/_build
+        working-directory: packages/python-ta

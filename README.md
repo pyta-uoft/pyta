@@ -1,39 +1,14 @@
-# PyTA
+# PythonTA
 
-PyTA is a Python program which uses static code analysis to help students find
-and fix common coding errors in introductory Python courses. Python already
-has great static analysis tools like pep8 and pylint, but these tools do not
-necessarily have the most beginner-friendly format. PyTA has two central goals:
+Welcome! This is the repository for PythonTA.
+For more information about the library, check out our [documentation website](https://www.cs.toronto.edu/~david/pyta/) or the [package README.md](./packages/python-ta/README.md).
 
-1. Statically identify common coding errors by using existing linting tools and
-   building custom linters (e.g., as pylint checkers).
-2. Present beautiful, intuitive messages to students that are both helpful for
-   fixing errors, and good preparation for the terser messages they will see
-   in their careers.
-
-This is a new project started in the Summer of 2016, and takes the form
-of a wrapper around [pylint](https://pylint.org) (with custom checkers) that operates
-directly on Python modules, as well as a website with some supplementary
-material going into further detail for the emitted errors.
-
-For greater details on the errors PyTA checks for: [Help Documentation](https://www.cs.toronto.edu/~david/pyta/).
-
-For help getting started using PyTA: [Quick Start](https://www.cs.toronto.edu/~david/pyta/usage/quick_start.html).
-
-## Installation
-
-If you're interested in using PyTA, you can install it using `pip` (or `pip3`, on OSX/Linux):
-
-```console
-> pip install python-ta
-```
-
-### Development
+## Development
 
 If you're developing PyTA:
 
 1. First, clone this repository.
-2. Open a terminal in this repo, and run `pip install -e ".[dev, cfg, z3]"` to install the dependencies.
+2. Open a terminal in this repo, and run `pip install -e "./packages/python-ta[dev, cfg, z3]"` to install the dependencies.
 3. Then run `pre-commit install` to install the pre-commit hooks (for automatically formatting and checking your code on each commit).
 
 While not strictly necessary for debugging, some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.
@@ -43,22 +18,22 @@ While not strictly necessary for debugging, some debugging tools require [graphv
 To run the test suite, run the following command from inside the `pyta` directory:
 
 ```console
-> python -m pytest tests  # Or python3 on OSX/Linux
+> python -m pytest packages/python-ta/tests  # Or python3 on OSX/Linux
 ```
 
-## Generating the docs
+### Generating the docs
 
 The PyTA documentation is generated using [Sphinx](https://www.sphinx-doc.org/en/master/index.html).
 To generate the documentation locally, run the commands:
 
 ```console
-> cd docs
+> cd packages/python-ta/docs
 > make html
 ```
 
-Then open the file `docs/_build/html/index.html` in your web browser!
+Then open the file `packages/python-ta/docs/_build/html/index.html` in your web browser!
 
-## Demo
+### Demo
 
 You can currently see a proof of concept in this repository. Clone it,
 and then run `python` in this directory (PyTA is primarily meant to be

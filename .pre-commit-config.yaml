@@ -21,12 +21,12 @@ repos:
 exclude: |
   (?x)^(
       examples|
-      tests/fixtures/|
-      tests/test_debug/snapshot_testing_snapshots|
-      tests/test_debug/snapshot_tracer_testing_snapshots|
-      tests/test_reporters/snapshots/test_html_server/test_no_watch_server_is_non_persistent/no_watch_html_server_snapshot.html|
-      tests/test_reporters/snapshots/test_html_server/test_watch_persistence/watch_html_server_snapshot.html|
-      tests/test_reporters/snapshots/test_html_server/test_watch_update/
+      packages/python-ta/tests/fixtures/|
+      packages/python-ta/tests/test_debug/snapshot_testing_snapshots|
+      packages/python-ta/tests/test_debug/snapshot_tracer_testing_snapshots|
+      packages/python-ta/tests/test_reporters/snapshots/test_html_server/test_no_watch_server_is_non_persistent/no_watch_html_server_snapshot.html|
+      packages/python-ta/tests/test_reporters/snapshots/test_html_server/test_watch_persistence/watch_html_server_snapshot.html|
+      packages/python-ta/tests/test_reporters/snapshots/test_html_server/test_watch_update/
   )
 
 ci:

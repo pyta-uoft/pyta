@@ -1,0 +1,80 @@
+[project]
+name = "python-ta"
+version = "2.12.1.dev"
+description = "Code checking tool for teaching Python"
+authors = [
+    {name = "David Liu", email = "david@cs.toronto.edu"},
+]
+license = {text = "MIT"}
+readme = "README.md"
+dependencies = [
+    "aiohttp >= 3.13.0,< 3.14.0",
+    "astroid ~= 4.0.2",
+    "black",
+    "click >= 8.0.1, < 9",
+    "colorama ~= 0.4.6",
+    "jinja2 ~= 3.1.2",
+    "markdown-it-py < 5",
+    "mypy ~= 1.13",
+    "pycodestyle ~= 2.11",
+    "pygments >= 2.14,< 2.20",
+    "pylint ~= 4.0.3",
+    "requests >= 2.28,< 2.33",
+    "six",
+    "tabulate ~= 0.9.0",
+    "toml ~= 0.10.2",
+    "typeguard >= 4.1.0, < 5",
+    "watchdog ~= 6.0.0",
+    "wrapt >= 1.15.0, < 3"
+]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = [
+    "coverage >= 7.10.6",
+    "hypothesis",
+    "inflection",
+    "myst-parser",
+    "pre-commit",
+    "pytest",
+    "pytest-cov >= 4.0,< 7.1",
+    "pytest-mock",
+    "pytest-snapshot",
+    "websocket-client",
+    "sphinx",
+    "sphinx-rtd-theme",
+]
+cfg = [
+    "graphviz",
+]
+z3 = [
+    "z3-solver",
+]
+
+[project.scripts]
+python_ta = "python_ta.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/pyta-uoft/pyta"
+Documentation = "https://www.cs.toronto.edu/~david/pyta/"
+Repository = "https://github.com/pyta-uoft/pyta.git"
+Changelog = "https://github.com/pyta-uoft/pyta/blob/master/packages/python-ta/CHANGELOG.md"
+
+
+[build-system]
+requires = ["uv_build>=0.9.23,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+data = [
+    "src/python_ta/config",
+    "src/python_ta/reporters/templates",
+    "src/python_ta/debug/webstepper"
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra"
+testpaths = [
+    "tests",
+]

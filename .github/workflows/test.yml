@@ -39,14 +39,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -e ./packages/python-ta[dev,cfg]
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
-            pip install ./packages/python-ta[z3]
+            pip install -e ./packages/python-ta[dev,cfg,z3]
+          else
+            pip install -e ./packages/python-ta[dev,cfg]
           fi
       - name: Run tests
         run: |
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
-            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov \
+            pytest -vv --cov python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov \
             --ignore=./packages/python-ta/tests/test_type_constraints \
             --ignore=./packages/python-ta/tests/test_type_inference \
             --ignore=./packages/python-ta/tests/test_debug/test_accumulation_table.py \
@@ -55,7 +56,7 @@ jobs:
             ./packages/python-ta/tests
             pytest -vv ./packages/python-ta/tests/test_debug/test_accumulation_table.py ./packages/python-ta/tests/test_debug/test_recursion_table.py ./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
           else
-            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov --exclude-z3 \
+            pytest -vv --cov python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov --exclude-z3 \
             --ignore=./packages/python-ta/tests/test_type_constraints \
             --ignore=./packages/python-ta/tests/test_type_inference \
             --ignore=./packages/python-ta/tests/test_debug/test_accumulation_table.py \

@@ -46,20 +46,22 @@ jobs:
       - name: Run tests
         run: |
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
-            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov ./packages/python-ta/tests \
+            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov \
             --ignore=./packages/python-ta/tests/test_type_constraints \
             --ignore=./packages/python-ta/tests/test_type_inference \
             --ignore=./packages/python-ta/tests/test_debug/test_accumulation_table.py \
             --ignore=./packages/python-ta/tests/test_debug/test_recursion_table.py \
-            --ignore=./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
+            --ignore=./packages/python-ta/tests/test_debug/test_snapshot_tracer.py \
+            ./packages/python-ta/tests
             pytest -vv ./packages/python-ta/tests/test_debug/test_accumulation_table.py ./packages/python-ta/tests/test_debug/test_recursion_table.py ./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
           else
-            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov --exclude-z3 ./packages/python-ta/tests \
+            pytest -vv --cov ./packages/python-ta/src/python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov --exclude-z3 \
             --ignore=./packages/python-ta/tests/test_type_constraints \
             --ignore=./packages/python-ta/tests/test_type_inference \
             --ignore=./packages/python-ta/tests/test_debug/test_accumulation_table.py \
             --ignore=./packages/python-ta/tests/test_debug/test_recursion_table.py \
-            --ignore=./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
+            --ignore=./packages/python-ta/tests/test_debug/test_snapshot_tracer.py \
+            ./packages/python-ta/tests
             pytest -vv ./packages/python-ta/tests/test_debug/test_accumulation_table.py ./packages/python-ta/tests/test_debug/test_recursion_table.py ./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
           fi
       - name: Upload test coverage to coveralls.io
@@ -95,7 +97,7 @@ jobs:
         uses: actions/cache@v5.0.1
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('packages/python-ta/pyproject.yml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-

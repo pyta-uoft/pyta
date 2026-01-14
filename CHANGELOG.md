@@ -13,6 +13,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fix bug that allowed users to inject code into the HTML template by closing the backticks in the e9920 f-string checker.
+
 ### 🔧 Internal changes
 
 ## [2.12.0] - 2025-12-08

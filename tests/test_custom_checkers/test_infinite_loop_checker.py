@@ -640,6 +640,45 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
     """,
     ]
 
+    GENERATOR_CASES = [
+        """
+    def only_generator():
+        return (x for x in range(5))
+
+    while only_generator(): #@
+        pass
+    """,
+        """
+    def only_generator():
+        if something:
+            return (x for x in range(10))
+        else:
+            return (x for x in range(0))
+
+    while only_generator(): #@
+        pass
+    """,
+    ]
+
+    NON_GENERATOR_CASES = [
+        """
+    def sometimes_generator():
+        if something:
+            return (x for x in range(10))
+        return 5
+
+    while sometimes_generator(): #@
+        pass
+    """,
+        """
+    def return_list():
+        return [1,2,3]
+
+    while return_list(): #@
+        pass
+    """,
+    ]
+
     @pytest.mark.parametrize("src", CONSTANT_COMP_CASES)
     def test_constant_comp_condition_correctness(self, src: str) -> None:
         """Test verifies that `_check_constant_form_condition` helper properly flags constant BoolOp or BinOp loop
@@ -689,3 +728,21 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
         with patch("pylint.checkers.utils.safe_infer", return_value=astroid.util.UninferableBase()):
             result = self.checker._check_constant_loop_cond(node.test)
             assert result is False
+
+    @pytest.mark.parametrize("src", GENERATOR_CASES)
+    def test_generator_only_cases(self, src: str) -> None:
+        """Test verifies that '_check_constant_loop_cond' helper flags functions that only return generators."""
+        node = astroid.extract_node(src)
+
+        expected = True
+        actual = self.checker._check_constant_loop_cond(node.test)
+        assert actual == expected
+
+    @pytest.mark.parametrize("src", NON_GENERATOR_CASES)
+    def test_non_generator_cases(self, src: str) -> None:
+        """Test verifies that '_check_constant_loop_cond' does not flag functions with non-generator returns."""
+        node = astroid.extract_node(src)
+
+        expected = False
+        actual = self.checker._check_constant_loop_cond(node.test)
+        assert actual == expected

@@ -23,7 +23,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=("var", "var"),
+                args=('`f"var"`', "`str(var)`"),
             ),
             ignore_position=True,
         ):
@@ -55,7 +55,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=("var + 1", "var + 1"),
+                args=('`f"var + 1"`', "`str(var + 1)`"),
             ),
             ignore_position=True,
         ):

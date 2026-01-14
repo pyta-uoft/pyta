@@ -18,6 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🔧 Internal changes
 
 - Removed old documentation files under `python_ta/reporters/`
+- Added tests for infinite_loop_checker_py to improve coverage for the generator portion of check_constant_loop_cond function.
 
 ## [2.12.0] - 2025-12-08
 

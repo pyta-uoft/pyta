@@ -32,9 +32,9 @@ class FormattedStringChecker(BaseChecker):
             expression = node.values[0].value.as_string()
             max_backtick_count = self.backtick_count(expression)
             f_string_message = (
-                f'{"`" * max_backtick_count}f"{{{expression}}}"{"`" * max_backtick_count}'
+                f'{'`' * max_backtick_count}f"{{{expression}}}"{'`' * max_backtick_count}'
             )
-            str_message = f"{"`" * max_backtick_count}str({expression}){"`" * max_backtick_count}"
+            str_message = f"{'`' * max_backtick_count}str({expression}){'`' * max_backtick_count}"
             self.add_message(
                 "unnecessary-f-string",
                 node=node,

@@ -23,7 +23,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=('`f"var"`', "`str(var)`"),
+                args=('`f"{var}"`', "`str(var)`"),
             ),
             ignore_position=True,
         ):
@@ -55,7 +55,27 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=('`f"var + 1"`', "`str(var + 1)`"),
+                args=('`f"{var + 1}"`', "`str(var + 1)`"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_with_backticks(self) -> None:
+        """Tests for when inner f-string expression modifies variable"""
+        src = """
+        var = 5
+        x = f\"{var + \'``20``\'}\"
+        """
+
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-f-string",
+                node=fstring_node,
+                line=2,
+                args=("```f\"{var + '``20``'}\"```", "```str(var + '``20``')```"),
             ),
             ignore_position=True,
         ):

@@ -1,3 +1,4 @@
+import base64
 import os
 import socket
 import sys
@@ -88,9 +89,13 @@ class HTMLReporter(PythonTaReporter):
             self.persistent_server = PersistentHTMLServer(self.port)
 
         # Embed resources so the output html can go anywhere, independent of assets.
-        # with open(os.path.join(TEMPLATES_DIR, 'pyta_logo_markdown.png'), 'rb+') as image_file:
-        #     # Encode img binary to base64 (+33% size), decode to remove the "b'"
-        #     pyta_logo_base64_encoded = b64encode(image_file.read()).decode()
+        with open(os.path.join(TEMPLATES_DIR, "pyta_logo_markdown.png"), "rb+") as image_file:
+            # Encode img binary to base64 (+33% size), decode to remove the "b'"
+            pyta_logo_base64_encoded = base64.b64encode(image_file.read()).decode()
+        pyta_logo_data_url = f"data:image/png;base64,{pyta_logo_base64_encoded}"
+
+        # Use the same pyta_logo_url for the favicon
+        favicon_data_url = pyta_logo_data_url
 
         # Render the jinja template
         rendered_template = template.render(
@@ -101,6 +106,8 @@ class HTMLReporter(PythonTaReporter):
             os=os,
             enumerate=enumerate,
             md=md,
+            pyta_logo_data_url=pyta_logo_data_url,
+            favicon_data_url=favicon_data_url,
         )
 
         # If a filepath was specified, write to the file

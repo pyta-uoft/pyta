@@ -6,6 +6,7 @@
         <style rel="stylesheet">
             {% include "stylesheet.css" %}
         </style>
+        <link rel="icon" type="image/png" href="{{ favicon_data_url }}">
     </head>
     <body>
         <div class="main-grid">
@@ -263,7 +264,7 @@
             </div>
             <div class="logos">
                 <a class="logo" href="https://www.cs.toronto.edu/~david/pyta/" target="_blank">
-                <img src="https://www.cs.toronto.edu/~david/pyta/images/pyta_logo.svg" alt="PyTA logo" height="40"/>
+                <img src="{{ pyta_logo_data_url }}" alt="PyTA logo" height="40"/>
                 </a>
                 <a class="logo" href="https://github.com/pyta-uoft/pyta" target="_blank">
                     <!-- From https://icons.getbootstrap.com/icons/github/ -->

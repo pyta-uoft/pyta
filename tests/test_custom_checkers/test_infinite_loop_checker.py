@@ -557,6 +557,68 @@ class TestInfiniteLoopChecker(pylint.testutils.CheckerTestCase):
             result = self.checker._check_immutable_cond_var_reassigned(node)
             assert result is False
 
+    CASES = [
+        """
+    x = (i for i in range(10))
+
+    while x: #@
+        pass
+    """,
+        """
+    x = 12
+    x = (i for i in range(5))
+
+    while x: #@
+        pass
+    """,
+        """
+    if something:
+        x = (i for i in range(7))
+    else:
+        x = (k for k in range(10))
+
+    while x: #@
+        pass
+    """,
+    ]
+
+    @pytest.mark.parametrize("src", CASES)
+    def test_name_generator_only_cases(self, src: str) -> None:
+        """Test verifies that `_name_holds_generator` returns True when the variable always holds a generator."""
+        node = astroid.extract_node(src)
+
+        expected = (True, None)
+        actual = self.checker._name_holds_generator(node.test)
+        assert actual == expected
+
+    def test_name_non_generator_case(self) -> None:
+        """Test verifies that `_name_holds_generator` returns False when the variable doesn't hold a generator."""
+        src = """
+        x = 5
+        y = x
+
+        while y: #@
+            pass
+        """
+
+        node = astroid.extract_node(src)
+        expected = (False, None)
+        actual = self.checker._name_holds_generator(node.test)
+        assert actual == expected
+
+    def test_function_call_case(self) -> None:
+        """Test verifies that `_name_holds_generator` returns a Call node when the variable holds a function result."""
+        src = """
+        x = some_call()
+
+        while x: #@
+            pass
+        """
+
+        node = astroid.extract_node(src)
+        emit, call = self.checker._name_holds_generator(node.test)
+        assert emit is False and isinstance(call, astroid.nodes.Call)
+
 
 class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = InfiniteLoopChecker
@@ -731,7 +793,7 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
 
     @pytest.mark.parametrize("src", GENERATOR_CASES)
     def test_generator_only_cases(self, src: str) -> None:
-        """Test verifies that '_check_constant_loop_cond' helper flags functions that only return generators."""
+        """Test verifies that `_check_constant_loop_cond` helper flags functions that only return generators."""
         node = astroid.extract_node(src)
 
         expected = True
@@ -740,7 +802,7 @@ class TestConstantConditionHelper(pylint.testutils.CheckerTestCase):
 
     @pytest.mark.parametrize("src", NON_GENERATOR_CASES)
     def test_non_generator_cases(self, src: str) -> None:
-        """Test verifies that '_check_constant_loop_cond' does not flag functions with non-generator returns."""
+        """Test verifies that `_check_constant_loop_cond` does not flag functions with non-generator returns."""
         node = astroid.extract_node(src)
 
         expected = False

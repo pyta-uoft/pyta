@@ -1,9 +1,0 @@
-[run]
-omit =
-    python_ta/debug/*
-    python_ta/reporters/templates/*
-    python_ta/util/*
-    python_ta/upload.py
-    python_ta/utils.py
-
-patch = subprocess

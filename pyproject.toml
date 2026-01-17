@@ -1,85 +1,30 @@
 [project]
-name = "python-ta"
-description = "Code checking tool for teaching Python"
-authors = [
-    {name = "David Liu", email = "david@cs.toronto.edu"},
-]
-license = {text = "MIT"}
-readme = "README.md"
-dependencies = [
-    "aiohttp >= 3.13.0,< 3.14.0",
-    "astroid ~= 4.0.2",
-    "black",
-    "click >= 8.0.1, < 9",
-    "colorama ~= 0.4.6",
-    "jinja2 ~= 3.1.2",
-    "markdown-it-py < 5",
-    "mypy ~= 1.13",
-    "pycodestyle ~= 2.11",
-    "pygments >= 2.14,< 2.20",
-    "pylint ~= 4.0.3",
-    "requests >= 2.28,< 2.33",
-    "six",
-    "tabulate ~= 0.9.0",
-    "toml ~= 0.10.2",
-    "typeguard >= 4.1.0, < 5",
-    "watchdog ~= 6.0.0",
-    "wrapt >= 1.15.0, < 3"
-]
-dynamic = ["version"]
+name = "python-ta-workspace"
+version = "0.1.0"
+description = "A workspace for PythonTA packages"
 requires-python = ">=3.10"
 
-[project.optional-dependencies]
-dev = [
-    "coverage >= 7.10.6",
-    "hypothesis",
-    "inflection",
-    "myst-parser",
-    "pre-commit",
-    "pytest",
-    "pytest-cov >= 4.0,< 7.1",
-    "pytest-mock",
-    "pytest-snapshot",
-    "websocket-client",
-    "sphinx",
-    "sphinx-rtd-theme",
+# Global dependencies that apply to all packages (e.g., testing/linting)
+dependencies = [
+    "python-ta[dev,z3,cfg]",
 ]
-cfg = [
-    "graphviz",
-]
-z3 = [
-    "z3-solver",
-]
-
-[project.scripts]
-python_ta = "python_ta.__main__:main"
-
-[project.urls]
-Homepage = "https://github.com/pyta-uoft/pyta"
-Documentation = "https://www.cs.toronto.edu/~david/pyta/"
-Repository = "https://github.com/pyta-uoft/pyta.git"
-Changelog = "https://github.com/pyta-uoft/pyta/blob/master/CHANGELOG.md"
-
 
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.9.23,<0.10.0"]
+build-backend = "uv_build"
 
-[tool.setuptools]
-include-package-data = true
-zip-safe = false
 
-[tool.setuptools.dynamic]
-version = {attr = "python_ta.__version__"}
-#readme = {file = "README.md", content-type = "text/markdown"}
+[tool.uv.sources]
+python-ta = { workspace = true }
 
-[tool.setuptools.packages.find]
-include = ["python_ta*"]
+[tool.uv.workspace]
+members = ["packages/*"]
+
 
 [tool.black]
 extend-exclude = '''
 ^/examples/
-^/tests/fixtures/
+^/packages/python-ta/tests/fixtures/
 '''
 line-length = 100
 target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
@@ -87,11 +32,5 @@ target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
 
 [tool.isort]
 profile = "black"
+known_local_folder = ["python_ta"]
 multi_line_output = 3
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-ra"
-testpaths = [
-    "tests",
-]

@@ -6,11 +6,11 @@
 __pycache__/
 
 # Setuptools folders.
-/dist/
-/build/
+**/dist/
+**/build/
 
 # Python egg metadata, regenerated from source files by setuptools.
-/*.egg-info
+*.egg-info
 
 # Hypothesis caches
 .hypothesis/
@@ -22,10 +22,11 @@ __pycache__/
 *.DS_Store
 
 # Sphinx documentation build files
-docs/_build
+**/docs/_build
 
 # Environments
 venv/
+.venv/
 
 # For prettier
 node_modules/

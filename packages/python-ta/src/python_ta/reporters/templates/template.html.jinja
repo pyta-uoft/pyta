@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>PythonTA Report</title>
+        <style rel="stylesheet">
+            {% include "stylesheet.css" %}
+        </style>
+        <link rel="icon" type="image/png" href="{{ favicon_data_url }}">
+    </head>
+    <body>
+        <div class="main-grid">
+            <header>
+                <h1 class="title">PythonTA Report</h1>
+                <time>{{ date_time }}</time>
+            </header>
+            <section class="sidebar">
+                <div class="section-header">
+                    <h2>Table of Contents</h2>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                        <!-- Sun and moon icons sourced from heroicons at https://heroicons.com/ -->
+                        <svg class="sun-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                        </svg>
+                    </button>
+                </div>
+                <ul>
+                    {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
+                    <li class="collapsible expanded">
+                        <button>
+                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+                        <span class="file-name">
+                            <a href={{'#{}'.format(filenum)}}>
+                                {{os.path.basename(filename)}}
+                            </a>
+                        </span>
+                        <ul>
+                            <li class="collapsible expanded">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                                <span>
+                                    <strong>Code Errors or Forbidden Usage</strong>
+                                </span>
+                                <ul>
+                                    {% for message_id in messages[0] %}
+                                    <li>
+                                        <a href={{'#{}-{}'.format(filenum, message_id)}}>
+                                            {{'{} ({})'.format(message_id, messages[0][message_id][0].symbol)}}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            <li class="collapsible expanded">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                                <span>
+                                    <strong>Style and Convention</strong>
+                                </span>
+                                <ul>
+                                    {% for message_id in messages[1] %}
+                                    <li>
+                                        <a href={{'#{}-{}'.format(filenum, message_id)}}>
+                                            {{'{} ({})'.format(message_id, messages[1][message_id][0].symbol)}}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            <main>
+                {% set limit = reporter.linter.config.pyta_number_of_messages %}
+                {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
+                <section id={{filenum}}>
+                    <div class="section-header">
+                        <h2> {{ filename }} </h2>
+                    </div>
+                    <article class="error-output code-errors">
+                        <h3 class="category-heading">
+                            <span>{{ reporter.code_err_title }}</span>
+                            <span class="slider">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible expanded">
+                            {% for message_id in messages[0] %}
+                                {% set occurrences = messages[0][message_id] %}
+                            <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
+                                <div class="info">
+                                    {% set mid = message_id.lower() %}
+                                    <span class="error-link code-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;{{mid}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    {% set num_occurrences = occurrences|length %}
+                                    <span class="occurrences">
+                                    {{ num_occurrences }}
+                                    {% if num_occurrences == 1 %}
+                                     occurrence.
+                                    {% else %}
+                                     occurrences.
+                                    {% endif %}
+                                    </span>
+                                    <span class="shown">
+                                    {% if 0 < limit < num_occurrences %}
+                                     (First {{ limit }} shown).
+                                    {% endif %}
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    {% for indiv in occurrences %}
+                                        {% if limit == 0 or loop.index0 < limit %}
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }} </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                {% if indiv.snippet != '' %}
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  <pre class="message-snippet">{{ indiv.snippet }}</pre>
+                                                </div>
+                                                {% else %}
+                                                <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                                {% endif %}
+                                            </div>
+                                       {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                            {% endfor %}
+                        </div>
+                    </article>
+                    <article class="error-output style-errors">
+                        <h3 class="category-heading">
+                            <span>{{ reporter.style_err_title }}</span>
+                            <span class="slider">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible expanded">
+                            {% for message_id, occurrences in messages[1].items() %}
+                            <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
+                                <div class="info">
+                                    {% set mid = message_id.lower() %}
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;{{mid}}" target="_blank">&#10064; {{ message_id }} ({{ occurrences[0].symbol }})  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    {% set num_occurrences = occurrences|length %}
+                                    <span class="occurrences">
+                                    {{ num_occurrences }}
+                                        {% if num_occurrences == 1 %}
+                                            occurrence.
+                                        {% else %}
+                                            occurrences.
+                                        {% endif %}
+                                    </span>
+                                    <span class="shown">
+                                    {% if 0 < limit < num_occurrences %}
+                                     (First {{ limit }} shown).
+                                    {% endif %}
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    {% for indiv in occurrences %}
+                                        {% if limit == 0 or loop.index0 < limit %}
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line {{ indiv.line }}] {{ md.renderInline(indiv.msg) | safe }} </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  {% if indiv.snippet != '' %}
+                                                  <pre class="message-snippet">{{ indiv.snippet }}</pre>
+                                                  {% else %}
+                                                  <span class="empty-placeholder">{{ reporter.no_snippet }}</span>
+                                                  {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+                            {% else %}
+                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
+                            {% endfor %}
+                        </div>
+                    </article>
+                </section>
+                {% endfor %}
+            </main>
+        </div>
+        <footer>
+            <div class="footer-text">
+            <p>
+                PythonTA is maintained by Professor David Liu and students at the University of Toronto.
+            </p>
+            <p>
+                Found a bug? Report it to <a href="mailto:david@cs.toronto.edu">Prof. Liu</a>!
+            </p>
+            <p>
+                <a href="https://www.cs.toronto.edu/~david/pyta/">PyTA Help Documentation</a>
+            </p>
+            </div>
+            <div class="logos">
+                <a class="logo" href="https://www.cs.toronto.edu/~david/pyta/" target="_blank">
+                <img src="{{ pyta_logo_data_url }}" alt="PyTA logo" height="40"/>
+                </a>
+                <a class="logo" href="https://github.com/pyta-uoft/pyta" target="_blank">
+                    <!-- From https://icons.getbootstrap.com/icons/github/ -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </a>
+            </div>
+        </footer>
+        <script type="text/javascript">
+            {% include "script.js" %}
+        </script>
+    </body>
+</html>

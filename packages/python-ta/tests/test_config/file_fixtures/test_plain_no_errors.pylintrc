@@ -1,0 +1,8 @@
+[REPORTS]
+
+output-format = pyta-plain
+
+[CUSTOM PYTA OPTIONS]
+
+# Default max amount of messages for reporter to display.
+pyta-number-of-messages = 10

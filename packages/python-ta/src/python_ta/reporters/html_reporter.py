@@ -64,7 +64,7 @@ class HTMLReporter(PythonTaReporter):
         This method can be implemented to display them after they've
         been aggregated.
         """
-        md = MarkdownIt()
+        md = MarkdownIt("js-default")
         grouped_messages = {
             path: self.group_messages(msgs) for path, msgs in self.gather_messages().items()
         }

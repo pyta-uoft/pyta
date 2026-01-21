@@ -26,10 +26,7 @@ class ExtendedMarkup(Markup):
             ".",
             "!",
             "|",
-            ">",
             "~",
-            "<",
-            ">",
             ":",
         ]
         for char in markdown_chars:

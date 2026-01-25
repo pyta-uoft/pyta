@@ -1,12 +1,12 @@
 import astroid
 import pylint.testutils
 from astroid import nodes
+from python_ta_z3 import Z3Visitor
 
 from python_ta.cfg.visitor import CFGVisitor
 from python_ta.checkers.inconsistent_or_missing_returns_checker import (
     InconsistentReturnChecker,
 )
-from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestInconsistentReturnChecker(pylint.testutils.CheckerTestCase):

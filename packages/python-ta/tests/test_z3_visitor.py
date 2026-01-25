@@ -4,9 +4,9 @@ from unittest.mock import patch
 import astroid
 import pytest
 import z3
+from python_ta_z3 import Z3Visitor
 
 from python_ta.cfg import ControlFlowGraph
-from python_ta.transforms.z3_visitor import Z3Visitor
 
 # test cases for z3 variables
 z3_vars_example = """
@@ -418,7 +418,7 @@ def test_cfg_z3_vars_initialization():
     assert cfg.z3_vars["a"] == z3.String("a")
 
 
-@patch.dict("sys.modules", {"python_ta.z3.z3_parser": None})
+@patch.dict("sys.modules", {"python_ta_z3": None})
 def test_cfg_z3_initialization_failed_import(caplog) -> None:
     """Test verifies if `add_argument` handles import error as expected."""
     node = astroid.extract_node(z3_vars_example)

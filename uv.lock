@@ -11,6 +11,7 @@ resolution-markers = [
 members = [
     "python-ta",
     "python-ta-workspace",
+    "python-ta-z3",
 ]
 
 [[package]]
@@ -1460,6 +1461,7 @@ dev = [
     { name = "websocket-client" },
 ]
 z3 = [
+    { name = "python-ta-z3" },
     { name = "z3-solver" },
 ]
 
@@ -1486,6 +1488,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0,<7.1" },
     { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "pytest-snapshot", marker = "extra == 'dev'" },
+    { name = "python-ta-z3", marker = "extra == 'z3'", editable = "packages/python-ta-z3" },
     { name = "requests", specifier = ">=2.28,<2.33" },
     { name = "six" },
     { name = "sphinx", marker = "extra == 'dev'" },
@@ -1506,10 +1509,41 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "python-ta", extra = ["cfg", "dev", "z3"] },
+    { name = "python-ta-z3" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "python-ta", extras = ["dev", "z3", "cfg"], editable = "packages/python-ta" }]
+requires-dist = [
+    { name = "python-ta", extras = ["dev", "z3", "cfg"], editable = "packages/python-ta" },
+    { name = "python-ta-z3", editable = "packages/python-ta-z3" },
+]
+
+[[package]]
+name = "python-ta-z3"
+version = "2.12.1.dev0"
+source = { editable = "packages/python-ta-z3" }
+dependencies = [
+    { name = "astroid" },
+    { name = "z3-solver" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "astroid", specifier = "~=4.0.2" },
+    { name = "z3-solver" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+]
 
 [[package]]
 name = "pytokens"

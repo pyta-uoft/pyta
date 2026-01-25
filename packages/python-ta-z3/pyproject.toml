@@ -1,0 +1,23 @@
+[project]
+name = "python-ta-z3"
+version = "2.12.1.dev"
+description = "Z3 solver integration for PythonTA"
+readme = "README.md"
+authors = [
+    {name = "David Liu", email = "david@cs.toronto.edu"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "astroid ~= 4.0.2",
+    "z3-solver",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.23,<0.10.0"]
+build-backend = "uv_build"

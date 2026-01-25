@@ -39,12 +39,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
+          pip install -e ./packages/python-ta-z3
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
             pip install -e ./packages/python-ta[dev,cfg,z3]
           else
             pip install -e ./packages/python-ta[dev,cfg]
           fi
-      - name: Run tests
+      - name: Run python-ta tests
         run: |
           if [ "${{ matrix.dependency }}" == "z3-solver" ]; then
             pytest -vv --cov python_ta --cov-config=./packages/python-ta/.coveragerc --cov-report lcov \
@@ -65,12 +66,24 @@ jobs:
             ./packages/python-ta/tests
             pytest -vv ./packages/python-ta/tests/test_debug/test_accumulation_table.py ./packages/python-ta/tests/test_debug/test_recursion_table.py ./packages/python-ta/tests/test_debug/test_snapshot_tracer.py
           fi
-      - name: Upload test coverage to coveralls.io
+      - name: Upload python-ta test coverage to coveralls.io
         uses: coverallsapp/github-action@v2.3.7
         env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           flag-name: run-${{ matrix.python-version }}-${{ matrix.dependency }}
+          parallel: true
+      - name: Run python-ta-z3 tests
+        if: matrix.dependency == 'base'
+        run: |
+          pytest -vv --cov python_ta_z3 --cov-report lcov ./packages/python-ta-z3
+      - name: Upload python-ta-z3 test coverage to coveralls.io
+        if: matrix.dependency == 'base'
+        uses: coverallsapp/github-action@v2.3.7
+        env:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          flag-name: run-${{ matrix.python-version }}-python-ta-z3
           parallel: true
 
   finish:
@@ -84,7 +97,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         with:
           parallel-finished: true
-          carryforward: "run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver,run-3.14-base,run-3.14-z3-solver"
+          carryforward: >
+            run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver,run-3.14-base,run-3.14-z3-solver,
+            run-3.10-python-ta-z3,run-3.11-python-ta-z3,run-3.12-python-ta-z3,run-3.13-python-ta-z3,run-3.14-python-ta-z3
 
   docs:
     runs-on: ubuntu-latest
@@ -105,7 +120,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install -e ./packages/python-ta[dev,cfg,z3]
+          pip install -e ./packages/python-ta-z3 ./packages/python-ta[dev,cfg,z3]
       - name: Generate docs
         run: sphinx-build -b html -W docs docs/_build
         working-directory: packages/python-ta

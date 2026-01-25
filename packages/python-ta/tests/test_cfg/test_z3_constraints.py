@@ -1,9 +1,9 @@
 import astroid
 import z3
 from astroid import nodes
+from python_ta_z3 import Z3Visitor
 
 from python_ta.cfg import CFGVisitor, ControlFlowGraph
-from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 def test_simple_function() -> None:

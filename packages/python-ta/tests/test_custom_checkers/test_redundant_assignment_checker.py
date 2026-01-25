@@ -1,10 +1,10 @@
 import astroid
 import pylint.testutils
 from astroid import nodes
+from python_ta_z3 import Z3Visitor
 
 from python_ta.cfg import CFGVisitor
 from python_ta.checkers.redundant_assignment_checker import RedundantAssignmentChecker
-from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestRedundantAssignmentChecker(pylint.testutils.CheckerTestCase):

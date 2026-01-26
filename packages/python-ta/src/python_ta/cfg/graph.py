@@ -74,7 +74,7 @@ class ControlFlowGraph:
 
         if self.z3_enabled:
             try:
-                from ..z3.z3_parser import Z3Parser
+                from python_ta_z3 import Z3Parser
 
             except ImportError:
                 logging.error("Failed to import Z3Parser despite Z3 being enabled.")
@@ -478,9 +478,8 @@ class Z3Environment:
         """Parse an Astroid node to a Z3 constraint
         Return the resulting expression
         """
+        from python_ta_z3 import Z3ParseException, Z3Parser
         from z3 import Z3Exception
-
-        from ..z3.z3_parser import Z3ParseException, Z3Parser
 
         parser = Z3Parser(self.variables)
         try:

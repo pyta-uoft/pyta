@@ -4,11 +4,11 @@ import astroid
 from astroid import AstroidError, nodes
 from astroid.transforms import TransformVisitor
 from astroid.util import safe_infer
-from python_ta_z3 import Z3ParseException, Z3Parser
 from z3 import And, simplify
 from z3.z3types import Z3Exception
 
-from ..contracts import parse_assertions
+from .utils import parse_assertions
+from .z3_parser import Z3ParseException, Z3Parser
 
 
 class Z3Visitor:

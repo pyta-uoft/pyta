@@ -19,7 +19,7 @@ def patch_ast_transforms():
         runtime_z3 = getattr(self.config, "z3", False)
         if runtime_z3:
             try:
-                from ..transforms.z3_visitor import Z3Visitor
+                from python_ta_z3 import Z3Visitor
 
                 ast = Z3Visitor().visitor.visit(ast)
             except Exception as e:

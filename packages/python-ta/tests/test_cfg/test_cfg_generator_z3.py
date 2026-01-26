@@ -30,7 +30,7 @@ def test_cfg_z3_enabled() -> None:
         os.remove(svg_file_path)
 
 
-@patch.dict("sys.modules", {"python_ta.transforms.z3_visitor": None})
+@patch.dict("sys.modules", {"python_ta_z3": None})
 def test_cfg_z3_failed_import() -> None:
     """Test verifies that `generate_cfg` handles ImportError appropriately."""
     file_path = "examples/pylint/r0912_too_many_branches.py"

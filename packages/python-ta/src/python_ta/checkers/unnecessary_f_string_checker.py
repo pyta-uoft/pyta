@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from astroid import nodes
+from astroid import InferenceError, nodes
 from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
@@ -37,15 +37,18 @@ class FormattedStringChecker(BaseChecker):
             expression = node.values[0].value.as_string()
             str_call_needed = False
 
-            for inferred in node.values[0].value.infer():
-                if isinstance(inferred, nodes.Const):
-                    source = inferred.as_string()
-                    if not (source.startswith(("'", '"'))):
+            try:
+                for inferred in node.values[0].value.infer():
+                    if isinstance(inferred, nodes.Const):
+                        source = inferred.as_string()
+                        if not (source.startswith(("'", '"'))):
+                            str_call_needed = True
+                            break
+                    else:
                         str_call_needed = True
                         break
-                else:
-                    str_call_needed = True
-                    break
+            except InferenceError:
+                str_call_needed = True
 
             if str_call_needed:
                 self.add_message(

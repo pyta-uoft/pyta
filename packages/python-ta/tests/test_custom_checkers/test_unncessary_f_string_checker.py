@@ -83,3 +83,42 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertNoMessages():
             self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_on_string_var(self) -> None:
+        """Test that alternate message triggered when string variable placed into f-string"""
+        src = """
+            var = "hi" + "bye" + "back"
+            x = f"{var}"
+            """
+
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-f-string-on-string",
+                node=fstring_node,
+                line=3,
+                args=("var", "var"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_on_string_direct(self) -> None:
+        """Test that alternate message triggered when strings placed directly into f-string"""
+        src = """
+            x = f"{'hi' + 'bye'}"
+            """
+
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-f-string-on-string",
+                node=fstring_node,
+                line=2,
+                args=("'hi' + 'bye'", "'hi' + 'bye'"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_joinedstr(fstring_node)

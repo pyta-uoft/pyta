@@ -12,6 +12,7 @@ from typing import IO, TYPE_CHECKING, Optional, Union
 from pylint.reporters import BaseReporter
 
 from .node_printers import LineType, render_message
+from python_ta.util.extended_markup import ExtendedMarkup
 
 if TYPE_CHECKING:
     from astroid import NodeNG
@@ -131,7 +132,6 @@ class PythonTaReporter(BaseReporter):
         curr_messages = self.messages[self.current_file]
         if len(curr_messages) >= 1 and curr_messages[-1].msg_id == msg_definition.msgid:
             msg = curr_messages[-1]
-
             if msg.symbol in NO_SNIPPET or msg.msg.startswith("Invalid module"):
                 snippet = ""
             else:

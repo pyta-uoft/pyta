@@ -129,11 +129,9 @@ class PythonTaReporter(BaseReporter):
         This is used by our patched version of MessagesHandlerMixIn.add_message
         (see python_ta/patches/messages.py).
         """
-        msg_definition.msg = ExtendedMarkup(msg_definition.msg)
         curr_messages = self.messages[self.current_file]
         if len(curr_messages) >= 1 and curr_messages[-1].msg_id == msg_definition.msgid:
             msg = curr_messages[-1]
-
             if msg.symbol in NO_SNIPPET or msg.msg.startswith("Invalid module"):
                 snippet = ""
             else:

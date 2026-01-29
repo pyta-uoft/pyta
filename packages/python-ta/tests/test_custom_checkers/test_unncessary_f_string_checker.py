@@ -21,7 +21,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=("var", "var"),
+                args=("var", "str(var)"),
             ),
             ignore_position=True,
         ):
@@ -53,7 +53,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=("var + 1", "var + 1"),
+                args=("var + 1", "str(var + 1)"),
             ),
             ignore_position=True,
         ):
@@ -85,7 +85,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_joinedstr(fstring_node)
 
     def test_f_string_on_string_var(self) -> None:
-        """Test that alternate message triggered when string variable placed into f-string"""
+        """Test that message without str() displayed when string variable placed directly into f-string"""
         src = """
             var = "hi" + "bye" + "back"
             x = f"{var}"
@@ -95,7 +95,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="unnecessary-f-string-on-string",
+                msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=3,
                 args=("var", "var"),
@@ -105,7 +105,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_joinedstr(fstring_node)
 
     def test_f_string_on_string_direct(self) -> None:
-        """Test that alternate message triggered when strings placed directly into f-string"""
+        """Test that message without str() displayed when strings placed directly into f-string"""
         src = """
             x = f"{'hi' + 'bye'}"
             """
@@ -114,7 +114,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
-                msg_id="unnecessary-f-string-on-string",
+                msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
                 args=("'hi' + 'bye'", "'hi' + 'bye'"),

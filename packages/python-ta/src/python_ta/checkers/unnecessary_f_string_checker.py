@@ -15,18 +15,13 @@ class FormattedStringChecker(BaseChecker):
     name = "unnecessary-f-string"
     msgs = {
         "E9920": (
-            'Unnecessary use of an f-string in the expression `f"{%s}"`. Use `str(%s)` instead.',
+            'Unnecessary use of an f-string in the expression f"{%s}". Use %s instead.',
             "unnecessary-f-string",
             "Used when the use of an f-string is unnecessary and can be replaced with the variable directly",
         ),
-        "E9921": (
-            'Unnecessary use of an f-string in the expression `f"{%s}"`. Use `%s` instead.',
-            "unnecessary-f-string-on-string",
-            "Used when an f-string is unnecessary and wraps an expression that is already a string.",
-        ),
     }
 
-    @only_required_for_messages("unnecessary-f-string", "unnecessary-f-string-on-string")
+    @only_required_for_messages("unnecessary-f-string")
     def visit_joinedstr(self, node: nodes.JoinedStr) -> None:
         if (
             len(node.values) == 1
@@ -37,35 +32,27 @@ class FormattedStringChecker(BaseChecker):
             expression = node.values[0].value.as_string()
             str_call_needed = False
 
-            try:
-                for inferred in node.values[0].value.infer():
-                    if isinstance(inferred, nodes.Const):
-                        source = inferred.as_string()
-                        if not (source.startswith(("'", '"'))):
-                            str_call_needed = True
-                            break
-                    else:
+            for inferred in node.values[0].value.inferred():
+                if isinstance(inferred, nodes.Const):
+                    source = inferred.as_string()
+                    if not (source.startswith(("'", '"'))):
                         str_call_needed = True
                         break
-            except InferenceError:
-                str_call_needed = True
+                else:
+                    str_call_needed = True
+                    break
 
+            message = expression
             if str_call_needed:
-                self.add_message(
-                    "unnecessary-f-string",
-                    node=node,
-                    args=(expression, expression),
-                    line=node.lineno,
-                    col_offset=node.col_offset,
-                )
-            else:
-                self.add_message(
-                    "unnecessary-f-string-on-string",
-                    node=node,
-                    args=(expression, expression),
-                    line=node.lineno,
-                    col_offset=node.col_offset,
-                )
+                message = f"str({expression})"
+
+            self.add_message(
+                "unnecessary-f-string",
+                node=node,
+                args=(expression, message),
+                line=node.lineno,
+                col_offset=node.col_offset,
+            )
 
 
 def register(linter: PyLinter) -> None:

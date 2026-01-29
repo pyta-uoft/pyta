@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import inspect
 import sys
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import tabulate
@@ -44,14 +45,17 @@ class RecursionTable:
     """
 
     frames_data: dict[types.FrameType, dict[str, Any]]
-    function_name: str
+    function_names: set[str]
     _trees: dict[types.FrameType, Tree]
 
-    def __init__(self, function_name: str) -> None:
+    def __init__(self, function_names: str | Iterable[str]) -> None:
         """Initialize a RecursionTable context manager for print-based recursive debugging
-        of <function_name>.
+        of one or more functions; <function_name> can represent a single function or a collection of functions.
         """
-        self.function_name = function_name
+        if isinstance(function_names, str):
+            self.function_names = {function_names}
+        else:
+            self.function_names = set(function_names)
         self.frames_data = {}
         self._trees = {}
 
@@ -60,14 +64,14 @@ class RecursionTable:
         if self.frames_data:
             return self._trees[next(iter(self.frames_data))]
 
-    def _create_func_call_string(self, frame_variables: dict[str, Any]) -> str:
+    def _create_func_call_string(self, func_name: str, frame_variables: dict[str, Any]) -> str:
         """Create a string representation of the function call given the inputs
         for eg. 'fib(2, 3)'.
         """
         # note that in python dicts the order is maintained based on insertion
         # we don't need to worry about the order of inputs changing
         function_inputs = ", ".join(str(frame_variables[var]) for var in frame_variables)
-        return f"{self.function_name}({function_inputs})"
+        return f"{func_name}({function_inputs})"
 
     def _insert_to_tree(
         self, current_func_string: str, frame: types.FrameType, caller_frame: types.FrameType
@@ -86,6 +90,9 @@ class RecursionTable:
         caller_frame = frame.f_back
         current_frame_variables = clean_frame_variables(frame)
 
+        func_name = frame.f_code.co_name
+        current_frame_data["function"] = func_name
+
         # add the inputs to the dict
         for variable in current_frame_variables:
             current_frame_data[variable] = current_frame_variables[variable]
@@ -97,7 +104,7 @@ class RecursionTable:
             current_frame_data["called by"] = self.frames_data[caller_frame]["call string"]
 
         # add the function call string for the current frame
-        current_func_string = self._create_func_call_string(current_frame_variables)
+        current_func_string = self._create_func_call_string(func_name, current_frame_variables)
         current_frame_data["call string"] = current_func_string
 
         self.frames_data[frame] = current_frame_data
@@ -117,9 +124,21 @@ class RecursionTable:
         """
         if not self.frames_data:
             return {}
+
+        param_names = []
+        seen = set()
+        for frame in self.frames_data:
+            params = inspect.getargvalues(frame).args
+            for p in params:
+                if p not in seen:
+                    seen.add(p)
+                    param_names.append(p)
+
         # intialize table columns using the first frame
-        parameters = inspect.getargvalues(next(iter(self.frames_data))).args
-        recursive_dict = {key: [] for key in parameters + ["return value", "called by"]}
+        # parameters = inspect.getargvalues(next(iter(self.frames_data))).args
+        recursive_dict = {
+            key: [] for key in (["function"] + param_names + ["return value", "called by"])
+        }
 
         for frame in self.frames_data:
             current_frame_data = self.frames_data[frame]
@@ -147,7 +166,7 @@ class RecursionTable:
         method depending on whether a call or return is detected.
         """
         # only trace frames that match the correct function name
-        if frame.f_code.co_name == self.function_name:
+        if frame.f_code.co_name in self.function_names:
             if event == "call":
                 self._record_call(frame)
             elif event == "return":

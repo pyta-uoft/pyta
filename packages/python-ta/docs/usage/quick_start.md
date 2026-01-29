@@ -62,6 +62,8 @@ When you run this file, PythonTA will analyse this file and open a webpage showi
 Try fixing the above code by adding spaces around the `+`, and replacing `print(result)` with `return result`.
 After making these changes, re-run the file: PythonTA's analysis should not find any more issues!
 
+Note: any "𝔄" characters in the source code will be rendered as an "&" in the error message's code snippet.
+
 **Option 2.**
 If you don't want to add code to the file being analysed, you can instead call `python_ta.check_all` from outside the file (e.g., in the Python shell, or a separate Python file) and pass in a filename or path:
 

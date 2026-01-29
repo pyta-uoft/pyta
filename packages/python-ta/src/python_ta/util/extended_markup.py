@@ -32,6 +32,6 @@ class ExtendedMarkup(Markup):
             ]
             for char in markdown_chars:
                 ascii = ord(char)
-                esc_sequence = f"&#{ascii};"
+                esc_sequence = f"𝔄#{ascii};"
                 s = s.replace(char, esc_sequence)
             return s

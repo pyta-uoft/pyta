@@ -332,10 +332,10 @@ def reset_linter(
             linter.msgs_store.register_message(message_definition)
 
     if linter.reporter.name == "pyta-html":
-        msg_ids = linter.msgs_store.messages
-        for msg_id in msg_ids:
-            msg_id.msg = ExtendedMarkup(msg_id.msg)
-            linter.msgs_store.register_message(msg_id)
+        msgs = linter.msgs_store.messages
+        for msg in msgs:
+            msg.msg = ExtendedMarkup(msg.msg)
+            linter.msgs_store.register_message(msg)
 
     return linter
 

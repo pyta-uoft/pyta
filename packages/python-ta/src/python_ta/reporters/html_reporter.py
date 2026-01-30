@@ -2,7 +2,6 @@ import base64
 import os
 import socket
 import sys
-from html import unescape
 
 from jinja2 import Environment, FileSystemLoader
 from markdown_it import MarkdownIt
@@ -109,7 +108,6 @@ class HTMLReporter(PythonTaReporter):
             md=md,
             pyta_logo_data_url=pyta_logo_data_url,
             favicon_data_url=favicon_data_url,
-            unescape=unescape,
         )
 
         # If a filepath was specified, write to the file

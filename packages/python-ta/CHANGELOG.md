@@ -23,7 +23,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Removed old documentation files under `python_ta/reporters/`
 - Added tests for `infinite_loop_checker.py` to improve coverage for the `_name_holds_generator` function and the generator portion of the `_check_constant_loop_cond` function.
 - Refactored `test_main.py` calls to use click's testing helpers.
-- Added tests to `test_unncessary_f_string_checker.py` to cover the alternate message when the input is already a string.
 
 ## [2.12.0] - 2025-12-08
 

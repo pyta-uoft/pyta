@@ -15,10 +15,10 @@ class FormattedStringChecker(BaseChecker):
     name = "unnecessary-f-string"
     msgs = {
         "E9920": (
-            'Unnecessary use of an f-string in the expression f"{%s}". Use %s instead.',
+            'Unnecessary use of an f-string in the expression `f"{%s}"`. Use `%s` instead.',
             "unnecessary-f-string",
             "Used when the use of an f-string is unnecessary and can be replaced with the variable directly",
-        ),
+        )
     }
 
     @only_required_for_messages("unnecessary-f-string")
@@ -34,8 +34,7 @@ class FormattedStringChecker(BaseChecker):
 
             for inferred in node.values[0].value.inferred():
                 if isinstance(inferred, nodes.Const):
-                    source = inferred.as_string()
-                    if not (source.startswith(("'", '"'))):
+                    if not (isinstance(inferred.value, str)):
                         str_call_needed = True
                         break
                 else:

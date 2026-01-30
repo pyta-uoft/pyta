@@ -20,6 +20,7 @@ def test_base_case_call() -> None:
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == ["fact"]
     assert recursive_dict["n"] == [0]
     assert recursive_dict["called by"] == ["N/A"]
     assert recursive_dict["return value"] == [1]
@@ -38,6 +39,7 @@ def test_one_parameter_one_call() -> None:
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == ["fact", "fact", "fact", "fact"]
     assert recursive_dict["n"] == [3, 2, 1, 0]
     assert recursive_dict["called by"] == ["N/A", "fact(3)", "fact(2)", "fact(1)"]
     assert recursive_dict["return value"] == [6, 2, 1, 1]
@@ -56,6 +58,7 @@ def test_one_parameter_multiple_calls() -> None:
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == ["fib", "fib", "fib", "fib", "fib"]
     assert recursive_dict["n"] == [3, 1, 2, 0, 1]
     assert recursive_dict["called by"] == ["N/A", "fib(3)", "fib(3)", "fib(2)", "fib(2)"]
     assert recursive_dict["return value"] == [3, 1, 2, 1, 1]
@@ -74,6 +77,7 @@ def test_multiple_parameters_one_call() -> None:
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 5
+    assert recursive_dict["function"] == ["fact_with_state", "fact_with_state", "fact_with_state"]
     assert recursive_dict["n"] == [3, 2, 1]
     assert recursive_dict["prod"] == [1, 3, 6]
     assert recursive_dict["called by"] == ["N/A", "fact_with_state(3, 1)", "fact_with_state(2, 3)"]
@@ -96,6 +100,15 @@ def test_multiple_parameters_multiple_calls() -> None:
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 5
+    assert recursive_dict["function"] == [
+        "sum_prod_lists",
+        "sum_prod_lists",
+        "sum_prod_lists",
+        "sum_prod_lists",
+        "sum_prod_lists",
+        "sum_prod_lists",
+        "sum_prod_lists",
+    ]
     assert recursive_dict["lst"] == [[1, 2, 3, 4], [1, 2], [1], [2], [3, 4], [3], [4]]
     assert recursive_dict["multiplier"] == [1, 2, 3, 3, 2, 3, 3]
     assert recursive_dict["called by"] == [
@@ -137,6 +150,12 @@ def test_static_method():
         Testing.fact_static(3)
 
     recursive_dict = table.get_recursive_dict()
+    assert recursive_dict["function"] == [
+        "fact_static",
+        "fact_static",
+        "fact_static",
+        "fact_static",
+    ]
     assert len(list(recursive_dict.keys())) == 4
     assert recursive_dict["n"] == [3, 2, 1, 0]
     assert recursive_dict["called by"] == [
@@ -155,6 +174,12 @@ def test_instance_method():
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == [
+        "fact_instance",
+        "fact_instance",
+        "fact_instance",
+        "fact_instance",
+    ]
     assert [str(obj) for obj in recursive_dict["self"]] == ["3", "2", "1", "0"]
     assert recursive_dict["called by"] == [
         "N/A",
@@ -178,6 +203,7 @@ def test_mutable_parameter():
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == ["mutate_list", "mutate_list", "mutate_list"]
     assert recursive_dict["lst"] == [[2, -1, 3], [1, -1, 3], [0, -1, 3]]
     assert recursive_dict["called by"] == [
         "N/A",
@@ -202,6 +228,7 @@ def test_mutable_return():
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == ["mutate_return", "mutate_return", "mutate_return"]
     assert recursive_dict["lst"] == [[2, -1, 3], [1, -1, 3], [0, -1, 3]]
     assert recursive_dict["called by"] == [
         "N/A",
@@ -241,6 +268,7 @@ def test_different_initial_function_call() -> None:
 
     recursive_dict = table.get_recursive_dict()
     assert len(list(recursive_dict.keys())) == 4
+    assert recursive_dict["function"] == ["fact", "fact", "fact", "fact"]
     assert recursive_dict["n"] == [3, 2, 1, 0]
     assert recursive_dict["called by"] == ["N/A", "fact(3)", "fact(2)", "fact(1)"]
     assert recursive_dict["return value"] == [6, 2, 1, 1]

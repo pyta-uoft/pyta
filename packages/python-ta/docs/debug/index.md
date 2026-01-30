@@ -350,11 +350,11 @@ When this file is run, we get the following output:
 $ python demo.py
 function     n    return value    called by
 ----------   ---  --------------  ------------
-fact         4    24              N/A
-fact         3    6               factorial(4)
-fact         2    2               factorial(3)
-fact         1    1               factorial(2)
-fact         0    1               factorial(1)
+factorial    4    24              N/A
+factorial    3    6               factorial(4)
+factorial    2    2               factorial(3)
+factorial    1    1               factorial(2)
+factorial    0    1               factorial(1)
 ```
 
 `RecursionTable` also supports mutual recursion, so multiple functions can be traced simultaneously:

@@ -45,17 +45,17 @@ class RecursionTable:
     """
 
     frames_data: dict[types.FrameType, dict[str, Any]]
-    function_names: set[str]
+    function_name: set[str]
     _trees: dict[types.FrameType, Tree]
 
-    def __init__(self, function_names: str | Iterable[str]) -> None:
+    def __init__(self, function_name: str | Iterable[str]) -> None:
         """Initialize a RecursionTable context manager for print-based recursive debugging
         of one or more functions; <function_name> can represent a single function or a collection of functions.
         """
-        if isinstance(function_names, str):
-            self.function_names = {function_names}
+        if isinstance(function_name, str):
+            self.function_name = {function_name}
         else:
-            self.function_names = set(function_names)
+            self.function_name = set(function_name)
         self.frames_data = {}
         self._trees = {}
 
@@ -134,8 +134,6 @@ class RecursionTable:
                     seen.add(p)
                     param_names.append(p)
 
-        # intialize table columns using the first frame
-        # parameters = inspect.getargvalues(next(iter(self.frames_data))).args
         recursive_dict = {
             key: [] for key in (["function"] + param_names + ["return value", "called by"])
         }
@@ -166,7 +164,7 @@ class RecursionTable:
         method depending on whether a call or return is detected.
         """
         # only trace frames that match the correct function name
-        if frame.f_code.co_name in self.function_names:
+        if frame.f_code.co_name in self.function_name:
             if event == "call":
                 self._record_call(frame)
             elif event == "return":

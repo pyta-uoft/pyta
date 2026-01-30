@@ -236,6 +236,12 @@ For example, we can override the error message for `E0111` as follows:
 E0111 = "reversed() can only be called on instances of sequence types like str, list, or tuple."
 ```
 
+PyTA also supports inline markdown for error messages in the HTML reporter.
+
+```toml
+E0111 = "`reversed()` can only be called on instances of sequence types like `str`, `list`, or `tuple`."
+```
+
 _Notes_:
 
 1. View the [default PythonTA message configuration](https://github.com/pyta-uoft/pyta/blob/master/python_ta/config/messages_config.toml) for examples of overriding messages.

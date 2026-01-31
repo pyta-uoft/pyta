@@ -21,7 +21,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=("var", "var"),
+                args=("var", "str(var)"),
             ),
             ignore_position=True,
         ):
@@ -53,7 +53,7 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
                 msg_id="unnecessary-f-string",
                 node=fstring_node,
                 line=2,
-                args=("var + 1", "var + 1"),
+                args=("var + 1", "str(var + 1)"),
             ),
             ignore_position=True,
         ):
@@ -82,4 +82,62 @@ class TestFormattedStringChecker(pylint.testutils.CheckerTestCase):
         mod = parse(src)
         fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
         with self.assertNoMessages():
+            self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_on_string_var(self) -> None:
+        """Test that message without str() displayed when string variable placed directly into f-string"""
+        src = """
+        var = "hi" + "bye" + "back"
+        x = f"{var}"
+        """
+
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-f-string",
+                node=fstring_node,
+                line=3,
+                args=("var", "var"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_on_string_direct(self) -> None:
+        """Test that message without str() is displayed when strings are placed directly into f-string"""
+        src = """
+        x = f"{'hi' + 'bye'}"
+        """
+
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-f-string",
+                node=fstring_node,
+                line=2,
+                args=("'hi' + 'bye'", "'hi' + 'bye'"),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_joinedstr(fstring_node)
+
+    def test_f_string_with_list(self) -> None:
+        """Test that a list value results in the str() message and types are properly flagged"""
+        src = """
+        lst = [1,2,3]
+        x = f"{lst}"
+        """
+        mod = parse(src)
+        fstring_node, *_ = mod.nodes_of_class(nodes.JoinedStr)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="unnecessary-f-string",
+                node=fstring_node,
+                line=2,
+                args=("lst", "str(lst)"),
+            ),
+            ignore_position=True,
+        ):
             self.checker.visit_joinedstr(fstring_node)

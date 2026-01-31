@@ -15,7 +15,7 @@ class FormattedStringChecker(BaseChecker):
     name = "unnecessary-f-string"
     msgs = {
         "E9920": (
-            'Unnecessary use of an f-string in the expression `f"{%s}"`. Use `str(%s)` instead.',
+            'Unnecessary use of an f-string in the expression `f"{%s}"`. Use `%s` instead.',
             "unnecessary-f-string",
             "Used when the use of an f-string is unnecessary and can be replaced with the variable directly",
         )
@@ -30,10 +30,25 @@ class FormattedStringChecker(BaseChecker):
             and node.values[0].format_spec is None
         ):
             expression = node.values[0].value.as_string()
+            str_call_needed = False
+
+            for inferred in node.values[0].value.inferred():
+                if isinstance(inferred, nodes.Const):
+                    if not (isinstance(inferred.value, str)):
+                        str_call_needed = True
+                        break
+                else:
+                    str_call_needed = True
+                    break
+
+            message = expression
+            if str_call_needed:
+                message = f"str({expression})"
+
             self.add_message(
                 "unnecessary-f-string",
                 node=node,
-                args=(expression, expression),
+                args=(expression, message),
                 line=node.lineno,
                 col_offset=node.col_offset,
             )

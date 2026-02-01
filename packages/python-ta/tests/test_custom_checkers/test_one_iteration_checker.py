@@ -2,10 +2,10 @@ import astroid
 import pylint.testutils
 import pytest
 from astroid import nodes
+from python_ta_z3 import Z3Visitor
 
 from python_ta.cfg.visitor import CFGVisitor
 from python_ta.checkers.one_iteration_checker import OneIterationChecker
-from python_ta.transforms.z3_visitor import Z3Visitor
 
 
 class TestOneIterationChecker(pylint.testutils.CheckerTestCase):

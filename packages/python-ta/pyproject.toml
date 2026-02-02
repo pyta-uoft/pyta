@@ -48,6 +48,7 @@ cfg = [
     "graphviz",
 ]
 z3 = [
+    "python-ta-z3 == 2.12.1.dev",
     "z3-solver",
 ]
 

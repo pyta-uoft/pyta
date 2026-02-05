@@ -121,10 +121,14 @@ class RecursionTable:
     def get_recursive_dict(self) -> dict[str, list]:
         """Use the instance variables that define the table to create a final dictionary
         which directly represents the table.
+
+        For mutually-recursive functions with different parameters, leave blank entries
+        for parameters that don't apply to the called function.
         """
         if not self.frames_data:
             return {}
 
+        # Get parameter names in order of first seen
         param_names = []
         seen = set()
         for frame in self.frames_data:
@@ -134,16 +138,20 @@ class RecursionTable:
                     seen.add(p)
                     param_names.append(p)
 
-        recursive_dict = {
-            key: [] for key in (["function"] + param_names + ["return value", "called by"])
-        }
+        headers = ["function"] + param_names + ["return value", "called by"]
+        recursive_dict = {h: [] for h in headers}
 
         for frame in self.frames_data:
-            current_frame_data = self.frames_data[frame]
-            for key in current_frame_data:
-                # this should always be true unless key == "call string"
-                if key in recursive_dict:
-                    recursive_dict[key].append(current_frame_data[key])
+            row = self.frames_data[frame]
+            recursive_dict["function"].append(row.get("function", ""))
+
+            for p in param_names:
+                # Leave blank when the param doesn't exist in this function
+                recursive_dict[p].append(row.get(p, ""))
+
+            recursive_dict["return value"].append(row.get("return value", ""))
+            recursive_dict["called by"].append(row.get("called by", ""))
+
         return recursive_dict
 
     def _tabulate_data(self) -> None:

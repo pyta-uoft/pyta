@@ -123,6 +123,38 @@ def test_multiple_parameters_multiple_calls() -> None:
     assert recursive_dict["return value"] == [30, 9, 3, 6, 21, 9, 12]
 
 
+def test_mutual_recursion_different_parameters() -> None:
+    with RecursionTable(["sum_even", "sum_odd"]) as table:
+
+        def sum_even(n: int, only_even: int, even_still: int) -> int:
+            if n == 0:
+                return only_even + even_still
+            return (n % 10) + sum_odd(n // 10)
+
+        def sum_odd(n: int) -> int:
+            if n == 0:
+                return 0
+            return sum_even(n // 10, 100, 7)
+
+        sum_even(1234, 5, 2)
+
+    recursive_dict = table.get_recursive_dict()
+    assert set(recursive_dict.keys()) == {
+        "function",
+        "n",
+        "only_even",
+        "even_still",
+        "return value",
+        "called by",
+    }
+    lengths = {len(recursive_dict[k]) for k in recursive_dict}
+    assert lengths == {5}
+    assert recursive_dict["function"] == ["sum_even", "sum_odd", "sum_even", "sum_odd", "sum_even"]
+    assert recursive_dict["n"] == [1234, 123, 12, 1, 0]
+    assert recursive_dict["only_even"] == [5, "", 100, "", 100]
+    assert recursive_dict["even_still"] == [2, "", 7, "", 7]
+
+
 class Testing:
     n: int
 

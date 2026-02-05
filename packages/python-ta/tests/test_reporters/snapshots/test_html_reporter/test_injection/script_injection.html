@@ -1613,7 +1613,7 @@
                     <div class="collapsible expanded message-snippet-container">
                       <pre
                         class="message-snippet"
-                      ><span class="grey line-num"> 14</span>  <span class="grey">        <span class="pygments-s2">&quot;server_port&quot;</span><span class="pygments-p">:</span> <span class="pygments-mi">5008</span></span>
+                      ><span class="grey line-num"> 14</span>  <span class="grey">        <span class="pygments-s2">&quot;server_port&quot;</span><span class="pygments-p">:</span> <span class="pygments-mi">2000</span></span>
 <span class="grey line-num"> 15</span>  <span class="grey">    <span class="pygments-p">})</span></span>
 <span class="gbold line-num"> 18</span>  <span class="highlight-pyta">                            </span>
 <span class="gbold line-num">   </span>  <span class="highlight-pyta"><span class="pygments-c1"># INSERT NEW BLANK LINE HERE</span></span>
@@ -2424,7 +2424,7 @@
         })
       }
 
-      const socket = new WebSocket("ws://localhost:5008/ws")
+      const socket = new WebSocket("ws://localhost:2000/ws")
 
       socket.onmessage = (event) => {
         if (event.data === "reload") {

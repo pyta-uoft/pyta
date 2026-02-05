@@ -11,7 +11,7 @@ def inject_script(mock_webbrowser_open):
     x = f'{a + "<script>alert(2);</script>"}'
     check_all(config={
         "watch": True,
-        "server_port": 5008
+        "server_port": 2000
     })
 
 inject_script()

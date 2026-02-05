@@ -18,12 +18,12 @@ def test_injection(snapshot):
 
     process = subprocess.Popen([sys.executable, script_path])
 
-    if not wait_for_server(5008):
+    if not wait_for_server(2000):
         process.send_signal(signal.SIGTERM)
         process.wait()
         pytest.fail("Server did not start within the expected timeout")
     try:
-        conn = HTTPConnection("127.0.0.1", 5008)
+        conn = HTTPConnection("127.0.0.1", 2000)
         conn.request("GET", "/")
         response = conn.getresponse()
         assert response.status == 200

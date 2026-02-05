@@ -30,7 +30,7 @@ from ..config import (
 from ..patches import patch_all
 from ..upload import upload_to_server
 from ..util.autoformat import run_autoformat
-from python_ta.util.extended_markup import ExtendedMarkup
+from ..util.extended_markup import ExtendedMarkup
 
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False

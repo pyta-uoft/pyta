@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 # Global dependencies that apply to all packages (e.g., testing/linting)
 dependencies = [
     "python-ta[dev,z3,cfg]",
+    "python-ta-z3",
 ]
 
 [build-system]
@@ -16,6 +17,7 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 python-ta = { workspace = true }
+python-ta-z3 = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]

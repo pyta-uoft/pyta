@@ -18,7 +18,8 @@ from astroid.manager import AstroidManager
 from .visitor import CFGVisitor
 
 if TYPE_CHECKING:
-    from ..transforms.z3_visitor import Z3Visitor
+    from python_ta_z3 import Z3Visitor
+
     from .graph import CFGBlock, ControlFlowGraph
 
 GRAPH_OPTIONS = {"format": "svg", "node_attr": {"shape": "box", "fontname": "Courier New"}}
@@ -77,7 +78,7 @@ def _generate(
     # invoke Z3Visitor if z3 dependency is enabled
     if z3_enabled:
         try:
-            from ..transforms.z3_visitor import Z3Visitor
+            from python_ta_z3 import Z3Visitor
 
         except ImportError:
             logging.error("Failed to import Z3Visitor. Aborting.")

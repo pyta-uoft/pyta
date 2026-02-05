@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Replaced the PyTA logo image data in the HTML report to be embedded directly in the src URL instead of using an external URL, and provided a favicon for the HTML report page using the same svg data.
+- Extended `unnecessary_f_string_checker.py` to present an alternate message when the input is already a string.
 
 ### 💫 New checkers
 
@@ -22,6 +23,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Removed old documentation files under `python_ta/reporters/`
 - Added tests for `infinite_loop_checker.py` to improve coverage for the `_name_holds_generator` function and the generator portion of the `_check_constant_loop_cond` function.
+- Refactored `test_main.py` calls to use click's testing helpers.
+- The `Z3Visitor`, `Z3Parser`, and `Z3ParseException` classes have been extracted into a _new Python package_, `python-ta-z3`.
 
 ## [2.12.0] - 2025-12-08
 

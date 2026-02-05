@@ -1,13 +1,25 @@
 import os
+import re
 import signal
 import subprocess
 import sys
 from http.client import HTTPConnection
 
 import pytest
-from tests.test_reporters.test_html_server import clean_response_body, wait_for_server
+from tests.test_reporters.test_html_server import wait_for_server
 
 escaped_script = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
+
+
+def clean_response_body(body) -> str:
+    """Remove dynamic portions (such as timestamps) from the response body
+    before snapshot testing."""
+    body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
+    body = re.sub(r".*tests[/\\]fixtures[/\\]reporters[/\\]content_injection\.py.*\n?", "", body)
+    body = re.sub(r'\s*<span class="pygments-w">\s*</span>\s*<span', " <span", body)
+    body = re.sub(r"^.*[/\\]watch_integration.py.*$", "", body, flags=re.MULTILINE)
+
+    return body.strip()
 
 
 def test_injection(snapshot):

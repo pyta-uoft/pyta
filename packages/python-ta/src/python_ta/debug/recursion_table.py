@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import inspect
 import sys
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import tabulate
@@ -44,14 +45,17 @@ class RecursionTable:
     """
 
     frames_data: dict[types.FrameType, dict[str, Any]]
-    function_name: str
+    function_name: set[str]
     _trees: dict[types.FrameType, Tree]
 
-    def __init__(self, function_name: str) -> None:
+    def __init__(self, function_name: str | Iterable[str]) -> None:
         """Initialize a RecursionTable context manager for print-based recursive debugging
-        of <function_name>.
+        of one or more functions; <function_name> can represent a single function or a collection of functions.
         """
-        self.function_name = function_name
+        if isinstance(function_name, str):
+            self.function_name = {function_name}
+        else:
+            self.function_name = set(function_name)
         self.frames_data = {}
         self._trees = {}
 
@@ -60,14 +64,14 @@ class RecursionTable:
         if self.frames_data:
             return self._trees[next(iter(self.frames_data))]
 
-    def _create_func_call_string(self, frame_variables: dict[str, Any]) -> str:
+    def _create_func_call_string(self, func_name: str, frame_variables: dict[str, Any]) -> str:
         """Create a string representation of the function call given the inputs
         for eg. 'fib(2, 3)'.
         """
         # note that in python dicts the order is maintained based on insertion
         # we don't need to worry about the order of inputs changing
         function_inputs = ", ".join(str(frame_variables[var]) for var in frame_variables)
-        return f"{self.function_name}({function_inputs})"
+        return f"{func_name}({function_inputs})"
 
     def _insert_to_tree(
         self, current_func_string: str, frame: types.FrameType, caller_frame: types.FrameType
@@ -86,6 +90,9 @@ class RecursionTable:
         caller_frame = frame.f_back
         current_frame_variables = clean_frame_variables(frame)
 
+        func_name = frame.f_code.co_name
+        current_frame_data["function"] = func_name
+
         # add the inputs to the dict
         for variable in current_frame_variables:
             current_frame_data[variable] = current_frame_variables[variable]
@@ -97,7 +104,7 @@ class RecursionTable:
             current_frame_data["called by"] = self.frames_data[caller_frame]["call string"]
 
         # add the function call string for the current frame
-        current_func_string = self._create_func_call_string(current_frame_variables)
+        current_func_string = self._create_func_call_string(func_name, current_frame_variables)
         current_frame_data["call string"] = current_func_string
 
         self.frames_data[frame] = current_frame_data
@@ -114,19 +121,37 @@ class RecursionTable:
     def get_recursive_dict(self) -> dict[str, list]:
         """Use the instance variables that define the table to create a final dictionary
         which directly represents the table.
+
+        For mutually-recursive functions with different parameters, leave blank entries
+        for parameters that don't apply to the called function.
         """
         if not self.frames_data:
             return {}
-        # intialize table columns using the first frame
-        parameters = inspect.getargvalues(next(iter(self.frames_data))).args
-        recursive_dict = {key: [] for key in parameters + ["return value", "called by"]}
+
+        # Get parameter names in order of first seen
+        param_names = []
+        seen = set()
+        for frame in self.frames_data:
+            params = inspect.getargvalues(frame).args
+            for p in params:
+                if p not in seen:
+                    seen.add(p)
+                    param_names.append(p)
+
+        headers = ["function"] + param_names + ["return value", "called by"]
+        recursive_dict = {h: [] for h in headers}
 
         for frame in self.frames_data:
-            current_frame_data = self.frames_data[frame]
-            for key in current_frame_data:
-                # this should always be true unless key == "call string"
-                if key in recursive_dict:
-                    recursive_dict[key].append(current_frame_data[key])
+            row = self.frames_data[frame]
+            recursive_dict["function"].append(row.get("function", ""))
+
+            for p in param_names:
+                # Leave blank when the param doesn't exist in this function
+                recursive_dict[p].append(row.get(p, ""))
+
+            recursive_dict["return value"].append(row.get("return value", ""))
+            recursive_dict["called by"].append(row.get("called by", ""))
+
         return recursive_dict
 
     def _tabulate_data(self) -> None:
@@ -147,7 +172,7 @@ class RecursionTable:
         method depending on whether a call or return is detected.
         """
         # only trace frames that match the correct function name
-        if frame.f_code.co_name == self.function_name:
+        if frame.f_code.co_name in self.function_name:
             if event == "call":
                 self._record_call(frame)
             elif event == "return":

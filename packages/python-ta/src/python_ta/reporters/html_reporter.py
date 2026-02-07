@@ -11,6 +11,7 @@ from pygments.lexers import PythonLexer
 from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
+from ..util.extended_markup import UNMAPPED_CODE_POINT
 from ..util.servers.one_shot_server import open_html_in_browser
 from ..util.servers.persistent_server import PersistentHTMLServer
 from .core import PythonTaReporter
@@ -64,7 +65,7 @@ class HTMLReporter(PythonTaReporter):
         This method can be implemented to display them after they've
         been aggregated.
         """
-        md = MarkdownIt("js-default")
+        md = MarkdownIt()
         grouped_messages = {
             path: self.group_messages(msgs) for path, msgs in self.gather_messages().items()
         }
@@ -108,6 +109,7 @@ class HTMLReporter(PythonTaReporter):
             md=md,
             pyta_logo_data_url=pyta_logo_data_url,
             favicon_data_url=favicon_data_url,
+            UNMAPPED_CODE_POINT=UNMAPPED_CODE_POINT,
         )
 
         # If a filepath was specified, write to the file

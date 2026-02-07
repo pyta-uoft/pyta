@@ -3,5 +3,5 @@ It is invoked by the test `tests/test_reporters/test_html_reporter::test_markdow
 to ensure that any markdown characters from the user's code are properly escaped before being rendered."""
 def markdown_chars():
     y = "hello"
-    z = f"{y + "` ##world `"}"
+    z = f'{y + "` ##world `"}'
 

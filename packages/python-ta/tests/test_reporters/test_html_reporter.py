@@ -1,14 +1,14 @@
 import os
 import re
-import signal
-import subprocess
-import sys
-from http.client import HTTPConnection
 
-import pytest
 from tests.test_reporters.test_html_server import wait_for_server
 
-escaped_script = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
+from python_ta import check_all
+
+ESCAPED_SCRIPT = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
+UNESCAPED_SCRIPT = "<script>alert(2);</script>"
+ESCAPED_MARKDOWN = "&#96; ##world &#96;"
+UNESCAPED_MARKDOWN = "</code> ##world <code>"
 
 
 def clean_response_body(body) -> str:
@@ -17,7 +17,7 @@ def clean_response_body(body) -> str:
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests[/\\]fixtures[/\\]reporters[/\\]content_injection\.py.*\n?", "", body)
     body = re.sub(r'\s*<span class="pygments-w">\s*</span>\s*<span', " <span", body)
-    body = re.sub(r"^.*[/\\]watch_integration.py.*$", "", body, flags=re.MULTILINE)
+    body = re.sub(r"localhost:\d+", "localhost:", body)
 
     return body.strip()
 
@@ -27,23 +27,38 @@ def test_injection(snapshot):
     script_path = os.path.normpath(
         os.path.join(__file__, "../../fixtures/reporters/content_injection.py")
     )
+    output_path = os.path.normpath(
+        os.path.join(__file__, "../../test_reporters/output_files/injection_script_output.html")
+    )
+    check_all(module_name=script_path, output=output_path)
 
-    process = subprocess.Popen([sys.executable, script_path])
+    with open(output_path, "r") as output_file:
 
-    if not wait_for_server(2000):
-        process.send_signal(signal.SIGTERM)
-        process.wait()
-        pytest.fail("Server did not start within the expected timeout")
-    try:
-        conn = HTTPConnection("127.0.0.1", 2000)
-        conn.request("GET", "/")
-        response = conn.getresponse()
-        assert response.status == 200
-
-        response_body = response.read().decode("utf-8")
+        response_body = output_file.read()
         cleaned_body = clean_response_body(response_body)
-        assert escaped_script in cleaned_body
+
+        assert ESCAPED_SCRIPT in cleaned_body
+        assert UNESCAPED_SCRIPT not in cleaned_body
+
         snapshot.assert_match(cleaned_body, "script_injection.html")
-    finally:
-        process.send_signal(signal.SIGTERM)
-        process.wait()
+
+
+def test_markdown_escape(snapshot):
+    """Test markdown characters in error messages are properly escaped"""
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../../fixtures/reporters/markdown_escape_script.py")
+    )
+    output_path = os.path.normpath(
+        os.path.join(__file__, "../../test_reporters/output_files/markdown_escape_output.html")
+    )
+    check_all(module_name=script_path, output=output_path)
+
+    with open(output_path, "r") as output_file:
+
+        response_body = output_file.read()
+        cleaned_body = clean_response_body(response_body)
+
+        assert ESCAPED_MARKDOWN in cleaned_body
+        assert UNESCAPED_MARKDOWN not in cleaned_body
+
+        snapshot.assert_match(cleaned_body, "markdown_escape.html")

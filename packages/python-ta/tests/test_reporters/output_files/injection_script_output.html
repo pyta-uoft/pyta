@@ -1,1326 +1,1229 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>PythonTA Report</title>
-    <style rel="stylesheet">
-      /* Theme variables */
-      :root {
-        /* Light theme (default) */
-        --pico-code-background-color: rgb(206, 208, 209);
-        --pico-code-color: rgb(36, 41, 47);
-        --pico-code-kbd-background-color: var(--pico-color);
-        --pico-code-kbd-color: var(--pico-background-color);
-        --pico-border-radius: 0.25rem;
-        --bg-primary: #ffffff;
-        --bg-secondary: #f8f9fa;
-        --bg-gradient-start: rgba(0, 82, 204, 0.08);
-        --bg-gradient-end: rgba(0, 82, 204, 0.03);
-        --text-primary: #000000;
-        --text-secondary: #212529;
-        --text-muted: #f8f9fa;
-        --text-grey: #495057;
-        --text-white: #000000;
-        --border-color: #d1d5d9;
-        --shadow-color: rgba(0, 0, 0, 0.2);
-        --section-bg: #f1f3f4;
-        --header-gradient-start: rgba(57, 114, 201, 0.95);
-        --header-gradient-end: rgba(30, 94, 203, 0.85);
-        --error-instance-bg: #ffffff;
-        --code-error: #dc3545;
-        --style-error: #0052cc;
-        --highlight-bg: rgba(255, 193, 7, 0.4);
-        --footer-bg: rgba(29, 97, 198, 0.95);
-        --text-empty-placeholder: #212529;
-        --header-text: #000000;
-        --footer-text: #ffffff;
-      }
-
-      [data-theme="dark"] {
-        /* Dark theme */
-        --pico-code-background-color: rgb(79, 79, 83);
-        --pico-code-color: rgb(178, 186, 194);
-        --pico-code-kbd-background-color: var(--pico-color);
-        --pico-code-kbd-color: var(--pico-background-color);
-        --pico-border-radius: 0.25rem;
-        --bg-primary: #1e1e1e;
-        --bg-secondary: #252526;
-        --bg-gradient-start: rgba(0, 0, 0, 0.8);
-        --bg-gradient-end: rgba(0, 0, 0, 0.8);
-        --text-primary: #ffffff;
-        --text-secondary: #e8e8e8;
-        --text-muted: #3c3c3c;
-        --text-grey: #808080;
-        --text-white: #ffffff;
-        --border-color: rgba(204, 204, 204, 0.2);
-        --shadow-color: rgba(0, 0, 0, 0.5);
-        --section-bg: rgba(23, 23, 23, 0.6);
-        --header-gradient-start: rgba(56, 112, 196, 0.95);
-        --header-gradient-end: rgba(30, 93, 202, 0.85);
-        --error-instance-bg: #2d2d30;
-        --code-error: #ea5c6a;
-        --style-error: #5089df;
-        --highlight-bg: rgba(255, 235, 59, 0.3);
-        --footer-bg: #1e1e1e;
-        --text-empty-placeholder: #f8f9fa;
-        --header-text: #ffffff;
-        --footer-text: #ffffff;
-      }
-
-      body {
-        margin: 0;
-        font-family:
-          -apple-system,
-          BlinkMacSystemFont,
-          Segoe UI,
-          Roboto,
-          Helvetica Neue,
-          Helvetica,
-          Ubuntu,
-          Arial,
-          sans-serif;
-        background: var(--bg-gradient-start);
-        background: -webkit-linear-gradient(
-          0deg,
-          var(--bg-gradient-end),
-          var(--bg-gradient-start)
-        );
-        background: linear-gradient(
-          90deg,
-          var(--bg-gradient-end),
-          var(--bg-gradient-start)
-        );
-        color: var(--text-primary);
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-
-      header {
-        font-weight: normal;
-        -webkit-font-smoothing: antialiased;
-        color: var(--header-text);
-        margin-top: 15px;
-        margin-left: 20px;
-        margin-bottom: 15px;
-        white-space: nowrap;
-      }
-
-      /* Theme toggle button */
-      .theme-toggle {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 6px;
-        padding: 6px;
-        cursor: pointer;
-        color: #ffffff !important;
-        transition: all 0.3s ease;
-        width: 32px;
-        height: 32px;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-
-      .theme-toggle:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-      }
-
-      .theme-toggle .sun-icon,
-      .theme-toggle .moon-icon {
-        display: none;
-      }
-
-      :root .theme-toggle .sun-icon {
-        display: block;
-      }
-
-      [data-theme="dark"] .theme-toggle .sun-icon {
-        display: none;
-      }
-
-      [data-theme="dark"] .theme-toggle .moon-icon {
-        display: block;
-      }
-
-      .main-grid {
-        display: grid;
-        flex: 1;
-        grid-template-columns: min-content 1fr;
-        grid-template-rows: min-content 1fr;
-      }
-
-      @media screen and (max-width: 768px) {
-        .sidebar {
-          display: none;
-        }
-        header {
-          display: none;
-        }
-      }
-
-      .sidebar {
-        margin: 0 20px auto;
-        position: sticky;
-        top: 15px;
-        height: fit-content;
-        max-height: 100vh;
-        overflow-y: auto;
-        overscroll-behavior-y: contain;
-      }
-
-      .sidebar ul {
-        font-size: 14px;
-        list-style-type: none;
-        padding: 0px 20px;
-        white-space: nowrap;
-        color: var(--text-primary);
-      }
-
-      .file-name {
-        font-weight: bold;
-        font-size: 1.1em;
-      }
-
-      .sidebar ul li {
-        margin: 5px 0px;
-      }
-
-      .sidebar button {
-        cursor: pointer;
-        background: transparent;
-        border-color: transparent;
-        padding: 0;
-        color: var(--text-primary);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        vertical-align: middle;
-      }
-
-      .sidebar svg.collapsed {
-        transform: rotate(-90deg);
-      }
-
-      .sidebar a:link,
-      a:visited {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .sidebar a:hover {
-        text-decoration: underline;
-      }
-
-      .title {
-        font-size: 2.4em;
-        margin: 0;
-      }
-
-      time {
-        display: block;
-        font-size: 1.2em;
-        margin-top: 10px;
-      }
-
-      .wrap {
-        padding: 10px;
-      }
-
-      main {
-        overflow: auto;
-        grid-column: 2;
-        grid-row: 1 / span 2;
-        padding: 20px;
-      }
-
-      main svg {
-        color: var(--text-primary);
-      }
-
-      section {
-        margin: auto;
-        display: inline-block;
-        min-width: 50%;
-        background: var(--section-bg);
-        box-shadow:
-          0 1px 3px rgba(0, 0, 0, 0.04),
-          0 1px 2px rgba(0, 0, 0, 0.04);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-      }
-
-      .section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 15px;
-        color: rgba(255, 255, 255, 0.9);
-        text-shadow: 0px 1px 2px black;
-        background: #141e30;
-        background: linear-gradient(
-          to left,
-          var(--header-gradient-end),
-          var(--header-gradient-start)
-        );
-        background: -webkit-linear-gradient(
-          right,
-          var(--header-gradient-end),
-          var(--header-gradient-start)
-        );
-        border-top-left-radius: 11px;
-        border-top-right-radius: 11px;
-      }
-
-      .sidebar .section-header h2 {
-        margin: 0;
-        padding: 15px 0;
-      }
-
-      .error-output {
-        padding: 0 15px;
-      }
-
-      .code-errors {
-      }
-
-      code {
-        border-radius: var(--pico-border-radius);
-        background: var(--pico-code-background-color);
-        color: var(--pico-code-color);
-        font-weight: var(--pico-font-weight);
-        font-size: 15px;
-        padding: 0.1em 0.35em;
-      }
-
-      .style-errors {
-        border-top: 3px solid rgba(192, 192, 192, 0.25);
-      }
-
-      .category-heading {
-        display: flex; /*Narrow width viewports*/
-        -webkit-font-smoothing: antialiased;
-        align-items: center;
-        margin-top: 7px;
-        color: var(--text-primary);
-      }
-
-      .error-instance {
-        display: grid;
-        background: var(--error-instance-bg);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        padding: 12px 20px;
-        margin-bottom: 8px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        transition:
-          box-shadow 0.2s ease,
-          transform 0.2s ease;
-      }
-
-      .error-instance:hover {
-        box-shadow: 0 2px 8px var(--shadow-hover);
-        transform: translateY(-1px);
-      }
-
-      .error-instance .collapsible {
-        width: 100%;
-      }
-
-      .error-instance > div {
-        width: 100%;
-      }
-
-      .error-instance:first-child {
-        margin-top: 1px;
-      }
-
-      .error-link {
-        line-height: 35px;
-      }
-
-      .error-link a {
-        font-weight: bold;
-        text-decoration: none;
-        color: inherit;
-      }
-      .error-link a:hover {
-        text-decoration: underline;
-      }
-
-      .error-link a:visited {
-        color: inherit;
-      }
-
-      .code-error-id {
-        color: var(--code-error);
-      }
-
-      .code-error-id a:link {
-      }
-
-      .style-error-id {
-        color: var(--style-error);
-      }
-
-      .style-error-id a:link {
-      }
-
-      .line-num {
-        color: var(--text-secondary);
-        font-size: 90%;
-      }
-
-      .grey {
-        color: var(--text-grey);
-      }
-
-      .gbold {
-        color: var(--text-grey);
-        font-weight: bold;
-      }
-
-      .highlight-pyta {
-        font-weight: bold;
-        background: var(--highlight-bg) !important;
-      }
-
-      .black {
-        color: var(--text-primary);
-      }
-
-      .occurrences,
-      .shown {
-        line-height: 35px;
-        padding-left: 20px;
-        vertical-align: middle;
-        color: var(--text-secondary);
-      }
-
-      .more-info {
-        color: var(--text-primary);
-        font-weight: normal;
-      }
-
-      .info {
-        font-size: 110%;
-        display: flex; /*Narrow width viewports*/
-      }
-
-      .slider {
-        margin-left: auto;
-        align-items: center;
-      }
-
-      .slider button {
-        background: none;
-        border: 1px solid transparent;
-        border-radius: 6px;
-        padding: 6px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-white);
-      }
-
-      .slider button:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.3);
-      }
-
-      .slider button.collapsed {
-        transform: scaleY(-1);
-      }
-
-      .collapsible {
-        width: 100%;
-        overflow-y: hidden;
-      }
-
-      .hide-and-maintain-width {
-        height: 0;
-        transition: height 0.15s ease-out;
-      }
-
-      .expanded {
-        height: auto;
-        transition: height 0.15s ease-out;
-      }
-
-      .content.hide-and-maintain-width,
-      .message-container.hide-and-maintain-width {
-        margin-bottom: 0;
-        transition: height 0.3s ease-out;
-      }
-
-      .content.expanded,
-      .message-container.expanded {
-        transition: height 0.3s ease-out;
-      }
-
-      .content {
-        margin-bottom: 15px;
-      }
-
-      .message-container.expanded {
-        border-top: 1px solid var(--border-color);
-        margin: 8px 0;
-      }
-
-      .message-snippet-container {
-        background-color: var(--bg-secondary);
-      }
-
-      .message-snippet {
-        font-size: 1.2em;
-        line-height: 1.4em;
-        margin: 0;
-        padding: 0.25em 0;
-        color: var(--text-primary);
-      }
-
-      .message-snippet.hide-and-maintain-width {
-        padding: 0;
-      }
-
-      .message-name {
-        display: flex;
-        align-items: center;
-      }
-
-      .message-name .slider {
-        margin-left: auto;
-      }
-
-      .empty-placeholder {
-        font-style: italic;
-        padding-left: 20px;
-        color: var(--text-empty-placeholder);
-      }
-
-      /* Footer styling */
-
-      footer {
-        background: var(--footer-bg);
-        color: var(--footer-text);
-        display: flex;
-        flex-direction: row;
-        padding: 15px;
-      }
-
-      footer a {
-        color: var(--footer-text);
-      }
-
-      footer a:hover {
-        color: #86d1ef;
-      }
-
-      footer p {
-        margin-top: 0;
-      }
-
-      .footer-text {
-        flex: 1;
-      }
-
-      .logos {
-        width: 110px;
-      }
-
-      .logo {
-        padding: 0 5px;
-        text-decoration: none;
-      }
-
-      /*  Pygments css. Edited and reformatted from original output.
+    <head>
+        <meta charset="utf-8">
+        <title>PythonTA Report</title>
+        <style rel="stylesheet">
+            /* Theme variables */
+:root {
+  /* Light theme (default) */
+  --pico-code-background-color: rgb(206, 208, 209);
+  --pico-code-color: rgb(36, 41, 47);
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-border-radius: 0.25rem;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-gradient-start: rgba(0, 82, 204, 0.08);
+  --bg-gradient-end: rgba(0, 82, 204, 0.03);
+  --text-primary: #000000;
+  --text-secondary: #212529;
+  --text-muted: #f8f9fa;
+  --text-grey: #495057;
+  --text-white: #000000;
+  --border-color: #d1d5d9;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --section-bg: #f1f3f4;
+  --header-gradient-start: rgba(57, 114, 201, 0.95);
+  --header-gradient-end: rgba(30, 94, 203, 0.85);
+  --error-instance-bg: #ffffff;
+  --code-error: #dc3545;
+  --style-error: #0052cc;
+  --highlight-bg: rgba(255, 193, 7, 0.4);
+  --footer-bg: rgba(29, 97, 198, 0.95);
+  --text-empty-placeholder: #212529;
+  --header-text: #000000;
+  --footer-text: #ffffff;
+}
+
+[data-theme="dark"] {
+  /* Dark theme */
+  --pico-code-background-color: rgb(79, 79, 83);
+  --pico-code-color: rgb(178, 186, 194);
+  --pico-code-kbd-background-color: var(--pico-color);
+  --pico-code-kbd-color: var(--pico-background-color);
+  --pico-border-radius: 0.25rem;
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-gradient-start: rgba(0, 0, 0, 0.8);
+  --bg-gradient-end: rgba(0, 0, 0, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: #e8e8e8;
+  --text-muted: #3c3c3c;
+  --text-grey: #808080;
+  --text-white: #ffffff;
+  --border-color: rgba(204, 204, 204, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --section-bg: rgba(23, 23, 23, 0.6);
+  --header-gradient-start: rgba(56, 112, 196, 0.95);
+  --header-gradient-end: rgba(30, 93, 202, 0.85);
+  --error-instance-bg: #2d2d30;
+  --code-error: #ea5c6a;
+  --style-error: #5089df;
+  --highlight-bg: rgba(255, 235, 59, 0.3);
+  --footer-bg: #1e1e1e;
+  --text-empty-placeholder: #f8f9fa;
+  --header-text: #ffffff;
+  --footer-text: #ffffff;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Helvetica Neue,
+    Helvetica,
+    Ubuntu,
+    Arial,
+    sans-serif;
+  background: var(--bg-gradient-start);
+  background: -webkit-linear-gradient(
+    0deg,
+    var(--bg-gradient-end),
+    var(--bg-gradient-start)
+  );
+  background: linear-gradient(
+    90deg,
+    var(--bg-gradient-end),
+    var(--bg-gradient-start)
+  );
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  font-weight: normal;
+  -webkit-font-smoothing: antialiased;
+  color: var(--header-text);
+  margin-top: 15px;
+  margin-left: 20px;
+  margin-bottom: 15px;
+  white-space: nowrap;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  color: #ffffff !important;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.theme-toggle .sun-icon,
+.theme-toggle .moon-icon {
+  display: none;
+}
+
+:root .theme-toggle .sun-icon {
+  display: block;
+}
+
+[data-theme="dark"] .theme-toggle .sun-icon {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle .moon-icon {
+  display: block;
+}
+
+.main-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: min-content 1fr;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  header {
+    display: none;
+  }
+}
+
+.sidebar {
+  margin: 0 20px auto;
+  position: sticky;
+  top: 15px;
+  height: fit-content;
+  max-height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.sidebar ul {
+  font-size: 14px;
+  list-style-type: none;
+  padding: 0px 20px;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.file-name {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.sidebar ul li {
+  margin: 5px 0px;
+}
+
+.sidebar button {
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  padding: 0;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.sidebar svg.collapsed {
+  transform: rotate(-90deg);
+}
+
+.sidebar a:link,
+a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+
+.title {
+  font-size: 2.4em;
+  margin: 0;
+}
+
+time {
+  display: block;
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+.wrap {
+  padding: 10px;
+}
+
+main {
+  overflow: auto;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 20px;
+}
+
+main svg {
+  color: var(--text-primary);
+}
+
+section {
+  margin: auto;
+  display: inline-block;
+  min-width: 50%;
+  background: var(--section-bg);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0px 1px 2px black;
+  background: #141e30;
+  background: linear-gradient(
+    to left,
+    var(--header-gradient-end),
+    var(--header-gradient-start)
+  );
+  background: -webkit-linear-gradient(
+    right,
+    var(--header-gradient-end),
+    var(--header-gradient-start)
+  );
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
+}
+
+.sidebar .section-header h2 {
+  margin: 0;
+  padding: 15px 0;
+}
+
+.error-output {
+  padding: 0 15px;
+}
+
+.code-errors {
+}
+
+code {
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-code-background-color);
+  color: var(--pico-code-color);
+  font-weight: var(--pico-font-weight);
+  font-size: 15px;
+  padding: 0.1em 0.35em;
+}
+
+.style-errors {
+  border-top: 3px solid rgba(192, 192, 192, 0.25);
+}
+
+.category-heading {
+  display: flex; /*Narrow width viewports*/
+  -webkit-font-smoothing: antialiased;
+  align-items: center;
+  margin-top: 7px;
+  color: var(--text-primary);
+}
+
+.error-instance {
+  display: grid;
+  background: var(--error-instance-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.error-instance:hover {
+  box-shadow: 0 2px 8px var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.error-instance .collapsible {
+  width: 100%;
+}
+
+.error-instance > div {
+  width: 100%;
+}
+
+.error-instance:first-child {
+  margin-top: 1px;
+}
+
+.error-link {
+  line-height: 35px;
+}
+
+.error-link a {
+  font-weight: bold;
+  text-decoration: none;
+  color: inherit;
+}
+.error-link a:hover {
+  text-decoration: underline;
+}
+
+.error-link a:visited {
+  color: inherit;
+}
+
+.code-error-id {
+  color: var(--code-error);
+}
+
+.code-error-id a:link {
+}
+
+.style-error-id {
+  color: var(--style-error);
+}
+
+.style-error-id a:link {
+}
+
+.line-num {
+  color: var(--text-secondary);
+  font-size: 90%;
+}
+
+.grey {
+  color: var(--text-grey);
+}
+
+.gbold {
+  color: var(--text-grey);
+  font-weight: bold;
+}
+
+.highlight-pyta {
+  font-weight: bold;
+  background: var(--highlight-bg) !important;
+}
+
+.black {
+  color: var(--text-primary);
+}
+
+.occurrences,
+.shown {
+  line-height: 35px;
+  padding-left: 20px;
+  vertical-align: middle;
+  color: var(--text-secondary);
+}
+
+.more-info {
+  color: var(--text-primary);
+  font-weight: normal;
+}
+
+.info {
+  font-size: 110%;
+  display: flex; /*Narrow width viewports*/
+}
+
+.slider {
+  margin-left: auto;
+  align-items: center;
+}
+
+.slider button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
+}
+
+.slider button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.slider button.collapsed {
+  transform: scaleY(-1);
+}
+
+.collapsible {
+  width: 100%;
+  overflow-y: hidden;
+}
+
+.hide-and-maintain-width {
+  height: 0;
+  transition: height 0.15s ease-out;
+}
+
+.expanded {
+  height: auto;
+  transition: height 0.15s ease-out;
+}
+
+.content.hide-and-maintain-width,
+.message-container.hide-and-maintain-width {
+  margin-bottom: 0;
+  transition: height 0.3s ease-out;
+}
+
+.content.expanded,
+.message-container.expanded {
+  transition: height 0.3s ease-out;
+}
+
+.content {
+  margin-bottom: 15px;
+}
+
+.message-container.expanded {
+  border-top: 1px solid var(--border-color);
+  margin: 8px 0;
+}
+
+.message-snippet-container {
+  background-color: var(--bg-secondary);
+}
+
+.message-snippet {
+  font-size: 1.2em;
+  line-height: 1.4em;
+  margin: 0;
+  padding: 0.25em 0;
+  color: var(--text-primary);
+}
+
+.message-snippet.hide-and-maintain-width {
+  padding: 0;
+}
+
+.message-name {
+  display: flex;
+  align-items: center;
+}
+
+.message-name .slider {
+  margin-left: auto;
+}
+
+.empty-placeholder {
+  font-style: italic;
+  padding-left: 20px;
+  color: var(--text-empty-placeholder);
+}
+
+/* Footer styling */
+
+footer {
+  background: var(--footer-bg);
+  color: var(--footer-text);
+  display: flex;
+  flex-direction: row;
+  padding: 15px;
+}
+
+footer a {
+  color: var(--footer-text);
+}
+
+footer a:hover {
+  color: #86d1ef;
+}
+
+footer p {
+  margin-top: 0;
+}
+
+.footer-text {
+  flex: 1;
+}
+
+.logos {
+  width: 110px;
+}
+
+.logo {
+  padding: 0 5px;
+  text-decoration: none;
+}
+
+/*  Pygments css. Edited and reformatted from original output.
     Unfortunately the class names cannot be improved to semantic names.
 */
-      .pygments-hll {
-        background-color: #ffffcc;
-      } /* ? */
-
-      .pygments-c {
-        color: #999;
-      } /* Comment */
-
-      .pygments-err {
-        /*border: 1px solid #FF0000;*/
-      } /* Error */
-
-      .pygments-k {
-        color: #aa22ff;
-        font-weight: bold;
-      } /* Keyword */
-
-      .pygments-o {
-        color: #666666;
-      } /* Operator */
-
-      .pygments-ch {
-        color: #408080;
-      } /* Comment.Hashbang */
-
-      .pygments-cm {
-        color: #999;
-      } /* Comment.Multiline */
-
-      .pygments-cp {
-        color: #bc7a00;
-      } /* Comment.Preproc */
-
-      .pygments-cpf {
-        color: #408080;
-      } /* Comment.PreprocFile */
-
-      .pygments-c1 {
-        color: #999;
-      } /* Comment.Single */
-
-      .pygments-cs {
-        color: #999;
-      } /* Comment.Special */
-
-      .pygments-gd {
-        color: #a00000;
-      } /* Generic.Deleted */
-
-      .pygments-ge {
-        font-style: italic;
-      } /* Generic.Emph */
-
-      .pygments-gr {
-        color: #ff0000;
-      } /* Generic.Error */
-
-      .pygments-gh {
-        color: #000080;
-        font-weight: bold;
-      } /* Generic.Heading */
-
-      .pygments-gi {
-        color: #00a000;
-      } /* Generic.Inserted */
-
-      .pygments-go {
-        color: #888888;
-      } /* Generic.Output */
-
-      .pygments-gp {
-        color: #000080;
-        font-weight: bold;
-      } /* Generic.Prompt */
-
-      .pygments-gs {
-        font-weight: bold;
-      } /* Generic.Strong */
-
-      .pygments-gu {
-        color: #800080;
-        font-weight: bold;
-      } /* Generic.Subheading */
-
-      .pygments-gt {
-        color: #0044dd;
-      } /* Generic.Traceback */
-
-      .pygments-kc {
-        color: #008000;
-        font-weight: bold;
-      } /* Keyword.Constant */
-
-      .pygments-kd {
-        color: #008000;
-        font-weight: bold;
-      } /* Keyword.Declaration */
-
-      .pygments-kn {
-        color: #008000;
-        font-weight: bold;
-      } /* Keyword.Namespace */
-
-      .pygments-kp {
-        color: #008000;
-      } /* Keyword.Pseudo */
-
-      .pygments-kr {
-        color: #008000;
-        font-weight: bold;
-      } /* Keyword.Reserved */
-
-      .pygments-kt {
-        color: #b00040;
-      } /* Keyword.Type */
-
-      .pygments-m {
-        color: #666666;
-      } /* Literal.Number */
-
-      .pygments-s {
-        color: #ba2121;
-      } /* Literal.String */
-
-      .pygments-na {
-        color: #7d9029;
-      } /* Name.Attribute */
-
-      .pygments-nb {
-        color: #008000;
-      } /* Name.Builtin */
-
-      .pygments-nc {
-        color: #0000ff;
-        font-weight: bold;
-      } /* Name.Class */
-
-      .pygments-no {
-        color: #880000;
-      } /* Name.Constant */
-
-      .pygments-nd {
-        color: #aa22ff;
-      } /* Name.Decorator */
-
-      .pygments-ni {
-        color: #999999;
-        font-weight: bold;
-      } /* Name.Entity */
-
-      .pygments-ne {
-        color: #d2413a;
-        font-weight: bold;
-      } /* Name.Exception */
-
-      .pygments-nf {
-        color: #0000ff;
-      } /* Name.Function */
-
-      .pygments-nl {
-        color: #a0a000;
-      } /* Name.Label */
-
-      .pygments-nn {
-        color: #0000ff;
-        font-weight: bold;
-      } /* Name.Namespace */
-
-      .pygments-nt {
-        color: #008000;
-        font-weight: bold;
-      } /* Name.Tag */
-
-      .pygments-nv {
-        color: #19177c;
-      } /* Name.Variable */
-
-      .pygments-ow {
-        color: #aa22ff;
-        font-weight: bold;
-      } /* Operator.Word */
-
-      .pygments-w {
-        color: #bbbbbb;
-      } /* Text.Whitespace */
-
-      .pygments-mb {
-        color: #075cc6;
-      } /* Literal.Number.Bin */
-
-      .pygments-mf {
-        color: #075cc6;
-      } /* Literal.Number.Float */
-
-      .pygments-mh {
-        color: #075cc6;
-      } /* Literal.Number.Hex */
-
-      .pygments-mi {
-        color: #075cc6;
-      } /* Literal.Number.Integer */
-
-      .pygments-mo {
-        color: #075cc6;
-      } /* Literal.Number.Oct */
-
-      .pygments-sa {
-        color: #059911;
-      } /* Literal.String.Affix */
-
-      .pygments-sb {
-        color: #059911;
-      } /* Literal.String.Backtick */
-
-      .pygments-sc {
-        color: #059911;
-      } /* Literal.String.Char */
-
-      .pygments-dl {
-        color: #059911;
-      } /* Literal.String.Delimiter */
-
-      .pygments-sd {
-        color: #059911;
-      } /* Literal.String.Doc */
-
-      .pygments-s2 {
-        color: #059911;
-      } /* Literal.String.Double */
-
-      .pygments-se {
-        color: #bb6622;
-        font-weight: bold;
-      } /* Literal.String.Escape */
-
-      .pygments-sh {
-        color: #059911;
-      } /* Literal.String.Heredoc */
-
-      .pygments-si {
-        color: #bb6688;
-        font-weight: bold;
-      } /* Literal.String.Interpol */
-
-      .pygments-sx {
-        color: #008000;
-      } /* Literal.String.Other */
-
-      .pygments-sr {
-        color: #bb6688;
-      } /* Literal.String.Regex */
-
-      .pygments-s1 {
-        color: #059911;
-      } /* Literal.String.Single */
-
-      .pygments-ss {
-        color: #19177c;
-      } /* Literal.String.Symbol */
-
-      .pygments-bp {
-        color: #008000;
-      } /* Name.Builtin.Pseudo */
-
-      .pygments-fm {
-        color: #0000ff;
-      } /* Name.Function.Magic */
-
-      .pygments-vc {
-        color: #19177c;
-      } /* Name.Variable.Class */
-
-      .pygments-vg {
-        color: #19177c;
-      } /* Name.Variable.Global */
-
-      .pygments-vi {
-        color: #19177c;
-      } /* Name.Variable.Instance */
-
-      .pygments-vm {
-        color: #19177c;
-      } /* Name.Variable.Magic */
-
-      .pygments-il {
-        color: #666666;
-      } /* Literal.Number.Integer.Long */
-
-      /* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source" */
-      [data-theme="dark"] .pygments-c {
-        color: #6a9955;
-      } /* Comment */
-      [data-theme="dark"] .pygments-err {
-        color: #f44747;
-      } /* Error */
-      [data-theme="dark"] .pygments-k {
-        color: #569cd6;
-      } /* Keyword */
-      [data-theme="dark"] .pygments-o {
-        color: #d4d4d4;
-      } /* Operator */
-      [data-theme="dark"] .pygments-ch {
-        color: #6a9955;
-      } /* Comment.Hashbang */
-      [data-theme="dark"] .pygments-cm {
-        color: #6a9955;
-      } /* Comment.Multiline */
-      [data-theme="dark"] .pygments-cp {
-        color: #569cd6;
-      } /* Comment.Preproc */
-      [data-theme="dark"] .pygments-cpf {
-        color: #6a9955;
-      } /* Comment.PreprocFile */
-      [data-theme="dark"] .pygments-c1 {
-        color: #6a9955;
-      } /* Comment.Single */
-      [data-theme="dark"] .pygments-cs {
-        color: #6a9955;
-      } /* Comment.Special */
-      [data-theme="dark"] .pygments-gd {
-        color: #f44747;
-      } /* Generic.Deleted */
-      [data-theme="dark"] .pygments-ge {
-        font-style: italic;
-      } /* Generic.Emph */
-      [data-theme="dark"] .pygments-gr {
-        color: #f44747;
-      } /* Generic.Error */
-      [data-theme="dark"] .pygments-gh {
-        color: #d4d4d4;
-        font-weight: bold;
-      } /* Generic.Heading */
-      [data-theme="dark"] .pygments-gi {
-        color: #b5cea8;
-      } /* Generic.Inserted */
-      [data-theme="dark"] .pygments-go {
-        color: #d4d4d4;
-      } /* Generic.Output */
-      [data-theme="dark"] .pygments-gp {
-        color: #d4d4d4;
-        font-weight: bold;
-      } /* Generic.Prompt */
-      [data-theme="dark"] .pygments-gs {
-        font-weight: bold;
-      } /* Generic.Strong */
-      [data-theme="dark"] .pygments-gu {
-        color: #d4d4d4;
-        font-weight: bold;
-      } /* Generic.Subheading */
-      [data-theme="dark"] .pygments-gt {
-        color: #f44747;
-      } /* Generic.Traceback */
-      [data-theme="dark"] .pygments-kc {
-        color: #569cd6;
-      } /* Keyword.Constant */
-      [data-theme="dark"] .pygments-kd {
-        color: #569cd6;
-      } /* Keyword.Declaration */
-      [data-theme="dark"] .pygments-kn {
-        color: #569cd6;
-      } /* Keyword.Namespace */
-      [data-theme="dark"] .pygments-kp {
-        color: #569cd6;
-      } /* Keyword.Pseudo */
-      [data-theme="dark"] .pygments-kr {
-        color: #569cd6;
-      } /* Keyword.Reserved */
-      [data-theme="dark"] .pygments-kt {
-        color: #4ec9b0;
-      } /* Keyword.Type */
-      [data-theme="dark"] .pygments-m {
-        color: #b5cea8;
-      } /* Literal.Number */
-      [data-theme="dark"] .pygments-s {
-        color: #ce9178;
-      } /* Literal.String */
-      [data-theme="dark"] .pygments-na {
-        color: #9cdcfe;
-      } /* Name.Attribute */
-      [data-theme="dark"] .pygments-nb {
-        color: #dcdcaa;
-      } /* Name.Builtin */
-      [data-theme="dark"] .pygments-nc {
-        color: #4ec9b0;
-      } /* Name.Class */
-      [data-theme="dark"] .pygments-no {
-        color: #9cdcfe;
-      } /* Name.Constant */
-      [data-theme="dark"] .pygments-nd {
-        color: #dcdcaa;
-      } /* Name.Decorator */
-      [data-theme="dark"] .pygments-ni {
-        color: #d4d4d4;
-      } /* Name.Entity */
-      [data-theme="dark"] .pygments-ne {
-        color: #4ec9b0;
-      } /* Name.Exception */
-      [data-theme="dark"] .pygments-nf {
-        color: #dcdcaa;
-      } /* Name.Function */
-      [data-theme="dark"] .pygments-nl {
-        color: #d4d4d4;
-      } /* Name.Label */
-      [data-theme="dark"] .pygments-nn {
-        color: #d4d4d4;
-      } /* Name.Namespace */
-      [data-theme="dark"] .pygments-nt {
-        color: #569cd6;
-      } /* Name.Tag */
-      [data-theme="dark"] .pygments-nv {
-        color: #9cdcfe;
-      } /* Name.Variable */
-      [data-theme="dark"] .pygments-ow {
-        color: #569cd6;
-      } /* Operator.Word */
-      [data-theme="dark"] .pygments-w {
-        color: #d4d4d4;
-      } /* Text.Whitespace */
-      [data-theme="dark"] .pygments-mb {
-        color: #b5cea8;
-      } /* Literal.Number.Bin */
-      [data-theme="dark"] .pygments-mf {
-        color: #b5cea8;
-      } /* Literal.Number.Float */
-      [data-theme="dark"] .pygments-mh {
-        color: #b5cea8;
-      } /* Literal.Number.Hex */
-      [data-theme="dark"] .pygments-mi {
-        color: #b5cea8;
-      } /* Literal.Number.Integer */
-      [data-theme="dark"] .pygments-mo {
-        color: #b5cea8;
-      } /* Literal.Number.Oct */
-      [data-theme="dark"] .pygments-sa {
-        color: #ce9178;
-      } /* Literal.String.Affix */
-      [data-theme="dark"] .pygments-sb {
-        color: #ce9178;
-      } /* Literal.String.Backtick */
-      [data-theme="dark"] .pygments-sc {
-        color: #ce9178;
-      } /* Literal.String.Char */
-      [data-theme="dark"] .pygments-dl {
-        color: #ce9178;
-      } /* Literal.String.Delimiter */
-      [data-theme="dark"] .pygments-sd {
-        color: #ce9178;
-      } /* Literal.String.Doc */
-      [data-theme="dark"] .pygments-s2 {
-        color: #ce9178;
-      } /* Literal.String.Double */
-      [data-theme="dark"] .pygments-se {
-        color: #d7ba7d;
-      } /* Literal.String.Escape */
-      [data-theme="dark"] .pygments-sh {
-        color: #ce9178;
-      } /* Literal.String.Heredoc */
-      [data-theme="dark"] .pygments-si {
-        color: #d7ba7d;
-      } /* Literal.String.Interpol */
-      [data-theme="dark"] .pygments-sx {
-        color: #ce9178;
-      } /* Literal.String.Other */
-      [data-theme="dark"] .pygments-sr {
-        color: #d16969;
-      } /* Literal.String.Regex */
-      [data-theme="dark"] .pygments-s1 {
-        color: #ce9178;
-      } /* Literal.String.Single */
-      [data-theme="dark"] .pygments-ss {
-        color: #ce9178;
-      } /* Literal.String.Symbol */
-      [data-theme="dark"] .pygments-bp {
-        color: #dcdcaa;
-      } /* Name.Builtin.Pseudo */
-      [data-theme="dark"] .pygments-fm {
-        color: #dcdcaa;
-      } /* Name.Function.Magic */
-      [data-theme="dark"] .pygments-vc {
-        color: #9cdcfe;
-      } /* Name.Variable.Class */
-      [data-theme="dark"] .pygments-vg {
-        color: #9cdcfe;
-      } /* Name.Variable.Global */
-      [data-theme="dark"] .pygments-vi {
-        color: #9cdcfe;
-      } /* Name.Variable.Instance */
-      [data-theme="dark"] .pygments-vm {
-        color: #9cdcfe;
-      } /* Name.Variable.Magic */
-      [data-theme="dark"] .pygments-il {
-        color: #b5cea8;
-      } /* Literal.Number.Integer.Long */
-    </style>
-    <link
-      rel="icon"
-      type="image/png"
-      href="data:image/png;base64,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"
-    />
-  </head>
-  <body>
-    <div class="main-grid">
-      <header>
-        <h1 class="title">PythonTA Report</h1>
-        <time>Sat. Feb. 07 2026, 12:00:49 PM</time>
-      </header>
-      <section class="sidebar">
-        <div class="section-header">
-          <h2>Table of Contents</h2>
-          <button
-            id="theme-toggle"
-            class="theme-toggle"
-            aria-label="Toggle theme"
-            title="Toggle theme"
-          >
-            <!-- Sun and moon icons sourced from heroicons at https://heroicons.com/ -->
-            <svg
-              class="sun-icon"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-              />
-            </svg>
-            <svg
-              class="moon-icon"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
-              />
-            </svg>
-          </button>
-        </div>
-        <ul>
-          <li class="collapsible expanded">
-            <button>
-              <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                width="10"
-                height="10"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                />
-              </svg>
-            </button>
-            <span class="file-name">
-              <a href="#0"> content_injection.py </a>
-            </span>
-            <ul>
-              <li class="collapsible expanded">
-                <button>
-                  <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    width="10"
-                    height="10"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-                </button>
-                <span>
-                  <strong>Code Errors or Forbidden Usage</strong>
-                </span>
-                <ul></ul>
-              </li>
-              <li class="collapsible expanded">
-                <button>
-                  <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    width="10"
-                    height="10"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-                </button>
-                <span>
-                  <strong>Style and Convention</strong>
-                </span>
-                <ul>
-                  <li>
-                    <a href="#0-E9989"> E9989 (pep8-errors) </a>
-                  </li>
-
-                  <li>
-                    <a href="#0-C0301"> C0301 (line-too-long) </a>
-                  </li>
-
-                  <li>
-                    <a href="#0-C0304"> C0304 (missing-final-newline) </a>
-                  </li>
-
-                  <li>
-                    <a href="#0-C0116"> C0116 (missing-function-docstring) </a>
-                  </li>
-
-                  <li>
-                    <a href="#0-E9971"> E9971 (missing-return-type) </a>
-                  </li>
-
-                  <li>
-                    <a href="#0-E9920"> E9920 (unnecessary-f-string) </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </section>
-      <main>
-        <section id="0">
-          <div class="section-header">
-            <h2>
-              /Users/zain/SDS/pyta-fork/packages/python-ta/tests/fixtures/reporters/content_injection.py
-            </h2>
-          </div>
-          <article class="error-output code-errors">
-            <h3 class="category-heading">
-              <span>Code Errors or Forbidden Usage (fix: high priority)</span>
-              <span class="slider">
-                <button>
-                  <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                  <svg
-                    class="collapse-trigger"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    width="60"
-                    height="30"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-                </button>
-              </span>
-            </h3>
-            <div class="content collapsible expanded">
-              <span class="empty-placeholder"
-                >No problems detected, good job!</span
-              >
-            </div>
-          </article>
-          <article class="error-output style-errors">
-            <h3 class="category-heading">
-              <span>Style or Convention Errors (fix: before submission)</span>
-              <span class="slider">
-                <button>
-                  <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                  <svg
-                    class="collapse-trigger"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    width="60"
-                    height="30"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-                </button>
-              </span>
-            </h3>
-            <div class="content collapsible expanded">
-              <div class="error-instance" id="0-E9989">
-                <div class="info">
-                  <span class="error-link style-error-id">
-                    <a
-                      href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9989"
-                      target="_blank"
-                      >&#10064; E9989 (pep8-errors)
-                      <span class="more-info">(Learn More)</span></a
-                    >
-                  </span>
-
-                  <span class="occurrences"> 1 occurrence. </span>
-                  <span class="shown"> </span>
-                  <span class="slider">
-                    <button>
-                      <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                      <svg
-                        class="collapse-trigger"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        width="60"
-                        height="30"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
+.pygments-hll {
+  background-color: #ffffcc;
+} /* ? */
+
+.pygments-c {
+  color: #999;
+} /* Comment */
+
+.pygments-err {
+  /*border: 1px solid #FF0000;*/
+} /* Error */
+
+.pygments-k {
+  color: #aa22ff;
+  font-weight: bold;
+} /* Keyword */
+
+.pygments-o {
+  color: #666666;
+} /* Operator */
+
+.pygments-ch {
+  color: #408080;
+} /* Comment.Hashbang */
+
+.pygments-cm {
+  color: #999;
+} /* Comment.Multiline */
+
+.pygments-cp {
+  color: #bc7a00;
+} /* Comment.Preproc */
+
+.pygments-cpf {
+  color: #408080;
+} /* Comment.PreprocFile */
+
+.pygments-c1 {
+  color: #999;
+} /* Comment.Single */
+
+.pygments-cs {
+  color: #999;
+} /* Comment.Special */
+
+.pygments-gd {
+  color: #a00000;
+} /* Generic.Deleted */
+
+.pygments-ge {
+  font-style: italic;
+} /* Generic.Emph */
+
+.pygments-gr {
+  color: #ff0000;
+} /* Generic.Error */
+
+.pygments-gh {
+  color: #000080;
+  font-weight: bold;
+} /* Generic.Heading */
+
+.pygments-gi {
+  color: #00a000;
+} /* Generic.Inserted */
+
+.pygments-go {
+  color: #888888;
+} /* Generic.Output */
+
+.pygments-gp {
+  color: #000080;
+  font-weight: bold;
+} /* Generic.Prompt */
+
+.pygments-gs {
+  font-weight: bold;
+} /* Generic.Strong */
+
+.pygments-gu {
+  color: #800080;
+  font-weight: bold;
+} /* Generic.Subheading */
+
+.pygments-gt {
+  color: #0044dd;
+} /* Generic.Traceback */
+
+.pygments-kc {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Constant */
+
+.pygments-kd {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Declaration */
+
+.pygments-kn {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Namespace */
+
+.pygments-kp {
+  color: #008000;
+} /* Keyword.Pseudo */
+
+.pygments-kr {
+  color: #008000;
+  font-weight: bold;
+} /* Keyword.Reserved */
+
+.pygments-kt {
+  color: #b00040;
+} /* Keyword.Type */
+
+.pygments-m {
+  color: #666666;
+} /* Literal.Number */
+
+.pygments-s {
+  color: #ba2121;
+} /* Literal.String */
+
+.pygments-na {
+  color: #7d9029;
+} /* Name.Attribute */
+
+.pygments-nb {
+  color: #008000;
+} /* Name.Builtin */
+
+.pygments-nc {
+  color: #0000ff;
+  font-weight: bold;
+} /* Name.Class */
+
+.pygments-no {
+  color: #880000;
+} /* Name.Constant */
+
+.pygments-nd {
+  color: #aa22ff;
+} /* Name.Decorator */
+
+.pygments-ni {
+  color: #999999;
+  font-weight: bold;
+} /* Name.Entity */
+
+.pygments-ne {
+  color: #d2413a;
+  font-weight: bold;
+} /* Name.Exception */
+
+.pygments-nf {
+  color: #0000ff;
+} /* Name.Function */
+
+.pygments-nl {
+  color: #a0a000;
+} /* Name.Label */
+
+.pygments-nn {
+  color: #0000ff;
+  font-weight: bold;
+} /* Name.Namespace */
+
+.pygments-nt {
+  color: #008000;
+  font-weight: bold;
+} /* Name.Tag */
+
+.pygments-nv {
+  color: #19177c;
+} /* Name.Variable */
+
+.pygments-ow {
+  color: #aa22ff;
+  font-weight: bold;
+} /* Operator.Word */
+
+.pygments-w {
+  color: #bbbbbb;
+} /* Text.Whitespace */
+
+.pygments-mb {
+  color: #075cc6;
+} /* Literal.Number.Bin */
+
+.pygments-mf {
+  color: #075cc6;
+} /* Literal.Number.Float */
+
+.pygments-mh {
+  color: #075cc6;
+} /* Literal.Number.Hex */
+
+.pygments-mi {
+  color: #075cc6;
+} /* Literal.Number.Integer */
+
+.pygments-mo {
+  color: #075cc6;
+} /* Literal.Number.Oct */
+
+.pygments-sa {
+  color: #059911;
+} /* Literal.String.Affix */
+
+.pygments-sb {
+  color: #059911;
+} /* Literal.String.Backtick */
+
+.pygments-sc {
+  color: #059911;
+} /* Literal.String.Char */
+
+.pygments-dl {
+  color: #059911;
+} /* Literal.String.Delimiter */
+
+.pygments-sd {
+  color: #059911;
+} /* Literal.String.Doc */
+
+.pygments-s2 {
+  color: #059911;
+} /* Literal.String.Double */
+
+.pygments-se {
+  color: #bb6622;
+  font-weight: bold;
+} /* Literal.String.Escape */
+
+.pygments-sh {
+  color: #059911;
+} /* Literal.String.Heredoc */
+
+.pygments-si {
+  color: #bb6688;
+  font-weight: bold;
+} /* Literal.String.Interpol */
+
+.pygments-sx {
+  color: #008000;
+} /* Literal.String.Other */
+
+.pygments-sr {
+  color: #bb6688;
+} /* Literal.String.Regex */
+
+.pygments-s1 {
+  color: #059911;
+} /* Literal.String.Single */
+
+.pygments-ss {
+  color: #19177c;
+} /* Literal.String.Symbol */
+
+.pygments-bp {
+  color: #008000;
+} /* Name.Builtin.Pseudo */
+
+.pygments-fm {
+  color: #0000ff;
+} /* Name.Function.Magic */
+
+.pygments-vc {
+  color: #19177c;
+} /* Name.Variable.Class */
+
+.pygments-vg {
+  color: #19177c;
+} /* Name.Variable.Global */
+
+.pygments-vi {
+  color: #19177c;
+} /* Name.Variable.Instance */
+
+.pygments-vm {
+  color: #19177c;
+} /* Name.Variable.Magic */
+
+.pygments-il {
+  color: #666666;
+} /* Literal.Number.Integer.Long */
+
+/* VS Code "Modern Dark" Theme for syntax highlighting in dark mode, see https://code.visualstudio.com/docs/configure/themes for source" */
+[data-theme="dark"] .pygments-c {
+  color: #6a9955;
+} /* Comment */
+[data-theme="dark"] .pygments-err {
+  color: #f44747;
+} /* Error */
+[data-theme="dark"] .pygments-k {
+  color: #569cd6;
+} /* Keyword */
+[data-theme="dark"] .pygments-o {
+  color: #d4d4d4;
+} /* Operator */
+[data-theme="dark"] .pygments-ch {
+  color: #6a9955;
+} /* Comment.Hashbang */
+[data-theme="dark"] .pygments-cm {
+  color: #6a9955;
+} /* Comment.Multiline */
+[data-theme="dark"] .pygments-cp {
+  color: #569cd6;
+} /* Comment.Preproc */
+[data-theme="dark"] .pygments-cpf {
+  color: #6a9955;
+} /* Comment.PreprocFile */
+[data-theme="dark"] .pygments-c1 {
+  color: #6a9955;
+} /* Comment.Single */
+[data-theme="dark"] .pygments-cs {
+  color: #6a9955;
+} /* Comment.Special */
+[data-theme="dark"] .pygments-gd {
+  color: #f44747;
+} /* Generic.Deleted */
+[data-theme="dark"] .pygments-ge {
+  font-style: italic;
+} /* Generic.Emph */
+[data-theme="dark"] .pygments-gr {
+  color: #f44747;
+} /* Generic.Error */
+[data-theme="dark"] .pygments-gh {
+  color: #d4d4d4;
+  font-weight: bold;
+} /* Generic.Heading */
+[data-theme="dark"] .pygments-gi {
+  color: #b5cea8;
+} /* Generic.Inserted */
+[data-theme="dark"] .pygments-go {
+  color: #d4d4d4;
+} /* Generic.Output */
+[data-theme="dark"] .pygments-gp {
+  color: #d4d4d4;
+  font-weight: bold;
+} /* Generic.Prompt */
+[data-theme="dark"] .pygments-gs {
+  font-weight: bold;
+} /* Generic.Strong */
+[data-theme="dark"] .pygments-gu {
+  color: #d4d4d4;
+  font-weight: bold;
+} /* Generic.Subheading */
+[data-theme="dark"] .pygments-gt {
+  color: #f44747;
+} /* Generic.Traceback */
+[data-theme="dark"] .pygments-kc {
+  color: #569cd6;
+} /* Keyword.Constant */
+[data-theme="dark"] .pygments-kd {
+  color: #569cd6;
+} /* Keyword.Declaration */
+[data-theme="dark"] .pygments-kn {
+  color: #569cd6;
+} /* Keyword.Namespace */
+[data-theme="dark"] .pygments-kp {
+  color: #569cd6;
+} /* Keyword.Pseudo */
+[data-theme="dark"] .pygments-kr {
+  color: #569cd6;
+} /* Keyword.Reserved */
+[data-theme="dark"] .pygments-kt {
+  color: #4ec9b0;
+} /* Keyword.Type */
+[data-theme="dark"] .pygments-m {
+  color: #b5cea8;
+} /* Literal.Number */
+[data-theme="dark"] .pygments-s {
+  color: #ce9178;
+} /* Literal.String */
+[data-theme="dark"] .pygments-na {
+  color: #9cdcfe;
+} /* Name.Attribute */
+[data-theme="dark"] .pygments-nb {
+  color: #dcdcaa;
+} /* Name.Builtin */
+[data-theme="dark"] .pygments-nc {
+  color: #4ec9b0;
+} /* Name.Class */
+[data-theme="dark"] .pygments-no {
+  color: #9cdcfe;
+} /* Name.Constant */
+[data-theme="dark"] .pygments-nd {
+  color: #dcdcaa;
+} /* Name.Decorator */
+[data-theme="dark"] .pygments-ni {
+  color: #d4d4d4;
+} /* Name.Entity */
+[data-theme="dark"] .pygments-ne {
+  color: #4ec9b0;
+} /* Name.Exception */
+[data-theme="dark"] .pygments-nf {
+  color: #dcdcaa;
+} /* Name.Function */
+[data-theme="dark"] .pygments-nl {
+  color: #d4d4d4;
+} /* Name.Label */
+[data-theme="dark"] .pygments-nn {
+  color: #d4d4d4;
+} /* Name.Namespace */
+[data-theme="dark"] .pygments-nt {
+  color: #569cd6;
+} /* Name.Tag */
+[data-theme="dark"] .pygments-nv {
+  color: #9cdcfe;
+} /* Name.Variable */
+[data-theme="dark"] .pygments-ow {
+  color: #569cd6;
+} /* Operator.Word */
+[data-theme="dark"] .pygments-w {
+  color: #d4d4d4;
+} /* Text.Whitespace */
+[data-theme="dark"] .pygments-mb {
+  color: #b5cea8;
+} /* Literal.Number.Bin */
+[data-theme="dark"] .pygments-mf {
+  color: #b5cea8;
+} /* Literal.Number.Float */
+[data-theme="dark"] .pygments-mh {
+  color: #b5cea8;
+} /* Literal.Number.Hex */
+[data-theme="dark"] .pygments-mi {
+  color: #b5cea8;
+} /* Literal.Number.Integer */
+[data-theme="dark"] .pygments-mo {
+  color: #b5cea8;
+} /* Literal.Number.Oct */
+[data-theme="dark"] .pygments-sa {
+  color: #ce9178;
+} /* Literal.String.Affix */
+[data-theme="dark"] .pygments-sb {
+  color: #ce9178;
+} /* Literal.String.Backtick */
+[data-theme="dark"] .pygments-sc {
+  color: #ce9178;
+} /* Literal.String.Char */
+[data-theme="dark"] .pygments-dl {
+  color: #ce9178;
+} /* Literal.String.Delimiter */
+[data-theme="dark"] .pygments-sd {
+  color: #ce9178;
+} /* Literal.String.Doc */
+[data-theme="dark"] .pygments-s2 {
+  color: #ce9178;
+} /* Literal.String.Double */
+[data-theme="dark"] .pygments-se {
+  color: #d7ba7d;
+} /* Literal.String.Escape */
+[data-theme="dark"] .pygments-sh {
+  color: #ce9178;
+} /* Literal.String.Heredoc */
+[data-theme="dark"] .pygments-si {
+  color: #d7ba7d;
+} /* Literal.String.Interpol */
+[data-theme="dark"] .pygments-sx {
+  color: #ce9178;
+} /* Literal.String.Other */
+[data-theme="dark"] .pygments-sr {
+  color: #d16969;
+} /* Literal.String.Regex */
+[data-theme="dark"] .pygments-s1 {
+  color: #ce9178;
+} /* Literal.String.Single */
+[data-theme="dark"] .pygments-ss {
+  color: #ce9178;
+} /* Literal.String.Symbol */
+[data-theme="dark"] .pygments-bp {
+  color: #dcdcaa;
+} /* Name.Builtin.Pseudo */
+[data-theme="dark"] .pygments-fm {
+  color: #dcdcaa;
+} /* Name.Function.Magic */
+[data-theme="dark"] .pygments-vc {
+  color: #9cdcfe;
+} /* Name.Variable.Class */
+[data-theme="dark"] .pygments-vg {
+  color: #9cdcfe;
+} /* Name.Variable.Global */
+[data-theme="dark"] .pygments-vi {
+  color: #9cdcfe;
+} /* Name.Variable.Instance */
+[data-theme="dark"] .pygments-vm {
+  color: #9cdcfe;
+} /* Name.Variable.Magic */
+[data-theme="dark"] .pygments-il {
+  color: #b5cea8;
+} /* Literal.Number.Integer.Long */
+        </style>
+        <link rel="icon" type="image/png" href="data:image/png;base64,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">
+    </head>
+    <body>
+        <div class="main-grid">
+            <header>
+                <h1 class="title">PythonTA Report</h1>
+                <time>Sat. Feb. 07 2026, 01:33:40 PM</time>
+            </header>
+            <section class="sidebar">
+                <div class="section-header">
+                    <h2>Table of Contents</h2>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                        <!-- Sun and moon icons sourced from heroicons at https://heroicons.com/ -->
+                        <svg class="sun-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                        </svg>
                     </button>
-                  </span>
                 </div>
-                <div class="message-container collapsible expanded">
-                  <div class="message">
-                    <p class="message-name">
-                      <span>
-                        [Line 5] expected 2 blank lines, found 1 (pycodestyle
-                        code E302)
-                      </span>
-                      <span class="slider">
-                        <button style="float: right">
-                          <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                          <svg
-                            class="collapse-trigger"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            width="60"
-                            height="20"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                            />
-                          </svg>
+                <ul>
+                    
+                    <li class="collapsible expanded">
+                        <button>
+                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
                         </button>
-                      </span>
-                    </p>
-                    <div class="collapsible expanded message-snippet-container">
-                      <pre
-                        class="message-snippet"
-                      ><span class="grey line-num">  2</span>  <span class="grey"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_reporter</span><span class="pygments-p">::</span><span class="pygments-n">test_injection</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
+                        <span class="file-name">
+                            <a href=#0>
+                                content_injection.py
+                            </a>
+                        </span>
+                        <ul>
+                            <li class="collapsible expanded">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                                <span>
+                                    <strong>Code Errors or Forbidden Usage</strong>
+                                </span>
+                                <ul>
+                                    
+                                </ul>
+                            </li>
+                            <li class="collapsible expanded">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                                <span>
+                                    <strong>Style and Convention</strong>
+                                </span>
+                                <ul>
+                                    
+                                    <li>
+                                        <a href=#0-E9989>
+                                            E9989 (pep8-errors)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-C0301>
+                                            C0301 (line-too-long)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-C0304>
+                                            C0304 (missing-final-newline)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-C0116>
+                                            C0116 (missing-function-docstring)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-E9971>
+                                            E9971 (missing-return-type)
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href=#0-E9920>
+                                            E9920 (unnecessary-f-string)
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </section>
+            <main>
+                
+                
+                <section id=0>
+                    <div class="section-header">
+                        <h2> /Users/zain/SDS/pyta-fork/packages/python-ta/tests/fixtures/reporters/content_injection.py </h2>
+                    </div>
+                    <article class="error-output code-errors">
+                        <h3 class="category-heading">
+                            <span>Code Errors or Forbidden Usage (fix: high priority)</span>
+                            <span class="slider">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible expanded">
+                            
+                            <span class="empty-placeholder">No problems detected, good job!</span>
+                            
+                        </div>
+                    </article>
+                    <article class="error-output style-errors">
+                        <h3 class="category-heading">
+                            <span>Style or Convention Errors (fix: before submission)</span>
+                            <span class="slider">
+                                <button>
+                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </h3>
+                        <div class="content collapsible expanded">
+                            
+                            <div class="error-instance" id=0-E9989>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9989" target="_blank">&#10064; E9989 (pep8-errors)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line 5] expected 2 blank lines, found 1 (pycodestyle code E302) </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  2</span>  <span class="grey"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_reporter</span><span class="pygments-p">::</span><span class="pygments-n">test_injection</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
 <span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">ensure</span> <span class="pygments-n">that</span> <span class="pygments-n">no</span> <span class="pygments-n">HTML</span> <span class="pygments-n">can</span> <span class="pygments-n">be</span> <span class="pygments-n">injected</span> <span class="pygments-n">into</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
 <span class="gbold line-num">  6</span>  <span class="highlight-pyta">                            </span>
 <span class="gbold line-num">   </span>  <span class="highlight-pyta"><span class="pygments-c1"># INSERT NEW BLANK LINE HERE</span></span>
@@ -1328,579 +1231,446 @@
 <span class="grey line-num">  6</span>  <span class="grey">    <span class="pygments-n">a</span> <span class="pygments-o">=</span> <span class="pygments-s2">&quot;hello&quot;</span></span>
 <span class="grey line-num">  7</span>  <span class="grey">    <span class="pygments-n">x</span> <span class="pygments-o">=</span> <span class="pygments-sa">f</span><span class="pygments-s1">&#39;</span><span class="pygments-si">{</span><span class="pygments-n">a</span><span class="pygments-w"> </span><span class="pygments-o">+</span><span class="pygments-w"> </span><span class="pygments-s2">&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;</span><span class="pygments-si">}</span><span class="pygments-s1">&#39;</span></span>
 </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
 
-              <div class="error-instance" id="0-C0301">
-                <div class="info">
-                  <span class="error-link style-error-id">
-                    <a
-                      href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0301"
-                      target="_blank"
-                      >&#10064; C0301 (line-too-long)
-                      <span class="more-info">(Learn More)</span></a
-                    >
-                  </span>
-
-                  <span class="occurrences"> 1 occurrence. </span>
-                  <span class="shown"> </span>
-                  <span class="slider">
-                    <button>
-                      <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                      <svg
-                        class="collapse-trigger"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        width="60"
-                        height="30"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div class="message-container collapsible expanded">
-                  <div class="message">
-                    <p class="message-name">
-                      <span>
-                        [Line 2] This line is 85 characters long, exceeding the
-                        limit of 80 characters.
-                      </span>
-                      <span class="slider">
-                        <button style="float: right">
-                          <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                          <svg
-                            class="collapse-trigger"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            width="60"
-                            height="20"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                            />
-                          </svg>
-                        </button>
-                      </span>
-                    </p>
-                    <div class="collapsible expanded message-snippet-container">
-                      <pre
-                        class="message-snippet"
-                      ><span class="grey line-num">  1</span>  <span class="grey"><span class="pygments-s2">&quot;&quot;&quot;This script serves as the entry point for the PyTA HTML reporter tests.</span></span>
+                            </div>
+                            
+                            <div class="error-instance" id=0-C0301>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0301" target="_blank">&#10064; C0301 (line-too-long)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line 2] This line is 85 characters long, exceeding the limit of 80 characters. </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  1</span>  <span class="grey"><span class="pygments-s2">&quot;&quot;&quot;This script serves as the entry point for the PyTA HTML reporter tests.</span></span>
 <span class="gbold line-num">  2</span>  <span class="black"><span class="pygments-n">It</span> <span class="pygments-ow">is</span> <span class="pygments-n">invoked</span> <span class="pygments-n">by</span> <span class="pygments-n">the</span> <span class="pygments-n">test</span> <span class="pygments-err">`</span><span class="pygments-n">tests</span><span class="pygments-o">/</span><span class="pygments-n">test_reporters</span><span class="pygments-o">/</span><span class="pygments-n">test_html_reporter</span><span class="pygments-p">::</span><span class="pygments-n">test_injecti</span></span><span class="highlight-pyta"><span class="pygments-n">on</span><span class="pygments-p">()</span><span class="pygments-err">`</span></span>
 <span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">ensure</span> <span class="pygments-n">that</span> <span class="pygments-n">no</span> <span class="pygments-n">HTML</span> <span class="pygments-n">can</span> <span class="pygments-n">be</span> <span class="pygments-n">injected</span> <span class="pygments-n">into</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
 </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
 
-              <div class="error-instance" id="0-C0304">
-                <div class="info">
-                  <span class="error-link style-error-id">
-                    <a
-                      href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0304"
-                      target="_blank"
-                      >&#10064; C0304 (missing-final-newline)
-                      <span class="more-info">(Learn More)</span></a
-                    >
-                  </span>
-
-                  <span class="occurrences"> 1 occurrence. </span>
-                  <span class="shown"> </span>
-                  <span class="slider">
-                    <button>
-                      <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                      <svg
-                        class="collapse-trigger"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        width="60"
-                        height="30"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div class="message-container collapsible expanded">
-                  <div class="message">
-                    <p class="message-name">
-                      <span>
-                        [Line 8] By convention, each Python file should end with
-                        a blank line. To fix this, go down to the bottom of your
-                        file and press Enter/Return to add an empty line.
-                      </span>
-                      <span class="slider">
-                        <button style="float: right">
-                          <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                          <svg
-                            class="collapse-trigger"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            width="60"
-                            height="20"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                            />
-                          </svg>
-                        </button>
-                      </span>
-                    </p>
-                    <div class="collapsible expanded message-snippet-container">
-                      <pre
-                        class="message-snippet"
-                      ><span class="grey line-num">  6</span>  <span class="grey">    <span class="pygments-n">a</span> <span class="pygments-o">=</span> <span class="pygments-s2">&quot;hello&quot;</span></span>
+                            </div>
+                            
+                            <div class="error-instance" id=0-C0304>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0304" target="_blank">&#10064; C0304 (missing-final-newline)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line 8] By convention, each Python file should end with a blank line. To fix this, go down to the bottom of your file and press Enter/Return to add an empty line. </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  6</span>  <span class="grey">    <span class="pygments-n">a</span> <span class="pygments-o">=</span> <span class="pygments-s2">&quot;hello&quot;</span></span>
 <span class="grey line-num">  7</span>  <span class="grey">    <span class="pygments-n">x</span> <span class="pygments-o">=</span> <span class="pygments-sa">f</span><span class="pygments-s1">&#39;</span><span class="pygments-si">{</span><span class="pygments-n">a</span><span class="pygments-w"> </span><span class="pygments-o">+</span><span class="pygments-w"> </span><span class="pygments-s2">&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;</span><span class="pygments-si">}</span><span class="pygments-s1">&#39;</span></span>
 <span class="gbold line-num">  8</span>  <span class="highlight-pyta">    <span class="pygments-k">return</span> <span class="pygments-n">x</span></span>
 </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
 
-              <div class="error-instance" id="0-C0116">
-                <div class="info">
-                  <span class="error-link style-error-id">
-                    <a
-                      href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0116"
-                      target="_blank"
-                      >&#10064; C0116 (missing-function-docstring)
-                      <span class="more-info">(Learn More)</span></a
-                    >
-                  </span>
-
-                  <span class="occurrences"> 1 occurrence. </span>
-                  <span class="shown"> </span>
-                  <span class="slider">
-                    <button>
-                      <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                      <svg
-                        class="collapse-trigger"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        width="60"
-                        height="30"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div class="message-container collapsible expanded">
-                  <div class="message">
-                    <p class="message-name">
-                      <span>
-                        [Line 5] Missing function or method docstring
-                      </span>
-                      <span class="slider">
-                        <button style="float: right">
-                          <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                          <svg
-                            class="collapse-trigger"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            width="60"
-                            height="20"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                            />
-                          </svg>
-                        </button>
-                      </span>
-                    </p>
-                    <div class="collapsible expanded message-snippet-container">
-                      <pre
-                        class="message-snippet"
-                      ><span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-k">def</span><span class="pygments-w"> </span><span class="pygments-nf">inject_script</span><span class="pygments-p">():</span></span>
+                            </div>
+                            
+                            <div class="error-instance" id=0-C0116>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;c0116" target="_blank">&#10064; C0116 (missing-function-docstring)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line 5] Missing function or method docstring </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-k">def</span><span class="pygments-w"> </span><span class="pygments-nf">inject_script</span><span class="pygments-p">():</span></span>
 <span class="black line-num">   </span>      <span class="highlight-pyta"><span class="pygments-sd">&quot;&quot;&quot;YOUR DOCSTRING HERE&quot;&quot;&quot;</span></span>
 <span class="grey line-num">  6</span>  <span class="grey">    <span class="pygments-n">a</span> <span class="pygments-o">=</span> <span class="pygments-s2">&quot;hello&quot;</span></span>
 <span class="grey line-num">  7</span>  <span class="grey">    <span class="pygments-n">x</span> <span class="pygments-o">=</span> <span class="pygments-sa">f</span><span class="pygments-s1">&#39;</span><span class="pygments-si">{</span><span class="pygments-n">a</span><span class="pygments-w"> </span><span class="pygments-o">+</span><span class="pygments-w"> </span><span class="pygments-s2">&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;</span><span class="pygments-si">}</span><span class="pygments-s1">&#39;</span></span>
 </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
 
-              <div class="error-instance" id="0-E9971">
-                <div class="info">
-                  <span class="error-link style-error-id">
-                    <a
-                      href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9971"
-                      target="_blank"
-                      >&#10064; E9971 (missing-return-type)
-                      <span class="more-info">(Learn More)</span></a
-                    >
-                  </span>
-
-                  <span class="occurrences"> 1 occurrence. </span>
-                  <span class="shown"> </span>
-                  <span class="slider">
-                    <button>
-                      <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                      <svg
-                        class="collapse-trigger"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        width="60"
-                        height="30"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div class="message-container collapsible expanded">
-                  <div class="message">
-                    <p class="message-name">
-                      <span>
-                        [Line 5] Function is missing return type annotation
-                      </span>
-                      <span class="slider">
-                        <button style="float: right">
-                          <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                          <svg
-                            class="collapse-trigger"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            width="60"
-                            height="20"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                            />
-                          </svg>
-                        </button>
-                      </span>
-                    </p>
-                    <div class="collapsible expanded message-snippet-container">
-                      <pre
-                        class="message-snippet"
-                      ><span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">ensure</span> <span class="pygments-n">that</span> <span class="pygments-n">no</span> <span class="pygments-n">HTML</span> <span class="pygments-n">can</span> <span class="pygments-n">be</span> <span class="pygments-n">injected</span> <span class="pygments-n">into</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
+                            </div>
+                            
+                            <div class="error-instance" id=0-E9971>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9971" target="_blank">&#10064; E9971 (missing-return-type)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line 5] Function is missing return type annotation </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  3</span>  <span class="grey"><span class="pygments-n">to</span> <span class="pygments-n">ensure</span> <span class="pygments-n">that</span> <span class="pygments-n">no</span> <span class="pygments-n">HTML</span> <span class="pygments-n">can</span> <span class="pygments-n">be</span> <span class="pygments-n">injected</span> <span class="pygments-n">into</span> <span class="pygments-n">the</span> <span class="pygments-n">HTML</span> <span class="pygments-n">report</span><span class="pygments-o">.</span><span class="pygments-s2">&quot;&quot;&quot;</span></span>
 <span class="grey line-num">  4</span>  <span class="grey"></span>
 <span class="gbold line-num">  5</span>  <span class="highlight-pyta"><span class="pygments-k">def</span><span class="pygments-w"> </span><span class="pygments-nf">inject_script</span><span class="pygments-p">()</span></span><span class="black"><span class="pygments-p">:</span></span>
 <span class="grey line-num">  6</span>  <span class="grey">    <span class="pygments-n">a</span> <span class="pygments-o">=</span> <span class="pygments-s2">&quot;hello&quot;</span></span>
 <span class="grey line-num">  7</span>  <span class="grey">    <span class="pygments-n">x</span> <span class="pygments-o">=</span> <span class="pygments-sa">f</span><span class="pygments-s1">&#39;</span><span class="pygments-si">{</span><span class="pygments-n">a</span><span class="pygments-w"> </span><span class="pygments-o">+</span><span class="pygments-w"> </span><span class="pygments-s2">&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;</span><span class="pygments-si">}</span><span class="pygments-s1">&#39;</span></span>
 </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
 
-              <div class="error-instance" id="0-E9920">
-                <div class="info">
-                  <span class="error-link style-error-id">
-                    <a
-                      href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9920"
-                      target="_blank"
-                      >&#10064; E9920 (unnecessary-f-string)
-                      <span class="more-info">(Learn More)</span></a
-                    >
-                  </span>
-
-                  <span class="occurrences"> 1 occurrence. </span>
-                  <span class="shown"> </span>
-                  <span class="slider">
-                    <button>
-                      <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                      <svg
-                        class="collapse-trigger"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        width="60"
-                        height="30"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div class="message-container collapsible expanded">
-                  <div class="message">
-                    <p class="message-name">
-                      <span>
-                        [Line 7] Unnecessary use of an f-string in the
-                        expression
-                        <code
-                          >f&quot;{a +
-                          '&lt;script&gt;alert(2);&lt;/script&gt;'}&quot;</code
-                        >. Use
-                        <code
-                          >a + '&lt;script&gt;alert(2);&lt;/script&gt;'</code
-                        >
-                        instead.
-                      </span>
-                      <span class="slider">
-                        <button style="float: right">
-                          <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                          <svg
-                            class="collapse-trigger"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            width="60"
-                            height="20"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                            />
-                          </svg>
-                        </button>
-                      </span>
-                    </p>
-                    <div class="collapsible expanded message-snippet-container">
-                      <pre
-                        class="message-snippet"
-                      ><span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-k">def</span><span class="pygments-w"> </span><span class="pygments-nf">inject_script</span><span class="pygments-p">():</span></span>
+                            </div>
+                            
+                            <div class="error-instance" id=0-E9920>
+                                <div class="info">
+                                    
+                                    <span class="error-link style-error-id">
+                                        <a href="http://www.cs.toronto.edu/~david/pyta/checkers/index.html&#35;e9920" target="_blank">&#10064; E9920 (unnecessary-f-string)  <span class="more-info">(Learn More)</span></a>
+                                    </span>
+                                    
+                                    <span class="occurrences">
+                                    1
+                                        
+                                            occurrence.
+                                        
+                                    </span>
+                                    <span class="shown">
+                                    
+                                    </span>
+                                    <span class="slider">
+                                        <button>
+                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="message-container collapsible expanded">
+                                    
+                                        
+                                            <div class="message">
+                                                <p class="message-name">
+                                                    <span> [Line 7] Unnecessary use of an f-string in the expression <code>f&quot;{a + '&lt;script&gt;alert(2);&lt;/script&gt;'}&quot;</code>. Use <code>a + '&lt;script&gt;alert(2);&lt;/script&gt;'</code> instead. </span>
+                                                    <span class="slider">
+                                                        <button style="float: right;">
+                                                            <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
+                                                            <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="20">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                                             </svg>
+                                                        </button>
+                                                    </span>
+                                                </p>
+                                                <div class="collapsible expanded message-snippet-container">
+                                                  
+                                                  <pre class="message-snippet"><span class="grey line-num">  5</span>  <span class="grey"><span class="pygments-k">def</span><span class="pygments-w"> </span><span class="pygments-nf">inject_script</span><span class="pygments-p">():</span></span>
 <span class="grey line-num">  6</span>  <span class="grey">    <span class="pygments-n">a</span> <span class="pygments-o">=</span> <span class="pygments-s2">&quot;hello&quot;</span></span>
 <span class="gbold line-num">  7</span>  <span class="black">    <span class="pygments-n">x</span> <span class="pygments-o">=</span> </span><span class="highlight-pyta"><span class="pygments-sa">f</span><span class="pygments-s1">&#39;</span><span class="pygments-si">{</span><span class="pygments-n">a</span><span class="pygments-w"> </span><span class="pygments-o">+</span><span class="pygments-w"> </span><span class="pygments-s2">&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;</span><span class="pygments-si">}</span><span class="pygments-s1">&#39;</span></span>
 </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                                                  
+                                                </div>
+                                            </div>
+                                        
+                                    
+                                </div>
+
+                            </div>
+                            
+                        </div>
+                    </article>
+                </section>
+                
+            </main>
+        </div>
+        <footer>
+            <div class="footer-text">
+            <p>
+                PythonTA is maintained by Professor David Liu and students at the University of Toronto.
+            </p>
+            <p>
+                Found a bug? Report it to <a href="mailto:david@cs.toronto.edu">Prof. Liu</a>!
+            </p>
+            <p>
+                <a href="https://www.cs.toronto.edu/~david/pyta/">PyTA Help Documentation</a>
+            </p>
             </div>
-          </article>
-        </section>
-      </main>
-    </div>
-    <footer>
-      <div class="footer-text">
-        <p>
-          PythonTA is maintained by Professor David Liu and students at the
-          University of Toronto.
-        </p>
-        <p>
-          Found a bug? Report it to
-          <a href="mailto:david@cs.toronto.edu">Prof. Liu</a>!
-        </p>
-        <p>
-          <a href="https://www.cs.toronto.edu/~david/pyta/"
-            >PyTA Help Documentation</a
-          >
-        </p>
-      </div>
-      <div class="logos">
-        <a
-          class="logo"
-          href="https://www.cs.toronto.edu/~david/pyta/"
-          target="_blank"
-        >
-          <img
-            src="data:image/png;base64,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"
-            alt="PyTA logo"
-            height="40"
-          />
-        </a>
-        <a
-          class="logo"
-          href="https://github.com/pyta-uoft/pyta"
-          target="_blank"
-        >
-          <!-- From https://icons.getbootstrap.com/icons/github/ -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="40"
-            height="40"
-            fill="currentColor"
-            class="bi bi-github"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-            />
-          </svg>
-        </a>
-      </div>
-    </footer>
-    <script type="text/javascript">
-      function initializeTheme() {
-        const savedTheme = localStorage.getItem("pyta-theme")
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches
-        const theme = savedTheme || (prefersDark ? "dark" : "light")
+            <div class="logos">
+                <a class="logo" href="https://www.cs.toronto.edu/~david/pyta/" target="_blank">
+                <img src="data:image/png;base64,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" alt="PyTA logo" height="40"/>
+                </a>
+                <a class="logo" href="https://github.com/pyta-uoft/pyta" target="_blank">
+                    <!-- From https://icons.getbootstrap.com/icons/github/ -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </a>
+            </div>
+        </footer>
+        <script type="text/javascript">
+            function initializeTheme() {
+  const savedTheme = localStorage.getItem("pyta-theme")
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+  const theme = savedTheme || (prefersDark ? "dark" : "light")
 
-        document.documentElement.setAttribute("data-theme", theme)
+  document.documentElement.setAttribute("data-theme", theme)
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute("data-theme")
+  const newTheme = currentTheme === "dark" ? "light" : "dark"
+
+  document.documentElement.setAttribute("data-theme", newTheme)
+  localStorage.setItem("pyta-theme", newTheme)
+}
+
+// Initialize the user's theme when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  initializeTheme()
+
+  // Theme toggle event listener
+  const themeToggle = document.getElementById("theme-toggle")
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme)
+  }
+})
+
+window
+  .matchMedia("(prefers-color-scheme: dark)")
+  .addEventListener("change", (e) => {
+    if (!localStorage.getItem("pyta-theme")) {
+      const theme = e.matches ? "dark" : "light"
+      document.documentElement.setAttribute("data-theme", theme)
+    }
+  })
+
+// Existing collapsible functionality
+document.body.addEventListener("click", (event) => {
+  const slider = event.target.closest(".slider")
+  if (slider) {
+    const parent = slider.parentElement
+    const elem = parent?.nextElementSibling
+
+    if (elem) {
+      toggleElement(elem)
+    }
+
+    Array.from(slider.children).forEach((child) => {
+      if (child.nodeType === 1) {
+        child.classList.toggle("collapsed")
       }
+    })
+  }
+})
 
-      function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute("data-theme")
-        const newTheme = currentTheme === "dark" ? "light" : "dark"
+document.querySelectorAll(".sidebar button").forEach((button) => {
+  button.addEventListener("click", () => {
+    let collapsible = button.closest(".collapsible")
 
-        document.documentElement.setAttribute("data-theme", newTheme)
-        localStorage.setItem("pyta-theme", newTheme)
+    if (collapsible) {
+      const ul = collapsible.querySelector("ul")
+      if (ul) {
+        ul.style.display = ul.style.display === "none" ? "block" : "none"
       }
+    }
 
-      // Initialize the user's theme when the page loads
-      document.addEventListener("DOMContentLoaded", () => {
-        initializeTheme()
+    const svg = button.querySelector("svg")
+    if (svg) {
+      svg.classList.toggle("collapsed")
+    }
+  })
+})
 
-        // Theme toggle event listener
-        const themeToggle = document.getElementById("theme-toggle")
-        if (themeToggle) {
-          themeToggle.addEventListener("click", toggleTheme)
-        }
-      })
+/* Function for animating a collapsible element, adapted from
+ * https://carlanderson.xyz/how-to-animate-on-height-auto/
+ */
+function toggleElement(elem) {
+  const expanded = elem.classList.contains("expanded")
+  elem.style.height = ""
+  elem.style.transition = "none"
 
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (e) => {
-          if (!localStorage.getItem("pyta-theme")) {
-            const theme = e.matches ? "dark" : "light"
-            document.documentElement.setAttribute("data-theme", theme)
-          }
-        })
+  // Set the start height to begin the transition
+  const startHeight = window.getComputedStyle(elem).height
 
-      // Existing collapsible functionality
-      document.body.addEventListener("click", (event) => {
-        const slider = event.target.closest(".slider")
-        if (slider) {
-          const parent = slider.parentElement
-          const elem = parent?.nextElementSibling
+  if (expanded) {
+    elem.style.height = startHeight
+  }
 
-          if (elem) {
-            toggleElement(elem)
-          }
+  elem.classList.toggle("hide-and-maintain-width")
+  elem.classList.toggle("expanded")
 
-          Array.from(slider.children).forEach((child) => {
-            if (child.nodeType === 1) {
-              child.classList.toggle("collapsed")
-            }
-          })
-        }
-      })
+  let height
+  if (expanded) {
+    height = 0
+  } else {
+    height = window.getComputedStyle(elem).height
+    elem.style.height = startHeight
+  }
 
-      document.querySelectorAll(".sidebar button").forEach((button) => {
-        button.addEventListener("click", () => {
-          let collapsible = button.closest(".collapsible")
+  // wait until the next frame so that everything has time to update before starting the transition
+  requestAnimationFrame(() => {
+    elem.style.transition = ""
 
-          if (collapsible) {
-            const ul = collapsible.querySelector("ul")
-            if (ul) {
-              ul.style.display = ul.style.display === "none" ? "block" : "none"
-            }
-          }
+    requestAnimationFrame(() => {
+      elem.style.height = height
+    })
+  })
 
-          const svg = button.querySelector("svg")
-          if (svg) {
-            svg.classList.toggle("collapsed")
-          }
-        })
-      })
+  // Clear the saved height values after the transition
+  elem.addEventListener("transitionend", () => {
+    elem.style.height = ""
+    elem.removeEventListener("transitionend", arguments.callee)
+  })
+}
 
-      /* Function for animating a collapsible element, adapted from
-       * https://carlanderson.xyz/how-to-animate-on-height-auto/
-       */
-      function toggleElement(elem) {
-        const expanded = elem.classList.contains("expanded")
-        elem.style.height = ""
-        elem.style.transition = "none"
+const socket = new WebSocket("ws://localhost:50792/ws")
 
-        // Set the start height to begin the transition
-        const startHeight = window.getComputedStyle(elem).height
-
-        if (expanded) {
-          elem.style.height = startHeight
-        }
-
-        elem.classList.toggle("hide-and-maintain-width")
-        elem.classList.toggle("expanded")
-
-        let height
-        if (expanded) {
-          height = 0
-        } else {
-          height = window.getComputedStyle(elem).height
-          elem.style.height = startHeight
-        }
-
-        // wait until the next frame so that everything has time to update before starting the transition
-        requestAnimationFrame(() => {
-          elem.style.transition = ""
-
-          requestAnimationFrame(() => {
-            elem.style.height = height
-          })
-        })
-
-        // Clear the saved height values after the transition
-        elem.addEventListener("transitionend", () => {
-          elem.style.height = ""
-          elem.removeEventListener("transitionend", arguments.callee)
-        })
-      }
-
-      const socket = new WebSocket("ws://localhost:49153/ws")
-
-      socket.onmessage = (event) => {
-        if (event.data === "reload") {
-          window.location.reload()
-        }
-      }
-    </script>
-  </body>
+socket.onmessage = (event) => {
+  if (event.data === "reload") {
+    window.location.reload()
+  }
+}
+        </script>
+    </body>
 </html>

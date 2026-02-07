@@ -27,6 +27,8 @@ exclude: |
       packages/python-ta/tests/test_reporters/snapshots/test_html_server/test_no_watch_server_is_non_persistent/no_watch_html_server_snapshot.html|
       packages/python-ta/tests/test_reporters/snapshots/test_html_server/test_watch_persistence/watch_html_server_snapshot.html|
       packages/python-ta/tests/test_reporters/snapshots/test_html_reporter/test_injection/script_injection.html|
+      packages/python-ta/tests/test_reporters/output_files/injection_script_output.html|
+      packages/python-ta/tests/test_reporters/output_files/markdown_escape_output.html|
       packages/python-ta/tests/test_reporters/snapshots/test_html_server/test_watch_update/
   )
 

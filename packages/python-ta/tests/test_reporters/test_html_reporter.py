@@ -16,6 +16,9 @@ def clean_response_body(body) -> str:
     before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
     body = re.sub(r".*tests[/\\]fixtures[/\\]reporters[/\\]content_injection\.py.*\n?", "", body)
+    body = re.sub(
+        r".*tests[/\\]fixtures[/\\]reporters[/\\]markdown_escape_script\.py.*\n?", "", body
+    )
     body = re.sub(r'\s*<span class="pygments-w">\s*</span>\s*<span', " <span", body)
     body = re.sub(r"localhost:\d+", "localhost:", body)
 

@@ -2,7 +2,7 @@ from typing import Any
 
 from markupsafe import Markup
 
-markdown_chars = [
+MARKDOWN_CHARS = [
     "`",
     "#",
     "\\",
@@ -20,7 +20,7 @@ markdown_chars = [
     "~",
     ":",
 ]
-unmapped_code_point = "\ue000"
+UNMAPPED_CODE_POINT = "\ue000"
 
 
 class ExtendedMarkup(Markup):
@@ -30,9 +30,9 @@ class ExtendedMarkup(Markup):
     def escape(cls: type["ExtendedMarkup"], s: Any) -> str:
         """Escape all markdown characters in s by replacing them with their corresponding escape sequence"""
         if isinstance(s, str):
-            for char in markdown_chars:
+            for char in MARKDOWN_CHARS:
                 ascii = ord(char)
-                esc_sequence = f"{unmapped_code_point}#{ascii};"
+                esc_sequence = f"{UNMAPPED_CODE_POINT}#{ascii};"
                 s = s.replace(char, esc_sequence)
                 return s
         else:

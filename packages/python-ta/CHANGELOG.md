@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Replaced the PyTA logo image data in the HTML report to be embedded directly in the src URL instead of using an external URL, and provided a favicon for the HTML report page using the same svg data.
+- Extended `RecursionTable` to handle mutual recursion by taking in a list of function names to trace. Updated table output format correspondingly to include a "function" key column.
 - Extended `unnecessary_f_string_checker.py` to present an alternate message when the input is already a string.
 
 ### 💫 New checkers

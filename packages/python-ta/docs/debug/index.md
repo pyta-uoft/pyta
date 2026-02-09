@@ -348,13 +348,51 @@ When this file is run, we get the following output:
 
 ```console
 $ python demo.py
-n    return value    called by
----  --------------  ------------
-4    24              N/A
-3    6               factorial(4)
-2    2               factorial(3)
-1    1               factorial(2)
-0    1               factorial(1)
+function     n    return value    called by
+----------   ---  --------------  ------------
+factorial    4    24              N/A
+factorial    3    6               factorial(4)
+factorial    2    2               factorial(3)
+factorial    1    1               factorial(2)
+factorial    0    1               factorial(1)
+```
+
+`RecursionTable` also supports mutual recursion, so multiple functions can be traced simultaneously:
+
+```python
+# demo_mutual.py
+from python_ta.debug import RecursionTable
+
+def sum_even(n: int) -> int:
+    """Return the sum of digits in even positions."""
+    if n == 0:
+        return 0
+    return (n % 10) + sum_odd(n // 10)
+
+def sum_odd(n: int) -> int:
+    """Return the sum of digits in odd positions."""
+    if n == 0:
+        return 0
+    return sum_even(n // 10)
+
+def sum_digits(number: int) -> None:
+    "Trace the mutually recursive function summing the digits using RecursionTable."
+    with RecursionTable(["sum_even", "sum_odd"]):
+        sum_even(number)
+
+if __name__ == '__main__':
+    trace_sum_digits(1234)
+```
+
+```console
+$ python demo_mutual.py
+function     n     return value    called by
+----------   ----  --------------  ----------------
+sum_even     1234  6               N/A
+sum_odd      123   2               sum_even(1234)
+sum_even     12    2               sum_odd(123)
+sum_odd      1     0               sum_even(12)
+sum_even     0     0               sum_odd(1)
 ```
 
 ### API
@@ -400,8 +438,6 @@ If you plan to use instances of a user-defined class in these tables (for exampl
 The `RecursionTable` is a new PythonTA feature and currently has the following known limitations:
 
 1. `RecursionTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
-
-2. Only one function can be traced per use of `RecursionTable`, and so mutually-recursive functions are not supported.
 
 [tabulate]: https://github.com/astanin/python-tabulate
 [`sys.settrace`]: https://docs.python.org/3/library/sys.html#sys.settrace

@@ -30,6 +30,7 @@ from ..config import (
 from ..patches import patch_all
 from ..upload import upload_to_server
 from ..util.autoformat import run_autoformat
+from ..util.extended_markup import ExtendedMarkup
 
 # Flag to determine if we've previously patched pylint
 PYLINT_PATCHED = False
@@ -329,6 +330,12 @@ def reset_linter(
             message_definition.msg = new_msg
             # Mutate the message definitions of the linter object
             linter.msgs_store.register_message(message_definition)
+
+    if linter.reporter.name == "pyta-html":
+        msgs = linter.msgs_store.messages
+        for msg in msgs:
+            msg.msg = ExtendedMarkup(msg.msg)
+            linter.msgs_store.register_message(msg)
 
     return linter
 

@@ -13,9 +13,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
-- Fixed bug in `setendings.py` that raised an error when encountering a slice as part of a subscript tuple, e.g. `df.iloc[:, 0]`
-
 ### 🔧 Internal changes
+
+## [2.12.1] - 2026-02-10
+
+### 🐛 Bug fixes
+
+- Fixed bug in `setendings.py` that raised an error when encountering a slice as part of a subscript tuple, e.g. `df.iloc[:, 0]`
 
 ## [2.12.0] - 2025-12-08
 

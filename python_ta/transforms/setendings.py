@@ -98,7 +98,6 @@ NODES_REQUIRING_SOURCE = [
     (nodes.DelName, _keyword_search("del"), None),
     (nodes.GeneratorExp, _token_search("("), _token_search(")")),
     (nodes.List, _token_search("["), _token_search("]")),
-    (nodes.Slice, _token_search("["), None),
     (nodes.Tuple, None, _token_search(",")),
 ]
 
@@ -129,7 +128,6 @@ def init_register_ending_setters(source_code):
     ending_transformer.register_transform(nodes.FunctionDef, _set_start_from_first_decorator)
     ending_transformer.register_transform(nodes.Tuple, _set_start_from_first_child)
     ending_transformer.register_transform(nodes.Arguments, fix_arguments(source_code))
-    ending_transformer.register_transform(nodes.Slice, fix_slice(source_code))
 
     for node_class in NODES_WITH_CHILDREN:
         ending_transformer.register_transform(node_class, set_from_last_child)
@@ -165,46 +163,6 @@ def init_register_ending_setters(source_code):
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
 # ====================================================
-def fix_slice(source_code):
-    """
-    The Slice node column positions are mostly set properly when it has (Const)
-    children. The main problem is when Slice node doesn't have children.
-    E.g "[:]", "[::]", "[:][:]", "[::][::]", ... yikes! The existing positions
-    are sometimes set improperly to 0.
-    """
-
-    def _find_square_brackets(node):
-        if _get_last_child(node):
-            set_from_last_child(node)
-            line_i = node.end_lineno - 1  # convert 1 to 0 index.
-            char_i = node.end_col_offset
-            has_children = True
-        else:
-            line_i = node.parent.value.end_lineno - 1  # convert 1 to 0 index.
-            char_i = node.parent.value.end_col_offset
-            has_children = False
-
-        # Search the remaining source code for the "]" char.
-        while (
-            line_i < len(source_code)
-            and char_i < len(source_code[line_i])
-            and source_code[line_i][char_i] != "]"
-        ):
-            if char_i == len(source_code[line_i]) - 1 or source_code[line_i][char_i] == "#":
-                char_i = 0
-                line_i += 1
-            else:
-                char_i += 1
-
-        if not has_children:
-            node.fromlineno, node.col_offset = line_i + 1, char_i
-        node.end_lineno, node.end_col_offset = line_i + 1, char_i + 1
-
-        return node
-
-    return _find_square_brackets
-
-
 def fix_arguments(source_code):
     """For an Arguments node"""
 

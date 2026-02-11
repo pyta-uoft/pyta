@@ -1,6 +1,6 @@
 [project]
 name = "python-ta-z3"
-version = "2.12.1.dev"
+version = "2.13.0.dev"
 description = "Z3 solver integration for PythonTA"
 readme = "README.md"
 authors = [

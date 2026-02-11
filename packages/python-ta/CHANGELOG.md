@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed bug that allowed users to inject code into the browser template through the E9920 unnecessary f-string checker
 - Fixed bug that caused user input containing markdown characters to be rendered by the markdown renderer in certain error messages
+- Fixed bug in `setendings.py` that raised an error when encountering a slice as part of a subscript tuple, e.g. `df.iloc[:, 0]`
 
 ### 🔧 Internal changes
 

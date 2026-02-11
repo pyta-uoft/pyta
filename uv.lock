@@ -1418,7 +1418,7 @@ wheels = [
 
 [[package]]
 name = "python-ta"
-version = "2.12.1.dev0"
+version = "2.13.0.dev0"
 source = { editable = "packages/python-ta" }
 dependencies = [
     { name = "aiohttp" },
@@ -1520,7 +1520,7 @@ requires-dist = [
 
 [[package]]
 name = "python-ta-z3"
-version = "2.12.1.dev0"
+version = "2.13.0.dev0"
 source = { editable = "packages/python-ta-z3" }
 dependencies = [
     { name = "astroid" },

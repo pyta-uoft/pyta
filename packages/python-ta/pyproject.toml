@@ -1,6 +1,6 @@
 [project]
 name = "python-ta"
-version = "2.12.1.dev"
+version = "2.13.0.dev"
 description = "Code checking tool for teaching Python"
 authors = [
     {name = "David Liu", email = "david@cs.toronto.edu"},
@@ -48,7 +48,7 @@ cfg = [
     "graphviz",
 ]
 z3 = [
-    "python-ta-z3 == 2.12.1.dev",
+    "python-ta-z3 == 2.13.0.dev",
     "z3-solver",
 ]
 

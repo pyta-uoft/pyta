@@ -111,7 +111,7 @@ class TestInvalidPreconditionChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_functiondef(func_node)
 
-    def test_normal_preconditions(self) -> None:
+    def test_valid_preconditions(self) -> None:
         """Test that single-line preconditions with correct syntax pass."""
         src = """
         def f(x: int) -> int:

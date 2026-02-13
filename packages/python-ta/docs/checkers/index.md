@@ -2691,6 +2691,36 @@ def f(x: int) -> int:
     """
 ```
 
+E(9980)=
+
+### Invalid syntax in function precondition (E9980)
+
+This error occurs when a function precondition contains invalid Python syntax.
+Does not currently support multi-line preconditions.
+
+Example:
+
+```{literalinclude} /../../../examples/custom_checkers/e9980_invalid_precondition_syntax.py
+---
+lines: 8-10
+---
+```
+
+The first precondition incorrectly attempts to use the inequality operator, which is not valid Python syntax.
+This should be corrected to use Python's inequality operator:
+
+```python
+def demo_function(x: int, y: int) -> int:
+    """
+    Demonstrates e9980_invalid_precondition_syntax
+
+    Preconditions:
+       - x != 0
+       - y != 0
+    """
+    return x//y
+```
+
 (E9989)=
 
 ### Pycodestyle errors (E9989)

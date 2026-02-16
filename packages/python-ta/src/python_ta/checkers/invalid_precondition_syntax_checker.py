@@ -9,7 +9,7 @@ from pylint.checkers import BaseChecker
 from pylint.checkers.utils import only_required_for_messages
 from pylint.lint import PyLinter
 
-from python_ta.contracts import parse_assertions
+from ..contracts import parse_assertions
 
 
 class InvalidPreconditionSyntaxChecker(BaseChecker):
@@ -20,7 +20,7 @@ class InvalidPreconditionSyntaxChecker(BaseChecker):
         "E9980": (
             "Invalid syntax in precondition: %s",
             "invalid-precondition-syntax",
-            "Reported when a precondition contains invalid Python syntax.",
+            "Reported when a precondition contains invalid Python expression syntax.",
         )
     }
 

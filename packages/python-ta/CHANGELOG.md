@@ -15,7 +15,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
-- `invalid_precondition_syntax_checker`: Added new checker that checks if a function contains invalid syntax within its precondition statements.
+- `invalid-precondition-syntax`: Added new checker that checks if a function contains invalid syntax within its precondition statements.
 
 ### 🐛 Bug fixes
 

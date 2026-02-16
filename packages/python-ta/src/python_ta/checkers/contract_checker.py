@@ -12,10 +12,10 @@ from pylint.lint import PyLinter
 from ..contracts import parse_assertions
 
 
-class InvalidPreconditionSyntaxChecker(BaseChecker):
-    """A checker that reports invalid Python syntax within function preconditions"""
+class ContractChecker(BaseChecker):
+    """A checker class that validates Python contract syntax."""
 
-    name = "invalid-precondition-checker"
+    name = "contract-checker"
     msgs = {
         "E9980": (
             "Invalid syntax in precondition: %s",
@@ -40,4 +40,4 @@ class InvalidPreconditionSyntaxChecker(BaseChecker):
 
 
 def register(linter: PyLinter) -> None:
-    linter.register_checker(InvalidPreconditionSyntaxChecker(linter))
+    linter.register_checker(ContractChecker(linter))

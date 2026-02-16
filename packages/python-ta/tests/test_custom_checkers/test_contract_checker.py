@@ -1,13 +1,11 @@
 import pylint.testutils
 from astroid import nodes, parse
 
-from python_ta.checkers.invalid_precondition_syntax_checker import (
-    InvalidPreconditionSyntaxChecker,
-)
+from python_ta.checkers.contract_checker import ContractChecker
 
 
-class TestInvalidPreconditionChecker(pylint.testutils.CheckerTestCase):
-    CHECKER_CLASS = InvalidPreconditionSyntaxChecker
+class TestContractChecker(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = ContractChecker
 
     def test_invalid_operator(self) -> None:
         """Test that !== operator is caught as invalid syntax."""

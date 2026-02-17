@@ -625,7 +625,7 @@ def test_snapshot_to_json_one_class():
 
 def test_snapshot_to_json_type_object():
     """
-    Test snapshot_to_json with snapshot data including a type object
+    Test snapshot_to_json with snapshot data including type objects
     """
     snapshot_data = [
         {"__main__": {"t1": int, "t2": str, "t3": OneClass}},

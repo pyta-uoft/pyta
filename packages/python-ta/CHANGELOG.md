@@ -26,7 +26,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests for `infinite_loop_checker.py` to improve coverage for the `_name_holds_generator` function and the generator portion of the `_check_constant_loop_cond` function.
 - Refactored `test_main.py` calls to use click's testing helpers.
 - The `Z3Visitor`, `Z3Parser`, and `Z3ParseException` classes have been extracted into a _new Python package_, `python-ta-z3`.
-- Extended `snapshot_to_json` behaviour to handle `type` instances and display the `repr` of the type.
 
 ## [2.12.1] - 2026-02-10
 
@@ -51,6 +50,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended `AccumulationTable` class to support multiple loops in sequence within the same context manager
 - Added a solution to prevent possible large snippets created by the `render_generic` function
 - Support Python 3.14
+- Extended `snapshot_to_json` behaviour to handle `type` instances and display the `repr` of the type.
 
 ### 💫 New checkers
 

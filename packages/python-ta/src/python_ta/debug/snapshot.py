@@ -210,7 +210,7 @@ def snapshot_to_json(
             elif isinstance(val, type):
                 value_entry = {
                     "type": ".class",
-                    "name": type(val).__name__,
+                    "name": "class",
                     "id": value_id_diagram,
                     "value": repr(val),
                 }

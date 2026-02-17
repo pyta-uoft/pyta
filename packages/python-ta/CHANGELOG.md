@@ -15,6 +15,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+- `invalid-precondition-syntax`: Added new checker that checks if a function contains invalid syntax within its precondition statements.
+
 ### 🐛 Bug fixes
 
 - Fixed bug that allowed users to inject code into the browser template through the E9920 unnecessary f-string checker

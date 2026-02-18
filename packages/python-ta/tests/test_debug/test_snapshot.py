@@ -623,6 +623,46 @@ def test_snapshot_to_json_one_class():
     assert json_data == expected_output
 
 
+def test_snapshot_to_json_type_object():
+    """
+    Test snapshot_to_json with snapshot data including type objects
+    """
+    snapshot_data = [
+        {"__main__": {"t1": int, "t2": str, "t3": OneClass}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "type": ".frame",
+            "name": "__main__",
+            "id": None,
+            "value": {"t1": 1, "t2": 2, "t3": 3},
+        },
+        {
+            "type": ".class",
+            "name": "class",
+            "id": 1,
+            "value": repr(int),
+        },
+        {
+            "type": ".class",
+            "name": "class",
+            "id": 2,
+            "value": repr(str),
+        },
+        {
+            "type": ".class",
+            "name": "class",
+            "id": 3,
+            "value": repr(OneClass),
+        },
+    ]
+
+    assert json_data == expected_output
+
+
 def test_snapshot_no_save_file():
     """
     Tests that snapshot's save feature is not triggered when save = False

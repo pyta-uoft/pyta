@@ -206,6 +206,14 @@ def snapshot_to_json(
                     "id": value_id_diagram,
                     "value": dict_ids,
                 }
+            # Handle instances of type
+            elif isinstance(val, type):
+                value_entry = {
+                    "type": ".class",
+                    "name": "class",
+                    "id": value_id_diagram,
+                    "value": repr(val),
+                }
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance
                 attr_ids = {}

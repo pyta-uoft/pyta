@@ -127,3 +127,55 @@ class TestContractChecker(pylint.testutils.CheckerTestCase):
         func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
+
+    def test_valid_multi_line_preconditions(self) -> None:
+        src = """
+        def f(data: list, threshold: int) -> int:
+            '''Return list length of a positive integer array
+
+            Preconditions:
+                - len(data) > 0 and \
+                  all(isinstance(x, int) for x in data) and \
+                  threshold >= 0
+                - data != []
+            '''
+            return len(data)
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+
+    def test_invalid_multi_line_preconditions(self) -> None:
+        src = """
+        def f(data: list, threshold: int) -> int:
+            '''Return list length of a positive integer array
+
+            Preconditions:
+                - len(data) > 0 and \
+all(isinstance(x, int) for x in data) and \
+threshold > = 0
+                - data !== []
+            '''
+            return len(data)
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-precondition-syntax",
+                node=func_node,
+                args=(
+                    "len(data) > 0 and all(isinstance(x, int) for x in data) and threshold > = 0",
+                ),
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="invalid-precondition-syntax",
+                node=func_node,
+                args=("data !== []",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)

@@ -154,8 +154,8 @@ class TestContractChecker(pylint.testutils.CheckerTestCase):
 
             Preconditions:
                 - len(data) > 0 and \
-all(isinstance(x, int) for x in data) and \
-threshold > = 0
+                  all(isinstance(x, int) for x in data) and \
+                  threshold > = 0
                 - data !== []
             '''
             return len(data)

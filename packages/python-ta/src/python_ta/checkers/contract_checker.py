@@ -3,6 +3,7 @@ Check for invalid syntax within function preconditons.
 """
 
 import ast
+import re
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -33,10 +34,13 @@ class ContractChecker(BaseChecker):
 
         preconditions = parse_assertions(node, parse_token="Precondition")
         for condition in preconditions:
+            cleaned_condition = re.sub(r"\s+", " ", condition)
             try:
-                ast.parse(condition, mode="eval")
+                ast.parse(cleaned_condition, mode="eval")
             except SyntaxError:
-                self.add_message("invalid-precondition-syntax", node=node, args=(condition,))
+                self.add_message(
+                    "invalid-precondition-syntax", node=node, args=(cleaned_condition,)
+                )
 
 
 def register(linter: PyLinter) -> None:

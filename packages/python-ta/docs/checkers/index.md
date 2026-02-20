@@ -2697,7 +2697,7 @@ def f(x: int) -> int:
 
 This error occurs when a function precondition contains invalid Python expression syntax. Valid Python statements
 (e.g. assignment statements like x = 5) are also flagged, as they aren't valid Python expressions.
-Does not currently support multi-line preconditions.
+Multi-line preconditions are supported using a backslash ('\') following a space at the end of each line except the last.
 
 Example:
 

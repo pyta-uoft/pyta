@@ -124,13 +124,16 @@ PythonTA uses the [typeguard] library to check types.
 
 ### Functions: custom preconditions
 
-You can write arbitrary preconditions as Python expressions in the function docstring, using the following syntax:
+You can write arbitrary preconditions as Python expressions in the function docstring, using the following syntax.
+Multi-line preconditions can be created by using a backslash ('\') following a space at the end of each line except the last:
 
 ```
 Preconditions:
     - <expr>
     - <expr>
-    - <expr>
+    - <expr> \
+      <expr> \
+      <expr>
 ```
 
 Each expression is evaluated in the same scope as the function body, in top-down order.

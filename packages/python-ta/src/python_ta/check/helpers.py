@@ -274,6 +274,7 @@ def reset_linter(
     # options in `.pylintrc` config file.
     # Options stored in linter: `linter._all_options`, `linter._external_opts`
     linter = PytaPyLinter(options=new_checker_options)
+    linter._parse_command_line_configuration(["--clear-cache-post-run=true"])
     linter.load_default_plugins()  # Load checkers, reporters
     linter.load_plugin_modules(custom_checkers)
     linter.load_plugin_modules(["python_ta.transforms.setendings"])

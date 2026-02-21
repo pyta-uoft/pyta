@@ -38,8 +38,8 @@ class ContractChecker(BaseChecker):
             return
 
         preconditions = parse_assertions(node, parse_token="Precondition")
-        for precond in preconditions:
-            cleaned_condition = re.sub(r"\s+", " ", precond)
+        for precondition in preconditions:
+            cleaned_condition = re.sub(r"\s+", " ", precondition)
             try:
                 ast.parse(cleaned_condition, mode="eval")
             except SyntaxError:
@@ -48,8 +48,8 @@ class ContractChecker(BaseChecker):
                 )
 
         postconditions = parse_assertions(node, parse_token="Postcondition")
-        for postcond in postconditions:
-            cleaned_condition = re.sub(r"\s+", " ", postcond)
+        for postcondition in postconditions:
+            cleaned_condition = re.sub(r"\s+", " ", postcondition)
             parseable_condition = re.sub(r"\$return_value", "_return_value", cleaned_condition)
             try:
                 ast.parse(parseable_condition, mode="eval")

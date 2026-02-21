@@ -2721,6 +2721,37 @@ def demo_function(x: int, y: int) -> int:
     return x // y
 ```
 
+(E9981)=
+
+### Invalid syntax in function postcondition (E9981)
+
+This error occurs when a function postcondition contains invalid Python expression syntax. Valid Python statements
+(e.g. assignment statements like x = 5) are also flagged, as they aren't valid Python expressions.
+Multi-line postconditions are supported using a backslash ('\') following a space at the end of each line except the last.
+The identifier `$return_value` can be used to refer to the return value of the function within postcondition statements.
+
+Example:
+
+```{literalinclude} /../../../examples/custom_checkers/e9981_invalid_postcondition_syntax.py
+---
+lines: 8-10
+---
+```
+
+The first precondition incorrectly has a whitespace in the middle of the greater than or equal to operator, which is not valid Python syntax.
+This should be corrected to use Python's the middle of the greater than or equal to operator:
+
+```python
+def demo_function(x: int, y: int) -> int:
+    """Demonstrates e9981_invalid_postcondition_syntax
+
+    Postconditions:
+       - $return_value >= 0
+       - $return_value != y
+    """
+    return max(0, x // y)
+```
+
 (E9989)=
 
 ### Pycodestyle errors (E9989)

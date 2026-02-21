@@ -4,7 +4,7 @@ from astroid import nodes, parse
 from python_ta.checkers.contract_checker import ContractChecker
 
 
-class TestContractChecker(pylint.testutils.CheckerTestCase):
+class TestContractCheckerPreconditions(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = ContractChecker
 
     def test_invalid_operator(self) -> None:
@@ -129,6 +129,7 @@ class TestContractChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_functiondef(func_node)
 
     def test_valid_multi_line_preconditions(self) -> None:
+        """Test that multi-line preconditions with valid syntax pass."""
         src = """
         def f(data: list, threshold: int) -> int:
             '''Return list length of a positive integer array
@@ -148,6 +149,7 @@ class TestContractChecker(pylint.testutils.CheckerTestCase):
             self.checker.visit_functiondef(func_node)
 
     def test_invalid_multi_line_preconditions(self) -> None:
+        """Test that multi-line preconditions with invalid syntax are flagged."""
         src = """
         def f(data: list, threshold: int) -> int:
             '''Return list length of a positive integer array
@@ -178,4 +180,132 @@ class TestContractChecker(pylint.testutils.CheckerTestCase):
             ),
             ignore_position=True,
         ):
+            self.checker.visit_functiondef(func_node)
+
+
+class TestContractCheckerPostconditions(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = ContractChecker
+
+    def test_invalid_postcondition_syntax(self) -> None:
+        """Test that the same invalid syntaxes as the precondition checks are caught in the postcondition ones.
+        Includes invalid !== operator, incorrect white space and assignment statements"""
+        src = """
+        def f(x: int) -> float:
+            '''Return 1/x.
+
+            Postconditions:
+                - x !== 0
+                - 0 < x < = 10
+                - x = 5
+            '''
+            return 1 / x
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-postcondition-syntax",
+                node=func_node,
+                args=("x !== 0",),
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="invalid-postcondition-syntax",
+                node=func_node,
+                args=("0 < x < = 10",),
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="invalid-postcondition-syntax",
+                node=func_node,
+                args=("x = 5",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_valid_postconditions(self) -> None:
+        """Test that single-line postconditions with correct syntax pass."""
+        src = """
+        def f(x: int) -> int:
+            '''Return 1/x
+
+            Postconditions:
+                - 1 <= x < 10
+                - x == 5
+                - x != 15
+            '''
+            return 1/x
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+
+    def test_valid_return_value_syntax(self) -> None:
+        """Test that valid postconditions using the return value identifier are not flagged."""
+        src = """
+        def f(x: int) -> list[int]:
+            '''Return a list of length x containing all ones
+
+            Postconditions:
+                - $return_value[0] > 0 and $return_value[0] < 100
+                - all(num >= 0 for num in $return_value)
+            '''
+            return [1]*x
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertNoMessages():
+            self.checker.visit_functiondef(func_node)
+
+    def test_invalid_return_value_syntax(self) -> None:
+        """Test that invalid postconditions using the return value identifier are flagged."""
+        src = """
+        def f(x: int) -> list[int]:
+            '''Return a list of length x containing all ones
+
+            Postconditions:
+                - $return_value[0] > = 0
+                - all(num >= 0 for num in $return_value
+            '''
+            return [1]*x
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-postcondition-syntax",
+                node=func_node,
+                args=("$return_value[0] > = 0",),
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="invalid-postcondition-syntax",
+                node=func_node,
+                args=("all(num >= 0 for num in $return_value",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(func_node)
+
+    def test_valid_multi_line_postconditions(self) -> None:
+        """Test that valid multi-line postconditions with the return value identifier are not flagged."""
+        src = """
+        def f(x: int) -> list[int]:
+            '''Return a list of length x containing all ones
+
+            Postconditions:
+                - $return_value[0] > 0 and \
+                $return_value[0] < 100 and \
+                $return_value[0] % 2 == 1
+                - all(num >= 0 for num in $return_value)
+            '''
+            return [1]*x
+        """
+
+        mod = parse(src)
+        func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)

@@ -22,10 +22,15 @@ class ContractChecker(BaseChecker):
             "Invalid syntax in precondition: %s",
             "invalid-precondition-syntax",
             "Reported when a precondition contains invalid Python expression syntax.",
-        )
+        ),
+        "E9981": (
+            "Invalid syntax in postcondition: %s",
+            "invalid-postcondition-syntax",
+            "Reported when a postcondition contains invalid Python expression syntax.",
+        ),
     }
 
-    @only_required_for_messages("invalid-precondition-syntax")
+    @only_required_for_messages("invalid-precondition-syntax", "invalid-postcondition-syntax")
     def visit_functiondef(self, node: nodes.FunctionDef) -> None:
         """Visit function definition and check preconditions in docstring."""
 
@@ -33,13 +38,24 @@ class ContractChecker(BaseChecker):
             return
 
         preconditions = parse_assertions(node, parse_token="Precondition")
-        for condition in preconditions:
-            cleaned_condition = re.sub(r"\s+", " ", condition)
+        for precond in preconditions:
+            cleaned_condition = re.sub(r"\s+", " ", precond)
             try:
                 ast.parse(cleaned_condition, mode="eval")
             except SyntaxError:
                 self.add_message(
                     "invalid-precondition-syntax", node=node, args=(cleaned_condition,)
+                )
+
+        postconditions = parse_assertions(node, parse_token="Postcondition")
+        for postcond in postconditions:
+            cleaned_condition = re.sub(r"\s+", " ", postcond)
+            parseable_condition = re.sub(r"\$return_value", "_return_value", cleaned_condition)
+            try:
+                ast.parse(parseable_condition, mode="eval")
+            except SyntaxError:
+                self.add_message(
+                    "invalid-postcondition-syntax", node=node, args=(cleaned_condition,)
                 )
 
 

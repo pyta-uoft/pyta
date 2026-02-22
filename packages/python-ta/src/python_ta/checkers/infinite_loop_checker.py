@@ -139,7 +139,6 @@ class InfiniteLoopChecker(BaseChecker):
         emit = isinstance(test_node, (nodes.Const, *structs, *CONST_NODES))
         if not isinstance(test_node, except_nodes):
             inferred = utils.safe_infer(test_node)
-            print(inferred)
             # If we can't infer what the value is but the test is just a variable name
             if isinstance(inferred, util.UninferableBase) and isinstance(test_node, nodes.Name):
                 emit, maybe_generator_call = InfiniteLoopChecker._name_holds_generator(test_node)
@@ -178,7 +177,6 @@ class InfiniteLoopChecker(BaseChecker):
         emit = False
         maybe_generator_call = None
         lookup_result = test_node.frame().lookup(test_node.name)
-        print(test_node.name, lookup_result)
         if not lookup_result:
             return emit, maybe_generator_call
         maybe_generator_assigned = (

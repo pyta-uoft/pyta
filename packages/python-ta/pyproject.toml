@@ -24,7 +24,6 @@ dependencies = [
     "tabulate ~= 0.9.0",
     "toml ~= 0.10.2",
     "typeguard >= 4.1.0, < 5",
-    "watchdog ~= 6.0.0",
     "wrapt >= 1.15.0, < 3"
 ]
 requires-python = ">=3.10"
@@ -46,6 +45,9 @@ dev = [
 ]
 cfg = [
     "graphviz",
+]
+watchdog = [
+    "watchdog ~= 6.0.0",
 ]
 z3 = [
     "python-ta-z3 == 2.13.0.dev",

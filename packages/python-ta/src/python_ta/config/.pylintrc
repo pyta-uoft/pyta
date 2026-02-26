@@ -30,6 +30,14 @@ allow-pylint-comments = no
 # Set whether the default error messages by pylint should be overwritten by PythonTA's custom messages
 use-pyta-error-messages = yes
 
+# Watch mode automatically re-runs checks when your files change.
+# To use watch mode install PythonTA with the `watchdog` extra:
+#
+#     pip install python-ta[watchdog]
+#
+# The default is `no` (disabled).
+watch = no
+
 [REPORTS]
 # The type of reporter to use to display results. Available PyTA options are
 # pyta-plain, pyta-color, pyta-html, pyta-json.

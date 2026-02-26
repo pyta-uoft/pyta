@@ -153,6 +153,12 @@ For the **HTMLReporter**, this enables a persistent server that serves the PyTA 
 
 When `false` (default), PythonTA performs a one-time analysis and exits after generating the report.
 
+> **Note:** This option requires the optional `watchdog` extra. Install it with:
+>
+> ```bash
+> pip install python-ta[watchdog]
+> ```
+
 ### `server-port` (default: `0`)
 
 The server-port option specifies the port number to use when serving the PyTA HTML report. When set to 0 (the default),

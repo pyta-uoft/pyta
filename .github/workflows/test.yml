@@ -73,6 +73,7 @@ jobs:
         with:
           flag-name: run-${{ matrix.python-version }}-${{ matrix.dependency }}
           parallel: true
+          fail-on-error: false
       - name: Run python-ta-z3 tests
         if: matrix.dependency == 'base'
         run: |
@@ -85,6 +86,7 @@ jobs:
         with:
           flag-name: run-${{ matrix.python-version }}-python-ta-z3
           parallel: true
+          fail-on-error: false
 
   finish:
     needs: test
@@ -100,6 +102,7 @@ jobs:
           carryforward: >
             run-3.10-base,run-3.10-z3-solver,run-3.11-base,run-3.11-z3-solver,run-3.12-base,run-3.12-z3-solver,run-3.13-base,run-3.13-z3-solver,run-3.14-base,run-3.14-z3-solver,
             run-3.10-python-ta-z3,run-3.11-python-ta-z3,run-3.12-python-ta-z3,run-3.13-python-ta-z3,run-3.14-python-ta-z3
+          fail-on-error: false
 
   docs:
     runs-on: ubuntu-latest

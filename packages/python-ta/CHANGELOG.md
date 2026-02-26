@@ -31,6 +31,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Refactored `test_main.py` calls to use click's testing helpers.
 - The `Z3Visitor`, `Z3Parser`, and `Z3ParseException` classes have been extracted into a _new Python package_, `python-ta-z3`.
 - Removed extraneous `print` calls in `InfiniteLoopChecker`
+- Added `fail-on-error: false` to the Coveralls jobs on CI
 
 ## [2.12.1] - 2026-02-10
 

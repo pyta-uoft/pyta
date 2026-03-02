@@ -48,13 +48,18 @@ def get_filtered_local_variables(
     """
     Helper function for filtering local variables in a frame.
     """
+    code_obj = frame.f_code
+    # Get only local variables and exclude freevars and nonlocals
+    local_names = dict.fromkeys((*code_obj.co_varnames, *code_obj.co_cellvars))
+
     if exclude_vars:
         return {
             var: frame.f_locals[var]
-            for var in frame.f_locals
-            if not any(re.search(regex, var) for regex in exclude_vars)
+            for var in local_names
+            if var in frame.f_locals and not any(re.search(regex, var) for regex in exclude_vars)
         }
-    return frame.f_locals
+
+    return {var: frame.f_locals[var] for var in local_names if var in frame.f_locals}
 
 
 def snapshot(

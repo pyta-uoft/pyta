@@ -6,9 +6,13 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    directories:
+      - "/packages/*" # Location of package manifests
     schedule:
       interval: "monthly"
+    groups:
+      per-dependency:
+        group-by: dependency-name
 
   - package-ecosystem: "github-actions"
     directory: "/"

@@ -209,7 +209,6 @@ def test_snapshot_excludes_nonlocal_from_inner_frame() -> None:
     result = func_with_nonlocal()
 
     assert result[0] == {"inner": {}}
-    assert "x" not in result[0]["inner"]
     assert result[1]["func_with_nonlocal"]["x"] == 2
 
 

@@ -1,7 +1,6 @@
 import json
 
-import attrs
-from lsprotocol import types
+from lsprotocol import converters, types
 from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import BaseLayout
 
@@ -35,6 +34,7 @@ class LSPReporter(PythonTaReporter):
 
     def display_messages(self, layout: BaseLayout) -> None:
         json_output = {}
+        converter = converters.get_converter()
         for filename, msgs in self.gather_messages().items():
             diagnostics_list = []
             for msg in msgs:
@@ -50,7 +50,9 @@ class LSPReporter(PythonTaReporter):
                     code=msg.msg_id,
                     source="python-ta",
                 )
-                diagnostics_list.append(attrs.asdict(diag, value_serializer=_serialize))
+                diagnostics_list.append(
+                    converter.unstructure(diag, unstructure_as=types.Diagnostic)
+                )
             json_output[filename] = diagnostics_list
         self.writeln(json.dumps(json_output, indent=4))
         self.out.flush()

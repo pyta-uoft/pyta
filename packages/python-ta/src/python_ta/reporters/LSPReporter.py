@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from lsprotocol import converters, types
 from pylint.lint import PyLinter
@@ -20,12 +21,6 @@ def _lsp_severity(category: str) -> types.DiagnosticSeverity:
     return category_to_lsp.get(category, types.DiagnosticSeverity.Warning)
 
 
-def _serialize(inst, field, value):
-    if isinstance(value, types.DiagnosticSeverity):
-        return value.value
-    return value
-
-
 class LSPReporter(PythonTaReporter):
 
     name = "pyta-lsp"
@@ -33,8 +28,9 @@ class LSPReporter(PythonTaReporter):
     messages: dict[str, list[NewMessage]]
 
     def display_messages(self, layout: BaseLayout) -> None:
-        json_output = {}
+        output = []
         converter = converters.get_converter()
+
         for filename, msgs in self.gather_messages().items():
             diagnostics_list = []
             for msg in msgs:
@@ -50,11 +46,16 @@ class LSPReporter(PythonTaReporter):
                     code=msg.msg_id,
                     source="python-ta",
                 )
-                diagnostics_list.append(
-                    converter.unstructure(diag, unstructure_as=types.Diagnostic)
-                )
-            json_output[filename] = diagnostics_list
-        self.writeln(json.dumps(json_output, indent=4))
+                diagnostics_list.append(diag)
+
+            params = types.PublishDiagnosticsParams(
+                uri=Path(filename).as_uri(), diagnostics=diagnostics_list
+            )
+            output.append(
+                converter.unstructure(params, unstructure_as=types.PublishDiagnosticsParams)
+            )
+
+        self.writeln(json.dumps(output, indent=4))
         self.out.flush()
 
 

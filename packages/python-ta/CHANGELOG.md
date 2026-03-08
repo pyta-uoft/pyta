@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended `RecursionTable` to handle mutual recursion by taking in a list of function names to trace. Updated table output format correspondingly to include a "function" key column.
 - Extended `unnecessary_f_string_checker.py` to present an alternate message when the input is already a string.
 - Extended `snapshot_to_json` behaviour to handle `type` instances and display the `repr` of the type.
+- Extended `snapshot` to distinguish between nonlocal variables and local variables within a stack frame.
 - Make `watchdog` an optional dependency; users can opt in with `pip install python-ta[watchdog]`. This affects runs of `python_ta.check_all` with the `watch` config option set to `True`.
 
 ### 💫 New checkers

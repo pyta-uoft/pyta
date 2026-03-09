@@ -57,8 +57,8 @@ def get_filtered_local_variables(
 
     return {
         var: frame.f_locals[var]
-        for var in local_names
-        if var in frame.f_locals and not any(re.search(regex, var) for regex in exclude_vars)
+        for var in frame.f_locals
+        if var in local_names and not any(re.search(regex, var) for regex in exclude_vars)
     }
 
 

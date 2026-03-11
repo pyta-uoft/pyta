@@ -40,7 +40,7 @@ watch = no
 
 [REPORTS]
 # The type of reporter to use to display results. Available PyTA options are
-# pyta-plain, pyta-color, pyta-html, pyta-json.
+# pyta-plain, pyta-color, pyta-html, pyta-json, pyta-lsp.
 # Replaces the pyta-reporter option.
 # output-format = pyta-html
 

@@ -5,4 +5,4 @@ from .lsp_reporter import LSPReporter
 from .plain_reporter import PlainReporter
 
 # Export tuple of reporter classes for python_ta init file.
-REPORTERS = (ColorReporter, PlainReporter, HTMLReporter, JSONReporter)
+REPORTERS = (ColorReporter, PlainReporter, HTMLReporter, JSONReporter, LSPReporter)

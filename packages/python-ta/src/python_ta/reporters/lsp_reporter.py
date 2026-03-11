@@ -7,7 +7,7 @@ from pylint.reporters.ureports.nodes import BaseLayout
 
 from .core import NewMessage, PythonTaReporter
 
-category_to_lsp = {
+CATEGORY_TO_LSP = {
     "error": types.DiagnosticSeverity.Error,
     "fatal": types.DiagnosticSeverity.Error,
     "warning": types.DiagnosticSeverity.Warning,
@@ -17,11 +17,12 @@ category_to_lsp = {
 
 
 def _lsp_severity(category: str) -> types.DiagnosticSeverity:
-    """Convert the PyLint category to DiagnosticSeverity type, return default of warning"""
-    return category_to_lsp.get(category, types.DiagnosticSeverity.Warning)
+    """Convert the Pylint category to DiagnosticSeverity type, return default of warning"""
+    return CATEGORY_TO_LSP.get(category, types.DiagnosticSeverity.Warning)
 
 
 class LSPReporter(PythonTaReporter):
+    """Reporter that displays results in Language Server Protocol (LSP) compliant JSON format"""
 
     name = "pyta-lsp"
     OUTPUT_FILENAME = "pyta_lsp_report.json"
@@ -34,12 +35,15 @@ class LSPReporter(PythonTaReporter):
         for filename, msgs in self.gather_messages().items():
             diagnostics_list = []
             for msg in msgs:
+                start_char = msg.column or 0
+                if msg.end_column is not None:
+                    end_char = msg.end_column
+                else:
+                    end_char = start_char
                 diag = types.Diagnostic(
                     range=types.Range(
-                        start=types.Position(line=msg.line - 1, character=msg.column or 0),
-                        end=types.Position(
-                            line=(msg.end_line or msg.line) - 1, character=msg.end_column or 0
-                        ),
+                        start=types.Position(line=msg.line - 1, character=start_char),
+                        end=types.Position(line=(msg.end_line or msg.line) - 1, character=end_char),
                     ),
                     message=msg.msg,
                     severity=_lsp_severity(msg.category),
@@ -49,7 +53,7 @@ class LSPReporter(PythonTaReporter):
                 diagnostics_list.append(diag)
 
             params = types.PublishDiagnosticsParams(
-                uri=Path(filename).as_uri(), diagnostics=diagnostics_list
+                uri=Path(filename).resolve().as_uri(), diagnostics=diagnostics_list
             )
             output.append(
                 converter.unstructure(params, unstructure_as=types.PublishDiagnosticsParams)

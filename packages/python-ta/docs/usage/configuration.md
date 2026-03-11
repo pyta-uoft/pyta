@@ -59,6 +59,7 @@ These may be set using the `output-format` configuration option.
 - `pyta-color`: outputs a colourized report (can only be used in the terminal/Python shell)
 - `pyta-json`: outputs a JSON representation of the messages reported
 - `pyta-html`: outputs report in a webpage
+- `pyta-lsp`: outputs report in LSP-compliant JSON format
 
 ### Disabled Pylint checks
 

@@ -1,2 +1,6 @@
 """This file is used as a fixture for testing LSPReporter."""
-x=1  # missing whitespace around operator, should cause a convention error on line 2
+
+
+def fun() -> None:
+    """Sets the variable x equal to 1"""
+    x = 1

@@ -110,7 +110,7 @@ def check_all(
     Returns:
         The ``PythonTaReporter`` object that generated the report.
     """
-    return _check(
+    reporter = _check(
         module_name=module_name,
         level="all",
         local_config=config,
@@ -119,6 +119,8 @@ def check_all(
         autoformat=autoformat,
         on_verify_fail=on_verify_fail,
     )
+    reporter.linter.msgs_store.get_message_definitions.cache_clear()
+    return reporter
 
 
 def _check(

@@ -48,13 +48,19 @@ def get_filtered_local_variables(
     """
     Helper function for filtering local variables in a frame.
     """
-    if exclude_vars:
-        return {
-            var: frame.f_locals[var]
-            for var in frame.f_locals
-            if not any(re.search(regex, var) for regex in exclude_vars)
-        }
-    return frame.f_locals
+    code_obj = frame.f_code
+    # Get only local variables and exclude freevars and nonlocals
+    local_names = set((*code_obj.co_varnames, *code_obj.co_cellvars))
+    frame_locals = dict(frame.f_locals)
+
+    if not exclude_vars:
+        exclude_vars = []
+
+    return {
+        var: frame.f_locals[var]
+        for var in frame_locals
+        if var in local_names and not any(re.search(regex, var) for regex in exclude_vars)
+    }
 
 
 def snapshot(
@@ -205,6 +211,14 @@ def snapshot_to_json(
                     "type": "dict",
                     "id": value_id_diagram,
                     "value": dict_ids,
+                }
+            # Handle instances of type
+            elif isinstance(val, type):
+                value_entry = {
+                    "type": ".class",
+                    "name": "class",
+                    "id": value_id_diagram,
+                    "value": repr(val),
                 }
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance

@@ -59,6 +59,7 @@ These may be set using the `output-format` configuration option.
 - `pyta-color`: outputs a colourized report (can only be used in the terminal/Python shell)
 - `pyta-json`: outputs a JSON representation of the messages reported
 - `pyta-html`: outputs report in a webpage
+- `pyta-lsp`: outputs report in LSP-compliant JSON format
 
 ### Disabled Pylint checks
 
@@ -152,6 +153,12 @@ When `true`, PythonTA continuously monitors the specified files for changes and 
 For the **HTMLReporter**, this enables a persistent server that serves the PyTA report, allowing users to view the report in real-time as they make changes to their code.
 
 When `false` (default), PythonTA performs a one-time analysis and exits after generating the report.
+
+> **Note:** This option requires the optional `watchdog` extra. Install it with:
+>
+> ```bash
+> pip install python-ta[watchdog]
+> ```
 
 ### `server-port` (default: `0`)
 

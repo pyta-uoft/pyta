@@ -111,6 +111,20 @@ def func_with_exclude_nested(
     return func_with_exclude(exclude_vars=exclude_vars, include_frames=include_frames)
 
 
+def func_with_nonlocal() -> list[dict]:
+    """
+    Function for testing that nonlocal variables are excluded from the inner frame's snapshot.
+    """
+    x = 1
+
+    def inner() -> list[dict]:
+        nonlocal x
+        x = 2
+        return snapshot(include_frames=["inner", "func_with_nonlocal"])
+
+    return inner()
+
+
 def test_snapshot_one_level() -> None:
     """
     Examines whether the snapshot() function accurately captures
@@ -185,6 +199,17 @@ def test_snapshot_main_stackframe() -> None:
             "team_num": 9,
         }
     }
+
+
+def test_snapshot_excludes_nonlocal_from_inner_frame() -> None:
+    """
+    Test that a nonlocal variable appears only in the outer frame,
+    not in the inner frame where it is declared nonlocal.
+    """
+    result = func_with_nonlocal()
+
+    assert result[0] == {"inner": {}}
+    assert result[1]["func_with_nonlocal"]["x"] == 2
 
 
 def test_snapshot_to_json_primitive():
@@ -617,6 +642,46 @@ def test_snapshot_to_json_one_class():
             "type": ".class",
             "name": "OneClass",
             "value": {"attr1": 2, "attr2": 3},
+        },
+    ]
+
+    assert json_data == expected_output
+
+
+def test_snapshot_to_json_type_object():
+    """
+    Test snapshot_to_json with snapshot data including type objects
+    """
+    snapshot_data = [
+        {"__main__": {"t1": int, "t2": str, "t3": OneClass}},
+    ]
+
+    json_data = snapshot_to_json(snapshot_data)
+
+    expected_output = [
+        {
+            "type": ".frame",
+            "name": "__main__",
+            "id": None,
+            "value": {"t1": 1, "t2": 2, "t3": 3},
+        },
+        {
+            "type": ".class",
+            "name": "class",
+            "id": 1,
+            "value": repr(int),
+        },
+        {
+            "type": ".class",
+            "name": "class",
+            "id": 2,
+            "value": repr(str),
+        },
+        {
+            "type": ".class",
+            "name": "class",
+            "id": 3,
+            "value": repr(OneClass),
         },
     ]
 

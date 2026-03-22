@@ -482,5 +482,6 @@ def _get_reporter_class_path(reporter_name: Optional[str]) -> str:
         "pyta-plain": "python_ta.reporters.plain_reporter.PlainReporter",
         "pyta-color": "python_ta.reporters.color_reporter.ColorReporter",
         "pyta-json": "python_ta.reporters.json_reporter.JSONReporter",
+        "pyta-lsp": "python_ta.reporters.lsp_reporter.LSPReporter",
     }
     return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter.HTMLReporter")

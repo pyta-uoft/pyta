@@ -1418,7 +1418,7 @@ wheels = [
 
 [[package]]
 name = "python-ta"
-version = "2.12.1.dev0"
+version = "2.13.0.dev0"
 source = { editable = "packages/python-ta" }
 dependencies = [
     { name = "aiohttp" },
@@ -1437,7 +1437,6 @@ dependencies = [
     { name = "tabulate" },
     { name = "toml" },
     { name = "typeguard" },
-    { name = "watchdog" },
     { name = "wrapt" },
 ]
 
@@ -1459,6 +1458,9 @@ dev = [
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "sphinx-rtd-theme" },
     { name = "websocket-client" },
+]
+watchdog = [
+    { name = "watchdog" },
 ]
 z3 = [
     { name = "python-ta-z3" },
@@ -1496,12 +1498,12 @@ requires-dist = [
     { name = "tabulate", specifier = "~=0.9.0" },
     { name = "toml", specifier = "~=0.10.2" },
     { name = "typeguard", specifier = ">=4.1.0,<5" },
-    { name = "watchdog", specifier = "~=6.0.0" },
+    { name = "watchdog", marker = "extra == 'watchdog'", specifier = "~=6.0.0" },
     { name = "websocket-client", marker = "extra == 'dev'" },
     { name = "wrapt", specifier = ">=1.15.0,<3" },
     { name = "z3-solver", marker = "extra == 'z3'" },
 ]
-provides-extras = ["dev", "cfg", "z3"]
+provides-extras = ["dev", "cfg", "watchdog", "z3"]
 
 [[package]]
 name = "python-ta-workspace"
@@ -1520,7 +1522,7 @@ requires-dist = [
 
 [[package]]
 name = "python-ta-z3"
-version = "2.12.1.dev0"
+version = "2.13.0.dev0"
 source = { editable = "packages/python-ta-z3" }
 dependencies = [
     { name = "astroid" },

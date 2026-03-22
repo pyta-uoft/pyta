@@ -12,8 +12,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Replaced the PyTA logo image data in the HTML report to be embedded directly in the src URL instead of using an external URL, and provided a favicon for the HTML report page using the same svg data.
 - Extended `RecursionTable` to handle mutual recursion by taking in a list of function names to trace. Updated table output format correspondingly to include a "function" key column.
 - Extended `unnecessary_f_string_checker.py` to present an alternate message when the input is already a string.
+- Extended `snapshot_to_json` behaviour to handle `type` instances and display the `repr` of the type.
+- Extended `snapshot` to distinguish between nonlocal variables and local variables within a stack frame.
+- Make `watchdog` an optional dependency; users can opt in with `pip install python-ta[watchdog]`. This affects runs of `python_ta.check_all` with the `watch` config option set to `True`.
+- Added `LSPReporter`, a new reporter that outputs lint diagnostics in LSP 3.17-compliant JSON format.
 
 ### 💫 New checkers
+
+- `invalid-precondition-syntax`: Added new checker that checks if a function contains invalid syntax within its precondition statements.
+- `invalid-postcondition-syntax`: Added new checker that checks if a function contains invalid syntax within its postcondition statements.
 
 ### 🐛 Bug fixes
 
@@ -26,6 +33,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests for `infinite_loop_checker.py` to improve coverage for the `_name_holds_generator` function and the generator portion of the `_check_constant_loop_cond` function.
 - Refactored `test_main.py` calls to use click's testing helpers.
 - The `Z3Visitor`, `Z3Parser`, and `Z3ParseException` classes have been extracted into a _new Python package_, `python-ta-z3`.
+- Removed extraneous `print` calls in `InfiniteLoopChecker`
+- Added `fail-on-error: false` to the Coveralls jobs on CI
+- Updated `dependabot.yml` configuration to handle multiple packages
+
+## [2.12.1] - 2026-02-10
+
+### 🐛 Bug fixes
+
+- Fixed bug in `setendings.py` that raised an error when encountering a slice as part of a subscript tuple, e.g. `df.iloc[:, 0]`
 
 ## [2.12.0] - 2025-12-08
 

@@ -17,6 +17,9 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_testing_snapshots"
 )
 
+# Globals used for global-keyword snapshot tests
+SNAPSHOT_GLOBAL_X = 10
+
 
 # The functions below are for snapshot() testing purposes ONLY
 def func1() -> list:
@@ -125,6 +128,53 @@ def func_with_nonlocal() -> list[dict]:
     return inner()
 
 
+def func_reads_global_without_keyword() -> list[dict]:
+    """
+    Function for testing that reading a module global excludes it from the local function snapshot.
+    """
+    y = SNAPSHOT_GLOBAL_X
+    return snapshot(include_frames=["func_reads_global_without_keyword"])
+
+
+def func_reads_global_with_keyword() -> list[dict]:
+    """
+    Function for testing that use of global keyword should still exclude the name from the local function snapshot.
+    """
+    global SNAPSHOT_GLOBAL_X
+    y = SNAPSHOT_GLOBAL_X
+    return snapshot(include_frames=["func_reads_global_with_keyword"])
+
+
+def func_shadow_global_with_param(SNAPSHOT_GLOBAL_X: str) -> list[dict]:
+    """
+    Test that a parameter with the same name as a global should appear in the function snapshot.
+    """
+    return snapshot(include_frames=["func_shadow_global_with_param"])
+
+
+def func_shadow_global_with_local() -> list[dict]:
+    """
+    Test that a local variable with the same name as a global should appear in the function snapshot.
+    """
+    SNAPSHOT_GLOBAL_X = "local"
+    return snapshot(include_frames=["func_shadow_global_with_local"])
+
+
+def func_nested_global_skips_enclosing_local() -> list[dict]:
+    """
+    Test that in a nested function, global should refer to the module scope global instead of the enclosing function local of the same name.
+    """
+    SNAPSHOT_GLOBAL_X = "outer"
+
+    def inner() -> list[dict]:
+        global SNAPSHOT_GLOBAL_X
+        SNAPSHOT_GLOBAL_X = "changed in inner"
+        z = "inner"
+        return snapshot(include_frames=["inner", "func_nested_global_skips_enclosing_local"])
+
+    return inner()
+
+
 def test_snapshot_one_level() -> None:
     """
     Examines whether the snapshot() function accurately captures
@@ -210,6 +260,68 @@ def test_snapshot_excludes_nonlocal_from_inner_frame() -> None:
 
     assert result[0] == {"inner": {}}
     assert result[1]["func_with_nonlocal"]["x"] == 2
+
+
+def test_global_without_keyword_excludes_name_from_locals() -> None:
+    """
+    Test that global should not appear in the function-local snapshot.
+    """
+    result = func_reads_global_without_keyword()
+    assert result == [
+        {"func_reads_global_without_keyword": {"y": 10}},
+    ]
+
+
+def test_global_with_keyword_excludes_name_from_locals() -> None:
+    """
+    Test that using `global` keyword does not make it a local variable in the frame.
+    """
+    result = func_reads_global_with_keyword()
+    assert result == [
+        {"func_reads_global_with_keyword": {"y": 10}},
+    ]
+
+
+def test_snapshot_parameter_shadows_global() -> None:
+    """
+    Test that a parameter appears in the local frame even when a module global
+    of the same name exists.
+    """
+    result = func_shadow_global_with_param("local")
+    assert result == [
+        {"func_shadow_global_with_param": {"SNAPSHOT_GLOBAL_X": "local"}},
+    ]
+
+
+def test_snapshot_local_shadows_global() -> None:
+    """
+    Test that a local variable appears in the local frame even when a module global
+    of the same name exists.
+    """
+    result = func_shadow_global_with_local()
+    assert result == [
+        {"func_shadow_global_with_local": {"SNAPSHOT_GLOBAL_X": "local"}},
+    ]
+
+
+def test_snapshot_nested_global() -> None:
+    """
+    Test that a nested function using `global` should not capture the enclosing
+    function-local variable with the same name.
+    """
+    global SNAPSHOT_GLOBAL_X
+    old_value = SNAPSHOT_GLOBAL_X
+
+    try:
+        result = func_nested_global_skips_enclosing_local()
+        assert result == [
+            {"inner": {"z": "inner"}},
+            {"func_nested_global_skips_enclosing_local": {"SNAPSHOT_GLOBAL_X": "outer"}},
+        ]
+        assert SNAPSHOT_GLOBAL_X == "changed in inner"
+
+    finally:
+        SNAPSHOT_GLOBAL_X = old_value
 
 
 def test_snapshot_to_json_primitive():

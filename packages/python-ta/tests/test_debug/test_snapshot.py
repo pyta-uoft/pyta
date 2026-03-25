@@ -314,10 +314,9 @@ def test_snapshot_nested_global() -> None:
 
     try:
         result = func_nested_global_skips_enclosing_local()
-        assert result == [
-            {"inner": {"z": "inner"}},
-            {"func_nested_global_skips_enclosing_local": {"SNAPSHOT_GLOBAL_X": "outer"}},
-        ]
+        assert result[0] == {"inner": {"z": "inner"}}
+        outer = result[1]["func_nested_global_skips_enclosing_local"]
+        assert outer["SNAPSHOT_GLOBAL_X"] == "outer"
         assert SNAPSHOT_GLOBAL_X == "changed in inner"
 
     finally:

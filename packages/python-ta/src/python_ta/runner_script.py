@@ -13,14 +13,15 @@ tracemalloc.start()
 
 
 def snapshot_runs():
+    run_runner()
     s1 = tracemalloc.take_snapshot()
     run_runner()
     s2 = tracemalloc.take_snapshot()
     stats = s2.compare_to(s1, "traceback")
-    for stat in stats[:40]:
-
+    for stat in stats[:10]:
         print(f"{stat.traceback.format()}")
         print(f"size_diff={stat.size_diff} | count_diff={stat.count_diff}")
+    print("-" * 50)
 
 
 def trace_memory_runs():
@@ -30,4 +31,5 @@ def trace_memory_runs():
         print(f" {i} | {int(current[0] / 1024 ** 2)} MB")
 
 
-snapshot_runs()
+for i in range(5):
+    snapshot_runs()

@@ -1,3 +1,4 @@
+import gc
 import io
 import tracemalloc
 
@@ -7,6 +8,7 @@ import python_ta
 def run_runner():
     buf = io.StringIO()
     python_ta.check_all(output=buf)
+    gc.collect()
 
 
 tracemalloc.start()

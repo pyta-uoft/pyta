@@ -92,8 +92,6 @@ class StaticTypeChecker(BaseRawFileChecker):
         ret = subprocess.run(call, capture_output=True, text=True)
         result = ret.stdout
 
-        # result, _, _ = api.run([filename] + mypy_options)
-
         for line in result.splitlines():
             common_match = re.match(self.COMMON_PATTERN, line)
             if not common_match:

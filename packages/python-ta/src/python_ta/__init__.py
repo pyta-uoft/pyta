@@ -17,6 +17,7 @@ if __name__ == '__main__':
 
 from __future__ import annotations
 
+import gc
 from importlib.metadata import version
 
 __version__ = version("python-ta")
@@ -120,6 +121,7 @@ def check_all(
         on_verify_fail=on_verify_fail,
     )
     reporter.linter.msgs_store.get_message_definitions.cache_clear()
+    gc.collect()
     return reporter
 
 

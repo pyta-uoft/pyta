@@ -21,8 +21,9 @@ def lsp_output():
         config={"output-format": "pyta-lsp"},
         output=buf,
     )
-    buf.seek(0)
-    return json.loads(buf.read())
+    raw = buf.getvalue()
+    print("RAW OUTPUT:", raw[:500])
+    return json.loads(raw)
 
 
 def test_exact_output(lsp_output):

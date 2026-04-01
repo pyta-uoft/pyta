@@ -37,7 +37,7 @@ dev = [
     "myst-parser",
     "pre-commit",
     "pytest",
-    "pytest-cov >= 4.0,< 7.1",
+    "pytest-cov >= 4.0,< 7.2",
     "pytest-mock",
     "pytest-snapshot",
     "websocket-client",

@@ -193,7 +193,7 @@ def _check(
                     linter=linter,
                     f_paths=f_paths,
                 )
-
+        current_reporter.linter.msgs_store.get_message_definitions.cache_clear()
         return current_reporter
     except Exception as e:
         logging.error(

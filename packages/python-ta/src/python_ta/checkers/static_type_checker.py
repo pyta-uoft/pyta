@@ -1,7 +1,7 @@
 import re
+import subprocess
 
 from astroid import nodes
-from mypy import api
 from pylint.checkers import BaseRawFileChecker
 from pylint.lint import PyLinter
 
@@ -88,7 +88,9 @@ class StaticTypeChecker(BaseRawFileChecker):
         for arg in self.linter.config.mypy_options:
             mypy_options.append("--" + arg)
 
-        result, _, _ = api.run([filename] + mypy_options)
+        call = ["mypy", filename] + mypy_options
+        ret = subprocess.run(call, capture_output=True, text=True)
+        result = ret.stdout
 
         for line in result.splitlines():
             common_match = re.match(self.COMMON_PATTERN, line)

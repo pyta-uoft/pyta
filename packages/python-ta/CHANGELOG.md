@@ -37,6 +37,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Removed extraneous `print` calls in `InfiniteLoopChecker`
 - Added `fail-on-error: false` to the Coveralls jobs on CI
 - Updated `dependabot.yml` configuration to handle multiple packages
+- Added tests for `snapshot.py` to improve coverage for usages of the `global` keyword.
 
 ## [2.12.1] - 2026-02-10
 

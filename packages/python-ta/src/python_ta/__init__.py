@@ -43,7 +43,6 @@ from .check.helpers import (
     upload_linter_results,
     verify_pre_check,
 )
-from .check.watch import watch_files
 
 if TYPE_CHECKING:
     from .reporters.core import PythonTaReporter
@@ -182,6 +181,9 @@ def _check(
         if is_any_file_checked:
             linter.generate_reports()
             if linter.config.watch:
+                # import only when needed to avoid dragging in watchdog
+                from .check.watch import watch_files
+
                 watch_files(
                     file_paths=linted_files,
                     level=level,
@@ -191,7 +193,7 @@ def _check(
                     linter=linter,
                     f_paths=f_paths,
                 )
-
+        current_reporter.linter.msgs_store.get_message_definitions.cache_clear()
         return current_reporter
     except Exception as e:
         logging.error(

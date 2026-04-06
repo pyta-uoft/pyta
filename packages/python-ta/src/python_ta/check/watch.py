@@ -6,8 +6,15 @@ import time
 from typing import Any, Optional, Union
 
 from pylint.lint import PyLinter
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+# ``watchdog`` is an optional extra. If someone imports this module without
+# installing the extra, we print an error message before raising the error.
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+except ImportError:  # pragma: no cover - impossible to trigger in CI since extra is installed
+    print("ERROR: watch mode requires python-ta[watchdog] to be installed.")
+    raise
 
 from .helpers import check_file, upload_linter_results
 

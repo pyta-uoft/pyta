@@ -16,7 +16,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended `snapshot` to distinguish between nonlocal variables and local variables within a stack frame.
 - Make `watchdog` an optional dependency; users can opt in with `pip install python-ta[watchdog]`. This affects runs of `python_ta.check_all` with the `watch` config option set to `True`.
 - Added `LSPReporter`, a new reporter that outputs lint diagnostics in LSP 3.17-compliant JSON format.
-- Extended `snapshot_to_json` behaviour to handle `type` instances and display the `repr` of the type.
 - Updated `SnapshotTracer` to convert snapshots to JSON with `snapshot_to_json` and pass JSON data to the webstepper template instead of SVG.
 
 ### 💫 New checkers

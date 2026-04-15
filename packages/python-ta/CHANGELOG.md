@@ -40,6 +40,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests for `snapshot.py` to improve coverage for usages of the `global` keyword.
 - Switched from `pre-commit` to `prek` for pre-commit hooks
 - Updated documentation to refer to `uv` installation
+- Configured CI to skip the `no-commit-to-branch` prek hook, which incorrectly fails when merging PRs into master
 
 ## [2.12.1] - 2026-02-10
 

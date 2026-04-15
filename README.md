@@ -8,8 +8,9 @@ For more information about the library, check out our [documentation website](ht
 If you're developing PyTA:
 
 1. First, clone this repository.
-2. Open a terminal in this repo, and run `pip install -e "./packages/python-ta-z3" "./packages/python-ta[dev, cfg, z3, watchdog]"` to install the dependencies.
-3. Then run `pre-commit install` to install the pre-commit hooks (for automatically formatting and checking your code on each commit).
+2. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/), which is the tool we use to manage Python packages.
+3. Open a terminal in this repo, and run `uv sync` to install the dependencies.
+4. Then run `uvx prek install` to install the pre-commit hooks (for automatically formatting and checking your code on each commit).
 
 While not strictly necessary for debugging, some debugging tools require [graphviz](https://www.graphviz.org/download/) to be installed on your system.
 
@@ -18,8 +19,8 @@ While not strictly necessary for debugging, some debugging tools require [graphv
 To run the test suites, run the following commands from inside the `pyta` directory:
 
 ```console
-> python -m pytest packages/python-ta/tests  # Or python3 on OSX/Linux
-> python -m pytest packages/python-ta-z3/tests  # Or python3 on OSX/Linux
+> uv run pytest packages/python-ta/tests
+> uv run pytest packages/python-ta-z3/tests
 ```
 
 ### Generating the docs

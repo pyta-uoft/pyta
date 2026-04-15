@@ -42,7 +42,6 @@ Before opening your pull request:
 
 After opening your pull request:
 
-- [ ] I have verified that the pre-commit.ci checks have passed.
 - [ ] I have verified that the CI tests have passed.
 - [ ] I have reviewed the test coverage changes reported by Coveralls.
 - [ ] I have [requested a review](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review) from a project maintainer.

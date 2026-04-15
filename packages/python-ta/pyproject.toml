@@ -35,7 +35,7 @@ dev = [
     "hypothesis",
     "inflection",
     "myst-parser",
-    "pre-commit",
+    "prek",
     "pytest",
     "pytest-cov >= 4.0,< 7.2",
     "pytest-mock",

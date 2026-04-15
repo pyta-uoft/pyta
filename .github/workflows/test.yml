@@ -8,6 +8,12 @@ on:
       - master
 
 jobs:
+  prek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: j178/prek-action@v2
+
   test:
     runs-on: ubuntu-latest
     strategy:

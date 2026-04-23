@@ -21,6 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `invalid-precondition-syntax`: Added new checker that checks if a function contains invalid syntax within its precondition statements.
 - `invalid-postcondition-syntax`: Added new checker that checks if a function contains invalid syntax within its postcondition statements.
+- `invalid-representation-invariant-syntax`: Added new checker that checks if a class contains invalid syntax within its representation invariant statements.
 
 ### 🐛 Bug fixes
 

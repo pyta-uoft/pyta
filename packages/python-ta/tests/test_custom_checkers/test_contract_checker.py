@@ -309,3 +309,268 @@ class TestContractCheckerPostconditions(pylint.testutils.CheckerTestCase):
         func_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         with self.assertNoMessages():
             self.checker.visit_functiondef(func_node)
+
+
+class TestContractCheckerRepresentationInvariants(pylint.testutils.CheckerTestCase):
+    CHECKER_CLASS = ContractChecker
+
+    def test_invalid_operator(self) -> None:
+        """Test that !== is caught as invalid representation invariant syntax."""
+        src = '''
+        class Person:
+            """A class representing a person.
+
+            Representation Invariants:
+                - self.age !== 0
+            """
+            age: int
+
+            def __init__(self, age: int) -> None:
+                self.age = age
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=("self.age !== 0",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_assignment_statement(self) -> None:
+        """Test that assignment statements are caught as invalid representation invariant syntax."""
+        src = '''
+        class Person:
+            """A class representing a person.
+
+            Representation Invariants:
+                - self.age = 5
+                - self.name = "hello"
+            """
+            age: int
+            name: str
+
+            def __init__(self, age: int, name: str) -> None:
+                self.age = age
+                self.name = name
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=("self.age = 5",),
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=('self.name = "hello"',),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_incorrect_whitespace(self) -> None:
+        """Test that incorrect whitespaces get flagged as bad representation invariant syntax."""
+        src = '''
+        class A:
+            """A class.
+
+            Representation Invariants:
+                - 0 < = self.x < 10
+            """
+            x: int
+
+            def __init__(self, x: int) -> None:
+                self.x = x
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=("0 < = self.x < 10",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_missing_parenthesis(self) -> None:
+        """Test that missing parentheses are caught in representation invariants."""
+        src = '''
+        class Container:
+            """A container class.
+
+            Representation Invariants:
+                - len(self.items > 0
+            """
+            items: list
+
+            def __init__(self, items: list) -> None:
+                self.items = items
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=("len(self.items > 0",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_valid_representation_invariants(self) -> None:
+        """Test that single-line representation invariants with correct syntax pass."""
+        src = '''
+        class Person:
+            """A class representing a person.
+
+            Representation Invariants:
+                - self.name.isalpha()
+                - self.age >= 0
+                - self.age != 15
+            """
+            age: int
+            name: str
+
+            def __init__(self, name: str, age: int) -> None:
+                self.name = name
+                self.age = age
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertNoMessages():
+            self.checker.visit_classdef(class_node)
+
+    def test_valid_multi_line_representation_invariants(self) -> None:
+        """Test that multi-line representation invariants with valid syntax pass."""
+        src = '''
+        class Data:
+            """A data container.
+
+            Representation Invariants:
+                - len(self.items) > 0 and \
+                  all(isinstance(x, int) for x in self.items) and \
+                  self.threshold >= 0
+                - self.items != []
+            """
+            items: list
+            threshold: int
+
+            def __init__(self, items: list, threshold: int) -> None:
+                self.items = items
+                self.threshold = threshold
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertNoMessages():
+            self.checker.visit_classdef(class_node)
+
+    def test_invalid_multi_line_representation_invariants(self) -> None:
+        """Test that multi-line representation invariants with invalid syntax are flagged."""
+        src = '''
+        class Data:
+            """A data container.
+
+            Representation Invariants:
+                - len(self.items) > 0 and \
+                  all(isinstance(x, int) for x in self.items) and \
+                  self.threshold > = 0
+                - self.items !== []
+            """
+            items: list
+            threshold: int
+
+            def __init__(self, items: list, threshold: int) -> None:
+                self.items = items
+                self.threshold = threshold
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=(
+                    "len(self.items) > 0 and all(isinstance(x, int) for x in self.items) and self.threshold > = 0",
+                ),
+            ),
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=("self.items !== []",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)
+
+    def test_class_without_docstring(self) -> None:
+        """Test that a class without a docstring does not produce any messages."""
+        src = """
+        class Empty:
+            x: int
+
+            def __init__(self, x: int) -> None:
+                self.x = x
+        """
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertNoMessages():
+            self.checker.visit_classdef(class_node)
+
+    def test_class_without_representation_invariants(self) -> None:
+        """Test that a class with a docstring but no representation invariants does not produce any messages."""
+        src = '''
+        class Simple:
+            """A simple class without representation invariants."""
+            x: int
+
+            def __init__(self, x: int) -> None:
+                self.x = x
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertNoMessages():
+            self.checker.visit_classdef(class_node)
+
+    def test_single_line_representation_invariant(self) -> None:
+        """Test single-line form 'Representation Invariant: <cond>'."""
+        src = '''
+        class Counter:
+            """A counter.
+
+            Representation Invariant: self.count !== 0
+            """
+            count: int
+
+            def __init__(self, count: int) -> None:
+                self.count = count
+        '''
+
+        mod = parse(src)
+        class_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="invalid-representation-invariant-syntax",
+                node=class_node,
+                args=("self.count !== 0",),
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_classdef(class_node)

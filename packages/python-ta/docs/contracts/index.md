@@ -305,13 +305,16 @@ However, PythonTA currently does *not* support this syntax; all attributes must 
 ### Classes: custom representation invariants
 
 Similar to function preconditions, you can define _representation invariants_ within a class docstring.
-Each representation invariant is a Python expression involving one or more attributes, and are defined using the following syntax:
+Each representation invariant is a Python expression involving one or more attributes, and are defined using the following syntax.
+Multi-line representation invariants can be created by using a backslash ('\') following a space at the end of each line except the last:
 
 ```
 Representation Invariants:
     - <expr>
     - <expr>
-    - <expr>
+    - <expr> \
+      <expr> \
+      <expr>
 ```
 
 Representation invariants are checked after method calls and when attributes are reassigned, immediately after attribute types are checked.

@@ -538,6 +538,31 @@ class TestUnnecessaryIndexingChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_for(for_node)
 
+    def test_range_start_no_msg(self):
+        """Check for no error when range does not start at 0"""
+        src = """
+        def f(lst: list) -> list:
+            return [lst[i] for i in range(1, len(lst))]
+        """
+        mod = astroid.parse(src)
+        comp_node, *_ = mod.nodes_of_class(nodes.Comprehension)
+
+        with self.assertNoMessages():
+            self.checker.visit_comprehension(comp_node)
+
+    def test_range_step_no_msg(self):
+        """Check for no error when range step is not 1"""
+        src = """
+        def f(lst: list) -> None:
+            for i in range(0, len(lst), 2):
+                print(lst[i])
+        """
+        mod = astroid.parse(src)
+        for_node, *_ = mod.nodes_of_class(nodes.For)
+
+        with self.assertNoMessages():
+            self.checker.visit_for(for_node)
+
 
 if __name__ == "__main__":
     import pytest

@@ -2752,6 +2752,40 @@ def demo_function(x: int, y: int) -> int:
     return max(0, x // y)
 ```
 
+(E9982)=
+
+### Invalid syntax in class representation invariant (E9982)
+
+This error occurs when a class representation invariant contains invalid Python expression syntax. Valid Python statements
+(e.g. assignment statements like `self.x = 5`) are also flagged, as they aren't valid Python expressions.
+Multi-line representation invariants are supported using a backslash ('\') following a space at the end of each line except the last.
+
+Example:
+
+```{literalinclude} /../../../examples/custom_checkers/e9982_invalid_representation_invariant_syntax.py
+---
+lines: 7-9
+---
+```
+
+The first representation invariant incorrectly attempts to use `!==`, which is not valid Python syntax.
+This should be corrected to use Python's inequality operator:
+
+```python
+class Person:
+    """A class representing a person.
+
+    Representation Invariants:
+       - self.age != 0
+       - self.age >= 0
+    """
+
+    age: int
+
+    def __init__(self, age: int) -> None:
+        self.age = age
+```
+
 (E9989)=
 
 ### Pycodestyle errors (E9989)

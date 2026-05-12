@@ -18,8 +18,7 @@ def f(x: int, y: float, z: bool, a: str):
 """
 
 # test cases for arithmetic expressions
-arithmetic_list = [
-    """
+arithmetic_list = ["""
     def f(x: int, y: int, z: float, a):
         '''
         Preconditions:
@@ -28,12 +27,10 @@ arithmetic_list = [
             - x + y != z
         '''
         pass
-    """
-]
+    """]
 
 # test cases for boolean expressions
-boolean_list = [
-    """
+boolean_list = ["""
     def f(x: bool, y: bool, z: bool, a):
         '''
         Preconditions:
@@ -41,8 +38,7 @@ boolean_list = [
             - not (x or y or z)
         '''
         pass
-    """
-]
+    """]
 
 # test cases for container (list/set/tuple) expressions
 container_list = [

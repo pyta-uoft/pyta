@@ -22,6 +22,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `invalid-precondition-syntax`: Added new checker that checks if a function contains invalid syntax within its precondition statements.
 - `invalid-postcondition-syntax`: Added new checker that checks if a function contains invalid syntax within its postcondition statements.
+- `invalid-representation-invariant-syntax`: Added new checker that checks if a class contains invalid syntax within its representation invariant statements.
 
 ### 🐛 Bug fixes
 
@@ -39,6 +40,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `fail-on-error: false` to the Coveralls jobs on CI
 - Updated `dependabot.yml` configuration to handle multiple packages
 - Added tests for `snapshot.py` to improve coverage for usages of the `global` keyword.
+- Switched from `pre-commit` to `prek` for pre-commit hooks
+- Updated documentation to refer to `uv` installation
+- Configured CI to skip the `no-commit-to-branch` prek hook, which incorrectly fails when merging PRs into master
 
 ## [2.12.1] - 2026-02-10
 

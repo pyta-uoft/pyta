@@ -295,12 +295,9 @@ def test_create_margherita_invalid() -> None:
     with pytest.raises(AssertionError) as excinfo:
         Pizza.margherita(0)
     msg = str(excinfo.value)
-    assert (
-        "0 \
+    assert "0 \
         < self.radius \
-            <= 10"
-        in msg
-    )
+            <= 10" in msg
 
 
 def test_circle_area_valid() -> None:

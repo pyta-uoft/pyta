@@ -28,6 +28,11 @@ class ContractChecker(BaseChecker):
             "invalid-postcondition-syntax",
             "Reported when a postcondition contains invalid Python expression syntax.",
         ),
+        "E9982": (
+            "Invalid syntax in representation invariant: %s",
+            "invalid-representation-invariant-syntax",
+            "Reported when a representation invariant contains invalid Python expression syntax.",
+        ),
     }
 
     @only_required_for_messages("invalid-precondition-syntax", "invalid-postcondition-syntax")
@@ -58,6 +63,25 @@ class ContractChecker(BaseChecker):
             except SyntaxError:
                 self.add_message(
                     "invalid-postcondition-syntax", node=node, args=(cleaned_postcondition,)
+                )
+
+    @only_required_for_messages("invalid-representation-invariant-syntax")
+    def visit_classdef(self, node: nodes.ClassDef) -> None:
+        """Visit class definition and check representation invariants in docstring."""
+
+        if not node.doc_node:
+            return
+
+        invariants = parse_assertions(node, parse_token="Representation Invariant")
+        for invariant in invariants:
+            cleaned_invariant = re.sub(r"\s+", " ", invariant)
+            try:
+                ast.parse(cleaned_invariant, mode="eval")
+            except SyntaxError:
+                self.add_message(
+                    "invalid-representation-invariant-syntax",
+                    node=node,
+                    args=(cleaned_invariant,),
                 )
 
 

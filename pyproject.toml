@@ -8,6 +8,7 @@ requires-python = ">=3.10"
 dependencies = [
     "python-ta[dev,z3,cfg]",
     "python-ta-z3",
+    "watchdog>=6.0.0",
 ]
 
 [build-system]

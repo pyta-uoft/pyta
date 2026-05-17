@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import os.path
 import sys
 from typing import Iterator
@@ -30,8 +31,10 @@ def func_one_line(output_directory: str = None) -> None:
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         num = 123
+
+    return tracer
 
 
 def func_multi_line(output_directory: str = None) -> None:
@@ -44,11 +47,13 @@ def func_multi_line(output_directory: str = None) -> None:
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         num = 123
         some_string = "Hello, world"
         num2 = 321
         arr = [some_string, "string 123321"]
+
+    return tracer
 
 
 def func_mutation(output_directory: str = None) -> None:
@@ -61,9 +66,11 @@ def func_mutation(output_directory: str = None) -> None:
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         num = 123
         num = 321
+
+    return tracer
 
 
 def func_for_loop(output_directory: str = None) -> None:
@@ -76,10 +83,11 @@ def func_for_loop(output_directory: str = None) -> None:
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         nums = [1, 2, 3]
         for i in range(len(nums)):
             nums[i] = nums[i] + 1
+    return tracer
 
 
 def func_if_else(output_directory: str = None) -> None:
@@ -92,12 +100,13 @@ def func_if_else(output_directory: str = None) -> None:
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         num = 10
         if num > 5:
             result = "greater"
         else:
             result = "lesser"
+    return tracer
 
 
 def func_while(output_directory: str = None) -> None:
@@ -110,10 +119,11 @@ def func_while(output_directory: str = None) -> None:
         exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         num = 0
         while num < 3:
             num += 1
+    return tracer
 
 
 def func_no_output_dir() -> None:
@@ -124,8 +134,9 @@ def func_no_output_dir() -> None:
         include_frames=(r"^func_no_output_dir$",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         s = "Hello"
+    return tracer
 
 
 def func_open_webstepper(output_directory: str = None) -> None:
@@ -139,45 +150,30 @@ def func_open_webstepper(output_directory: str = None) -> None:
         webstepper=True,
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
-    ):
+    ) as tracer:
         nums = [1, 2, 3]
         for i in range(len(nums)):
             nums[i] = nums[i] + 1
+    return tracer
 
 
 # Helpers
 
 
-def assert_output_files_match(
-    output_directory: str, snapshot: Snapshot, function_name: str
+def assert_snapshot_data(
+    tracer: SnapshotTracer,
+    expected_num_snapshots: int,
 ) -> None:
     """
-    Assert that the output files in the output directory match the expected output.
+    Assert that SnapshotTracer stored JSON snapshot data correctly.
     """
-    actual_svgs = {}
-    files = os.listdir(output_directory)
-    for file in files:
-        actual_path = os.path.join(output_directory, file)
-        with open(actual_path) as actual_file:
-            actual_svg = actual_file.read()
-            actual_svgs[file] = actual_svg
-    snapshot.assert_match_dir(actual_svgs, function_name)
+    assert len(tracer._snapshots) == expected_num_snapshots
 
+    for snapshot_entry in tracer._snapshots:
+        assert "lineNumber" in snapshot_entry
+        assert "memoryVizInput" in snapshot_entry
 
-# Fixtures
-
-
-@pytest.fixture(scope="function")
-def setup_curr_dir_testing(snapshot: Snapshot) -> Iterator[None]:
-    """
-    Set up and tear down the current directory for the SnapshotTracer tests.
-    """
-    snapshot.snapshot_dir = SNAPSHOT_DIR
-    file_name = "snapshot-0.svg"
-    if os.path.exists(file_name):
-        os.remove(file_name)
-    yield
-    os.remove(file_name)
+        assert isinstance(snapshot_entry["memoryVizInput"], list)
 
 
 # Tests
@@ -204,11 +200,14 @@ class TestSnapshotTracer:
         """
         Test SnapshotTracer with various simple functions.
         """
-        snapshot.snapshot_dir = SNAPSHOT_DIR
+        tracer = test_func(str(tmp_path))
 
-        test_func(str(tmp_path))
-
-        assert_output_files_match(str(tmp_path), snapshot, test_func.__name__)
+        assert len(tracer._snapshots) > 0
+        for entry in tracer._snapshots:
+            assert "lineNumber" in entry
+            assert "memoryVizInput" in entry
+            assert isinstance(entry["lineNumber"], int)
+            assert isinstance(entry["memoryVizInput"], list)
 
     def test_using_output_flag(self):
         """
@@ -225,18 +224,36 @@ class TestSnapshotTracer:
             ):
                 pass
 
-    def test_no_output_directory(self, snapshot, setup_curr_dir_testing):
+    def test_no_output_directory(self):
         """
         Test SnapshotTracer outputs to the current directory when `output_directory` is not specified.
         """
-        func_no_output_dir()
-
-        with open("snapshot-0.svg") as actual_file:
-            snapshot.assert_match_dir(
-                {"snapshot-0.svg": actual_file.read()}, func_no_output_dir.__name__
-            )
+        tracer = func_no_output_dir()
+        assert len(tracer._snapshots) > 0
 
     def test_serve_html_calls_open_in_browser(self):
         with patch("python_ta.debug.snapshot_tracer.open_html_in_browser") as mock_open:
             func_open_webstepper()
             mock_open.assert_called_once()
+
+    def test_snapshot_contains_json_data(self, tmp_path):
+        tracer = func_multi_line(str(tmp_path))
+        snapshot_entry = tracer._snapshots[0]
+        memory_input = snapshot_entry["memoryVizInput"]
+        assert isinstance(memory_input, list)
+        frame_entries = [entry for entry in memory_input if entry["type"] == ".frame"]
+        assert len(frame_entries) > 0
+
+    def test_snapshot_to_json_called(self, tmp_path):
+        with patch("python_ta.debug.snapshot_tracer.snapshot_to_json") as mock_json:
+            mock_json.return_value = []
+
+            func_one_line(str(tmp_path))
+
+            mock_json.assert_called()
+
+    def test_build_html_contains_memory_viz_data(self, tmp_path):
+        tracer = func_one_line(str(tmp_path))
+        frame = inspect.currentframe()
+        html = tracer._build_self_contained_html(frame).decode("utf-8")
+        assert "memoryVizInput" in html

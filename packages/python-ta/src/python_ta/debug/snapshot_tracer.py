@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import copy
 import inspect
-import json
 import logging
 import os
 import socket
@@ -35,7 +34,7 @@ class SnapshotTracer:
 
     output_directory: Optional[str]
     webstepper: bool
-    _snapshots: list[dict[int, int]]
+    _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
     _first_line: int
 
@@ -77,10 +76,6 @@ class SnapshotTracer:
         if self._first_line == float("inf"):
             self._first_line = frame.f_lineno
         if event == "line":
-            filename = os.path.join(
-                self.output_directory,
-                f"snapshot-{len(self._snapshots)}.svg",
-            )
             snapshot_output = snapshot(
                 id_tracker=self.id_tracker,
                 **self._snapshot_args,

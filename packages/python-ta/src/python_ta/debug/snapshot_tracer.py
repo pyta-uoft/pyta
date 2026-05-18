@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import copy
 import inspect
-import json
 import logging
 import os
 import socket
@@ -15,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from ..util.servers.one_shot_server import open_html_in_browser
 from .id_tracker import IDTracker
-from .snapshot import snapshot
+from .snapshot import snapshot, snapshot_to_json
 
 if TYPE_CHECKING:
     import types
@@ -35,7 +34,7 @@ class SnapshotTracer:
 
     output_directory: Optional[str]
     webstepper: bool
-    _snapshots: list[dict[int, int]]
+    _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
     _first_line: int
 
@@ -77,30 +76,21 @@ class SnapshotTracer:
         if self._first_line == float("inf"):
             self._first_line = frame.f_lineno
         if event == "line":
-            filename = os.path.join(
-                self.output_directory,
-                f"snapshot-{len(self._snapshots)}.svg",
-            )
-            self._snapshot_args["memory_viz_args"].extend(["--output", filename])
-
-            snapshot(
+            snapshot_output = snapshot(
                 id_tracker=self.id_tracker,
-                save=True,
                 **self._snapshot_args,
             )
+            json_data = snapshot_to_json(snapshot_output, id_tracker=self.id_tracker)
+            self._add_json_to_map(json_data, frame.f_lineno)
 
-            self._add_svg_to_map(filename, frame.f_lineno)
-
-    def _add_svg_to_map(self, filename: str, line: int) -> None:
-        """Add the SVG in filename to self._snapshots"""
-        with open(filename) as svg_file:
-            svg_content = svg_file.read()
-            self._snapshots.append(
-                {
-                    "lineNumber": line,
-                    "svg": svg_content,
-                }
-            )
+    def _add_json_to_map(self, json_data: list[dict], line: int) -> None:
+        """Add the JSON data to self._snapshots"""
+        self._snapshots.append(
+            {
+                "lineNumber": line,
+                "memoryVizInput": json_data,
+            }
+        )
 
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
@@ -144,7 +134,7 @@ class SnapshotTracer:
 
         rendered_html = template.render(
             code_text=self._get_code(func_frame),
-            svg_array=self._snapshots,
+            memory_viz_data=self._snapshots,
             bundle_content=bundle_content,
         )
 

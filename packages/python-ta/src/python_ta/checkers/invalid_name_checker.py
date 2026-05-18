@@ -120,17 +120,24 @@ def _ignore_name(name: str, pattern: re.Pattern) -> bool:
     return pattern.pattern and pattern.match(name) is not None
 
 
+def _to_snake_case(name: str) -> str:
+    """Converts a name to snake_case format."""
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name).lower()
+
+
 def _check_module_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    module names.
+    module names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid module name."""
     error_msgs = []
 
     if not _is_in_snake_case(name):
+        suggested_name = _to_snake_case(name)
         error_msgs.append(
             f'Module name "{name}" should be in snake_case format. Modules should be all-lowercase '
-            f"names, with each name separated by underscores."
+            f"names, with each name separated by underscores. "
+            f'Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs
@@ -176,17 +183,19 @@ def _check_class_name(_node_type: str, name: str) -> list[str]:
 
 def _check_function_and_variable_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    function and variable names.
+    function and variable names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid function or variable name."""
     error_msgs = []
 
     if name != "_" and not _is_in_snake_case(name):
+        suggested_name = _to_snake_case(name)
         error_msgs.append(
             f'{node_type.capitalize()} name "{name}" should be in snake_case format. '
             f"{node_type.capitalize()} names should be lowercase, with words "
             f"separated by underscores. A single leading underscore can be used to "
-            f"denote a private {node_type}."
+            f"denote a private {node_type}. "
+            f'Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs
@@ -194,19 +203,21 @@ def _check_function_and_variable_name(node_type: str, name: str) -> list[str]:
 
 def _check_method_and_attr_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    method and instance or class attribute names.
+    method and instance or class attribute names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid method, instance, or attribute name."""
     error_msgs = []
 
     # Also consider the case of invoking Python's name mangling rules with leading dunderscores.
     if not (_is_in_snake_case(name) or (name.startswith("__") and _is_in_snake_case(name[2:]))):
+        suggested_name = _to_snake_case(name)
         error_msgs.append(
             f'{node_type.capitalize()} name "{name}" should be in snake_case format. '
             f"{node_type.capitalize()} names should be lowercase, with words "
             f"separated by underscores. A single leading underscore can be used to "
             f"denote a private {node_type} while a double leading underscore invokes "
-            f"Python's name-mangling rules."
+            f"Python's name-mangling rules. "
+            f'Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs
@@ -214,17 +225,19 @@ def _check_method_and_attr_name(node_type: str, name: str) -> list[str]:
 
 def _check_argument_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    argument names.
+    argument names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid argument name."""
     error_msgs = []
 
     if not _is_in_snake_case(name):
+        suggested_name = _to_snake_case(name)
         error_msgs.append(
             f'Argument name "{name}" should be in snake_case format. Argument names should be '
             f"lowercase, with words separated by underscores. A single leading "
             f"underscore can be used to indicate that the argument is not being used "
-            f"but is still needed somehow."
+            f"but is still needed somehow. "
+            f'Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs

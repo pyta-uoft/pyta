@@ -1504,14 +1504,12 @@ source = { editable = "." }
 dependencies = [
     { name = "python-ta", extra = ["cfg", "dev", "z3"] },
     { name = "python-ta-z3" },
-    { name = "watchdog" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "python-ta", extras = ["dev", "z3", "cfg"], editable = "packages/python-ta" },
     { name = "python-ta-z3", editable = "packages/python-ta-z3" },
-    { name = "watchdog", specifier = ">=6.0.0" },
 ]
 
 [[package]]

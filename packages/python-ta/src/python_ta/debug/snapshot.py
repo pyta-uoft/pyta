@@ -195,10 +195,7 @@ def snapshot_to_json(
 
             # Handle compound built-in data types
             if isinstance(val, (list, set, tuple)):
-                items = list(val)
-                element_ids = [process_value(element) for element in items]
-                if isinstance(val, tuple):
-                    element_ids = tuple(element_ids)
+                element_ids = [process_value(element) for element in val]
                 value_entry = {
                     "type": type(val).__name__,
                     "id": value_id_diagram,
@@ -206,7 +203,7 @@ def snapshot_to_json(
                 }
             elif isinstance(val, dict):
                 dict_ids = {}
-                for key, v in list(val.items()):
+                for key, v in val.items():
                     key_id = process_value(key)
                     val_id = process_value(v)
                     dict_ids[key_id] = val_id
@@ -226,7 +223,7 @@ def snapshot_to_json(
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance
                 attr_ids = {}
-                for attr_name, attr_val in list(vars(val).items()):
+                for attr_name, attr_val in vars(val).items():
                     attr_id = process_value(attr_val)
                     attr_ids[attr_name] = attr_id
                 value_entry = {

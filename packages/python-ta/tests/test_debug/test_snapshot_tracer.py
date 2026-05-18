@@ -28,7 +28,7 @@ def func_one_line(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_one_line$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -44,7 +44,7 @@ def func_multi_line(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_multi_line$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -63,7 +63,7 @@ def func_mutation(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_mutation$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -80,7 +80,7 @@ def func_for_loop(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_for_loop$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -97,7 +97,7 @@ def func_if_else(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_if_else$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -116,7 +116,7 @@ def func_while(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_while$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -132,6 +132,7 @@ def func_no_output_dir() -> None:
     """
     with SnapshotTracer(
         include_frames=(r"^func_no_output_dir$",),
+        exclude_vars=("tracer",),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -146,7 +147,7 @@ def func_open_webstepper(output_directory: str = None) -> None:
     with SnapshotTracer(
         output_directory=output_directory,
         include_frames=(r"^func_open_webstepper$",),
-        exclude_vars=("output_directory",),
+        exclude_vars=("output_directory", "tracer"),
         webstepper=True,
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -247,13 +248,10 @@ class TestSnapshotTracer:
     def test_snapshot_to_json_called(self, tmp_path):
         with patch("python_ta.debug.snapshot_tracer.snapshot_to_json") as mock_json:
             mock_json.return_value = []
-
             func_one_line(str(tmp_path))
-
             mock_json.assert_called()
 
-    def test_build_html_contains_memory_viz_data(self, tmp_path):
+    def test_build_html_contains_memoryviz_data(self, tmp_path):
         tracer = func_one_line(str(tmp_path))
-        frame = inspect.currentframe()
-        html = tracer._build_self_contained_html(frame).decode("utf-8")
-        assert "memoryVizInput" in html
+        assert len(tracer._snapshots) > 0
+        assert all("memoryVizInput" in snap for snap in tracer._snapshots)

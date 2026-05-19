@@ -73,13 +73,40 @@ def _is_in_pascal_case(name: str) -> bool:
 def _is_in_upper_case_with_underscores(name: str) -> bool:
     """Returns whether `name` is in UPPER_CASE_WITH_UNDERSCORES.
 
-    `name` is in `UPPER_CASE_WITH_UNDERSCORES if:
+    `name` is in `UPPER_CASE_WITH_UNDERSCORES` if:
       - each word is in uppercase, and
       - words are separated by an underscore.
     """
     pattern = "(_?[A-Z][A-Z0-9_]*)$"
 
     return re.match(pattern, name) is not None
+
+
+def _parse_name(name: str) -> tuple[str, list[str], str]:
+    """Extracts the prefix, words, and suffix from `name`."""
+    name_match = re.match(r"(_*)(.*?)(_*)$", name)
+    if not name_match:
+        return "", [name], ""
+    prefix, core, suffix = name_match.groups()
+    prefix = "_" if prefix else ""
+    core = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", core)
+    core = re.sub(r"([A-Z])([A-Z][a-z])", r"\1_\2", core)
+
+    return prefix, [word for word in core.split("_") if word], suffix
+
+
+def _to_pascal_case(name: str) -> str:
+    """Returns a PascalCase version of `name`."""
+    prefix, words, _ = _parse_name(name)
+
+    return prefix + "".join(word.capitalize() for word in words)
+
+
+def _to_upper_case_with_underscores(name: str) -> str:
+    """Returns an UPPER_CASE_WITH_UNDERSCORES version of `name`."""
+    prefix, words, suffix = _parse_name(name)
+
+    return prefix + "_".join(word.upper() for word in words) + suffix
 
 
 def _is_bad_name(name: str) -> str:
@@ -144,6 +171,7 @@ def _check_const_name(node_type: str, name: str) -> list[str]:
     error_msgs = []
 
     if not _is_in_upper_case_with_underscores(name):
+        suggested_name = _to_upper_case_with_underscores(name)
         msg = (
             f'{node_type.capitalize()} name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. '
             f"Constants should be all-uppercase words with each word separated by an "
@@ -151,6 +179,7 @@ def _check_const_name(node_type: str, name: str) -> list[str]:
         )
         if node_type == "class constant":
             msg += " A double leading underscore invokes Python's name-mangling rules."
+        msg += f' Consider renaming to "{suggested_name}".'
         error_msgs.append(msg)
 
     return error_msgs
@@ -164,11 +193,12 @@ def _check_class_name(_node_type: str, name: str) -> list[str]:
     error_msgs = []
 
     if not _is_in_pascal_case(name):
+        suggested_name = _to_pascal_case(name)
         error_msgs.append(
             f'Class name "{name}" should be in PascalCase format. Class names should have the '
             f"first letter of each word capitalized with no separation between each "
             f"word. A single leading underscore can be used to denote a private "
-            f"class."
+            f'class. Consider renaming to "{suggested_name}".'
         )
 
     return error_msgs
@@ -238,10 +268,11 @@ def _check_typevar_name(_node_type: str, name: str) -> list[str]:
     error_msgs = []
 
     if not _is_in_pascal_case(name):
+        suggested_name = _to_pascal_case(name)
         error_msgs.append(
             f'Type variable name "{name}" should be in PascalCase format. Type variable '
             f"names should have the first letter of each word capitalized with no separation "
-            f"between each word."
+            f'between each word. Consider renaming to "{suggested_name}".'
         )
 
     return error_msgs
@@ -255,10 +286,11 @@ def _check_type_alias_name(_node_type: str, name: str) -> list[str]:
     error_msgs = []
 
     if not _is_in_pascal_case(name):
+        suggested_name = _to_pascal_case(name)
         error_msgs.append(
             f'Type alias name "{name}" should be in PascalCase format. Type alias names should '
             f"have the first letter of each word capitalized with no separation "
-            f"between each word."
+            f'between each word. Consider renaming to "{suggested_name}".'
         )
 
     return error_msgs

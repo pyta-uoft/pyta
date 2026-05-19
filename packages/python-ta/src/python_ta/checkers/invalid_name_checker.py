@@ -165,7 +165,7 @@ def _check_module_name(_node_type: str, name: str) -> list[str]:
 
 def _check_const_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    constant and class constant names.
+    constant and class constant names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid (global or class) constant name."""
     error_msgs = []
@@ -179,7 +179,7 @@ def _check_const_name(node_type: str, name: str) -> list[str]:
         )
         if node_type == "class constant":
             msg += " A double leading underscore invokes Python's name-mangling rules."
-        msg += f' Consider renaming to "{suggested_name}".'
+        msg += f' Suggested fix: "{suggested_name}".'
         error_msgs.append(msg)
 
     return error_msgs
@@ -187,7 +187,7 @@ def _check_const_name(node_type: str, name: str) -> list[str]:
 
 def _check_class_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    class names.
+    class names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid class name."""
     error_msgs = []
@@ -198,7 +198,7 @@ def _check_class_name(_node_type: str, name: str) -> list[str]:
             f'Class name "{name}" should be in PascalCase format. Class names should have the '
             f"first letter of each word capitalized with no separation between each "
             f"word. A single leading underscore can be used to denote a private "
-            f'class. Consider renaming to "{suggested_name}".'
+            f'class. Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs
@@ -262,7 +262,7 @@ def _check_argument_name(_node_type: str, name: str) -> list[str]:
 
 def _check_typevar_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    type variable names.
+    type variable names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid type variable name."""
     error_msgs = []
@@ -272,7 +272,7 @@ def _check_typevar_name(_node_type: str, name: str) -> list[str]:
         error_msgs.append(
             f'Type variable name "{name}" should be in PascalCase format. Type variable '
             f"names should have the first letter of each word capitalized with no separation "
-            f'between each word. Consider renaming to "{suggested_name}".'
+            f'between each word. Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs
@@ -280,7 +280,7 @@ def _check_typevar_name(_node_type: str, name: str) -> list[str]:
 
 def _check_type_alias_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    type alias names.
+    type alias names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid type alias name."""
     error_msgs = []
@@ -290,7 +290,7 @@ def _check_type_alias_name(_node_type: str, name: str) -> list[str]:
         error_msgs.append(
             f'Type alias name "{name}" should be in PascalCase format. Type alias names should '
             f"have the first letter of each word capitalized with no separation "
-            f'between each word. Consider renaming to "{suggested_name}".'
+            f'between each word. Suggested fix: "{suggested_name}".'
         )
 
     return error_msgs

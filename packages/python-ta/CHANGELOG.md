@@ -16,6 +16,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended `snapshot` to distinguish between nonlocal variables and local variables within a stack frame.
 - Make `watchdog` an optional dependency; users can opt in with `pip install python-ta[watchdog]`. This affects runs of `python_ta.check_all` with the `watch` config option set to `True`.
 - Added `LSPReporter`, a new reporter that outputs lint diagnostics in LSP 3.17-compliant JSON format.
+- Added suggested fixes for pascal and uppercase names in `invalid_name_checker.py`
 
 ### 💫 New checkers
 

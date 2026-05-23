@@ -10,7 +10,12 @@ import pylint.testutils
 from astroid import nodes
 
 import python_ta
-from python_ta.checkers.invalid_name_checker import InvalidNameChecker
+from python_ta.checkers.invalid_name_checker import (
+    InvalidNameChecker,
+    _to_pascal_case,
+    _to_snake_case,
+    _to_upper_case_with_underscores,
+)
 
 
 class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
@@ -68,8 +73,9 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. Constants '
-            f"should be all-uppercase words with each word separated by an underscore. A "
+            f'Constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. '
+            f'Suggested fix: "CONST_NOT_UPPER". '
+            f"Constants should be all-uppercase words with each word separated by an underscore. A "
             f"single leading underscore can be used to denote a private constant."
         )
 
@@ -92,8 +98,9 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. Constants '
-            f"should be all-uppercase words with each word separated by an underscore. A "
+            f'Constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. '
+            f'Suggested fix: "CONST_NOT_UPPER". '
+            f"Constants should be all-uppercase words with each word separated by an underscore. A "
             f"single leading underscore can be used to denote a private constant."
         )
 
@@ -137,9 +144,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         classdef_node, *_ = mod.nodes_of_class(nodes.ClassDef)
         name = classdef_node.name
         msg = (
-            f'Class name "{name}" should be in PascalCase format. Class names should have the '
-            f"first letter of each word capitalized with no separation between each word. A "
-            f"single leading underscore can be used to denote a private class."
+            f'Class name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "NotPascalcase". '
+            f"Class names should have the first letter of each word capitalized with no separation "
+            f"between each word. A single leading underscore can be used to denote a private class."
         )
 
         with self.assertAddsMessages(
@@ -162,9 +170,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Class name "{name}" should be in PascalCase format. Class names should have the '
-            f"first letter of each word capitalized with no separation between each word. A "
-            f"single leading underscore can be used to denote a private class."
+            f'Class name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "SnakeCase". '
+            f"Class names should have the first letter of each word capitalized with no separation "
+            f"between each word. A single leading underscore can be used to denote a private class."
         )
 
         with self.assertAddsMessages(
@@ -579,6 +588,7 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         name = assignname_node.name
         msg = (
             f'Class constant name "{name}" should be in UPPER_CASE_WITH_UNDERSCORES format. '
+            f'Suggested fix: "OOGA_BOOGA". '
             f"Constants should be all-uppercase words with each word separated by an "
             f"underscore. A single leading underscore can be used to denote a private "
             f"constant. A double leading underscore invokes Python's name-mangling rules."
@@ -618,9 +628,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Type variable name "{name}" should be in PascalCase format. Type variable names '
-            f"should have the first letter of each word capitalized with no separation between "
-            f"each word."
+            f'Type variable name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "TypeVar". '
+            f"Type variable names should have the first letter of each word capitalized with "
+            f"no separation between each word."
         )
 
         with self.assertAddsMessages(
@@ -642,9 +653,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         _, assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Type variable name "{name}" should be in PascalCase format. Type variable names '
-            f"should have the first letter of each word capitalized with no separation between "
-            f"each word."
+            f'Type variable name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "TypeVar". '
+            f"Type variable names should have the first letter of each word capitalized with "
+            f"no separation between each word."
         )
 
         with self.assertAddsMessages(
@@ -680,9 +692,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Type alias name "{name}" should be in PascalCase format. Type alias names should '
-            f"have the first letter of each word capitalized with no separation between each "
-            f"word."
+            f'Type alias name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "NotPascal". '
+            f"Type alias names should have the first letter of each word capitalized with "
+            f"no separation between each word."
         )
 
         with self.assertAddsMessages(
@@ -706,9 +719,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Type alias name "{name}" should be in PascalCase format. Type alias names should '
-            f"have the first letter of each word capitalized with no separation between each "
-            f"word."
+            f'Type alias name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "NotPascal". '
+            f"Type alias names should have the first letter of each word capitalized with "
+            f"no separation between each word."
         )
 
         with self.assertAddsMessages(
@@ -732,9 +746,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         _, assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Type alias name "{name}" should be in PascalCase format. Type alias names should '
-            f"have the first letter of each word capitalized with no separation between each "
-            f"word."
+            f'Type alias name "{name}" should be in PascalCase format. '
+            f'Suggested fix: "NotPascal". '
+            f"Type alias names should have the first letter of each word capitalized with "
+            f"no separation between each word."
         )
 
         with self.assertAddsMessages(
@@ -923,3 +938,32 @@ def test_module_name_no_snippet() -> None:
     snippet = reporter.messages[file_fixture][0].snippet
 
     assert snippet == ""
+
+
+class TestNamingConventionHelpers(unittest.TestCase):
+    def test_to_pascal_case(self) -> None:
+        """Test that names are correctly converted to PascalCase."""
+        self.assertEqual(_to_pascal_case("snake_case"), "SnakeCase")
+        self.assertEqual(_to_pascal_case("PascalCase"), "PascalCase")
+        self.assertEqual(_to_pascal_case("_UPPER_CASE_NAME"), "_UPPERCASENAME")
+        self.assertEqual(_to_pascal_case("__varName_here_"), "_VarNameHere")
+        self.assertEqual(_to_pascal_case("parseJSONText"), "ParseJSONText")
+
+    def test_to_uppercase_with_underscores(self) -> None:
+        """Test that names are correctly converted to UPPERCASE_WITH_UNDERSCORES."""
+        self.assertEqual(_to_upper_case_with_underscores("snake_case"), "SNAKE_CASE")
+        self.assertEqual(_to_upper_case_with_underscores("PascalCase"), "PASCAL_CASE")
+        self.assertEqual(_to_upper_case_with_underscores("_UPPER_CASE_NAME"), "_UPPER_CASE_NAME")
+        self.assertEqual(_to_upper_case_with_underscores("__varName_here_"), "_VAR_NAME_HERE_")
+        self.assertEqual(_to_upper_case_with_underscores("parseJSONText"), "PARSE_JSON_TEXT")
+
+    def test_to_snake_case(self) -> None:
+        """Test that names are correctly converted to snake_case."""
+        self.assertEqual(_to_snake_case("snake_case"), "snake_case")
+        self.assertEqual(_to_snake_case("PascalCase"), "pascal_case")
+        self.assertEqual(_to_snake_case("UPPER_CASE_NAME"), "upper_case_name")
+        self.assertEqual(_to_snake_case("_MIXED_CaseName"), "_mixed_case_name")
+        self.assertEqual(_to_snake_case("_5first_char_non_letter"), None)
+        self.assertEqual(
+            _to_snake_case("_name_with_num_not_first_10"), "_name_with_num_not_first_10"
+        )

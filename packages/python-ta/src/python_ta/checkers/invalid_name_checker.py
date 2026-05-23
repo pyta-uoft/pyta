@@ -162,7 +162,7 @@ def _ignore_name(name: str, pattern: re.Pattern) -> bool:
 
 def _check_module_name(_node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    module names and provides a suggested correction if applicable.
+    module names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid module name."""
     error_msgs = []
@@ -226,7 +226,7 @@ def _check_class_name(_node_type: str, name: str) -> list[str]:
 
 def _check_function_and_variable_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    function and variable names and provides a suggested correction if applicable.
+    function and variable names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid function or variable name."""
     error_msgs = []
@@ -250,7 +250,7 @@ def _check_function_and_variable_name(node_type: str, name: str) -> list[str]:
 
 def _check_method_and_attr_name(node_type: str, name: str) -> list[str]:
     """Returns a list of strings, each detailing how `name` violates Python naming conventions for
-    method and instance or class attribute names and provides a suggested correction if applicable.
+    method and instance or class attribute names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid method, instance, or attribute name."""
     error_msgs = []

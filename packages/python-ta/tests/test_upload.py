@@ -3,11 +3,13 @@ import json
 import uuid
 from types import SimpleNamespace
 
+import pytest
 import requests
 
 from python_ta.upload import (
     ANONYMOUS_ID_ENV_VAR,
     UPLOAD_TIMEOUT_SECONDS,
+    _get_anonymous_id_path,
     errors_to_dict,
     get_anonymous_id,
     get_hashed_id,
@@ -100,6 +102,32 @@ def test_get_hashed_id_aliases_anonymous_id(monkeypatch, tmp_path) -> None:
     assert get_hashed_id() == get_anonymous_id()
 
 
+def test_get_anonymous_id_path_uses_environment_override(monkeypatch, tmp_path) -> None:
+    anonymous_id_file = tmp_path / "custom_id"
+    monkeypatch.setenv(ANONYMOUS_ID_ENV_VAR, str(anonymous_id_file))
+
+    assert _get_anonymous_id_path() == anonymous_id_file
+
+
+def test_get_anonymous_id_path_uses_appdata_on_windows(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv(ANONYMOUS_ID_ENV_VAR, raising=False)
+    monkeypatch.setenv("APPDATA", str(tmp_path / "AppData" / "Roaming"))
+    monkeypatch.setattr("python_ta.upload.sys.platform", "win32")
+
+    expected_path = tmp_path / "AppData" / "Roaming" / "PythonTA" / "anonymous_id"
+
+    assert _get_anonymous_id_path() == expected_path
+
+
+def test_get_anonymous_id_path_uses_home_directory_by_default(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv(ANONYMOUS_ID_ENV_VAR, raising=False)
+    monkeypatch.delenv("APPDATA", raising=False)
+    monkeypatch.setattr("python_ta.upload.sys.platform", "linux")
+    monkeypatch.setattr("python_ta.upload.Path.home", lambda: tmp_path)
+
+    assert _get_anonymous_id_path() == tmp_path / ".python_ta" / "anonymous_id"
+
+
 def test_errors_to_dict_accepts_current_reporter_messages() -> None:
     message = _make_message()
 
@@ -120,11 +148,47 @@ def test_errors_to_dict_accepts_current_reporter_messages() -> None:
 def test_errors_to_dict_accepts_legacy_message_sets() -> None:
     message = _make_message("C0301")
     message_set = SimpleNamespace(
-        code={},
+        code={"E0001": SimpleNamespace(messages=[_make_message()])},
         style={"C0301": SimpleNamespace(messages=[message])},
     )
 
     assert errors_to_dict([message_set])["C0301"][0]["symbol"] == "syntax-error"
+    assert errors_to_dict([message_set])["E0001"][0]["symbol"] == "syntax-error"
+
+
+def test_errors_to_dict_accepts_single_messages_and_skips_messages_without_ids() -> None:
+    message = _make_message()
+    message_without_id = SimpleNamespace(msg="missing id")
+
+    assert errors_to_dict([message, message_without_id]) == {
+        "E0001": [
+            {
+                "msg_id": "E0001",
+                "msg": "syntax error",
+                "symbol": "syntax-error",
+                "module": "sample",
+                "category": "error",
+                "line": 1,
+            }
+        ]
+    }
+
+
+def test_errors_to_dict_uses_none_for_missing_optional_message_fields() -> None:
+    message = SimpleNamespace(msg_id="E9999")
+
+    assert errors_to_dict([message]) == {
+        "E9999": [
+            {
+                "msg_id": "E9999",
+                "msg": None,
+                "symbol": None,
+                "module": None,
+                "category": None,
+                "line": None,
+            }
+        ]
+    }
 
 
 def test_upload_to_server_posts_payload_with_timeout(monkeypatch, tmp_path) -> None:
@@ -218,6 +282,113 @@ def test_upload_to_server_handles_forbidden_response(monkeypatch, tmp_path, caps
     )
 
     assert "HTTP Response Status 403" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    ("status_code", "expected_message"),
+    [
+        (400, "HTTP Response Status 400"),
+        (500, "HTTP Response Status 500"),
+        (503, "HTTP Response Status 503"),
+    ],
+)
+def test_upload_to_server_handles_http_error_responses(
+    monkeypatch, tmp_path, capsys, status_code: int, expected_message: str
+) -> None:
+    anonymous_id_file = tmp_path / "anonymous_id"
+    upload_file = tmp_path / "sample.py"
+    upload_file.write_text("print('hello')\n", encoding="utf-8")
+    monkeypatch.setenv(ANONYMOUS_ID_ENV_VAR, str(anonymous_id_file))
+
+    class ErrorResponse:
+        def raise_for_status(self) -> None:
+            response = SimpleNamespace(status_code=status_code)
+            raise requests.HTTPError(response=response)
+
+    monkeypatch.setattr("python_ta.upload.requests.post", lambda **_kwargs: ErrorResponse())
+
+    upload_to_server(
+        errors=[],
+        paths=[str(upload_file)],
+        config={},
+        url="https://example.com/upload",
+        version="1.0.0",
+    )
+
+    assert expected_message in capsys.readouterr().out
+
+
+def test_upload_to_server_handles_http_error_without_response(
+    monkeypatch, tmp_path, capsys
+) -> None:
+    anonymous_id_file = tmp_path / "anonymous_id"
+    upload_file = tmp_path / "sample.py"
+    upload_file.write_text("print('hello')\n", encoding="utf-8")
+    monkeypatch.setenv(ANONYMOUS_ID_ENV_VAR, str(anonymous_id_file))
+
+    class ErrorResponse:
+        def raise_for_status(self) -> None:
+            raise requests.HTTPError("server failed")
+
+    monkeypatch.setattr("python_ta.upload.requests.post", lambda **_kwargs: ErrorResponse())
+
+    upload_to_server(
+        errors=[],
+        paths=[str(upload_file)],
+        config={},
+        url="https://example.com/upload",
+        version="1.0.0",
+    )
+
+    assert 'Error message: "server failed"' in capsys.readouterr().out
+
+
+def test_upload_to_server_handles_request_exception(monkeypatch, tmp_path, capsys) -> None:
+    anonymous_id_file = tmp_path / "anonymous_id"
+    upload_file = tmp_path / "sample.py"
+    upload_file.write_text("print('hello')\n", encoding="utf-8")
+    monkeypatch.setenv(ANONYMOUS_ID_ENV_VAR, str(anonymous_id_file))
+
+    def fake_post(**_kwargs):
+        raise requests.RequestException("request failed")
+
+    monkeypatch.setattr("python_ta.upload.requests.post", fake_post)
+
+    upload_to_server(
+        errors=[],
+        paths=[str(upload_file)],
+        config={},
+        url="https://example.com/upload",
+        version="1.0.0",
+    )
+
+    assert 'Error message: "request failed"' in capsys.readouterr().out
+
+
+def test_upload_to_server_posts_empty_files_and_serializes_config_values(
+    monkeypatch, tmp_path
+) -> None:
+    anonymous_id_file = tmp_path / "anonymous_id"
+    monkeypatch.setenv(ANONYMOUS_ID_ENV_VAR, str(anonymous_id_file))
+    posted = {}
+
+    def fake_post(**kwargs):
+        posted.update(kwargs)
+        return FakeResponse()
+
+    monkeypatch.setattr("python_ta.upload.requests.post", fake_post)
+
+    upload_to_server(
+        errors=[],
+        paths=[],
+        config={"path": tmp_path},
+        url="https://example.com/upload",
+        version="1.0.0",
+    )
+
+    assert posted["files"] == {}
+    payload = json.loads(posted["data"]["payload"])
+    assert payload == {"errors": {}, "cfg": {"path": str(tmp_path)}}
 
 
 def test_upload_to_server_closes_files_when_request_fails(monkeypatch, tmp_path, capsys) -> None:

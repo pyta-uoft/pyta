@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import unittest
+from unittest.mock import patch
 
 import astroid
 import pylint.testutils
@@ -12,6 +13,7 @@ from astroid import nodes
 import python_ta
 from python_ta.checkers.invalid_name_checker import (
     InvalidNameChecker,
+    _parse_name,
     _to_pascal_case,
     _to_upper_case_with_underscores,
 )
@@ -905,6 +907,16 @@ def test_module_name_no_snippet() -> None:
 
 
 class TestNamingConventionHelpers(unittest.TestCase):
+    def test_parse_name_returns_empty_result_when_name_is_not_parsed(self) -> None:
+        """Test that parsing handles unexpected match failures defensively."""
+        with patch("python_ta.checkers.invalid_name_checker.re.match", return_value=None):
+            self.assertEqual(_parse_name("snake_case"), ("", None, ""))
+
+    def test_converters_return_none_for_names_starting_with_digit(self) -> None:
+        """Test that name conversion fails when a name starts with a digit."""
+        self.assertIsNone(_to_pascal_case("1bad_name"))
+        self.assertIsNone(_to_upper_case_with_underscores("1bad_name"))
+
     def test_to_pascal_case(self) -> None:
         """Test that names are correctly converted to PascalCase."""
         self.assertEqual(_to_pascal_case("snake_case"), "SnakeCase")

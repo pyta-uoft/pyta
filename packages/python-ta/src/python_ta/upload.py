@@ -43,9 +43,7 @@ def upload_to_server(
 
     try:
         with ExitStack() as stack:
-            upload = {
-                str(i): stack.enter_context(open(path, "rb")) for i, path in enumerate(paths)
-            }
+            upload = {str(i): stack.enter_context(open(path, "rb")) for i, path in enumerate(paths)}
             response = requests.post(
                 url=url,
                 files=upload,

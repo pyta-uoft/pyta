@@ -54,9 +54,6 @@ def upload_to_server(
             )
         response.raise_for_status()
         print("[INFO] Upload successful")
-    except OSError as e:
-        print("[ERROR] Upload failed")
-        print(f'[ERROR] Could not read a file selected for upload: "{e}"')
     except requests.HTTPError as e:
         print("[ERROR] Upload failed")
         status_code = e.response.status_code if e.response is not None else None
@@ -95,6 +92,9 @@ def upload_to_server(
     except requests.RequestException as e:
         print("[ERROR] Upload failed")
         print('[ERROR] Error message: "{}"'.format(e))
+    except OSError as e:
+        print("[ERROR] Upload failed")
+        print(f'[ERROR] Could not read a file selected for upload: "{e}"')
 
 
 def get_anonymous_id() -> str:

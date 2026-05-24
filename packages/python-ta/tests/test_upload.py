@@ -196,6 +196,30 @@ def test_upload_to_server_handles_timeout(monkeypatch, tmp_path, capsys) -> None
     assert "Connection timed out" in capsys.readouterr().out
 
 
+def test_upload_to_server_handles_forbidden_response(monkeypatch, tmp_path, capsys) -> None:
+    anonymous_id_file = tmp_path / "anonymous_id"
+    upload_file = tmp_path / "sample.py"
+    upload_file.write_text("print('hello')\n", encoding="utf-8")
+    monkeypatch.setenv(ANONYMOUS_ID_ENV_VAR, str(anonymous_id_file))
+
+    class ForbiddenResponse:
+        def raise_for_status(self) -> None:
+            response = SimpleNamespace(status_code=403)
+            raise requests.HTTPError(response=response)
+
+    monkeypatch.setattr("python_ta.upload.requests.post", lambda **_kwargs: ForbiddenResponse())
+
+    upload_to_server(
+        errors=[],
+        paths=[str(upload_file)],
+        config={},
+        url="https://example.com/upload",
+        version="1.0.0",
+    )
+
+    assert "HTTP Response Status 403" in capsys.readouterr().out
+
+
 def test_upload_to_server_closes_files_when_request_fails(monkeypatch, tmp_path, capsys) -> None:
     anonymous_id_file = tmp_path / "anonymous_id"
     upload_file = tmp_path / "sample.py"

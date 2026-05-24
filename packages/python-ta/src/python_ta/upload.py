@@ -13,6 +13,7 @@ import requests
 
 UPLOAD_TIMEOUT_SECONDS = 5
 ANONYMOUS_ID_ENV_VAR = "PYTA_ANONYMOUS_ID_FILE"
+_cached_local_anonymous_id: tuple[str, str] | None = None
 
 
 def errors_to_dict(errors: Iterable[Any]) -> dict[str, list[dict[str, Any]]]:
@@ -88,7 +89,7 @@ def upload_to_server(
     except requests.ConnectionError:
         print("[ERROR] Upload failed")
         print(
-            "[ERROR] Error message: Connection timed out. This may be caused by your firewall, or the server may be "
+            "[ERROR] Error message: Could not connect. This may be caused by your firewall, or the server may be "
             "temporarily down."
         )
     except requests.RequestException as e:
@@ -117,7 +118,16 @@ def get_hashed_id() -> str:
 
 def _get_or_create_local_anonymous_id() -> str:
     """Return the random local ID used as input for the anonymous upload ID."""
+    global _cached_local_anonymous_id
+
     anonymous_id_path = _get_anonymous_id_path()
+    anonymous_id_path_key = str(anonymous_id_path)
+    if (
+        _cached_local_anonymous_id is not None
+        and _cached_local_anonymous_id[0] == anonymous_id_path_key
+    ):
+        return _cached_local_anonymous_id[1]
+
     try:
         anonymous_id = anonymous_id_path.read_text(encoding="utf-8").strip()
         uuid.UUID(anonymous_id)
@@ -129,7 +139,7 @@ def _get_or_create_local_anonymous_id() -> str:
         anonymous_id_path.parent.mkdir(parents=True, exist_ok=True)
         anonymous_id_path.write_text(anonymous_id + "\n", encoding="utf-8")
     except OSError:
-        pass
+        _cached_local_anonymous_id = (anonymous_id_path_key, anonymous_id)
     return anonymous_id
 
 

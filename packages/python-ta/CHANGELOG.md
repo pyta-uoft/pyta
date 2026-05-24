@@ -30,6 +30,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed bug that caused user input containing markdown characters to be rendered by the markdown renderer in certain error messages
 - Fixed memory leak issue that caused the memory usage to increase with each call to `python_ta.check_all()`.
 - Fixed opt-in data uploads to use a random anonymous ID instead of a MAC-address-derived hash, close uploaded files reliably, and time out stalled network requests.
+  Existing opt-in users will receive a new anonymous client ID after upgrading.
 
 ### 🔧 Internal changes
 

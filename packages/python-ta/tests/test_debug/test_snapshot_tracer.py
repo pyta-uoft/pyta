@@ -21,14 +21,13 @@ MEMORY_VIZ_VERSION = "0.5.0"
 # Function inputs for testing the SnapshotTracer
 
 
-def func_one_line(output_directory: str = None) -> None:
+def func_one_line() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_one_line$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -37,14 +36,13 @@ def func_one_line(output_directory: str = None) -> None:
     return tracer
 
 
-def func_multi_line(output_directory: str = None) -> None:
+def func_multi_line() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_multi_line$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -56,14 +54,13 @@ def func_multi_line(output_directory: str = None) -> None:
     return tracer
 
 
-def func_mutation(output_directory: str = None) -> None:
+def func_mutation() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_mutation$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -73,14 +70,13 @@ def func_mutation(output_directory: str = None) -> None:
     return tracer
 
 
-def func_for_loop(output_directory: str = None) -> None:
+def func_for_loop() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_for_loop$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -90,14 +86,13 @@ def func_for_loop(output_directory: str = None) -> None:
     return tracer
 
 
-def func_if_else(output_directory: str = None) -> None:
+def func_if_else() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_if_else$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -109,14 +104,13 @@ def func_if_else(output_directory: str = None) -> None:
     return tracer
 
 
-def func_while(output_directory: str = None) -> None:
+def func_while() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_while$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
     ) as tracer:
@@ -140,14 +134,13 @@ def func_no_output_dir() -> None:
     return tracer
 
 
-def func_open_webstepper(output_directory: str = None) -> None:
+def func_open_webstepper() -> None:
     """
     Function for testing SnapshotTracer works with Webstepper
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=(r"^func_open_webstepper$",),
-        exclude_vars=("output_directory", "tracer"),
+        exclude_vars=("tracer"),
         webstepper=True,
         memory_viz_args=MEMORY_VIZ_ARGS,
         memory_viz_version=MEMORY_VIZ_VERSION,
@@ -197,11 +190,11 @@ class TestSnapshotTracer:
             func_if_else,
         ],
     )
-    def test_snapshot_tracer_with_functions(self, test_func, snapshot, tmp_path):
+    def test_snapshot_tracer_with_functions(self, test_func):
         """
         Test SnapshotTracer with various simple functions.
         """
-        tracer = test_func(str(tmp_path))
+        tracer = test_func()
 
         assert len(tracer._snapshots) > 0
         for entry in tracer._snapshots:
@@ -210,48 +203,45 @@ class TestSnapshotTracer:
             assert isinstance(entry["lineNumber"], int)
             assert isinstance(entry["memoryVizInput"], list)
 
-    def test_using_output_flag(self):
+    def test_output_directory_deprecated(self):
         """
-        Test SnapshotTracer raises an error when the `memory_viz_args` include_framess the `--output` flag.
+        Test that a warning is raised when the deprecated `output_directory` argument is used.
         """
-        with pytest.raises(
-            ValueError,
-            match="Use the output_directory parameter to specify a different output path.",
-        ):
-            with SnapshotTracer(
-                include_frames=("func_duplicate_output_path",),
-                memory_viz_args=["--output", "."],
-                memory_viz_version=MEMORY_VIZ_VERSION,
-            ):
-                pass
-
-    def test_no_output_directory(self):
-        """
-        Test SnapshotTracer outputs to the current directory when `output_directory` is not specified.
-        """
-        tracer = func_no_output_dir()
-        assert len(tracer._snapshots) > 0
+        with pytest.warns(DeprecationWarning):
+            SnapshotTracer(output_directory=".")
 
     def test_serve_html_calls_open_in_browser(self):
+        """
+        Test that SnapshotTracer opens the Webstepper HTML page when `webstepper=True`.
+        """
         with patch("python_ta.debug.snapshot_tracer.open_html_in_browser") as mock_open:
             func_open_webstepper()
             mock_open.assert_called_once()
 
-    def test_snapshot_contains_json_data(self, tmp_path):
-        tracer = func_multi_line(str(tmp_path))
+    def test_snapshot_contains_json_data(self):
+        """
+        Test SnapshotTracer stores memory visualization data in JSON format.
+        """
+        tracer = func_multi_line()
         snapshot_entry = tracer._snapshots[0]
         memory_input = snapshot_entry["memoryVizInput"]
         assert isinstance(memory_input, list)
         frame_entries = [entry for entry in memory_input if entry["type"] == ".frame"]
         assert len(frame_entries) > 0
 
-    def test_snapshot_to_json_called(self, tmp_path):
+    def test_snapshot_to_json_called(self):
+        """
+        Test that SnapshotTracer calls `snapshot_to_json` when processing snapshots.
+        """
         with patch("python_ta.debug.snapshot_tracer.snapshot_to_json") as mock_json:
             mock_json.return_value = []
-            func_one_line(str(tmp_path))
+            func_one_line()
             mock_json.assert_called()
 
-    def test_build_html_contains_memoryviz_data(self, tmp_path):
-        tracer = func_one_line(str(tmp_path))
+    def test_build_html_contains_memoryviz_data(self):
+        """
+        Test that SnapshotTracer stores memory visualization data to generate HTML.
+        """
+        tracer = func_one_line()
         assert len(tracer._snapshots) > 0
         assert all("memoryVizInput" in snap for snap in tracer._snapshots)

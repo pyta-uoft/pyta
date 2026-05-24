@@ -46,7 +46,7 @@ class SnapshotTracer:
         """Initialize a context manager for snapshot-based debugging.
 
         Args:
-            output_directory: This argument is deprecated.
+            output_directory: This argument is deprecated; previously used for file-based outputs.
             webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """

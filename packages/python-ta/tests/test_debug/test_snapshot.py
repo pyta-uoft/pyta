@@ -335,13 +335,11 @@ def test_snapshot_to_json_primitive():
     assert json_data == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 2},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"num": 3, "is_david_cool": 4, "num_alias": 3},
         },
@@ -361,7 +359,6 @@ def test_snapshot_to_json_none():
     assert json_data == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"test_var": 1},
         },
@@ -385,13 +382,11 @@ def test_snapshot_to_json_lists_primitive_only():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"projects": 8},
         },
@@ -428,13 +423,11 @@ def test_snapshot_to_json_tuples_primitive():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"projects": 8},
         },
@@ -481,13 +474,11 @@ def test_snapshot_to_json_sets_primitive():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"test_var1a": 1, "test_var2a": 5},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"projects": 8},
         },
@@ -519,10 +510,9 @@ def test_snapshot_to_json_dicts_primitive():
     json_data_objects = sorted(json_data[2:], key=lambda x: x["id"])
 
     assert json_data_frames == [
-        {"type": ".frame", "name": "func1", "id": None, "value": {"var1": 1}},
+        {"type": ".frame", "name": "func1", "value": {"var1": 1}},
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"var2": 6},
         },
@@ -569,13 +559,11 @@ def test_snapshot_to_json_lists_of_dicts():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"test_list1": 1, "test_list2": 8},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"projects": 15},
         },
@@ -622,13 +610,11 @@ def test_snapshot_to_json_dicts_of_lists():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"var1": 1, "var2": 5},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"config": 9, "values": 13},
         },
@@ -675,13 +661,11 @@ def test_snapshot_to_json_dicts_of_dicts():
     assert json_data_frames == [
         {
             "type": ".frame",
-            "id": None,
             "name": "func1",
             "value": {"nested1": 1, "nested2": 6},
         },
         {
             "type": ".frame",
-            "id": None,
             "name": "__main__",
             "value": {"configurations": 11},
         },
@@ -741,7 +725,6 @@ def test_snapshot_to_json_one_class():
 
     expected_output = [
         {
-            "id": None,
             "type": ".frame",
             "name": "__main__",
             "value": {"one_class_instance": 1},
@@ -773,26 +756,25 @@ def test_snapshot_to_json_type_object():
         {
             "type": ".frame",
             "name": "__main__",
-            "id": None,
             "value": {"t1": 1, "t2": 2, "t3": 3},
         },
         {
             "type": ".class",
-            "name": "class",
+            "name": "int",
             "id": 1,
-            "value": repr(int),
+            "value": {},
         },
         {
             "type": ".class",
-            "name": "class",
+            "name": "str",
             "id": 2,
-            "value": repr(str),
+            "value": {},
         },
         {
             "type": ".class",
-            "name": "class",
+            "name": "OneClass",
             "id": 3,
-            "value": repr(OneClass),
+            "value": {},
         },
     ]
 
@@ -941,7 +923,6 @@ def test_snapshot_serializes_unserializable_value():
     result = func_with_unserializable_objects()
     assert result == [
         {
-            "id": None,
             "name": "func_with_unserializable_objects",
             "type": ".frame",
             "value": {"var": 1},

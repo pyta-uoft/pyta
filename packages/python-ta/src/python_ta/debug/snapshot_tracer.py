@@ -3,11 +3,11 @@ from __future__ import annotations
 import base64
 import copy
 import inspect
-import json
 import logging
 import os
 import socket
 import sys
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -15,7 +15,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from ..util.servers.one_shot_server import open_html_in_browser
 from .id_tracker import IDTracker
-from .snapshot import snapshot
+from .snapshot import snapshot, snapshot_to_json
 
 if TYPE_CHECKING:
     import types
@@ -26,16 +26,14 @@ class SnapshotTracer:
     A class used for snapshot-based debugging to visualize program memory at each line in the calling function.
 
     Instance attributes:
-        output_directory: The directory where the memory model diagrams will be saved. Defaults to the current directory.
         webstepper: Opens the web-based visualizer.
         _snapshots: A list of dictionaries that maps the code line number and the snapshot number.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _first_line: Line number of the first line in the `with` block.
     """
 
-    output_directory: Optional[str]
     webstepper: bool
-    _snapshots: list[dict[int, int]]
+    _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
     _first_line: int
 
@@ -48,26 +46,20 @@ class SnapshotTracer:
         """Initialize a context manager for snapshot-based debugging.
 
         Args:
-            output_directory: The directory to save the snapshots, defaulting to the current directory.
-                **Note**: Use this argument instead of the `--output` flag in `memory_viz_args` to specify the output directory.
-                The directory will be created if it does not exist.
+            output_directory: This argument is deprecated; previously used for file-based outputs.
             webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):
             logging.warning("You need Python 3.10 or later to use SnapshotTracer.")
-        if any("--output" in arg for arg in kwargs.get("memory_viz_args", [])):
-            raise ValueError(
-                "Use the output_directory parameter to specify a different output path."
-            )
+        if output_directory is not None:
+            warnings.warn("The output_directory argument is deprecated.", DeprecationWarning)
         self._snapshots = []
         self._snapshot_args = kwargs
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
         self._snapshot_args["exclude_frames"] = copy.deepcopy(kwargs.get("exclude_frames", []))
         self._snapshot_args["exclude_frames"].append("_trace_func")
-        self.output_directory = os.path.abspath(output_directory if output_directory else ".")
         self.id_tracker = IDTracker()
-        Path(self.output_directory).mkdir(parents=True, exist_ok=True)
 
         self.webstepper = webstepper
         self._first_line = float("inf")
@@ -77,28 +69,15 @@ class SnapshotTracer:
         if self._first_line == float("inf"):
             self._first_line = frame.f_lineno
         if event == "line":
-            filename = os.path.join(
-                self.output_directory,
-                f"snapshot-{len(self._snapshots)}.svg",
-            )
-            self._snapshot_args["memory_viz_args"].extend(["--output", filename])
-
-            snapshot(
+            snapshot_output = snapshot(
                 id_tracker=self.id_tracker,
-                save=True,
                 **self._snapshot_args,
             )
-
-            self._add_svg_to_map(filename, frame.f_lineno)
-
-    def _add_svg_to_map(self, filename: str, line: int) -> None:
-        """Add the SVG in filename to self._snapshots"""
-        with open(filename) as svg_file:
-            svg_content = svg_file.read()
+            json_data = snapshot_to_json(snapshot_output, id_tracker=self.id_tracker)
             self._snapshots.append(
                 {
-                    "lineNumber": line,
-                    "svg": svg_content,
+                    "lineNumber": frame.f_lineno,
+                    "memoryVizInput": json_data,
                 }
             )
 
@@ -144,7 +123,7 @@ class SnapshotTracer:
 
         rendered_html = template.render(
             code_text=self._get_code(func_frame),
-            svg_array=self._snapshots,
+            memory_viz_data=self._snapshots,
             bundle_content=bundle_content,
         )
 

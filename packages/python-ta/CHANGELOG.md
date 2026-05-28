@@ -18,6 +18,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `LSPReporter`, a new reporter that outputs lint diagnostics in LSP 3.17-compliant JSON format.
 - Added suggested fixes for pascal and uppercase names in `invalid_name_checker.py`
 - Updated `invalid_name_checker.py` to include a suggested fix for invalid names in checks using snake_case format.
+- Updated `SnapshotTracer` to convert snapshots to JSON with `snapshot_to_json` and pass JSON data to the webstepper template instead of SVG.
 
 ### 💫 New checkers
 

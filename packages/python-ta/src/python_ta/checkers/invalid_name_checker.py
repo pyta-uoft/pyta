@@ -18,22 +18,6 @@ if TYPE_CHECKING:
 # Bad variable names.
 BAD_NAMES = {"l", "I", "O"}
 
-# Set a limit in name length to keep certain variable names short.
-VAR_NAME_LENGTHS = {
-    "module": 30,
-    "constant": 30,
-    "class": 30,
-    "function": 30,
-    "method": 30,
-    "attribute": 30,
-    "argument": 30,
-    "variable": 30,
-    "class attribute": 30,
-    "class constant": 30,
-    "type variable": 20,
-    "type alias": 20,
-}
-
 TYPE_VAR_QNAME = frozenset(
     (
         "typing.TypeVar",
@@ -139,12 +123,11 @@ def _is_bad_name(name: str) -> str:
     return msg
 
 
-def _is_within_name_length(node_type: str, name: str) -> str:
+def _is_within_name_length(node_type: str, name: str, name_length_limit: int) -> str:
     """Returns a string saying that `name` exceeds the character limit for that variable name type.
 
     Returns the empty string if `name` is within the name length limit."""
     msg = ""
-    name_length_limit = VAR_NAME_LENGTHS[node_type]
 
     if len(name) > name_length_limit:
         msg = (
@@ -394,6 +377,114 @@ class InvalidNameChecker(BaseChecker):
                 "help": "Ignore C9104 module name violation for module names that exactly match the pattern",
             },
         ),
+        (
+            "module-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for module names",
+            },
+        ),
+        (
+            "constant-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for constant names",
+            },
+        ),
+        (
+            "class-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for class names",
+            },
+        ),
+        (
+            "function-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for function names",
+            },
+        ),
+        (
+            "method-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for method names",
+            },
+        ),
+        (
+            "attribute-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for attribute names",
+            },
+        ),
+        (
+            "argument-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for argument names",
+            },
+        ),
+        (
+            "variable-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for variable names",
+            },
+        ),
+        (
+            "class-attribute-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for class attribute names",
+            },
+        ),
+        (
+            "class-constant-max-name-length",
+            {
+                "default": 30,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for class constant names",
+            },
+        ),
+        (
+            "type-variable-max-name-length",
+            {
+                "default": 20,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for type variable names",
+            },
+        ),
+        (
+            "type-alias-max-name-length",
+            {
+                "default": 20,
+                "type": "int",
+                "metavar": "<int>",
+                "help": "Maximum allowed length for type alias names",
+            },
+        ),
     )
 
     @only_required_for_messages("module-name-violation")
@@ -534,7 +625,11 @@ class InvalidNameChecker(BaseChecker):
         if bad_name_msg:
             error_msgs.append(bad_name_msg)
 
-        name_length_msg = _is_within_name_length(node_type, name)
+        name_length_msg = _is_within_name_length(
+            node_type,
+            name,
+            self._get_name_length_limit(node_type),
+        )
         if name_length_msg:
             error_msgs.append(name_length_msg)
 
@@ -543,6 +638,11 @@ class InvalidNameChecker(BaseChecker):
 
         for msg in error_msgs:
             self.add_message(msgid=msg_id, node=node, args=msg, line=line_no)
+
+    def _get_name_length_limit(self, node_type: str) -> int:
+        """Return the configured maximum length for a given name type."""
+        option_name = f"{node_type.replace(' ', '_')}_max_name_length"
+        return getattr(self.linter.config, option_name)
 
     @staticmethod
     def _assigns_typevar(node: Optional[nodes.NodeNG]) -> bool:

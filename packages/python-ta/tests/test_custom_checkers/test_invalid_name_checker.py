@@ -23,6 +23,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
     CONFIG = {
         "ignore_names": re.compile("(ignored[a-zA-Z0-9_]*)$"),
         "ignore_module_names": re.compile("(ignored_[a-zA-Z0-9_]*)$"),
+        "constant_max_name_length": 20,
+        "argument_max_name_length": 40,
+        "class_attribute_max_name_length": 40,
+        "type_alias_max_name_length": 15,
     }
 
     def set_up(self) -> None:
@@ -134,6 +138,24 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
+    def test_const_name_length_violation(self) -> None:
+        """Test that the checker correctly reports a constant name that exceeds the maximum length."""
+        src = """
+        NAME_MORE_THAN_20_CHARACTERS = "too long"
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+        name = assignname_node.name
+        msg = f'Constant name "{name}" exceeds the limit of 20 characters.'
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_assignname(assignname_node)
+
     def test_class_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid class name."""
         src = """
@@ -211,25 +233,6 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
             f"Function names should be lowercase, with words separated by underscores. "
             f"A single leading underscore can be used to denote a private function."
         )
-
-        with self.assertAddsMessages(
-            pylint.testutils.MessageTest(
-                msg_id="naming-convention-violation", node=functiondef_node, args=msg
-            ),
-            ignore_position=True,
-        ):
-            self.checker.visit_functiondef(functiondef_node)
-
-    def test_function_name_length_violation(self) -> None:
-        """Test that the checker correctly reports a function name that's too long."""
-        long_name = "a" * 31
-        src = f"""
-        def {long_name}():
-            pass
-        """
-        mod = astroid.parse(src)
-        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
-        msg = f'Function name "{long_name}" exceeds the limit of 30 characters.'
 
         with self.assertAddsMessages(
             pylint.testutils.MessageTest(
@@ -378,6 +381,19 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         src = """
         def good(_name: str) -> None:
             print(_name)
+        """
+        mod = astroid.parse(src)
+        argument_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(argument_node)
+
+    def test_argument_name_length(self) -> None:
+        """Test that the checker does not report an argument name that is longer than
+        the default limit but shorter than the configured limit."""
+        src = """
+        def good(longer_than_30_chars_but_still_valid: str) -> None:
+            pass
         """
         mod = astroid.parse(src)
         argument_node, *_ = mod.nodes_of_class(nodes.AssignName)
@@ -568,6 +584,19 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
 
         class BadClass:
             _snake_case: ClassVar = "CONSTANT"
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+
+        with self.assertNoMessages():
+            self.checker.visit_assignname(assignname_node)
+
+    def test_class_attribute_name_length(self) -> None:
+        """Test that the checker does not report a class attribute name that is longer than
+        the default limit but shorter than the configured limit."""
+        src = """
+        class MyClass:
+            a_very_long_class_attribute_name = "CONSTANT"
         """
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
@@ -774,6 +803,27 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
+    @unittest.skipIf(sys.version_info < (3, 10, 0), "TypeAlias was new in version 3.10.")
+    def test_typealias_name_length_violation(self) -> None:
+        """Test that the checker correctly reports a type alias name that exceeds the maximum length."""
+        src = """
+        from typing import TypeAlias
+
+        NameThatIsTooLong: TypeAlias = dict, str
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+        name = assignname_node.name
+        msg = f'Type alias name "{name}" exceeds the limit of 15 characters.'
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_assignname(assignname_node)
+
     def test_name_in_main_block(self) -> None:
         """Test that the checker does not report a top-level variable that is assigned within
         a main block."""
@@ -926,6 +976,79 @@ class TestInvalidNameCheckerDefaultConfig(pylint.testutils.CheckerTestCase):
 
         with self.assertNoMessages():
             self.checker.visit_functiondef(functiondef_node)
+
+    def test_default_module_length_violation(self) -> None:
+        """Test that the checker correctly reports a module name that's longer than the default
+        limit of 30 characters."""
+        src = """
+        i = "test module"
+        """
+        mod = astroid.parse(src)
+        module_node, *_ = mod.nodes_of_class(nodes.Module)
+        module_node.name = "abc" * 11
+        msg = f'Module name "{module_node.name}" exceeds the limit of 30 characters.'
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="module-name-violation", node=module_node, args=msg, line=1
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_module(module_node)
+
+    def test_default_class_name_length_no_violation(self) -> None:
+        """Test that the checker does not report an error for a class name that's shorter than the
+        default limit of 30 characters."""
+        src = """
+        class ClassNameThatIsNotTooLong:
+            pass
+        """
+        mod = astroid.parse(src)
+        classdef_node, *_ = mod.nodes_of_class(nodes.ClassDef)
+
+        with self.assertNoMessages():
+            self.checker.visit_classdef(classdef_node)
+
+    def test_default_function_name_length_violation(self) -> None:
+        """Test that the checker correctly reports a function name that's longer than the default
+        limit of 30 characters."""
+        long_name = "a" * 31
+        src = f"""
+        def {long_name}():
+            pass
+        """
+        mod = astroid.parse(src)
+        functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
+        msg = f'Function name "{long_name}" exceeds the limit of 30 characters.'
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="naming-convention-violation", node=functiondef_node, args=msg
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_functiondef(functiondef_node)
+
+    def test_default_typevar_name_length_violation(self) -> None:
+        """Test that the checker correctly reports a type variable name that's longer than the default
+        limit of 20 characters."""
+        long_name = "Aa" * 11
+        src = f"""
+        from typing import TypeVar
+
+        {long_name} = TypeVar('{long_name}')
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+        msg = f'Type variable name "{long_name}" exceeds the limit of 20 characters.'
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_assignname(assignname_node)
 
 
 def test_module_name_no_snippet() -> None:

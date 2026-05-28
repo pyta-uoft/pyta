@@ -459,7 +459,6 @@ def func_multi_line() -> None:
     """
     with SnapshotTracer(
         include_frames=("func_multi_line",),
-        exclude_vars=(),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -472,7 +471,7 @@ if __name__ == '__main__':
     func_multi_line()
 ```
 
-When this function runs,snapshots are captured as JSON objects and stored internally in the SnapshotTracer. If webstepper=True, the snapshots are rendered into an HTML visualization. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
+When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. If `webstepper=True`, the snapshots are rendered into an HTML visualization. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
 
 ### API
 

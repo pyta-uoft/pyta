@@ -453,14 +453,12 @@ The following section will focus on tracing the Python memory model. This featur
 from python_ta.debug import SnapshotTracer
 
 
-def func_multi_line(output_directory: str = None) -> None:
+def func_multi_line() -> None:
     """
     Function for testing SnapshotTracer
     """
     with SnapshotTracer(
-        output_directory=output_directory,
         include_frames=("func_multi_line",),
-        exclude_vars=("output_directory",),
         memory_viz_args=MEMORY_VIZ_ARGS,
     ):
         num = 123
@@ -473,7 +471,7 @@ if __name__ == '__main__':
     func_multi_line()
 ```
 
-When this function runs, the variables within `func_multi_line` are captured, and memory models are outputted to `output_directory` for each line of code. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
+When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. If `webstepper=True`, the snapshots are rendered into an HTML visualization. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
 
 ### API
 

@@ -199,6 +199,54 @@ By default, this is an empty string, meaning no names are ignored.
 A regular expression that matches module names to ignore when performing the **module-name-violation** check.
 By default, this is an empty string, meaning no names are ignored.
 
+### `module-max-name-length`
+
+An integer for the maximum number of characters allowed in a module name when performing the **module-name-violation** check. By default, the maximum length is 30.
+
+### `constant-max-name-length`
+
+An integer for the maximum number of characters allowed in a constant name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `class-max-name-length`
+
+An integer for the maximum number of characters allowed in a class name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `function-max-name-length`
+
+An integer for the maximum number of characters allowed in a function name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `method-max-name-length`
+
+An integer for the maximum number of characters allowed in a method name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `attribute-max-name-length`
+
+An integer for the maximum number of characters allowed in a attribute name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `argument-max-name-length`
+
+An integer for the maximum number of characters allowed in a argument name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `variable-max-name-length`
+
+An integer for the maximum number of characters allowed in a variable name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `class-attribute-max-name-length`
+
+An integer for the maximum number of characters allowed in a class attribute name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `class-constant-max-name-length`
+
+An integer for the maximum number of characters allowed in a class constant name when performing the **naming-convention-violation** check. By default, the maximum length is 30.
+
+### `type-variable-max-name-length`
+
+An integer for the maximum number of characters allowed in a type variable name when performing the **naming-convention-violation** check. By default, the maximum length is 20.
+
+### `type-alias-max-name-length`
+
+An integer for the maximum number of characters allowed in a type alias name when performing the **naming-convention-violation** check. By default, the maximum length is 20.
+
 ### `allowed-import-modules`
 
 A list of module names that are permitted by the **forbidden-import** check.

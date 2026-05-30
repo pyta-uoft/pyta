@@ -78,6 +78,42 @@ ignore-names =
 # Regular expression matching module names to ignore when checking naming conventions
 ignore-module-names =
 
+# Maximum length for module names
+module-max-name-length = 30
+
+# Maximum length for constant names
+constant-max-name-length = 30
+
+# Maximum length for class names
+class-max-name-length = 30
+
+# Maximum length for function names
+function-max-name-length = 30
+
+# Maximum length for method names
+method-max-name-length = 30
+
+# Maximum length for attribute names
+attribute-max-name-length = 30
+
+# Maximum length for argument names
+argument-max-name-length = 30
+
+# Maximum length for variable names
+variable-max-name-length = 30
+
+# Maximum length for class attribute names
+class-attribute-max-name-length = 30
+
+# Maximum length for class constant names
+class-constant-max-name-length = 30
+
+# Maximum length for type variable names
+type-variable-max-name-length = 20
+
+# Maximum length for type alias names
+type-alias-max-name-length = 20
+
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s).

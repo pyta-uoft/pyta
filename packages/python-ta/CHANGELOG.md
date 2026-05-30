@@ -31,6 +31,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed bug that allowed users to inject code into the browser template through the E9920 unnecessary f-string checker
 - Fixed bug that caused user input containing markdown characters to be rendered by the markdown renderer in certain error messages
 - Fixed memory leak issue that caused the memory usage to increase with each call to `python_ta.check_all()`.
+- Fixed webstepper build to include only a single file.
 
 ### 🔧 Internal changes
 

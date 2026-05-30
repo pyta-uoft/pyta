@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import unittest
+from unittest import mock
 
 import astroid
 import pylint.testutils
@@ -1072,6 +1073,10 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_pascal_case("__varName_here_"), "_VarNameHere")
         self.assertEqual(_to_pascal_case("parseJSONText"), "ParseJSONText")
 
+    def test_to_pascal_case_invalid_leading_digit(self) -> None:
+        """Test that PascalCase conversion fails for names starting with numbers."""
+        self.assertIsNone(_to_pascal_case("2badname"))
+
     def test_to_uppercase_with_underscores(self) -> None:
         """Test that names are correctly converted to UPPERCASE_WITH_UNDERSCORES."""
         self.assertEqual(_to_upper_case_with_underscores("snake_case"), "SNAKE_CASE")
@@ -1079,6 +1084,10 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_upper_case_with_underscores("_UPPER_CASE_NAME"), "_UPPER_CASE_NAME")
         self.assertEqual(_to_upper_case_with_underscores("__varName_here_"), "_VAR_NAME_HERE_")
         self.assertEqual(_to_upper_case_with_underscores("parseJSONText"), "PARSE_JSON_TEXT")
+
+    def test_to_uppercase_with_underscores_invalid_leading_digit(self) -> None:
+        """Test that UPPER_CASE_WITH_UNDERSCORES conversion fails for names starting with numbers."""
+        self.assertIsNone(_to_upper_case_with_underscores("2badname"))
 
     def test_to_snake_case(self) -> None:
         """Test that names are correctly converted to snake_case."""
@@ -1090,3 +1099,14 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(
             _to_snake_case("_name_with_num_not_first_10"), "_name_with_num_not_first_10"
         )
+
+    def test_to_snake_case_invalid_leading_digit(self) -> None:
+        """Test that snake_case conversion fails for names starting with numbers."""
+        self.assertIsNone(_to_snake_case("2badname"))
+
+    def test_conversion_no_match(self) -> None:
+        """Test that conversion returns None when regex match fails."""
+        with mock.patch("python_ta.checkers.invalid_name_checker.re.match", return_value=None):
+            self.assertIsNone(_to_pascal_case("name"))
+            self.assertIsNone(_to_upper_case_with_underscores("name"))
+            self.assertIsNone(_to_snake_case("name"))

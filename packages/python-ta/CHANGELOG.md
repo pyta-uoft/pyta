@@ -32,6 +32,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed bug that allowed users to inject code into the browser template through the E9920 unnecessary f-string checker
 - Fixed bug that caused user input containing markdown characters to be rendered by the markdown renderer in certain error messages
 - Fixed memory leak issue that caused the memory usage to increase with each call to `python_ta.check_all()`.
+- Fixed webstepper build to include only a single file.
 
 ### 🔧 Internal changes
 
@@ -48,6 +49,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Configured CI to skip the `no-commit-to-branch` prek hook, which incorrectly fails when merging PRs into master
 - Added tests for `unnecessary_indexing_checker.py` to improve coverage for `_iterable_if_range` function
 - Added tests for `invalid_name_checker.py` to improve coverage
+- Update tests for `invalid_name_checker.py` for coverage
 
 ## [2.12.1] - 2026-02-10
 

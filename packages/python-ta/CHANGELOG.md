@@ -17,6 +17,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Make `watchdog` an optional dependency; users can opt in with `pip install python-ta[watchdog]`. This affects runs of `python_ta.check_all` with the `watch` config option set to `True`.
 - Added `LSPReporter`, a new reporter that outputs lint diagnostics in LSP 3.17-compliant JSON format.
 - Added suggested fixes for pascal and uppercase names in `invalid_name_checker.py`
+- Updated `invalid_name_checker.py` to include a suggested fix for invalid names in checks using snake_case format.
+- Updated `SnapshotTracer` to convert snapshots to JSON with `snapshot_to_json` and pass JSON data to the webstepper template instead of SVG.
 
 ### 💫 New checkers
 
@@ -31,6 +33,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed memory leak issue that caused the memory usage to increase with each call to `python_ta.check_all()`.
 - Fixed opt-in data uploads to use a random anonymous ID instead of a MAC-address-derived hash, close uploaded files reliably, and time out stalled network requests.
   Existing opt-in users will receive a new anonymous client ID after upgrading.
+- Fixed webstepper build to include only a single file.
 
 ### 🔧 Internal changes
 
@@ -48,6 +51,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Configured CI to skip the `no-commit-to-branch` prek hook, which incorrectly fails when merging PRs into master
 - Added tests for `unnecessary_indexing_checker.py` to improve coverage for `_iterable_if_range` function
 - Added tests for `invalid_name_checker.py` to improve coverage
+- Update tests for `invalid_name_checker.py` for coverage
 
 ## [2.12.1] - 2026-02-10
 

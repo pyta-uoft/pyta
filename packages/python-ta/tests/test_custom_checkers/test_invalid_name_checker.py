@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import unittest
+from unittest import mock
 
 import astroid
 import pylint.testutils
@@ -13,6 +14,7 @@ import python_ta
 from python_ta.checkers.invalid_name_checker import (
     InvalidNameChecker,
     _to_pascal_case,
+    _to_snake_case,
     _to_upper_case_with_underscores,
 )
 
@@ -205,9 +207,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         name = functiondef_node.name
         msg = (
-            f'Function name "{name}" should be in snake_case format. Function names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private function."
+            f'Function name "{name}" should be in snake_case format. '
+            f'Suggested fix: "not_snake_case". '
+            f"Function names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private function."
         )
 
         with self.assertAddsMessages(
@@ -260,10 +263,11 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         name = functiondef_node.name
         msg = (
-            f'Method name "{name}" should be in snake_case format. Method names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private method while a double leading underscore invokes "
-            f"Python's name-mangling rules."
+            f'Method name "{name}" should be in snake_case format. '
+            f'Suggested fix: "also_also_not_snake_case". '
+            f"Method names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private method while "
+            f"a double leading underscore invokes Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
@@ -318,10 +322,11 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Attribute name "{name}" should be in snake_case format. Attribute names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private attribute while a double leading underscore invokes "
-            f"Python's name-mangling rules."
+            f'Attribute name "{name}" should be in snake_case format. '
+            f'Suggested fix: "also_not_snake_case". '
+            f"Attribute names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private attribute while "
+            f"a double leading underscore invokes Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
@@ -354,10 +359,11 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         argument_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = argument_node.name
         msg = (
-            f'Argument name "{name}" should be in snake_case format. Argument names should be '
-            f"lowercase, with words separated by underscores. A single leading "
-            f"underscore can be used to indicate that the argument is not being used "
-            f"but is still needed somehow."
+            f'Argument name "{name}" should be in snake_case format. '
+            f'Suggested fix: "also_not_snake_case". '
+            f"Argument names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to indicate that the argument is "
+            f"not being used but is still needed somehow."
         )
 
         with self.assertAddsMessages(
@@ -390,9 +396,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Variable name "{name}" should be in snake_case format. Variable names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private variable."
+            f'Variable name "{name}" should be in snake_case format. '
+            f'Suggested fix: "why_is_this_not_in_snake_case". '
+            f"Variable names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private variable."
         )
 
         with self.assertAddsMessages(
@@ -415,9 +422,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Variable name "{name}" should be in snake_case format. Variable names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private variable."
+            f'Variable name "{name}" should be in snake_case format. '
+            f'Suggested fix: "not_snake_case". '
+            f"Variable names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private variable."
         )
 
         with self.assertAddsMessages(
@@ -438,9 +446,10 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Variable name "{name}" should be in snake_case format. Variable names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private variable."
+            f'Variable name "{name}" should be in snake_case format. '
+            f'Suggested fix: "bad_name". '
+            f"Variable names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private variable."
         )
 
         with self.assertAddsMessages(
@@ -476,6 +485,30 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_assignname(assignname_node)
 
+    def test_variable_name_first_char_violation(self) -> None:
+        """Test that the checker correctly reports a variable name that starts with a non-letter character
+        and does not provide a suggested fix."""
+        src = """
+        def f():
+            _9bad_name = 10
+        """
+        mod = astroid.parse(src)
+        assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
+        name = assignname_node.name
+        msg = (
+            f'Variable name "{name}" should be in snake_case format. '
+            f"Variable names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private variable."
+        )
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="naming-convention-violation", node=assignname_node, args=msg
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_assignname(assignname_node)
+
     def test_class_attribute_name_violation(self) -> None:
         """Test that the checker correctly reports an invalid class attribute name."""
         src = """
@@ -486,10 +519,11 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Class attribute name "{name}" should be in snake_case format. Class attribute names '
-            f"should be lowercase, with words separated by underscores. A single leading "
-            f"underscore can be used to denote a private class attribute while a double "
-            f"leading underscore invokes Python's name-mangling rules."
+            f'Class attribute name "{name}" should be in snake_case format. '
+            f'Suggested fix: "not_snaking". '
+            f"Class attribute names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private class attribute while "
+            f"a double leading underscore invokes Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
@@ -512,10 +546,11 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)
         name = assignname_node.name
         msg = (
-            f'Class attribute name "{name}" should be in snake_case format. Class attribute names '
-            f"should be lowercase, with words separated by underscores. A single leading "
-            f"underscore can be used to denote a private class attribute while a double "
-            f"leading underscore invokes Python's name-mangling rules."
+            f'Class attribute name "{name}" should be in snake_case format. '
+            f'Suggested fix: "not_snaking". '
+            f"Class attribute names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private class attribute while "
+            f"a double leading underscore invokes Python's name-mangling rules."
         )
 
         with self.assertAddsMessages(
@@ -827,6 +862,7 @@ class TestInvalidNameCheckerDefaultConfig(pylint.testutils.CheckerTestCase):
         module_node.name = "InvalidModuleName"
         msg = (
             f'Module name "{module_node.name}" should be in snake_case format. '
+            f'Suggested fix: "invalid_module_name". '
             f"Modules should be all-lowercase names, with each name separated by underscores."
         )
 
@@ -864,9 +900,10 @@ class TestInvalidNameCheckerDefaultConfig(pylint.testutils.CheckerTestCase):
         functiondef_node, *_ = mod.nodes_of_class(nodes.FunctionDef)
         name = functiondef_node.name
         msg = (
-            f'Function name "{name}" should be in snake_case format. Function names should be '
-            f"lowercase, with words separated by underscores. A single leading underscore can "
-            f"be used to denote a private function."
+            f'Function name "{name}" should be in snake_case format. '
+            f'Suggested fix: "not_snake_case". '
+            f"Function names should be lowercase, with words separated by underscores. "
+            f"A single leading underscore can be used to denote a private function."
         )
 
         with self.assertAddsMessages(
@@ -913,6 +950,10 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_pascal_case("__varName_here_"), "_VarNameHere")
         self.assertEqual(_to_pascal_case("parseJSONText"), "ParseJSONText")
 
+    def test_to_pascal_case_invalid_leading_digit(self) -> None:
+        """Test that PascalCase conversion fails for names starting with numbers."""
+        self.assertIsNone(_to_pascal_case("2badname"))
+
     def test_to_uppercase_with_underscores(self) -> None:
         """Test that names are correctly converted to UPPERCASE_WITH_UNDERSCORES."""
         self.assertEqual(_to_upper_case_with_underscores("snake_case"), "SNAKE_CASE")
@@ -920,3 +961,29 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_upper_case_with_underscores("_UPPER_CASE_NAME"), "_UPPER_CASE_NAME")
         self.assertEqual(_to_upper_case_with_underscores("__varName_here_"), "_VAR_NAME_HERE_")
         self.assertEqual(_to_upper_case_with_underscores("parseJSONText"), "PARSE_JSON_TEXT")
+
+    def test_to_uppercase_with_underscores_invalid_leading_digit(self) -> None:
+        """Test that UPPER_CASE_WITH_UNDERSCORES conversion fails for names starting with numbers."""
+        self.assertIsNone(_to_upper_case_with_underscores("2badname"))
+
+    def test_to_snake_case(self) -> None:
+        """Test that names are correctly converted to snake_case."""
+        self.assertEqual(_to_snake_case("snake_case"), "snake_case")
+        self.assertEqual(_to_snake_case("PascalCase"), "pascal_case")
+        self.assertEqual(_to_snake_case("UPPER_CASE_NAME"), "upper_case_name")
+        self.assertEqual(_to_snake_case("_MIXED_CaseName"), "_mixed_case_name")
+        self.assertEqual(_to_snake_case("_5first_char_non_letter"), None)
+        self.assertEqual(
+            _to_snake_case("_name_with_num_not_first_10"), "_name_with_num_not_first_10"
+        )
+
+    def test_to_snake_case_invalid_leading_digit(self) -> None:
+        """Test that snake_case conversion fails for names starting with numbers."""
+        self.assertIsNone(_to_snake_case("2badname"))
+
+    def test_conversion_no_match(self) -> None:
+        """Test that conversion returns None when regex match fails."""
+        with mock.patch("python_ta.checkers.invalid_name_checker.re.match", return_value=None):
+            self.assertIsNone(_to_pascal_case("name"))
+            self.assertIsNone(_to_upper_case_with_underscores("name"))
+            self.assertIsNone(_to_snake_case("name"))

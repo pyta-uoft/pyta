@@ -642,7 +642,7 @@ class InvalidNameChecker(BaseChecker):
     def _get_name_length_limit(self, node_type: str) -> int:
         """Return the configured maximum length for a given name type."""
         option_name = f"{node_type.replace(' ', '_')}_max_name_length"
-        return getattr(self.linter.config, option_name)
+        return getattr(self.linter.config, option_name, 30)
 
     @staticmethod
     def _assigns_typevar(node: Optional[nodes.NodeNG]) -> bool:

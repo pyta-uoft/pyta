@@ -809,7 +809,7 @@ class TestInvalidNameChecker(pylint.testutils.CheckerTestCase):
         src = """
         from typing import TypeAlias
 
-        NameThatIsTooLong: TypeAlias = dict, str
+        NameThatIsTooLong: TypeAlias = str
         """
         mod = astroid.parse(src)
         assignname_node, *_ = mod.nodes_of_class(nodes.AssignName)

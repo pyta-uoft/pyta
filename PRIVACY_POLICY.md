@@ -25,7 +25,8 @@ PyTA will not collect or send identifying information about you or your computer
 PyTA does not derive its anonymous client ID from hardware identifiers such as your device's MAC address.
 Instead, when data is first submitted, PyTA generates a random ID and stores it locally.
 Future opt-in submissions include a hash of this random ID, allowing submissions to be grouped without sending the locally stored ID itself.
-On Windows this is stored in `%APPDATA%\PythonTA\anonymous_id`; on other platforms it is stored in `~/.python_ta/anonymous_id`.
+By default, this is stored in the platform-specific user data directory for PythonTA, in a file named `anonymous_id`.
+You can override this directory by setting the `PYTHON_TA_DATA_DIR` environment variable.
 Deleting this file resets the anonymous ID.
 
 ## Who will the data be sent to?

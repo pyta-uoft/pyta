@@ -3,38 +3,43 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import sys
 import uuid
+import warnings
 from contextlib import ExitStack
+from functools import cache
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Generator, Iterable
 
 import requests
+from platformdirs import user_data_path
+
+if TYPE_CHECKING:
+    from pylint.message import Message
 
 UPLOAD_TIMEOUT_SECONDS = 5
-ANONYMOUS_ID_ENV_VAR = "PYTA_ANONYMOUS_ID_FILE"
-_cached_local_anonymous_id: tuple[str, str] | None = None
+PYTHON_TA_DATA_DIR_ENV_VAR = "PYTHON_TA_DATA_DIR"
 
 
-def errors_to_dict(errors: Iterable[Any]) -> dict[str, list[dict[str, Any]]]:
-    """Convert PyTA errors from MessageSet format to a json format Dictionary."""
+def errors_to_dict(errors: Iterable[list[Message]]) -> dict[str, list[dict[str, Any]]]:
+    """Convert PyTA errors to a JSON-compatible dictionary."""
     error_info = ["msg_id", "msg", "symbol", "module", "category", "line"]
     err_as_dict = {}
     for msg in _iter_error_messages(errors):
-        msg_id = getattr(msg, "msg_id", None)
-        if msg_id is None:
-            continue
-        err_as_dict.setdefault(msg_id, []).append(
-            {field: getattr(msg, field, None) for field in error_info}
+        err_as_dict.setdefault(msg.msg_id, []).append(
+            {field: getattr(msg, field) for field in error_info}
         )
     return err_as_dict
 
 
 def upload_to_server(
-    errors: Iterable[Any], paths: list[str], config: dict[str, Any], url: str, version: str
+    errors: Iterable[list[Message]],
+    paths: list[str],
+    config: dict[str, Any],
+    url: str,
+    version: str,
 ) -> None:
     """Send POST request to server with formatted data."""
-    unique_id = get_anonymous_id()
+    unique_id = _get_anonymous_id()
     errors_dict = errors_to_dict(errors)
     to_json = {"errors": errors_dict}
     if config:  # 'config' is an empty dictionary if the default was used
@@ -95,37 +100,29 @@ def upload_to_server(
         print(f'[ERROR] Could not read a file selected for upload: "{e}"')
 
 
-def get_anonymous_id() -> str:
+def _get_anonymous_id() -> str:
     """Return an anonymous ID for opt-in data uploads.
 
     This is a hash of a random local ID so multiple opt-in uploads can be
     grouped without deriving an identifier from hardware information.
     """
-    local_anonymous_id = _get_or_create_local_anonymous_id()
+    local_anonymous_id = _get_or_create_local_anonymous_id(_get_anonymous_id_path())
     return hashlib.sha512(local_anonymous_id.encode("utf-8")).hexdigest()
 
 
 def get_hashed_id() -> str:
-    """Return the anonymous upload ID.
+    """Return the anonymous upload ID."""
+    warnings.warn(
+        "get_hashed_id is deprecated and should not be called directly.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return _get_anonymous_id()
 
-    This function is kept as a backwards-compatible alias for older code that
-    imported it directly.
-    """
-    return get_anonymous_id()
 
-
-def _get_or_create_local_anonymous_id() -> str:
+@cache
+def _get_or_create_local_anonymous_id(anonymous_id_path: Path) -> str:
     """Return the random local ID used as input for the anonymous upload ID."""
-    global _cached_local_anonymous_id
-
-    anonymous_id_path = _get_anonymous_id_path()
-    anonymous_id_path_key = str(anonymous_id_path)
-    if (
-        _cached_local_anonymous_id is not None
-        and _cached_local_anonymous_id[0] == anonymous_id_path_key
-    ):
-        return _cached_local_anonymous_id[1]
-
     try:
         anonymous_id = anonymous_id_path.read_text(encoding="utf-8").strip()
         uuid.UUID(anonymous_id)
@@ -136,30 +133,21 @@ def _get_or_create_local_anonymous_id() -> str:
     try:
         anonymous_id_path.parent.mkdir(parents=True, exist_ok=True)
         anonymous_id_path.write_text(anonymous_id + "\n", encoding="utf-8")
+        print(f"[INFO] Saved anonymous ID to {anonymous_id_path}")
     except OSError:
-        _cached_local_anonymous_id = (anonymous_id_path_key, anonymous_id)
+        pass
     return anonymous_id
 
 
-def _iter_error_messages(errors: Iterable[Any]) -> Iterable[Any]:
-    """Yield individual messages from current and legacy reporter upload data."""
+def _iter_error_messages(errors: Iterable[list[Message]]) -> Generator[Message, None, None]:
+    """Yield individual messages from current reporter upload data."""
     for error_group in errors:
-        if isinstance(error_group, list):
-            yield from error_group
-        elif hasattr(error_group, "code") and hasattr(error_group, "style"):
-            for error_type in ("code", "style"):
-                current_type = getattr(error_group, error_type)
-                for info_set in current_type.values():
-                    yield from info_set.messages
-        else:
-            yield error_group
+        yield from error_group
 
 
 def _get_anonymous_id_path() -> Path:
     """Return the local path used to store the anonymous upload ID."""
-    if ANONYMOUS_ID_ENV_VAR in os.environ:
-        return Path(os.environ[ANONYMOUS_ID_ENV_VAR]).expanduser()
+    if PYTHON_TA_DATA_DIR_ENV_VAR in os.environ:
+        return Path(os.environ[PYTHON_TA_DATA_DIR_ENV_VAR]).expanduser() / "anonymous_id"
 
-    if sys.platform == "win32" and os.environ.get("APPDATA"):
-        return Path(os.environ["APPDATA"]) / "PythonTA" / "anonymous_id"
-    return Path.home() / ".python_ta" / "anonymous_id"
+    return user_data_path("PythonTA", appauthor=False) / "anonymous_id"

@@ -9,7 +9,7 @@ license = {text = "MIT"}
 readme = "README.md"
 dependencies = [
     "aiohttp >= 3.13.0,< 3.14.0",
-    "astroid ~= 4.0.2",
+    "astroid >= 4.0.2,< 4.2.0",
     "black",
     "click >= 8.0.1, < 9",
     "colorama ~= 0.4.6",

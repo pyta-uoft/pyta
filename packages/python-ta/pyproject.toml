@@ -16,7 +16,7 @@ dependencies = [
     "jinja2 ~= 3.1.2",
     "lsprotocol >= 2025.0.0",
     "markdown-it-py < 5",
-    "mypy ~= 1.13",
+    "mypy >= 1.13,< 3.0",
     "pycodestyle ~= 2.11",
     "pygments >= 2.14,< 2.21",
     "pylint ~= 4.0.3",

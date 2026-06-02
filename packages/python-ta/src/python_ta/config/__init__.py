@@ -31,11 +31,14 @@ def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
         return os.path.join(curr_dir, "config", ".pylintrc")
     elif os.path.exists(os.path.join(curr_dir, "config", "pylintrc")):
         return os.path.join(curr_dir, "config", "pylintrc")
+    elif os.path.exists(os.path.join(curr_dir, "config", "pyproject.toml")):
+        return os.path.join(curr_dir, "config", "pyproject.toml")
 
 
 def load_config(linter: PyLinter, config_location: AnyStr) -> None:
     """Load configuration into the linter."""
-    _config_initialization(linter, args_list=[], config_file=config_location)
+    args_list = _get_pyta_toml_args(config_location, linter)
+    _config_initialization(linter, args_list=args_list, config_file=config_location)
     linter.config_file = config_location
 
 
@@ -53,6 +56,8 @@ def override_config(linter: PyLinter, config_location: AnyStr) -> None:
     except OSError as ex:
         logging.error(ex)
         sys.exit(32)
+
+    config_args.extend(_get_pyta_toml_args(config_location, linter))
 
     # Override the config options by parsing the provided file.
     try:
@@ -103,3 +108,31 @@ def flatten(config_dict: dict) -> dict:
         else:
             flat_dict[key] = value
     return flat_dict
+
+
+def _get_pyta_toml_args(config_location: AnyStr, linter: PyLinter) -> list[str]:
+    """Extracts [tool.python-ta] options from a TOML file and formats them as arguments."""
+    args_list = []
+    if not (config_location and config_location.endswith(".toml")):
+        return args_list
+
+    try:
+        with open(config_location, "r") as f:
+            config_data = toml.load(f)
+    except OSError as ex:
+        logging.error(ex)
+        return args_list
+    except toml.TomlDecodeError as ex:
+        linter.add_message("config-parse-error", line=0, args=str(ex))
+        return args_list
+
+    pyta_config = config_data.get("tool", {}).get("python-ta", {})
+    merged_pyta_config = flatten(pyta_config)
+
+    for key, value in merged_pyta_config.items():
+        if isinstance(value, list):
+            args_list.extend([f"--{key}", ",".join(map(str, value))])
+        else:
+            args_list.extend([f"--{key}", str(value)])
+
+    return args_list

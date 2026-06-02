@@ -72,6 +72,17 @@ def test_user_config_file(configure_linter_load_default) -> None:
     assert actual == expected
 
 
+def test_user_config_toml_file(configure_linter_load_default) -> None:
+    """Test that reset_linter correctly overrides the default options when the user provides a
+    config file of type str that is a TOML file."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test.toml")
+    expected = configure_linter_load_default.config.__dict__
+    actual = reset_linter(config=config).config.__dict__
+
+    assert actual == expected
+
+
 def test_user_config_dict_no_default(configure_linter_no_default) -> None:
     """Test that reset_linter correctly overrides the default options when the user provides a
     config of type dict.
@@ -90,6 +101,19 @@ def test_user_config_file_no_default(configure_linter_no_default) -> None:
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test.pylintrc")
+    expected = configure_linter_no_default.config.__dict__
+    actual = reset_linter(config=config, load_default_config=False).config.__dict__
+
+    assert actual == expected
+
+
+def test_user_config_toml_file_no_default(configure_linter_no_default) -> None:
+    """Test that reset_linter correctly overrides the default options when the user provides a
+    config file of type str that is a TOML file.
+
+    The default options are not loaded from the PythonTA default config."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test.toml")
     expected = configure_linter_no_default.config.__dict__
     actual = reset_linter(config=config, load_default_config=False).config.__dict__
 
@@ -160,6 +184,38 @@ def test_config_parsing_errors_no_default() -> None:
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = reset_linter(config=config, load_default_config=False).reporter
+
+    # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert all(error in message_ids for error in CONFIG_ERRORS_TO_CHECK)
+
+
+def test_toml_config_parsing_errors() -> None:
+    """Test that the configuration options gets overridden without error when there are semantic errors
+    parsing the TOML config files.
+
+    This checks the non-fatal errors from parsing the config file."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.toml")
+    reporter = reset_linter(config=config).reporter
+
+    # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert all(error in message_ids for error in CONFIG_ERRORS_TO_CHECK)
+
+
+def test_toml_config_parsing_errors_no_default() -> None:
+    """Test that the configuration options gets loaded without error when there are semantic errors
+    parsing the TOML config files.
+
+    This checks the non-fatal errors from parsing the config file.
+
+    The default options are not loaded from the PythonTA default config."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.toml")
     reporter = reset_linter(config=config, load_default_config=False).reporter
 
     # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.

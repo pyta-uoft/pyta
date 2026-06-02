@@ -5,9 +5,10 @@ Test suite for checking whether configuration worked correctly with user-inputte
 import io
 import json
 import os
-from unittest.mock import mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
+import toml
 from pylint import lint
 
 import python_ta
@@ -18,6 +19,7 @@ TEST_CONFIG = {
     "pyta-number-of-messages": 10,
     "max-nested-blocks": 5,
     "max-line-length": 120,
+    "autoformat-options": ["skip-string-normalization"],
 }
 
 # Non-fatal config errors. Fatal errors will be checked individually.
@@ -344,6 +346,30 @@ def test_override_config_logging(caplog) -> None:
         override_config(linter, path)
     assert caplog.records[0].levelname == "ERROR"
     assert f"The config file {path} doesn't exist!" in caplog.text
+
+
+def test_get_pyta_toml_args_oserror(caplog) -> None:
+    """Testing that the OSError in _get_pyta_toml_args is logged correctly"""
+    path = "C:\\foo\\tests\\file_fixtures\\non_existent.toml"
+    linter = lint.PyLinter()
+
+    args = python_ta.config._get_pyta_toml_args(path, linter)
+    assert args == []
+    assert caplog.records[0].levelname == "ERROR"
+
+
+@patch("python_ta.config.toml.load")
+def test_get_pyta_toml_args_decode_error(mock_toml_load) -> None:
+    """Testing that TomlDecodeError is caught and adds a config-parse-error message."""
+    mock_toml_load.side_effect = toml.TomlDecodeError("Mock malformed TOML", "doc", 0)
+    mock_linter = MagicMock()
+
+    with patch("builtins.open", mock_open(read_data="")):
+        args = python_ta.config._get_pyta_toml_args("dummy.toml", mock_linter)
+    assert args == []
+    mock_linter.add_message.assert_called_once_with(
+        "config-parse-error", line=0, args="Mock malformed TOML (line 1 column 1 char 0)"
+    )
 
 
 @patch("python_ta.config.toml.load", side_effect=FileNotFoundError)

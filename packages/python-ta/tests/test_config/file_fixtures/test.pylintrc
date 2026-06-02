@@ -6,6 +6,11 @@ pyta-number-of-messages = 10
 # Set whether the default error messages by pylint should be overwritten by python TA's custom messages
 overwrite-error-messages = yes
 
+[AUTOFORMAT]
+
+# List of configuration flags for the formatting tool
+autoformat-options = skip-string-normalization
+
 [ELIF]
 
 # Set maximum allowed if nesting.

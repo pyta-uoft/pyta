@@ -30,12 +30,12 @@ def _is_in_snake_case(name: str) -> bool:
     """Returns whether `name` is in snake_case.
 
     `name` is in snake_case if:
-      - `name` starts with a lowercase letter or an underscore (to denote private fields) followed
+      - `name` starts with a lowercase letter or up to two underscores followed
         by a lowercase letter,
       - each word is separated by an underscore, and
       - each word is in lowercase.
     """
-    pattern = "(_?[a-z][a-z0-9_]*)$"
+    pattern = "(_{0,2}[a-z][a-z0-9_]*)$"
 
     return re.match(pattern, name) is not None
 
@@ -44,12 +44,12 @@ def _is_in_pascal_case(name: str) -> bool:
     """Returns whether `name` is in PascalCase.
 
     `name` is in PascalCase if:
-      - `name` starts with an uppercase letter or an underscore (to denote private fields) followed
-        by an uppercase letter.
+      - `name` starts with an uppercase letter or up to two underscores followed
+        by an uppercase letter,
       - each word has its first character capitalized, and
       - there is no whitespace, underscore, or punctuation between words.
     """
-    pattern = "(_?[A-Z][a-zA-Z0-9]*)$"
+    pattern = "(_{0,2}[A-Z][a-zA-Z0-9]*)$"
 
     return re.match(pattern, name) is not None
 
@@ -58,10 +58,12 @@ def _is_in_upper_case_with_underscores(name: str) -> bool:
     """Returns whether `name` is in UPPER_CASE_WITH_UNDERSCORES.
 
     `name` is in `UPPER_CASE_WITH_UNDERSCORES` if:
+      - `name` starts with an uppercase letter or up to two underscores followed
+        by an uppercase letter,
       - each word is in uppercase, and
       - words are separated by an underscore.
     """
-    pattern = "(_?[A-Z][A-Z0-9_]*)$"
+    pattern = "(_{0,2}[A-Z][A-Z0-9_]*)$"
 
     return re.match(pattern, name) is not None
 
@@ -72,7 +74,8 @@ def _parse_name(name: str) -> tuple[str, list[str] | None, str]:
     if not name_match:
         return "", None, ""
     prefix, core, suffix = name_match.groups()
-    prefix = "_" if prefix else ""
+    if len(prefix) >= 2:
+        prefix = "__"
     if core and core[0].isdigit():
         return "", None, ""
     core = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", core)
@@ -82,7 +85,7 @@ def _parse_name(name: str) -> tuple[str, list[str] | None, str]:
 
 
 def _to_pascal_case(name: str) -> str | None:
-    """Returns a PascalCase version of `name`."""
+    """Returns a PascalCase version of `name` or None if no valid suggestion can be made."""
     prefix, words, _ = _parse_name(name)
     if words is None:
         return None
@@ -91,7 +94,8 @@ def _to_pascal_case(name: str) -> str | None:
 
 
 def _to_upper_case_with_underscores(name: str) -> str | None:
-    """Returns an UPPER_CASE_WITH_UNDERSCORES version of `name`."""
+    """Returns an UPPER_CASE_WITH_UNDERSCORES version of `name` or None if no valid
+    suggestion can be made."""
     prefix, words, suffix = _parse_name(name)
     if words is None:
         return None
@@ -101,9 +105,11 @@ def _to_upper_case_with_underscores(name: str) -> str | None:
 
 def _to_snake_case(name: str) -> str | None:
     """Returns name converted to snake_case format or None if no valid suggestion can be made."""
-    if not re.match(r"_?[A-Za-z]", name):
+    prefix, words, suffix = _parse_name(name)
+    if words is None:
         return None
-    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name).lower()
+
+    return prefix + "_".join(word.lower() for word in words) + suffix
 
 
 def _is_bad_name(name: str) -> str:
@@ -238,8 +244,7 @@ def _check_method_and_attr_name(node_type: str, name: str) -> list[str]:
     Returns an empty list if `name` is a valid method, instance, or attribute name."""
     error_msgs = []
 
-    # Also consider the case of invoking Python's name mangling rules with leading dunderscores.
-    if not (_is_in_snake_case(name) or (name.startswith("__") and _is_in_snake_case(name[2:]))):
+    if not _is_in_snake_case(name):
         suggested_name = _to_snake_case(name)
         msg = f'{node_type.capitalize()} name "{name}" should be in snake_case format. '
 

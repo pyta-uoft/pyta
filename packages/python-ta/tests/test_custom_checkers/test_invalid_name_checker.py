@@ -1070,8 +1070,9 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_pascal_case("snake_case"), "SnakeCase")
         self.assertEqual(_to_pascal_case("PascalCase"), "PascalCase")
         self.assertEqual(_to_pascal_case("_UPPER_CASE_NAME"), "_UPPERCASENAME")
-        self.assertEqual(_to_pascal_case("__varName_here_"), "_VarNameHere")
+        self.assertEqual(_to_pascal_case("__varName_here_"), "__VarNameHere")
         self.assertEqual(_to_pascal_case("parseJSONText"), "ParseJSONText")
+        self.assertEqual(_to_pascal_case("___many_leading_underscores"), "__ManyLeadingUnderscores")
 
     def test_to_pascal_case_invalid_leading_digit(self) -> None:
         """Test that PascalCase conversion fails for names starting with numbers."""
@@ -1082,8 +1083,12 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_upper_case_with_underscores("snake_case"), "SNAKE_CASE")
         self.assertEqual(_to_upper_case_with_underscores("PascalCase"), "PASCAL_CASE")
         self.assertEqual(_to_upper_case_with_underscores("_UPPER_CASE_NAME"), "_UPPER_CASE_NAME")
-        self.assertEqual(_to_upper_case_with_underscores("__varName_here_"), "_VAR_NAME_HERE_")
+        self.assertEqual(_to_upper_case_with_underscores("__varName_here_"), "__VAR_NAME_HERE_")
         self.assertEqual(_to_upper_case_with_underscores("parseJSONText"), "PARSE_JSON_TEXT")
+        self.assertEqual(
+            _to_upper_case_with_underscores("___many_leading_underscores"),
+            "__MANY_LEADING_UNDERSCORES",
+        )
 
     def test_to_uppercase_with_underscores_invalid_leading_digit(self) -> None:
         """Test that UPPER_CASE_WITH_UNDERSCORES conversion fails for names starting with numbers."""
@@ -1098,6 +1103,10 @@ class TestNamingConventionHelpers(unittest.TestCase):
         self.assertEqual(_to_snake_case("_5first_char_non_letter"), None)
         self.assertEqual(
             _to_snake_case("_name_with_num_not_first_10"), "_name_with_num_not_first_10"
+        )
+        self.assertEqual(_to_snake_case("__varName_here_"), "__var_name_here_")
+        self.assertEqual(
+            _to_snake_case("___many_leading_underscores"), "__many_leading_underscores"
         )
 
     def test_to_snake_case_invalid_leading_digit(self) -> None:

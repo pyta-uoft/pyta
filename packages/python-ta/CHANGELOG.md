@@ -32,12 +32,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed bug that allowed users to inject code into the browser template through the E9920 unnecessary f-string checker
 - Fixed bug that caused user input containing markdown characters to be rendered by the markdown renderer in certain error messages
 - Fixed memory leak issue that caused the memory usage to increase with each call to `python_ta.check_all()`.
+- Fixed opt-in data uploads to use a random anonymous ID instead of a MAC-address-derived hash, close uploaded files reliably, and time out stalled network requests.
+  Existing opt-in users will receive a new anonymous client ID after upgrading.
 - Fixed webstepper build to include only a single file.
 - Fixed bug in `invalid_name_checker.py` that allowed three leading underscores in `_check_method_and_attr_name`
 
 ### 🔧 Internal changes
 
 - Removed old documentation files under `python_ta/reporters/`
+- Added tests for the opt-in data upload path.
 - Added tests for `infinite_loop_checker.py` to improve coverage for the `_name_holds_generator` function and the generator portion of the `_check_constant_loop_cond` function.
 - Refactored `test_main.py` calls to use click's testing helpers.
 - The `Z3Visitor`, `Z3Parser`, and `Z3ParseException` classes have been extracted into a _new Python package_, `python-ta-z3`.

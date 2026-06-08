@@ -271,7 +271,7 @@ def reset_linter(
     ]
 
     # Register new options to a checker here to allow references to
-    # options in `.pylintrc` config file.
+    # options in config file.
     # Options stored in linter: `linter._all_options`, `linter._external_opts`
     linter = PytaPyLinter(options=new_checker_options)
     linter.load_default_plugins()  # Load checkers, reporters
@@ -296,13 +296,13 @@ def reset_linter(
         set_config(linter, config)
     else:
         # If available, use config file at directory of the file being linted.
-        pylintrc_location = None
+        config_location = None
         if file_linted:
-            pylintrc_location = find_local_config(file_linted)
+            config_location = find_local_config(file_linted)
 
         # Load or override the options if there is a config file in the current directory.
-        if pylintrc_location:
-            set_config(linter, pylintrc_location)
+        if config_location:
+            set_config(linter, config_location)
 
         # Override part of the default config, with a dict of config options.
         # Note: these configs are overridden by config file in user's codebase

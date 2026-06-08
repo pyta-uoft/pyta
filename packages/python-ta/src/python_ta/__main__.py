@@ -58,8 +58,8 @@ def main(
 
     # `config` is None if `-c` flag is not set
     if generate_config:
-        pylintrc_location = path.join(path.dirname(__file__), DEFAULT_CONFIG_LOCATION)
-        with open(pylintrc_location, "r") as f:
+        config_location = path.join(path.dirname(__file__), DEFAULT_CONFIG_LOCATION)
+        with open(config_location, "r") as f:
             contents = f.read()
             print(contents)
             sys.exit(0)

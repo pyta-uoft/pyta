@@ -19,11 +19,11 @@ DEFAULT_CONFIG_LOCATION = os.path.join("config", ".pylintrc")
 
 
 def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
-    """Search for a `.pylintrc` configuration file provided in same (user)
+    """Search for a configuration file provided in same (user)
     location as the source file to check.
     Return absolute path to the file, or None.
     `curr_dir` is an absolute path to a directory, containing a file to check.
-    For more info see, pylint.config.find_pylintrc
+    For more info see, pylint.config.find_default_config_files
     """
     if curr_dir.endswith(".py"):
         curr_dir = os.path.dirname(curr_dir)

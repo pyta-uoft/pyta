@@ -3,6 +3,7 @@ import re
 from io import StringIO
 
 from python_ta import check_all
+from python_ta.reporters import html_reporter
 
 ESCAPED_SCRIPT = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
 UNESCAPED_SCRIPT = "<script>alert(2);</script>"
@@ -24,7 +25,7 @@ def clean_response_body(body) -> str:
     return body.strip()
 
 
-def test_injection(snapshot):
+def test_injection(snapshot, monkeypatch):
     """Test the HTML injection is properly escaped and is not executed as HTML code"""
 
     script_path = os.path.normpath(
@@ -32,6 +33,8 @@ def test_injection(snapshot):
     )
 
     buf = StringIO()
+
+    monkeypatch.setattr(html_reporter.random, "choice", lambda emojis: emojis[0])
 
     check_all(module_name=script_path, output=buf)
 
@@ -46,7 +49,7 @@ def test_injection(snapshot):
     snapshot.assert_match(cleaned_body, "script_injection.html")
 
 
-def test_markdown_escape(snapshot):
+def test_markdown_escape(snapshot, monkeypatch):
     """Test markdown characters in error messages are properly escaped"""
 
     script_path = os.path.normpath(
@@ -54,6 +57,8 @@ def test_markdown_escape(snapshot):
     )
 
     buf = StringIO()
+
+    monkeypatch.setattr(html_reporter.random, "choice", lambda emojis: emojis[0])
 
     check_all(module_name=script_path, output=buf)
 

@@ -145,6 +145,7 @@ header {
   flex: 1;
   grid-template-columns: min-content 1fr;
   grid-template-rows: min-content 1fr;
+  column-gap: 3rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -361,6 +362,12 @@ code {
 }
 
 .style-error-id a:link {
+}
+
+.no-errors {
+  text-align: center;
+  padding: 25px;
+  font-size: 1.1em;
 }
 
 .line-num {

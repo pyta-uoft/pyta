@@ -29,6 +29,10 @@
                 </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
+                    {% set code_messages = messages[0] %}
+                    {% set style_messages = messages[1] %}
+                    {% set has_code_messages = code_messages|length > 0 %}
+                    {% set has_style_messages = style_messages|length > 0 %}
                     <li class="collapsible expanded">
                         <button>
                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -41,7 +45,9 @@
                                 {{os.path.basename(filename)}}
                             </a>
                         </span>
+                        {% if has_code_messages or has_style_messages %}
                         <ul>
+                            {% if has_code_messages %}
                             <li class="collapsible expanded">
                                 <button>
                                     <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -53,15 +59,17 @@
                                     <strong>Code Errors or Forbidden Usage</strong>
                                 </span>
                                 <ul>
-                                    {% for message_id in messages[0] %}
+                                    {% for message_id in code_messages %}
                                     <li>
                                         <a href={{'#{}-{}'.format(filenum, message_id)}}>
-                                            {{'{} ({})'.format(message_id, messages[0][message_id][0].symbol)}}
+                                            {{'{} ({})'.format(message_id, code_messages[message_id][0].symbol)}}
                                         </a>
                                     </li>
                                     {% endfor %}
                                 </ul>
                             </li>
+                            {% endif %}
+                            {% if has_style_messages %}
                             <li class="collapsible expanded">
                                 <button>
                                     <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -73,16 +81,18 @@
                                     <strong>Style and Convention</strong>
                                 </span>
                                 <ul>
-                                    {% for message_id in messages[1] %}
+                                    {% for message_id in style_messages %}
                                     <li>
                                         <a href={{'#{}-{}'.format(filenum, message_id)}}>
-                                            {{'{} ({})'.format(message_id, messages[1][message_id][0].symbol)}}
+                                            {{'{} ({})'.format(message_id, style_messages[message_id][0].symbol)}}
                                         </a>
                                     </li>
                                     {% endfor %}
                                 </ul>
                             </li>
+                            {% endif %}
                         </ul>
+                        {% endif %}
                     </li>
                     {% endfor %}
                 </ul>
@@ -90,10 +100,15 @@
             <main>
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
+                {% set code_messages = messages[0] %}
+                {% set style_messages = messages[1] %}
+                {% set has_code_messages = code_messages|length > 0 %}
+                {% set has_style_messages = style_messages|length > 0 %}
                 <section id={{filenum}}>
                     <div class="section-header">
                         <h2> {{ filename }} </h2>
                     </div>
+                    {% if has_code_messages %}
                     <article class="error-output code-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.code_err_title }}</span>
@@ -107,8 +122,8 @@
                             </span>
                         </h3>
                         <div class="content collapsible expanded">
-                            {% for message_id in messages[0] %}
-                                {% set occurrences = messages[0][message_id] %}
+                            {% for message_id in code_messages %}
+                                {% set occurrences = code_messages[message_id] %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
                                     {% set mid = message_id.lower() %}
@@ -165,11 +180,11 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            {% else %}
-                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
                             {% endfor %}
                         </div>
                     </article>
+                    {% endif %}
+                    {% if has_style_messages %}
                     <article class="error-output style-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.style_err_title }}</span>
@@ -183,7 +198,7 @@
                             </span>
                         </h3>
                         <div class="content collapsible expanded">
-                            {% for message_id, occurrences in messages[1].items() %}
+                            {% for message_id, occurrences in style_messages.items() %}
                             <div class="error-instance" id={{'{}-{}'.format(filenum, message_id)}}>
                                 <div class="info">
                                     {% set mid = message_id.lower() %}
@@ -239,13 +254,14 @@
                                         {% endif %}
                                     {% endfor %}
                                 </div>
-
                             </div>
-                            {% else %}
-                            <span class="empty-placeholder">{{ reporter.no_err_message }}</span>
                             {% endfor %}
                         </div>
                     </article>
+                    {% endif %}
+                    {% if not has_code_messages and not has_style_messages %}
+                    <div class="no-errors">{{ reporter.no_err_message() }}</div>
+                    {% endif %}
                 </section>
                 {% endfor %}
             </main>

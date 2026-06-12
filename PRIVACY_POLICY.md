@@ -16,7 +16,7 @@ Each upload also includes the PythonTA version and an anonymous client ID used t
 
 ## How can I opt in or opt out of this data collection?
 
-To change your participation, open your `.pylintrc` configuration file and set the fields `pyta-file-permission` and `pyta-error-permission` to your preference (`yes` or `no`).
+To change your participation, open your configuration file (e.g. `.pylintrc` or `[tool.python-ta]` of `pyproject.toml`) and set the fields `pyta-file-permission` and `pyta-error-permission` to your preference (`yes` or `no`).
 The default configuration in the `python_ta` directory is `no` for both options.
 
 ## How will the data be anonymised?

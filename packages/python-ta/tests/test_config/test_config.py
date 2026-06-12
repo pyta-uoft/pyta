@@ -5,9 +5,10 @@ Test suite for checking whether configuration worked correctly with user-inputte
 import io
 import json
 import os
-from unittest.mock import mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
+import toml
 from pylint import lint
 
 import python_ta
@@ -18,6 +19,7 @@ TEST_CONFIG = {
     "pyta-number-of-messages": 10,
     "max-nested-blocks": 5,
     "max-line-length": 120,
+    "autoformat-options": ["skip-string-normalization"],
 }
 
 # Non-fatal config errors. Fatal errors will be checked individually.
@@ -72,6 +74,17 @@ def test_user_config_file(configure_linter_load_default) -> None:
     assert actual == expected
 
 
+def test_user_config_toml_file(configure_linter_load_default) -> None:
+    """Test that reset_linter correctly overrides the default options when the user provides a
+    config file of type str that is a TOML file."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test.toml")
+    expected = configure_linter_load_default.config.__dict__
+    actual = reset_linter(config=config).config.__dict__
+
+    assert actual == expected
+
+
 def test_user_config_dict_no_default(configure_linter_no_default) -> None:
     """Test that reset_linter correctly overrides the default options when the user provides a
     config of type dict.
@@ -90,6 +103,19 @@ def test_user_config_file_no_default(configure_linter_no_default) -> None:
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test.pylintrc")
+    expected = configure_linter_no_default.config.__dict__
+    actual = reset_linter(config=config, load_default_config=False).config.__dict__
+
+    assert actual == expected
+
+
+def test_user_config_toml_file_no_default(configure_linter_no_default) -> None:
+    """Test that reset_linter correctly overrides the default options when the user provides a
+    config file of type str that is a TOML file.
+
+    The default options are not loaded from the PythonTA default config."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test.toml")
     expected = configure_linter_no_default.config.__dict__
     actual = reset_linter(config=config, load_default_config=False).config.__dict__
 
@@ -160,6 +186,38 @@ def test_config_parsing_errors_no_default() -> None:
     The default options are not loaded from the PythonTA default config."""
     curr_dir = os.path.dirname(__file__)
     config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.pylintrc")
+    reporter = reset_linter(config=config, load_default_config=False).reporter
+
+    # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert all(error in message_ids for error in CONFIG_ERRORS_TO_CHECK)
+
+
+def test_toml_config_parsing_errors() -> None:
+    """Test that the configuration options gets overridden without error when there are semantic errors
+    parsing the TOML config files.
+
+    This checks the non-fatal errors from parsing the config file."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.toml")
+    reporter = reset_linter(config=config).reporter
+
+    # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
+    message_ids = [msg.msg_id for message_lis in reporter.messages.values() for msg in message_lis]
+
+    assert all(error in message_ids for error in CONFIG_ERRORS_TO_CHECK)
+
+
+def test_toml_config_parsing_errors_no_default() -> None:
+    """Test that the configuration options gets loaded without error when there are semantic errors
+    parsing the TOML config files.
+
+    This checks the non-fatal errors from parsing the config file.
+
+    The default options are not loaded from the PythonTA default config."""
+    curr_dir = os.path.dirname(__file__)
+    config = os.path.join(curr_dir, "file_fixtures", "test_with_errors.toml")
     reporter = reset_linter(config=config, load_default_config=False).reporter
 
     # Check if there are messages with `msg_id`s from CONFIG_ERRORS_TO_CHECK.
@@ -288,6 +346,30 @@ def test_override_config_logging(caplog) -> None:
         override_config(linter, path)
     assert caplog.records[0].levelname == "ERROR"
     assert f"The config file {path} doesn't exist!" in caplog.text
+
+
+def test_get_pyta_toml_args_oserror(caplog) -> None:
+    """Testing that the OSError in _get_pyta_toml_args is logged correctly"""
+    path = "C:\\foo\\tests\\file_fixtures\\non_existent.toml"
+    linter = lint.PyLinter()
+
+    args = python_ta.config._get_pyta_toml_args(path, linter)
+    assert args == []
+    assert caplog.records[0].levelname == "ERROR"
+
+
+@patch("python_ta.config.toml.load")
+def test_get_pyta_toml_args_decode_error(mock_toml_load) -> None:
+    """Testing that TomlDecodeError is caught and adds a config-parse-error message."""
+    mock_toml_load.side_effect = toml.TomlDecodeError("Mock malformed TOML", "doc", 0)
+    mock_linter = MagicMock()
+
+    with patch("builtins.open", mock_open(read_data="")):
+        args = python_ta.config._get_pyta_toml_args("dummy.toml", mock_linter)
+    assert args == []
+    mock_linter.add_message.assert_called_once_with(
+        "config-parse-error", line=0, args="Mock malformed TOML (line 1 column 1 char 0)"
+    )
 
 
 @patch("python_ta.config.toml.load", side_effect=FileNotFoundError)

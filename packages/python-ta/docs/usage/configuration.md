@@ -1,9 +1,9 @@
 # Configuration
 
-PythonTA supports configuration through `pyproject.toml` files and "rc files" in the [INI format](https://docs.python.org/3/library/configparser.html).
+PythonTA supports configuration through TOML files and "rc files" in the [INI format](https://docs.python.org/3/library/configparser.html).
 A custom configuration file can be passed in the command-line using the `--config <path>` option,
 and to `python_ta.check_all` with the `config=<path>` argument.
-When using a `pyproject.toml` file, PythonTA-specific options must be placed under the [tool.python-ta] section, while standard Pylint options should be placed under [tool.pylint] (e.g., [tool.pylint.FORMAT]).
+When using a TOML file, PythonTA-specific options must be placed under the `[tool.python-ta]` section, while standard Pylint options should be placed under `[tool.pylint]` (e.g., `[tool.pylint.FORMAT]`).
 Additionally, a dictionary containing key-value pairs corresponding to configuration options may be passed as the `config` argument to `python_ta.check_all`.
 In all cases, custom configuration options are merged with PythonTA's default configuration.
 

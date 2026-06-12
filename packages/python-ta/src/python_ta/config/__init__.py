@@ -117,7 +117,7 @@ def _get_pyta_toml_args(config_location: AnyStr, linter: PyLinter) -> list[str]:
         return args_list
 
     try:
-        with open(config_location, "r") as f:
+        with open(config_location, "r", encoding="utf-8") as f:
             config_data = toml.load(f)
     except OSError as ex:
         logging.error(ex)

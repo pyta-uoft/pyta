@@ -45,7 +45,7 @@ class HTMLReporter(PythonTaReporter):
     }
     _PRE_LINE_NUM_SPACES = 0
 
-    NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊"]
+    NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊", "🎊", "🙌", "🕺"]
 
     no_snippet = "No code to display for this message."
     code_err_title = "Code Errors or Forbidden Usage (fix: high priority)"

@@ -66,7 +66,7 @@ def get_filtered_local_variables(
 def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
-    memory_viz_version: str = "latest",
+    memory_viz_version: str = "0.9.1",
     include_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
@@ -216,9 +216,9 @@ def snapshot_to_json(
             elif isinstance(val, type):
                 value_entry = {
                     "type": ".class",
-                    "name": val.__name__,
+                    "name": "type",
                     "id": value_id_diagram,
-                    "value": {},
+                    "value": val.__name__,
                 }
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance

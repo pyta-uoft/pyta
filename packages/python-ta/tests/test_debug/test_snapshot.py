@@ -760,21 +760,21 @@ def test_snapshot_to_json_type_object():
         },
         {
             "type": ".class",
-            "name": "int",
+            "name": "type",
             "id": 1,
-            "value": {},
+            "value": "int",
         },
         {
             "type": ".class",
-            "name": "str",
+            "name": "type",
             "id": 2,
-            "value": {},
+            "value": "str",
         },
         {
             "type": ".class",
-            "name": "OneClass",
+            "name": "type",
             "id": 3,
-            "value": {},
+            "value": "OneClass",
         },
     ]
 

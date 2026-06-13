@@ -140,7 +140,7 @@ def _check(
     `local_config` is a dict of config options or string (config file name).
     `output` is an absolute or relative path to a file, or a typing.IO object to capture pyta data
     output. If None, stdout is used.
-    `load_default_config` is used to specify whether to load the default .pylintrc file that comes
+    `load_default_config` is used to specify whether to load the default config file that comes
     with PythonTA. It will load it by default.
     `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
     `on_verify_fail` determines how to handle files that cannot be checked. If set to "log" (default), an error

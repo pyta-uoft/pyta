@@ -90,7 +90,7 @@ def test_config_generation() -> None:
         ],
     )
 
-    pylintrc_location = path.join(
+    config_location = path.join(
         SOURCE_ROOT,
         "packages",
         "python-ta",
@@ -98,7 +98,7 @@ def test_config_generation() -> None:
         "python_ta",
         DEFAULT_CONFIG_LOCATION,
     )
-    with open(pylintrc_location, "r") as f:
+    with open(config_location, "r") as f:
         actual_config = f.read()
 
     generated_config = result.output[:-1]  # Remove trailing newline

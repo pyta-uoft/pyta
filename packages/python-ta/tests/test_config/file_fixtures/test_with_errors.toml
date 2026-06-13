@@ -1,0 +1,19 @@
+[tool.pylint.reports]
+
+output-format = "pyta-html"
+
+[tool.pylint.format]
+
+max-line-length = 100
+
+ignore-long-lines = '^\s*((# )?<?https?://\S+>?)|(>>>.*)$'
+
+[tool.pylint."forbidden import"]
+extra-imports = ["math", "tkinter"]
+
+[tool.pylint."messages control"]
+# To trigger W0012, R0022
+disable = ["ooga", "bad-continuation"]
+
+# To trigger E0015
+no-space-check = ""

@@ -90,10 +90,10 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                            {% endif -%}
-                    </ul>
-                        {% endif -%}
-                </li>
+                            {%- endif %}
+                        </ul>
+                        {%- endif %}
+                    </li>
                     {% endfor %}
                 </ul>
             </section>
@@ -259,11 +259,11 @@
                             {% endfor %}
                         </div>
                     </article>
-                    {% endif -%}
+                    {%- endif %}
                     {% if not has_code_messages and not has_style_messages -%}
                     <div class="no-errors">{{ reporter.no_err_message() }}</div>
-                    {% endif -%}
-            </section>
+                    {%- endif %}
+                </section>
                 {% endfor %}
             </main>
         </div>

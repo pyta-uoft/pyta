@@ -151,6 +151,7 @@ header {
   flex: 1;
   grid-template-columns: min-content 1fr;
   grid-template-rows: min-content 1fr;
+  column-gap: 3rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -367,6 +368,12 @@ code {
 }
 
 .style-error-id a:link {
+}
+
+.no-errors {
+  text-align: center;
+  padding: 25px;
+  font-size: 1.1em;
 }
 
 .line-num {
@@ -1080,20 +1087,6 @@ footer p {
                                     </svg>
                                 </button>
                                 <span>
-                                    <strong>Code Errors or Forbidden Usage</strong>
-                                </span>
-                                <ul>
-                                    
-                                </ul>
-                            </li>
-                            <li class="collapsible expanded">
-                                <button>
-                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="10" height="10">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </button>
-                                <span>
                                     <strong>Style and Convention</strong>
                                 </span>
                                 <ul>
@@ -1135,24 +1128,6 @@ footer p {
                 <section id=0>
                     <div class="section-header">
                     </div>
-                    <article class="error-output code-errors">
-                        <h3 class="category-heading">
-                            <span>Code Errors or Forbidden Usage (fix: high priority)</span>
-                            <span class="slider">
-                                <button>
-                                    <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
-                                    <svg class="collapse-trigger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="60" height="30">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </button>
-                            </span>
-                        </h3>
-                        <div class="content collapsible expanded">
-                            
-                            <span class="empty-placeholder">No problems detected, good job!</span>
-                            
-                        </div>
-                    </article>
                     <article class="error-output style-errors">
                         <h3 class="category-heading">
                             <span>Style or Convention Errors (fix: before submission)</span>

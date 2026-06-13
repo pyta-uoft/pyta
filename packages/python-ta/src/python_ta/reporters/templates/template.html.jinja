@@ -260,7 +260,7 @@
                         </div>
                     </article>
                     {%- endif %}
-                    {% if not has_code_messages and not has_style_messages -%}
+                    {%- if not has_code_messages and not has_style_messages -%}
                     <div class="no-errors">{{ reporter.no_err_message() }}</div>
                     {%- endif %}
                 </section>

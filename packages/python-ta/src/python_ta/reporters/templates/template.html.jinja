@@ -29,10 +29,10 @@
                 </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
-                    {% set code_messages = messages[0] %}
-                    {% set style_messages = messages[1] %}
-                    {% set has_code_messages = code_messages|length > 0 %}
-                    {% set has_style_messages = style_messages|length > 0 %}
+                    {% set code_messages = messages[0] -%}
+                    {% set style_messages = messages[1] -%}
+                    {% set has_code_messages = code_messages|length > 0 -%}
+                    {% set has_style_messages = style_messages|length > 0 -%}
                     <li class="collapsible expanded">
                         <button>
                             <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -45,9 +45,9 @@
                                 {{os.path.basename(filename)}}
                             </a>
                         </span>
-                        {% if has_code_messages or has_style_messages %}
+                        {% if has_code_messages or has_style_messages -%}
                         <ul>
-                            {% if has_code_messages %}
+                            {% if has_code_messages -%}
                             <li class="collapsible expanded">
                                 <button>
                                     <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -68,8 +68,8 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                            {% endif %}
-                            {% if has_style_messages %}
+                            {% endif -%}
+                            {% if has_style_messages -%}
                             <li class="collapsible expanded">
                                 <button>
                                     <!-- Chevron down icon from heroicons at https://heroicons.com/ -->
@@ -90,9 +90,9 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                            {% endif %}
+                            {% endif -%}
                         </ul>
-                        {% endif %}
+                        {% endif -%}
                     </li>
                     {% endfor %}
                 </ul>
@@ -100,15 +100,15 @@
             <main>
                 {% set limit = reporter.linter.config.pyta_number_of_messages %}
                 {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
-                {% set code_messages = messages[0] %}
-                {% set style_messages = messages[1] %}
-                {% set has_code_messages = code_messages|length > 0 %}
-                {% set has_style_messages = style_messages|length > 0 %}
+                {% set code_messages = messages[0] -%}
+                {% set style_messages = messages[1] -%}
+                {% set has_code_messages = code_messages|length > 0 -%}
+                {% set has_style_messages = style_messages|length > 0 -%}
                 <section id={{filenum}}>
                     <div class="section-header">
                         <h2> {{ filename }} </h2>
                     </div>
-                    {% if has_code_messages %}
+                    {% if has_code_messages -%}
                     <article class="error-output code-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.code_err_title }}</span>
@@ -183,8 +183,8 @@
                             {% endfor %}
                         </div>
                     </article>
-                    {% endif %}
-                    {% if has_style_messages %}
+                    {% endif -%}
+                    {% if has_style_messages -%}
                     <article class="error-output style-errors">
                         <h3 class="category-heading">
                             <span>{{ reporter.style_err_title }}</span>
@@ -254,14 +254,15 @@
                                         {% endif %}
                                     {% endfor %}
                                 </div>
+
                             </div>
                             {% endfor %}
                         </div>
                     </article>
-                    {% endif %}
-                    {% if not has_code_messages and not has_style_messages %}
+                    {% endif -%}
+                    {% if not has_code_messages and not has_style_messages -%}
                     <div class="no-errors">{{ reporter.no_err_message() }}</div>
-                    {% endif %}
+                    {% endif -%}
                 </section>
                 {% endfor %}
             </main>

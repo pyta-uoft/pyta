@@ -21,6 +21,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Updated `SnapshotTracer` to convert snapshots to JSON with `snapshot_to_json` and pass JSON data to the webstepper template instead of SVG.
 - Added configuration options for maximum name lengths of each name category in `invalid_name_checker.py`.
 - Update configuration options to support `.toml` files
+- Add `Pyiodide` demo page to support checking code on a web page
 
 ### 💫 New checkers
 

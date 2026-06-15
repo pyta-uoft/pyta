@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import random
 from typing import TYPE_CHECKING
 
 from .core import NewMessage, PythonTaReporter
@@ -17,8 +16,6 @@ class PlainReporter(PythonTaReporter):
 
     OUTPUT_FILENAME = "pyta_report.txt"
 
-    NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊", "🎊", "🙌", "🕺"]
-
     # Rendering constants
     _SPACE = " "
     _BREAK = "\n"
@@ -26,10 +23,6 @@ class PlainReporter(PythonTaReporter):
     code_err_title = "=== Code errors/forbidden usage (fix: high priority) ==="
     style_err_title = "=== Style/convention errors (fix: before submission) ==="
     no_snippet = "No code to display for this message." + _BREAK * 2
-
-    def no_err_message(self) -> str:
-        """Return the no errors message with a random emoji."""
-        return "No problems detected, good job! " + random.choice(self.NO_ERR_EMOJIS)
 
     def print_messages(self, level: str = "all") -> None:
         """Print messages for the current file.
@@ -41,18 +34,18 @@ class PlainReporter(PythonTaReporter):
 
         result = "PyTA Report for: " + self._colourify("bold", self.current_file) + self._BREAK
         result += self._generate_report_date_time() + self._BREAK
+
         code_msgs_result = self._colour_messages_by_type(error_msgs)
         if code_msgs_result:
             result += self._colourify("code-heading", self.code_err_title + self._BREAK)
             result += code_msgs_result
 
-        if level == "all":
-            style_msgs_result = self._colour_messages_by_type(style_msgs)
-            if style_msgs_result:
-                result += self._colourify("style-heading", self.style_err_title + self._BREAK)
-                result += style_msgs_result
+        style_msgs_result = self._colour_messages_by_type(style_msgs) if level == "all" else ""
+        if style_msgs_result:
+            result += self._colourify("style-heading", self.style_err_title + self._BREAK)
+            result += style_msgs_result
 
-        if not (code_msgs_result or style_msgs_result):
+        if not code_msgs_result and (not style_msgs_result or level != "all"):
             result += self.no_err_message()
 
         self.writeln(result)

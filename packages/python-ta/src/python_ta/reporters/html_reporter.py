@@ -1,6 +1,5 @@
 import base64
 import os
-import random
 import socket
 import sys
 
@@ -45,18 +44,12 @@ class HTMLReporter(PythonTaReporter):
     }
     _PRE_LINE_NUM_SPACES = 0
 
-    NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊", "🎊", "🙌", "🕺"]
-
     no_snippet = "No code to display for this message."
     code_err_title = "Code Errors or Forbidden Usage (fix: high priority)"
     style_err_title = "Style or Convention Errors (fix: before submission)"
     OUTPUT_FILENAME = "pyta_report.html"
     port = None
     persistent_server = None
-
-    def no_err_message(self) -> str:
-        """Return the no errors message with a random emoji."""
-        return "No problems detected, good job! " + random.choice(self.NO_ERR_EMOJIS)
 
     def print_messages(self, level="all"):
         """Do nothing to print messages, since all are displayed in a single HTML file."""

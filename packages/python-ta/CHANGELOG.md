@@ -17,6 +17,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Make `watchdog` an optional dependency; users can opt in with `pip install python-ta[watchdog]`. This affects runs of `python_ta.check_all` with the `watch` config option set to `True`.
 - Added `LSPReporter`, a new reporter that outputs lint diagnostics in LSP 3.17-compliant JSON format.
 - Added suggested fixes for pascal and uppercase names in `invalid_name_checker.py`
+- Update `snapshot_to_json` function in `snapshot.py` to handle updated MemoryViz `0.9.1` schema
 - Updated `invalid_name_checker.py` to include a suggested fix for invalid names in checks using snake_case format.
 - Updated `SnapshotTracer` to convert snapshots to JSON with `snapshot_to_json` and pass JSON data to the webstepper template instead of SVG.
 - Added configuration options for maximum name lengths of each name category in `invalid_name_checker.py`.

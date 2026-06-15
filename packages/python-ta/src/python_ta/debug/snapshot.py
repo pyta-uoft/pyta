@@ -66,7 +66,7 @@ def get_filtered_local_variables(
 def snapshot(
     save: bool = False,
     memory_viz_args: Optional[list[str]] = None,
-    memory_viz_version: str = "0.7.0",
+    memory_viz_version: str = "0.9.1",
     include_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_frames: Optional[Iterable[str | re.Pattern]] = None,
     exclude_vars: Optional[Iterable[str | re.Pattern]] = None,
@@ -263,7 +263,6 @@ def snapshot_to_json(
             json_object_frame = {
                 "type": ".frame",
                 "name": frame_name,
-                "id": None,
                 "value": frame_variables,
             }
             json_data.append(json_object_frame)

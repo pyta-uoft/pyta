@@ -141,11 +141,11 @@ header {
 }
 
 .main-grid {
+  column-gap: 3rem;
   display: grid;
   flex: 1;
   grid-template-columns: min-content 1fr;
   grid-template-rows: min-content 1fr;
-  column-gap: 3rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -365,9 +365,9 @@ code {
 }
 
 .no-errors {
-  text-align: center;
-  padding: 25px;
   font-size: 1.1em;
+  padding: 25px;
+  text-align: center;
 }
 
 .line-num {

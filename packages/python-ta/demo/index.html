@@ -1,23 +1,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <style>
-      #output-container {
-        width: 100%;
-        height: 600px;
-        border: 1px solid #ccc;
-        margin-top: 10px;
-      }
-      iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-      }
-    </style>
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/pyodide/v314.0.0/full/pyodide.js"
-    ></script>
+    <link rel="stylesheet" href="style.css" />
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -28,7 +12,7 @@
     </div>
 
     <div id="output-container">
-      <div style="color: #666">Report will appear here.</div>
+      <div class="placeholder-text">Report will appear here.</div>
     </div>
   </body>
 </html>

@@ -17,57 +17,66 @@ def add_two(x: int, y: int) -> int:
 
 document.getElementById("codeblock").value = defaultCode
 
-let checkAll = () => {}
-
 const submitButton = document.getElementById("submitButton")
 const outputContainer = document.getElementById("output-container")
 const codeblock = document.getElementById("codeblock")
 
+const pyodideWorker = new Worker("worker.js", { type: "module" })
+
+let lastId = 1
+
+function requestResponse(worker, msg) {
+  return new Promise((resolve) => {
+    const idWorker = lastId++
+
+    function listener(event) {
+      if (event.data?.id !== idWorker) {
+        return
+      }
+      worker.removeEventListener("message", listener)
+      resolve(event.data)
+    }
+
+    worker.addEventListener("message", listener)
+    worker.postMessage({ id: idWorker, ...msg })
+  })
+}
+
+async function initialize() {
+  submitButton.disabled = true
+  const response = await requestResponse(pyodideWorker, { type: "INIT" })
+  if (response.type === "READY") {
+    submitButton.disabled = false
+    submitButton.innerText = "Check Code!"
+  } else {
+    console.error("Failed to initialize Pyodide:", response.error)
+  }
+}
+
+initialize()
+
 submitButton.addEventListener("click", async () => {
   const codeInput = codeblock.value
 
-  try {
-    const reportHtml = checkAll(codeInput)
-    outputContainer.innerHTML = `<iframe srcdoc="${reportHtml}"></iframe>`
-  } catch (err) {
-    console.error(err)
-    outputContainer.innerHTML = `<div style="color: red;">An error occurred while analyzing the code:<br><br>${err.message}</div>`
-  }
-})
+  submitButton.disabled = true
+  submitButton.innerText = "Analyzing Code..."
+  outputContainer.innerHTML = '<div class="placeholder-text">Analyzing...</div>'
 
-async function initialize() {
-  let pyodide = await loadPyodide({
-    packages: ["micropip"],
+  const response = await requestResponse(pyodideWorker, {
+    type: "CHECK_CODE",
+    code: codeInput,
   })
 
-  await pyodide.runPythonAsync(`
-        import micropip
-        mock_watchdog_modules = {
-            "watchdog": "",
-            "watchdog.events": "class FileSystemEventHandler: pass",
-            "watchdog.observers": "class Observer: pass",
-        }
-        micropip.add_mock_package("watchdog", "6.0.0", modules=mock_watchdog_modules)
-        await micropip.install("python-ta")
-    `)
-
-  const generateReport = pyodide.runPython(`
-        import python_ta
-        def generate_report():
-            python_ta.check_all("code_input.py", output="report.html")
-        generate_report
-    `)
-
-  checkAll = (codeInput) => {
-    pyodide.FS.writeFile("code_input.py", codeInput)
-    generateReport()
-    const htmlOutput = pyodide.FS.readFile("report.html", { encoding: "utf8" })
-    const safeHtmlOutput = htmlOutput.replace(/"/g, "&quot;")
-    return safeHtmlOutput
+  if (response.type === "RESULT") {
+    const iframe = document.createElement("iframe")
+    iframe.srcdoc = response.html
+    outputContainer.innerHTML = ""
+    outputContainer.appendChild(iframe)
+  } else if (response.type === "ERROR") {
+    console.error(response.error)
+    outputContainer.innerHTML = `<div class="error-text">An error occurred while analyzing the code:<br><br>${response.error}</div>`
   }
 
   submitButton.disabled = false
   submitButton.innerText = "Check Code!"
-}
-
-initialize()
+})

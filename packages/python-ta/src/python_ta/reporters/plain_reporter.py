@@ -22,7 +22,6 @@ class PlainReporter(PythonTaReporter):
     _COLOURING = {}
     code_err_title = "=== Code errors/forbidden usage (fix: high priority) ==="
     style_err_title = "=== Style/convention errors (fix: before submission) ==="
-    no_err_message = "No problems detected, good job!" + _BREAK * 2
     no_snippet = "No code to display for this message." + _BREAK * 2
 
     def print_messages(self, level: str = "all") -> None:
@@ -35,20 +34,19 @@ class PlainReporter(PythonTaReporter):
 
         result = "PyTA Report for: " + self._colourify("bold", self.current_file) + self._BREAK
         result += self._generate_report_date_time() + self._BREAK
-        result += self._colourify("code-heading", self.code_err_title + self._BREAK)
-        messages_result = self._colour_messages_by_type(error_msgs)
-        if messages_result:
-            result += messages_result
-        else:
-            result += self.no_err_message
 
-        if level == "all":
+        code_msgs_result = self._colour_messages_by_type(error_msgs)
+        if code_msgs_result:
+            result += self._colourify("code-heading", self.code_err_title + self._BREAK)
+            result += code_msgs_result
+
+        style_msgs_result = self._colour_messages_by_type(style_msgs) if level == "all" else ""
+        if style_msgs_result:
             result += self._colourify("style-heading", self.style_err_title + self._BREAK)
-            messages_result = self._colour_messages_by_type(style_msgs)
-            if messages_result:
-                result += messages_result
-            else:
-                result += self.no_err_message
+            result += style_msgs_result
+
+        if not code_msgs_result and (not style_msgs_result or level != "all"):
+            result += self.no_err_message()
 
         self.writeln(result)
         self.out.flush()

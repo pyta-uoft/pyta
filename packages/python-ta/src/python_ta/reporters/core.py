@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os.path
+import random
 import sys
 from collections import defaultdict
 from datetime import datetime
@@ -70,6 +71,9 @@ class PythonTaReporter(BaseReporter):
     _NUM_LENGTH_SPACES = 3
     _AFTER_NUM_SPACES = 2
 
+    # List of emojis to randomly choose for the no errors message.
+    NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊", "🎊", "🙌", "🕺"]
+
     # The error messages to report, mapping filename to a list of messages.
     messages: dict[str, list[Message]]
     # Whether the reporter's output stream should be closed out.
@@ -83,6 +87,10 @@ class PythonTaReporter(BaseReporter):
         self.module_name = ""
         self.current_file = ""
         self.should_close_out = False
+
+    def no_err_message(self) -> str:
+        """Return the no errors message with a random emoji."""
+        return "No problems detected, good job! " + random.choice(self.NO_ERR_EMOJIS)
 
     def print_messages(self, level: str = "all") -> None:
         """Print messages for the current file.

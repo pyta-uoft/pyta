@@ -141,6 +141,7 @@ header {
 }
 
 .main-grid {
+  column-gap: 3rem;
   display: grid;
   flex: 1;
   grid-template-columns: min-content 1fr;
@@ -361,6 +362,12 @@ code {
 }
 
 .style-error-id a:link {
+}
+
+.no-errors {
+  font-size: 1.1em;
+  padding: 25px;
+  text-align: center;
 }
 
 .line-num {

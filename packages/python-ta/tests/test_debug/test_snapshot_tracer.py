@@ -161,9 +161,9 @@ def assert_snapshot_data(
     """
     Assert that SnapshotTracer stored JSON snapshot data correctly.
     """
-    assert len(tracer._snapshots) == expected_num_snapshots
+    assert len(tracer.snapshots) == expected_num_snapshots
 
-    for snapshot_entry in tracer._snapshots:
+    for snapshot_entry in tracer.snapshots:
         assert "lineNumber" in snapshot_entry
         assert "memoryVizInput" in snapshot_entry
 
@@ -196,8 +196,8 @@ class TestSnapshotTracer:
         """
         tracer = test_func()
 
-        assert len(tracer._snapshots) > 0
-        for entry in tracer._snapshots:
+        assert len(tracer.snapshots) > 0
+        for entry in tracer.snapshots:
             assert "lineNumber" in entry
             assert "memoryVizInput" in entry
             assert isinstance(entry["lineNumber"], int)
@@ -223,7 +223,7 @@ class TestSnapshotTracer:
         Test SnapshotTracer stores memory visualization data in JSON format.
         """
         tracer = func_multi_line()
-        snapshot_entry = tracer._snapshots[0]
+        snapshot_entry = tracer.snapshots[0]
         memory_input = snapshot_entry["memoryVizInput"]
         assert isinstance(memory_input, list)
         frame_entries = [entry for entry in memory_input if entry["type"] == ".frame"]
@@ -243,5 +243,20 @@ class TestSnapshotTracer:
         Test that SnapshotTracer stores memory visualization data to generate HTML.
         """
         tracer = func_one_line()
-        assert len(tracer._snapshots) > 0
-        assert all("memoryVizInput" in snap for snap in tracer._snapshots)
+        assert len(tracer.snapshots) > 0
+        assert all("memoryVizInput" in snap for snap in tracer.snapshots)
+
+    def test_snapshots_property_returns_internal_data(self):
+        """
+        Test that the `snapshots` property returns the same data as `_snapshots`.
+        """
+        tracer = func_multi_line()
+        assert tracer.snapshots is tracer._snapshots
+
+    def test_snapshots_property_is_read_only(self):
+        """
+        Test that the `snapshots` property is read-only and cannot be set to a new value.
+        """
+        tracer = func_multi_line()
+        with pytest.raises(AttributeError):
+            tracer.snapshots = []

@@ -27,7 +27,7 @@ class SnapshotTracer:
 
     Instance attributes:
         webstepper: Opens the web-based visualizer.
-        _snapshots: A list of dictionaries that maps the code line number and the snapshot number.
+        snapshots: A list of dictionaries that maps the code line number and corresponding MemoryViz JSON snapshot at each traced line.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _first_line: Line number of the first line in the `with` block.
     """
@@ -162,3 +162,8 @@ class SnapshotTracer:
             i += 1
 
         return "\n".join(lst_str_lines[startpoint : endpoint + 1])
+
+    @property
+    def snapshots(self) -> list[dict[str, Any]]:
+        """Return the snapshots taken at each line of code."""
+        return self._snapshots

@@ -471,12 +471,14 @@ if __name__ == '__main__':
     func_multi_line()
 ```
 
-When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. If `webstepper=True`, the snapshots are rendered into an HTML visualization. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
+When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. These snapshots can be accessed via the `snapshots` property. If `webstepper=True`, the snapshots are rendered into an HTML visualization. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
 
 ### API
 
 ```{eval-rst}
 .. automethod:: python_ta.debug.SnapshotTracer.__init__
+
+.. autoattribute:: python_ta.debug.SnapshotTracer.snapshots
 ```
 
 ### Current Limitations

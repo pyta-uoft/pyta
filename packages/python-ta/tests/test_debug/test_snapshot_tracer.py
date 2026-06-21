@@ -245,3 +245,18 @@ class TestSnapshotTracer:
         tracer = func_one_line()
         assert len(tracer._snapshots) > 0
         assert all("memoryVizInput" in snap for snap in tracer._snapshots)
+
+    def test_snapshots_property_returns_internal_data(self):
+        """
+        Test that the `snapshots` property returns the same data as `_snapshots`.
+        """
+        tracer = func_multi_line()
+        assert tracer.snapshots == tracer._snapshots
+
+    def test_snapshots_property_is_read_only(self):
+        """
+        Test that the `snapshots` property is read-only and cannot be set to a new value.
+        """
+        tracer = func_multi_line()
+        with pytest.raises(AttributeError):
+            tracer.snapshots = []

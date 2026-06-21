@@ -23,6 +23,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added configuration options for maximum name lengths of each name category in `invalid_name_checker.py`.
 - Update configuration options to support `.toml` files
 - Updated plain text and HTML PyTA reports to not show sections with no errors and only show 'good job' message once when there are no errors in either section.
+- Added `snapshots` property to `SnapshotTracer` for accessing memory snapshots captured during execution.
 
 ### 💫 New checkers
 

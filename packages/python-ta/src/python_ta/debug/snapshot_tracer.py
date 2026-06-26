@@ -52,8 +52,7 @@ class SnapshotTracer:
             output_directory: This argument is deprecated; previously used for file-based outputs.
             webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
             webstepper_options: A dictionary of configuration options for the Webstepper visualizer when webstepper=True.
-                Supported options:
-                    line_context: Number of lines of context to show above and below the traced block in the Webstepper view if > 0.
+                Supported options: line_context, the number of lines of context to show above and below the traced block in the Webstepper view if > 0.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):

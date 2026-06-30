@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import csv
 import inspect
+import json
 import sys
 from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, Union
 
@@ -108,7 +109,7 @@ class AccumulationTable:
         self,
         accumulation_names: Union[list[str], list[list[str]]],
         output: Union[None, str] = None,
-        format: Literal["table", "csv"] = "table",
+        format: Literal["table", "csv", "json"] = "table",
     ) -> None:
         """Initialize an AccumulationTable context manager for print-based loop debugging.
 
@@ -198,28 +199,36 @@ class AccumulationTable:
                 return
 
         try:
-            for lst_index in range(len(self.loops)):
-                iteration_dict = self._create_iteration_dict(lst_index)
-                if self.output_format == "table":
-                    table = tabulate.tabulate(
-                        iteration_dict,
-                        headers="keys",
-                        colalign=(*["left"] * len(iteration_dict),),
-                        disable_numparse=True,
-                        missingval="None",
-                    )
-                    if lst_index > 0:
-                        file_io.write("\n")
-                    file_io.write(table)
+            if self.output_format == "json":
+                json_output = [
+                    self._create_iteration_dict(lst_index) for lst_index in range(len(self.loops))
+                ]
+                json.dump(json_output, file_io)
+                if self.output_filepath is None:
                     file_io.write("\n")
-                else:
-                    csv_preformat = [
-                        dict(zip(iteration_dict.keys(), row))
-                        for row in zip(*iteration_dict.values())
-                    ]
-                    writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
-                    writer.writeheader()
-                    writer.writerows(csv_preformat)
+            else:
+                for lst_index in range(len(self.loops)):
+                    iteration_dict = self._create_iteration_dict(lst_index)
+                    if self.output_format == "table":
+                        table = tabulate.tabulate(
+                            iteration_dict,
+                            headers="keys",
+                            colalign=(*["left"] * len(iteration_dict),),
+                            disable_numparse=True,
+                            missingval="None",
+                        )
+                        if lst_index > 0:
+                            file_io.write("\n")
+                        file_io.write(table)
+                        file_io.write("\n")
+                    elif self.output_format == "csv":
+                        csv_preformat = [
+                            dict(zip(iteration_dict.keys(), row))
+                            for row in zip(*iteration_dict.values())
+                        ]
+                        writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
+                        writer.writeheader()
+                        writer.writerows(csv_preformat)
         except OSError as e:
             print(f"Error writing data: {e}")
         finally:

@@ -7,9 +7,10 @@ from __future__ import annotations
 
 import copy
 import inspect
+import json
 import sys
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
 
 import tabulate
 
@@ -48,7 +49,12 @@ class RecursionTable:
     function_name: set[str]
     _trees: dict[types.FrameType, Tree]
 
-    def __init__(self, function_name: str | Iterable[str]) -> None:
+    def __init__(
+        self,
+        function_name: str | Iterable[str],
+        output: Union[None, str] = None,
+        format: Literal["table", "json"] = "table",
+    ) -> None:
         """Initialize a RecursionTable context manager for print-based recursive debugging
         of one or more functions; <function_name> can represent a single function or a collection of functions.
         """
@@ -58,6 +64,8 @@ class RecursionTable:
             self.function_name = set(function_name)
         self.frames_data = {}
         self._trees = {}
+        self.output_filepath = output
+        self.output_format = format
 
     def _get_root(self) -> Optional[Tree]:
         """Return the root node of the tree."""
@@ -156,16 +164,36 @@ class RecursionTable:
 
     def _tabulate_data(self) -> None:
         """Print the recursive table."""
-        recursive_dict = self.get_recursive_dict()
-        print(
-            tabulate.tabulate(
-                recursive_dict,
-                headers="keys",
-                colalign=(*["left"] * len(recursive_dict),),
-                disable_numparse=True,
-                missingval="None",
-            )
-        )
+        if self.output_filepath is None:
+            file_io = sys.stdout
+        else:
+            try:
+                file_io = open(self.output_filepath, "a", newline="")
+            except OSError as e:
+                print(f"Error opening output file: {e}")
+                return
+
+        try:
+            recursive_dict = self.get_recursive_dict()
+            if self.output_format == "table":
+                table = tabulate.tabulate(
+                    recursive_dict,
+                    headers="keys",
+                    colalign=(*["left"] * len(recursive_dict),),
+                    disable_numparse=True,
+                    missingval="None",
+                )
+                file_io.write(table)
+                file_io.write("\n")
+            else:
+                json.dump(recursive_dict, file_io)
+                if self.output_filepath is None:
+                    file_io.write("\n")
+        except OSError as e:
+            print(f"Error writing data: {e}")
+        finally:
+            if self.output_filepath is not None:
+                file_io.close()
 
     def _trace_recursion(self, frame: types.FrameType, event: str, _arg: Any) -> Callable:
         """Trace through the recursive exexution and call the corresponding

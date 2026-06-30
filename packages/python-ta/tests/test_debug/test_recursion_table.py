@@ -3,6 +3,11 @@ Test suite for the RecursionTable class on different
 types of recursive functions.
 """
 
+import json
+
+import pytest
+import tabulate
+
 from python_ta.debug import RecursionTable
 from python_ta.util.tree import Tree
 
@@ -477,3 +482,81 @@ def test_invalid_names_list() -> None:
         fact(3)
 
     assert table.get_recursive_dict() == {}
+
+
+@pytest.fixture(params=["table", "json"])
+def output_format(request):
+    """Parametrized fixture for output format."""
+    return request.param
+
+
+@pytest.fixture
+def existing_file_content(tmp_path):
+    """Fixture that creates a file with existing content."""
+    output_file = tmp_path / "output.txt"
+    with open(output_file, "a") as file:
+        file.write("Existing Content\n")
+    return output_file
+
+
+def get_expected_content(format_type):
+    """Return the expected string by dynamically generating it."""
+    if format_type == "table":
+        return """function    n    return value    called by
+----------  ---  --------------  ------------
+factorial   4    24              N/A
+factorial   3    6               factorial(4)
+factorial   2    2               factorial(3)
+factorial   1    1               factorial(2)
+factorial   0    1               factorial(1)"""
+    else:
+        return """{"function": ["factorial", "factorial", "factorial", "factorial", "factorial"], "n": [4, 3, 2, 1, 0], "return value": [24, 6, 2, 1, 1], "called by": ["N/A", "factorial(4)", "factorial(3)", "factorial(2)", "factorial(1)"]}"""
+
+
+def test_output_to_existing_file(existing_file_content, output_format):
+    """Test output to existing file with exact newline matching."""
+    table_kwargs = {"output": str(existing_file_content), "format": output_format}
+
+    with RecursionTable("factorial", **table_kwargs):
+
+        def factorial(n):
+            if n == 0:
+                return 1
+            return n * factorial(n - 1)
+
+        factorial(4)
+
+    with open(existing_file_content, "r") as file:
+        content = file.read()
+
+    expected_table_content = get_expected_content(output_format)
+    if output_format == "table":
+        expected_file_content = "Existing Content\n" + expected_table_content + "\n"
+    else:
+        expected_file_content = "Existing Content\n" + expected_table_content
+
+    assert content == expected_file_content
+
+
+def test_output_to_new_file(tmp_path, output_format):
+    """Test output to new file with exact newline matching."""
+    output_file = tmp_path / "output.txt"
+    table_kwargs = {"output": str(output_file), "format": output_format}
+
+    with RecursionTable("factorial", **table_kwargs):
+
+        def factorial(n):
+            if n == 0:
+                return 1
+            return n * factorial(n - 1)
+
+        factorial(4)
+
+    with open(output_file, "r") as file:
+        content = file.read()
+
+    expected_content = get_expected_content(output_format)
+    if output_format == "table":
+        expected_content = expected_content + "\n"
+
+    assert content == expected_content

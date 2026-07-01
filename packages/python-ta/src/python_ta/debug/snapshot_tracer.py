@@ -28,11 +28,13 @@ class SnapshotTracer:
     Instance attributes:
         webstepper: Opens the web-based visualizer.
         snapshots: A list of dictionaries that maps the code line number and corresponding MemoryViz JSON snapshot at each traced line.
+        _webstepper_options: A dictionary of configuration options for the webstepper visualizer.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _first_line: Line number of the first line in the `with` block.
     """
 
     webstepper: bool
+    _webstepper_options: dict[str, Any]
     _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
     _first_line: int
@@ -41,6 +43,7 @@ class SnapshotTracer:
         self,
         output_directory: Optional[str] = None,
         webstepper: bool = False,
+        webstepper_options: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """Initialize a context manager for snapshot-based debugging.
@@ -48,6 +51,8 @@ class SnapshotTracer:
         Args:
             output_directory: This argument is deprecated; previously used for file-based outputs.
             webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
+            webstepper_options: A dictionary of configuration options for the Webstepper visualizer when webstepper=True.
+                Supported options: line_context, the number of lines of context to show above and below the traced block in the Webstepper view if > 0.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):
@@ -62,6 +67,12 @@ class SnapshotTracer:
         self.id_tracker = IDTracker()
 
         self.webstepper = webstepper
+        self._webstepper_options = webstepper_options if webstepper_options is not None else {}
+        if self._webstepper_options and not self.webstepper:
+            warnings.warn(
+                "webstepper_options have no effect when webstepper=False. Set webstepper=True to use webstepper_options.",
+                UserWarning,
+            )
         self._first_line = float("inf")
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
@@ -121,8 +132,11 @@ class SnapshotTracer:
         template_env = Environment(loader=template_loader)
         template = template_env.get_template("webstepper_template.html.jinja")
 
+        code_text, start_line_number = self._get_code(func_frame)
+
         rendered_html = template.render(
-            code_text=self._get_code(func_frame),
+            code_text=code_text,
+            start_line_number=start_line_number,
             memory_viz_data=self._snapshots,
             bundle_content=bundle_content,
         )
@@ -137,8 +151,11 @@ class SnapshotTracer:
 
         open_html_in_browser(html_content, port)
 
-    def _get_code(self, func_frame: types.FrameType) -> str:
-        """Retrieve and save the code string to be displayed in Webstepper."""
+    def _get_code(self, func_frame: types.FrameType) -> tuple[str, int]:
+        """Retrieve and save the code string to be displayed in Webstepper.
+        Return a tuple of (code_text, start_line_number) where start_line_number
+        is the line number in the source file of the first line of the traced code.
+        """
         code_lines = inspect.cleandoc(inspect.getsource(func_frame))
         i = self._first_line - func_frame.f_code.co_firstlineno
         lst_str_lines = code_lines.splitlines()
@@ -161,7 +178,14 @@ class SnapshotTracer:
             endpoint = i
             i += 1
 
-        return "\n".join(lst_str_lines[startpoint : endpoint + 1])
+        line_context = self._webstepper_options.get("line_context", 0)
+        if line_context > 0:
+            startpoint = max(0, startpoint - line_context)
+            endpoint = min(len(lst_str_lines) - 1, endpoint + line_context)
+
+        start_line_number = max(1, self._first_line - line_context)
+
+        return "\n".join(lst_str_lines[startpoint : endpoint + 1]), start_line_number
 
     @property
     def snapshots(self) -> list[dict[str, Any]]:

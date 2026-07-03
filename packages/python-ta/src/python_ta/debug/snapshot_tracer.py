@@ -30,12 +30,14 @@ class SnapshotTracer:
         snapshots: A list of dictionaries that maps the code line number and corresponding MemoryViz JSON snapshot at each traced line.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _first_line: Line number of the first line in the `with` block.
+        _origin_file: The absolute path of the module where SnapshotTracer is used.
     """
 
     webstepper: bool
     _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
     _first_line: int
+    _origin_file: str | None
 
     def __init__(
         self,
@@ -63,9 +65,17 @@ class SnapshotTracer:
 
         self.webstepper = webstepper
         self._first_line = float("inf")
+        self._origin_file = None
 
-    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
-        """Take a snapshot of the variables in the functions specified in `self.include`"""
+    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
+        """Take a snapshot of the variables in the functions specified in `self.include`, tracing into same-module function calls."""
+        if event == "call":
+            # Only trace functions in the same module as the calling function.
+            called_file = os.path.normcase(os.path.abspath(frame.f_globals.get("__file__", "")))
+            if called_file == self._origin_file and frame.f_code.co_name != "_trace_func":
+                return self._trace_func
+            return None
+
         if self._first_line == float("inf"):
             self._first_line = frame.f_lineno
         if event == "line":
@@ -85,7 +95,10 @@ class SnapshotTracer:
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_frame.f_trace = self._trace_func
-        sys.settrace(lambda *_args: None)
+        self._origin_file = os.path.normcase(
+            os.path.abspath(func_frame.f_globals.get("__file__", ""))
+        )
+        sys.settrace(self._trace_func)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

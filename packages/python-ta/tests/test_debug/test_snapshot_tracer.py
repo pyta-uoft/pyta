@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import importlib.util
 import inspect
 import os.path
 import sys
-from typing import Iterator
+from typing import Any, Iterator
 from unittest.mock import patch
 
 import pytest
@@ -151,6 +152,51 @@ def func_open_webstepper() -> None:
     return tracer
 
 
+def func_same_module_call() -> SnapshotTracer:
+    """
+    Function for testing SnapshotTracer traces into same-module function calls
+    """
+    with SnapshotTracer(
+        include_frames=(r"^func_same_module_call$", r"^helper_same_module$"),
+        exclude_vars=("tracer",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ) as tracer:
+        helper_same_module(5)
+        num = 42
+
+    return tracer
+
+
+def func_builtin_call() -> SnapshotTracer:
+    """
+    Function for testing SnapshotTracer does not trace into built-in function calls
+    """
+    with SnapshotTracer(
+        include_frames=(r"^func_builtin_call$",),
+        exclude_vars=("tracer",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ) as tracer:
+        nums = [1, 2, 3]
+        total = sum(nums)
+
+    return tracer
+
+
+def func_calls_external_helper(external_helper: Any) -> SnapshotTracer:
+    """Function for testing SnapshotTracer does not trace into imported modules."""
+    with SnapshotTracer(
+        include_frames=(r"^func_calls_external_helper$", r"^external_helper_call$"),
+        exclude_vars=("tracer",),
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ) as tracer:
+        external_helper.external_helper_call()
+
+    return tracer
+
+
 # Helpers
 
 
@@ -168,6 +214,14 @@ def assert_snapshot_data(
         assert "memoryVizInput" in snapshot_entry
 
         assert isinstance(snapshot_entry["memoryVizInput"], list)
+
+
+def helper_same_module(x: int) -> int:
+    """
+    Helper used to verify SnapshotTracer traces into same-module calls.
+    """
+    result = x
+    return result
 
 
 # Tests
@@ -260,3 +314,65 @@ class TestSnapshotTracer:
         tracer = func_multi_line()
         with pytest.raises(AttributeError):
             tracer.snapshots = []
+
+    def test_traces_same_module_function_calls(self):
+        """
+        Test SnapshotTracer traces into helper functions defined in the same module.
+        """
+        tracer = func_same_module_call()
+        traced_frame_names = {
+            entry["name"]
+            for snapshot_entry in tracer.snapshots
+            for entry in snapshot_entry["memoryVizInput"]
+            if entry["type"] == ".frame"
+        }
+        assert "helper_same_module" in traced_frame_names
+
+    def test_does_not_trace_builtin_calls(self):
+        """
+        Test SnapshotTracer does not trace into built-in function calls
+        """
+        tracer = func_builtin_call()
+        traced_frame_names = {
+            entry["name"]
+            for snapshot_entry in tracer.snapshots
+            for entry in snapshot_entry["memoryVizInput"]
+            if entry["type"] == ".frame"
+        }
+        assert "sum" not in traced_frame_names
+
+    def test_does_not_trace_external_module_calls(self, tmp_path):
+        """
+        Test SnapshotTracer does not trace into functions defined in external modules.
+        """
+        module_path = tmp_path / "external_helper.py"
+        module_path.write_text(
+            """
+            def external_helper_call():
+                value = 1
+                value += 1
+                return value
+            """.lstrip(),
+            encoding="utf-8",
+        )
+
+        spec = importlib.util.spec_from_file_location("external_helper", module_path)
+        assert spec is not None and spec.loader is not None
+        external_helper = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(external_helper)
+
+        tracer = func_calls_external_helper(external_helper)
+        traced_frame_names = {
+            entry["name"]
+            for snapshot_entry in tracer.snapshots
+            for entry in snapshot_entry["memoryVizInput"]
+            if entry["type"] == ".frame"
+        }
+        assert "external_helper_call" not in traced_frame_names
+
+    def test_settrace_restored_after_exit(self):
+        """
+        Test that sys.settrace is restored after exiting the SnapshotTracer context.
+        """
+        func_one_line()
+        assert sys.gettrace() is None

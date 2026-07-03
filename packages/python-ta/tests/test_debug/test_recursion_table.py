@@ -484,7 +484,7 @@ def test_invalid_names_list() -> None:
     assert table.get_recursive_dict() == {}
 
 
-@pytest.fixture(params=["table", "json"])
+@pytest.fixture(params=["table", "csv", "json"])
 def output_format(request):
     """Parametrized fixture for output format."""
     return request.param
@@ -509,6 +509,14 @@ factorial   3    6               factorial(4)
 factorial   2    2               factorial(3)
 factorial   1    1               factorial(2)
 factorial   0    1               factorial(1)"""
+    elif format_type == "csv":
+        return """function,n,return value,called by
+factorial,4,24,N/A
+factorial,3,6,factorial(4)
+factorial,2,2,factorial(3)
+factorial,1,1,factorial(2)
+factorial,0,1,factorial(1)
+"""
     else:
         return """{"function": ["factorial", "factorial", "factorial", "factorial", "factorial"], "n": [4, 3, 2, 1, 0], "return value": [24, 6, 2, 1, 1], "called by": ["N/A", "factorial(4)", "factorial(3)", "factorial(2)", "factorial(1)"]}"""
 

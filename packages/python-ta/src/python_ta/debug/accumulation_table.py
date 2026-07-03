@@ -10,7 +10,7 @@ import csv
 import inspect
 import json
 import sys
-from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, TextIO, Union
 
 import astroid
 import tabulate
@@ -94,7 +94,7 @@ class AccumulationTable:
             - "loop_lineno": the line number of the loop
             - "loop_accumulators": dict mapping accumulator names to their values per iteration
         output_filepath: the filepath where the table will be written if it is passed in, defaults to None
-        output_format: the format of the output ("table" or "csv")
+        output_format: the format of the output ("table", "csv" or "json")
     """
 
     _accumulator_names: Union[list[str], list[list[str]]]
@@ -187,6 +187,42 @@ class AccumulationTable:
             **loop_accumulators,
         }
 
+    def _output_json(self, file_io: TextIO) -> None:
+        """Output the tracked loops in JSON format."""
+        json_output = [
+            self._create_iteration_dict(lst_index) for lst_index in range(len(self.loops))
+        ]
+        json.dump(json_output, file_io)
+        if self.output_filepath is None:
+            file_io.write("\n")
+
+    def _output_table(self, file_io: TextIO) -> None:
+        """Output the tracked loops as formatted text tables."""
+        for lst_index in range(len(self.loops)):
+            iteration_dict = self._create_iteration_dict(lst_index)
+            table = tabulate.tabulate(
+                iteration_dict,
+                headers="keys",
+                colalign=(*["left"] * len(iteration_dict),),
+                disable_numparse=True,
+                missingval="None",
+            )
+            if lst_index > 0:
+                file_io.write("\n")
+            file_io.write(table)
+            file_io.write("\n")
+
+    def _output_csv(self, file_io: TextIO) -> None:
+        """Output the tracked loops in CSV format."""
+        for lst_index in range(len(self.loops)):
+            iteration_dict = self._create_iteration_dict(lst_index)
+            csv_preformat = [
+                dict(zip(iteration_dict.keys(), row)) for row in zip(*iteration_dict.values())
+            ]
+            writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
+            writer.writeheader()
+            writer.writerows(csv_preformat)
+
     def _tabulate_data(self) -> None:
         """Print the values of the accumulator and loop variables into a table"""
         if self.output_filepath is None:
@@ -200,35 +236,11 @@ class AccumulationTable:
 
         try:
             if self.output_format == "json":
-                json_output = [
-                    self._create_iteration_dict(lst_index) for lst_index in range(len(self.loops))
-                ]
-                json.dump(json_output, file_io)
-                if self.output_filepath is None:
-                    file_io.write("\n")
-            else:
-                for lst_index in range(len(self.loops)):
-                    iteration_dict = self._create_iteration_dict(lst_index)
-                    if self.output_format == "table":
-                        table = tabulate.tabulate(
-                            iteration_dict,
-                            headers="keys",
-                            colalign=(*["left"] * len(iteration_dict),),
-                            disable_numparse=True,
-                            missingval="None",
-                        )
-                        if lst_index > 0:
-                            file_io.write("\n")
-                        file_io.write(table)
-                        file_io.write("\n")
-                    elif self.output_format == "csv":
-                        csv_preformat = [
-                            dict(zip(iteration_dict.keys(), row))
-                            for row in zip(*iteration_dict.values())
-                        ]
-                        writer = csv.DictWriter(file_io, fieldnames=iteration_dict.keys())
-                        writer.writeheader()
-                        writer.writerows(csv_preformat)
+                self._output_json(file_io)
+            elif self.output_format == "table":
+                self._output_table(file_io)
+            elif self.output_format == "csv":
+                self._output_csv(file_io)
         except OSError as e:
             print(f"Error writing data: {e}")
         finally:

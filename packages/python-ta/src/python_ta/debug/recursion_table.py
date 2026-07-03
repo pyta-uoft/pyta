@@ -6,11 +6,12 @@ for a recursive function.
 from __future__ import annotations
 
 import copy
+import csv
 import inspect
 import json
 import sys
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, TextIO, Union
 
 import tabulate
 
@@ -43,17 +44,21 @@ class RecursionTable:
         function_name: name of the function to be traced
         _trees: mapping of the frames to the corresponding tree
             representing the function call
+        output_filepath: the filepath where the table will be written if it is passed in, defaults to None
+        output_format: the format of the output ("table", "csv" or "json")
     """
 
     frames_data: dict[types.FrameType, dict[str, Any]]
     function_name: set[str]
     _trees: dict[types.FrameType, Tree]
+    output_filepath: Optional[str]
+    output_format: str
 
     def __init__(
         self,
         function_name: str | Iterable[str],
         output: Union[None, str] = None,
-        format: Literal["table", "json"] = "table",
+        format: Literal["table", "csv", "json"] = "table",
     ) -> None:
         """Initialize a RecursionTable context manager for print-based recursive debugging
         of one or more functions; <function_name> can represent a single function or a collection of functions.
@@ -162,6 +167,35 @@ class RecursionTable:
 
         return recursive_dict
 
+    def _output_json(self, file_io: TextIO, recursive_dict: dict[str, list]) -> None:
+        """Output the recursion data in JSON format."""
+        json.dump(recursive_dict, file_io)
+        if self.output_filepath is None:
+            file_io.write("\n")
+
+    def _output_table(self, file_io: TextIO, recursive_dict: dict[str, list]) -> None:
+        """Output the recursion data as formatted text tables."""
+        table = tabulate.tabulate(
+            recursive_dict,
+            headers="keys",
+            colalign=(*["left"] * len(recursive_dict),),
+            disable_numparse=True,
+            missingval="None",
+        )
+        file_io.write(table)
+        file_io.write("\n")
+
+    def _output_csv(self, file_io: TextIO, recursive_dict: dict[str, list]) -> None:
+        """Output the recursion data in CSV format."""
+        if not recursive_dict:
+            return
+        csv_preformat = [
+            dict(zip(recursive_dict.keys(), row)) for row in zip(*recursive_dict.values())
+        ]
+        writer = csv.DictWriter(file_io, fieldnames=recursive_dict.keys())
+        writer.writeheader()
+        writer.writerows(csv_preformat)
+
     def _tabulate_data(self) -> None:
         """Print the recursive table."""
         if self.output_filepath is None:
@@ -176,19 +210,11 @@ class RecursionTable:
         try:
             recursive_dict = self.get_recursive_dict()
             if self.output_format == "table":
-                table = tabulate.tabulate(
-                    recursive_dict,
-                    headers="keys",
-                    colalign=(*["left"] * len(recursive_dict),),
-                    disable_numparse=True,
-                    missingval="None",
-                )
-                file_io.write(table)
-                file_io.write("\n")
-            else:
-                json.dump(recursive_dict, file_io)
-                if self.output_filepath is None:
-                    file_io.write("\n")
+                self._output_table(file_io, recursive_dict)
+            elif self.output_format == "json":
+                self._output_json(file_io, recursive_dict)
+            elif self.output_format == "csv":
+                self._output_csv(file_io, recursive_dict)
         except OSError as e:
             print(f"Error writing data: {e}")
         finally:

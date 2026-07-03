@@ -287,7 +287,7 @@ def process_with_multiple_loops(numbers: list) -> int:
 
 You also have the option to pass in a file path as an attribute to the AccumulationTable object. In this case, the table will be appended to the file instead of being written the console.
 
-Finally, you can also specify the output format as a third attribute using the `format` argument. By default, the format is "table", which produces the same nicely formatted tabular output shown above. If you want to write the output as a .csv file, pass "csv" as the format.
+Finally, you can also specify the output format as a third attribute using the `format` argument. By default, the format is "table", which produces the same nicely formatted tabular output shown above. You can also pass "csv" to write the output as a .csv file, or "json" to output the data as a .json file.
 
 For example, the following code writes a csv formattted output to `output.txt`.
 
@@ -426,6 +426,24 @@ def trace_factorial(number: int) -> None:
 
     traced_data = table.get_recursive_dict()
     print(traced_data)
+```
+
+Like `AccumulationTable`, you can optionally pass an `output` file path and a `format` ("table", "csv", or "json") to `RecursionTable`, which defaults to a nicely formatted "table".
+
+For example, the following code writes JSON formatted output to `output.json`:
+
+```python
+from python_ta.debug import RecursionTable
+
+def factorial(n: int) -> int:
+    if n == 0:
+        return 1
+    return n * factorial(n - 1)
+
+def trace_and_export_factorial(number: int) -> None:
+    output_file = 'output.json'
+    with RecursionTable("factorial", output=output_file, format="json"):
+        factorial(number)
 ```
 
 ## Tracing with user-defined classes

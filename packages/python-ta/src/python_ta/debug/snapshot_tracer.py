@@ -31,6 +31,7 @@ class SnapshotTracer:
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _first_line: Line number of the first line in the `with` block.
         _origin_file: The absolute path of the module where SnapshotTracer is used.
+        _traced_frames: A list of dictionaries that store the first line number and source lines of same-module functions traced during execution.
     """
 
     webstepper: bool
@@ -38,6 +39,7 @@ class SnapshotTracer:
     _snapshot_args: dict[str, Any]
     _first_line: int
     _origin_file: str | None
+    _traced_frames: list[dict[str, Any]]
 
     def __init__(
         self,
@@ -66,6 +68,7 @@ class SnapshotTracer:
         self.webstepper = webstepper
         self._first_line = float("inf")
         self._origin_file = None
+        self._traced_frames = []
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
         """Take a snapshot of the variables in the functions specified in `self.include`, tracing into same-module function calls."""
@@ -73,6 +76,12 @@ class SnapshotTracer:
             # Only trace functions in the same module as the calling function.
             called_file = os.path.normcase(os.path.abspath(frame.f_globals.get("__file__", "")))
             if called_file == self._origin_file and frame.f_code.co_name != "_trace_func":
+                self._traced_frames.append(
+                    {
+                        "co_firstlineno": frame.f_code.co_firstlineno,
+                        "source_lines": inspect.getsource(frame.f_code).splitlines(),
+                    }
+                )
                 return self._trace_func
             return None
 
@@ -134,8 +143,11 @@ class SnapshotTracer:
         template_env = Environment(loader=template_loader)
         template = template_env.get_template("webstepper_template.html.jinja")
 
+        code_text, start_line_number = self._get_code(func_frame)
+
         rendered_html = template.render(
-            code_text=self._get_code(func_frame),
+            code_text=code_text,
+            start_line_number=start_line_number,
             memory_viz_data=self._snapshots,
             bundle_content=bundle_content,
         )
@@ -150,7 +162,7 @@ class SnapshotTracer:
 
         open_html_in_browser(html_content, port)
 
-    def _get_code(self, func_frame: types.FrameType) -> str:
+    def _get_code(self, func_frame: types.FrameType) -> tuple[str, int]:
         """Retrieve and save the code string to be displayed in Webstepper."""
         code_lines = inspect.cleandoc(inspect.getsource(func_frame))
         i = self._first_line - func_frame.f_code.co_firstlineno
@@ -174,7 +186,23 @@ class SnapshotTracer:
             endpoint = i
             i += 1
 
-        return "\n".join(lst_str_lines[startpoint : endpoint + 1])
+        # If any same-module functions were traced, extend the displayed code to include
+        # the entire range of those functions.
+        if self._traced_frames:
+            for traced in self._traced_frames:
+                func_start_line = traced["co_firstlineno"]
+                func_end_line = func_start_line + len(traced["source_lines"]) - 1
+                func_first_index = func_start_line - func_frame.f_code.co_firstlineno
+                func_last_index = func_end_line - func_frame.f_code.co_firstlineno
+
+                if func_first_index < startpoint and func_first_index >= 0:
+                    startpoint = func_first_index
+                if func_last_index > endpoint and func_last_index < len(lst_str_lines):
+                    endpoint = func_last_index
+
+        start_line_number = func_frame.f_code.co_firstlineno + startpoint
+
+        return "\n".join(lst_str_lines[startpoint : endpoint + 1]), start_line_number
 
     @property
     def snapshots(self) -> list[dict[str, Any]]:

@@ -29,17 +29,19 @@ class SnapshotTracer:
         webstepper: Opens the web-based visualizer.
         snapshots: A list of dictionaries that maps the code line number and corresponding MemoryViz JSON snapshot at each traced line.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
-        _first_line: Line number of the first line in the `with` block.
+        _start_lineno: Line number of the first line to be displayed in the code section of the Webstepper.
+        _end_lineno: Line number of the last line to be displayed in the code section of the Webstepper.
         _origin_file: The absolute path of the module where SnapshotTracer is used.
-        _traced_frames: A list of dictionaries that store the first line number and source lines of same-module functions traced during execution.
+        _module_source_lines: A list of strings representing the source code lines of the module where SnapshotTracer is used.
     """
 
     webstepper: bool
     _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
-    _first_line: int
+    _start_lineno: int
+    _end_lineno: int
     _origin_file: str | None
-    _traced_frames: list[dict[str, Any]]
+    _module_source_lines: list[str] | None
 
     def __init__(
         self,
@@ -66,28 +68,31 @@ class SnapshotTracer:
         self.id_tracker = IDTracker()
 
         self.webstepper = webstepper
-        self._first_line = float("inf")
+        self._start_lineno = sys.maxsize
+        self._end_lineno = 0
         self._origin_file = None
-        self._traced_frames = []
+        self._module_source_lines = None
 
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
         """Take a snapshot of the variables in the functions specified in `self.include`, tracing into same-module function calls."""
         if event == "call":
+            if self._origin_file is None:
+                return None
             # Only trace functions in the same module as the calling function.
-            called_file = os.path.normcase(os.path.abspath(frame.f_globals.get("__file__", "")))
+            called_file = os.path.normcase(os.path.abspath(frame.f_code.co_filename))
             if called_file == self._origin_file and frame.f_code.co_name != "_trace_func":
-                self._traced_frames.append(
-                    {
-                        "co_firstlineno": frame.f_code.co_firstlineno,
-                        "source_lines": inspect.getsource(frame.f_code).splitlines(),
-                    }
+                self._start_lineno = min(self._start_lineno, frame.f_code.co_firstlineno)
+                self._end_lineno = max(
+                    self._end_lineno,
+                    frame.f_code.co_firstlineno + len(inspect.getsourcelines(frame)[0]) - 1,
                 )
+                # Return self._trace_func to trace into the called function, otherwise return None to skip tracing.
                 return self._trace_func
             return None
 
-        if self._first_line == float("inf"):
-            self._first_line = frame.f_lineno
         if event == "line":
+            self._start_lineno = min(self._start_lineno, frame.f_lineno)
+            self._end_lineno = max(self._end_lineno, frame.f_lineno)
             snapshot_output = snapshot(
                 id_tracker=self.id_tracker,
                 **self._snapshot_args,
@@ -104,9 +109,14 @@ class SnapshotTracer:
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
         func_frame.f_trace = self._trace_func
-        self._origin_file = os.path.normcase(
-            os.path.abspath(func_frame.f_globals.get("__file__", ""))
+        origin_file = func_frame.f_globals.get("__file__")
+        self._origin_file = (
+            os.path.normcase(os.path.abspath(origin_file)) if origin_file is not None else None
         )
+        if self._origin_file is not None:
+            self._module_source_lines = (
+                Path(self._origin_file).read_text(encoding="utf-8").splitlines()
+            )
         sys.settrace(self._trace_func)
         return self
 
@@ -143,11 +153,9 @@ class SnapshotTracer:
         template_env = Environment(loader=template_loader)
         template = template_env.get_template("webstepper_template.html.jinja")
 
-        code_text, start_line_number = self._get_code(func_frame)
-
         rendered_html = template.render(
-            code_text=code_text,
-            start_line_number=start_line_number,
+            code_text=self._get_code(),
+            start_line_number=self._start_lineno,
             memory_viz_data=self._snapshots,
             bundle_content=bundle_content,
         )
@@ -162,47 +170,14 @@ class SnapshotTracer:
 
         open_html_in_browser(html_content, port)
 
-    def _get_code(self, func_frame: types.FrameType) -> tuple[str, int]:
+    def _get_code(self) -> str:
         """Retrieve and save the code string to be displayed in Webstepper."""
-        code_lines = inspect.cleandoc(inspect.getsource(func_frame))
-        i = self._first_line - func_frame.f_code.co_firstlineno
-        lst_str_lines = code_lines.splitlines()
-        num_whitespace = len(lst_str_lines[i]) - len(lst_str_lines[i].lstrip())
+        if self._module_source_lines is None or self._start_lineno > self._end_lineno:
+            return ""
 
-        endpoint = len(lst_str_lines)
-        startpoint = i
-        while i < len(lst_str_lines):
-            line = lst_str_lines[i]
-            if (
-                line.strip() != ""
-                and not line.lstrip()[0] == "#"
-                and not line[:num_whitespace].isspace()
-            ):
-                break
-            if line.lstrip() != "" and len(line) - len(line.lstrip()) >= num_whitespace:
-                lst_str_lines[i] = line[num_whitespace:]
-            else:
-                lst_str_lines[i] = line.lstrip()
-            endpoint = i
-            i += 1
-
-        # If any same-module functions were traced, extend the displayed code to include
-        # the entire range of those functions.
-        if self._traced_frames:
-            for traced in self._traced_frames:
-                func_start_line = traced["co_firstlineno"]
-                func_end_line = func_start_line + len(traced["source_lines"]) - 1
-                func_first_index = func_start_line - func_frame.f_code.co_firstlineno
-                func_last_index = func_end_line - func_frame.f_code.co_firstlineno
-
-                if func_first_index < startpoint and func_first_index >= 0:
-                    startpoint = func_first_index
-                if func_last_index > endpoint and func_last_index < len(lst_str_lines):
-                    endpoint = func_last_index
-
-        start_line_number = func_frame.f_code.co_firstlineno + startpoint
-
-        return "\n".join(lst_str_lines[startpoint : endpoint + 1]), start_line_number
+        start_index = max(self._start_lineno - 1, 0)
+        end_index = min(self._end_lineno, len(self._module_source_lines))
+        return "\n".join(self._module_source_lines[start_index:end_index])
 
     @property
     def snapshots(self) -> list[dict[str, Any]]:

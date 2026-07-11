@@ -73,14 +73,17 @@ class SnapshotTracer:
         self._origin_file = None
         self._module_source_lines = None
 
-    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
-        """Take a snapshot of the variables in the functions specified in `self.include`, tracing into same-module function calls."""
+    def _global_trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
+        """Global trace function that handles 'call' events to determine which functions to trace into."""
         if event == "call":
             if self._origin_file is None:
                 return None
             # Only trace functions in the same module as the calling function.
             called_file = os.path.normcase(os.path.abspath(frame.f_code.co_filename))
-            if called_file == self._origin_file and frame.f_code.co_name != "_trace_func":
+            if called_file == self._origin_file and frame.f_code.co_name not in (
+                "_trace_func",
+                "_global_trace_func",
+            ):
                 self._start_lineno = min(self._start_lineno, frame.f_code.co_firstlineno)
                 self._end_lineno = max(
                     self._end_lineno,
@@ -90,6 +93,8 @@ class SnapshotTracer:
                 return self._trace_func
             return None
 
+    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
+        """Local trace function set on each frame to take a snapshot of the variables in the functions specified in `self.include`."""
         if event == "line":
             self._start_lineno = min(self._start_lineno, frame.f_lineno)
             self._end_lineno = max(self._end_lineno, frame.f_lineno)
@@ -117,7 +122,7 @@ class SnapshotTracer:
             self._module_source_lines = (
                 Path(self._origin_file).read_text(encoding="utf-8").splitlines()
             )
-        sys.settrace(self._trace_func)
+        sys.settrace(self._global_trace_func)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

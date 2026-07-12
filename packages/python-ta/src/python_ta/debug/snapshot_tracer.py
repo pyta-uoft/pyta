@@ -9,7 +9,7 @@ import socket
 import sys
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -65,6 +65,7 @@ class SnapshotTracer:
         self._snapshot_args["memory_viz_args"] = copy.deepcopy(kwargs.get("memory_viz_args", []))
         self._snapshot_args["exclude_frames"] = copy.deepcopy(kwargs.get("exclude_frames", []))
         self._snapshot_args["exclude_frames"].append("_trace_func")
+        self._snapshot_args["exclude_frames"].append("_global_trace_func")
         self.id_tracker = IDTracker()
 
         self.webstepper = webstepper
@@ -73,27 +74,28 @@ class SnapshotTracer:
         self._origin_file = None
         self._module_source_lines = None
 
-    def _global_trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
+    def _global_trace_func(
+        self, frame: types.FrameType, event: str, _arg: Any
+    ) -> Callable[[types.FrameType, str, Any], None] | None:
         """Global trace function that handles 'call' events to determine which functions to trace into."""
-        if event == "call":
-            if self._origin_file is None:
-                return None
-            # Only trace functions in the same module as the calling function.
-            called_file = os.path.normcase(os.path.abspath(frame.f_code.co_filename))
-            if called_file == self._origin_file and frame.f_code.co_name not in (
-                "_trace_func",
-                "_global_trace_func",
-            ):
-                self._start_lineno = min(self._start_lineno, frame.f_code.co_firstlineno)
-                self._end_lineno = max(
-                    self._end_lineno,
-                    frame.f_code.co_firstlineno + len(inspect.getsourcelines(frame)[0]) - 1,
-                )
-                # Return self._trace_func to trace into the called function, otherwise return None to skip tracing.
-                return self._trace_func
+        if event != "call" or self._origin_file is None:
             return None
+        # Only trace functions in the same module as the calling function.
+        called_file = os.path.normcase(os.path.abspath(frame.f_code.co_filename))
+        if called_file == self._origin_file and frame.f_code.co_name not in (
+            self._trace_func.__name__,
+            self._global_trace_func.__name__,
+        ):
+            self._start_lineno = min(self._start_lineno, frame.f_code.co_firstlineno)
+            self._end_lineno = max(
+                self._end_lineno,
+                frame.f_code.co_firstlineno + len(inspect.getsourcelines(frame)[0]) - 1,
+            )
+            # Return self._trace_func to trace into the called function, otherwise return None to skip tracing.
+            return self._trace_func
+        return None
 
-    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> Any:
+    def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Local trace function set on each frame to take a snapshot of the variables in the functions specified in `self.include`."""
         if event == "line":
             self._start_lineno = min(self._start_lineno, frame.f_lineno)

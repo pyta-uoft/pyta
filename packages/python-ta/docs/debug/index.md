@@ -489,7 +489,7 @@ if __name__ == '__main__':
     func_multi_line()
 ```
 
-When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. These snapshots can be accessed via the `snapshots` property. If `webstepper=True`, the snapshots are rendered into an HTML visualization. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
+When this function runs, MemoryViz snapshots are captured and stored internally in the `SnapshotTracer`. These snapshots can be accessed via the `snapshots` property. If `webstepper=True`, the snapshots are rendered into an HTML visualization. The context manager will step into Python functions defined in the same module as the traced context; calls into external modules and built-ins are not traced. For the expected output, refer to the snapshots in `tests/test_debug/snapshot_tracer_testing_snapshots/func_multi_line`.
 
 ### API
 
@@ -504,5 +504,4 @@ When this function runs, MemoryViz snapshots are captured and stored internally 
 The `SnapshotTracer` has the following limitations:
 
 1. Due to differences in Python interpreters, this context manager only works with Python versions >= 3.10.
-2. The context manager does not step into any function calls. Calling functions within the traced function may lead to undefined behavior.
-3. `SnapshotTracer` uses [`sys.settrace`] to update variable states, and therefore is not compatible with other libraries (e.g., debuggers, code coverage tools).
+2. `SnapshotTracer` uses [`sys.settrace`] to update variable states, and therefore is not compatible with other libraries (e.g., debuggers, code coverage tools).

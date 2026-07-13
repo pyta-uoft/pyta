@@ -26,6 +26,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `snapshots` property to `SnapshotTracer` to make captured snapshot data available through the public API.
 - Added `json` response format to `AccumulationTable` and `RecursionTable`
 - Added `csv` response format to `RecursionTable`
+- Modified `SnapshotTracer` to trace into calls of functions defined in the same module that `SnapshotTracer` is called.
 
 ### 💫 New checkers
 

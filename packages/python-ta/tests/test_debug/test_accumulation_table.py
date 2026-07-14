@@ -450,7 +450,7 @@ def test_uninitialized_loop_accumulators() -> None:
                 _ = number
 
 
-@pytest.fixture(params=["table", "csv"])
+@pytest.fixture(params=["table", "csv", "json"])
 def output_format(request):
     """Parametrized fixture for output format."""
     return request.param
@@ -478,7 +478,7 @@ def get_expected_content(format_type):
 5,50,150,30.0,"[(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0)]"
 6,60,210,35.0,"[(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0), (210, 35.0)]"
 """
-    else:
+    elif format_type == "table":
         return """iteration    number    sum_so_far    avg_so_far    list_so_far
 -----------  --------  ------------  ------------  ---------------------------------------------------------------------------
 0            N/A       0             None          []
@@ -488,6 +488,8 @@ def get_expected_content(format_type):
 4            40        100           25.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0)]
 5            50        150           30.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0)]
 6            60        210           35.0          [(10, 10.0), (30, 15.0), (60, 20.0), (100, 25.0), (150, 30.0), (210, 35.0)]"""
+    else:
+        return """[{"iteration": [0, 1, 2, 3, 4, 5, 6], "number": ["N/A", 10, 20, 30, 40, 50, 60], "sum_so_far": [0, 10, 30, 60, 100, 150, 210], "avg_so_far": [null, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0], "list_so_far": [[], [[10, 10.0]], [[10, 10.0], [30, 15.0]], [[10, 10.0], [30, 15.0], [60, 20.0]], [[10, 10.0], [30, 15.0], [60, 20.0], [100, 25.0]], [[10, 10.0], [30, 15.0], [60, 20.0], [100, 25.0], [150, 30.0]], [[10, 10.0], [30, 15.0], [60, 20.0], [100, 25.0], [150, 30.0], [210, 35.0]]]}]"""
 
 
 def test_output_to_existing_file(existing_file_content, output_format):
@@ -497,9 +499,7 @@ def test_output_to_existing_file(existing_file_content, output_format):
     list_so_far = []
     avg_so_far = None
 
-    table_kwargs = {"output": str(existing_file_content)}
-    if output_format == "csv":
-        table_kwargs["format"] = "csv"
+    table_kwargs = {"output": str(existing_file_content), "format": str(output_format)}
 
     with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], **table_kwargs):
         for number in numbers:
@@ -527,9 +527,7 @@ def test_output_to_new_file(tmp_path, output_format):
     list_so_far = []
     avg_so_far = None
 
-    table_kwargs = {"output": str(output_file)}
-    if output_format == "csv":
-        table_kwargs["format"] = "csv"
+    table_kwargs = {"output": str(output_file), "format": str(output_format)}
 
     with AccumulationTable(["sum_so_far", "avg_so_far", "list_so_far"], **table_kwargs):
         for number in numbers:

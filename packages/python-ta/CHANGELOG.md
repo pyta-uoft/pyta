@@ -24,6 +24,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update configuration options to support `.toml` files
 - Updated plain text and HTML PyTA reports to not show sections with no errors and only show 'good job' message once when there are no errors in either section.
 - Added `snapshots` property to `SnapshotTracer` to make captured snapshot data available through the public API.
+- Added `json` response format to `AccumulationTable` and `RecursionTable`
+- Added `csv` response format to `RecursionTable`
+- Modified `SnapshotTracer` to trace into calls of functions defined in the same module that `SnapshotTracer` is called.
 
 ### 💫 New checkers
 

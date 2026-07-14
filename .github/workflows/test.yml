@@ -11,7 +11,7 @@ jobs:
   prek:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: j178/prek-action@v2
         env:
           SKIP: no-commit-to-branch
@@ -24,7 +24,7 @@ jobs:
         dependency: ["base", "z3-solver"]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
@@ -37,7 +37,7 @@ jobs:
         run: |
           sudo apt-get install -y graphviz
       - name: Cache pip
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('packages/python-ta/pyproject.yml') }}
@@ -115,13 +115,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
           python-version: 3.14
       - name: Cache pip
-        uses: actions/cache@v5.0.5
+        uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('packages/python-ta/pyproject.yml') }}

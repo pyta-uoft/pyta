@@ -1,15 +1,31 @@
 from __future__ import annotations
 
+import configparser
 import sys
 from os import path
 from typing import Optional
 
 import click
+import toml
 
 from python_ta import __version__, check_all, check_errors
-from python_ta.config import DEFAULT_CONFIG_LOCATION
+from python_ta.config import DEFAULT_CONFIG_LOCATION, flatten
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+
+
+def _load_config_as_dict(config_path: str) -> dict[str, str]:
+    """Load a config file and return it as a dictionary of option: value pairs."""
+    if config_path.endswith(".toml"):
+        return flatten(toml.load(config_path).get("tool", {}).get("python-ta", {}))
+    else:
+        parser = configparser.ConfigParser()
+        parser.read(config_path)
+        return {
+            option: value
+            for section in parser.sections()
+            for option, value in parser.items(section)
+        }
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -36,8 +52,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 )
 @click.option(
     "--output-format",
-    help="Specify the format of output report. This option is ignored if a --config argument is specified.",
-    default="pyta-html",
+    help="Specify the format of output report. This option overrides the output format specified in the config file.",
+    default=None,
 )
 def main(
     version: bool,
@@ -46,7 +62,7 @@ def main(
     filenames: list[str],
     exit_zero: bool,
     generate_config: bool,
-    output_format: str,
+    output_format: Optional[str],
 ) -> None:
     """A code checking tool for teaching Python.
     FILENAMES can be a string of a directory, or file to check (`.py` extension optional) or
@@ -67,10 +83,17 @@ def main(
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]
 
-    if config is None:
+    if output_format and config:
+        # If both specified, use the config file and override the output format
+        config_data = _load_config_as_dict(config)
+        config_data["output-format"] = output_format
+        reporter = checker(module_name=paths, config=config_data)
+    elif output_format:
         reporter = checker(module_name=paths, config={"output-format": output_format})
-    else:
+    elif config:
         reporter = checker(module_name=paths, config=config)
+    else:
+        reporter = checker(module_name=paths)
 
     if not exit_zero and reporter.has_messages():
         sys.exit(1)

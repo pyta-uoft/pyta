@@ -7,12 +7,18 @@ from os import path
 from click.testing import CliRunner
 
 import python_ta
+import python_ta.__main__ as pyta_main
 from python_ta.__main__ import main
 from python_ta.config import DEFAULT_CONFIG_LOCATION
 
 SOURCE_ROOT = path.normpath(path.join(path.dirname(__file__), "../../.."))
 TEST_ROOT = path.join(SOURCE_ROOT, "packages", "python-ta", "tests")
 TEST_CONFIG = path.join(TEST_ROOT, "test.pylintrc")
+
+
+class _DummyReporter:
+    def has_messages(self) -> bool:
+        return False
 
 
 def test_check_no_errors_zero() -> None:
@@ -121,3 +127,113 @@ def test_no_config() -> None:
     )
 
     assert output.exit_code == 0
+
+
+def test_output_format_overrides_config_value(monkeypatch, tmp_path) -> None:
+    """Test that CLI output-format takes precedence if both --config and --output-format are passed."""
+    config_file = tmp_path / "pyproject.toml"
+    config_file.write_text(
+        """
+        [tool.python-ta]
+        output-format = "pyta-html"
+        max-line-length = 90
+        """.strip(),
+        encoding="utf-8",
+    )
+
+    calls = []
+
+    def fake_checker(*, module_name, config=None):
+        calls.append({"module_name": module_name, "config": config})
+        return _DummyReporter()
+
+    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--config",
+            str(config_file),
+            "--output-format",
+            "pyta-plain",
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert isinstance(calls[0]["config"], dict)
+    assert calls[0]["config"]["output-format"] == "pyta-plain"
+    assert calls[0]["config"]["max-line-length"] == 90
+
+
+def test_output_format_only_passes_output_format_dict(monkeypatch) -> None:
+    """Test that checker receives only the override dict if only --output-format is passed."""
+    calls = []
+
+    def fake_checker(*, module_name, config=None):
+        calls.append({"module_name": module_name, "config": config})
+        return _DummyReporter()
+
+    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--output-format",
+            "pyta-plain",
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["config"] == {"output-format": "pyta-plain"}
+
+
+def test_config_only_passes_config_path(monkeypatch) -> None:
+    """Test that checker receives the config path string if only --config is passed."""
+    calls = []
+
+    def fake_checker(*, module_name, config=None):
+        calls.append({"module_name": module_name, "config": config})
+        return _DummyReporter()
+
+    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--config",
+            TEST_CONFIG,
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["config"] == path.abspath(TEST_CONFIG)
+
+
+def test_no_output_format_or_config_uses_defaults(monkeypatch) -> None:
+    """Test that checker is called without config if neither --config nor --output-format is passed."""
+    calls = []
+
+    def fake_checker(*, module_name, **kwargs):
+        calls.append({"module_name": module_name, "kwargs": kwargs})
+        return _DummyReporter()
+
+    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [path.join(TEST_ROOT, "fixtures", "no_errors.py")],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["kwargs"] == {}

@@ -36,8 +36,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 )
 @click.option(
     "--output-format",
-    help="Specify the format of output report. This option is ignored if a --config argument is specified.",
-    default="pyta-html",
+    help="Specify the format of output report. This option overrides the output format specified in the config file.",
+    default=None,
 )
 def main(
     version: bool,
@@ -46,7 +46,7 @@ def main(
     filenames: list[str],
     exit_zero: bool,
     generate_config: bool,
-    output_format: str,
+    output_format: Optional[str],
 ) -> None:
     """A code checking tool for teaching Python.
     FILENAMES can be a string of a directory, or file to check (`.py` extension optional) or
@@ -67,10 +67,19 @@ def main(
     checker = check_errors if errors_only else check_all
     paths = [click.format_filename(fn) for fn in filenames]
 
-    if config is None:
+    if output_format and config:
+        # If both specified, use the config file and override the output format
+        reporter = checker(
+            module_name=paths,
+            config=config,
+            pylint_args=["--output-format", output_format],
+        )
+    elif output_format:
         reporter = checker(module_name=paths, config={"output-format": output_format})
-    else:
+    elif config:
         reporter = checker(module_name=paths, config=config)
+    else:
+        reporter = checker(module_name=paths)
 
     if not exit_zero and reporter.has_messages():
         sys.exit(1)

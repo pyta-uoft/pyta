@@ -48,9 +48,14 @@ def setup_linter(
     local_config: Union[dict[str, Any], str],
     load_default_config: bool,
     output: Optional[Union[str, IO]],
+    pylint_args: Optional[list[str]] = None,
 ) -> tuple[PyLinter, Union[BaseReporter, MultiReporter]]:
     """Set up the linter and reporter for the check."""
-    linter = reset_linter(config=local_config, load_default_config=load_default_config)
+    linter = reset_linter(
+        config=local_config,
+        load_default_config=load_default_config,
+        pylint_args=pylint_args,
+    )
     current_reporter = linter.reporter
     current_reporter.set_output(output)
     messages_config_path = linter.config.messages_config_path
@@ -70,6 +75,7 @@ def check_file(
     is_any_file_checked: bool,
     current_reporter: Union[BaseReporter, MultiReporter],
     f_paths: list,
+    pylint_args: Optional[list[str]] = None,
 ) -> tuple[bool, PyLinter]:
     """Perform linting on a single Python file using the provided linter and configuration"""
     # Load config file in user location. Construct new linter each
@@ -79,6 +85,7 @@ def check_file(
         config=local_config,
         file_linted=file_py,
         load_default_config=load_default_config,
+        pylint_args=pylint_args,
     )
 
     if autoformat:
@@ -146,6 +153,7 @@ def reset_linter(
     config: Optional[Union[dict, str]] = None,
     file_linted: Optional[AnyStr] = None,
     load_default_config: bool = True,
+    pylint_args: Optional[list[str]] = None,
 ) -> PyLinter:
     """Construct a new linter. Register config and checker plugins.
 
@@ -281,7 +289,7 @@ def reset_linter(
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
     set_config = load_config
 
-    output_format_override = _get_output_format_override(config)
+    output_format_override = _get_output_format_override(config, pylint_args)
 
     reporter_class_path = _get_reporter_class_path(output_format_override)
     reporter_class = _load_reporter_by_class(reporter_class_path)
@@ -293,7 +301,7 @@ def reset_linter(
         set_config = override_config
 
     if isinstance(config, str) and config != "":
-        set_config(linter, config)
+        set_config(linter, config, pylint_args=pylint_args)
     else:
         # If available, use config file at directory of the file being linted.
         config_location = None
@@ -302,7 +310,7 @@ def reset_linter(
 
         # Load or override the options if there is a config file in the current directory.
         if config_location:
-            set_config(linter, config_location)
+            set_config(linter, config_location, pylint_args=pylint_args)
 
         # Override part of the default config, with a dict of config options.
         # Note: these configs are overridden by config file in user's codebase
@@ -455,8 +463,15 @@ def verify_pre_check(
     return True
 
 
-def _get_output_format_override(config: Optional[Union[str, dict]]) -> Optional[str]:
+def _get_output_format_override(
+    config: Optional[Union[str, dict]], pylint_args: Optional[list[str]] = None
+) -> Optional[str]:
     """Retrieve the output format override from the parsed configuration prematurely"""
+    if pylint_args and "--output-format" in pylint_args:
+        output_format_index = pylint_args.index("--output-format")
+        if output_format_index + 1 < len(pylint_args):
+            return pylint_args[output_format_index + 1]
+
     output_format_override = None
     if isinstance(config, str) and config != "":
         config_path = os.path.abspath(config)

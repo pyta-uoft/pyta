@@ -43,6 +43,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Existing opt-in users will receive a new anonymous client ID after upgrading.
 - Fixed webstepper build to include only a single file.
 - Fixed bug in `invalid_name_checker.py` that allowed three leading underscores in `_check_method_and_attr_name`
+- Fixed PyTA CLI behaviour to prioritze the output format specified by the `--output-format` flag over the `config` file's `output-format` setting
 
 ### 🔧 Internal changes
 

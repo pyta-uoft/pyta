@@ -143,8 +143,8 @@ def test_output_format_overrides_config_value(monkeypatch, tmp_path) -> None:
 
     calls = []
 
-    def fake_checker(*, module_name, config=None):
-        calls.append({"module_name": module_name, "config": config})
+    def fake_checker(*, module_name, config=None, pylint_args=None):
+        calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
         return _DummyReporter()
 
     monkeypatch.setattr(pyta_main, "check_all", fake_checker)
@@ -163,17 +163,16 @@ def test_output_format_overrides_config_value(monkeypatch, tmp_path) -> None:
 
     assert result.exit_code == 0
     assert len(calls) == 1
-    assert isinstance(calls[0]["config"], dict)
-    assert calls[0]["config"]["output-format"] == "pyta-plain"
-    assert calls[0]["config"]["max-line-length"] == 90
+    assert calls[0]["config"] == str(config_file)
+    assert calls[0]["pylint_args"] == ["--output-format", "pyta-plain"]
 
 
 def test_output_format_only_passes_output_format_dict(monkeypatch) -> None:
     """Test that checker receives only the override dict if only --output-format is passed."""
     calls = []
 
-    def fake_checker(*, module_name, config=None):
-        calls.append({"module_name": module_name, "config": config})
+    def fake_checker(*, module_name, config=None, pylint_args=None):
+        calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
         return _DummyReporter()
 
     monkeypatch.setattr(pyta_main, "check_all", fake_checker)
@@ -191,14 +190,15 @@ def test_output_format_only_passes_output_format_dict(monkeypatch) -> None:
     assert result.exit_code == 0
     assert len(calls) == 1
     assert calls[0]["config"] == {"output-format": "pyta-plain"}
+    assert calls[0]["pylint_args"] is None
 
 
 def test_config_only_passes_config_path(monkeypatch) -> None:
     """Test that checker receives the config path string if only --config is passed."""
     calls = []
 
-    def fake_checker(*, module_name, config=None):
-        calls.append({"module_name": module_name, "config": config})
+    def fake_checker(*, module_name, config=None, pylint_args=None):
+        calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
         return _DummyReporter()
 
     monkeypatch.setattr(pyta_main, "check_all", fake_checker)
@@ -216,6 +216,7 @@ def test_config_only_passes_config_path(monkeypatch) -> None:
     assert result.exit_code == 0
     assert len(calls) == 1
     assert calls[0]["config"] == path.abspath(TEST_CONFIG)
+    assert calls[0]["pylint_args"] is None
 
 
 def test_no_output_format_or_config_uses_defaults(monkeypatch) -> None:

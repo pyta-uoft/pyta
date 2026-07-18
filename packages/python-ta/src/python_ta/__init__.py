@@ -57,6 +57,7 @@ def check_errors(
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
     on_verify_fail: Literal["log", "raise"] = "log",
+    pylint_args: Optional[list[str]] = None,
 ) -> PythonTaReporter:
     """Check a module for errors, printing a report."""
     return _check(
@@ -67,6 +68,7 @@ def check_errors(
         load_default_config=load_default_config,
         autoformat=autoformat,
         on_verify_fail=on_verify_fail,
+        pylint_args=pylint_args,
     )
 
 
@@ -77,6 +79,7 @@ def check_all(
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
     on_verify_fail: Literal["log", "raise"] = "log",
+    pylint_args: Optional[list[str]] = None,
 ) -> PythonTaReporter:
     """Analyse one or more Python modules for code issues and display the results.
 
@@ -106,6 +109,8 @@ def check_all(
             Determines how to handle files that cannot be checked. If set to "log" (default), an error
             message is logged and execution continues. If set to "raise", an error is raised immediately to stop
             execution.
+        pylint_args:
+            A list of command-line arguments to pass to pylint.
 
     Returns:
         The ``PythonTaReporter`` object that generated the report.
@@ -118,6 +123,7 @@ def check_all(
         load_default_config=load_default_config,
         autoformat=autoformat,
         on_verify_fail=on_verify_fail,
+        pylint_args=pylint_args,
     )
 
 
@@ -129,6 +135,7 @@ def _check(
     load_default_config: bool = True,
     autoformat: Optional[bool] = False,
     on_verify_fail: Literal["log", "raise"] = "log",
+    pylint_args: Optional[list[str]] = None,
 ) -> PythonTaReporter:
     """Check a module for problems, printing a report.
 
@@ -145,10 +152,16 @@ def _check(
     `autoformat` is used to specify whether the black formatting tool is run. It is not run by default.
     `on_verify_fail` determines how to handle files that cannot be checked. If set to "log" (default), an error
      message is logged and execution continues. If set to "raise", an error is raised immediately to stop execution.
+    `pylint_args` is a list of command-line arguments to pass to pylint.
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
-    linter, current_reporter = setup_linter(local_config, load_default_config, output)
+    linter, current_reporter = setup_linter(
+        local_config,
+        load_default_config,
+        output,
+        pylint_args=pylint_args,
+    )
     try:
         # Flag indicating whether at least one file has been checked
         is_any_file_checked = False
@@ -173,6 +186,7 @@ def _check(
                     is_any_file_checked=is_any_file_checked,
                     current_reporter=current_reporter,
                     f_paths=f_paths,
+                    pylint_args=pylint_args,
                 )
                 current_reporter = linter.reporter
                 current_reporter.print_messages(level)

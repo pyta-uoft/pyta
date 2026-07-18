@@ -1,31 +1,15 @@
 from __future__ import annotations
 
-import configparser
 import sys
 from os import path
 from typing import Optional
 
 import click
-import toml
 
 from python_ta import __version__, check_all, check_errors
-from python_ta.config import DEFAULT_CONFIG_LOCATION, flatten
+from python_ta.config import DEFAULT_CONFIG_LOCATION
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
-
-
-def _load_config_as_dict(config_path: str) -> dict[str, str]:
-    """Load a config file and return it as a dictionary of option: value pairs."""
-    if config_path.endswith(".toml"):
-        return flatten(toml.load(config_path).get("tool", {}).get("python-ta", {}))
-    else:
-        parser = configparser.ConfigParser()
-        parser.read(config_path)
-        return {
-            option: value
-            for section in parser.sections()
-            for option, value in parser.items(section)
-        }
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -85,9 +69,11 @@ def main(
 
     if output_format and config:
         # If both specified, use the config file and override the output format
-        config_data = _load_config_as_dict(config)
-        config_data["output-format"] = output_format
-        reporter = checker(module_name=paths, config=config_data)
+        reporter = checker(
+            module_name=paths,
+            config=config,
+            pylint_args=["--output-format", output_format],
+        )
     elif output_format:
         reporter = checker(module_name=paths, config={"output-format": output_format})
     elif config:

@@ -35,14 +35,24 @@ def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
         return os.path.join(curr_dir, "config", "pyproject.toml")
 
 
-def load_config(linter: PyLinter, config_location: AnyStr) -> None:
+def load_config(
+    linter: PyLinter,
+    config_location: AnyStr,
+    pylint_args: Optional[list[str]] = None,
+) -> None:
     """Load configuration into the linter."""
     args_list = _get_pyta_toml_args(config_location, linter)
+    if pylint_args:
+        args_list.extend(pylint_args)
     _config_initialization(linter, args_list=args_list, config_file=config_location)
     linter.config_file = config_location
 
 
-def override_config(linter: PyLinter, config_location: AnyStr) -> None:
+def override_config(
+    linter: PyLinter,
+    config_location: AnyStr,
+    pylint_args: Optional[list[str]] = None,
+) -> None:
     """Override the default linter configuration options (if possible).
 
     Snippets taken from pylint.config.config_initialization.
@@ -58,6 +68,8 @@ def override_config(linter: PyLinter, config_location: AnyStr) -> None:
         sys.exit(32)
 
     config_args.extend(_get_pyta_toml_args(config_location, linter))
+    if pylint_args:
+        config_args.extend(pylint_args)
 
     # Override the config options by parsing the provided file.
     try:

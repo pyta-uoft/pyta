@@ -24,6 +24,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update configuration options to support `.toml` files
 - Updated plain text and HTML PyTA reports to not show sections with no errors and only show 'good job' message once when there are no errors in either section.
 - Added `snapshots` property to `SnapshotTracer` to make captured snapshot data available through the public API.
+- Added `json` response format to `AccumulationTable` and `RecursionTable`
+- Added `csv` response format to `RecursionTable`
+- Modified `SnapshotTracer` to trace into calls of functions defined in the same module that `SnapshotTracer` is called.
 - Added `webstepper_options` attribute to `SnapshotTracer` to allow configuration options for MemoryViz Webstepper, including the `line_context` option.
 
 ### 💫 New checkers
@@ -41,6 +44,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Existing opt-in users will receive a new anonymous client ID after upgrading.
 - Fixed webstepper build to include only a single file.
 - Fixed bug in `invalid_name_checker.py` that allowed three leading underscores in `_check_method_and_attr_name`
+- Fixed PyTA CLI behaviour to prioritze the output format specified by the `--output-format` flag over the `config` file's `output-format` setting
 
 ### 🔧 Internal changes
 

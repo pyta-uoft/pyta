@@ -109,7 +109,6 @@ class SnapshotTracer:
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Local trace function set on each frame to take a snapshot of the variables in the functions specified in `self.include`."""
         if event == "line":
-            self._start_lineno = min(self._start_lineno, frame.f_lineno)
             self._end_lineno = max(self._end_lineno, frame.f_lineno)
             snapshot_output = snapshot(
                 id_tracker=self.id_tracker,
@@ -126,6 +125,9 @@ class SnapshotTracer:
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
+        self._start_lineno = (
+            func_frame.f_lineno + 1
+        )  # add 1 to account for the line of the with statement
         func_frame.f_trace = self._trace_func
         origin_file = func_frame.f_globals.get("__file__")
         self._origin_file = (
@@ -165,7 +167,7 @@ class SnapshotTracer:
                 image_replacements[image_filename] = data_uri
 
         for filename, data_uri in image_replacements.items():
-            bundle_content = bundle_content.replace(filename, data_uri)
+            bundle_content = bundle_content.replace(f'a.p+"{filename}"', f'"{data_uri}"')
 
         template_loader = FileSystemLoader(webstepper_dir)
         template_env = Environment(loader=template_loader)
@@ -195,7 +197,7 @@ class SnapshotTracer:
         Return a tuple of the code string and the starting line number.
         """
         if self._module_source_lines is None or self._start_lineno > self._end_lineno:
-            return ""
+            return "", 1
         line_context = self._webstepper_options.get("line_context", 0)
         start_index = max(self._start_lineno - 1 - line_context, 0)
         end_index = min(self._end_lineno + line_context, len(self._module_source_lines))

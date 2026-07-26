@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 from os import path
 from typing import Optional
 
@@ -24,7 +25,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 )
 @click.option("-E", "--errors-only", is_flag=True, help="Displays errors only", default=False)
 @click.argument(
-    "filenames", nargs=-1, type=click.Path(exists=True, dir_okay=True, resolve_path=True)
+    "filenames", nargs=-1, type=click.Path(dir_okay=True, resolve_path=True, allow_dash=True)
 )
 @click.option("--exit-zero", is_flag=True, help="Always return with status code 0", default=False)
 @click.option(
@@ -39,6 +40,12 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Specify the format of output report. This option overrides the output format specified in the config file.",
     default=None,
 )
+@click.option(
+    "--stdin",
+    is_flag=True,
+    help="Read file contents from stdin instead of a file",
+    default=False,
+)
 def main(
     version: bool,
     config: Optional[str],
@@ -47,10 +54,12 @@ def main(
     exit_zero: bool,
     generate_config: bool,
     output_format: Optional[str],
+    stdin: bool,
 ) -> None:
     """A code checking tool for teaching Python.
     FILENAMES can be a string of a directory, or file to check (`.py` extension optional) or
-    a list of strings of directories or files.
+    a list of strings of directories or files. Pass - as a filename or use --stdin to read
+    from standard input.
     """
     if version:
         print(__version__)
@@ -65,26 +74,49 @@ def main(
             sys.exit(0)
 
     checker = check_errors if errors_only else check_all
-    paths = [click.format_filename(fn) for fn in filenames]
+    use_stdin = stdin or (len(filenames) == 1 and filenames[0] == "-")
 
-    if output_format and config:
-        # If both specified, use the config file and override the output format
-        reporter = checker(
-            module_name=paths,
-            config=config,
-            pylint_args=["--output-format", output_format],
-        )
-    elif output_format:
-        reporter = checker(module_name=paths, config={"output-format": output_format})
-    elif config:
-        reporter = checker(module_name=paths, config=config)
+    if use_stdin:
+        stdin_contents = sys.stdin.read()
+        # Write the contents to a temporary file
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".py", delete=False, encoding="utf-8"
+        ) as temp_file:
+            temp_file.write(stdin_contents)
+            temp_file_path = temp_file.name
+
+        try:
+            paths = [temp_file_path]
+            reporter = _invoke_checker(checker, paths, config, output_format)
+        finally:
+            # Clean up the temporary file
+            path.os.unlink(temp_file_path)
+
     else:
-        reporter = checker(module_name=paths)
+        paths = [click.format_filename(fn) for fn in filenames]
+        reporter = _invoke_checker(checker, paths, config, output_format)
 
     if not exit_zero and reporter.has_messages():
         sys.exit(1)
     else:
         sys.exit(0)
+
+
+def _invoke_checker(checker, paths, config, output_format):
+    """Invoke the checker with the appropriate arguments based on the provided config and output_format."""
+    if output_format and config:
+        # If both specified, use the config file and override the output format
+        return checker(
+            module_name=paths,
+            config=config,
+            pylint_args=["--output-format", output_format],
+        )
+    elif output_format:
+        return checker(module_name=paths, config={"output-format": output_format})
+    elif config:
+        return checker(module_name=paths, config=config)
+    else:
+        return checker(module_name=paths)
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -27,6 +27,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `json` response format to `AccumulationTable` and `RecursionTable`
 - Added `csv` response format to `RecursionTable`
 - Modified `SnapshotTracer` to trace into calls of functions defined in the same module that `SnapshotTracer` is called.
+- Added `webstepper_options` attribute to `SnapshotTracer` to allow configuration options for MemoryViz Webstepper, including the `line_context` option.
 
 ### 💫 New checkers
 
@@ -44,6 +45,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed webstepper build to include only a single file.
 - Fixed bug in `invalid_name_checker.py` that allowed three leading underscores in `_check_method_and_attr_name`
 - Fixed PyTA CLI behaviour to prioritze the output format specified by the `--output-format` flag over the `config` file's `output-format` setting
+- Fix the `static_type_checker.py` so that it calls `mypy` with the Python interpreter
 
 ### 🔧 Internal changes
 

@@ -1,5 +1,6 @@
 import re
 import subprocess
+import sys
 
 from astroid import nodes
 from pylint.checkers import BaseRawFileChecker
@@ -88,7 +89,7 @@ class StaticTypeChecker(BaseRawFileChecker):
         for arg in self.linter.config.mypy_options:
             mypy_options.append("--" + arg)
 
-        call = ["mypy", filename] + mypy_options
+        call = [sys.executable, "-m", "mypy", filename] + mypy_options
         ret = subprocess.run(call, capture_output=True, text=True)
         result = ret.stdout
 

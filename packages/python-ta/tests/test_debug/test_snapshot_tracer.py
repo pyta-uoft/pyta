@@ -4,6 +4,7 @@ import importlib.util
 import inspect
 import os.path
 import sys
+import warnings
 from typing import Any, Iterator
 from unittest.mock import patch
 
@@ -197,6 +198,24 @@ def func_calls_external_helper(external_helper: Any) -> SnapshotTracer:
     return tracer
 
 
+def func_webstepper_options() -> None:
+    """
+    Function for testing SnapshotTracer with webstepper_options.
+    """
+    with SnapshotTracer(
+        include_frames=(r"^func_webstepper_options$",),
+        exclude_vars=("tracer",),
+        webstepper=True,
+        webstepper_options={"line_context": 2},
+        memory_viz_args=MEMORY_VIZ_ARGS,
+        memory_viz_version=MEMORY_VIZ_VERSION,
+    ) as tracer:
+        nums = [1, 2, 3]
+        for i in range(len(nums)):
+            nums[i] = nums[i] + 1
+    return tracer
+
+
 # Helpers
 
 
@@ -376,3 +395,37 @@ class TestSnapshotTracer:
         """
         func_one_line()
         assert sys.gettrace() is None
+
+    def test_webstepper_options_warning_when_webstepper_false(self):
+        """
+        Test that a warning is raised when webstepper_options are provided but webstepper=False.
+        """
+        with pytest.warns(UserWarning):
+            SnapshotTracer(webstepper=False, webstepper_options={"line_context": 2})
+
+    def test_webstepper_options_no_warning_when_webstepper_true(self):
+        """
+        Test that no warning is raised when webstepper_options are provided and webstepper=True.
+        """
+        with patch("python_ta.debug.snapshot_tracer.open_html_in_browser"):
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", UserWarning)
+                SnapshotTracer(webstepper=True, webstepper_options={"line_context": 2})
+
+    def test_line_context_expands_code(self):
+        """
+        Test that line_context produces more lines of code than without it.
+        """
+        with patch("python_ta.debug.snapshot_tracer.open_html_in_browser"):
+            tracer_no_context = func_open_webstepper()
+            tracer_with_context = func_webstepper_options()
+
+        assert len(tracer_with_context.snapshots) >= len(tracer_no_context.snapshots)
+
+    def test_webstepper_options_line_context_with_html(self):
+        """
+        Test that SnapshotTracer with line_context opens the Webstepper HTML page.
+        """
+        with patch("python_ta.debug.snapshot_tracer.open_html_in_browser") as mock_open:
+            func_webstepper_options()
+            mock_open.assert_called_once()

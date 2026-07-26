@@ -28,6 +28,7 @@ class SnapshotTracer:
     Instance attributes:
         webstepper: Opens the web-based visualizer.
         snapshots: A list of dictionaries that maps the code line number and corresponding MemoryViz JSON snapshot at each traced line.
+        _webstepper_options: A dictionary of configuration options for the webstepper visualizer.
         _snapshot_args: A dictionary of keyword arguments to pass to the `snapshot` function.
         _start_lineno: Line number of the first line to be displayed in the code section of the Webstepper.
         _end_lineno: Line number of the last line to be displayed in the code section of the Webstepper.
@@ -36,6 +37,7 @@ class SnapshotTracer:
     """
 
     webstepper: bool
+    _webstepper_options: dict[str, Any]
     _snapshots: list[dict[str, Any]]
     _snapshot_args: dict[str, Any]
     _start_lineno: int
@@ -47,6 +49,7 @@ class SnapshotTracer:
         self,
         output_directory: Optional[str] = None,
         webstepper: bool = False,
+        webstepper_options: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """Initialize a context manager for snapshot-based debugging.
@@ -54,6 +57,8 @@ class SnapshotTracer:
         Args:
             output_directory: This argument is deprecated; previously used for file-based outputs.
             webstepper: Opens a MemoryViz Webstepper webpage to interactively visualize the resulting memory diagrams.
+            webstepper_options: A dictionary of configuration options for the Webstepper visualizer when webstepper=True.
+                Supported options: line_context, the number of lines of context to show above and below the traced block in the Webstepper view if > 0.
             **kwargs: All other keyword arguments are passed to `python.debug.snapshot`. Refer to the `snapshot` function for more details.
         """
         if sys.version_info < (3, 10, 0):
@@ -69,6 +74,12 @@ class SnapshotTracer:
         self.id_tracker = IDTracker()
 
         self.webstepper = webstepper
+        self._webstepper_options = webstepper_options if webstepper_options is not None else {}
+        if self._webstepper_options and not self.webstepper:
+            warnings.warn(
+                "webstepper_options have no effect when webstepper=False. Set webstepper=True to use webstepper_options.",
+                UserWarning,
+            )
         self._start_lineno = sys.maxsize
         self._end_lineno = 0
         self._origin_file = None
@@ -98,7 +109,6 @@ class SnapshotTracer:
     def _trace_func(self, frame: types.FrameType, event: str, _arg: Any) -> None:
         """Local trace function set on each frame to take a snapshot of the variables in the functions specified in `self.include`."""
         if event == "line":
-            self._start_lineno = min(self._start_lineno, frame.f_lineno)
             self._end_lineno = max(self._end_lineno, frame.f_lineno)
             snapshot_output = snapshot(
                 id_tracker=self.id_tracker,
@@ -115,6 +125,9 @@ class SnapshotTracer:
     def __enter__(self):
         """Set up the trace function to take snapshots at each line of code."""
         func_frame = inspect.getouterframes(inspect.currentframe())[1].frame
+        self._start_lineno = (
+            func_frame.f_lineno + 1
+        )  # add 1 to account for the line of the with statement
         func_frame.f_trace = self._trace_func
         origin_file = func_frame.f_globals.get("__file__")
         self._origin_file = (
@@ -154,15 +167,17 @@ class SnapshotTracer:
                 image_replacements[image_filename] = data_uri
 
         for filename, data_uri in image_replacements.items():
-            bundle_content = bundle_content.replace(filename, data_uri)
+            bundle_content = bundle_content.replace(f'a.p+"{filename}"', f'"{data_uri}"')
 
         template_loader = FileSystemLoader(webstepper_dir)
         template_env = Environment(loader=template_loader)
         template = template_env.get_template("webstepper_template.html.jinja")
 
+        code_text, start_line_number = self._get_code()
+
         rendered_html = template.render(
-            code_text=self._get_code(),
-            start_line_number=self._start_lineno,
+            code_text=code_text,
+            start_line_number=start_line_number,
             memory_viz_data=self._snapshots,
             bundle_content=bundle_content,
         )
@@ -177,14 +192,16 @@ class SnapshotTracer:
 
         open_html_in_browser(html_content, port)
 
-    def _get_code(self) -> str:
-        """Retrieve and save the code string to be displayed in Webstepper."""
+    def _get_code(self) -> tuple[str, int]:
+        """Retrieve and save the code string to be displayed in Webstepper.
+        Return a tuple of the code string and the starting line number.
+        """
         if self._module_source_lines is None or self._start_lineno > self._end_lineno:
-            return ""
-
-        start_index = max(self._start_lineno - 1, 0)
-        end_index = min(self._end_lineno, len(self._module_source_lines))
-        return "\n".join(self._module_source_lines[start_index:end_index])
+            return "", 1
+        line_context = self._webstepper_options.get("line_context", 0)
+        start_index = max(self._start_lineno - 1 - line_context, 0)
+        end_index = min(self._end_lineno + line_context, len(self._module_source_lines))
+        return "\n".join(self._module_source_lines[start_index:end_index]), start_index + 1
 
     @property
     def snapshots(self) -> list[dict[str, Any]]:

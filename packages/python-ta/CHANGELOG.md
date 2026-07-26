@@ -27,6 +27,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `json` response format to `AccumulationTable` and `RecursionTable`
 - Added `csv` response format to `RecursionTable`
 - Modified `SnapshotTracer` to trace into calls of functions defined in the same module that `SnapshotTracer` is called.
+- Added `webstepper_options` attribute to `SnapshotTracer` to allow configuration options for MemoryViz Webstepper, including the `line_context` option.
 
 ### 💫 New checkers
 

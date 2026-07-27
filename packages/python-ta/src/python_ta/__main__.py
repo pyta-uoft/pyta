@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import sys
 import tempfile
 from os import path
@@ -77,20 +78,15 @@ def main(
     use_stdin = stdin or (len(filenames) == 1 and filenames[0] == "-")
 
     if use_stdin:
-        stdin_contents = sys.stdin.read()
-        # Write the contents to a temporary file
+        # Write the contents of stdin to a temporary file
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
+            mode="w", prefix="stdin_", suffix=".py", delete=False, encoding="utf-8"
         ) as temp_file:
-            temp_file.write(stdin_contents)
-            temp_file_path = temp_file.name
-
-        try:
-            paths = [temp_file_path]
-            reporter = _invoke_checker(checker, paths, config, output_format)
-        finally:
-            # Clean up the temporary file
-            path.os.unlink(temp_file_path)
+            shutil.copyfileobj(sys.stdin, temp_file)
+            temp_file.flush()
+            reporter = _invoke_checker(checker, [temp_file.name], config, output_format)
+        # Clean up the temporary file
+        path.os.unlink(temp_file.name)
 
     else:
         paths = [click.format_filename(fn) for fn in filenames]

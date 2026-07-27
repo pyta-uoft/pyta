@@ -78,6 +78,14 @@ You can run PythonTA directly from the command line by passing in a filename or 
 $ python_ta sample.py
 ```
 
+You can also pass Python code directly through standard input (stdin) instead of providing
+a file by using either the `--stdin` flag or `-` as the filename:
+
+```console
+$ echo "x = 1" | python_ta --stdin
+$ echo "x = 1" | python_ta -
+```
+
 ## Learning about the checks
 
 Our {doc}`PythonTA Checks <../checkers/index>` webpage describes all checks that are performed by PythonTA.

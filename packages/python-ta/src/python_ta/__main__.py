@@ -79,6 +79,9 @@ def main(
 
     if use_stdin:
         # Write the contents of stdin to a temporary file
+        # TODO: Replace `delete=False` with `delete_on_close=False` after PythonTA
+        # no longer supports Python 3.11 and earlier. This will allow the temporary
+        # file to be cleaned up automatically by `NamedTemporaryFile`.
         with tempfile.NamedTemporaryFile(
             mode="w", prefix="stdin_", suffix=".py", delete=False, encoding="utf-8"
         ) as temp_file:

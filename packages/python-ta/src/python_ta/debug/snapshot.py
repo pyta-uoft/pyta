@@ -35,9 +35,19 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
         for var in global_vars
         if not var.startswith("__")
         and not inspect.ismodule(global_vars[var])
-        and not inspect.isfunction(global_vars[var])
         and not inspect.isclass(global_vars[var])
-        and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__") == "__main__"
+        and (
+            # Include routines assigned to variables
+            (
+                inspect.isroutine(global_vars[var])
+                and getattr(global_vars[var], "__name__", var) != var
+            )
+            or (
+                not inspect.isroutine(global_vars[var])
+                and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__")
+                == "__main__"
+            )
+        )
     }
     return {"__main__": true_global_vars}
 
@@ -219,6 +229,13 @@ def snapshot_to_json(
                     "name": "class",
                     "id": value_id_diagram,
                     "value": repr(val),
+                }
+            elif inspect.isroutine(val):
+                value_entry = {
+                    "type": ".class",
+                    "name": "function",
+                    "id": value_id_diagram,
+                    "value": getattr(val, "__qualname__", getattr(val, "__name__", repr(val))),
                 }
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance

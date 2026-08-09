@@ -17,6 +17,7 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_testing_snapshots"
 )
 
+
 # Globals used for global-keyword snapshot tests
 SNAPSHOT_GLOBAL_X = 10
 
@@ -695,6 +696,111 @@ def test_snapshot_to_json_dicts_of_dicts():
         {"id": 22, "type": "str", "value": "settingD"},
         {"id": 23, "type": "str", "value": "valueD"},
     ]
+
+
+def test_snapshot_to_json_builtin_function():
+    """
+    Test snapshot_to_json correctly handles built-in functions assigned to variables.
+    """
+    snapshot_data = [{"func1": {"my_func": sum}}]
+    json_data = snapshot_to_json(snapshot_data)
+
+    assert json_data[0] == {
+        "type": ".frame",
+        "name": "func1",
+        "value": {"my_func": 1},
+    }
+    assert json_data[1] == {
+        "type": ".class",
+        "name": "function",
+        "id": 1,
+        "value": "sum",
+    }
+
+
+def test_snapshot_to_json_user_defined_function():
+    """
+    Test snapshot_to_json correctly handles user-defined functions assigned to variables.
+    """
+
+    def my_helper():
+        pass
+
+    snapshot_data = [{"func1": {"my_func": my_helper}}]
+    json_data = snapshot_to_json(snapshot_data)
+
+    assert json_data[0] == {
+        "type": ".frame",
+        "name": "func1",
+        "value": {"my_func": 1},
+    }
+    assert json_data[1] == {
+        "type": ".class",
+        "name": "function",
+        "id": 1,
+        "value": "test_snapshot_to_json_user_defined_function.<locals>.my_helper",
+    }
+
+
+def test_snapshot_to_json_bound_method():
+    """
+    Test snapshot_to_json correctly handles bound methods assigned to variables.
+    """
+    my_list = [1, 2, 3]
+    snapshot_data = [{"func1": {"my_method": my_list.append}}]
+    json_data = snapshot_to_json(snapshot_data)
+
+    assert json_data[0] == {
+        "type": ".frame",
+        "name": "func1",
+        "value": {"my_method": 1},
+    }
+    assert json_data[1] == {
+        "type": ".class",
+        "name": "function",
+        "id": 1,
+        "value": "list.append",
+    }
+
+
+def test_snapshot_to_json_unbound_method():
+    """
+    Test snapshot_to_json correctly handles unbound methods assigned to variables.
+    """
+    snapshot_data = [{"func1": {"my_method": list.append}}]
+    json_data = snapshot_to_json(snapshot_data)
+
+    assert json_data[0] == {
+        "type": ".frame",
+        "name": "func1",
+        "value": {"my_method": 1},
+    }
+    assert json_data[1] == {
+        "type": ".class",
+        "name": "function",
+        "id": 1,
+        "value": "list.append",
+    }
+
+
+def test_snapshot_to_json_lambda():
+    """
+    Test snapshot_to_json correctly handles lambda functions assigned to variables.
+    """
+    snapshot_data = [{"func1": {"my_lambda": lambda x: x * 2}}]
+    json_data = snapshot_to_json(snapshot_data)
+
+    assert json_data[0] == {
+        "type": ".frame",
+        "name": "func1",
+        "value": {"my_lambda": 1},
+    }
+    assert json_data[1] == {
+        "type": ".class",
+        "name": "function",
+        "id": 1,
+        "value": "test_snapshot_to_json_lambda.<locals>.<lambda>",
+    }
 
 
 class OneClass:

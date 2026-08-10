@@ -17,7 +17,6 @@ SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_testing_snapshots"
 )
 
-
 # Globals used for global-keyword snapshot tests
 SNAPSHOT_GLOBAL_X = 10
 
@@ -714,7 +713,7 @@ def test_snapshot_to_json_builtin_function():
         "type": ".class",
         "name": "function",
         "id": 1,
-        "value": "sum",
+        "value": "<built-in function sum>",
     }
 
 
@@ -738,7 +737,7 @@ def test_snapshot_to_json_user_defined_function():
         "type": ".class",
         "name": "function",
         "id": 1,
-        "value": "test_snapshot_to_json_user_defined_function.<locals>.my_helper",
+        "value": "<function test_snapshot_to_json_user_defined_function.<locals>.my_helper>",
     }
 
 
@@ -759,7 +758,7 @@ def test_snapshot_to_json_bound_method():
         "type": ".class",
         "name": "function",
         "id": 1,
-        "value": "list.append",
+        "value": "<bound method list.append>",
     }
 
 
@@ -779,7 +778,7 @@ def test_snapshot_to_json_unbound_method():
         "type": ".class",
         "name": "function",
         "id": 1,
-        "value": "list.append",
+        "value": "<built-in function list.append>",
     }
 
 
@@ -799,7 +798,7 @@ def test_snapshot_to_json_lambda():
         "type": ".class",
         "name": "function",
         "id": 1,
-        "value": "test_snapshot_to_json_lambda.<locals>.<lambda>",
+        "value": "<function test_snapshot_to_json_lambda.<locals>.<lambda>>",
     }
 
 

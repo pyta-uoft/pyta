@@ -230,12 +230,25 @@ def snapshot_to_json(
                     "id": value_id_diagram,
                     "value": repr(val),
                 }
+            # Handle functions and methods
             elif inspect.isroutine(val):
+                self_ = getattr(val, "__self__", None)
+                is_bound = (
+                    self_ is not None
+                    and not inspect.ismodule(self_)
+                    and not isinstance(self_, type)
+                )
+                if is_bound or inspect.ismethod(val):
+                    display_name = f"<bound method {val.__qualname__}>"
+                elif inspect.isbuiltin(val) or inspect.ismethoddescriptor(val):
+                    display_name = f"<built-in function {val.__qualname__}>"
+                else:
+                    display_name = f"<function {val.__qualname__}>"
                 value_entry = {
                     "type": ".class",
                     "name": "function",
                     "id": value_id_diagram,
-                    "value": getattr(val, "__qualname__", getattr(val, "__name__", repr(val))),
+                    "value": display_name,
                 }
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance

@@ -233,15 +233,15 @@ def snapshot_to_json(
             # Handle functions and methods
             elif inspect.isroutine(val):
                 self_ = getattr(val, "__self__", None)
-                is_bound = (
+                is_bound_method = (
                     self_ is not None
                     and not inspect.ismodule(self_)
                     and not isinstance(self_, type)
                 )
-                if is_bound or inspect.ismethod(val):
-                    display_name = f"<bound method {val.__qualname__}>"
-                elif inspect.isbuiltin(val) or inspect.ismethoddescriptor(val):
+                if inspect.isbuiltin(val) and not is_bound_method:
                     display_name = f"<built-in function {val.__qualname__}>"
+                elif is_bound_method or inspect.ismethod(val):
+                    display_name = f"<bound method {val.__qualname__}>"
                 else:
                     display_name = f"<function {val.__qualname__}>"
                 value_entry = {

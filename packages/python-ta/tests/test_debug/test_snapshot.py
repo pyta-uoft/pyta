@@ -778,7 +778,7 @@ def test_snapshot_to_json_unbound_method():
         "type": ".class",
         "name": "function",
         "id": 1,
-        "value": "<built-in function list.append>",
+        "value": "<function list.append>",
     }
 
 

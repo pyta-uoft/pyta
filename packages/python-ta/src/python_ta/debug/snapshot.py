@@ -35,9 +35,19 @@ def get_filtered_global_variables(frame: FrameType) -> dict:
         for var in global_vars
         if not var.startswith("__")
         and not inspect.ismodule(global_vars[var])
-        and not inspect.isfunction(global_vars[var])
         and not inspect.isclass(global_vars[var])
-        and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__") == "__main__"
+        and (
+            # Include routines assigned to variables
+            (
+                inspect.isroutine(global_vars[var])
+                and getattr(global_vars[var], "__name__", var) != var
+            )
+            or (
+                not inspect.isroutine(global_vars[var])
+                and getattr(inspect.getmodule(global_vars[var]), "__name__", "__main__")
+                == "__main__"
+            )
+        )
     }
     return {"__main__": true_global_vars}
 
@@ -219,6 +229,26 @@ def snapshot_to_json(
                     "name": "class",
                     "id": value_id_diagram,
                     "value": repr(val),
+                }
+            # Handle functions and methods
+            elif inspect.isroutine(val):
+                self_ = getattr(val, "__self__", None)
+                is_bound_method = (
+                    self_ is not None
+                    and not inspect.ismodule(self_)
+                    and not isinstance(self_, type)
+                )
+                if inspect.isbuiltin(val) and not is_bound_method:
+                    display_name = f"<built-in function {val.__qualname__}>"
+                elif is_bound_method or inspect.ismethod(val):
+                    display_name = f"<bound method {val.__qualname__}>"
+                else:
+                    display_name = f"<function {val.__qualname__}>"
+                value_entry = {
+                    "type": ".class",
+                    "name": "function",
+                    "id": value_id_diagram,
+                    "value": display_name,
                 }
             # Handle user-defined classes
             elif hasattr(val, "__dict__"):  # Check if val is a user-defined class instance

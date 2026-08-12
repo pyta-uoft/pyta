@@ -52,7 +52,7 @@ watchdog = [
     "watchdog ~= 6.0.0",
 ]
 z3 = [
-    "python-ta-z3 == 2.13.0.dev",
+    "python-ta-z3 == 2.13.0",
     "z3-solver",
 ]
 

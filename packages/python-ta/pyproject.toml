@@ -1,6 +1,6 @@
 [project]
 name = "python-ta"
-version = "2.13.0.dev"
+version = "2.13.0"
 description = "Code checking tool for teaching Python"
 authors = [
     {name = "David Liu", email = "david@cs.toronto.edu"},

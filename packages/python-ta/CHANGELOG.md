@@ -66,6 +66,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added tests for `unnecessary_indexing_checker.py` to improve coverage for `_iterable_if_range` function
 - Added tests for `invalid_name_checker.py` to improve coverage
 - Update tests for `invalid_name_checker.py` for coverage
+- Updated vendored webstepper library to v0.11.0
 
 ## [2.12.1] - 2026-02-10
 

@@ -1,6 +1,6 @@
 [project]
 name = "python-ta"
-version = "2.13.0"
+version = "2.13.1"
 description = "Code checking tool for teaching Python"
 authors = [
     {name = "David Liu", email = "david@cs.toronto.edu"},
@@ -52,7 +52,7 @@ watchdog = [
     "watchdog ~= 6.0.0",
 ]
 z3 = [
-    "python-ta-z3 == 2.13.0",
+    "python-ta-z3 == 2.13.1",
     "z3-solver",
 ]
 

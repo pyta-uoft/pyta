@@ -14,3 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🐛 Bug fixes
 
 ### 🔧 Internal changes
+
+## [2.13.0] - 2026-08-12
+
+Initial release!

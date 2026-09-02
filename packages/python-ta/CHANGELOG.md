@@ -9,6 +9,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Added the ability to pin errors in the HTML report. Pinned errors are highlighted in the report and the table of contents, can be filtered to on their own, and are remembered by the browser across report reloads (including those triggered by the `watch` configuration option).
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes

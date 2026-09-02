@@ -86,6 +86,27 @@ $ echo "x = 1" | python_ta --stdin
 $ echo "x = 1" | python_ta -
 ```
 
+## Working through the report
+
+When a report lists many issues at once, you can **pin** the ones you want to focus on.
+Select the bookmark icon beside any error to pin it: the error is highlighted in the report, and its
+entry in the Table of Contents is highlighted too.
+
+Once you have pinned at least one error, a bookmark button appears in the Table of Contents header
+showing how many errors you have pinned. Select it to hide everything except your pinned errors, and
+select it again to show the full report. "Unpin all" clears the pins for the files in the current report.
+
+Pins are remembered by your web browser, so they are still there when the report is regenerated.
+This is especially useful together with the `watch` configuration option, where the report reloads
+automatically every time you save your code.
+
+```{note}
+Because pins are stored by your web browser, they are kept per report address.
+PythonTA picks an available port each time it runs unless you set the `server-port` configuration
+option, so pins always persist while a report reloads, and persist between separate runs of
+PythonTA when the port stays the same.
+```
+
 ## Learning about the checks
 
 Our {doc}`PythonTA Checks <../checkers/index>` webpage describes all checks that are performed by PythonTA.

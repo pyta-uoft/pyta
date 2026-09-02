@@ -17,6 +17,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Added tests for the HTML report's error-pinning markup.
+
 ## [2.13.1] - 2026-08-12
 
 ### 🐛 Bug fixes

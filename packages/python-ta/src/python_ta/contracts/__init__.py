@@ -247,7 +247,7 @@ def add_class_invariants(klass: type) -> None:
 
         if name in cls_annotations:
             try:
-                _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
+                _debug(f"Checking type of attribute {name} for {klass.__qualname__} instance")
                 check_type(
                     value,
                     cls_annotations[name],
@@ -566,6 +566,9 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
     cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
 
     for attr, annotation in cls_annotations.items():
+        # if attribute has not been assigned yet, skip the type check
+        if not hasattr(instance, attr):
+            continue
         value = getattr(instance, attr)
         try:
             _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")

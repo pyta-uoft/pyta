@@ -15,6 +15,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Added tests for `static_type_checker.py` to improve coverage for the `_add_message` method
+
 ## [2.13.1] - 2026-08-12
 
 ### 🐛 Bug fixes

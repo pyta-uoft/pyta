@@ -102,5 +102,6 @@ Jasmine Wu,
 Raine Yang,
 Philippe Yu,
 Shirley Zhang,
+Angela Zheng,
 Yi Cheng (Michael) Zhao,
 Rachel Zhu

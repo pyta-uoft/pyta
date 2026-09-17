@@ -201,6 +201,11 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.process_module(mod)
 
+    def test_ignores_unknown_message_error_code(self) -> None:
+        """Adds a message with an unknown error code, which should be ignored."""
+        with self.assertNoMessages():
+            self.checker._add_message({"code": "unknown-code"}, {})
+
 
 class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
     CHECKER_CLASS = StaticTypeChecker
@@ -385,3 +390,8 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
         mod = MANAGER.ast_from_file(file_path)
         with self.assertNoMessages():
             self.checker.process_module(mod)
+
+    def test_ignores_unknown_message_error_code(self) -> None:
+        """Adds a message with an unknown error code, which should be ignored."""
+        with self.assertNoMessages():
+            self.checker._add_message({"code": "unknown-code"}, {})

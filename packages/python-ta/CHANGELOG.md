@@ -13,6 +13,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug fixes
 
+- Fixed `DEBUG_CONTRACTS` logging the wrong attribute name when checking instance attribute types.
+- Fixed `AttributeError` when checking a class with an annotated attribute that is never assigned.
+
 ### 🔧 Internal changes
 
 ## [2.13.1] - 2026-08-12

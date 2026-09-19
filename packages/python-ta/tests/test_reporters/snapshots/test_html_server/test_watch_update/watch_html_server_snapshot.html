@@ -2024,17 +2024,7 @@ window
     }
   })
 
-/* Pinned errors
- *
- * A pin marks one error type within one file. Pins are keyed by filename rather
- * than by the position of the file in the report, so they survive the reloads
- * that watch mode triggers on every save.
- *
- * Note that localStorage is scoped to an origin, and the report server picks a
- * free port per run unless `server-port` is configured. Pins therefore always
- * persist across watch-mode reloads, and across separate runs only when the
- * port is stable.
- */
+/* A pin marks one error type within one file. */
 
 const PIN_STORAGE_KEY = "pyta-pinned-errors"
 // NUL cannot appear in a filename, so it cannot collide with one.

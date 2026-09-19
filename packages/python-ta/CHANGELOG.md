@@ -9,6 +9,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Added the ability to pin errors in the HTML report.
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes

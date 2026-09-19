@@ -2,6 +2,8 @@ import os
 import re
 from io import StringIO
 
+import pytest
+
 from python_ta import check_all
 
 ESCAPED_SCRIPT = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
@@ -66,3 +68,104 @@ def test_markdown_escape(snapshot):
     assert UNESCAPED_MARKDOWN not in cleaned_body
 
     snapshot.assert_match(cleaned_body, "markdown_escape.html")
+
+
+def _render_report(module_path: str) -> str:
+    """Return the HTML report produced for the given module."""
+    buf = StringIO()
+    check_all(module_name=module_path, output=buf)
+    buf.seek(0)
+    return buf.read()
+
+
+@pytest.fixture()
+def pinning_report() -> str:
+    """Return an HTML report for a file that produces several distinct errors."""
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../../fixtures/reporters/lsp_reporter_input.py")
+    )
+    return _render_report(script_path)
+
+
+def test_every_error_instance_has_a_pin_button(pinning_report):
+    """Each reported error can be pinned."""
+    instances = re.findall(r'<div class="error-instance"[^>]*>', pinning_report)
+    pin_buttons = re.findall(r'<button class="pin-toggle"[^>]*>', pinning_report)
+
+    assert instances, "expected the fixture to report at least one error"
+    assert len(pin_buttons) == len(instances)
+
+
+def test_error_instances_carry_their_message_id(pinning_report):
+    """A pin is identified by message id, so every instance must expose one."""
+    instances = re.findall(r'<div class="error-instance"[^>]*>', pinning_report)
+
+    for instance in instances:
+        assert re.search(r'data-msg-id="[A-Z]\d{4}"', instance), instance
+
+
+def test_section_carries_the_filename(pinning_report):
+    """Pins are keyed by filename so that they survive watch-mode reloads."""
+    filenames = re.findall(r'<section id=\d+ data-filename="([^"]+)"', pinning_report)
+
+    assert len(filenames) == 1
+    assert filenames[0].endswith("lsp_reporter_input.py")
+
+
+def test_sidebar_entries_reference_real_error_instances(pinning_report):
+    """The sidebar highlights pinned errors by looking up the id it references.
+
+    A stale or misspelled reference would silently break that syncing, so check
+    that every reference resolves to an element that actually exists.
+    """
+    referenced = set(re.findall(r'<li data-pin-ref="([^"]+)"', pinning_report))
+    instance_ids = set(re.findall(r'<div class="error-instance" id=([\w-]+)', pinning_report))
+
+    assert referenced, "expected at least one sidebar entry"
+    assert referenced == instance_ids
+
+
+def test_report_has_the_timestamp_pin_keys_use(pinning_report):
+    """Pin keys include the report timestamp, so the header must render one."""
+    match = re.search(r"<time>(.+?)</time>", pinning_report)
+
+    assert match is not None
+    assert match.group(1).strip()
+
+
+def test_pins_are_stored_only_for_the_session(pinning_report):
+    """Closing the report must discard its pins, so they cannot outlive the page."""
+    assert "sessionStorage.getItem(PIN_STORAGE_KEY)" in pinning_report
+    assert "sessionStorage.setItem(" in pinning_report
+    assert "localStorage.getItem(PIN_STORAGE_KEY)" not in pinning_report
+
+
+def test_pin_filter_is_present(pinning_report):
+    """The filter control the pinning UI depends on is rendered."""
+    assert 'id="pin-filter"' in pinning_report
+
+
+def test_pin_filter_starts_hidden(pinning_report):
+    """With no pins stored yet, the filter must not be shown."""
+    match = re.search(r'<[^>]*id="pin-filter"[^>]*>', pinning_report)
+
+    assert match is not None
+    assert " hidden" in match.group(0), match.group(0)
+
+
+def test_hidden_attribute_overrides_explicit_display(pinning_report):
+    """Elements the filter hides must actually be hidden.
+
+    Several of them set an explicit ``display``, which wins over the user
+    agent's rule for the ``hidden`` attribute, so the stylesheet has to
+    neutralise it. ``section`` is the easy one to miss: without it, filtering a
+    report covering more than one file leaves an empty card behind for every
+    file that has no pinned errors.
+    """
+    match = re.search(r"([^{}]*\[hidden\][^{}]*)\{\s*display:\s*none;\s*\}", pinning_report)
+
+    assert match is not None, "no [hidden] display override found in the report stylesheet"
+
+    selectors = match.group(1)
+    for required in (".error-instance[hidden]", "section[hidden]"):
+        assert required in selectors, f"{required} missing from the [hidden] override"

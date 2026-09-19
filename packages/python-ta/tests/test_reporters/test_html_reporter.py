@@ -125,6 +125,14 @@ def test_sidebar_entries_reference_real_error_instances(pinning_report):
     assert referenced == instance_ids
 
 
+def test_report_has_the_timestamp_pin_keys_use(pinning_report):
+    """Pin keys include the report timestamp, so the header must render one."""
+    match = re.search(r"<time>(.+?)</time>", pinning_report)
+
+    assert match is not None
+    assert match.group(1).strip()
+
+
 def test_pin_filter_is_present(pinning_report):
     """The filter control the pinning UI depends on is rendered."""
     assert 'id="pin-filter"' in pinning_report

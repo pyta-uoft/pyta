@@ -520,7 +520,6 @@ section[hidden] {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
   height: 32px;
   padding: 6px 8px;
   margin: 0;
@@ -543,13 +542,6 @@ section[hidden] {
   border-color: #ffffff;
   color: #1a1a1a;
   text-shadow: none;
-}
-
-.pin-count {
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
 }
 
 .pin-summary {

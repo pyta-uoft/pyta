@@ -111,13 +111,9 @@ function applyPinFilter() {
 
 function updatePinControls(count) {
   const filter = document.getElementById("pin-filter")
-  const countElement = document.getElementById("pin-count")
   const summary = document.getElementById("pin-summary")
   const summaryText = document.getElementById("pin-summary-text")
 
-  if (countElement) {
-    countElement.textContent = String(count)
-  }
   if (filter) {
     filter.hidden = count === 0
     // Filtering to an empty report would leave no way back, so release the

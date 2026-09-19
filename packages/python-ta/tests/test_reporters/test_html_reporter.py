@@ -127,7 +127,7 @@ def test_sidebar_entries_reference_real_error_instances(pinning_report):
 
 def test_pin_controls_are_present(pinning_report):
     """The filter and summary controls the pinning UI depends on are rendered."""
-    for element_id in ("pin-filter", "pin-summary", "pin-summary-text", "clear-pins"):
+    for element_id in ("pin-filter", "pin-summary", "pin-summary-text"):
         assert f'id="{element_id}"' in pinning_report
 
 

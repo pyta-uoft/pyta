@@ -176,18 +176,6 @@ function togglePin(instance) {
   renderPinState()
 }
 
-/* Unpin only what this report shows, so pins for files checked separately survive. */
-function clearPinsInReport() {
-  document.querySelectorAll(".error-instance").forEach((instance) => {
-    const key = pinKeyFor(instance)
-    if (key !== null) {
-      pinnedKeys.delete(key)
-    }
-  })
-  savePinnedKeys()
-  renderPinState()
-}
-
 function initializePins() {
   pinnedKeys = loadPinnedKeys()
 
@@ -217,11 +205,6 @@ function initializePins() {
       )
       applyPinFilter()
     })
-  }
-
-  const clearButton = document.getElementById("clear-pins")
-  if (clearButton) {
-    clearButton.addEventListener("click", clearPinsInReport)
   }
 
   renderPinState()

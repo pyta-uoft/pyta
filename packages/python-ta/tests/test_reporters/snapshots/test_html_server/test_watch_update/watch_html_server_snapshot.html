@@ -560,24 +560,13 @@ section[hidden] {
   color: var(--text-secondary);
 }
 
-.link-button {
-  padding: 0;
-  font: inherit;
-  background: none;
-  border: none;
-  color: var(--pin-accent);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .sidebar li.pinned > a {
   color: var(--pin-accent);
   font-weight: 600;
 }
 
 .pin-toggle:focus-visible,
-.pin-filter:focus-visible,
-.link-button:focus-visible {
+.pin-filter:focus-visible {
   outline: 2px solid var(--pin-accent);
   outline-offset: 2px;
 }
@@ -1217,7 +1206,6 @@ footer p {
                 </div>
                 <div class="pin-summary" id="pin-summary" hidden>
                     <span id="pin-summary-text">0 pinned errors</span>
-                    <button type="button" id="clear-pins" class="link-button">Unpin all</button>
                 </div>
                 <ul>
                     
@@ -2156,18 +2144,6 @@ function togglePin(instance) {
   renderPinState()
 }
 
-/* Unpin only what this report shows, so pins for files checked separately survive. */
-function clearPinsInReport() {
-  document.querySelectorAll(".error-instance").forEach((instance) => {
-    const key = pinKeyFor(instance)
-    if (key !== null) {
-      pinnedKeys.delete(key)
-    }
-  })
-  savePinnedKeys()
-  renderPinState()
-}
-
 function initializePins() {
   pinnedKeys = loadPinnedKeys()
 
@@ -2197,11 +2173,6 @@ function initializePins() {
       )
       applyPinFilter()
     })
-  }
-
-  const clearButton = document.getElementById("clear-pins")
-  if (clearButton) {
-    clearButton.addEventListener("click", clearPinsInReport)
   }
 
   renderPinState()

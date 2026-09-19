@@ -35,9 +35,6 @@
                         </button>
                     </div>
                 </div>
-                <div class="pin-summary" id="pin-summary" hidden>
-                    <span id="pin-summary-text">0 pinned errors</span>
-                </div>
                 <ul>
                     {% for filenum, (filename, messages) in enumerate(grouped_messages.items()) %}
                     {% set code_messages = messages[0] -%}

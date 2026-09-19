@@ -125,18 +125,17 @@ def test_sidebar_entries_reference_real_error_instances(pinning_report):
     assert referenced == instance_ids
 
 
-def test_pin_controls_are_present(pinning_report):
-    """The filter and summary controls the pinning UI depends on are rendered."""
-    for element_id in ("pin-filter", "pin-summary", "pin-summary-text"):
-        assert f'id="{element_id}"' in pinning_report
+def test_pin_filter_is_present(pinning_report):
+    """The filter control the pinning UI depends on is rendered."""
+    assert 'id="pin-filter"' in pinning_report
 
 
-def test_pin_controls_start_hidden(pinning_report):
-    """With no pins stored yet, the filter and summary must not be shown."""
-    for element_id in ("pin-filter", "pin-summary"):
-        match = re.search(rf'<[^>]*id="{element_id}"[^>]*>', pinning_report)
-        assert match is not None
-        assert " hidden" in match.group(0), match.group(0)
+def test_pin_filter_starts_hidden(pinning_report):
+    """With no pins stored yet, the filter must not be shown."""
+    match = re.search(r'<[^>]*id="pin-filter"[^>]*>', pinning_report)
+
+    assert match is not None
+    assert " hidden" in match.group(0), match.group(0)
 
 
 def test_hidden_attribute_overrides_explicit_display(pinning_report):

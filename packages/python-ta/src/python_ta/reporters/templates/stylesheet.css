@@ -452,7 +452,6 @@ code {
    user-agent rule for the `hidden` attribute. */
 .error-instance[hidden],
 .pin-filter[hidden],
-.pin-summary[hidden],
 section[hidden] {
   display: none;
 }
@@ -542,16 +541,6 @@ section[hidden] {
   border-color: #ffffff;
   color: #1a1a1a;
   text-shadow: none;
-}
-
-.pin-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 20px;
-  font-size: 13px;
-  color: var(--text-secondary);
 }
 
 .sidebar li.pinned > a {

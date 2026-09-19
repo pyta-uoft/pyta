@@ -111,8 +111,6 @@ function applyPinFilter() {
 
 function updatePinControls(count) {
   const filter = document.getElementById("pin-filter")
-  const summary = document.getElementById("pin-summary")
-  const summaryText = document.getElementById("pin-summary-text")
 
   if (filter) {
     filter.hidden = count === 0
@@ -122,13 +120,6 @@ function updatePinControls(count) {
       filter.setAttribute("aria-pressed", "false")
       document.body.classList.remove("pinned-only")
     }
-  }
-  if (summary) {
-    summary.hidden = count === 0
-  }
-  if (summaryText) {
-    summaryText.textContent =
-      count === 1 ? "1 pinned error" : count + " pinned errors"
   }
 }
 

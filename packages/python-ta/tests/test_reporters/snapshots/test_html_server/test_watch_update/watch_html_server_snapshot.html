@@ -458,7 +458,6 @@ code {
    user-agent rule for the `hidden` attribute. */
 .error-instance[hidden],
 .pin-filter[hidden],
-.pin-summary[hidden],
 section[hidden] {
   display: none;
 }
@@ -548,16 +547,6 @@ section[hidden] {
   border-color: #ffffff;
   color: #1a1a1a;
   text-shadow: none;
-}
-
-.pin-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 20px;
-  font-size: 13px;
-  color: var(--text-secondary);
 }
 
 .sidebar li.pinned > a {
@@ -1203,9 +1192,6 @@ footer p {
                             </svg>
                         </button>
                     </div>
-                </div>
-                <div class="pin-summary" id="pin-summary" hidden>
-                    <span id="pin-summary-text">0 pinned errors</span>
                 </div>
                 <ul>
                     
@@ -2079,8 +2065,6 @@ function applyPinFilter() {
 
 function updatePinControls(count) {
   const filter = document.getElementById("pin-filter")
-  const summary = document.getElementById("pin-summary")
-  const summaryText = document.getElementById("pin-summary-text")
 
   if (filter) {
     filter.hidden = count === 0
@@ -2090,13 +2074,6 @@ function updatePinControls(count) {
       filter.setAttribute("aria-pressed", "false")
       document.body.classList.remove("pinned-only")
     }
-  }
-  if (summary) {
-    summary.hidden = count === 0
-  }
-  if (summaryText) {
-    summaryText.textContent =
-      count === 1 ? "1 pinned error" : count + " pinned errors"
   }
 }
 

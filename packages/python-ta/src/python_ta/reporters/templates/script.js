@@ -37,6 +37,7 @@ window
 
 /* A pin marks one error type within one file. */
 
+// Pins live in sessionStorage so that closing the report discards them.
 const PIN_STORAGE_KEY = "pyta-pinned-errors"
 // NUL cannot appear in a filename, so it cannot collide with one.
 const PIN_SEPARATOR = "\u0000"
@@ -47,7 +48,7 @@ let reportTimestamp = ""
 
 function loadPinnedKeys() {
   try {
-    const raw = localStorage.getItem(PIN_STORAGE_KEY)
+    const raw = sessionStorage.getItem(PIN_STORAGE_KEY)
     if (!raw) {
       return new Set()
     }
@@ -65,7 +66,7 @@ function loadPinnedKeys() {
 
 function savePinnedKeys() {
   try {
-    localStorage.setItem(
+    sessionStorage.setItem(
       PIN_STORAGE_KEY,
       JSON.stringify(Array.from(pinnedKeys)),
     )

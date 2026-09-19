@@ -133,6 +133,13 @@ def test_report_has_the_timestamp_pin_keys_use(pinning_report):
     assert match.group(1).strip()
 
 
+def test_pins_are_stored_only_for_the_session(pinning_report):
+    """Closing the report must discard its pins, so they cannot outlive the page."""
+    assert "sessionStorage.getItem(PIN_STORAGE_KEY)" in pinning_report
+    assert "sessionStorage.setItem(" in pinning_report
+    assert "localStorage.getItem(PIN_STORAGE_KEY)" not in pinning_report
+
+
 def test_pin_filter_is_present(pinning_report):
     """The filter control the pinning UI depends on is rendered."""
     assert 'id="pin-filter"' in pinning_report

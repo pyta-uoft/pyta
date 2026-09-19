@@ -1,5 +1,7 @@
 import logging
 
+import pytest
+
 from python_ta import contracts
 
 contracts.DEBUG_CONTRACTS = True
@@ -57,8 +59,8 @@ def test_contracts_debug_instance_attribute(caplog) -> None:
 
 
 def test_contracts_debug_unassigned_attribute(caplog) -> None:
-    """Test that an annotated but unassigned attribute does not suppress the messages
-    for the attributes that follow it."""
+    """Test that an annotated but unassigned attribute is reported as a contract violation,
+    and that the debug message for that attribute is logged before the error is raised."""
     caplog.set_level(logging.DEBUG)
 
     @check_contracts
@@ -71,11 +73,9 @@ def test_contracts_debug_unassigned_attribute(caplog) -> None:
         def __init__(self, name: str) -> None:
             self.name = name
 
-        def rename(self, name: str) -> None:
-            self.name = name
+    with pytest.raises(AssertionError) as excinfo:
+        Config("a")
+    msg = str(excinfo.value)
 
-    config = Config("a")
-    caplog.clear()
-    config.rename("b")
-
-    assert f"Checking type of attribute name for {Config.__qualname__} instance" in caplog.text
+    assert f"Checking type of attribute cache for {Config.__qualname__} instance" in caplog.text
+    assert f"Attribute cache is not defined for this {Config.__qualname__} instance" in msg

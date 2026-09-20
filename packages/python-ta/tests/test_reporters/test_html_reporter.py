@@ -4,7 +4,7 @@ from io import StringIO
 
 from python_ta import check_all
 
-ESCAPED_SCRIPT = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
+ESCAPED_SCRIPT = '"&lt;script&gt;alert(2);&lt;/script&gt;"'
 UNESCAPED_SCRIPT = "<script>alert(2);</script>"
 ESCAPED_MARKDOWN = "&#96; ##world &#96;"
 UNESCAPED_MARKDOWN = "</code> ##world <code>"
@@ -39,7 +39,6 @@ def test_injection(snapshot):
 
     response_body = buf.read()
     cleaned_body = clean_response_body(response_body)
-
     assert ESCAPED_SCRIPT in cleaned_body
     assert UNESCAPED_SCRIPT not in cleaned_body
 

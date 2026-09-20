@@ -20,6 +20,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Updated `uv.lock` file with latest packages
+- Switched dependabot configuration from `pip` to `uv` to ensure `uv.lock` file is updated
+
 ## [2.13.1] - 2026-08-12
 
 ### 🐛 Bug fixes

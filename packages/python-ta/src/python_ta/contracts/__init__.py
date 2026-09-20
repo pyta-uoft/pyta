@@ -247,7 +247,7 @@ def add_class_invariants(klass: type) -> None:
 
         if name in cls_annotations:
             try:
-                _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
+                _debug(f"Checking type of attribute {name} for {klass.__qualname__} instance")
                 check_type(
                     value,
                     cls_annotations[name],
@@ -566,9 +566,14 @@ def _check_class_type_annotations(klass: type, instance: Any) -> None:
     cls_annotations = typing.get_type_hints(klass, localns=klass_mod.__dict__)
 
     for attr, annotation in cls_annotations.items():
+        _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
+        if not hasattr(instance, attr):
+            raise AssertionError(
+                f"Attribute {attr} is not defined for this {klass.__qualname__} instance, but "
+                f"is expected to have type {_display_annotation(annotation)}"
+            )
         value = getattr(instance, attr)
         try:
-            _debug(f"Checking type of attribute {attr} for {klass.__qualname__} instance")
             check_type(
                 value, annotation, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS
             )

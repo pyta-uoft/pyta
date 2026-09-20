@@ -10,6 +10,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### ✨ Enhancements
 
 - Contract checking now reports a class attribute that is annotated but never assigned as a contract violation, raising an `AssertionError` with a descriptive message instead of an `AttributeError`.
+- Added the ability to pin errors in the HTML report.
 
 ### 💫 New checkers
 

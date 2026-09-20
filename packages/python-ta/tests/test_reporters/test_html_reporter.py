@@ -6,6 +6,7 @@ import pytest
 
 from python_ta import check_all
 
+RUN_ID_PATTERN = '<body data-run-id="([^"]*)"'
 ESCAPED_SCRIPT = "&quot;&lt;script&gt;alert(2);&lt;/script&gt;&quot;"
 UNESCAPED_SCRIPT = "<script>alert(2);</script>"
 ESCAPED_MARKDOWN = "&#96; ##world &#96;"
@@ -16,6 +17,7 @@ def clean_response_body(body) -> str:
     """Remove dynamic portions (such as timestamps) from the response body
     before snapshot testing."""
     body = re.sub(r".*<time>.*?</time>.*\n?", "", body)
+    body = re.sub('data-run-id="[^"]*"', 'data-run-id=""', body)
     body = re.sub(r".*tests[/\\]fixtures[/\\]reporters[/\\]content_injection\.py.*\n?", "", body)
     body = re.sub(
         r".*tests[/\\]fixtures[/\\]reporters[/\\]markdown_escape_script\.py.*\n?", "", body
@@ -87,6 +89,15 @@ def pinning_report() -> str:
     return _render_report(script_path)
 
 
+@pytest.fixture()
+def pinning_report_second_run() -> str:
+    """Return a second report, as a later run of PythonTA would produce."""
+    script_path = os.path.normpath(
+        os.path.join(__file__, "../../fixtures/reporters/lsp_reporter_input.py")
+    )
+    return _render_report(script_path)
+
+
 def test_every_error_instance_has_a_pin_button(pinning_report):
     """Each reported error can be pinned."""
     instances = re.findall(r'<div class="error-instance"[^>]*>', pinning_report)
@@ -125,12 +136,20 @@ def test_sidebar_entries_reference_real_error_instances(pinning_report):
     assert referenced == instance_ids
 
 
-def test_report_has_the_timestamp_pin_keys_use(pinning_report):
-    """Pin keys include the report timestamp, so the header must render one."""
-    match = re.search(r"<time>(.+?)</time>", pinning_report)
+def test_report_has_the_run_id_pin_keys_use(pinning_report):
+    """Pin keys include the run id, so the report must expose one."""
+    match = re.search(RUN_ID_PATTERN, pinning_report)
 
     assert match is not None
     assert match.group(1).strip()
+
+
+def test_each_run_gets_its_own_run_id(pinning_report, pinning_report_second_run):
+    """A later run must not adopt the pins of an earlier one, even on the same port."""
+    first = re.search(RUN_ID_PATTERN, pinning_report).group(1)
+    second = re.search(RUN_ID_PATTERN, pinning_report_second_run).group(1)
+
+    assert first != second
 
 
 def test_pins_are_stored_only_for_the_session(pinning_report):

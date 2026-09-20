@@ -43,8 +43,8 @@ const PIN_STORAGE_KEY = "pyta-pinned-errors"
 const PIN_SEPARATOR = "\u0000"
 
 let pinnedKeys = new Set()
-// The time the report was generated, so keys from an earlier run never match.
-let reportTimestamp = ""
+// Identifies this run of PythonTA, so keys from an earlier run never match.
+let runId = ""
 
 function loadPinnedKeys() {
   try {
@@ -80,11 +80,9 @@ function pinKeyFor(instance) {
   if (!section || !instance.dataset.msgId) {
     return null
   }
-  return [
-    reportTimestamp,
-    section.dataset.filename,
-    instance.dataset.msgId,
-  ].join(PIN_SEPARATOR)
+  return [runId, section.dataset.filename, instance.dataset.msgId].join(
+    PIN_SEPARATOR,
+  )
 }
 
 function isPinnedOnly() {
@@ -175,8 +173,7 @@ function togglePin(instance) {
 }
 
 function initializePins() {
-  const time = document.querySelector("header time")
-  reportTimestamp = time ? time.textContent.trim() : ""
+  runId = document.body.dataset.runId || ""
   pinnedKeys = loadPinnedKeys()
 
   document.body.addEventListener("click", (event) => {

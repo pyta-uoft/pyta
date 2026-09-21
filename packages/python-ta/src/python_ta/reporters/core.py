@@ -114,6 +114,9 @@ class PythonTaReporter(BaseReporter):
         """
         if out is None or out == "-":
             self.out = sys.stdout
+            # Ensure the self.out stream uses UTF-8 encoding
+            if hasattr(self.out, "reconfigure"):
+                self.out.reconfigure(encoding="utf-8")
         elif isinstance(out, str):
             # Paths may contain system-specific or relative syntax, e.g. `~`, `../`
             out = os.path.expanduser(out)

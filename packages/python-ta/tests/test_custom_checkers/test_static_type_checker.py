@@ -1,4 +1,7 @@
 import os
+import re
+import subprocess
+from unittest.mock import patch
 
 import pylint.testutils
 from astroid import MANAGER
@@ -202,9 +205,42 @@ class TestStaticTypeChecker(pylint.testutils.CheckerTestCase):
             self.checker.process_module(mod)
 
     def test_ignores_unknown_message_error_code(self) -> None:
-        """Adds a message with an unknown error code, which should be ignored."""
-        with self.assertNoMessages():
-            self.checker._add_message({"code": "unknown-code"}, {})
+        """
+        Mocks Mypy returning an unsupported error code, which should be ignored
+        by the StaticTypeChecker.
+        """
+        file_path = os.path.normpath(os.path.join(DIR_PATH, "mypy_unknown_error.py"))
+        mod = MANAGER.ast_from_file(file_path)
+
+        mypy_output = (
+            "mypy_unknown_error.py:17:4:17:6: error: "
+            '"f" does not return a value (it only ever returns None) '
+            "[func-returns-value]\n"
+        )
+        result = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout=mypy_output,
+            stderr="",
+        )
+
+        with (
+            patch(
+                "python_ta.checkers.static_type_checker.subprocess.run",
+                return_value=result,
+            ),
+            patch.dict(
+                StaticTypeChecker.SPECIFIC_PATTERNS,
+                {
+                    "func-returns-value": re.compile(
+                        r'"(?P<func_name>[^"]+)" does not return a value '
+                        r"\(it only ever returns None\)"
+                    )
+                },
+            ),
+        ):
+            with self.assertNoMessages():
+                self.checker.process_module(mod)
 
 
 class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
@@ -392,6 +428,39 @@ class TestStaticTypeCheckerCustomConfig(pylint.testutils.CheckerTestCase):
             self.checker.process_module(mod)
 
     def test_ignores_unknown_message_error_code(self) -> None:
-        """Adds a message with an unknown error code, which should be ignored."""
-        with self.assertNoMessages():
-            self.checker._add_message({"code": "unknown-code"}, {})
+        """
+        Mocks Mypy returning an unsupported error code, which should be ignored
+        by the StaticTypeChecker.
+        """
+        file_path = os.path.normpath(os.path.join(DIR_PATH, "mypy_unknown_error.py"))
+        mod = MANAGER.ast_from_file(file_path)
+
+        mypy_output = (
+            "mypy_unknown_error.py:17:4:17:6: error: "
+            '"f" does not return a value (it only ever returns None) '
+            "[func-returns-value]\n"
+        )
+        result = subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout=mypy_output,
+            stderr="",
+        )
+
+        with (
+            patch(
+                "python_ta.checkers.static_type_checker.subprocess.run",
+                return_value=result,
+            ),
+            patch.dict(
+                StaticTypeChecker.SPECIFIC_PATTERNS,
+                {
+                    "func-returns-value": re.compile(
+                        r'"(?P<func_name>[^"]+)" does not return a value '
+                        r"\(it only ever returns None\)"
+                    )
+                },
+            ),
+        ):
+            with self.assertNoMessages():
+                self.checker.process_module(mod)

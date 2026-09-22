@@ -6,9 +6,10 @@ from __future__ import annotations
 
 import io
 import os
-import select
+import queue
 import subprocess
 import sys
+import threading
 import time
 import tokenize
 from os import path, remove
@@ -370,23 +371,50 @@ def wait_for_file_response(file_path: Path, timeout) -> bool:
     return False
 
 
+def _enqueue_lines(stream: io.TextIOWrapper, line_queue: queue.Queue) -> None:
+    """Read lines from stream and put them on line_queue until the stream is closed."""
+    for line in iter(stream.readline, ""):
+        line_queue.put(line)
+
+
+def _get_reader_queue(process: subprocess.Popen, stream_name: str) -> queue.Queue:
+    """Return a queue fed by a daemon thread reading lines from process's stdout or stderr stream
+    (given by stream_name).
+
+    The queue is cached on process so repeated calls reuse the same thread.
+    """
+    cache_attr = f"_{stream_name}_queue"
+    line_queue = getattr(process, cache_attr, None)
+    if line_queue is None:
+        line_queue = queue.Queue()
+        stream = getattr(process, stream_name)
+        thread = threading.Thread(target=_enqueue_lines, args=(stream, line_queue), daemon=True)
+        thread.start()
+        setattr(process, cache_attr, line_queue)
+    return line_queue
+
+
 def wait_for_log_message(process: subprocess.Popen, match: str, timeout: int) -> bool:
     """Wait until a specific line containing the given match string appears in the process's stderr.
     Returns True if the line is found within the timeout period, and False otherwise.
     """
+    line_queue = _get_reader_queue(process, "stderr")
     start = time.time()
-    while time.time() - start < timeout:
-        ready, _, _ = select.select([process.stderr], [], [], 0)
-        if ready:
-            line = process.stderr.readline()
-            if match in line:
-                return True
-    return False
+    while True:
+        remaining = timeout - (time.time() - start)
+        if remaining <= 0:
+            return False
+        try:
+            line = line_queue.get(timeout=remaining)
+        except queue.Empty:
+            return False
+        if match in line:
+            return True
 
 
 def reset_watch_fixture(output_path: str = None) -> None:
     """Reset the contents of watch_enabled_configuration.py to its original state."""
-    output_arg = f', output="{output_path}"' if output_path else ""
+    output_arg = f", output={output_path!r}" if output_path else ""
     original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
 import python_ta
 
@@ -409,7 +437,7 @@ if __name__ == "__main__":
 
 def modify_watch_fixture(output_path: str = None) -> None:
     """Modify the contents of watch_enabled_configuration.py to fix the type error."""
-    output_arg = f', output="{output_path}"' if output_path else ""
+    output_arg = f", output={output_path!r}" if output_path else ""
     original_content = f'''"""This script serves as the entry point for an integration test of the _check watch mode."""\n
 import python_ta
 
@@ -434,17 +462,19 @@ def read_nonblocking(process: Popen[str], timeout: int) -> list[str]:
     """Reads output from process without blocking until timeout or termination condition."""
     lines = []
     start_time = time.time()
+    line_queue = _get_reader_queue(process, "stdout")
 
-    ready, _, _ = select.select([process.stdout], [], [], timeout)
-    if ready:
-        while True:
-            line = process.stdout.readline().strip()
-            lines.append(line)
-            if (
-                "=== Style/convention errors (fix: before submission) ===" in line
-                or time.time() - start_time > timeout
-            ):
-                break
+    while True:
+        remaining = timeout - (time.time() - start_time)
+        if remaining <= 0:
+            break
+        try:
+            line = line_queue.get(timeout=remaining).strip()
+        except queue.Empty:
+            break
+        lines.append(line)
+        if "=== Style/convention errors (fix: before submission) ===" in line:
+            break
     return lines
 
 

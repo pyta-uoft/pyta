@@ -9,12 +9,21 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✨ Enhancements
 
+- Contract checking now reports a class attribute that is annotated but never assigned as a contract violation, raising an `AssertionError` with a descriptive message instead of an `AttributeError`.
+- Added the ability to pin errors in the HTML report.
+
 ### 💫 New checkers
 
 ### 🐛 Bug fixes
 
+- Fixed `DEBUG_CONTRACTS` logging the wrong attribute name when checking instance attribute types.
+- Ensured reporter output stream always uses UTF-8 encoding (was not always set on Windows)
+
 ### 🔧 Internal changes
 
+- Updated `uv.lock` file with latest packages
+- Switched dependabot configuration from `pip` to `uv` to ensure `uv.lock` file is updated
+- Fixed watch tests on Windows by using `threading` rather than `select`
 - Added tests for `static_type_checker.py` to improve coverage for the `_add_message` method
 
 ## [2.13.1] - 2026-08-12

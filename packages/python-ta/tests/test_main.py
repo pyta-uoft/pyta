@@ -143,7 +143,7 @@ def test_output_format_overrides_config_value(monkeypatch, tmp_path) -> None:
 
     calls = []
 
-    def fake_checker(*, module_name, config=None, pylint_args=None):
+    def fake_checker(*, module_name, config=None, autoformat=False, pylint_args=None):
         calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
         return _DummyReporter()
 
@@ -171,7 +171,7 @@ def test_output_format_only_passes_output_format_dict(monkeypatch) -> None:
     """Test that checker receives only the override dict if only --output-format is passed."""
     calls = []
 
-    def fake_checker(*, module_name, config=None, pylint_args=None):
+    def fake_checker(*, module_name, config=None, autoformat=False, pylint_args=None):
         calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
         return _DummyReporter()
 
@@ -197,7 +197,7 @@ def test_config_only_passes_config_path(monkeypatch) -> None:
     """Test that checker receives the config path string if only --config is passed."""
     calls = []
 
-    def fake_checker(*, module_name, config=None, pylint_args=None):
+    def fake_checker(*, module_name, config=None, autoformat=False, pylint_args=None):
         calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
         return _DummyReporter()
 
@@ -223,8 +223,8 @@ def test_no_output_format_or_config_uses_defaults(monkeypatch) -> None:
     """Test that checker is called without config if neither --config nor --output-format is passed."""
     calls = []
 
-    def fake_checker(*, module_name, **kwargs):
-        calls.append({"module_name": module_name, "kwargs": kwargs})
+    def fake_checker(*, module_name, autoformat):
+        calls.append({"module_name": module_name, "autoformat": autoformat})
         return _DummyReporter()
 
     monkeypatch.setattr(pyta_main, "check_all", fake_checker)
@@ -237,7 +237,56 @@ def test_no_output_format_or_config_uses_defaults(monkeypatch) -> None:
 
     assert result.exit_code == 0
     assert len(calls) == 1
-    assert calls[0]["kwargs"] == {}
+    assert calls[0]["autoformat"] is False
+
+
+def test_autoformat_passes_true_to_check_all(monkeypatch) -> None:
+    """Test that --autoformat enables autoformatting when running all checks."""
+    calls = []
+
+    def fake_checker(*, module_name, autoformat):
+        calls.append({"module_name": module_name, "autoformat": autoformat})
+        return _DummyReporter()
+
+    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--autoformat",
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["autoformat"] is True
+
+
+def test_autoformat_passes_true_to_check_errors(monkeypatch) -> None:
+    """Test that --autoformat enables autoformatting when running error checks."""
+    calls = []
+
+    def fake_checker(*, module_name, autoformat):
+        calls.append({"module_name": module_name, "autoformat": autoformat})
+        return _DummyReporter()
+
+    monkeypatch.setattr(pyta_main, "check_errors", fake_checker)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--errors-only",
+            "--autoformat",
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["autoformat"] is True
 
 
 def test_stdin_flag_reads_from_stdin(monkeypatch) -> None:

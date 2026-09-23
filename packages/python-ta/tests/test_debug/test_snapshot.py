@@ -11,8 +11,6 @@ import subprocess
 import sys
 from typing import Iterable, Optional
 
-import pytest
-
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
 
 SNAPSHOT_DIR = os.path.join(
@@ -969,19 +967,25 @@ def test_snapshot_save_stdout(snapshot):
     snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_stdout.svg")
 
 
-def test_snapshot_save_raises_when_npx_missing(mocker):
+def test_snapshot_save_raises_when_npx_missing():
     """
-    Test that snapshot's save feature raises an informative FileNotFoundError, and does not
-    spawn a subprocess, when npx is not found on the PATH.
+    Test that snapshot's save feature raises an informative FileNotFoundError, rather than
+    failing inside the subprocess call, when npx is not found on the PATH.
     """
-    mocker.patch("python_ta.debug.snapshot.shutil.which", return_value=None)
-    mock_run = mocker.patch("python_ta.debug.snapshot.subprocess.run")
 
-    with pytest.raises(FileNotFoundError, match="Could not find 'npx' on your PATH"):
-        snapshot(True)
+    # Calls snapshot in separate file, with an emptied PATH so that npx cannot be found
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_no_npx.py")
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env={**os.environ, "PATH": ""},
+    )
 
-    # subprocess.run is shared with other modules, so check that npx specifically was not invoked
-    assert all(call.args[0][0] != "npx" for call in mock_run.call_args_list if call.args)
+    assert result.returncode != 0
+    assert "FileNotFoundError: Could not find 'npx' on your PATH" in result.stderr
 
 
 def test_snapshot_only_includes_function_self():

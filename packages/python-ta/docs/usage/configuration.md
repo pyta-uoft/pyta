@@ -170,7 +170,8 @@ to bind to that port. This configuration option only applies to the HTMLReporter
 ### `autoformat-options` (default: `skip-string-normalization`)
 
 A list of [command-line arguments](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#command-line-options)
-to be passed into the Black formatting tool if `python_ta.check_all` is called with `autoformat=True`.
+to be passed into the Black formatting tool when autoformatting is enabled, either by using the `--autoformat`
+command-line option or by calling `python_ta.check_all` with `autoformat=True`.
 Modifying this option will override the default flag.
 
 ## PythonTA checker configuration options

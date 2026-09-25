@@ -94,13 +94,25 @@ def main(
         ) as temp_file:
             shutil.copyfileobj(sys.stdin, temp_file)
             temp_file.flush()
-            reporter = _invoke_checker(checker, [temp_file.name], config, output_format, autoformat)
+            reporter = _invoke_checker(
+                checker=checker,
+                paths=[temp_file.name],
+                config=config,
+                output_format=output_format,
+                autoformat=autoformat,
+            )
         # Clean up the temporary file
         path.os.unlink(temp_file.name)
 
     else:
         paths = [click.format_filename(fn) for fn in filenames]
-        reporter = _invoke_checker(checker, paths, config, output_format, autoformat)
+        reporter = _invoke_checker(
+            checker=checker,
+            paths=paths,
+            config=config,
+            output_format=output_format,
+            autoformat=autoformat,
+        )
 
     if not exit_zero and reporter.has_messages():
         sys.exit(1)
@@ -108,7 +120,7 @@ def main(
         sys.exit(0)
 
 
-def _invoke_checker(checker, paths, config, output_format, autoformat):
+def _invoke_checker(checker, paths, config, output_format, autoformat: bool):
     """Invoke the checker with the appropriate arguments based on the provided config and output_format."""
     if output_format and config:
         # If both specified, use the config file and override the output format

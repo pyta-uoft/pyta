@@ -1,21 +1,37 @@
 """Specify how errors should be rendered."""
 
+from __future__ import annotations
+
 import re
 from enum import Enum
+from typing import TYPE_CHECKING, Any, Callable, Generator
 
 from astroid import nodes
+
+if TYPE_CHECKING:
+    from python_ta.reporters.core import NewMessage
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
 MAX_SNIPPET_LINES = 10
 
 
-def render_message(msg, node, source_lines, config=None):
+def render_message(
+    msg: NewMessage,
+    node: nodes.NodeNG | None,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a message based on type."""
     renderer = CUSTOM_MESSAGES.get(msg.symbol, render_generic)
     yield from renderer(msg, node, source_lines, config)
 
 
-def render_generic(msg, node=None, source_lines=None, config=None):
+def render_generic(
+    msg: NewMessage,
+    node: nodes.NodeNG | None,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Default rendering for a message."""
     if node is not None:
         start_line, start_col = node.fromlineno, node.col_offset
@@ -72,7 +88,12 @@ def render_generic(msg, node=None, source_lines=None, config=None):
         yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_missing_docstring(_msg, node, source_lines=None, config=None):
+def render_missing_docstring(
+    _msg: NewMessage,
+    node: nodes.NodeNG | None,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a missing docstring message."""
     if isinstance(node, nodes.Module):
         yield (None, slice(None, None), LineType.DOCSTRING, '"""YOUR DOCSTRING HERE"""')
@@ -93,19 +114,33 @@ def render_missing_docstring(_msg, node, source_lines=None, config=None):
         yield from render_context(end, end + 2, source_lines)
 
 
-def render_line_too_long(msg, node, source_lines=None, config=None):
+def render_line_too_long(
+    msg: NewMessage,
+    node: nodes.NodeNG | None,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a line too long message."""
     line = msg.line
 
     # Set start_index to configured max-line-length and end_index to length of line
-    start_index, end_index = config.max_line_length, len(source_lines[line - 1])
+    if isinstance(config, dict):
+        max_line_length = config.get("max_line_length", 79)
+    else:
+        max_line_length = getattr(config, "max_line_length", 79)
+    start_index, end_index = max_line_length, len(source_lines[line - 1])
 
     yield from render_context(line - 2, line, source_lines)
     yield (line, slice(start_index, end_index), LineType.ERROR, source_lines[line - 1])
     yield from render_context(line + 1, line + 2, source_lines)
 
 
-def render_trailing_newlines(msg, _node, source_lines=None, config=None):
+def render_trailing_newlines(
+    msg: NewMessage,
+    _node: nodes.NodeNG | None,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a trailing newlines message."""
     # Get start of trailing newlines
     half_threshold = MAX_SNIPPET_LINES // 2
@@ -145,7 +180,12 @@ def render_trailing_newlines(msg, _node, source_lines=None, config=None):
     yield (total_lines, slice(None, None), LineType.ERROR, "# DELETE THIS LINE")
 
 
-def render_trailing_whitespace(msg, _node, source_lines=None, config=None):
+def render_trailing_whitespace(
+    msg: NewMessage,
+    _node: nodes.NodeNG | None,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a trailing whitespace message."""
     line = msg.line
     start_index, end_index = len(source_lines[line - 1].rstrip()), len(source_lines[line - 1])
@@ -154,7 +194,11 @@ def render_trailing_whitespace(msg, _node, source_lines=None, config=None):
     yield from render_context(line + 1, line + 2, source_lines)
 
 
-def render_context(start, stop, source_lines):
+def render_context(
+    start: int,
+    stop: int,
+    source_lines: list[str],
+) -> Generator[tuple[int, slice[int | None, int | None, int | None], LineType, str], None, None]:
     """Helper for rendering context lines."""
     start, stop = max(start, 1), min(stop, len(source_lines))
     yield from (
@@ -163,7 +207,12 @@ def render_context(start, stop, source_lines):
     )
 
 
-def render_missing_return_type(_msg, node, source_lines=None, config=None):
+def render_missing_return_type(
+    _msg: NewMessage,
+    node: nodes.FunctionDef,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[tuple[int, slice[int | None, int | None, int | None], LineType, str], None, None]:
     """Render a type annotation return message."""
     start_line, start_col = node.fromlineno, node.parent.col_offset
     end_line, end_col = node.end_lineno, node.end_col_offset
@@ -178,13 +227,23 @@ def render_missing_return_type(_msg, node, source_lines=None, config=None):
     yield from render_context(end_line + 1, end_line + 3, source_lines)
 
 
-def render_too_many_arguments(msg, node, source_lines=None, config=None):
+def render_too_many_arguments(
+    msg: NewMessage,
+    node: nodes.FunctionDef,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a too many arguments message."""
     # node is a FunctionDef node so replace it with its Arguments child
     yield from render_generic(msg, node.args, source_lines, config)
 
 
-def render_missing_space_in_doctest(msg, _node, source_lines=None, config=None):
+def render_missing_space_in_doctest(
+    msg: NewMessage,
+    _node: nodes.NodeNG,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a missing space in doctest message"""
     line = msg.line
 
@@ -194,7 +253,12 @@ def render_missing_space_in_doctest(msg, _node, source_lines=None, config=None):
     yield from render_context(line + 1, line + 3, source_lines)
 
 
-def render_pep8_errors(msg, _node, source_lines=None, config=None):
+def render_pep8_errors(
+    msg: NewMessage,
+    _node: nodes.NodeNG,
+    source_lines: list[str],
+    config: Any | None = None,
+) -> Generator[RenderResult, None, None]:
     """Render a PEP8 error message."""
     # Extract the raw error message
     raw_msg = getattr(msg, "msg", "")
@@ -220,12 +284,16 @@ def render_pep8_errors(msg, _node, source_lines=None, config=None):
     yield from render_generic(msg, _node, source_lines)
 
 
-def render_blank_line(line):
+def render_blank_line(line: int) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a blank line for a PEP8 error message."""
     yield (line + 1, slice(None, None), LineType.ERROR, " " * 28)
 
 
-def render_pep8_errors_e101_and_e123_and_e116(line, col, source_line=None):
+def render_pep8_errors_e101_and_e123_and_e116(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 indentation contains mixed spaces and tabs message
     AND a PEP8 closing bracket does not match indentation of opening bracket's line message.
     """
@@ -233,7 +301,11 @@ def render_pep8_errors_e101_and_e123_and_e116(line, col, source_line=None):
     yield (line, slice(0, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e115(line, col, source_line=None):
+def render_pep8_errors_e115(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 expected an indented block (comment) message."""
     yield (
         line,
@@ -243,7 +315,11 @@ def render_pep8_errors_e115(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e122_and_e127_and_e131(line, col, source_line=None):
+def render_pep8_errors_e122_and_e127_and_e131(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """
     Render a PEP8 continuation line missing indentation or outdented message, a line over-indented for visual indent
     message, and a continuation line unaligned for hanging indent message.
@@ -258,12 +334,20 @@ def render_pep8_errors_e122_and_e127_and_e131(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e124(line, col, source_line=None):
+def render_pep8_errors_e124(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 closing bracket does not match visual indentation message."""
     yield (line, slice(col, col + 1), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e125_and_e129(line, col, source_line=None):
+def render_pep8_errors_e125_and_e129(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str]]:
     """Render a PEP8 continuation line with same indent as next logical line message
     AND a PEP8 visually indented line with same indent as next logical line messsage"""
     curr_idx = len(source_line) - len(source_line.lstrip())
@@ -275,12 +359,20 @@ def render_pep8_errors_e125_and_e129(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e128(line, col, source_line):
+def render_pep8_errors_e128(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 continuation line under-indented for visual indent message."""
     yield (line, slice(0, col if col != 0 else None), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272(line, col, source_line=None):
+def render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 whitespace after '(' message,
     a PEP8 whitespace before ')' message,
     a PEP8 whitespace before ‘,’, ‘;’, or ‘:’ message,
@@ -294,7 +386,11 @@ def render_pep8_errors_e201_e202_e203_e211_e221_e222_e271_e272(line, col, source
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e204(line, col, source_line=None):
+def render_pep8_errors_e204(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 whitespace after decorator '@' message"""
     # calculates the length of the leading whitespaces by subtracting the length of everything after the first character after stripping all leading whitespaces from the total line length
     curr_idx = col + len(source_line[col:]) - len(source_line[col + 1 :].lstrip())
@@ -302,21 +398,33 @@ def render_pep8_errors_e204(line, col, source_line=None):
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e223_and_e274(line, col, source_line=None):
+def render_pep8_errors_e223_and_e274(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 tab before operator message and a PEP8 tab before keyword message."""
     curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip("\t"))
 
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e224_and_e273(line, col, source_line):
+def render_pep8_errors_e224_and_e273(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 tab after operator message and a PEP8 tab after keyword message."""
     curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip("\t"))
 
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e225(line, col, source_line):
+def render_pep8_errors_e225(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 missing whitespace around operator message"""
     curr_idx = col + 1
 
@@ -347,7 +455,11 @@ def render_pep8_errors_e225(line, col, source_line):
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e226(line, col, source_line):
+def render_pep8_errors_e226(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 missing whitespace around arithmetic operator message"""
     end_idx = col + 1
 
@@ -359,7 +471,11 @@ def render_pep8_errors_e226(line, col, source_line):
     yield (line, slice(col, end_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e227(line, col, source_line=None):
+def render_pep8_errors_e227(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 missing whitespace around bitwise or shift operator message."""
     # Check which operator to get the correct range of the line to highlight.
     # Default highlight is one character, but may be updated to two.
@@ -371,7 +487,11 @@ def render_pep8_errors_e227(line, col, source_line=None):
     yield (line, slice(col, end_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e228(line, col, source_line=None):
+def render_pep8_errors_e228(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 missing whitespace around modulo operator message."""
     yield (
         line,
@@ -381,13 +501,21 @@ def render_pep8_errors_e228(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e231(line, col, source_line=None):
+def render_pep8_errors_e231(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     curr_idx = col + 1
 
     yield (line, slice(col, curr_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e251(line, col, source_line=None):
+def render_pep8_errors_e251(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 unexpected spaces around keyword / parameter equals message."""
     equals_sign_idx = source_line[col:].find("=")
     code = source_line[col : col + equals_sign_idx if equals_sign_idx != -1 else None]
@@ -396,7 +524,11 @@ def render_pep8_errors_e251(line, col, source_line=None):
     yield (line, slice(col, end_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e261(line, col, source_line=None):
+def render_pep8_errors_e261(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 at least two spaces before inline comment message."""
     yield (
         line,
@@ -406,14 +538,22 @@ def render_pep8_errors_e261(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e262(line, col, source_line=None):
+def render_pep8_errors_e262(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 inline comment should start with '# ' message"""
     keyword_idx = len(source_line) - len(source_line[col:].lstrip("# \t"))
 
     yield (line, slice(col, keyword_idx), LineType.ERROR, source_line)
 
 
-def render_pep8_errors_e265(line, col, source_line=None):
+def render_pep8_errors_e265(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 block comment should start with '# ' message."""
     yield (
         line,
@@ -423,7 +563,11 @@ def render_pep8_errors_e265(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e266(line, col, source_line=None):
+def render_pep8_errors_e266(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 too many leading ‘#’ for block comment message."""
     curr_idx = col + len(source_line[col:]) - len(source_line[col:].lstrip("#"))
 
@@ -435,7 +579,11 @@ def render_pep8_errors_e266(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e275(line, col, source_line=None):
+def render_pep8_errors_e275(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 missing whitespace after keyword message."""
     # Get the range for highlighting the corresponding keyword.
     keyword = source_line[:col].split()[-1]
@@ -449,7 +597,11 @@ def render_pep8_errors_e275(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e301(line, col, source_line=None):
+def render_pep8_errors_e301(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int | None, slice, LineType, str], None, None]:
     """Render a PEP8 expected 1 blank line message."""
     indentation = len(source_line) - len(source_line.lstrip())
     yield (
@@ -460,7 +612,11 @@ def render_pep8_errors_e301(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e302(msg, line, source_lines=None):
+def render_pep8_errors_e302(
+    msg: NewMessage,
+    line: int,
+    source_lines: list[str],
+) -> Generator[tuple[int | None, slice, LineType, str], None, None]:
     """Render a PEP8 expected 2 blank lines message."""
     if "found 0" in msg.msg:
         yield from render_context(line - 3, line, source_lines)
@@ -480,7 +636,11 @@ def render_pep8_errors_e302(msg, line, source_lines=None):
     yield from render_context(line, line + 3, source_lines)
 
 
-def render_pep8_errors_e303_and_e304(msg, line, source_lines=None):
+def render_pep8_errors_e303_and_e304(
+    msg: NewMessage,
+    line: int,
+    source_lines: list[str],
+) -> Generator[tuple[int | str | None, slice, LineType, str], None, None]:
     """Render a PEP8 too many blank lines message
     and a PEP8 blank lines found after function decorator message
     """
@@ -518,7 +678,11 @@ def render_pep8_errors_e303_and_e304(msg, line, source_lines=None):
     yield from render_context(line, line + 3, source_lines)
 
 
-def render_pep8_errors_e305(msg, line, source_lines=None):
+def render_pep8_errors_e305(
+    msg: NewMessage,
+    line: int,
+    source_lines: list[str],
+) -> Generator[tuple[int | None, slice, LineType, str], None, None]:
     """Render a PEP8 expected 2 blank lines after class or function definition message."""
     if "found 0" in msg.msg:
         yield from render_context(line - 3, line, source_lines)
@@ -538,7 +702,11 @@ def render_pep8_errors_e305(msg, line, source_lines=None):
     yield from render_context(line, line + 3, source_lines)
 
 
-def render_pep8_errors_e306(line, col, source_line=None):
+def render_pep8_errors_e306(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int | None, slice, LineType, str], None, None]:
     """Render a PEP8 expected 1 blank line before a nested definition message."""
     indentation = len(source_line) - len(source_line.lstrip())
     yield (
@@ -549,12 +717,21 @@ def render_pep8_errors_e306(line, col, source_line=None):
     )
 
 
-def render_pep8_errors_e502(line, col, source_line=None):
+def render_pep8_errors_e502(
+    line: int,
+    col: int,
+    source_line: str,
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a PEP8 the backslash is redundant between brackets."""
     yield (line, slice(col, col + 1), LineType.ERROR, source_line)
 
 
-def render_missing_return_statement(msg, node, source_lines=None, config=None):
+def render_missing_return_statement(
+    msg: NewMessage,
+    node: nodes.NodeNG,
+    source_lines: list[str],
+    config: dict[str, Any] | None = None,
+) -> Generator[tuple[int | None, slice, LineType, str], None, None]:
     """
     Render a missing return statements message
     """
@@ -586,7 +763,12 @@ def render_missing_return_statement(msg, node, source_lines=None, config=None):
     yield from render_context(msg.end_line + 1, msg.end_line + 3, source_lines)
 
 
-def render_static_type_checker_errors(msg, _node=None, source_lines=None, config=None):
+def render_static_type_checker_errors(
+    msg: NewMessage,
+    _node: nodes.NodeNG | None = None,
+    source_lines: list[str] = [],
+    config: dict[str, Any] | None = None,
+) -> Generator[tuple[int | None, slice, LineType, str], None, None]:
     """Render a message for incompatible argument types."""
     start_line = msg.line
     start_col = msg.column
@@ -609,7 +791,7 @@ def render_static_type_checker_errors(msg, _node=None, source_lines=None, config
             source_lines[start_line - 1],
         )
         yield from (
-            (line, slice(None, None), LineType.ERROR, source_lines)
+            (line, slice(None, None), LineType.ERROR, source_lines[line - 1])
             for line in range(start_line + 1, end_line)
         )
         yield (
@@ -621,7 +803,7 @@ def render_static_type_checker_errors(msg, _node=None, source_lines=None, config
     yield from render_context(end_line + 1, end_line + 3, source_lines)
 
 
-CUSTOM_MESSAGES = {
+CUSTOM_MESSAGES: dict[str, Callable[..., Generator[RenderResult, None, None]]] = {
     "missing-module-docstring": render_missing_docstring,
     "missing-class-docstring": render_missing_docstring,
     "missing-function-docstring": render_missing_docstring,
@@ -641,7 +823,7 @@ CUSTOM_MESSAGES = {
     "dict-item-type-mismatch": render_static_type_checker_errors,
 }
 
-RENDERERS = {
+RENDERERS: dict[str, Callable[..., Generator[RenderResult, None, None]]] = {
     "E101": render_pep8_errors_e101_and_e123_and_e116,
     "E123": render_pep8_errors_e101_and_e123_and_e116,
     "E115": render_pep8_errors_e115,
@@ -695,3 +877,6 @@ class LineType(Enum):
     OTHER = 3  # line included in source but not error
     ELLIPSIS = 5  # code replaced with ellipsis
     DOCSTRING = 6  # docstring needed warning
+
+
+RenderResult = tuple[int | str | None, slice, LineType, str]

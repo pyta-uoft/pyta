@@ -52,6 +52,16 @@ class CFGVisitor:
         self._control_boundaries = []
         self.z3_enabled = z3_enabled
 
+    def _cb(self) -> CFGBlock:
+        """Return the current block, asserting it's not None for typing."""
+        assert self._current_block is not None
+        return self._current_block
+
+    def _ccfg(self) -> ControlFlowGraph:
+        """Return the current CFG, asserting it's not None for typing."""
+        assert self._current_cfg is not None
+        return self._current_cfg
+
     def __getattr__(self, attr: str):
         if attr.startswith("visit_"):
             return self.visit_generic
@@ -83,8 +93,8 @@ class CFGVisitor:
         for child in module.body:
             child.accept(self)
 
-        self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
-        self._current_cfg.update_block_reachability()
+        self._ccfg().link_or_merge(self._cb(), self._ccfg().end)
+        self._ccfg().update_block_reachability()
 
     def visit_classdef(self, node: nodes.ClassDef) -> None:
         functions_to_render = self.options.get("functions", [])
@@ -128,7 +138,7 @@ class CFGVisitor:
         )
 
         # Current CFG block is self._current_cfg.start while initially creating the function cfg
-        self._current_cfg.add_arguments(func.args)
+        self._ccfg().add_arguments(func.args)
 
         preconditions_node = _get_preconditions_node(func)
 
@@ -141,8 +151,8 @@ class CFGVisitor:
 
         self._control_boundaries.pop()
 
-        self._current_cfg.link_or_merge(self._current_block, self._current_cfg.end)
-        self._current_cfg.update_block_reachability()
+        self._ccfg().link_or_merge(self._cb(), self._ccfg().end)
+        self._ccfg().update_block_reachability()
 
         if hasattr(func, "z3_constraints"):
             self._current_cfg.precondition_constraints = func.z3_constraints
@@ -166,9 +176,9 @@ class CFGVisitor:
         else:
             # If the options doesn't specify to separate the test condition blocks, just add it to
             # the current block.
-            self._current_block.add_statement(node.test)
-        node.cfg_block = self._current_block
-        old_curr = self._current_block
+            self._cb().add_statement(node.test)
+        node.cfg_block = self._cb()
+        old_curr = self._cb()
 
         # Handle "then" branch and label it.
         then_block = self._current_cfg.create_block(
@@ -190,7 +200,7 @@ class CFGVisitor:
             self._current_block = else_block
             for child in node.orelse:
                 child.accept(self)
-            end_else = self._current_block
+            end_else = self._cb()
 
         after_if_block = self._current_cfg.create_block()
         self._current_cfg.link_or_merge(end_if, after_if_block)
@@ -212,7 +222,7 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
-        old_curr = self._current_block
+        old_curr = self._cb()
 
         # Handle "test" block
         test_block = self._current_cfg.create_block()
@@ -260,7 +270,7 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
-        old_curr = self._current_block
+        old_curr = self._cb()
         old_curr.add_statement(node.iter)
         node.cfg_block = old_curr
 
@@ -316,8 +326,8 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
-        old_curr = self._current_block
-        unreachable_block = self._current_cfg.create_block()
+        old_curr = self._cb()
+        unreachable_block = self._ccfg().create_block()
         for boundary, exits in reversed(self._control_boundaries):
             if (
                 isinstance(boundary, nodes.FunctionDef) or isinstance(boundary, nodes.ClassDef)
@@ -326,7 +336,7 @@ class CFGVisitor:
                     f"'{type(node).__name__}' outside"
                     f' {"function" if isinstance(node, nodes.Return) else "loop"}'
                 )
-                self._current_cfg.link(old_curr, unreachable_block)
+                self._ccfg().link(old_curr, unreachable_block)
                 old_curr.add_statement(node)
                 break
 
@@ -358,8 +368,8 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
-        if self._current_block.statements != []:
-            self._current_block = self._current_cfg.create_block(self._current_block)
+        if self._cb().statements != []:
+            self._current_block = self._ccfg().create_block(self._cb())
 
         node.cfg_block = self._current_block
 
@@ -372,7 +382,7 @@ class CFGVisitor:
         self._control_boundaries.append((node, {nodes.Raise.__name__: end_block}))
         cbs_added = 1
 
-        after_body = []
+        after_body: list[CFGBlock] = []
         # Construct blocks in reverse to give precedence to the first block in overlapping except
         # branches
         for handler in reversed(node.handlers):
@@ -413,7 +423,7 @@ class CFGVisitor:
 
         for child in node.body:
             child.accept(self)
-        end_body = self._current_block
+        end_body = self._cb()
 
         # Remove each control boundary that we added in this method
         for _ in range(cbs_added):
@@ -429,9 +439,9 @@ class CFGVisitor:
             return
 
         for context_node, name in node.items:
-            self._current_block.add_statement(context_node)
+            self._cb().add_statement(context_node)
             if name is not None:
-                self._current_block.add_statement(name)
+                self._cb().add_statement(name)
 
         for child in node.body:
             child.accept(self)
@@ -442,14 +452,15 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
-        self._current_block.add_statement(node.subject)
-        node.cfg_block = self._current_block
-        after_match_block = self._current_cfg.create_block()
+        self._cb().add_statement(node.subject)
+        node.cfg_block = self._cb()
+        after_match_block = self._ccfg().create_block()
 
-        case_end_blocks = []
+        case_end_blocks: list[CFGBlock] = []
 
         prev_case = self._current_block
         connect_guard_block = False
+        guard_block: Optional[CFGBlock] = None
 
         for case in node.cases:
             edge_label = "No Match" if case_end_blocks else ""
@@ -460,6 +471,7 @@ class CFGVisitor:
             pattern_block.add_statement(case.pattern)
 
             if connect_guard_block:
+                assert guard_block is not None
                 self._current_cfg.link_or_merge(guard_block, pattern_block, edge_label="False")
                 connect_guard_block = False
 
@@ -484,6 +496,7 @@ class CFGVisitor:
         # For the final block, create a new block that links to the end of the match
         self._current_cfg.link_or_merge(pattern_block, after_match_block, edge_label="No Match")
         if connect_guard_block:
+            assert guard_block is not None
             self._current_cfg.link_or_merge(guard_block, after_match_block, edge_label="False")
 
         for end_block in case_end_blocks:
@@ -497,7 +510,7 @@ def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:
     list of strings.
     """
     exceptions = node.type
-    exceptions_so_far = []
+    exceptions_so_far: list[str] = []
     # ExceptHandler.type will either be Tuple, NodeNG, or None.
     if exceptions is None:
         return exceptions_so_far

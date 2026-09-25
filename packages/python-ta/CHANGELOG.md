@@ -27,6 +27,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed watch tests on Windows by using `threading` rather than `select`
 - Added tests using unsupported Mypy error codes in `StaticTypeChecker` to improve coverage for the `_add_message` method
 - Removed unnecessary `_override_check_invalid_name_in_main ` patch
+- Added type annotations and fixed all mypy errors in the `packages\python-ta\src\python_ta` directory
 
 ## [2.13.1] - 2026-08-12
 

@@ -1,16 +1,17 @@
 """Patch to add transforms for setting type constraints and creating control flow graphs."""
 
 import logging
+from typing import Any
 
 from pylint.lint import PyLinter
 
 from ..cfg.visitor import CFGVisitor
 
 
-def patch_ast_transforms():
+def patch_ast_transforms() -> None:
     old_get_ast = PyLinter.get_ast
 
-    def new_get_ast(self, filepath, modname, data):
+    def new_get_ast(self, filepath: str, modname: str, data: str) -> None:
         ast = old_get_ast(self, filepath, modname, data)
         if ast is None:
             return None
@@ -36,4 +37,4 @@ def patch_ast_transforms():
 
         return ast
 
-    PyLinter.get_ast = new_get_ast
+    setattr(PyLinter, "get_ast", new_get_ast)

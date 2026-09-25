@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from .core import NewMessage, PythonTaReporter
+from .core import MessageLike, NewMessage, PythonTaReporter
 
 if TYPE_CHECKING:
     from pylint.lint import PyLinter
-    from pylint.reporters.ureports.nodes import BaseLayout
+    from pylint.reporters.ureports.nodes import Section
 
 
 class JSONReporter(PythonTaReporter):
@@ -20,9 +20,9 @@ class JSONReporter(PythonTaReporter):
 
     OUTPUT_FILENAME = "pyta_report.json"
 
-    messages: dict[str, list[NewMessage]]
+    messages: dict[str, list[MessageLike]]
 
-    def display_messages(self, layout: BaseLayout) -> None:
+    def display_messages(self, layout: Section | None) -> None:
         """Hook for displaying the messages of the reporter
 
         This will be called whenever the underlying messages
@@ -37,7 +37,7 @@ class JSONReporter(PythonTaReporter):
             output.append(
                 {
                     "filename": k,
-                    "msgs": self._output_messages(msgs),
+                    "msgs": self._output_messages(cast(list[NewMessage], msgs)),
                 }
             )
 

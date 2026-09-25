@@ -53,10 +53,10 @@ def _is_unnecessary_indexing(node: Union[nodes.For, nodes.Comprehension]) -> boo
 
     True if unnecessary usage, False otherwise or if index variable not used at all.
     """
-    index_nodes = []
+    index_nodes: list[nodes.Name] = []
     for assign_name_node in node.target.nodes_of_class((nodes.AssignName, nodes.Name)):
         index_nodes.extend(_index_name_nodes(assign_name_node.name, node))
-    return all(_is_redundant(index_node, node) for index_node in index_nodes) and index_nodes
+    return all(_is_redundant(index_node, node) for index_node in index_nodes) and bool(index_nodes)
 
 
 def _iterable_if_range(node: nodes.NodeNG) -> Optional[str]:
@@ -100,6 +100,7 @@ def _iterable_if_range(node: nodes.NodeNG) -> Optional[str]:
         and isinstance(stop_arg.args[0], nodes.Name)
     ):
         return stop_arg.args[0].name
+    return None
 
 
 def _is_load_subscript(

@@ -65,7 +65,7 @@ class PossiblyUndefinedChecker(BaseChecker):
         Data flow algorithms retrieved from:
         https://www.seas.harvard.edu/courses/cs252/2011sp/slides/Lec02-Dataflow.pdf#page=31
         """
-        out_facts = {}
+        out_facts: dict[CFGBlock, set[str]] = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
         blocks = list(cfg.get_blocks_postorder(only_feasible=self.linter.config.z3))
@@ -100,7 +100,7 @@ class PossiblyUndefinedChecker(BaseChecker):
 
     def _transfer(self, block: CFGBlock, in_facts: set[str], local_vars: set[str]) -> set[str]:
         gen = in_facts.copy()
-        kill = set()
+        kill: set[str] = set()
         for statement in block.statements:
             if isinstance(statement, nodes.FunctionDef):
                 continue
@@ -131,8 +131,8 @@ class PossiblyUndefinedChecker(BaseChecker):
         Note that `local variable` in the context of a module level analysis,
         refers to global variables.
         """
-        assigns = set()
-        kills = set()
+        assigns: set[str] = set()
+        kills: set[str] = set()
         for name, assign_nodes in node.scope().locals.items():
             if any(isinstance(elem, nodes.AssignName) for elem in assign_nodes):
                 assigns.add(name)

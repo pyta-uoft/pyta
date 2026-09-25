@@ -111,7 +111,7 @@ class ForbiddenImportChecker(BaseChecker):
                         args = ("module " + node.args[0].value,)
                         self.add_message("forbidden-import", node=node, args=args)
 
-    def get_allowed_local_files(self) -> list:
+    def get_allowed_local_files(self) -> list[str]:
         """
         Returns the list of the local files given by self.linter.current_file
 
@@ -136,7 +136,7 @@ def register(linter: PyLinter) -> None:
     linter.register_checker(ForbiddenImportChecker(linter))
 
 
-def _get_full_import_names(modname: str, names: list[tuple[str, str]]) -> list:
+def _get_full_import_names(modname: str, names: list[tuple[str, str]]) -> list[str]:
     """Given a module name and a list of names imported from the module, return a list of strings
     in the form {module name}.{function name}.
 

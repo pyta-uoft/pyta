@@ -31,7 +31,7 @@ class GlobalVariablesChecker(BaseChecker):
 
     def __init__(self, linter=None) -> None:
         super().__init__(linter)
-        self.import_names = []
+        self.import_names: list[str] = []
 
     @only_required_for_messages("forbidden-global-variables")
     def visit_global(self, node: nodes.Global) -> None:
@@ -93,7 +93,7 @@ def _get_child_disallowed_global_var_nodes(node: nodes.NodeNG) -> list[nodes.Nod
     """Return a list of all top-level Name or AssignName nodes for a given
     global, non-constant and non-type alias variable.
     """
-    node_list = []
+    node_list: list[nodes.NodeNG] = []
     if (
         (
             isinstance(node, (nodes.AssignName, nodes.Name))

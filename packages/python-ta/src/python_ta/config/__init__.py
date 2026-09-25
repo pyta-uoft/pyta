@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import AnyStr, Optional
+from typing import Optional
 
 import toml
 from pylint.config.config_file_parser import _ConfigurationFileParser
@@ -18,7 +18,7 @@ from pylint.lint import PyLinter
 DEFAULT_CONFIG_LOCATION = os.path.join("config", ".pylintrc")
 
 
-def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
+def find_local_config(curr_dir: str) -> Optional[str]:
     """Search for a configuration file provided in same (user)
     location as the source file to check.
     Return absolute path to the file, or None.
@@ -33,11 +33,12 @@ def find_local_config(curr_dir: AnyStr) -> Optional[AnyStr]:
         return os.path.join(curr_dir, "config", "pylintrc")
     elif os.path.exists(os.path.join(curr_dir, "config", "pyproject.toml")):
         return os.path.join(curr_dir, "config", "pyproject.toml")
+    return None
 
 
 def load_config(
     linter: PyLinter,
-    config_location: AnyStr,
+    config_location: str,
     pylint_args: Optional[list[str]] = None,
 ) -> None:
     """Load configuration into the linter."""
@@ -45,12 +46,12 @@ def load_config(
     if pylint_args:
         args_list.extend(pylint_args)
     _config_initialization(linter, args_list=args_list, config_file=config_location)
-    linter.config_file = config_location
+    setattr(linter, "config_file", config_location)  # use setattr to avoid mypy errors
 
 
 def override_config(
     linter: PyLinter,
-    config_location: AnyStr,
+    config_location: str,
     pylint_args: Optional[list[str]] = None,
 ) -> None:
     """Override the default linter configuration options (if possible).
@@ -62,7 +63,7 @@ def override_config(
     # Read the configuration file.
     config_file_parser = _ConfigurationFileParser(verbose=True, linter=linter)
     try:
-        _, config_args = config_file_parser.parse_config_file(file_path=config_location)
+        _, config_args = config_file_parser.parse_config_file(file_path=Path(config_location))
     except OSError as ex:
         logging.error(ex)
         sys.exit(32)
@@ -81,7 +82,7 @@ def override_config(
     # Everything has been set up already so emit any stashed messages.
     linter._emit_stashed_messages()
 
-    linter.config_file = config_location
+    setattr(linter, "config_file", config_location)  # use setattr to avoid mypy errors
 
 
 def load_messages_config(path: str, default_path: str, use_pyta_error_messages: bool) -> dict:
@@ -113,7 +114,7 @@ def load_messages_config(path: str, default_path: str, use_pyta_error_messages: 
 
 def flatten(config_dict: dict) -> dict:
     """Given a nested dictionary, flatten it such that no values are themselves dictionaries."""
-    flat_dict = {}
+    flat_dict: dict[str, str] = {}
     for key, value in config_dict.items():
         if isinstance(value, dict):
             flat_dict.update(flatten(value))
@@ -122,9 +123,9 @@ def flatten(config_dict: dict) -> dict:
     return flat_dict
 
 
-def _get_pyta_toml_args(config_location: AnyStr, linter: PyLinter) -> list[str]:
+def _get_pyta_toml_args(config_location: str, linter: PyLinter) -> list[str]:
     """Extracts [tool.python-ta] options from a TOML file and formats them as arguments."""
-    args_list = []
+    args_list: list[str] = []
     if not (config_location and config_location.endswith(".toml")):
         return args_list
 

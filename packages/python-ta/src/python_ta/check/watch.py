@@ -3,9 +3,10 @@
 import logging
 import os
 import time
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 
 from pylint.lint import PyLinter
+from pylint.reporters import BaseReporter
 
 # ``watchdog`` is an optional extra. If someone imports this module without
 # installing the extra, we print an error message before raising the error.
@@ -57,13 +58,15 @@ class FileChangeHandler(FileSystemEventHandler):
             load_default_config=self.load_default_config,
             autoformat=self.autoformat,
             is_any_file_checked=True,
-            current_reporter=current_reporter,
+            current_reporter=cast(BaseReporter, current_reporter),
             f_paths=[],
         )
         current_reporter = self.linter.reporter
-        current_reporter.print_messages(self.level)
+        cast(Any, current_reporter).print_messages(self.level)
         self.linter.generate_reports()
-        upload_linter_results(self.linter, current_reporter, self.f_paths, self.local_config)
+        upload_linter_results(
+            self.linter, cast(BaseReporter, current_reporter), self.f_paths, self.local_config
+        )
 
 
 def watch_files(
@@ -96,8 +99,9 @@ def watch_files(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        event_handler.linter.reporter.should_close_out = True
-        event_handler.linter.reporter.on_close(event_handler.linter.stats, None)
+        reporter = event_handler.linter.reporter
+        cast(Any, reporter).should_close_out = True
+        reporter.on_close(event_handler.linter.stats, None)
         observer.stop()
 
     observer.join()

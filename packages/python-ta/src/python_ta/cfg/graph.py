@@ -365,6 +365,7 @@ class CFGBlock:
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]
+        return None
 
     @property
     def is_feasible(self) -> bool:
@@ -457,7 +458,7 @@ class Z3Environment:
         """Returns all z3 constraints in the environments
         Removes constraints with reassigned variables
         """
-        updated_constraints = []
+        updated_constraints: list[ExprRef] = []
         for constraint in self.constraints:
             # discard expressions with reassigned variables
             variables = _get_vars(constraint)
@@ -492,7 +493,7 @@ def _get_vars(expr: ExprRef) -> Set[str]:
     """Retrieve all z3 variables from a z3 expression"""
     from z3 import Z3_OP_UNINTERPRETED, is_const
 
-    variables = set()
+    variables: set[str] = set()
 
     def traverse(e: ExprRef) -> None:
         if is_const(e) and e.decl().kind() == Z3_OP_UNINTERPRETED:

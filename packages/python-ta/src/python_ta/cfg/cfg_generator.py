@@ -98,7 +98,12 @@ def _get_valid_file_path(mod: str = "") -> Optional[str]:
     if mod == "":
         m = sys.modules["__main__"]
         spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
-        mod = spec.origin
+        if spec is None:
+            return None
+        origin = spec.origin
+        if origin is None:
+            return None
+        mod = origin
     # Enforce the API to only except `mod` type as str
     elif not isinstance(mod, str):
         print(
@@ -106,13 +111,13 @@ def _get_valid_file_path(mod: str = "") -> Optional[str]:
                 mod
             )
         )
-        return
+        return None
 
     # At this point, `mod` is of type str
     if not os.path.isfile(mod):
         # `mod` is not a file so print an error message
         print("Could not find the file called, `{}`\n".format(mod))
-        return
+        return None
 
     # `mod` may be a relative path to a valid file so return its absolute path
     return os.path.abspath(mod)
@@ -134,7 +139,7 @@ def _display(
         else:
             continue
         with graph.subgraph(name=f"cluster_{cfg.cfg_id}") as c:
-            visited = set()
+            visited: set[str] = set()
             _visit(cfg.start, c, visited, cfg.end)
             for block in cfg.unreachable_blocks:
                 _visit(block, c, visited, cfg.end)
@@ -143,7 +148,7 @@ def _display(
     graph.render(outfile=filename + ".svg", view=auto_open)
 
 
-def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[int], end: CFGBlock) -> None:
+def _visit(block: CFGBlock, graph: graphviz.Digraph, visited: set[str], end: CFGBlock) -> None:
     """
     Visit a CFGBlock and add it to the control flow graph.
     """

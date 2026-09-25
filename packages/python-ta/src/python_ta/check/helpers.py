@@ -10,7 +10,8 @@ import re
 import sys
 import tokenize
 from configparser import Error as ConfigParserError
-from typing import IO, Any, AnyStr, Generator, Literal, Optional, Union
+from pathlib import Path
+from typing import IO, Any, Generator, Literal, Optional, Union, cast
 
 from astroid import MANAGER, modutils
 from pylint.config.config_file_parser import _RawConfParser
@@ -47,18 +48,20 @@ class PytaPyLinter(PyLinter):
 def setup_linter(
     local_config: Union[dict[str, Any], str],
     load_default_config: bool,
-    output: Optional[Union[str, IO]],
+    output: Optional[Union[str, IO[str]]],
     pylint_args: Optional[list[str]] = None,
-) -> tuple[PyLinter, Union[BaseReporter, MultiReporter]]:
+) -> tuple[PyLinter, BaseReporter]:
     """Set up the linter and reporter for the check."""
     linter = reset_linter(
         config=local_config,
         load_default_config=load_default_config,
         pylint_args=pylint_args,
     )
-    current_reporter = linter.reporter
-    current_reporter.set_output(output)
-    messages_config_path = linter.config.messages_config_path
+    # Pylint exposes a reporter object dynamically; PythonTA only relies on the
+    # BaseReporter API here, so narrow it for the rest of this helper.
+    current_reporter = cast(BaseReporter, linter.reporter)
+    cast(Any, current_reporter).set_output(output)
+    messages_config_path = cast(Any, linter.config).messages_config_path
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -68,13 +71,13 @@ def setup_linter(
 
 
 def check_file(
-    file_py: AnyStr,
+    file_py: str,
     local_config: Union[dict[str, Any], str],
     load_default_config: bool,
     autoformat: Optional[bool],
     is_any_file_checked: bool,
-    current_reporter: Union[BaseReporter, MultiReporter],
-    f_paths: list,
+    current_reporter: BaseReporter,
+    f_paths: list[str],
     pylint_args: Optional[list[str]] = None,
 ) -> tuple[bool, PyLinter]:
     """Perform linting on a single Python file using the provided linter and configuration"""
@@ -92,16 +95,18 @@ def check_file(
         run_autoformat(file_py, linter.config.autoformat_options, linter.config.max_line_length)
 
     if not is_any_file_checked:
-        prev_output = current_reporter.out
-        prev_should_close_out = current_reporter.should_close_out
-        current_reporter = linter.reporter
-        current_reporter.out = prev_output
-        current_reporter.should_close_out = not linter.config.watch and prev_should_close_out
+        prev_output = cast(Any, current_reporter).out
+        prev_should_close_out = cast(Any, current_reporter).should_close_out
+        current_reporter = cast(BaseReporter, linter.reporter)
+        cast(Any, current_reporter).out = prev_output
+        cast(Any, current_reporter).should_close_out = (
+            not cast(Any, linter.config).watch and prev_should_close_out
+        )
 
         # At this point, the only possible errors are those from parsing the config file
         # so print them, if there are any.
-        if current_reporter.has_messages():
-            current_reporter.print_messages()
+        if cast(Any, current_reporter).has_messages():
+            cast(Any, current_reporter).print_messages()
     else:
         linter.set_reporter(current_reporter)
 
@@ -112,14 +117,16 @@ def check_file(
     if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
         del MANAGER.astroid_cache[module_name]
     linter.check([file_py])  # Lint !
-    if linter.config.pyta_file_permission:
+    if cast(Any, linter.config).pyta_file_permission:
         f_paths.append(file_py)  # Appending paths for upload
     logging.debug(
-        "File: {} was checked using the configuration file: {}".format(file_py, linter.config_file)
+        "File: {} was checked using the configuration file: {}".format(
+            file_py, cast(Any, linter).config_file
+        )
     )
     logging.debug(
         "File: {} was checked using the messages-config file: {}".format(
-            file_py, linter.config.messages_config_path
+            file_py, cast(Any, linter.config).messages_config_path
         )
     )
     return is_any_file_checked, linter
@@ -127,18 +134,18 @@ def check_file(
 
 def upload_linter_results(
     linter: PyLinter,
-    current_reporter: Union[BaseReporter, MultiReporter],
-    f_paths: list,
+    current_reporter: BaseReporter,
+    f_paths: list[str],
     local_config: Union[dict[str, Any], str],
 ) -> None:
     """Upload linter results and configuration data to the specified server if permissions allow."""
-    config = {}  # Configuration settings for data submission
-    errs = []  # Errors caught in files for data submission
-    if linter.config.pyta_error_permission:
-        errs = list(current_reporter.messages.values())
+    config: dict[str, Any] = {}  # Configuration settings for data submission
+    errs: Any = []  # Errors caught in files for data submission
+    if cast(Any, linter.config).pyta_error_permission:
+        errs = list(cast(Any, current_reporter).messages.values())
     if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
         # Checks if default configuration was used without changing options through the local_config argument
-        if linter.config_file[-19:-10] != "python_ta" or local_config != "":
+        if cast(Any, linter).config_file[-19:-10] != "python_ta" or local_config != "":
             config = linter.config.__dict__
         upload_to_server(
             errors=errs,
@@ -151,7 +158,7 @@ def upload_linter_results(
 
 def reset_linter(
     config: Optional[Union[dict, str]] = None,
-    file_linted: Optional[AnyStr] = None,
+    file_linted: Optional[Union[str, bytes]] = None,
     load_default_config: bool = True,
     pylint_args: Optional[list[str]] = None,
 ) -> PyLinter:
@@ -167,7 +174,7 @@ def reset_linter(
     """
 
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
-    new_checker_options = (
+    new_checker_options: Any = (
         (
             "server-port",
             {
@@ -287,6 +294,7 @@ def reset_linter(
     linter.load_plugin_modules(["python_ta.transforms.setendings"])
 
     default_config_path = find_local_config(os.path.dirname(os.path.dirname(__file__)))
+    assert default_config_path is not None
     set_config = load_config
 
     output_format_override = _get_output_format_override(config, pylint_args)
@@ -306,7 +314,7 @@ def reset_linter(
         # If available, use config file at directory of the file being linted.
         config_location = None
         if file_linted:
-            config_location = find_local_config(file_linted)
+            config_location = find_local_config(os.fsdecode(file_linted))
 
         # Load or override the options if there is a config file in the current directory.
         if config_location:
@@ -321,10 +329,12 @@ def reset_linter(
 
     # Override error messages
     messages_config_path = linter.config.messages_config_path
-    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
+    messages_config_default_path = cast(
+        str, linter._option_dicts["messages-config-path"]["default"]
+    )
     use_pyta_error_messages = linter.config.use_pyta_error_messages
     messages_config = load_messages_config(
-        messages_config_path, messages_config_default_path, use_pyta_error_messages
+        messages_config_path, messages_config_default_path, bool(use_pyta_error_messages)
     )
     for error_id, new_msg in messages_config.items():
         # Create new message definition object according to configured error messages
@@ -348,12 +358,14 @@ def reset_linter(
     return linter
 
 
-def get_valid_files_to_check(module_name: Union[list[str], str]) -> Generator[AnyStr, None, None]:
+def get_valid_files_to_check(module_name: Union[list[str], str]) -> Generator[str, None, None]:
     """A generator for all valid files to check."""
     # Allow call to check with empty args
     if module_name == "":
         m = sys.modules["__main__"]
         spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
+        if spec is None or spec.origin is None:
+            return None
         module_name = [spec.origin]
     # Enforce API to expect 1 file or directory if type is list
     elif isinstance(module_name, str):
@@ -385,7 +397,7 @@ def get_valid_files_to_check(module_name: Union[list[str], str]) -> Generator[An
             yield item  # Check other valid files.
 
 
-def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
+def get_file_paths(rel_path: str) -> Generator[str, None, None]:
     """A generator for iterating python files within a directory.
     `rel_path` is a relative path to a file or directory.
     Returns paths to all files in a directory.
@@ -399,7 +411,7 @@ def get_file_paths(rel_path: AnyStr) -> Generator[AnyStr, None, None]:
 
 
 def verify_pre_check(
-    filepath: AnyStr,
+    filepath: str,
     allow_pylint_comments: bool,
     on_verify_fail: Literal["log", "raise"] = "log",
 ) -> bool:
@@ -464,7 +476,7 @@ def verify_pre_check(
 
 
 def _get_output_format_override(
-    config: Optional[Union[str, dict]], pylint_args: Optional[list[str]] = None
+    config: Optional[Union[str, dict[str, Any]]], pylint_args: Optional[list[str]] = None
 ) -> Optional[str]:
     """Retrieve the output format override from the parsed configuration prematurely"""
     if pylint_args and "--output-format" in pylint_args:
@@ -472,12 +484,12 @@ def _get_output_format_override(
         if output_format_index + 1 < len(pylint_args):
             return pylint_args[output_format_index + 1]
 
-    output_format_override = None
+    output_format_override: Optional[str] = None
     if isinstance(config, str) and config != "":
-        config_path = os.path.abspath(config)
-        if not os.path.exists(config_path):
+        config_path = Path(os.path.abspath(config))
+        if not config_path.exists():
             logging.warn(f"The following config file was not found: {config}")
-            return
+            return None
 
         try:
             config_data, _ = _RawConfParser.parse_config_file(config_path, verbose=False)
@@ -498,4 +510,5 @@ def _get_reporter_class_path(reporter_name: Optional[str]) -> str:
         "pyta-json": "python_ta.reporters.json_reporter.JSONReporter",
         "pyta-lsp": "python_ta.reporters.lsp_reporter.LSPReporter",
     }
-    return reporter_map.get(reporter_name, "python_ta.reporters.html_reporter.HTMLReporter")
+    key = reporter_name if reporter_name is not None else "pyta-html"
+    return reporter_map.get(key, "python_ta.reporters.html_reporter.HTMLReporter")

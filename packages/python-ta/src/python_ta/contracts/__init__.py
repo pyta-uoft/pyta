@@ -242,7 +242,7 @@ def add_class_invariants(klass: type) -> None:
         Check representation invariants for this class when not within an instance method of the class.
         """
         if not ENABLE_CONTRACT_CHECKING:
-            super(type(self), self).__setattr__(name, value)
+            super(klass, self).__setattr__(name, value)
             return
 
         nonlocal cls_annotations
@@ -266,8 +266,8 @@ def add_class_invariants(klass: type) -> None:
         original_attr_value = None
         if hasattr(self, name):
             original_attr_value_exists = True
-            original_attr_value = super(type(self), self).__getattribute__(name)
-        super(type(self), self).__setattr__(name, value)
+            original_attr_value = super(klass, self).__getattribute__(name)  # type: ignore[arg-type]
+        super(klass, self).__setattr__(name, value)  # type: ignore[arg-type]
         current_frame = inspect.currentframe()
         if current_frame is None or current_frame.f_back is None:
             return
@@ -281,9 +281,9 @@ def add_class_invariants(klass: type) -> None:
                     _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
                     if original_attr_value_exists:
-                        super(type(self), self).__setattr__(name, original_attr_value)
+                        super(klass, self).__setattr__(name, original_attr_value)  # type: ignore[arg-type]
                     else:
-                        super(type(self), self).__delattr__(name)
+                        super(klass, self).__delattr__(name)  # type: ignore[arg-type]
                     raise AssertionError(str(e)) from None
         elif caller_self is not self:
             # Keep track of mutations to instances that are of the same type as caller_self (and are also not `self`)

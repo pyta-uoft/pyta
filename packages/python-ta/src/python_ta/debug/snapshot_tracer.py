@@ -157,7 +157,7 @@ class SnapshotTracer:
         with open(bundle_path, "r", encoding="utf-8") as f:
             bundle_content = f.read()
 
-        image_replacements = {}
+        image_replacements: dict[str, str] = {}
         for image_filename in ["99ee5c67fd0c522b4b6a.png", "fd6133fe40f4f90440d6.png"]:
             image_path = os.path.join(webstepper_dir, image_filename)
             with open(image_path, "rb") as f:

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from .core import NewMessage, PythonTaReporter
+from .core import MessageLike, NewMessage, PythonTaReporter
 from .node_printers import LineType
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ class PlainReporter(PythonTaReporter):
     # Rendering constants
     _SPACE = " "
     _BREAK = "\n"
-    _COLOURING = {}
+    _COLOURING: dict[str, str] = {}
     code_err_title = "=== Code errors/forbidden usage (fix: high priority) ==="
     style_err_title = "=== Style/convention errors (fix: before submission) ==="
     no_snippet = "No code to display for this message." + _BREAK * 2
@@ -51,7 +51,7 @@ class PlainReporter(PythonTaReporter):
         self.writeln(result)
         self.out.flush()
 
-    def _colour_messages_by_type(self, messages: dict[str, list[NewMessage]]) -> str:
+    def _colour_messages_by_type(self, messages: dict[str, list[MessageLike]]) -> str:
         """
         Return string of properly formatted members of the messages dict
         (error or style) indicated by style.
@@ -83,12 +83,14 @@ class PlainReporter(PythonTaReporter):
                     + self._BREAK
                 )
 
-                result += msg.snippet
+                result += cast(NewMessage, msg).snippet or ""
                 result += self._BREAK
 
         return result
 
-    def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = "") -> str:
+    def _add_line(
+        self, lineno: int | str | None, linetype: LineType, slice_: slice, text: str = ""
+    ) -> str:
         """Format given source code line as specified and return as str.
 
         Called by _build_snippet, relies on _colourify.

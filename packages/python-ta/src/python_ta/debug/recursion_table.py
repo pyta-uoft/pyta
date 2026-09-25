@@ -76,6 +76,7 @@ class RecursionTable:
         """Return the root node of the tree."""
         if self.frames_data:
             return self._trees[next(iter(self.frames_data))]
+        return None
 
     def _create_func_call_string(self, func_name: str, frame_variables: dict[str, Any]) -> str:
         """Create a string representation of the function call given the inputs
@@ -87,19 +88,22 @@ class RecursionTable:
         return f"{func_name}({function_inputs})"
 
     def _insert_to_tree(
-        self, current_func_string: str, frame: types.FrameType, caller_frame: types.FrameType
+        self,
+        current_func_string: str,
+        frame: types.FrameType,
+        caller_frame: types.FrameType | None,
     ) -> None:
         """Create a new node for self._trees and add it as a child for its parent frame, if applicable."""
         current_node = Tree([current_func_string])
         self._trees[frame] = current_node
         # this will always be true unless frame is the initial function call frame
-        if caller_frame in self._trees:
+        if caller_frame is not None and caller_frame in self._trees:
             caller_node = self._trees[caller_frame]
             caller_node.add_child(current_node)
 
     def _record_call(self, frame: types.FrameType) -> None:
         """Update the state of the table representation after a function call is detected."""
-        current_frame_data = {}
+        current_frame_data: dict[str, str] = {}
         caller_frame = frame.f_back
         current_frame_variables = clean_frame_variables(frame)
 
@@ -142,8 +146,8 @@ class RecursionTable:
             return {}
 
         # Get parameter names in order of first seen
-        param_names = []
-        seen = set()
+        param_names: list[str] = []
+        seen: set[str] = set()
         for frame in self.frames_data:
             params = inspect.getargvalues(frame).args
             for p in params:
@@ -152,7 +156,7 @@ class RecursionTable:
                     param_names.append(p)
 
         headers = ["function"] + param_names + ["return value", "called by"]
-        recursive_dict = {h: [] for h in headers}
+        recursive_dict: dict[str, list] = {h: [] for h in headers}
 
         for frame in self.frames_data:
             row = self.frames_data[frame]

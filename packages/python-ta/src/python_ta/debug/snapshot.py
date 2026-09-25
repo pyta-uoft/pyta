@@ -104,8 +104,9 @@ def snapshot(
     if id_tracker is None:
         id_tracker = IDTracker()
 
-    variables = []
-    frame = inspect.currentframe().f_back
+    variables: list[dict[str, dict[str, Any]]] = []
+    current_frame = inspect.currentframe()
+    frame = current_frame.f_back if current_frame is not None else None
 
     while frame:
         frame_name = frame.f_code.co_name
@@ -148,7 +149,9 @@ def snapshot(
             logging.warning("PythonTA only supports MemoryViz versions 0.3.1 and later.")
 
         # Update CLI flags for MemoryViz >= 0.7.0
-        if memory_viz_version == "latest" or memory_viz_version_parsed >= Version("0.7.0"):
+        if memory_viz_version == "latest" or (
+            memory_viz_version_parsed is not None and memory_viz_version_parsed >= Version("0.7.0")
+        ):
             command.extend(["--no-interactive"])
 
         if memory_viz_args:
@@ -183,8 +186,8 @@ def snapshot_to_json(
     if id_tracker is None:
         id_tracker = IDTracker()
 
-    json_data = []  # This will store the converted frames and their variables
-    value_entries = []  # Stores additional processed value entries
+    json_data: list[dict[str, Any]] = []  # This will store the converted frames and their variables
+    value_entries: list[dict[str, Any]] = []  # Stores additional processed value entries
 
     def process_value(val: Any) -> int:
         """

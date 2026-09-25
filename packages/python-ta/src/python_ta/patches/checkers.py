@@ -1,5 +1,7 @@
 """Patch pylint checker behaviour."""
 
+from typing import Any, cast
+
 from pylint.checkers.base import NameChecker
 from pylint.checkers.classes import ClassChecker
 from pylint.checkers.utils import node_frame_class
@@ -7,13 +9,13 @@ from pylint.checkers.utils import node_frame_class
 from python_ta.utils import _is_in_main
 
 
-def patch_checkers():
+def patch_checkers() -> None:
     """Run patches to modify built-in pylint checker behaviour."""
     _override_check_protected_attribute_access()
     _override_check_invalid_name_in_main()
 
 
-def _override_check_protected_attribute_access():
+def _override_check_protected_attribute_access() -> None:
     """Override protected-member-access check.
 
     We find pylint's default protected-member-access check too restrictive in
@@ -26,7 +28,7 @@ def _override_check_protected_attribute_access():
     """
     old_check_protected_attribute_access = ClassChecker._check_protected_attribute_access
 
-    def _check(self, node):
+    def _check(self, node) -> None:
         attrname = node.attrname
         klass = node_frame_class(node)
         if klass is None or (
@@ -35,10 +37,11 @@ def _override_check_protected_attribute_access():
         ):
             old_check_protected_attribute_access(self, node)
 
-    ClassChecker._check_protected_attribute_access = _check
+    # cast to Any to avoid mypy error: "Cannot assign to a method"
+    cast(Any, ClassChecker)._check_protected_attribute_access = _check
 
 
-def _override_check_invalid_name_in_main():
+def _override_check_invalid_name_in_main() -> None:
     """Override invalid-name check for variables in main block.
 
     pylint normally complains about variable names in the main block
@@ -49,10 +52,10 @@ def _override_check_invalid_name_in_main():
     """
     old_visit_assignname = NameChecker.visit_assignname
 
-    def patched_visit_assignname(self, node):
+    def patched_visit_assignname(self, node) -> None:
         if _is_in_main(node):
             self._check_name("variable", node.name, node)
         else:
             old_visit_assignname(self, node)
 
-    NameChecker.visit_assignname = patched_visit_assignname
+    cast(Any, NameChecker).visit_assignname = patched_visit_assignname

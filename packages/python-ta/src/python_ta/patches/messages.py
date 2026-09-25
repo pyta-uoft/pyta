@@ -4,7 +4,7 @@ from pylint.interfaces import UNDEFINED
 from pylint.lint import PyLinter
 
 
-def patch_messages():
+def patch_messages() -> None:
     """Patch PyLinter to pass the node to reporter."""
     old_add_message = PyLinter.add_message
 
@@ -18,7 +18,7 @@ def patch_messages():
         col_offset=None,
         end_lineno=None,
         end_col_offset=None,
-    ):
+    ) -> None:
         old_add_message(
             self, msg_id, line, node, args, confidence, col_offset, end_lineno, end_col_offset
         )
@@ -27,4 +27,4 @@ def patch_messages():
         if hasattr(self.reporter, "handle_node"):
             self.reporter.handle_node(msg_info, node)
 
-    PyLinter.add_message = new_add_message
+    setattr(PyLinter, "add_message", new_add_message)

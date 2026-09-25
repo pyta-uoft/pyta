@@ -29,10 +29,13 @@ class Tree:
         """Add child_node as one of the tree's children."""
         self.children.append(child_node)
 
-    def __eq__(self, tree: Tree) -> bool:
-        """Check if self and tree are equal by comparing their values and
+    # __eq__ is expected to accept an argument of type "object"
+    def __eq__(self, tree: object) -> bool:
+        """Check if self and other are equal by comparing their values and
         structure.
         """
+        if not isinstance(tree, Tree):
+            return NotImplemented
         if self.value != tree.value or len(self.children) != len(tree.children):
             return False
         for i in range(len(self.children)):

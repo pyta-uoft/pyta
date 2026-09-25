@@ -60,7 +60,7 @@ class InfiniteLoopChecker(BaseChecker):
         appear in the body, which indicates an infinite loop.
         """
         # Get variable(s) used inside condition
-        cond_vars = set()
+        cond_vars: set[str] = set()
         for child in node.test.nodes_of_class(nodes.Name):
             if not isinstance(child.parent, nodes.Call) or child.parent.func is not child:
                 cond_vars.add(child.name)
@@ -106,11 +106,12 @@ class InfiniteLoopChecker(BaseChecker):
                     and isinstance(exit_node.func, nodes.Attribute)
                     and exit_node.func.attrname == "exit"
                 ):
-                    inferred = get_safely_inferred(exit_node.func.expr)
+                    # use different variable to avoid type incompatibility with the outer loop's `inferred` variable
+                    inferred_exit_target = get_safely_inferred(exit_node.func.expr)
                     if (
-                        inferred is not None
-                        and isinstance(inferred, nodes.Module)
-                        and inferred.name == "sys"
+                        inferred_exit_target is not None
+                        and isinstance(inferred_exit_target, nodes.Module)
+                        and inferred_exit_target.name == "sys"
                     ):
                         return False
         else:
@@ -134,8 +135,8 @@ class InfiniteLoopChecker(BaseChecker):
             nodes.UnaryOp,
             nodes.Subscript,
         )
-        inferred = None
-        maybe_generator_call = None
+        inferred: Optional[nodes.NodeNG] = None
+        maybe_generator_call: Optional[nodes.Call] = None
         emit = isinstance(test_node, (nodes.Const, *structs, *CONST_NODES))
         if not isinstance(test_node, except_nodes):
             inferred = utils.safe_infer(test_node)
@@ -152,7 +153,7 @@ class InfiniteLoopChecker(BaseChecker):
             if isinstance(inferred_call, nodes.FunctionDef):
                 # Can't use all(x) or not any(not x) for this condition, because it
                 # will return True for empty generators, which is not what we want.
-                all_returns_were_generator = None
+                all_returns_were_generator: Optional[bool] = None
                 for return_node in inferred_call._get_return_nodes_skip_functions():
                     if not isinstance(return_node.value, nodes.GeneratorExp):
                         all_returns_were_generator = False
@@ -175,7 +176,7 @@ class InfiniteLoopChecker(BaseChecker):
         detail."""
         assert isinstance(test_node, nodes.Name)
         emit = False
-        maybe_generator_call = None
+        maybe_generator_call: Optional[nodes.Call] = None
         lookup_result = test_node.frame().lookup(test_node.name)
         if not lookup_result:
             return emit, maybe_generator_call
@@ -206,7 +207,7 @@ class InfiniteLoopChecker(BaseChecker):
         - All variables in the `while` condition are immutable (int, float, complex, bool,
           str, bytes, tuple, or NoneType)
         - None of these variables are reassigned in the loop body"""
-        immutable_vars = set()
+        immutable_vars: set[str] = set()
         for child in node.test.nodes_of_class(nodes.Name):
             if isinstance(child.parent, nodes.Call) and child.parent.func is child:
                 continue

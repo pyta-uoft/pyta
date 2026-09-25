@@ -36,3 +36,10 @@ target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
 profile = "black"
 known_local_folder = ["python_ta"]
 multi_line_output = 3
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = [
+    "astroid.*"
+]
+ignore_missing_imports = true

@@ -36,7 +36,9 @@ class InvalidRangeIndexChecker(BaseChecker):
                 if not all(isinstance(node, nodes.Const) for node in inferred_params):
                     return
 
-                eval_params = [const.value for const in inferred_params]
+                eval_params = [
+                    node.value for node in inferred_params if isinstance(node, nodes.Const)
+                ]
 
                 if (
                     len(args) == 0

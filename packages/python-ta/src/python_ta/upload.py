@@ -23,7 +23,7 @@ PYTHON_TA_DATA_DIR_ENV_VAR = "PYTHON_TA_DATA_DIR"
 def errors_to_dict(errors: Iterable[list[Message]]) -> dict[str, list[dict[str, Any]]]:
     """Convert PyTA errors to a JSON-compatible dictionary."""
     error_info = ["msg_id", "msg", "symbol", "module", "category", "line"]
-    err_as_dict = {}
+    err_as_dict: dict[str, list[dict[str, Any]]] = {}
     for msg in _iter_error_messages(errors):
         err_as_dict.setdefault(msg.msg_id, []).append(
             {field: getattr(msg, field) for field in error_info}

@@ -28,8 +28,15 @@ Astroid Source:
 https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
 
+from collections.abc import Callable
+from typing import Any, cast
+
 from astroid import nodes
 from astroid.transforms import TransformVisitor
+from pylint.lint import PyLinter
+
+NodePredicate = Callable[[str, int, nodes.NodeNG], bool]
+NodeTransform = Callable[[nodes.NodeNG], nodes.NodeNG]
 
 CONSUMABLES = " \n\t\\"
 
@@ -46,13 +53,13 @@ NODES_WITH_CHILDREN = [
 # Predicates can only return a single truthy value, because of how its used in
 # `astroid/transforms.py`
 # ====================================================
-def _token_search(token):
+def _token_search(token: str) -> NodePredicate:
     """
     @type token: string
     @rtype: function
     """
 
-    def _is_token(s, index, node):
+    def _is_token(s: str, index: int, node: nodes.NodeNG) -> bool:
         """Fix to include certain tokens such as a paren, bracket, or brace.
         @type s: string
         @type index: int
@@ -64,13 +71,13 @@ def _token_search(token):
     return _is_token
 
 
-def _keyword_search(keyword):
+def _keyword_search(keyword: str) -> NodePredicate:
     """
     @type keyword: string
     @rtype: function
     """
 
-    def _is_keyword(s, index, node):
+    def _is_keyword(s: str, index: int, node: nodes.NodeNG) -> bool:
         """Search for a keyword. Right-to-left.
         @type s: string
         @type index: int
@@ -82,7 +89,7 @@ def _keyword_search(keyword):
     return _is_keyword
 
 
-def _is_arg_name(s, index, node):
+def _is_arg_name(s: str, index: int, node: nodes.NodeNG) -> bool:
     """Search for the name of the argument. Right-to-left."""
     if not node.arg:
         return False
@@ -102,7 +109,7 @@ NODES_REQUIRING_SOURCE = [
 ]
 
 
-def init_register_ending_setters(source_code):
+def init_register_ending_setters(source_code: list[str]) -> TransformVisitor:
     """Instantiate a visitor to transform the nodes.
     Register the transform functions on an instance of TransformVisitor.
 
@@ -163,7 +170,7 @@ def init_register_ending_setters(source_code):
 # `fromlineno` and `col_offset` properties of the nodes,
 # or to set the `end_lineno` and `end_col_offset` attributes for a node.
 # ====================================================
-def fix_arguments(source_code):
+def fix_arguments(source_code: list[str]) -> NodeTransform:
     """For an Arguments node"""
 
     def _find(node: nodes.Arguments) -> nodes.Arguments:
@@ -211,7 +218,7 @@ def fix_arguments(source_code):
     return _find
 
 
-def fix_start_attributes(node):
+def fix_start_attributes(node: nodes.NodeNG) -> nodes.NodeNG:
     """Some nodes don't always have the `col_offset` property set by Astroid:
     Comprehension, Keyword, Module, Slice.
     """
@@ -240,7 +247,7 @@ def fix_start_attributes(node):
     return node
 
 
-def _set_start_from_first_child(node):
+def _set_start_from_first_child(node: nodes.NodeNG) -> nodes.NodeNG:
     """Set the start attributes of this node from its first child."""
     try:
         first_child = next(node.get_children())
@@ -252,7 +259,7 @@ def _set_start_from_first_child(node):
     return node
 
 
-def _set_start_from_first_decorator(node):
+def _set_start_from_first_decorator(node: nodes.NodeNG) -> nodes.NodeNG:
     """Set the start attributes of this node from its first child, if that child is a decorator."""
     if getattr(node, "decorators"):
         first_child = node.decorators
@@ -261,7 +268,7 @@ def _set_start_from_first_decorator(node):
     return node
 
 
-def set_from_last_child(node):
+def set_from_last_child(node: nodes.NodeNG) -> nodes.NodeNG:
     """Populate ending locations for astroid node based on its last child.
 
     Preconditions:
@@ -279,7 +286,7 @@ def set_from_last_child(node):
     return node
 
 
-def _get_last_child(node):
+def _get_last_child(node: nodes.NodeNG) -> nodes.NodeNG | None:
     """Returns the last child node, or None.
     Some nodes' last_child() attribute not set, e.g. nodes.Arguments.
     """
@@ -293,7 +300,9 @@ def _get_last_child(node):
         return skip_to_last_child  # postcondition: node, or None.
 
 
-def end_setter_from_source(source_code, pred, only_consumables=False):
+def end_setter_from_source(
+    source_code: list[str], pred: NodePredicate, only_consumables: bool = False
+) -> NodeTransform:
     """Returns a *function* that sets ending locations for a node from source.
 
     The basic technique is to do the following:
@@ -309,7 +318,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
     TODO: really the behaviour should be the same for all lines searched for.
     """
 
-    def set_endings_from_source(node):
+    def set_endings_from_source(node: nodes.NodeNG) -> nodes.NodeNG:
         # Tuple nodes have an end_col_offset that includes the end paren,
         # but their col_offset does not include the start paren.
         # To address this, we override the Tuple node's end_col_offset.
@@ -347,7 +356,7 @@ def end_setter_from_source(source_code, pred, only_consumables=False):
     return set_endings_from_source
 
 
-def start_setter_from_source(source_code, pred):
+def start_setter_from_source(source_code: list[str], pred: NodePredicate) -> NodeTransform:
     """Returns a *function* that sets start locations for a node from source.
     Recall `source_code`, `pred` are within the lexical scope of the returned function.
 
@@ -360,7 +369,7 @@ def start_setter_from_source(source_code, pred):
     e.g. _is_open_paren
     """
 
-    def set_start_from_source(node):
+    def set_start_from_source(node: nodes.NodeNG) -> nodes.NodeNG:
         # Initialize counters. Note: fromlineno is 1-indexed.
         col_offset, lineno = node.col_offset, node.fromlineno - 1
 
@@ -385,15 +394,15 @@ def start_setter_from_source(source_code, pred):
     return set_start_from_source
 
 
-def add_parens(source_code):
-    def h(node):
+def add_parens(source_code: list[str]) -> Callable[[nodes.NodeNG], None]:
+    def h(node: nodes.NodeNG) -> None:
         _add_parens(source_code)(node)
 
     return h
 
 
-def _add_parens(source_code):
-    def h(node):
+def _add_parens(source_code: list[str]) -> Callable[[nodes.NodeNG], nodes.NodeNG]:
+    def h(node: nodes.NodeNG) -> nodes.NodeNG:
         # Initialize counters. Note: fromlineno is 1-indexed.
         prev = node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
         while True:
@@ -422,6 +431,9 @@ def _add_parens(source_code):
                             break
                     if prev_char is not None:
                         break
+
+            if prev_char is None or new_lineno is None or new_coloffset is None:
+                break
 
             if prev_char != "(":
                 # No enclosing parentheses
@@ -457,6 +469,9 @@ def _add_parens(source_code):
                     if next_char is not None:
                         break
 
+            if next_char is None or new_end_lineno is None or new_end_coloffset is None:
+                break
+
             if next_char != ")":
                 break
 
@@ -479,11 +494,11 @@ def _add_parens(source_code):
 
 
 # Make this module a pylint plugin
-def register(linter):
+def register(linter: PyLinter) -> None:
     """Patch linter to apply message transform with source code."""
     old_get_ast = linter.get_ast
 
-    def new_get_ast(filepath, modname, data):
+    def new_get_ast(filepath: str, modname: str, data: str) -> Any:
         ast = old_get_ast(filepath, modname, data)
         if ast is not None:
             with open(filepath, encoding="utf-8") as f:
@@ -492,4 +507,4 @@ def register(linter):
             ending_transformer.visit(ast)
         return ast
 
-    linter.get_ast = new_get_ast
+    cast(Any, linter).get_ast = new_get_ast

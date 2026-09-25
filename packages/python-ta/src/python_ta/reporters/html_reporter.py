@@ -2,6 +2,7 @@ import base64
 import os
 import socket
 import sys
+import uuid
 
 from jinja2 import Environment, FileSystemLoader
 from markdown_it import MarkdownIt
@@ -50,6 +51,7 @@ class HTMLReporter(PythonTaReporter):
     OUTPUT_FILENAME = "pyta_report.html"
     port: int | None = None
     persistent_server: PersistentHTMLServer | None = None
+    run_id: str | None = None
 
     def print_messages(self, level="all"):
         """Do nothing to print messages, since all are displayed in a single HTML file."""
@@ -88,6 +90,11 @@ class HTMLReporter(PythonTaReporter):
         if not self.persistent_server:
             self.persistent_server = PersistentHTMLServer(self.port)
 
+        # Identifies this run of PythonTA, including every re-check that watch mode
+        # triggers, so that the report's pins are not picked up by a later run.
+        if not self.run_id:
+            self.run_id = uuid.uuid4().hex
+
         # Embed resources so the output html can go anywhere, independent of assets.
         with open(os.path.join(TEMPLATES_DIR, "pyta_logo_markdown.png"), "rb+") as image_file:
             # Encode img binary to base64 (+33% size), decode to remove the "b'"
@@ -101,6 +108,7 @@ class HTMLReporter(PythonTaReporter):
         rendered_template_str = template.render(
             date_time=self._generate_report_date_time(),
             port=self.port,
+            run_id=self.run_id,
             reporter=self,
             grouped_messages=grouped_messages,
             os=os,

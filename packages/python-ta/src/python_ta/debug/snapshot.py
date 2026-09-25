@@ -159,6 +159,13 @@ def snapshot(
 
         # Create a child to call the MemoryViz CLI
         npx_path = shutil.which("npx")
+        if npx_path is None:
+            raise FileNotFoundError(
+                "Could not find 'npx' on your PATH. python_ta.debug.snapshot requires Node.js "
+                "(which includes npx) in order to render MemoryViz diagrams when save=True. "
+                "Install Node.js from https://nodejs.org/ and ensure 'npx' is on your PATH, or "
+                "call snapshot() without save=True to get the snapshot data without a diagram."
+            )
         subprocess.run(
             command,
             input=json.dumps(json_compatible_vars),

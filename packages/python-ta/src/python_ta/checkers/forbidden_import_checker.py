@@ -6,7 +6,7 @@ import os
 from typing import TYPE_CHECKING
 
 from astroid import nodes
-from pylint.checkers import BaseChecker
+from pylint.checkers import BaseChecker, utils
 from pylint.checkers.utils import only_required_for_messages
 
 if TYPE_CHECKING:
@@ -103,12 +103,16 @@ class ForbiddenImportChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 if name == "__import__":
+                    inferred = utils.safe_infer(node.args[0])
+                    if not isinstance(inferred, nodes.Const) or not isinstance(inferred.value, str):
+                        return
+                    module_name = inferred.value
                     if (
-                        node.args[0].value not in self.linter.config.allowed_import_modules
-                        and node.args[0].value not in self.linter.config.extra_imports
-                        and node.args[0].value not in self.get_allowed_local_files()
+                        module_name not in self.linter.config.allowed_import_modules
+                        and module_name not in self.linter.config.extra_imports
+                        and module_name not in self.get_allowed_local_files()
                     ):
-                        args = ("module " + node.args[0].value,)
+                        args = ("module " + module_name,)
                         self.add_message("forbidden-import", node=node, args=args)
 
     def get_allowed_local_files(self) -> list:

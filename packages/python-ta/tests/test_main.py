@@ -25,6 +25,8 @@ class _DummyReporter(BaseReporter):
 
 
 def mock_checker(calls: list[dict[str, Any]]) -> Callable[..., BaseReporter]:
+    """Return a fake checker that records its keyword arguments in calls."""
+
     def fake_checker(*, module_name: list[str], **kwargs: Any) -> BaseReporter:
         calls.append({"module_name": module_name, **kwargs})
         return _DummyReporter()

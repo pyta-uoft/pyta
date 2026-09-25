@@ -1,12 +1,15 @@
 """Specify how errors should be rendered."""
 
+from __future__ import annotations
+
 import re
 from enum import Enum
-from typing import Any, Callable, Generator
+from typing import TYPE_CHECKING, Any, Callable, Generator
 
 from astroid import nodes
 
-from python_ta.reporters.core import NewMessage
+if TYPE_CHECKING:
+    from python_ta.reporters.core import NewMessage
 
 NEW_BLANK_LINE_MESSAGE = "# INSERT NEW BLANK LINE HERE"
 MAX_SNIPPET_LINES = 10
@@ -876,4 +879,4 @@ class LineType(Enum):
     DOCSTRING = 6  # docstring needed warning
 
 
-RenderResult = tuple[int | str | None, slice[int | None, int | None, int | None], LineType, str]
+RenderResult = tuple[int | str | None, slice, LineType, str]

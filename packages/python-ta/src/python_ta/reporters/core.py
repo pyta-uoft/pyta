@@ -48,7 +48,7 @@ class NewMessage:
 
 # Type alias for a message-like object, which can be either a Pylint Message or a NewMessage.
 # This is for type checking purposes.
-MessageLike = Message | NewMessage
+MessageLike = Union["Message", NewMessage]
 
 # Messages without a source code line to highlight
 NO_SNIPPET = {
@@ -150,7 +150,7 @@ class PythonTaReporter(BaseReporter):
         """
         curr_messages = self.messages[self.current_file]
         if len(curr_messages) >= 1 and curr_messages[-1].msg_id == msg_definition.msgid:
-            msg = cast(Message, curr_messages[-1])
+            msg = cast(Any, curr_messages[-1])
 
             if msg.symbol in NO_SNIPPET or msg.msg.startswith("Invalid module"):
                 snippet = ""

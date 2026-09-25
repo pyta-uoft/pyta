@@ -216,7 +216,7 @@ def _check(
                 )
         if linter is not None:
             cast(Any, linter).msgs_store.get_message_definitions.cache_clear()
-        return cast(PythonTaReporter, current_reporter)
+        return cast(Any, current_reporter)
     except Exception as e:
         logging.error(
             "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."

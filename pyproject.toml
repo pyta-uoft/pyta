@@ -45,6 +45,7 @@ module = [
     "graphviz.*",
     "lsprotocol.*",
     "markdown_it.*",
+    "pycodestyle.*",
     "python_ta_z3",
     "watchdog.*",
     "wrapt.*",

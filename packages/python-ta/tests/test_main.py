@@ -2,9 +2,12 @@
 installed `python_ta` package.
 """
 
+from collections.abc import Callable
 from os import path
+from typing import Any
 
 from click.testing import CliRunner
+from pylint.reporters import BaseReporter
 
 import python_ta
 import python_ta.__main__ as pyta_main
@@ -16,9 +19,19 @@ TEST_ROOT = path.join(SOURCE_ROOT, "packages", "python-ta", "tests")
 TEST_CONFIG = path.join(TEST_ROOT, "test.pylintrc")
 
 
-class _DummyReporter:
+class _DummyReporter(BaseReporter):
     def has_messages(self) -> bool:
         return False
+
+
+def mock_checker(calls: list[dict[str, Any]]) -> Callable[..., BaseReporter]:
+    """Return a fake checker that records its keyword arguments in calls."""
+
+    def fake_checker(*, module_name: list[str], **kwargs: Any) -> BaseReporter:
+        calls.append({"module_name": module_name, **kwargs})
+        return _DummyReporter()
+
+    return fake_checker
 
 
 def test_check_no_errors_zero() -> None:
@@ -142,12 +155,7 @@ def test_output_format_overrides_config_value(monkeypatch, tmp_path) -> None:
     )
 
     calls = []
-
-    def fake_checker(*, module_name, config=None, pylint_args=None):
-        calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     result = runner.invoke(
@@ -170,12 +178,7 @@ def test_output_format_overrides_config_value(monkeypatch, tmp_path) -> None:
 def test_output_format_only_passes_output_format_dict(monkeypatch) -> None:
     """Test that checker receives only the override dict if only --output-format is passed."""
     calls = []
-
-    def fake_checker(*, module_name, config=None, pylint_args=None):
-        calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     result = runner.invoke(
@@ -190,18 +193,13 @@ def test_output_format_only_passes_output_format_dict(monkeypatch) -> None:
     assert result.exit_code == 0
     assert len(calls) == 1
     assert calls[0]["config"] == {"output-format": "pyta-plain"}
-    assert calls[0]["pylint_args"] is None
+    assert calls[0].get("pylint_args") is None
 
 
 def test_config_only_passes_config_path(monkeypatch) -> None:
     """Test that checker receives the config path string if only --config is passed."""
     calls = []
-
-    def fake_checker(*, module_name, config=None, pylint_args=None):
-        calls.append({"module_name": module_name, "config": config, "pylint_args": pylint_args})
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     result = runner.invoke(
@@ -216,18 +214,13 @@ def test_config_only_passes_config_path(monkeypatch) -> None:
     assert result.exit_code == 0
     assert len(calls) == 1
     assert calls[0]["config"] == path.abspath(TEST_CONFIG)
-    assert calls[0]["pylint_args"] is None
+    assert calls[0].get("pylint_args") is None
 
 
 def test_no_output_format_or_config_uses_defaults(monkeypatch) -> None:
     """Test that checker is called without config if neither --config nor --output-format is passed."""
     calls = []
-
-    def fake_checker(*, module_name, **kwargs):
-        calls.append({"module_name": module_name, "kwargs": kwargs})
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     result = runner.invoke(
@@ -237,18 +230,52 @@ def test_no_output_format_or_config_uses_defaults(monkeypatch) -> None:
 
     assert result.exit_code == 0
     assert len(calls) == 1
-    assert calls[0]["kwargs"] == {}
+    assert calls[0]["autoformat"] is False
+
+
+def test_autoformat_passes_true_to_check_all(monkeypatch) -> None:
+    """Test that --autoformat enables autoformatting when running all checks."""
+    calls = []
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--autoformat",
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["autoformat"] is True
+
+
+def test_autoformat_passes_true_to_check_errors(monkeypatch) -> None:
+    """Test that --autoformat enables autoformatting when running error checks."""
+    calls = []
+    monkeypatch.setattr(pyta_main, "check_errors", mock_checker(calls))
+
+    runner = CliRunner()
+    result = runner.invoke(
+        pyta_main.main,
+        [
+            "--errors-only",
+            "--autoformat",
+            path.join(TEST_ROOT, "fixtures", "no_errors.py"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert len(calls) == 1
+    assert calls[0]["autoformat"] is True
 
 
 def test_stdin_flag_reads_from_stdin(monkeypatch) -> None:
     """Test that --stdin reads source code from stdin and passes it to the checker."""
     calls = []
-
-    def fake_checker(*, module_name, pylint_args=None, **kwargs):
-        calls.append({"module_name": module_name, "pylint_args": pylint_args})
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     result = runner.invoke(
@@ -267,12 +294,7 @@ def test_stdin_flag_reads_from_stdin(monkeypatch) -> None:
 def test_dash_filename_reads_from_stdin(monkeypatch) -> None:
     """Test that passing - as the filename triggers stdin mode."""
     calls = []
-
-    def fake_checker(*, module_name, pylint_args=None, **kwargs):
-        calls.append({"module_name": module_name, "pylint_args": pylint_args})
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     result = runner.invoke(
@@ -289,13 +311,8 @@ def test_dash_filename_reads_from_stdin(monkeypatch) -> None:
 def test_stdin_contents_written_to_temp_file(monkeypatch) -> None:
     """Test that the stdin contents are correctly written to the temp file passed to the checker."""
     source_code = "x = 1\ny = 2\n"
-    captured_paths = []
-
-    def fake_checker(*, module_name, pylint_args=None, **kwargs):
-        captured_paths.extend(module_name)
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    calls = []
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     runner.invoke(
@@ -304,21 +321,14 @@ def test_stdin_contents_written_to_temp_file(monkeypatch) -> None:
         input=source_code,
     )
 
-    assert len(captured_paths) == 1
+    assert len(calls) == 1
+    assert len(calls[0]["module_name"]) == 1
 
 
 def test_stdin_temp_file_deleted_after_check(monkeypatch) -> None:
     """Test that the temp file created for stdin is deleted after checking."""
-    import os
-
-    captured_paths = []
-
-    def fake_checker(*, module_name, pylint_args=None, **kwargs):
-        captured_paths.extend(module_name)
-        assert os.path.exists(module_name[0]), "Temp file should exist during check"
-        return _DummyReporter()
-
-    monkeypatch.setattr(pyta_main, "check_all", fake_checker)
+    calls = []
+    monkeypatch.setattr(pyta_main, "check_all", mock_checker(calls))
 
     runner = CliRunner()
     runner.invoke(
@@ -327,5 +337,6 @@ def test_stdin_temp_file_deleted_after_check(monkeypatch) -> None:
         input="x = 1\n",
     )
 
-    assert len(captured_paths) == 1
-    assert not path.exists(captured_paths[0]), "Temp file should be deleted after check"
+    assert len(calls) == 1
+    temp_file_path = calls[0]["module_name"][0]
+    assert not path.exists(temp_file_path), "Temp file should be deleted after check"

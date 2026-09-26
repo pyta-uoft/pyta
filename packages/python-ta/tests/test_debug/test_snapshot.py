@@ -964,7 +964,32 @@ def test_snapshot_save_stdout(snapshot):
         check=True,
     )
 
+    # check if default width is used when no width is specified in memory_viz_args
+    assert result.stdout.startswith('<svg width="800"')
     snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_stdout.svg")
+
+
+def test_snapshot_save_custom_width(snapshot):
+    """
+    Test that snapshot's save feature uses the width specified in memory_viz_args
+    instead of the default width.
+    """
+
+    snapshot.snapshot_dir = SNAPSHOT_DIR
+
+    # Calls snapshot in separate file
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_width.py")
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path],
+        capture_output=True,
+        encoding="utf-8",
+        text=True,
+        check=True,
+    )
+
+    assert result.stdout.startswith('<svg width="1200"')
+    snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_width.svg")
 
 
 def test_snapshot_save_raises_when_npx_missing():

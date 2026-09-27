@@ -103,9 +103,13 @@ class ForbiddenImportChecker(BaseChecker):
             # locals nor globals scope)
             if not (name in node.frame() or name in node.root()):
                 if name == "__import__":
+                    if len(node.args) == 0:
+                        return
+
                     inferred = utils.safe_infer(node.args[0])
                     if not isinstance(inferred, nodes.Const) or not isinstance(inferred.value, str):
                         return
+
                     module_name = inferred.value
                     if (
                         module_name not in self.linter.config.allowed_import_modules

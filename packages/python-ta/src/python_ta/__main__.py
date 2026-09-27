@@ -47,6 +47,12 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Read file contents from stdin instead of a file",
     default=False,
 )
+@click.option(
+    "--autoformat",
+    is_flag=True,
+    help="Autoformat files using Black before analyzing code",
+    default=False,
+)
 def main(
     version: bool,
     config: Optional[str],
@@ -56,6 +62,7 @@ def main(
     generate_config: bool,
     output_format: Optional[str],
     stdin: bool,
+    autoformat: bool,
 ) -> None:
     """A code checking tool for teaching Python.
     FILENAMES can be a string of a directory, or file to check (`.py` extension optional) or
@@ -87,13 +94,25 @@ def main(
         ) as temp_file:
             shutil.copyfileobj(sys.stdin, temp_file)
             temp_file.flush()
-            reporter = _invoke_checker(checker, [temp_file.name], config, output_format)
+            reporter = _invoke_checker(
+                checker=checker,
+                paths=[temp_file.name],
+                config=config,
+                output_format=output_format,
+                autoformat=autoformat,
+            )
         # Clean up the temporary file
         path.os.unlink(temp_file.name)
 
     else:
         paths = [click.format_filename(fn) for fn in filenames]
-        reporter = _invoke_checker(checker, paths, config, output_format)
+        reporter = _invoke_checker(
+            checker=checker,
+            paths=paths,
+            config=config,
+            output_format=output_format,
+            autoformat=autoformat,
+        )
 
     if not exit_zero and reporter.has_messages():
         sys.exit(1)
@@ -101,21 +120,26 @@ def main(
         sys.exit(0)
 
 
-def _invoke_checker(checker, paths, config, output_format):
+def _invoke_checker(checker, paths, config, output_format, autoformat: bool):
     """Invoke the checker with the appropriate arguments based on the provided config and output_format."""
     if output_format and config:
         # If both specified, use the config file and override the output format
         return checker(
             module_name=paths,
             config=config,
+            autoformat=autoformat,
             pylint_args=["--output-format", output_format],
         )
     elif output_format:
-        return checker(module_name=paths, config={"output-format": output_format})
+        return checker(
+            module_name=paths,
+            config={"output-format": output_format},
+            autoformat=autoformat,
+        )
     elif config:
-        return checker(module_name=paths, config=config)
+        return checker(module_name=paths, config=config, autoformat=autoformat)
     else:
-        return checker(module_name=paths)
+        return checker(module_name=paths, autoformat=autoformat)
 
 
 if __name__ == "__main__":  # pragma: no cover

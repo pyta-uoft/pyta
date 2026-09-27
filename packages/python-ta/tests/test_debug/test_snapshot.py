@@ -967,6 +967,27 @@ def test_snapshot_save_stdout(snapshot):
     snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_stdout.svg")
 
 
+def test_snapshot_save_raises_when_npx_missing():
+    """
+    Test that snapshot's save feature raises an informative FileNotFoundError, rather than
+    failing inside the subprocess call, when npx is not found on the PATH.
+    """
+
+    # Calls snapshot in separate file, with an emptied PATH so that npx cannot be found
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_save_path = os.path.join(current_directory, "snapshot_save_no_npx.py")
+    result = subprocess.run(
+        [sys.executable, snapshot_save_path],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env={**os.environ, "PATH": ""},
+    )
+
+    assert result.returncode != 0
+    assert "FileNotFoundError: Could not find 'npx' on your PATH" in result.stderr
+
+
 def test_snapshot_only_includes_function_self():
     result = func_with_include(include_frames=("func_with_include",))
     assert result == [

@@ -11,11 +11,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Contract checking now reports a class attribute that is annotated but never assigned as a contract violation, raising an `AssertionError` with a descriptive message instead of an `AttributeError`.
 - Added the ability to pin errors in the HTML report.
+- Added an `--autoformat` CLI option to format files with Black before analysis.
 
 ### 💫 New checkers
 
 ### 🐛 Bug fixes
 
+- Raise a `FileNotFoundError` with informative message in `python_ta.debug.snapshot` when `npx` is not found on the PATH, preventing a subprocess from being spawned that will ultimately fail.
 - Fixed `DEBUG_CONTRACTS` logging the wrong attribute name when checking instance attribute types.
 - Ensured reporter output stream always uses UTF-8 encoding (was not always set on Windows)
 - Used astroid inference for arguments passed to `__import__` in `ForbiddenImportChecker`
@@ -26,6 +28,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Switched dependabot configuration from `pip` to `uv` to ensure `uv.lock` file is updated
 - Fixed watch tests on Windows by using `threading` rather than `select`
 - Added tests using unsupported Mypy error codes in `StaticTypeChecker` to improve coverage for the `_add_message` method
+- Removed unnecessary `_override_check_invalid_name_in_main ` patch
 
 ## [2.13.1] - 2026-08-12
 

@@ -78,6 +78,13 @@ You can run PythonTA directly from the command line by passing in a filename or 
 $ python_ta sample.py
 ```
 
+To automatically format files with Black before analyzing them, you can use the `--autoformat` option.
+This modifies the files in place:
+
+```console
+$ python_ta --autoformat sample.py
+```
+
 You can also pass Python code directly through standard input (stdin) instead of providing
 a file by using either the `--stdin` flag or `-` as the filename:
 

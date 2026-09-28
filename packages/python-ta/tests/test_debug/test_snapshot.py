@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from typing import Iterable, Optional
 
 from python_ta.debug.snapshot import snapshot, snapshot_to_json
@@ -965,7 +966,10 @@ def test_snapshot_save_stdout(snapshot):
     )
 
     # check if default width is used when no width is specified in memory_viz_args
-    assert result.stdout.startswith('<svg width="800"')
+    svg_root = ET.fromstring(result.stdout)
+    assert svg_root.tag.endswith("svg")
+    assert svg_root.get("width") == "800"
+
     snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_stdout.svg")
 
 
@@ -988,7 +992,10 @@ def test_snapshot_save_custom_width(snapshot):
         check=True,
     )
 
-    assert result.stdout.startswith('<svg width="1200"')
+    svg_root = ET.fromstring(result.stdout)
+    assert svg_root.tag.endswith("svg")
+    assert svg_root.get("width") == "1200"
+
     snapshot.assert_match(result.stdout, f"snapshot_testing_snapshots_expected_width.svg")
 
 

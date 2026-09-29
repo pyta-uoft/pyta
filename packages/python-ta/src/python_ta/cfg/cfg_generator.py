@@ -98,12 +98,9 @@ def _get_valid_file_path(mod: str = "") -> Optional[str]:
     if mod == "":
         m = sys.modules["__main__"]
         spec = importlib.util.spec_from_file_location(m.__name__, m.__file__)
-        if spec is None:
+        if spec is None or spec.origin is None:
             return None
-        origin = spec.origin
-        if origin is None:
-            return None
-        mod = origin
+        mod = spec.origin
     # Enforce the API to only except `mod` type as str
     elif not isinstance(mod, str):
         print(

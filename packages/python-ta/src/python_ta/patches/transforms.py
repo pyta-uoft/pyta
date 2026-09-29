@@ -37,4 +37,4 @@ def patch_ast_transforms() -> None:
 
         return ast
 
-    setattr(PyLinter, "get_ast", new_get_ast)
+    PyLinter.get_ast = new_get_ast  # type: ignore[assignment]

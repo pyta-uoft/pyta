@@ -100,7 +100,8 @@ def _iterable_if_range(node: nodes.NodeNG) -> Optional[str]:
         and isinstance(stop_arg.args[0], nodes.Name)
     ):
         return stop_arg.args[0].name
-    return None
+    else:
+        return None
 
 
 def _is_load_subscript(

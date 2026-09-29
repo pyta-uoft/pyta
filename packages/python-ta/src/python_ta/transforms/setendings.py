@@ -29,7 +29,7 @@ https://github.com/PyCQA/astroid/blob/master/astroid/transforms.py
 """
 
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any
 
 from astroid import nodes
 from astroid.transforms import TransformVisitor
@@ -394,14 +394,14 @@ def start_setter_from_source(source_code: list[str], pred: NodePredicate) -> Nod
     return set_start_from_source
 
 
-def add_parens(source_code: list[str]) -> Callable[[nodes.NodeNG], None]:
-    def h(node: nodes.NodeNG) -> None:
+def add_parens(source_code: list[str]) -> NodeTransform:
+    def h(node: nodes.NodeNG) -> nodes.NodeNG:
         _add_parens(source_code)(node)
 
     return h
 
 
-def _add_parens(source_code: list[str]) -> Callable[[nodes.NodeNG], nodes.NodeNG]:
+def _add_parens(source_code: list[str]) -> NodeTransform:
     def h(node: nodes.NodeNG) -> nodes.NodeNG:
         # Initialize counters. Note: fromlineno is 1-indexed.
         prev = node.fromlineno, node.col_offset, node.end_lineno, node.end_col_offset
@@ -507,4 +507,4 @@ def register(linter: PyLinter) -> None:
             ending_transformer.visit(ast)
         return ast
 
-    cast(Any, linter).get_ast = new_get_ast
+    linter.get_ast = new_get_ast  # type: ignore[assignment, method-assign]

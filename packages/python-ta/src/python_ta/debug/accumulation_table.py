@@ -10,7 +10,7 @@ import csv
 import inspect
 import json
 import sys
-from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, TextIO, Union, cast
+from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, TextIO, Union
 
 import astroid
 import tabulate
@@ -284,11 +284,11 @@ class AccumulationTable:
                     nested_node.name: [] for nested_node in node.target.nodes_of_class(AssignName)
                 }
 
-            # Determine accumulators for this specific loop.
+            # Determine accumulators for this specific loop
             if self._accumulator_names and isinstance(self._accumulator_names[0], list):
-                accumulators_for_this_loop = cast(list[str], self._accumulator_names[i])
+                accumulators_for_this_loop = self._accumulator_names[i]
             else:
-                accumulators_for_this_loop = cast(list[str], self._accumulator_names)
+                accumulators_for_this_loop = self._accumulator_names  # type: ignore[assignment]
 
             assert (
                 accumulators_for_this_loop or loop_variables

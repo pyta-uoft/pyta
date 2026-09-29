@@ -24,7 +24,6 @@ from typing import (
     Optional,
     TypeVar,
     Union,
-    cast,
     get_args,
     get_origin,
     overload,
@@ -216,16 +215,15 @@ def check_contracts(  # type: ignore[misc]
         return _enable_function_contracts(func_or_class)
     elif inspect.isclass(func_or_class):
         add_class_invariants(func_or_class)
-        # mypy sees the class object as `type`. Cast it back to the function's union contract.
-        return cast(Union[Class, FunctionType], func_or_class)
+        return func_or_class  # type: ignore[return-value]
     else:
         # Default action
         return func_or_class
 
 
-def add_class_invariants(klass: type) -> None:
+def add_class_invariants(klass: type[Class]) -> None:
     """Modify the given class to check representation invariants and method contracts."""
-    if not ENABLE_CONTRACT_CHECKING or "__representation_invariants__" in klass.__dict__:
+    if not ENABLE_CONTRACT_CHECKING or "__representation_invariants__" in vars(klass):
         # This means the class has already been decorated
         return
 
@@ -236,13 +234,13 @@ def add_class_invariants(klass: type) -> None:
         None  # This is a cached value set the first time new_setattr is called
     )
 
-    def new_setattr(self: Any, name: str, value: Any) -> None:
+    def new_setattr(self: Class, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
 
         Check representation invariants for this class when not within an instance method of the class.
         """
         if not ENABLE_CONTRACT_CHECKING:
-            super(klass, self).__setattr__(name, value)
+            super(type(self), self).__setattr__(name, value)
             return
 
         nonlocal cls_annotations
@@ -294,7 +292,7 @@ def add_class_invariants(klass: type) -> None:
                 if self not in mutated_instances:
                     mutated_instances.append(self)
 
-    for attr, value in klass.__dict__.items():
+    for attr, value in vars(klass).items():
         # Skip built-in __annotate_func__, which was introduced in Python 3.14
         if attr == "__annotate_func__":
             continue
@@ -355,8 +353,7 @@ def _check_function_contracts(
 
     # Check function preconditions
     if not hasattr(target, "__preconditions__") and preconditions_enabled:
-        target = cast(Any, target)
-        target.__preconditions__ = []
+        target_preconditions: list[tuple[str, CodeType]] = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
             try:
@@ -366,9 +363,8 @@ def _check_function_contracts(
                     f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
                 )
                 continue
-            cast(list[tuple[str, CodeType]], target.__preconditions__).append(
-                (precondition, compiled)
-            )
+            target_preconditions.append((precondition, compiled))
+        target.__preconditions__ = target_preconditions
 
     if ENABLE_CONTRACT_CHECKING and preconditions_enabled:
         _check_assertions(wrapped, function_locals)
@@ -391,8 +387,7 @@ def _check_function_contracts(
 
     # Check function postconditions
     if postconditions_enabled and not hasattr(target, "__postconditions__"):
-        target = cast(Any, target)
-        target.__postconditions__ = []
+        target_postconditions: list[tuple[str, CodeType, str]] = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
@@ -406,9 +401,8 @@ def _check_function_contracts(
                     f"Warning: postcondition {postcondition} could not be parsed as a valid Python expression"
                 )
                 continue
-            cast(list[tuple[str, CodeType, str]], target.__postconditions__).append(
-                (postcondition, compiled, return_val_var_name)
-            )
+            target_postconditions.append((postcondition, compiled, return_val_var_name))
+        target.__postconditions__ = target_postconditions
 
     if ENABLE_CONTRACT_CHECKING and postconditions_enabled:
         _check_assertions(
@@ -608,9 +602,8 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
 
     super(type(instance), instance).__setattr__("__pyta_currently_checking", True)
 
-    rep_invariants = cast(
-        list[tuple[str, CodeType]],
-        getattr(klass, "__representation_invariants__", []),
+    rep_invariants: set[tuple[str, CodeType]] = getattr(
+        klass, "__representation_invariants__", set()
     )
 
     try:
@@ -696,16 +689,16 @@ def _check_assertions(
 ) -> None:
     """Check that the given assertions are still satisfied."""
     # Check bounded function
-    wrapped_obj = cast(Any, wrapped)
+    wrapped_obj = wrapped
     if hasattr(wrapped_obj, "__self__"):
-        target = wrapped_obj.__func__
+        target = wrapped_obj.__func__  # type: ignore[attr-defined]
     else:
         target = wrapped_obj
     assertions: list[Any] = []
     if condition_type == "precondition":
-        assertions = cast(list[Any], getattr(target, "__preconditions__", []))
+        assertions = getattr(target, "__preconditions__", [])
     elif condition_type == "postcondition":
-        assertions = cast(list[Any], getattr(target, "__postconditions__", []))
+        assertions = getattr(target, "__postconditions__", [])
     for assertion in assertions:
         if condition_type == "precondition":
             assertion_str, compiled = assertion
@@ -868,11 +861,9 @@ def _set_invariants(klass: type) -> None:
 
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
-        cls_obj = cast(Any, cls)
+        cls_obj = cls
         if "__representation_invariants__" in cls_obj.__dict__:
-            rep_invariants.extend(
-                cast(list[tuple[str, CodeType]], cls_obj.__representation_invariants__)
-            )
+            rep_invariants.extend(cls_obj.__representation_invariants__)  # type: ignore[attr-defined]
         elif cls_obj.__module__ != "builtins":
             assertions = parse_assertions(cls_obj, parse_token="Representation Invariant")
             # Try compiling assertions

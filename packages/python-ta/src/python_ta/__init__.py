@@ -33,9 +33,7 @@ except AttributeError:
 
 import logging
 import webbrowser
-from typing import IO, TYPE_CHECKING, Any, Literal, Optional, Union, cast
-
-from pylint.reporters import BaseReporter, MultiReporter
+from typing import IO, TYPE_CHECKING, Any, Literal, Optional, Union
 
 from .check.helpers import (
     check_file,
@@ -164,9 +162,7 @@ def _check(
         output,
         pylint_args=pylint_args,
     )
-    current_reporter: BaseReporter | MultiReporter = cast(
-        BaseReporter | MultiReporter, initial_reporter
-    )
+    current_reporter = initial_reporter
     try:
         # Flag indicating whether at least one file has been checked
         is_any_file_checked = False
@@ -189,15 +185,13 @@ def _check(
                     load_default_config=load_default_config,
                     autoformat=autoformat,
                     is_any_file_checked=is_any_file_checked,
-                    current_reporter=cast(BaseReporter, current_reporter),
+                    current_reporter=current_reporter,
                     f_paths=f_paths,
                     pylint_args=pylint_args,
                 )
-                current_reporter = cast(BaseReporter | MultiReporter, linter.reporter)
-                cast(Any, current_reporter).print_messages(level)
-            upload_linter_results(
-                linter, cast(BaseReporter, current_reporter), f_paths, local_config
-            )
+                current_reporter = linter.reporter  # type: ignore[assignment]
+                current_reporter.print_messages(level)
+            upload_linter_results(linter, current_reporter, f_paths, local_config)
         # Only generate reports (display the webpage) if there were valid files to check
         if is_any_file_checked:
             linter.generate_reports()
@@ -215,8 +209,8 @@ def _check(
                     f_paths=f_paths,
                 )
         if linter is not None:
-            cast(Any, linter).msgs_store.get_message_definitions.cache_clear()
-        return cast(Any, current_reporter)
+            linter.msgs_store.get_message_definitions.cache_clear()
+        return current_reporter
     except Exception as e:
         logging.error(
             "Unexpected error encountered! Please report this to your instructor (and attach the code that caused the error)."

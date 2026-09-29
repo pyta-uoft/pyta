@@ -11,14 +11,13 @@ import sys
 import tokenize
 from configparser import Error as ConfigParserError
 from pathlib import Path
-from typing import IO, Any, Generator, Literal, Optional, Union, cast
+from typing import IO, Any, Generator, Literal, Optional, Union
 
 from astroid import MANAGER, modutils
 from pylint.config.config_file_parser import _RawConfParser
 from pylint.exceptions import UnknownMessageError
 from pylint.lint import PyLinter
 from pylint.lint.pylinter import _load_reporter_by_class
-from pylint.reporters import BaseReporter, MultiReporter
 from pylint.utils.pragma_parser import OPTION_PO
 
 from .. import __version__
@@ -29,6 +28,7 @@ from ..config import (
     override_config,
 )
 from ..patches import patch_all
+from ..reporters.core import PythonTaReporter
 from ..upload import upload_to_server
 from ..util.autoformat import run_autoformat
 from ..util.extended_markup import ExtendedMarkup
@@ -50,18 +50,16 @@ def setup_linter(
     load_default_config: bool,
     output: Optional[Union[str, IO[str]]],
     pylint_args: Optional[list[str]] = None,
-) -> tuple[PyLinter, BaseReporter]:
+) -> tuple[PyLinter, PythonTaReporter]:
     """Set up the linter and reporter for the check."""
     linter = reset_linter(
         config=local_config,
         load_default_config=load_default_config,
         pylint_args=pylint_args,
     )
-    # Pylint exposes a reporter object dynamically; PythonTA only relies on the
-    # BaseReporter API here, so narrow it for the rest of this helper.
-    current_reporter = cast(BaseReporter, linter.reporter)
-    cast(Any, current_reporter).set_output(output)
-    messages_config_path = cast(Any, linter.config).messages_config_path
+    current_reporter: PythonTaReporter = linter.reporter  # type: ignore[assignment]
+    current_reporter.set_output(output)
+    messages_config_path = linter.config.messages_config_path
 
     global PYLINT_PATCHED
     if not PYLINT_PATCHED:
@@ -76,7 +74,7 @@ def check_file(
     load_default_config: bool,
     autoformat: Optional[bool],
     is_any_file_checked: bool,
-    current_reporter: BaseReporter,
+    current_reporter: PythonTaReporter,
     f_paths: list[str],
     pylint_args: Optional[list[str]] = None,
 ) -> tuple[bool, PyLinter]:
@@ -95,18 +93,16 @@ def check_file(
         run_autoformat(file_py, linter.config.autoformat_options, linter.config.max_line_length)
 
     if not is_any_file_checked:
-        prev_output = cast(Any, current_reporter).out
-        prev_should_close_out = cast(Any, current_reporter).should_close_out
-        current_reporter = cast(BaseReporter, linter.reporter)
-        cast(Any, current_reporter).out = prev_output
-        cast(Any, current_reporter).should_close_out = (
-            not cast(Any, linter.config).watch and prev_should_close_out
-        )
+        prev_output = current_reporter.out
+        prev_should_close_out = current_reporter.should_close_out
+        current_reporter = linter.reporter  # type: ignore[assignment]
+        current_reporter.out = prev_output
+        current_reporter.should_close_out = not linter.config.watch and prev_should_close_out
 
         # At this point, the only possible errors are those from parsing the config file
         # so print them, if there are any.
-        if cast(Any, current_reporter).has_messages():
-            cast(Any, current_reporter).print_messages()
+        if current_reporter.has_messages():
+            current_reporter.print_messages()
     else:
         linter.set_reporter(current_reporter)
 
@@ -117,16 +113,16 @@ def check_file(
     if module_name in MANAGER.astroid_cache:  # Remove module from astroid cache
         del MANAGER.astroid_cache[module_name]
     linter.check([file_py])  # Lint !
-    if cast(Any, linter.config).pyta_file_permission:
+    if linter.config.pyta_file_permission:
         f_paths.append(file_py)  # Appending paths for upload
     logging.debug(
         "File: {} was checked using the configuration file: {}".format(
-            file_py, cast(Any, linter).config_file
+            file_py, linter.config_file  # type: ignore[attr-defined]
         )
     )
     logging.debug(
         "File: {} was checked using the messages-config file: {}".format(
-            file_py, cast(Any, linter.config).messages_config_path
+            file_py, linter.config.messages_config_path
         )
     )
     return is_any_file_checked, linter
@@ -134,18 +130,18 @@ def check_file(
 
 def upload_linter_results(
     linter: PyLinter,
-    current_reporter: BaseReporter,
+    current_reporter: PythonTaReporter,
     f_paths: list[str],
     local_config: Union[dict[str, Any], str],
 ) -> None:
     """Upload linter results and configuration data to the specified server if permissions allow."""
     config: dict[str, Any] = {}  # Configuration settings for data submission
     errs: Any = []  # Errors caught in files for data submission
-    if cast(Any, linter.config).pyta_error_permission:
-        errs = list(cast(Any, current_reporter).messages.values())
+    if linter.config.pyta_error_permission:  # type: ignore[attr-defined]
+        errs = list(current_reporter.messages.values())
     if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
         # Checks if default configuration was used without changing options through the local_config argument
-        if cast(Any, linter).config_file[-19:-10] != "python_ta" or local_config != "":
+        if linter.config_file[-19:-10] != "python_ta" or local_config != "":  # type: ignore[attr-defined]
             config = linter.config.__dict__
         upload_to_server(
             errors=errs,
@@ -329,12 +325,10 @@ def reset_linter(
 
     # Override error messages
     messages_config_path = linter.config.messages_config_path
-    messages_config_default_path = cast(
-        str, linter._option_dicts["messages-config-path"]["default"]
-    )
+    messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
     use_pyta_error_messages = linter.config.use_pyta_error_messages
     messages_config = load_messages_config(
-        messages_config_path, messages_config_default_path, bool(use_pyta_error_messages)
+        messages_config_path, messages_config_default_path, bool(use_pyta_error_messages)  # type: ignore[arg-type]
     )
     for error_id, new_msg in messages_config.items():
         # Create new message definition object according to configured error messages

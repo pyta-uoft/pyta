@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from .core import MessageLike, NewMessage, PythonTaReporter
 
@@ -37,7 +37,7 @@ class JSONReporter(PythonTaReporter):
             output.append(
                 {
                     "filename": k,
-                    "msgs": self._output_messages(cast(list[NewMessage], msgs)),
+                    "msgs": self._output_messages(msgs),  # type: ignore[arg-type]
                 }
             )
 

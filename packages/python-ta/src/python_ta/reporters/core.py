@@ -8,15 +8,15 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, Optional, TextIO, Union, cast
+from typing import IO, TYPE_CHECKING, Optional, Union
 
+from pylint.message import Message
 from pylint.reporters import BaseReporter
 
 from .node_printers import LineType, render_message
 
 if TYPE_CHECKING:
     from astroid import NodeNG
-    from pylint.message import Message
     from pylint.message.message_definition import MessageDefinition
     from pylint.reporters.ureports.nodes import BaseLayout, Section
 
@@ -48,7 +48,7 @@ class NewMessage:
 
 # Type alias for a message-like object, which can be either a Pylint Message or a NewMessage.
 # This is for type checking purposes.
-MessageLike = Union["Message", NewMessage]
+MessageLike = Message | NewMessage
 
 # Messages without a source code line to highlight
 NO_SNIPPET = {
@@ -81,7 +81,7 @@ class PythonTaReporter(BaseReporter):
     NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊", "🎊", "🙌", "🕺"]
 
     # The error messages to report, mapping filename to a list of messages.
-    messages: Any  # Pylint's BaseReporter type for messages is too narrow for this subclass; Any is used to avoid type errors.
+    messages: dict[str, list[MessageLike]]  # type: ignore[assignment]
     source_lines: list[str]
     module_name: str
     current_file: str
@@ -131,12 +131,11 @@ class PythonTaReporter(BaseReporter):
             out = os.path.expanduser(out)
             if os.path.isdir(out):
                 out = os.path.join(out, self.OUTPUT_FILENAME)
-
-            self.out = cast(TextIO, open(out, "w", encoding="utf-8"))
+            self.out = open(out, "w", encoding="utf-8")
             self.should_close_out = True
         else:
             # out is a typing.IO object
-            self.out = cast(TextIO, out)
+            self.out = out  # type: ignore[assignment]
 
     def handle_message(self, msg: Message) -> None:
         """Handle a new message triggered on the current file."""
@@ -150,14 +149,14 @@ class PythonTaReporter(BaseReporter):
         """
         curr_messages = self.messages[self.current_file]
         if len(curr_messages) >= 1 and curr_messages[-1].msg_id == msg_definition.msgid:
-            msg = cast(Any, curr_messages[-1])
+            msg = curr_messages[-1]
 
             if msg.symbol in NO_SNIPPET or msg.msg.startswith("Invalid module"):
                 snippet = ""
             else:
-                snippet = self._build_snippet(cast(NewMessage, msg), node)
+                snippet = self._build_snippet(msg, node)
 
-            curr_messages[-1] = NewMessage(msg, node, snippet)
+            curr_messages[-1] = NewMessage(msg, node, snippet)  # type: ignore[arg-type]
 
     def gather_messages(self) -> dict[str, list[MessageLike]]:
         """Return a filtered version of self.messages for reporting.
@@ -199,7 +198,7 @@ class PythonTaReporter(BaseReporter):
         code_snippet = ""
 
         for lineno, slice_, line_type, text in render_message(
-            cast(NewMessage, msg), node, self.source_lines, self.linter.config
+            msg, node, self.source_lines, self.linter.config  # type: ignore[arg-type]
         ):
             code_snippet += self._add_line(lineno, line_type, slice_, text)
 

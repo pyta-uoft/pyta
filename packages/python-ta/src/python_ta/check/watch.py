@@ -3,10 +3,12 @@
 import logging
 import os
 import time
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, Union
 
 from pylint.lint import PyLinter
 from pylint.reporters import BaseReporter
+
+from python_ta.reporters.core import PythonTaReporter
 
 # ``watchdog`` is an optional extra. If someone imports this module without
 # installing the extra, we print an error message before raising the error.
@@ -48,7 +50,7 @@ class FileChangeHandler(FileSystemEventHandler):
 
         logging.info(f"File modified: {event.src_path}, re-running checks...")
 
-        current_reporter = self.linter.reporter
+        current_reporter: PythonTaReporter = self.linter.reporter  # type: ignore[assignment]
         if event.src_path in current_reporter.messages:
             del current_reporter.messages[event.src_path]
 
@@ -58,15 +60,13 @@ class FileChangeHandler(FileSystemEventHandler):
             load_default_config=self.load_default_config,
             autoformat=self.autoformat,
             is_any_file_checked=True,
-            current_reporter=cast(BaseReporter, current_reporter),
+            current_reporter=current_reporter,
             f_paths=[],
         )
-        current_reporter = self.linter.reporter
-        cast(Any, current_reporter).print_messages(self.level)
+        current_reporter = self.linter.reporter  # type: ignore[assignment]
+        current_reporter.print_messages(self.level)
         self.linter.generate_reports()
-        upload_linter_results(
-            self.linter, cast(BaseReporter, current_reporter), self.f_paths, self.local_config
-        )
+        upload_linter_results(self.linter, current_reporter, self.f_paths, self.local_config)
 
 
 def watch_files(
@@ -100,7 +100,7 @@ def watch_files(
             time.sleep(1)
     except KeyboardInterrupt:
         reporter = event_handler.linter.reporter
-        cast(Any, reporter).should_close_out = True
+        reporter.should_close_out = True  # type: ignore[union-attr]
         reporter.on_close(event_handler.linter.stats, None)
         observer.stop()
 

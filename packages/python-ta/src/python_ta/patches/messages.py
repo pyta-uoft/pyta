@@ -27,4 +27,4 @@ def patch_messages() -> None:
         if hasattr(self.reporter, "handle_node"):
             self.reporter.handle_node(msg_info, node)
 
-    setattr(PyLinter, "add_message", new_add_message)
+    PyLinter.add_message = new_add_message  # type: ignore[assignment]

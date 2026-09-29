@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
-from .core import MessageLike, NewMessage, PythonTaReporter
+from .core import MessageLike, PythonTaReporter
 from .node_printers import LineType
 
 if TYPE_CHECKING:
@@ -83,7 +83,7 @@ class PlainReporter(PythonTaReporter):
                     + self._BREAK
                 )
 
-                result += cast(NewMessage, msg).snippet or ""
+                result += msg.snippet or ""  # type: ignore[union-attr]
                 result += self._BREAK
 
         return result

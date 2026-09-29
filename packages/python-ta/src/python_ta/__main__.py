@@ -103,7 +103,7 @@ def main(
                 output_format=output_format,
                 autoformat=autoformat,
             )
-        # Clean up the temporary file.
+        # Clean up the temporary file
         os.unlink(temp_file.name)
 
     else:
@@ -127,6 +127,7 @@ def _invoke_checker(
     paths: list[str],
     config: dict[str, Any] | str | None,
     output_format: Optional[str],
+    autoformat: bool,
 ) -> PythonTaReporter:
     """Invoke the checker with the appropriate arguments based on the provided config and output_format."""
     if output_format and config:

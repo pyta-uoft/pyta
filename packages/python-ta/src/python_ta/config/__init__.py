@@ -33,7 +33,8 @@ def find_local_config(curr_dir: str) -> Optional[str]:
         return os.path.join(curr_dir, "config", "pylintrc")
     elif os.path.exists(os.path.join(curr_dir, "config", "pyproject.toml")):
         return os.path.join(curr_dir, "config", "pyproject.toml")
-    return None
+    else:
+        return None
 
 
 def load_config(
@@ -46,7 +47,7 @@ def load_config(
     if pylint_args:
         args_list.extend(pylint_args)
     _config_initialization(linter, args_list=args_list, config_file=config_location)
-    setattr(linter, "config_file", config_location)  # use setattr to avoid mypy errors
+    linter.config_file = config_location  # type: ignore[attr-defined]
 
 
 def override_config(
@@ -82,7 +83,7 @@ def override_config(
     # Everything has been set up already so emit any stashed messages.
     linter._emit_stashed_messages()
 
-    setattr(linter, "config_file", config_location)  # use setattr to avoid mypy errors
+    linter.config_file = config_location  # type: ignore[attr-defined]
 
 
 def load_messages_config(path: str, default_path: str, use_pyta_error_messages: bool) -> dict:

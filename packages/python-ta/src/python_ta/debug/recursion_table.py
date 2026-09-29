@@ -76,7 +76,8 @@ class RecursionTable:
         """Return the root node of the tree."""
         if self.frames_data:
             return self._trees[next(iter(self.frames_data))]
-        return None
+        else:
+            return None
 
     def _create_func_call_string(self, func_name: str, frame_variables: dict[str, Any]) -> str:
         """Create a string representation of the function call given the inputs

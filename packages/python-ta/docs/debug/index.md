@@ -505,3 +505,80 @@ The `SnapshotTracer` has the following limitations:
 
 1. Due to differences in Python interpreters, this context manager only works with Python versions >= 3.10.
 2. `SnapshotTracer` uses [`sys.settrace`] to update variable states, and therefore is not compatible with other libraries (e.g., debuggers, code coverage tools).
+
+## Capturing memory with `snapshot`
+
+Unlike `SnapshotTracer`, which records the program's memory at every line of a block, the `python_ta.debug.snapshot.snapshot` function captures the variables at the single point where it is called.
+
+When `save=False` (the default), no diagram is produced. Instead, the function returns the captured variables as a list with one dictionary per stack frame, where each dictionary maps the frame's name to its variables.
+
+```python
+# demo.py
+from python_ta.debug.snapshot import snapshot
+
+
+def func(n: int) -> None:
+    nums = [n, n + 1]
+    snapshot()
+
+
+message = "Hello, world"
+func(1)
+```
+
+The call to `snapshot()` would return the following:
+
+```
+[{'func': {'n': 1, 'nums': [1, 2]}}, {'__main__': {'message': 'Hello, world'}}]
+```
+
+When `save=True`, it calls the [MemoryViz CLI](https://www.cs.toronto.edu/~david/memory-viz/docs/cli) and writes the memory diagram as an SVG to standard output (or to a file, if `--output` is passed in `memory_viz_args`).
+
+### Saving to standard output
+
+By default, the SVG is printed to standard output:
+
+```python
+# demo.py
+from python_ta.debug.snapshot import snapshot
+
+test_var1a = "David is cool!"
+test_var2a = "Students Developing Software"
+snapshot(save=True)
+```
+
+Running `python demo.py > demo.svg` saves the diagram to `demo.svg` through a shell redirect.
+
+### Saving to a specific file
+
+To write the SVG straight to a file, pass MemoryViz's `--output` option in `memory_viz_args`:
+
+```python
+# demo.py
+from python_ta.debug.snapshot import snapshot
+
+test_var1a = "David is cool!"
+test_var2a = "Students Developing Software"
+snapshot(save=True, memory_viz_args=["--output=demo.svg"])
+```
+
+This saves the diagram to `demo.svg` instead of printing it.
+
+### Setting the width
+
+The generated SVG has a default width of `800`. To use a different width, pass MemoryViz's `--width` option in `memory_viz_args`, either as `"--width", "<value>"` or as `"--width=<value>"`:
+
+```python
+# demo.py
+from python_ta.debug.snapshot import snapshot
+
+test_var1a = "David is cool!"
+test_var2a = "Students Developing Software"
+snapshot(save=True, memory_viz_args=["--width", "1200"])
+```
+
+### API
+
+```{eval-rst}
+.. autofunction:: python_ta.debug.snapshot.snapshot
+```

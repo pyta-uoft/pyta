@@ -88,19 +88,25 @@ def snapshot(
     Excludes the global module context.
 
     When save is True, a MemoryViz-created svg is produced.
-    memory_viz_args can be used to pass in options to the MemoryViz CLI.
+
+    `memory_viz_args` can be used to pass in options to the MemoryViz CLI.
     For details on the MemoryViz CLI, see https://www.cs.toronto.edu/~david/memory-viz/docs/cli.
-    The width of the generated svg defaults to 800, and can be changed by passing "--width" in memory_viz_args.
-    memory_viz_version can be used to dictate version, with a default of the latest version.
+    The width of the generated svg defaults to 800, and can be changed by passing "--width" in `memory_viz_args`.
+
+    `memory_viz_version` can be used to dictate version, with a default of the latest version.
     Note that this function is compatible only with MemoryViz version 0.3.1 and above.
-    include_frames can be used to specify a collection of function names, either as strings or regular expressions,
+
+    `include_frames` can be used to specify a collection of function names, either as strings or regular expressions,
     whose variables will be captured. By default, all variables in all functions will be captured if no `include_frames`
     argument is provided.
-    exclude_frames can be used to specify a collection of function names, either as strings or regular expressions,
+
+    `exclude_frames` can be used to specify a collection of function names, either as strings or regular expressions,
     whose variables should be excluded.
-    exclude_vars can be used to specify a collection of variable names, either as strings or regular expressions,
+
+    `exclude_vars` can be used to specify a collection of variable names, either as strings or regular expressions,
     that will be excluded from the snapshot. By default, all variables will be captured if no `exclude_vars` is provided.
-    id_tracker can be used to allow long-term tracking of IDs across multiple snapshots.
+
+    `id_tracker` can be used to allow long-term tracking of IDs across multiple snapshots.
     """
     if id_tracker is None:
         id_tracker = IDTracker()

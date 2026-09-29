@@ -36,3 +36,19 @@ target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
 profile = "black"
 known_local_folder = ["python_ta"]
 multi_line_output = 3
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = [
+    "aiohttp.*",
+    "astroid.*",
+    "graphviz.*",
+    "lsprotocol.*",
+    "markdown_it.*",
+    "pycodestyle.*",
+    "python_ta_z3",
+    "watchdog.*",
+    "wrapt.*",
+    "z3"
+]
+ignore_missing_imports = true

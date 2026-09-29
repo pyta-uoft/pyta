@@ -38,7 +38,7 @@ class InconsistentReturnChecker(BaseChecker):
     )
 
     def __init__(self, linter: Optional[PyLinter] = None) -> None:
-        super().__init__(linter=linter)
+        super().__init__(linter=linter)  # type: ignore[arg-type]
 
     @only_required_for_messages("missing-return-statement", "inconsistent-returns")
     def visit_functiondef(self, node) -> None:
@@ -62,7 +62,7 @@ class InconsistentReturnChecker(BaseChecker):
         end_blocks = [edge.source for edge in end.predecessors]
 
         # gather the return statement of each code block
-        return_statements = {}
+        return_statements: dict[nodes.Block, nodes.Return] = {}
         for block in end_blocks:
             return_statements[block] = None
             statement = block.statements[-1]

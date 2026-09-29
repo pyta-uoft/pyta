@@ -5,7 +5,7 @@ from .messages import patch_messages
 from .transforms import patch_ast_transforms
 
 
-def patch_all():
+def patch_all() -> None:
     """Execute all patches defined in this module."""
     patch_checkers()
     patch_ast_transforms()

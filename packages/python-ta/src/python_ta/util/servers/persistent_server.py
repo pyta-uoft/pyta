@@ -13,6 +13,12 @@ LOADING_HTML = b"<h1>Loading report...</h1>"
 class PersistentHTMLServer:
     """A persistent HTML server that serves HTML content and supports WebSocket connections."""
 
+    port: int
+    latest_html: bytes
+    websockets: set[web.WebSocketResponse]
+    server_started: bool
+    loop: asyncio.AbstractEventLoop
+
     def __init__(self, port: int):
         self.port = port
         self.latest_html = LOADING_HTML

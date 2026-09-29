@@ -3,9 +3,9 @@ from pathlib import Path
 
 from lsprotocol import converters, types
 from pylint.lint import PyLinter
-from pylint.reporters.ureports.nodes import BaseLayout
+from pylint.reporters.ureports.nodes import Section
 
-from .core import NewMessage, PythonTaReporter
+from .core import MessageLike, PythonTaReporter
 
 CATEGORY_TO_LSP = {
     "error": types.DiagnosticSeverity.Error,
@@ -26,14 +26,14 @@ class LSPReporter(PythonTaReporter):
 
     name = "pyta-lsp"
     OUTPUT_FILENAME = "pyta_lsp_report.json"
-    messages: dict[str, list[NewMessage]]
+    messages: dict[str, list[MessageLike]]
 
-    def display_messages(self, layout: BaseLayout) -> None:
-        output = []
+    def display_messages(self, layout: Section | None) -> None:
+        output: list[dict] = []
         converter = converters.get_converter()
 
         for filename, msgs in self.gather_messages().items():
-            diagnostics_list = []
+            diagnostics_list: list[types.Diagnostic] = []
             for msg in msgs:
                 start_char = msg.column or 0
                 if msg.end_column is not None:
@@ -63,5 +63,5 @@ class LSPReporter(PythonTaReporter):
         self.out.flush()
 
 
-def register(linter: PyLinter):
+def register(linter: PyLinter) -> None:
     linter.register_reporter(LSPReporter)

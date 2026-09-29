@@ -7,6 +7,8 @@ from typing import Any, Optional, Union
 
 from pylint.lint import PyLinter
 
+from python_ta.reporters.core import PythonTaReporter
+
 # ``watchdog`` is an optional extra. If someone imports this module without
 # installing the extra, we print an error message before raising the error.
 try:
@@ -47,7 +49,7 @@ class FileChangeHandler(FileSystemEventHandler):
 
         logging.info(f"File modified: {event.src_path}, re-running checks...")
 
-        current_reporter = self.linter.reporter
+        current_reporter: PythonTaReporter = self.linter.reporter  # type: ignore[assignment]
         if event.src_path in current_reporter.messages:
             del current_reporter.messages[event.src_path]
 
@@ -60,7 +62,7 @@ class FileChangeHandler(FileSystemEventHandler):
             current_reporter=current_reporter,
             f_paths=[],
         )
-        current_reporter = self.linter.reporter
+        current_reporter = self.linter.reporter  # type: ignore[assignment]
         current_reporter.print_messages(self.level)
         self.linter.generate_reports()
         upload_linter_results(self.linter, current_reporter, self.f_paths, self.local_config)
@@ -96,7 +98,7 @@ def watch_files(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        event_handler.linter.reporter.should_close_out = True
+        event_handler.linter.reporter.should_close_out = True  # type: ignore[union-attr]
         event_handler.linter.reporter.on_close(event_handler.linter.stats, None)
         observer.stop()
 

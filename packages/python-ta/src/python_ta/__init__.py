@@ -26,7 +26,7 @@ __version__ = version("python-ta")
 import builtins
 
 try:
-    del builtins._
+    delattr(builtins, "_")
 except AttributeError:
     pass
 
@@ -156,17 +156,18 @@ def _check(
     """
     # Configuring logger
     logging.basicConfig(format="[%(levelname)s] %(message)s", level=logging.INFO)
-    linter, current_reporter = setup_linter(
+    linter, initial_reporter = setup_linter(
         local_config,
         load_default_config,
         output,
         pylint_args=pylint_args,
     )
+    current_reporter = initial_reporter
     try:
         # Flag indicating whether at least one file has been checked
         is_any_file_checked = False
         linted_files = set()
-        f_paths = []  # Paths to files for data submission
+        f_paths: list[str] = []  # Paths to files for data submission
         for locations in get_valid_files_to_check(module_name):
             f_paths = []
             for file_py in get_file_paths(locations):
@@ -188,7 +189,7 @@ def _check(
                     f_paths=f_paths,
                     pylint_args=pylint_args,
                 )
-                current_reporter = linter.reporter
+                current_reporter = linter.reporter  # type: ignore[assignment]
                 current_reporter.print_messages(level)
             upload_linter_results(linter, current_reporter, f_paths, local_config)
         # Only generate reports (display the webpage) if there were valid files to check
@@ -207,7 +208,8 @@ def _check(
                     linter=linter,
                     f_paths=f_paths,
                 )
-        current_reporter.linter.msgs_store.get_message_definitions.cache_clear()
+        if linter is not None:
+            linter.msgs_store.get_message_definitions.cache_clear()
         return current_reporter
     except Exception as e:
         logging.error(

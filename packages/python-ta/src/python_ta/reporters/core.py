@@ -10,15 +10,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Optional, Union
 
+from pylint.message import Message
 from pylint.reporters import BaseReporter
 
 from .node_printers import LineType, render_message
 
 if TYPE_CHECKING:
     from astroid import NodeNG
-    from pylint.message import Message
     from pylint.message.message_definition import MessageDefinition
-    from pylint.reporters.ureports.nodes import BaseLayout
+    from pylint.reporters.ureports.nodes import BaseLayout, Section
 
 
 class NewMessage:
@@ -46,6 +46,10 @@ class NewMessage:
         }
 
 
+# Type alias for a message-like object, which can be either a Pylint Message or a NewMessage.
+# This is for type checking purposes.
+MessageLike = Message | NewMessage
+
 # Messages without a source code line to highlight
 NO_SNIPPET = {
     "invalid-name",
@@ -63,10 +67,12 @@ class PythonTaReporter(BaseReporter):
     Reminder: see pylint BaseReporter for other instance variables.
     """
 
+    OUTPUT_FILENAME = "pyta_report.txt"
+
     # Rendering constants
     _SPACE = " "
     _BREAK = "\n"
-    _COLOURING = {}
+    _COLOURING: dict[str, str] = {}
     _PRE_LINE_NUM_SPACES = 2
     _NUM_LENGTH_SPACES = 3
     _AFTER_NUM_SPACES = 2
@@ -75,7 +81,10 @@ class PythonTaReporter(BaseReporter):
     NO_ERR_EMOJIS = ["🎉", "🥳", "🌟", "👍", "👏", "😊", "🎊", "🙌", "🕺"]
 
     # The error messages to report, mapping filename to a list of messages.
-    messages: dict[str, list[Message]]
+    messages: dict[str, list[MessageLike]]  # type: ignore[assignment]
+    source_lines: list[str]
+    module_name: str
+    current_file: str
     # Whether the reporter's output stream should be closed out.
     should_close_out: bool
 
@@ -103,7 +112,7 @@ class PythonTaReporter(BaseReporter):
         """Return whether there are any messages registered."""
         return any(messages for messages in self.messages.values())
 
-    def set_output(self, out: Optional[Union[str, IO]] = None) -> None:
+    def set_output(self, out: Optional[Union[str, IO[str]]] = None) -> None:
         """Set output stream based on out.
 
         If out is None or '-', sys.stdout is used.
@@ -122,12 +131,11 @@ class PythonTaReporter(BaseReporter):
             out = os.path.expanduser(out)
             if os.path.isdir(out):
                 out = os.path.join(out, self.OUTPUT_FILENAME)
-
             self.out = open(out, "w", encoding="utf-8")
             self.should_close_out = True
         else:
             # out is a typing.IO object
-            self.out = out
+            self.out = out  # type: ignore[assignment]
 
     def handle_message(self, msg: Message) -> None:
         """Handle a new message triggered on the current file."""
@@ -148,9 +156,9 @@ class PythonTaReporter(BaseReporter):
             else:
                 snippet = self._build_snippet(msg, node)
 
-            curr_messages[-1] = NewMessage(msg, node, snippet)
+            curr_messages[-1] = NewMessage(msg, node, snippet)  # type: ignore[arg-type]
 
-    def gather_messages(self) -> dict[str, list[Message]]:
+    def gather_messages(self) -> dict[str, list[MessageLike]]:
         """Return a filtered version of self.messages for reporting.
 
         This filters out configuration files (i.e., non-".py" files) that do not have any errors.
@@ -158,8 +166,8 @@ class PythonTaReporter(BaseReporter):
         return {path: msgs for path, msgs in self.messages.items() if path.endswith(".py") or msgs}
 
     def group_messages(
-        self, messages: list[Message]
-    ) -> tuple[dict[str, list[Message]], dict[str, list[Message]]]:
+        self, messages: list[MessageLike]
+    ) -> tuple[dict[str, list[MessageLike]], dict[str, list[MessageLike]]]:
         """Group messages for the current file by their (error/style) and type (msg_id)."""
         error_msgs_by_type = defaultdict(list)
         style_msgs_by_type = defaultdict(list)
@@ -171,7 +179,7 @@ class PythonTaReporter(BaseReporter):
 
         return error_msgs_by_type, style_msgs_by_type
 
-    def display_messages(self, layout: BaseLayout) -> None:
+    def display_messages(self, layout: Section | None) -> None:
         """Hook for displaying the messages of the reporter
 
         This will be called whenever the underlying messages
@@ -183,20 +191,22 @@ class PythonTaReporter(BaseReporter):
         """
 
     # Rendering
-    def _build_snippet(self, msg: Message, node: NodeNG) -> str:
+    def _build_snippet(self, msg: MessageLike, node: NodeNG) -> str:
         """Return a code snippet for the given Message object, formatted appropriately according
         to line type.
         """
         code_snippet = ""
 
         for lineno, slice_, line_type, text in render_message(
-            msg, node, self.source_lines, self.linter.config
+            msg, node, self.source_lines, self.linter.config  # type: ignore[arg-type]
         ):
             code_snippet += self._add_line(lineno, line_type, slice_, text)
 
         return code_snippet
 
-    def _add_line(self, lineno: int, linetype: LineType, slice_: slice, text: str = "") -> str:
+    def _add_line(
+        self, lineno: int | str | None, linetype: LineType, slice_: slice, text: str = ""
+    ) -> str:
         """Format given source code line as specified and return as str.
 
         Called by _build_snippet, relies on _colourify.
@@ -224,7 +234,7 @@ class PythonTaReporter(BaseReporter):
         snippet += self._BREAK
         return snippet
 
-    def _add_line_number(self, lineno: int, linetype: LineType) -> str:
+    def _add_line_number(self, lineno: int | str | None, linetype: LineType) -> str:
         """Return a formatted string displaying a line number."""
         pre_spaces = self._PRE_LINE_NUM_SPACES * self._SPACE
         spaces = self._AFTER_NUM_SPACES * self._SPACE

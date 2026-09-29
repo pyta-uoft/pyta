@@ -32,11 +32,12 @@ class InvalidRangeIndexChecker(BaseChecker):
                     return
 
                 inferred_params = [utils.safe_infer(arg) for arg in args]
-                # Check whether every inference was successful
-                if not all(isinstance(node, nodes.Const) for node in inferred_params):
+                eval_params = [
+                    node.value for node in inferred_params if isinstance(node, nodes.Const)
+                ]
+                # Check whether every inference was successful.
+                if len(eval_params) != len(inferred_params):
                     return
-
-                eval_params = [const.value for const in inferred_params]
 
                 if (
                     len(args) == 0

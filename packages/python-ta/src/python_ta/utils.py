@@ -1,4 +1,4 @@
-from typing import ForwardRef, _GenericAlias
+from typing import ForwardRef, get_args, get_origin
 
 from astroid import nodes
 
@@ -9,9 +9,9 @@ def _get_name(t: type) -> str:
         return t.__forward_arg__
     elif isinstance(t, type):
         return t.__name__
-    elif isinstance(t, _GenericAlias):
+    elif get_origin(t) is not None:
         return "{} of {}".format(
-            _get_name(t.__origin__), ", ".join(_get_name(arg) for arg in t.__args__)
+            _get_name(get_origin(t)), ", ".join(_get_name(arg) for arg in get_args(t))
         )
     else:
         return str(t)

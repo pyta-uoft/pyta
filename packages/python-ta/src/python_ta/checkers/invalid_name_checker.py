@@ -154,7 +154,7 @@ def _check_module_name(_node_type: str, name: str) -> list[str]:
     module names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid module name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_snake_case(name):
         suggested_name = _to_snake_case(name)
@@ -174,7 +174,7 @@ def _check_const_name(node_type: str, name: str) -> list[str]:
     constant and class constant names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid (global or class) constant name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_upper_case_with_underscores(name):
         suggested_name = _to_upper_case_with_underscores(name)
@@ -197,7 +197,7 @@ def _check_class_name(_node_type: str, name: str) -> list[str]:
     class names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid class name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_pascal_case(name):
         suggested_name = _to_pascal_case(name)
@@ -218,7 +218,7 @@ def _check_function_and_variable_name(node_type: str, name: str) -> list[str]:
     function and variable names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid function or variable name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if name != "_" and not _is_in_snake_case(name):
         suggested_name = _to_snake_case(name)
@@ -242,7 +242,7 @@ def _check_method_and_attr_name(node_type: str, name: str) -> list[str]:
     method and instance or class attribute names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid method, instance, or attribute name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_snake_case(name):
         suggested_name = _to_snake_case(name)
@@ -267,7 +267,7 @@ def _check_argument_name(_node_type: str, name: str) -> list[str]:
     argument names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid argument name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_snake_case(name):
         suggested_name = _to_snake_case(name)
@@ -290,7 +290,7 @@ def _check_typevar_name(_node_type: str, name: str) -> list[str]:
     type variable names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid type variable name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_pascal_case(name):
         suggested_name = _to_pascal_case(name)
@@ -311,7 +311,7 @@ def _check_type_alias_name(_node_type: str, name: str) -> list[str]:
     type alias names and provides a suggested correction.
 
     Returns an empty list if `name` is a valid type alias name."""
-    error_msgs = []
+    error_msgs: list[str] = []
 
     if not _is_in_pascal_case(name):
         suggested_name = _to_pascal_case(name)

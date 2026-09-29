@@ -38,7 +38,7 @@ class ColorReporter(PlainReporter):
             super().print_messages(level)
 
     @classmethod
-    def _colourify(cls, colour_class: str, text: str) -> str:
+    def _colourify(cls: type["ColorReporter"], colour_class: str, text: str) -> str:
         """
         Adds given ANSI colouring tokens (or key to colouring tokens in the
         class-level dict "_COLOURING") to text as well as final colour reset.

@@ -10,7 +10,7 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 from pylint.lint import PyLinter
-from pylint.reporters.ureports.nodes import BaseLayout
+from pylint.reporters.ureports.nodes import Section
 
 from ..util.extended_markup import UNMAPPED_CODE_POINT
 from ..util.servers.one_shot_server import open_html_in_browser
@@ -49,14 +49,14 @@ class HTMLReporter(PythonTaReporter):
     code_err_title = "Code Errors or Forbidden Usage (fix: high priority)"
     style_err_title = "Style or Convention Errors (fix: before submission)"
     OUTPUT_FILENAME = "pyta_report.html"
-    port = None
-    persistent_server = None
-    run_id = None
+    port: int | None = None
+    persistent_server: PersistentHTMLServer | None = None
+    run_id: str | None = None
 
     def print_messages(self, level="all"):
         """Do nothing to print messages, since all are displayed in a single HTML file."""
 
-    def display_messages(self, layout: BaseLayout) -> None:
+    def display_messages(self, layout: Section | None) -> None:
         """Hook for displaying the messages of the reporter
 
         This will be called whenever the underlying messages
@@ -105,7 +105,7 @@ class HTMLReporter(PythonTaReporter):
         favicon_data_url = pyta_logo_data_url
 
         # Render the jinja template
-        rendered_template = template.render(
+        rendered_template_str = template.render(
             date_time=self._generate_report_date_time(),
             port=self.port,
             run_id=self.run_id,
@@ -121,14 +121,14 @@ class HTMLReporter(PythonTaReporter):
 
         # If a filepath was specified, write to the file
         if self.out is not sys.stdout:
-            self.writeln(rendered_template)
+            self.writeln(rendered_template_str)
             self.out.flush()
         else:
-            rendered_template = rendered_template.encode("utf8")
+            rendered_template_bytes = rendered_template_str.encode("utf8")
             if self.linter.config.watch:
-                self.persistent_server.start_server_once(rendered_template)
+                self.persistent_server.start_server_once(rendered_template_bytes)
             else:
-                open_html_in_browser(rendered_template, self.port)
+                open_html_in_browser(rendered_template_bytes, self.port)
                 print(
                     "[INFO] Your PythonTA report is being opened in your web browser.\n"
                     "       If it doesn't open, please add an output argument to python_ta.check_all\n"

@@ -80,7 +80,7 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
     if not ENABLE_CONTRACT_CHECKING:
         return
 
-    modules = []
+    modules: list[ModuleType | None] = []
     if decorate_main:
         mod_names = mod_names + ("__main__",)
 
@@ -127,8 +127,8 @@ def check_contracts(
 ) -> Class: ...
 
 
-def check_contracts(
-    func_or_class: Union[Class, FunctionType] = None,
+def check_contracts(  # type: ignore[misc]
+    func_or_class: Optional[Union[Class, FunctionType]] = None,
     *,
     module_names: Optional[set[str]] = None,
     argument_types: bool = True,
@@ -215,24 +215,26 @@ def check_contracts(
         return _enable_function_contracts(func_or_class)
     elif inspect.isclass(func_or_class):
         add_class_invariants(func_or_class)
-        return func_or_class
+        return func_or_class  # type: ignore[return-value]
     else:
         # Default action
         return func_or_class
 
 
-def add_class_invariants(klass: type) -> None:
+def add_class_invariants(klass: type[Class]) -> None:
     """Modify the given class to check representation invariants and method contracts."""
-    if not ENABLE_CONTRACT_CHECKING or "__representation_invariants__" in klass.__dict__:
+    if not ENABLE_CONTRACT_CHECKING or "__representation_invariants__" in vars(klass):
         # This means the class has already been decorated
         return
 
     _set_invariants(klass)
 
     klass_mod = _get_module(klass)
-    cls_annotations = None  # This is a cached value set the first time new_setattr is called
+    cls_annotations: Optional[dict[str, Any]] = (
+        None  # This is a cached value set the first time new_setattr is called
+    )
 
-    def new_setattr(self: klass, name: str, value: Any) -> None:
+    def new_setattr(self: Class, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
 
         Check representation invariants for this class when not within an instance method of the class.
@@ -262,9 +264,12 @@ def add_class_invariants(klass: type) -> None:
         original_attr_value = None
         if hasattr(self, name):
             original_attr_value_exists = True
-            original_attr_value = super(klass, self).__getattribute__(name)
-        super(klass, self).__setattr__(name, value)
-        frame_locals = inspect.currentframe().f_back.f_locals
+            original_attr_value = super(klass, self).__getattribute__(name)  # type: ignore[arg-type]
+        super(klass, self).__setattr__(name, value)  # type: ignore[arg-type]
+        current_frame = inspect.currentframe()
+        if current_frame is None or current_frame.f_back is None:
+            return
+        frame_locals = current_frame.f_back.f_locals
         caller_self = frame_locals.get("self")
         if not isinstance(caller_self, type(self)):
             # Only validating if the attribute is not being set in a instance/class method
@@ -274,9 +279,9 @@ def add_class_invariants(klass: type) -> None:
                     _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
                     if original_attr_value_exists:
-                        super(klass, self).__setattr__(name, original_attr_value)
+                        super(klass, self).__setattr__(name, original_attr_value)  # type: ignore[arg-type]
                     else:
-                        super(klass, self).__delattr__(name)
+                        super(klass, self).__delattr__(name)  # type: ignore[arg-type]
                     raise AssertionError(str(e)) from None
         elif caller_self is not self:
             # Keep track of mutations to instances that are of the same type as caller_self (and are also not `self`)
@@ -287,7 +292,7 @@ def add_class_invariants(klass: type) -> None:
                 if self not in mutated_instances:
                     mutated_instances.append(self)
 
-    for attr, value in klass.__dict__.items():
+    for attr, value in vars(klass).items():
         # Skip built-in __annotate_func__, which was introduced in Python 3.14
         if attr == "__annotate_func__":
             continue
@@ -298,7 +303,7 @@ def add_class_invariants(klass: type) -> None:
             else:
                 setattr(klass, attr, _instance_method_wrapper(value, klass))
 
-    klass.__setattr__ = new_setattr
+    klass.__setattr__ = new_setattr  # type: ignore[assignment, method-assign]
 
 
 def _check_function_contracts(
@@ -310,7 +315,7 @@ def _check_function_contracts(
     return_type_enabled: bool = True,
     preconditions_enabled: bool = True,
     postconditions_enabled: bool = True,
-):
+) -> Any:
     params = wrapped.__code__.co_varnames[: wrapped.__code__.co_argcount]
     if instance is not None:
         klass_mod = _get_module(type(instance))
@@ -348,7 +353,7 @@ def _check_function_contracts(
 
     # Check function preconditions
     if not hasattr(target, "__preconditions__") and preconditions_enabled:
-        target.__preconditions__: list[tuple[str, CodeType]] = []
+        target_preconditions: list[tuple[str, CodeType]] = []
         preconditions = parse_assertions(wrapped)
         for precondition in preconditions:
             try:
@@ -358,7 +363,8 @@ def _check_function_contracts(
                     f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
                 )
                 continue
-            target.__preconditions__.append((precondition, compiled))
+            target_preconditions.append((precondition, compiled))
+        target.__preconditions__ = target_preconditions
 
     if ENABLE_CONTRACT_CHECKING and preconditions_enabled:
         _check_assertions(wrapped, function_locals)
@@ -381,7 +387,7 @@ def _check_function_contracts(
 
     # Check function postconditions
     if postconditions_enabled and not hasattr(target, "__postconditions__"):
-        target.__postconditions__: list[tuple[str, CodeType, str]] = []
+        target_postconditions: list[tuple[str, CodeType, str]] = []
         return_val_var_name = _get_legal_return_val_var_name(
             {**wrapped.__globals__, **function_locals}
         )
@@ -395,7 +401,8 @@ def _check_function_contracts(
                     f"Warning: postcondition {postcondition} could not be parsed as a valid Python expression"
                 )
                 continue
-            target.__postconditions__.append((postcondition, compiled, return_val_var_name))
+            target_postconditions.append((postcondition, compiled, return_val_var_name))
+        target.__postconditions__ = target_postconditions
 
     if ENABLE_CONTRACT_CHECKING and postconditions_enabled:
         _check_assertions(
@@ -541,8 +548,11 @@ def _instance_init_in_callstack(instance: Any) -> bool:
     Note: due to the nature of the check, externally defined __init__ functions with
     'self' defined as the first parameter may pass this check.
     """
-    frame = inspect.currentframe().f_back
-    while frame:
+    current_frame = inspect.currentframe()
+    if current_frame is None:
+        return False
+    frame = current_frame.f_back
+    while frame is not None:
         frame_context_name = inspect.getframeinfo(frame).function
         frame_context_self = frame.f_locals.get("self")
         frame_context_vars = frame.f_code.co_varnames
@@ -592,7 +602,9 @@ def _check_invariants(instance, klass: type, global_scope: dict) -> None:
 
     super(type(instance), instance).__setattr__("__pyta_currently_checking", True)
 
-    rep_invariants = getattr(klass, "__representation_invariants__", set())
+    rep_invariants: set[tuple[str, CodeType]] = getattr(
+        klass, "__representation_invariants__", set()
+    )
 
     try:
         for invariant, compiled in rep_invariants:
@@ -656,7 +668,7 @@ def _get_legal_return_val_var_name(var_dict: dict) -> str:
     return legal_var_name
 
 
-def _replace_return_val_assertion(assertion: str, return_val_var_name: Optional[str]) -> str:
+def _replace_return_val_assertion(assertion: str, return_val_var_name: str) -> str:
     """
     Replace FUNCTION_RETURN_VALUE in the assertion with the legal python variable name generated and return the new
     assertion. If FUNCTION_RETURN_VALUE does not appear in assertion, then simply return the original assertion.
@@ -678,10 +690,10 @@ def _check_assertions(
     """Check that the given assertions are still satisfied."""
     # Check bounded function
     if hasattr(wrapped, "__self__"):
-        target = wrapped.__func__
+        target = wrapped.__func__  # type: ignore[attr-defined]
     else:
         target = wrapped
-    assertions = []
+    assertions: list[Any] = []
     if condition_type == "precondition":
         assertions = target.__preconditions__
     elif condition_type == "postcondition":
@@ -744,7 +756,7 @@ def parse_assertions(obj: Any, parse_token: str = "Precondition") -> list[str]:
     if lines[first].startswith(parse_token + ":"):
         return [lines[first][len(parse_token + ":") :].strip()]
     elif lines[first].startswith(parse_token + "s:"):
-        assertions = []
+        assertions: list[str] = []
         for line in lines[first + 1 :]:
             if line.startswith("-"):
                 assertion = line[1:].strip()
@@ -846,7 +858,7 @@ def _set_invariants(klass: type) -> None:
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
         if "__representation_invariants__" in cls.__dict__:
-            rep_invariants.extend(cls.__representation_invariants__)
+            rep_invariants.extend(cls.__representation_invariants__)  # type: ignore[attr-defined]
         elif cls.__module__ != "builtins":
             assertions = parse_assertions(cls, parse_token="Representation Invariant")
             # Try compiling assertions

@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 import tempfile
 from os import path
-from typing import Optional
+from typing import Any, Callable, Optional
 
 import click
 
 from python_ta import __version__, check_all, check_errors
 from python_ta.config import DEFAULT_CONFIG_LOCATION
+from python_ta.reporters.core import PythonTaReporter
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -102,7 +104,7 @@ def main(
                 autoformat=autoformat,
             )
         # Clean up the temporary file
-        path.os.unlink(temp_file.name)
+        os.unlink(temp_file.name)
 
     else:
         paths = [click.format_filename(fn) for fn in filenames]
@@ -120,7 +122,13 @@ def main(
         sys.exit(0)
 
 
-def _invoke_checker(checker, paths, config, output_format, autoformat: bool):
+def _invoke_checker(
+    checker: Callable[..., PythonTaReporter],
+    paths: list[str],
+    config: dict[str, Any] | str | None,
+    output_format: Optional[str],
+    autoformat: bool,
+) -> PythonTaReporter:
     """Invoke the checker with the appropriate arguments based on the provided config and output_format."""
     if output_format and config:
         # If both specified, use the config file and override the output format

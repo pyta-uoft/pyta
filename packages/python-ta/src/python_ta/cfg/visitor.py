@@ -166,6 +166,7 @@ class CFGVisitor:
         else:
             # If the options doesn't specify to separate the test condition blocks, just add it to
             # the current block.
+            assert self._current_block is not None
             self._current_block.add_statement(node.test)
         node.cfg_block = self._current_block
         old_curr = self._current_block
@@ -211,7 +212,7 @@ class CFGVisitor:
         # When only creating cfgs for functions, _current_cfg will only be None outside of functions
         if self._current_cfg is None:
             return
-
+        assert self._current_block is not None
         old_curr = self._current_block
 
         # Handle "test" block
@@ -260,6 +261,7 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
+        assert self._current_block is not None
         old_curr = self._current_block
         old_curr.add_statement(node.iter)
         node.cfg_block = old_curr
@@ -316,6 +318,7 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
+        assert self._current_block is not None
         old_curr = self._current_block
         unreachable_block = self._current_cfg.create_block()
         for boundary, exits in reversed(self._control_boundaries):
@@ -357,7 +360,7 @@ class CFGVisitor:
         # When only creating cfgs for functions, _current_cfg will only be None outside of functions
         if self._current_cfg is None:
             return
-
+        assert self._current_block is not None
         if self._current_block.statements != []:
             self._current_block = self._current_cfg.create_block(self._current_block)
 
@@ -372,7 +375,7 @@ class CFGVisitor:
         self._control_boundaries.append((node, {nodes.Raise.__name__: end_block}))
         cbs_added = 1
 
-        after_body = []
+        after_body: list[CFGBlock] = []
         # Construct blocks in reverse to give precedence to the first block in overlapping except
         # branches
         for handler in reversed(node.handlers):
@@ -428,6 +431,7 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
+        assert self._current_block is not None
         for context_node, name in node.items:
             self._current_block.add_statement(context_node)
             if name is not None:
@@ -442,14 +446,16 @@ class CFGVisitor:
         if self._current_cfg is None:
             return
 
+        assert self._current_block is not None
         self._current_block.add_statement(node.subject)
         node.cfg_block = self._current_block
         after_match_block = self._current_cfg.create_block()
 
-        case_end_blocks = []
+        case_end_blocks: list[CFGBlock] = []
 
         prev_case = self._current_block
         connect_guard_block = False
+        guard_block: CFGBlock
 
         for case in node.cases:
             edge_label = "No Match" if case_end_blocks else ""
@@ -497,7 +503,7 @@ def _extract_exceptions(node: nodes.ExceptHandler) -> List[str]:
     list of strings.
     """
     exceptions = node.type
-    exceptions_so_far = []
+    exceptions_so_far: list[str] = []
     # ExceptHandler.type will either be Tuple, NodeNG, or None.
     if exceptions is None:
         return exceptions_so_far

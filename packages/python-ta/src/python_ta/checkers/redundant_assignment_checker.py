@@ -98,7 +98,7 @@ class RedundantAssignmentChecker(BaseChecker):
         """
         # Stores all the variable names that will be re-defined before any usage at a
         # particular program point.
-        out_facts = {}
+        out_facts: dict[CFGBlock, set[str]] = {}
         cfg = ControlFlowGraph()
         cfg.start = node.cfg_block
         worklist = list(cfg.get_blocks_postorder(only_feasible=self.linter.config.z3))
@@ -132,7 +132,7 @@ class RedundantAssignmentChecker(BaseChecker):
 
     def _transfer(self, block: CFGBlock, out_facts: set[str]) -> set[str]:
         gen = out_facts.copy()
-        kill = set()
+        kill: set[str] = set()
         for statement in reversed(block.statements):
             if isinstance(statement, nodes.FunctionDef):
                 # `nodes_of_class` below doesnt block looking for required nodes
@@ -194,8 +194,8 @@ class RedundantAssignmentChecker(BaseChecker):
         Note that `local variable` in the context of a module level analysis,
         refers to global variables.
         """
-        assigns = set()
-        kills = set()
+        assigns: set[str] = set()
+        kills: set[str] = set()
         for name, assign_nodes in node.locals.items():
             if any(isinstance(elem, nodes.AssignName) for elem in assign_nodes):
                 assigns.add(name)

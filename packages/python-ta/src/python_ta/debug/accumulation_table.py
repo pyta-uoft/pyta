@@ -277,7 +277,7 @@ class AccumulationTable:
 
         for i, node in enumerate(nodes):
             loop_lineno = inspect.getlineno(func_frame) + node.lineno
-            loop_variables = {}
+            loop_variables: dict[str, list] = {}
 
             if isinstance(node, For):
                 loop_variables = {
@@ -288,7 +288,7 @@ class AccumulationTable:
             if self._accumulator_names and isinstance(self._accumulator_names[0], list):
                 accumulators_for_this_loop = self._accumulator_names[i]
             else:
-                accumulators_for_this_loop = self._accumulator_names
+                accumulators_for_this_loop = self._accumulator_names  # type: ignore[assignment]
 
             assert (
                 accumulators_for_this_loop or loop_variables

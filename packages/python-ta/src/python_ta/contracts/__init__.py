@@ -230,9 +230,7 @@ def add_class_invariants(klass: type[Class]) -> None:
     _set_invariants(klass)
 
     klass_mod = _get_module(klass)
-    cls_annotations: dict[str, Any] | None = (
-        None  # This is a cached value set the first time new_setattr is called
-    )
+    cls_annotations: Optional[dict[str, Any]] = None
 
     def new_setattr(self: Class, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
@@ -240,7 +238,7 @@ def add_class_invariants(klass: type[Class]) -> None:
         Check representation invariants for this class when not within an instance method of the class.
         """
         if not ENABLE_CONTRACT_CHECKING:
-            super(type(self), self).__setattr__(name, value)
+            super(klass, self).__setattr__(name, value)
             return
 
         nonlocal cls_annotations
@@ -303,7 +301,7 @@ def add_class_invariants(klass: type[Class]) -> None:
             else:
                 setattr(klass, attr, _instance_method_wrapper(value, klass))
 
-    setattr(klass, "__setattr__", new_setattr)
+    klass.__setattr__ = new_setattr  # type: ignore[assignment, method-assign]
 
 
 def _check_function_contracts(
@@ -689,23 +687,19 @@ def _check_assertions(
 ) -> None:
     """Check that the given assertions are still satisfied."""
     # Check bounded function
-    wrapped_obj = wrapped
-    if hasattr(wrapped_obj, "__self__"):
-        target = wrapped_obj.__func__  # type: ignore[attr-defined]
+    if hasattr(wrapped, "__self__"):
+        target = wrapped.__func__  # type: ignore[attr-defined]
     else:
-        target = wrapped_obj
+        target = wrapped
     assertions: list[Any] = []
     if condition_type == "precondition":
-        assertions = getattr(target, "__preconditions__", [])
+        assertions = target.__preconditions__
     elif condition_type == "postcondition":
-        assertions = getattr(target, "__postconditions__", [])
-    for assertion in assertions:
-        if condition_type == "precondition":
-            assertion_str, compiled = assertion
-            return_val_dict: dict[str, Any] = {}
-        else:
-            assertion_str, compiled, return_val_var_name = assertion
-            return_val_dict = {return_val_var_name: function_return_val}
+        assertions = target.__postconditions__
+    for assertion_str, compiled, *return_val_var_name in assertions:
+        return_val_dict = {}
+        if condition_type == "postcondition":
+            return_val_dict = {return_val_var_name[0]: function_return_val}
         try:
             _debug(f"Checking {condition_type} for {wrapped.__qualname__}: {assertion_str}")
             check = eval(compiled, {**wrapped.__globals__, **function_locals, **return_val_dict})
@@ -861,11 +855,10 @@ def _set_invariants(klass: type) -> None:
 
     # Iterate over all inherited classes except builtins
     for cls in reversed(klass.__mro__):
-        cls_obj = cls
-        if "__representation_invariants__" in cls_obj.__dict__:
-            rep_invariants.extend(cls_obj.__representation_invariants__)  # type: ignore[attr-defined]
-        elif cls_obj.__module__ != "builtins":
-            assertions = parse_assertions(cls_obj, parse_token="Representation Invariant")
+        if "__representation_invariants__" in cls.__dict__:
+            rep_invariants.extend(cls.__representation_invariants__)  # type: ignore[attr-defined]
+        elif cls.__module__ != "builtins":
+            assertions = parse_assertions(cls, parse_token="Representation Invariant")
             # Try compiling assertions
             for assertion in assertions:
                 try:

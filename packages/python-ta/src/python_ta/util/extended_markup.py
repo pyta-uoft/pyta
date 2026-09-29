@@ -29,7 +29,7 @@ class ExtendedMarkup(Markup):
     """Extends the standard Markup class defined in markupsafe to include escaping of markdown characters"""
 
     @classmethod
-    def escape(cls, s: Any) -> ExtendedMarkup:  # type: ignore[return]
+    def escape(cls: type[ExtendedMarkup], s: Any) -> ExtendedMarkup:  # type: ignore[return]
         """Escape all markdown characters in s by replacing them with their corresponding escape sequence"""
         if isinstance(s, str):
             for char in MARKDOWN_CHARS:

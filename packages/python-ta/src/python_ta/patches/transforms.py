@@ -1,7 +1,6 @@
 """Patch to add transforms for setting type constraints and creating control flow graphs."""
 
 import logging
-from typing import Any
 
 from pylint.lint import PyLinter
 

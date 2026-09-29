@@ -365,7 +365,8 @@ class CFGBlock:
     def jump(self) -> Optional[NodeNG]:
         if len(self.statements) > 0:
             return self.statements[-1]
-        return None
+        else:
+            return None
 
     @property
     def is_feasible(self) -> bool:

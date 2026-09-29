@@ -6,7 +6,6 @@ import time
 from typing import Any, Optional, Union
 
 from pylint.lint import PyLinter
-from pylint.reporters import BaseReporter
 
 from python_ta.reporters.core import PythonTaReporter
 
@@ -99,9 +98,8 @@ def watch_files(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        reporter = event_handler.linter.reporter
-        reporter.should_close_out = True  # type: ignore[union-attr]
-        reporter.on_close(event_handler.linter.stats, None)
+        event_handler.linter.reporter.should_close_out = True  # type: ignore[union-attr]
+        event_handler.linter.reporter.on_close(event_handler.linter.stats, None)
         observer.stop()
 
     observer.join()

@@ -136,7 +136,7 @@ def upload_linter_results(
 ) -> None:
     """Upload linter results and configuration data to the specified server if permissions allow."""
     config: dict[str, Any] = {}  # Configuration settings for data submission
-    errs: Any = []  # Errors caught in files for data submission
+    errs: list = []  # Errors caught in files for data submission
     if linter.config.pyta_error_permission:  # type: ignore[attr-defined]
         errs = list(current_reporter.messages.values())
     if f_paths != [] or errs != []:  # Only call upload_to_server() if there's something to upload
@@ -170,7 +170,7 @@ def reset_linter(
     """
 
     # Tuple of custom options. Note: 'type' must map to a value equal a key in the pylint/config/option.py `VALIDATORS` dict.
-    new_checker_options: Any = (
+    new_checker_options: tuple[tuple[str, dict[str, Any]], ...] = (
         (
             "server-port",
             {
@@ -328,7 +328,7 @@ def reset_linter(
     messages_config_default_path = linter._option_dicts["messages-config-path"]["default"]
     use_pyta_error_messages = linter.config.use_pyta_error_messages
     messages_config = load_messages_config(
-        messages_config_path, messages_config_default_path, bool(use_pyta_error_messages)  # type: ignore[arg-type]
+        messages_config_path, messages_config_default_path, use_pyta_error_messages  # type: ignore[arg-type]
     )
     for error_id, new_msg in messages_config.items():
         # Create new message definition object according to configured error messages

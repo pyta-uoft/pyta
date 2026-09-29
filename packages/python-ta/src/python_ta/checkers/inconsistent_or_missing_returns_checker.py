@@ -2,7 +2,7 @@
 Check for inconsistent return statements in functions and missing return statements in non-None functions.
 """
 
-from typing import Optional, cast
+from typing import Optional
 
 from astroid import nodes
 from pylint.checkers import BaseChecker
@@ -38,8 +38,7 @@ class InconsistentReturnChecker(BaseChecker):
     )
 
     def __init__(self, linter: Optional[PyLinter] = None) -> None:
-        # Pylint accepts an optional PyLinter but BaseChecker expects a concrete PyLinter, so cast to satisfy the type checker.
-        super().__init__(linter=cast(PyLinter, linter))
+        super().__init__(linter=linter)  # type: ignore[arg-type]
 
     @only_required_for_messages("missing-return-statement", "inconsistent-returns")
     def visit_functiondef(self, node) -> None:

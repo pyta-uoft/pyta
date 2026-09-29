@@ -640,7 +640,7 @@ def render_pep8_errors_e303_and_e304(
     msg: NewMessage,
     line: int,
     source_lines: list[str],
-) -> Generator[tuple[int | str | None, slice, LineType, str], None, None]:
+) -> Generator[RenderResult, None, None]:
     """Render a PEP8 too many blank lines message
     and a PEP8 blank lines found after function decorator message
     """

@@ -90,6 +90,92 @@ class TestForbiddenImportChecker(pylint.testutils.CheckerTestCase):
         ):
             self.checker.visit_call(node)
 
+    def test_allowed_dunder_import_inferred_arg(self) -> None:
+        """Tests importing an allowed module passed in as a BinOp."""
+        src = """
+        __import__('math' + '.floor')
+        """
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.Call)
+
+        with self.assertNoMessages():
+            self.checker.visit_call(node)
+
+    def test_forbidden_dunder_import_inferred_arg(self) -> None:
+        """Tests importing a forbidden module passed in as a BinOp."""
+        src = """
+        __import__('ma' + 'th')
+        """
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.Call)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-import", node=node, line=1, args=("module math",)
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_call(node)
+
+    def test_forbidden_dunder_import_inferred_variable_arg(self) -> None:
+        """Tests importing a forbidden module passed in as a variable."""
+        src = """
+        module = "copy"
+        __import__(module)
+        """
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.Call)
+
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(
+                msg_id="forbidden-import", node=node, line=1, args=("module copy",)
+            ),
+            ignore_position=True,
+        ):
+            self.checker.visit_call(node)
+
+    def test_dunder_import_inferred_nonstring_arg(self) -> None:
+        """
+        Tests importing a module that is not a string.
+        This is invalid Python code, but is beyond the scope of this checker to report.
+        """
+        src = """
+        __import__(12)
+        """
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.Call)
+
+        with self.assertNoMessages():
+            self.checker.visit_call(node)
+
+    def test_dunder_import_inferred_undefined_arg(self) -> None:
+        """Tests importing a module passed in as an undefined variable."""
+        src = """
+        __import__(module)
+        """
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.Call)
+
+        with self.assertNoMessages():
+            self.checker.visit_call(node)
+
+    def test_dunder_import_inferred_no_arg(self) -> None:
+        """Tests importing with no arguments passed in."""
+        src = """
+        __import__()
+        """
+        mod = astroid.parse(src)
+
+        node, *_ = mod.nodes_of_class(astroid.nodes.Call)
+
+        with self.assertNoMessages():
+            self.checker.visit_call(node)
+
     @pylint.testutils.set_config(allow_local_imports=True)
     def test_allowed_local_import(self) -> None:
         src = """

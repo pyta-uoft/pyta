@@ -230,7 +230,9 @@ def add_class_invariants(klass: type[Class]) -> None:
     _set_invariants(klass)
 
     klass_mod = _get_module(klass)
-    cls_annotations: Optional[dict[str, Any]] = None
+    cls_annotations: Optional[dict[str, Any]] = (
+        None  # This is a cached value set the first time new_setattr is called
+    )
 
     def new_setattr(self: Class, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.

@@ -103,11 +103,13 @@ def check_all_contracts(*mod_names: str, decorate_main: bool = True) -> None:
 
 # Wildcard Type Variable
 Class = TypeVar("Class", bound=type)
+T = TypeVar("T")
 
 
 @overload
 def check_contracts(
-    func: FunctionType,
+    func_or_class: FunctionType,
+    *,
     module_names: Optional[set[str]] = None,
     argument_types: bool = True,
     return_type: bool = True,
@@ -118,7 +120,8 @@ def check_contracts(
 
 @overload
 def check_contracts(
-    func: Class,
+    func_or_class: Class,
+    *,
     module_names: Optional[set[str]] = None,
     argument_types: bool = True,
     return_type: bool = True,
@@ -127,7 +130,7 @@ def check_contracts(
 ) -> Class: ...
 
 
-def check_contracts(  # type: ignore[misc]
+def check_contracts(
     func_or_class: Optional[Union[Class, FunctionType]] = None,
     *,
     module_names: Optional[set[str]] = None,
@@ -135,7 +138,7 @@ def check_contracts(  # type: ignore[misc]
     return_type: bool = True,
     preconditions: bool = True,
     postconditions: bool = True,
-) -> Union[Class, FunctionType]:
+) -> Any:
     """A decorator to enable contract checking for a function or class.
 
     When used with a class, all methods defined within the class have contract checking enabled.
@@ -215,13 +218,13 @@ def check_contracts(  # type: ignore[misc]
         return _enable_function_contracts(func_or_class)
     elif inspect.isclass(func_or_class):
         add_class_invariants(func_or_class)
-        return func_or_class  # type: ignore[return-value]
+        return func_or_class
     else:
         # Default action
         return func_or_class
 
 
-def add_class_invariants(klass: type[Class]) -> None:
+def add_class_invariants(klass: type[T]) -> None:
     """Modify the given class to check representation invariants and method contracts."""
     if not ENABLE_CONTRACT_CHECKING or "__representation_invariants__" in vars(klass):
         # This means the class has already been decorated
@@ -234,7 +237,7 @@ def add_class_invariants(klass: type[Class]) -> None:
         None  # This is a cached value set the first time new_setattr is called
     )
 
-    def new_setattr(self: Class, name: str, value: Any) -> None:
+    def new_setattr(self: T, name: str, value: Any) -> None:
         """Set the value of the given attribute on self to the given value.
 
         Check representation invariants for this class when not within an instance method of the class.
@@ -264,8 +267,8 @@ def add_class_invariants(klass: type[Class]) -> None:
         original_attr_value = None
         if hasattr(self, name):
             original_attr_value_exists = True
-            original_attr_value = super(klass, self).__getattribute__(name)  # type: ignore[arg-type]
-        super(klass, self).__setattr__(name, value)  # type: ignore[arg-type]
+            original_attr_value = super(klass, self).__getattribute__(name)  # type: ignore[misc]
+        super(klass, self).__setattr__(name, value)  # type: ignore[misc]
         current_frame = inspect.currentframe()
         if current_frame is None or current_frame.f_back is None:
             return
@@ -279,9 +282,9 @@ def add_class_invariants(klass: type[Class]) -> None:
                     _check_invariants(self, klass, klass_mod.__dict__)
                 except PyTAContractError as e:
                     if original_attr_value_exists:
-                        super(klass, self).__setattr__(name, original_attr_value)  # type: ignore[arg-type]
+                        super(klass, self).__setattr__(name, original_attr_value)  # type: ignore[misc]
                     else:
-                        super(klass, self).__delattr__(name)  # type: ignore[arg-type]
+                        super(klass, self).__delattr__(name)  # type: ignore[misc]
                     raise AssertionError(str(e)) from None
         elif caller_self is not self:
             # Keep track of mutations to instances that are of the same type as caller_self (and are also not `self`)

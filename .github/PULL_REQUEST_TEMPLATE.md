@@ -2,8 +2,6 @@
 
 _(Describe your changes here. Also describe the motivation for your changes: what problem do they solve, or how do they improve the application or codebase? If this pull request fixes an open issue, [use a keyword to link this pull request to the issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword).)_
 
-...
-
 <details>
 <summary>Screenshots of your changes (if applicable)</summary>
 

@@ -358,9 +358,12 @@ def _check_function_contracts(
         for precondition in preconditions:
             try:
                 compiled = compile(precondition, "<string>", "eval")
-            except:
+
+            except (SyntaxError, ValueError, MemoryError, RecursionError, OverflowError) as error:
                 _debug(
-                    f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
+                    f"Warning: precondition {precondition} could not be parsed "
+                    "as a valid Python expression.\n"
+                    f"{type(error).__name__}: {error}"
                 )
                 continue
             target_preconditions.append((precondition, compiled))
@@ -396,9 +399,11 @@ def _check_function_contracts(
             assertion = _replace_return_val_assertion(postcondition, return_val_var_name)
             try:
                 compiled = compile(assertion, "<string>", "eval")
-            except:
+            except (SyntaxError, ValueError, MemoryError, RecursionError, OverflowError) as error:
                 _debug(
-                    f"Warning: postcondition {postcondition} could not be parsed as a valid Python expression"
+                    f"Warning: postcondition {postcondition} could not be parsed "
+                    "as a valid Python expression.\n"
+                    f"{type(error).__name__}: {error}"
                 )
                 continue
             target_postconditions.append((postcondition, compiled, return_val_var_name))
@@ -865,9 +870,17 @@ def _set_invariants(klass: type) -> None:
             for assertion in assertions:
                 try:
                     compiled = compile(assertion, "<string>", "eval")
-                except:
+                except (
+                    SyntaxError,
+                    ValueError,
+                    MemoryError,
+                    RecursionError,
+                    OverflowError,
+                ) as error:
                     _debug(
-                        f"Warning: representation invariant {assertion} could not be parsed as a valid Python expression"
+                        f"Warning: assertion {assertion} could not be parsed "
+                        "as a valid Python expression.\n"
+                        f"{type(error).__name__}: {error}"
                     )
                     continue
                 rep_invariants.append((assertion, compiled))

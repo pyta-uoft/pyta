@@ -24,6 +24,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🔧 Internal changes
 
+- Removed placeholder text (...) from the pull request template.
 - Updated `uv.lock` file with latest packages
 - Switched dependabot configuration from `pip` to `uv` to ensure `uv.lock` file is updated
 - Fixed watch tests on Windows by using `threading` rather than `select`

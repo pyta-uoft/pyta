@@ -198,7 +198,7 @@ def render_context(
     start: int,
     stop: int,
     source_lines: list[str],
-) -> Generator[tuple[int, slice[int | None, int | None, int | None], LineType, str], None, None]:
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Helper for rendering context lines."""
     start, stop = max(start, 1), min(stop, len(source_lines))
     yield from (
@@ -212,7 +212,7 @@ def render_missing_return_type(
     node: nodes.FunctionDef,
     source_lines: list[str],
     config: Any | None = None,
-) -> Generator[tuple[int, slice[int | None, int | None, int | None], LineType, str], None, None]:
+) -> Generator[tuple[int, slice, LineType, str], None, None]:
     """Render a type annotation return message."""
     start_line, start_col = node.fromlineno, node.parent.col_offset
     end_line, end_col = node.end_lineno, node.end_col_offset

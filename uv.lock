@@ -1853,7 +1853,9 @@ dependencies = [
     { name = "lsprotocol" },
     { name = "markdown-it-py", version = "3.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "markdown-it-py", version = "4.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "markupsafe" },
     { name = "mypy" },
+    { name = "packaging" },
     { name = "platformdirs" },
     { name = "pycodestyle" },
     { name = "pygments" },
@@ -1885,6 +1887,11 @@ dev = [
     { name = "sphinx", version = "9.0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-rtd-theme" },
+    { name = "types-colorama" },
+    { name = "types-pygments" },
+    { name = "types-requests" },
+    { name = "types-tabulate" },
+    { name = "types-toml" },
     { name = "websocket-client" },
 ]
 watchdog = [
@@ -1909,8 +1916,10 @@ requires-dist = [
     { name = "jinja2", specifier = "~=3.1.2" },
     { name = "lsprotocol", specifier = ">=2025.0.0" },
     { name = "markdown-it-py", specifier = "<5" },
+    { name = "markupsafe" },
     { name = "mypy", specifier = "~=1.13" },
     { name = "myst-parser", marker = "extra == 'dev'" },
+    { name = "packaging" },
     { name = "platformdirs", specifier = ">=4.0,<5" },
     { name = "prek", marker = "extra == 'dev'" },
     { name = "pycodestyle", specifier = "~=2.11" },
@@ -1928,6 +1937,11 @@ requires-dist = [
     { name = "tabulate", specifier = ">=0.9,<0.11" },
     { name = "toml", specifier = "~=0.10.2" },
     { name = "typeguard", specifier = ">=4.1.0,<5" },
+    { name = "types-colorama", marker = "extra == 'dev'" },
+    { name = "types-pygments", marker = "extra == 'dev'" },
+    { name = "types-requests", marker = "extra == 'dev'" },
+    { name = "types-tabulate", marker = "extra == 'dev'" },
+    { name = "types-toml", marker = "extra == 'dev'" },
     { name = "watchdog", marker = "extra == 'watchdog'", specifier = "~=6.0.0" },
     { name = "websocket-client", marker = "extra == 'dev'" },
     { name = "wrapt", specifier = ">=1.15.0,<3" },
@@ -2401,6 +2415,54 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b4/de/4420db493fa8fc0856d5e5c1b159c63a323d2de2317babe36b01568928e8/typeguard-4.6.0.tar.gz", hash = "sha256:e7414f09111317de3e335de92cd397c5c0ca00b1cc1676de12e1d444a79b3f21", size = 82330, upload-time = "2026-07-26T08:40:23.207Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/eb/461d5f167b6f5c7d97696f397c82f82e3480e003fce3f0a1cd1dd26e2eb2/typeguard-4.6.0-py3-none-any.whl", hash = "sha256:79878165bb86f2cf5d41d159a0ff1792a796cf496882d2fe1b1c6c7049b9cdd7", size = 36884, upload-time = "2026-07-26T08:40:21.868Z" },
+]
+
+[[package]]
+name = "types-colorama"
+version = "0.4.15.20260508"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/d5/4870d88c6c87adf786ef33d674cbf82b3a2d5fcbe6deec29282cff80e8b3/types_colorama-0.4.15.20260508.tar.gz", hash = "sha256:3a8916039e57452bd21f57e674e1f221ca9e4f319893c5e3bbd37b845c27d8e6", size = 10638, upload-time = "2026-05-08T04:47:14.593Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/56/33/a3449e3e93c43861b92d0a93ed4ea5505756463e507625812cfb29c91c7a/types_colorama-0.4.15.20260508-py3-none-any.whl", hash = "sha256:b0c39908a3e5171ef1f8bf3d59fae082e9eaff3a19ca49b6d640b83f78cff61c", size = 10755, upload-time = "2026-05-08T04:47:13.761Z" },
+]
+
+[[package]]
+name = "types-pygments"
+version = "2.21.0.20260819"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/84/2b/b3e929c39fb056f0e44560acbe53a7c3f28f428af5362d043642d80b31ec/types_pygments-2.21.0.20260819.tar.gz", hash = "sha256:68e0cb27115b08b681c843e30a153b5d9850c048e1158623ada36ccd4cf7e89b", size = 21509, upload-time = "2026-08-19T02:47:15.827Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/a5/10a2de06b53a36f4334391fcf292b51877cbc71d3f6eac353e7b87a0a17e/types_pygments-2.21.0.20260819-py3-none-any.whl", hash = "sha256:85e216770d616db6a7e96fb70c2de9d9f283b746c37edb7768ce645bdbcaddb2", size = 29099, upload-time = "2026-08-19T02:47:14.81Z" },
+]
+
+[[package]]
+name = "types-requests"
+version = "2.33.0.20260906"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c0/18/4c2c0290953f8b3b9612adfcb07b57f144ade3ad32a76764fca42b77c5f3/types_requests-2.33.0.20260906.tar.gz", hash = "sha256:76ab8a0fb736744a0c3deee7aa57b2927e301f078d9e61f5391b3e92002416b9", size = 25263, upload-time = "2026-09-06T06:35:47.707Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/4c/51ec821d22a45b4162fa3f3e9e94ea4c0f8c49e82363b10955baa5438391/types_requests-2.33.0.20260906-py3-none-any.whl", hash = "sha256:9f53622652bd921ead7a54d665be1b8d518165c8b51cc9d68d944cd6b6bfa8fb", size = 21461, upload-time = "2026-09-06T06:35:45.856Z" },
+]
+
+[[package]]
+name = "types-tabulate"
+version = "0.10.0.20260508"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/af/c100d86897d3fdb010d8f813569fa80355b5cb553f51080e37d4f3c451bb/types_tabulate-0.10.0.20260508.tar.gz", hash = "sha256:8e51f159e8b24976849706ae2ed1dc9adba8ebbd080b17e494ebb66a8cc92c74", size = 8395, upload-time = "2026-05-08T04:47:58.921Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/36/443b700f54a585cf8ed4e76d8ad08b12df6914f8782a2788ecd0d8491519/types_tabulate-0.10.0.20260508-py3-none-any.whl", hash = "sha256:b1e1a2d0456fbd655a71690b09a7aaeffdf2978d32049184ea436492aa51d20a", size = 8137, upload-time = "2026-05-08T04:47:57.872Z" },
+]
+
+[[package]]
+name = "types-toml"
+version = "0.10.8.20260518"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/11/6ece999e91f2ccb848ab4420f3f4816e78ac0541f739e6864affdaaa5737/types_toml-0.10.8.20260518.tar.gz", hash = "sha256:80e10facd24fdeda9d5c672187d72be3ac284843788d67f5aae59e3e016db6fe", size = 9419, upload-time = "2026-05-18T06:02:16.719Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/25/489751806bf5c95e4007f8e17409199c54d31e49ffbea07c5729b1286c8e/types_toml-0.10.8.20260518-py3-none-any.whl", hash = "sha256:0e564ab05f6fde62a315b3b5a9b6624fda569399795d30a37e64705a70459303", size = 9669, upload-time = "2026-05-18T06:02:15.86Z" },
 ]
 
 [[package]]

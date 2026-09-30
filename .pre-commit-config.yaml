@@ -22,6 +22,27 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        args:
+          - --follow-imports=silent
+          - --config-file=pyproject.toml
+        files: ^packages/python-ta/src/python_ta/
+        additional_dependencies:
+          - types-requests
+          - types-toml
+          - types-tabulate
+          - types-colorama
+          - types-Pygments
+          - pylint~=4.0.3
+          - click>=8.0.1,<9
+          - jinja2~=3.1.2
+          - platformdirs>=4.0,<5
+          - typeguard>=4.1.0,<5
+          - markupsafe
+          - packaging
 exclude: |
   (?x)^(
       examples|

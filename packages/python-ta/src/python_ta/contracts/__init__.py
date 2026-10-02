@@ -881,7 +881,7 @@ def _set_invariants(klass: type) -> None:
                     OverflowError,
                 ) as error:
                     _debug(
-                        f"Warning: assertion {assertion} could not be parsed "
+                        f"Warning: representation invariant {assertion} could not be parsed "
                         "as a valid Python expression.\n"
                         f"{type(error).__name__}: {error}"
                     )

@@ -126,7 +126,7 @@ def test_contracts_debug_real_assertion_errors(
 
     assert issubclass(logged_error_type, error_type)
     assert (
-        f"Warning: assertion {contract} could not be parsed as a valid Python expression."
+        f"Warning: representation invariant {contract} could not be parsed as a valid Python expression."
         in caplog.text
         and logged_error_type.__name__ in caplog.text
     )

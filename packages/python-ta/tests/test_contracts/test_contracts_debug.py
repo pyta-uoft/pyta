@@ -31,6 +31,202 @@ def test_contracts_debug(caplog) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "contract,error_type,logged_error_type",
+    [
+        ("x !== 0", SyntaxError, SyntaxError),
+        ("\ud800", ValueError, UnicodeEncodeError),
+    ],
+)
+def test_contracts_debug_real_precondition_errors(
+    caplog, contract, error_type, logged_error_type
+) -> None:
+    """Test syntax and value errors for preconditions."""
+    caplog.set_level(logging.DEBUG)
+
+    @check_contracts
+    def value_of(x: int) -> int:
+        """Return x."""
+        return x
+
+    value_of.__doc__ = f"""Return x.
+
+    Preconditions:
+        - {contract}
+    """
+    value_of(1)
+
+    assert issubclass(logged_error_type, error_type)
+    assert (
+        f"Warning: precondition {contract} could not be parsed as a valid Python expression."
+        in caplog.text
+        and logged_error_type.__name__ in caplog.text
+    )
+
+
+@pytest.mark.parametrize(
+    "contract,error_type,logged_error_type",
+    [
+        ("x !== 0", SyntaxError, SyntaxError),
+        ("\ud800", ValueError, UnicodeEncodeError),
+    ],
+)
+def test_contracts_debug_real_postcondition_errors(
+    caplog, contract, error_type, logged_error_type
+) -> None:
+    """Test syntax and value errors for postconditions."""
+    caplog.set_level(logging.DEBUG)
+
+    @check_contracts
+    def value_of(x: int) -> int:
+        """Return x."""
+        return x
+
+    value_of.__doc__ = f"""Return x.
+
+    Postconditions:
+        - {contract}
+    """
+    value_of(1)
+
+    assert issubclass(logged_error_type, error_type)
+    assert (
+        f"Warning: postcondition {contract} could not be parsed as a valid Python expression."
+        in caplog.text
+        and logged_error_type.__name__ in caplog.text
+    )
+
+
+@pytest.mark.parametrize(
+    "contract,error_type,logged_error_type",
+    [
+        ("self.x !== 0", SyntaxError, SyntaxError),
+        ("\ud800", ValueError, UnicodeEncodeError),
+    ],
+)
+def test_contracts_debug_real_assertion_errors(
+    caplog, contract, error_type, logged_error_type
+) -> None:
+    """Test syntax and value errors for representation invariants."""
+    caplog.set_level(logging.DEBUG)
+
+    class Num:
+        """A number."""
+
+        def __init__(self, x: int) -> None:
+            self.x = x
+
+    Num.__doc__ = f"""A number.
+
+    Representation Invariants:
+        - {contract}
+    """
+    check_contracts(Num)
+    Num(1)
+
+    assert issubclass(logged_error_type, error_type)
+    assert (
+        f"Warning: assertion {contract} could not be parsed as a valid Python expression."
+        in caplog.text
+        and logged_error_type.__name__ in caplog.text
+    )
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        MemoryError("out of memory"),
+        RecursionError("recursion limit exceeded"),
+        OverflowError("compiler limit exceeded"),
+    ],
+)
+def test_contracts_debug_patched_precondition_errors(caplog, monkeypatch, error) -> None:
+    """Test patched resource-related errors for preconditions."""
+    caplog.set_level(logging.DEBUG)
+
+    def raise_compile_error(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(contracts, "compile", raise_compile_error, raising=False)
+
+    @check_contracts
+    def divide(x: int) -> int:
+        """Return x.
+
+        Preconditions:
+            - x > 0
+        """
+        return x
+
+    divide(1)
+
+    assert f"{type(error).__name__}: {error}" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        MemoryError("out of memory"),
+        RecursionError("recursion limit exceeded"),
+        OverflowError("compiler limit exceeded"),
+    ],
+)
+def test_contracts_debug_patched_postcondition_errors(caplog, monkeypatch, error) -> None:
+    """Test patched resource-related errors for postconditions."""
+    caplog.set_level(logging.DEBUG)
+
+    def raise_compile_error(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(contracts, "compile", raise_compile_error, raising=False)
+
+    @check_contracts
+    def divide(x: int) -> int:
+        """Return x.
+
+        Postconditions:
+            - $return_value > 0
+        """
+        return x
+
+    divide(1)
+
+    assert f"{type(error).__name__}: {error}" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        MemoryError("out of memory"),
+        RecursionError("recursion limit exceeded"),
+        OverflowError("compiler limit exceeded"),
+    ],
+)
+def test_contracts_debug_patched_assertion_errors(caplog, monkeypatch, error) -> None:
+    """Test patched resource-related errors for representation invariants."""
+    caplog.set_level(logging.DEBUG)
+
+    def raise_compile_error(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(contracts, "compile", raise_compile_error, raising=False)
+
+    class Num:
+        """A number.
+
+        Representation Invariants:
+            - self.x > 0
+        """
+
+        def __init__(self, x: int) -> None:
+            self.x = x
+
+    check_contracts(Num)
+    Num(1)
+
+    assert f"{type(error).__name__}: {error}" in caplog.text
+
+
 def test_contracts_debug_instance_attribute(caplog) -> None:
     """Test that setting an instance attribute logs a message naming that attribute"""
     caplog.set_level(logging.DEBUG)

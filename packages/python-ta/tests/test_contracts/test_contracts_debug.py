@@ -32,15 +32,13 @@ def test_contracts_debug(caplog) -> None:
 
 
 @pytest.mark.parametrize(
-    "contract,error_type,logged_error_type",
+    "contract",
     [
-        ("x !== 0", SyntaxError, SyntaxError),
-        ("\ud800", ValueError, UnicodeEncodeError),
+        "x !== 0",
+        "\ud800",
     ],
 )
-def test_contracts_debug_real_precondition_errors(
-    caplog, contract, error_type, logged_error_type
-) -> None:
+def test_contracts_debug_real_precondition_errors(caplog, contract) -> None:
     """Test syntax and value errors for preconditions."""
     caplog.set_level(logging.DEBUG)
 
@@ -56,24 +54,20 @@ def test_contracts_debug_real_precondition_errors(
     """
     value_of(1)
 
-    assert issubclass(logged_error_type, error_type)
     assert (
-        f"Warning: precondition {contract} could not be parsed as a valid Python expression."
+        f"Warning: precondition {contract} could not be parsed as a valid Python expression"
         in caplog.text
-        and logged_error_type.__name__ in caplog.text
     )
 
 
 @pytest.mark.parametrize(
-    "contract,error_type,logged_error_type",
+    "contract",
     [
-        ("x !== 0", SyntaxError, SyntaxError),
-        ("\ud800", ValueError, UnicodeEncodeError),
+        "x !== 0",
+        "\ud800",
     ],
 )
-def test_contracts_debug_real_postcondition_errors(
-    caplog, contract, error_type, logged_error_type
-) -> None:
+def test_contracts_debug_real_postcondition_errors(caplog, contract) -> None:
     """Test syntax and value errors for postconditions."""
     caplog.set_level(logging.DEBUG)
 
@@ -89,24 +83,20 @@ def test_contracts_debug_real_postcondition_errors(
     """
     value_of(1)
 
-    assert issubclass(logged_error_type, error_type)
     assert (
-        f"Warning: postcondition {contract} could not be parsed as a valid Python expression."
+        f"Warning: postcondition {contract} could not be parsed as a valid Python expression"
         in caplog.text
-        and logged_error_type.__name__ in caplog.text
     )
 
 
 @pytest.mark.parametrize(
-    "contract,error_type,logged_error_type",
+    "contract",
     [
-        ("self.x !== 0", SyntaxError, SyntaxError),
-        ("\ud800", ValueError, UnicodeEncodeError),
+        "self.x !== 0",
+        "\ud800",
     ],
 )
-def test_contracts_debug_real_assertion_errors(
-    caplog, contract, error_type, logged_error_type
-) -> None:
+def test_contracts_debug_real_assertion_errors(caplog, contract) -> None:
     """Test syntax and value errors for representation invariants."""
     caplog.set_level(logging.DEBUG)
 
@@ -124,11 +114,9 @@ def test_contracts_debug_real_assertion_errors(
     check_contracts(Num)
     Num(1)
 
-    assert issubclass(logged_error_type, error_type)
     assert (
-        f"Warning: representation invariant {contract} could not be parsed as a valid Python expression."
+        f"Warning: representation invariant {contract} could not be parsed as a valid Python expression"
         in caplog.text
-        and logged_error_type.__name__ in caplog.text
     )
 
 
@@ -160,7 +148,10 @@ def test_contracts_debug_patched_precondition_errors(caplog, monkeypatch, error)
 
     divide(1)
 
-    assert f"{type(error).__name__}: {error}" in caplog.text
+    assert (
+        "Warning: precondition x > 0 could not be parsed as a valid Python expression"
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(
@@ -191,7 +182,10 @@ def test_contracts_debug_patched_postcondition_errors(caplog, monkeypatch, error
 
     divide(1)
 
-    assert f"{type(error).__name__}: {error}" in caplog.text
+    assert (
+        "Warning: postcondition $return_value > 0 could not be parsed as a valid Python expression"
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(
@@ -224,7 +218,10 @@ def test_contracts_debug_patched_assertion_errors(caplog, monkeypatch, error) ->
     check_contracts(Num)
     Num(1)
 
-    assert f"{type(error).__name__}: {error}" in caplog.text
+    assert (
+        "Warning: representation invariant self.x > 0 could not be parsed as a valid Python expression"
+        in caplog.text
+    )
 
 
 def test_contracts_debug_instance_attribute(caplog) -> None:

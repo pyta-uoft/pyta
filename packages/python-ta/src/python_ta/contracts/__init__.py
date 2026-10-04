@@ -361,8 +361,7 @@ def _check_function_contracts(
         for precondition in preconditions:
             try:
                 compiled = compile(precondition, "<string>", "eval")
-
-            except (SyntaxError, ValueError, MemoryError, RecursionError, OverflowError) as error:
+            except (SyntaxError, ValueError, MemoryError, RecursionError, OverflowError):
                 _debug(
                     f"Warning: precondition {precondition} could not be parsed as a valid Python expression"
                 )
@@ -400,7 +399,7 @@ def _check_function_contracts(
             assertion = _replace_return_val_assertion(postcondition, return_val_var_name)
             try:
                 compiled = compile(assertion, "<string>", "eval")
-            except (SyntaxError, ValueError, MemoryError, RecursionError, OverflowError) as error:
+            except (SyntaxError, ValueError, MemoryError, RecursionError, OverflowError):
                 _debug(
                     f"Warning: postcondition {postcondition} could not be parsed as a valid Python expression"
                 )

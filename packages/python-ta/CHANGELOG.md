@@ -22,6 +22,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed `DEBUG_CONTRACTS` logging the wrong attribute name when checking instance attribute types.
 - Ensured reporter output stream always uses UTF-8 encoding (was not always set on Windows)
 - Used astroid inference for arguments passed to `__import__` in `ForbiddenImportChecker`
+- Modified `LSPReporter` to flag only the first line in a module when the message pertains to the entire module, such as a missing module docstring.
 
 ### 🔧 Internal changes
 

@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from astroid import nodes
 from lsprotocol import converters, types
 from pylint.lint import PyLinter
 from pylint.reporters.ureports.nodes import Section
@@ -34,16 +35,24 @@ class LSPReporter(PythonTaReporter):
 
         for filename, msgs in self.gather_messages().items():
             diagnostics_list: list[types.Diagnostic] = []
+            first_line_end = None
             for msg in msgs:
                 start_char = msg.column or 0
+                end_line = msg.end_line or msg.line
                 if msg.end_column is not None:
                     end_char = msg.end_column
                 else:
                     end_char = start_char
+                if isinstance(getattr(msg, "node", None), nodes.Module):
+                    end_line = msg.line
+                    if first_line_end is None:
+                        with open(filename, encoding="utf-8") as source:
+                            first_line_end = len(source.readline().rstrip("\r\n"))
+                    end_char = first_line_end
                 diag = types.Diagnostic(
                     range=types.Range(
                         start=types.Position(line=msg.line - 1, character=start_char),
-                        end=types.Position(line=(msg.end_line or msg.line) - 1, character=end_char),
+                        end=types.Position(line=end_line - 1, character=end_char),
                     ),
                     message=msg.msg,
                     severity=_lsp_severity(msg.category),

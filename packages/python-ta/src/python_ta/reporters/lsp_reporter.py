@@ -28,40 +28,25 @@ class LSPReporter(PythonTaReporter):
     name = "pyta-lsp"
     OUTPUT_FILENAME = "pyta_lsp_report.json"
     messages: dict[str, list[MessageLike]]
-    _message_ranges: dict[str, list[types.Range]]
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._message_ranges = {}
 
     def handle_message(self, msg: Message) -> None:
-        """Handle the message and store the message ranges while source_lines belongs to this message's file."""
-        if not self.messages[self.current_file]:
-            self._message_ranges[self.current_file] = []
+        """Update the message's location while its source lines are available."""
+        self._update_message_range(msg)
         super().handle_message(msg)
-        self._message_ranges[self.current_file].append(self._get_message_range(msg))
 
-    def _get_message_range(self, msg: MessageLike) -> types.Range:
-        """
-        Return the message diagnostic range.
-        Highlight only the first line of full-module messages.
-        """
-        start_char = msg.column or 0
-        end_line = msg.end_line or msg.line
-        end_char = msg.end_column if msg.end_column is not None else start_char
+    def _update_message_range(self, msg: Message) -> None:
+        """Mutate the message's location attributes for LSP output."""
 
-        if self.source_lines and (
-            msg.line == 1
-            and start_char == 0
-            and end_line == len(self.source_lines)
-            and end_char == len(self.source_lines[-1])
+        # Highlight only the first line of full-module messages
+        if (
+            self.source_lines
+            and msg.line == 1
+            and msg.column == 0
+            and msg.end_line == len(self.source_lines)
+            and msg.end_column == len(self.source_lines[-1])
         ):
-            end_line = msg.line
-            end_char = len(self.source_lines[0])
-        return types.Range(
-            start=types.Position(line=msg.line - 1, character=start_char),
-            end=types.Position(line=end_line - 1, character=end_char),
-        )
+            msg.end_line = msg.line
+            msg.end_column = len(self.source_lines[0])
 
     def display_messages(self, layout: Section | None) -> None:
         output: list[dict] = []
@@ -69,9 +54,17 @@ class LSPReporter(PythonTaReporter):
 
         for filename, msgs in self.gather_messages().items():
             diagnostics_list: list[types.Diagnostic] = []
-            for msg, msg_range in zip(msgs, self._message_ranges.get(filename, [])):
+            for msg in msgs:
+                start_char = msg.column or 0
+                if msg.end_column is not None:
+                    end_char = msg.end_column
+                else:
+                    end_char = start_char
                 diag = types.Diagnostic(
-                    range=msg_range,
+                    range=types.Range(
+                        start=types.Position(line=msg.line - 1, character=start_char),
+                        end=types.Position(line=(msg.end_line or msg.line) - 1, character=end_char),
+                    ),
                     message=msg.msg,
                     severity=_lsp_severity(msg.category),
                     code=msg.msg_id,

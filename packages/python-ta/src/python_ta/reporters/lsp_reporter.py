@@ -3,6 +3,7 @@ from pathlib import Path
 
 from lsprotocol import converters, types
 from pylint.lint import PyLinter
+from pylint.message import Message
 from pylint.reporters.ureports.nodes import Section
 
 from .core import MessageLike, PythonTaReporter
@@ -27,6 +28,25 @@ class LSPReporter(PythonTaReporter):
     name = "pyta-lsp"
     OUTPUT_FILENAME = "pyta_lsp_report.json"
     messages: dict[str, list[MessageLike]]
+
+    def handle_message(self, msg: Message) -> None:
+        """Update the message's location while its source lines are available."""
+        self._update_message_range(msg)
+        super().handle_message(msg)
+
+    def _update_message_range(self, msg: Message) -> None:
+        """Mutate the message's location attributes for LSP output."""
+
+        # Highlight only the first line of full-module messages
+        if (
+            self.source_lines
+            and msg.line == 1
+            and msg.column == 0
+            and msg.end_line == len(self.source_lines)
+            and msg.end_column == len(self.source_lines[-1])
+        ):
+            msg.end_line = msg.line
+            msg.end_column = len(self.source_lines[0])
 
     def display_messages(self, layout: Section | None) -> None:
         output: list[dict] = []

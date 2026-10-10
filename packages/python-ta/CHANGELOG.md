@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added the ability to pin errors in the HTML report.
 - Added an `--autoformat` CLI option to format files with Black before analysis.
 - `python_ta.debug.snapshot` now only uses the default MemoryViz diagram width of 800 when no `--width` is passed in `memory_viz_args`. Also added this new behaviour and `python_ta.debug.snapshot` as a whole to the documentation.
+- Modified `LSPReporter` to flag only the first line in a module when the message pertains to the entire module, such as a missing module docstring.
 
 ### 💫 New checkers
 

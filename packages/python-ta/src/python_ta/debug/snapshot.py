@@ -129,11 +129,6 @@ def snapshot(
     while frame:
         frame_name = frame.f_code.co_name
 
-        # The "__main__" module frame is the outermost frame of the user's program. Any frames
-        # above it belong to whatever launched the program (e.g.run_with_snapshot_comments).
-        is_main_module = frame_name == "<module>" and frame.f_globals.get("__name__") == "__main__"
-        next_frame = None if is_main_module else frame.f_back
-
         # Check whether frame_name is included
         if include_frames is not None and all(
             not re.search(regex, frame_name) for regex in include_frames

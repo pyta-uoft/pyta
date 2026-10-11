@@ -9,7 +9,9 @@ import copy
 import csv
 import inspect
 import json
+import linecache
 import sys
+import textwrap
 from typing import TYPE_CHECKING, Any, Generator, Literal, Optional, TextIO, Union
 
 import astroid
@@ -64,7 +66,15 @@ def _is_nested_loop(node: NodeNG, with_module: Module) -> bool:
 
 def get_loop_nodes(frame: types.FrameType) -> Generator[Union[For, While]]:
     """Yield the For or While node(s) from the frame containing the accumulator loop(s)"""
-    func_string = inspect.cleandoc(inspect.getsource(frame))
+    try:
+        source = inspect.getsource(frame)
+    except OSError:
+        # The Python 3.13+ REPL stores each input's source in linecache, keyed by code object
+        lines: list[str] = getattr(linecache, "_getlines_from_code", lambda _: [])(frame.f_code)
+        if not lines:
+            raise
+        source = "".join(lines)
+    func_string = textwrap.dedent(source)
     with_stmt_index = inspect.getlineno(frame) - frame.f_code.co_firstlineno
     lst_str_lines = func_string.splitlines()
     lst_from_with_stmt = lst_str_lines[with_stmt_index + 1 :]

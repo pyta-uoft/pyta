@@ -33,6 +33,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Removed unnecessary `_override_check_invalid_name_in_main ` patch
 - Added type annotations and fixed all mypy errors in the `packages\python-ta\src\python_ta` directory
 - Added `mypy` to the `prek` pre-commit hook configuration
+- Modified `python_ta.contracts` module to catch only documented `compile` exceptions
 
 ## [2.13.1] - 2026-08-12
 

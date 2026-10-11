@@ -1,33 +1,17 @@
-"""
-Run a Python file in which "magic comments" of the form `# pyta: snapshot(...)` are turned into
-calls to python_ta.debug.snapshot.snapshot, so that memory snapshots can be taken without
-importing or calling snapshot directly.
-
-The comments are found with `tokenize` (since the `ast` module discards comments). The file is parsed
-with `ast`, a call node is inserted at each comment, and the modified tree is compiled and run.
-"""
-
-from __future__ import annotations
-
 import ast
-import difflib
-import inspect
-import io
-import os
 import re
-import sys
 import tokenize
-import types
 from dataclasses import dataclass
 
-from .snapshot import snapshot
+from .snapshot import ROOT_FRAME_MARKER
 
-# The name the inserted calls use for snapshot. The leading "__" keeps it out of the global
-# variables captured by snapshot, and the trailing "__" prevents name mangling in class bodies.
-_SNAPSHOT_ALIAS = "__pyta_snapshot__"
+SNAPSHOT_MODULE = "python_ta.debug.snapshot"
+SNAPSHOT_NAME = "snapshot"
+SNAPSHOT_ALIAS = "__pyta_snapshot__"
 
-MAGIC_COMMENT_PATTERN = re.compile(r"#\s*pyta:")
+PATTERN = re.compile(r"#\s*pyta:\s*(snapshot\(.*\))\s*")
 
+# Tokens that don't count as code when finding which lines contain code
 _NON_CODE_TOKENS = {
     tokenize.COMMENT,
     tokenize.NL,
@@ -37,287 +21,220 @@ _NON_CODE_TOKENS = {
     tokenize.ENDMARKER,
 }
 
-# Statements that a call inserted directly after could never be reached
-_UNREACHABLE_AFTER = (ast.Return, ast.Raise, ast.Break, ast.Continue)
-
 
 @dataclass
-class MagicComment:
-    """A `# pyta: ...` comment found in source code.
+class SnapshotComment:
+    """A snapshot comment in a Python file.
 
-    Instance attributes:
-        lineno: the line the comment is on
-        comment_col: the column of the comment's "#"
-        call_col: the column where the call text starts
-        call_text: the text after "pyta:", e.g. "snapshot(save=True)"
-        line: the full source line containing the comment
-        standalone: whether the comment is the only thing on its line
+    Attributes:
+        line: The line number of the comment.
+        col: The column number of the comment.
+        snapshot_call: The snapshot call string.
+        inline: Whether the comment is inline or not.
     """
 
-    lineno: int
-    comment_col: int
-    call_col: int
-    call_text: str
-    line: str
-    standalone: bool = True
+    line: int
+    col: int
+    snapshot_call: str
+    inline: bool
 
 
 def run_with_snapshot_comments(path: str) -> None:
-    """Run the Python file at `path`, replacing each `# pyta: snapshot(...)` comment with a call to
-    python_ta.debug.snapshot.snapshot.
+    """Run the given Python file with snapshot comments enabled.
 
-    The file runs as the "__main__" module, as it would with `python <path>`. Each snapshot call
-    runs whenever execution reaches the line of its comment. Unless the comment passes `save`
-    itself, `save=True` is used, so that a MemoryViz diagram is produced.
-
-    A comment on its own line takes a snapshot between the statements around it. A comment at the
-    end of a line of code takes a snapshot after that line runs.
-
-    Raises a SyntaxError (before any of the file runs) if a magic comment is not a valid call to
-    snapshot, or if it is not clear where in the code the comment belongs.
+    Args:
+        path: The path to the Python file to run.
     """
-    path = os.path.abspath(os.path.expanduser(path))
-    with tokenize.open(path) as f:
-        source = f.read()
-    code = compile(_add_snapshot_calls(source, path), path, "exec")
+    snapshot_comments, tree, code_lines = parse_with_snapshot_comments(path)
 
-    # Make fake __main__ module to run the code in, so that it sees the file as "__main__" and can import
-    module = types.ModuleType("__main__")
-    module.__file__ = path
+    if snapshot_comments:
+        for comment in snapshot_comments:
+            insert_snapshot_call(tree, comment, code_lines)
 
-    # Save the current interpreter state
-    original_main = sys.modules.get("__main__")
-    original_argv = sys.argv
-    original_path = sys.path[:]
+        insert_snapshot_import(tree)
+        ast.fix_missing_locations(tree)
 
-    # Make it look like the file is being run as a script
-    sys.modules["__main__"] = module
-    sys.argv = [path]
-    sys.path.insert(0, os.path.dirname(path))
-    try:
-        exec(code, module.__dict__)
-    finally:
-        # Restore the interpreter state
-        if original_main is None:
-            sys.modules.pop("__main__", None)
-        else:
-            sys.modules["__main__"] = original_main
-        sys.argv = original_argv
-        sys.path[:] = original_path
+    code = compile(tree, filename=path, mode="exec")
+    # Mark the file's module as the outermost frame, so snapshot() doesn't capture the frames that ran it
+    exec(code, {"__name__": "__main__", "__file__": path, ROOT_FRAME_MARKER: True})
 
 
-def _add_snapshot_calls(source: str, filename: str = "<unknown>") -> ast.Module:
-    """Return the ast of `source` with a snapshot call inserted for each `# pyta: snapshot(...)`
-    comment, along with an import of snapshot function.
+def parse_with_snapshot_comments(path: str) -> tuple[list[SnapshotComment], ast.Module, set[int]]:
+    """Get all snapshot comments in the given Python file.
 
-    The original statements keep their line numbers, and each inserted call is given the line
-    number of its comment.
+    Args:
+        path: The path to the Python file to search.
+
+    Returns:
+        A tuple containing:
+            - A list of SnapshotComment objects for each snapshot comment found.
+            - A parsed AST of the file.
+            - The set of line numbers that contain code (not just comments or blank space).
     """
-    tree = ast.parse(source, filename)
-    comments, code_lines = _find_magic_comments(source)
-    if not comments:
-        return tree
-
-    statements = _statements_with_blocks(tree)
-    for comment in comments:
-        call = _parse_snapshot_call(comment, filename)
-
-        # Find the block of statements that the call should be inserted into, and insert it in order
-        block = _find_block(comment, statements, code_lines, filename)
-        block.append(call)
-        block.sort(key=lambda stmt: stmt.lineno)
-
-    import_node = ast.ImportFrom(
-        module="python_ta.debug.snapshot",
-        names=[ast.alias(name="snapshot", asname=_SNAPSHOT_ALIAS)],
-        level=0,
-        lineno=1,
-        col_offset=0,
-    )
-    tree.body.insert(_import_index(tree.body), import_node)
-
-    # Fill in missing location details for the new nodes
-    return ast.fix_missing_locations(tree)
-
-
-def _find_magic_comments(source: str) -> tuple[list[MagicComment], set[int]]:
-    """Return the magic comments in the source code, and the set of line numbers that contain code."""
     comments = []
     code_lines: set[int] = set()
 
-    for tok in tokenize.generate_tokens(io.StringIO(source).readline):
-        if tok.type == tokenize.COMMENT:
-            match = MAGIC_COMMENT_PATTERN.match(tok.string)
-            if match is None:
+    with tokenize.open(path) as f:
+
+        source = f.read()
+        tree = ast.parse(source, filename=path)
+
+        # Reset the file pointer to the beginning of the file
+        f.seek(0)
+        for tok in tokenize.generate_tokens(f.readline):
+            if tok.type not in _NON_CODE_TOKENS:
+                code_lines.update(range(tok.start[0], tok.end[0] + 1))
                 continue
-            rest = tok.string[match.end() :]
-            call_text = rest.strip()
-            lineno, comment_col = tok.start
-            call_col = comment_col + match.end() + (len(rest) - len(rest.lstrip()))
-            comments.append(MagicComment(lineno, comment_col, call_col, call_text, tok.line))
-        elif tok.type not in _NON_CODE_TOKENS:
-            code_lines.update(range(tok.start[0], tok.end[0] + 1))
+            if tok.type != tokenize.COMMENT:
+                continue
 
-    # Determine if magic comments are on their own lines or at the end of a line of code
-    for comment in comments:
-        comment.standalone = comment.lineno not in code_lines
-    return comments, code_lines
+            match = PATTERN.fullmatch(tok.string)
+            if match:
+                line, col = tok.start
+                inline = bool(tok.line[:col].strip())
+                comments.append(SnapshotComment(line, col, match.group(1), inline))
+
+    return comments, tree, code_lines
 
 
-def _parse_snapshot_call(comment: MagicComment, filename: str) -> ast.Expr:
-    """Return a statement calling snapshot, parsed from the text of `comment`.
+def parse_snapshot_call(snapshot_call: str) -> ast.Call:
+    """Parse a snapshot call string into an AST node.
 
-    The statement is positioned at the comment, and calls snapshot under the name _SNAPSHOT_ALIAS.
+    Args:
+        snapshot_call: The snapshot call string to parse.
+
+    Returns:
+        An AST node representing the snapshot call.
     """
-    try:
-        call = ast.parse(comment.call_text, mode="eval").body
-    except SyntaxError as e:
-        raise _comment_error(f"invalid pyta comment: {e.msg}", comment, filename) from None
+    tree = ast.parse(snapshot_call, mode="eval")
 
-    # Check that the comment is a call to snapshot, and that it has valid arguments
     if not (
-        isinstance(call, ast.Call)
-        and isinstance(call.func, ast.Name)
-        and call.func.id == "snapshot"
+        isinstance(tree.body, ast.Call)
+        and isinstance(tree.body.func, ast.Name)
+        and tree.body.func.id == SNAPSHOT_NAME
     ):
-        raise _comment_error(
-            "a pyta comment must be a call to snapshot, e.g. '# pyta: snapshot()'",
-            comment,
-            filename,
-        )
+        raise ValueError(f"Invalid snapshot call: {snapshot_call}")
 
-    parameters = inspect.signature(snapshot).parameters
-    if len(call.args) > len(parameters):
-        raise _comment_error(
-            f"snapshot() takes at most {len(parameters)} positional arguments", comment, filename
-        )
-    for keyword in call.keywords:
-        if keyword.arg is not None and keyword.arg not in parameters:
-            message = f"snapshot() got an unexpected keyword argument '{keyword.arg}'"
-            suggestions = difflib.get_close_matches(keyword.arg, parameters, n=1)
-            if suggestions:
-                message += f". Did you mean '{suggestions[0]}'?"
-            raise _comment_error(message, comment, filename)
-
-    # The value returned by the inserted call is discarded, so save the snapshot by default
-    if not call.args and all(keyword.arg not in ("save", None) for keyword in call.keywords):
-        call.keywords.insert(0, ast.keyword(arg="save", value=ast.Constant(value=True)))
-
-    call.func.id = _SNAPSHOT_ALIAS
-    stmt = ast.fix_missing_locations(ast.copy_location(ast.Expr(value=call), call))
-
-    # Move the statement from the start of the call text to the comment's position
-    ast.increment_lineno(stmt, comment.lineno - 1)
-    for node in ast.walk(stmt):
-        for attribute in ("col_offset", "end_col_offset"):
-            offset = getattr(node, attribute, None)
-            if offset is not None:
-                setattr(node, attribute, offset + comment.call_col)
-    return stmt
+    return tree.body
 
 
-def _find_block(
-    comment: MagicComment,
-    statements: list[tuple[ast.stmt, list[ast.stmt]]],
-    code_lines: set[int],
-    filename: str,
-) -> list[ast.stmt]:
-    """Return the list of statements that the call for `comment` should be inserted into."""
+def insert_snapshot_import(tree: ast.Module) -> None:
+    """Insert an import statement for the snapshot function at the top of the AST.
 
-    # If comment is not on its own line, it must be at the end of a statement, and the call should be inserted after that statement
-    if not comment.standalone:
-        # Use the innermost statement that ends on the comment's line
-        on_line = [
-            (stmt, block) for stmt, block in statements if _end_lineno(stmt) == comment.lineno
-        ]
-        if not on_line:
-            raise _comment_error(
-                "this pyta comment must be on its own line, or at the end of a statement",
-                comment,
-                filename,
-            )
-        target, block = max(on_line, key=lambda pair: (pair[0].lineno, pair[0].col_offset))
-        if isinstance(target, _UNREACHABLE_AFTER):
-            raise _comment_error(
-                f"a snapshot after this '{type(target).__name__.lower()}' statement would never "
-                "run; put the pyta comment on its own line before it",
-                comment,
-                filename,
-            )
-        return block
-
-    # If comment is on its own line, find the statement before or after it at the same indentation
-    aligned = [
-        (stmt, block) for stmt, block in statements if stmt.col_offset == comment.comment_col
-    ]
-
-    # The statement directly before the comment, at the same indentation
-    before = [(stmt, block) for stmt, block in aligned if _end_lineno(stmt) < comment.lineno]
-    if before:
-        prev, block = max(before, key=lambda pair: _end_lineno(pair[0]))
-        if not _has_code_between(code_lines, _end_lineno(prev), comment.lineno):
-            return block
-
-    # The statement directly after the comment, at the same indentation
-    after = [(stmt, block) for stmt, block in aligned if _start_lineno(stmt) > comment.lineno]
-    if after:
-        nxt, block = min(after, key=lambda pair: _start_lineno(pair[0]))
-        if not _has_code_between(code_lines, comment.lineno, _start_lineno(nxt)):
-            return block
-
-    raise _comment_error(
-        "could not tell where this pyta comment belongs; "
-        "indent it to line up with the statements around it",
-        comment,
-        filename,
+    Args:
+        tree: The AST to modify.
+    """
+    import_node = ast.ImportFrom(
+        module=SNAPSHOT_MODULE,
+        names=[ast.alias(name=SNAPSHOT_NAME, asname=SNAPSHOT_ALIAS)],
+        level=0,
     )
-
-
-def _statements_with_blocks(tree: ast.Module) -> list[tuple[ast.stmt, list[ast.stmt]]]:
-    """Return every statement in `tree`, paired with the list of statements that contains it."""
-    statements: list[tuple[ast.stmt, list[ast.stmt]]] = []
-    for node in ast.walk(tree):
-        for field in ("body", "orelse", "finalbody"):
-            block = getattr(node, field, None)
-            if isinstance(block, list):
-                statements.extend((stmt, block) for stmt in block if isinstance(stmt, ast.stmt))
-    return statements
-
-
-def _start_lineno(stmt: ast.stmt) -> int:
-    """Return the first line of `stmt`, including any decorators."""
-    decorators = getattr(stmt, "decorator_list", [])
-    return min([stmt.lineno] + [decorator.lineno for decorator in decorators])
-
-
-def _end_lineno(stmt: ast.stmt) -> int:
-    """Return the last line of `stmt`."""
-    return stmt.end_lineno if stmt.end_lineno is not None else stmt.lineno
-
-
-def _has_code_between(code_lines: set[int], start: int, end: int) -> bool:
-    """Return whether any line strictly between `start` and `end` contains code."""
-    return any(start < lineno < end for lineno in code_lines)
-
-
-def _import_index(body: list[ast.stmt]) -> int:
-    """Return the index in a module body after its docstring and any `from __future__` imports."""
-    index = 0
-    if (
-        body
-        and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, ast.Constant)
-        and isinstance(body[0].value.value, str)
-    ):
-        index = 1
-    while index < len(body):
-        stmt = body[index]
+    # A module docstring and `from __future__` imports must stay at the top of the file
+    index = 1 if ast.get_docstring(tree, clean=False) is not None else 0
+    for stmt in tree.body[index:]:
         if not (isinstance(stmt, ast.ImportFrom) and stmt.module == "__future__"):
             break
         index += 1
-    return index
+    tree.body.insert(index, import_node)
 
 
-def _comment_error(message: str, comment: MagicComment, filename: str) -> SyntaxError:
-    """Return a SyntaxError pointing at the call text of `comment`."""
-    return SyntaxError(message, (filename, comment.lineno, comment.call_col + 1, comment.line))
+def insert_snapshot_call(
+    tree: ast.Module, snapshot_comment: SnapshotComment, code_lines: set[int]
+) -> None:
+    """Insert a snapshot call at the given line and column in the AST.
+
+    Args:
+        tree: The AST to modify.
+        snapshot_comment: The snapshot comment to insert.
+        code_lines: The set of line numbers that contain code.
+    """
+    snapshot_node = parse_snapshot_call(snapshot_comment.snapshot_call)
+    snapshot_node.func = ast.Name(id=SNAPSHOT_ALIAS, ctx=ast.Load())
+    expr_node = ast.Expr(value=snapshot_node)
+
+    # Report errors raised by the snapshot call at the comment's position
+    for node in ast.walk(expr_node):
+        if isinstance(node, (ast.expr, ast.stmt)):
+            node.lineno = node.end_lineno = snapshot_comment.line
+            node.col_offset = node.end_col_offset = snapshot_comment.col
+
+    if snapshot_comment.inline:
+        pass
+    else:
+        block = _standalone_block(
+            tree.body, snapshot_comment.line, snapshot_comment.col, code_lines
+        )
+        # The comment runs just before the first statement that comes after it
+        index = next(
+            (i for i, stmt in enumerate(block) if stmt.lineno > snapshot_comment.line),
+            len(block),
+        )
+        block.insert(index, expr_node)
+
+
+def _standalone_block(
+    body: list[ast.stmt], line: int, col: int, code_lines: set[int]
+) -> list[ast.stmt]:
+    """Return the statement list a comment on its own line belongs to, by indentation."""
+    if not body or col <= body[0].col_offset:
+        return body
+
+    owner = None
+    for stmt in body:
+        if stmt.lineno >= line:
+            break
+        owner = stmt
+
+    chosen = None
+    for header, block in (_child_blocks(owner, code_lines) if owner else []):
+        if header < line:
+            chosen = block
+    if chosen is None:
+        raise IndentationError(f"line {line}: snapshot comment doesn't line up with any block")
+
+    return _standalone_block(chosen, line, col, code_lines)
+
+
+def _child_blocks(stmt: ast.stmt, code_lines: set[int]) -> list[tuple[int, list[ast.stmt]]]:
+    """Return (header line, statement list) for each block inside a compound statement."""
+    blocks = []
+
+    # Add the main body of the statement, if it has one
+    body = getattr(stmt, "body", None)
+    if body and isinstance(body[0], ast.stmt):
+        blocks.append((stmt.lineno, body))
+
+    # Add any except handlers, if the statement is a try statement
+    handlers = getattr(stmt, "handlers", [])
+    for handler in handlers:
+        blocks.append((handler.lineno, handler.body))
+
+    # Add any case blocks, if the statement is a match statement
+    for case in getattr(stmt, "cases", []):
+        blocks.append((case.pattern.lineno, case.body))
+
+    # Add any else or finally blocks
+    # else / finally aren't nodes, so their header is the first line of code after the previous block ends
+    before_else = handlers[-1].body if handlers else body or []
+
+    orelse = getattr(stmt, "orelse", [])
+    if orelse:
+        header = _first_code_line(code_lines, before_else[-1].end_lineno, orelse[0].lineno)
+        if len(orelse) == 1 and isinstance(orelse[0], ast.If) and orelse[0].lineno == header:
+            # An elif is stored as an If inside orelse, starting on the header line itself
+            blocks.extend(_child_blocks(orelse[0], code_lines))
+        else:
+            blocks.append((header, orelse))
+
+    finalbody = getattr(stmt, "finalbody", [])
+    if finalbody:
+        before_finally = orelse or before_else
+        header = _first_code_line(code_lines, before_finally[-1].end_lineno, finalbody[0].lineno)
+        blocks.append((header, finalbody))
+
+    return sorted(blocks, key=lambda b: b[0])
+
+
+def _first_code_line(code_lines: set[int], after: int, upto: int) -> int:
+    """Return the first line in (after, upto] that contains code."""
+    return next(lineno for lineno in range(after + 1, upto + 1) if lineno in code_lines)

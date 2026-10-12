@@ -123,6 +123,10 @@ class Z3Parser:
                 return left / right
             elif op == "**":
                 return left**right
+            elif op == "%":
+                return self.apply_mod_op(left, right)
+            elif op == "//":
+                return self.apply_floordiv_op(left, right)
             elif op == "==":
                 return left == right
             elif op == "!=":
@@ -145,6 +149,51 @@ class Z3Parser:
                 )
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
+
+    def _is_int(self, value: Any) -> bool:
+        """Check if value is a Python int or z3 Int expression."""
+        return isinstance(value, int) or z3.is_int(value)
+
+    def apply_mod_op(
+        self, left: Union[int, z3.ExprRef], right: Union[int, z3.ExprRef, list[z3.ExprRef]]
+    ) -> Union[int, z3.ExprRef]:
+        """
+        Apply Python's % (modulo) operation on left and right.
+        Raise Z3ParseException if the operands do not support % operator.
+        """
+        if not (self._is_int(left) and self._is_int(right)):
+            raise Z3ParseException(f"% only supported for ints.")
+        if isinstance(right, int):
+            if right == 0:
+                raise Z3ParseException("Modulo by zero is undefined.")
+            if isinstance(left, int):
+                return left % right
+            else:  # left is a z3 Int expression
+                return left % right if right > 0 else -((-left) % (-right))
+
+        # right is a z3 Int expression, use If to handle which calculation to perform
+        return z3.If(right > 0, left % right, -((-left) % (-right)))
+
+    def apply_floordiv_op(
+        self, left: Union[int, z3.ExprRef], right: Union[int, z3.ExprRef, list[z3.ExprRef]]
+    ) -> Union[int, z3.ExprRef]:
+        """
+        Apply Python's // (floor division) operation on left and right.
+        Raise Z3ParseException if the operands do not support // operator.
+        """
+        if not (self._is_int(left) and self._is_int(right)):
+            raise Z3ParseException(f"// only supported for ints.")
+        if isinstance(right, int):
+            if right == 0:
+                raise Z3ParseException("Floor division by zero is undefined.")
+            if isinstance(left, int):
+                return left // right
+            else:  # left is a z3 Int expression
+                # "//" operator not supported in z3, use "/" which applies Euclidean division
+                return left / right if right > 0 else (-left) / (-right)
+
+        # right is a z3 Int expression, use If to handle which calculation to perform
+        return z3.If(right > 0, left / right, (-left) / (-right))
 
     def apply_bool_op(self, op: str, values: Union[z3.ExprRef, list[z3.ExprRef]]) -> z3.ExprRef:
         """Apply boolean operation given by op to values."""

@@ -118,18 +118,22 @@ def snapshot(
     while frame:
         frame_name = frame.f_code.co_name
 
+        # Stop at the first module-level frame so that snapshot does not
+        # "break out of" exec calls into the caller's frames
+        next_frame = None if frame_name == "<module>" else frame.f_back
+
         # Check whether frame_name is included
         if include_frames is not None and all(
             not re.search(regex, frame_name) for regex in include_frames
         ):
-            frame = frame.f_back
+            frame = next_frame
             continue
 
         # Check whether frame_name is excluded
         if exclude_frames is not None and any(
             re.search(regex, frame_name) for regex in exclude_frames
         ):
-            frame = frame.f_back
+            frame = next_frame
             continue
 
         if frame_name != "<module>":
@@ -138,7 +142,7 @@ def snapshot(
         else:
             global_vars = get_filtered_global_variables(frame)
             variables.append(global_vars)
-        frame = frame.f_back
+        frame = next_frame
 
     if save:
         json_compatible_vars = snapshot_to_json(variables, id_tracker=id_tracker)

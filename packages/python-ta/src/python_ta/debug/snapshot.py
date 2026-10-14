@@ -118,8 +118,7 @@ def snapshot(
     while frame:
         frame_name = frame.f_code.co_name
 
-        # Stop at the first module-level frame so that snapshot does not
-        # "break out of" exec calls into the caller's frames
+        # Stop at the first module-level frame
         next_frame = None if frame_name == "<module>" else frame.f_back
 
         # Check whether frame_name is included

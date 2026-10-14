@@ -32,11 +32,11 @@ def test_apply_mod_op_matches_python(a, b) -> None:
     assert _value(parser.apply_mod_op(a, z3.IntVal(b))) == expected
 
 
-def test_apply_mod_op_by_zero_raises_exception() -> None:
-    """Test that applying modulo by zero raises a Z3ParseException."""
+def test_apply_mod_op_by_zero_is_unsatisfiable() -> None:
+    """Test that applying modulo by zero returns an unsatisfiable formula."""
     parser = Z3Parser()
-    with pytest.raises(Z3ParseException):
-        parser.apply_mod_op(5, 0)
+    assert z3.is_false(parser.apply_mod_op(5, 0))
+    assert z3.is_false(parser.apply_mod_op(5, z3.IntVal(0)))
 
 
 @pytest.mark.parametrize("a,b", itertools.product(range(-5, 5), [-3, -2, 2, 3]))
@@ -50,11 +50,20 @@ def test_apply_floordiv_op_matches_python(a, b) -> None:
     assert _value(parser.apply_floordiv_op(a, z3.IntVal(b))) == expected
 
 
-def test_apply_floordiv_op_by_zero_raises_exception() -> None:
-    """Test that applying floor division by zero raises a Z3ParseException."""
+def test_apply_floordiv_op_by_zero_is_unsatisfiable() -> None:
+    """Test that applying floor division by zero returns an unsatisfiable formula."""
     parser = Z3Parser()
-    with pytest.raises(Z3ParseException):
-        parser.apply_floordiv_op(5, 0)
+    assert z3.is_false(parser.apply_floordiv_op(5, 0))
+    assert z3.is_false(parser.apply_floordiv_op(5, z3.IntVal(0)))
+
+
+@pytest.mark.parametrize("operator", ["%", "//"])
+def test_zero_divisor_comparison_is_unsatisfiable(operator) -> None:
+    """Test that comparing an operation with a zero divisor returns false."""
+    node = extract_node(f"x {operator} 0 == 2")
+    parser = Z3Parser({"x": "int"})
+
+    assert z3.is_false(parser.parse(node))
 
 
 @pytest.mark.parametrize(

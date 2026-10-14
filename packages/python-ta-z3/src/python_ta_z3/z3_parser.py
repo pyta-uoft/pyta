@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import astroid
 import z3
@@ -112,6 +112,8 @@ class Z3Parser:
         self, left: z3.ExprRef, op: str, right: Union[z3.ExprRef, list[z3.ExprRef]]
     ) -> z3.ExprRef:
         """Given left, right, op, apply the binary operation."""
+        if (z3.is_bool(left) and z3.is_false(left)) or (z3.is_bool(right) and z3.is_false(right)):
+            return z3.BoolVal(False)
         try:
             if op == "+":
                 return left + right
@@ -159,19 +161,21 @@ class Z3Parser:
     ) -> Union[int, z3.ExprRef]:
         """
         Apply Python's % (modulo) operation on left and right.
-        Raise Z3ParseException if the operands do not support % operator.
+        Raise Z3ParseException if the operands are not integers.
         """
         if not (self._is_int(left) and self._is_int(right)):
-            raise Z3ParseException(f"% only supported for ints.")
-        if isinstance(right, int):
-            if right == 0:
-                raise Z3ParseException("Modulo by zero is undefined.")
-            if isinstance(left, int):
-                return left % right
-            else:  # left is a z3 Int expression
-                return left % right if right > 0 else -((-left) % (-right))
-
-        # right is a z3 Int expression, use If to handle which calculation to perform
+            raise Z3ParseException("% only supported for ints.")
+        # if right is 0, return an unsatisfiable formula
+        if (isinstance(right, int) and right == 0) or (
+            z3.is_int_value(right) and right.as_long() == 0
+        ):
+            return z3.BoolVal(False)
+        # if both operands are Python ints, return the result of the modulo operation
+        if isinstance(left, int) and isinstance(right, int):
+            return left % right
+        # left or right is a z3 Int expression. Use z3.If to handle which calculation to perform.
+        # For a negative divisor, negate both operands so the divisor becomes positive
+        # and negate the result so the result is the same sign as the divisor.
         return z3.If(right > 0, left % right, -((-left) % (-right)))
 
     def apply_floordiv_op(
@@ -179,20 +183,21 @@ class Z3Parser:
     ) -> Union[int, z3.ExprRef]:
         """
         Apply Python's // (floor division) operation on left and right.
-        Raise Z3ParseException if the operands do not support // operator.
+        Raise Z3ParseException if the operands are not integers.
         """
         if not (self._is_int(left) and self._is_int(right)):
-            raise Z3ParseException(f"// only supported for ints.")
-        if isinstance(right, int):
-            if right == 0:
-                raise Z3ParseException("Floor division by zero is undefined.")
-            if isinstance(left, int):
-                return left // right
-            else:  # left is a z3 Int expression
-                # "//" operator not supported in z3, use "/" which applies Euclidean division
-                return left / right if right > 0 else (-left) / (-right)
-
-        # right is a z3 Int expression, use If to handle which calculation to perform
+            raise Z3ParseException("// only supported for ints.")
+        # if right is 0, return an unsatisfiable formula
+        if (isinstance(right, int) and right == 0) or (
+            z3.is_int_value(right) and right.as_long() == 0
+        ):
+            return z3.BoolVal(False)
+        if isinstance(left, int) and isinstance(right, int):
+            return left // right
+        # left or right is a z3 Int expression. Use z3.If to handle which calculation to perform.
+        # The "//" operator is not supported in z3. Use "/" which applies Euclidean division.
+        # For a negative divisor, negate both operands. This gives the same quotient
+        # but the divisor becomes positive, so the result is rounded down.
         return z3.If(right > 0, left / right, (-left) / (-right))
 
     def apply_bool_op(self, op: str, values: Union[z3.ExprRef, list[z3.ExprRef]]) -> z3.ExprRef:

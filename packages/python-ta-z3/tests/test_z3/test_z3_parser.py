@@ -21,6 +21,13 @@ def _value(z3_expr: int | z3.ExprRef) -> int:
     return z3.simplify(z3_expr).as_long() if z3.is_int(z3_expr) else z3_expr
 
 
+def _is_unsat(*formulas: z3.BoolRef) -> bool:
+    """Check if the conjunction of the given formulas is unsatisfiable."""
+    solver = z3.Solver()
+    solver.add(*formulas)
+    return solver.check() == z3.unsat
+
+
 @pytest.mark.parametrize("a,b", itertools.product(range(-5, 5), [-3, -2, 2, 3]))
 def test_apply_mod_op_matches_python(a, b) -> None:
     """Test that apply_mod_op method matches Python's modulo operation."""
@@ -30,13 +37,6 @@ def test_apply_mod_op_matches_python(a, b) -> None:
     assert _value(parser.apply_mod_op(z3.IntVal(a), z3.IntVal(b))) == expected
     assert _value(parser.apply_mod_op(z3.IntVal(a), b)) == expected
     assert _value(parser.apply_mod_op(a, z3.IntVal(b))) == expected
-
-
-def test_apply_mod_op_by_zero_is_unsatisfiable() -> None:
-    """Test that applying modulo by zero returns an unsatisfiable formula."""
-    parser = Z3Parser()
-    assert z3.is_false(parser.apply_mod_op(5, 0))
-    assert z3.is_false(parser.apply_mod_op(5, z3.IntVal(0)))
 
 
 @pytest.mark.parametrize("a,b", itertools.product(range(-5, 5), [-3, -2, 2, 3]))
@@ -50,20 +50,24 @@ def test_apply_floordiv_op_matches_python(a, b) -> None:
     assert _value(parser.apply_floordiv_op(a, z3.IntVal(b))) == expected
 
 
-def test_apply_floordiv_op_by_zero_is_unsatisfiable() -> None:
-    """Test that applying floor division by zero returns an unsatisfiable formula."""
+@pytest.mark.parametrize("method_name", ["apply_mod_op", "apply_floordiv_op"])
+@pytest.mark.parametrize("zero", [0, z3.IntVal(0)])
+def test_zero_divisor_records_unsatisfiable_constraint(method_name, zero):
+    """Test that applying modulo or floor division with a zero divisor records an unsatisfiable constraint."""
     parser = Z3Parser()
-    assert z3.is_false(parser.apply_floordiv_op(5, 0))
-    assert z3.is_false(parser.apply_floordiv_op(5, z3.IntVal(0)))
+    getattr(parser, method_name)(5, zero)
+    assert len(parser.parsing_constraints) == 1
+    assert _is_unsat(*parser.parsing_constraints)
 
 
-@pytest.mark.parametrize("operator", ["%", "//"])
-def test_zero_divisor_comparison_is_unsatisfiable(operator) -> None:
-    """Test that comparing an operation with a zero divisor returns false."""
-    node = extract_node(f"x {operator} 0 == 2")
+@pytest.mark.parametrize("operator", ["//", "%"])
+@pytest.mark.parametrize("rhs", [0, 2])
+def test_zero_divisior_comparison_is_unsatisfiable(operator, rhs) -> None:
+    """Test that comparison with a zero divisor is unsatisfiable."""
+    node = extract_node(f"x {operator} 0 == {rhs}")
     parser = Z3Parser({"x": "int"})
-
-    assert z3.is_false(parser.parse(node))
+    expr = parser.parse(node)
+    assert _is_unsat(expr, *parser.parsing_constraints)
 
 
 @pytest.mark.parametrize(

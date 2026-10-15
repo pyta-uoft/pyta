@@ -46,6 +46,8 @@ class Z3Visitor:
             parser = Z3Parser(types)
             try:
                 transformed = parser.parse(pre)
+                if parser.parsing_constraints:
+                    transformed = And(transformed, *parser.parsing_constraints)
             except (AstroidError, Z3Exception, Z3ParseException):
                 transformed = None
             if transformed is not None:

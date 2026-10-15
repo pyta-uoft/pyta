@@ -1,0 +1,2 @@
+LONG_NAME = 1
+X = 1

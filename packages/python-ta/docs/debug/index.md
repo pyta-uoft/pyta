@@ -317,6 +317,7 @@ The `AccumulationTable` is a new PythonTA feature and currently has the followin
 
 1. `AccumulationTable` uses [`sys.settrace`] to update variable state, and so is not compatible with other libraries (e.g. debuggers, code coverage tools).
 2. Nested loops are not tracked. The `AccumulationTable` is designed to work with sequential loops (loops that run one after another).
+3. `AccumulationTable` needs access to the source code of the loop(s) it tracks. It works in Python files and in the Python REPL in Python 3.13 or later, but raises an `OSError` in the basic REPL used by earlier Python versions (or when the `PYTHON_BASIC_REPL` environment variable is set), which does not keep the source code of the code you type.
 
 ## Recursion tracing with `RecursionTable`
 

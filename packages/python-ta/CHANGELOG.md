@@ -13,6 +13,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added the ability to pin errors in the HTML report.
 - Added an `--autoformat` CLI option to format files with Black before analysis.
 - `python_ta.debug.snapshot` now only uses the default MemoryViz diagram width of 800 when no `--width` is passed in `memory_viz_args`. Also added this new behaviour and `python_ta.debug.snapshot` as a whole to the documentation.
+- Modified `LSPReporter` to flag only the first line in a module when the message pertains to the entire module, such as a missing module docstring.
 
 ### 💫 New checkers
 
@@ -22,6 +23,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed `DEBUG_CONTRACTS` logging the wrong attribute name when checking instance attribute types.
 - Ensured reporter output stream always uses UTF-8 encoding (was not always set on Windows)
 - Used astroid inference for arguments passed to `__import__` in `ForbiddenImportChecker`
+- Fixed `AccumulationTable` functionality in Python REPL
+- Fixed `python_ta.debug.snapshot` capturing frames outside of `exec` calls by stopping at the first top-level (`<module>`) frame
 
 ### 🔧 Internal changes
 
@@ -34,6 +37,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added type annotations and fixed all mypy errors in the `packages\python-ta\src\python_ta` directory
 - Added `mypy` to the `prek` pre-commit hook configuration
 - Modified `python_ta.contracts` module to catch only documented `compile` exceptions
+- Added Python 3.15 to the CI test matrix
 
 ## [2.13.1] - 2026-08-12
 

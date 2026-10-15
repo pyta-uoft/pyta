@@ -21,17 +21,6 @@ from .id_tracker import IDTracker
 if TYPE_CHECKING:
     from types import FrameType
 
-# A module whose globals set this to True is treated as the outermost frame by snapshot(),
-# e.g. a file run by run_with_snapshot_comments, so the frames that ran it aren't captured
-ROOT_FRAME_MARKER = "__pyta_snapshot_root__"
-
-
-def _outer_frame(frame: FrameType) -> Optional[FrameType]:
-    """Return the frame that called the given frame, or None if it is the outermost frame."""
-    if frame.f_code.co_name == "<module>" and frame.f_globals.get(ROOT_FRAME_MARKER):
-        return None
-    return frame.f_back
-
 
 def get_filtered_global_variables(frame: FrameType) -> dict:
     """
@@ -133,14 +122,14 @@ def snapshot(
         if include_frames is not None and all(
             not re.search(regex, frame_name) for regex in include_frames
         ):
-            frame = _outer_frame(frame)
+            frame = frame.f_back
             continue
 
         # Check whether frame_name is excluded
         if exclude_frames is not None and any(
             re.search(regex, frame_name) for regex in exclude_frames
         ):
-            frame = _outer_frame(frame)
+            frame = frame.f_back
             continue
 
         if frame_name != "<module>":
@@ -149,7 +138,8 @@ def snapshot(
         else:
             global_vars = get_filtered_global_variables(frame)
             variables.append(global_vars)
-        frame = _outer_frame(frame)
+            break  # Stop at the first module-level frame
+        frame = frame.f_back
 
     if save:
         json_compatible_vars = snapshot_to_json(variables, id_tracker=id_tracker)

@@ -138,6 +138,7 @@ def snapshot(
         else:
             global_vars = get_filtered_global_variables(frame)
             variables.append(global_vars)
+            break  # Stop at the first module-level frame
         frame = frame.f_back
 
     if save:

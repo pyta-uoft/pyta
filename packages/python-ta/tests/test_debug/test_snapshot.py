@@ -252,6 +252,21 @@ def test_snapshot_main_stackframe() -> None:
     }
 
 
+def test_snapshot_exec_stops_at_module_frame() -> None:
+    """
+    Test that snapshot() called within exec'd code stops at the exec'd <module> stack frame,
+    and does not capture the frames of the code that called exec.
+    """
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    snapshot_exec_frame_path = os.path.join(current_directory, "snapshot_exec_frame.py")
+    exec_frame = subprocess.run(
+        [sys.executable, snapshot_exec_frame_path], capture_output=True, text=True
+    )
+    parsed_vars = json.loads(exec_frame.stdout)
+
+    assert parsed_vars == [{"exec_func": {"exec_var": 1}}, {"__main__": {"exec_global": 2}}]
+
+
 def test_snapshot_excludes_nonlocal_from_inner_frame() -> None:
     """
     Test that a nonlocal variable appears only in the outer frame,

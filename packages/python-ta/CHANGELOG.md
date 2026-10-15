@@ -25,6 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Ensured reporter output stream always uses UTF-8 encoding (was not always set on Windows)
 - Used astroid inference for arguments passed to `__import__` in `ForbiddenImportChecker`
 - Fixed `AccumulationTable` functionality in Python REPL
+- Fixed `python_ta.debug.snapshot` capturing frames outside of `exec` calls by stopping at the first top-level (`<module>`) frame
 
 ### 🔧 Internal changes
 

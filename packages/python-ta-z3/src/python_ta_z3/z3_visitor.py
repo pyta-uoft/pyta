@@ -50,9 +50,9 @@ class Z3Visitor:
                 transformed = None
             if transformed is not None:
                 z3_constraints.append(transformed)
+            z3_constraints.extend(parser.parsing_constraints)
         # Set z3 constraints
         if z3_constraints:
             node.z3_constraints = [simplify(expr) for expr in z3_constraints]
         else:
             node.z3_constraints = []
-        node.z3_constraints.extend(parser.parsing_constraints)

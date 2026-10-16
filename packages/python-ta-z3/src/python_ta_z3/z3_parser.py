@@ -23,6 +23,7 @@ class Z3Parser:
 
     Instance attributes:
         - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
+        - parsing_constraints: list of z3 constraints that are generated during parsing.
     """
 
     node: nodes.NodeNG

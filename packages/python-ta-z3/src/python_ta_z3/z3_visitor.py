@@ -46,8 +46,6 @@ class Z3Visitor:
             parser = Z3Parser(types)
             try:
                 transformed = parser.parse(pre)
-                if parser.parsing_constraints:
-                    transformed = And(transformed, *parser.parsing_constraints)
             except (AstroidError, Z3Exception, Z3ParseException):
                 transformed = None
             if transformed is not None:
@@ -57,3 +55,4 @@ class Z3Visitor:
             node.z3_constraints = [simplify(expr) for expr in z3_constraints]
         else:
             node.z3_constraints = []
+        node.z3_constraints.extend(parser.parsing_constraints)

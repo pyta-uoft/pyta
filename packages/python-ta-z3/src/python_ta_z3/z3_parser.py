@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import astroid
 import z3
@@ -23,15 +23,18 @@ class Z3Parser:
 
     Instance attributes:
         - types: dictionary mapping variable names in astroid expression to their type name or z3 variable.
+        - parsing_constraints: list of z3 constraints that are generated during parsing.
     """
 
     node: nodes.NodeNG
     types: dict[str, Union[str, z3.ExprRef]]
+    parsing_constraints: list[z3.BoolRef]
 
     def __init__(self, types: Optional[dict[str, Union[str, z3.ExprRef]]] = None):
         if types is None:
             types = {}
         self.types = types
+        self.parsing_constraints = []
 
     def parse(self, node: nodes.NodeNG) -> z3.ExprRef:
         """
@@ -123,6 +126,10 @@ class Z3Parser:
                 return left / right
             elif op == "**":
                 return left**right
+            elif op == "%":
+                return self.apply_mod_op(left, right)
+            elif op == "//":
+                return self.apply_floordiv_op(left, right)
             elif op == "==":
                 return left == right
             elif op == "!=":
@@ -145,6 +152,53 @@ class Z3Parser:
                 )
         except TypeError:
             raise Z3ParseException(f"Operation {op} incompatible with types {left} and {right}.")
+
+    def _is_int(self, value: Any) -> bool:
+        """Check if value is a Python int or z3 Int expression."""
+        return isinstance(value, int) or z3.is_int(value)
+
+    def apply_mod_op(
+        self, left: Union[int, z3.ExprRef], right: Union[int, z3.ExprRef, list[z3.ExprRef]]
+    ) -> z3.ExprRef:
+        """
+        Apply Python's % (modulo) operation on left and right.
+        Raise Z3ParseException if the operands are not integers.
+        """
+        if not (self._is_int(left) and self._is_int(right)):
+            raise Z3ParseException("% only supported for ints.")
+
+        # Convert to z3.IntVal to prevent ZeroDivisionError if right is 0
+        left = z3.IntVal(left) if isinstance(left, int) else left
+        right = z3.IntVal(right) if isinstance(right, int) else right
+
+        self.parsing_constraints.append(right != 0)
+
+        # Use z3.If to handle which calculation to perform depending on the divisor's sign.
+        # For a negative divisor, negate both operands so the divisor becomes positive
+        # and negate the result so the result is the same sign as the divisor.
+        return z3.If(right > 0, left % right, -((-left) % (-right)))
+
+    def apply_floordiv_op(
+        self, left: Union[int, z3.ExprRef], right: Union[int, z3.ExprRef, list[z3.ExprRef]]
+    ) -> z3.ExprRef:
+        """
+        Apply Python's // (floor division) operation on left and right.
+        Raise Z3ParseException if the operands are not integers.
+        """
+        if not (self._is_int(left) and self._is_int(right)):
+            raise Z3ParseException("// only supported for ints.")
+
+        # Convert to z3.IntVal to ensure the division produces an integer result
+        left = z3.IntVal(left) if isinstance(left, int) else left
+        right = z3.IntVal(right) if isinstance(right, int) else right
+
+        self.parsing_constraints.append(right != 0)
+
+        # Use z3.If to handle which calculation to perform depending on the divisor's sign.
+        # The "//" operator is not supported in z3. Use "/" which applies Euclidean division.
+        # For a negative divisor, negate both operands. This gives the same quotient
+        # but the divisor becomes positive, so the result is rounded down.
+        return z3.If(right > 0, left / right, (-left) / (-right))
 
     def apply_bool_op(self, op: str, values: Union[z3.ExprRef, list[z3.ExprRef]]) -> z3.ExprRef:
         """Apply boolean operation given by op to values."""

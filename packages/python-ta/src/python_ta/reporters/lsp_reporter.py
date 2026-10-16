@@ -6,6 +6,7 @@ from pylint.lint import PyLinter
 from pylint.message import Message
 from pylint.reporters.ureports.nodes import Section
 
+import python_ta
 from .core import MessageLike, PythonTaReporter
 
 CATEGORY_TO_LSP = {
@@ -68,6 +69,9 @@ class LSPReporter(PythonTaReporter):
                     message=msg.msg,
                     severity=_lsp_severity(msg.category),
                     code=msg.msg_id,
+                    code_description=types.CodeDescription(
+                        href=f"{python_ta.HELP_URL}#{msg.msg_id.lower()}"
+                    ),
                     source="python-ta",
                 )
                 diagnostics_list.append(diag)

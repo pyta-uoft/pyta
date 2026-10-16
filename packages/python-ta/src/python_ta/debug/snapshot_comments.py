@@ -58,12 +58,26 @@ def insert_snapshot_calls(source: str, filename: str = "<unknown>") -> str:
     }
 
     # Find all snapshot comments and replace them with snapshot calls
-    edits = [
-        _edit(atok, tok, stmt_ends, filename)
-        for tok in atok.tokens
-        if tok.type == tokenize.COMMENT and PATTERN.fullmatch(tok.string)
+    comments = [
+        tok for tok in atok.tokens if tok.type == tokenize.COMMENT and PATTERN.fullmatch(tok.string)
     ]
-    return replace(source, edits)
+    new_source = replace(source, [_edit(atok, tok, stmt_ends, filename) for tok in comments])
+
+    # The source parsed before the calls were inserted, so any error here was caused by a
+    # snapshot comment. Report it at the last snapshot comment at or before the error line.
+    try:
+        ast.parse(new_source, filename=filename)
+    except SyntaxError as e:
+        culprits = [tok for tok in comments if e.lineno and tok.start[0] <= e.lineno]
+        if not culprits:
+            raise
+        line, col = culprits[-1].start
+        raise SyntaxError(
+            "snapshot comment can't go here (check its indentation)",
+            (filename, line, col + 1, culprits[-1].line),
+        ) from None
+
+    return new_source
 
 
 def _edit(

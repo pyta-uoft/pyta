@@ -43,7 +43,7 @@ def test_exact_output(lsp_output):
                     "severity": 2,
                     "code": "W0612",
                     "codeDescription": {
-                        "href": "http://www.cs.toronto.edu/~david/pyta/checkers/index.html#w0612"
+                        "href": "https://www.cs.toronto.edu/~david/pyta/checkers/index.html#w0612"
                     },
                     "source": "python-ta",
                 }

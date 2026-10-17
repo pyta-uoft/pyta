@@ -137,6 +137,6 @@ def test_doc_log(capsys) -> None:
     python_ta.doc("E0602")
     captured = capsys.readouterr()
     assert (
-        "Opening http://www.cs.toronto.edu/~david/pyta/checkers/index.html#e0602 in a browser."
+        "Opening https://www.cs.toronto.edu/~david/pyta/checkers/index.html#e0602 in a browser."
         in captured.out
     )

@@ -33,7 +33,7 @@ R1712 = "Use parallel assignment to swap the values of variables. For example: t
 R1713 = "If you want to concatenate a sequence of strings, use the str.join method."
 R1714 = "To check whether this variable is equal to one of many values, use the in operator with a set or list, for example: '%s %sin {%s}'."
 R1715 = "To lookup a value from a dictionary if a key is present and use a default value if the key is not, use the built-in dict.get method."
-R1716 = "You can simplify this boolean operation into a chained comparison. Instead of 'a < b and b < c', use 'a < b < c'."
+R1716 = "You can simplify this boolean operation into a chained comparison: %s"
 R1721 = "When you want to convert a collection from one type into another, use the appropriate type constructor instead of a comprehension. Here, use %s instead."
 C1802 = "When checking if a collection is empty, either check equality with an empty instance of the collection type (e.g., == []) or explicitly check that the len is equal to 0."
 C0117 = "Change \"%s\" to \"%s\". Removing the negation simplifies the expression."

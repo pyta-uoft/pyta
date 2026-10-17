@@ -18,6 +18,16 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 💫 New checkers
 
+Pylint checkers v4.1:
+
+- `looping-through-iterator`
+- `chained-comparison-all-equal`
+- `using-comprehension-unpacking-in-unsupported-version`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
+
 ### 🐛 Bug fixes
 
 - Raise a `FileNotFoundError` with informative message in `python_ta.debug.snapshot` when `npx` is not found on the PATH, preventing a subprocess from being spawned that will ultimately fail.
@@ -39,6 +49,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `mypy` to the `prek` pre-commit hook configuration
 - Modified `python_ta.contracts` module to catch only documented `compile` exceptions
 - Added Python 3.15 to the CI test matrix
+- Updated to pylint v4.1 and astroid v4.3
+- Updated the PythonTA message for `chained-comparison` (R1716) to include pylint's suggested simplification
 
 ## [2.13.1] - 2026-08-12
 

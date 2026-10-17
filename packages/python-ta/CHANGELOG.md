@@ -51,6 +51,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Added Python 3.15 to the CI test matrix
 - Updated to pylint v4.1 and astroid v4.3
 - Updated the PythonTA message for `chained-comparison` (R1716) to include pylint's suggested simplification
+- Added `.gitattributes` to normalize line endings to LF
 
 ## [2.13.1] - 2026-08-12
 

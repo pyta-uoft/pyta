@@ -16,6 +16,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### 🔧 Internal changes
 
 - Pinned `z3` version to 4.x
+- Upgraded `z3` version to 5.3.x
 
 ## [2.13.1] - 2026-08-13
 

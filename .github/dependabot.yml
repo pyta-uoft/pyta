@@ -11,6 +11,12 @@ updates:
     schedule:
       interval: "monthly"
     groups:
+      # pylint pins a narrow astroid range, so they must be updated together.
+      # Listed before per-dependency because a dependency joins the first matching group.
+      pylint-astroid:
+        patterns:
+          - "pylint"
+          - "astroid"
       per-dependency:
         group-by: dependency-name
 

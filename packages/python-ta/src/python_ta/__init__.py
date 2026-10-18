@@ -43,11 +43,10 @@ from .check.helpers import (
     upload_linter_results,
     verify_pre_check,
 )
+from .util.documentation import get_documentation_url
 
 if TYPE_CHECKING:
     from .reporters.core import PythonTaReporter
-
-HELP_URL = "http://www.cs.toronto.edu/~david/pyta/checkers/index.html"
 
 
 def check_errors(
@@ -225,6 +224,6 @@ def doc(msg_id: str) -> None:
     Args:
         msg_id: The five-character error code, e.g. ``"E0401"``.
     """
-    msg_url = HELP_URL + "#" + msg_id.lower()
+    msg_url = get_documentation_url(msg_id)
     print("Opening {} in a browser.".format(msg_url))
     webbrowser.open(msg_url)

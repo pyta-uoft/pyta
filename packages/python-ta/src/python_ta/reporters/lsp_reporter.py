@@ -7,6 +7,7 @@ from pylint.message import Message
 from pylint.reporters.ureports.nodes import Section
 
 from .core import MessageLike, PythonTaReporter
+from python_ta.util.documentation import get_documentation_url
 
 CATEGORY_TO_LSP = {
     "error": types.DiagnosticSeverity.Error,
@@ -68,6 +69,7 @@ class LSPReporter(PythonTaReporter):
                     message=msg.msg,
                     severity=_lsp_severity(msg.category),
                     code=msg.msg_id,
+                    code_description=types.CodeDescription(href=get_documentation_url(msg.msg_id)),
                     source="python-ta",
                 )
                 diagnostics_list.append(diag)

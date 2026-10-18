@@ -28,7 +28,7 @@ def _is_unsat(*formulas: z3.BoolRef) -> bool:
     return solver.check() == z3.unsat
 
 
-@pytest.mark.parametrize("a,b", itertools.product(range(-5, 5), [-3, -2, 2, 3]))
+@pytest.mark.parametrize("a,b", list(itertools.product(range(-5, 5), [-3, -2, 2, 3])))
 def test_apply_mod_op_matches_python(a, b) -> None:
     """Test that apply_mod_op method matches Python's modulo operation."""
     parser = Z3Parser()
@@ -39,7 +39,7 @@ def test_apply_mod_op_matches_python(a, b) -> None:
     assert _value(parser.apply_mod_op(a, z3.IntVal(b))) == expected
 
 
-@pytest.mark.parametrize("a,b", itertools.product(range(-5, 5), [-3, -2, 2, 3]))
+@pytest.mark.parametrize("a,b", list(itertools.product(range(-5, 5), [-3, -2, 2, 3])))
 def test_apply_floordiv_op_matches_python(a, b) -> None:
     """Test that apply_floordiv_op method matches Python's floor division operation."""
     parser = Z3Parser()

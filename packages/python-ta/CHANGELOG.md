@@ -54,6 +54,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated to pylint v4.1 and astroid v4.3
 - Updated the PythonTA message for `chained-comparison` (R1716) to include pylint's suggested simplification
 - Added `.gitattributes` to normalize line endings to LF
+- Edited tests in `test_z3_parser.py` to prevent deprecation warnings
 
 ## [2.13.1] - 2026-08-12
 

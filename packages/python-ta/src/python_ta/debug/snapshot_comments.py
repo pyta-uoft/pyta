@@ -38,28 +38,30 @@ def transform_snapshot_comments(path: str) -> str:
     tokens = asttokens.ASTTokens(source, parse=True, filename=path)
     assert tokens.tree is not None  # parse=True always builds the tree
 
-    # Indices of the last token of each simple statement, for checking that an inline comment follows one
+    # Indices of the last token of each statement, for checking that an inline comment follows one
     stmt_ends = {
         node.last_token.index  # type: ignore[attr-defined]  # added by asttokens
         for node in ast.walk(tokens.tree)
-        if isinstance(node, ast.stmt) and not hasattr(node, "body")
+        if isinstance(node, ast.stmt)
     }
 
     # Find all snapshot comments and replace them with snapshot calls
-    comments = [
-        tok
+    edits = [
+        _edit(tokens, tok, match, stmt_ends, path)
         for tok in tokens.tokens
-        if tok.type == tokenize.COMMENT and PATTERN.fullmatch(tok.string)
+        if tok.type == tokenize.COMMENT and (match := PATTERN.fullmatch(tok.string))
     ]
-    return replace(source, [_edit(tokens, tok, stmt_ends, path) for tok in comments])
+    return replace(source, edits)
 
 
 def _edit(
-    tokens: asttokens.ASTTokens, tok: Token, stmt_ends: set[int], filename: str
+    tokens: asttokens.ASTTokens,
+    tok: Token,
+    match: re.Match[str],
+    stmt_ends: set[int],
+    filename: str,
 ) -> tuple[int, int, str]:
     """Return the (start, end, text) edit that turns the snapshot comment tok into a snapshot call."""
-    match = PATTERN.fullmatch(tok.string)
-    assert match is not None  # only called on snapshot comments
     line, col = tok.start
 
     def error(msg: str) -> SyntaxError:

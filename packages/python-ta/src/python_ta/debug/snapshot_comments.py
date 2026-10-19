@@ -79,9 +79,9 @@ def _edit(
             raise error("an inline snapshot comment must follow a complete statement")
         replacement = "; " + SNAPSHOT_ALIAS
 
-    # Replace everything up to the call's "(", padded so the arguments don't move
+    # Replace everything up to the call's "("
     prefix_len = match.start(1) + len(SNAPSHOT_NAME)
-    return tok.startpos, tok.startpos + prefix_len, replacement.ljust(prefix_len)
+    return tok.startpos, tok.startpos + prefix_len, replacement
 
 
 def _is_snapshot_call(call: str) -> bool:

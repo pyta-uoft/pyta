@@ -18,36 +18,28 @@ PATTERN = re.compile(r"#\s*pyta:\s*(snapshot\(.*\))\s*")
 _EXITS = {ast.Return: "return", ast.Raise: "raise", ast.Break: "break", ast.Continue: "continue"}
 
 
-def run_with_snapshot_comments(path: str) -> None:
+def run_with_snapshots(path: str) -> None:
     """Run the given Python file with snapshot comments enabled.
 
     Args:
         path: The path to the Python file to run.
     """
-    with tokenize.open(path) as f:
-        source = f.read()
-
-    try:
-        code = compile(insert_snapshot_calls(source, path), filename=path, mode="exec")
-    except SyntaxError as e:
-        # Show the line as the user wrote it, not with the inserted snapshot call
-        if e.lineno:
-            e.text = source.splitlines(keepends=True)[e.lineno - 1]
-        raise
-
+    code = compile(transform_snapshot_comments(path), filename=path, mode="exec")
     exec(code, {"__name__": "__main__", "__file__": path, SNAPSHOT_ALIAS: snapshot})
 
 
-def insert_snapshot_calls(source: str, filename: str = "<unknown>") -> str:
-    """Return the given source with each snapshot comment replaced by a snapshot call.
+def transform_snapshot_comments(path: str) -> str:
+    """Return the source of the given Python file with each snapshot comment replaced by a snapshot call.
 
     Each call replaces its comment on the same line.
 
     Args:
-        source: The Python source code.
-        filename: The filename to report in syntax errors.
+        path: The path to the Python file to transform.
     """
-    atok = asttokens.ASTTokens(source, parse=True, filename=filename)
+    with tokenize.open(path) as f:
+        source = f.read()
+
+    atok = asttokens.ASTTokens(source, parse=True, filename=path)
     assert atok.tree is not None  # parse=True always builds the tree
 
     # Map from index of last token to statement node, for finding which statement an inline comment follows
@@ -61,12 +53,12 @@ def insert_snapshot_calls(source: str, filename: str = "<unknown>") -> str:
     comments = [
         tok for tok in atok.tokens if tok.type == tokenize.COMMENT and PATTERN.fullmatch(tok.string)
     ]
-    new_source = replace(source, [_edit(atok, tok, stmt_ends, filename) for tok in comments])
+    new_source = replace(source, [_edit(atok, tok, stmt_ends, path) for tok in comments])
 
     # The source parsed before the calls were inserted, so any error here was caused by a
     # snapshot comment. Report it at the last snapshot comment at or before the error line.
     try:
-        ast.parse(new_source, filename=filename)
+        ast.parse(new_source, filename=path)
     except SyntaxError as e:
         culprits = [tok for tok in comments if e.lineno and tok.start[0] <= e.lineno]
         if not culprits:
@@ -74,7 +66,7 @@ def insert_snapshot_calls(source: str, filename: str = "<unknown>") -> str:
         line, col = culprits[-1].start
         raise SyntaxError(
             "snapshot comment can't go here (check its indentation)",
-            (filename, line, col + 1, culprits[-1].line),
+            (path, line, col + 1, culprits[-1].line),
         ) from None
 
     return new_source

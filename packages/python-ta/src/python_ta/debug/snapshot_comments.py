@@ -9,13 +9,9 @@ from .snapshot import snapshot
 
 SNAPSHOT_NAME = "snapshot"
 
-# Note that same length as shortest prefix  "#pyta:snapshot"
 SNAPSHOT_ALIAS = "__snapshot__"
 
 PATTERN = re.compile(r"#\s*pyta:\s*(snapshot\(.*\))\s*")
-
-# Statements that leave their block, so a snapshot call placed after them would never run
-_EXITS = {ast.Return: "return", ast.Raise: "raise", ast.Break: "break", ast.Continue: "continue"}
 
 
 def run_with_snapshots(path: str) -> None:
@@ -39,41 +35,27 @@ def transform_snapshot_comments(path: str) -> str:
     with tokenize.open(path) as f:
         source = f.read()
 
-    atok = asttokens.ASTTokens(source, parse=True, filename=path)
-    assert atok.tree is not None  # parse=True always builds the tree
+    tokens = asttokens.ASTTokens(source, parse=True, filename=path)
+    assert tokens.tree is not None  # parse=True always builds the tree
 
-    # Map from index of last token to statement node, for finding which statement an inline comment follows
+    # Indices of the last token of each simple statement, for checking that an inline comment follows one
     stmt_ends = {
-        node.last_token.index: node  # type: ignore[attr-defined]  # added by asttokens
-        for node in ast.walk(atok.tree)
+        node.last_token.index  # type: ignore[attr-defined]  # added by asttokens
+        for node in ast.walk(tokens.tree)
         if isinstance(node, ast.stmt) and not hasattr(node, "body")
     }
 
     # Find all snapshot comments and replace them with snapshot calls
     comments = [
-        tok for tok in atok.tokens if tok.type == tokenize.COMMENT and PATTERN.fullmatch(tok.string)
+        tok
+        for tok in tokens.tokens
+        if tok.type == tokenize.COMMENT and PATTERN.fullmatch(tok.string)
     ]
-    new_source = replace(source, [_edit(atok, tok, stmt_ends, path) for tok in comments])
-
-    # The source parsed before the calls were inserted, so any error here was caused by a
-    # snapshot comment. Report it at the last snapshot comment at or before the error line.
-    try:
-        ast.parse(new_source, filename=path)
-    except SyntaxError as e:
-        culprits = [tok for tok in comments if e.lineno and tok.start[0] <= e.lineno]
-        if not culprits:
-            raise
-        line, col = culprits[-1].start
-        raise SyntaxError(
-            "snapshot comment can't go here (check its indentation)",
-            (path, line, col + 1, culprits[-1].line),
-        ) from None
-
-    return new_source
+    return replace(source, [_edit(tokens, tok, stmt_ends, path) for tok in comments])
 
 
 def _edit(
-    atok: asttokens.ASTTokens, tok: Token, stmt_ends: dict[int, ast.stmt], filename: str
+    tokens: asttokens.ASTTokens, tok: Token, stmt_ends: set[int], filename: str
 ) -> tuple[int, int, str]:
     """Return the (start, end, text) edit that turns the snapshot comment tok into a snapshot call."""
     match = PATTERN.fullmatch(tok.string)
@@ -87,17 +69,12 @@ def _edit(
         raise error(f"invalid snapshot comment: {match.group(1)}")
 
     # If the snapshot comment is on a line by itself
-    if not tok.line[:col].strip():
+    if col == 0 or tok.line[:col].isspace():
         replacement = SNAPSHOT_ALIAS
     else:
-        prev = atok.prev_token(tok)
-        stmt = stmt_ends.get(prev.index)
-        if prev.string == ":":
-            raise error("a snapshot comment can't go on a line ending in ':'")
-        if stmt is None:
+        prev = tokens.prev_token(tok)
+        if prev.index not in stmt_ends:
             raise error("an inline snapshot comment must follow a complete statement")
-        if type(stmt) in _EXITS:
-            raise error(f"a snapshot comment after '{_EXITS[type(stmt)]}' would never run")
         replacement = "; " + SNAPSHOT_ALIAS
 
     # Replace everything up to the call's "(", padded so the arguments don't move

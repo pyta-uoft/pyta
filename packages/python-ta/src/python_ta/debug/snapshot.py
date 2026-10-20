@@ -11,6 +11,7 @@ import ast
 import inspect
 import json
 import logging
+import os
 import re
 import shutil
 import subprocess
@@ -343,7 +344,14 @@ def run_with_snapshots(path: str) -> None:
         path: The path to the Python file to run.
     """
     code = compile(transform_snapshot_comments(path), filename=path, mode="exec")
-    exec(code, {"__name__": "__main__", "__file__": path, SNAPSHOT_ALIAS: snapshot})
+
+    # Add the file's directory to the import path, as running it directly would
+    old_path = sys.path[:]
+    sys.path.insert(0, os.path.dirname(os.path.abspath(path)))
+    try:
+        exec(code, {"__name__": "__main__", "__file__": path, SNAPSHOT_ALIAS: snapshot})
+    finally:
+        sys.path[:] = old_path
 
 
 def transform_snapshot_comments(path: str) -> str:
@@ -397,9 +405,13 @@ def _edit(
         replacement = SNAPSHOT_ALIAS
     else:
         prev = tokens.prev_token(tok)
+        # The statement may already end with a ";"
+        has_semicolon = prev.string == ";"
+        if has_semicolon:
+            prev = tokens.prev_token(prev)
         if prev.index not in stmt_ends:
             raise error("an inline snapshot comment must follow a complete statement")
-        replacement = "; " + SNAPSHOT_ALIAS
+        replacement = SNAPSHOT_ALIAS if has_semicolon else "; " + SNAPSHOT_ALIAS
 
     # Replace everything up to the call's "("
     prefix_len = match.start(1) + len(SNAPSHOT_NAME)

@@ -53,7 +53,7 @@ In this case, Pylint's default configuration will be used instead, though all cu
 
 ### PythonTA reporters
 
-PythonTA offers four different types of reporters used to display the results of its analysis.
+PythonTA offers five different types of reporters used to display the results of its analysis.
 These may be set using the `output-format` configuration option.
 
 - `pyta-plain`: outputs report in plain text
@@ -61,6 +61,9 @@ These may be set using the `output-format` configuration option.
 - `pyta-json`: outputs a JSON representation of the messages reported
 - `pyta-html`: outputs report in a webpage
 - `pyta-lsp`: outputs report in LSP-compliant JSON format
+
+When `pyta-json` or `pyta-lsp` writes to standard output, the complete output is valid JSON.
+Operational messages (like data-upload status updates) are written to standard error instead.
 
 ### Disabled Pylint checks
 

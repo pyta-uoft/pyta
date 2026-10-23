@@ -14,6 +14,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added an `--autoformat` CLI option to format files with Black before analysis.
 - `python_ta.debug.snapshot` now only uses the default MemoryViz diagram width of 800 when no `--width` is passed in `memory_viz_args`. Also added this new behaviour and `python_ta.debug.snapshot` as a whole to the documentation.
 - Modified `LSPReporter` to flag only the first line in a module when the message pertains to the entire module, such as a missing module docstring.
+- Added snapshot comments (`# pyta: snapshot(...)`) and `python_ta.debug.run_with_snapshots` for running a file with them, along with documentation.
 
 ### 💫 New checkers
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from python_ta import check_all
+from python_ta import check_all, doc
 
 FIXTURE_PATH = os.path.normpath(
     os.path.join(__file__, "../../fixtures/reporters/lsp_reporter_input.py")
@@ -42,6 +42,9 @@ def test_exact_output(lsp_output):
                     "message": "The variable x is unused and can be removed. If you intended to use it, there may be a typo elsewhere in the code.",
                     "severity": 2,
                     "code": "W0612",
+                    "codeDescription": {
+                        "href": "https://www.cs.toronto.edu/~david/pyta/checkers/index.html#w0612"
+                    },
                     "source": "python-ta",
                 }
             ],
@@ -64,3 +67,13 @@ def test_module_diagnostic_highlights_only_first_line(lsp_output):
         "start": {"line": 0, "character": 0},
         "end": {"line": 0, "character": 13},
     }
+
+
+def test_code_description_matches_doc(lsp_output, mocker):
+    """Tests that each diagnostic links to the same URL opened by python_ta.doc."""
+    open_browser = mocker.patch("webbrowser.open")
+
+    for output in lsp_output:
+        for diagnostic in output["diagnostics"]:
+            doc(diagnostic["code"])
+            open_browser.assert_called_with(diagnostic["codeDescription"]["href"])

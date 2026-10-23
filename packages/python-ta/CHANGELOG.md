@@ -14,9 +14,22 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added an `--autoformat` CLI option to format files with Black before analysis.
 - `python_ta.debug.snapshot` now only uses the default MemoryViz diagram width of 800 when no `--width` is passed in `memory_viz_args`. Also added this new behaviour and `python_ta.debug.snapshot` as a whole to the documentation.
 - Modified `LSPReporter` to flag only the first line in a module when the message pertains to the entire module, such as a missing module docstring.
-- Added snapshot comments (`# pyta: snapshot(...)`) and `python_ta.debug.run_with_snapshots` for running a file with them, along with documentation.
+- Extended `Z3Parser.apply_bin_op` to handle `%` and `//` operators.
+- Added `CodeDescription` to `LSPReporter` so that each diagnostic contains a URL to its corresponding documentation section.
+- Modified documentation URLs to use HTTPS instead of HTTP.
+- Added snapshot comments (`# pyta: snapshot(...)`) which call `snapshot` without needing to import it or add code, and `python_ta.debug.run_with_snapshots` for running a file containing them. Also added documentation for both..
 
 ### 💫 New checkers
+
+Pylint checkers v4.1:
+
+- `looping-through-iterator`
+- `chained-comparison-all-equal`
+- `using-comprehension-unpacking-in-unsupported-version`
+
+For more information on these checkers, please see the
+[Pylint release notes](http://pylint.pycqa.org/en/latest/whatsnew/index.html). Note that the above
+list only contains the Pylint checkers enabled by default in PythonTA.
 
 ### 🐛 Bug fixes
 
@@ -39,6 +52,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `mypy` to the `prek` pre-commit hook configuration
 - Modified `python_ta.contracts` module to catch only documented `compile` exceptions
 - Added Python 3.15 to the CI test matrix
+- Updated to pylint v4.1 and astroid v4.3
+- Updated the PythonTA message for `chained-comparison` (R1716) to include pylint's suggested simplification
+- Added `.gitattributes` to normalize line endings to LF
+- Edited tests in `test_z3_parser.py` to prevent deprecation warnings
 
 ## [2.13.1] - 2026-08-12
 

@@ -43,8 +43,15 @@ IGNORED_TESTS = [
 # The following tests require z3-solver as dependency
 Z3_RELATED_TESTS = ["r9900_redundant_condition.py", "r9901_impossible_condition.py"]
 
+# The following test requires allow_pylint_comments to be enabled
+PYLINT_COMMENT_TESTS = ["e0011_unrecognized_inline_option.py"]
 
-def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> list[str]:
+
+def get_file_paths(
+    paths: Union[str, list[str]],
+    z3_enabled: bool = False,
+    pylint_comments_only: bool = False,
+) -> list[str]:
     """
     Get all the Python files from the specified directories for testing. This will
     return the full file paths for each Python file, excluding those listed in IGNORED_TESTS.
@@ -53,6 +60,8 @@ def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> li
 
     :param paths: The path or list of paths to retrieve the Python files from.
     :param z3_enabled: Option to enable z3 dependency.
+    :param pylint_comments_only: Select only examples requiring Pylint comments when True;
+        exclude those examples when False.
     :return: A list of full file paths to the Python files.
     """
     test_files = []
@@ -67,6 +76,7 @@ def get_file_paths(paths: Union[str, list[str]], z3_enabled: bool = False) -> li
                     filename not in IGNORED_TESTS
                     and filename.endswith(".py")
                     and (z3_enabled or filename not in Z3_RELATED_TESTS)
+                    and ((filename in PYLINT_COMMENT_TESTS) == pylint_comments_only)
                 ):
                     full_path = os.path.join(root, filename)
                     rel_path = os.path.relpath(full_path, path)
@@ -80,6 +90,8 @@ def _symbols_by_file_pyta(
     include_msg: bool = False,
     z3_enabled: bool = False,
     pycodestyle_enabled: bool = False,
+    allow_pylint_comments: bool = False,
+    pylint_comments_only: bool = False,
 ) -> dict[str, set[str]]:
     """
     Run python_ta.check_all() on files from specified directories and return the map of file name to the
@@ -90,10 +102,15 @@ def _symbols_by_file_pyta(
     :param include_msg: whether to include message descriptions in the symbol set
     :param z3_enabled: Option to enable z3 dependency.
     :param pycodestyle_enabled: Option to enable pycodestyle-specific checks (E9989).
+    :param allow_pylint_comments: Option to allow inline Pylint directives (E0011).
+    :param pylint_comments_only: Select only examples requiring Pylint comments when True;
+        exclude those examples when False.
     :return: A dictionary mapping each file name to a set of PythonTA message symbols
     (and descriptions if include_msg is True).
     """
-    files_to_check = get_file_paths(paths, z3_enabled=z3_enabled)
+    files_to_check = get_file_paths(
+        paths, z3_enabled=z3_enabled, pylint_comments_only=pylint_comments_only
+    )
     pyta_list_output = []
     for file in files_to_check:
         if pycodestyle_enabled:
@@ -108,6 +125,7 @@ def _symbols_by_file_pyta(
                 "disable": ["all"],
                 "enable": enable_checks,
                 "z3": z3_enabled,
+                "allow-pylint-comments": allow_pylint_comments,
             },
             output=buf,
         )
@@ -164,6 +182,14 @@ def pyta_pycodestyle_symbols() -> dict[str, set[str]]:
     :return: A dictionary mapping file names to sets of PythonTA message symbols and descriptions.
     """
     return _symbols_by_file_pyta([_PYCODESTYLE_PATH], include_msg=True, pycodestyle_enabled=True)
+
+
+@pytest.fixture(scope="session")
+def pyta_pylint_comments_symbols() -> dict[str, set[str]]:
+    """Return message symbols for examples that require inline Pylint directives."""
+    return _symbols_by_file_pyta(
+        [_EXAMPLES_PATH], allow_pylint_comments=True, pylint_comments_only=True
+    )
 
 
 @pytest.mark.skipif(
@@ -252,6 +278,20 @@ def test_pycodestyle_errors_pyta(
     assert any(
         error_code in msg for msg in file_symbols
     ), f"Failed {test_file}. The correct PEP8 error type is not in reported message."
+
+
+@pytest.mark.parametrize("test_file", get_file_paths(_EXAMPLES_PATH, pylint_comments_only=True))
+def test_pylint_comments_files_pyta(
+    test_file: str, pyta_pylint_comments_symbols: dict[str, set[str]]
+) -> None:
+    """Test examples requiring Pylint comments separately from the default configuration."""
+    base_name = os.path.basename(test_file)
+    checker_name = base_name[6:-3].replace("_", "-")
+    file_symbols = pyta_pylint_comments_symbols[base_name]
+    found_pylint_message = checker_name in file_symbols
+    assert (
+        found_pylint_message
+    ), f"Failed {test_file}. File does not add expected message {checker_name}: {file_symbols}."
 
 
 def test_c9104_module_name_violation() -> None:

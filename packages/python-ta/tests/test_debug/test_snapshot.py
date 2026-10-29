@@ -10,9 +10,18 @@ import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 from typing import Iterable, Optional
 
-from python_ta.debug.snapshot import snapshot, snapshot_to_json
+import pytest
+
+from python_ta.debug.snapshot import (
+    SNAPSHOT_ALIAS,
+    run_with_snapshots,
+    snapshot,
+    snapshot_to_json,
+    transform_snapshot_comments,
+)
 
 SNAPSHOT_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "snapshot_testing_snapshots"
@@ -1188,3 +1197,151 @@ def test_snapshot_excludes_variables_with_regex():
             }
         },
     ]
+
+
+def transform_snapshot_source(tmp_path: Path, source: str) -> str:
+    """
+    Helper for transform_snapshot_comments() testing.
+    Writes the given source to a file in tmp_path and returns its transformed source.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text(source, encoding="utf-8")
+    return transform_snapshot_comments(str(path))
+
+
+def test_snapshot_comment_multiple(tmp_path) -> None:
+    """
+    Test that every snapshot comment in a file is replaced.
+    """
+    result = transform_snapshot_source(
+        tmp_path,
+        "x = 1  # pyta: snapshot()\n# pyta: snapshot(save=True)\ny = 2  # pyta: snapshot()\n",
+    )
+
+    assert result == (
+        f"x = 1  ; {SNAPSHOT_ALIAS}()\n{SNAPSHOT_ALIAS}(save=True)\ny = 2  ; {SNAPSHOT_ALIAS}()\n"
+    )
+
+
+def test_snapshot_comment_after_semicolon(tmp_path) -> None:
+    """
+    Test that a snapshot comment following a statement that already ends with a semicolon
+    does not add a second semicolon.
+    """
+    result = transform_snapshot_source(tmp_path, "x = 1;  # pyta: snapshot()\n")
+
+    assert result == f"x = 1;  {SNAPSHOT_ALIAS}()\n"
+
+
+def test_snapshot_comment_after_compound_header_raises(tmp_path) -> None:
+    """
+    Test that an inline snapshot comment following the header of a compound statement
+    (e.g. "if x:") raises a SyntaxError.
+    """
+    with pytest.raises(SyntaxError, match="must follow a complete statement") as exc_info:
+        transform_snapshot_source(tmp_path, "x = 1\nif x:  # pyta: snapshot()\n    pass\n")
+
+    assert exc_info.value.lineno == 2
+
+
+def test_run_with_snapshots_invalid_comment_raises(tmp_path) -> None:
+    """
+    Test that run_with_snapshots raises a SyntaxError pointing at an invalid snapshot comment.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text("x = 1\n# pyta: snapshot(save=)\n", encoding="utf-8")
+
+    with pytest.raises(SyntaxError, match="invalid snapshot comment") as exc_info:
+        run_with_snapshots(str(path))
+
+    assert exc_info.value.filename == str(path)
+    assert exc_info.value.lineno == 2
+
+
+def test_run_with_snapshots_error_points_to_original_line(tmp_path) -> None:
+    """
+    Test that an error raised by a file with snapshot comments is reported at the file's
+    original path and line.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text(
+        'x = 1  # pyta: snapshot()\n# pyta: snapshot()\nraise ValueError("error")\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        run_with_snapshots(str(path))
+
+    last_frame = exc_info.tb
+    while last_frame.tb_next is not None:
+        last_frame = last_frame.tb_next
+    assert last_frame.tb_frame.f_code.co_filename == str(path)
+    assert last_frame.tb_lineno == 3
+
+
+def test_run_with_snapshots_can_import_from_file_directory(tmp_path) -> None:
+    """
+    Test that run_with_snapshots sets up sys.path as if the file were run directly with Python,
+    so the file's imports resolve the same way. In particular, the file can import modules from
+    its own directory.
+    """
+    (tmp_path / "snapshot_comment_helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text("from snapshot_comment_helper import VALUE\n", encoding="utf-8")
+
+    # A ModuleNotFoundError here would mean the import failed
+    try:
+        run_with_snapshots(str(path))
+    finally:
+        sys.modules.pop("snapshot_comment_helper", None)
+
+
+def test_run_with_snapshots_restores_sys_path_after_error(tmp_path) -> None:
+    """
+    Test that run_with_snapshots restores sys.path after running the file, even when the file
+    raises an error.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text('raise ValueError("error")\n', encoding="utf-8")
+    old_path = sys.path[:]
+
+    with pytest.raises(ValueError, match="error"):
+        run_with_snapshots(str(path))
+
+    assert sys.path == old_path
+
+
+def test_run_with_snapshots_save_stdout(snapshot) -> None:
+    """
+    Test that run_with_snapshots runs both a snapshot comment following a statement and a
+    snapshot comment on its own line, each returning a MemoryViz svg of the stack frame at that
+    point to stdout.
+    """
+
+    snapshot.snapshot_dir = SNAPSHOT_DIR
+
+    # Runs the snapshot comment file in a separate process
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    runner_path = os.path.join(current_directory, "snapshot_comment_runner.py")
+    comment_path = os.path.join(current_directory, "snapshot_comment_save_stdout.py")
+    result = subprocess.run(
+        [sys.executable, runner_path, comment_path],
+        capture_output=True,
+        encoding="utf-8",
+        text=True,
+        check=True,
+    )
+
+    # Each snapshot comment writes its own svg to stdout
+    svgs = re.findall(r"<svg.*?</svg>", result.stdout, re.DOTALL)
+    assert len(svgs) == 2
+    for svg in svgs:
+        # Raises a ParseError if the svg is not valid XML
+        ET.fromstring(svg)
+
+    # The own line snapshot comment runs after total is assigned, so its svg differs
+    inline_svg, own_line_svg = svgs
+    assert inline_svg != own_line_svg
+
+    snapshot.assert_match(inline_svg, "snapshot_testing_snapshots_expected_comment_inline.svg")
+    snapshot.assert_match(own_line_svg, "snapshot_testing_snapshots_expected_comment_own_line.svg")

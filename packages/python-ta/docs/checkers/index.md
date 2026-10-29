@@ -1517,6 +1517,12 @@ This error occurs when an import alias is the same as the original package name.
 
 ```
 
+The above can be modified to:
+
+```python
+import math as mathematics
+```
+
 (C0415)=
 
 ### Import outside toplevel (C0415)

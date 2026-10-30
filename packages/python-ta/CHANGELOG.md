@@ -39,6 +39,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Used astroid inference for arguments passed to `__import__` in `ForbiddenImportChecker`
 - Fixed `AccumulationTable` functionality in Python REPL
 - Fixed `python_ta.debug.snapshot` capturing frames outside of `exec` calls by stopping at the first top-level (`<module>`) frame
+- Fixed false positive `redundant-condition` reports when variables constrained before a loop are reassigned in the loop body
 
 ### 🔧 Internal changes
 

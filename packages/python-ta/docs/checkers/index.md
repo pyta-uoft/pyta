@@ -582,6 +582,29 @@ if True:  # Error was on this line
   pass
 ```
 
+(C1802)=
+
+### Use implicit booleaness, not len (C1802)
+
+This error occurs when `len` is used to test whether a sequence is empty or non-empty.
+Empty sequences are false in a boolean context, so we can instead test the sequence directly.
+
+```{literalinclude} /../../../examples/pylint/c1802_use_implicit_booleaness_not_len.py
+
+```
+
+The above can be modified to:
+
+```python
+ARRAY = [1, 2, 3]
+
+if ARRAY:
+    pass
+```
+
+Use `if not ARRAY` to test for an empty sequence. A length comparison such as `len(ARRAY) > 1`
+is still appropriate when we need to check for a specific number of elements.
+
 (C0121)=
 
 ### Singleton comparison (C0121)
@@ -1022,6 +1045,36 @@ This error occurs when a module, function, class or method has an empty docstrin
 
 ```
 
+(C0114)=
+
+### Missing module docstring (C0114)
+
+This error occurs when a module has no docstring.
+
+```{literalinclude} /../../../examples/pylint/c0114_missing_module_docstring.py
+
+```
+
+(C0115)=
+
+### Missing class docstring (C0115)
+
+This error occurs when a class has no docstring.
+
+```{literalinclude} /../../../examples/pylint/c0115_missing_class_docstring.py
+
+```
+
+(C0116)=
+
+### Missing function docstring (C0116)
+
+This error occurs when a function or method has no docstring.
+
+```{literalinclude} /../../../examples/pylint/c0116_missing_function_docstring.py
+
+```
+
 (C9960)=
 
 ### Unmentioned Parameter (C9960)
@@ -1069,6 +1122,24 @@ meaningful one. Here are some of the disallowed names to avoid:
 
 ```{literalinclude} /../../../examples/pylint/c0104_disallowed_name.py
 
+```
+
+(C2401)=
+
+### Non-ASCII name (C2401)
+
+This error occurs when an identifier, such as a variable, function, or class name, contains
+non-ASCII characters. Although Python allows these names, non-ASCII characters can make
+it more difficult to use and debug code.
+
+```{literalinclude} /../../../examples/pylint/c2401_non_ascii_name.py
+
+```
+
+The above can be modified to:
+
+```python
+cafe = "coffee"
 ```
 
 (E0102)=
@@ -1436,6 +1507,22 @@ docstring.
 
 ```
 
+(C0414)=
+
+### Useless import alias (C0414)
+
+This error occurs when an import alias is the same as the original package name.
+
+```{literalinclude} /../../../examples/pylint/c0414_useless_import_alias.py
+
+```
+
+The above can be modified to:
+
+```python
+import math as mathematics
+```
+
 (C0415)=
 
 ### Import outside toplevel (C0415)
@@ -1444,6 +1531,23 @@ Imports should be placed at the top-level of the module, not inside function or 
 
 ```{literalinclude} /../../../examples/pylint/c0415_import_outside_toplevel.py
 
+```
+
+(C2403)=
+
+### Non-ASCII module import (C2403)
+
+This error occurs when a name introduced by an import, including an alias, contains non-ASCII
+characters. Use an ASCII name or alias to make the import easier to read and distinguish.
+
+```{literalinclude} /../../../examples/pylint/c2403_non_ascii_module_import.py
+
+```
+
+The above can be modified to:
+
+```python
+import math as mathematics
 ```
 
 (W0611)=
@@ -3506,6 +3610,16 @@ Corrected version:
 print("Hello World!")
 ```
 
+(C0303)=
+
+### Trailing whitespace (C0303)
+
+This error occurs when there is whitespace between the end of a line and the newline.
+
+```{literalinclude} /../../../examples/pylint/c0303_trailing_whitespace.py
+
+```
+
 (C0304)=
 
 ### Missing final newline (C0304)
@@ -3694,6 +3808,53 @@ spam = 0
 spam += 1
 spam -= 1
 ```
+
+## Configuration errors
+
+(E0011)=
+
+### Unrecognized inline option (E0011)
+
+PythonTA disallows `# pylint:` comments by default. This error applies only when such comments
+are permitted through the `allow-pylint-comments` configuration option.
+
+This error occurs when a `# pylint:` comment contains an option that Pylint does not recognize.
+Check the spelling of the option and use a supported option such as `disable` or `enable`.
+
+```{literalinclude} /../../../examples/pylint/e0011_unrecognized_inline_option.py
+
+```
+
+The above can be modified to:
+
+```python
+# pylint: disable=missing-module-docstring
+```
+
+(E0013)=
+
+### Bad plugin value (E0013)
+
+This error occurs when PythonTA cannot import a plugin named in the `load-plugins` configuration
+option. The plugin name may be misspelled, or the plugin may not be installed in the active
+Python environment.
+
+For example, this PythonTA configuration misspells the plugin module name:
+
+```ini
+[MAIN]
+load-plugins = pylint.extensions.bad_biultin
+```
+
+The above can be modified to:
+
+```ini
+[MAIN]
+load-plugins = pylint.extensions.bad_builtin
+```
+
+If the module name is correct, make sure the plugin and its dependencies are installed in the
+same environment as PythonTA.
 
 ## Older errors
 

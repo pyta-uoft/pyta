@@ -578,8 +578,41 @@ test_var2a = "Students Developing Software"
 snapshot(save=True, memory_viz_args=["--width", "1200"])
 ```
 
+### Snapshot comments
+
+Instead of importing and calling `snapshot`, you can write a `# pyta: snapshot(...)` comment where you want to capture memory, and then run the file with `python_ta.debug.run_with_snapshots`. Each snapshot comment is replaced by a call to `snapshot` with the same arguments before the file is run:
+
+```python
+# demo.py
+def func(n: int) -> None:
+    nums = [n, n + 1]  # pyta: snapshot(save=True, memory_viz_args=["--output=demo.svg"])
+
+
+message = "Hello, world"
+func(1)
+```
+
+```python
+# run_demo.py
+from python_ta.debug import run_with_snapshots
+
+run_with_snapshots("demo.py")
+```
+
+Running `python run_demo.py` saves the memory diagram to `demo.svg`.
+
+A snapshot comment can be on its own line, or on the same line after a complete statement (as above), in which case the snapshot is taken after that statement runs. It takes the same arguments as `snapshot()`. Since the return value of a snapshot comment is discarded, you will usually want `save=True`.
+
 ### API
 
 ```{eval-rst}
 .. autofunction:: python_ta.debug.snapshot.snapshot
+```
+
+```{eval-rst}
+.. autofunction:: python_ta.debug.snapshot.run_with_snapshots
+```
+
+```{eval-rst}
+.. autofunction:: python_ta.debug.snapshot.transform_snapshot_comments
 ```

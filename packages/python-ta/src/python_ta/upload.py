@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
 import uuid
 import warnings
 from contextlib import ExitStack
@@ -18,6 +19,11 @@ if TYPE_CHECKING:
 
 UPLOAD_TIMEOUT_SECONDS = 5
 PYTHON_TA_DATA_DIR_ENV_VAR = "PYTHON_TA_DATA_DIR"
+
+
+def _print_status(message: str) -> None:
+    """Print status messages to stderr so they don't contaminate reports."""
+    print(message, file=sys.stderr)
 
 
 def errors_to_dict(errors: Iterable[list[Message]]) -> dict[str, list[dict[str, Any]]]:
@@ -56,48 +62,50 @@ def upload_to_server(
                 timeout=UPLOAD_TIMEOUT_SECONDS,
             )
         response.raise_for_status()
-        print("[INFO] Upload successful")
+        _print_status("[INFO] Upload successful")
     except requests.HTTPError as e:
-        print("[ERROR] Upload failed")
+        _print_status("[ERROR] Upload failed")
         status_code = e.response.status_code if e.response is not None else None
         if status_code == 400:
-            print(
+            _print_status(
                 "[ERROR] HTTP Response Status 400: Client-side error, likely due to improper syntax. "
                 "Please report this to your instructor (and attach the code that caused the error)."
             )
         elif status_code == 403:
-            print(
+            _print_status(
                 "[ERROR] HTTP Response Status 403: Authorization is currently required for submission."
             )
         elif status_code == 500:
-            print(
+            _print_status(
                 "[ERROR] HTTP Response Status 500: The server ran into a situation it doesn't know how to handle. "
             )
-            print(
+            _print_status(
                 "Please report this to your instructor (and attach the code that caused the error)."
             )
         elif status_code == 503:
-            print(
+            _print_status(
                 "[ERROR] HTTP Response Status 503: The server is not ready to handle your request. "
             )
-            print("It may be down for maintenance.")
+            _print_status("It may be down for maintenance.")
         else:
-            print('[ERROR] Error message: "{}"'.format(e))
+            _print_status('[ERROR] Error message: "{}"'.format(e))
     except requests.Timeout:
-        print("[ERROR] Upload failed")
-        print("[ERROR] Error message: Connection timed out. The server may be temporarily down.")
+        _print_status("[ERROR] Upload failed")
+        _print_status(
+            "[ERROR] Error message: Connection timed out. The server may be temporarily down."
+        )
     except requests.ConnectionError:
-        print("[ERROR] Upload failed")
-        print(
+        _print_status("[ERROR] Upload failed")
+        _print_status(
             "[ERROR] Error message: Could not connect. This may be caused by your firewall, or the server may be "
             "temporarily down."
         )
     except requests.RequestException as e:
-        print("[ERROR] Upload failed")
-        print('[ERROR] Error message: "{}"'.format(e))
+        _print_status("[ERROR] Upload failed")
+        _print_status('[ERROR] Error message: "{}"'.format(e))
     except OSError as e:
-        print("[ERROR] Upload failed")
-        print(f'[ERROR] Could not read a file selected for upload: "{e}"')
+        _print_status("[ERROR] Upload failed")
+        _print_status(f'[ERROR] Could not read a file selected for upload: "{e}"')
 
 
 def _get_anonymous_id() -> str:
@@ -133,7 +141,7 @@ def _get_or_create_local_anonymous_id(anonymous_id_path: Path) -> str:
     try:
         anonymous_id_path.parent.mkdir(parents=True, exist_ok=True)
         anonymous_id_path.write_text(anonymous_id + "\n", encoding="utf-8")
-        print(f"[INFO] Saved anonymous ID to {anonymous_id_path}")
+        _print_status(f"[INFO] Saved anonymous ID to {anonymous_id_path}")
     except OSError:
         pass
     return anonymous_id

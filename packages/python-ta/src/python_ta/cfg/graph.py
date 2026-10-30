@@ -17,9 +17,11 @@ from astroid.nodes import (
     AugAssign,
     Break,
     Continue,
+    For,
     NodeNG,
     Raise,
     Return,
+    While,
 )
 
 # Global z3
@@ -276,6 +278,7 @@ class ControlFlowGraph:
         - While conditions
 
         Constraints with reassigned variables are not included in subsequent edges.
+        At loop headers, constraints for any variables that are reassigned in a loop are removed.
         """
         if not self.z3_enabled:
             return
@@ -299,6 +302,13 @@ class ControlFlowGraph:
 
                 # traverse into target node
                 for node in edge.target.statements:
+                    loop = node.parent
+                    # remove constraints with reassigned variables in the loop
+                    if (isinstance(loop, While) and node is loop.test) or (
+                        isinstance(loop, For) and node is loop.target
+                    ):
+                        names = {n.name for n in loop.nodes_of_class(AssignName)}
+                        z3_environment.invalidate(names)
                     if isinstance(node, (Assign, AugAssign, AnnAssign)):
                         self._handle_variable_reassignment(node, z3_environment)
 
@@ -488,6 +498,13 @@ class Z3Environment:
             return parser.parse(node)
         except (Z3Exception, Z3ParseException):
             return None
+
+    def invalidate(self, names: Set[str]) -> None:
+        """Drop all current constraints that contain variables in names.
+        Unlike assign, this does not mark the variables as reassigned, so constraints
+        added later are kept.
+        """
+        self.constraints = [c for c in self.constraints if not (_get_vars(c) & names)]
 
 
 def _get_vars(expr: ExprRef) -> Set[str]:

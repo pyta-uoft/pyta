@@ -231,6 +231,37 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
         with self.assertNoMessages():
             self.checker.visit_if(condition_node)
 
+    def test_not_redundant_by_reassignment_in_loop(self):
+        src = """
+        def func(x: int, y: int) -> None:
+            '''
+            Precondition: y == 0
+            '''
+            while x > 0:
+                y += 1
+                x -= 1
+            if y == 0:
+                print(y)
+        """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertNoMessages():
+            self.checker.visit_if(condition_node)
+
+    def test_redundant_after_loop_header(self):
+        src = """
+        def func(x: int) -> None:
+            while x < 10:
+                if x < 10:
+                    print(x)
+                x += 1
+        """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertAddsMessages(
+            pylint.testutils.MessageTest(msg_id="redundant-condition", node=condition_node.test),
+            ignore_position=True,
+        ):
+            self.checker.visit_if(condition_node)
+
     def _apply_cfg_visitor(self, src: str) -> nodes.NodeNG:
         z3v = Z3Visitor()
         mod = z3v.visitor.visit(astroid.parse(src))

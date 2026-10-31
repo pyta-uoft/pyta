@@ -3982,9 +3982,7 @@ spam -= 1
 
 ## Configuration errors
 
-Pass the configuration file to PythonTA using `python_ta.check_all("my_file.py", config="pyproject.toml")`
-or the command `python_ta --config pyproject.toml my_file.py`.
-See [Configuration](../usage/configuration.md) for more details.
+See the [Configuration documentation](../usage/configuration.md) for details on configuring PythonTA.
 
 (E0011)=
 

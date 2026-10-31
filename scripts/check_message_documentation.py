@@ -9,7 +9,8 @@ messages have documentation. It checks all Pylint and PythonTA messages using
 PythonTA's default configuration and the installed Pylint version.
 
 It includes all enabled message definitions, even when reporting them requires additional
-configuration, such as z3=True.
+configuration, such as z3=True. Known messages that remain registered but are no longer
+emitted are explicitly excluded.
 """
 
 from __future__ import annotations
@@ -24,6 +25,14 @@ from python_ta.check.helpers import reset_linter
 DEFAULT_DOCS_PATH = (
     Path(__file__).resolve().parents[1] / "packages/python-ta/docs/checkers/index.md"
 )
+
+# These messages will be ignored by this script.
+# Document the reason and supporting source for each exclusion.
+EXCLUDED_MESSAGES = {
+    # No longer emitted since Pylint's configuration parser changed in version 2.14.
+    # https://pylint.readthedocs.io/en/stable/user_guide/messages/error/bad-configuration-section.html
+    "E0014",
+}
 
 
 def main() -> int:
@@ -54,11 +63,14 @@ def main() -> int:
         if linter.is_message_enabled(message.msgid)
     }
 
-    # Calculate and output the messages with missing documentation
-    missing = sorted(enabled.keys() - documented)
+    # Exclude known retired diagnostics before checking documentation coverage.
+    ignored = enabled.keys() & EXCLUDED_MESSAGES
+    checked = enabled.keys() - ignored
+    missing = sorted(checked - documented)
 
     print(f"Enabled messages: {len(enabled)}")
-    print(f"Enabled messages with documentation: {len(enabled.keys() & documented)}")
+    print(f"Ignored messages no longer emitted: {len(ignored)}")
+    print(f"Enabled messages with documentation: {len(checked & documented)}")
     print(f"Missing documentation: {len(missing)}")
     for msg_id in missing:
         print(f"{msg_id}: {enabled[msg_id]}")

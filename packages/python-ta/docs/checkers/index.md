@@ -1770,26 +1770,6 @@ class Child(Parent):
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
 
-(E1003)=
-
-### Bad super call (E1003)
-
-This error occurs when the first argument to `super` is not the class containing the method. In Python 2.7, `super` requires the current class and `self` as arguments.
-
-```{literalinclude} /../../../examples/pylint/e1003_bad_super_call.py
-
-```
-
-Corrected version:
-
-```python
-class Bar(Foo):
-    def __init__(self):
-        super(Bar, self).__init__()
-```
-
-**See also**: [R1725](#R1725) (In Python 3, we prefer calling `super()` without arguments.)
-
 (W0245)=
 
 ### Super without brackets (W0245)

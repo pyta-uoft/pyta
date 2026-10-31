@@ -492,6 +492,25 @@ for number in [1, 2, 3]:
     print(number)
 ```
 
+(E0111)=
+
+### Bad reversed sequence (E0111)
+
+This error occurs when `reversed` is called on an object that does not support reverse
+iteration. The object must define `__reversed__`, or both `__len__` and `__getitem__`.
+
+In the following example, an integer does not support reverse iteration.
+
+```{literalinclude} /../../../examples/pylint/e0111_bad_reversed_sequence.py
+
+```
+
+Corrected version:
+
+```python
+reversed([1, 2, 3, 4, 5])
+```
+
 (E1134)=
 
 ### Not a mapping (E1134)
@@ -1751,6 +1770,26 @@ class Child(Parent):
 - [Python's super considered harmful]
 - [StackOverflow: What does 'super' do in Python?]
 
+(E1003)=
+
+### Bad super call (E1003)
+
+This error occurs when the first argument to `super` is not the class containing the method. In Python 2.7, `super` requires the current class and `self` as arguments.
+
+```{literalinclude} /../../../examples/pylint/e1003_bad_super_call.py
+
+```
+
+Corrected version:
+
+```python
+class Bar(Foo):
+    def __init__(self):
+        super(Bar, self).__init__()
+```
+
+**See also**: [R1725](#R1725) (In Python 3, we prefer calling `super()` without arguments.)
+
 (W0245)=
 
 ### Super without brackets (W0245)
@@ -1901,6 +1940,28 @@ A class should not inherit from a different class multiple times.
 
 ```{literalinclude} /../../../examples/pylint/e0241_duplicate_bases.py
 
+```
+
+(E0245)=
+
+### Declare non-slot (E0245)
+
+This error occurs when a class declares an attribute using a type annotation, but the name
+is missing from `__slots__`, and `__slots__` does not include `__dict__`. Add the attribute name
+to `__slots__` so that instances can store it.
+
+```{literalinclude} /../../../examples/pylint/e0245_declare_non_slot.py
+
+```
+
+Corrected version:
+
+```python
+class Student:
+    __slots__ = ("name", "surname")
+
+    name: str
+    surname: str
 ```
 
 (E0211)=
@@ -3017,6 +3078,25 @@ This often indicates a logical error that may lead to an infinite loop or a loop
 
 ## Miscellaneous
 
+(E0119)=
+
+### Misplaced format function (E0119)
+
+This error occurs when `.format` is called on the result of a function call instead of on the string passed to that function.
+
+In the following example, `print` returns `None`, which has
+no `format` method. Format the string before passing it to `print`.
+
+```{literalinclude} /../../../examples/pylint/e0119_misplaced_format_function.py
+
+```
+
+Corrected version:
+
+```python
+print('My name is {}'.format('Adam'))
+```
+
 (E1305)=
 
 ### Too many format args (E1305)
@@ -3433,6 +3513,33 @@ lst.append(4)
 print("Appended 4 to my list!")
 ```
 
+(E0301)=
+
+### Non-iterator returned (E0301)
+
+This error occurs when the `__iter__` special method returns an object that is not an
+iterator. An iterator must define `__next__` to produce the next item and raise `StopIteration`
+when there are no more items. In the following example, returning `self` is invalid because
+the class does not define `__next__`.
+
+```{literalinclude} /../../../examples/pylint/e0301_non_iterator_returned.py
+
+```
+
+Corrected version:
+
+```python
+class Iterator:
+    ...  # Same as in the code above
+
+    def __next__(self):
+        if self.n >= self.end:
+            raise StopIteration
+        value = self.n
+        self.n += 1
+        return value
+```
+
 (E0303)=
 
 ### Invalid length returned (E0303)
@@ -3455,6 +3562,70 @@ class Company:
 
     def __len__(self) -> int:
         return len(self._employees)
+```
+
+(E0304)=
+
+### Invalid bool returned (E0304)
+
+This error occurs when the `__bool__` special method returns something other than a `bool`
+value (`True` or `False`).
+In the following example, the method returns a dictionary instead.
+
+```{literalinclude} /../../../examples/pylint/e0304_invalid_bool_returned.py
+
+```
+
+Corrected version:
+
+```python
+class Company:
+    ...  # Same as in the code above
+
+    def __bool__(self) -> bool:
+        return bool(self._employees)
+```
+
+(E0306)=
+
+### Invalid repr returned (E0306)
+
+This error occurs when the `__repr__` special method returns something other than a string.
+In the following example, the method returns a dictionary instead.
+
+```{literalinclude} /../../../examples/pylint/e0306_invalid_repr_returned.py
+
+```
+
+Corrected version:
+
+```python
+class Company:
+    ...  # Same as in the code above
+
+    def __repr__(self) -> str:
+        return f"Company({self._employees!r})"
+```
+
+(E0307)=
+
+### Invalid str returned (E0307)
+
+This error occurs when the `__str__` special method returns something other than a string.
+In the following example, the method returns a dictionary instead.
+
+```{literalinclude} /../../../examples/pylint/e0307_invalid_str_returned.py
+
+```
+
+Corrected version:
+
+```python
+class Company:
+    ...  # Same as in the code above
+
+    def __str__(self) -> str:
+        return f"A company with {len(self._employees)} employees."
 ```
 
 (W1515)=
@@ -3811,6 +3982,10 @@ spam -= 1
 
 ## Configuration errors
 
+Pass the configuration file to PythonTA using `python_ta.check_all("my_file.py", config="pyproject.toml")`
+or the command `python_ta --config pyproject.toml my_file.py`.
+See [Configuration](../usage/configuration.md) for more details.
+
 (E0011)=
 
 ### Unrecognized inline option (E0011)
@@ -3855,6 +4030,30 @@ load-plugins = pylint.extensions.bad_builtin
 
 If the module name is correct, make sure the plugin and its dependencies are installed in the
 same environment as PythonTA.
+
+(E0015)=
+
+### Unrecognized option (E0015)
+
+This error occurs when a configuration file or command-line argument contains an option that
+PythonTA does not recognize. Check the option's spelling and whether it is supported by the
+installed version of PythonTA.
+
+In a TOML configuration file, PythonTA-specific options belong under `[tool.python-ta]`, while
+standard Pylint options belong under `[tool.pylint]`. In the following example,
+`pyta-number-of-message` is a misspelling of `pyta-number-of-messages`:
+
+```toml
+[tool.python-ta]
+pyta-number-of-message = 10
+```
+
+Corrected version:
+
+```toml
+[tool.python-ta]
+pyta-number-of-messages = 10
+```
 
 ## Older errors
 

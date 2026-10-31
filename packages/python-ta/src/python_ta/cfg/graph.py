@@ -300,17 +300,40 @@ class ControlFlowGraph:
 
                 edge.z3_constraints[path_id] = z3_environment.update_constraints()
 
+                # at loop headers, invalidate constraints for variables that are reassigned in the loop
+                header = self._get_loop_header(edge.target)
+                if header is not None:
+                    loop = header.parent
+                    if self._loop_condition_sat(loop, header, z3_environment):
+                        names = {n.name for n in loop.nodes_of_class(AssignName)}
+                        z3_environment.invalidate_constraints(names)
+
                 # traverse into target node
                 for node in edge.target.statements:
-                    loop = node.parent
-                    # remove constraints with reassigned variables in the loop
-                    if (isinstance(loop, While) and node is loop.test) or (
-                        isinstance(loop, For) and node is loop.target
-                    ):
-                        names = {n.name for n in loop.nodes_of_class(AssignName)}
-                        z3_environment.invalidate(names)
                     if isinstance(node, (Assign, AugAssign, AnnAssign)):
                         self._handle_variable_reassignment(node, z3_environment)
+
+    def _get_loop_header(self, block: NodeNG) -> Optional[NodeNG]:
+        """Return the statement that makes block a loop header (a while test or for target).
+        Return None if block is not a loop header."""
+        for stmt in block.statements:
+            loop = stmt.parent
+            if (isinstance(loop, While) and stmt is loop.test) or (
+                isinstance(loop, For) and stmt is loop.target
+            ):
+                return stmt
+        return None
+
+    def _loop_condition_sat(self, loop: NodeNG, condition: NodeNG, env: Z3Environment) -> bool:
+        """Return whether the loop condition is satisfiable."""
+        if isinstance(loop, For):
+            return True
+        cond = env.parse_constraint(condition)
+        if cond is None:
+            return True
+        solver = z3.Solver()
+        solver.add(*env.update_constraints(), cond)
+        return solver.check() == z3.sat
 
     def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
         """Check for reassignment statements and invoke Z3 environment"""
@@ -499,7 +522,7 @@ class Z3Environment:
         except (Z3Exception, Z3ParseException):
             return None
 
-    def invalidate(self, names: Set[str]) -> None:
+    def invalidate_constraints(self, names: Set[str]) -> None:
         """Drop all current constraints that contain variables in names.
         Unlike assign, this does not mark the variables as reassigned, so constraints
         added later are kept.

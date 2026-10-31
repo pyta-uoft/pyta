@@ -233,6 +233,21 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
 
     def test_not_redundant_by_reassignment_in_loop(self):
         src = """
+        def func(x: int) -> None:
+            '''
+            Precondition: x == 0
+            '''
+            for i in range(3):
+                if x == 0:
+                    print("zero")
+                x = i + 1
+        """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertNoMessages():
+            self.checker.visit_if(condition_node)
+
+    def test_not_redundant_by_augmented_reassignment_in_loop(self):
+        src = """
         def func(x: int, y: int) -> None:
             '''
             Precondition: y == 0
@@ -242,6 +257,22 @@ class TestRedundantConditionChecker(pylint.testutils.CheckerTestCase):
                 x -= 1
             if y == 0:
                 print(y)
+        """
+        *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
+        with self.assertNoMessages():
+            self.checker.visit_if(condition_node)
+
+    def test_not_redundant_by_annotated_reassignment_in_loop(self):
+        src = """
+        def func(x: int, y: int) -> None:
+            '''
+            Precondition: x == 0
+            '''
+            while y > 0:
+                if x == 0:
+                    print("zero")
+                x: int = y
+                y = y - 1
         """
         *_, condition_node = self._apply_cfg_visitor(src).nodes_of_class(nodes.If)
         with self.assertNoMessages():

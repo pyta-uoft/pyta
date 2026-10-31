@@ -740,6 +740,53 @@ def test_variable_reassignment_in_while_loop() -> None:
     )
 
 
+def test_variable_reassignment_in_unsatisfiable_loop_remains() -> None:
+    """Test that constraints on reassigned variables remain on an unsatisfiable loop's exit path."""
+    src = """
+    def func(x: int) -> None:
+        '''
+        Precondition: x == 0
+        '''
+        while x > 0:
+            x -= 1
+        print(x)
+    """
+    cfg = _create_cfg(src, "func")
+    x = z3.Int("x")
+
+    expected_while_true_path = [
+        {x == 0},
+        {x == 0, x > 0},
+        set(),
+    ]
+    expected_while_false_path = [
+        {x == 0},
+        {x == 0, z3.Not(x > 0)},
+        {x == 0, z3.Not(x > 0)},
+    ]
+
+    actual_path_first = []
+    actual_path_second = []
+    for edge in cfg.get_edges():
+        actual1 = edge.z3_constraints.get(0)
+        actual2 = edge.z3_constraints.get(1)
+        if actual1 is not None:
+            actual_path_first.append(actual1)
+        if actual2 is not None:
+            actual_path_second.append(actual2)
+
+    assert len(actual_path_first) == len(expected_while_true_path)
+    assert len(actual_path_second) == len(expected_while_false_path)
+    assert all(
+        set(actual) == expected
+        for actual, expected in zip(actual_path_first, expected_while_true_path)
+    )
+    assert all(
+        set(actual) == expected
+        for actual, expected in zip(actual_path_second, expected_while_false_path)
+    )
+
+
 def _create_cfg(src: str, name: str) -> ControlFlowGraph:
     """
     Return the control flow graph of given function

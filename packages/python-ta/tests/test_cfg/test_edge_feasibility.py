@@ -111,7 +111,7 @@ def test_unfeasible_while_condition_with_reassignment() -> None:
         print("end")
     """
     cfg = _create_cfg(src, "func")
-    expected_while_path = [True, True, True]
+    expected_while_path = [True, False, True]
     expected_other_path = [True, True, True]
 
     paths = cfg.get_paths()

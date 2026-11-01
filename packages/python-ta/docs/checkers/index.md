@@ -85,7 +85,7 @@ This error occurs when trying to access the index of an iterable (such as `list`
 
 ```
 
-Corrected Version:
+Corrected version:
 
 ```python
 coffees = ['americano', 'latte', 'macchiato', 'mocha']
@@ -536,7 +536,7 @@ error, the expression can be simplified to not use a negation.
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 number = 5
@@ -557,7 +557,7 @@ The preferred way to include Python values in strings is with f-strings.
 
 ```
 
-The above can be changed to:
+Corrected version:
 
 ```python
 name = "Bob"
@@ -576,7 +576,7 @@ Test conditions are expressions evaluated inside of statements such as `if`, `wh
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 if a:  # Error was on this line
@@ -594,7 +594,7 @@ Test conditions are expressions evaluated inside of statements such as `if`, `wh
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 if True:  # Error was on this line
@@ -612,7 +612,7 @@ Empty sequences are false in a boolean context, so we can instead test the seque
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 ARRAY = [1, 2, 3]
@@ -637,7 +637,7 @@ Here is an example involving a comparison to `None`:
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 def square(number: Optional[float]) -> Optional[float]:
@@ -722,7 +722,7 @@ example below is considered to have _six_ nested blocks, not seven.
 
 ```
 
-The code above can be fixed using a helper function:
+Corrected version (using a helper function):
 
 ```python
 def drop_none(lst: list[Optional[int]]) -> list[int]:
@@ -745,7 +745,7 @@ def cross_join(x_list: list[Optional[int]], y_list: list[Optional[int]],
     return cross_join_list
 ```
 
-or using list comprehension:
+Corrected version (using a list comprehension):
 
 ```python
 def cross_join(x_list: list[Optional[int]], y_list: list[Optional[int]],
@@ -866,7 +866,7 @@ This error occurs when values for a dictionary are accessed using an index looku
 
 ```
 
-The code above can be fixed by accessing the dictionary values directly:
+Corrected version (by accessing the dictionary values directly):
 
 ```python
 sample_dict = {"key_one": "value_one", "key_two": "value_two"}
@@ -995,7 +995,7 @@ This error occurs when `list()` is used instead of `[]` to create an empty list.
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 lst = [1, 2, 3, 4]
@@ -1155,7 +1155,7 @@ it more difficult to use and debug code.
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 cafe = "coffee"
@@ -1374,15 +1374,16 @@ for example, when multiple modules have objects with identical names.
 
 ```
 
-Rather than importing everything with wildcard `*`, we should specify the names of the objects which
-we would like to import:
+Corrected version (importing specific objects):
 
 ```python
 from module_name import SOME_CONSTANT, SomeClass, some_function
 ```
 
-Or, if we need to import many objects from a particular module, we can import the module itself, and
-use it as a namespace for the required objects:
+If we need to import many objects from a particular module, we can import the module itself and
+use it as a namespace for the required objects.
+
+Corrected version (importing the module):
 
 ```python
 import module_name
@@ -1473,7 +1474,7 @@ Different modules should not be imported on a single line.
 
 ```
 
-Rather, each module should be imported on a separate line.
+Corrected version (importing each module on a separate line):
 
 ```python
 import sys
@@ -1536,7 +1537,7 @@ This error occurs when an import alias is the same as the original package name.
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 import math as mathematics
@@ -1563,7 +1564,7 @@ characters. Use an ASCII name or alias to make the import easier to read and dis
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 import math as mathematics
@@ -1596,6 +1597,8 @@ do too many things.
 
 One solution is to logically decompose the class into multiple classes, each with fewer instance
 attributes. We can then use composition to access those attributes in a different class.
+
+Corrected version (using composition):
 
 ```python
 class Edible(object):
@@ -1744,7 +1747,7 @@ unrelated class.
 
 ```
 
-To fix this, call the `__init__` method of the parent class.
+Corrected version (calling the `__init__` method of the parent class):
 
 ```python
 class Child(Parent):
@@ -1754,7 +1757,7 @@ class Child(Parent):
         Parent.__init__(self)
 ```
 
-Another option is to use [`super()`][super].
+Corrected version (using [`super()`][super]):
 
 ```python
 class Child(Parent):
@@ -1807,7 +1810,7 @@ Python 3.
 
 ```
 
-Corrected Version:
+Corrected version:
 
 ```python
 class DummyClass:
@@ -1827,7 +1830,7 @@ attributes the class actually has.
 
 ```
 
-We should do this instead:
+Corrected version:
 
 ```python
 class SomeNumbers:
@@ -2105,7 +2108,9 @@ This error occurs when an exception is created but never assigned, raised or ret
 
 ```
 
-This error can be resolved by assigning, raising or returning the exception as demonstrated below:
+This error can be resolved by assigning, raising or returning the exception.
+
+Corrected version (raising the exception):
 
 ```python
 def reciprocal(num: float) -> float:
@@ -2131,7 +2136,7 @@ returned instead. Moving that return statement outside the `finally` block would
 
 ```
 
-Corrected Version:
+Corrected version:
 
 ```python
 def error_code(error_codes):
@@ -2370,7 +2375,7 @@ Example:
 
 ```
 
-To fix this, you could place the testing code inside the main block. For example:
+Corrected version (placing the testing code inside the main block):
 
 ```python
 def example_function(name: str) -> str:
@@ -2457,7 +2462,8 @@ def all_even(nums: list[int]) -> bool:
 
 In this example, the return value of `all_even` is based only on the first number in `nums`, and none
 of the other list elements are checked. This version would incorrectly return `True` on the list `[2, 3]`.
-Here is a corrected version of this function:
+
+Corrected version:
 
 ```python
 def all_even(nums: list[int]) -> bool:
@@ -2503,7 +2509,7 @@ lines: 5-11
 ---
 ```
 
-We can simplify the above code by changing the loop to go over the elements of the list directly:
+Corrected version (changing the loop to go over the elements of the list directly):
 
 ```python
 def sum_items(lst: list[int]) -> int:
@@ -2523,7 +2529,7 @@ lines: 98-100
 ---
 ```
 
-We can simplify the above code by changing the comprehension to go over the elements of the list directly:
+Corrected version (changing the comprehension to go over the elements of the list directly):
 
 ```python
 def list_comp(lst: list) -> list:
@@ -2579,7 +2585,8 @@ lines: 54-56
 ```
 
 To fix this, always use a brand-new variable name for your index variable.
-For example:
+
+Corrected version:
 
 For loop:
 
@@ -2667,7 +2674,7 @@ lines: 2-4
 This error occurs when a type is not annotated but rather assigned in a function or class definition.
 In Python, default values for function arguments and class instance variables are assigned using `=` during their respective definitions.
 Type annotations, on the other hand, are declared using `:`.
-Below is a correct usage of assigning default values and annotating types.
+Corrected version (assigning default values and annotating types):
 
 ```python
 def print_str_argument(str_argument: str = "Some default value."):
@@ -2685,7 +2692,7 @@ Example:
 
 ```
 
-To fix these errors, one may make the following changes.
+Corrected version:
 
 ```python
 from __future__ import annotations
@@ -2741,7 +2748,8 @@ lines: 8-14
 ```
 
 These f-strings can be directly replaced with the expression or after casting the expression to a string first.
-For example:
+
+Corrected version:
 
 ```python
 x = "hello"
@@ -2770,7 +2778,7 @@ elif x < -5:
 
 The nested `if` statement can be removed and its test condition can be added to the `elif` branch immediately above it.
 
-For example:
+Corrected version:
 
 ```python
 x = 5
@@ -2796,7 +2804,8 @@ lines: 4-9
 ```
 
 These type annotations should be written at the top of the class body.
-For example:
+
+Corrected version:
 
 ```python
 class ExampleClass:
@@ -2825,7 +2834,7 @@ lines: 4-9
 ---
 ```
 
-This can simply be corrected by adding a space before the code be executed:
+Corrected version (adding a space before the code being executed):
 
 ```
 def f(x: int) -> int:
@@ -2853,7 +2862,8 @@ lines: 8-10
 ```
 
 The first precondition incorrectly attempts to use the inequality operator (!=), which is not valid Python syntax.
-This should be corrected to use Python's inequality operator:
+
+Corrected version (using Python's inequality operator):
 
 ```python
 def demo_function(x: int, y: int) -> int:
@@ -2884,7 +2894,8 @@ lines: 8-10
 ```
 
 The first precondition incorrectly has a whitespace in the middle of the greater than or equal to operator, which is not valid Python syntax.
-This should be corrected to use Python's the middle of the greater than or equal to operator:
+
+Corrected version (using Python's greater than or equal to operator):
 
 ```python
 def demo_function(x: int, y: int) -> int:
@@ -2914,7 +2925,8 @@ lines: 7-9
 ```
 
 The first representation invariant incorrectly attempts to use `!==`, which is not valid Python syntax.
-This should be corrected to use Python's inequality operator:
+
+Corrected version (using Python's inequality operator):
 
 ```python
 class Person:
@@ -3131,8 +3143,10 @@ normal string.
 
 ```
 
-The issue above can be resolved in 2 ways - either the f-string can be converted into a normal string, or the missing
-interpolation variable can be added to the f-string. The snippet below shows both these solutions.
+The issue above can be resolved in 2 ways --- either the f-string can be converted into a normal string, or the missing
+interpolation variable can be added to the f-string.
+
+Corrected version (with both solutions):
 
 ```python
 # Using a normal string instead of an f-string
@@ -3157,7 +3171,7 @@ and there should be interpolation variables in the string.
 
 ```
 
-The error above can be resolved as follows:
+Corrected version:
 
 ```python
 greeting = 'Hello There, {name}'.format(name='person')
@@ -3222,7 +3236,7 @@ Corrected version:
 s = "{} and {}".format("a", "b")
 ```
 
-or:
+Corrected version (using manual field numbering):
 
 ```python
 s = "{0} and {1}".format("a", "b")
@@ -3250,6 +3264,8 @@ literals.
 
 If a backslash character is not used to start one of the escape sequences listed above, we should
 make this explicit by escaping the backslash with another backslash.
+
+Corrected version (escaping the backslash):
 
 ```python
 print('This is a tab: \t')
@@ -3282,7 +3298,7 @@ Use `isinstance(x, Y)` instead of `type(x) == Y`.
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 def is_int(obj: Union[int, float, str]) -> bool:
@@ -3322,8 +3338,9 @@ However, the actual output is:
 ```
 
 If we want to prevent this surprising behavior, we should use `None` as the default argument, and
-then check for `None` inside the function body. For example, the following code prints the expected
-output:
+then check for `None` inside the function body.
+
+Corrected version (using `None` as the default argument):
 
 ```python
 from __future__ import annotations
@@ -3417,6 +3434,8 @@ programmer had intended.
 If we would like to assert multiple conditions, we should join those conditions using the `and`
 operator, or use individual `assert` statements for each condition.
 
+Corrected version (using `and` or separate assertions):
+
 ```python
 def check(condition1: bool, condition2: bool, condition3: bool) -> None:
     # Option 1
@@ -3429,6 +3448,8 @@ def check(condition1: bool, condition2: bool, condition3: bool) -> None:
 
 If we would like `assert` to show a special error message when the assertion fails, we should
 provide that message as the second argument.
+
+Corrected version (providing an assertion message):
 
 ```python
 def check(condition, message):
@@ -3453,6 +3474,8 @@ a Python interpreter one-by-one.
 
 To prevent the confusion, it is advisable to use the equality operator `==` when comparing objects
 with Python literals.
+
+Corrected version (using equality comparisons):
 
 ```python
 num = 256
@@ -3782,7 +3805,7 @@ a (typically invisible) newline character as `¬`, the following file would rais
 
 ```
 
-while the corrected file which contains a trailing newline character would not:
+Corrected version (including a trailing newline):
 
 ```python
 print("Hello World!")  # Trailing newline is present:  ¬
@@ -3978,7 +4001,7 @@ Check the spelling of the option and use a supported option such as `disable` or
 
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```python
 # pylint: disable=missing-module-docstring
@@ -3999,7 +4022,7 @@ For example, this PythonTA configuration misspells the plugin module name:
 load-plugins = pylint.extensions.bad_biultin
 ```
 
-The above can be modified to:
+Corrected version:
 
 ```ini
 [MAIN]

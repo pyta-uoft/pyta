@@ -59,6 +59,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Edited tests in `test_z3_parser.py` to prevent deprecation warnings
 - Added `scripts/check_message_documentation.py` to report enabled Pylint and PythonTA messages missing from the PythonTA documentation
 - Added a separate fixture and test for examples requiring inline Pylint comments (E0011)
+- Disabled E0014 and E1003, which relate to older Pylint and Python versions, respectively.
 
 ## [2.13.1] - 2026-08-12
 

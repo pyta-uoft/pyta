@@ -19,6 +19,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Modified documentation URLs to use HTTPS instead of HTTP.
 - Added snapshot comments (`# pyta: snapshot(...)`) which call `snapshot` without needing to import it or add code, and `python_ta.debug.run_with_snapshots` for running a file containing them. Also added documentation for both.
 - Added documentation for some of the enabled but previously missing Pylint messages.
+- Added a `python_ta.debug` CLI with a `snapshot` subcommand (`python -m python_ta.debug snapshot FILE`) that runs a file with snapshot comments enabled.
 
 ### 💫 New checkers
 

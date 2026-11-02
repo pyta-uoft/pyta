@@ -304,7 +304,7 @@ class ControlFlowGraph:
                 header = self._get_loop_header(edge.target)
                 if header is not None:
                     loop = header.parent
-                    if self._loop_condition_sat(loop, header, z3_environment):
+                    if self._loop_condition_sat(loop, z3_environment):
                         names = {n.name for n in loop.nodes_of_class(AssignName)}
                         z3_environment.invalidate_constraints(names)
 
@@ -313,22 +313,24 @@ class ControlFlowGraph:
                     if isinstance(node, (Assign, AugAssign, AnnAssign)):
                         self._handle_variable_reassignment(node, z3_environment)
 
-    def _get_loop_header(self, block: NodeNG) -> Optional[NodeNG]:
+    def _get_loop_header(self, block: CFGBlock) -> Optional[NodeNG]:
         """Return the statement that makes block a loop header (a while test or for target).
         Return None if block is not a loop header."""
-        for stmt in block.statements:
-            loop = stmt.parent
-            if (isinstance(loop, While) and stmt is loop.test) or (
-                isinstance(loop, For) and stmt is loop.target
-            ):
-                return stmt
+        if len(block.statements) != 1:
+            return None
+        stmt = block.statements[0]
+        loop = stmt.parent
+        if (isinstance(loop, While) and stmt is loop.test) or (
+            isinstance(loop, For) and stmt is loop.target
+        ):
+            return stmt
         return None
 
-    def _loop_condition_sat(self, loop: NodeNG, condition: NodeNG, env: Z3Environment) -> bool:
+    def _loop_condition_sat(self, loop: NodeNG, env: Z3Environment) -> bool:
         """Return whether the loop condition is satisfiable."""
         if isinstance(loop, For):
             return True
-        cond = env.parse_constraint(condition)
+        cond = env.parse_constraint(loop.test)
         if cond is None:
             return True
         solver = z3.Solver()

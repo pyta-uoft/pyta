@@ -37,6 +37,7 @@ repos:
           - types-colorama
           - types-Pygments
           - pylint~=4.0.3
+          - asttokens~=3.0
           - click>=8.0.1,<9
           - jinja2~=3.1.2
           - platformdirs>=4.0,<5

@@ -17,6 +17,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Extended `Z3Parser.apply_bin_op` to handle `%` and `//` operators.
 - Added `CodeDescription` to `LSPReporter` so that each diagnostic contains a URL to its corresponding documentation section.
 - Modified documentation URLs to use HTTPS instead of HTTP.
+- Added snapshot comments (`# pyta: snapshot(...)`) which call `snapshot` without needing to import it or add code, and `python_ta.debug.run_with_snapshots` for running a file containing them. Also added documentation for both.
+- Added documentation for some of the enabled but previously missing Pylint messages.
 
 ### 💫 New checkers
 
@@ -39,6 +41,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed `AccumulationTable` functionality in Python REPL
 - Fixed `python_ta.debug.snapshot` capturing frames outside of `exec` calls by stopping at the first top-level (`<module>`) frame
 - Kept `JSONReporter` and `LSPReporter` standard output valid JSON by logging data-upload status messages to standard error.
+- Fixed false positive `redundant-condition` reports when variables constrained before a loop are reassigned in the loop body
 
 ### 🔧 Internal changes
 
@@ -56,6 +59,10 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Updated the PythonTA message for `chained-comparison` (R1716) to include pylint's suggested simplification
 - Added `.gitattributes` to normalize line endings to LF
 - Edited tests in `test_z3_parser.py` to prevent deprecation warnings
+- Added `scripts/check_message_documentation.py` to report enabled Pylint and PythonTA messages missing from the PythonTA documentation
+- Added a separate fixture and test for examples requiring inline Pylint comments (E0011)
+- Disabled E0014 and E1003, which relate to older Pylint and Python versions, respectively.
+- Standardized correction examples in the checker documentation.
 
 ## [2.13.1] - 2026-08-12
 

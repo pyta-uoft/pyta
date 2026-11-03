@@ -63,7 +63,7 @@ These may be set using the `output-format` configuration option.
 - `pyta-lsp`: outputs report in LSP-compliant JSON format
 
 When `pyta-json` or `pyta-lsp` writes to standard output, the complete output is valid JSON.
-Operational messages (like data-upload status updates) are written to standard error instead.
+Operational messages (like data-upload status updates) are logged to standard error instead.
 
 ### Disabled Pylint checks
 

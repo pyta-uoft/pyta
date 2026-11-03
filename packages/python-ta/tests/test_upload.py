@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 import uuid
 from types import SimpleNamespace
 
@@ -55,14 +56,15 @@ def test_get_anonymous_id_is_random_and_stable(monkeypatch, tmp_path) -> None:
     assert local_anonymous_id != anonymous_id
 
 
-def test_get_anonymous_id_prints_save_path(monkeypatch, tmp_path, capsys) -> None:
+def test_get_anonymous_id_logs_save_path(monkeypatch, tmp_path, capsys, caplog) -> None:
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
+    caplog.set_level(logging.INFO)
 
     _get_anonymous_id()
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert f"[INFO] Saved anonymous ID to {tmp_path / 'anonymous_id'}" in captured.err
+    assert f"Saved anonymous ID to {tmp_path / 'anonymous_id'}" in caplog.text
 
 
 def test_get_anonymous_id_hashes_locally_stored_id(monkeypatch, tmp_path) -> None:
@@ -159,10 +161,11 @@ def test_errors_to_dict_accepts_current_reporter_messages() -> None:
     }
 
 
-def test_upload_to_server_posts_payload_with_timeout(monkeypatch, tmp_path, capsys) -> None:
+def test_upload_to_server_posts_payload_with_timeout(monkeypatch, tmp_path, capsys, caplog) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
+    caplog.set_level(logging.INFO)
     posted = {}
 
     def fake_post(**kwargs):
@@ -189,10 +192,12 @@ def test_upload_to_server_posts_payload_with_timeout(monkeypatch, tmp_path, caps
     assert payload["errors"]["E0001"][0]["msg"] == "syntax error"
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "[INFO] Upload successful" in captured.err
+    assert "Upload successful" in caplog.text
 
 
-def test_upload_to_server_handles_missing_upload_file(monkeypatch, tmp_path, capsys) -> None:
+def test_upload_to_server_handles_missing_upload_file(
+    monkeypatch, tmp_path, capsys, caplog
+) -> None:
     missing_file = tmp_path / "missing.py"
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
 
@@ -206,10 +211,10 @@ def test_upload_to_server_handles_missing_upload_file(monkeypatch, tmp_path, cap
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "Could not read a file selected for upload" in captured.err
+    assert "Could not read a file selected for upload" in caplog.text
 
 
-def test_upload_to_server_handles_timeout(monkeypatch, tmp_path, capsys) -> None:
+def test_upload_to_server_handles_timeout(monkeypatch, tmp_path, capsys, caplog) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
@@ -229,10 +234,10 @@ def test_upload_to_server_handles_timeout(monkeypatch, tmp_path, capsys) -> None
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "Connection timed out" in captured.err
+    assert "Connection timed out" in caplog.text
 
 
-def test_upload_to_server_handles_forbidden_response(monkeypatch, tmp_path, capsys) -> None:
+def test_upload_to_server_handles_forbidden_response(monkeypatch, tmp_path, capsys, caplog) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
@@ -254,7 +259,7 @@ def test_upload_to_server_handles_forbidden_response(monkeypatch, tmp_path, caps
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "HTTP Response Status 403" in captured.err
+    assert "HTTP Response Status 403" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -266,7 +271,7 @@ def test_upload_to_server_handles_forbidden_response(monkeypatch, tmp_path, caps
     ],
 )
 def test_upload_to_server_handles_http_error_responses(
-    monkeypatch, tmp_path, capsys, status_code: int, expected_message: str
+    monkeypatch, tmp_path, capsys, caplog, status_code: int, expected_message: str
 ) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
@@ -289,11 +294,11 @@ def test_upload_to_server_handles_http_error_responses(
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert expected_message in captured.err
+    assert expected_message in caplog.text
 
 
 def test_upload_to_server_handles_http_error_without_response(
-    monkeypatch, tmp_path, capsys
+    monkeypatch, tmp_path, capsys, caplog
 ) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
@@ -315,10 +320,10 @@ def test_upload_to_server_handles_http_error_without_response(
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert 'Error message: "server failed"' in captured.err
+    assert 'Error message: "server failed"' in caplog.text
 
 
-def test_upload_to_server_handles_request_exception(monkeypatch, tmp_path, capsys) -> None:
+def test_upload_to_server_handles_request_exception(monkeypatch, tmp_path, capsys, caplog) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
@@ -338,7 +343,7 @@ def test_upload_to_server_handles_request_exception(monkeypatch, tmp_path, capsy
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert 'Error message: "request failed"' in captured.err
+    assert 'Error message: "request failed"' in caplog.text
 
 
 def test_upload_to_server_posts_empty_files_and_serializes_config_values(
@@ -366,7 +371,9 @@ def test_upload_to_server_posts_empty_files_and_serializes_config_values(
     assert payload == {"errors": {}, "cfg": {"path": str(tmp_path)}}
 
 
-def test_upload_to_server_closes_files_when_request_fails(monkeypatch, tmp_path, capsys) -> None:
+def test_upload_to_server_closes_files_when_request_fails(
+    monkeypatch, tmp_path, capsys, caplog
+) -> None:
     upload_file = tmp_path / "sample.py"
     upload_file.write_text("print('hello')\n", encoding="utf-8")
     monkeypatch.setenv(PYTHON_TA_DATA_DIR_ENV_VAR, str(tmp_path))
@@ -389,4 +396,4 @@ def test_upload_to_server_closes_files_when_request_fails(monkeypatch, tmp_path,
     assert posted["files"]["0"].closed
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "[ERROR] Upload failed" in captured.err
+    assert "Upload failed" in caplog.text

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import uuid
 import warnings
@@ -56,48 +57,48 @@ def upload_to_server(
                 timeout=UPLOAD_TIMEOUT_SECONDS,
             )
         response.raise_for_status()
-        print("[INFO] Upload successful")
+        logging.info("Upload successful")
     except requests.HTTPError as e:
-        print("[ERROR] Upload failed")
+        logging.error("Upload failed")
         status_code = e.response.status_code if e.response is not None else None
         if status_code == 400:
-            print(
-                "[ERROR] HTTP Response Status 400: Client-side error, likely due to improper syntax. "
+            logging.error(
+                "HTTP Response Status 400: Client-side error, likely due to improper syntax. "
                 "Please report this to your instructor (and attach the code that caused the error)."
             )
         elif status_code == 403:
-            print(
-                "[ERROR] HTTP Response Status 403: Authorization is currently required for submission."
+            logging.error(
+                "HTTP Response Status 403: Authorization is currently required for submission."
             )
         elif status_code == 500:
-            print(
-                "[ERROR] HTTP Response Status 500: The server ran into a situation it doesn't know how to handle. "
+            logging.error(
+                "HTTP Response Status 500: The server ran into a situation it doesn't know how to handle. "
             )
-            print(
+            logging.error(
                 "Please report this to your instructor (and attach the code that caused the error)."
             )
         elif status_code == 503:
-            print(
-                "[ERROR] HTTP Response Status 503: The server is not ready to handle your request. "
+            logging.error(
+                "HTTP Response Status 503: The server is not ready to handle your request. "
             )
-            print("It may be down for maintenance.")
+            logging.error("It may be down for maintenance.")
         else:
-            print('[ERROR] Error message: "{}"'.format(e))
+            logging.error('Error message: "{}"'.format(e))
     except requests.Timeout:
-        print("[ERROR] Upload failed")
-        print("[ERROR] Error message: Connection timed out. The server may be temporarily down.")
+        logging.error("Upload failed")
+        logging.error("Error message: Connection timed out. The server may be temporarily down.")
     except requests.ConnectionError:
-        print("[ERROR] Upload failed")
-        print(
-            "[ERROR] Error message: Could not connect. This may be caused by your firewall, or the server may be "
+        logging.error("Upload failed")
+        logging.error(
+            "Error message: Could not connect. This may be caused by your firewall, or the server may be "
             "temporarily down."
         )
     except requests.RequestException as e:
-        print("[ERROR] Upload failed")
-        print('[ERROR] Error message: "{}"'.format(e))
+        logging.error("Upload failed")
+        logging.error('Error message: "{}"'.format(e))
     except OSError as e:
-        print("[ERROR] Upload failed")
-        print(f'[ERROR] Could not read a file selected for upload: "{e}"')
+        logging.error("Upload failed")
+        logging.error(f'Could not read a file selected for upload: "{e}"')
 
 
 def _get_anonymous_id() -> str:
@@ -133,7 +134,7 @@ def _get_or_create_local_anonymous_id(anonymous_id_path: Path) -> str:
     try:
         anonymous_id_path.parent.mkdir(parents=True, exist_ok=True)
         anonymous_id_path.write_text(anonymous_id + "\n", encoding="utf-8")
-        print(f"[INFO] Saved anonymous ID to {anonymous_id_path}")
+        logging.info(f"Saved anonymous ID to {anonymous_id_path}")
     except OSError:
         pass
     return anonymous_id

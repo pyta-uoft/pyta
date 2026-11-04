@@ -601,6 +601,12 @@ run_with_snapshots("demo.py")
 
 Running `python run_demo.py` saves the memory diagram to `demo.svg`.
 
+You can also run the file from the command line without writing a separate script:
+
+```console
+$ python -m python_ta.debug snapshot demo.py
+```
+
 A snapshot comment can be on its own line, or on the same line after a complete statement (as above), in which case the snapshot is taken after that statement runs. It takes the same arguments as `snapshot()`. Since the return value of a snapshot comment is discarded, you will usually want `save=True`.
 
 ### API

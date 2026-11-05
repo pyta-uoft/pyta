@@ -12,6 +12,7 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Iterable, Optional
+from unittest.mock import patch
 
 import pytest
 
@@ -1233,6 +1234,17 @@ def test_snapshot_comment_after_semicolon(tmp_path) -> None:
     assert result == f"x = 1;  {SNAPSHOT_ALIAS}()\n"
 
 
+def test_snapshot_comment_bare(tmp_path) -> None:
+    """
+    Test that a snapshot comment without parentheses is replaced the same way as
+    "snapshot()", both on its own line and following a statement.
+    """
+    bare = transform_snapshot_source(tmp_path, "x = 1  # pyta: snapshot\n# pyta: snapshot\n")
+    called = transform_snapshot_source(tmp_path, "x = 1  # pyta: snapshot()\n# pyta: snapshot()\n")
+
+    assert bare == called == f"x = 1  ; {SNAPSHOT_ALIAS}()\n{SNAPSHOT_ALIAS}()\n"
+
+
 def test_snapshot_comment_after_compound_header_raises(tmp_path) -> None:
     """
     Test that an inline snapshot comment following the header of a compound statement
@@ -1270,7 +1282,7 @@ def test_run_with_snapshots_error_points_to_original_line(tmp_path) -> None:
     )
 
     with pytest.raises(ValueError) as exc_info:
-        run_with_snapshots(str(path))
+        run_with_snapshots(str(path), save=False)
 
     last_frame = exc_info.tb
     while last_frame.tb_next is not None:
@@ -1345,3 +1357,55 @@ def test_run_with_snapshots_save_stdout(snapshot) -> None:
 
     snapshot.assert_match(inline_svg, "snapshot_testing_snapshots_expected_comment_inline.svg")
     snapshot.assert_match(own_line_svg, "snapshot_testing_snapshots_expected_comment_own_line.svg")
+
+
+def test_run_with_snapshots_saves_by_default(tmp_path) -> None:
+    """
+    Test that a snapshot comment saves by default when run with run_with_snapshots.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text("# pyta: snapshot()\n", encoding="utf-8")
+
+    with patch("python_ta.debug.snapshot.snapshot", autospec=True) as mock_snapshot:
+        run_with_snapshots(str(path))
+
+    mock_snapshot.assert_called_once_with(save=True)
+
+
+def test_run_with_snapshots_kwargs_passed_to_comments(tmp_path) -> None:
+    """
+    Test that keyword arguments given to run_with_snapshots are passed to every snapshot comment.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text("x = 1  # pyta: snapshot\n# pyta: snapshot\n", encoding="utf-8")
+
+    with patch("python_ta.debug.snapshot.snapshot", autospec=True) as mock_snapshot:
+        run_with_snapshots(str(path), memory_viz_version="0.3.1")
+
+    assert mock_snapshot.call_count == 2
+    mock_snapshot.assert_called_with(save=True, memory_viz_version="0.3.1")
+
+
+def test_run_with_snapshots_comment_args_override_kwargs(tmp_path) -> None:
+    """
+    Test that arguments given in a snapshot comment override the keyword arguments
+    given to run_with_snapshots.
+    """
+    path = tmp_path / "snapshot_comment.py"
+    path.write_text('# pyta: snapshot(save=False, memory_viz_version="0.3.1")\n', encoding="utf-8")
+
+    with patch("python_ta.debug.snapshot.snapshot", autospec=True) as mock_snapshot:
+        run_with_snapshots(str(path), save=True, memory_viz_version="0.9.1")
+
+    mock_snapshot.assert_called_once_with(save=False, memory_viz_version="0.3.1")
+
+
+def test_snapshot_comment_positional_args_raises(tmp_path) -> None:
+    """
+    Test that a snapshot comment with positional arguments raises a SyntaxError
+    explaining that only keyword arguments are accepted.
+    """
+    with pytest.raises(SyntaxError, match="only accept keyword arguments") as exc_info:
+        transform_snapshot_source(tmp_path, "x = 1\n# pyta: snapshot(False)\n")
+
+    assert exc_info.value.lineno == 2

@@ -11,9 +11,12 @@ def func(n: int) -> None:
     """
     Function for snapshot comment testing.
     """
-    nums = [n, n + 1]  # pyta: snapshot(True, ["--roughjs-config", "seed=12345"], "0.3.1")
+    nums = [
+        n,
+        n + 1,
+    ]  # pyta: snapshot(memory_viz_args=["--roughjs-config", "seed=12345"], memory_viz_version="0.3.1")
     total = sum(nums)
-    # pyta: snapshot(True, ["--roughjs-config", "seed=12345"], "0.3.1")
+    # pyta: snapshot(memory_viz_args=["--roughjs-config", "seed=12345"], memory_viz_version="0.3.1")
 
 
 if __name__ == "__main__":

@@ -309,6 +309,26 @@ a = ['p', 'y', 'T', 'A']
 print(a[0:3])
 ```
 
+(E1129)=
+
+### Not context manager (E1129)
+
+This error occurs when an object used in a `with` statement does not support the context manager
+protocol. A context manager must provide both `__enter__` and `__exit__` methods.
+
+```{literalinclude} /../../../examples/pylint/e1129_not_context_manager.py
+
+```
+
+Use an object that supports this protocol, such as a file returned by `open`.
+
+Corrected version:
+
+```python
+with open('data.txt', encoding='utf-8') as data_file:
+    contents = data_file.read()
+```
+
 (E1130)=
 
 ### Invalid unary operand type (E1130)
@@ -399,6 +419,45 @@ named_list = NamedList(['a', 'b', 'c'], [1, 2, 3])
 print('c' in named_list)  # Prints True
 del named_list['c']
 print('c' in named_list)  # Prints False
+```
+
+(E1141)=
+
+### Dict iter missing items (E1141)
+
+This error occurs when we iterate over a dictionary and unpack each item into multiple variables
+without calling `.items()`. Iterating over a dictionary directly produces its keys, rather than
+key-value pairs.
+
+```{literalinclude} /../../../examples/pylint/e1141_dict_iter_missing_items.py
+
+```
+
+Corrected version:
+
+```python
+data = {'x': 1, 'y': 2, 'z': 3}
+for key, value in data.items():
+    print(key, value)
+```
+
+(E1143)=
+
+### Unhashable member (E1143)
+
+This error occurs when we use an unhashable value as a dictionary key or a set member.
+Lists, dictionaries, and sets are unhashable and cannot be used in these contexts.
+
+```{literalinclude} /../../../examples/pylint/e1143_unhashable_member.py
+
+```
+
+Corrected version, using a tuple:
+
+```python
+data = {}
+numbers = (1, 2, 3)
+data[numbers] = True
 ```
 
 (E1144)=
@@ -3131,6 +3190,29 @@ s = "{} and {}".format("first", "second")
 
 **See also**: [E1120](#E1120)
 
+(E1307)=
+
+### Bad string format type (E1307)
+
+This error occurs when a value passed to `%` string formatting has a type that is incompatible
+with its conversion specifier. Use a value of the required type, or change the conversion specifier
+to match the intended value.
+
+For example, `%d` expects a number, but the following code passes a string:
+
+```{literalinclude} /../../../examples/pylint/e1307_bad_string_format_type.py
+
+```
+
+Corrected version:
+
+```python
+print("%d" % 10)
+```
+
+**Note**: PythonTA currently performs this check only for `%` formatting, not for `str.format()`
+or f-strings.
+
 (W1309)=
 
 ### F-string without interpolation (W1309)
@@ -3631,6 +3713,29 @@ class Company:
         return f"A company with {len(self._employees)} employees."
 ```
 
+(E1520)=
+
+### Singledispatchmethod function (E1520)
+
+This error occurs when `functools.singledispatchmethod` decorates a standalone function.
+This decorator is intended for methods in a class. Use `functools.singledispatch` for a standalone
+function instead.
+
+```{literalinclude} /../../../examples/pylint/e1520_singledispatchmethod_function.py
+
+```
+
+Corrected version:
+
+```python
+from functools import singledispatch
+
+
+@singledispatch
+def describe(value):
+    return str(value)
+```
+
 (W1515)=
 
 ### Forgotten debug statement (W1515)
@@ -3866,6 +3971,15 @@ The different types of comparison operators can be classified in the following c
 
 ```
 
+(E2501)=
+
+### Invalid Unicode codec (E2501)
+
+This error occurs when Python source files are encoded using UTF-16 or UTF-32, which are not
+ASCII-compatible source encodings. Save Python source files using UTF-8 instead.
+
+**See also**: [PEP 263: source encoding restrictions][pep263: concepts]
+
 ## Syntax errors
 
 (E0001)=
@@ -4056,6 +4170,63 @@ Corrected version:
 pyta-number-of-messages = 10
 ```
 
+(F0011)=
+
+### Config parse error (F0011)
+
+This error occurs when Pylint cannot parse a configuration file. The accompanying message
+describes the parsing failure, such as a malformed INI section or invalid TOML syntax.
+Fix the configuration file identified in the message.
+
+For example, this INI configuration is missing a closing bracket in the section header:
+
+```ini
+[FORMAT
+max-line-length = 100
+```
+
+Corrected version:
+
+```ini
+[FORMAT]
+max-line-length = 100
+```
+
+## Analysis failures
+
+PythonTA uses Pylint, a tool that analyzes Python code without running it, to detect many of the
+errors described on this page.
+
+These fatal messages indicate that Pylint could not analyze a module, and not necessarily an error
+in the program.
+
+Check that you are using a supported Python version and that PythonTA’s dependencies are installed
+correctly. If you suspect an installation problem, try reinstalling PythonTA in a fresh environment.
+
+If the error persists, please don't hesitate to send an email to \[david at cs dot toronto dot edu\].
+Include the full error message and an example that reproduces the failure.
+
+(F0001)=
+
+### Fatal (F0001)
+
+This error occurs when an internal problem prevents Pylint from analyzing a module, for example
+when it cannot find the module.
+
+(F0002)=
+
+### Astroid error (F0002)
+
+This error occurs when an unexpected error prevents Astroid, Pylint's code analysis library,
+from building its representation of a module. It is usually accompanied by a traceback.
+
+(F0010)=
+
+### Parse error (F0010)
+
+This error occurs when an exception that Astroid can handle prevents it from building its
+representation of a module. The accompanying message provides details about the parsing failure.
+
 ## Older errors
 
 The following errors are no longer checked by the latest version of PythonTA.
@@ -4135,6 +4306,10 @@ function and method calls or definitions.
 [pep8: other recommendations]: https://www.python.org/dev/peps/pep-0008/#other-recommendations
 [pep8: tabs or spaces?]: https://www.python.org/dev/peps/pep-0008/#tabs-or-spaces
 [pep8: whitespace in expressions and statements]: https://www.python.org/dev/peps/pep-0008/#whitespace-in-expressions-and-statements
+
+<!-- PEP 263 -->
+
+[pep263: concepts]: https://peps.python.org/pep-0263/#concepts
 
 <!-- StackOverflow -->
 

@@ -17,7 +17,7 @@ CATEGORY_TO_LSP = {
     "refactor": types.DiagnosticSeverity.Hint,
 }
 
-# Deprecation-related checks, including disabled checks and the optional typing extension.
+# Deprecation-related checks, including disabled checks.
 DEPRECATION_CHECKS = {
     "deprecated-module",
     "deprecated-method",

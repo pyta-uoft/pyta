@@ -88,7 +88,7 @@ def test_code_description_matches_doc(lsp_output, mocker):
 
 
 def test_deprecated_attribute_tag(lsp_output):
-    """Tests that deprecation checks are emitted with the deprecated tag."""
+    """Tests that deprecation checks are emitted with the Deprecated tag."""
     diagnostics = lsp_output[2]["diagnostics"]
     diagnostic = next(diag for diag in diagnostics if diag["code"] == "W4906")
     assert diagnostic["tags"] == [DiagnosticTag.Deprecated]

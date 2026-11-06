@@ -4203,6 +4203,9 @@ in the program.
 Check that you are using a supported Python version and that PythonTA’s dependencies are installed
 correctly. If you suspect an installation problem, try reinstalling PythonTA in a fresh environment.
 
+If the error persists, please don't hesitate to send an email to \[david at cs dot toronto dot edu\].
+Include the full error message and an example that reproduces the failure.
+
 (F0001)=
 
 ### Fatal (F0001)

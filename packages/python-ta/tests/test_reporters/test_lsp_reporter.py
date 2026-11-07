@@ -4,6 +4,7 @@ from io import StringIO
 from pathlib import Path
 
 import pytest
+from lsprotocol.types import DiagnosticSeverity, DiagnosticTag
 
 from python_ta import check_all, doc
 
@@ -13,6 +14,9 @@ FIXTURE_PATH = os.path.normpath(
 MISSING_DOCSTRING_FIXTURE_PATH = str(
     Path(FIXTURE_PATH).with_name("lsp_reporter_missing_docstring.py")
 )
+DEPRECATED_ATTRIBUTE_FIXTURE_PATH = str(
+    Path(FIXTURE_PATH).with_name("lsp_reporter_deprecated_attribute.py")
+)
 
 
 @pytest.fixture()
@@ -20,7 +24,11 @@ def lsp_output():
     """Run check_all with LSPReporter and return parsed JSON output."""
     buf = StringIO()
     check_all(
-        module_name=[FIXTURE_PATH, MISSING_DOCSTRING_FIXTURE_PATH],
+        module_name=[
+            FIXTURE_PATH,
+            MISSING_DOCSTRING_FIXTURE_PATH,
+            DEPRECATED_ATTRIBUTE_FIXTURE_PATH,
+        ],
         config={"output-format": "pyta-lsp"},
         output=buf,
     )
@@ -77,3 +85,11 @@ def test_code_description_matches_doc(lsp_output, mocker):
         for diagnostic in output["diagnostics"]:
             doc(diagnostic["code"])
             open_browser.assert_called_with(diagnostic["codeDescription"]["href"])
+
+
+def test_deprecated_attribute_tag(lsp_output):
+    """Tests that deprecation checks are emitted with the Deprecated tag."""
+    diagnostics = lsp_output[2]["diagnostics"]
+    diagnostic = next(diag for diag in diagnostics if diag["code"] == "W4906")
+    assert diagnostic["tags"] == [DiagnosticTag.Deprecated]
+    assert diagnostic["severity"] == DiagnosticSeverity.Warning

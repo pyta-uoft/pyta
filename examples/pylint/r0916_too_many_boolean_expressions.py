@@ -1,6 +1,13 @@
-def number_choice(x: int, y: int, z: int) -> None:
-    # Error on line below
-    if (x or (y and z)) or (x % 53 == 7 or (z % x == y and z % 2 == 1) or ((x == y) and not (z == y))):
-        print('nice choice of numbers')
+def check_password(password: str) -> None:
+    """Print whether password is valid."""
+    if (
+        len(password) >= 8
+        and any(character.islower() for character in password)
+        and any(character.isupper() for character in password)
+        and any(character.isdigit() for character in password)
+        and any(character in "!@#$" for character in password)
+        and " " not in password
+    ):
+        print("Valid password.")
     else:
-        print('pick better numbers')
+        print("Invalid password.")

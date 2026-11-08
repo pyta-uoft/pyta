@@ -727,7 +727,7 @@ def f(x: Any) -> bool:
 ### Consider using get (R1715)
 
 This error occurs when an `if` statement checks for a dictionary key and selects either its value
-or a default value. The dictionary's `get` method performs both steps directly.
+or a default value. The `dict.get` method performs both steps directly.
 
 ```{literalinclude} /../../../examples/pylint/r1715_consider_using_get.py
 
@@ -736,7 +736,7 @@ or a default value. The dictionary's `get` method performs both steps directly.
 Corrected version:
 
 ```python
-dictionary = dict()
+dictionary = {}
 
 variable = dictionary.get('key', 'default')
 ```
@@ -918,20 +918,22 @@ branches.
 Corrected version:
 
 ```python
-def number_choice(x: int, y: int, z: int) -> None:
-    is_nice_choice = bool(x or (y and z))
+def check_password(password: str) -> None:
+    """Print whether password is valid."""
+    has_valid_length = len(password) >= 8
+    has_lowercase = any(character.islower() for character in password)
+    has_uppercase = any(character.isupper() for character in password)
+    has_digit = any(character.isdigit() for character in password)
+    has_special_character = any(character in "!@#$" for character in password)
+    has_no_spaces = " " not in password
 
-    if not is_nice_choice:
-        is_nice_choice = x % 53 == 7
-    if not is_nice_choice:
-        is_nice_choice = z % x == y and z % 2 == 1
-    if not is_nice_choice:
-        is_nice_choice = x == y and z != y
+    has_mixed_case = has_lowercase and has_uppercase
+    has_required_characters = has_digit and has_special_character
 
-    if is_nice_choice:
-        print('nice choice of numbers')
+    if has_valid_length and has_mixed_case and has_required_characters and has_no_spaces:
+        print("Valid password.")
     else:
-        print('pick better numbers')
+        print("Invalid password.")
 ```
 
 (R1702)=

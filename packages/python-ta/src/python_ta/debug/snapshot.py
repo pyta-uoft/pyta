@@ -339,13 +339,13 @@ def snapshot_to_json(
 
 
 def run_with_snapshots(path: str, **kwargs: Any) -> None:
-    """Run the given Python file with snapshot comments enabled.
+    """Run the given Python file with snapshot comments enabled. Snapshot comments
+    save by default (save=True). Positional arguments are not allowed in snapshot comments.
 
     Args:
         path: The path to the Python file to run.
-        **kwargs: Default arguments passed to every snapshot comment. Snapshot comments
-            save by default (save=True). Keyword arguments given in a comment override these
-            defaults. Positional arguments are not allowed in snapshot comments.
+        **kwargs: Default arguments passed to every snapshot comment. Keyword arguments given in a comment override these
+            defaults.
     """
     code = compile(transform_snapshot_comments(path), filename=path, mode="exec")
 
@@ -364,7 +364,7 @@ def transform_snapshot_comments(path: str) -> str:
     """Return the source of the given Python file with each snapshot comment replaced by a snapshot call.
 
     Each call replaces its comment on the same line.
-    A bare "snapshot" comment is treated as "snapshot()".
+    A bare "snapshot" comment is treated as "snapshot(save=True)".
 
     Args:
         path: The path to the Python file to transform.

@@ -624,6 +624,141 @@ print(f"Hi! My name is {name}!")
 print(f"{name} is my name!")
 ```
 
+(R0124)=
+
+### Comparison with itself (R0124)
+
+This error occurs when a value is compared with itself, which may indicate that one side of the
+comparison contains the wrong variable.
+
+```{literalinclude} /../../../examples/pylint/r0124_comparison_with_itself.py
+
+```
+
+Corrected version:
+
+```python
+def is_new_high_score(score: int, high_score: int) -> bool:
+    """Return whether score is greater than the current high score."""
+    return score > high_score
+```
+
+(R1701)=
+
+### Consider merging isinstance (R1701)
+
+This error occurs when multiple calls to `isinstance` test the same value against different types.
+Pass the types as a tuple in a single call instead.
+
+```{literalinclude} /../../../examples/pylint/r1701_consider_merging_isinstance.py
+
+```
+
+Corrected version:
+
+```python
+from typing import Any
+
+
+def is_int_or_str(mystery: Any) -> bool:
+    """Return whether mystery is an int or str, or some other type."""
+    return isinstance(mystery, (int, str))
+```
+
+(R1712)=
+
+### Consider swap variables (R1712)
+
+This error occurs when a temporary variable is used only to swap the values of two variables.
+Python supports swapping them directly with parallel assignment.
+
+```{literalinclude} /../../../examples/pylint/r1712_consider_swap_variables.py
+
+```
+
+Corrected version:
+
+```python
+original = 1
+new = 2
+
+original, new = new, original
+```
+
+(R1713)=
+
+### Consider using join (R1713)
+
+This error occurs when strings from a sequence are concatenated one at a time in a loop. Use
+`str.join` to express the operation directly and avoid repeatedly creating intermediate strings.
+
+```{literalinclude} /../../../examples/pylint/r1713_consider_using_join.py
+
+```
+
+Corrected version:
+
+```python
+letters = ['H', 'e', 'l', 'l', 'o']
+word = "".join(letters)
+```
+
+(R1714)=
+
+### Consider using in (R1714)
+
+This error occurs when several equality comparisons test the same value and are joined with `or`.
+Use the `in` operator to test whether the value belongs to a collection of choices.
+
+```{literalinclude} /../../../examples/pylint/r1714_consider_using_in.py
+
+```
+
+Corrected version:
+
+```python
+def f(x: Any) -> bool:
+    """Return whether x is one of a few different values."""
+    return x in {1, "hello", 2.5}
+```
+
+(R1715)=
+
+### Consider using get (R1715)
+
+This error occurs when an `if` statement checks for a dictionary key and selects either its value
+or a default value. The dictionary's `get` method performs both steps directly.
+
+```{literalinclude} /../../../examples/pylint/r1715_consider_using_get.py
+
+```
+
+Corrected version:
+
+```python
+dictionary = dict()
+
+variable = dictionary.get('key', 'default')
+```
+
+(R1716)=
+
+### Chained comparison (R1716)
+
+This error occurs when comparisons joined by `and` repeat the middle value. Python allows the
+comparisons to be written as one chained comparison.
+
+```{literalinclude} /../../../examples/pylint/r1716_chained_comparison.py
+
+```
+
+Corrected version:
+
+```python
+if a < b < c:
+    pass
+```
+
 (R1726)=
 
 ### Simplifiable condition (R1726)
@@ -764,6 +899,39 @@ function/method is too complex, and should be split up.
 
 ```{literalinclude} /../../../examples/pylint/r0912_too_many_branches.py
 
+```
+
+(R0916)=
+
+### Too many boolean expressions (R0916)
+
+This error occurs when an `if` condition contains too many boolean expressions, making it difficult
+to read and understand. Extract meaningful parts into named variables or split the condition into
+branches.
+
+**Note**: The default checker limit is 5 boolean expressions.
+
+```{literalinclude} /../../../examples/pylint/r0916_too_many_boolean_expressions.py
+
+```
+
+Corrected version:
+
+```python
+def number_choice(x: int, y: int, z: int) -> None:
+    is_nice_choice = bool(x or (y and z))
+
+    if not is_nice_choice:
+        is_nice_choice = x % 53 == 7
+    if not is_nice_choice:
+        is_nice_choice = z % x == y and z % 2 == 1
+    if not is_nice_choice:
+        is_nice_choice = x == y and z != y
+
+    if is_nice_choice:
+        print('nice choice of numbers')
+    else:
+        print('pick better numbers')
 ```
 
 (R1702)=
@@ -1640,6 +1808,24 @@ This error occurs when we import a module which is not used anywhere in our code
 ```
 
 ## Classes and objects
+
+(R0205)=
+
+### Useless object inheritance (R0205)
+
+This error occurs when a class explicitly inherits from `object`. In Python 3, every class already
+inherits from `object`, so naming it as a base class is unnecessary.
+
+```{literalinclude} /../../../examples/pylint/r0205_useless_object_inheritance.py
+
+```
+
+Corrected version:
+
+```python
+class A:
+    pass
+```
 
 (R0902)=
 
@@ -4100,6 +4286,27 @@ spam -= 1
 ## Configuration errors
 
 See the [Configuration documentation](../usage/configuration.md) for details on configuring PythonTA.
+
+(R0022)=
+
+### Useless option value (R0022)
+
+This error occurs when a Pylint configuration option names a message that has been removed and can
+no longer be enabled or disabled. Remove the obsolete message name from the option's value.
+
+For example, `bad-continuation` is a removed Pylint message and has no effect here:
+
+```ini
+[MESSAGES CONTROL]
+disable = bad-continuation
+```
+
+Corrected version:
+
+```ini
+[MESSAGES CONTROL]
+disable =
+```
 
 (E0011)=
 

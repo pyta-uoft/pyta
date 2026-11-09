@@ -43,6 +43,7 @@ list only contains the Pylint checkers enabled by default in PythonTA.
 - Fixed `python_ta.debug.snapshot` capturing frames outside of `exec` calls by stopping at the first top-level (`<module>`) frame
 - Kept `JSONReporter` and `LSPReporter` standard output valid JSON by logging data-upload status messages to standard error.
 - Fixed false positive `redundant-condition` reports when variables constrained before a loop are reassigned in the loop body
+- Fixed missing `redundant-condition` reports on reassigned variables by adding versioning
 
 ### 🔧 Internal changes
 

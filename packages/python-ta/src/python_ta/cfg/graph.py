@@ -299,14 +299,15 @@ class ControlFlowGraph:
                             )
 
                 edge.z3_constraints[path_id] = z3_environment.update_constraints()
+                edge.z3_vars[path_id] = z3_environment.variables.copy()
 
                 # at loop headers, invalidate constraints for variables that are reassigned in the loop
                 header = self._get_loop_header(edge.target)
                 if header is not None:
                     loop = header.parent
                     if self._loop_condition_sat(loop, z3_environment):
-                        names = {n.name for n in loop.nodes_of_class(AssignName)}
-                        z3_environment.invalidate_constraints(names)
+                        for name in {n.name for n in loop.nodes_of_class(AssignName)}:
+                            z3_environment.assign(name)
 
                 # traverse into target node
                 for node in edge.target.statements:
@@ -340,11 +341,15 @@ class ControlFlowGraph:
     def _handle_variable_reassignment(self, node: NodeNG, env: Z3Environment) -> None:
         """Check for reassignment statements and invoke Z3 environment"""
         if isinstance(node, Assign):
+            value = env.parse_constraint(node.value)
             for target in node.targets:
                 if isinstance(target, AssignName):
-                    env.assign(target.name)
-        elif isinstance(node, (AugAssign, AnnAssign)):
-            env.assign(node.target.name)
+                    env.assign(target.name, value)
+        elif isinstance(node, AugAssign) and isinstance(node.target, AssignName):
+            env.assign(node.target.name, env.parse_aug_assign(node))
+        elif isinstance(node, AnnAssign) and isinstance(node.target, AssignName):
+            if node.value is not None:
+                env.assign(node.target.name, env.parse_constraint(node.value))
 
     def update_edge_feasibility(self) -> None:
         """Traverse through edges in DFS order and update is_feasible
@@ -430,6 +435,7 @@ class CFGEdge:
     negate: Optional[bool]
     z3_constraints: Dict[int, List[ExprRef]]
     is_feasible: bool
+    z3_vars: Dict[int, Dict[str, ExprRef]]
 
     def __init__(
         self,
@@ -448,6 +454,7 @@ class CFGEdge:
         self.target.predecessors.append(self)
         self.z3_constraints = {}
         self.is_feasible = True
+        self.z3_vars = {}
 
     def get_label(self) -> Optional[str]:
         """Return the edge label if specified.
@@ -464,48 +471,43 @@ class CFGEdge:
 class Z3Environment:
     """Z3 Environment stores the Z3 variables and constraints in the current CFG path
 
-    variable_unassigned:
-        A dictionary mapping each variable in the current environment to a boolean indicating
-        whether it has been reassigned (False) or remains unassigned (True).
-
     variables:
         A dictionary mapping each variable in the current environment to its z3 variable.
 
     constraints:
         A list of Z3 constraints in the current environment.
+
+    version_map:
+        A dictionary mapping each variable in the current environment to its version number.
     """
 
-    variable_unassigned: Dict[str, bool]
     variables: Dict[str, ExprRef]
     constraints: List[ExprRef]
+    version_map: Dict[str, int]
 
     def __init__(self, variables: Dict[str, ExprRef], constraints: List[ExprRef]) -> None:
         """Initialize the environment with function parameters and preconditions"""
-        self.variable_unassigned = {var: True for var in variables}
-        self.variables = variables
+        self.variables = variables.copy()
         self.constraints = constraints.copy()
+        self.version_map = {var: 0 for var in variables}
 
-    def assign(self, name: str) -> None:
-        """Handle a variable assignment statement"""
-        if name in self.variable_unassigned:
-            self.variable_unassigned[name] = False
+    def assign(self, name: str, value: Optional[ExprRef] = None) -> None:
+        """Handle a variable assignment statement.
+        Update the variable's version and z3 expression.
+        """
+        if name not in self.variables:
+            return
+        old_var = self.variables[name]
+        sort = value.sort() if value is not None else old_var.sort()
+        self.version_map[name] += 1
+        new_var = z3.Const(f"{name}!{self.version_map[name]}", sort)
+        if value is not None:
+            self.constraints.append(new_var == value)
+        self.variables[name] = new_var
 
     def update_constraints(self) -> List[ExprRef]:
-        """Returns all z3 constraints in the environments
-        Removes constraints with reassigned variables
-        """
-        updated_constraints: list[ExprRef] = []
-        for constraint in self.constraints:
-            # discard expressions with reassigned variables
-            variables = _get_vars(constraint)
-            reassigned = any(
-                not self.variable_unassigned.get(variable, False) for variable in variables
-            )
-            if not reassigned:
-                updated_constraints.append(constraint)
-
-        self.constraints = updated_constraints
-        return updated_constraints.copy()
+        """Returns all z3 constraints in the environments"""
+        return self.constraints.copy()
 
     def add_constraint(self, constraint: ExprRef) -> None:
         """Add a new z3 constraint to environment"""
@@ -524,12 +526,20 @@ class Z3Environment:
         except (Z3Exception, Z3ParseException):
             return None
 
-    def invalidate_constraints(self, names: Set[str]) -> None:
-        """Drop all current constraints that contain variables in names.
-        Unlike assign, this does not mark the variables as reassigned, so constraints
-        added later are kept.
+    def parse_aug_assign(self, node: AugAssign) -> Optional[ExprRef]:
+        """Parse an AugAssign node to a Z3 constraint
+        Return the resulting expression
         """
-        self.constraints = [c for c in self.constraints if not (_get_vars(c) & names)]
+        from python_ta_z3 import Z3ParseException, Z3Parser
+        from z3 import Z3Exception
+
+        parser = Z3Parser(self.variables)
+        try:
+            return parser.apply_bin_op(
+                parser.parse(node.target), node.op[:-1], parser.parse(node.value)
+            )
+        except (Z3Exception, Z3ParseException):
+            return None
 
 
 def _get_vars(expr: ExprRef) -> Set[str]:
